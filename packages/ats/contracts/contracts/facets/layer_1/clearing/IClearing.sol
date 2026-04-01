@@ -3,8 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
+import { IClearingStorageWrapper } from "../../../domain/asset/clearing/IClearingStorageWrapper.sol";
 
-interface IClearing {
+interface IClearing is IClearingStorageWrapper {
     enum ClearingOperationType {
         Transfer,
         Redeem,

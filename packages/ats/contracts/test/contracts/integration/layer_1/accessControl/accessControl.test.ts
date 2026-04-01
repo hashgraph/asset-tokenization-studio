@@ -2,7 +2,7 @@
 
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type AccessControlFacet, PauseFacet } from "@contract-types";
+import { type ResolverProxy, type IAsset } from "@contract-types";
 import { ATS_ROLES } from "@scripts";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac } from "@test";
@@ -11,8 +11,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 describe("Access Control Tests", () => {
   let diamond: ResolverProxy;
-  let pauseFacet: PauseFacet;
-  let accessControlFacet: AccessControlFacet;
+  let asset: IAsset;
   let deployer: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
@@ -21,16 +20,15 @@ describe("Access Control Tests", () => {
   async function deployFixture() {
     const base = await deployEquityTokenFixture();
     diamond = base.diamond;
-    await executeRbac(base.accessControlFacet, [
+    asset = await ethers.getContractAt("IAsset", diamond.target);
+    await executeRbac(asset, [
       {
         role: ATS_ROLES._PAUSER_ROLE,
         members: [base.user1.address],
       },
     ]);
 
-    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target);
     deployer = base.deployer;
-    pauseFacet = base.pauseFacet;
     signer_B = base.user1;
     signer_C = base.user2;
     unknownSigner = base.unknownSigner;
@@ -41,26 +39,26 @@ describe("Access Control Tests", () => {
   });
 
   it("GIVEN an account without administrative role WHEN grantRole THEN transaction fails with AccountHasNoRole", async () => {
-    await expect(
-      accessControlFacet.connect(signer_C).grantRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address),
-    ).to.be.rejectedWith("AccountHasNoRole");
+    await expect(asset.connect(signer_C).grantRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address)).to.be.rejectedWith(
+      "AccountHasNoRole",
+    );
   });
 
   it("GIVEN an account without administrative role WHEN revokeRole THEN transaction fails with AccountHasNoRole", async () => {
     await expect(
-      accessControlFacet.connect(signer_C).revokeRole(ATS_ROLES._DEFAULT_ADMIN_ROLE, unknownSigner.address),
+      asset.connect(signer_C).revokeRole(ATS_ROLES._DEFAULT_ADMIN_ROLE, unknownSigner.address),
     ).to.be.rejectedWith("AccountHasNoRole");
   });
 
   it("GIVEN an account without administrative role WHEN applyRoles THEN transaction fails with AccountHasNoRole", async () => {
     await expect(
-      accessControlFacet.connect(signer_C).applyRoles([ATS_ROLES._DEFAULT_ADMIN_ROLE], [true], unknownSigner.address),
+      asset.connect(signer_C).applyRoles([ATS_ROLES._DEFAULT_ADMIN_ROLE], [true], unknownSigner.address),
     ).to.be.rejectedWith("AccountHasNoRole");
   });
 
   it("GIVEN a list of roles and actives that is not equally long WHEN applyRoles THEN transaction fails with RolesAndActivesLengthMismatch", async () => {
     await expect(
-      accessControlFacet.connect(signer_C).applyRoles([ATS_ROLES._DEFAULT_ADMIN_ROLE], [], unknownSigner.address),
+      asset.connect(signer_C).applyRoles([ATS_ROLES._DEFAULT_ADMIN_ROLE], [], unknownSigner.address),
     ).to.be.rejectedWith("RolesAndActivesLengthMismatch");
   });
 
@@ -80,69 +78,67 @@ describe("Access Control Tests", () => {
     const actives_2 = [true, true, true, false, true, true, true, true];
 
     // revoke role fails
-    await expect(accessControlFacet.connect(deployer).applyRoles(Roles_1, actives_1, unknownSigner.address))
-      .to.be.revertedWithCustomError(accessControlFacet, "ContradictoryValuesInArray")
+    await expect(asset.connect(deployer).applyRoles(Roles_1, actives_1, unknownSigner.address))
+      .to.be.revertedWithCustomError(asset, "ContradictoryValuesInArray")
       .withArgs(3, 6);
 
-    await expect(accessControlFacet.connect(deployer).applyRoles(Roles_1, actives_2, unknownSigner.address))
-      .to.be.revertedWithCustomError(accessControlFacet, "ContradictoryValuesInArray")
+    await expect(asset.connect(deployer).applyRoles(Roles_1, actives_2, unknownSigner.address))
+      .to.be.revertedWithCustomError(asset, "ContradictoryValuesInArray")
       .withArgs(3, 6);
   });
 
   it("GIVEN a paused Token WHEN grantRole THEN transaction fails with TokenIsPaused", async () => {
-    await pauseFacet.connect(signer_B).pause();
+    await asset.connect(signer_B).pause();
 
-    await expect(
-      accessControlFacet.connect(deployer).grantRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address),
-    ).to.be.rejectedWith("TokenIsPaused");
-  });
-
-  it("GIVEN a paused Token WHEN revokeRole THEN transaction fails with TokenIsPaused", async () => {
-    await pauseFacet.connect(signer_B).pause();
-
-    await expect(
-      accessControlFacet.connect(deployer).revokeRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address),
-    ).to.be.rejectedWith("TokenIsPaused");
-  });
-
-  it("GIVEN a paused Token WHEN renounce THEN transaction fails with TokenIsPaused", async () => {
-    // Pausing the token
-    await pauseFacet.connect(signer_B).pause();
-
-    // revoke role fails
-    await expect(accessControlFacet.connect(deployer).renounceRole(ATS_ROLES._PAUSER_ROLE)).to.be.rejectedWith(
+    await expect(asset.connect(deployer).grantRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address)).to.be.rejectedWith(
       "TokenIsPaused",
     );
   });
 
+  it("GIVEN a paused Token WHEN revokeRole THEN transaction fails with TokenIsPaused", async () => {
+    await asset.connect(signer_B).pause();
+
+    await expect(asset.connect(deployer).revokeRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address)).to.be.rejectedWith(
+      "TokenIsPaused",
+    );
+  });
+
+  it("GIVEN a paused Token WHEN renounce THEN transaction fails with TokenIsPaused", async () => {
+    // Pausing the token
+    await asset.connect(signer_B).pause();
+
+    // revoke role fails
+    await expect(asset.connect(deployer).renounceRole(ATS_ROLES._PAUSER_ROLE)).to.be.rejectedWith("TokenIsPaused");
+  });
+
   it("GIVEN an paused Token WHEN applyRoles THEN transaction fails with TokenIsPaused", async () => {
     // Pausing the token
-    await pauseFacet.connect(signer_B).pause();
+    await asset.connect(signer_B).pause();
 
     // revoke role fails
     await expect(
-      accessControlFacet.connect(signer_B).applyRoles([ATS_ROLES._DEFAULT_ADMIN_ROLE], [true], unknownSigner.address),
+      asset.connect(signer_B).applyRoles([ATS_ROLES._DEFAULT_ADMIN_ROLE], [true], unknownSigner.address),
     ).to.be.rejectedWith("TokenIsPaused");
   });
 
   it("GIVEN an account with administrative role WHEN grantRole THEN transaction succeeds", async () => {
     // check that C does not have the role
-    let check_C = await accessControlFacet.hasRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address);
+    let check_C = await asset.hasRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address);
     expect(check_C).to.equal(false);
 
     // grant Role
-    await expect(accessControlFacet.connect(deployer).grantRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address))
-      .to.emit(accessControlFacet, "RoleGranted")
+    await expect(asset.connect(deployer).grantRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address))
+      .to.emit(asset, "RoleGranted")
       .withArgs(deployer.address, unknownSigner.address, ATS_ROLES._PAUSER_ROLE);
 
     // check that C has the role
-    check_C = await accessControlFacet.hasRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address);
+    check_C = await asset.hasRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address);
     expect(check_C).to.equal(true);
     // check roles and members count and lists
-    const roleCountFor_C = await accessControlFacet.getRoleCountFor(unknownSigner.address);
-    const rolesFor_C = await accessControlFacet.getRolesFor(unknownSigner.address, 0, roleCountFor_C);
-    const memberCountFor_Pause = await accessControlFacet.getRoleMemberCount(ATS_ROLES._PAUSER_ROLE);
-    const membersFor_Pause = await accessControlFacet.getRoleMembers(ATS_ROLES._PAUSER_ROLE, 0, memberCountFor_Pause);
+    const roleCountFor_C = await asset.getRoleCountFor(unknownSigner.address);
+    const rolesFor_C = await asset.getRolesFor(unknownSigner.address, 0, roleCountFor_C);
+    const memberCountFor_Pause = await asset.getRoleMemberCount(ATS_ROLES._PAUSER_ROLE);
+    const membersFor_Pause = await asset.getRoleMembers(ATS_ROLES._PAUSER_ROLE, 0, memberCountFor_Pause);
     expect(roleCountFor_C).to.equal(1);
     expect(rolesFor_C.length).to.equal(roleCountFor_C);
     expect(rolesFor_C[0].toUpperCase()).to.equal(ATS_ROLES._PAUSER_ROLE.toUpperCase());
@@ -154,22 +150,22 @@ describe("Access Control Tests", () => {
 
   it("GIVEN an account with administrative role WHEN revokeRole THEN transaction succeeds", async () => {
     // check that B has the role
-    let check_B = await accessControlFacet.hasRole(ATS_ROLES._PAUSER_ROLE, signer_B.address);
+    let check_B = await asset.hasRole(ATS_ROLES._PAUSER_ROLE, signer_B.address);
     expect(check_B).to.equal(true);
 
     // revoke Role
-    await expect(accessControlFacet.connect(deployer).revokeRole(ATS_ROLES._PAUSER_ROLE, signer_B.address))
-      .to.emit(accessControlFacet, "RoleRevoked")
+    await expect(asset.connect(deployer).revokeRole(ATS_ROLES._PAUSER_ROLE, signer_B.address))
+      .to.emit(asset, "RoleRevoked")
       .withArgs(deployer.address, signer_B.address, ATS_ROLES._PAUSER_ROLE);
 
     // check that B does not have the role
-    check_B = await accessControlFacet.hasRole(ATS_ROLES._PAUSER_ROLE, signer_B.address);
+    check_B = await asset.hasRole(ATS_ROLES._PAUSER_ROLE, signer_B.address);
     expect(check_B).to.equal(false);
     // check roles and members count and lists
-    const roleCountFor_B = await accessControlFacet.getRoleCountFor(signer_B.address);
-    const rolesFor_B = await accessControlFacet.getRolesFor(signer_B.address, 0, roleCountFor_B);
-    const memberCountFor_Pause = await accessControlFacet.getRoleMemberCount(ATS_ROLES._PAUSER_ROLE);
-    const membersFor_Pause = await accessControlFacet.getRoleMembers(ATS_ROLES._PAUSER_ROLE, 0, memberCountFor_Pause);
+    const roleCountFor_B = await asset.getRoleCountFor(signer_B.address);
+    const rolesFor_B = await asset.getRolesFor(signer_B.address, 0, roleCountFor_B);
+    const memberCountFor_Pause = await asset.getRoleMemberCount(ATS_ROLES._PAUSER_ROLE);
+    const membersFor_Pause = await asset.getRoleMembers(ATS_ROLES._PAUSER_ROLE, 0, memberCountFor_Pause);
     expect(roleCountFor_B).to.equal(0);
     expect(rolesFor_B.length).to.equal(roleCountFor_B);
     expect(memberCountFor_Pause).to.equal(0);
@@ -178,22 +174,22 @@ describe("Access Control Tests", () => {
 
   it("GIVEN an account with pauser role WHEN renouncing the pauser role THEN transaction succeeds", async () => {
     // check that B has the role
-    let check_B = await accessControlFacet.hasRole(ATS_ROLES._PAUSER_ROLE, signer_B.address);
+    let check_B = await asset.hasRole(ATS_ROLES._PAUSER_ROLE, signer_B.address);
     expect(check_B).to.equal(true);
 
     // revoke Role
-    await expect(accessControlFacet.connect(signer_B).renounceRole(ATS_ROLES._PAUSER_ROLE))
-      .to.emit(accessControlFacet, "RoleRenounced")
+    await expect(asset.connect(signer_B).renounceRole(ATS_ROLES._PAUSER_ROLE))
+      .to.emit(asset, "RoleRenounced")
       .withArgs(signer_B.address, ATS_ROLES._PAUSER_ROLE);
 
     // check that B does not have the role
-    check_B = await accessControlFacet.hasRole(ATS_ROLES._PAUSER_ROLE, signer_B.address);
+    check_B = await asset.hasRole(ATS_ROLES._PAUSER_ROLE, signer_B.address);
     expect(check_B).to.equal(false);
     // check roles and members count and lists
-    const roleCountFor_B = await accessControlFacet.getRoleCountFor(signer_B.address);
-    const rolesFor_B = await accessControlFacet.getRolesFor(signer_B.address, 0, roleCountFor_B);
-    const memberCountFor_Pause = await accessControlFacet.getRoleMemberCount(ATS_ROLES._PAUSER_ROLE);
-    const membersFor_Pause = await accessControlFacet.getRoleMembers(ATS_ROLES._PAUSER_ROLE, 0, memberCountFor_Pause);
+    const roleCountFor_B = await asset.getRoleCountFor(signer_B.address);
+    const rolesFor_B = await asset.getRolesFor(signer_B.address, 0, roleCountFor_B);
+    const memberCountFor_Pause = await asset.getRoleMemberCount(ATS_ROLES._PAUSER_ROLE);
+    const membersFor_Pause = await asset.getRoleMembers(ATS_ROLES._PAUSER_ROLE, 0, memberCountFor_Pause);
     expect(roleCountFor_B).to.equal(0);
     expect(rolesFor_B.length).to.equal(roleCountFor_B);
     expect(memberCountFor_Pause).to.equal(0);
@@ -202,31 +198,27 @@ describe("Access Control Tests", () => {
 
   it("GIVEN an account with administrative role WHEN applyRoles THEN transaction succeeds", async () => {
     // check that C does not have the role
-    await accessControlFacet.connect(deployer).grantRole(ATS_ROLES._PAUSER_ROLE, signer_C.address);
+    await asset.connect(deployer).grantRole(ATS_ROLES._PAUSER_ROLE, signer_C.address);
 
     // grant Role
     await expect(
-      accessControlFacet
+      asset
         .connect(deployer)
         .applyRoles([ATS_ROLES._PAUSER_ROLE, ATS_ROLES._DEFAULT_ADMIN_ROLE], [false, true], signer_C.address),
     )
-      .to.emit(accessControlFacet, "RolesApplied")
+      .to.emit(asset, "RolesApplied")
       .withArgs([ATS_ROLES._PAUSER_ROLE, ATS_ROLES._DEFAULT_ADMIN_ROLE], [false, true], signer_C.address);
 
     // check that C has the role
-    expect(await accessControlFacet.hasRole(ATS_ROLES._PAUSER_ROLE, signer_C.address)).to.equal(false);
-    expect(await accessControlFacet.hasRole(ATS_ROLES._DEFAULT_ADMIN_ROLE, signer_C.address)).to.equal(true);
+    expect(await asset.hasRole(ATS_ROLES._PAUSER_ROLE, signer_C.address)).to.equal(false);
+    expect(await asset.hasRole(ATS_ROLES._DEFAULT_ADMIN_ROLE, signer_C.address)).to.equal(true);
     // check roles and members count and lists
-    const roleCountFor_C = await accessControlFacet.getRoleCountFor(signer_C.address);
-    const rolesFor_C = await accessControlFacet.getRolesFor(signer_C.address, 0, roleCountFor_C);
-    const memberCountFor_Pause = await accessControlFacet.getRoleMemberCount(ATS_ROLES._PAUSER_ROLE);
-    const membersFor_Pause = await accessControlFacet.getRoleMembers(ATS_ROLES._PAUSER_ROLE, 0, memberCountFor_Pause);
-    const memberCountFor_Default = await accessControlFacet.getRoleMemberCount(ATS_ROLES._DEFAULT_ADMIN_ROLE);
-    const membersFor_Default = await accessControlFacet.getRoleMembers(
-      ATS_ROLES._DEFAULT_ADMIN_ROLE,
-      0,
-      memberCountFor_Default,
-    );
+    const roleCountFor_C = await asset.getRoleCountFor(signer_C.address);
+    const rolesFor_C = await asset.getRolesFor(signer_C.address, 0, roleCountFor_C);
+    const memberCountFor_Pause = await asset.getRoleMemberCount(ATS_ROLES._PAUSER_ROLE);
+    const membersFor_Pause = await asset.getRoleMembers(ATS_ROLES._PAUSER_ROLE, 0, memberCountFor_Pause);
+    const memberCountFor_Default = await asset.getRoleMemberCount(ATS_ROLES._DEFAULT_ADMIN_ROLE);
+    const membersFor_Default = await asset.getRoleMembers(ATS_ROLES._DEFAULT_ADMIN_ROLE, 0, memberCountFor_Default);
     expect(roleCountFor_C).to.equal(1);
     expect(rolesFor_C.length).to.equal(roleCountFor_C);
     expect(rolesFor_C[0].toUpperCase()).to.equal(ATS_ROLES._DEFAULT_ADMIN_ROLE.toUpperCase());
@@ -240,11 +232,11 @@ describe("Access Control Tests", () => {
 
   it("GIVEN an account with administrative role, if roles are duplicated but not contradictory WHEN applyRoles THEN transaction succeeds", async () => {
     // check that C does not have the role
-    await accessControlFacet.connect(deployer).grantRole(ATS_ROLES._PAUSER_ROLE, signer_C.address);
+    await asset.connect(deployer).grantRole(ATS_ROLES._PAUSER_ROLE, signer_C.address);
 
     // grant Role
     await expect(
-      accessControlFacet
+      asset
         .connect(deployer)
         .applyRoles(
           [ATS_ROLES._PAUSER_ROLE, ATS_ROLES._DEFAULT_ADMIN_ROLE, ATS_ROLES._DEFAULT_ADMIN_ROLE],
@@ -252,7 +244,7 @@ describe("Access Control Tests", () => {
           signer_C.address,
         ),
     )
-      .to.emit(accessControlFacet, "RolesApplied")
+      .to.emit(asset, "RolesApplied")
       .withArgs(
         [ATS_ROLES._PAUSER_ROLE, ATS_ROLES._DEFAULT_ADMIN_ROLE, ATS_ROLES._DEFAULT_ADMIN_ROLE],
         [true, false, false],
@@ -260,11 +252,11 @@ describe("Access Control Tests", () => {
       );
 
     // check that C has the role
-    expect(await accessControlFacet.hasRole(ATS_ROLES._PAUSER_ROLE, signer_C.address)).to.equal(true);
-    expect(await accessControlFacet.hasRole(ATS_ROLES._DEFAULT_ADMIN_ROLE, signer_C.address)).to.equal(false);
+    expect(await asset.hasRole(ATS_ROLES._PAUSER_ROLE, signer_C.address)).to.equal(true);
+    expect(await asset.hasRole(ATS_ROLES._DEFAULT_ADMIN_ROLE, signer_C.address)).to.equal(false);
     // check roles and members count and lists
-    const roleCountFor_C = await accessControlFacet.getRoleCountFor(signer_C.address);
-    const rolesFor_C = await accessControlFacet.getRolesFor(signer_C.address, 0, roleCountFor_C);
+    const roleCountFor_C = await asset.getRoleCountFor(signer_C.address);
+    const rolesFor_C = await asset.getRolesFor(signer_C.address, 0, roleCountFor_C);
 
     expect(roleCountFor_C).to.equal(1);
     expect(rolesFor_C.length).to.equal(roleCountFor_C);
@@ -273,34 +265,34 @@ describe("Access Control Tests", () => {
 
   it("GIVEN an account that already has a role WHEN grantRole is called again THEN transaction fails with AccountAssignedToRole", async () => {
     // Grant the role first time
-    await accessControlFacet.connect(deployer).grantRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address);
+    await asset.connect(deployer).grantRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address);
 
     // Verify role was granted
-    expect(await accessControlFacet.hasRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address)).to.equal(true);
+    expect(await asset.hasRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address)).to.equal(true);
 
     // Try to grant the same role again and expect it to fail
-    await expect(accessControlFacet.connect(deployer).grantRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address))
-      .to.be.revertedWithCustomError(accessControlFacet, "AccountAssignedToRole")
+    await expect(asset.connect(deployer).grantRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address))
+      .to.be.revertedWithCustomError(asset, "AccountAssignedToRole")
       .withArgs(ATS_ROLES._PAUSER_ROLE, unknownSigner.address);
   });
 
   it("GIVEN an account without a specific role WHEN revokeRole is called THEN transaction fails with AccountNotAssignedToRole", async () => {
     // Verify that the account does not have the role
-    expect(await accessControlFacet.hasRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address)).to.equal(false);
+    expect(await asset.hasRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address)).to.equal(false);
 
     // Try to revoke a role that the account doesn't have
-    await expect(accessControlFacet.connect(deployer).revokeRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address))
-      .to.be.revertedWithCustomError(accessControlFacet, "AccountNotAssignedToRole")
+    await expect(asset.connect(deployer).revokeRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address))
+      .to.be.revertedWithCustomError(asset, "AccountNotAssignedToRole")
       .withArgs(ATS_ROLES._PAUSER_ROLE, unknownSigner.address);
   });
 
   it("GIVEN an account without a specific role WHEN renounceRole is called THEN transaction fails with AccountNotAssignedToRole", async () => {
     // Verify that the account does not have the role
-    expect(await accessControlFacet.hasRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address)).to.equal(false);
+    expect(await asset.hasRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address)).to.equal(false);
 
     // Try to renounce a role that the account doesn't have
-    await expect(accessControlFacet.connect(unknownSigner).renounceRole(ATS_ROLES._PAUSER_ROLE))
-      .to.be.revertedWithCustomError(accessControlFacet, "AccountNotAssignedToRole")
+    await expect(asset.connect(unknownSigner).renounceRole(ATS_ROLES._PAUSER_ROLE))
+      .to.be.revertedWithCustomError(asset, "AccountNotAssignedToRole")
       .withArgs(ATS_ROLES._PAUSER_ROLE, unknownSigner.address);
   });
 });

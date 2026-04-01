@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-interface IVoting {
+import { IVotingStorageWrapper } from "../../../domain/asset/voting/IVotingStorageWrapper.sol";
+
+interface IVoting is IVotingStorageWrapper {
     struct Voting {
         uint256 recordDate;
         bytes data;

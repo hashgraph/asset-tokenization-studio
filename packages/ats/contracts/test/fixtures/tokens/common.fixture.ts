@@ -10,7 +10,7 @@ import {
   RegulationType,
 } from "@scripts";
 import { FactoryRegulationDataParams, Rbac, SecurityDataParams } from "@scripts/domain";
-import { AccessControlFacet, BusinessLogicResolver } from "@contract-types";
+import { IAsset, BusinessLogicResolver } from "@contract-types";
 import { MaxUint256, encodeBytes32String, parseUnits, ZeroAddress } from "ethers";
 import { isinGenerator } from "@thomaschaplin/isin-generator";
 
@@ -29,7 +29,7 @@ export const TEST_AMOUNTS = {
   LARGE: parseUnits("10000", 6),
 } as const;
 
-export async function executeRbac(accessControlFacet: AccessControlFacet, rbac: Rbac[]) {
+export async function executeRbac(accessControlFacet: IAsset, rbac: Rbac[]) {
   await Promise.all(
     rbac.map(async (r) => {
       const roleHash = ATS_ROLES[r.role as AtsRoleName] || (r.role as AtsRoleHash);

@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type Security, IERC1410 } from "@contract-types";
+import { type ResolverProxy, type IAsset } from "@contract-types";
 import { ATS_ROLES } from "@scripts";
 import { executeRbac } from "@test";
 import { deployEquityTokenFixture } from "@test";
@@ -18,8 +18,7 @@ describe("Security Tests", () => {
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
 
-  let securityFacet: Security;
-  let erc1410Facet: IERC1410;
+  let asset: IAsset;
 
   async function deploySecurityFixture() {
     const base = await deployEquityTokenFixture({
@@ -35,15 +34,14 @@ describe("Security Tests", () => {
     signer_B = base.user2;
     signer_C = base.user3;
 
-    await executeRbac(base.accessControlFacet, [
+    asset = await ethers.getContractAt("IAsset", diamond.target);
+
+    await executeRbac(asset, [
       {
         role: ATS_ROLES._ISSUER_ROLE,
         members: [signer_A.address],
       },
     ]);
-
-    securityFacet = await ethers.getContractAt("Security", diamond.target);
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target);
   }
 
   beforeEach(async () => {
@@ -52,32 +50,32 @@ describe("Security Tests", () => {
 
   describe("security", () => {
     it("Check Security Total Holders and Holders when adding", async () => {
-      const TotalTokenHolders_1 = await securityFacet.getTotalSecurityHolders();
-      const TokenHolders_1 = await securityFacet.getSecurityHolders(0, TotalTokenHolders_1);
+      const TotalTokenHolders_1 = await asset.getTotalSecurityHolders();
+      const TokenHolders_1 = await asset.getSecurityHolders(0, TotalTokenHolders_1);
 
-      await erc1410Facet.connect(signer_A).issueByPartition({
+      await asset.connect(signer_A).issueByPartition({
         partition: _PARTITION_ID_1,
         tokenHolder: signer_A.address,
         value: 1,
         data: "0x",
       });
 
-      await erc1410Facet.connect(signer_A).issueByPartition({
+      await asset.connect(signer_A).issueByPartition({
         partition: _PARTITION_ID_1,
         tokenHolder: signer_B.address,
         value: 1,
         data: "0x",
       });
 
-      await erc1410Facet.connect(signer_A).issueByPartition({
+      await asset.connect(signer_A).issueByPartition({
         partition: _PARTITION_ID_2,
         tokenHolder: signer_C.address,
         value: 1,
         data: "0x",
       });
 
-      const TotalTokenHolders_2 = await securityFacet.getTotalSecurityHolders();
-      const TokenHolders_2 = await securityFacet.getSecurityHolders(0, TotalTokenHolders_2);
+      const TotalTokenHolders_2 = await asset.getTotalSecurityHolders();
+      const TokenHolders_2 = await asset.getSecurityHolders(0, TotalTokenHolders_2);
 
       expect(TotalTokenHolders_1).to.equal(0);
       expect(TokenHolders_1.length).to.equal(TotalTokenHolders_1);
@@ -88,44 +86,44 @@ describe("Security Tests", () => {
     });
 
     it("Check Security Total Holders and Holders when removing", async () => {
-      await erc1410Facet.connect(signer_A).issueByPartition({
+      await asset.connect(signer_A).issueByPartition({
         partition: _PARTITION_ID_1,
         tokenHolder: signer_A.address,
         value: 1,
         data: "0x",
       });
 
-      await erc1410Facet.connect(signer_A).issueByPartition({
+      await asset.connect(signer_A).issueByPartition({
         partition: _PARTITION_ID_1,
         tokenHolder: signer_B.address,
         value: 1,
         data: "0x",
       });
 
-      await erc1410Facet.connect(signer_A).issueByPartition({
+      await asset.connect(signer_A).issueByPartition({
         partition: _PARTITION_ID_2,
         tokenHolder: signer_C.address,
         value: 1,
         data: "0x",
       });
 
-      const TotalTokenHolders_1 = await securityFacet.getTotalSecurityHolders();
-      const TokenHolders_1 = await securityFacet.getSecurityHolders(0, TotalTokenHolders_1);
+      const TotalTokenHolders_1 = await asset.getTotalSecurityHolders();
+      const TokenHolders_1 = await asset.getSecurityHolders(0, TotalTokenHolders_1);
 
-      await erc1410Facet.connect(signer_B).redeemByPartition(_PARTITION_ID_1, 1, "0x");
+      await asset.connect(signer_B).redeemByPartition(_PARTITION_ID_1, 1, "0x");
 
-      const TotalTokenHolders_2 = await securityFacet.getTotalSecurityHolders();
-      const TokenHolders_2 = await securityFacet.getSecurityHolders(0, TotalTokenHolders_2);
+      const TotalTokenHolders_2 = await asset.getTotalSecurityHolders();
+      const TokenHolders_2 = await asset.getSecurityHolders(0, TotalTokenHolders_2);
 
-      await erc1410Facet.connect(signer_A).redeemByPartition(_PARTITION_ID_1, 1, "0x");
+      await asset.connect(signer_A).redeemByPartition(_PARTITION_ID_1, 1, "0x");
 
-      const TotalTokenHolders_3 = await securityFacet.getTotalSecurityHolders();
-      const TokenHolders_3 = await securityFacet.getSecurityHolders(0, TotalTokenHolders_3);
+      const TotalTokenHolders_3 = await asset.getTotalSecurityHolders();
+      const TokenHolders_3 = await asset.getSecurityHolders(0, TotalTokenHolders_3);
 
-      await erc1410Facet.connect(signer_C).redeemByPartition(_PARTITION_ID_2, 1, "0x");
+      await asset.connect(signer_C).redeemByPartition(_PARTITION_ID_2, 1, "0x");
 
-      const TotalTokenHolders_4 = await securityFacet.getTotalSecurityHolders();
-      const TokenHolders_4 = await securityFacet.getSecurityHolders(0, TotalTokenHolders_4);
+      const TotalTokenHolders_4 = await asset.getTotalSecurityHolders();
+      const TokenHolders_4 = await asset.getSecurityHolders(0, TotalTokenHolders_4);
 
       expect(TotalTokenHolders_1).to.equal(3);
       expect(TokenHolders_1.length).to.equal(TotalTokenHolders_1);
@@ -144,17 +142,17 @@ describe("Security Tests", () => {
     });
 
     it("Check Security Total Holders and Holders when replacing", async () => {
-      await erc1410Facet.connect(signer_A).issueByPartition({
+      await asset.connect(signer_A).issueByPartition({
         partition: _PARTITION_ID_1,
         tokenHolder: signer_A.address,
         value: 1,
         data: "0x",
       });
 
-      const TotalTokenHolders_1 = await securityFacet.getTotalSecurityHolders();
-      const TokenHolders_1 = await securityFacet.getSecurityHolders(0, TotalTokenHolders_1);
+      const TotalTokenHolders_1 = await asset.getTotalSecurityHolders();
+      const TokenHolders_1 = await asset.getSecurityHolders(0, TotalTokenHolders_1);
 
-      await erc1410Facet.transferByPartition(
+      await asset.transferByPartition(
         _PARTITION_ID_1,
         {
           to: signer_B.address,
@@ -163,8 +161,8 @@ describe("Security Tests", () => {
         "0x",
       );
 
-      const TotalTokenHolders_2 = await securityFacet.getTotalSecurityHolders();
-      const TokenHolders_2 = await securityFacet.getSecurityHolders(0, TotalTokenHolders_2);
+      const TotalTokenHolders_2 = await asset.getTotalSecurityHolders();
+      const TokenHolders_2 = await asset.getSecurityHolders(0, TotalTokenHolders_2);
 
       expect(TotalTokenHolders_1).to.equal(1);
       expect(TokenHolders_1.length).to.equal(TotalTokenHolders_1);

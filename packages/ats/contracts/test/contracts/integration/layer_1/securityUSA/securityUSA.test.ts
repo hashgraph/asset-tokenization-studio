@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type BondUSAReadFacet } from "@contract-types";
+import { type IAsset } from "@contract-types";
 import { RegulationType, RegulationSubType, TIME_PERIODS_S } from "@scripts";
 import { deployEquityTokenFixture } from "@test";
 
@@ -21,7 +21,7 @@ let maturityDate = startingDate + numberOfCoupons * frequency;
 describe("Security USA Tests", () => {
   let signer_B: HardhatEthersSigner;
 
-  let bondUSAFacet: BondUSAReadFacet;
+  let asset: IAsset;
 
   before(async () => {
     currentTimeInSeconds = (await ethers.provider.getBlock("latest"))!.timestamp;
@@ -46,9 +46,9 @@ describe("Security USA Tests", () => {
       const diamond = base.diamond;
       signer_B = base.user2;
 
-      const equityUSAFacet = await ethers.getContractAt("EquityUSA", diamond.target, signer_B);
+      asset = await ethers.getContractAt("IAsset", diamond.target);
       // retrieve security regulation data
-      const regulation = await equityUSAFacet.getSecurityRegulationData();
+      const regulation = await asset.connect(signer_B).getSecurityRegulationData();
 
       expect(regulation.regulationData.regulationType).to.equal(RegulationType.REG_S);
       expect(regulation.regulationData.regulationSubType).to.equal(RegulationSubType.NONE);
@@ -79,10 +79,10 @@ describe("Security USA Tests", () => {
       const diamond = base.diamond;
       signer_B = base.user2;
 
-      const equityUSAFacet = await ethers.getContractAt("EquityUSA", diamond.target, signer_B);
+      asset = await ethers.getContractAt("IAsset", diamond.target);
 
       // retrieve security regulation data
-      const regulation = await equityUSAFacet.getSecurityRegulationData();
+      const regulation = await asset.connect(signer_B).getSecurityRegulationData();
 
       expect(regulation.regulationData.regulationType).to.equal(RegulationType.REG_D);
       expect(regulation.regulationData.regulationSubType).to.equal(RegulationSubType.REG_D_506_B);
@@ -112,10 +112,10 @@ describe("Security USA Tests", () => {
       const diamond = base.diamond;
       signer_B = base.user2;
 
-      const equityUSAFacet = await ethers.getContractAt("EquityUSA", diamond.target, signer_B);
+      asset = await ethers.getContractAt("IAsset", diamond.target);
 
       // retrieve security regulation data
-      const regulation = await equityUSAFacet.getSecurityRegulationData();
+      const regulation = await asset.connect(signer_B).getSecurityRegulationData();
 
       expect(regulation.regulationData.regulationType).to.equal(RegulationType.REG_D);
       expect(regulation.regulationData.regulationSubType).to.equal(RegulationSubType.REG_D_506_C);
@@ -147,10 +147,10 @@ describe("Security USA Tests", () => {
       const diamond = base.diamond;
       signer_B = base.user2;
 
-      bondUSAFacet = await ethers.getContractAt("BondUSAReadFacet", diamond.target);
+      asset = await ethers.getContractAt("IAsset", diamond.target);
 
       // retrieve security regulation data
-      const regulation = await bondUSAFacet.getSecurityRegulationData();
+      const regulation = await asset.getSecurityRegulationData();
 
       expect(regulation.regulationData.regulationType).to.equal(RegulationType.REG_S);
       expect(regulation.regulationData.regulationSubType).to.equal(RegulationSubType.NONE);
@@ -180,9 +180,9 @@ describe("Security USA Tests", () => {
       const diamond = base.diamond;
       signer_B = base.user2;
 
-      bondUSAFacet = await ethers.getContractAt("BondUSAReadFacet", diamond.target);
+      asset = await ethers.getContractAt("IAsset", diamond.target);
       // retrieve security regulation data
-      const regulation = await bondUSAFacet.getSecurityRegulationData();
+      const regulation = await asset.getSecurityRegulationData();
 
       expect(regulation.regulationData.regulationType).to.equal(RegulationType.REG_D);
       expect(regulation.regulationData.regulationSubType).to.equal(RegulationSubType.REG_D_506_B);
@@ -212,9 +212,9 @@ describe("Security USA Tests", () => {
       const diamond = base.diamond;
       signer_B = base.user2;
 
-      bondUSAFacet = await ethers.getContractAt("BondUSAReadFacet", diamond.target);
+      asset = await ethers.getContractAt("IAsset", diamond.target);
       // retrieve security regulation data
-      const regulation = await bondUSAFacet.getSecurityRegulationData();
+      const regulation = await asset.getSecurityRegulationData();
 
       expect(regulation.regulationData.regulationType).to.equal(RegulationType.REG_D);
       expect(regulation.regulationData.regulationSubType).to.equal(RegulationSubType.REG_D_506_C);

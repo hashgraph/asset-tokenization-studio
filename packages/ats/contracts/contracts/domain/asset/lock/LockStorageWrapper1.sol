@@ -19,10 +19,6 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         mapping(address => mapping(bytes32 => uint256)) nextLockIdByAccountAndPartition;
     }
 
-    error WrongLockId();
-    error WrongExpirationTimestamp();
-    error LockExpirationNotReached();
-
     modifier onlyWithValidExpirationTimestamp(uint256 _expirationTimestamp) override {
         _checkExpirationTimestamp(_expirationTimestamp);
         _;
@@ -160,7 +156,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
     }
 
     function _checkExpirationTimestamp(uint256 _expirationTimestamp) internal view override {
-        if (_expirationTimestamp < _blockTimestamp()) revert WrongExpirationTimestamp();
+        if (_expirationTimestamp < _blockTimestamp()) revert ILock.WrongExpirationTimestamp();
     }
 
     function _lockStorage() internal pure returns (LockDataStorage storage lock_) {
@@ -172,10 +168,10 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
     }
 
     function _checkValidLockId(bytes32 _partition, address _tokenHolder, uint256 _lockId) private view {
-        if (!_isLockIdValid(_partition, _tokenHolder, _lockId)) revert WrongLockId();
+        if (!_isLockIdValid(_partition, _tokenHolder, _lockId)) revert ILock.WrongLockId();
     }
 
     function _checkLockedExpirationTimestamp(bytes32 _partition, address _tokenHolder, uint256 _lockId) private view {
-        if (!_isLockedExpirationTimestamp(_partition, _tokenHolder, _lockId)) revert LockExpirationNotReached();
+        if (!_isLockedExpirationTimestamp(_partition, _tokenHolder, _lockId)) revert ILock.LockExpirationNotReached();
     }
 }

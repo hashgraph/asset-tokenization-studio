@@ -14,8 +14,6 @@ abstract contract ExternalListManagementStorageWrapper is SsiManagementStorageWr
         EnumerableSet.AddressSet list;
     }
 
-    error ZeroAddressNotAllowed();
-
     function _updateExternalLists(
         bytes32 _position,
         address[] calldata _lists,

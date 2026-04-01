@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-interface IDividend {
+import { IDividendStorageWrapper } from "../../../domain/asset/dividend/IDividendStorageWrapper.sol";
+
+interface IDividend is IDividendStorageWrapper {
     struct Dividend {
         uint256 recordDate;
         uint256 executionDate;
