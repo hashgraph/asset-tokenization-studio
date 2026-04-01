@@ -364,7 +364,9 @@ describe("Bond Token Deployment", () => {
       const params = createDeployBondParams(mockFactory);
       const regulationData = createMockRegulationData();
 
-      await expect(deployBondFromFactory(params, regulationData)).to.be.rejectedWith("BondDeployed event not found");
+      await expect(deployBondFromFactory(params, regulationData)).to.be.rejectedWith(
+        'Event log for "BondDeployed" not found in transaction receipt',
+      );
     });
 
     it("should throw if BondDeployed event not found", async () => {
@@ -373,7 +375,9 @@ describe("Bond Token Deployment", () => {
       const params = createDeployBondParams(mockFactory);
       const regulationData = createMockRegulationData();
 
-      await expect(deployBondFromFactory(params, regulationData)).to.be.rejectedWith("BondDeployed event not found");
+      await expect(deployBondFromFactory(params, regulationData)).to.be.rejectedWith(
+        'Event log for "BondDeployed" not found in transaction receipt',
+      );
     });
 
     it("should throw if event has no args", async () => {
@@ -381,7 +385,9 @@ describe("Bond Token Deployment", () => {
       const params = createDeployBondParams(mockFactory);
       const regulationData = createMockRegulationData();
 
-      await expect(deployBondFromFactory(params, regulationData)).to.be.rejectedWith("BondDeployed event not found");
+      await expect(deployBondFromFactory(params, regulationData)).to.be.rejectedWith(
+        "Invalid diamond address from BondDeployed event",
+      );
     });
 
     it("should throw if diamondAddress is zero address", async () => {
