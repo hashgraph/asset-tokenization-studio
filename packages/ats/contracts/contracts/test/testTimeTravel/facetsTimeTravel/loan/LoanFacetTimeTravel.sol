@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { LoanFacet } from "../../../../facets/layer_2/loan/standard/LoanFacet.sol";
+import { LoanFacet } from "../../../../facets/layer_2/loan/LoanFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 

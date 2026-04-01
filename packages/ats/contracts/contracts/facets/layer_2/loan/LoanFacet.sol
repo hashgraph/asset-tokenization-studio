@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ILoan } from "../ILoan.sol";
-import { Loan } from "../Loan.sol";
-import { _LOAN_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
-import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { Common } from "../../../../domain/Common.sol";
+import { ILoan } from "./ILoan.sol";
+import { Loan } from "./Loan.sol";
+import { _LOAN_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
+import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Common } from "../../../domain/Common.sol";
 
 contract LoanFacet is Loan, IStaticFunctionSelectors, Common {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
