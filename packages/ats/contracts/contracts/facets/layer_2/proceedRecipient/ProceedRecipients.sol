@@ -65,10 +65,8 @@ abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
     }
 
     // Internal functions for override in rate-specific variants
-    function _addProceedRecipientInternal(
-        address _proceedRecipient,
-        bytes calldata _data
-    ) internal notZeroAddress(_proceedRecipient) {
+    function _addProceedRecipientInternal(address _proceedRecipient, bytes calldata _data) internal {
+        AddressValidation.checkZeroAddress(_proceedRecipient);
         ProceedRecipientsStorageWrapper.requireNotProceedRecipient(_proceedRecipient);
         ProceedRecipientsStorageWrapper.addProceedRecipient(_proceedRecipient, _data);
         emit ProceedRecipientAdded(msg.sender, _proceedRecipient, _data);
