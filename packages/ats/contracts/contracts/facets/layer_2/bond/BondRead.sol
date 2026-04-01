@@ -6,30 +6,48 @@ import { COUPON_CORPORATE_ACTION_TYPE } from "../../../constants/values.sol";
 import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateActionsStorageWrapper.sol";
 import { BondStorageWrapper } from "../../../domain/asset/BondStorageWrapper.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 
-abstract contract BondRead is IBondRead, TimestampProvider {
+abstract contract BondRead is IBondRead, TimestampProvider, Modifiers {
     function getBondDetails() external view override returns (BondDetailsData memory bondDetailsData_) {
         return BondStorageWrapper.getBondDetails();
     }
 
-    function getCoupon(uint256 _couponID) external view override returns (RegisteredCoupon memory registeredCoupon_) {
-        CorporateActionsStorageWrapper.requireMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
+    function getCoupon(
+        uint256 _couponID
+    )
+        external
+        view
+        override
+        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
+        returns (RegisteredCoupon memory registeredCoupon_)
+    {
         return BondStorageWrapper.getCoupon(_couponID);
     }
 
     function getCouponFor(
         uint256 _couponID,
         address _account
-    ) external view override returns (CouponFor memory couponFor_) {
-        CorporateActionsStorageWrapper.requireMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
+    )
+        external
+        view
+        override
+        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
+        returns (CouponFor memory couponFor_)
+    {
         return BondStorageWrapper.getCouponFor(_couponID, _account);
     }
 
     function getCouponAmountFor(
         uint256 _couponID,
         address _account
-    ) external view override returns (CouponAmountFor memory couponAmountFor_) {
-        CorporateActionsStorageWrapper.requireMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
+    )
+        external
+        view
+        override
+        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
+        returns (CouponAmountFor memory couponAmountFor_)
+    {
         return BondStorageWrapper.getCouponAmountFor(_couponID, _account);
     }
 

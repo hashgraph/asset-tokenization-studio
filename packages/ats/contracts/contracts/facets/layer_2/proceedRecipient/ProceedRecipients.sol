@@ -34,8 +34,14 @@ abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
     function updateProceedRecipientData(
         address _proceedRecipient,
         bytes calldata _data
-    ) external override onlyUnpaused onlyRole(_PROCEED_RECIPIENT_MANAGER_ROLE) notZeroAddress(_proceedRecipient) {
-        ProceedRecipientsStorageWrapper.requireProceedRecipient(_proceedRecipient);
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_PROCEED_RECIPIENT_MANAGER_ROLE)
+        notZeroAddress(_proceedRecipient)
+        onlyIfProceedRecipient(_proceedRecipient)
+    {
         ProceedRecipientsStorageWrapper.setProceedRecipientData(_proceedRecipient, _data);
         emit ProceedRecipientDataUpdated(msg.sender, _proceedRecipient, _data);
     }

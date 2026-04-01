@@ -74,15 +74,26 @@ abstract contract Equity is IEquity, Modifiers {
 
     function getDividends(
         uint256 _dividendID
-    ) external view override returns (RegisteredDividend memory registeredDividend_) {
-        CorporateActionsStorageWrapper.requireMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1);
+    )
+        external
+        view
+        override
+        onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1)
+        returns (RegisteredDividend memory registeredDividend_)
+    {
         return EquityStorageWrapper.getDividends(_dividendID);
     }
 
     function getDividendsFor(
         uint256 _dividendID,
         address _account
-    ) external view override returns (DividendFor memory dividendFor_) {
+    )
+        external
+        view
+        override
+        onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1)
+        returns (DividendFor memory dividendFor_)
+    {
         CorporateActionsStorageWrapper.requireMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1);
         return EquityStorageWrapper.getDividendsFor(_dividendID, _account);
     }
@@ -90,8 +101,13 @@ abstract contract Equity is IEquity, Modifiers {
     function getDividendAmountFor(
         uint256 _dividendID,
         address _account
-    ) external view override returns (DividendAmountFor memory dividendAmountFor_) {
-        CorporateActionsStorageWrapper.requireMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1);
+    )
+        external
+        view
+        override
+        onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1)
+        returns (DividendAmountFor memory dividendAmountFor_)
+    {
         return EquityStorageWrapper.getDividendAmountFor(_dividendID, _account);
     }
 
@@ -111,16 +127,28 @@ abstract contract Equity is IEquity, Modifiers {
         return EquityStorageWrapper.getTotalDividendHolders(_dividendID);
     }
 
-    function getVoting(uint256 _voteID) external view override returns (RegisteredVoting memory registeredVoting_) {
-        CorporateActionsStorageWrapper.requireMatchingActionType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1);
+    function getVoting(
+        uint256 _voteID
+    )
+        external
+        view
+        override
+        onlyMatchingActionType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1)
+        returns (RegisteredVoting memory registeredVoting_)
+    {
         return EquityStorageWrapper.getVoting(_voteID);
     }
 
     function getVotingFor(
         uint256 _voteID,
         address _account
-    ) external view override returns (VotingFor memory votingFor_) {
-        CorporateActionsStorageWrapper.requireMatchingActionType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1);
+    )
+        external
+        view
+        override
+        onlyMatchingActionType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1)
+        returns (VotingFor memory votingFor_)
+    {
         return EquityStorageWrapper.getVotingFor(_voteID, _account);
     }
 
@@ -142,11 +170,13 @@ abstract contract Equity is IEquity, Modifiers {
 
     function getScheduledBalanceAdjustment(
         uint256 _balanceAdjustmentID
-    ) external view override returns (ScheduledBalanceAdjustment memory balanceAdjustment_) {
-        CorporateActionsStorageWrapper.requireMatchingActionType(
-            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
-            _balanceAdjustmentID - 1
-        );
+    )
+        external
+        view
+        override
+        onlyMatchingActionType(BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE, _balanceAdjustmentID - 1)
+        returns (ScheduledBalanceAdjustment memory balanceAdjustment_)
+    {
         return EquityStorageWrapper.getScheduledBalanceAdjustment(_balanceAdjustmentID);
     }
 

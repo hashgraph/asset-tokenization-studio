@@ -48,9 +48,7 @@ abstract contract ProceedRecipientModifiers {
      * @param _proceedRecipient The address to check
      */
     modifier onlyIfNotProceedRecipient(address _proceedRecipient) {
-        if (ProceedRecipientsStorageWrapper.isProceedRecipient(_proceedRecipient)) {
-            revert IProceedRecipients.ProceedRecipientAlreadyExists(_proceedRecipient);
-        }
+        ProceedRecipientsStorageWrapper.requireNotProceedRecipient(_proceedRecipient);
         _;
     }
 }

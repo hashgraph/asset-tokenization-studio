@@ -10,8 +10,10 @@ import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvid
 
 abstract contract Cap is ICap, TimestampProvider, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_Cap(uint256 maxSupply, PartitionCap[] calldata partitionCap) external override {
-        _checkNotInitialized(CapStorageWrapper.isCapInitialized());
+    function initialize_Cap(
+        uint256 maxSupply,
+        PartitionCap[] calldata partitionCap
+    ) external override onlyNotCapInitialized {
         CapStorageWrapper.requireValidNewMaxSupply(maxSupply, _getBlockTimestamp());
         CapStorageWrapper.initialize_Cap(maxSupply, partitionCap);
     }
