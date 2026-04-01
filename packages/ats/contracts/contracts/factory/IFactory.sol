@@ -6,6 +6,7 @@ import { IBusinessLogicResolver } from "../infrastructure/diamond/IBusinessLogic
 import { IERC20 } from "../facets/layer_1/ERC1400/ERC20/IERC20.sol";
 import { IBondRead } from "../facets/layer_2/bond/IBondRead.sol";
 import { IEquity } from "../facets/layer_2/equity/IEquity.sol";
+import { ILoan } from "../facets/layer_2/loan/ILoan.sol";
 import { FactoryRegulationData, RegulationData, RegulationType, RegulationSubType } from "../constants/regulation.sol";
 import { IFixedRate } from "../facets/layer_2/interestRate/fixedRate/IFixedRate.sol";
 import { IKpiLinkedRate } from "../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
@@ -20,7 +21,8 @@ interface IFactory {
         Equity,
         BondFixedRate,
         BondKpiLinkedRate,
-        BondSPTRate
+        BondSPTRate,
+        Loan
     }
 
     struct ResolverProxyConfiguration {
@@ -81,6 +83,13 @@ interface IFactory {
         IFixedRate.FixedRateData fixedRateData;
     }
 
+    struct LoanData {
+        SecurityData security;
+        ILoan.LoanDetailsData loanDetails;
+        uint256 nominalValue;
+        uint8 nominalValueDecimals;
+    }
+
     event ProxyDeployed(
         address indexed proxyAddress,
         IBusinessLogicResolver resolver,
@@ -115,6 +124,13 @@ interface IFactory {
         address indexed deployer,
         address bondAddress,
         BondSustainabilityPerformanceTargetRateData bondSustainabilityPerformanceTargetRateData
+    );
+
+    event LoanDeployed(
+        address indexed deployer,
+        address loanAddress,
+        LoanData loanData,
+        FactoryRegulationData regulationData
     );
 
     error EmptyResolver(IBusinessLogicResolver resolver);
@@ -155,6 +171,14 @@ interface IFactory {
     function deployBondSustainabilityPerformanceTargetRate(
         BondSustainabilityPerformanceTargetRateData calldata _bondSustainabilityPerformanceTargetRateData
     ) external returns (address bondAddress_);
+
+    /**
+     * @notice Deploys a new loan given the input loan data
+     */
+    function deployLoan(
+        LoanData calldata _loanData,
+        FactoryRegulationData calldata _factoryRegulationData
+    ) external returns (address loanAddress_);
 
     function getAppliedRegulationData(
         RegulationType _regulationType,

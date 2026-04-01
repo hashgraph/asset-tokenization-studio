@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-30T15:38:13.264Z
- * Facets: 204
+ * Generated: 2026-04-01T09:50:08.792Z
+ * Facets: 205
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -315,6 +315,8 @@ import {
   KycKpiLinkedRateFacetTimeTravel__factory,
   KycSustainabilityPerformanceTargetRateFacet__factory,
   KycSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
+  LoanFacet__factory,
+  LoanFacetTimeTravel__factory,
   LockFacet__factory,
   LockFacetTimeTravel__factory,
   LockFixedRateFacet__factory,
@@ -8309,6 +8311,44 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         : new KycSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
+  LoanFacet: {
+    name: "LoanFacet",
+    resolverKey: {
+      name: "_LOAN_RESOLVER_KEY",
+      value: "0x99001f821b750d64e6a82cf207800dc005acf93b2880abe9f1cdbbfb5e996b86",
+    },
+    inheritance: ["Loan", "IStaticFunctionSelectors", "Common"],
+    methods: [
+      {
+        name: "getLoanDetails",
+        signature:
+          "function getLoanDetails() view returns (((bytes3 currency, uint256 startingDate, uint256 maturityDate, uint8 loanStructureType, uint8 repaymentType, uint8 interestType, uint256 signingDate, address originatorAccount, address servicerAccount) loanBasicData, (uint8 baseReferenceRate, uint256 floorRate, uint256 capRate, uint256 rateMargin, uint8 dayCount, uint8 paymentFrequency, uint256 firstAccrualDate, uint256 prepaymentPenalty, uint256 commitmentFee, uint256 utilizationFee, uint8 utilizationFeeType, uint256 servicingFee) loanInterestData, (string internalRiskGrade, uint256 defaultProbability, uint256 lossGivenDefault) riskData, (uint256 totalCollateralValue, uint256 loanToValue) collateral, (uint8 performanceStatus, uint256 daysPastDue) loanPerformanceStatus) loanDetailsData_)",
+        selector: "0xa3b9e39d",
+      },
+      {
+        name: "initialize_Loan",
+        signature:
+          "function initialize_Loan(((bytes3 currency, uint256 startingDate, uint256 maturityDate, uint8 loanStructureType, uint8 repaymentType, uint8 interestType, uint256 signingDate, address originatorAccount, address servicerAccount) loanBasicData, (uint8 baseReferenceRate, uint256 floorRate, uint256 capRate, uint256 rateMargin, uint8 dayCount, uint8 paymentFrequency, uint256 firstAccrualDate, uint256 prepaymentPenalty, uint256 commitmentFee, uint256 utilizationFee, uint8 utilizationFeeType, uint256 servicingFee) loanInterestData, (string internalRiskGrade, uint256 defaultProbability, uint256 lossGivenDefault) riskData, (uint256 totalCollateralValue, uint256 loanToValue) collateral, (uint8 performanceStatus, uint256 daysPastDue) loanPerformanceStatus) _loanDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
+        selector: "0xdd5030fc",
+      },
+      {
+        name: "setLoanDetails",
+        signature:
+          "function setLoanDetails(((bytes3 currency, uint256 startingDate, uint256 maturityDate, uint8 loanStructureType, uint8 repaymentType, uint8 interestType, uint256 signingDate, address originatorAccount, address servicerAccount) loanBasicData, (uint8 baseReferenceRate, uint256 floorRate, uint256 capRate, uint256 rateMargin, uint8 dayCount, uint8 paymentFrequency, uint256 firstAccrualDate, uint256 prepaymentPenalty, uint256 commitmentFee, uint256 utilizationFee, uint8 utilizationFeeType, uint256 servicingFee) loanInterestData, (string internalRiskGrade, uint256 defaultProbability, uint256 lossGivenDefault) riskData, (uint256 totalCollateralValue, uint256 loanToValue) collateral, (uint8 performanceStatus, uint256 daysPastDue) loanPerformanceStatus) loanDetailsData_)",
+        selector: "0xdbdda85b",
+      },
+    ],
+    events: [
+      {
+        name: "LoanDetailsSet",
+        signature: "LoanDetailsSet(LoanDetailsData)",
+        topic0: "0x7ee27291e9770fce5963cb0951bfbac4204dceb5ef7f10c9dad985b496a1bf0b",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new LoanFacetTimeTravel__factory(signer) : new LoanFacet__factory(signer),
+  },
+
   LockFacet: {
     name: "LockFacet",
     resolverKey: {
@@ -10901,7 +10941,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 204 as const;
+export const TOTAL_FACETS = 205 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -11171,6 +11211,12 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
         signature:
           "function deployEquity(((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) equityDetails) _equityData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) _factoryRegulationData) returns (address equityAddress_)",
         selector: "0xfb3c59d8",
+      },
+      {
+        name: "deployLoan",
+        signature:
+          "function deployLoan(((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, ((bytes3 currency, uint256 startingDate, uint256 maturityDate, uint8 loanStructureType, uint8 repaymentType, uint8 interestType, uint256 signingDate, address originatorAccount, address servicerAccount) loanBasicData, (uint8 baseReferenceRate, uint256 floorRate, uint256 capRate, uint256 rateMargin, uint8 dayCount, uint8 paymentFrequency, uint256 firstAccrualDate, uint256 prepaymentPenalty, uint256 commitmentFee, uint256 utilizationFee, uint8 utilizationFeeType, uint256 servicingFee) loanInterestData, (string internalRiskGrade, uint256 defaultProbability, uint256 lossGivenDefault) riskData, (uint256 totalCollateralValue, uint256 loanToValue) collateral, (uint8 performanceStatus, uint256 daysPastDue) loanPerformanceStatus) loanDetails, uint256 nominalValue, uint8 nominalValueDecimals) _loanData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) _factoryRegulationData) returns (address loanAddress_)",
+        selector: "0x566996a0",
       },
       {
         name: "deployProxy",
@@ -11785,6 +11831,11 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     ],
   },
 
+  ILoanStorageWrapper: {
+    name: "ILoanStorageWrapper",
+    methods: [],
+  },
+
   IPauseStorageWrapper: {
     name: "IPauseStorageWrapper",
     methods: [],
@@ -11935,6 +11986,12 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [],
   },
 
+  LoanStorageWrapper: {
+    name: "LoanStorageWrapper",
+    inheritance: ["BondStorageWrapper"],
+    methods: [],
+  },
+
   NominalValueStorageWrapper: {
     name: "NominalValueStorageWrapper",
     inheritance: ["ERC20PermitStorageWrapper"],
@@ -12039,7 +12096,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   VotingStorageWrapper: {
     name: "VotingStorageWrapper",
-    inheritance: ["IVotingStorageWrapper", "BondStorageWrapper"],
+    inheritance: ["IVotingStorageWrapper", "LoanStorageWrapper"],
     methods: [],
   },
 };
@@ -12047,7 +12104,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 66 as const;
+export const TOTAL_STORAGE_WRAPPERS = 68 as const;
 
 /**
  * All role identifiers extracted from contracts.
@@ -12073,6 +12130,7 @@ export const ROLES = {
   _KPI_MANAGER_ROLE: "0x441e549cc2c88d01fa80bd9e7b40412d3106214149223501aa25d4fa23bf306d",
   _KYC_MANAGER_ROLE: "0x8ebae577938c1afa7fb3dc7b06459c79c86ffd2ac9805b6da92ee4cbbf080449",
   _KYC_ROLE: "0x6fbd421e041603fa367357d79ffc3b2f9fd37a6fc4eec661aa5537a9ae75f93d",
+  _LOAN_MANAGER_ROLE: "0xc085daff7cbf912b30437b0b95363f3920f33cbd53213a269a2fc5d44ee8289d",
   _LOCKER_ROLE: "0xd8aa8c6f92fe8ac3f3c0f88216e25f7c08b3a6c374b4452a04d200c29786ce88",
   _MATURITY_REDEEMER_ROLE: "0xa0d696902e9ed231892dc96649f0c62b808a1cb9dd1269e78e0adc1cc4b8358c",
   _NOMINAL_VALUE_ROLE: "0x127c185a9f04723376575bc896cc0d3cf15a32dd0db17f01168dcac5d2de6102",
@@ -12090,4 +12148,4 @@ export const ROLES = {
 /**
  * Total number of unique roles in the registry.
  */
-export const TOTAL_ROLES = 32 as const;
+export const TOTAL_ROLES = 33 as const;

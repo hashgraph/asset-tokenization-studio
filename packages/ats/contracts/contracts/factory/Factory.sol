@@ -24,6 +24,7 @@ import {
 } from "../constants/regulation.sol";
 import { IEquityUSA } from "../facets/layer_3/equityUSA/IEquityUSA.sol";
 import { IBondUSA } from "../facets/layer_3/bondUSA/IBondUSA.sol";
+import { ILoan } from "../facets/layer_2/loan/ILoan.sol";
 import { IProceedRecipients } from "../facets/layer_2/proceedRecipient/IProceedRecipients.sol";
 import { IProtectedPartitions } from "../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 import { IExternalPauseManagement } from "../facets/layer_1/externalPause/IExternalPauseManagement.sol";
@@ -236,6 +237,30 @@ contract Factory is IFactory, Common {
             bondAddress_,
             _bondSustainabilityPerformanceTargetRateData
         );
+    }
+
+    function deployLoan(
+        LoanData calldata _loanData,
+        FactoryRegulationData calldata _factoryRegulationData
+    )
+        external
+        checkResolver(_loanData.security.resolver)
+        checkISIN(_loanData.security.erc20MetadataInfo.isin)
+        checkAdmins(_loanData.security.rbacs)
+        checkRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
+        returns (address loanAddress_)
+    {
+        loanAddress_ = _deploySecurity(_loanData.security, SecurityType.Loan);
+
+        ILoan(loanAddress_).initialize_Loan(
+            _loanData.loanDetails,
+            buildRegulationData(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType),
+            _factoryRegulationData.additionalSecurityData
+        );
+
+        INominalValue(loanAddress_).initialize_NominalValue(_loanData.nominalValue, _loanData.nominalValueDecimals);
+
+        emit LoanDeployed(_msgSender(), loanAddress_, _loanData, _factoryRegulationData);
     }
 
     function getAppliedRegulationData(

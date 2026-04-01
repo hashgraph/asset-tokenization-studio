@@ -41,6 +41,7 @@ import {
   ProceedRecipientsFacet__factory,
   TimeTravelFacet__factory,
   Factory__factory,
+  Loan__factory,
 } from "@contract-types";
 
 import { decodeEvent } from "@scripts/infrastructure";
@@ -151,6 +152,7 @@ export async function deployLoanTokenFixture(params: DeepPartial<DeployLoanToken
   const externalPauseManagementFacet = ExternalPauseManagementFacet__factory.connect(proxyAddress, deployer);
   const proceedRecipientsFacet = ProceedRecipientsFacet__factory.connect(proxyAddress, deployer);
   const timeTravelFacet = TimeTravelFacet__factory.connect(proxyAddress, deployer);
+  const loanFacet = Loan__factory.connect(proxyAddress, deployer);
 
   await controlListFacet.initialize_ControlList(p.isWhiteList);
   await erc1410ManagementFacet.initialize_ERC1410(p.isMultiPartition);
@@ -170,6 +172,64 @@ export async function deployLoanTokenFixture(params: DeepPartial<DeployLoanToken
   await erc20VotesFacet.initialize_ERC20Votes(p.erc20VotesActivated);
   await erc3643ManagementFacet.initialize_ERC3643(ZeroAddress, ZeroAddress);
   await nominalValueFacet.initialize_NominalValue(p.nominalValue, p.nominalValueDecimals);
+  const now = Math.floor(Date.now() / 1000);
+  const loanDetailsData = {
+    loanBasicData: {
+      currency: "0x555344",
+      startingDate: now + 3600,
+      maturityDate: now + 3600 + 100_000,
+      loanStructureType: 1,
+      repaymentType: 0,
+      interestType: 0,
+      signingDate: now + 1800,
+      originatorAccount: deployer.address,
+      servicerAccount: deployer.address,
+    },
+    loanInterestData: {
+      baseReferenceRate: 0,
+      floorRate: 0,
+      capRate: 0,
+      rateMargin: 0,
+      dayCount: 0,
+      paymentFrequency: 0,
+      firstAccrualDate: now + 3600,
+      prepaymentPenalty: 0,
+      commitmentFee: 0,
+      utilizationFee: 0,
+      utilizationFeeType: 0,
+      servicingFee: 0,
+    },
+    riskData: {
+      internalRiskGrade: "test",
+      defaultProbability: 0,
+      lossGivenDefault: 0,
+    },
+    collateral: {
+      totalCollateralValue: 0,
+      loanToValue: 0,
+    },
+    loanPerformanceStatus: {
+      performanceStatus: 0,
+      daysPastDue: 0,
+    },
+  };
+  const regulationData = {
+    regulationType: 1,
+    regulationSubType: 0,
+    dealSize: 0,
+    accreditedInvestors: 1,
+    maxNonAccreditedInvestors: 0,
+    manualInvestorVerification: 1,
+    internationalInvestors: 1,
+    resaleHoldPeriod: 0,
+  };
+  const additionalSecurityData = {
+    countriesControlListType: true,
+    listOfCountries: "US",
+    info: "test",
+    country: "US",
+  };
+  await loanFacet.initialize_Loan(loanDetailsData, regulationData, additionalSecurityData);
 
   return {
     ...infrastructure,

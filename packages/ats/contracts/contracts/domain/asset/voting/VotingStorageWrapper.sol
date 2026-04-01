@@ -8,9 +8,9 @@ import {
 } from "../../../constants/values.sol";
 import { IVoting } from "../../../facets/layer_2/voting/IVoting.sol";
 import { IVotingStorageWrapper } from "./IVotingStorageWrapper.sol";
-import { BondStorageWrapper } from "../bond/BondStorageWrapper.sol";
+import { LoanStorageWrapper } from "../loan/LoanStorageWrapper.sol";
 
-abstract contract VotingStorageWrapper is IVotingStorageWrapper, BondStorageWrapper {
+abstract contract VotingStorageWrapper is IVotingStorageWrapper, LoanStorageWrapper {
     function _setVoting(
         IVoting.Voting calldata _newVoting
     ) internal override returns (bytes32 corporateActionId_, uint256 voteID_) {

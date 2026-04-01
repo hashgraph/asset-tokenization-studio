@@ -6,6 +6,7 @@ import { TRexIBusinessLogicResolver as IBusinessLogicResolver } from "./IBusines
 import { TRexIERC20 as IERC20 } from "./IERC20.sol";
 import { TRexIBondRead as IBondRead } from "./IBondRead.sol";
 import { TRexIEquity as IEquity } from "./IEquity.sol";
+import { TRexILoan as ILoan } from "./ILoan.sol";
 import { FactoryRegulationData, RegulationData, RegulationType, RegulationSubType } from "./regulation.sol";
 import { TRexIFixedRate as IFixedRate } from "./IFixedRate.sol";
 import { TRexIKpiLinkedRate as IKpiLinkedRate } from "./IKpiLinkedRate.sol";
@@ -20,7 +21,8 @@ interface TRexIFactory {
         Equity,
         BondFixedRate,
         BondKpiLinkedRate,
-        BondSPTRate
+        BondSPTRate,
+        Loan
     }
 
     struct ResolverProxyConfiguration {
@@ -81,6 +83,13 @@ interface TRexIFactory {
         IFixedRate.FixedRateData fixedRateData;
     }
 
+    struct LoanData {
+        SecurityData security;
+        ILoan.LoanDetailsData loanDetails;
+        uint256 nominalValue;
+        uint8 nominalValueDecimals;
+    }
+
     event ProxyDeployed(
         address indexed proxyAddress,
         IBusinessLogicResolver resolver,
@@ -115,6 +124,13 @@ interface TRexIFactory {
         address indexed deployer,
         address bondAddress,
         BondSustainabilityPerformanceTargetRateData bondSustainabilityPerformanceTargetRateData
+    );
+
+    event LoanDeployed(
+        address indexed deployer,
+        address loanAddress,
+        LoanData loanData,
+        FactoryRegulationData regulationData
     );
 
     error EmptyResolver(IBusinessLogicResolver resolver);
@@ -155,6 +171,14 @@ interface TRexIFactory {
     function deployBondSustainabilityPerformanceTargetRate(
         BondSustainabilityPerformanceTargetRateData calldata _bondSustainabilityPerformanceTargetRateData
     ) external returns (address bondAddress_);
+
+    /**
+     * @notice Deploys a new loan given the input loan data
+     */
+    function deployLoan(
+        LoanData calldata _loanData,
+        FactoryRegulationData calldata _factoryRegulationData
+    ) external returns (address loanAddress_);
 
     function getAppliedRegulationData(
         RegulationType _regulationType,
