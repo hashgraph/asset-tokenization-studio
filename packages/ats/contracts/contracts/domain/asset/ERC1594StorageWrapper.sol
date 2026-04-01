@@ -125,7 +125,7 @@ library ERC1594StorageWrapper {
         bytes memory /*_data*/,
         bytes memory /*_operatorData*/
     ) internal view returns (bool isAbleToRedeemFrom, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
-        (isAbleToRedeemFrom, statusCode, reasonCode, details) = genericChecks();
+        (isAbleToRedeemFrom, statusCode, reasonCode, details) = _genericChecks();
         if (!isAbleToRedeemFrom) {
             return (isAbleToRedeemFrom, statusCode, reasonCode, details);
         }
@@ -140,14 +140,14 @@ library ERC1594StorageWrapper {
             );
         }
 
-        bool checkSender = from != EvmAccessors.getMsgSender() && !checkSenderHasProtectedPartitionRole(partition);
+        bool checkSender = from != EvmAccessors.getMsgSender() && !_checkSenderHasProtectedPartitionRole(partition);
 
-        (isAbleToRedeemFrom, statusCode, reasonCode, details) = isCompliant(from, address(0), value, checkSender);
+        (isAbleToRedeemFrom, statusCode, reasonCode, details) = _isCompliant(from, address(0), value, checkSender);
         if (!isAbleToRedeemFrom) {
             return (isAbleToRedeemFrom, statusCode, reasonCode, details);
         }
 
-        (isAbleToRedeemFrom, statusCode, reasonCode, details) = isIdentified(from, address(0));
+        (isAbleToRedeemFrom, statusCode, reasonCode, details) = _isIdentified(from, address(0));
         if (!isAbleToRedeemFrom) {
             return (isAbleToRedeemFrom, statusCode, reasonCode, details);
         }
@@ -156,7 +156,7 @@ library ERC1594StorageWrapper {
         bool checkAllowance = checkSender &&
             !ERC1410StorageWrapper.isAuthorized(partition, EvmAccessors.getMsgSender(), from);
 
-        return businessLogicChecks(checkAllowance, from, value, partition);
+        return _businessLogicChecks(checkAllowance, from, value, partition);
     }
 
     function checkCanTransferFromByPartition(
@@ -188,7 +188,7 @@ library ERC1594StorageWrapper {
         bytes memory /*_data*/,
         bytes memory /*_operatorData*/
     ) internal view returns (bool isAbleToTransfer, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
-        (isAbleToTransfer, statusCode, reasonCode, details) = genericChecks();
+        (isAbleToTransfer, statusCode, reasonCode, details) = _genericChecks();
         if (!isAbleToTransfer) {
             return (isAbleToTransfer, statusCode, reasonCode, details);
         }
@@ -203,14 +203,14 @@ library ERC1594StorageWrapper {
             );
         }
 
-        bool checkSender = from != EvmAccessors.getMsgSender() && !checkSenderHasProtectedPartitionRole(partition);
+        bool checkSender = from != EvmAccessors.getMsgSender() && !_checkSenderHasProtectedPartitionRole(partition);
 
-        (isAbleToTransfer, statusCode, reasonCode, details) = isCompliant(from, to, value, checkSender);
+        (isAbleToTransfer, statusCode, reasonCode, details) = _isCompliant(from, to, value, checkSender);
         if (!isAbleToTransfer) {
             return (isAbleToTransfer, statusCode, reasonCode, details);
         }
 
-        (isAbleToTransfer, statusCode, reasonCode, details) = isIdentified(from, to);
+        (isAbleToTransfer, statusCode, reasonCode, details) = _isIdentified(from, to);
         if (!isAbleToTransfer) {
             return (isAbleToTransfer, statusCode, reasonCode, details);
         }
@@ -219,19 +219,19 @@ library ERC1594StorageWrapper {
         bool checkAllowance = checkSender &&
             !ERC1410StorageWrapper.isAuthorized(partition, EvmAccessors.getMsgSender(), from);
 
-        return businessLogicChecks(checkAllowance, from, value, partition);
+        return _businessLogicChecks(checkAllowance, from, value, partition);
     }
 
     function checkIdentity(address from, address to) internal view {
-        (bool isIdentified, , bytes32 reasonCode, bytes memory details) = isIdentified(from, to);
-        if (!isIdentified) {
+        (bool isIdentified_, , bytes32 reasonCode, bytes memory details) = _isIdentified(from, to);
+        if (!isIdentified_) {
             LowLevelCall.revertWithData(bytes4(reasonCode), details);
         }
     }
 
     function checkCompliance(address from, address to, bool checkSender) internal view {
-        (bool isCompliant, , bytes32 reasonCode, bytes memory details) = isCompliant(from, to, 0, checkSender);
-        if (!isCompliant) {
+        (bool isCompliant_, , bytes32 reasonCode, bytes memory details) = _isCompliant(from, to, 0, checkSender);
+        if (!isCompliant_) {
             LowLevelCall.revertWithData(bytes4(reasonCode), details);
         }
     }
@@ -248,14 +248,14 @@ library ERC1594StorageWrapper {
 
     // --- Private helper functions ---
 
-    function genericChecks() private view returns (bool, bytes1, bytes32, bytes memory) {
+    function _genericChecks() private view returns (bool, bytes1, bytes32, bytes memory) {
         if (ClearingStorageWrapper.isClearingActivated()) {
             return (false, Eip1066.UNAVAILABLE, IClearing.ClearingIsActivated.selector, EMPTY_BYTES);
         }
 
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
     }
-    function checkSenderHasProtectedPartitionRole(bytes32 partition) private view returns (bool hasRole_) {
+    function _checkSenderHasProtectedPartitionRole(bytes32 partition) private view returns (bool hasRole_) {
         bytes32 role = ProtectedPartitionsStorageWrapper.protectedPartitionsRole(partition);
         bytes32 position = _ACCESS_CONTROL_STORAGE_POSITION;
         RoleDataStorage storage roleDataStorage;
@@ -266,7 +266,7 @@ library ERC1594StorageWrapper {
         hasRole_ = EnumerableSet.contains(roleDataStorage.roles[role].roleMembers, EvmAccessors.getMsgSender());
     }
 
-    function isCompliant(
+    function _isCompliant(
         address from,
         address to,
         uint256 value,
@@ -363,7 +363,7 @@ library ERC1594StorageWrapper {
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
     }
 
-    function isIdentified(
+    function _isIdentified(
         address from,
         address to
     ) private view returns (bool status, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
@@ -410,7 +410,7 @@ library ERC1594StorageWrapper {
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
     }
 
-    function businessLogicChecks(
+    function _businessLogicChecks(
         bool checkAllowance,
         address from,
         uint256 value,

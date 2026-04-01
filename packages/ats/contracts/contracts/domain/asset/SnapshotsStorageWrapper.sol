@@ -523,12 +523,12 @@ library SnapshotsStorageWrapper {
         (bool snapshotted, uint256 value) = valueAt(snapshotId, snapshots);
         if (snapshotted) return value;
 
-        uint256 abafAtSnapshot = abafAtSnapshot(snapshotId);
+        uint256 abafAtSnapshot_ = abafAtSnapshot(snapshotId);
         uint256 abaf = AdjustBalancesStorageWrapper.getAbafAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
 
-        if (abafAtSnapshot == abaf) return currentBalanceAdjusted;
+        if (abafAtSnapshot_ == abaf) return currentBalanceAdjusted;
 
-        uint256 factor = abaf / abafAtSnapshot;
+        uint256 factor = abaf / abafAtSnapshot_;
 
         return currentBalanceAdjusted / factor;
     }

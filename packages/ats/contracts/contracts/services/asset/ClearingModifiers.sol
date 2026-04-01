@@ -18,7 +18,7 @@ abstract contract ClearingModifiers {
      * @dev Reverts if clearing is activated
      */
     modifier onlyClearingDisabled() {
-        ClearingStorageWrapper._checkClearingDisabled();
+        ClearingStorageWrapper.checkClearingDisabled();
         _;
     }
 

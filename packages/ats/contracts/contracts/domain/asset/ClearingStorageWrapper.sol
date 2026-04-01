@@ -261,43 +261,6 @@ library ClearingStorageWrapper {
         return _isClearingBasicInfo(_clearingOperationIdentifier);
     }
 
-    /// @notice Internal helper for memory parameter
-    function _isClearingBasicInfo(
-        IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier
-    ) internal view returns (IClearing.ClearingOperationBasicInfo memory) {
-        if (_clearingOperationIdentifier.clearingOperationType == IClearing.ClearingOperationType.Transfer) {
-            IClearing.ClearingTransferData memory data = clearingStorage().clearingTransferByAccountPartitionAndId[
-                _clearingOperationIdentifier.tokenHolder
-            ][_clearingOperationIdentifier.partition][_clearingOperationIdentifier.clearingId];
-            return
-                IClearing.ClearingOperationBasicInfo({
-                    amount: data.amount,
-                    expirationTimestamp: data.expirationTimestamp,
-                    destination: data.destination
-                });
-        }
-        if (_clearingOperationIdentifier.clearingOperationType == IClearing.ClearingOperationType.Redeem) {
-            IClearing.ClearingRedeemData memory data = clearingStorage().clearingRedeemByAccountPartitionAndId[
-                _clearingOperationIdentifier.tokenHolder
-            ][_clearingOperationIdentifier.partition][_clearingOperationIdentifier.clearingId];
-            return
-                IClearing.ClearingOperationBasicInfo({
-                    amount: data.amount,
-                    expirationTimestamp: data.expirationTimestamp,
-                    destination: address(0)
-                });
-        }
-        IClearing.ClearingHoldCreationData memory data = clearingStorage().clearingHoldCreationByAccountPartitionAndId[
-            _clearingOperationIdentifier.tokenHolder
-        ][_clearingOperationIdentifier.partition][_clearingOperationIdentifier.clearingId];
-        return
-            IClearing.ClearingOperationBasicInfo({
-                amount: data.amount,
-                expirationTimestamp: data.expirationTimestamp,
-                destination: data.holdTo
-            });
-    }
-
     function getClearingTransferForByPartition(
         bytes32 _partition,
         address _tokenHolder,
@@ -494,9 +457,47 @@ library ClearingStorageWrapper {
         }
     }
 
-    function _checkClearingDisabled() internal view {
+    function checkClearingDisabled() internal view {
         if (isClearingActivated()) {
             revert IClearing.ClearingIsActivated();
         }
+    }
+
+    /// @notice Internal helper for memory parameter
+    function _isClearingBasicInfo(
+        IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier
+    ) private view returns (IClearing.ClearingOperationBasicInfo memory) {
+        if (_clearingOperationIdentifier.clearingOperationType == IClearing.ClearingOperationType.Transfer) {
+            IClearing.ClearingTransferData memory transferData = clearingStorage()
+                .clearingTransferByAccountPartitionAndId[_clearingOperationIdentifier.tokenHolder][
+                    _clearingOperationIdentifier.partition
+                ][_clearingOperationIdentifier.clearingId];
+            return
+                IClearing.ClearingOperationBasicInfo({
+                    amount: transferData.amount,
+                    expirationTimestamp: transferData.expirationTimestamp,
+                    destination: transferData.destination
+                });
+        }
+        if (_clearingOperationIdentifier.clearingOperationType == IClearing.ClearingOperationType.Redeem) {
+            IClearing.ClearingRedeemData memory redeemData = clearingStorage().clearingRedeemByAccountPartitionAndId[
+                _clearingOperationIdentifier.tokenHolder
+            ][_clearingOperationIdentifier.partition][_clearingOperationIdentifier.clearingId];
+            return
+                IClearing.ClearingOperationBasicInfo({
+                    amount: redeemData.amount,
+                    expirationTimestamp: redeemData.expirationTimestamp,
+                    destination: address(0)
+                });
+        }
+        IClearing.ClearingHoldCreationData memory data = clearingStorage().clearingHoldCreationByAccountPartitionAndId[
+            _clearingOperationIdentifier.tokenHolder
+        ][_clearingOperationIdentifier.partition][_clearingOperationIdentifier.clearingId];
+        return
+            IClearing.ClearingOperationBasicInfo({
+                amount: data.amount,
+                expirationTimestamp: data.expirationTimestamp,
+                destination: data.holdTo
+            });
     }
 }
