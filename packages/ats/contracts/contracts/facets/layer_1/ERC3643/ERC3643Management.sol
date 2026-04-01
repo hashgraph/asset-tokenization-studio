@@ -14,8 +14,7 @@ import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTrave
 
 abstract contract ERC3643Management is IERC3643Management, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC3643(address _compliance, address _identityRegistry) external {
-        _checkNotInitialized(ERC3643StorageWrapper.isERC3643Initialized());
+    function initialize_ERC3643(address _compliance, address _identityRegistry) external onlyNotERC3643Initialized {
         ERC3643StorageWrapper.initialize_ERC3643(_compliance, _identityRegistry);
     }
 

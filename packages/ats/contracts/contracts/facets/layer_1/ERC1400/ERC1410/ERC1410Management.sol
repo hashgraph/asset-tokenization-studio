@@ -18,8 +18,7 @@ import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 
 abstract contract ERC1410Management is IERC1410Management, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1410(bool _multiPartition) external override {
-        _checkNotInitialized(ERC1410StorageWrapper.isERC1410Initialized());
+    function initialize_ERC1410(bool _multiPartition) external override onlyNotERC1410Initialized {
         ERC1410StorageWrapper.initialize_ERC1410(_multiPartition);
     }
 

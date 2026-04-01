@@ -13,8 +13,7 @@ abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
     function initialize_ProceedRecipients(
         address[] calldata _proceedRecipients,
         bytes[] calldata _data
-    ) external override {
-        _checkNotInitialized(ProceedRecipientsStorageWrapper.isProceedRecipientsInitialized());
+    ) external override onlyNotProceedRecipientsInitialized {
         ProceedRecipientsStorageWrapper.initialize_ProceedRecipients(_proceedRecipients, _data);
     }
 

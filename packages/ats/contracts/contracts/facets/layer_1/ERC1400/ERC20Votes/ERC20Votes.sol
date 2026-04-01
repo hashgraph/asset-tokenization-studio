@@ -9,8 +9,7 @@ import { _checkNotInitialized } from "../../../../services/InitializationErrors.
 
 abstract contract ERC20Votes is IERC20Votes, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC20Votes(bool _activated) external override {
-        _checkNotInitialized(ERC20VotesStorageWrapper.isERC20VotesInitialized());
+    function initialize_ERC20Votes(bool _activated) external override onlyNotERC20VotesInitialized {
         ERC20VotesStorageWrapper.initialize_ERC20Votes(_activated);
     }
 

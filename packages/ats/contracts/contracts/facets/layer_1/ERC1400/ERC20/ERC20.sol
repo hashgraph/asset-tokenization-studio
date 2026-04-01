@@ -20,8 +20,7 @@ import { TimestampProvider } from "../../../../infrastructure/utils/TimestampPro
 
 abstract contract ERC20 is IERC20, TimestampProvider, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC20(ERC20Metadata calldata erc20Metadata) external override {
-        _checkNotInitialized(ERC20StorageWrapper.isERC20Initialized());
+    function initialize_ERC20(ERC20Metadata calldata erc20Metadata) external override onlyNotERC20Initialized {
         ERC20StorageWrapper.initializeERC20(erc20Metadata);
     }
 

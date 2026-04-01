@@ -13,8 +13,7 @@ import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 
 abstract contract ERC1644 is IERC1644, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1644(bool _controllable) external override {
-        _checkNotInitialized(ERC1644StorageWrapper.isERC1644Initialized());
+    function initialize_ERC1644(bool _controllable) external override onlyNotERC1644Initialized {
         ERC1644StorageWrapper.initialize_ERC1644(_controllable);
     }
 
