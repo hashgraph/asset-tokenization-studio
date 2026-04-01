@@ -13,8 +13,7 @@ import { _checkNotInitialized } from "../../../services/InitializationErrors.sol
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ClearingActions is IClearingActions, Modifiers {
-    function initializeClearing(bool _clearingActive) external {
-        _checkNotInitialized(ClearingStorageWrapper.isClearingInitialized());
+    function initializeClearing(bool _clearingActive) external onlyNotClearingInitialized {
         ClearingStorageWrapper.initializeClearing(_clearingActive);
     }
 
