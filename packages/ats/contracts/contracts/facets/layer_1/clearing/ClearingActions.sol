@@ -36,6 +36,7 @@ abstract contract ClearingActions is IClearingActions, Modifiers {
         onlyUnpaused
         onlyRole(_CLEARING_VALIDATOR_ROLE)
         onlyClearingActivated
+        onlyDefaultPartitionWithSinglePartition
         returns (bool success_, bytes32 partition_)
     {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition);

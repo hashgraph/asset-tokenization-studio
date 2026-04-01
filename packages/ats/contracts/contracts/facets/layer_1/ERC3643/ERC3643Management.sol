@@ -63,9 +63,9 @@ abstract contract ERC3643Management is IERC3643Management, Modifiers {
         onlyRole(_AGENT_ROLE)
         onlyUnrecoveredAddress(_lostWallet)
         onlyEmptyWallet(_lostWallet)
+        onlyWithoutMultiPartition
         returns (bool success_)
     {
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
         success_ = ERC3643StorageWrapper.recoveryAddress(
             _lostWallet,
             _newWallet,

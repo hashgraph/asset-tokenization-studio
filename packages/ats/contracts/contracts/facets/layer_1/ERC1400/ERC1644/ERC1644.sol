@@ -24,8 +24,7 @@ abstract contract ERC1644 is IERC1644, Modifiers {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    ) external override onlyUnpaused onlyControllable {
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
+    ) external override onlyUnpaused onlyControllable onlyWithoutMultiPartition {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
@@ -41,8 +40,7 @@ abstract contract ERC1644 is IERC1644, Modifiers {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    ) external override onlyUnpaused onlyControllable {
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
+    ) external override onlyUnpaused onlyControllable onlyWithoutMultiPartition {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;

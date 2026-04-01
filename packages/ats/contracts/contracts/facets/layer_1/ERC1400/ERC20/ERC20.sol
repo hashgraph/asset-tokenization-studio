@@ -28,34 +28,50 @@ abstract contract ERC20 is IERC20, TimestampProvider, Modifiers {
     function approve(
         address spender,
         uint256 value
-    ) external override onlyUnpaused onlyUnrecoveredAddress(msg.sender) onlyUnrecoveredAddress(spender) returns (bool) {
+    )
+        external
+        override
+        onlyUnpaused
+        onlyUnrecoveredAddress(msg.sender)
+        onlyUnrecoveredAddress(spender)
+        onlyWithoutMultiPartition
+        returns (bool)
+    {
         ERC1594StorageWrapper.requireCompliant(msg.sender, spender, false);
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
         return ERC20StorageWrapper.approve(msg.sender, spender, value);
     }
 
-    function transfer(address to, uint256 amount) external override onlyUnpaused returns (bool) {
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
+    function transfer(
+        address to,
+        uint256 amount
+    ) external override onlyUnpaused onlyWithoutMultiPartition returns (bool) {
         _requireUnProtectedPartitionsOrWildCardRole();
         ERC1594StorageWrapper.requireCanTransferFromByPartition(msg.sender, to, _DEFAULT_PARTITION, amount);
         return TokenCoreOps.transfer(msg.sender, to, amount);
     }
 
-    function transferFrom(address from, address to, uint256 amount) external override onlyUnpaused returns (bool) {
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    ) external override onlyUnpaused onlyWithoutMultiPartition returns (bool) {
         _requireUnProtectedPartitionsOrWildCardRole();
         ERC1594StorageWrapper.requireCanTransferFromByPartition(from, to, _DEFAULT_PARTITION, amount);
         return TokenCoreOps.transferFrom(msg.sender, from, to, amount);
     }
 
-    function increaseAllowance(address spender, uint256 addedValue) external onlyUnpaused returns (bool) {
+    function increaseAllowance(
+        address spender,
+        uint256 addedValue
+    ) external onlyUnpaused onlyWithoutMultiPartition returns (bool) {
         ERC1594StorageWrapper.requireCompliant(msg.sender, spender, false);
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
         return ERC20StorageWrapper.increaseAllowance(spender, addedValue);
     }
 
-    function decreaseAllowance(address spender, uint256 subtractedValue) external onlyUnpaused returns (bool) {
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
+    function decreaseAllowance(
+        address spender,
+        uint256 subtractedValue
+    ) external onlyUnpaused onlyWithoutMultiPartition returns (bool) {
         ERC1594StorageWrapper.requireCompliant(msg.sender, spender, false);
         return ERC20StorageWrapper.decreaseAllowance(spender, subtractedValue);
     }

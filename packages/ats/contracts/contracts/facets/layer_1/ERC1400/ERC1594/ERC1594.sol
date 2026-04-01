@@ -27,8 +27,11 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
         ERC1594StorageWrapper.initialize();
     }
 
-    function transferWithData(address _to, uint256 _value, bytes calldata _data) external override {
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
+    function transferWithData(
+        address _to,
+        uint256 _value,
+        bytes calldata _data
+    ) external override onlyWithoutMultiPartition {
         _requireUnProtectedPartitionsOrWildCardRole();
         ERC1594StorageWrapper.requireCanTransferFromByPartition(msg.sender, _to, _DEFAULT_PARTITION, _value);
         TokenCoreOps.transfer(msg.sender, _to, _value);
@@ -40,16 +43,25 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
         address _to,
         uint256 _value,
         bytes calldata _data
-    ) external override onlyUnrecoveredAddress(msg.sender) onlyUnrecoveredAddress(_to) onlyUnrecoveredAddress(_from) {
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
+    )
+        external
+        override
+        onlyUnrecoveredAddress(msg.sender)
+        onlyUnrecoveredAddress(_to)
+        onlyUnrecoveredAddress(_from)
+        onlyWithoutMultiPartition
+    {
         _requireUnProtectedPartitionsOrWildCardRole();
         ERC1594StorageWrapper.requireCanTransferFromByPartition(_from, _to, _DEFAULT_PARTITION, _value);
         TokenCoreOps.transferFrom(msg.sender, _from, _to, _value);
         emit TransferFromWithData(msg.sender, _from, _to, _value, _data);
     }
 
-    function issue(address _tokenHolder, uint256 _value, bytes calldata _data) external override onlyUnpaused {
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
+    function issue(
+        address _tokenHolder,
+        uint256 _value,
+        bytes calldata _data
+    ) external override onlyUnpaused onlyWithoutMultiPartition {
         CapStorageWrapper.requireWithinMaxSupply(_value, _getBlockTimestamp());
         ERC1594StorageWrapper.requireIdentified(address(0), _tokenHolder);
         ERC1594StorageWrapper.requireCompliant(address(0), _tokenHolder, false);
@@ -60,8 +72,7 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
         ERC1594StorageWrapper.issue(_tokenHolder, _value, _data);
     }
 
-    function redeem(uint256 _value, bytes memory _data) external override {
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
+    function redeem(uint256 _value, bytes memory _data) external override onlyWithoutMultiPartition {
         _requireUnProtectedPartitionsOrWildCardRole();
         ERC1594StorageWrapper.requireCanRedeemFromByPartition(msg.sender, _DEFAULT_PARTITION, _value);
         ERC1594StorageWrapper.redeem(_value, _data);
@@ -71,8 +82,13 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
         address _tokenHolder,
         uint256 _value,
         bytes memory _data
-    ) external override onlyUnrecoveredAddress(msg.sender) onlyUnrecoveredAddress(_tokenHolder) {
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
+    )
+        external
+        override
+        onlyUnrecoveredAddress(msg.sender)
+        onlyUnrecoveredAddress(_tokenHolder)
+        onlyWithoutMultiPartition
+    {
         _requireUnProtectedPartitionsOrWildCardRole();
         ERC1594StorageWrapper.requireCanRedeemFromByPartition(_tokenHolder, _DEFAULT_PARTITION, _value);
         ERC1594StorageWrapper.redeemFrom(_tokenHolder, _value, _data);
@@ -86,11 +102,10 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
         address _to,
         uint256 _value,
         bytes memory _data
-    ) external view override returns (bool, bytes1, bytes32) {
+    ) external view override onlyWithoutMultiPartition returns (bool, bytes1, bytes32) {
         if (PauseStorageWrapper.isPaused()) {
             return (false, Eip1066.PAUSED, IPauseStorageWrapper.TokenIsPaused.selector);
         }
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
         (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToTransferFromByPartition(
             msg.sender,
             _to,
@@ -107,11 +122,10 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
         address _to,
         uint256 _value,
         bytes memory _data
-    ) external view returns (bool, bytes1, bytes32) {
+    ) external view onlyWithoutMultiPartition returns (bool, bytes1, bytes32) {
         if (PauseStorageWrapper.isPaused()) {
             return (false, Eip1066.PAUSED, IPauseStorageWrapper.TokenIsPaused.selector);
         }
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
         (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToTransferFromByPartition(
             _from,
             _to,

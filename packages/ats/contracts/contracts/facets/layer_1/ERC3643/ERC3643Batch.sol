@@ -23,9 +23,8 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, Modifiers {
     function batchTransfer(
         address[] calldata _toList,
         uint256[] calldata _amounts
-    ) external onlyUnpaused onlyValidInputAmountsArrayLength(_toList, _amounts) {
+    ) external onlyUnpaused onlyValidInputAmountsArrayLength(_toList, _amounts) onlyWithoutMultiPartition {
         if (ClearingStorageWrapper.isClearingActivated()) revert IClearing.ClearingIsActivated();
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
         _requireUnProtectedPartitionsOrWildCardRole();
         ERC1594StorageWrapper.requireIdentified(msg.sender, address(0));
         ERC1594StorageWrapper.requireCompliant(msg.sender, address(0), false);
@@ -48,8 +47,8 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, Modifiers {
         onlyUnpaused
         onlyValidInputAmountsArrayLength(_fromList, _amounts)
         onlyValidInputAmountsArrayLength(_toList, _amounts)
+        onlyWithoutMultiPartition
     {
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
         ERC1644StorageWrapper.requireControllable();
         {
             bytes32[] memory roles = new bytes32[](2);
@@ -66,8 +65,7 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, Modifiers {
     function batchMint(
         address[] calldata _toList,
         uint256[] calldata _amounts
-    ) external onlyUnpaused onlyValidInputAmountsArrayLength(_toList, _amounts) {
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
+    ) external onlyUnpaused onlyValidInputAmountsArrayLength(_toList, _amounts) onlyWithoutMultiPartition {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _ISSUER_ROLE;
@@ -87,9 +85,8 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, Modifiers {
     function batchBurn(
         address[] calldata _userAddresses,
         uint256[] calldata _amounts
-    ) external onlyUnpaused onlyValidInputAmountsArrayLength(_userAddresses, _amounts) {
+    ) external onlyUnpaused onlyValidInputAmountsArrayLength(_userAddresses, _amounts) onlyWithoutMultiPartition {
         ERC1644StorageWrapper.requireControllable();
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;

@@ -14,9 +14,8 @@ import { TokenCoreOps } from "../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
 abstract contract ERC3643Operations is IERC3643Operations, TimestampProvider, Modifiers {
-    function burn(address _userAddress, uint256 _amount) external onlyUnpaused {
+    function burn(address _userAddress, uint256 _amount) external onlyUnpaused onlyWithoutMultiPartition {
         ERC1644StorageWrapper.requireControllable();
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
@@ -27,8 +26,7 @@ abstract contract ERC3643Operations is IERC3643Operations, TimestampProvider, Mo
         emit IERC1644StorageWrapper.ControllerRedemption(msg.sender, _userAddress, _amount, "", "");
     }
 
-    function mint(address _to, uint256 _amount) external onlyUnpaused {
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
+    function mint(address _to, uint256 _amount) external onlyUnpaused onlyWithoutMultiPartition {
         CapStorageWrapper.requireWithinMaxSupply(_amount, _getBlockTimestamp());
         ERC1594StorageWrapper.requireIdentified(address(0), _to);
         ERC1594StorageWrapper.requireCompliant(address(0), _to, false);
@@ -41,8 +39,11 @@ abstract contract ERC3643Operations is IERC3643Operations, TimestampProvider, Mo
         ERC1594StorageWrapper.issue(_to, _amount, "");
     }
 
-    function forcedTransfer(address _from, address _to, uint256 _amount) external onlyUnpaused returns (bool) {
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
+    function forcedTransfer(
+        address _from,
+        address _to,
+        uint256 _amount
+    ) external onlyUnpaused onlyWithoutMultiPartition returns (bool) {
         ERC1644StorageWrapper.requireControllable();
         {
             bytes32[] memory roles = new bytes32[](2);
