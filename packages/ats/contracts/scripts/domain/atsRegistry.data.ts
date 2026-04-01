@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-30T12:41:52.758Z
+ * Generated: 2026-03-30T15:06:16.638Z
  * Facets: 203
  * Infrastructure: 2
  *
@@ -2917,6 +2917,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xb16fd0cc",
       },
     ],
+    events: [
+      {
+        name: "CouponSet",
+        signature: "CouponSet(bytes32,uint256,address,ICoupon.Coupon)",
+        topic0: "0x45a4a51111e1d39f00bd8ed73c6ec8c10ca5663e2228f2cd49e7f44828e70ca8",
+      },
+    ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new CouponFacetTimeTravel__factory(signer) : new CouponFacet__factory(signer),
   },
@@ -2995,6 +3002,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function setCoupon((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
         selector: "0xb16fd0cc",
+      },
+    ],
+    events: [
+      {
+        name: "CouponSet",
+        signature: "CouponSet(bytes32,uint256,address,ICoupon.Coupon)",
+        topic0: "0x45a4a51111e1d39f00bd8ed73c6ec8c10ca5663e2228f2cd49e7f44828e70ca8",
       },
     ],
     errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
@@ -3076,6 +3090,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function setCoupon((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
         selector: "0xb16fd0cc",
+      },
+    ],
+    events: [
+      {
+        name: "CouponSet",
+        signature: "CouponSet(bytes32,uint256,address,ICoupon.Coupon)",
+        topic0: "0x45a4a51111e1d39f00bd8ed73c6ec8c10ca5663e2228f2cd49e7f44828e70ca8",
       },
     ],
     errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
@@ -5132,6 +5153,18 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x6fcfff45",
       },
     ],
+    events: [
+      {
+        name: "DelegateChanged",
+        signature: "DelegateChanged(address,address,address)",
+        topic0: "0x3134e8a2e6d97e929a7e54011ea5485d7d196dd5f0ba4d4ef95803e8e3fc257f",
+      },
+      {
+        name: "DelegateVotesChanged",
+        signature: "DelegateVotesChanged(address,uint256,uint256)",
+        topic0: "0xdec2bacdd2f05b59de34da9b523dff8be42e5e38e818c82fdb0bae774387a724",
+      },
+    ],
     errors: [
       {
         name: "AbafChangeForBlockForbidden",
@@ -5189,6 +5222,18 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "numCheckpoints",
         signature: "function numCheckpoints(address _account) view returns (uint256)",
         selector: "0x6fcfff45",
+      },
+    ],
+    events: [
+      {
+        name: "DelegateChanged",
+        signature: "DelegateChanged(address,address,address)",
+        topic0: "0x3134e8a2e6d97e929a7e54011ea5485d7d196dd5f0ba4d4ef95803e8e3fc257f",
+      },
+      {
+        name: "DelegateVotesChanged",
+        signature: "DelegateVotesChanged(address,uint256,uint256)",
+        topic0: "0xdec2bacdd2f05b59de34da9b523dff8be42e5e38e818c82fdb0bae774387a724",
       },
     ],
     errors: [
@@ -5251,6 +5296,18 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "numCheckpoints",
         signature: "function numCheckpoints(address _account) view returns (uint256)",
         selector: "0x6fcfff45",
+      },
+    ],
+    events: [
+      {
+        name: "DelegateChanged",
+        signature: "DelegateChanged(address,address,address)",
+        topic0: "0x3134e8a2e6d97e929a7e54011ea5485d7d196dd5f0ba4d4ef95803e8e3fc257f",
+      },
+      {
+        name: "DelegateVotesChanged",
+        signature: "DelegateVotesChanged(address,uint256,uint256)",
+        topic0: "0xdec2bacdd2f05b59de34da9b523dff8be42e5e38e818c82fdb0bae774387a724",
       },
     ],
     errors: [
@@ -8249,6 +8306,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x1f36cfc418f72043825aa85b5d279c03191ab83364af0ec5f170d67f1a7ba152",
       },
     ],
+    errors: [
+      { name: "LockExpirationNotReached", signature: "LockExpirationNotReached()", selector: "0xe8232ac2" },
+      { name: "WrongExpirationTimestamp", signature: "WrongExpirationTimestamp()", selector: "0xe39f4776" },
+      { name: "WrongLockId", signature: "WrongLockId()", selector: "0x039be1dd" },
+    ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new LockFacetTimeTravel__factory(signer) : new LockFacet__factory(signer),
   },
@@ -8343,7 +8405,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x1f36cfc418f72043825aa85b5d279c03191ab83364af0ec5f170d67f1a7ba152",
       },
     ],
-    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
+    errors: [
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+      { name: "LockExpirationNotReached", signature: "LockExpirationNotReached()", selector: "0xe8232ac2" },
+      { name: "WrongExpirationTimestamp", signature: "WrongExpirationTimestamp()", selector: "0xe39f4776" },
+      { name: "WrongLockId", signature: "WrongLockId()", selector: "0x039be1dd" },
+    ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new LockFixedRateFacetTimeTravel__factory(signer) : new LockFixedRateFacet__factory(signer),
   },
@@ -8438,7 +8505,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x1f36cfc418f72043825aa85b5d279c03191ab83364af0ec5f170d67f1a7ba152",
       },
     ],
-    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
+    errors: [
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+      { name: "LockExpirationNotReached", signature: "LockExpirationNotReached()", selector: "0xe8232ac2" },
+      { name: "WrongExpirationTimestamp", signature: "WrongExpirationTimestamp()", selector: "0xe39f4776" },
+      { name: "WrongLockId", signature: "WrongLockId()", selector: "0x039be1dd" },
+    ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new LockKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -11155,18 +11227,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     name: "ERC20VotesStorageWrapper",
     inheritance: ["ERC1594StorageWrapper"],
     methods: [],
-    events: [
-      {
-        name: "DelegateChanged",
-        signature: "DelegateChanged(address,address,address)",
-        topic0: "0x3134e8a2e6d97e929a7e54011ea5485d7d196dd5f0ba4d4ef95803e8e3fc257f",
-      },
-      {
-        name: "DelegateVotesChanged",
-        signature: "DelegateVotesChanged(address,uint256,uint256)",
-        topic0: "0xdec2bacdd2f05b59de34da9b523dff8be42e5e38e818c82fdb0bae774387a724",
-      },
-    ],
     errors: [{ name: "s", signature: "s()", selector: "0x86b714e2" }],
   },
 
@@ -11186,7 +11246,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     name: "ExternalListManagementStorageWrapper",
     inheritance: ["SsiManagementStorageWrapper"],
     methods: [],
-    errors: [{ name: "ZeroAddressNotAllowed", signature: "ZeroAddressNotAllowed()", selector: "0x8579befe" }],
   },
 
   ExternalPauseManagementStorageWrapper: {
@@ -11371,11 +11430,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         name: "CouponCancelled",
         signature: "CouponCancelled(uint256,address)",
         topic0: "0xf3f7ee3ec63ca38fe59a56a06f6d730ef89a41b7819ca5c04dda2205c4f2a712",
-      },
-      {
-        name: "CouponSet",
-        signature: "CouponSet(bytes32,uint256,address,ICoupon.Coupon)",
-        topic0: "0x45a4a51111e1d39f00bd8ed73c6ec8c10ca5663e2228f2cd49e7f44828e70ca8",
       },
     ],
     errors: [

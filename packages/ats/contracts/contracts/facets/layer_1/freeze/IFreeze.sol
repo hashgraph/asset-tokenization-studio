@@ -33,6 +33,12 @@ interface IFreeze {
      */
     function unfreezePartialTokens(address _userAddress, uint256 _amount) external;
 
+    function batchSetAddressFrozen(address[] calldata _userAddresses, bool[] calldata _freeze) external;
+
+    function batchFreezePartialTokens(address[] calldata _userAddresses, uint256[] calldata _amounts) external;
+
+    function batchUnfreezePartialTokens(address[] calldata _userAddresses, uint256[] calldata _amounts) external;
+
     /*
      * @dev Freezes the user's address entirely, disabling all token operations.
      * Emits a TokensFrozen event.

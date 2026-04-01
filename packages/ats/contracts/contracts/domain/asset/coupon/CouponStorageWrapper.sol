@@ -22,7 +22,7 @@ abstract contract CouponStorageWrapper is ICouponStorageWrapper, NominalValueSto
 
         _initCoupon(corporateActionId_, _newCoupon);
 
-        emit CouponSet(corporateActionId_, couponID_, _msgSender(), _newCoupon);
+        emit ICoupon.CouponSet(corporateActionId_, couponID_, _msgSender(), _newCoupon);
     }
 
     function _cancelCoupon(uint256 _couponId) internal override returns (bool success_) {

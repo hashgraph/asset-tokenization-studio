@@ -7,10 +7,9 @@ import {
     ScheduledTask,
     ScheduledTasksDataStorage
 } from "../../../facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
+import { IScheduledTasksCommon } from "./IScheduledTasksCommon.sol";
 
 abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
-    error WrongTimestamp(uint256 timeStamp);
-
     modifier onlyValidTimestamp(uint256 _timestamp) override {
         _checkTimestamp(_timestamp);
         _;
@@ -56,6 +55,6 @@ abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
     }
 
     function _checkTimestamp(uint256 _timestamp) private view {
-        if (_timestamp <= _blockTimestamp()) revert WrongTimestamp(_timestamp);
+        if (_timestamp <= _blockTimestamp()) revert IScheduledTasksCommon.WrongTimestamp(_timestamp);
     }
 }

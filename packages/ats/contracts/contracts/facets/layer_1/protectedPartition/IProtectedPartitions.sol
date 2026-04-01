@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-interface IProtectedPartitions {
+import {
+    IProtectedPartitionsStorageWrapper
+} from "../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
+
+interface IProtectedPartitions is IProtectedPartitionsStorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ProtectedPartitions(bool _arePartitionsProtected) external returns (bool success_);
 

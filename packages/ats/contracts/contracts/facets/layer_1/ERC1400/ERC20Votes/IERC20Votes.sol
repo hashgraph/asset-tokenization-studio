@@ -7,6 +7,10 @@ import { IERC5805 } from "./IERC5805.sol";
 import { CheckpointsLib } from "../../../../infrastructure/utils/CheckpointsLib.sol";
 
 interface IERC20Votes is IERC5805 {
+    event DelegateChanged(address indexed delegator, address indexed fromDelegate, address indexed toDelegate);
+
+    event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance);
+
     error AbafChangeForBlockForbidden(uint256 blockNumber);
 
     // solhint-disable-next-line func-name-mixedcase
