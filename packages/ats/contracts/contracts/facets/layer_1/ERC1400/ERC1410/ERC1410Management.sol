@@ -75,15 +75,15 @@ abstract contract ERC1410Management is IERC1410Management, Modifiers {
         notZeroAddress(_operatorTransferData.to)
         onlyDefaultPartitionWithSinglePartition(_operatorTransferData.partition)
         onlyUnProtectedPartitionsOrWildCardRole
-        returns (bytes32)
-    {
-        ERC1410StorageWrapper.requireOperator(_operatorTransferData.partition, _operatorTransferData.from);
-        ERC1594StorageWrapper.requireCanTransferFromByPartition(
+        onlyCanTransferFromByPartition(
             _operatorTransferData.from,
             _operatorTransferData.to,
             _operatorTransferData.partition,
             _operatorTransferData.value
-        );
+        )
+        returns (bytes32)
+    {
+        ERC1410StorageWrapper.requireOperator(_operatorTransferData.partition, _operatorTransferData.from);
         return TokenCoreOps.operatorTransferByPartition(_operatorTransferData);
     }
 
@@ -93,9 +93,14 @@ abstract contract ERC1410Management is IERC1410Management, Modifiers {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    ) external override onlyDefaultPartitionWithSinglePartition(_partition) onlyUnProtectedPartitionsOrWildCardRole {
+    )
+        external
+        override
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyCanRedeemFromByPartition(_tokenHolder, _partition, _value)
+    {
         ERC1410StorageWrapper.requireOperator(_partition, _tokenHolder);
-        ERC1594StorageWrapper.requireCanRedeemFromByPartition(_tokenHolder, _partition, _value);
         TokenCoreOps.redeemByPartition(_partition, _tokenHolder, msg.sender, _value, _data, _operatorData);
     }
 
@@ -110,10 +115,10 @@ abstract contract ERC1410Management is IERC1410Management, Modifiers {
         override
         onlyUnpaused
         onlyRole(ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition))
+        onlyProtectedPartitions
+        onlyCanTransferFromByPartition(_from, _to, _partition, _amount)
         returns (bytes32)
     {
-        ProtectedPartitionsStorageWrapper.requireProtectedPartitions();
-        ERC1594StorageWrapper.requireCanTransferFromByPartition(_from, _to, _partition, _amount);
         return TokenCoreOps.protectedTransferFromByPartition(_partition, _from, _to, _amount, _protectionData);
     }
 
@@ -122,9 +127,14 @@ abstract contract ERC1410Management is IERC1410Management, Modifiers {
         address _from,
         uint256 _amount,
         IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
-    ) external override onlyUnpaused onlyRole(ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition)) {
-        ProtectedPartitionsStorageWrapper.requireProtectedPartitions();
-        ERC1594StorageWrapper.requireCanRedeemFromByPartition(_from, _partition, _amount);
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition))
+        onlyProtectedPartitions
+        onlyCanRedeemFromByPartition(_from, _partition, _amount)
+    {
         TokenCoreOps.protectedRedeemFromByPartition(_partition, _from, _amount, _protectionData);
     }
 }

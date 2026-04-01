@@ -31,8 +31,13 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
         address _to,
         uint256 _value,
         bytes calldata _data
-    ) external override onlyWithoutMultiPartition onlyUnProtectedPartitionsOrWildCardRole {
-        ERC1594StorageWrapper.requireCanTransferFromByPartition(msg.sender, _to, _DEFAULT_PARTITION, _value);
+    )
+        external
+        override
+        onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyCanTransferFromByPartition(msg.sender, _to, _DEFAULT_PARTITION, _value)
+    {
         TokenCoreOps.transfer(msg.sender, _to, _value);
         emit TransferWithData(msg.sender, _to, _value, _data);
     }
@@ -50,8 +55,8 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
         onlyUnrecoveredAddress(_from)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyCanTransferFromByPartition(_from, _to, _DEFAULT_PARTITION, _value)
     {
-        ERC1594StorageWrapper.requireCanTransferFromByPartition(_from, _to, _DEFAULT_PARTITION, _value);
         TokenCoreOps.transferFrom(msg.sender, _from, _to, _value);
         emit TransferFromWithData(msg.sender, _from, _to, _value, _data);
     }
@@ -74,8 +79,13 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
     function redeem(
         uint256 _value,
         bytes memory _data
-    ) external override onlyWithoutMultiPartition onlyUnProtectedPartitionsOrWildCardRole {
-        ERC1594StorageWrapper.requireCanRedeemFromByPartition(msg.sender, _DEFAULT_PARTITION, _value);
+    )
+        external
+        override
+        onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyCanRedeemFromByPartition(msg.sender, _DEFAULT_PARTITION, _value)
+    {
         ERC1594StorageWrapper.redeem(_value, _data);
     }
 
@@ -90,8 +100,8 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
         onlyUnrecoveredAddress(_tokenHolder)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyCanRedeemFromByPartition(_tokenHolder, _DEFAULT_PARTITION, _value)
     {
-        ERC1594StorageWrapper.requireCanRedeemFromByPartition(_tokenHolder, _DEFAULT_PARTITION, _value);
         ERC1594StorageWrapper.redeemFrom(_tokenHolder, _value, _data);
     }
 

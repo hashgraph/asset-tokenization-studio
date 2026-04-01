@@ -26,14 +26,9 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Modifiers {
         override
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyCanTransferFromByPartition(msg.sender, _basicTransferInfo.to, _partition, _basicTransferInfo.value)
         returns (bytes32)
     {
-        ERC1594StorageWrapper.requireCanTransferFromByPartition(
-            msg.sender,
-            _basicTransferInfo.to,
-            _partition,
-            _basicTransferInfo.value
-        );
         return TokenCoreOps.transferByPartition(msg.sender, _basicTransferInfo, _partition, _data, address(0), "");
     }
 
@@ -41,8 +36,13 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Modifiers {
         bytes32 _partition,
         uint256 _value,
         bytes calldata _data
-    ) external override onlyDefaultPartitionWithSinglePartition(_partition) onlyUnProtectedPartitionsOrWildCardRole {
-        ERC1594StorageWrapper.requireCanRedeemFromByPartition(msg.sender, _partition, _value);
+    )
+        external
+        override
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyCanRedeemFromByPartition(msg.sender, _partition, _value)
+    {
         TokenCoreOps.redeemByPartition(_partition, msg.sender, address(0), _value, _data, "");
     }
 

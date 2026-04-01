@@ -44,8 +44,15 @@ abstract contract ERC20 is IERC20, TimestampProvider, Modifiers {
     function transfer(
         address to,
         uint256 amount
-    ) external override onlyUnpaused onlyWithoutMultiPartition onlyUnProtectedPartitionsOrWildCardRole returns (bool) {
-        ERC1594StorageWrapper.requireCanTransferFromByPartition(msg.sender, to, _DEFAULT_PARTITION, amount);
+    )
+        external
+        override
+        onlyUnpaused
+        onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyCanTransferFromByPartition(msg.sender, to, _DEFAULT_PARTITION, amount)
+        returns (bool)
+    {
         return TokenCoreOps.transfer(msg.sender, to, amount);
     }
 
@@ -53,8 +60,15 @@ abstract contract ERC20 is IERC20, TimestampProvider, Modifiers {
         address from,
         address to,
         uint256 amount
-    ) external override onlyUnpaused onlyWithoutMultiPartition onlyUnProtectedPartitionsOrWildCardRole returns (bool) {
-        ERC1594StorageWrapper.requireCanTransferFromByPartition(from, to, _DEFAULT_PARTITION, amount);
+    )
+        external
+        override
+        onlyUnpaused
+        onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyCanTransferFromByPartition(from, to, _DEFAULT_PARTITION, amount)
+        returns (bool)
+    {
         return TokenCoreOps.transferFrom(msg.sender, from, to, amount);
     }
 
