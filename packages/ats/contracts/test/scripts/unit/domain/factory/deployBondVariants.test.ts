@@ -149,7 +149,7 @@ describe("Bond Variant Deployments", () => {
         const fixedRateParams = createMockFixedRateParams();
 
         await expect(deployBondFixedRateFromFactory(params, regulationData, fixedRateParams)).to.be.rejectedWith(
-          "BondFixedRateDeployed event not found",
+          'Event log for "BondFixedRateDeployed" not found in transaction receipt',
         );
       });
 
@@ -160,7 +160,7 @@ describe("Bond Variant Deployments", () => {
         const fixedRateParams = createMockFixedRateParams();
 
         await expect(deployBondFixedRateFromFactory(params, regulationData, fixedRateParams)).to.be.rejectedWith(
-          "BondFixedRateDeployed event not found",
+          "Invalid diamond address from BondFixedRateDeployed event",
         );
       });
 
@@ -291,7 +291,7 @@ describe("Bond Variant Deployments", () => {
 
         await expect(
           deployBondKpiLinkedRateFromFactory(params, regulationData, interestRateParams, impactDataParams),
-        ).to.be.rejectedWith("BondKpiLinkedRateDeployed event not found");
+        ).to.be.rejectedWith('Event log for "BondKpiLinkedRateDeployed" not found in transaction receipt');
       });
 
       it("should throw if event has no args", async () => {
@@ -303,7 +303,7 @@ describe("Bond Variant Deployments", () => {
 
         await expect(
           deployBondKpiLinkedRateFromFactory(params, regulationData, interestRateParams, impactDataParams),
-        ).to.be.rejectedWith("BondKpiLinkedRateDeployed event not found");
+        ).to.be.rejectedWith("Invalid diamond address from BondKpiLinkedRateDeployed event");
       });
 
       it("should throw if diamondAddress is zero address", async () => {
@@ -538,7 +538,9 @@ describe("Bond Variant Deployments", () => {
             impactDataParams,
             projects,
           ),
-        ).to.be.rejectedWith("BondSustainabilityPerformanceTargetRateDeployed event not found");
+        ).to.be.rejectedWith(
+          'Event log for "BondSustainabilityPerformanceTargetRateDeployed" not found in transaction receipt',
+        );
       });
 
       it("should throw if event has no args", async () => {
@@ -557,7 +559,7 @@ describe("Bond Variant Deployments", () => {
             impactDataParams,
             projects,
           ),
-        ).to.be.rejectedWith("BondSustainabilityPerformanceTargetRateDeployed event not found");
+        ).to.be.rejectedWith("Invalid diamond address from BondSustainabilityPerformanceTargetRateDeployed event");
       });
 
       it("should throw if diamondAddress is zero address", async () => {

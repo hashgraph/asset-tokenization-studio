@@ -235,10 +235,21 @@ export function createMockImpactDataParamsSPT() {
  * @param diamondAddress - Diamond proxy address to return in event args
  * @returns Mock receipt object with events array
  */
-export function createMockReceipt(eventName: string, diamondAddress: string) {
+export function createMockReceipt(
+  eventName: string,
+  diamondAddress: string,
+  logAddress: string = TEST_ADDRESSES.VALID_0,
+) {
   return {
     logs: [
       {
+        address: logAddress,
+        topics: [
+          VALID_FACTORY_EVENTS.includes(eventName)
+            ? `0x${Buffer.from(eventName).slice(0, 32).toString("hex").padEnd(64, "0")}`
+            : "0x",
+        ],
+        data: diamondAddress,
         eventName: eventName,
         args: {
           diamondProxyAddress: diamondAddress,
@@ -262,11 +273,19 @@ export function createMockReceiptWithNoEvents() {
  * Create mock receipt with event but no args.
  *
  * @param eventName - Name of the event
+ * @param logAddress - Address to use for the log entry
  */
-export function createMockReceiptWithEventNoArgs(eventName: string) {
+export function createMockReceiptWithEventNoArgs(eventName: string, logAddress: string = TEST_ADDRESSES.VALID_0) {
   return {
     logs: [
       {
+        address: logAddress,
+        topics: [
+          VALID_FACTORY_EVENTS.includes(eventName)
+            ? `0x${Buffer.from(eventName).slice(0, 32).toString("hex").padEnd(64, "0")}`
+            : "0x",
+        ],
+        data: "0x",
         eventName: eventName,
         args: undefined,
       },
@@ -286,6 +305,48 @@ export function createMockReceiptWithWrongEvent(diamondAddress: string) {
 // ============================================================================
 // Factory Contract Stubs
 // ============================================================================
+
+const VALID_FACTORY_EVENTS = [
+  "EquityDeployed",
+  "BondDeployed",
+  "BondFixedRateDeployed",
+  "BondKpiLinkedRateDeployed",
+  "BondSustainabilityPerformanceTargetRateDeployed",
+];
+
+function getEventTopicHash(eventName: string): string {
+  if (!VALID_FACTORY_EVENTS.includes(eventName)) {
+    return "0x0000000000000000000000000000000000000000000000000000000000000000";
+  }
+  const hash = `0x${Buffer.from(eventName).slice(0, 32).toString("hex").padEnd(64, "0")}`;
+  return hash;
+}
+
+function createMockInterface(diamondAddress: string) {
+  return {
+    getEvent: sinon.stub().callsFake((name: string) => {
+      if (VALID_FACTORY_EVENTS.includes(name)) {
+        return {
+          topicHash: getEventTopicHash(name),
+          name,
+        };
+      }
+      return null;
+    }),
+    decodeEventLog: sinon.stub().callsFake((_fragment, _data, _topics) => {
+      return {
+        bondAddress: diamondAddress,
+        equityAddress: diamondAddress,
+        diamondProxyAddress: diamondAddress,
+        toObject: () => ({
+          bondAddress: diamondAddress,
+          equityAddress: diamondAddress,
+          diamondProxyAddress: diamondAddress,
+        }),
+      };
+    }),
+  };
+}
 
 /**
  * Create a minimal mock signer that satisfies ethers.js BaseContract requirements.
@@ -336,13 +397,15 @@ export function createMockSigner() {
  * @returns Mock factory object with stubbed methods
  */
 export function createMockFactory(receiptEvent: string, diamondAddress: string) {
-  const mockReceipt = createMockReceipt(receiptEvent, diamondAddress);
+  const factoryAddress = TEST_ADDRESSES.VALID_0;
+  const mockReceipt = createMockReceipt(receiptEvent, diamondAddress, factoryAddress);
   const mockTx = {
     wait: sinon.stub().resolves(mockReceipt),
     hash: TEST_TX_HASHES.SAMPLE_0,
   };
 
   const mockSigner = createMockSigner();
+  const mockInterface = createMockInterface(diamondAddress);
   return {
     deployEquity: sinon.stub().resolves(mockTx),
     deployBond: sinon.stub().resolves(mockTx),
@@ -351,6 +414,8 @@ export function createMockFactory(receiptEvent: string, diamondAddress: string) 
     deployBondSustainabilityPerformanceTargetRate: sinon.stub().resolves(mockTx),
     signer: mockSigner,
     runner: mockSigner,
+    interface: mockInterface,
+    getAddress: sinon.stub().resolves(factoryAddress) as any,
   };
 }
 
@@ -365,17 +430,31 @@ export function createMockFactoryWithWrongEvent(diamondAddress: string) {
 
 /**
  * Create mock factory that returns receipt with event but no args.
+ * Uses an interface that returns empty decoded args to simulate missing event data.
  *
  * @param eventName - Event name to include
  */
 export function createMockFactoryWithNoArgs(eventName: string) {
-  const mockReceipt = createMockReceiptWithEventNoArgs(eventName);
+  const factoryAddress = TEST_ADDRESSES.VALID_0;
+  const mockReceipt = createMockReceiptWithEventNoArgs(eventName, factoryAddress);
   const mockTx = {
     wait: sinon.stub().resolves(mockReceipt),
     hash: TEST_TX_HASHES.SAMPLE_0,
   };
 
   const mockSigner = createMockSigner();
+  const mockInterface = {
+    getEvent: sinon.stub().callsFake((name: string) => {
+      if (VALID_FACTORY_EVENTS.includes(name)) {
+        return { topicHash: getEventTopicHash(name), name };
+      }
+      return null;
+    }),
+    decodeEventLog: sinon.stub().callsFake((_fragment: unknown, _data: unknown, _topics: unknown) => {
+      return { toObject: () => ({}) };
+    }),
+  };
+
   return {
     deployEquity: sinon.stub().resolves(mockTx),
     deployBond: sinon.stub().resolves(mockTx),
@@ -384,6 +463,8 @@ export function createMockFactoryWithNoArgs(eventName: string) {
     deployBondSustainabilityPerformanceTargetRate: sinon.stub().resolves(mockTx),
     signer: mockSigner,
     runner: mockSigner,
+    interface: mockInterface,
+    getAddress: sinon.stub().resolves(factoryAddress) as any,
   };
 }
 
