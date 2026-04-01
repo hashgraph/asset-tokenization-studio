@@ -30,8 +30,7 @@ abstract contract ERC1410Management is IERC1410Management, Modifiers {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    ) external override onlyUnpaused returns (bytes32) {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
+    ) external override onlyUnpaused onlyDefaultPartitionWithSinglePartition(_partition) returns (bytes32) {
         ERC1644StorageWrapper.requireControllable();
         bytes32[] memory roles = new bytes32[](2);
         roles[0] = _CONTROLLER_ROLE;
@@ -54,8 +53,7 @@ abstract contract ERC1410Management is IERC1410Management, Modifiers {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    ) external override onlyUnpaused {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
+    ) external override onlyUnpaused onlyDefaultPartitionWithSinglePartition(_partition) {
         ERC1644StorageWrapper.requireControllable();
         bytes32[] memory roles = new bytes32[](2);
         roles[0] = _CONTROLLER_ROLE;
@@ -66,8 +64,13 @@ abstract contract ERC1410Management is IERC1410Management, Modifiers {
 
     function operatorTransferByPartition(
         OperatorTransferData calldata _operatorTransferData
-    ) external override notZeroAddress(_operatorTransferData.to) returns (bytes32) {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_operatorTransferData.partition);
+    )
+        external
+        override
+        notZeroAddress(_operatorTransferData.to)
+        onlyDefaultPartitionWithSinglePartition(_operatorTransferData.partition)
+        returns (bytes32)
+    {
         ERC1410StorageWrapper.requireOperator(_operatorTransferData.partition, _operatorTransferData.from);
         _requireUnProtectedPartitionsOrWildCardRole();
         ERC1594StorageWrapper.requireCanTransferFromByPartition(
@@ -85,8 +88,7 @@ abstract contract ERC1410Management is IERC1410Management, Modifiers {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    ) external override {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
+    ) external override onlyDefaultPartitionWithSinglePartition(_partition) {
         ERC1410StorageWrapper.requireOperator(_partition, _tokenHolder);
         _requireUnProtectedPartitionsOrWildCardRole();
         ERC1594StorageWrapper.requireCanRedeemFromByPartition(_tokenHolder, _partition, _value);

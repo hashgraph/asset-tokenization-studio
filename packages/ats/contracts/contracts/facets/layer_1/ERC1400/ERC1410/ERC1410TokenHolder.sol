@@ -21,9 +21,8 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Modifiers {
         bytes32 _partition,
         BasicTransferInfo calldata _basicTransferInfo,
         bytes memory _data
-    ) external override returns (bytes32) {
+    ) external override onlyDefaultPartitionWithSinglePartition(_partition) returns (bytes32) {
         _requireUnProtectedPartitionsOrWildCardRole();
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
         ERC1594StorageWrapper.requireCanTransferFromByPartition(
             msg.sender,
             _basicTransferInfo.to,
@@ -33,8 +32,11 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Modifiers {
         return TokenCoreOps.transferByPartition(msg.sender, _basicTransferInfo, _partition, _data, address(0), "");
     }
 
-    function redeemByPartition(bytes32 _partition, uint256 _value, bytes calldata _data) external override {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
+    function redeemByPartition(
+        bytes32 _partition,
+        uint256 _value,
+        bytes calldata _data
+    ) external override onlyDefaultPartitionWithSinglePartition(_partition) {
         _requireUnProtectedPartitionsOrWildCardRole();
         ERC1594StorageWrapper.requireCanRedeemFromByPartition(msg.sender, _partition, _value);
         TokenCoreOps.redeemByPartition(_partition, msg.sender, address(0), _value, _data, "");
@@ -55,14 +57,18 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Modifiers {
         ERC1410StorageWrapper.revokeOperator(_operator);
     }
 
-    function authorizeOperatorByPartition(bytes32 _partition, address _operator) external override onlyUnpaused {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
+    function authorizeOperatorByPartition(
+        bytes32 _partition,
+        address _operator
+    ) external override onlyUnpaused onlyDefaultPartitionWithSinglePartition(_partition) {
         ERC1594StorageWrapper.requireCompliant(msg.sender, _operator, false);
         ERC1410StorageWrapper.authorizeOperatorByPartition(_partition, _operator);
     }
 
-    function revokeOperatorByPartition(bytes32 _partition, address _operator) external override onlyUnpaused {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
+    function revokeOperatorByPartition(
+        bytes32 _partition,
+        address _operator
+    ) external override onlyUnpaused onlyDefaultPartitionWithSinglePartition(_partition) {
         ERC1594StorageWrapper.requireIdentified(msg.sender, _operator);
         ERC1594StorageWrapper.requireCompliant(msg.sender, _operator, false);
         ERC1410StorageWrapper.revokeOperatorByPartition(_partition, _operator);

@@ -55,9 +55,9 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
         onlyUnrecoveredAddress(msg.sender)
         onlyUnrecoveredAddress(_hold.to)
         notZeroAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(_partition)
         returns (bool success_, uint256 holdId_)
     {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
         _requireUnProtectedPartitionsOrWildCardRole();
         (success_, holdId_) = HoldStorageWrapper.createHoldByPartition(
             _partition,
@@ -139,8 +139,13 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
         HoldIdentifier calldata _holdIdentifier,
         address _to,
         uint256 _amount
-    ) external override onlyUnpaused returns (bool success_, bytes32 partition_) {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_holdIdentifier.partition);
+    )
+        external
+        override
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
+        returns (bool success_, bytes32 partition_)
+    {
         ERC1594StorageWrapper.requireIdentified(_holdIdentifier.tokenHolder, _to);
         ERC1594StorageWrapper.requireCompliant(address(0), _to, false);
         HoldStorageWrapper.requireValidHoldId(_holdIdentifier);
@@ -170,8 +175,13 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
     function releaseHoldByPartition(
         HoldIdentifier calldata _holdIdentifier,
         uint256 _amount
-    ) external override onlyUnpaused returns (bool success_) {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_holdIdentifier.partition);
+    )
+        external
+        override
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
+        returns (bool success_)
+    {
         HoldStorageWrapper.requireValidHoldId(_holdIdentifier);
         success_ = HoldStorageWrapper.releaseHoldByPartition(_holdIdentifier, _amount);
         emit HoldByPartitionReleased(
@@ -195,8 +205,13 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
      */
     function reclaimHoldByPartition(
         HoldIdentifier calldata _holdIdentifier
-    ) external override onlyUnpaused returns (bool success_) {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_holdIdentifier.partition);
+    )
+        external
+        override
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
+        returns (bool success_)
+    {
         HoldStorageWrapper.requireValidHoldId(_holdIdentifier);
         uint256 amount;
         (success_, amount) = HoldStorageWrapper.reclaimHoldByPartition(_holdIdentifier);

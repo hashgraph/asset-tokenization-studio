@@ -47,7 +47,7 @@ abstract contract Lock is ILock, TimestampProvider, Modifiers {
         onlyRole(_LOCKER_ROLE)
         onlyValidExpirationTimestamp(_expirationTimestamp)
         onlyUnrecoveredAddress(_tokenHolder)
-        onlyDefaultPartition(_partition)
+        onlyDefaultPartitionWithSinglePartition(_partition)
         returns (bool success_, uint256 lockId_)
     {
         (success_, lockId_) = LockStorageWrapper.lockByPartition(
@@ -89,7 +89,7 @@ abstract contract Lock is ILock, TimestampProvider, Modifiers {
         external
         override
         onlyUnpaused
-        onlyDefaultPartition(_partition)
+        onlyDefaultPartitionWithSinglePartition(_partition)
         onlyWithValidLockId(_partition, _tokenHolder, _lockId)
         onlyWithLockedExpirationTimestamp(_partition, _tokenHolder, _lockId)
         returns (bool success_)
@@ -121,7 +121,7 @@ abstract contract Lock is ILock, TimestampProvider, Modifiers {
         bytes32 _partition,
         uint256 _lockId,
         address _tokenHolder
-    ) external onlyUnpaused onlyDefaultPartition(_partition) returns (bool success_) {
+    ) external onlyUnpaused onlyDefaultPartitionWithSinglePartition(_partition) returns (bool success_) {
         bytes32[] memory roles = new bytes32[](2);
         roles[0] = _LOCKER_ROLE;
         roles[1] = _CONTROLLER_ROLE;

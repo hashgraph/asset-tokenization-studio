@@ -32,9 +32,9 @@ abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider, Modi
         onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(_to)
         notZeroAddress(_to)
+        onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
         returns (bool success_, uint256 clearingId_)
     {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_clearingOperation.partition);
         _requireUnProtectedPartitionsOrWildCardRole();
         (success_, clearingId_) = ClearingOps.clearingTransferCreation(
             _clearingOperation,
@@ -79,11 +79,9 @@ abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider, Modi
         onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(_to)
         onlyUnrecoveredAddress(_clearingOperationFrom.from)
+        onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
         returns (bool success_, uint256 clearingId_)
     {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        );
         _requireUnProtectedPartitionsOrWildCardRole();
         {
             ERC1410StorageWrapper.requireValidAddress(_clearingOperationFrom.from);

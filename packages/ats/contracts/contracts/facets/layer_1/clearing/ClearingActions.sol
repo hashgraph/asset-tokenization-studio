@@ -36,10 +36,9 @@ abstract contract ClearingActions is IClearingActions, Modifiers {
         onlyUnpaused
         onlyRole(_CLEARING_VALIDATOR_ROLE)
         onlyClearingActivated
-        onlyDefaultPartitionWithSinglePartition
+        onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
         returns (bool success_, bytes32 partition_)
     {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition);
         ClearingStorageWrapper.requireValidClearingId(_clearingOperationIdentifier);
         ClearingStorageWrapper.requireExpirationTimestamp(_clearingOperationIdentifier, false);
 
@@ -63,8 +62,15 @@ abstract contract ClearingActions is IClearingActions, Modifiers {
 
     function cancelClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
-    ) external override onlyUnpaused onlyRole(_CLEARING_VALIDATOR_ROLE) onlyClearingActivated returns (bool success_) {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition);
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_CLEARING_VALIDATOR_ROLE)
+        onlyClearingActivated
+        onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
+        returns (bool success_)
+    {
         ClearingStorageWrapper.requireValidClearingId(_clearingOperationIdentifier);
         ClearingStorageWrapper.requireExpirationTimestamp(_clearingOperationIdentifier, false);
         success_ = ClearingOps.cancelClearingOperationByPartition(_clearingOperationIdentifier);

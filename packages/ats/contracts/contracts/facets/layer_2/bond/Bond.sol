@@ -93,7 +93,7 @@ abstract contract Bond is IBond, TimestampProvider, Modifiers {
         onlyUnpaused
         onlyRole(_MATURITY_REDEEMER_ROLE)
         onlyValidAddress(_tokenHolder)
-        onlyDefaultPartition(_partition)
+        onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnrecoveredAddress(_tokenHolder)
         onlyListedAllowed(_tokenHolder)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)

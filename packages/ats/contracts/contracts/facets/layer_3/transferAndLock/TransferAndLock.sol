@@ -28,9 +28,9 @@ abstract contract TransferAndLock is ITransferAndLock, Modifiers {
         onlyUnpaused
         onlyRole(_LOCKER_ROLE)
         onlyWithValidExpirationTimestamp(_expirationTimestamp)
+        onlyDefaultPartitionWithSinglePartition(_partition)
         returns (bool success_, uint256 lockId_)
     {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
         _requireUnProtectedPartitionsOrWildCardRole();
         ERC1410StorageWrapper.transferByPartition(
             EvmAccessors.getMsgSender(),

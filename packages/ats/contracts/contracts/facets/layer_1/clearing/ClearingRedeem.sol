@@ -28,9 +28,9 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider, Modifier
         onlyClearingActivated
         onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
         onlyUnrecoveredAddress(msg.sender)
+        onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
         returns (bool success_, uint256 clearingId_)
     {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_clearingOperation.partition);
         _requireUnProtectedPartitionsOrWildCardRole();
         (success_, clearingId_) = ClearingOps.clearingRedeemCreation(
             _clearingOperation,
@@ -53,11 +53,9 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider, Modifier
         onlyClearingActivated
         onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
         notZeroAddress(_clearingOperationFrom.from)
+        onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
         returns (bool success_, uint256 clearingId_)
     {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        );
         _requireUnProtectedPartitionsOrWildCardRole();
         (success_, clearingId_) = ClearingOps.clearingRedeemCreation(
             _clearingOperationFrom.clearingOperation,
@@ -87,11 +85,9 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider, Modifier
         onlyUnrecoveredAddress(msg.sender)
         onlyUnrecoveredAddress(_clearingOperationFrom.from)
         notZeroAddress(_clearingOperationFrom.from)
+        onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
         returns (bool success_, uint256 clearingId_)
     {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        );
         _requireUnProtectedPartitionsOrWildCardRole();
         {
             ERC1410StorageWrapper.requireOperator(

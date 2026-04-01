@@ -14,14 +14,20 @@ import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 
 abstract contract ERC1410Issuer is IERC1410Issuer, TimestampProvider, Modifiers {
-    function issueByPartition(IssueData calldata _issueData) external onlyUnpaused onlyUnrecoveredAddress(msg.sender) {
+    function issueByPartition(
+        IssueData calldata _issueData
+    )
+        external
+        onlyUnpaused
+        onlyUnrecoveredAddress(msg.sender)
+        onlyDefaultPartitionWithSinglePartition(_issueData.partition)
+    {
         CapStorageWrapper.requireWithinMaxSupply(_issueData.value, _getBlockTimestamp());
         CapStorageWrapper.requireWithinMaxSupplyByPartition(
             _issueData.partition,
             _issueData.value,
             _getBlockTimestamp()
         );
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_issueData.partition);
         ERC1594StorageWrapper.requireIdentified(address(0), _issueData.tokenHolder);
         ERC1594StorageWrapper.requireCompliant(address(0), _issueData.tokenHolder, false);
         bytes32[] memory roles = new bytes32[](2);

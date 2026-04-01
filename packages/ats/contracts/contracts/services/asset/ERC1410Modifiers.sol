@@ -26,17 +26,4 @@ abstract contract ERC1410Modifiers {
         ERC1410StorageWrapper.requireValidAddress(_account);
         _;
     }
-
-    /**
-     * @dev Modifier that validates partition is allowed in single partition mode
-     *
-     * Requirements:
-     * - Partition must be the default partition when in single partition mode
-     *
-     * @param _partition The partition to validate
-     */
-    modifier onlyDefaultPartition(bytes32 _partition) {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
-        _;
-    }
 }

@@ -33,9 +33,9 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, Modifiers {
         onlyUnrecoveredAddress(msg.sender)
         onlyUnrecoveredAddress(_hold.to)
         notZeroAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
         returns (bool success_, uint256 clearingId_)
     {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_clearingOperation.partition);
         _requireUnProtectedPartitionsOrWildCardRole();
         (success_, clearingId_) = ClearingOps.clearingHoldCreationCreation(
             _clearingOperation,
