@@ -75,6 +75,7 @@
     "ats:start": "npm ci && npm run ats:contracts:build && npm run ats:sdk:build && npm run ats:web:dev",
     "ats:clean": "npm run ats:contracts:clean && npm run ats:sdk:clean && npm run ats:web:clean && npm run clean:deps && echo '\n✅ All ATS compilation, build and similar files have been cleaned'",
     "ats:publish": "npm run ats:contracts:publish && npm run ats:sdk:publish",
+    "ats:script:validate-sdk-contracts": "python3 scripts/ats/validate-sdk-contracts/validate_sdk_contracts.py",
     "ats:contracts:format": "npm run format --workspace=packages/ats/contracts",
     "ats:contracts:format:check": "npm run format:check --workspace=packages/ats/contracts",
     "ats:contracts:lint": "npm run lint --workspace=packages/ats/contracts",
