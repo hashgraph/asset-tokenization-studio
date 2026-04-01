@@ -21,8 +21,13 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Modifiers {
         bytes32 _partition,
         BasicTransferInfo calldata _basicTransferInfo,
         bytes memory _data
-    ) external override onlyDefaultPartitionWithSinglePartition(_partition) returns (bytes32) {
-        _requireUnProtectedPartitionsOrWildCardRole();
+    )
+        external
+        override
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyUnProtectedPartitionsOrWildCardRole
+        returns (bytes32)
+    {
         ERC1594StorageWrapper.requireCanTransferFromByPartition(
             msg.sender,
             _basicTransferInfo.to,
@@ -36,8 +41,7 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Modifiers {
         bytes32 _partition,
         uint256 _value,
         bytes calldata _data
-    ) external override onlyDefaultPartitionWithSinglePartition(_partition) {
-        _requireUnProtectedPartitionsOrWildCardRole();
+    ) external override onlyDefaultPartitionWithSinglePartition(_partition) onlyUnProtectedPartitionsOrWildCardRole {
         ERC1594StorageWrapper.requireCanRedeemFromByPartition(msg.sender, _partition, _value);
         TokenCoreOps.redeemByPartition(_partition, msg.sender, address(0), _value, _data, "");
     }
@@ -72,14 +76,5 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Modifiers {
         ERC1594StorageWrapper.requireIdentified(msg.sender, _operator);
         ERC1594StorageWrapper.requireCompliant(msg.sender, _operator, false);
         ERC1410StorageWrapper.revokeOperatorByPartition(_partition, _operator);
-    }
-
-    function _requireUnProtectedPartitionsOrWildCardRole() internal view {
-        if (
-            ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
-            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, msg.sender)
-        ) {
-            revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(msg.sender, _WILD_CARD_ROLE);
-        }
     }
 }

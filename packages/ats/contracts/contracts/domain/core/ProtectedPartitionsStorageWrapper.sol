@@ -6,6 +6,7 @@ import { _PROTECTED_PARTITIONS_STORAGE_POSITION } from "../../constants/storageP
 import { IProtectedPartitionsStorageWrapper } from "./protectedPartition/IProtectedPartitionsStorageWrapper.sol";
 import { IClearing } from "../../facets/layer_1/clearing/IClearing.sol";
 import { Hold, ProtectedHold } from "../../facets/layer_1/hold/IHold.sol";
+import { AccessControlStorageWrapper } from "./AccessControlStorageWrapper.sol";
 import { ResolverProxyStorageWrapper } from "./ResolverProxyStorageWrapper.sol";
 import {
     _getMessageHashTransfer,
@@ -16,6 +17,7 @@ import {
     _getMessageHashClearingRedeem,
     _verify
 } from "../../infrastructure/utils/ERC712.sol";
+import { _WILD_CARD_ROLE } from "../../constants/roles.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
@@ -66,11 +68,15 @@ library ProtectedPartitionsStorageWrapper {
         return protectedPartitionsStorage().initialized;
     }
 
-    function _checkUnProtectedPartitionsOrWildCardRole(bytes32 /*partition*/, bool isWildCardRole) internal view {
-        if (!isWildCardRole && arePartitionsProtected()) {
-            // TODO: REVERT REASONS CANNOT BE USED
-            // solhint-disable-next-line reason-string
-            revert("Protected partition");
+    function requireUnProtectedPartitionsOrWildCardRole() internal view {
+        if (
+            ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
+            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, EvmAccessors.getMsgSender())
+        ) {
+            revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(
+                EvmAccessors.getMsgSender(),
+                _WILD_CARD_ROLE
+            );
         }
     }
 

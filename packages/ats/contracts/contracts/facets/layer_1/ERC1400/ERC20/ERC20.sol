@@ -44,8 +44,7 @@ abstract contract ERC20 is IERC20, TimestampProvider, Modifiers {
     function transfer(
         address to,
         uint256 amount
-    ) external override onlyUnpaused onlyWithoutMultiPartition returns (bool) {
-        _requireUnProtectedPartitionsOrWildCardRole();
+    ) external override onlyUnpaused onlyWithoutMultiPartition onlyUnProtectedPartitionsOrWildCardRole returns (bool) {
         ERC1594StorageWrapper.requireCanTransferFromByPartition(msg.sender, to, _DEFAULT_PARTITION, amount);
         return TokenCoreOps.transfer(msg.sender, to, amount);
     }
@@ -54,8 +53,7 @@ abstract contract ERC20 is IERC20, TimestampProvider, Modifiers {
         address from,
         address to,
         uint256 amount
-    ) external override onlyUnpaused onlyWithoutMultiPartition returns (bool) {
-        _requireUnProtectedPartitionsOrWildCardRole();
+    ) external override onlyUnpaused onlyWithoutMultiPartition onlyUnProtectedPartitionsOrWildCardRole returns (bool) {
         ERC1594StorageWrapper.requireCanTransferFromByPartition(from, to, _DEFAULT_PARTITION, amount);
         return TokenCoreOps.transferFrom(msg.sender, from, to, amount);
     }
@@ -98,14 +96,5 @@ abstract contract ERC20 is IERC20, TimestampProvider, Modifiers {
 
     function getERC20Metadata() external view returns (ERC20Metadata memory) {
         return ERC20StorageWrapper.getERC20MetadataAdjustedAt(_getBlockTimestamp());
-    }
-
-    function _requireUnProtectedPartitionsOrWildCardRole() internal view {
-        if (
-            ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
-            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, msg.sender)
-        ) {
-            revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(msg.sender, _WILD_CARD_ROLE);
-        }
     }
 }

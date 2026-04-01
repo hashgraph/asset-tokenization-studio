@@ -34,9 +34,9 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, Modifiers {
         onlyUnrecoveredAddress(_hold.to)
         notZeroAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
+        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 clearingId_)
     {
-        _requireUnProtectedPartitionsOrWildCardRole();
         (success_, clearingId_) = ClearingOps.clearingHoldCreationCreation(
             _clearingOperation,
             msg.sender,
@@ -61,12 +61,12 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, Modifiers {
         onlyUnrecoveredAddress(_clearingOperationFrom.from)
         notZeroAddress(_hold.escrow)
         notZeroAddress(_clearingOperationFrom.from)
+        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 clearingId_)
     {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
         );
-        _requireUnProtectedPartitionsOrWildCardRole();
 
         (success_, clearingId_) = ClearingOps.clearingHoldCreationCreation(
             _clearingOperationFrom.clearingOperation,
@@ -100,6 +100,7 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, Modifiers {
         onlyUnrecoveredAddress(_clearingOperationFrom.from)
         notZeroAddress(_hold.escrow)
         notZeroAddress(_clearingOperationFrom.from)
+        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 clearingId_)
     {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
@@ -110,7 +111,6 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, Modifiers {
                 _clearingOperationFrom.clearingOperation.partition,
                 _clearingOperationFrom.from
             );
-            _requireUnProtectedPartitionsOrWildCardRole();
         }
 
         (success_, clearingId_) = ClearingOps.clearingHoldCreationCreation(
@@ -162,14 +162,5 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, Modifiers {
                 _clearingId,
                 TimeTravelStorageWrapper.getBlockTimestamp()
             );
-    }
-
-    function _requireUnProtectedPartitionsOrWildCardRole() internal view {
-        if (
-            ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
-            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, msg.sender)
-        ) {
-            revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(msg.sender, _WILD_CARD_ROLE);
-        }
     }
 }

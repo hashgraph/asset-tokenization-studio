@@ -31,8 +31,7 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
         address _to,
         uint256 _value,
         bytes calldata _data
-    ) external override onlyWithoutMultiPartition {
-        _requireUnProtectedPartitionsOrWildCardRole();
+    ) external override onlyWithoutMultiPartition onlyUnProtectedPartitionsOrWildCardRole {
         ERC1594StorageWrapper.requireCanTransferFromByPartition(msg.sender, _to, _DEFAULT_PARTITION, _value);
         TokenCoreOps.transfer(msg.sender, _to, _value);
         emit TransferWithData(msg.sender, _to, _value, _data);
@@ -50,8 +49,8 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
         onlyUnrecoveredAddress(_to)
         onlyUnrecoveredAddress(_from)
         onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
     {
-        _requireUnProtectedPartitionsOrWildCardRole();
         ERC1594StorageWrapper.requireCanTransferFromByPartition(_from, _to, _DEFAULT_PARTITION, _value);
         TokenCoreOps.transferFrom(msg.sender, _from, _to, _value);
         emit TransferFromWithData(msg.sender, _from, _to, _value, _data);
@@ -72,8 +71,10 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
         ERC1594StorageWrapper.issue(_tokenHolder, _value, _data);
     }
 
-    function redeem(uint256 _value, bytes memory _data) external override onlyWithoutMultiPartition {
-        _requireUnProtectedPartitionsOrWildCardRole();
+    function redeem(
+        uint256 _value,
+        bytes memory _data
+    ) external override onlyWithoutMultiPartition onlyUnProtectedPartitionsOrWildCardRole {
         ERC1594StorageWrapper.requireCanRedeemFromByPartition(msg.sender, _DEFAULT_PARTITION, _value);
         ERC1594StorageWrapper.redeem(_value, _data);
     }
@@ -88,8 +89,8 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
         onlyUnrecoveredAddress(msg.sender)
         onlyUnrecoveredAddress(_tokenHolder)
         onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
     {
-        _requireUnProtectedPartitionsOrWildCardRole();
         ERC1594StorageWrapper.requireCanRedeemFromByPartition(_tokenHolder, _DEFAULT_PARTITION, _value);
         ERC1594StorageWrapper.redeemFrom(_tokenHolder, _value, _data);
     }
@@ -135,14 +136,5 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
             ""
         );
         return (status, statusCode, reason);
-    }
-
-    function _requireUnProtectedPartitionsOrWildCardRole() internal view {
-        if (
-            ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
-            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, msg.sender)
-        ) {
-            revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(msg.sender, _WILD_CARD_ROLE);
-        }
     }
 }

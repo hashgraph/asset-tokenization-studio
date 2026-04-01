@@ -29,9 +29,9 @@ abstract contract TransferAndLock is ITransferAndLock, Modifiers {
         onlyRole(_LOCKER_ROLE)
         onlyWithValidExpirationTimestamp(_expirationTimestamp)
         onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 lockId_)
     {
-        _requireUnProtectedPartitionsOrWildCardRole();
         ERC1410StorageWrapper.transferByPartition(
             EvmAccessors.getMsgSender(),
             BasicTransferInfo(_to, _amount),
@@ -70,9 +70,9 @@ abstract contract TransferAndLock is ITransferAndLock, Modifiers {
         onlyRole(_LOCKER_ROLE)
         onlyWithValidExpirationTimestamp(_expirationTimestamp)
         onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 lockId_)
     {
-        _requireUnProtectedPartitionsOrWildCardRole();
         ERC1410StorageWrapper.transferByPartition(
             EvmAccessors.getMsgSender(),
             BasicTransferInfo(_to, _amount),
@@ -97,17 +97,5 @@ abstract contract TransferAndLock is ITransferAndLock, Modifiers {
             _expirationTimestamp,
             lockId_
         );
-    }
-
-    function _requireUnProtectedPartitionsOrWildCardRole() internal view {
-        if (
-            ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
-            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, EvmAccessors.getMsgSender())
-        ) {
-            revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(
-                EvmAccessors.getMsgSender(),
-                _WILD_CARD_ROLE
-            );
-        }
     }
 }

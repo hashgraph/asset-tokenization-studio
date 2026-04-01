@@ -23,9 +23,14 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, Modifiers {
     function batchTransfer(
         address[] calldata _toList,
         uint256[] calldata _amounts
-    ) external onlyUnpaused onlyValidInputAmountsArrayLength(_toList, _amounts) onlyWithoutMultiPartition {
+    )
+        external
+        onlyUnpaused
+        onlyValidInputAmountsArrayLength(_toList, _amounts)
+        onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
+    {
         if (ClearingStorageWrapper.isClearingActivated()) revert IClearing.ClearingIsActivated();
-        _requireUnProtectedPartitionsOrWildCardRole();
         ERC1594StorageWrapper.requireIdentified(msg.sender, address(0));
         ERC1594StorageWrapper.requireCompliant(msg.sender, address(0), false);
         for (uint256 i = 0; i < _toList.length; i++) {
@@ -101,15 +106,6 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, Modifiers {
         for (uint256 i = 0; i < _userAddresses.length; i++) {
             TokenCoreOps.burn(_userAddresses[i], _amounts[i]);
             emit IERC1644StorageWrapper.ControllerRedemption(msg.sender, _userAddresses[i], _amounts[i], "", "");
-        }
-    }
-
-    function _requireUnProtectedPartitionsOrWildCardRole() internal view {
-        if (
-            ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
-            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, msg.sender)
-        ) {
-            revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(msg.sender, _WILD_CARD_ROLE);
         }
     }
 }

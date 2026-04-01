@@ -33,9 +33,9 @@ abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider, Modi
         onlyUnrecoveredAddress(_to)
         notZeroAddress(_to)
         onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
+        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 clearingId_)
     {
-        _requireUnProtectedPartitionsOrWildCardRole();
         (success_, clearingId_) = ClearingOps.clearingTransferCreation(
             _clearingOperation,
             _amount,
@@ -80,9 +80,9 @@ abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider, Modi
         onlyUnrecoveredAddress(_to)
         onlyUnrecoveredAddress(_clearingOperationFrom.from)
         onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
+        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 clearingId_)
     {
-        _requireUnProtectedPartitionsOrWildCardRole();
         {
             ERC1410StorageWrapper.requireValidAddress(_clearingOperationFrom.from);
             ERC1410StorageWrapper.requireValidAddress(_to);
@@ -155,7 +155,7 @@ abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider, Modi
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
         );
-        _requireUnProtectedPartitionsOrWildCardRole();
+        ProtectedPartitionsStorageWrapper.requireUnProtectedPartitionsOrWildCardRole();
         (success_, clearingId_) = ClearingOps.clearingTransferCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
@@ -171,17 +171,5 @@ abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider, Modi
             _clearingOperationFrom.from,
             _amount
         );
-    }
-
-    function _requireUnProtectedPartitionsOrWildCardRole() internal view {
-        if (
-            ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
-            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, EvmAccessors.getMsgSender())
-        ) {
-            revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(
-                EvmAccessors.getMsgSender(),
-                _WILD_CARD_ROLE
-            );
-        }
     }
 }

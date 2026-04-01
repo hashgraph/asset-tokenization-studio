@@ -66,11 +66,11 @@ abstract contract HoldManagement is IHoldManagement, Modifiers {
         onlyUnrecoveredAddress(_from)
         notZeroAddress(_from)
         notZeroAddress(_hold.escrow)
+        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
         ERC1410StorageWrapper.requireOperator(_partition, _from);
-        _requireUnProtectedPartitionsOrWildCardRole();
 
         (success_, holdId_) = HoldStorageWrapper.createHoldByPartition(
             _partition,
@@ -182,24 +182,5 @@ abstract contract HoldManagement is IHoldManagement, Modifiers {
         );
 
         emit ProtectedHeldByPartition(msg.sender, _from, _partition, holdId_, _protectedHold.hold, "");
-    }
-
-    /**
-     * @dev Internal function to require un-protected partitions or wildcard role
-     *
-     * Reverts if partitions are protected and caller does not have WILD_CARD_ROLE
-     *
-     * Requirements:
-     * - Either partitions are not protected OR caller has WILD_CARD_ROLE
-     *
-     * Reverts with PartitionsAreProtectedAndNoRole if requirements not met
-     */
-    function _requireUnProtectedPartitionsOrWildCardRole() internal view {
-        if (
-            ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
-            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, msg.sender)
-        ) {
-            revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(msg.sender, _WILD_CARD_ROLE);
-        }
     }
 }

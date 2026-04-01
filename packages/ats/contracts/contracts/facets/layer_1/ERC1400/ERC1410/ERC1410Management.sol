@@ -74,10 +74,10 @@ abstract contract ERC1410Management is IERC1410Management, Modifiers {
         override
         notZeroAddress(_operatorTransferData.to)
         onlyDefaultPartitionWithSinglePartition(_operatorTransferData.partition)
+        onlyUnProtectedPartitionsOrWildCardRole
         returns (bytes32)
     {
         ERC1410StorageWrapper.requireOperator(_operatorTransferData.partition, _operatorTransferData.from);
-        _requireUnProtectedPartitionsOrWildCardRole();
         ERC1594StorageWrapper.requireCanTransferFromByPartition(
             _operatorTransferData.from,
             _operatorTransferData.to,
@@ -93,9 +93,8 @@ abstract contract ERC1410Management is IERC1410Management, Modifiers {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    ) external override onlyDefaultPartitionWithSinglePartition(_partition) {
+    ) external override onlyDefaultPartitionWithSinglePartition(_partition) onlyUnProtectedPartitionsOrWildCardRole {
         ERC1410StorageWrapper.requireOperator(_partition, _tokenHolder);
-        _requireUnProtectedPartitionsOrWildCardRole();
         ERC1594StorageWrapper.requireCanRedeemFromByPartition(_tokenHolder, _partition, _value);
         TokenCoreOps.redeemByPartition(_partition, _tokenHolder, msg.sender, _value, _data, _operatorData);
     }
@@ -127,14 +126,5 @@ abstract contract ERC1410Management is IERC1410Management, Modifiers {
         ProtectedPartitionsStorageWrapper.requireProtectedPartitions();
         ERC1594StorageWrapper.requireCanRedeemFromByPartition(_from, _partition, _amount);
         TokenCoreOps.protectedRedeemFromByPartition(_partition, _from, _amount, _protectionData);
-    }
-
-    function _requireUnProtectedPartitionsOrWildCardRole() internal view {
-        if (
-            ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
-            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, msg.sender)
-        ) {
-            revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(msg.sender, _WILD_CARD_ROLE);
-        }
     }
 }

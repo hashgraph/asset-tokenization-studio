@@ -29,9 +29,9 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider, Modifier
         onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
         onlyUnrecoveredAddress(msg.sender)
         onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
+        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 clearingId_)
     {
-        _requireUnProtectedPartitionsOrWildCardRole();
         (success_, clearingId_) = ClearingOps.clearingRedeemCreation(
             _clearingOperation,
             _amount,
@@ -54,9 +54,9 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider, Modifier
         onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
         notZeroAddress(_clearingOperationFrom.from)
         onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
+        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 clearingId_)
     {
-        _requireUnProtectedPartitionsOrWildCardRole();
         (success_, clearingId_) = ClearingOps.clearingRedeemCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
@@ -86,9 +86,9 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider, Modifier
         onlyUnrecoveredAddress(_clearingOperationFrom.from)
         notZeroAddress(_clearingOperationFrom.from)
         onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
+        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 clearingId_)
     {
-        _requireUnProtectedPartitionsOrWildCardRole();
         {
             ERC1410StorageWrapper.requireOperator(
                 _clearingOperationFrom.clearingOperation.partition,
@@ -144,14 +144,5 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider, Modifier
                 _clearingId,
                 _getBlockTimestamp()
             );
-    }
-
-    function _requireUnProtectedPartitionsOrWildCardRole() internal view {
-        if (
-            ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
-            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, msg.sender)
-        ) {
-            revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(msg.sender, _WILD_CARD_ROLE);
-        }
     }
 }
