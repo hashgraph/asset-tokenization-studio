@@ -401,4 +401,20 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
 
         return snapshotted ? value : _totalSupply();
     }
+
+    function _getSnapshotTakenBalance(
+        uint256 _date,
+        uint256 _snapshotId,
+        address _account
+    ) internal view override returns (uint256 balance_, uint8 decimals_, bool snapshotTaken_) {
+        if (_date < _blockTimestamp()) {
+            snapshotTaken_ = true;
+
+            balance_ = (_snapshotId != 0)
+                ? _getTotalBalanceOfAtSnapshot(_snapshotId, _account)
+                : _getTotalBalanceForAdjustedAt(_account, _date);
+
+            decimals_ = (_snapshotId != 0) ? _decimalsAtSnapshot(_snapshotId) : _decimalsAdjustedAt(_date);
+        }
+    }
 }

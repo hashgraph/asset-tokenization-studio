@@ -123,6 +123,9 @@ export * from "./domain/equity/createConfiguration";
 // Bond configuration
 export * from "./domain/bond/createConfiguration";
 
+// Loan configuration
+export * from "./domain/loan/createConfiguration";
+
 // Factory deployment
 export * from "./domain/factory/deploy";
 

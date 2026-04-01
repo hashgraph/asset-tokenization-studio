@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { ethers, type EventLog } from "ethers";
+import { ethers } from "ethers";
 import type { ResolverProxy } from "@contract-types";
 import { ResolverProxy__factory } from "@contract-types";
-import { GAS_LIMIT } from "@scripts/infrastructure";
+import { GAS_LIMIT, decodeEvent } from "@scripts/infrastructure";
 import {
   ATS_ROLES,
   BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
@@ -166,22 +166,15 @@ export async function deployBondSustainabilityPerformanceTargetRateFromFactory(
   });
   const receipt = await tx.wait();
 
-  // Find BondDeployed event to get diamond address
-  const event = receipt?.logs.find(
-    (log) => "eventName" in log && (log as EventLog).eventName === "BondSustainabilityPerformanceTargetRateDeployed",
-  ) as EventLog | undefined;
-  if (!event || !event.args) {
-    throw new Error(
-      `BondSustainabilityPerformanceTargetRateDeployed event not found in deployment transaction. Events: ${JSON.stringify(
-        receipt?.logs.filter((log) => "eventName" in log).map((e) => (e as EventLog).eventName),
-      )}`,
-    );
-  }
-
-  const diamondAddress = event.args.diamondProxyAddress || event.args[1];
+  // Find BondSustainabilityPerformanceTargetRateDeployed event to get diamond address
+  const { bondAddress: diamondAddress } = await decodeEvent(
+    factory,
+    "BondSustainabilityPerformanceTargetRateDeployed",
+    receipt,
+  );
 
   if (!diamondAddress || diamondAddress === ethers.ZeroAddress) {
-    throw new Error(`Invalid diamond address from event. Args: ${JSON.stringify(event.args)}`);
+    throw new Error(`Invalid diamond address from BondSustainabilityPerformanceTargetRateDeployed event`);
   }
 
   // Return diamond proxy as ResolverProxy contract

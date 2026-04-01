@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { ethers, type EventLog } from "ethers";
+import { ethers } from "ethers";
 import type { IFactory, ResolverProxy } from "@contract-types";
 import { ResolverProxy__factory } from "@contract-types";
-import { GAS_LIMIT } from "@scripts/infrastructure";
+import { GAS_LIMIT, decodeEvent } from "@scripts/infrastructure";
 import { ATS_ROLES, EQUITY_CONFIG_ID } from "../constants";
 import { EquityDetailsDataParams, FactoryRegulationDataParams, Rbac, SecurityDataParams } from "./types";
 
@@ -145,21 +145,10 @@ export async function deployEquityFromFactory(
   const receipt = await tx.wait();
 
   // Find EquityDeployed event to get diamond address
-  const event = receipt?.logs.find((log) => "eventName" in log && (log as EventLog).eventName === "EquityDeployed") as
-    | EventLog
-    | undefined;
-  if (!event || !event.args) {
-    throw new Error(
-      `EquityDeployed event not found in deployment transaction. Events: ${JSON.stringify(
-        receipt?.logs.filter((log) => "eventName" in log).map((e) => (e as EventLog).eventName),
-      )}`,
-    );
-  }
-
-  const diamondAddress = event.args.diamondProxyAddress || event.args[1];
+  const { equityAddress: diamondAddress } = await decodeEvent(factory, "EquityDeployed", receipt);
 
   if (!diamondAddress || diamondAddress === ethers.ZeroAddress) {
-    throw new Error(`Invalid diamond address from event. Args: ${JSON.stringify(event.args)}`);
+    throw new Error(`Invalid diamond address from EquityDeployed event`);
   }
 
   // Return diamond proxy as ResolverProxy contract

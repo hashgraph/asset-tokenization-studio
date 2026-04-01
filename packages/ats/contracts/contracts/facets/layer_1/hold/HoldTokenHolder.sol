@@ -77,6 +77,9 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Internals {
         onlyWithValidHoldId(_holdIdentifier)
         returns (bool success_, bytes32 partition_)
     {
+        {
+            _validateHoldForExecute(_holdIdentifier, _to);
+        }
         (success_, partition_) = _executeHoldByPartition(_holdIdentifier, _to, _amount);
 
         emit HoldByPartitionExecuted(
@@ -97,6 +100,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Internals {
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
         onlyWithValidHoldId(_holdIdentifier)
+        onlyActiveHoldWithValidEscrow(_holdIdentifier)
         returns (bool success_)
     {
         success_ = _releaseHoldByPartition(_holdIdentifier, _amount);
@@ -116,6 +120,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Internals {
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
         onlyWithValidHoldId(_holdIdentifier)
+        onlyExpiredHold(_holdIdentifier)
         returns (bool success_)
     {
         uint256 amount;

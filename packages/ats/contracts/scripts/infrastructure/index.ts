@@ -281,6 +281,9 @@ export { fetchHederaContractId, getMirrorNodeUrl, isHederaNetwork } from "./util
 
 export { getSelector } from "./utils/selector";
 
+export { decodeEvent } from "./utils/decodeEvent";
+export type { GetEventArguments } from "./utils/decodeEvent";
+
 export { dateToUnixTimestamp, generateTimestamp } from "./utils/time";
 
 export { withRetry, withRetryFn, DEFAULT_RETRYABLE_ERRORS } from "./utils/retry";
