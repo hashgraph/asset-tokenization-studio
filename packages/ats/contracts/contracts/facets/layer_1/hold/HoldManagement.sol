@@ -118,10 +118,9 @@ abstract contract HoldManagement is IHoldManagement, Modifiers {
         notZeroAddress(_hold.escrow)
         onlyValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyControllable
         returns (bool success_, uint256 holdId_)
     {
-        ERC1644StorageWrapper.requireControllable();
-
         (success_, holdId_) = HoldStorageWrapper.createHoldByPartition(
             _partition,
             _from,

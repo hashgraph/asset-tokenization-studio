@@ -48,8 +48,8 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, Modifiers {
         onlyValidInputAmountsArrayLength(_fromList, _amounts)
         onlyValidInputAmountsArrayLength(_toList, _amounts)
         onlyWithoutMultiPartition
+        onlyControllable
     {
-        ERC1644StorageWrapper.requireControllable();
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
@@ -85,8 +85,13 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, Modifiers {
     function batchBurn(
         address[] calldata _userAddresses,
         uint256[] calldata _amounts
-    ) external onlyUnpaused onlyValidInputAmountsArrayLength(_userAddresses, _amounts) onlyWithoutMultiPartition {
-        ERC1644StorageWrapper.requireControllable();
+    )
+        external
+        onlyUnpaused
+        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
+        onlyWithoutMultiPartition
+        onlyControllable
+    {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;

@@ -14,8 +14,10 @@ import { TokenCoreOps } from "../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
 abstract contract ERC3643Operations is IERC3643Operations, TimestampProvider, Modifiers {
-    function burn(address _userAddress, uint256 _amount) external onlyUnpaused onlyWithoutMultiPartition {
-        ERC1644StorageWrapper.requireControllable();
+    function burn(
+        address _userAddress,
+        uint256 _amount
+    ) external onlyUnpaused onlyWithoutMultiPartition onlyControllable {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
@@ -43,8 +45,7 @@ abstract contract ERC3643Operations is IERC3643Operations, TimestampProvider, Mo
         address _from,
         address _to,
         uint256 _amount
-    ) external onlyUnpaused onlyWithoutMultiPartition returns (bool) {
-        ERC1644StorageWrapper.requireControllable();
+    ) external onlyUnpaused onlyWithoutMultiPartition onlyControllable returns (bool) {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;

@@ -30,8 +30,14 @@ abstract contract ERC1410Management is IERC1410Management, Modifiers {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    ) external override onlyUnpaused onlyDefaultPartitionWithSinglePartition(_partition) returns (bytes32) {
-        ERC1644StorageWrapper.requireControllable();
+    )
+        external
+        override
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyControllable
+        returns (bytes32)
+    {
         bytes32[] memory roles = new bytes32[](2);
         roles[0] = _CONTROLLER_ROLE;
         roles[1] = _AGENT_ROLE;
@@ -53,8 +59,7 @@ abstract contract ERC1410Management is IERC1410Management, Modifiers {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    ) external override onlyUnpaused onlyDefaultPartitionWithSinglePartition(_partition) {
-        ERC1644StorageWrapper.requireControllable();
+    ) external override onlyUnpaused onlyDefaultPartitionWithSinglePartition(_partition) onlyControllable {
         bytes32[] memory roles = new bytes32[](2);
         roles[0] = _CONTROLLER_ROLE;
         roles[1] = _AGENT_ROLE;

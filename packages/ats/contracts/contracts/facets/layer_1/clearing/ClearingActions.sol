@@ -37,9 +37,9 @@ abstract contract ClearingActions is IClearingActions, Modifiers {
         onlyRole(_CLEARING_VALIDATOR_ROLE)
         onlyClearingActivated
         onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
+        onlyWithValidClearingId(_clearingOperationIdentifier)
         returns (bool success_, bytes32 partition_)
     {
-        ClearingStorageWrapper.requireValidClearingId(_clearingOperationIdentifier);
         ClearingStorageWrapper.requireExpirationTimestamp(_clearingOperationIdentifier, false);
 
         // Check identity verification for tokenHolder
@@ -69,9 +69,9 @@ abstract contract ClearingActions is IClearingActions, Modifiers {
         onlyRole(_CLEARING_VALIDATOR_ROLE)
         onlyClearingActivated
         onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
+        onlyWithValidClearingId(_clearingOperationIdentifier)
         returns (bool success_)
     {
-        ClearingStorageWrapper.requireValidClearingId(_clearingOperationIdentifier);
         ClearingStorageWrapper.requireExpirationTimestamp(_clearingOperationIdentifier, false);
         success_ = ClearingOps.cancelClearingOperationByPartition(_clearingOperationIdentifier);
         emit ClearingOperationCanceled(
@@ -91,10 +91,10 @@ abstract contract ClearingActions is IClearingActions, Modifiers {
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
         onlyWithValidClearingId(_clearingOperationIdentifier)
+        onlyClearingActivated
         returns (bool success_)
     {
         ERC1594StorageWrapper.requireIdentified(_clearingOperationIdentifier.tokenHolder, address(0));
-        ClearingStorageWrapper.requireClearingActivated();
         ClearingStorageWrapper.requireExpirationTimestamp(_clearingOperationIdentifier, true);
         success_ = ClearingOps.reclaimClearingOperationByPartition(_clearingOperationIdentifier);
         emit ClearingOperationReclaimed(
