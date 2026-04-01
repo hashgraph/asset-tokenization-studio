@@ -113,7 +113,6 @@ abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
         bool[] calldata _freeze
     ) external onlyUnpaused onlyValidInputBoolArrayLength(_userAddresses, _freeze) {
         _requireFreezeRoles();
-        require(_userAddresses.length == _freeze.length, "Freeze: arrays length mismatch");
         for (uint256 i = 0; i < _userAddresses.length; ++i) {
             ExternalListManagementStorageWrapper.checkValidAddress(_userAddresses[i]);
             ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
@@ -136,8 +135,13 @@ abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
     function batchFreezePartialTokens(
         address[] calldata _userAddresses,
         uint256[] calldata _amounts
-    ) external onlyUnpaused onlyValidInputAmountsArrayLength(_userAddresses, _amounts) onlyWithoutMultiPartition {
-        require(_userAddresses.length == _amounts.length, "Freeze: arrays length mismatch");
+    )
+        external
+        onlyUnpaused
+        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
+        onlyWithoutMultiPartition
+        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
+    {
         for (uint256 i = 0; i < _userAddresses.length; ++i) {
             ERC1410StorageWrapper.requireValidAddress(_userAddresses[i]);
             ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
@@ -160,8 +164,13 @@ abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
     function batchUnfreezePartialTokens(
         address[] calldata _userAddresses,
         uint256[] calldata _amounts
-    ) external onlyUnpaused onlyValidInputAmountsArrayLength(_userAddresses, _amounts) onlyWithoutMultiPartition {
-        require(_userAddresses.length == _amounts.length, "Freeze: arrays length mismatch");
+    )
+        external
+        onlyUnpaused
+        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
+        onlyWithoutMultiPartition
+        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
+    {
         for (uint256 i = 0; i < _userAddresses.length; ++i) {
             ERC1410StorageWrapper.requireValidAddress(_userAddresses[i]);
             ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);

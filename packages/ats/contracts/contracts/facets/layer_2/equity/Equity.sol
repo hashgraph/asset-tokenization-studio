@@ -94,7 +94,6 @@ abstract contract Equity is IEquity, Modifiers {
         onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1)
         returns (DividendFor memory dividendFor_)
     {
-        CorporateActionsStorageWrapper.requireMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1);
         return EquityStorageWrapper.getDividendsFor(_dividendID, _account);
     }
 

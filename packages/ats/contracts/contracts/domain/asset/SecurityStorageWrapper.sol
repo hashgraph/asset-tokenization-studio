@@ -24,17 +24,15 @@ library SecurityStorageWrapper {
         data.additionalSecurityData = _additionalSecurityData;
     }
 
-    // --- View functions ---
+    // --- Pure functions ---
 
     function getSecurityRegulationData()
         internal
-        view
+        pure
         returns (ISecurity.SecurityRegulationData memory securityRegulationData_)
     {
         securityRegulationData_ = securityStorage();
     }
-
-    // --- Pure functions ---
 
     function securityStorage() internal pure returns (ISecurity.SecurityRegulationData storage securityStorage_) {
         bytes32 position = _SECURITY_STORAGE_POSITION;

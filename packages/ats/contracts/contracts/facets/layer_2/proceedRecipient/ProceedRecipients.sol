@@ -7,6 +7,7 @@ import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProceedRecipientsStorageWrapper } from "../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";
+import { AddressValidation } from "../../../infrastructure/utils/AddressValidation.sol";
 
 abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
