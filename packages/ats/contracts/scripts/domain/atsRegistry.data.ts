@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-01T09:50:08.792Z
+ * Generated: 2026-04-06T09:06:09.935Z
  * Facets: 205
  * Infrastructure: 2
  *
@@ -10947,7 +10947,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 203 as const;
+export const TOTAL_FACETS = 205 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -11254,12 +11254,6 @@ export const TOTAL_INFRASTRUCTURE_CONTRACTS = 2 as const;
 export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> = {
   AccessControlStorageWrapper: {
     name: "AccessControlStorageWrapper",
-    methods: [],
-  },
-
-  AmortizationStorageWrapper: {
-    name: "AmortizationStorageWrapper",
-    inheritance: ["IAmortizationStorageWrapper", "SecurityStorageWrapper"],
     methods: [],
   },
 
@@ -12122,7 +12116,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 64 as const;
+export const TOTAL_STORAGE_WRAPPERS = 68 as const;
 
 /**
  * All role identifiers extracted from contracts.
@@ -12166,4 +12160,4 @@ export const ROLES = {
 /**
  * Total number of unique roles in the registry.
  */
-export const TOTAL_ROLES = 31 as const;
+export const TOTAL_ROLES = 33 as const;
