@@ -5,10 +5,9 @@ import { TimeTravelProvider } from "./TimeTravelProvider.sol";
 import { TimeTravelStorageWrapper } from "./TimeTravelStorageWrapper.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { ITimeTravel } from "../ITimeTravel.sol";
-import { ITimeTravelStorageWrapper } from "../ITimeTravelStorageWrapper.sol";
 import { _TIME_TRAVEL_RESOLVER_KEY } from "../constants/resolverKeys.sol";
 
-contract TimeTravelFacet is IStaticFunctionSelectors, ITimeTravel, ITimeTravelStorageWrapper, TimeTravelProvider {
+contract TimeTravelFacet is IStaticFunctionSelectors, ITimeTravel, TimeTravelProvider {
     function changeSystemTimestamp(uint256 newTimestamp) external override {
         if (newTimestamp == 0) {
             revert InvalidTimestamp(newTimestamp);

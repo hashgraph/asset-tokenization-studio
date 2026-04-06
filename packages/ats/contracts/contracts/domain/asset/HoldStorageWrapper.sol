@@ -22,7 +22,6 @@ import { IERC1410StorageWrapper } from "./ERC1400/ERC1410/IERC1410StorageWrapper
 import { ThirdPartyType } from "./types/ThirdPartyType.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { _checkNounceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
-import { IControlListStorageWrapper } from "../core/controlList/IControlListStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
@@ -203,7 +202,7 @@ library HoldStorageWrapper {
 
         if (_operation == OperationType.Execute) {
             if (!ControlListStorageWrapper.isAbleToAccess(_holdIdentifier.tokenHolder)) {
-                revert IControlListStorageWrapper.AccountIsBlocked(_holdIdentifier.tokenHolder);
+                revert ControlListStorageWrapper.AccountIsBlocked(_holdIdentifier.tokenHolder);
             }
 
             if (holdData.hold.to != address(0) && _to != holdData.hold.to) {

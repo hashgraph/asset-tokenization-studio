@@ -43,6 +43,10 @@ interface TRexIBusinessLogicResolver {
     /// @param newLatestVersion new latest version = previous latest version + 1.
     event BusinessLogicsRegistered(BusinessLogicRegistryData[] businessLogics, uint256 newLatestVersion);
 
+    error BusinessLogicVersionDoesNotExist(uint256 version);
+    error BusinessLogicKeyDuplicated(bytes32 businessLogicKey);
+    error ZeroKeyNotValidForBusinessLogic();
+
     // solhint-disable-next-line func-name-mixedcase
     function initialize_BusinessLogicResolver() external returns (bool success_);
 

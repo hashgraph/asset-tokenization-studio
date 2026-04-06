@@ -6,7 +6,6 @@ import { _AGENT_ROLE } from "../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { IERC3643Management } from "../../facets/layer_1/ERC3643/IERC3643Management.sol";
 import { IAccessControl } from "../../facets/layer_1/accessControl/IAccessControl.sol";
-import { IERC3643StorageWrapper } from "../asset/ERC3643/IERC3643StorageWrapper.sol";
 import { IIdentityRegistry } from "../../facets/layer_1/ERC3643/IIdentityRegistry.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
@@ -30,6 +29,21 @@ library ERC3643StorageWrapper {
     using LowLevelCall for address;
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.Bytes32Set;
+
+    /**
+     *  @notice This event is emitted when the Compliance has been set for the token
+     */
+    event ComplianceAdded(address indexed compliance);
+
+    /*
+     *   @notice Thrown when unfreezing more than what is frozen
+     */
+    error InsufficientFrozenBalance(
+        address user,
+        uint256 requestedUnfreeze,
+        uint256 availableFrozen,
+        bytes32 partition
+    );
 
     // --- Initialization ---
 
@@ -69,7 +83,7 @@ library ERC3643StorageWrapper {
 
     function setCompliance(address _compliance) internal {
         erc3643Storage().compliance = _compliance;
-        emit IERC3643StorageWrapper.ComplianceAdded(_compliance);
+        emit ComplianceAdded(_compliance);
     }
 
     function setIdentityRegistry(address _identityRegistry) internal {
@@ -361,7 +375,7 @@ library ERC3643StorageWrapper {
     ) private view {
         uint256 frozenAmount = getFrozenAmountForByPartitionAdjustedAt(_partition, _userAddress, _timestamp);
         if (frozenAmount < _amount) {
-            revert IERC3643StorageWrapper.InsufficientFrozenBalance(_userAddress, _amount, frozenAmount, _partition);
+            revert InsufficientFrozenBalance(_userAddress, _amount, frozenAmount, _partition);
         }
     }
 }

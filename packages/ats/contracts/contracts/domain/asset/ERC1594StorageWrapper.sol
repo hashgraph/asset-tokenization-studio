@@ -19,7 +19,6 @@ import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { ClearingStorageWrapper } from "./ClearingStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
-import { IControlListStorageWrapper } from "../core/controlList/IControlListStorageWrapper.sol";
 import { ControlListStorageWrapper } from "../core/ControlListStorageWrapper.sol";
 import { KycStorageWrapper } from "../core/KycStorageWrapper.sol";
 
@@ -135,7 +134,7 @@ library ERC1594StorageWrapper {
             return (
                 false,
                 Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-                IControlListStorageWrapper.AccountIsBlocked.selector,
+                ControlListStorageWrapper.AccountIsBlocked.selector,
                 EMPTY_BYTES
             );
         }
@@ -278,7 +277,7 @@ library ERC1594StorageWrapper {
                 return (
                     false,
                     Eip1066.DISALLOWED_OR_STOP,
-                    IControlListStorageWrapper.AccountIsBlocked.selector,
+                    ControlListStorageWrapper.AccountIsBlocked.selector,
                     abi.encode(EvmAccessors.getMsgSender())
                 );
             }
@@ -325,7 +324,7 @@ library ERC1594StorageWrapper {
                 return (
                     false,
                     Eip1066.DISALLOWED_OR_STOP,
-                    IControlListStorageWrapper.AccountIsBlocked.selector,
+                    ControlListStorageWrapper.AccountIsBlocked.selector,
                     abi.encode(from)
                 );
             }
@@ -339,7 +338,7 @@ library ERC1594StorageWrapper {
                 return (
                     false,
                     Eip1066.DISALLOWED_OR_STOP,
-                    IControlListStorageWrapper.AccountIsBlocked.selector,
+                    ControlListStorageWrapper.AccountIsBlocked.selector,
                     abi.encode(to)
                 );
             }

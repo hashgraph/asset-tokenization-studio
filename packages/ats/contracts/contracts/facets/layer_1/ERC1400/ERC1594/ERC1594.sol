@@ -11,7 +11,6 @@ import {
 import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
 import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
-import { IPauseStorageWrapper } from "../../../../domain/core/pause/IPauseStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { CapStorageWrapper } from "../../../../domain/core/CapStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
@@ -115,7 +114,7 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
         bytes memory _data
     ) external view override onlyWithoutMultiPartition returns (bool, bytes1, bytes32) {
         if (PauseStorageWrapper.isPaused()) {
-            return (false, Eip1066.PAUSED, IPauseStorageWrapper.TokenIsPaused.selector);
+            return (false, Eip1066.PAUSED, PauseStorageWrapper.TokenIsPaused.selector);
         }
         (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToTransferFromByPartition(
             msg.sender,
@@ -135,7 +134,7 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
         bytes memory _data
     ) external view onlyWithoutMultiPartition returns (bool, bytes1, bytes32) {
         if (PauseStorageWrapper.isPaused()) {
-            return (false, Eip1066.PAUSED, IPauseStorageWrapper.TokenIsPaused.selector);
+            return (false, Eip1066.PAUSED, PauseStorageWrapper.TokenIsPaused.selector);
         }
         (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToTransferFromByPartition(
             _from,

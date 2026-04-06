@@ -4,10 +4,9 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IBusinessLogicResolver } from "./IBusinessLogicResolver.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSetBytes4 } from "../../infrastructure/utils/EnumerableSetBytes4.sol";
-import { IBusinessLogicResolverWrapper } from "./IBusinessLogicResolverWrapper.sol";
 import { _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 
-abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper {
+abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
     struct BusinessLogicResolverDataStorage {
         uint256 latestVersion;
         // list of facetIds

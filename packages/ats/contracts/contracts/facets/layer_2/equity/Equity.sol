@@ -13,7 +13,6 @@ import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateAc
 import { AdjustBalancesStorageWrapper } from "../../../domain/asset/AdjustBalancesStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { EquityStorageWrapper, EquityDataStorage } from "../../../domain/asset/EquityStorageWrapper.sol";
-import { IEquityStorageWrapper } from "../../../domain/asset/equity/IEquityStorageWrapper.sol";
 
 abstract contract Equity is IEquity, Modifiers {
     function setDividends(
@@ -23,7 +22,7 @@ abstract contract Equity is IEquity, Modifiers {
         ScheduledTasksStorageWrapper.requireValidTimestamp(_newDividend.recordDate);
         bytes32 corporateActionID;
         (corporateActionID, dividendID_) = EquityStorageWrapper.setDividends(_newDividend);
-        emit IEquityStorageWrapper.DividendSet(
+        emit IEquity.DividendSet(
             corporateActionID,
             dividendID_,
             msg.sender,
@@ -40,13 +39,7 @@ abstract contract Equity is IEquity, Modifiers {
         ScheduledTasksStorageWrapper.requireValidTimestamp(_newVoting.recordDate);
         bytes32 corporateActionID;
         (corporateActionID, voteID_) = EquityStorageWrapper.setVoting(_newVoting);
-        emit IEquityStorageWrapper.VotingSet(
-            corporateActionID,
-            voteID_,
-            msg.sender,
-            _newVoting.recordDate,
-            _newVoting.data
-        );
+        emit IEquity.VotingSet(corporateActionID, voteID_, msg.sender, _newVoting.recordDate, _newVoting.data);
     }
 
     function setScheduledBalanceAdjustment(
@@ -58,7 +51,7 @@ abstract contract Equity is IEquity, Modifiers {
         (corporateActionID, balanceAdjustmentID_) = EquityStorageWrapper.setScheduledBalanceAdjustment(
             _newBalanceAdjustment
         );
-        emit IEquityStorageWrapper.ScheduledBalanceAdjustmentSet(
+        emit IEquity.ScheduledBalanceAdjustmentSet(
             corporateActionID,
             balanceAdjustmentID_,
             msg.sender,

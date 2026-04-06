@@ -9,7 +9,6 @@ import {
     SNAPSHOT_TASK_TYPE
 } from "../../constants/values.sol";
 import { IBondRead } from "../../facets/layer_2/bond/IBondRead.sol";
-import { IBondStorageWrapper } from "./bond/IBondStorageWrapper.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
@@ -34,6 +33,25 @@ struct BondDataStorage {
 }
 
 library BondStorageWrapper {
+    /**
+     * @notice Emitted when a coupon is created or updated for a bond or corporate action.
+     * @param corporateActionId Unique identifier grouping related corporate actions or coupons.
+     * @param couponId Identifier of the created or updated coupon.
+     * @param operator Address that performed the operation.
+     * @param coupon Coupon struct containing recordDate, executionDate, rate, and period.
+     */
+    event CouponSet(bytes32 corporateActionId, uint256 couponId, address indexed operator, IBondRead.Coupon coupon);
+
+    /**
+     * @notice Coupon creation failed due to an internal failure.
+     */
+    error CouponCreationFailed();
+
+    /**
+     * @notice Provided maturity date is invalid (e.g. in the past or before issuance).
+     */
+    error BondMaturityDateWrong();
+
     // --- State Modifying Functions ---
 
     // solhint-disable-next-line func-name-mixedcase
@@ -72,12 +90,12 @@ library BondStorageWrapper {
 
         initCoupon(corporateActionId_, newCoupon);
 
-        emit IBondStorageWrapper.CouponSet(corporateActionId_, couponID_, EvmAccessors.getMsgSender(), newCoupon);
+        emit BondStorageWrapper.CouponSet(corporateActionId_, couponID_, EvmAccessors.getMsgSender(), newCoupon);
     }
 
     function initCoupon(bytes32 actionId, IBondRead.Coupon memory newCoupon) internal {
         if (actionId == bytes32(0)) {
-            revert IBondStorageWrapper.CouponCreationFailed();
+            revert BondStorageWrapper.CouponCreationFailed();
         }
 
         ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newCoupon.recordDate, SNAPSHOT_TASK_TYPE);
@@ -338,7 +356,7 @@ library BondStorageWrapper {
     // --- Guard functions ---
 
     function requireValidMaturityDate(uint256 maturityDate) internal view {
-        if (maturityDate <= getMaturityDate()) revert IBondStorageWrapper.BondMaturityDateWrong();
+        if (maturityDate <= getMaturityDate()) revert BondStorageWrapper.BondMaturityDateWrong();
     }
 
     // --- Pure Functions ---

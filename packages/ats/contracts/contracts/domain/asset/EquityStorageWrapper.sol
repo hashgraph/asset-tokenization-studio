@@ -11,7 +11,6 @@ import {
     BALANCE_ADJUSTMENT_TASK_TYPE
 } from "../../constants/values.sol";
 import { IEquity } from "../../facets/layer_2/equity/IEquity.sol";
-import { IEquityStorageWrapper } from "./equity/IEquityStorageWrapper.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
@@ -36,6 +35,10 @@ struct EquityDataStorage {
 }
 
 library EquityStorageWrapper {
+    error DividendCreationFailed();
+    error VotingRightsCreationFailed();
+    error BalanceAdjustmentCreationFailed();
+
     function storeEquityDetails(IEquity.EquityDetailsData memory equityDetailsData) internal {
         equityStorage().votingRight = equityDetailsData.votingRight;
         equityStorage().informationRight = equityDetailsData.informationRight;
@@ -65,7 +68,7 @@ library EquityStorageWrapper {
 
     function initDividend(bytes32 actionId, bytes memory data) internal {
         if (actionId == bytes32(0)) {
-            revert IEquityStorageWrapper.DividendCreationFailed();
+            revert DividendCreationFailed();
         }
 
         IEquity.Dividend memory newDividend = abi.decode(data, (IEquity.Dividend));
@@ -89,7 +92,7 @@ library EquityStorageWrapper {
 
     function initVotingRights(bytes32 actionId, bytes memory data) internal {
         if (actionId == bytes32(0)) {
-            revert IEquityStorageWrapper.VotingRightsCreationFailed();
+            revert VotingRightsCreationFailed();
         }
 
         IEquity.Voting memory newVoting = abi.decode(data, (IEquity.Voting));
@@ -113,7 +116,7 @@ library EquityStorageWrapper {
 
     function initBalanceAdjustment(bytes32 actionId, bytes memory data) internal {
         if (actionId == bytes32(0)) {
-            revert IEquityStorageWrapper.BalanceAdjustmentCreationFailed();
+            revert BalanceAdjustmentCreationFailed();
         }
 
         IEquity.ScheduledBalanceAdjustment memory newBalanceAdjustment = abi.decode(
