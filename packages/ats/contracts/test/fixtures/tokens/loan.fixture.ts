@@ -182,12 +182,12 @@ export async function deployLoanTokenFixture(params: DeepPartial<DeployLoanToken
   await erc3643ManagementFacet.initialize_ERC3643(ZeroAddress, ZeroAddress);
   await nominalValueFacet.initialize_NominalValue(p.nominalValue, p.nominalValueDecimals);
   const now = Math.floor(Date.now() / 1000);
-  const loanInit = p.loanInit ?? {
-    startingDate: now + 3600,
-    maturityDate: now + 3600 + 100_000,
-    signingDate: now + 1800,
-    originatorAccount: deployer.address,
-    servicerAccount: deployer.address,
+  const loanInit = {
+    startingDate: p.loanInit?.startingDate ?? now + 3600,
+    maturityDate: p.loanInit?.maturityDate ?? now + 3600 + 100_000,
+    signingDate: p.loanInit?.signingDate ?? now + 1800,
+    originatorAccount: p.loanInit?.originatorAccount ?? deployer.address,
+    servicerAccount: p.loanInit?.servicerAccount ?? deployer.address,
   };
   const loanDetailsData = {
     loanBasicData: {

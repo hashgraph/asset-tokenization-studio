@@ -20,6 +20,8 @@ export interface DeployLoanFromFactoryParams {
   factory: IFactory;
   securityData: SecurityDataParams;
   loanDetails: LoanDetailsDataParams;
+  nominalValue: ethers.BigNumberish;
+  nominalValueDecimals: number;
 }
 
 // ============================================================================
@@ -88,6 +90,8 @@ export async function deployLoanFromFactory(
   const loanData = {
     security: securityData,
     loanDetails: loanDetailsParams,
+    nominalValue: loanDataParams.nominalValue,
+    nominalValueDecimals: loanDataParams.nominalValueDecimals,
   };
 
   // Build regulation data
