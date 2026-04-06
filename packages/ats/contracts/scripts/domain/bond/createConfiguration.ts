@@ -90,7 +90,6 @@ const BOND_FACETS = [
   "ScheduledSnapshotsFacet",
   "SsiManagementFacet",
   "TransferAndLockFacet",
-
   "NominalValueFacet",
   "CouponFacet",
 

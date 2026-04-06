@@ -6,6 +6,8 @@ sidebar_position: 3
 
 # User Guides
 
+> These docs are live at [https://docs.tokenization-studio.hedera.com/](https://docs.tokenization-studio.hedera.com/)
+
 Step-by-step guides for using the Asset Tokenization Studio web application.
 
 ![ATS Web Application](../../images/ats-web-dashboard.png)
@@ -140,6 +142,7 @@ Before following these guides, make sure you have:
     </ul>
     <a href="./updating-configuration" className="card-link">Read Guide</a>
   </div>
+
 </div>
 
 ## Need Help?

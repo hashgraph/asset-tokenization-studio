@@ -9,6 +9,7 @@ import { ERC3643BatchFacetBase } from "../ERC3643BatchFacetBase.sol";
 import {
     CommonSustainabilityPerformanceTargetInterestRate
 } from "../../../../domain/asset/extension/coupon/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
+
 /* solhint-enable max-line-length */
 
 contract ERC3643BatchSustainabilityPerformanceTargetRateFacet is

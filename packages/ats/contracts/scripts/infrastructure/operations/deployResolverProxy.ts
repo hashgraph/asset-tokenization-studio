@@ -21,6 +21,8 @@ import {
   success,
   validateAddress,
   GAS_LIMIT,
+  DEFAULT_TRANSACTION_TIMEOUT,
+  hederaGasOverrides,
 } from "@scripts/infrastructure";
 
 /**
@@ -160,7 +162,7 @@ export async function deployResolverProxy(
     version = LATEST_VERSION,
     rbac = [],
     network: _network,
-    overrides = { gasLimit: GAS_LIMIT.default },
+    overrides = { gasLimit: GAS_LIMIT.default, ...hederaGasOverrides() },
     confirmations = 1,
   } = options;
 
@@ -187,7 +189,13 @@ export async function deployResolverProxy(
       rbac,
       overrides as any,
     );
-    await resolverProxy.waitForDeployment();
+    const deployTimeout = DEFAULT_TRANSACTION_TIMEOUT * 3;
+    await Promise.race([
+      resolverProxy.waitForDeployment(),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error(`waitForDeployment timed out after ${deployTimeout}ms`)), deployTimeout),
+      ),
+    ]);
 
     const deployTx = resolverProxy.deploymentTransaction();
     if (deployTx) {

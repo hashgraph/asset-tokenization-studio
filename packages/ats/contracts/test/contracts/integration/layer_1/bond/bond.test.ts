@@ -364,6 +364,74 @@ describe("Bond Tests", () => {
           .to.emit(asset, "RedeemedByPartition")
           .withArgs(DEFAULT_PARTITION, signer_A.address, signer_A.address, amount, "0x", "0x");
       });
+      describe("Cancel Coupon", () => {
+        it("GIVEN an account with corporateActions role WHEN cancelling a coupon THEN transaction succeeds", async () => {
+          await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+
+          await bondFacet.connect(signer_C).setCoupon(couponData);
+
+          await expect(bondFacet.connect(signer_C).cancelCoupon(1))
+            .to.emit(bondFacet, "CouponCancelled")
+            .withArgs(1, signer_C.address);
+          const isDisabled = (await bondReadFacet.getCoupon(1)).isDisabled_;
+          expect(isDisabled).to.equal(true);
+          const couponFor = await bondReadFacet.getCouponFor(1, signer_A.address);
+          expect(couponFor.isDisabled).to.equal(true);
+        });
+
+        it("GIVEN a coupon after execution date WHEN cancelCoupon THEN transaction fails with CorporateActionAlreadyExecuted", async () => {
+          await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+
+          await bondFacet.connect(signer_C).setCoupon(couponData);
+
+          // Time travel past execution date
+          await timeTravelFacet.changeSystemTimestamp(couponExecutionDateInSeconds + 1);
+
+          // Attempt to cancel after execution date
+          await expect(bondFacet.connect(signer_C).cancelCoupon(1)).to.be.revertedWithCustomError(
+            bondFacet,
+            "CouponAlreadyExecuted",
+          );
+        });
+
+        it("GIVEN a coupon after record date but before execution date WHEN cancelCoupon THEN transaction succeeds", async () => {
+          await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+
+          await bondFacet.connect(signer_C).setCoupon(couponData);
+
+          // Time travel past record date but before execution date
+          await timeTravelFacet.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+
+          // Cancel should succeed as execution date hasn't passed
+          await expect(bondFacet.connect(signer_C).cancelCoupon(1))
+            .to.emit(bondFacet, "CouponCancelled")
+            .withArgs(1, signer_C.address);
+        });
+
+        it("GIVEN an account without corporateActions role WHEN cancelCoupon THEN transaction fails with AccountHasNoRole", async () => {
+          await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+
+          await bondFacet.connect(signer_C).setCoupon(couponData);
+
+          await expect(bondFacet.connect(signer_D).cancelCoupon(1)).to.be.rejectedWith("AccountHasNoRole");
+        });
+
+        it("GIVEN a paused Token WHEN cancelCoupon THEN transaction fails with TokenIsPaused", async () => {
+          await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+
+          await bondFacet.connect(signer_C).setCoupon(couponData);
+
+          await pauseFacet.connect(signer_B).pause();
+
+          await expect(bondFacet.connect(signer_C).cancelCoupon(1)).to.be.rejectedWith("TokenIsPaused");
+        });
+
+        it("GIVEN no existing coupon WHEN cancelCoupon with invalid ID THEN transaction fails", async () => {
+          await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+
+          await expect(bondFacet.connect(signer_C).cancelCoupon(999)).to.be.reverted;
+        });
+      });
     });
     describe("Uncovered Branch Tests", () => {
       it("GIVEN a token holder with zero balance WHEN fullRedeemAtMaturity is called THEN succeeds without redeeming", async () => {

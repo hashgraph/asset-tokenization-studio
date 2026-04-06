@@ -70,7 +70,7 @@ npm run ats:build
 
 The SDK tests are located in the _**tests**_ folder at the root of the sdk module.
 
-Before running the tests you will need to create an ".env" file following the ".env.sample" template.
+Before running the tests you will need to create an ".env" file following the ".env.example" template.
 
 Run SDK tests:
 
@@ -1371,9 +1371,9 @@ Use the **Network.init** method, with the following input data:
 - **Factory**:
   - _Testnet_: '0.0.6797955'
   - _Mainnet_: nothing deployed yet.
-- **Business Logic Keys Common**: Check the .env.sample from "web".
-- **Business Logic Keys Equity**: Check the .env.sample from "web".
-- **Business Logic Keys Bond**: Check the .env.sample from "web".
+- **Business Logic Keys Common**: Check the .env.example from "web".
+- **Business Logic Keys Equity**: Check the .env.example from "web".
+- **Business Logic Keys Bond**: Check the .env.example from "web".
 
 ## Connect an account to the SDK
 

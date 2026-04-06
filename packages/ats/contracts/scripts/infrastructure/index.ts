@@ -232,6 +232,7 @@ export {
 
 export {
   waitForTransaction,
+  hederaGasOverrides,
   extractRevertReason,
   getGasPrice,
   estimateGasLimit,

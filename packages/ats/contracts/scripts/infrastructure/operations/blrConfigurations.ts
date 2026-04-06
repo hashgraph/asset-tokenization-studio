@@ -42,6 +42,7 @@ import {
   formatGasUsage,
   waitForTransaction,
   isInstantMiningNetwork,
+  hederaGasOverrides,
 } from "@scripts/infrastructure";
 
 // Types imported from centralized types module
@@ -270,6 +271,7 @@ export async function sendBatchConfiguration(
 
     const txResponse = await blrContract.createBatchConfiguration(configId, configurations, finalBatch, {
       gasLimit: gasLimit || GAS_LIMIT.businessLogicResolver.createConfiguration,
+      ...hederaGasOverrides(),
     });
 
     info(`Batch configuration transaction sent: ${txResponse.hash}`);
