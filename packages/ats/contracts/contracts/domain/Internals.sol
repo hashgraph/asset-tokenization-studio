@@ -218,8 +218,9 @@ abstract contract Internals is Modifiers {
     function _initialize_bond(IBondRead.BondDetailsData calldata _bondDetailsData) internal virtual;
     // solhint-disable-next-line func-name-mixedcase
     function _initialize_equity(IEquity.EquityDetailsData calldata _equityDetailsData) internal virtual;
-    function _initializeLoanDetails(ILoan.LoanDetailsData calldata _loanDetailsData) internal virtual;
-    function _storeLoanDetails(ILoan.LoanDetailsData memory _loanDetails) internal virtual;
+    // solhint-disable-next-line func-name-mixedcase
+    function _initialize_loan(ILoan.LoanDetailsData calldata _loanDetailsData) internal virtual;
+    function _setLoanDetails(ILoan.LoanDetailsData memory _loanDetails) internal virtual;
     function _setExternalListInitialized(bytes32 _position) internal virtual;
     function _issue(address _tokenHolder, uint256 _value, bytes memory _data) internal virtual;
     function _issueByPartition(IssueData memory _issueData) internal virtual;

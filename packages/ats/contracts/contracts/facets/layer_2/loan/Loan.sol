@@ -12,8 +12,14 @@ abstract contract Loan is ILoan, Internals {
         LoanDetailsData calldata _loanDetailsData,
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
-    ) external override onlyUninitialized(_isLoanInitialized()) {
-        _initializeLoanDetails(_loanDetailsData);
+    )
+        external
+        override
+        onlyUninitialized(_isLoanInitialized())
+        onlyValidTimestamp(_loanDetailsData.loanBasicData.startingDate)
+        validateDates(_loanDetailsData.loanBasicData.startingDate, _loanDetailsData.loanBasicData.maturityDate)
+    {
+        _initialize_loan(_loanDetailsData);
         _initializeSecurity(_regulationData, _additionalSecurityData);
     }
 
@@ -32,8 +38,7 @@ abstract contract Loan is ILoan, Internals {
         validateAddress(loanDetailsData_.loanBasicData.originatorAccount)
         validateAddress(loanDetailsData_.loanBasicData.servicerAccount)
     {
-        _storeLoanDetails(loanDetailsData_);
-        emit LoanDetailsSet(loanDetailsData_);
+        _setLoanDetails(loanDetailsData_);
     }
 
     function getLoanDetails() external view override returns (LoanDetailsData memory loanDetailsData_) {

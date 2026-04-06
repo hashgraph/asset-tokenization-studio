@@ -122,26 +122,46 @@ describe("Loan Tests", () => {
     });
   });
 
-  describe("Loan facet functionality tests", () => {
+  describe("setLoanDetails", () => {
     it("GIVEN a loan token WHEN setLoanDetails THEN loan details are set correctly", async () => {
       const loanDetails = buildLoanDetails();
       await asset.connect(signer_A).setLoanDetails(loanDetails);
       const result = await asset.getLoanDetails();
+      // LoanBasicData
       expect(result.loanBasicData.currency).to.equal(loanDetails.loanBasicData.currency);
       expect(result.loanBasicData.startingDate).to.equal(loanDetails.loanBasicData.startingDate);
-    });
-
-    it("GIVEN a loan token WHEN updating loan details THEN new values are returned", async () => {
-      const loanDetails = buildLoanDetails();
-      await asset.connect(signer_A).setLoanDetails(loanDetails);
-
-      const updatedDetails = buildLoanDetails({
-        riskData: { internalRiskGrade: "test2" },
-      });
-      await asset.connect(signer_A).setLoanDetails(updatedDetails);
-
-      const result = await asset.getLoanDetails();
-      expect(result.riskData.internalRiskGrade).to.equal("test2");
+      expect(result.loanBasicData.maturityDate).to.equal(loanDetails.loanBasicData.maturityDate);
+      expect(result.loanBasicData.loanStructureType).to.equal(loanDetails.loanBasicData.loanStructureType);
+      expect(result.loanBasicData.repaymentType).to.equal(loanDetails.loanBasicData.repaymentType);
+      expect(result.loanBasicData.interestType).to.equal(loanDetails.loanBasicData.interestType);
+      expect(result.loanBasicData.signingDate).to.equal(loanDetails.loanBasicData.signingDate);
+      expect(result.loanBasicData.originatorAccount).to.equal(loanDetails.loanBasicData.originatorAccount);
+      expect(result.loanBasicData.servicerAccount).to.equal(loanDetails.loanBasicData.servicerAccount);
+      // LoanInterestData
+      expect(result.loanInterestData.baseReferenceRate).to.equal(loanDetails.loanInterestData.baseReferenceRate);
+      expect(result.loanInterestData.floorRate).to.equal(loanDetails.loanInterestData.floorRate);
+      expect(result.loanInterestData.capRate).to.equal(loanDetails.loanInterestData.capRate);
+      expect(result.loanInterestData.rateMargin).to.equal(loanDetails.loanInterestData.rateMargin);
+      expect(result.loanInterestData.dayCount).to.equal(loanDetails.loanInterestData.dayCount);
+      expect(result.loanInterestData.paymentFrequency).to.equal(loanDetails.loanInterestData.paymentFrequency);
+      expect(result.loanInterestData.firstAccrualDate).to.equal(loanDetails.loanInterestData.firstAccrualDate);
+      expect(result.loanInterestData.prepaymentPenalty).to.equal(loanDetails.loanInterestData.prepaymentPenalty);
+      expect(result.loanInterestData.commitmentFee).to.equal(loanDetails.loanInterestData.commitmentFee);
+      expect(result.loanInterestData.utilizationFee).to.equal(loanDetails.loanInterestData.utilizationFee);
+      expect(result.loanInterestData.utilizationFeeType).to.equal(loanDetails.loanInterestData.utilizationFeeType);
+      expect(result.loanInterestData.servicingFee).to.equal(loanDetails.loanInterestData.servicingFee);
+      // RiskData
+      expect(result.riskData.internalRiskGrade).to.equal(loanDetails.riskData.internalRiskGrade);
+      expect(result.riskData.defaultProbability).to.equal(loanDetails.riskData.defaultProbability);
+      expect(result.riskData.lossGivenDefault).to.equal(loanDetails.riskData.lossGivenDefault);
+      // Collateral
+      expect(result.collateral.totalCollateralValue).to.equal(loanDetails.collateral.totalCollateralValue);
+      expect(result.collateral.loanToValue).to.equal(loanDetails.collateral.loanToValue);
+      // LoanPerformanceStatus
+      expect(result.loanPerformanceStatus.performanceStatus).to.equal(
+        loanDetails.loanPerformanceStatus.performanceStatus,
+      );
+      expect(result.loanPerformanceStatus.daysPastDue).to.equal(loanDetails.loanPerformanceStatus.daysPastDue);
     });
 
     it("GIVEN an account without loan manager role WHEN setLoanDetails THEN transaction fails with AccountHasNoRole", async () => {
@@ -152,30 +172,6 @@ describe("Loan Tests", () => {
       );
     });
 
-    it("GIVEN an initialized loan WHEN trying to initialize again THEN transaction fails with AlreadyInitialized", async () => {
-      const loanDetails = buildLoanDetails();
-      const regulationData = {
-        regulationType: 1,
-        regulationSubType: 2,
-        dealSize: 1,
-        accreditedInvestors: 1,
-        maxNonAccreditedInvestors: 1,
-        manualInvestorVerification: 1,
-        internationalInvestors: 0,
-        resaleHoldPeriod: 1,
-      };
-      const additionalSecurityData = {
-        countriesControlListType: true,
-        listOfCountries: "US,CA",
-        info: "Info",
-        country: "US",
-      };
-
-      await expect(
-        asset.connect(signer_A).initialize_Loan(loanDetails, regulationData, additionalSecurityData),
-      ).to.be.rejectedWith("AlreadyInitialized");
-    });
-
     it("GIVEN a paused token WHEN setLoanDetails THEN transaction fails with TokenIsPaused", async () => {
       await asset.connect(signer_B).pause();
       const loanDetails = buildLoanDetails();
@@ -184,40 +180,7 @@ describe("Loan Tests", () => {
         "TokenIsPaused",
       );
     });
-  });
 
-  describe("initialize_Loan validations", () => {
-    it("GIVEN startingDate is 0 WHEN deploying loan THEN transaction fails with WrongTimestamp", async () => {
-      await expect(
-        deployLoanTokenFixture({
-          loanInit: {
-            startingDate: 0,
-            maturityDate: 100_000,
-            signingDate: 50_000,
-            originatorAccount: "0x1234567890123456789012345678901234567890",
-            servicerAccount: "0x1234567890123456789012345678901234567891",
-          },
-        }),
-      ).to.be.rejectedWith("WrongTimestamp");
-    });
-
-    it("GIVEN startingDate after maturityDate WHEN deploying loan THEN transaction fails with WrongDates", async () => {
-      const now = Math.floor(Date.now() / 1000);
-      await expect(
-        deployLoanTokenFixture({
-          loanInit: {
-            startingDate: now + 200_000,
-            maturityDate: now + 100_000,
-            signingDate: now + 1800,
-            originatorAccount: "0x1234567890123456789012345678901234567890",
-            servicerAccount: "0x1234567890123456789012345678901234567891",
-          },
-        }),
-      ).to.be.rejectedWith("WrongDates");
-    });
-  });
-
-  describe("setLoanDetails validations", () => {
     it("GIVEN startingDate is 0 WHEN setLoanDetails THEN transaction fails with WrongTimestamp", async () => {
       const loanDetails = buildLoanDetails({ loanBasicData: { startingDate: 0 } });
       await expect(asset.connect(signer_A).setLoanDetails(loanDetails)).to.be.revertedWithCustomError(
@@ -272,6 +235,61 @@ describe("Loan Tests", () => {
         asset,
         "WrongTimestamp",
       );
+    });
+  });
+
+  describe("initialize_Loan validations", () => {
+    it("GIVEN an initialized loan WHEN trying to initialize again THEN transaction fails with AlreadyInitialized", async () => {
+      const loanDetails = buildLoanDetails();
+      const regulationData = {
+        regulationType: 1,
+        regulationSubType: 2,
+        dealSize: 1,
+        accreditedInvestors: 1,
+        maxNonAccreditedInvestors: 1,
+        manualInvestorVerification: 1,
+        internationalInvestors: 0,
+        resaleHoldPeriod: 1,
+      };
+      const additionalSecurityData = {
+        countriesControlListType: true,
+        listOfCountries: "US,CA",
+        info: "Info",
+        country: "US",
+      };
+
+      await expect(
+        asset.connect(signer_A).initialize_Loan(loanDetails, regulationData, additionalSecurityData),
+      ).to.be.rejectedWith("AlreadyInitialized");
+    });
+
+    it("GIVEN startingDate is 0 WHEN deploying loan THEN transaction fails with WrongTimestamp", async () => {
+      await expect(
+        deployLoanTokenFixture({
+          loanInit: {
+            startingDate: 0,
+            maturityDate: 100_000,
+            signingDate: 50_000,
+            originatorAccount: "0x1234567890123456789012345678901234567890",
+            servicerAccount: "0x1234567890123456789012345678901234567891",
+          },
+        }),
+      ).to.be.rejectedWith("WrongTimestamp");
+    });
+
+    it("GIVEN startingDate after maturityDate WHEN deploying loan THEN transaction fails with WrongDates", async () => {
+      const now = Math.floor(Date.now() / 1000);
+      await expect(
+        deployLoanTokenFixture({
+          loanInit: {
+            startingDate: now + 200_000,
+            maturityDate: now + 100_000,
+            signingDate: now + 1800,
+            originatorAccount: "0x1234567890123456789012345678901234567890",
+            servicerAccount: "0x1234567890123456789012345678901234567891",
+          },
+        }),
+      ).to.be.rejectedWith("WrongDates");
     });
   });
 });

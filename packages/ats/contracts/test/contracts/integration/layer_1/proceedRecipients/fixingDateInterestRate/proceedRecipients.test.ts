@@ -3,14 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import {
-  type IAsset,
-  ResolverProxy,
-  ProceedRecipientsKpiLinkedRateFacetTimeTravel,
-  ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel,
-  TimeTravelFacet,
-  CouponFacetTimeTravel,
-} from "@contract-types";
+import { type IAsset, ResolverProxy } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployBondKpiLinkedRateTokenFixture } from "@test";

@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { ResolverProxy, TimeTravelFacet as TimeTravel, type IAsset } from "@contract-types";
+import { ResolverProxy, type IAsset } from "@contract-types";
 import {
   DEFAULT_PARTITION,
   ATS_ROLES,

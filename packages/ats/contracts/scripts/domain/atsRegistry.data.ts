@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-06T09:06:09.935Z
+ * Generated: 2026-04-06T14:08:20.749Z
  * Facets: 205
  * Infrastructure: 2
  *
@@ -11219,12 +11219,6 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
         selector: "0xfb3c59d8",
       },
       {
-        name: "deployLoan",
-        signature:
-          "function deployLoan(((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, ((bytes3 currency, uint256 startingDate, uint256 maturityDate, uint8 loanStructureType, uint8 repaymentType, uint8 interestType, uint256 signingDate, address originatorAccount, address servicerAccount) loanBasicData, (uint8 baseReferenceRate, uint256 floorRate, uint256 capRate, uint256 rateMargin, uint8 dayCount, uint8 paymentFrequency, uint256 firstAccrualDate, uint256 prepaymentPenalty, uint256 commitmentFee, uint256 utilizationFee, uint8 utilizationFeeType, uint256 servicingFee) loanInterestData, (string internalRiskGrade, uint256 defaultProbability, uint256 lossGivenDefault) riskData, (uint256 totalCollateralValue, uint256 loanToValue) collateral, (uint8 performanceStatus, uint256 daysPastDue) loanPerformanceStatus) loanDetails, uint256 nominalValue, uint8 nominalValueDecimals) _loanData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) _factoryRegulationData) returns (address loanAddress_)",
-        selector: "0x566996a0",
-      },
-      {
         name: "deployProxy",
         signature:
           "function deployProxy(address _resolver, bytes32 _configKey, uint256 _version, (bytes32 role, address[] members)[] _rbacs) returns (address proxyAddress_)",
@@ -11843,11 +11837,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     ],
   },
 
-  ILoanStorageWrapper: {
-    name: "ILoanStorageWrapper",
-    methods: [],
-  },
-
   IPauseStorageWrapper: {
     name: "IPauseStorageWrapper",
     methods: [],
@@ -12116,7 +12105,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 68 as const;
+export const TOTAL_STORAGE_WRAPPERS = 67 as const;
 
 /**
  * All role identifiers extracted from contracts.

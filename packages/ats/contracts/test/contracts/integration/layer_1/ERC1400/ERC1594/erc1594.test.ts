@@ -3,14 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import {
-  ERC20Facet,
-  ERC3643ManagementFacet,
-  ERC3643ReadFacet,
-  IERC1410,
-  type IAsset,
-  type ResolverProxy,
-} from "@contract-types";
+import { type IAsset, type ResolverProxy } from "@contract-types";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ATS_ROLES, DEFAULT_PARTITION, EIP1066_CODES, EMPTY_STRING, ZERO } from "@scripts";

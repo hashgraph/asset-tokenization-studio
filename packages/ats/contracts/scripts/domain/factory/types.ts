@@ -83,47 +83,6 @@ export interface EquityDetailsDataParams {
   nominalValueDecimals: number;
 }
 
-export interface LoanDetailsDataParams {
-  loanBasicData: {
-    currency: string;
-    startingDate: number;
-    maturityDate: number;
-    loanStructureType: number;
-    repaymentType: number;
-    interestType: number;
-    signingDate: number;
-    originatorAccount: string;
-    servicerAccount: string;
-  };
-  loanInterestData: {
-    baseReferenceRate: number;
-    floorRate: ethers.BigNumberish;
-    capRate: ethers.BigNumberish;
-    rateMargin: ethers.BigNumberish;
-    dayCount: number;
-    paymentFrequency: number;
-    firstAccrualDate: number;
-    prepaymentPenalty: ethers.BigNumberish;
-    commitmentFee: ethers.BigNumberish;
-    utilizationFee: ethers.BigNumberish;
-    utilizationFeeType: number;
-    servicingFee: ethers.BigNumberish;
-  };
-  riskData: {
-    internalRiskGrade: string;
-    defaultProbability: ethers.BigNumberish;
-    lossGivenDefault: ethers.BigNumberish;
-  };
-  collateral: {
-    totalCollateralValue: ethers.BigNumberish;
-    loanToValue: ethers.BigNumberish;
-  };
-  loanPerformanceStatus: {
-    performanceStatus: number;
-    daysPastDue: ethers.BigNumberish;
-  };
-}
-
 export interface FactoryRegulationDataParams {
   /** Regulation type */
   regulationType: number;
