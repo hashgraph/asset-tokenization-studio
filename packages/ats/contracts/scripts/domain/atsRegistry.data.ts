@@ -874,8 +874,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       {
         name: "getActiveAmortizationIds",
-        signature: "function getActiveAmortizationIds() view returns (uint256[] activeIds_)",
-        selector: "0x8a4ae606",
+        signature:
+          "function getActiveAmortizationIds(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] activeIds_)",
+        selector: "0x50adea94",
       },
       {
         name: "getAmortization",
@@ -916,6 +917,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "getTotalActiveAmortizationHoldHolders",
         signature: "function getTotalActiveAmortizationHoldHolders(uint256 _amortizationID) view returns (uint256)",
         selector: "0xa18237e7",
+      },
+      {
+        name: "getTotalActiveAmortizationIds",
+        signature: "function getTotalActiveAmortizationIds() view returns (uint256)",
+        selector: "0x23099a13",
       },
       {
         name: "getTotalAmortizationHolders",
@@ -11481,6 +11487,12 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         name: "AmortizationHoldNotActive",
         signature: "AmortizationHoldNotActive(bytes32,uint256,address)",
         selector: "0x5571ab32",
+      },
+      { name: "AmortizationNotActive", signature: "AmortizationNotActive(bytes32,uint256)", selector: "0x3d9766c5" },
+      {
+        name: "InvalidAmortizationHoldAmount",
+        signature: "InvalidAmortizationHoldAmount(uint256)",
+        selector: "0x57fbc6f7",
       },
     ],
   },

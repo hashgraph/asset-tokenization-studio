@@ -92,4 +92,17 @@ interface IAmortizationStorageWrapper {
      * @param tokenHolder The address of the token holder with no active hold.
      */
     error AmortizationHoldNotActive(bytes32 corporateActionId, uint256 amortizationID, address tokenHolder);
+
+    /**
+     * @notice Thrown when attempting to operate on a cancelled amortization.
+     * @param corporateActionId The corporate action ID of the amortization.
+     * @param amortizationID The amortization ID.
+     */
+    error AmortizationNotActive(bytes32 corporateActionId, uint256 amortizationID);
+
+    /**
+     * @notice Thrown when attempting to set a hold with a zero token amount.
+     * @param amortizationID The amortization ID.
+     */
+    error InvalidAmortizationHoldAmount(uint256 amortizationID);
 }

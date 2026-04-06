@@ -7,7 +7,7 @@ import { Amortization } from "./Amortization.sol";
 
 abstract contract AmortizationFacetBase is Amortization, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        staticFunctionSelectors_ = new bytes4[](14);
+        staticFunctionSelectors_ = new bytes4[](15);
         uint256 selectorIndex;
         staticFunctionSelectors_[selectorIndex++] = this.setAmortization.selector;
         staticFunctionSelectors_[selectorIndex++] = this.cancelAmortization.selector;
@@ -23,6 +23,7 @@ abstract contract AmortizationFacetBase is Amortization, IStaticFunctionSelector
         staticFunctionSelectors_[selectorIndex++] = this.getActiveAmortizationHoldHolders.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getTotalActiveAmortizationHoldHolders.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getActiveAmortizationIds.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getTotalActiveAmortizationIds.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {

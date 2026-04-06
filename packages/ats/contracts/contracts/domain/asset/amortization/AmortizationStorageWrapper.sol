@@ -32,6 +32,10 @@ abstract contract AmortizationStorageWrapper is IAmortizationStorageWrapper, Sec
         _;
     }
 
+    modifier onlyPositiveTokenAmount(uint256 _amount, uint256 _amortizationID) override {
+        if (_amount == 0) revert IAmortizationStorageWrapper.InvalidAmortizationHoldAmount(_amortizationID);
+        _;
+    }
     function _setAmortization(
         IAmortization.Amortization memory _newAmortization
     ) internal virtual override returns (bytes32 corporateActionId_, uint256 amortizationID_) {
@@ -63,7 +67,10 @@ abstract contract AmortizationStorageWrapper is IAmortizationStorageWrapper, Sec
     function _cancelAmortization(uint256 _amortizationID) internal override returns (bool success_) {
         IAmortization.RegisteredAmortization memory registeredAmortization;
         bytes32 corporateActionId;
-        (registeredAmortization, corporateActionId, ) = _getAmortization(_amortizationID);
+        bool isDisabled;
+        (registeredAmortization, corporateActionId, isDisabled) = _getAmortization(_amortizationID);
+
+        if (isDisabled) revert IAmortizationStorageWrapper.AmortizationNotActive(corporateActionId, _amortizationID);
 
         if (registeredAmortization.amortization.executionDate <= _blockTimestamp()) {
             revert IAmortizationStorageWrapper.AmortizationAlreadyExecuted(corporateActionId, _amortizationID);
@@ -84,6 +91,10 @@ abstract contract AmortizationStorageWrapper is IAmortizationStorageWrapper, Sec
             AMORTIZATION_CORPORATE_ACTION_TYPE,
             _amortizationID - 1
         );
+
+        bool isDisabled;
+        (, , , isDisabled) = _getCorporateAction(corporateActionId);
+        if (isDisabled) revert IAmortizationStorageWrapper.AmortizationNotActive(corporateActionId, _amortizationID);
 
         AmortizationDataStorage storage s = _amortizationStorage();
         AmortizationHoldInfo storage existing = s.amortizationHolds[corporateActionId][_tokenHolder];
@@ -319,8 +330,15 @@ abstract contract AmortizationStorageWrapper is IAmortizationStorageWrapper, Sec
         return _amortizationStorage().activeHoldHolders[corporateActionId].length();
     }
 
-    function _getActiveAmortizationIds() internal view override returns (uint256[] memory activeIds_) {
-        return _amortizationStorage().activeAmortizationIds.values();
+    function _getActiveAmortizationIds(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view override returns (uint256[] memory activeIds_) {
+        return LibCommon.getFromSet(_amortizationStorage().activeAmortizationIds, _pageIndex, _pageLength);
+    }
+
+    function _getTotalActiveAmortizationIds() internal view override returns (uint256) {
+        return _amortizationStorage().activeAmortizationIds.length();
     }
 
     function _checkNoActiveAmortizationHolds(uint256 _amortizationID) internal view {

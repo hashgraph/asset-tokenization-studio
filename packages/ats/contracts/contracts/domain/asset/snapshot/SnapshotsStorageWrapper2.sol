@@ -229,7 +229,7 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
         address[] memory tk = new address[](LibCommon.getSize(start, end, _totalTokenHoldersAt(snapshotId)));
         uint256 length = tk.length;
         for (uint256 i = 0; i < length; ) {
-            uint256 index = i + 1;
+            uint256 index = start + i + 1;
             (bool snapshotted, address value) = _addressValueAt(
                 snapshotId,
                 _snapshotStorage().tokenHoldersSnapshots[index]

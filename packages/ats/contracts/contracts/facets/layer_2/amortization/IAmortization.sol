@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-interface IAmortization {
+import { IAmortizationStorageWrapper } from "../../../domain/asset/amortization/IAmortizationStorageWrapper.sol";
+
+interface IAmortization is IAmortizationStorageWrapper {
     /// @notice Core amortization data structure
     /// @dev Stores the record/execution dates and the total amount of tokens to redeem (burn) across all holders.
     ///      Per-holder token amounts are submitted off-chain by the backend via `setAmortizationHold`.
@@ -177,9 +179,20 @@ interface IAmortization {
     function getTotalActiveAmortizationHoldHolders(uint256 _amortizationID) external view returns (uint256);
 
     /**
-     * @notice Retrieves the IDs of all non-cancelled amortizations.
+     * @notice Retrieves a paginated list of non-cancelled amortization IDs.
      * @dev Cancelled amortizations (isDisabled=true) are excluded from the result.
+     * @param _pageIndex The page index for pagination.
+     * @param _pageLength The number of records per page.
      * @return activeIds_ Array of amortization IDs that have not been cancelled.
      */
-    function getActiveAmortizationIds() external view returns (uint256[] memory activeIds_);
+    function getActiveAmortizationIds(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (uint256[] memory activeIds_);
+
+    /**
+     * @notice Retrieves the total number of non-cancelled amortizations.
+     * @return The total count of active (non-cancelled) amortization IDs.
+     */
+    function getTotalActiveAmortizationIds() external view returns (uint256);
 }

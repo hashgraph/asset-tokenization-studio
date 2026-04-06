@@ -108,6 +108,7 @@ abstract contract Modifiers is LocalContext {
     modifier onlyActiveHoldWithValidEscrow(HoldIdentifier calldata _holdIdentifier) virtual;
     modifier onlyExpiredHold(HoldIdentifier calldata _holdIdentifier) virtual;
     modifier onlyNoActiveAmortizationHolds(uint256 _amortizationID) virtual;
+    modifier onlyPositiveTokenAmount(uint256 _amount, uint256 _amortizationID) virtual;
 
     // ===== AdjustBalances Modifiers =====
     modifier validateFactor(uint256 _factor) virtual;
