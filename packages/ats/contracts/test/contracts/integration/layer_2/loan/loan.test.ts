@@ -186,6 +186,37 @@ describe("Loan Tests", () => {
     });
   });
 
+  describe("initialize_Loan validations", () => {
+    it("GIVEN startingDate is 0 WHEN deploying loan THEN transaction fails with WrongTimestamp", async () => {
+      await expect(
+        deployLoanTokenFixture({
+          loanInit: {
+            startingDate: 0,
+            maturityDate: 100_000,
+            signingDate: 50_000,
+            originatorAccount: "0x1234567890123456789012345678901234567890",
+            servicerAccount: "0x1234567890123456789012345678901234567891",
+          },
+        }),
+      ).to.be.rejectedWith("WrongTimestamp");
+    });
+
+    it("GIVEN startingDate after maturityDate WHEN deploying loan THEN transaction fails with WrongDates", async () => {
+      const now = Math.floor(Date.now() / 1000);
+      await expect(
+        deployLoanTokenFixture({
+          loanInit: {
+            startingDate: now + 200_000,
+            maturityDate: now + 100_000,
+            signingDate: now + 1800,
+            originatorAccount: "0x1234567890123456789012345678901234567890",
+            servicerAccount: "0x1234567890123456789012345678901234567891",
+          },
+        }),
+      ).to.be.rejectedWith("WrongDates");
+    });
+  });
+
   describe("setLoanDetails validations", () => {
     it("GIVEN startingDate is 0 WHEN setLoanDetails THEN transaction fails with WrongTimestamp", async () => {
       const loanDetails = buildLoanDetails({ loanBasicData: { startingDate: 0 } });

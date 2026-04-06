@@ -67,6 +67,14 @@ export const DEFAULT_LOAN_PARAMS = {
   erc20VotesActivated: false,
 } as const;
 
+interface LoanInitData {
+  startingDate: number;
+  maturityDate: number;
+  signingDate: number;
+  originatorAccount: string;
+  servicerAccount: string;
+}
+
 interface DeployLoanTokenFixtureParams {
   name: string;
   symbol: string;
@@ -81,6 +89,7 @@ interface DeployLoanTokenFixtureParams {
   internalKycActivated: boolean;
   nominalValueDecimals: number;
   erc20VotesActivated: boolean;
+  loanInit: LoanInitData;
 }
 
 /**
@@ -173,17 +182,24 @@ export async function deployLoanTokenFixture(params: DeepPartial<DeployLoanToken
   await erc3643ManagementFacet.initialize_ERC3643(ZeroAddress, ZeroAddress);
   await nominalValueFacet.initialize_NominalValue(p.nominalValue, p.nominalValueDecimals);
   const now = Math.floor(Date.now() / 1000);
+  const loanInit = p.loanInit ?? {
+    startingDate: now + 3600,
+    maturityDate: now + 3600 + 100_000,
+    signingDate: now + 1800,
+    originatorAccount: deployer.address,
+    servicerAccount: deployer.address,
+  };
   const loanDetailsData = {
     loanBasicData: {
       currency: "0x555344",
-      startingDate: now + 3600,
-      maturityDate: now + 3600 + 100_000,
+      startingDate: loanInit.startingDate,
+      maturityDate: loanInit.maturityDate,
       loanStructureType: 1,
       repaymentType: 0,
       interestType: 0,
-      signingDate: now + 1800,
-      originatorAccount: deployer.address,
-      servicerAccount: deployer.address,
+      signingDate: loanInit.signingDate,
+      originatorAccount: loanInit.originatorAccount,
+      servicerAccount: loanInit.servicerAccount,
     },
     loanInterestData: {
       baseReferenceRate: 0,
