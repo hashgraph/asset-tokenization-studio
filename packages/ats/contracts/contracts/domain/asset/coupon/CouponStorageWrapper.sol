@@ -29,7 +29,7 @@ abstract contract CouponStorageWrapper is ICouponStorageWrapper, NominalValueSto
         ICoupon.RegisteredCoupon memory registeredCoupon;
         bytes32 corporateActionId;
         (registeredCoupon, corporateActionId, ) = _getCoupon(_couponId);
-        if (registeredCoupon.coupon.executionDate != 0 && registeredCoupon.coupon.executionDate <= _blockTimestamp()) {
+        if (registeredCoupon.coupon.executionDate <= _blockTimestamp()) {
             revert ICouponStorageWrapper.CouponAlreadyExecuted(corporateActionId, _couponId);
         }
         _cancelCorporateAction(corporateActionId);

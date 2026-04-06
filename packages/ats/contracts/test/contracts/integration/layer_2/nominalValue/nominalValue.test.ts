@@ -46,7 +46,7 @@ async function addMigrationFacetToDiamond(base: Awaited<ReturnType<typeof deploy
   return base;
 }
 
-describe("NominalValue Migration Tests", () => {
+describe("NominalValue Tests", () => {
   describe("Bond NominalValue Migration", () => {
     let diamond: ResolverProxy;
     let signer_A: HardhatEthersSigner;

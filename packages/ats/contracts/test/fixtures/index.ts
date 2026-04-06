@@ -41,6 +41,12 @@ export {
   DEFAULT_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_PARAMS,
 } from "./tokens/bondSustainabilityPerformanceTargetRate.fixture";
 
+// Loan token fixtures
+export { deployLoanTokenFixture, DEFAULT_LOAN_PARAMS } from "./tokens/loan.fixture";
+
+// Loan Portfolio token fixtures
+export { deployLoanPortfolioTokenFixture, DEFAULT_LOAN_PORTFOLIO_PARAMS } from "./tokens/loanPortfolio.fixture";
+
 // Common token utilities
 export {
   MAX_UINT256,

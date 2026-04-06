@@ -50,7 +50,7 @@ abstract contract HoldStorageWrapper1 is ERC3643StorageWrapper1 {
     }
 
     function _getHoldForByPartition(
-        HoldIdentifier calldata _holdIdentifier
+        HoldIdentifier memory _holdIdentifier
     )
         internal
         view

@@ -229,7 +229,7 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
         address[] memory tk = new address[](LibCommon.getSize(start, end, _totalTokenHoldersAt(snapshotId)));
         uint256 length = tk.length;
         for (uint256 i = 0; i < length; ) {
-            uint256 index = i + 1;
+            uint256 index = start + i + 1;
             (bool snapshotted, address value) = _addressValueAt(
                 snapshotId,
                 _snapshotStorage().tokenHoldersSnapshots[index]
@@ -400,5 +400,21 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
         (bool snapshotted, uint256 value) = _valueAt(_snapshotId, _snapshotStorage().totalSupplySnapshots);
 
         return snapshotted ? value : _totalSupply();
+    }
+
+    function _getSnapshotTakenBalance(
+        uint256 _date,
+        uint256 _snapshotId,
+        address _account
+    ) internal view override returns (uint256 balance_, uint8 decimals_, bool snapshotTaken_) {
+        if (_date < _blockTimestamp()) {
+            snapshotTaken_ = true;
+
+            balance_ = (_snapshotId != 0)
+                ? _getTotalBalanceOfAtSnapshot(_snapshotId, _account)
+                : _getTotalBalanceForAdjustedAt(_account, _date);
+
+            decimals_ = (_snapshotId != 0) ? _decimalsAtSnapshot(_snapshotId) : _decimalsAdjustedAt(_date);
+        }
     }
 }

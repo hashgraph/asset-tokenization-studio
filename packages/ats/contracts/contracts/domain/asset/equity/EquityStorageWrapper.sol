@@ -175,22 +175,6 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, DividendStorage
         return _getCorporateActionCountByType(BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE);
     }
 
-    function _getSnapshotBalanceForIfDateReached(
-        uint256 _date,
-        uint256 _snapshotId,
-        address _account
-    ) internal view override returns (uint256 balance_, uint8 decimals_, bool dateReached_) {
-        if (_date < _blockTimestamp()) {
-            dateReached_ = true;
-
-            balance_ = (_snapshotId != 0)
-                ? _getTotalBalanceOfAtSnapshot(_snapshotId, _account)
-                : _getTotalBalanceForAdjustedAt(_account, _date);
-
-            decimals_ = (_snapshotId != 0) ? _decimalsAtSnapshot(_snapshotId) : _decimalsAdjustedAt(_date);
-        }
-    }
-
     /// @dev DEPRECATED – MIGRATION: Remove once all legacy tokens have been migrated.
     function _equityNominalValue() internal view virtual override returns (uint256) {
         return _equityStorage().DEPRECATED_nominalValue;

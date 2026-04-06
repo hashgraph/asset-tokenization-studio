@@ -96,7 +96,7 @@ abstract contract DividendStorageWrapper is IDividendStorageWrapper, VotingStora
             dividendFor_.tokenBalance,
             dividendFor_.decimals,
             dividendFor_.recordDateReached
-        ) = _getSnapshotBalanceForIfDateReached(
+        ) = _getSnapshotTakenBalance(
             registeredDividend.dividend.recordDate,
             registeredDividend.snapshotId,
             _account

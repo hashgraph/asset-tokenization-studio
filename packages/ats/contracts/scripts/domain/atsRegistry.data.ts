@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-30T15:06:16.638Z
- * Facets: 203
+ * Generated: 2026-04-01T14:56:58.652Z
+ * Facets: 204
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -35,6 +35,8 @@ import {
   AdjustBalancesKpiLinkedRateFacetTimeTravel__factory,
   AdjustBalancesSustainabilityPerformanceTargetRateFacet__factory,
   AdjustBalancesSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
+  AmortizationFacet__factory,
+  AmortizationFacetTimeTravel__factory,
   BondUSAFacet__factory,
   BondUSAFacetTimeTravel__factory,
   BondUSAFixedRateFacet__factory,
@@ -847,6 +849,103 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       useTimeTravel
         ? new AdjustBalancesSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
         : new AdjustBalancesSustainabilityPerformanceTargetRateFacet__factory(signer),
+  },
+
+  AmortizationFacet: {
+    name: "AmortizationFacet",
+    resolverKey: {
+      name: "_AMORTIZATION_RESOLVER_KEY",
+      value: "0xe45d89550ef8988da0d14267142ce98f9acdca60da74da2a89cecd9e27d0661b",
+    },
+    inheritance: ["AmortizationFacetBase", "Common"],
+    methods: [
+      {
+        name: "cancelAmortization",
+        signature: "function cancelAmortization(uint256 _amortizationID)",
+        selector: "0x99c50121",
+      },
+      {
+        name: "getActiveAmortizationHoldHolders",
+        signature:
+          "function getActiveAmortizationHoldHolders(uint256 _amortizationID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+        selector: "0x3c819d06",
+      },
+      {
+        name: "getActiveAmortizationIds",
+        signature:
+          "function getActiveAmortizationIds(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] activeIds_)",
+        selector: "0x50adea94",
+      },
+      {
+        name: "getAmortization",
+        signature:
+          "function getAmortization(uint256 _amortizationID) view returns (((uint256 recordDate, uint256 executionDate, uint256 tokensToRedeem) amortization, uint256 snapshotId) registeredAmortization_, bool isDisabled_)",
+        selector: "0x52347466",
+      },
+      {
+        name: "getAmortizationFor",
+        signature:
+          "function getAmortizationFor(uint256 _amortizationID, address _account) view returns ((address account, uint256 recordDate, uint256 executionDate, uint256 holdId, bool holdActive, uint256 tokenHeldAmount, uint8 decimalsHeld, uint256 abafAtHold, uint256 tokenBalance, uint8 decimalsBalance, bool recordDateReached, uint256 abafAtSnapshot, uint256 nominalValue, uint8 nominalValueDecimals) amortizationFor_)",
+        selector: "0x57cc97ee",
+      },
+      {
+        name: "getAmortizationHolders",
+        signature:
+          "function getAmortizationHolders(uint256 _amortizationID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+        selector: "0x695453e3",
+      },
+      {
+        name: "getAmortizationPaymentAmount",
+        signature:
+          "function getAmortizationPaymentAmount(uint256 _amortizationID, address _tokenHolder) view returns (uint256 tokenAmount_, uint8 decimals_)",
+        selector: "0xbc4cd5c9",
+      },
+      {
+        name: "getAmortizationsCount",
+        signature: "function getAmortizationsCount() view returns (uint256 amortizationCount_)",
+        selector: "0x0d9d3cd5",
+      },
+      {
+        name: "getAmortizationsFor",
+        signature:
+          "function getAmortizationsFor(uint256 _amortizationID, uint256 _pageIndex, uint256 _pageLength) view returns ((address account, uint256 recordDate, uint256 executionDate, uint256 holdId, bool holdActive, uint256 tokenHeldAmount, uint8 decimalsHeld, uint256 abafAtHold, uint256 tokenBalance, uint8 decimalsBalance, bool recordDateReached, uint256 abafAtSnapshot, uint256 nominalValue, uint8 nominalValueDecimals)[] amortizationsFor_)",
+        selector: "0xed73a37e",
+      },
+      {
+        name: "getTotalActiveAmortizationHoldHolders",
+        signature: "function getTotalActiveAmortizationHoldHolders(uint256 _amortizationID) view returns (uint256)",
+        selector: "0xa18237e7",
+      },
+      {
+        name: "getTotalActiveAmortizationIds",
+        signature: "function getTotalActiveAmortizationIds() view returns (uint256)",
+        selector: "0x23099a13",
+      },
+      {
+        name: "getTotalAmortizationHolders",
+        signature: "function getTotalAmortizationHolders(uint256 _amortizationID) view returns (uint256)",
+        selector: "0x8bd49432",
+      },
+      {
+        name: "releaseAmortizationHold",
+        signature: "function releaseAmortizationHold(uint256 _amortizationID, address _tokenHolder)",
+        selector: "0x9a7381f6",
+      },
+      {
+        name: "setAmortization",
+        signature:
+          "function setAmortization((uint256 recordDate, uint256 executionDate, uint256 tokensToRedeem) _amortization) returns (bool success_, uint256 amortizationID_)",
+        selector: "0xf593eb40",
+      },
+      {
+        name: "setAmortizationHold",
+        signature:
+          "function setAmortizationHold(uint256 _amortizationID, address _tokenHolder, uint256 _tokenAmount) returns (uint256 holdId_)",
+        selector: "0xd9333b98",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new AmortizationFacetTimeTravel__factory(signer) : new AmortizationFacet__factory(signer),
   },
 
   BondUSAFacet: {
@@ -10808,7 +10907,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 203 as const;
+export const TOTAL_FACETS = 204 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -11112,6 +11211,12 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [],
   },
 
+  AmortizationStorageWrapper: {
+    name: "AmortizationStorageWrapper",
+    inheritance: ["IAmortizationStorageWrapper", "SecurityStorageWrapper"],
+    methods: [],
+  },
+
   BondStorageWrapper: {
     name: "BondStorageWrapper",
     inheritance: ["IBondStorageWrapper", "CouponStorageWrapper"],
@@ -11292,6 +11397,58 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
       },
     ],
     errors: [{ name: "FactorIsZero", signature: "FactorIsZero()", selector: "0x936e9b6d" }],
+  },
+
+  IAmortizationStorageWrapper: {
+    name: "IAmortizationStorageWrapper",
+    methods: [],
+    events: [
+      {
+        name: "AmortizationCancelled",
+        signature: "AmortizationCancelled(uint256,address)",
+        topic0: "0x18803023b629c4a3ede894304addcceae743d6b917a4ccc19f373dfd12eb49e7",
+      },
+      {
+        name: "AmortizationHoldReleased",
+        signature: "AmortizationHoldReleased(bytes32,uint256,address,uint256)",
+        topic0: "0xb68a1513ec98c9158bdd268508331c067c99421e004ba039d01568346364e988",
+      },
+      {
+        name: "AmortizationHoldSet",
+        signature: "AmortizationHoldSet(bytes32,uint256,address,uint256,uint256)",
+        topic0: "0xccaca046dd516fd9d1e384a4ff3f42164508d2ce6da3db1c344c0e9bb8b522a1",
+      },
+      {
+        name: "AmortizationSet",
+        signature: "AmortizationSet(bytes32,uint256,address,uint256,uint256)",
+        topic0: "0x145e417c42aaec40a27eb55eb8c6e70db11d163fa9493227376f8cfdf4580933",
+      },
+    ],
+    errors: [
+      {
+        name: "AmortizationAlreadyExecuted",
+        signature: "AmortizationAlreadyExecuted(bytes32,uint256)",
+        selector: "0x5d18d966",
+      },
+      { name: "AmortizationCreationFailed", signature: "AmortizationCreationFailed()", selector: "0x93182eae" },
+      {
+        name: "AmortizationHasActiveHolds",
+        signature: "AmortizationHasActiveHolds(bytes32,uint256)",
+        selector: "0x9931e168",
+      },
+      { name: "AmortizationHoldFailed", signature: "AmortizationHoldFailed(bytes32,uint256)", selector: "0xf23c95d9" },
+      {
+        name: "AmortizationHoldNotActive",
+        signature: "AmortizationHoldNotActive(bytes32,uint256,address)",
+        selector: "0x5571ab32",
+      },
+      { name: "AmortizationNotActive", signature: "AmortizationNotActive(bytes32,uint256)", selector: "0x3d9766c5" },
+      {
+        name: "InvalidAmortizationHoldAmount",
+        signature: "InvalidAmortizationHoldAmount(uint256)",
+        selector: "0x57fbc6f7",
+      },
+    ],
   },
 
   IBondStorageWrapper: {
@@ -11902,7 +12059,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 64 as const;
+export const TOTAL_STORAGE_WRAPPERS = 66 as const;
 
 /**
  * All role identifiers extracted from contracts.
@@ -11910,6 +12067,7 @@ export const TOTAL_STORAGE_WRAPPERS = 64 as const;
 export const ROLES = {
   _ADJUSTMENT_BALANCE_ROLE: "0x6d0d63b623e69df3a6ea8aebd01f360a0250a880cbc44f7f10c49726a80a78a9",
   _AGENT_ROLE: "0xc4aed0454da9bde6defa5baf93bb49d4690626fc243d138104e12d1def783ea6",
+  _AMORTIZATION_ROLE: "0x29b3565c49b924f0c461060cea1eabe7d7136c83f454f891574239e9f8ee9431",
   _BOND_MANAGER_ROLE: "0x8e99f55d84328dd46dd7790df91f368b44ea448d246199c88b97896b3f83f65d",
   _CAP_ROLE: "0xb60cac52541732a1020ce6841bc7449e99ed73090af03b50911c75d631476571",
   _CLEARING_ROLE: "0x2292383e7bb988fb281e5195ab88da11e62fec74cf43e8685cff613d6b906450",
@@ -11944,4 +12102,4 @@ export const ROLES = {
 /**
  * Total number of unique roles in the registry.
  */
-export const TOTAL_ROLES = 31 as const;
+export const TOTAL_ROLES = 32 as const;

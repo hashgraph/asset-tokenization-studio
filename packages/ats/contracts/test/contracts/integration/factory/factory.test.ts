@@ -29,6 +29,7 @@ import {
 } from "@scripts";
 import { Rbac, SecurityType } from "@scripts/domain";
 import { getBondDetails } from "@test";
+import { decodeEvent } from "@scripts/infrastructure";
 
 describe("Factory Tests", () => {
   let signer_A: HardhatEthersSigner;
@@ -485,21 +486,13 @@ describe("Factory Tests", () => {
       const result = await tx;
       const receipt = await result.wait();
 
-      const deployedProxyEvent = receipt!.logs
-        .map((log) => {
-          try {
-            return factory.interface.parseLog({ topics: log.topics as string[], data: log.data });
-          } catch {
-            return null;
-          }
-        })
-        .find((parsed) => parsed?.name === "ProxyDeployed");
+      const deployedProxyEvent = await decodeEvent(factory, "ProxyDeployed", receipt);
 
-      const proxyAddress = deployedProxyEvent!.args!.proxyAddress;
-      const resolver = deployedProxyEvent!.args!.resolver;
-      const configKey = deployedProxyEvent!.args!.configKey;
-      const version = deployedProxyEvent!.args!.version;
-      const rbac = deployedProxyEvent!.args!.rbac;
+      const proxyAddress = deployedProxyEvent.proxyAddress;
+      const resolver = deployedProxyEvent.resolver;
+      const configKey = deployedProxyEvent.configKey;
+      const version = deployedProxyEvent.version;
+      const rbac = deployedProxyEvent.rbac;
 
       expect(proxyAddress).not.to.equal(ADDRESS_ZERO);
       expect(proxyAddress).to.equal(expectedProxyAddress);
@@ -645,16 +638,8 @@ describe("Factory Tests", () => {
 
       const result = await tx;
       const receipt = await result.wait();
-      const deployedEquityEvent = receipt!.logs
-        .map((log) => {
-          try {
-            return factory.interface.parseLog({ topics: log.topics as string[], data: log.data });
-          } catch {
-            return null;
-          }
-        })
-        .find((parsed) => parsed?.name === "EquityDeployed");
-      const equityAddress = deployedEquityEvent!.args!.equityAddress;
+      const deployedEquityEvent = await decodeEvent(factory, "EquityDeployed", receipt);
+      const equityAddress = deployedEquityEvent.equityAddress;
 
       await readFacets(equityAddress);
 
@@ -810,16 +795,8 @@ describe("Factory Tests", () => {
 
       const result = await tx;
       const receipt = await result.wait();
-      const deployedBondEvent = receipt!.logs
-        .map((log) => {
-          try {
-            return factory.interface.parseLog({ topics: log.topics as string[], data: log.data });
-          } catch {
-            return null;
-          }
-        })
-        .find((parsed) => parsed?.name === "BondDeployed");
-      const bondAddress = deployedBondEvent!.args!.bondAddress;
+      const deployedBondEvent = await decodeEvent(factory, "BondDeployed", receipt);
+      const bondAddress = deployedBondEvent.bondAddress;
 
       await readFacets(bondAddress);
 
@@ -1057,16 +1034,8 @@ describe("Factory Tests", () => {
 
       const result = await tx;
       const receipt = await result.wait();
-      const deployedBondEvent = receipt!.logs
-        .map((log) => {
-          try {
-            return factory.interface.parseLog({ topics: log.topics as string[], data: log.data });
-          } catch {
-            return null;
-          }
-        })
-        .find((parsed) => parsed?.name === "BondFixedRateDeployed");
-      const bondAddress = deployedBondEvent!.args!.bondAddress;
+      const deployedBondEvent = await decodeEvent(factory, "BondFixedRateDeployed", receipt);
+      const bondAddress = deployedBondEvent.bondAddress;
 
       // Verify fixed rate was set
       const fixedRateFacet = await ethers.getContractAt("FixedRate", bondAddress);
@@ -1222,16 +1191,8 @@ describe("Factory Tests", () => {
 
       const result = await tx;
       const receipt = await result.wait();
-      const deployedBondEvent = receipt!.logs
-        .map((log) => {
-          try {
-            return factory.interface.parseLog({ topics: log.topics as string[], data: log.data });
-          } catch {
-            return null;
-          }
-        })
-        .find((parsed) => parsed?.name === "BondKpiLinkedRateDeployed");
-      const bondAddress = deployedBondEvent!.args!.bondAddress;
+      const deployedBondEvent = await decodeEvent(factory, "BondKpiLinkedRateDeployed", receipt);
+      const bondAddress = deployedBondEvent.bondAddress;
 
       // Verify KPI linked rate was set
       const kpiLinkedRateFacet = await ethers.getContractAt("KpiLinkedRate", bondAddress);
@@ -1607,16 +1568,8 @@ describe("Factory Tests", () => {
 
       const result = await tx;
       const receipt = await result.wait();
-      const deployedBondEvent = receipt!.logs
-        .map((log) => {
-          try {
-            return factory.interface.parseLog({ topics: log.topics as string[], data: log.data });
-          } catch {
-            return null;
-          }
-        })
-        .find((parsed) => parsed?.name === "BondSustainabilityPerformanceTargetRateDeployed");
-      const bondAddress = deployedBondEvent!.args!.bondAddress;
+      const deployedBondEvent = await decodeEvent(factory, "BondSustainabilityPerformanceTargetRateDeployed", receipt);
+      const bondAddress = deployedBondEvent.bondAddress;
 
       // Verify sustainability rate was set
       const sustainabilityRateFacet = await ethers.getContractAt("SustainabilityPerformanceTargetRate", bondAddress);
