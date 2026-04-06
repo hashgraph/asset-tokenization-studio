@@ -66,8 +66,12 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
 
   // HWC v2 properties
   protected hederaAdapter: any;
+  protected eip155Adapter: any;
   protected appKit: any;
   protected hederaProvider: any;
+  protected injectedEip155Provider: any | undefined;
+  private _isConnecting = false;
+  private _hederaSessionCaptured = false;
 
   constructor(
     @lazyInject(EventService)
@@ -130,49 +134,114 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
     LogService.logInfo("Connecting to WalletConnect v2 with network:", network);
     const currentNetwork = network ?? this.networkService.environment;
 
-    if (this.hederaProvider) {
-      LogService.logTrace("Existing provider detected. Stopping...");
+    this._isConnecting = true;
+    try {
+      // Snapshot whether AppKit already exists before init.
+      // initAdaptersAndProvider is a singleton: it creates adapters/AppKit only
+      // once and returns early on subsequent calls.
+      const appKitExistedBefore = !!this.appKit;
+      await this.initAdaptersAndProvider(currentNetwork);
+
+      if (!appKitExistedBefore && this.appKit) {
+        // AppKit's constructor fires initialize() as a background async task.
+        // That task calls unSyncExistingConnection() → ConnectionController
+        // .disconnect() → ModalController.close(), which would immediately
+        // close the pairing modal we are about to open.
+        // A short fixed delay is enough because unSyncExistingConnection only
+        // does in-memory work (no network I/O) and completes in <100 ms.
+        await new Promise((r) => setTimeout(r, 500));
+        LogService.logInfo("[HWC v2] AppKit initialization settled; opening pairing modal");
+      }
+
+      await this.openPairingModal();
+
+      // ── Path A: WalletConnect session ──────────────────────────────────────
+      // _hederaSessionCaptured is set eagerly inside openPairingModal's
+      // subscribeState callback the moment the session appears (AppKit may set
+      // and then clear it before modal close). Also poll hederaProvider.session
+      // as a safety net in case it appears after the modal closes.
+      if (!this._hederaSessionCaptured && !this.hederaProvider?.session) {
+        const pollEnd = Date.now() + 2000;
+        while (!this._hederaSessionCaptured && !this.hederaProvider?.session && Date.now() < pollEnd) {
+          await new Promise((r) => setTimeout(r, 100));
+        }
+      }
+      if (this._hederaSessionCaptured || this.hederaProvider?.session) {
+        // Safety net: eip155 WC session but eip155Provider not initialised means
+        // MetaMask approved WC but has no Hedera EVM chain configured.
+        if (this.isEvmSession() && !(this.hederaProvider as any)?.eip155Provider) {
+          const accounts: string[] = (this.hederaProvider as any)?.session?.namespaces?.eip155?.accounts ?? [];
+          const allChains = [...new Set(accounts.map((acc) => acc.split(":").slice(0, 2).join(":")))];
+          await this.stop();
+          throw new Error(
+            `MetaMask is not connected to a Hedera EVM network` +
+              (allChains.length ? ` (connected on: ${allChains.join(", ")})` : "") +
+              `. Please add Hedera EVM Testnet (chainId 296) or Mainnet (chainId 295) to MetaMask, ` +
+              `switch to it, and try connecting again.`,
+          );
+        }
+        await this.resolveAndCacheAccount(currentNetwork);
+        this.subscribe();
+        LogService.logInfo("connectWalletConnect completed.");
+        return currentNetwork;
+      }
+
+      // ── Path B: EIP-1193 injected provider (MetaMask browser extension) ────
+      // injectedEip155Provider may already have been captured eagerly inside
+      // openPairingModal's subscribeState callback (to avoid the race where
+      // AppKit sets and then clears activeInjectedProvider before modal closes).
+      // Fall back to polling activeInjectedProvider as a safety net.
+      if (!this.injectedEip155Provider) {
+        const pollEnd = Date.now() + 2000;
+        while (!this.injectedEip155Provider && Date.now() < pollEnd) {
+          await new Promise((r) => setTimeout(r, 100));
+          const p = (this.eip155Adapter as any)?.activeInjectedProvider;
+          if (p) this.injectedEip155Provider = p;
+        }
+      }
+      if (this.injectedEip155Provider) {
+        await this.resolveAndCacheAccountFromInjected(currentNetwork);
+        this.subscribeInjected();
+        LogService.logInfo("connectWalletConnect completed via injected provider.");
+        return currentNetwork;
+      }
+
+      // ── Path C: Nothing connected (user cancelled) ─────────────────────────
       await this.stop();
+      throw new Error("No wallet was connected. Please open the modal and select a wallet to continue.");
+    } finally {
+      this._isConnecting = false;
     }
+  }
 
-    await this.initAdaptersAndProvider(currentNetwork);
-    await this.openPairingModal();
+  public subscribeInjected(): void {
+    if (!this.injectedEip155Provider) return;
 
-    // Safety net: if eip155Provider is still null after pairing, it means
-    // patchInitProviders found no Hedera EVM accounts in the approved session —
-    // i.e. MetaMask is connected but has no Hedera EVM chain configured at all.
-    if (this.isEvmSession() && !this.hederaProvider?.eip155Provider) {
-      const accounts: string[] = this.hederaProvider?.session?.namespaces?.eip155?.accounts ?? [];
-      const allChains = [...new Set(accounts.map((acc) => acc.split(":").slice(0, 2).join(":")))];
-      await this.stop();
-      throw new Error(
-        `MetaMask is not connected to a Hedera EVM network` +
-          (allChains.length ? ` (connected on: ${allChains.join(", ")})` : "") +
-          `. Please add Hedera EVM Testnet (chainId 296) or Mainnet (chainId 295) to MetaMask, ` +
-          `switch to it, and try connecting again.`,
-      );
-    }
+    const provider = this.injectedEip155Provider as any;
 
-    await this.resolveAndCacheAccount(currentNetwork);
-    this.subscribe();
+    const onAccountsChanged = async (accounts: string[]) => {
+      if (!accounts || accounts.length === 0) {
+        await this.stop();
+      }
+    };
+    const onChainChanged = async (chainIdHex: string) => {
+      const chainId = parseInt(chainIdHex, 16);
+      const hederaChainId = this.isTestnet() ? 296 : 295;
+      if (chainId !== hederaChainId) {
+        LogService.logInfo(`[HWC Injected] Chain changed to ${chainId}, disconnecting`);
+        await this.stop();
+      }
+    };
 
-    LogService.logInfo("connectWalletConnect completed.");
-    return currentNetwork;
+    provider.on?.("accountsChanged", onAccountsChanged);
+    provider.on?.("chainChanged", onChainChanged);
   }
 
   public async stop(): Promise<boolean> {
+    let success = true;
     try {
       await this.hederaProvider?.disconnect();
       await this.appKit?.disconnect();
-      this.hederaAdapter = undefined;
-      this.appKit = undefined;
-      this.hederaProvider = undefined;
-
-      this.eventService.emit(WalletEvents.walletDisconnect, {
-        wallet: SupportedWallets.HWALLETCONNECT,
-      });
-      LogService.logInfo("Hedera WalletConnect v2 stopped successfully");
-      return true;
     } catch (error) {
       const msg = (error as Error)?.message ?? String(error);
       if (msg.includes("No active session") || msg.includes("No matching key")) {
@@ -180,8 +249,21 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
       } else {
         LogService.logError(`Error stopping Hedera WalletConnect: ${msg}`);
       }
-      return false;
+      success = false;
+    } finally {
+      // Keep hederaProvider, appKit, hederaAdapter and eip155Adapter alive —
+      // they are singletons. AppKit holds refs to the original adapter instances
+      // and sets activeInjectedProvider on them; clearing them breaks EIP-6963
+      // detection on reconnect.
+      this.injectedEip155Provider = undefined;
+      this._hederaSessionCaptured = false;
+
+      this.eventService.emit(WalletEvents.walletDisconnect, {
+        wallet: SupportedWallets.HWALLETCONNECT,
+      });
+      LogService.logInfo("Hedera WalletConnect v2 stopped successfully");
     }
+    return success;
   }
 
   public async restart(network: NetworkName): Promise<void> {
@@ -196,15 +278,21 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _startDate?: string,
   ): Promise<TransactionResponse> {
-    LogService.logInfo("[HWC v2] Signing and sending transaction...");
+    return await this.executeNativeTransaction(transaction);
+  }
+
+  private async executeNativeTransaction(transaction: Transaction): Promise<TransactionResponse> {
+    LogService.logInfo(`[HWC Native] Executing ${transaction.constructor.name}`);
     this.ensureInitialized();
     this.ensureNativeProviderReady();
 
     try {
       this.ensureFrozen(transaction);
+      LogService.logTrace(`[HWC Native] Transaction frozen for account ${this.account.id.toString()}`);
 
       const transactionBytes = transaction.toBytes();
       const transactionBase64 = Buffer.from(transactionBytes).toString("base64");
+      LogService.logTrace(`[HWC Native] Transaction serialized, size: ${transactionBytes.length} bytes`);
 
       const chainRef = this.isTestnet() ? "hedera:testnet" : "hedera:mainnet";
 
@@ -213,18 +301,16 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
         signerAccountId: `${chainRef}:${this.account.id.toString()}`,
       };
 
-      LogService.logTrace(`[HWC v2] Sending transaction for signing: ${JSON.stringify(params)}`);
+      LogService.logInfo(`[HWC Native] Sending transaction for signing...`);
+      LogService.logTrace(`[HWC Native] Execute params: ${JSON.stringify(params)}`);
 
       const result = await this.hederaProvider.request(
-        {
-          method: "hedera_signAndExecuteTransaction",
-          params,
-        },
+        { method: "hedera_signAndExecuteTransaction", params },
         chainRef as any,
       );
 
-      LogService.logInfo("[HWC v2] Transaction signed and sent successfully");
-      LogService.logTrace(`[HWC v2] Result: ${JSON.stringify(result)}`);
+      LogService.logInfo("[HWC Native] Transaction executed successfully");
+      LogService.logTrace(`[HWC Native] Result: ${JSON.stringify(result)}`);
 
       const txResponse = result as any;
       return new TransactionResponse(
@@ -232,6 +318,7 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
         txResponse,
       );
     } catch (error) {
+      LogService.logError("[HWC Native] Error executing transaction:", error);
       if (error instanceof Error) {
         LogService.logError(error.stack);
       }
@@ -278,16 +365,49 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
       toAddress = contractInfo.evmAddress;
     }
 
-    const encodedHex = iface.encodeFunctionData(functionName, params as any[]);
-    const chainRef = this.currentEvmChainRef();
+    return await this.executeEvmContractCall(toAddress, iface, functionName, params, gasLimit, payableAmountHbar);
+  }
 
+  private async executeEvmContractCall(
+    proxyAddress: string,
+    iface: ethers.Interface,
+    functionName: string,
+    params: unknown[],
+    gasLimit: number,
+    payableAmountHbar?: string,
+  ): Promise<TransactionResponse> {
+    const encodedHex = iface.encodeFunctionData(functionName, params as any[]);
+    const to = proxyAddress.startsWith("0x") ? proxyAddress : `0x${proxyAddress}`;
+
+    // ── EIP-1193 injected provider path (MetaMask browser extension) ────
+    if (this.injectedEip155Provider) {
+      const txParams: Record<string, string> = {
+        from: this.account.evmAddress!,
+        to,
+        data: encodedHex,
+        gas: ethers.toBeHex(gasLimit),
+      };
+      if (payableAmountHbar) {
+        txParams.value = ethers.toBeHex(ethers.parseEther(payableAmountHbar));
+      }
+      const txHash = await (this.injectedEip155Provider as any).request({
+        method: "eth_sendTransaction",
+        params: [txParams],
+      });
+      const provider = this.rpcProvider();
+      const receipt = await provider.waitForTransaction(txHash as string);
+      const responsePayload = { hash: txHash, wait: () => Promise.resolve(receipt) } as any;
+      return RPCTransactionResponseAdapter.manageResponse(responsePayload, this.networkService.environment);
+    }
+
+    // ── WalletConnect EVM session path ───────────────────────────────────
+    const chainRef = this.currentEvmChainRef();
     const txParams: Record<string, string> = {
-      from: this.account.evmAddress,
-      to: toAddress.startsWith("0x") ? toAddress : `0x${toAddress}`,
+      from: this.account.evmAddress!,
+      to,
       data: encodedHex,
       gas: ethers.toBeHex(gasLimit),
     };
-
     if (payableAmountHbar) {
       txParams.value = ethers.toBeHex(ethers.parseEther(payableAmountHbar));
     }
@@ -298,15 +418,9 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
       { method: "eth_sendTransaction", params: [txParams] },
       chainRef,
     );
-
     const provider = this.rpcProvider();
     const receipt = await provider.waitForTransaction(txHash as string);
-
-    const responsePayload = {
-      hash: txHash,
-      wait: () => Promise.resolve(receipt),
-    } as any;
-
+    const responsePayload = { hash: txHash, wait: () => Promise.resolve(receipt) } as any;
     return RPCTransactionResponseAdapter.manageResponse(responsePayload, this.networkService.environment);
   }
 
@@ -436,6 +550,14 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
     return this.account;
   }
 
+  public getNetworkService(): NetworkService {
+    return this.networkService;
+  }
+
+  public getMirrorNodeAdapter(): MirrorNodeAdapter {
+    return this.mirrorNodeAdapter;
+  }
+
   // ===== Private helpers =====
 
   private async initAdaptersAndProvider(currentNetwork: string): Promise<void> {
@@ -450,6 +572,15 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
       ? [HederaChainDefinition.EVM.Testnet, HederaChainDefinition.EVM.Mainnet]
       : [HederaChainDefinition.EVM.Mainnet, HederaChainDefinition.EVM.Testnet];
 
+    // Adapters, provider and AppKit are singletons — create only once.
+    // On reconnect the same instances must be reused: AppKit holds refs to the
+    // original adapters and sets activeInjectedProvider on them; creating new
+    // instances would break EIP-6963 detection on the second connect.
+    if (this.hederaAdapter && this.eip155Adapter) {
+      LogService.logInfo("[HWC v2] Reusing existing adapters for reconnect");
+      return;
+    }
+
     this.hederaAdapter = new HederaAdapter({
       projectId: this.projectId,
       networks: nativeNetworks,
@@ -461,6 +592,8 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
       networks: evmNetworks,
       namespace: "eip155",
     });
+    // Store so connectWalletConnect can detect EIP-1193 (MetaMask extension) connections
+    this.eip155Adapter = eip155HederaAdapter;
 
     const eip155Chains = isTest ? ["eip155:296", "eip155:295"] : ["eip155:295", "eip155:296"];
     const hederaChains = isTest ? ["hedera:testnet", "hedera:mainnet"] : ["hedera:mainnet", "hedera:testnet"];
@@ -527,26 +660,38 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
     }
     this.patchInitProviders();
 
-    this.appKit = createAppKit({
-      adapters: [this.hederaAdapter, eip155HederaAdapter],
-      universalProvider: this.hederaProvider,
-      projectId: this.projectId,
-      metadata: this.dappMetadata,
-      networks: [
-        HederaChainDefinition.Native.Testnet,
-        HederaChainDefinition.Native.Mainnet,
-        HederaChainDefinition.EVM.Testnet,
-        HederaChainDefinition.EVM.Mainnet,
-      ],
-      enableReconnect: false,
-      features: {
-        analytics: true,
-        socials: false,
-        swaps: false,
-        onramp: false,
-        email: false,
-      },
-    });
+    try {
+      this.appKit = createAppKit({
+        adapters: [this.hederaAdapter, eip155HederaAdapter],
+        universalProvider: this.hederaProvider,
+        projectId: this.projectId,
+        metadata: this.dappMetadata,
+        networks: [
+          HederaChainDefinition.Native.Testnet,
+          HederaChainDefinition.Native.Mainnet,
+          HederaChainDefinition.EVM.Testnet,
+          HederaChainDefinition.EVM.Mainnet,
+        ],
+        enableReconnect: false,
+        features: {
+          analytics: true,
+          socials: false,
+          swaps: false,
+          onramp: false,
+          email: false,
+        },
+      });
+    } catch (error) {
+      // If createAppKit fails (e.g. adapter version mismatch), clear all
+      // singleton state so the next connect attempt starts fresh instead of
+      // hitting NotInitialized on openPairingModal.
+      LogService.logError(`[HWC v2] createAppKit failed — resetting adapter state: ${(error as Error)?.message}`);
+      this.hederaAdapter = undefined as any;
+      this.eip155Adapter = undefined as any;
+      this.hederaProvider = undefined as any;
+      this.appKit = undefined as any;
+      throw error;
+    }
 
     LogService.logInfo(`[HWC v2] Initialized with network ${currentNetwork}`);
   }
@@ -555,6 +700,7 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
     if (!this.appKit) throw new NotInitialized();
 
     await this.appKit.open();
+    let stateChangeCount = 0;
     await new Promise<void>((resolve, reject) => {
       const timeout = setTimeout(() => {
         unsubscribe();
@@ -562,7 +708,29 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
       }, 300000);
 
       const unsubscribe = this.appKit.subscribeState((state: any) => {
+        stateChangeCount++;
+        const session = this.hederaProvider?.session;
+        const injected = (this.eip155Adapter as any)?.activeInjectedProvider;
+        LogService.logInfo(
+          `[HWC Modal] state#${stateChangeCount} open=${state.open} ` +
+            `hederaSession=${!!session} injectedProvider=${!!injected} ` +
+            `_hederaSessionCaptured=${this._hederaSessionCaptured} ` +
+            `_injectedCaptured=${!!this.injectedEip155Provider}`,
+        );
+
+        if (session && !this._hederaSessionCaptured) {
+          this._hederaSessionCaptured = true;
+          LogService.logInfo("[HWC Modal] Captured hederaProvider.session");
+        }
+        if (injected && !this.injectedEip155Provider) {
+          this.injectedEip155Provider = injected;
+          LogService.logInfo("[HWC Modal] Captured activeInjectedProvider");
+        }
         if (state.open === false) {
+          LogService.logInfo(
+            `[HWC Modal] Modal closed after ${stateChangeCount} state changes. ` +
+              `hederaSessionCaptured=${this._hederaSessionCaptured} injectedCaptured=${!!this.injectedEip155Provider}`,
+          );
           clearTimeout(timeout);
           unsubscribe();
           resolve();
@@ -573,6 +741,21 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
     // Let provider settle after modal close
     await new Promise((r) => setTimeout(r, 300));
 
+    const sessionAfter = this.hederaProvider?.session;
+    const injectedAfter = (this.eip155Adapter as any)?.activeInjectedProvider;
+    LogService.logInfo(
+      `[HWC Modal] After 300ms settle: hederaSession=${!!sessionAfter} injectedProvider=${!!injectedAfter} ` +
+        `_hederaSessionCaptured=${this._hederaSessionCaptured} _injectedCaptured=${!!this.injectedEip155Provider}`,
+    );
+    if (injectedAfter && !this.injectedEip155Provider) {
+      this.injectedEip155Provider = injectedAfter;
+      LogService.logInfo("[HWC Modal] Captured activeInjectedProvider after settle");
+    }
+    if (sessionAfter && !this._hederaSessionCaptured) {
+      this._hederaSessionCaptured = true;
+      LogService.logInfo("[HWC Modal] Captured hederaProvider.session after settle");
+    }
+
     // Ensure native provider accounts are populated after session establishment
     this.ensureNativeProviderReady();
   }
@@ -581,15 +764,23 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
     if (!this.hederaProvider) throw new NotInitialized();
 
     const hederaAccount = this.hederaProvider.getAccountAddresses()[0];
-    if (!hederaAccount) {
-      throw new AccountNotFound();
-    }
+    if (!hederaAccount) throw new AccountNotFound();
 
     LogService.logInfo(`[HWC v2] Provided account: ${hederaAccount}`);
 
-    const accountMirror = await this.mirrorNodeAdapter.getAccountInfo(hederaAccount);
+    let accountMirror;
+    try {
+      accountMirror = await this.mirrorNodeAdapter.getAccountInfo(hederaAccount);
+      LogService.logInfo(`[HWC v2] Successfully retrieved account info from Mirror Node`);
+    } catch (error) {
+      const errorMessage = `Account ${hederaAccount} does not exist in ${currentNetwork}. Please create or import an account for this network in your wallet.`;
+      LogService.logError(`[HWC v2] ${errorMessage}`);
+      throw new Error(errorMessage);
+    }
 
-    if (!accountMirror) {
+    if (!accountMirror || !accountMirror.id) {
+      const errorMessage = `No valid account info from Mirror Node for ${hederaAccount} in ${currentNetwork}`;
+      LogService.logError(`[HWC v2] ${errorMessage}`);
       throw new AccountNotFound();
     }
 
@@ -605,15 +796,58 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
 
     const eventData: WalletPairedEvent = {
       wallet: SupportedWallets.HWALLETCONNECT,
-      data: {
-        account: this.account,
-        pairing: "",
-        topic: "",
-      },
+      data: { account: this.account, pairing: "", topic: "" },
       network: {
         name: this.networkService.environment,
         recognized: true,
         factoryId: this.networkService.configuration ? this.networkService.configuration.factoryAddress : "",
+        resolverId: this.networkService.configuration?.resolverAddress ?? "",
+      },
+    };
+    this.eventService.emit(WalletEvents.walletPaired, eventData);
+  }
+
+  private async resolveAndCacheAccountFromInjected(currentNetwork: string): Promise<void> {
+    if (!this.injectedEip155Provider) throw new Error("No injected EIP-1193 provider available");
+
+    const accounts = (await (this.injectedEip155Provider as any).request({
+      method: "eth_accounts",
+    })) as string[];
+
+    if (!accounts || accounts.length === 0) throw new Error("No accounts returned from MetaMask");
+
+    const evmAddress = accounts[0];
+    LogService.logInfo(`[HWC Injected] EVM address from MetaMask: ${evmAddress}`);
+
+    let accountMirror;
+    try {
+      accountMirror = await this.mirrorNodeAdapter.getAccountInfo(evmAddress);
+    } catch (error) {
+      throw new Error(
+        `No Hedera account found for EVM address ${evmAddress} on ${currentNetwork}. ` +
+          `Make sure your MetaMask account has a linked Hedera account on this network.`,
+      );
+    }
+
+    if (!accountMirror?.id) {
+      throw new Error(`No valid Hedera account for EVM address ${evmAddress} on ${currentNetwork}`);
+    }
+
+    this.account = new Account({
+      id: accountMirror.id?.toString() ?? evmAddress,
+      publicKey: accountMirror.publicKey,
+      evmAddress: accountMirror.evmAddress || evmAddress,
+    });
+    this.network = currentNetwork;
+
+    const eventData: WalletPairedEvent = {
+      wallet: SupportedWallets.HWALLETCONNECT,
+      data: { account: this.account, pairing: "", topic: "" },
+      network: {
+        name: this.network,
+        recognized: true,
+        factoryId: this.networkService.configuration?.factoryAddress ?? "",
+        resolverId: this.networkService.configuration?.resolverAddress ?? "",
       },
     };
     this.eventService.emit(WalletEvents.walletPaired, eventData);
@@ -626,7 +860,7 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
     }
 
     this.hederaProvider.on("session_delete", async () => {
-      await this.stop();
+      if (!this._isConnecting) await this.stop();
     });
 
     this.hederaProvider.on("session_update", async (event: unknown) => {
@@ -634,12 +868,12 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
     });
 
     this.hederaProvider.on("disconnect", async () => {
-      await this.stop();
+      if (!this._isConnecting) await this.stop();
     });
 
     if (this.appKit) {
       this.appKit.subscribeState((state: unknown) => {
-        LogService.logTrace(`[HWC v2] AppKit state: ${JSON.stringify(state)}`);
+        LogService.logInfo(`[HWC] AppKit state: ${JSON.stringify(state)}`);
       });
     }
   }
@@ -677,6 +911,8 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
   }
 
   private isEvmSession(): boolean {
+    // EIP-1193 injected path (MetaMask extension, no WC session) is also EVM
+    if (this.injectedEip155Provider) return true;
     return !this.hederaProvider?.session?.namespaces?.hedera;
   }
 
