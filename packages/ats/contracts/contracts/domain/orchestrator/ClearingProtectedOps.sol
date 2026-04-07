@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ClearingOps } from "./ClearingOps.sol";
-import { IClearing } from "../../facets/layer_1/clearing/IClearing.sol";
+import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
 import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
@@ -17,7 +17,7 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
 /// @dev Extracted from ClearingOps to reduce bytecode size.
 library ClearingProtectedOps {
     function protectedClearingTransferByPartition(
-        IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
+        IClearingTypes.ProtectedClearingOperation calldata _protectedClearingOperation,
         uint256 _amount,
         address _to,
         bytes calldata _signature
@@ -53,7 +53,7 @@ library ClearingProtectedOps {
     }
 
     function protectedClearingRedeemByPartition(
-        IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
+        IClearingTypes.ProtectedClearingOperation calldata _protectedClearingOperation,
         uint256 _amount,
         bytes calldata _signature
     ) public returns (bool success_, uint256 clearingId_) {
@@ -86,7 +86,7 @@ library ClearingProtectedOps {
     }
 
     function protectedClearingCreateHoldByPartition(
-        IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
+        IClearingTypes.ProtectedClearingOperation calldata _protectedClearingOperation,
         IHoldTypes.Hold calldata _hold,
         bytes calldata _signature
     ) public returns (bool success_, uint256 clearingId_) {

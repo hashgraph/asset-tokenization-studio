@@ -2,10 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IHoldTypes } from "../hold/IHoldTypes.sol";
-import { IClearing } from "./IClearing.sol";
 import { IClearingTypes } from "./IClearingTypes.sol";
 
-interface IClearingHoldCreation is IClearing, IClearingTypes {
+interface IClearingHoldCreation is IClearingTypes {
     /**
      * @notice Creates a hold for a clearing operation by partition
      *
@@ -13,7 +12,7 @@ interface IClearingHoldCreation is IClearing, IClearingTypes {
      * @param _hold The hold details
      */
     function clearingCreateHoldByPartition(
-        ClearingOperation calldata _clearingOperation,
+        IClearingTypes.ClearingOperation calldata _clearingOperation,
         IHoldTypes.Hold calldata _hold
     ) external returns (bool success_, uint256 clearingId_);
 
@@ -25,7 +24,7 @@ interface IClearingHoldCreation is IClearing, IClearingTypes {
      * @param _hold The hold details
      */
     function clearingCreateHoldFromByPartition(
-        ClearingOperationFrom calldata _clearingOperationFrom,
+        IClearingTypes.ClearingOperationFrom calldata _clearingOperationFrom,
         IHoldTypes.Hold calldata _hold
     ) external returns (bool success_, uint256 clearingId_);
 
@@ -37,7 +36,7 @@ interface IClearingHoldCreation is IClearing, IClearingTypes {
      * @param _hold The hold details
      */
     function operatorClearingCreateHoldByPartition(
-        ClearingOperationFrom calldata _clearingOperationFrom,
+        IClearingTypes.ClearingOperationFrom calldata _clearingOperationFrom,
         IHoldTypes.Hold calldata _hold
     ) external returns (bool success_, uint256 clearingId_);
 
@@ -50,7 +49,7 @@ interface IClearingHoldCreation is IClearing, IClearingTypes {
      * @param _signature The signature of the token holder authorizing the operation
      */
     function protectedClearingCreateHoldByPartition(
-        ProtectedClearingOperation calldata _protectedClearingOperation,
+        IClearingTypes.ProtectedClearingOperation calldata _protectedClearingOperation,
         IHoldTypes.Hold calldata _hold,
         bytes calldata _signature
     ) external returns (bool success_, uint256 clearingId_);
@@ -68,5 +67,5 @@ interface IClearingHoldCreation is IClearing, IClearingTypes {
         bytes32 _partition,
         address _tokenHolder,
         uint256 _clearingId
-    ) external view returns (ClearingHoldCreationData memory clearingHoldCreationData_);
+    ) external view returns (IClearingTypes.ClearingHoldCreationData memory clearingHoldCreationData_);
 }

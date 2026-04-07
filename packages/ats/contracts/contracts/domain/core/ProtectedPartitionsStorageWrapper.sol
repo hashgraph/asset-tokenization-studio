@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _PROTECTED_PARTITIONS_PARTICIPANT_ROLE } from "../../constants/roles.sol";
 import { _PROTECTED_PARTITIONS_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IProtectedPartitions } from "../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
-import { IClearing } from "../../facets/layer_1/clearing/IClearing.sol";
+import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
 import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
 import { AccessControlStorageWrapper } from "./AccessControlStorageWrapper.sol";
 import { ResolverProxyStorageWrapper } from "./ResolverProxyStorageWrapper.sol";
@@ -186,7 +186,7 @@ library ProtectedPartitionsStorageWrapper {
     }
 
     function checkClearingCreateHoldSignature(
-        IClearing.ProtectedClearingOperation memory _protectedClearingOperation,
+        IClearingTypes.ProtectedClearingOperation memory _protectedClearingOperation,
         IHoldTypes.Hold memory _hold,
         bytes calldata _signature,
         string memory _name
@@ -196,7 +196,7 @@ library ProtectedPartitionsStorageWrapper {
     }
 
     function isClearingCreateHoldSignatureValid(
-        IClearing.ProtectedClearingOperation memory _protectedClearingOperation,
+        IClearingTypes.ProtectedClearingOperation memory _protectedClearingOperation,
         IHoldTypes.Hold memory _hold,
         bytes calldata _signature,
         string memory _name
@@ -215,7 +215,7 @@ library ProtectedPartitionsStorageWrapper {
     }
 
     function checkClearingTransferSignature(
-        IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
+        IClearingTypes.ProtectedClearingOperation calldata _protectedClearingOperation,
         uint256 _amount,
         address _to,
         bytes calldata _signature,
@@ -226,7 +226,7 @@ library ProtectedPartitionsStorageWrapper {
     }
 
     function isClearingTransferSignatureValid(
-        IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
+        IClearingTypes.ProtectedClearingOperation calldata _protectedClearingOperation,
         address _to,
         uint256 _amount,
         bytes calldata _signature,
@@ -246,7 +246,7 @@ library ProtectedPartitionsStorageWrapper {
     }
 
     function checkClearingRedeemSignature(
-        IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
+        IClearingTypes.ProtectedClearingOperation calldata _protectedClearingOperation,
         uint256 _amount,
         bytes calldata _signature,
         string memory _name
@@ -256,7 +256,7 @@ library ProtectedPartitionsStorageWrapper {
     }
 
     function isClearingRedeemSignatureValid(
-        IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
+        IClearingTypes.ProtectedClearingOperation calldata _protectedClearingOperation,
         uint256 _amount,
         bytes calldata _signature,
         string memory _name

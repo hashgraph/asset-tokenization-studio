@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IClearing } from "./IClearing.sol";
 import { IClearingTypes } from "./IClearingTypes.sol";
 
-interface IClearingRedeem is IClearing, IClearingTypes {
+interface IClearingRedeem is IClearingTypes {
     /**
      * @notice Creates a redeem clearing operation for a partition
      *
@@ -12,7 +11,7 @@ interface IClearingRedeem is IClearing, IClearingTypes {
      * @param _amount The amount to redeem
      */
     function clearingRedeemByPartition(
-        ClearingOperation calldata _clearingOperation,
+        IClearingTypes.ClearingOperation calldata _clearingOperation,
         uint256 _amount
     ) external returns (bool success_, uint256 clearingId_);
 
@@ -24,7 +23,7 @@ interface IClearingRedeem is IClearing, IClearingTypes {
      * @param _amount The amount to redeem
      */
     function clearingRedeemFromByPartition(
-        ClearingOperationFrom calldata _clearingOperationFrom,
+        IClearingTypes.ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount
     ) external returns (bool success_, uint256 clearingId_);
 
@@ -36,7 +35,7 @@ interface IClearingRedeem is IClearing, IClearingTypes {
      * @param _amount The amount to redeem
      */
     function operatorClearingRedeemByPartition(
-        ClearingOperationFrom calldata _clearingOperationFrom,
+        IClearingTypes.ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount
     ) external returns (bool success_, uint256 clearingId_);
 
@@ -49,7 +48,7 @@ interface IClearingRedeem is IClearing, IClearingTypes {
      * @param _signature The signature of the token holder authorizing the operation
      */
     function protectedClearingRedeemByPartition(
-        ProtectedClearingOperation calldata _protectedClearingOperation,
+        IClearingTypes.ProtectedClearingOperation calldata _protectedClearingOperation,
         uint256 _amount,
         bytes calldata _signature
     ) external returns (bool success_, uint256 clearingId_);
@@ -67,5 +66,5 @@ interface IClearingRedeem is IClearing, IClearingTypes {
         bytes32 _partition,
         address _tokenHolder,
         uint256 _clearingId
-    ) external view returns (ClearingRedeemData memory clearingRedeemData_);
+    ) external view returns (IClearingTypes.ClearingRedeemData memory clearingRedeemData_);
 }

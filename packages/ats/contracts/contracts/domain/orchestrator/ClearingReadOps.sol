@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ClearingStorageWrapper } from "../asset/ClearingStorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";
-import { IClearing } from "../../facets/layer_1/clearing/IClearing.sol";
+import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
 import { IClearingTransfer } from "../../facets/layer_1/clearing/IClearingTransfer.sol";
 import { IClearingRedeem } from "../../facets/layer_1/clearing/IClearingRedeem.sol";
 import { IClearingHoldCreation } from "../../facets/layer_1/clearing/IClearingHoldCreation.sol";
@@ -62,11 +62,11 @@ library ClearingReadOps {
         );
 
         uint256 abaf = AdjustBalancesStorageWrapper.getAbafAdjustedAt(_timestamp);
-        IClearing.ClearingOperationIdentifier memory clearingId = IClearing.ClearingOperationIdentifier({
+        IClearingTypes.ClearingOperationIdentifier memory clearingId = IClearingTypes.ClearingOperationIdentifier({
             tokenHolder: _tokenHolder,
             partition: _partition,
             clearingId: _clearingId,
-            clearingOperationType: IClearing.ClearingOperationType.Transfer
+            clearingOperationType: IClearingTypes.ClearingOperationType.Transfer
         });
         uint256 labaf = AdjustBalancesStorageWrapper.getClearingLabafById(clearingId);
         uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(abaf, labaf);
@@ -89,11 +89,11 @@ library ClearingReadOps {
         );
 
         uint256 abaf = AdjustBalancesStorageWrapper.getAbafAdjustedAt(_timestamp);
-        IClearing.ClearingOperationIdentifier memory clearingId = IClearing.ClearingOperationIdentifier({
+        IClearingTypes.ClearingOperationIdentifier memory clearingId = IClearingTypes.ClearingOperationIdentifier({
             tokenHolder: _tokenHolder,
             partition: _partition,
             clearingId: _clearingId,
-            clearingOperationType: IClearing.ClearingOperationType.Redeem
+            clearingOperationType: IClearingTypes.ClearingOperationType.Redeem
         });
         uint256 labaf = AdjustBalancesStorageWrapper.getClearingLabafById(clearingId);
         uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(abaf, labaf);
@@ -116,11 +116,11 @@ library ClearingReadOps {
         );
 
         uint256 abaf = AdjustBalancesStorageWrapper.getAbafAdjustedAt(_timestamp);
-        IClearing.ClearingOperationIdentifier memory clearingId = IClearing.ClearingOperationIdentifier({
+        IClearingTypes.ClearingOperationIdentifier memory clearingId = IClearingTypes.ClearingOperationIdentifier({
             tokenHolder: _tokenHolder,
             partition: _partition,
             clearingId: _clearingId,
-            clearingOperationType: IClearing.ClearingOperationType.HoldCreation
+            clearingOperationType: IClearingTypes.ClearingOperationType.HoldCreation
         });
         uint256 labaf = AdjustBalancesStorageWrapper.getClearingLabafById(clearingId);
         uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(abaf, labaf);
@@ -134,7 +134,7 @@ library ClearingReadOps {
 
     /// @notice Check clearing operation expiration timestamp
     function checkClearingExpirationTimestamp(
-        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
+        IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
         bool _mustBeExpired,
         uint256 /* _blockTimestamp */
     ) public view {

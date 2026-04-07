@@ -7,7 +7,7 @@ import { _ERC1594_STORAGE_POSITION } from "../../constants/storagePositions.sol"
 import { IKyc } from "../../facets/layer_1/kyc/IKyc.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { Eip1066 } from "../../constants/eip1066.sol";
-import { IClearing } from "../../facets/layer_1/clearing/IClearing.sol";
+import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
 import { IERC3643Management } from "../../facets/layer_1/ERC3643/IERC3643Management.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { IIdentityRegistry } from "../../facets/layer_1/ERC3643/IIdentityRegistry.sol";
@@ -249,7 +249,7 @@ library ERC1594StorageWrapper {
 
     function _genericChecks() private view returns (bool, bytes1, bytes32, bytes memory) {
         if (ClearingStorageWrapper.isClearingActivated()) {
-            return (false, Eip1066.UNAVAILABLE, IClearing.ClearingIsActivated.selector, EMPTY_BYTES);
+            return (false, Eip1066.UNAVAILABLE, IClearingTypes.ClearingIsActivated.selector, EMPTY_BYTES);
         }
 
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);

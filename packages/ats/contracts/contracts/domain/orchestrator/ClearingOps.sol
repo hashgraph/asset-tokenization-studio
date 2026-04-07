@@ -8,7 +8,7 @@ import { TokenCoreOps } from "./TokenCoreOps.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
-import { IClearing } from "../../facets/layer_1/clearing/IClearing.sol";
+import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
 import { IClearingActions } from "../../facets/layer_1/clearing/IClearingActions.sol";
 import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
@@ -33,7 +33,7 @@ library ClearingOps {
     // ============================================================================
 
     function clearingTransferCreation(
-        IClearing.ClearingOperation memory _clearingOperation,
+        IClearingTypes.ClearingOperation memory _clearingOperation,
         uint256 _amount,
         address _to,
         address _from,
@@ -45,7 +45,7 @@ library ClearingOps {
         clearingId_ = ClearingStorageWrapper.increaseClearingId(
             _from,
             partition,
-            IClearing.ClearingOperationType.Transfer
+            IClearingTypes.ClearingOperationType.Transfer
         );
 
         beforeClearingOperation(
@@ -53,7 +53,7 @@ library ClearingOps {
                 _from,
                 partition,
                 clearingId_,
-                IClearing.ClearingOperationType.Transfer
+                IClearingTypes.ClearingOperationType.Transfer
             ),
             address(0)
         );
@@ -89,7 +89,7 @@ library ClearingOps {
     }
 
     function clearingRedeemCreation(
-        IClearing.ClearingOperation memory _clearingOperation,
+        IClearingTypes.ClearingOperation memory _clearingOperation,
         uint256 _amount,
         address _from,
         bytes memory _operatorData,
@@ -100,7 +100,7 @@ library ClearingOps {
         clearingId_ = ClearingStorageWrapper.increaseClearingId(
             _from,
             partition,
-            IClearing.ClearingOperationType.Redeem
+            IClearingTypes.ClearingOperationType.Redeem
         );
 
         beforeClearingOperation(
@@ -108,7 +108,7 @@ library ClearingOps {
                 _from,
                 partition,
                 clearingId_,
-                IClearing.ClearingOperationType.Redeem
+                IClearingTypes.ClearingOperationType.Redeem
             ),
             address(0)
         );
@@ -142,7 +142,7 @@ library ClearingOps {
     }
 
     function clearingHoldCreationCreation(
-        IClearing.ClearingOperation memory _clearingOperation,
+        IClearingTypes.ClearingOperation memory _clearingOperation,
         address _from,
         IHoldTypes.Hold calldata _hold,
         bytes memory _operatorData,
@@ -153,7 +153,7 @@ library ClearingOps {
         clearingId_ = ClearingStorageWrapper.increaseClearingId(
             _from,
             partition,
-            IClearing.ClearingOperationType.HoldCreation
+            IClearingTypes.ClearingOperationType.HoldCreation
         );
 
         beforeClearingOperation(
@@ -161,7 +161,7 @@ library ClearingOps {
                 _from,
                 partition,
                 clearingId_,
-                IClearing.ClearingOperationType.HoldCreation
+                IClearingTypes.ClearingOperationType.HoldCreation
             ),
             address(0)
         );
@@ -203,30 +203,27 @@ library ClearingOps {
     // ============================================================================
 
     function approveClearingOperationByPartition(
-        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
+        IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) public returns (bool success_, bytes memory operationData_, bytes32 partition_) {
         return
-            handleClearingOperationByPartition(
-                _clearingOperationIdentifier,
-                IClearingActions.ClearingActionType.Approve
-            );
+            handleClearingOperationByPartition(_clearingOperationIdentifier, IClearingTypes.ClearingActionType.Approve);
     }
 
     function cancelClearingOperationByPartition(
-        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
+        IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) public returns (bool success_) {
         (success_, , ) = handleClearingOperationByPartition(
             _clearingOperationIdentifier,
-            IClearingActions.ClearingActionType.Cancel
+            IClearingTypes.ClearingActionType.Cancel
         );
     }
 
     function reclaimClearingOperationByPartition(
-        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
+        IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) public returns (bool success_) {
         (success_, , ) = handleClearingOperationByPartition(
             _clearingOperationIdentifier,
-            IClearingActions.ClearingActionType.Reclaim
+            IClearingTypes.ClearingActionType.Reclaim
         );
     }
 
@@ -235,7 +232,7 @@ library ClearingOps {
     // ============================================================================
 
     function protectedClearingTransferByPartition(
-        IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
+        IClearingTypes.ProtectedClearingOperation calldata _protectedClearingOperation,
         uint256 _amount,
         address _to,
         bytes calldata _signature
@@ -272,7 +269,7 @@ library ClearingOps {
     }
 
     function protectedClearingRedeemByPartition(
-        IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
+        IClearingTypes.ProtectedClearingOperation calldata _protectedClearingOperation,
         uint256 _amount,
         bytes calldata _signature
     ) public returns (bool success_, uint256 clearingId_) {
@@ -306,7 +303,7 @@ library ClearingOps {
     }
 
     function protectedClearingCreateHoldByPartition(
-        IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
+        IClearingTypes.ProtectedClearingOperation calldata _protectedClearingOperation,
         IHoldTypes.Hold calldata _hold,
         bytes calldata _signature
     ) public returns (bool success_, uint256 clearingId_) {
@@ -346,7 +343,7 @@ library ClearingOps {
     function decreaseAllowedBalanceForClearing(
         bytes32 _partition,
         uint256 _clearingId,
-        IClearing.ClearingOperationType _clearingOperationType,
+        IClearingTypes.ClearingOperationType _clearingOperationType,
         address _from,
         uint256 _amount
     ) public {
@@ -360,20 +357,20 @@ library ClearingOps {
     // ============================================================================
 
     function handleClearingOperationByPartition(
-        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
-        IClearingActions.ClearingActionType _operationType
+        IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
+        IClearingTypes.ClearingActionType _operationType
     ) internal returns (bool success_, bytes memory operationData_, bytes32 partition_) {
         partition_ = _clearingOperationIdentifier.partition;
 
-        IClearing.ClearingOperationBasicInfo memory data = ClearingStorageWrapper.isClearingBasicInfo(
+        IClearingTypes.ClearingOperationBasicInfo memory data = ClearingStorageWrapper.isClearingBasicInfo(
             _clearingOperationIdentifier
         );
 
         // Get destination for beforeClearingOperation (like reference implementation)
         address destination;
-        if (_clearingOperationIdentifier.clearingOperationType == IClearing.ClearingOperationType.Transfer) {
+        if (_clearingOperationIdentifier.clearingOperationType == IClearingTypes.ClearingOperationType.Transfer) {
             destination = data.destination;
-        } else if (_clearingOperationIdentifier.clearingOperationType == IClearing.ClearingOperationType.Redeem) {
+        } else if (_clearingOperationIdentifier.clearingOperationType == IClearingTypes.ClearingOperationType.Redeem) {
             destination = address(0);
         } else {
             // HoldCreation: restore to holder for Cancel/Reclaim, no transfer for Approve
@@ -381,7 +378,7 @@ library ClearingOps {
         }
 
         // For Cancel/Reclaim, adjust destination to restore to holder
-        if (_operationType != IClearingActions.ClearingActionType.Approve) {
+        if (_operationType != IClearingTypes.ClearingActionType.Approve) {
             destination = _clearingOperationIdentifier.tokenHolder;
         }
 
@@ -391,10 +388,10 @@ library ClearingOps {
         // Initialize operationData_ as empty (only HoldCreation fills it)
         bytes memory holdData;
 
-        if (_clearingOperationIdentifier.clearingOperationType == IClearing.ClearingOperationType.Transfer) {
+        if (_clearingOperationIdentifier.clearingOperationType == IClearingTypes.ClearingOperationType.Transfer) {
             clearingTransferExecution(_clearingOperationIdentifier, data, _operationType);
             success_ = true;
-        } else if (_clearingOperationIdentifier.clearingOperationType == IClearing.ClearingOperationType.Redeem) {
+        } else if (_clearingOperationIdentifier.clearingOperationType == IClearingTypes.ClearingOperationType.Redeem) {
             clearingRedeemExecution(_clearingOperationIdentifier, data, _operationType);
             success_ = true;
         } else {
@@ -406,7 +403,7 @@ library ClearingOps {
         }
 
         // Restore allowance and remove clearing (like reference's _restoreAllowanceAndRemoveClearing)
-        if (_operationType != IClearingActions.ClearingActionType.Approve) {
+        if (_operationType != IClearingTypes.ClearingActionType.Approve) {
             restoreAllowanceAndRemoveClearing(_clearingOperationIdentifier);
         } else {
             ClearingStorageWrapper.removeClearing(_clearingOperationIdentifier);
@@ -414,20 +411,21 @@ library ClearingOps {
     }
 
     function clearingTransferExecution(
-        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
-        IClearing.ClearingOperationBasicInfo memory /* data */,
-        IClearingActions.ClearingActionType _operationType
+        IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
+        IClearingTypes.ClearingOperationBasicInfo memory /* data */,
+        IClearingTypes.ClearingActionType _operationType
     ) internal {
         // Get the ABAF-adjusted amount from storage (already updated by beforeClearingOperation)
-        IClearing.ClearingTransferData memory transferData = ClearingStorageWrapper.getClearingTransferForByPartition(
-            _clearingOperationIdentifier.partition,
-            _clearingOperationIdentifier.tokenHolder,
-            _clearingOperationIdentifier.clearingId
-        );
+        IClearingTypes.ClearingTransferData memory transferData = ClearingStorageWrapper
+            .getClearingTransferForByPartition(
+                _clearingOperationIdentifier.partition,
+                _clearingOperationIdentifier.tokenHolder,
+                _clearingOperationIdentifier.clearingId
+            );
 
         // Determine destination: original for Approve, holder for Cancel/Reclaim
         address destination;
-        if (_operationType == IClearingActions.ClearingActionType.Approve) {
+        if (_operationType == IClearingTypes.ClearingActionType.Approve) {
             destination = transferData.destination;
         } else {
             destination = _clearingOperationIdentifier.tokenHolder;
@@ -438,7 +436,7 @@ library ClearingOps {
 
         // Only check identity/compliance for Approve operations with different destination
         if (
-            _operationType == IClearingActions.ClearingActionType.Approve &&
+            _operationType == IClearingTypes.ClearingActionType.Approve &&
             _clearingOperationIdentifier.tokenHolder != destination
         ) {
             TokenCoreOps.checkIdentity(_clearingOperationIdentifier.tokenHolder, destination);
@@ -463,12 +461,12 @@ library ClearingOps {
     }
 
     function clearingRedeemExecution(
-        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
-        IClearing.ClearingOperationBasicInfo memory /* data */,
-        IClearingActions.ClearingActionType _operationType
+        IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
+        IClearingTypes.ClearingOperationBasicInfo memory /* data */,
+        IClearingTypes.ClearingActionType _operationType
     ) internal {
         // Get the ABAF-adjusted amount from storage (already updated by beforeClearingOperation)
-        IClearing.ClearingRedeemData memory redeemData = ClearingStorageWrapper.getClearingRedeemForByPartition(
+        IClearingTypes.ClearingRedeemData memory redeemData = ClearingStorageWrapper.getClearingRedeemForByPartition(
             _clearingOperationIdentifier.partition,
             _clearingOperationIdentifier.tokenHolder,
             _clearingOperationIdentifier.clearingId
@@ -476,7 +474,7 @@ library ClearingOps {
 
         // For Approve: nothing to transfer (tokens are burned)
         // For Cancel/Reclaim: restore ABAF-adjusted amount to holder
-        if (_operationType != IClearingActions.ClearingActionType.Approve) {
+        if (_operationType != IClearingTypes.ClearingActionType.Approve) {
             transferClearingBalance(
                 _clearingOperationIdentifier.partition,
                 _clearingOperationIdentifier.tokenHolder,
@@ -485,19 +483,19 @@ library ClearingOps {
         }
 
         // Only check identity/compliance for Approve operations
-        if (_operationType == IClearingActions.ClearingActionType.Approve) {
+        if (_operationType == IClearingTypes.ClearingActionType.Approve) {
             TokenCoreOps.checkIdentity(_clearingOperationIdentifier.tokenHolder, address(0));
             TokenCoreOps.checkCompliance(_clearingOperationIdentifier.tokenHolder, address(0), false);
         }
     }
 
     function clearingHoldCreationExecution(
-        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
-        IClearing.ClearingOperationBasicInfo memory /* data */,
-        IClearingActions.ClearingActionType _operationType
+        IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
+        IClearingTypes.ClearingOperationBasicInfo memory /* data */,
+        IClearingTypes.ClearingActionType _operationType
     ) internal returns (bytes memory operationData_) {
         // Get the ABAF-adjusted amount from storage (already updated by beforeClearingOperation)
-        IClearing.ClearingHoldCreationData memory holdCreationData = ClearingStorageWrapper
+        IClearingTypes.ClearingHoldCreationData memory holdCreationData = ClearingStorageWrapper
             .getClearingHoldCreationForByPartition(
                 _clearingOperationIdentifier.partition,
                 _clearingOperationIdentifier.tokenHolder,
@@ -514,7 +512,7 @@ library ClearingOps {
 
         // For Approve: create hold from holder's balance with ABAF-adjusted amount
         // Return operationData_ (holdId) only for Approve operations
-        if (_operationType == IClearingActions.ClearingActionType.Approve) {
+        if (_operationType == IClearingTypes.ClearingActionType.Approve) {
             IHoldTypes.Hold memory hold = IHoldTypes.Hold({
                 amount: holdCreationData.amount,
                 expirationTimestamp: holdCreationData.holdExpirationTimestamp,
@@ -541,7 +539,7 @@ library ClearingOps {
     // ============================================================================
 
     function adjustClearingBalances(
-        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
+        IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
         address _to,
         uint256 _amount
     ) internal {
@@ -613,7 +611,7 @@ library ClearingOps {
     // ============================================================================
 
     function beforeClearingOperation(
-        IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier,
+        IClearingTypes.ClearingOperationIdentifier memory _clearingOperationIdentifier,
         address _destination
     ) internal {
         // Trigger pending scheduled tasks and sync balance adjustments
@@ -681,7 +679,7 @@ library ClearingOps {
     }
 
     function updateClearing(
-        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
+        IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
         bytes32 _partition,
         address _tokenHolder
     ) internal returns (uint256 abaf_) {
@@ -722,9 +720,9 @@ library ClearingOps {
     }
 
     function restoreAllowanceAndRemoveClearing(
-        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
+        IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) internal returns (uint256 amount_) {
-        IClearing.ClearingOperationBasicInfo memory data = ClearingStorageWrapper.isClearingBasicInfo(
+        IClearingTypes.ClearingOperationBasicInfo memory data = ClearingStorageWrapper.isClearingBasicInfo(
             _clearingOperationIdentifier
         );
         amount_ = data.amount;
@@ -734,7 +732,7 @@ library ClearingOps {
     }
 
     function restoreClearingAllowance(
-        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
+        IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
         uint256 _amount
     ) internal {
         ThirdPartyType operatorType = ClearingStorageWrapper.getClearingThirdPartyType(_clearingOperationIdentifier);

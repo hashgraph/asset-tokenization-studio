@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IClearing } from "../../facets/layer_1/clearing/IClearing.sol";
+import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
 import { ClearingStorageWrapper } from "../../domain/asset/ClearingStorageWrapper.sol";
 import { _checkNotInitialized } from "../InitializationErrors.sol";
 
@@ -36,7 +36,7 @@ abstract contract ClearingModifiers {
      * @dev Reverts if clearing ID is invalid
      * @param _clearingOperationIdentifier The clearing operation identifier to validate
      */
-    modifier onlyWithValidClearingId(IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier) {
+    modifier onlyWithValidClearingId(IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier) {
         ClearingStorageWrapper.requireValidClearingId(_clearingOperationIdentifier);
         _;
     }

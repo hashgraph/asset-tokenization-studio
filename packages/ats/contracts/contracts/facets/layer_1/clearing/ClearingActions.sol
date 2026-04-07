@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearingActions } from "./IClearingActions.sol";
-import { IClearing } from "./IClearing.sol";
+import { IClearingTypes } from "./IClearingTypes.sol";
 import { _CLEARING_VALIDATOR_ROLE, _CLEARING_ROLE } from "../../../constants/roles.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
@@ -28,7 +28,7 @@ abstract contract ClearingActions is IClearingActions, Modifiers {
     }
 
     function approveClearingOperationByPartition(
-        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
+        IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     )
         external
         override
@@ -60,7 +60,7 @@ abstract contract ClearingActions is IClearingActions, Modifiers {
     }
 
     function cancelClearingOperationByPartition(
-        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
+        IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     )
         external
         override
@@ -83,7 +83,7 @@ abstract contract ClearingActions is IClearingActions, Modifiers {
     }
 
     function reclaimClearingOperationByPartition(
-        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
+        IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     )
         external
         override

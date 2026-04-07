@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _ADJUST_BALANCES_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { IClearing } from "../../facets/layer_1/clearing/IClearing.sol";
+import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
@@ -29,7 +29,7 @@ struct AdjustBalancesStorage {
     mapping(address => uint256) labafClearedAmountByAccount;
     mapping(address => mapping(bytes32 => uint256)) labafClearedAmountByAccountAndPartition;
     // solhint-disable-next-line max-line-length
-    mapping(address => mapping(bytes32 => mapping(IClearing.ClearingOperationType => mapping(uint256 => uint256)))) labafClearedAmountByAccountPartitionTypeAndId;
+    mapping(address => mapping(bytes32 => mapping(IClearingTypes.ClearingOperationType => mapping(uint256 => uint256)))) labafClearedAmountByAccountPartitionTypeAndId;
     // Freezes
     mapping(address => uint256) labafFrozenAmountByAccount;
     mapping(address => mapping(bytes32 => uint256)) labafFrozenAmountByAccountAndPartition;
@@ -125,7 +125,7 @@ library AdjustBalancesStorageWrapper {
     // --- Clearing LABAF ---
 
     function setClearedLabafById(
-        IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier,
+        IClearingTypes.ClearingOperationIdentifier memory _clearingOperationIdentifier,
         uint256 _labaf
     ) internal {
         _adjustBalancesStorage().labafClearedAmountByAccountPartitionTypeAndId[
@@ -143,7 +143,9 @@ library AdjustBalancesStorageWrapper {
         _adjustBalancesStorage().labafClearedAmountByAccountAndPartition[_tokenHolder][_partition] = _labaf;
     }
 
-    function removeLabafClearing(IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier) internal {
+    function removeLabafClearing(
+        IClearingTypes.ClearingOperationIdentifier memory _clearingOperationIdentifier
+    ) internal {
         delete _adjustBalancesStorage().labafClearedAmountByAccountPartitionTypeAndId[
             _clearingOperationIdentifier.tokenHolder
         ][_clearingOperationIdentifier.partition][_clearingOperationIdentifier.clearingOperationType][
@@ -261,7 +263,7 @@ library AdjustBalancesStorageWrapper {
     }
 
     function getClearingLabafById(
-        IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier
+        IClearingTypes.ClearingOperationIdentifier memory _clearingOperationIdentifier
     ) internal view returns (uint256) {
         return
             zeroToOne(

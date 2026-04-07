@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _CONTROLLER_ROLE, _ISSUER_ROLE, _AGENT_ROLE, _WILD_CARD_ROLE } from "../../../constants/roles.sol";
 import { IERC3643Batch } from "./IERC3643Batch.sol";
-import { IClearing } from "../clearing/IClearing.sol";
+import { IClearingTypes } from "../clearing/IClearingTypes.sol";
 import { IERC1644 } from "../ERC1400/ERC1644/IERC1644.sol";
 import { IProtectedPartitions } from "../../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
@@ -28,7 +28,7 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, Modifiers {
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
     {
-        if (ClearingStorageWrapper.isClearingActivated()) revert IClearing.ClearingIsActivated();
+        if (ClearingStorageWrapper.isClearingActivated()) revert IClearingTypes.ClearingIsActivated();
         ERC1594StorageWrapper.requireIdentified(msg.sender, address(0));
         ERC1594StorageWrapper.requireCompliant(msg.sender, address(0), false);
         for (uint256 i = 0; i < _toList.length; i++) {
