@@ -49,7 +49,7 @@ describe("GetAmortizationForQueryHandler", () => {
       await expect(resultPromise).rejects.toBeInstanceOf(GetAmortizationForQueryError);
 
       await expect(resultPromise).rejects.toMatchObject({
-        message: expect.stringContaining(`An error occurred while querying account's amortization: ${errorMsg}`),
+        message: expect.stringContaining(`An error occurred while querying amortization for: ${errorMsg}`),
         errorCode: ErrorCode.UncaughtQueryError,
       });
     });

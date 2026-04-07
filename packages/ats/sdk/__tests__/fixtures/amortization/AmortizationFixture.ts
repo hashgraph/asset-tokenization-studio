@@ -41,7 +41,7 @@ import BigDecimal from "@domain/context/shared/BigDecimal";
 // ---- Command Fixtures ----
 
 export const SetAmortizationCommandFixture = createFixture<SetAmortizationCommand>((command) => {
-  command.address.as(() => HederaIdPropsFixture.create().value);
+  command.securityId.as(() => HederaIdPropsFixture.create().value);
   command.recordDate.faker((faker) => faker.date.future().getTime().toString());
   command.executionDate.faker((faker) => faker.date.future().getTime().toString());
   command.tokensToRedeem.faker((faker) => faker.number.int({ min: 1 }).toString());

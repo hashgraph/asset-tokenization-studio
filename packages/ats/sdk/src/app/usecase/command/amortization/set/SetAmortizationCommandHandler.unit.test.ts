@@ -82,12 +82,12 @@ describe("SetAmortizationCommandHandler", () => {
 
         expect(result).toBeInstanceOf(SetAmortizationCommandResponse);
         expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(command.address);
-        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(command.address);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(command.securityId);
+        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(command.securityId);
         expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
           SecurityRole._CORPORATEACTIONS_ROLE,
           accountEvmAddress,
-          command.address,
+          command.securityId,
         );
         expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledTimes(1);
         expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledWith(
@@ -104,7 +104,7 @@ describe("SetAmortizationCommandHandler", () => {
           BigDecimal.fromString(command.recordDate),
           BigDecimal.fromString(command.executionDate),
           BigDecimal.fromString(command.tokensToRedeem),
-          command.address,
+          command.securityId,
         );
         expect(result.payload).toBe(parseInt(amortizationId, 16));
         expect(result.transactionId).toBe(transactionId);
