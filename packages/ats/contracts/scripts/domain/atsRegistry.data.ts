@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-07T08:19:30.243Z
+ * Generated: 2026-04-07T10:24:51.459Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -328,11 +328,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
-        name: "MaturityDateUpdated",
-        signature: "MaturityDateUpdated(address,uint256,uint256)",
-        topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
-      },
-      {
         name: "on",
         signature: "on(address,bytes32,uint256)",
         topic0: "0x0e81a3e75de9a324032d08e6d14c0e2b509aaa75489e4531bcbd54d949f33989",
@@ -382,11 +377,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
-        name: "MaturityDateUpdated",
-        signature: "MaturityDateUpdated(address,uint256,uint256)",
-        topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
-      },
-      {
         name: "on",
         signature: "on(address,bytes32,uint256)",
         topic0: "0x0e81a3e75de9a324032d08e6d14c0e2b509aaa75489e4531bcbd54d949f33989",
@@ -435,11 +425,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     events: [
-      {
-        name: "MaturityDateUpdated",
-        signature: "MaturityDateUpdated(address,uint256,uint256)",
-        topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
-      },
       {
         name: "on",
         signature: "on(address,bytes32,uint256)",
@@ -865,11 +850,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     events: [
-      {
-        name: "MaturityDateUpdated",
-        signature: "MaturityDateUpdated(address,uint256,uint256)",
-        topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
-      },
       {
         name: "on",
         signature: "on(address,bytes32,uint256)",
@@ -4482,17 +4462,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
   BondStorageWrapper: {
     name: "BondStorageWrapper",
     methods: [],
-    events: [
-      {
-        name: "CouponSet",
-        signature: "CouponSet(bytes32,uint256,address,IBondRead.Coupon)",
-        topic0: "0x1d6989dd898a107b9d5cee785b926348c7339560721a818c4013b3cca11c137f",
-      },
-    ],
-    errors: [
-      { name: "BondMaturityDateWrong", signature: "BondMaturityDateWrong()", selector: "0x67d08758" },
-      { name: "CouponCreationFailed", signature: "CouponCreationFailed()", selector: "0x3a11c78b" },
-    ],
   },
 
   CapStorageWrapper: {

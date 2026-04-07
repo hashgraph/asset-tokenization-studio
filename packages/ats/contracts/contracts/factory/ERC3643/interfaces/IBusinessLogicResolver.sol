@@ -5,6 +5,7 @@
 // `erc3643-clone-interfaces` task in `tasks/compile.ts`.
 // Edits to this file will be silently overwritten.
 pragma solidity ^0.8.17;
+import { TRexIDiamondCutManager as IDiamondCutManager } from "./IDiamondCutManager.sol";
 
 /**
  * @title Contracts Repository
@@ -19,7 +20,7 @@ pragma solidity ^0.8.17;
  *			Registering a business logic (register = update its latest version or add it to the registry) will increase the
  *			latest version for all Business Logics by 1.
  */
-interface TRexIBusinessLogicResolver {
+interface TRexIBusinessLogicResolver is IDiamondCutManager {
     enum VersionStatus {
         NONE,
         ACTIVATED,

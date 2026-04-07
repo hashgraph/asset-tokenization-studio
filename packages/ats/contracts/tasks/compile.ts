@@ -68,9 +68,11 @@ task("erc3643-clone-interfaces", async (_, hre) => {
   const targetDir = hre.config.paths.sources + "/factory/ERC3643/interfaces";
   const interfacesToClone: DataSustitution[] = [
     { original: "IAccessControl" },
-    { original: "IBondRead" },
+    { original: "IBondTypes" },
+    { original: "IBondRead", removeImports: false, removeHierarchy: false },
     {
       original: "IBusinessLogicResolver",
+      removeImports: false,
       removeHierarchy: false,
     },
     {
@@ -79,6 +81,7 @@ task("erc3643-clone-interfaces", async (_, hre) => {
     },
     {
       original: "IDiamondLoupe",
+      removeImports: false,
       removeHierarchy: false,
     },
     { original: "IEquity" },
@@ -170,10 +173,10 @@ task("erc3643-clone-interfaces", async (_, hre) => {
         source = source.replace(/^pragma solidity\s+[^;]+;/m, "pragma solidity ^0.8.17;");
       }
 
-      // Rename interface/contract and remove inheritance in a single step
+      // Rename interface/contract; optionally preserve inheritance clause
       source = source.replace(
         new RegExp(`(contract|interface)\\s+${originalArtifact.contractName}\\b(\\s+is[^\\{]+)?`, "m"),
-        `$1 TRex${originalArtifact.contractName}`,
+        i.removeHierarchy ? `$1 TRex${originalArtifact.contractName}` : `$1 TRex${originalArtifact.contractName}$2`,
       );
 
       const targetPath = `${targetDir}/${originalArtifact.contractName}.sol`;

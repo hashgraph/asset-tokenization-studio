@@ -6,7 +6,9 @@
 // Edits to this file will be silently overwritten.
 pragma solidity ^0.8.17;
 
-interface TRexIDiamondLoupe {
+import { TRexIStaticFunctionSelectors as IStaticFunctionSelectors } from "./IStaticFunctionSelectors.sol";
+
+interface TRexIDiamondLoupe is IStaticFunctionSelectors {
     struct Facet {
         bytes32 id;
         address addr;

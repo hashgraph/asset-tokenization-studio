@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBond } from "./IBond.sol";
-import { IBondRead } from "./IBondRead.sol";
+import { IBondManagement } from "./IBondManagement.sol";
+import { IBondTypes } from "./IBondTypes.sol";
 import { IKyc } from "../../layer_1/kyc/IKyc.sol";
 import { _CORPORATE_ACTION_ROLE, _BOND_MANAGER_ROLE, _MATURITY_REDEEMER_ROLE } from "../../../constants/roles.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
@@ -23,7 +23,7 @@ error InterestRateIsKpiLinked();
  * @notice Inherit from this contract to gain access to bond management functions
  * @author Asset Tokenization Studio Team
  */
-abstract contract Bond is IBond, TimestampProvider, Modifiers {
+abstract contract Bond is IBondManagement, TimestampProvider, Modifiers {
     /**
      * @dev Redeems all tokens at maturity for a token holder
      *
@@ -118,7 +118,7 @@ abstract contract Bond is IBond, TimestampProvider, Modifiers {
      * Emits CouponSet event on success
      */
     function setCoupon(
-        IBondRead.Coupon calldata _newCoupon
+        IBondTypes.Coupon calldata _newCoupon
     )
         external
         override
@@ -131,7 +131,7 @@ abstract contract Bond is IBond, TimestampProvider, Modifiers {
         requireValidTimestamp(_newCoupon.fixingDate)
         returns (uint256 couponID_)
     {
-        IBondRead.Coupon memory coupon = _prepareCoupon(_newCoupon);
+        IBondTypes.Coupon memory coupon = _prepareCoupon(_newCoupon);
         bytes32 corporateActionID;
         (corporateActionID, couponID_) = BondStorageWrapper.setCoupon(coupon);
     }
@@ -164,11 +164,11 @@ abstract contract Bond is IBond, TimestampProvider, Modifiers {
         return success_;
     }
 
-    function _prepareCoupon(IBondRead.Coupon calldata _newCoupon) internal virtual returns (IBondRead.Coupon memory) {
+    function _prepareCoupon(IBondTypes.Coupon calldata _newCoupon) internal virtual returns (IBondTypes.Coupon memory) {
         // For KPI-linked rate bonds, rate must be PENDING (0), rate must be 0, and rateDecimals must be 0
         if (InterestRateStorageWrapper.isKpiLinkedRateInitialized()) {
             if (
-                _newCoupon.rateStatus != IBondRead.RateCalculationStatus.PENDING ||
+                _newCoupon.rateStatus != IBondTypes.RateCalculationStatus.PENDING ||
                 _newCoupon.rate != 0 ||
                 _newCoupon.rateDecimals != 0
             ) {
