@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _WILD_CARD_ROLE } from "../../../constants/roles.sol";
 import { IClearingHoldCreation } from "./IClearingHoldCreation.sol";
-import { Hold } from "../hold/IHold.sol";
+import { IHoldTypes } from "../hold/IHoldTypes.sol";
 import { IProtectedPartitions } from "../../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
@@ -20,7 +20,7 @@ import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTrave
 abstract contract ClearingHoldCreation is IClearingHoldCreation, Modifiers {
     function clearingCreateHoldByPartition(
         ClearingOperation calldata _clearingOperation,
-        Hold calldata _hold
+        IHoldTypes.Hold calldata _hold
     )
         external
         override
@@ -46,7 +46,7 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, Modifiers {
 
     function clearingCreateHoldFromByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
-        Hold calldata _hold
+        IHoldTypes.Hold calldata _hold
     )
         external
         override
@@ -85,7 +85,7 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, Modifiers {
 
     function operatorClearingCreateHoldByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
-        Hold calldata _hold
+        IHoldTypes.Hold calldata _hold
     )
         external
         override
@@ -122,7 +122,7 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, Modifiers {
 
     function protectedClearingCreateHoldByPartition(
         ProtectedClearingOperation calldata _protectedClearingOperation,
-        Hold calldata _hold,
+        IHoldTypes.Hold calldata _hold,
         bytes calldata _signature
     )
         external

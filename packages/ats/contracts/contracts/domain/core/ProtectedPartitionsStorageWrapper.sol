@@ -5,7 +5,7 @@ import { _PROTECTED_PARTITIONS_PARTICIPANT_ROLE } from "../../constants/roles.so
 import { _PROTECTED_PARTITIONS_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IProtectedPartitions } from "../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 import { IClearing } from "../../facets/layer_1/clearing/IClearing.sol";
-import { Hold, ProtectedHold } from "../../facets/layer_1/hold/IHold.sol";
+import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
 import { AccessControlStorageWrapper } from "./AccessControlStorageWrapper.sol";
 import { ResolverProxyStorageWrapper } from "./ResolverProxyStorageWrapper.sol";
 import {
@@ -157,7 +157,7 @@ library ProtectedPartitionsStorageWrapper {
     function checkCreateHoldSignature(
         bytes32 _partition,
         address _from,
-        ProtectedHold memory _protectedHold,
+        IHoldTypes.ProtectedHold memory _protectedHold,
         bytes calldata _signature,
         string memory _name
     ) internal view {
@@ -168,7 +168,7 @@ library ProtectedPartitionsStorageWrapper {
     function isCreateHoldSignatureValid(
         bytes32 _partition,
         address _from,
-        ProtectedHold memory _protectedHold,
+        IHoldTypes.ProtectedHold memory _protectedHold,
         bytes calldata _signature,
         string memory _name
     ) internal view returns (bool) {
@@ -187,7 +187,7 @@ library ProtectedPartitionsStorageWrapper {
 
     function checkClearingCreateHoldSignature(
         IClearing.ProtectedClearingOperation memory _protectedClearingOperation,
-        Hold memory _hold,
+        IHoldTypes.Hold memory _hold,
         bytes calldata _signature,
         string memory _name
     ) internal view {
@@ -197,7 +197,7 @@ library ProtectedPartitionsStorageWrapper {
 
     function isClearingCreateHoldSignatureValid(
         IClearing.ProtectedClearingOperation memory _protectedClearingOperation,
-        Hold memory _hold,
+        IHoldTypes.Hold memory _hold,
         bytes calldata _signature,
         string memory _name
     ) internal view returns (bool) {

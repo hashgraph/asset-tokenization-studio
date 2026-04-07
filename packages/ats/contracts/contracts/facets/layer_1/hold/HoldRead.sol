@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { HoldIdentifier } from "./IHold.sol";
+import { IHoldTypes } from "./IHoldTypes.sol";
 import { IHoldRead } from "./IHoldRead.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 import { HoldStorageWrapper } from "../../../domain/asset/HoldStorageWrapper.sol";
@@ -36,7 +36,7 @@ abstract contract HoldRead is IHoldRead, TimestampProvider {
     }
 
     function getHoldForByPartition(
-        HoldIdentifier calldata _holdIdentifier
+        IHoldTypes.HoldIdentifier calldata _holdIdentifier
     )
         external
         view
@@ -54,7 +54,9 @@ abstract contract HoldRead is IHoldRead, TimestampProvider {
         return HoldStorageWrapper.getHoldForByPartitionAdjustedAt(_holdIdentifier, _getBlockTimestamp());
     }
 
-    function getHoldThirdParty(HoldIdentifier calldata _holdIdentifier) external view override returns (address) {
+    function getHoldThirdParty(
+        IHoldTypes.HoldIdentifier calldata _holdIdentifier
+    ) external view override returns (address) {
         return HoldStorageWrapper.getHoldThirdParty(_holdIdentifier);
     }
 }

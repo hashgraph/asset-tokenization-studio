@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { HoldStorageWrapper } from "../../../domain/asset/HoldStorageWrapper.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
-import { Hold, HoldIdentifier } from "./IHold.sol";
+import { IHoldTypes } from "./IHoldTypes.sol";
 import { IHoldTokenHolder } from "./IHoldTokenHolder.sol";
 import { IProtectedPartitions } from "../../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
@@ -43,7 +43,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
      */
     function createHoldByPartition(
         bytes32 _partition,
-        Hold calldata _hold
+        IHoldTypes.Hold calldata _hold
     )
         external
         override
@@ -88,7 +88,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
     function createHoldFromByPartition(
         bytes32 _partition,
         address _from,
-        Hold calldata _hold,
+        IHoldTypes.Hold calldata _hold,
         bytes calldata _operatorData
     )
         external
@@ -134,7 +134,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
      * @return partition_ The partition identifier
      */
     function executeHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier,
+        IHoldTypes.HoldIdentifier calldata _holdIdentifier,
         address _to,
         uint256 _amount
     )
@@ -171,7 +171,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
      * @return success_ Boolean indicating success
      */
     function releaseHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier,
+        IHoldTypes.HoldIdentifier calldata _holdIdentifier,
         uint256 _amount
     )
         external
@@ -202,7 +202,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
      * @return success_ Boolean indicating success
      */
     function reclaimHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier
+        IHoldTypes.HoldIdentifier calldata _holdIdentifier
     )
         external
         override

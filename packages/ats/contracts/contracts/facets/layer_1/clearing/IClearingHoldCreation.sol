@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Hold } from "../hold/IHold.sol";
+import { IHoldTypes } from "../hold/IHoldTypes.sol";
 import { IClearing } from "./IClearing.sol";
 import { IClearingTypes } from "./IClearingTypes.sol";
 
@@ -14,7 +14,7 @@ interface IClearingHoldCreation is IClearing, IClearingTypes {
      */
     function clearingCreateHoldByPartition(
         ClearingOperation calldata _clearingOperation,
-        Hold calldata _hold
+        IHoldTypes.Hold calldata _hold
     ) external returns (bool success_, uint256 clearingId_);
 
     /**
@@ -26,7 +26,7 @@ interface IClearingHoldCreation is IClearing, IClearingTypes {
      */
     function clearingCreateHoldFromByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
-        Hold calldata _hold
+        IHoldTypes.Hold calldata _hold
     ) external returns (bool success_, uint256 clearingId_);
 
     /**
@@ -38,7 +38,7 @@ interface IClearingHoldCreation is IClearing, IClearingTypes {
      */
     function operatorClearingCreateHoldByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
-        Hold calldata _hold
+        IHoldTypes.Hold calldata _hold
     ) external returns (bool success_, uint256 clearingId_);
 
     /**
@@ -51,7 +51,7 @@ interface IClearingHoldCreation is IClearing, IClearingTypes {
      */
     function protectedClearingCreateHoldByPartition(
         ProtectedClearingOperation calldata _protectedClearingOperation,
-        Hold calldata _hold,
+        IHoldTypes.Hold calldata _hold,
         bytes calldata _signature
     ) external returns (bool success_, uint256 clearingId_);
 

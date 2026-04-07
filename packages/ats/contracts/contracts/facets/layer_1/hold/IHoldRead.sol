@@ -2,9 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
-import { HoldIdentifier } from "./IHold.sol";
+import { IHoldTypes } from "./IHoldTypes.sol";
 
-interface IHoldRead {
+interface IHoldRead is IHoldTypes {
     /**
      * @notice Gets the total amount of tokens held for a specific token holder
      * @param _tokenHolder The address of the token holder
@@ -60,7 +60,7 @@ interface IHoldRead {
      * @return thirdPartyType_ The type of third party associated with the hold
      */
     function getHoldForByPartition(
-        HoldIdentifier calldata _holdIdentifier
+        IHoldTypes.HoldIdentifier calldata _holdIdentifier
     )
         external
         view
@@ -74,5 +74,7 @@ interface IHoldRead {
             ThirdPartyType thirdPartyType_
         );
 
-    function getHoldThirdParty(HoldIdentifier calldata _holdIdentifier) external view returns (address thirdParty_);
+    function getHoldThirdParty(
+        IHoldTypes.HoldIdentifier calldata _holdIdentifier
+    ) external view returns (address thirdParty_);
 }

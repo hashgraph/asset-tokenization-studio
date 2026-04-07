@@ -13,7 +13,7 @@ import { IClearingActions } from "../../facets/layer_1/clearing/IClearingActions
 import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { IERC3643Management } from "../../facets/layer_1/ERC3643/IERC3643Management.sol";
-import { Hold } from "../../facets/layer_1/hold/IHold.sol";
+import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
 import { ThirdPartyType } from "../asset/types/ThirdPartyType.sol";
 import { HoldOps } from "./HoldOps.sol";
 import { _checkNounceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
@@ -144,7 +144,7 @@ library ClearingOps {
     function clearingHoldCreationCreation(
         IClearing.ClearingOperation memory _clearingOperation,
         address _from,
-        Hold calldata _hold,
+        IHoldTypes.Hold calldata _hold,
         bytes memory _operatorData,
         ThirdPartyType _thirdPartyType
     ) public returns (bool success_, uint256 clearingId_) {
@@ -307,7 +307,7 @@ library ClearingOps {
 
     function protectedClearingCreateHoldByPartition(
         IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
-        Hold calldata _hold,
+        IHoldTypes.Hold calldata _hold,
         bytes calldata _signature
     ) public returns (bool success_, uint256 clearingId_) {
         _checkNounceAndDeadline(
@@ -515,7 +515,7 @@ library ClearingOps {
         // For Approve: create hold from holder's balance with ABAF-adjusted amount
         // Return operationData_ (holdId) only for Approve operations
         if (_operationType == IClearingActions.ClearingActionType.Approve) {
-            Hold memory hold = Hold({
+            IHoldTypes.Hold memory hold = IHoldTypes.Hold({
                 amount: holdCreationData.amount,
                 expirationTimestamp: holdCreationData.holdExpirationTimestamp,
                 escrow: holdCreationData.holdEscrow,
@@ -885,7 +885,7 @@ library ClearingOps {
         address _from,
         bytes32 _partition,
         uint256 _clearingId,
-        Hold calldata _hold,
+        IHoldTypes.Hold calldata _hold,
         uint256 _expirationTimestamp,
         bytes memory _data,
         bytes memory _operatorData,

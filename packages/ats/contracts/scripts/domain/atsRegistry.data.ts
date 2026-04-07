@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-07T06:27:21.768Z
+ * Generated: 2026-04-07T08:19:30.243Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -2676,24 +2676,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
-        name: "ControllerHeldByPartition",
-        signature: "ControllerHeldByPartition(address,address,bytes32,uint256,Hold,bytes)",
-        topic0: "0xf6f3741306d730c309f18e6262f05de4790259d916f67334766f2f71dbf00b11",
-      },
-      {
         name: "on",
-        signature: "on(bytes32,address,Hold,bytes)",
-        topic0: "0xd870e45eb1ba04173c1d2416f69cb8e771b45eb6dc760ea82a594d1d017612eb",
-      },
-      {
-        name: "OperatorHeldByPartition",
-        signature: "OperatorHeldByPartition(address,address,bytes32,uint256,Hold,bytes)",
-        topic0: "0xecb0a532842468318362280a5b81ec910b4d495202a817fc545fd2b7628559e4",
-      },
-      {
-        name: "ProtectedHeldByPartition",
-        signature: "ProtectedHeldByPartition(address,address,bytes32,uint256,Hold,bytes)",
-        topic0: "0xdf892a9d471e7ee25020da7f5f096608aadc1cbdf9aacb751bf1b83eb97a8d58",
+        signature: "on(bytes32,address,IHoldTypes.Hold,bytes)",
+        topic0: "0xe59c3d153208737dc18e29b6e90d2cfbcbbbc8680665c798d7e8f4710073d29e",
       },
     ],
     factory: (signer) => new HoldManagementFacet__factory(signer),
@@ -2785,33 +2770,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function releaseHoldByPartition((bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, uint256 _amount) returns (bool success_)",
         selector: "0xf8bafc1c",
-      },
-    ],
-    events: [
-      {
-        name: "HeldByPartition",
-        signature: "HeldByPartition(address,address,bytes32,uint256,Hold,bytes)",
-        topic0: "0x8aaecda291be1880bb8f1b74d739076b63e172f3758535440d4781002a135663",
-      },
-      {
-        name: "HeldFromByPartition",
-        signature: "HeldFromByPartition(address,address,bytes32,uint256,Hold,bytes)",
-        topic0: "0x89e7674560e6cad671bf2d392a62a88b25b960e62476504e038081c3aabe7ece",
-      },
-      {
-        name: "HoldByPartitionExecuted",
-        signature: "HoldByPartitionExecuted(address,bytes32,uint256,uint256,address)",
-        topic0: "0x4fb20409d1b2a56fa4c5b29c11d9b1e148649db67860c5648a8a86f35edf8582",
-      },
-      {
-        name: "HoldByPartitionReclaimed",
-        signature: "HoldByPartitionReclaimed(address,address,bytes32,uint256,uint256)",
-        topic0: "0xee0ec155026031ca64823d8fbf00832ff3f96c7da0994432ddc1a32c72022a09",
-      },
-      {
-        name: "HoldByPartitionReleased",
-        signature: "HoldByPartitionReleased(address,bytes32,uint256,uint256)",
-        topic0: "0x6c167944f4b372d42d168efc93004d7e517cb82a501d67490af33f95530ca50e",
       },
     ],
     factory: (signer) => new HoldTokenHolderFacet__factory(signer),

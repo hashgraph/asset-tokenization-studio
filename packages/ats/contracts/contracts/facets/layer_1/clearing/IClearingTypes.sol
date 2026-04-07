@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Hold } from "../hold/IHold.sol";
+import { IHoldTypes } from "../hold/IHoldTypes.sol";
 
 interface IClearingTypes {
     event ClearedRedeemByPartition(
@@ -53,7 +53,7 @@ interface IClearingTypes {
         address indexed tokenHolder,
         bytes32 partition,
         uint256 clearingId,
-        Hold hold,
+        IHoldTypes.Hold hold,
         uint256 expirationDate,
         bytes data,
         bytes operatorData
@@ -64,7 +64,7 @@ interface IClearingTypes {
         address indexed tokenHolder,
         bytes32 partition,
         uint256 clearingId,
-        Hold hold,
+        IHoldTypes.Hold hold,
         uint256 expirationDate,
         bytes data,
         bytes operatorData
@@ -75,7 +75,7 @@ interface IClearingTypes {
         address indexed tokenHolder,
         bytes32 partition,
         uint256 clearingId,
-        Hold hold,
+        IHoldTypes.Hold hold,
         uint256 expirationDate,
         bytes data,
         bytes operatorData
@@ -86,7 +86,7 @@ interface IClearingTypes {
         address indexed tokenHolder,
         bytes32 partition,
         uint256 clearingId,
-        Hold hold,
+        IHoldTypes.Hold hold,
         uint256 expirationDate,
         bytes data,
         bytes operatorData

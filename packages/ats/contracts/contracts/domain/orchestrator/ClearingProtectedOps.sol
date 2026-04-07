@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ClearingOps } from "./ClearingOps.sol";
 import { IClearing } from "../../facets/layer_1/clearing/IClearing.sol";
-import { Hold } from "../../facets/layer_1/hold/IHold.sol";
+import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../asset/ERC1594StorageWrapper.sol";
@@ -87,7 +87,7 @@ library ClearingProtectedOps {
 
     function protectedClearingCreateHoldByPartition(
         IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
-        Hold calldata _hold,
+        IHoldTypes.Hold calldata _hold,
         bytes calldata _signature
     ) public returns (bool success_, uint256 clearingId_) {
         _checkNounceAndDeadline(
