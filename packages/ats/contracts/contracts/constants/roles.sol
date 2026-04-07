@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+// CANONICAL SOURCE — single source of truth for ATS role identifiers.
+// A pragma-rewritten copy is auto-generated to
+// `contracts/factory/ERC3643/interfaces/roles.sol` on every compile by the
+// `erc3643-clone-interfaces` task in `tasks/compile.ts` for T-REX ABI compatibility.
+// Do NOT edit the generated copy — it is rewritten on every `npx hardhat compile`.
+
 // solhint-disable max-line-length
 
 bytes32 constant _DEFAULT_ADMIN_ROLE = 0x00;

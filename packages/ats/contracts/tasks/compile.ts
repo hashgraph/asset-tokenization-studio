@@ -39,6 +39,25 @@ function patchTypeChainFiles(pattern: string) {
   });
 }
 
+function autoGenHeader(sourcePath: string): string {
+  return [
+    "// AUTO-GENERATED — DO NOT EDIT.",
+    `// Source: ${sourcePath}`,
+    "// Regenerated on every `npx hardhat compile` by the",
+    "// `erc3643-clone-interfaces` task in `tasks/compile.ts`.",
+    "// Edits to this file will be silently overwritten.",
+  ].join("\n");
+}
+
+function injectHeader(source: string, header: string): string {
+  // Insert the header immediately after the SPDX line if present, otherwise at the top.
+  const spdxMatch = source.match(/^(\/\/\s*SPDX-License-Identifier:[^\n]*\n)/);
+  if (spdxMatch) {
+    return source.replace(spdxMatch[0], `${spdxMatch[0]}${header}\n`);
+  }
+  return `${header}\n${source}`;
+}
+
 task("erc3643-clone-interfaces", async (_, hre) => {
   interface DataSustitution {
     original: string;
@@ -158,7 +177,8 @@ task("erc3643-clone-interfaces", async (_, hre) => {
       );
 
       const targetPath = `${targetDir}/${originalArtifact.contractName}.sol`;
-      fs.writeFileSync(targetPath, source, "utf8");
+      const header = autoGenHeader(originalArtifact.sourceName);
+      fs.writeFileSync(targetPath, injectHeader(source, header), "utf8");
       console.log(`Generated: ${targetPath}`);
     }),
   );
@@ -172,7 +192,8 @@ task("erc3643-clone-interfaces", async (_, hre) => {
 
       content = content.replace(/^pragma solidity\s+[^;]+;/m, "pragma solidity ^0.8.17;");
 
-      fs.writeFileSync(dst, content, "utf8");
+      const header = autoGenHeader(`contracts/${c.src}.sol`);
+      fs.writeFileSync(dst, injectHeader(content, header), "utf8");
       console.log(`Copied constant with updated pragma: ${dst}`);
     } else {
       console.warn(`Not found: ${src}`);
