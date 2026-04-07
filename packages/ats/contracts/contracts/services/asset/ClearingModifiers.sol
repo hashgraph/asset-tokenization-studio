@@ -50,18 +50,60 @@ abstract contract ClearingModifiers {
         _;
     }
 
-    modifier onlyValidClearingTransferByPartition(
+    modifier onlyValidOperatorClearingTransferByPartition(
         uint256 _expirationTimestamp,
-        address _msgSender,
+        address _account,
         address _to,
         address _from,
         bytes32 _partition
     ) {
-        ClearingStorageWrapper.checkClearingTransferByPartition(
+        ClearingStorageWrapper.checkOperatorClearingTransferByPartition(
             _expirationTimestamp,
-            _msgSender,
+            _account,
             _to,
             _from,
+            _partition
+        );
+        _;
+    }
+
+    modifier onlyValidClearingCreateHoldByPartition(
+        uint256 _holdExpirationTimestamp,
+        uint256 _operationExpirationTimestamp,
+        address _account,
+        address _to,
+        address _from,
+        address _escrow,
+        bytes32 _partition
+    ) {
+        ClearingStorageWrapper.checkClearingCreateHoldByPartition(
+            _holdExpirationTimestamp,
+            _operationExpirationTimestamp,
+            _account,
+            _to,
+            _from,
+            _escrow,
+            _partition
+        );
+        _;
+    }
+
+    modifier onlyValidOperatorClearingCreateHoldByPartition(
+        uint256 _holdExpirationTimestamp,
+        uint256 _operationExpirationTimestamp,
+        address _account,
+        address _to,
+        address _from,
+        address _escrow,
+        bytes32 _partition
+    ) {
+        ClearingStorageWrapper.checkOperatorClearingCreateHoldByPartition(
+            _holdExpirationTimestamp,
+            _operationExpirationTimestamp,
+            _account,
+            _to,
+            _from,
+            _escrow,
             _partition
         );
         _;

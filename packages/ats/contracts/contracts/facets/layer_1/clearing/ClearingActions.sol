@@ -37,13 +37,10 @@ abstract contract ClearingActions is IClearingActions, Modifiers {
         onlyClearingActivated
         onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
         onlyWithValidClearingId(_clearingOperationIdentifier)
+        onlyValidExpirationTimestampForClearing(_clearingOperationIdentifier, false)
+        onlyIdentifiedAddresses(_clearingOperationIdentifier.tokenHolder, address(0))
         returns (bool success_, bytes32 partition_)
     {
-        ClearingStorageWrapper.requireExpirationTimestamp(_clearingOperationIdentifier, false);
-
-        // Check identity verification for tokenHolder
-        ERC1594StorageWrapper.requireIdentified(_clearingOperationIdentifier.tokenHolder, address(0));
-
         bytes memory operationData;
         (success_, operationData, partition_) = ClearingOps.approveClearingOperationByPartition(
             _clearingOperationIdentifier
@@ -69,9 +66,9 @@ abstract contract ClearingActions is IClearingActions, Modifiers {
         onlyClearingActivated
         onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
         onlyWithValidClearingId(_clearingOperationIdentifier)
+        onlyValidExpirationTimestampForClearing(_clearingOperationIdentifier, false)
         returns (bool success_)
     {
-        ClearingStorageWrapper.requireExpirationTimestamp(_clearingOperationIdentifier, false);
         success_ = ClearingOps.cancelClearingOperationByPartition(_clearingOperationIdentifier);
         emit ClearingOperationCanceled(
             msg.sender,
@@ -91,10 +88,10 @@ abstract contract ClearingActions is IClearingActions, Modifiers {
         onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
         onlyWithValidClearingId(_clearingOperationIdentifier)
         onlyClearingActivated
+        onlyValidExpirationTimestampForClearing(_clearingOperationIdentifier, true)
+        onlyIdentifiedAddresses(_clearingOperationIdentifier.tokenHolder, address(0))
         returns (bool success_)
     {
-        ERC1594StorageWrapper.requireIdentified(_clearingOperationIdentifier.tokenHolder, address(0));
-        ClearingStorageWrapper.requireExpirationTimestamp(_clearingOperationIdentifier, true);
         success_ = ClearingOps.reclaimClearingOperationByPartition(_clearingOperationIdentifier);
         emit ClearingOperationReclaimed(
             msg.sender,

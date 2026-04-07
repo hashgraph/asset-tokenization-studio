@@ -487,7 +487,7 @@ library ClearingStorageWrapper {
         }
     }
 
-    function checkClearingTransferByPartition(
+    function checkOperatorClearingTransferByPartition(
         uint256 _expirationTimestamp,
         address _account,
         address _to,
@@ -501,6 +501,46 @@ library ClearingStorageWrapper {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
         ERC1410StorageWrapper.requireValidAddress(_from);
         ERC1410StorageWrapper.requireValidAddress(_to);
+        ERC1410StorageWrapper.requireOperator(_partition, _from);
+    }
+
+    function checkClearingCreateHoldByPartition(
+        uint256 _holdExpirationTimestamp,
+        uint256 _operationExpirationTimestamp,
+        address _account,
+        address _to,
+        address _from,
+        address _escrow,
+        bytes32 _partition
+    ) internal view {
+        LockStorageWrapper.requireValidExpirationTimestamp(_holdExpirationTimestamp);
+        LockStorageWrapper.requireValidExpirationTimestamp(_operationExpirationTimestamp);
+        ERC3643StorageWrapper.requireUnrecoveredAddress(_account);
+        ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
+        ERC3643StorageWrapper.requireUnrecoveredAddress(_from);
+        ERC1410StorageWrapper.requireValidAddress(_escrow);
+        ERC1410StorageWrapper.requireValidAddress(_from);
+        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
+    }
+
+    function checkOperatorClearingCreateHoldByPartition(
+        uint256 _holdExpirationTimestamp,
+        uint256 _operationExpirationTimestamp,
+        address _account,
+        address _to,
+        address _from,
+        address _escrow,
+        bytes32 _partition
+    ) internal view {
+        checkClearingCreateHoldByPartition(
+            _holdExpirationTimestamp,
+            _operationExpirationTimestamp,
+            _account,
+            _to,
+            _from,
+            _escrow,
+            _partition
+        );
         ERC1410StorageWrapper.requireOperator(_partition, _from);
     }
 

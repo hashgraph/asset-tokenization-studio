@@ -52,20 +52,18 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, Modifiers {
         override
         onlyUnpaused
         onlyClearingActivated
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
-        onlyUnrecoveredAddress(msg.sender)
-        onlyUnrecoveredAddress(_hold.to)
-        onlyUnrecoveredAddress(_clearingOperationFrom.from)
-        notZeroAddress(_hold.escrow)
-        notZeroAddress(_clearingOperationFrom.from)
+        onlyValidClearingCreateHoldByPartition(
+            _hold.expirationTimestamp,
+            _clearingOperationFrom.clearingOperation.expirationTimestamp,
+            msg.sender,
+            _hold.to,
+            _clearingOperationFrom.from,
+            _hold.escrow,
+            _clearingOperationFrom.clearingOperation.partition
+        )
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 clearingId_)
     {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        );
-
         (success_, clearingId_) = ClearingOps.clearingHoldCreationCreation(
             _clearingOperationFrom.clearingOperation,
             _clearingOperationFrom.from,
@@ -91,26 +89,18 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, Modifiers {
         override
         onlyUnpaused
         onlyClearingActivated
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
-        onlyUnrecoveredAddress(msg.sender)
-        onlyUnrecoveredAddress(_hold.to)
-        onlyUnrecoveredAddress(_clearingOperationFrom.from)
-        notZeroAddress(_hold.escrow)
-        notZeroAddress(_clearingOperationFrom.from)
+        onlyValidOperatorClearingCreateHoldByPartition(
+            _hold.expirationTimestamp,
+            _clearingOperationFrom.clearingOperation.expirationTimestamp,
+            msg.sender,
+            _hold.to,
+            _clearingOperationFrom.from,
+            _hold.escrow,
+            _clearingOperationFrom.clearingOperation.partition
+        )
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 clearingId_)
     {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        );
-        {
-            ERC1410StorageWrapper.requireOperator(
-                _clearingOperationFrom.clearingOperation.partition,
-                _clearingOperationFrom.from
-            );
-        }
-
         (success_, clearingId_) = ClearingOps.clearingHoldCreationCreation(
             _clearingOperationFrom.clearingOperation,
             _clearingOperationFrom.from,

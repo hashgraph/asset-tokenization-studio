@@ -26,4 +26,15 @@ abstract contract ERC1410Modifiers {
         ERC1410StorageWrapper.requireValidAddress(_account);
         _;
     }
+
+    /**
+     * @dev Modifier that validates that an account is the operator for a partition
+     *
+     * @param _partition The partition
+     * @param _account The account
+     */
+    modifier onlyOperator(bytes32 _partition, address _account) {
+        ERC1410StorageWrapper.requireOperator(_partition, _account);
+        _;
+    }
 }

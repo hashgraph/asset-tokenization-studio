@@ -85,15 +85,9 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider, Modifier
         notZeroAddress(_clearingOperationFrom.from)
         onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyOperator(_clearingOperationFrom.clearingOperation.partition, _clearingOperationFrom.from)
         returns (bool success_, uint256 clearingId_)
     {
-        {
-            ERC1410StorageWrapper.requireOperator(
-                _clearingOperationFrom.clearingOperation.partition,
-                _clearingOperationFrom.from
-            );
-        }
-
         (success_, clearingId_) = ClearingOps.clearingRedeemCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,

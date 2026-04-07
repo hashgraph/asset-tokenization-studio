@@ -74,7 +74,7 @@ abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider, Modi
         onlyUnpaused
         onlyClearingActivated
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidClearingTransferByPartition(
+        onlyValidOperatorClearingTransferByPartition(
             _clearingOperationFrom.clearingOperation.expirationTimestamp,
             EvmAccessors.getMsgSender(),
             _to,

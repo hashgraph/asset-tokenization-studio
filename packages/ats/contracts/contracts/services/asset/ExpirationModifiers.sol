@@ -40,8 +40,8 @@ abstract contract ExpirationModifiers {
      * @param _clearingOperationIdentifier The clearing operation identifier
      * @param _mustBeExpired Whether the operation must be expired
      */
-    modifier validateExpirationTimestamp(
-        IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
+    modifier onlyValidExpirationTimestampForClearing(
+        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
         bool _mustBeExpired
     ) {
         ClearingStorageWrapper.requireExpirationTimestamp(_clearingOperationIdentifier, _mustBeExpired);
