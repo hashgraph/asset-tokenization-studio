@@ -46,11 +46,7 @@ describe("HederaWalletConnectTransactionAdapter", () => {
     jest.clearAllMocks();
 
     // Create adapter with mocked dependencies
-    adapter = new HederaWalletConnectTransactionAdapter(
-      mockEventService,
-      mockNetworkService,
-      mockMirrorNodeAdapter,
-    );
+    adapter = new HederaWalletConnectTransactionAdapter(mockEventService, mockNetworkService, mockMirrorNodeAdapter);
   });
 
   describe("constructor", () => {
@@ -100,9 +96,9 @@ describe("HederaWalletConnectTransactionAdapter", () => {
 
       // Mock connectWalletConnect to avoid actual connection
       adapter.connectWalletConnect = jest.fn().mockResolvedValue(testnet);
-      adapter.getAccount = jest.fn().mockReturnValue(
-        new Account({ id: "0.0.123", publicKey: undefined, evmAddress: "0xabc" }),
-      );
+      adapter.getAccount = jest
+        .fn()
+        .mockReturnValue(new Account({ id: "0.0.123", publicKey: undefined, evmAddress: "0xabc" }));
 
       await adapter.register(settings);
 

@@ -227,10 +227,7 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
       LogService.logTrace(`[HWC v2] Result: ${JSON.stringify(result)}`);
 
       const txResponse = result as any;
-      return new TransactionResponse(
-        txResponse?.transactionId || txResponse?.result?.transactionId || "",
-        txResponse,
-      );
+      return new TransactionResponse(txResponse?.transactionId || txResponse?.result?.transactionId || "", txResponse);
     } catch (error) {
       if (error instanceof Error) {
         LogService.logError(error.stack);
@@ -294,10 +291,7 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
 
     LogService.logTrace(`[HWC v2 EVM] Sending eth_sendTransaction: ${JSON.stringify(txParams)}`);
 
-    const txHash = await this.hederaProvider.request(
-      { method: "eth_sendTransaction", params: [txParams] },
-      chainRef,
-    );
+    const txHash = await this.hederaProvider.request({ method: "eth_sendTransaction", params: [txParams] }, chainRef);
 
     const provider = this.rpcProvider();
     const receipt = await provider.waitForTransaction(txHash as string);
@@ -328,10 +322,7 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
 
       LogService.logTrace(`[HWC v2 EVM] Deploying contract via eth_sendTransaction: ${JSON.stringify(txParams)}`);
 
-      const txHash = await this.hederaProvider.request(
-        { method: "eth_sendTransaction", params: [txParams] },
-        chainRef,
-      );
+      const txHash = await this.hederaProvider.request({ method: "eth_sendTransaction", params: [txParams] }, chainRef);
 
       const provider = this.rpcProvider();
       const receipt = await provider.waitForTransaction(txHash as string);
@@ -422,9 +413,7 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
         throw new SignatureNotFound(JSON.stringify(firstPair, null, 2));
       }
 
-      const hexSignature = Hex.fromUint8Array(
-        signature instanceof Uint8Array ? signature : new Uint8Array(signature),
-      );
+      const hexSignature = Hex.fromUint8Array(signature instanceof Uint8Array ? signature : new Uint8Array(signature));
       LogService.logTrace(`Final hex signature: ${hexSignature}`);
       return hexSignature;
     } catch (error) {

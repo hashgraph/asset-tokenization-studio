@@ -16,9 +16,7 @@ import ContractService from "@service/contract/ContractService";
 import { GetClearingTransferForByPartitionQueryError } from "./error/GetClearingTransferForByPartitionQueryError";
 
 @QueryHandler(GetClearingTransferForByPartitionQuery)
-export class GetClearingTransferForByPartitionQueryHandler
-  implements IQueryHandler<GetClearingTransferForByPartitionQuery>
-{
+export class GetClearingTransferForByPartitionQueryHandler implements IQueryHandler<GetClearingTransferForByPartitionQuery> {
   constructor(
     @lazyInject(SecurityService)
     private readonly securityService: SecurityService,
