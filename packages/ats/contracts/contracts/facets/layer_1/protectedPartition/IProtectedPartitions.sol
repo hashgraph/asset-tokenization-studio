@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { WrongSignature } from "../../../infrastructure/errors/CommonErrors.sol";
+
 interface IProtectedPartitions {
     struct ProtectionData {
         uint256 deadline;
@@ -34,7 +36,6 @@ interface IProtectedPartitions {
     // Errors
     error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
     error PartitionsAreUnProtected();
-    error WrongSignature();
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ProtectedPartitions(bool _arePartitionsProtected) external returns (bool success_);

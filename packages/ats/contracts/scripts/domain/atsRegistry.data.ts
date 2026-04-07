@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-07T11:19:40.137Z
+ * Generated: 2026-04-07T12:51:12.426Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -332,7 +332,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "on(address,bytes32,uint256)",
         topic0: "0x0e81a3e75de9a324032d08e6d14c0e2b509aaa75489e4531bcbd54d949f33989",
       },
-      { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
     ],
     errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer) => new BondUSAFacet__factory(signer),
@@ -381,7 +380,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "on(address,bytes32,uint256)",
         topic0: "0x0e81a3e75de9a324032d08e6d14c0e2b509aaa75489e4531bcbd54d949f33989",
       },
-      { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
     ],
     errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer) => new BondUSAFixedRateFacet__factory(signer),
@@ -430,7 +428,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "on(address,bytes32,uint256)",
         topic0: "0x0e81a3e75de9a324032d08e6d14c0e2b509aaa75489e4531bcbd54d949f33989",
       },
-      { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
     ],
     errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer) => new BondUSAKpiLinkedRateFacet__factory(signer),
@@ -855,7 +852,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "on(address,bytes32,uint256)",
         topic0: "0x0e81a3e75de9a324032d08e6d14c0e2b509aaa75489e4531bcbd54d949f33989",
       },
-      { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
     ],
     errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer) => new BondUSASustainabilityPerformanceTargetRateFacet__factory(signer),
@@ -2006,7 +2002,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5d6824c4",
       },
       { name: "SpenderWithZeroAddress", signature: "SpenderWithZeroAddress()", selector: "0x80e32d8f" },
-      { name: "ZeroAddressNotAllowed", signature: "ZeroAddressNotAllowed()", selector: "0x8579befe" },
       { name: "ZeroOwnerAddress", signature: "ZeroOwnerAddress()", selector: "0x42cad957" },
     ],
     factory: (signer) => new ERC20Facet__factory(getLibLinks("tokenCoreOps") as any, signer),
@@ -3071,10 +3066,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x1f36cfc418f72043825aa85b5d279c03191ab83364af0ec5f170d67f1a7ba152",
       },
     ],
-    errors: [
-      { name: "from", signature: "from()", selector: "0xd5ce3389" },
-      { name: "LockExpirationNotReached", signature: "LockExpirationNotReached()", selector: "0xe8232ac2" },
-    ],
+    errors: [{ name: "LockExpirationNotReached", signature: "LockExpirationNotReached()", selector: "0xe8232ac2" }],
     factory: (signer) => new LockFacet__factory(signer),
     timeTravelFactory: (signer) => new LockFacetTimeTravel__factory(signer),
   },
@@ -3426,7 +3418,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x55347310",
       },
       { name: "PartitionsAreUnProtected", signature: "PartitionsAreUnProtected()", selector: "0x05681565" },
-      { name: "WrongSignature", signature: "WrongSignature()", selector: "0x356a4418" },
     ],
     factory: (signer) => new ProtectedPartitionsFacet__factory(signer),
     timeTravelFactory: (signer) => new ProtectedPartitionsFacetTimeTravel__factory(signer),
@@ -3603,7 +3594,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     events: [
-      { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
       {
         name: "SnapshotTriggered",
         signature: "SnapshotTriggered(uint256,bytes)",
@@ -4476,13 +4466,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
   ERC1410StorageWrapper: {
     name: "ERC1410StorageWrapper",
     methods: [],
-    events: [
-      {
-        name: "AFTER",
-        signature: "AFTER(partition,operator,from,basicTransferInfo.to,basicTransferInfo.value,data,operatorData)",
-        topic0: "0x05c2f834f1449cce18bfdd251f389c5e728a67e8b2a65570a788bcb94c0c3172",
-      },
-    ],
   },
 
   ERC1594StorageWrapper: {
@@ -4520,7 +4503,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         topic0: "0xdec2bacdd2f05b59de34da9b523dff8be42e5e38e818c82fdb0bae774387a724",
       },
     ],
-    errors: [{ name: "s", signature: "s()", selector: "0x86b714e2" }],
   },
 
   ERC3643StorageWrapper: {
@@ -4577,7 +4559,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [],
     errors: [
       { name: "LockExpirationNotReached", signature: "LockExpirationNotReached()", selector: "0xe8232ac2" },
-      { name: "WrongExpirationTimestamp", signature: "WrongExpirationTimestamp()", selector: "0xe39f4776" },
       { name: "WrongLockId", signature: "WrongLockId()", selector: "0x039be1dd" },
     ],
   },

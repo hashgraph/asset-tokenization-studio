@@ -102,7 +102,6 @@ interface IERC1410 is IERC1410Read, IERC1410TokenHolder, IERC1410Management, IER
     // Re-export permit-related errors from ERC712.sol utility
     error ExpiredDeadline(uint256 deadline);
     error WrongSignatureLength();
-    error WrongSignature();
     error WrongNounce(uint256 nounce, address account);
 
     // Re-export initialization error from InitializationErrors.sol

@@ -4,6 +4,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IFactory } from "../../../../factory/IFactory.sol";
+import { ZeroAddressNotAllowed } from "../../../../infrastructure/errors/CommonErrors.sol";
 
 interface IERC20 {
     struct ERC20MetadataInfo {
@@ -26,7 +27,6 @@ interface IERC20 {
     error ZeroOwnerAddress();
     error InsufficientAllowance(address spender, address from);
     error SpenderWithZeroAddress();
-    error ZeroAddressNotAllowed();
     error AccountIsBlocked(address account);
     error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
 

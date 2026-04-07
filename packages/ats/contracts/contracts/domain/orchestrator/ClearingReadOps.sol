@@ -7,17 +7,12 @@ import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol
 import { IClearingTransfer } from "../../facets/layer_1/clearing/IClearingTransfer.sol";
 import { IClearingRedeem } from "../../facets/layer_1/clearing/IClearingRedeem.sol";
 import { IClearingHoldCreation } from "../../facets/layer_1/clearing/IClearingHoldCreation.sol";
+import { WrongExpirationTimestamp } from "../../infrastructure/errors/CommonErrors.sol";
 
 /// @title ClearingReadOps
 /// @notice Clearing read operations library - deployed once and called via DELEGATECALL
 /// @dev Contains read-only clearing operations with ABAF adjustments
 library ClearingReadOps {
-    // ==========================================================================
-    // ERRORS
-    // ==========================================================================
-
-    error WrongExpirationTimestamp();
-
     // ==========================================================================
     // CLEARING READ OPERATIONS (ABAF-adjusted)
     // ==========================================================================

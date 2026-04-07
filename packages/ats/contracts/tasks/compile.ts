@@ -115,6 +115,7 @@ task("erc3643-clone-interfaces", async (_, hre) => {
       src: "facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon",
       dst: "IScheduledTasksCommon",
     },
+    { src: "infrastructure/errors/CommonErrors", dst: "CommonErrors" },
   ];
 
   function rewriteImports(source: string): string {

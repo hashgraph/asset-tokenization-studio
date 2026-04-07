@@ -9,6 +9,7 @@
 pragma solidity ^0.8.17;
 
 import { TRexIFactory as IFactory } from "./IFactory.sol";
+import { ZeroAddressNotAllowed } from "./CommonErrors.sol";
 
 interface TRexIERC20 {
     struct ERC20MetadataInfo {
@@ -31,7 +32,6 @@ interface TRexIERC20 {
     error ZeroOwnerAddress();
     error InsufficientAllowance(address spender, address from);
     error SpenderWithZeroAddress();
-    error ZeroAddressNotAllowed();
     error AccountIsBlocked(address account);
     error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
 

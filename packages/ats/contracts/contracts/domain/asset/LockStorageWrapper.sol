@@ -12,6 +12,7 @@ import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { WrongExpirationTimestamp } from "../../infrastructure/errors/CommonErrors.sol";
 
 struct LockDataStorage {
     mapping(address => uint256) totalLockedAmountByAccount;
@@ -26,7 +27,6 @@ library LockStorageWrapper {
     using EnumerableSet for EnumerableSet.UintSet;
 
     error WrongLockId();
-    error WrongExpirationTimestamp();
     error LockExpirationNotReached();
 
     // --- Lock operation functions ---

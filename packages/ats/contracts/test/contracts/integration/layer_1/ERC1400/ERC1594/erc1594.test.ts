@@ -18,7 +18,7 @@ import {
   type ResolverProxy,
   SsiManagementFacet,
 } from "@contract-types";
-import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
+import { deployEquityTokenFixture, executeRbac, getCommonErrorSelector, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ATS_ROLES, DEFAULT_PARTITION, EIP1066_CODES, EMPTY_STRING, ZERO } from "@scripts";
 import { getSelector } from "@scripts/infrastructure";
@@ -571,14 +571,14 @@ describe("ERC1594 Tests", () => {
       expect(await erc1594Facet.canTransfer(ethers.ZeroAddress, AMOUNT, DATA)).to.be.deep.equal([
         false,
         EIP1066_CODES.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-        getSelector(erc20Facet, "ZeroAddressNotAllowed"),
+        getCommonErrorSelector("ZeroAddressNotAllowed()"),
       ]);
       await erc1594Issuer.issue(signer_D.address, AMOUNT, DATA);
       await erc20Facet.connect(signer_D).increaseAllowance(signer_A.address, AMOUNT);
       expect(await erc1594Facet.canTransferFrom(signer_D.address, ethers.ZeroAddress, AMOUNT, DATA)).to.be.deep.equal([
         false,
         EIP1066_CODES.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-        getSelector(erc20Facet, "ZeroAddressNotAllowed"),
+        getCommonErrorSelector("ZeroAddressNotAllowed()"),
       ]);
     });
 

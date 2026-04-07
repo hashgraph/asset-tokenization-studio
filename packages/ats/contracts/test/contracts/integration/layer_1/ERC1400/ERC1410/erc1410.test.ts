@@ -20,7 +20,7 @@ import {
   SnapshotsFacet,
   TimeTravelFacet,
 } from "@contract-types";
-import { deployEquityTokenFixture, executeRbac, grantRoleAndPauseToken, MAX_UINT256 } from "@test";
+import { deployEquityTokenFixture, executeRbac, getCommonErrors, grantRoleAndPauseToken, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import {
   ADDRESS_ZERO,
@@ -2278,7 +2278,7 @@ describe("ERC1410 Tests", () => {
                 signature:
                   "0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344",
               }),
-          ).to.be.revertedWithCustomError(erc1410Facet, "WrongSignature");
+          ).to.be.revertedWithCustomError(getCommonErrors(diamond.target), "WrongSignature");
         });
 
         it("GIVEN a wrong nounce WHEN performing a protected transfer THEN transaction fails with WrongNounce", async () => {
@@ -2408,7 +2408,7 @@ describe("ERC1410 Tests", () => {
               signature:
                 "0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344",
             }),
-          ).to.be.revertedWithCustomError(erc1410Facet, "WrongSignature");
+          ).to.be.revertedWithCustomError(getCommonErrors(diamond.target), "WrongSignature");
         });
 
         it("GIVEN a wrong nounce WHEN performing a protected redeem THEN transaction fails with WrongNounce", async () => {
