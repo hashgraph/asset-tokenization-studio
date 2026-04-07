@@ -24,8 +24,11 @@ describe("LoansPortfolio Token Tests", () => {
   let signer_C: HardhatEthersSigner;
   let loanAsset: IAsset;
 
+  let sharedInfrastructure: Awaited<ReturnType<typeof deployLoansPortfolioTokenFixture>>;
+
   async function deployLoansPortfolioFixture() {
     const base = await deployLoansPortfolioTokenFixture();
+    sharedInfrastructure = base;
     signer_A = base.deployer;
     signer_B = base.user2;
     signer_C = base.user3;
@@ -51,6 +54,7 @@ describe("LoansPortfolio Token Tests", () => {
         },
       },
       useLoadFixture: false,
+      infrastructure: sharedInfrastructure,
     });
 
     const loanIAsset = await ethers.getContractAt("IAsset", loanBase.tokenAddress, signer_A);
