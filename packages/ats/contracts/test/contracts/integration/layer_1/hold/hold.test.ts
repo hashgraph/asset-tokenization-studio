@@ -15,7 +15,7 @@ import {
   dateToUnixTimestamp,
   DEFAULT_PARTITION,
 } from "@scripts";
-import { ResolverProxy, DiamondFacet, IAsset } from "@contract-types";
+import { ResolverProxy, IAsset } from "@contract-types";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const _WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
