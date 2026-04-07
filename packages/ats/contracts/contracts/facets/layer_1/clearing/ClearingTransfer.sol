@@ -73,23 +73,16 @@ abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider, Modi
         override
         onlyUnpaused
         onlyClearingActivated
-        onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
-        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
-        onlyUnrecoveredAddress(_to)
-        onlyUnrecoveredAddress(_clearingOperationFrom.from)
-        onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyValidClearingTransferByPartition(
+            _clearingOperationFrom.clearingOperation.expirationTimestamp,
+            EvmAccessors.getMsgSender(),
+            _to,
+            _clearingOperationFrom.from,
+            _clearingOperationFrom.clearingOperation.partition
+        )
         returns (bool success_, uint256 clearingId_)
     {
-        {
-            ERC1410StorageWrapper.requireValidAddress(_clearingOperationFrom.from);
-            ERC1410StorageWrapper.requireValidAddress(_to);
-            ERC1410StorageWrapper.requireOperator(
-                _clearingOperationFrom.clearingOperation.partition,
-                _clearingOperationFrom.from
-            );
-        }
-
         (success_, clearingId_) = ClearingOps.clearingTransferCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,

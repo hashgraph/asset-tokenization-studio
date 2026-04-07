@@ -6,6 +6,9 @@ import { IClearing } from "../../facets/layer_1/clearing/IClearing.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
+import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
+import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
+import { LockStorageWrapper } from "./LockStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { ThirdPartyType } from "./types/ThirdPartyType.sol";
 
@@ -461,6 +464,23 @@ library ClearingStorageWrapper {
         if (isClearingActivated()) {
             revert IClearing.ClearingIsActivated();
         }
+    }
+
+    function checkClearingTransferByPartition(
+        uint256 _expirationTimestamp,
+        address _account,
+        address _to,
+        address _from,
+        bytes32 _partition
+    ) internal view {
+        LockStorageWrapper.requireValidExpirationTimestamp(_expirationTimestamp);
+        ERC3643StorageWrapper.requireUnrecoveredAddress(_account);
+        ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
+        ERC3643StorageWrapper.requireUnrecoveredAddress(_from);
+        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
+        ERC1410StorageWrapper.requireValidAddress(_from);
+        ERC1410StorageWrapper.requireValidAddress(_to);
+        ERC1410StorageWrapper.requireOperator(_partition, _from);
     }
 
     /// @notice Internal helper for memory parameter

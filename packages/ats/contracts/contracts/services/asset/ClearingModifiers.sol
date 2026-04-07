@@ -49,4 +49,21 @@ abstract contract ClearingModifiers {
         _checkNotInitialized(ClearingStorageWrapper.isClearingInitialized());
         _;
     }
+
+    modifier onlyValidClearingTransferByPartition(
+        uint256 _expirationTimestamp,
+        address _msgSender,
+        address _to,
+        address _from,
+        bytes32 _partition
+    ) {
+        ClearingStorageWrapper.checkClearingTransferByPartition(
+            _expirationTimestamp,
+            _msgSender,
+            _to,
+            _from,
+            _partition
+        );
+        _;
+    }
 }
