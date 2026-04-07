@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-06T13:12:14.100Z
+ * Generated: 2026-04-07T06:27:21.768Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -278,6 +278,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe2d77e44",
       },
     ],
+    events: [
+      {
+        name: "AdjustmentBalanceSet",
+        signature: "AdjustmentBalanceSet(address,uint256,uint8)",
+        topic0: "0x312510931206ef5f91f1ef19e1a01253812b7201fb8b2d5d4afa056cce53e34a",
+      },
+    ],
+    errors: [{ name: "FactorIsZero", signature: "FactorIsZero()", selector: "0x936e9b6d" }],
     factory: (signer) => new AdjustBalancesFacet__factory(signer),
     timeTravelFactory: (signer) => new AdjustBalancesFacetTimeTravel__factory(signer),
   },
@@ -908,6 +916,38 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x99b69647",
       },
     ],
+    events: [
+      {
+        name: "MaxSupplyByPartitionSet",
+        signature: "MaxSupplyByPartitionSet(address,bytes32,uint256,uint256)",
+        topic0: "0x9c0c8826170fa45c79bf64a2913df8ccc3e77407aba502d85946253332a4d749",
+      },
+      {
+        name: "MaxSupplySet",
+        signature: "MaxSupplySet(address,uint256,uint256)",
+        topic0: "0xccc3b7560f9d81f26c619129ba9fa74ded9a6edb555a04655baaeca673e0a809",
+      },
+    ],
+    errors: [
+      { name: "MaxSupplyReached", signature: "MaxSupplyReached(uint256)", selector: "0xf9f84915" },
+      {
+        name: "MaxSupplyReachedForPartition",
+        signature: "MaxSupplyReachedForPartition(bytes32,uint256)",
+        selector: "0x57c004a9",
+      },
+      {
+        name: "NewMaxSupplyByPartitionTooHigh",
+        signature: "NewMaxSupplyByPartitionTooHigh(bytes32,uint256,uint256)",
+        selector: "0x21aa64a7",
+      },
+      { name: "NewMaxSupplyCannotBeZero", signature: "NewMaxSupplyCannotBeZero()", selector: "0x76f138fb" },
+      {
+        name: "NewMaxSupplyForPartitionTooLow",
+        signature: "NewMaxSupplyForPartitionTooLow(bytes32,uint256,uint256)",
+        selector: "0x820c68a8",
+      },
+      { name: "NewMaxSupplyTooLow", signature: "NewMaxSupplyTooLow(uint256,uint256)", selector: "0x98c2b03b" },
+    ],
     factory: (signer) => new CapFacet__factory(signer),
     timeTravelFactory: (signer) => new CapFacetTimeTravel__factory(signer),
   },
@@ -1296,6 +1336,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "DuplicatedCorporateAction(bytes32,bytes)",
         selector: "0x3266e9e3",
       },
+      { name: "WrongDates", signature: "WrongDates(uint256,uint256)", selector: "0x1c94559c" },
+      { name: "WrongIndexForAction", signature: "WrongIndexForAction(uint256,bytes32)", selector: "0xd3924f4e" },
     ],
     factory: (signer) => new CorporateActionsFacet__factory(signer),
     timeTravelFactory: (signer) => new CorporateActionsFacetTimeTravel__factory(signer),
@@ -1799,6 +1841,16 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
+        name: "Issued",
+        signature: "Issued(address,address,uint256,bytes)",
+        topic0: "0x0e9905d62635f049c2f4e11678ebf9dc3d1f8c4a653e290759b772e47ba00d00",
+      },
+      {
+        name: "Redeemed",
+        signature: "Redeemed(address,address,uint256,bytes)",
+        topic0: "0xb7d0d6b60740753e9f16692a2f479472a1385aec2420fa43225b02f2ffa1afe7",
+      },
+      {
         name: "TransferFromWithData",
         signature: "TransferFromWithData(address,address,address,uint256,bytes)",
         topic0: "0x7d32874c3a67d8bea4a75c3d32f8fda3b1d5c767d4d42b96710a820b22e31957",
@@ -1894,6 +1946,24 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "isControllable", signature: "function isControllable() view returns (bool)", selector: "0x4c783bf5" },
     ],
+    events: [
+      {
+        name: "ControllerRedemption",
+        signature: "ControllerRedemption(address,address,uint256,bytes,bytes)",
+        topic0: "0x876b7cb47aa150b3a5516188b19ed308752ad4d0ae9a702543353b78163f7589",
+      },
+      {
+        name: "ControllerTransfer",
+        signature: "ControllerTransfer(address,address,address,uint256,bytes,bytes)",
+        topic0: "0x6bf62b4b9c7b768275122bf70d429efc398a056d669b1efdf6c3976346246d7d",
+      },
+      {
+        name: "FinalizedControllerFeature",
+        signature: "FinalizedControllerFeature(address)",
+        topic0: "0x08a9c42b6917e90aff41cebfd6d2815b241dc3555d2482d792eeada3fe7df6fd",
+      },
+    ],
+    errors: [{ name: "TokenIsNotControllable", signature: "TokenIsNotControllable()", selector: "0xf4b7b072" }],
     factory: (signer) => new ERC1644Facet__factory(getLibLinks("tokenCoreOps") as any, signer),
     timeTravelFactory: (signer) => new ERC1644FacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
@@ -1959,20 +2029,32 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
+        name: "Approval",
+        signature: "Approval(address,address,uint256)",
+        topic0: "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
+      },
+      {
         name: "indicating",
         signature: "indicating(address,uint256)",
         topic0: "0x46bcf81f2ddc9f000abc20dea52d3061e6deb0c928ad04616fd2bee32e475440",
       },
+      {
+        name: "Transfer",
+        signature: "Transfer(address,address,uint256)",
+        topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+      },
     ],
     errors: [
       { name: "AccountIsBlocked", signature: "AccountIsBlocked(address)", selector: "0x796c1f0d" },
+      { name: "InsufficientAllowance", signature: "InsufficientAllowance(address,address)", selector: "0xf180d8f9" },
       {
         name: "InsufficientBalance",
         signature: "InsufficientBalance(address,uint256,uint256,bytes32)",
         selector: "0x5d6824c4",
       },
-      { name: "s", signature: "s()", selector: "0x86b714e2" },
+      { name: "SpenderWithZeroAddress", signature: "SpenderWithZeroAddress()", selector: "0x80e32d8f" },
       { name: "ZeroAddressNotAllowed", signature: "ZeroAddressNotAllowed()", selector: "0x8579befe" },
+      { name: "ZeroOwnerAddress", signature: "ZeroOwnerAddress()", selector: "0x42cad957" },
     ],
     factory: (signer) => new ERC20Facet__factory(getLibLinks("tokenCoreOps") as any, signer),
     timeTravelFactory: (signer) => new ERC20FacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
@@ -3404,6 +3486,28 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1277b323",
       },
     ],
+    events: [
+      {
+        name: "PartitionsProtected",
+        signature: "PartitionsProtected(address)",
+        topic0: "0x990fbe2c0a8b93cc7974d7ab6416266441112d61fa0989af94a79de43dda48ff",
+      },
+      {
+        name: "PartitionsUnProtected",
+        signature: "PartitionsUnProtected(address)",
+        topic0: "0xd556aabec0a33d5b3b9b8c739af1745b14ba2abecc20c3c080fd4ac6143e8525",
+      },
+      {
+        name: "ProtectedRedeemFrom",
+        signature: "ProtectedRedeemFrom(bytes32,address,address,uint256,uint256,uint256,bytes)",
+        topic0: "0xac2a7d7fcbf24c034d113f94d7ccf1df23cb94932becc61aa96ab060df6f101b",
+      },
+      {
+        name: "ProtectedTransferFrom",
+        signature: "ProtectedTransferFrom(bytes32,address,address,address,uint256,uint256,uint256,bytes)",
+        topic0: "0x2abbd5300acea8488bc2d0777cfb860f38dee76badd52ff8b36d3dec0f5fdb6c",
+      },
+    ],
     errors: [
       {
         name: "PartitionsAreProtectedAndNoRole",
@@ -3411,7 +3515,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x55347310",
       },
       { name: "PartitionsAreUnProtected", signature: "PartitionsAreUnProtected()", selector: "0x05681565" },
-      { name: "s", signature: "s()", selector: "0x86b714e2" },
       { name: "WrongSignature", signature: "WrongSignature()", selector: "0x356a4418" },
     ],
     factory: (signer) => new ProtectedPartitionsFacet__factory(signer),
@@ -3712,6 +3815,22 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           "function totalSupplyAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID) view returns (uint256 totalSupply_)",
         selector: "0x9657ddb9",
       },
+    ],
+    events: [
+      {
+        name: "SnapshotTaken",
+        signature: "SnapshotTaken(address,uint256)",
+        topic0: "0xd252178ed4aae4bc61be5bc8161b97bca1aae7b7fbde4523d5f4498cfca42763",
+      },
+      {
+        name: "SnapshotTriggered",
+        signature: "SnapshotTriggered(uint256,bytes)",
+        topic0: "0xf256aa4705d42c3984e319d2b0a2d1eb0a18a8a820922b71ba13e37c7699828c",
+      },
+    ],
+    errors: [
+      { name: "SnapshotIdDoesNotExists", signature: "SnapshotIdDoesNotExists(uint256)", selector: "0x8e81eb83" },
+      { name: "SnapshotIdNull", signature: "SnapshotIdNull()", selector: "0xf128004d" },
     ],
     factory: (signer) => new SnapshotsFacet__factory(getLibLinks("clearingReadOps") as any, signer),
     timeTravelFactory: (signer) => new SnapshotsFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
@@ -4538,327 +4657,9 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [],
   },
 
-  IAdjustBalancesStorageWrapper: {
-    name: "IAdjustBalancesStorageWrapper",
-    methods: [],
-    events: [
-      {
-        name: "AdjustmentBalanceSet",
-        signature: "AdjustmentBalanceSet(address,uint256,uint8)",
-        topic0: "0x312510931206ef5f91f1ef19e1a01253812b7201fb8b2d5d4afa056cce53e34a",
-      },
-    ],
-    errors: [{ name: "FactorIsZero", signature: "FactorIsZero()", selector: "0x936e9b6d" }],
-  },
-
-  ICapStorageWrapper: {
-    name: "ICapStorageWrapper",
-    methods: [],
-    events: [
-      {
-        name: "MaxSupplyByPartitionSet",
-        signature: "MaxSupplyByPartitionSet(address,bytes32,uint256,uint256)",
-        topic0: "0x9c0c8826170fa45c79bf64a2913df8ccc3e77407aba502d85946253332a4d749",
-      },
-      {
-        name: "MaxSupplySet",
-        signature: "MaxSupplySet(address,uint256,uint256)",
-        topic0: "0xccc3b7560f9d81f26c619129ba9fa74ded9a6edb555a04655baaeca673e0a809",
-      },
-    ],
-    errors: [
-      { name: "MaxSupplyReached", signature: "MaxSupplyReached(uint256)", selector: "0xf9f84915" },
-      {
-        name: "MaxSupplyReachedForPartition",
-        signature: "MaxSupplyReachedForPartition(bytes32,uint256)",
-        selector: "0x57c004a9",
-      },
-      {
-        name: "NewMaxSupplyByPartitionTooHigh",
-        signature: "NewMaxSupplyByPartitionTooHigh(bytes32,uint256,uint256)",
-        selector: "0x21aa64a7",
-      },
-      { name: "NewMaxSupplyCannotBeZero", signature: "NewMaxSupplyCannotBeZero()", selector: "0x76f138fb" },
-      {
-        name: "NewMaxSupplyForPartitionTooLow",
-        signature: "NewMaxSupplyForPartitionTooLow(bytes32,uint256,uint256)",
-        selector: "0x820c68a8",
-      },
-      { name: "NewMaxSupplyTooLow", signature: "NewMaxSupplyTooLow(uint256,uint256)", selector: "0x98c2b03b" },
-    ],
-  },
-
-  IClearingStorageWrapper: {
-    name: "IClearingStorageWrapper",
-    methods: [],
-    events: [
-      {
-        name: "ClearedHoldByPartition",
-        signature: "ClearedHoldByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
-        topic0: "0xecba87eb6d871a001547362d9a9bb69ae25dd165858d73fe5cc600a705f3f3a0",
-      },
-      {
-        name: "ClearedHoldFromByPartition",
-        signature: "ClearedHoldFromByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
-        topic0: "0xc8f249767e17c28ab7d211bf631a717a0ee7f840405af4618f625a7659bf7f63",
-      },
-      {
-        name: "ClearedOperatorHoldByPartition",
-        signature: "ClearedOperatorHoldByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
-        topic0: "0xa9683588d7eb6dd41a2a62f56bd396a439f9e506ac7ca2efa031bcc5f99b4651",
-      },
-      {
-        name: "ClearedOperatorRedeemByPartition",
-        signature: "ClearedOperatorRedeemByPartition(address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
-        topic0: "0xfec64ec403134db0b1e479976a765b3e364f24c765f7c73ce9bf4b31e13ed3c8",
-      },
-      {
-        name: "ClearedOperatorTransferByPartition",
-        signature:
-          "ClearedOperatorTransferByPartition(address,address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
-        topic0: "0x8d9578064c4e2cadfe39cab8d79866d9e1c16956b958c6cbaedcec51f80d234a",
-      },
-      {
-        name: "ClearedRedeemByPartition",
-        signature: "ClearedRedeemByPartition(address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
-        topic0: "0x7aaaa46250ad330b8cea62db34f608101d55300f94dd9b5ddbe83142bb51dc5f",
-      },
-      {
-        name: "ClearedRedeemFromByPartition",
-        signature: "ClearedRedeemFromByPartition(address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
-        topic0: "0x376e6c31cfecec25cc3fede988557cb98dee3c5ffa5976b48a0b614b84c45d79",
-      },
-      {
-        name: "ClearedTransferByPartition",
-        signature: "ClearedTransferByPartition(address,address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
-        topic0: "0x3d9505d4e04c873230c8ad112ce725e8338ab4fa6c98a7699ea41d4d63c2758f",
-      },
-      {
-        name: "ClearedTransferFromByPartition",
-        signature:
-          "ClearedTransferFromByPartition(address,address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
-        topic0: "0x374f3552ea6ef855812358112ab8344010038fd2d56b9f47a1d9cb0320c275a2",
-      },
-      {
-        name: "ProtectedClearedHoldByPartition",
-        signature: "ProtectedClearedHoldByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
-        topic0: "0x7fd4d7541b7da42375ec1b3f05c454acb77234a17c2f4349c102add4bc61e306",
-      },
-      {
-        name: "ProtectedClearedRedeemByPartition",
-        signature: "ProtectedClearedRedeemByPartition(address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
-        topic0: "0xdd233f03eaed8aec1fe549f12e218c32dc2e73b3d5777bdeb33afa43e2fa2230",
-      },
-      {
-        name: "ProtectedClearedTransferByPartition",
-        signature:
-          "ProtectedClearedTransferByPartition(address,address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
-        topic0: "0x8aea721bf4270b3b07d0974586b57ecd35862ae7a8b733530161d941489283f1",
-      },
-    ],
-  },
-
-  ICorporateActionsStorageWrapper: {
-    name: "ICorporateActionsStorageWrapper",
-    methods: [],
-    errors: [
-      { name: "WrongDates", signature: "WrongDates(uint256,uint256)", selector: "0x1c94559c" },
-      { name: "WrongIndexForAction", signature: "WrongIndexForAction(uint256,bytes32)", selector: "0xd3924f4e" },
-    ],
-  },
-
-  IERC1410StorageWrapper: {
-    name: "IERC1410StorageWrapper",
-    methods: [],
-    events: [
-      {
-        name: "AuthorizedOperator",
-        signature: "AuthorizedOperator(address,address)",
-        topic0: "0xf4caeb2d6ca8932a215a353d0703c326ec2d81fc68170f320eb2ab49e9df61f9",
-      },
-      {
-        name: "AuthorizedOperatorByPartition",
-        signature: "AuthorizedOperatorByPartition(bytes32,address,address)",
-        topic0: "0x3646a897c70797ecc134b0adc32f471b07bf1d6f451133b0384badab531e3fd6",
-      },
-      {
-        name: "IssuedByPartition",
-        signature: "IssuedByPartition(bytes32,address,address,uint256,bytes)",
-        topic0: "0x5af1c8f424b104b6ba4e3c0885f2ed9fef04a9b1ea39cd9ed362432105c0791a",
-      },
-      {
-        name: "RedeemedByPartition",
-        signature: "RedeemedByPartition(bytes32,address,address,uint256,bytes,bytes)",
-        topic0: "0xa4f62471c9bdf88115b97203943c74c59b655913ee5ee592706d84ef53fb6be2",
-      },
-      {
-        name: "RevokedOperator",
-        signature: "RevokedOperator(address,address)",
-        topic0: "0x50546e66e5f44d728365dc3908c63bc5cfeeab470722c1677e3073a6ac294aa1",
-      },
-      {
-        name: "RevokedOperatorByPartition",
-        signature: "RevokedOperatorByPartition(bytes32,address,address)",
-        topic0: "0x3b287c4f1bab4df949b33bceacef984f544dc5d5479930d00e4ee8c9d8dd96f2",
-      },
-      {
-        name: "TransferByPartition",
-        signature: "TransferByPartition(bytes32,address,address,address,uint256,bytes,bytes)",
-        topic0: "0xff4e9a26af4eb73b8bacfaa4abd4fea03d9448e7b912dc5ff4019048875aa2d4",
-      },
-    ],
-    errors: [
-      { name: "InsufficientAllowance", signature: "InsufficientAllowance(address,address)", selector: "0xf180d8f9" },
-      {
-        name: "InsufficientBalance",
-        signature: "InsufficientBalance(address,uint256,uint256,bytes32)",
-        selector: "0x5d6824c4",
-      },
-      { name: "InvalidPartition", signature: "InvalidPartition(address,bytes32)", selector: "0xbf84f4ec" },
-      { name: "NotAllowedInMultiPartitionMode", signature: "NotAllowedInMultiPartitionMode()", selector: "0x76d08f88" },
-      {
-        name: "PartitionNotAllowedInSinglePartitionMode",
-        signature: "PartitionNotAllowedInSinglePartitionMode(bytes32)",
-        selector: "0xb96d9539",
-      },
-      { name: "Unauthorized", signature: "Unauthorized(address,address,bytes32)", selector: "0x1e09743f" },
-      { name: "ZeroPartition", signature: "ZeroPartition()", selector: "0x4a6f30c3" },
-      { name: "ZeroValue", signature: "ZeroValue()", selector: "0x7c946ed7" },
-    ],
-  },
-
-  IERC1594StorageWrapper: {
-    name: "IERC1594StorageWrapper",
-    methods: [],
-    events: [
-      {
-        name: "Issued",
-        signature: "Issued(address,address,uint256,bytes)",
-        topic0: "0x0e9905d62635f049c2f4e11678ebf9dc3d1f8c4a653e290759b772e47ba00d00",
-      },
-      {
-        name: "Redeemed",
-        signature: "Redeemed(address,address,uint256,bytes)",
-        topic0: "0xb7d0d6b60740753e9f16692a2f479472a1385aec2420fa43225b02f2ffa1afe7",
-      },
-    ],
-  },
-
-  IERC1644StorageWrapper: {
-    name: "IERC1644StorageWrapper",
-    methods: [],
-    events: [
-      {
-        name: "ControllerRedemption",
-        signature: "ControllerRedemption(address,address,uint256,bytes,bytes)",
-        topic0: "0x876b7cb47aa150b3a5516188b19ed308752ad4d0ae9a702543353b78163f7589",
-      },
-      {
-        name: "ControllerTransfer",
-        signature: "ControllerTransfer(address,address,address,uint256,bytes,bytes)",
-        topic0: "0x6bf62b4b9c7b768275122bf70d429efc398a056d669b1efdf6c3976346246d7d",
-      },
-      {
-        name: "FinalizedControllerFeature",
-        signature: "FinalizedControllerFeature(address)",
-        topic0: "0x08a9c42b6917e90aff41cebfd6d2815b241dc3555d2482d792eeada3fe7df6fd",
-      },
-    ],
-    errors: [{ name: "TokenIsNotControllable", signature: "TokenIsNotControllable()", selector: "0xf4b7b072" }],
-  },
-
-  IERC20StorageWrapper: {
-    name: "IERC20StorageWrapper",
-    methods: [],
-    events: [
-      {
-        name: "Approval",
-        signature: "Approval(address,address,uint256)",
-        topic0: "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
-      },
-      {
-        name: "Transfer",
-        signature: "Transfer(address,address,uint256)",
-        topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
-      },
-    ],
-    errors: [
-      { name: "InsufficientAllowance", signature: "InsufficientAllowance(address,address)", selector: "0xf180d8f9" },
-      { name: "SpenderWithZeroAddress", signature: "SpenderWithZeroAddress()", selector: "0x80e32d8f" },
-      { name: "ZeroOwnerAddress", signature: "ZeroOwnerAddress()", selector: "0x42cad957" },
-    ],
-  },
-
-  IERC20VotesStorageWrapper: {
-    name: "IERC20VotesStorageWrapper",
-    methods: [],
-  },
-
-  IInterestRateStorageWrapper: {
-    name: "IInterestRateStorageWrapper",
-    methods: [],
-  },
-
   InterestRateStorageWrapper: {
     name: "InterestRateStorageWrapper",
     methods: [],
-  },
-
-  IProtectedPartitionsStorageWrapper: {
-    name: "IProtectedPartitionsStorageWrapper",
-    methods: [],
-    events: [
-      {
-        name: "PartitionsProtected",
-        signature: "PartitionsProtected(address)",
-        topic0: "0x990fbe2c0a8b93cc7974d7ab6416266441112d61fa0989af94a79de43dda48ff",
-      },
-      {
-        name: "PartitionsUnProtected",
-        signature: "PartitionsUnProtected(address)",
-        topic0: "0xd556aabec0a33d5b3b9b8c739af1745b14ba2abecc20c3c080fd4ac6143e8525",
-      },
-      {
-        name: "ProtectedRedeemFrom",
-        signature: "ProtectedRedeemFrom(bytes32,address,address,uint256,uint256,uint256,bytes)",
-        topic0: "0xac2a7d7fcbf24c034d113f94d7ccf1df23cb94932becc61aa96ab060df6f101b",
-      },
-      {
-        name: "ProtectedTransferFrom",
-        signature: "ProtectedTransferFrom(bytes32,address,address,address,uint256,uint256,uint256,bytes)",
-        topic0: "0x2abbd5300acea8488bc2d0777cfb860f38dee76badd52ff8b36d3dec0f5fdb6c",
-      },
-    ],
-    errors: [
-      {
-        name: "PartitionsAreProtectedAndNoRole",
-        signature: "PartitionsAreProtectedAndNoRole(address,bytes32)",
-        selector: "0x55347310",
-      },
-      { name: "PartitionsAreUnProtected", signature: "PartitionsAreUnProtected()", selector: "0x05681565" },
-      { name: "WrongSignature", signature: "WrongSignature()", selector: "0x356a4418" },
-    ],
-  },
-
-  ISnapshotsStorageWrapper: {
-    name: "ISnapshotsStorageWrapper",
-    methods: [],
-    events: [
-      {
-        name: "SnapshotTaken",
-        signature: "SnapshotTaken(address,uint256)",
-        topic0: "0xd252178ed4aae4bc61be5bc8161b97bca1aae7b7fbde4523d5f4498cfca42763",
-      },
-      {
-        name: "SnapshotTriggered",
-        signature: "SnapshotTriggered(uint256,bytes)",
-        topic0: "0xf256aa4705d42c3984e319d2b0a2d1eb0a18a8a820922b71ba13e37c7699828c",
-      },
-    ],
-    errors: [
-      { name: "SnapshotIdDoesNotExists", signature: "SnapshotIdDoesNotExists(uint256)", selector: "0x8e81eb83" },
-      { name: "SnapshotIdNull", signature: "SnapshotIdNull()", selector: "0xf128004d" },
-    ],
   },
 
   KpisStorageWrapper: {
@@ -4953,7 +4754,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 43 as const;
+export const TOTAL_STORAGE_WRAPPERS = 31 as const;
 
 /**
  * All role identifiers extracted from contracts.

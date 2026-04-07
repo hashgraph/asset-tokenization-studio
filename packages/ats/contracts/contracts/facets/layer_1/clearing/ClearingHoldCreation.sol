@@ -4,9 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _WILD_CARD_ROLE } from "../../../constants/roles.sol";
 import { IClearingHoldCreation } from "./IClearingHoldCreation.sol";
 import { Hold } from "../hold/IHold.sol";
-import {
-    IProtectedPartitionsStorageWrapper
-} from "../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
+import { IProtectedPartitions } from "../../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";

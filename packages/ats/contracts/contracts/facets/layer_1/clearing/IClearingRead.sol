@@ -2,8 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearing } from "./IClearing.sol";
+import { IClearingTypes } from "./IClearingTypes.sol";
 
-interface IClearingRead is IClearing {
+interface IClearingRead is IClearing, IClearingTypes {
     /**
      * @notice Gets the total cleared amount for a token holder across all partitions
      */

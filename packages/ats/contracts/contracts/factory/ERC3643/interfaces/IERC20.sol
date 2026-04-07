@@ -18,7 +18,14 @@ interface TRexIERC20 {
         IFactory.SecurityType securityType;
     }
 
-    // Re-export errors from libraries used by ERC20
+    // Events
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+
+    // Errors
+    error ZeroOwnerAddress();
+    error InsufficientAllowance(address spender, address from);
+    error SpenderWithZeroAddress();
     error ZeroAddressNotAllowed();
     error AccountIsBlocked(address account);
     error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);

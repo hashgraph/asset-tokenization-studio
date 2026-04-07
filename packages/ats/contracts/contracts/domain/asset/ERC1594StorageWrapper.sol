@@ -6,14 +6,13 @@ import { ZERO_ADDRESS, EMPTY_BYTES, _DEFAULT_PARTITION } from "../../constants/v
 import { _ERC1594_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IKyc } from "../../facets/layer_1/kyc/IKyc.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
-import { IERC1594StorageWrapper } from "./ERC1400/ERC1594/IERC1594StorageWrapper.sol";
 import { Eip1066 } from "../../constants/eip1066.sol";
 import { IClearing } from "../../facets/layer_1/clearing/IClearing.sol";
 import { IERC3643Management } from "../../facets/layer_1/ERC3643/IERC3643Management.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { IIdentityRegistry } from "../../facets/layer_1/ERC3643/IIdentityRegistry.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
-import { IERC1410StorageWrapper } from "./ERC1400/ERC1410/IERC1410StorageWrapper.sol";
+import { IERC1410 } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
@@ -26,6 +25,7 @@ import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsSt
 import { _ACCESS_CONTROL_STORAGE_POSITION, RoleDataStorage } from "../core/AccessControlStorageWrapper.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { IERC1594 } from "../../facets/layer_1/ERC1400/ERC1594/IERC1594.sol";
 
 struct ERC1594Storage {
     bool issuance;
@@ -45,17 +45,17 @@ library ERC1594StorageWrapper {
 
     function issue(address tokenHolder, uint256 value, bytes memory data) internal {
         ERC20StorageWrapper.mint(tokenHolder, value);
-        emit IERC1594StorageWrapper.Issued(EvmAccessors.getMsgSender(), tokenHolder, value, data);
+        emit IERC1594.Issued(EvmAccessors.getMsgSender(), tokenHolder, value, data);
     }
 
     function redeem(uint256 value, bytes memory data) internal {
         ERC20StorageWrapper.burn(EvmAccessors.getMsgSender(), value);
-        emit IERC1594StorageWrapper.Redeemed(address(0), EvmAccessors.getMsgSender(), value, data);
+        emit IERC1594.Redeemed(address(0), EvmAccessors.getMsgSender(), value, data);
     }
 
     function redeemFrom(address tokenHolder, uint256 value, bytes memory data) internal {
         ERC20StorageWrapper.burnFrom(tokenHolder, value);
-        emit IERC1594StorageWrapper.Redeemed(EvmAccessors.getMsgSender(), tokenHolder, value, data);
+        emit IERC1594.Redeemed(EvmAccessors.getMsgSender(), tokenHolder, value, data);
     }
 
     function isIssuable() internal view returns (bool) {
@@ -425,7 +425,7 @@ library ERC1594StorageWrapper {
                 return (
                     false,
                     Eip1066.INSUFFICIENT_FUNDS,
-                    IERC1410StorageWrapper.InsufficientAllowance.selector,
+                    IERC1410.InsufficientAllowance.selector,
                     abi.encode(EvmAccessors.getMsgSender(), from, currentAllowance, value, _DEFAULT_PARTITION)
                 );
             }
@@ -433,12 +433,7 @@ library ERC1594StorageWrapper {
 
         // Partition validation check
         if (!ERC1410StorageWrapper.validPartition(partition, from)) {
-            return (
-                false,
-                Eip1066.INSUFFICIENT_FUNDS,
-                IERC1410StorageWrapper.InvalidPartition.selector,
-                abi.encode(from, partition)
-            );
+            return (false, Eip1066.INSUFFICIENT_FUNDS, IERC1410.InvalidPartition.selector, abi.encode(from, partition));
         }
 
         // Balance check - check partition-specific balance
@@ -451,7 +446,7 @@ library ERC1594StorageWrapper {
             return (
                 false,
                 Eip1066.INSUFFICIENT_FUNDS,
-                IERC1410StorageWrapper.InsufficientBalance.selector,
+                IERC1410.InsufficientBalance.selector,
                 abi.encode(from, currentPartitionBalance, value, partition)
             );
         }

@@ -5,9 +5,7 @@ import { HoldStorageWrapper } from "../../../domain/asset/HoldStorageWrapper.sol
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 import { Hold, HoldIdentifier } from "./IHold.sol";
 import { IHoldTokenHolder } from "./IHoldTokenHolder.sol";
-import {
-    IProtectedPartitionsStorageWrapper
-} from "../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
+import { IProtectedPartitions } from "../../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";

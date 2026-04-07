@@ -4,9 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _CONTROLLER_ROLE, _AGENT_ROLE, _WILD_CARD_ROLE } from "../../../../constants/roles.sol";
 import { BasicTransferInfo, OperatorTransferData } from "./IERC1410.sol";
 import { IERC1410Management } from "./IERC1410Management.sol";
-import {
-    IProtectedPartitionsStorageWrapper
-} from "../../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
+import { IProtectedPartitions } from "../../../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
@@ -108,7 +106,7 @@ abstract contract ERC1410Management is IERC1410Management, Modifiers {
         address _from,
         address _to,
         uint256 _amount,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
+        IProtectedPartitions.ProtectionData calldata _protectionData
     )
         external
         override
@@ -125,7 +123,7 @@ abstract contract ERC1410Management is IERC1410Management, Modifiers {
         bytes32 _partition,
         address _from,
         uint256 _amount,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
+        IProtectedPartitions.ProtectionData calldata _protectionData
     )
         external
         override

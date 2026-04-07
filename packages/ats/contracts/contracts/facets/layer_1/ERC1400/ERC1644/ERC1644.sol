@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC1644 } from "./IERC1644.sol";
-import { IERC1644StorageWrapper } from "../../../../domain/asset/ERC1400/ERC1644/IERC1644StorageWrapper.sol";
 import { _DEFAULT_ADMIN_ROLE, _CONTROLLER_ROLE, _AGENT_ROLE } from "../../../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
@@ -31,7 +30,7 @@ abstract contract ERC1644 is IERC1644, Modifiers {
             AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
         }
         TokenCoreOps.transfer(_from, _to, _value);
-        emit IERC1644StorageWrapper.ControllerTransfer(msg.sender, _from, _to, _value, _data, _operatorData);
+        emit IERC1644.ControllerTransfer(msg.sender, _from, _to, _value, _data, _operatorData);
     }
 
     function controllerRedeem(
@@ -47,7 +46,7 @@ abstract contract ERC1644 is IERC1644, Modifiers {
             AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
         }
         TokenCoreOps.burn(_tokenHolder, _value);
-        emit IERC1644StorageWrapper.ControllerRedemption(msg.sender, _tokenHolder, _value, _data, _operatorData);
+        emit IERC1644.ControllerRedemption(msg.sender, _tokenHolder, _value, _data, _operatorData);
     }
 
     function finalizeControllable() external override onlyRole(_DEFAULT_ADMIN_ROLE) onlyControllable {

@@ -5,8 +5,8 @@ import { _LOCK_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { ILock } from "../../facets/layer_1/lock/ILock.sol";
-import { IERC20StorageWrapper } from "./ERC1400/ERC20/IERC20StorageWrapper.sol";
-import { IERC1410StorageWrapper } from "./ERC1400/ERC1410/IERC1410StorageWrapper.sol";
+import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
+import { IERC1410 } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
@@ -57,8 +57,8 @@ library LockStorageWrapper {
         lockStorageRef.totalLockedAmountByAccountAndPartition[tokenHolder][partition] += amount;
         lockStorageRef.totalLockedAmountByAccount[tokenHolder] += amount;
 
-        emit IERC1410StorageWrapper.TransferByPartition(partition, operator, tokenHolder, address(0), amount, "", "");
-        emit IERC20StorageWrapper.Transfer(tokenHolder, address(0), amount);
+        emit IERC1410.TransferByPartition(partition, operator, tokenHolder, address(0), amount, "", "");
+        emit IERC20.Transfer(tokenHolder, address(0), amount);
 
         success_ = true;
     }
@@ -93,16 +93,8 @@ library LockStorageWrapper {
             ERC1410StorageWrapper.increaseBalanceByPartition(tokenHolder, lockAmount, partition);
         }
 
-        emit IERC1410StorageWrapper.TransferByPartition(
-            partition,
-            operator,
-            address(0),
-            tokenHolder,
-            lockAmount,
-            "",
-            ""
-        );
-        emit IERC20StorageWrapper.Transfer(address(0), tokenHolder, lockAmount);
+        emit IERC1410.TransferByPartition(partition, operator, address(0), tokenHolder, lockAmount, "", "");
+        emit IERC20.Transfer(address(0), tokenHolder, lockAmount);
 
         success_ = true;
     }

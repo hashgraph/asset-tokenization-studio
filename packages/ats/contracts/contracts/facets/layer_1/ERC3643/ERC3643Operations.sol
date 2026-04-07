@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _CONTROLLER_ROLE, _ISSUER_ROLE, _AGENT_ROLE } from "../../../constants/roles.sol";
 import { IERC3643Operations } from "./IERC3643Operations.sol";
-import { IERC1644StorageWrapper } from "../../../domain/asset/ERC1400/ERC1644/IERC1644StorageWrapper.sol";
+import { IERC1644 } from "../ERC1400/ERC1644/IERC1644.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../../domain/core/CapStorageWrapper.sol";
@@ -25,7 +25,7 @@ abstract contract ERC3643Operations is IERC3643Operations, TimestampProvider, Mo
             AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
         }
         TokenCoreOps.burn(_userAddress, _amount);
-        emit IERC1644StorageWrapper.ControllerRedemption(msg.sender, _userAddress, _amount, "", "");
+        emit IERC1644.ControllerRedemption(msg.sender, _userAddress, _amount, "", "");
     }
 
     function mint(address _to, uint256 _amount) external onlyUnpaused onlyWithoutMultiPartition {
@@ -53,7 +53,7 @@ abstract contract ERC3643Operations is IERC3643Operations, TimestampProvider, Mo
             AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
         }
         TokenCoreOps.transfer(_from, _to, _amount);
-        emit IERC1644StorageWrapper.ControllerTransfer(msg.sender, _from, _to, _amount, "", "");
+        emit IERC1644.ControllerTransfer(msg.sender, _from, _to, _amount, "", "");
         return true;
     }
 }

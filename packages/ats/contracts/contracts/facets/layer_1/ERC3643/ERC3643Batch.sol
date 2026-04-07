@@ -4,10 +4,8 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _CONTROLLER_ROLE, _ISSUER_ROLE, _AGENT_ROLE, _WILD_CARD_ROLE } from "../../../constants/roles.sol";
 import { IERC3643Batch } from "./IERC3643Batch.sol";
 import { IClearing } from "../clearing/IClearing.sol";
-import { IERC1644StorageWrapper } from "../../../domain/asset/ERC1400/ERC1644/IERC1644StorageWrapper.sol";
-import {
-    IProtectedPartitionsStorageWrapper
-} from "../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
+import { IERC1644 } from "../ERC1400/ERC1644/IERC1644.sol";
+import { IProtectedPartitions } from "../../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../../domain/core/CapStorageWrapper.sol";
@@ -63,7 +61,7 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, Modifiers {
         }
         for (uint256 i = 0; i < _fromList.length; i++) {
             TokenCoreOps.transfer(_fromList[i], _toList[i], _amounts[i]);
-            emit IERC1644StorageWrapper.ControllerTransfer(msg.sender, _fromList[i], _toList[i], _amounts[i], "", "");
+            emit IERC1644.ControllerTransfer(msg.sender, _fromList[i], _toList[i], _amounts[i], "", "");
         }
     }
 
@@ -105,7 +103,7 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, Modifiers {
         }
         for (uint256 i = 0; i < _userAddresses.length; i++) {
             TokenCoreOps.burn(_userAddresses[i], _amounts[i]);
-            emit IERC1644StorageWrapper.ControllerRedemption(msg.sender, _userAddresses[i], _amounts[i], "", "");
+            emit IERC1644.ControllerRedemption(msg.sender, _userAddresses[i], _amounts[i], "", "");
         }
     }
 }

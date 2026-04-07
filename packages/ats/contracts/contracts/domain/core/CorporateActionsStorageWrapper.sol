@@ -3,11 +3,22 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {
-    ICorporateActionsStorageWrapper,
-    CorporateActionDataStorage
-} from "../asset/corporateAction/ICorporateActionsStorageWrapper.sol";
+import { ICorporateActions } from "../../facets/layer_1/corporateAction/ICorporateActions.sol";
 import { _CORPORATE_ACTION_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+
+struct ActionData {
+    bytes32 actionType;
+    bytes data;
+    bytes[] results;
+    uint256 actionIdByType;
+}
+
+struct CorporateActionDataStorage {
+    EnumerableSet.Bytes32Set actions;
+    mapping(bytes32 => ActionData) actionsData;
+    mapping(bytes32 => bytes32[]) actionsByType;
+    mapping(bytes32 => bool) actionsContentHashes;
+}
 
 library CorporateActionsStorageWrapper {
     using Pagination for EnumerableSet.Bytes32Set;
@@ -62,7 +73,7 @@ library CorporateActionsStorageWrapper {
 
     function requireMatchingActionType(bytes32 _actionType, uint256 _index) internal view {
         if (getCorporateActionCountByType(_actionType) <= _index)
-            revert ICorporateActionsStorageWrapper.WrongIndexForAction(_index, _actionType);
+            revert ICorporateActions.WrongIndexForAction(_index, _actionType);
     }
 
     function getCorporateAction(
@@ -146,7 +157,7 @@ library CorporateActionsStorageWrapper {
 
     function requireValidDates(uint256 _firstDate, uint256 _secondDate) internal pure {
         if (_secondDate < _firstDate) {
-            revert ICorporateActionsStorageWrapper.WrongDates(_firstDate, _secondDate);
+            revert ICorporateActions.WrongDates(_firstDate, _secondDate);
         }
     }
 

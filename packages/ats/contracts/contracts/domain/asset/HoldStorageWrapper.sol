@@ -16,9 +16,9 @@ import {
 } from "../../facets/layer_1/hold/IHold.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { IERC3643Management } from "../../facets/layer_1/ERC3643/IERC3643Management.sol";
-import { IERC20StorageWrapper } from "./ERC1400/ERC20/IERC20StorageWrapper.sol";
+import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
-import { IERC1410StorageWrapper } from "./ERC1400/ERC1410/IERC1410StorageWrapper.sol";
+import { IERC1410 } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
 import { ThirdPartyType } from "./types/ThirdPartyType.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { _checkNounceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
@@ -65,7 +65,7 @@ library HoldStorageWrapper {
         holdStorageRef.totalHeldAmountByAccountAndPartition[_from][_partition] += _hold.amount;
         holdStorageRef.totalHeldAmountByAccount[_from] += _hold.amount;
 
-        emit IERC1410StorageWrapper.TransferByPartition(
+        emit IERC1410.TransferByPartition(
             _partition,
             EvmAccessors.getMsgSender(),
             _from,
@@ -74,7 +74,7 @@ library HoldStorageWrapper {
             _operatorData,
             ""
         );
-        emit IERC20StorageWrapper.Transfer(_from, address(0), _hold.amount);
+        emit IERC20.Transfer(_from, address(0), _hold.amount);
 
         success_ = true;
     }
@@ -237,7 +237,7 @@ library HoldStorageWrapper {
                     IERC3643Management.ComplianceCallFailed.selector
                 );
             }
-            emit IERC1410StorageWrapper.TransferByPartition(
+            emit IERC1410.TransferByPartition(
                 _holdIdentifier.partition,
                 EvmAccessors.getMsgSender(),
                 address(0),
@@ -246,7 +246,7 @@ library HoldStorageWrapper {
                 "",
                 ""
             );
-            emit IERC20StorageWrapper.Transfer(address(0), _to, _amount);
+            emit IERC20.Transfer(address(0), _to, _amount);
             return;
         }
         ERC1410StorageWrapper.addPartitionTo(_amount, _to, _holdIdentifier.partition);
@@ -256,7 +256,7 @@ library HoldStorageWrapper {
                 IERC3643Management.ComplianceCallFailed.selector
             );
         }
-        emit IERC1410StorageWrapper.TransferByPartition(
+        emit IERC1410.TransferByPartition(
             _holdIdentifier.partition,
             EvmAccessors.getMsgSender(),
             address(0),
@@ -265,7 +265,7 @@ library HoldStorageWrapper {
             "",
             ""
         );
-        emit IERC20StorageWrapper.Transfer(address(0), _to, _amount);
+        emit IERC20.Transfer(address(0), _to, _amount);
     }
 
     // --- Hold amount operations ---

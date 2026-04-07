@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Hold } from "../../../facets/layer_1/hold/IHold.sol";
+import { Hold } from "../hold/IHold.sol";
 
-interface IClearingStorageWrapper {
+interface IClearingTypes {
     event ClearedRedeemByPartition(
         address indexed operator,
         address indexed tokenHolder,
@@ -47,6 +47,7 @@ interface IClearingStorageWrapper {
         bytes data,
         bytes operatorData
     );
+
     event ClearedHoldByPartition(
         address indexed operator,
         address indexed tokenHolder,

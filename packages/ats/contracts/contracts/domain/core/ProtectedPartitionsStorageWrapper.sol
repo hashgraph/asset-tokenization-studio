@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _PROTECTED_PARTITIONS_PARTICIPANT_ROLE } from "../../constants/roles.sol";
 import { _PROTECTED_PARTITIONS_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { IProtectedPartitionsStorageWrapper } from "./protectedPartition/IProtectedPartitionsStorageWrapper.sol";
+import { IProtectedPartitions } from "../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 import { IClearing } from "../../facets/layer_1/clearing/IClearing.sol";
 import { Hold, ProtectedHold } from "../../facets/layer_1/hold/IHold.sol";
 import { AccessControlStorageWrapper } from "./AccessControlStorageWrapper.sol";
@@ -48,16 +48,16 @@ library ProtectedPartitionsStorageWrapper {
     function setProtectedPartitions(bool _protected) internal {
         protectedPartitionsStorage().arePartitionsProtected = _protected;
         if (_protected) {
-            emit IProtectedPartitionsStorageWrapper.PartitionsProtected(EvmAccessors.getMsgSender());
+            emit IProtectedPartitions.PartitionsProtected(EvmAccessors.getMsgSender());
             return;
         }
-        emit IProtectedPartitionsStorageWrapper.PartitionsUnProtected(EvmAccessors.getMsgSender());
+        emit IProtectedPartitions.PartitionsUnProtected(EvmAccessors.getMsgSender());
     }
 
     // --- Internal view functions ---
 
     function requireProtectedPartitions() internal view {
-        if (!arePartitionsProtected()) revert IProtectedPartitionsStorageWrapper.PartitionsAreUnProtected();
+        if (!arePartitionsProtected()) revert IProtectedPartitions.PartitionsAreUnProtected();
     }
 
     function arePartitionsProtected() internal view returns (bool) {
@@ -73,10 +73,7 @@ library ProtectedPartitionsStorageWrapper {
             ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
             !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, EvmAccessors.getMsgSender())
         ) {
-            revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(
-                EvmAccessors.getMsgSender(),
-                _WILD_CARD_ROLE
-            );
+            revert IProtectedPartitions.PartitionsAreProtectedAndNoRole(EvmAccessors.getMsgSender(), _WILD_CARD_ROLE);
         }
     }
 
@@ -85,11 +82,11 @@ library ProtectedPartitionsStorageWrapper {
         address _from,
         address _to,
         uint256 _amount,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData,
+        IProtectedPartitions.ProtectionData calldata _protectionData,
         string memory _name
     ) internal view {
         if (!isTransferSignatureValid(_partition, _from, _to, _amount, _protectionData, _name))
-            revert IProtectedPartitionsStorageWrapper.WrongSignature();
+            revert IProtectedPartitions.WrongSignature();
     }
 
     function isTransferSignatureValid(
@@ -97,7 +94,7 @@ library ProtectedPartitionsStorageWrapper {
         address _from,
         address _to,
         uint256 _amount,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData,
+        IProtectedPartitions.ProtectionData calldata _protectionData,
         string memory _name
     ) internal view returns (bool) {
         bytes32 functionHash = _getMessageHashTransfer(
@@ -124,18 +121,18 @@ library ProtectedPartitionsStorageWrapper {
         bytes32 _partition,
         address _from,
         uint256 _amount,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData,
+        IProtectedPartitions.ProtectionData calldata _protectionData,
         string memory _name
     ) internal view {
         if (!isRedeemSignatureValid(_partition, _from, _amount, _protectionData, _name))
-            revert IProtectedPartitionsStorageWrapper.WrongSignature();
+            revert IProtectedPartitions.WrongSignature();
     }
 
     function isRedeemSignatureValid(
         bytes32 _partition,
         address _from,
         uint256 _amount,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData,
+        IProtectedPartitions.ProtectionData calldata _protectionData,
         string memory _name
     ) internal view returns (bool) {
         bytes32 functionHash = _getMessageHashRedeem(
@@ -165,7 +162,7 @@ library ProtectedPartitionsStorageWrapper {
         string memory _name
     ) internal view {
         if (!isCreateHoldSignatureValid(_partition, _from, _protectedHold, _signature, _name))
-            revert IProtectedPartitionsStorageWrapper.WrongSignature();
+            revert IProtectedPartitions.WrongSignature();
     }
 
     function isCreateHoldSignatureValid(
@@ -195,7 +192,7 @@ library ProtectedPartitionsStorageWrapper {
         string memory _name
     ) internal view {
         if (!isClearingCreateHoldSignatureValid(_protectedClearingOperation, _hold, _signature, _name))
-            revert IProtectedPartitionsStorageWrapper.WrongSignature();
+            revert IProtectedPartitions.WrongSignature();
     }
 
     function isClearingCreateHoldSignatureValid(
@@ -225,7 +222,7 @@ library ProtectedPartitionsStorageWrapper {
         string memory _name
     ) internal view {
         if (!isClearingTransferSignatureValid(_protectedClearingOperation, _to, _amount, _signature, _name))
-            revert IProtectedPartitionsStorageWrapper.WrongSignature();
+            revert IProtectedPartitions.WrongSignature();
     }
 
     function isClearingTransferSignatureValid(
@@ -255,7 +252,7 @@ library ProtectedPartitionsStorageWrapper {
         string memory _name
     ) internal view {
         if (!isClearingRedeemSignatureValid(_protectedClearingOperation, _amount, _signature, _name))
-            revert IProtectedPartitionsStorageWrapper.WrongSignature();
+            revert IProtectedPartitions.WrongSignature();
     }
 
     function isClearingRedeemSignatureValid(

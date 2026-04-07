@@ -9,10 +9,14 @@ import { ERC1410StorageWrapper } from "../asset/ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../asset/ERC20StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../asset/ERC1594StorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
-import { IERC1410StorageWrapper } from "../asset/ERC1400/ERC1410/IERC1410StorageWrapper.sol";
-import { IERC20StorageWrapper } from "../asset/ERC1400/ERC20/IERC20StorageWrapper.sol";
-import { BasicTransferInfo, IssueData, OperatorTransferData } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
-import { IProtectedPartitionsStorageWrapper } from "../core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
+import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
+import {
+    BasicTransferInfo,
+    IssueData,
+    OperatorTransferData,
+    IERC1410
+} from "../../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
+import { IProtectedPartitions } from "../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 
 /// @title TokenCoreOps - Orchestrator for core token operations
 /// @notice Deployed once as a separate contract. Facets call via DELEGATECALL.
@@ -50,7 +54,7 @@ library TokenCoreOps {
         address _from,
         address _to,
         uint256 _amount,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
+        IProtectedPartitions.ProtectionData calldata _protectionData
     ) public returns (bytes32) {
         return ERC1410StorageWrapper.protectedTransferFromByPartition(_partition, _from, _to, _amount, _protectionData);
     }
@@ -78,7 +82,7 @@ library TokenCoreOps {
         bytes32 _partition,
         address _from,
         uint256 _amount,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
+        IProtectedPartitions.ProtectionData calldata _protectionData
     ) public {
         ERC1410StorageWrapper.protectedRedeemFromByPartition(_partition, _from, _amount, _protectionData);
     }
@@ -145,7 +149,7 @@ library TokenCoreOps {
 
     function transferDefaultPartition(address _sender, address _from, address _to, uint256 _amount) public {
         ERC20StorageWrapper.transfer(_from, _to, _amount);
-        emit IERC20StorageWrapper.Transfer(_sender, _to, _amount);
+        emit IERC20.Transfer(_sender, _to, _amount);
     }
 
     function increaseAllowedBalance(address _owner, address _spender, uint256 _amount) public {
@@ -177,19 +181,11 @@ library TokenCoreOps {
         bytes memory _data,
         bytes memory _operatorData
     ) public {
-        emit IERC1410StorageWrapper.TransferByPartition(
-            _partition,
-            _operator,
-            _from,
-            _to,
-            _amount,
-            _data,
-            _operatorData
-        );
+        emit IERC1410.TransferByPartition(_partition, _operator, _from, _to, _amount, _data, _operatorData);
     }
 
     function emitTransfer(address _from, address _to, uint256 _amount) public {
-        emit IERC20StorageWrapper.Transfer(_from, _to, _amount);
+        emit IERC20.Transfer(_from, _to, _amount);
     }
 
     // ============================================================================

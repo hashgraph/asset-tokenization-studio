@@ -8,9 +8,7 @@ import { BasicTransferInfo } from "../../layer_1/ERC1400/ERC1410/IERC1410.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
-import {
-    IProtectedPartitionsStorageWrapper
-} from "../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
+import { IProtectedPartitions } from "../../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";

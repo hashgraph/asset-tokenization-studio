@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _ADJUST_BALANCES_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { IAdjustBalancesStorageWrapper } from "./adjustBalance/IAdjustBalancesStorageWrapper.sol";
 import { IClearing } from "../../facets/layer_1/clearing/IClearing.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
@@ -10,6 +9,7 @@ import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { CapStorageWrapper } from "../core/CapStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { IAdjustBalances } from "../../facets/layer_2/adjustBalance/IAdjustBalances.sol";
 
 struct AdjustBalancesStorage {
     mapping(address => uint256[]) labafUserPartition;
@@ -162,7 +162,7 @@ library AdjustBalancesStorageWrapper {
         CapStorageWrapper.adjustMaxSupply(_factor);
         updateAbaf(_factor);
 
-        emit IAdjustBalancesStorageWrapper.AdjustmentBalanceSet(EvmAccessors.getMsgSender(), _factor, _decimals);
+        emit IAdjustBalances.AdjustmentBalanceSet(EvmAccessors.getMsgSender(), _factor, _decimals);
     }
 
     function adjustTotalAndMaxSupplyForPartition(bytes32 _partition) internal {
@@ -372,7 +372,7 @@ library AdjustBalancesStorageWrapper {
     }
 
     function requireValidFactor(uint256 _factor) internal pure {
-        if (_factor == 0) revert IAdjustBalancesStorageWrapper.FactorIsZero();
+        if (_factor == 0) revert IAdjustBalances.FactorIsZero();
     }
 
     function _adjustBalancesStorage() internal pure returns (AdjustBalancesStorage storage adjustBalancesStorage_) {

@@ -7,11 +7,15 @@ import {
     _ERC1410_BASIC_STORAGE_POSITION,
     _ERC1410_OPERATOR_STORAGE_POSITION
 } from "../../constants/storagePositions.sol";
-import { IERC1410StorageWrapper } from "./ERC1400/ERC1410/IERC1410StorageWrapper.sol";
-import { BasicTransferInfo, IssueData, OperatorTransferData } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
+import {
+    BasicTransferInfo,
+    IssueData,
+    OperatorTransferData,
+    IERC1410
+} from "../../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { IERC3643Management } from "../../facets/layer_1/ERC3643/IERC3643Management.sol";
-import { IProtectedPartitionsStorageWrapper } from "../core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
+import { IProtectedPartitions } from "../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 import { _checkNounceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
@@ -81,13 +85,13 @@ library ERC1410StorageWrapper {
 
     function reduceBalanceByPartition(address from, uint256 value, bytes32 partition) internal {
         if (!validPartition(partition, from)) {
-            revert IERC1410StorageWrapper.InvalidPartition(from, partition);
+            revert IERC1410.InvalidPartition(from, partition);
         }
 
         uint256 fromBalance = balanceOfByPartition(partition, from);
 
         if (fromBalance < value) {
-            revert IERC1410StorageWrapper.InsufficientBalance(from, fromBalance, value, partition);
+            revert IERC1410.InsufficientBalance(from, fromBalance, value, partition);
         }
 
         ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
@@ -116,7 +120,7 @@ library ERC1410StorageWrapper {
 
     function increaseBalanceByPartition(address from, uint256 value, bytes32 partition) internal {
         if (!validPartition(partition, from)) {
-            revert IERC1410StorageWrapper.InvalidPartition(from, partition);
+            revert IERC1410.InvalidPartition(from, partition);
         }
 
         ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
@@ -183,22 +187,22 @@ library ERC1410StorageWrapper {
 
     function authorizeOperator(address operator) internal {
         erc1410OperatorStorage().approvals[EvmAccessors.getMsgSender()][operator] = true;
-        emit IERC1410StorageWrapper.AuthorizedOperator(operator, EvmAccessors.getMsgSender());
+        emit IERC1410.AuthorizedOperator(operator, EvmAccessors.getMsgSender());
     }
 
     function revokeOperator(address operator) internal {
         erc1410OperatorStorage().approvals[EvmAccessors.getMsgSender()][operator] = false;
-        emit IERC1410StorageWrapper.RevokedOperator(operator, EvmAccessors.getMsgSender());
+        emit IERC1410.RevokedOperator(operator, EvmAccessors.getMsgSender());
     }
 
     function authorizeOperatorByPartition(bytes32 partition, address operator) internal {
         erc1410OperatorStorage().partitionApprovals[EvmAccessors.getMsgSender()][partition][operator] = true;
-        emit IERC1410StorageWrapper.AuthorizedOperatorByPartition(partition, operator, EvmAccessors.getMsgSender());
+        emit IERC1410.AuthorizedOperatorByPartition(partition, operator, EvmAccessors.getMsgSender());
     }
 
     function revokeOperatorByPartition(bytes32 partition, address operator) internal {
         erc1410OperatorStorage().partitionApprovals[EvmAccessors.getMsgSender()][partition][operator] = false;
-        emit IERC1410StorageWrapper.RevokedOperatorByPartition(partition, operator, EvmAccessors.getMsgSender());
+        emit IERC1410.RevokedOperatorByPartition(partition, operator, EvmAccessors.getMsgSender());
     }
 
     // ============================================================================
@@ -225,7 +229,7 @@ library ERC1410StorageWrapper {
 
         // Emit transfer event AFTER all partition balance changes are complete.
         // This ensures TransferByPartition is emitted when partitions[] changes.
-        emit IERC1410StorageWrapper.TransferByPartition(
+        emit IERC1410.TransferByPartition(
             partition,
             operator,
             from,
@@ -293,7 +297,7 @@ library ERC1410StorageWrapper {
         afterTokenTransfer(issueData.partition, address(0), issueData.tokenHolder, issueData.value);
 
         // RULE 2: Emit TransferByPartition when ERC1410BasicStorage.partitions change
-        emit IERC1410StorageWrapper.TransferByPartition(
+        emit IERC1410.TransferByPartition(
             issueData.partition,
             EvmAccessors.getMsgSender(),
             address(0),
@@ -303,7 +307,7 @@ library ERC1410StorageWrapper {
             ""
         );
 
-        emit IERC1410StorageWrapper.IssuedByPartition(
+        emit IERC1410.IssuedByPartition(
             issueData.partition,
             EvmAccessors.getMsgSender(),
             issueData.tokenHolder,
@@ -325,15 +329,7 @@ library ERC1410StorageWrapper {
         reduceBalanceByPartition(from, value, partition);
 
         // RULE 2: Emit TransferByPartition when ERC1410BasicStorage.partitions change
-        emit IERC1410StorageWrapper.TransferByPartition(
-            partition,
-            operator,
-            from,
-            address(0),
-            value,
-            data,
-            operatorData
-        );
+        emit IERC1410.TransferByPartition(partition, operator, from, address(0), value, data, operatorData);
 
         reduceTotalSupplyByPartition(partition, value);
 
@@ -346,7 +342,7 @@ library ERC1410StorageWrapper {
 
         afterTokenTransfer(partition, from, address(0), value);
 
-        emit IERC1410StorageWrapper.RedeemedByPartition(partition, operator, from, value, data, operatorData);
+        emit IERC1410.RedeemedByPartition(partition, operator, from, value, data, operatorData);
     }
 
     // ============================================================================
@@ -358,7 +354,7 @@ library ERC1410StorageWrapper {
         address from,
         address to,
         uint256 amount,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata protectionData
+        IProtectedPartitions.ProtectionData calldata protectionData
     ) internal returns (bytes32) {
         _checkNounceAndDeadline(
             protectionData.nounce,
@@ -386,7 +382,7 @@ library ERC1410StorageWrapper {
         bytes32 partition,
         address from,
         uint256 amount,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata protectionData
+        IProtectedPartitions.ProtectionData calldata protectionData
     ) internal {
         _checkNounceAndDeadline(
             protectionData.nounce,
@@ -677,16 +673,16 @@ library ERC1410StorageWrapper {
 
     function requireOperator(bytes32 partition, address from) internal view {
         if (!isAuthorized(partition, EvmAccessors.getMsgSender(), from))
-            revert IERC1410StorageWrapper.Unauthorized(EvmAccessors.getMsgSender(), from, partition);
+            revert IERC1410.Unauthorized(EvmAccessors.getMsgSender(), from, partition);
     }
 
     function requireWithoutMultiPartition() internal view {
-        if (isMultiPartition()) revert IERC1410StorageWrapper.NotAllowedInMultiPartitionMode();
+        if (isMultiPartition()) revert IERC1410.NotAllowedInMultiPartitionMode();
     }
 
     function requireDefaultPartitionWithSinglePartition(bytes32 partition) internal view {
         if (!isMultiPartition() && partition != _DEFAULT_PARTITION)
-            revert IERC1410StorageWrapper.PartitionNotAllowedInSinglePartitionMode(partition);
+            revert IERC1410.PartitionNotAllowedInSinglePartitionMode(partition);
     }
 
     // ============================================================================
@@ -695,10 +691,10 @@ library ERC1410StorageWrapper {
 
     function validateParams(bytes32 partition, uint256 value) internal pure {
         if (value == uint256(0)) {
-            revert IERC1410StorageWrapper.ZeroValue();
+            revert IERC1410.ZeroValue();
         }
         if (partition == bytes32(0)) {
-            revert IERC1410StorageWrapper.ZeroPartition();
+            revert IERC1410.ZeroPartition();
         }
     }
 
@@ -744,7 +740,7 @@ library ERC1410StorageWrapper {
         if (newAmount != oldAmount) {
             basicStorage.partitions[account][partitionsIndex - 1].amount = newAmount;
             unchecked {
-                emit IERC1410StorageWrapper.TransferByPartition(
+                emit IERC1410.TransferByPartition(
                     partition,
                     EvmAccessors.getMsgSender(),
                     address(0),

@@ -5,7 +5,7 @@ import { ArraysUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/Arr
 import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import { _SNAPSHOT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import {
-    ISnapshotsStorageWrapper,
+    ISnapshots,
     Snapshots,
     SnapshotsAddress,
     PartitionSnapshots,
@@ -559,10 +559,10 @@ library SnapshotsStorageWrapper {
 
     function indexFor(uint256 snapshotId, uint256[] storage ids) internal view returns (bool, uint256) {
         if (snapshotId == 0) {
-            revert ISnapshotsStorageWrapper.SnapshotIdNull();
+            revert ISnapshots.SnapshotIdNull();
         }
         if (snapshotId > getCurrentSnapshotId()) {
-            revert ISnapshotsStorageWrapper.SnapshotIdDoesNotExists(snapshotId);
+            revert ISnapshots.SnapshotIdDoesNotExists(snapshotId);
         }
 
         uint256 index = ids.findUpperBound(snapshotId);

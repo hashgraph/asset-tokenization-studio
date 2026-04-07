@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ISnapshotsStorageWrapper } from "../../../domain/asset/snapshot/ISnapshotsStorageWrapper.sol";
-
 // Snapshotted values have arrays of ids and the value corresponding to that id. These could be an array of a
 // Snapshot struct, but that would impede usage of functions that work on an array.
 struct Snapshots {
@@ -28,7 +26,14 @@ struct HolderBalance {
     uint256 balance;
 }
 
-interface ISnapshots is ISnapshotsStorageWrapper {
+interface ISnapshots {
+    // Events
+    event SnapshotTaken(address indexed operator, uint256 indexed snapshotID);
+    event SnapshotTriggered(uint256 snapshotId, bytes metadata);
+
+    // Errors
+    error SnapshotIdNull();
+    error SnapshotIdDoesNotExists(uint256 snapshotId);
     /**
      * @notice Takes a snapshot of the current balances and total supplies
      * @dev Taking a snapshot means the next time a user modifies their balance, the current balance will be stored

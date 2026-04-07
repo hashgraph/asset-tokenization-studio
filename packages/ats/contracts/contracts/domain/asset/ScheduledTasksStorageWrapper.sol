@@ -11,7 +11,7 @@ import {
 } from "../../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
 import { IEquity } from "../../facets/layer_2/equity/IEquity.sol";
 import { IBondRead } from "../../facets/layer_2/bond/IBondRead.sol";
-import { ISnapshotsStorageWrapper } from "../../facets/layer_1/snapshot/ISnapshots.sol";
+import { ISnapshots } from "../../facets/layer_1/snapshot/ISnapshots.sol";
 import {
     _SCHEDULED_SNAPSHOTS_STORAGE_POSITION,
     _SCHEDULED_COUPON_LISTING_STORAGE_POSITION,
@@ -327,7 +327,7 @@ library ScheduledTasksStorageWrapper {
         bytes32 actionId = abi.decode(data, (bytes32));
 
         uint256 newSnapShotID = SnapshotsStorageWrapper.takeSnapshot();
-        emit ISnapshotsStorageWrapper.SnapshotTriggered(newSnapShotID, abi.encodePacked(actionId));
+        emit ISnapshots.SnapshotTriggered(newSnapShotID, abi.encodePacked(actionId));
         CorporateActionsStorageWrapper.updateCorporateActionResult(
             actionId,
             SNAPSHOT_RESULT_ID,

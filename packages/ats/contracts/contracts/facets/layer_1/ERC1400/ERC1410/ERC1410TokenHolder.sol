@@ -5,9 +5,7 @@ import { BasicTransferInfo } from "./IERC1410.sol";
 import { IERC1410TokenHolder } from "./IERC1410TokenHolder.sol";
 import { _WILD_CARD_ROLE } from "../../../../constants/roles.sol";
 
-import {
-    IProtectedPartitionsStorageWrapper
-} from "../../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
+import { IProtectedPartitions } from "../../../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 
 import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";

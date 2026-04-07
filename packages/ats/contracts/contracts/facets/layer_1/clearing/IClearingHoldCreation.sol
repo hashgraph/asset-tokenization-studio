@@ -3,8 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { Hold } from "../hold/IHold.sol";
 import { IClearing } from "./IClearing.sol";
+import { IClearingTypes } from "./IClearingTypes.sol";
 
-interface IClearingHoldCreation is IClearing {
+interface IClearingHoldCreation is IClearing, IClearingTypes {
     /**
      * @notice Creates a hold for a clearing operation by partition
      *

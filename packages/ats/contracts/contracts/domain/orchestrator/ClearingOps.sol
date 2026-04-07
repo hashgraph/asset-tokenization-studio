@@ -10,7 +10,7 @@ import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsSt
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { IClearing } from "../../facets/layer_1/clearing/IClearing.sol";
 import { IClearingActions } from "../../facets/layer_1/clearing/IClearingActions.sol";
-import { IClearingStorageWrapper } from "../asset/clearing/IClearingStorageWrapper.sol";
+import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { IERC3643Management } from "../../facets/layer_1/ERC3643/IERC3643Management.sol";
 import { Hold } from "../../facets/layer_1/hold/IHold.sol";
@@ -766,7 +766,7 @@ library ClearingOps {
         ThirdPartyType _thirdPartyType
     ) internal {
         if (_thirdPartyType == ThirdPartyType.NULL) {
-            emit IClearingStorageWrapper.ClearedTransferByPartition(
+            emit IClearingTypes.ClearedTransferByPartition(
                 EvmAccessors.getMsgSender(),
                 _from,
                 _to,
@@ -780,7 +780,7 @@ library ClearingOps {
             return;
         }
         if (_thirdPartyType == ThirdPartyType.AUTHORIZED) {
-            emit IClearingStorageWrapper.ClearedTransferFromByPartition(
+            emit IClearingTypes.ClearedTransferFromByPartition(
                 EvmAccessors.getMsgSender(),
                 _from,
                 _to,
@@ -794,7 +794,7 @@ library ClearingOps {
             return;
         }
         if (_thirdPartyType == ThirdPartyType.OPERATOR) {
-            emit IClearingStorageWrapper.ClearedOperatorTransferByPartition(
+            emit IClearingTypes.ClearedOperatorTransferByPartition(
                 EvmAccessors.getMsgSender(),
                 _from,
                 _to,
@@ -807,7 +807,7 @@ library ClearingOps {
             );
             return;
         }
-        emit IClearingStorageWrapper.ProtectedClearedTransferByPartition(
+        emit IClearingTypes.ProtectedClearedTransferByPartition(
             EvmAccessors.getMsgSender(),
             _from,
             _to,
@@ -831,7 +831,7 @@ library ClearingOps {
         ThirdPartyType _thirdPartyType
     ) internal {
         if (_thirdPartyType == ThirdPartyType.NULL) {
-            emit IClearingStorageWrapper.ClearedRedeemByPartition(
+            emit IClearingTypes.ClearedRedeemByPartition(
                 EvmAccessors.getMsgSender(),
                 _from,
                 _partition,
@@ -844,7 +844,7 @@ library ClearingOps {
             return;
         }
         if (_thirdPartyType == ThirdPartyType.AUTHORIZED) {
-            emit IClearingStorageWrapper.ClearedRedeemFromByPartition(
+            emit IClearingTypes.ClearedRedeemFromByPartition(
                 EvmAccessors.getMsgSender(),
                 _from,
                 _partition,
@@ -857,7 +857,7 @@ library ClearingOps {
             return;
         }
         if (_thirdPartyType == ThirdPartyType.OPERATOR) {
-            emit IClearingStorageWrapper.ClearedOperatorRedeemByPartition(
+            emit IClearingTypes.ClearedOperatorRedeemByPartition(
                 EvmAccessors.getMsgSender(),
                 _from,
                 _partition,
@@ -869,7 +869,7 @@ library ClearingOps {
             );
             return;
         }
-        emit IClearingStorageWrapper.ProtectedClearedRedeemByPartition(
+        emit IClearingTypes.ProtectedClearedRedeemByPartition(
             EvmAccessors.getMsgSender(),
             _from,
             _partition,
@@ -892,7 +892,7 @@ library ClearingOps {
         ThirdPartyType _thirdPartyType
     ) internal {
         if (_thirdPartyType == ThirdPartyType.NULL) {
-            emit IClearingStorageWrapper.ClearedHoldByPartition(
+            emit IClearingTypes.ClearedHoldByPartition(
                 EvmAccessors.getMsgSender(),
                 _from,
                 _partition,
@@ -905,7 +905,7 @@ library ClearingOps {
             return;
         }
         if (_thirdPartyType == ThirdPartyType.AUTHORIZED) {
-            emit IClearingStorageWrapper.ClearedHoldFromByPartition(
+            emit IClearingTypes.ClearedHoldFromByPartition(
                 EvmAccessors.getMsgSender(),
                 _from,
                 _partition,
@@ -918,7 +918,7 @@ library ClearingOps {
             return;
         }
         if (_thirdPartyType == ThirdPartyType.OPERATOR) {
-            emit IClearingStorageWrapper.ClearedOperatorHoldByPartition(
+            emit IClearingTypes.ClearedOperatorHoldByPartition(
                 EvmAccessors.getMsgSender(),
                 _from,
                 _partition,
@@ -930,7 +930,7 @@ library ClearingOps {
             );
             return;
         }
-        emit IClearingStorageWrapper.ProtectedClearedHoldByPartition(
+        emit IClearingTypes.ProtectedClearedHoldByPartition(
             EvmAccessors.getMsgSender(),
             _from,
             _partition,

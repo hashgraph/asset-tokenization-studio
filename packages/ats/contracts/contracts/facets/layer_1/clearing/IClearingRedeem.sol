@@ -2,8 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearing } from "./IClearing.sol";
+import { IClearingTypes } from "./IClearingTypes.sol";
 
-interface IClearingRedeem is IClearing {
+interface IClearingRedeem is IClearing, IClearingTypes {
     /**
      * @notice Creates a redeem clearing operation for a partition
      *
