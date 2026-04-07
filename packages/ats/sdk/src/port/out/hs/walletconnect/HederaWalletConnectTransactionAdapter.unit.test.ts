@@ -302,21 +302,30 @@ describe("HederaWalletConnectTransactionAdapter", () => {
   });
 
   describe("stop", () => {
-    it("should disconnect provider and appKit", async () => {
+    it("should disconnect provider and appKit, reset session state, and emit walletDisconnect", async () => {
       const mockDisconnect = jest.fn().mockResolvedValue(undefined);
       const mockAppKitDisconnect = jest.fn().mockResolvedValue(undefined);
 
       (adapter as any).hederaProvider = { disconnect: mockDisconnect };
       (adapter as any).appKit = { disconnect: mockAppKitDisconnect };
+      (adapter as any).injectedEip155Provider = {};
+      (adapter as any)._hederaSessionCaptured = true;
 
       const result = await adapter.stop();
 
       expect(result).toBe(true);
       expect(mockDisconnect).toHaveBeenCalled();
       expect(mockAppKitDisconnect).toHaveBeenCalled();
-      expect((adapter as any).hederaProvider).toBeUndefined();
-      expect((adapter as any).appKit).toBeUndefined();
-      expect((adapter as any).hederaAdapter).toBeUndefined();
+
+      // hederaProvider, appKit and hederaAdapter are kept alive as singletons
+      // so that reconnect can reuse them without re-initialising AppKit.
+      expect((adapter as any).hederaProvider).toBeDefined();
+      expect((adapter as any).appKit).toBeDefined();
+
+      // Session-specific state IS cleared on stop.
+      expect((adapter as any).injectedEip155Provider).toBeUndefined();
+      expect((adapter as any)._hederaSessionCaptured).toBe(false);
+
       expect(mockEventService.emit).toHaveBeenCalledWith(
         WalletEvents.walletDisconnect,
         expect.objectContaining({

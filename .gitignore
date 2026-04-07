@@ -136,6 +136,11 @@ asset-tokenization-studio.iml
 # AI files
 .kiro/
 .claude/
+.agents/
 CLAUDE.md
+GEMINI.md
+AGENTS.md
+packages/ats/contracts/AGENTS.md
+packages/ats/sdk/AGENTS.md
 .tasks/
 .atl/

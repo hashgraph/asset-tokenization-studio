@@ -227,6 +227,6 @@
     "*.sol": ["node check-license.js", "npm run lint:staged:sol --", "npm run format:staged --"],
     "*.{ts,tsx}": ["node check-license.js", "npm run lint:staged:js -- --fix", "npm run format:staged --"],
     "*.{js,mjs,cjs,mts}": ["npm run lint:staged:js -- --fix", "npm run format:staged --"],
-    "*.{json,md,yml,yaml}": ["npm run format:staged --"]
+    "!(CLAUDE|GEMINI).{json,md,yml,yaml}": ["npm run format:staged --"]
   }
 }

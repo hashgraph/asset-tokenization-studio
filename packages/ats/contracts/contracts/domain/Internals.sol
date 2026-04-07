@@ -18,6 +18,7 @@ import {
 import { ILock } from "../facets/layer_1/lock/ILock.sol";
 import { ISecurity } from "../facets/layer_2/security/ISecurity.sol";
 import { IBondRead } from "../facets/layer_2/bond/IBondRead.sol";
+import { ILoan } from "../facets/layer_2/loan/ILoan.sol";
 import { ICoupon } from "../facets/layer_2/coupon/ICoupon.sol";
 import { IDividend } from "../facets/layer_2/dividend/IDividend.sol";
 import { IAmortization } from "../facets/layer_2/amortization/IAmortization.sol";
@@ -217,6 +218,9 @@ abstract contract Internals is Modifiers {
     function _initialize_bond(IBondRead.BondDetailsData calldata _bondDetailsData) internal virtual;
     // solhint-disable-next-line func-name-mixedcase
     function _initialize_equity(IEquity.EquityDetailsData calldata _equityDetailsData) internal virtual;
+    // solhint-disable-next-line func-name-mixedcase
+    function _initialize_loan(ILoan.LoanDetailsData calldata _loanDetailsData) internal virtual;
+    function _setLoanDetails(ILoan.LoanDetailsData memory _loanDetails) internal virtual;
     function _setExternalListInitialized(bytes32 _position) internal virtual;
     function _issue(address _tokenHolder, uint256 _value, bytes memory _data) internal virtual;
     function _issueByPartition(IssueData memory _issueData) internal virtual;
@@ -1410,6 +1414,8 @@ abstract contract Internals is Modifiers {
     ) internal view virtual returns (bool);
     function _isBondInitialized() internal view virtual returns (bool);
     function _isCapInitialized() internal view virtual returns (bool);
+    function _isLoanInitialized() internal view virtual returns (bool);
+    function _getLoanDetails() internal view virtual returns (ILoan.LoanDetailsData memory);
     function _isClearingActivated() internal view virtual returns (bool);
     function _isClearingCreateHoldSignatureValid(
         IClearing.ProtectedClearingOperation memory _protectedClearingOperation,

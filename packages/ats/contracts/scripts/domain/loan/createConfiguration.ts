@@ -24,7 +24,7 @@ import { atsRegistry } from "../atsRegistry";
 import { BusinessLogicResolver } from "@contract-types";
 
 /**
- * Loan-specific facets list (44 facets total).
+ * Loan-specific facets list (45 facets total).
  *
  * This is an explicit positive list of all facets required for loan tokens.
  *
@@ -36,6 +36,7 @@ import { BusinessLogicResolver } from "@contract-types";
  */
 const LOAN_FACETS = [
   // Loan Functionality
+  "LoanFacet",
   "CouponFacet",
   "NominalValueFacet",
   "AmortizationFacet",

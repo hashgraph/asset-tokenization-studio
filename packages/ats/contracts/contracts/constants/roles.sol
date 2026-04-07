@@ -95,5 +95,8 @@ bytes32 constant _TREX_OWNER_ROLE = 0x03ce2fdc316501dd97f5219e6ad908a3238f1e90f9
 // keccak256('security.token.standard.role.wildcard');
 bytes32 constant _WILD_CARD_ROLE = 0x96658f163b67573bbf1e3f9e9330b199b3ac2f6ec0139ea95f622e20a5df2f46;
 
+// keccak256('security.token.standard.role.loanManager');
+bytes32 constant _LOAN_MANAGER_ROLE = 0xc085daff7cbf912b30437b0b95363f3920f33cbd53213a269a2fc5d44ee8289d;
+
 // keccak256('security.token.standard.role.nominalValue');
 bytes32 constant _NOMINAL_VALUE_ROLE = 0x127c185a9f04723376575bc896cc0d3cf15a32dd0db17f01168dcac5d2de6102;

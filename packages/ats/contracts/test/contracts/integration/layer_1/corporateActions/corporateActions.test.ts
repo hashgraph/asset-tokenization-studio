@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset, TimeTravelFacet } from "@contract-types";
+import { type ResolverProxy, type IAsset } from "@contract-types";
 import { ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
@@ -13,7 +13,6 @@ const corporateActionId_1 = "0x0000000000000000000000000000000000000000000000000
 
 describe("Corporate Actions Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
 
@@ -22,7 +21,6 @@ describe("Corporate Actions Tests", () => {
   async function deploySecurityFixtureSinglePartition() {
     const base = await deployEquityTokenFixture();
     diamond = base.diamond;
-    signer_A = base.deployer;
     signer_B = base.user1;
     signer_C = base.user2;
 
