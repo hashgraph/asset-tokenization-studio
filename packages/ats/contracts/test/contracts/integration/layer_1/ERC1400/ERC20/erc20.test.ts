@@ -132,25 +132,27 @@ describe("ERC20 Tests", () => {
     });
 
     it("GIVEN a initialized ERC20 WHEN running any state changing method THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
-      await expect(erc20Facet.connect(signer_A).approve(signer_D.address, amount)).to.be.rejectedWith(
+      await expect(erc20Facet.connect(signer_A).approve(signer_D.address, amount)).to.be.revertedWithCustomError(
+        erc20Facet,
         "NotAllowedInMultiPartitionMode",
       );
 
-      await expect(erc20Facet.connect(signer_A).transfer(signer_D.address, amount)).to.be.rejectedWith(
+      await expect(erc20Facet.connect(signer_A).transfer(signer_D.address, amount)).to.be.revertedWithCustomError(
+        erc20Facet,
         "NotAllowedInMultiPartitionMode",
       );
 
       await expect(
         erc20Facet.connect(signer_A).transferFrom(signer_C.address, signer_D.address, amount),
-      ).to.be.rejectedWith("NotAllowedInMultiPartitionMode");
+      ).to.be.revertedWithCustomError(erc20Facet, "NotAllowedInMultiPartitionMode");
 
-      await expect(erc20Facet.connect(signer_A).increaseAllowance(signer_C.address, amount)).to.be.rejectedWith(
-        "NotAllowedInMultiPartitionMode",
-      );
+      await expect(
+        erc20Facet.connect(signer_A).increaseAllowance(signer_C.address, amount),
+      ).to.be.revertedWithCustomError(erc20Facet, "NotAllowedInMultiPartitionMode");
 
-      await expect(erc20Facet.connect(signer_A).decreaseAllowance(signer_C.address, amount)).to.be.rejectedWith(
-        "NotAllowedInMultiPartitionMode",
-      );
+      await expect(
+        erc20Facet.connect(signer_A).decreaseAllowance(signer_C.address, amount),
+      ).to.be.revertedWithCustomError(erc20Facet, "NotAllowedInMultiPartitionMode");
     });
   });
 
@@ -479,17 +481,30 @@ describe("ERC20 Tests", () => {
     it("GIVEN a paused ERC20 WHEN running any state changing method THEN transaction fails with TokenIsPaused", async () => {
       await pauseFacet.pause();
 
-      await expect(erc20Facet.approve(signer_D.address, amount)).to.be.rejectedWith("TokenIsPaused");
-
-      await expect(erc20Facet.transfer(signer_D.address, amount)).to.be.rejectedWith("TokenIsPaused");
-
-      await expect(erc20Facet.transferFrom(signer_C.address, signer_D.address, amount)).to.be.rejectedWith(
+      await expect(erc20Facet.approve(signer_D.address, amount)).to.be.revertedWithCustomError(
+        erc20Facet,
         "TokenIsPaused",
       );
 
-      await expect(erc20Facet.increaseAllowance(signer_C.address, amount)).to.be.rejectedWith("TokenIsPaused");
+      await expect(erc20Facet.transfer(signer_D.address, amount)).to.be.revertedWithCustomError(
+        erc20Facet,
+        "TokenIsPaused",
+      );
 
-      await expect(erc20Facet.decreaseAllowance(signer_C.address, amount)).to.be.rejectedWith("TokenIsPaused");
+      await expect(erc20Facet.transferFrom(signer_C.address, signer_D.address, amount)).to.be.revertedWithCustomError(
+        erc20Facet,
+        "TokenIsPaused",
+      );
+
+      await expect(erc20Facet.increaseAllowance(signer_C.address, amount)).to.be.revertedWithCustomError(
+        erc20Facet,
+        "TokenIsPaused",
+      );
+
+      await expect(erc20Facet.decreaseAllowance(signer_C.address, amount)).to.be.revertedWithCustomError(
+        erc20Facet,
+        "TokenIsPaused",
+      );
     });
 
     it("GIVEN an ERC20 with clearing active WHEN transfer THEN transaction fails with ClearingIsActivated", async () => {

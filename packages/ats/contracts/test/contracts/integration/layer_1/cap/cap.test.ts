@@ -110,11 +110,11 @@ describe("Cap Tests", () => {
           },
         },
       }),
-    ).to.be.rejectedWith("NewMaxSupplyCannotBeZero");
+    ).to.be.revertedWithCustomError(capFacet, "NewMaxSupplyCannotBeZero");
   });
 
   it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-    await expect(capFacet.initialize_Cap(5, [])).to.be.rejectedWith("AlreadyInitialized");
+    await expect(capFacet.initialize_Cap(5, [])).to.be.revertedWithCustomError(capFacet, "AlreadyInitialized");
   });
 
   describe("Paused", () => {
@@ -125,21 +125,27 @@ describe("Cap Tests", () => {
 
     it("GIVEN a paused Token WHEN setMaxSupply THEN transaction fails with TokenIsPaused", async () => {
       // transfer with data fails
-      await expect(capFacet.connect(signer_C).setMaxSupply(maxSupply)).to.be.rejectedWith("TokenIsPaused");
+      await expect(capFacet.connect(signer_C).setMaxSupply(maxSupply)).to.be.revertedWithCustomError(
+        pauseFacet,
+        "TokenIsPaused",
+      );
     });
 
     it("GIVEN a paused Token WHEN setMaxSupplyByPartition THEN transaction fails with TokenIsPaused", async () => {
       // transfer from with data fails
       await expect(
         capFacet.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupplyByPartition),
-      ).to.be.rejectedWith("TokenIsPaused");
+      ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
     });
   });
 
   describe("AccessControl", () => {
     it("GIVEN an account without cap role WHEN setMaxSupply THEN transaction fails with AccountHasNoRole", async () => {
       // add to list fails
-      await expect(capFacet.connect(signer_C).setMaxSupply(maxSupply)).to.be.rejectedWith(Error);
+      await expect(capFacet.connect(signer_C).setMaxSupply(maxSupply)).to.be.revertedWithCustomError(
+        accessControlFacet,
+        "AccountHasNoRole",
+      );
     });
 
     it("GIVEN an account without cap role WHEN setMaxSupplyByPartition THEN transaction fails with AccountHasNoRole", async () => {

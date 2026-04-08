@@ -727,7 +727,10 @@ describe("Factory Tests", () => {
         "WrongISIN",
       );
       bondData.security.erc20MetadataInfo.isin = "SJ5633813321";
-      await expect(factory.deployBond(bondData, factoryRegulationData)).to.be.rejectedWith("WrongISINChecksum");
+      await expect(factory.deployBond(bondData, factoryRegulationData)).to.be.revertedWithCustomError(
+        factory,
+        "WrongISINChecksum",
+      );
     });
 
     it("GIVEN no admin WHEN deploying a new resolverProxy THEN transaction fails", async () => {
@@ -744,7 +747,10 @@ describe("Factory Tests", () => {
 
       const factoryRegulationData = getRegulationData();
 
-      await expect(factory.deployBond(bondData, factoryRegulationData)).to.be.rejectedWith("NoInitialAdmins");
+      await expect(factory.deployBond(bondData, factoryRegulationData)).to.be.revertedWithCustomError(
+        factory,
+        "NoInitialAdmins",
+      );
     });
 
     it("GIVEN incorrect maturity or starting date WHEN deploying a new bond THEN transaction fails", async () => {
@@ -1678,9 +1684,9 @@ describe("Factory Tests", () => {
         version: 1,
       };
 
-      await expect(factory.deployBondSustainabilityPerformanceTargetRate(bondSustainabilityData)).to.be.rejectedWith(
-        "EmptyResolver",
-      );
+      await expect(
+        factory.deployBondSustainabilityPerformanceTargetRate(bondSustainabilityData),
+      ).to.be.revertedWithCustomError(factory, "EmptyResolver");
     });
 
     it("GIVEN wrong ISIN WHEN deploying BondSustainabilityPerformanceTargetRate THEN transaction fails", async () => {
@@ -1717,9 +1723,9 @@ describe("Factory Tests", () => {
         version: 1,
       };
 
-      await expect(factory.deployBondSustainabilityPerformanceTargetRate(bondSustainabilityData)).to.be.rejectedWith(
-        "WrongISIN",
-      );
+      await expect(
+        factory.deployBondSustainabilityPerformanceTargetRate(bondSustainabilityData),
+      ).to.be.revertedWithCustomError(factory, "WrongISINChecksum");
     });
 
     it("GIVEN no admin WHEN deploying BondSustainabilityPerformanceTargetRate THEN transaction fails", async () => {
@@ -1753,9 +1759,9 @@ describe("Factory Tests", () => {
         version: 1,
       };
 
-      await expect(factory.deployBondSustainabilityPerformanceTargetRate(bondSustainabilityData)).to.be.rejectedWith(
-        "NoInitialAdmins",
-      );
+      await expect(
+        factory.deployBondSustainabilityPerformanceTargetRate(bondSustainabilityData),
+      ).to.be.revertedWithCustomError(factory, "NoInitialAdmins");
     });
 
     it("GIVEN wrong regulation type WHEN deploying BondSustainabilityPerformanceTargetRate THEN transaction fails", async () => {

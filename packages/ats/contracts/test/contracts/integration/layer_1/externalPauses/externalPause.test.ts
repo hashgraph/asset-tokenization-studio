@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT } from "@scripts";
 import { deployEquityTokenFixture } from "@test";
-import { ResolverProxy, ExternalPauseManagementFacet, MockedExternalPause } from "@contract-types";
+import { ResolverProxy, ExternalPauseManagementFacet, MockedExternalPause, AccessControl } from "@contract-types";
 
 describe("ExternalPause Tests", () => {
   let diamond: ResolverProxy;
@@ -14,6 +14,7 @@ describe("ExternalPause Tests", () => {
   let signer_B: HardhatEthersSigner;
 
   let externalPauseManagement: ExternalPauseManagementFacet;
+  let accessControlFacet: AccessControl;
   let externalPauseMock1: MockedExternalPause;
   let externalPauseMock2: MockedExternalPause;
   let externalPauseMock3: MockedExternalPause;
@@ -40,6 +41,7 @@ describe("ExternalPause Tests", () => {
     signer_B = base.user1;
 
     externalPauseManagement = await ethers.getContractAt("ExternalPauseManagementFacet", diamond.target, signer_A);
+    accessControlFacet = base.accessControlFacet;
 
     await base.accessControlFacet.grantRole(ATS_ROLES._PAUSE_MANAGER_ROLE, signer_A.address);
 
@@ -330,7 +332,7 @@ describe("ExternalPause Tests", () => {
       const newPause = externalPauseMock3.target as string;
       await expect(
         externalPauseManagement.connect(signer_B).addExternalPause(newPause, { gasLimit: GAS_LIMIT.default }),
-      ).to.be.rejectedWith("AccountHasNoRole");
+      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
     });
 
     it("GIVEN an account with ATS_ROLES._PAUSE_MANAGER_ROLE WHEN adding an external pause THEN it succeeds", async () => {
@@ -353,7 +355,7 @@ describe("ExternalPause Tests", () => {
         externalPauseManagement.connect(signer_B).removeExternalPause(externalPauseMock1.target as string, {
           gasLimit: GAS_LIMIT.default,
         }),
-      ).to.be.rejectedWith("AccountHasNoRole");
+      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
     });
 
     it("GIVEN an account with ATS_ROLES._PAUSE_MANAGER_ROLE WHEN removing an external pause THEN it succeeds", async () => {
@@ -376,7 +378,7 @@ describe("ExternalPause Tests", () => {
         externalPauseManagement.connect(signer_B).updateExternalPauses(pauses, actives, {
           gasLimit: GAS_LIMIT.high,
         }),
-      ).to.be.rejectedWith("AccountHasNoRole");
+      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
     });
 
     it("GIVEN an account with ATS_ROLES._PAUSE_MANAGER_ROLE WHEN updating external pauses THEN it succeeds", async () => {

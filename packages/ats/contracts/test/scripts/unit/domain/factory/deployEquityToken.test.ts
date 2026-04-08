@@ -404,9 +404,14 @@ describe("Equity Token Deployment", () => {
       const params = createDeployEquityParams(mockFactory);
       const regulationData = createMockRegulationData();
 
-      await expect(deployEquityFromFactory(params, regulationData)).to.be.rejectedWith(
-        "EquityDeployed event not found",
-      );
+      let threw = false;
+      try {
+        await deployEquityFromFactory(params, regulationData);
+      } catch (err: unknown) {
+        threw = true;
+        expect((err as Error).message).to.include("EquityDeployed event not found");
+      }
+      expect(threw).to.equal(true);
     });
 
     it("should throw if event has no args", async () => {
@@ -414,9 +419,14 @@ describe("Equity Token Deployment", () => {
       const params = createDeployEquityParams(mockFactory);
       const regulationData = createMockRegulationData();
 
-      await expect(deployEquityFromFactory(params, regulationData)).to.be.rejectedWith(
-        "EquityDeployed event not found",
-      );
+      let threw = false;
+      try {
+        await deployEquityFromFactory(params, regulationData);
+      } catch (err: unknown) {
+        threw = true;
+        expect((err as Error).message).to.include("EquityDeployed event not found");
+      }
+      expect(threw).to.equal(true);
     });
 
     it("should throw if diamondAddress is zero address", async () => {
@@ -424,7 +434,14 @@ describe("Equity Token Deployment", () => {
       const params = createDeployEquityParams(mockFactory);
       const regulationData = createMockRegulationData();
 
-      await expect(deployEquityFromFactory(params, regulationData)).to.be.rejectedWith("Invalid diamond address");
+      let threw = false;
+      try {
+        await deployEquityFromFactory(params, regulationData);
+      } catch (err: unknown) {
+        threw = true;
+        expect((err as Error).message).to.include("Invalid diamond address");
+      }
+      expect(threw).to.equal(true);
     });
 
     it("should extract diamondProxyAddress from event args", async () => {

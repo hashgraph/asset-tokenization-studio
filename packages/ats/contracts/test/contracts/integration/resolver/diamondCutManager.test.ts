@@ -344,9 +344,9 @@ describe("DiamondCutManager", () => {
       2,
     );
     expect(configVersionDoesNotExist).to.be.false;
-    await expect(diamondCutManager.checkResolverProxyConfigurationRegistered(EQUITY_CONFIG_ID, 2)).to.be.rejectedWith(
-      "ResolverProxyConfigurationNoRegistered",
-    );
+    await expect(
+      diamondCutManager.checkResolverProxyConfigurationRegistered(EQUITY_CONFIG_ID, 2),
+    ).to.be.revertedWithCustomError(diamondCutManager, "ResolverProxyConfigurationNoRegistered");
 
     const configDoesNotExist = await diamondCutManager.isResolverProxyConfigurationRegistered(
       "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -358,7 +358,7 @@ describe("DiamondCutManager", () => {
         "0x0000000000000000000000000000000000000000000000000000000000000000",
         1,
       ),
-    ).to.be.rejectedWith("ResolverProxyConfigurationNoRegistered");
+    ).to.be.revertedWithCustomError(diamondCutManager, "ResolverProxyConfigurationNoRegistered");
 
     const noFacetAddress = await diamondCutManager.resolveResolverProxyCall(EQUITY_CONFIG_ID, 1, "0x00000001");
     expect(noFacetAddress).to.equal("0x0000000000000000000000000000000000000000");
@@ -380,7 +380,7 @@ describe("DiamondCutManager", () => {
       diamondCutManager
         .connect(signer_A)
         .createConfiguration("0x0000000000000000000000000000000000000000000000000000000000000000", facetConfigurations),
-    ).to.be.rejectedWith("DefaultValueForConfigurationIdNotPermitted");
+    ).to.be.revertedWithCustomError(diamondCutManager, "DefaultValueForConfigurationIdNotPermitted");
   });
 
   it("GIVEN a resolver and a non admin user WHEN adding a new configuration THEN fails with AccountHasNoRole", async () => {
@@ -394,7 +394,7 @@ describe("DiamondCutManager", () => {
 
     await expect(
       diamondCutManager.connect(signer_B).createConfiguration(EQUITY_CONFIG_ID, facetConfigurations),
-    ).to.be.rejectedWith("AccountHasNoRole");
+    ).to.be.revertedWithCustomError(diamondCutManager, "AccountHasNoRole");
   });
 
   it("GIVEN a paused resolver WHEN adding a new configuration THEN fails with TokenIsPaused", async () => {
@@ -410,7 +410,7 @@ describe("DiamondCutManager", () => {
 
     await expect(
       diamondCutManager.connect(signer_A).createConfiguration(TEST_CONFIG_IDS.PAUSE_TEST, facetConfigurations),
-    ).to.be.rejectedWith("TokenIsPaused");
+    ).to.be.revertedWithCustomError(diamondCutManager, "TokenIsPaused");
 
     await pause.connect(signer_B).unpause();
   });
@@ -425,7 +425,7 @@ describe("DiamondCutManager", () => {
 
     await expect(
       diamondCutManager.connect(signer_A).createConfiguration(EQUITY_CONFIG_ID, facetConfigurations),
-    ).to.be.rejectedWith("FacetIdNotRegistered");
+    ).to.be.revertedWithCustomError(diamondCutManager, "FacetIdNotRegistered");
   });
 
   it("GIVEN a resolver WHEN adding a new configuration with a duplicated facet THEN fails with DuplicatedFacetInConfiguration", async () => {
@@ -503,7 +503,7 @@ describe("DiamondCutManager", () => {
           facetConfigurations,
           false,
         ),
-    ).to.be.rejectedWith("DefaultValueForConfigurationIdNotPermitted");
+    ).to.be.revertedWithCustomError(diamondCutManager, "DefaultValueForConfigurationIdNotPermitted");
   });
 
   it("GIVEN a resolver and a non admin user WHEN adding a new configuration with createBatchConfiguration THEN fails with AccountHasNoRole", async () => {
@@ -517,7 +517,7 @@ describe("DiamondCutManager", () => {
 
     await expect(
       diamondCutManager.connect(signer_B).createBatchConfiguration(EQUITY_CONFIG_ID, facetConfigurations, false),
-    ).to.be.rejectedWith("AccountHasNoRole");
+    ).to.be.revertedWithCustomError(diamondCutManager, "AccountHasNoRole");
   });
 
   it("GIVEN a paused resolver WHEN adding a new configuration with createBatchConfiguration THEN fails with TokenIsPaused", async () => {
@@ -535,7 +535,7 @@ describe("DiamondCutManager", () => {
       diamondCutManager
         .connect(signer_A)
         .createBatchConfiguration(TEST_CONFIG_IDS.PAUSE_BATCH_TEST, facetConfigurations, false),
-    ).to.be.rejectedWith("TokenIsPaused");
+    ).to.be.revertedWithCustomError(diamondCutManager, "TokenIsPaused");
 
     await pause.connect(signer_B).unpause();
   });
@@ -550,7 +550,7 @@ describe("DiamondCutManager", () => {
 
     await expect(
       diamondCutManager.connect(signer_A).createBatchConfiguration(EQUITY_CONFIG_ID, facetConfigurations, false),
-    ).to.be.rejectedWith("FacetIdNotRegistered");
+    ).to.be.revertedWithCustomError(diamondCutManager, "FacetIdNotRegistered");
   });
 
   it("GIVEN a resolver WHEN adding a new configuration with a duplicated facet using createBatchConfiguration THEN fails with DuplicatedFacetInConfiguration", async () => {
@@ -634,9 +634,9 @@ describe("DiamondCutManager", () => {
 
     await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, facetConfigurations, false);
 
-    await expect(diamondCutManager.connect(signer_B).cancelBatchConfiguration(testConfigId)).to.be.rejectedWith(
-      "AccountHasNoRole",
-    );
+    await expect(
+      diamondCutManager.connect(signer_B).cancelBatchConfiguration(testConfigId),
+    ).to.be.revertedWithCustomError(diamondCutManager, "AccountHasNoRole");
   });
 
   it("GIVEN a paused resolver WHEN canceling a batch configuration THEN fails with TokenIsPaused", async () => {
@@ -653,9 +653,9 @@ describe("DiamondCutManager", () => {
 
     await pause.connect(signer_B).pause();
 
-    await expect(diamondCutManager.connect(signer_A).cancelBatchConfiguration(testConfigId)).to.be.rejectedWith(
-      "TokenIsPaused",
-    );
+    await expect(
+      diamondCutManager.connect(signer_A).cancelBatchConfiguration(testConfigId),
+    ).to.be.revertedWithCustomError(diamondCutManager, "TokenIsPaused");
   });
 
   it("GIVEN a resolver WHEN canceling a batch configuration with configId at 0 THEN fails with DefaultValueForConfigurationIdNotPermitted", async () => {
@@ -663,7 +663,7 @@ describe("DiamondCutManager", () => {
       diamondCutManager
         .connect(signer_A)
         .cancelBatchConfiguration("0x0000000000000000000000000000000000000000000000000000000000000000"),
-    ).to.be.rejectedWith("DefaultValueForConfigurationIdNotPermitted");
+    ).to.be.revertedWithCustomError(diamondCutManager, "DefaultValueForConfigurationIdNotPermitted");
   });
 
   it("GIVEN a configuration WHEN creating a new version (v2) THEN the configuration is already active", async () => {
@@ -742,7 +742,7 @@ describe("DiamondCutManager", () => {
 
     await expect(
       diamondCutManager.checkResolverProxyConfigurationRegistered(nonExistentConfigId, 1),
-    ).to.be.rejectedWith("ResolverProxyConfigurationNoRegistered");
+    ).to.be.revertedWithCustomError(diamondCutManager, "ResolverProxyConfigurationNoRegistered");
   });
 
   it("GIVEN an existing configuration WHEN checking if registered THEN returns true and does not revert", async () => {

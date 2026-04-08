@@ -95,9 +95,9 @@ describe("Adjust Balances Tests", () => {
 
   it("GIVEN an account without adjustBalances role WHEN adjustBalances THEN transaction fails with AccountHasNoRole", async () => {
     // adjustBalances fails
-    await expect(adjustBalancesFacet.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals)).to.be.rejectedWith(
-      "AccountHasNoRole",
-    );
+    await expect(
+      adjustBalancesFacet.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals),
+    ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
   });
 
   it("GIVEN a paused Token WHEN adjustBalances THEN transaction fails with TokenIsPaused", async () => {
@@ -112,9 +112,9 @@ describe("Adjust Balances Tests", () => {
     );
 
     // adjustBalances fails
-    await expect(adjustBalancesFacet.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals)).to.be.rejectedWith(
-      "TokenIsPaused",
-    );
+    await expect(
+      adjustBalancesFacet.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals),
+    ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
   });
 
   it("GIVEN a Token WHEN adjustBalances with factor set at 0 THEN transaction fails with FactorIsZero", async () => {

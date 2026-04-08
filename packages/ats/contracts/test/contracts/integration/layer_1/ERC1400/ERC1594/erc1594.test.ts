@@ -100,7 +100,7 @@ describe("ERC1594 Tests", () => {
     });
 
     it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-      await expect(erc1594Facet.initialize_ERC1594()).to.be.rejectedWith("AlreadyInitialized");
+      await expect(erc1594Facet.initialize_ERC1594()).to.be.revertedWithCustomError(erc1594Facet, "AlreadyInitialized");
     });
 
     describe("NotAllowedInMultiPartitionMode", () => {
@@ -243,9 +243,9 @@ describe("ERC1594 Tests", () => {
     describe("Cap", () => {
       it("GIVEN a max supply WHEN issue more than the max supply THEN transaction fails with MaxSupplyReached", async () => {
         // add to list fails
-        await expect(erc1594Facet.connect(signer_A).issue(signer_E.address, MAX_SUPPLY + 1, DATA)).to.be.rejectedWith(
-          "MaxSupplyReached",
-        );
+        await expect(
+          erc1594Facet.connect(signer_A).issue(signer_E.address, MAX_SUPPLY + 1, DATA),
+        ).to.be.revertedWithCustomError(erc1594Facet, "MaxSupplyReached");
       });
     });
 
@@ -406,12 +406,12 @@ describe("ERC1594 Tests", () => {
         // transfer with data fails
         await expect(
           erc1594Facet.connect(signer_C).transferWithData(signer_D.address, AMOUNT, DATA),
-        ).to.be.rejectedWith("TokenIsPaused");
+        ).to.be.revertedWithCustomError(erc1594Facet, "TokenIsPaused");
 
         // transfer from with data fails
         await expect(
           erc1594Facet.connect(signer_C).transferFromWithData(signer_E.address, signer_D.address, AMOUNT, DATA),
-        ).to.be.rejectedWith("TokenIsPaused");
+        ).to.be.revertedWithCustomError(erc1594Facet, "TokenIsPaused");
       });
 
       it("GIVEN a paused Token WHEN issue THEN transaction fails with TokenIsPaused", async () => {
@@ -423,30 +423,33 @@ describe("ERC1594 Tests", () => {
 
       it("GIVEN a paused Token WHEN redeem THEN transaction fails with TokenIsPaused", async () => {
         // transfer with data fails
-        await expect(erc1594Facet.connect(signer_C).redeem(AMOUNT, DATA)).to.be.rejectedWith("TokenIsPaused");
-
-        // transfer from with data fails
-        await expect(erc1594Facet.connect(signer_C).redeemFrom(signer_E.address, AMOUNT, DATA)).to.be.rejectedWith(
+        await expect(erc1594Facet.connect(signer_C).redeem(AMOUNT, DATA)).to.be.revertedWithCustomError(
+          erc1594Facet,
           "TokenIsPaused",
         );
+
+        // transfer from with data fails
+        await expect(
+          erc1594Facet.connect(signer_C).redeemFrom(signer_E.address, AMOUNT, DATA),
+        ).to.be.revertedWithCustomError(erc1594Facet, "TokenIsPaused");
       });
     });
 
     describe("AccessControl", () => {
       it("GIVEN an account without issuer role WHEN issue THEN transaction fails with AccountHasNoRole", async () => {
         // add to list fails
-        await expect(erc1594Facet.connect(signer_B).issue(signer_E.address, AMOUNT, DATA)).to.be.rejectedWith(
-          "AccountHasNoRole",
-        );
+        await expect(
+          erc1594Facet.connect(signer_B).issue(signer_E.address, AMOUNT, DATA),
+        ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRoles");
       });
     });
 
     describe("AccessControl", () => {
       it("GIVEN an account without issuer role WHEN issue THEN transaction fails with AccountHasNoRole", async () => {
         // add to list fails
-        await expect(erc1594Facet.connect(signer_B).issue(signer_E.address, AMOUNT, DATA)).to.be.rejectedWith(
-          "AccountHasNoRole",
-        );
+        await expect(
+          erc1594Facet.connect(signer_B).issue(signer_E.address, AMOUNT, DATA),
+        ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRoles");
       });
     });
 

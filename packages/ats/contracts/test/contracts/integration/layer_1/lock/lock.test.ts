@@ -161,24 +161,27 @@ describe("Lock Tests", () => {
         // lockByPartition with data fails
         await expect(
           lockFacet.lockByPartition(_NON_DEFAULT_PARTITION, _AMOUNT, signer_A.address, currentTimestamp),
-        ).to.be.rejectedWith("TokenIsPaused");
+        ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
       });
 
       it("GIVEN a paused Token WHEN releaseByPartition THEN transaction fails with TokenIsPaused", async () => {
         // transfer from with data fails
-        await expect(lockFacet.releaseByPartition(_NON_DEFAULT_PARTITION, 1, signer_A.address)).to.be.rejectedWith(
-          "TokenIsPaused",
-        );
+        await expect(
+          lockFacet.releaseByPartition(_NON_DEFAULT_PARTITION, 1, signer_A.address),
+        ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
       });
 
       it("GIVEN a paused Token WHEN lock THEN transaction fails with TokenIsPaused", async () => {
         // lockByPartition with data fails
-        await expect(lockFacet.lock(_AMOUNT, signer_A.address, currentTimestamp)).to.be.rejectedWith("TokenIsPaused");
+        await expect(lockFacet.lock(_AMOUNT, signer_A.address, currentTimestamp)).to.be.revertedWithCustomError(
+          pauseFacet,
+          "TokenIsPaused",
+        );
       });
 
       it("GIVEN a paused Token WHEN release THEN transaction fails with TokenIsPaused", async () => {
         // transfer from with data fails
-        await expect(lockFacet.release(1, signer_A.address)).to.be.rejectedWith("TokenIsPaused");
+        await expect(lockFacet.release(1, signer_A.address)).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
       });
     });
 
@@ -189,14 +192,14 @@ describe("Lock Tests", () => {
           lockFacet
             .connect(signer_D)
             .lockByPartition(_NON_DEFAULT_PARTITION, _AMOUNT, signer_A.address, currentTimestamp),
-        ).to.be.rejectedWith("AccountHasNoRole");
+        ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
       });
 
       it("GIVEN an account without LOCKER role WHEN lock THEN transaction fails with AccountHasNoRole", async () => {
         // add to list fails
-        await expect(lockFacet.connect(signer_D).lock(_AMOUNT, signer_A.address, currentTimestamp)).to.be.rejectedWith(
-          "AccountHasNoRole",
-        );
+        await expect(
+          lockFacet.connect(signer_D).lock(_AMOUNT, signer_A.address, currentTimestamp),
+        ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
       });
     });
 

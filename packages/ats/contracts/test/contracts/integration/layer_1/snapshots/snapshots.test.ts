@@ -149,7 +149,10 @@ describe("Snapshots Tests", () => {
 
   it("GIVEN an account without snapshot role WHEN takeSnapshot THEN transaction fails with AccountHasNoRole", async () => {
     // snapshot fails
-    await expect(snapshotFacet.connect(signer_C).takeSnapshot()).to.be.rejectedWith("AccountHasNoRole");
+    await expect(snapshotFacet.connect(signer_C).takeSnapshot()).to.be.revertedWithCustomError(
+      accessControlFacet,
+      "AccountHasNoRole",
+    );
   });
 
   it("GIVEN a paused Token WHEN takeSnapshot THEN transaction fails with TokenIsPaused", async () => {
@@ -163,30 +166,58 @@ describe("Snapshots Tests", () => {
       signer_C.address,
     );
 
-    await expect(snapshotFacet.connect(signer_C).takeSnapshot()).to.be.rejectedWith("TokenIsPaused");
+    await expect(snapshotFacet.connect(signer_C).takeSnapshot()).to.be.revertedWithCustomError(
+      pauseFacet,
+      "TokenIsPaused",
+    );
   });
 
   it("GIVEN no snapshot WHEN reading snapshot values THEN transaction fails", async () => {
     // check snapshot
-    await expect(snapshotFacet.balanceOfAtSnapshot(1, signer_A.address)).to.be.rejectedWith("SnapshotIdDoesNotExists");
-    await expect(snapshotFacet.balanceOfAtSnapshot(0, signer_A.address)).to.be.rejectedWith("SnapshotIdNull");
-    await expect(snapshotFacet.totalSupplyAtSnapshot(1)).to.be.rejectedWith("SnapshotIdDoesNotExists");
-    await expect(snapshotFacet.totalSupplyAtSnapshot(0)).to.be.rejectedWith("SnapshotIdNull");
-    await expect(snapshotFacet.balanceOfAtSnapshotByPartition(_PARTITION_ID_1, 1, signer_A.address)).to.be.rejectedWith(
+    await expect(snapshotFacet.balanceOfAtSnapshot(1, signer_A.address)).to.be.revertedWithCustomError(
+      snapshotFacet,
       "SnapshotIdDoesNotExists",
     );
-    await expect(snapshotFacet.balanceOfAtSnapshotByPartition(_PARTITION_ID_1, 0, signer_A.address)).to.be.rejectedWith(
+    await expect(snapshotFacet.balanceOfAtSnapshot(0, signer_A.address)).to.be.revertedWithCustomError(
+      snapshotFacet,
       "SnapshotIdNull",
     );
-    await expect(snapshotFacet.partitionsOfAtSnapshot(1, signer_A.address)).to.be.rejectedWith(
+    await expect(snapshotFacet.totalSupplyAtSnapshot(1)).to.be.revertedWithCustomError(
+      snapshotFacet,
       "SnapshotIdDoesNotExists",
     );
-    await expect(snapshotFacet.partitionsOfAtSnapshot(0, signer_A.address)).to.be.rejectedWith("SnapshotIdNull");
+    await expect(snapshotFacet.totalSupplyAtSnapshot(0)).to.be.revertedWithCustomError(snapshotFacet, "SnapshotIdNull");
+    await expect(
+      snapshotFacet.balanceOfAtSnapshotByPartition(_PARTITION_ID_1, 1, signer_A.address),
+    ).to.be.revertedWithCustomError(snapshotFacet, "SnapshotIdDoesNotExists");
+    await expect(
+      snapshotFacet.balanceOfAtSnapshotByPartition(_PARTITION_ID_1, 0, signer_A.address),
+    ).to.be.revertedWithCustomError(snapshotFacet, "SnapshotIdNull");
+    await expect(snapshotFacet.partitionsOfAtSnapshot(1, signer_A.address)).to.be.revertedWithCustomError(
+      snapshotFacet,
+      "SnapshotIdDoesNotExists",
+    );
+    await expect(snapshotFacet.partitionsOfAtSnapshot(0, signer_A.address)).to.be.revertedWithCustomError(
+      snapshotFacet,
+      "SnapshotIdNull",
+    );
 
-    await expect(snapshotFacet.getTokenHoldersAtSnapshot(1, 0, 1)).to.be.rejectedWith("SnapshotIdDoesNotExists");
-    await expect(snapshotFacet.getTokenHoldersAtSnapshot(0, 0, 1)).to.be.rejectedWith("SnapshotIdNull");
-    await expect(snapshotFacet.getTotalTokenHoldersAtSnapshot(1)).to.be.rejectedWith("SnapshotIdDoesNotExists");
-    await expect(snapshotFacet.getTotalTokenHoldersAtSnapshot(0)).to.be.rejectedWith("SnapshotIdNull");
+    await expect(snapshotFacet.getTokenHoldersAtSnapshot(1, 0, 1)).to.be.revertedWithCustomError(
+      snapshotFacet,
+      "SnapshotIdDoesNotExists",
+    );
+    await expect(snapshotFacet.getTokenHoldersAtSnapshot(0, 0, 1)).to.be.revertedWithCustomError(
+      snapshotFacet,
+      "SnapshotIdNull",
+    );
+    await expect(snapshotFacet.getTotalTokenHoldersAtSnapshot(1)).to.be.revertedWithCustomError(
+      snapshotFacet,
+      "SnapshotIdDoesNotExists",
+    );
+    await expect(snapshotFacet.getTotalTokenHoldersAtSnapshot(0)).to.be.revertedWithCustomError(
+      snapshotFacet,
+      "SnapshotIdNull",
+    );
   });
 
   it("GIVEN an account with snapshot role WHEN takeSnapshot THEN transaction succeeds", async () => {

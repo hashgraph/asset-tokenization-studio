@@ -148,9 +148,14 @@ describe("Bond Variant Deployments", () => {
         const regulationData = createMockRegulationData();
         const fixedRateParams = createMockFixedRateParams();
 
-        await expect(deployBondFixedRateFromFactory(params, regulationData, fixedRateParams)).to.be.rejectedWith(
-          "BondFixedRateDeployed event not found",
-        );
+        let threw = false;
+        try {
+          await deployBondFixedRateFromFactory(params, regulationData, fixedRateParams);
+        } catch (err: unknown) {
+          threw = true;
+          expect((err as Error).message).to.include("BondFixedRateDeployed event not found");
+        }
+        expect(threw).to.equal(true);
       });
 
       it("should throw if event has no args", async () => {
@@ -159,9 +164,14 @@ describe("Bond Variant Deployments", () => {
         const regulationData = createMockRegulationData();
         const fixedRateParams = createMockFixedRateParams();
 
-        await expect(deployBondFixedRateFromFactory(params, regulationData, fixedRateParams)).to.be.rejectedWith(
-          "BondFixedRateDeployed event not found",
-        );
+        let threw = false;
+        try {
+          await deployBondFixedRateFromFactory(params, regulationData, fixedRateParams);
+        } catch (err: unknown) {
+          threw = true;
+          expect((err as Error).message).to.include("BondFixedRateDeployed event not found");
+        }
+        expect(threw).to.equal(true);
       });
 
       it("should throw if diamondAddress is zero address", async () => {
@@ -170,9 +180,14 @@ describe("Bond Variant Deployments", () => {
         const regulationData = createMockRegulationData();
         const fixedRateParams = createMockFixedRateParams();
 
-        await expect(deployBondFixedRateFromFactory(params, regulationData, fixedRateParams)).to.be.rejectedWith(
-          "Invalid diamond address",
-        );
+        let threw = false;
+        try {
+          await deployBondFixedRateFromFactory(params, regulationData, fixedRateParams);
+        } catch (err: unknown) {
+          threw = true;
+          expect((err as Error).message).to.include("Invalid diamond address");
+        }
+        expect(threw).to.equal(true);
       });
     });
   });
@@ -289,9 +304,14 @@ describe("Bond Variant Deployments", () => {
         const interestRateParams = createMockInterestRateParams();
         const impactDataParams = createMockImpactDataParams();
 
-        await expect(
-          deployBondKpiLinkedRateFromFactory(params, regulationData, interestRateParams, impactDataParams),
-        ).to.be.rejectedWith("BondKpiLinkedRateDeployed event not found");
+        let threw = false;
+        try {
+          await deployBondKpiLinkedRateFromFactory(params, regulationData, interestRateParams, impactDataParams);
+        } catch (err: unknown) {
+          threw = true;
+          expect((err as Error).message).to.include("BondKpiLinkedRateDeployed event not found");
+        }
+        expect(threw).to.equal(true);
       });
 
       it("should throw if event has no args", async () => {
@@ -301,9 +321,14 @@ describe("Bond Variant Deployments", () => {
         const interestRateParams = createMockInterestRateParams();
         const impactDataParams = createMockImpactDataParams();
 
-        await expect(
-          deployBondKpiLinkedRateFromFactory(params, regulationData, interestRateParams, impactDataParams),
-        ).to.be.rejectedWith("BondKpiLinkedRateDeployed event not found");
+        let threw = false;
+        try {
+          await deployBondKpiLinkedRateFromFactory(params, regulationData, interestRateParams, impactDataParams);
+        } catch (err: unknown) {
+          threw = true;
+          expect((err as Error).message).to.include("BondKpiLinkedRateDeployed event not found");
+        }
+        expect(threw).to.equal(true);
       });
 
       it("should throw if diamondAddress is zero address", async () => {
@@ -313,9 +338,14 @@ describe("Bond Variant Deployments", () => {
         const interestRateParams = createMockInterestRateParams();
         const impactDataParams = createMockImpactDataParams();
 
-        await expect(
-          deployBondKpiLinkedRateFromFactory(params, regulationData, interestRateParams, impactDataParams),
-        ).to.be.rejectedWith("Invalid diamond address");
+        let threw = false;
+        try {
+          await deployBondKpiLinkedRateFromFactory(params, regulationData, interestRateParams, impactDataParams);
+        } catch (err: unknown) {
+          threw = true;
+          expect((err as Error).message).to.include("Invalid diamond address");
+        }
+        expect(threw).to.equal(true);
       });
     });
   });
@@ -530,15 +560,20 @@ describe("Bond Variant Deployments", () => {
         const impactDataParams = [createMockImpactDataParamsSPT()];
         const projects = [TEST_ADDRESSES.VALID_4];
 
-        await expect(
-          deployBondSustainabilityPerformanceTargetRateFromFactory(
+        let threw = false;
+        try {
+          await deployBondSustainabilityPerformanceTargetRateFromFactory(
             params,
             regulationData,
             interestRateParams,
             impactDataParams,
             projects,
-          ),
-        ).to.be.rejectedWith("BondSustainabilityPerformanceTargetRateDeployed event not found");
+          );
+        } catch (err: unknown) {
+          threw = true;
+          expect((err as Error).message).to.include("BondSustainabilityPerformanceTargetRateDeployed event not found");
+        }
+        expect(threw).to.equal(true);
       });
 
       it("should throw if event has no args", async () => {
@@ -549,15 +584,20 @@ describe("Bond Variant Deployments", () => {
         const impactDataParams = [createMockImpactDataParamsSPT()];
         const projects = [TEST_ADDRESSES.VALID_4];
 
-        await expect(
-          deployBondSustainabilityPerformanceTargetRateFromFactory(
+        let threw = false;
+        try {
+          await deployBondSustainabilityPerformanceTargetRateFromFactory(
             params,
             regulationData,
             interestRateParams,
             impactDataParams,
             projects,
-          ),
-        ).to.be.rejectedWith("BondSustainabilityPerformanceTargetRateDeployed event not found");
+          );
+        } catch (err: unknown) {
+          threw = true;
+          expect((err as Error).message).to.include("BondSustainabilityPerformanceTargetRateDeployed event not found");
+        }
+        expect(threw).to.equal(true);
       });
 
       it("should throw if diamondAddress is zero address", async () => {
@@ -568,15 +608,20 @@ describe("Bond Variant Deployments", () => {
         const impactDataParams = [createMockImpactDataParamsSPT()];
         const projects = [TEST_ADDRESSES.VALID_4];
 
-        await expect(
-          deployBondSustainabilityPerformanceTargetRateFromFactory(
+        let threw = false;
+        try {
+          await deployBondSustainabilityPerformanceTargetRateFromFactory(
             params,
             regulationData,
             interestRateParams,
             impactDataParams,
             projects,
-          ),
-        ).to.be.rejectedWith("Invalid diamond address");
+          );
+        } catch (err: unknown) {
+          threw = true;
+          expect((err as Error).message).to.include("Invalid diamond address");
+        }
+        expect(threw).to.equal(true);
       });
     });
   });

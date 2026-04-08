@@ -10,6 +10,7 @@ import {
   Pause,
   ExternalControlListManagementFacet,
   IERC1410,
+  AccessControl,
 } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
@@ -22,6 +23,7 @@ describe("ExternalControlList Management Tests", () => {
   let diamond: ResolverProxy;
   let externalControlListManagement: ExternalControlListManagementFacet;
   let pauseFacet: Pause;
+  let accessControlFacet: AccessControl;
   let initMock1: MockedWhitelist;
   let initMock2: MockedBlacklist;
   let externalWhitelistMock1: MockedWhitelist;
@@ -58,10 +60,11 @@ describe("ExternalControlList Management Tests", () => {
     );
     pauseFacet = await ethers.getContractAt("Pause", diamond.target, signer_A);
     erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target, signer_A);
+    accessControlFacet = base.accessControlFacet;
 
-    await base.accessControlFacet.grantRole(ATS_ROLES._CONTROL_LIST_MANAGER_ROLE, signer_A.address);
-    await base.accessControlFacet.grantRole(ATS_ROLES._PAUSER_ROLE, signer_A.address);
-    await base.accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+    await accessControlFacet.grantRole(ATS_ROLES._CONTROL_LIST_MANAGER_ROLE, signer_A.address);
+    await accessControlFacet.grantRole(ATS_ROLES._PAUSER_ROLE, signer_A.address);
+    await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
 
     externalWhitelistMock1 = await (await ethers.getContractFactory("MockedWhitelist", signer_A)).deploy();
     await externalWhitelistMock1.waitForDeployment();
@@ -359,7 +362,7 @@ describe("ExternalControlList Management Tests", () => {
         externalControlListManagement.connect(signer_B).addExternalControlList(newControlList, {
           gasLimit: GAS_LIMIT.default,
         }),
-      ).to.be.rejectedWith("AccountHasNoRole");
+      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
     });
 
     it("GIVEN an account with _CONTROL_LIST_MANAGER_ROLE WHEN adding an external control list THEN it succeeds", async () => {
@@ -384,7 +387,7 @@ describe("ExternalControlList Management Tests", () => {
           .removeExternalControlList(externalWhitelistMock1.target as string, {
             gasLimit: GAS_LIMIT.default,
           }),
-      ).to.be.rejectedWith("AccountHasNoRole");
+      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
     });
 
     it("GIVEN an account with _CONTROL_LIST_MANAGER_ROLE WHEN removing an external control list THEN it succeeds", async () => {
@@ -410,7 +413,7 @@ describe("ExternalControlList Management Tests", () => {
         externalControlListManagement.connect(signer_B).updateExternalControlLists(controlLists, actives, {
           gasLimit: GAS_LIMIT.high,
         }),
-      ).to.be.rejectedWith("AccountHasNoRole");
+      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
     });
 
     it("GIVEN an account with _CONTROL_LIST_MANAGER_ROLE WHEN updating external control lists THEN it succeeds", async () => {

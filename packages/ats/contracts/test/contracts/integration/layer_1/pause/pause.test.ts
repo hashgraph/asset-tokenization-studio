@@ -55,11 +55,17 @@ describe("Pause Tests", () => {
   });
 
   it("GIVEN an account without pause role WHEN pause THEN transaction fails with AccountHasNoRole", async () => {
-    await expect(pauseFacet.connect(unknownSigner).pause()).to.be.rejectedWith("AccountHasNoRole");
+    await expect(pauseFacet.connect(unknownSigner).pause()).to.be.revertedWithCustomError(
+      accessControlFacet,
+      "AccountHasNoRole",
+    );
   });
 
   it("GIVEN an account without pause role WHEN unpause THEN transaction fails with AccountHasNoRole", async () => {
-    await expect(pauseFacet.connect(unknownSigner).unpause()).to.be.rejectedWith("AccountHasNoRole");
+    await expect(pauseFacet.connect(unknownSigner).unpause()).to.be.revertedWithCustomError(
+      accessControlFacet,
+      "AccountHasNoRole",
+    );
   });
 
   it("GIVEN a paused Token WHEN pause THEN transaction fails with TokenIsPaused", async () => {

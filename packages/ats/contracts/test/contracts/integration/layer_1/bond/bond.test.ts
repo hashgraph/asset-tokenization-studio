@@ -224,7 +224,7 @@ describe("Bond Tests", () => {
       };
       await expect(
         bondFacet._initialize_bondUSA(await getBondDetails(), regulationData, additionalSecurityData),
-      ).to.be.rejectedWith("AlreadyInitialized");
+      ).to.be.revertedWithCustomError(bondFacet, "AlreadyInitialized");
     });
   });
 
@@ -393,7 +393,10 @@ describe("Bond Tests", () => {
     describe("Coupons", () => {
       it("GIVEN an account without corporateActions role WHEN setCoupon THEN transaction fails with AccountHasNoRole", async () => {
         // set coupon fails
-        await expect(bondFacet.connect(signer_C).setCoupon(couponData)).to.be.rejectedWith("AccountHasNoRole");
+        await expect(bondFacet.connect(signer_C).setCoupon(couponData)).to.be.revertedWithCustomError(
+          accessControlFacet,
+          "AccountHasNoRole",
+        );
       });
 
       it("GIVEN a paused Token WHEN setCoupon THEN transaction fails with TokenIsPaused", async () => {
@@ -408,7 +411,10 @@ describe("Bond Tests", () => {
         );
 
         // set coupon fails
-        await expect(bondFacet.connect(signer_C).setCoupon(couponData)).to.be.rejectedWith("TokenIsPaused");
+        await expect(bondFacet.connect(signer_C).setCoupon(couponData)).to.be.revertedWithCustomError(
+          pauseFacet,
+          "TokenIsPaused",
+        );
       });
 
       it("GIVEN an account with corporateActions role WHEN setCoupon with wrong dates THEN transaction fails", async () => {
@@ -540,7 +546,7 @@ describe("Bond Tests", () => {
           ]);
 
         // check list members
-        await expect(bondReadFacet.getCoupon(1000)).to.be.rejectedWith("WrongIndexForAction");
+        await expect(bondReadFacet.getCoupon(1000)).to.be.revertedWithCustomError(bondReadFacet, "WrongIndexForAction");
 
         const listCount = await bondReadFacet.getCouponCount();
         const coupon = await bondReadFacet.getCoupon(1);
@@ -748,7 +754,8 @@ describe("Bond Tests", () => {
 
         // * Act & Assert
         // Set maturity date
-        await expect(bondFacet.connect(signer_C).updateMaturityDate(newMaturityDate)).to.be.rejectedWith(
+        await expect(bondFacet.connect(signer_C).updateMaturityDate(newMaturityDate)).to.be.revertedWithCustomError(
+          accessControlFacet,
           "AccountHasNoRole",
         );
         // Ensure maturity date is not updated
@@ -774,7 +781,8 @@ describe("Bond Tests", () => {
 
         // * Act & Assert
         // Set maturity date
-        await expect(bondFacet.connect(signer_C).updateMaturityDate(newMaturityDate)).to.be.rejectedWith(
+        await expect(bondFacet.connect(signer_C).updateMaturityDate(newMaturityDate)).to.be.revertedWithCustomError(
+          pauseFacet,
           "TokenIsPaused",
         );
         // Ensure maturity date is not updated

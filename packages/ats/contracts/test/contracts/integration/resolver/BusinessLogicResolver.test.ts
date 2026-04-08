@@ -57,7 +57,10 @@ describe("BusinessLogicResolver", () => {
   });
 
   it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-    await expect(businessLogicResolver.initialize_BusinessLogicResolver()).to.be.rejectedWith("AlreadyInitialized");
+    await expect(businessLogicResolver.initialize_BusinessLogicResolver()).to.be.revertedWithCustomError(
+      businessLogicResolver,
+      "AlreadyInitialized",
+    );
   });
 
   describe("Paused", () => {
@@ -68,9 +71,9 @@ describe("BusinessLogicResolver", () => {
 
     it("GIVEN a paused Token WHEN registrying logics THEN transaction fails with TokenIsPaused", async () => {
       // transfer with data fails
-      await expect(businessLogicResolver.registerBusinessLogics(BUSINESS_LOGIC_KEYS.slice(0, 2))).to.be.rejectedWith(
-        "TokenIsPaused",
-      );
+      await expect(
+        businessLogicResolver.registerBusinessLogics(BUSINESS_LOGIC_KEYS.slice(0, 2)),
+      ).to.be.revertedWithCustomError(businessLogicResolver, "TokenIsPaused");
     });
   });
 
@@ -79,7 +82,7 @@ describe("BusinessLogicResolver", () => {
       // add to list fails
       await expect(
         businessLogicResolver.connect(signer_C).registerBusinessLogics(BUSINESS_LOGIC_KEYS.slice(0, 2)),
-      ).to.be.rejectedWith("AccountHasNoRole");
+      ).to.be.revertedWithCustomError(businessLogicResolver, "AccountHasNoRole");
     });
 
     it("GIVEN an account without admin role WHEN adding selectors to blacklist THEN transaction fails with AccountHasNoRole", async () => {
@@ -87,7 +90,7 @@ describe("BusinessLogicResolver", () => {
 
       await expect(
         businessLogicResolver.connect(signer_C).addSelectorsToBlacklist(EQUITY_CONFIG_ID, blackListedSelectors),
-      ).to.be.rejectedWith("AccountHasNoRole");
+      ).to.be.revertedWithCustomError(businessLogicResolver, "AccountHasNoRole");
     });
 
     it("GIVEN an account without admin role WHEN removing selectors from blacklist THEN transaction fails with AccountHasNoRole", async () => {
@@ -95,23 +98,26 @@ describe("BusinessLogicResolver", () => {
 
       await expect(
         businessLogicResolver.connect(signer_C).removeSelectorsFromBlacklist(EQUITY_CONFIG_ID, blackListedSelectors),
-      ).to.be.rejectedWith("AccountHasNoRole");
+      ).to.be.revertedWithCustomError(businessLogicResolver, "AccountHasNoRole");
     });
   });
 
   describe("Business Logic Resolver functionality", () => {
     it("GIVEN an empty registry WHEN getting data THEN responds empty values or BusinessLogicVersionDoesNotExist", async () => {
       expect(await businessLogicResolver.getLatestVersion()).is.equal(0);
-      await expect(businessLogicResolver.getVersionStatus(0)).to.be.rejectedWith("BusinessLogicVersionDoesNotExist");
+      await expect(businessLogicResolver.getVersionStatus(0)).to.be.revertedWithCustomError(
+        businessLogicResolver,
+        "BusinessLogicVersionDoesNotExist",
+      );
       expect(await businessLogicResolver.resolveLatestBusinessLogic(BUSINESS_LOGIC_KEYS[0].businessLogicKey)).is.equal(
         ethers.ZeroAddress,
       );
       await expect(
         businessLogicResolver.resolveBusinessLogicByVersion(BUSINESS_LOGIC_KEYS[0].businessLogicKey, 0),
-      ).to.be.rejectedWith("BusinessLogicVersionDoesNotExist");
+      ).to.be.revertedWithCustomError(businessLogicResolver, "BusinessLogicVersionDoesNotExist");
       await expect(
         businessLogicResolver.resolveBusinessLogicByVersion(BUSINESS_LOGIC_KEYS[0].businessLogicKey, 1),
-      ).to.be.rejectedWith("BusinessLogicVersionDoesNotExist");
+      ).to.be.revertedWithCustomError(businessLogicResolver, "BusinessLogicVersionDoesNotExist");
       expect(await businessLogicResolver.getBusinessLogicCount()).is.equal(0);
       expect(await businessLogicResolver.getBusinessLogicKeys(1, 10)).is.deep.equal([]);
     });
@@ -124,17 +130,17 @@ describe("BusinessLogicResolver", () => {
         },
       ];
 
-      await expect(businessLogicResolver.registerBusinessLogics(BUSINESS_LOGICS_TO_REGISTER)).to.be.rejectedWith(
-        "ZeroKeyNotValidForBusinessLogic",
-      );
+      await expect(
+        businessLogicResolver.registerBusinessLogics(BUSINESS_LOGICS_TO_REGISTER),
+      ).to.be.revertedWithCustomError(businessLogicResolver, "ZeroKeyNotValidForBusinessLogic");
     });
 
     it("GIVEN an duplicated key WHEN registerBusinessLogics THEN Fails with BusinessLogicKeyDuplicated", async () => {
       const BUSINESS_LOGICS_TO_REGISTER = [BUSINESS_LOGIC_KEYS[0], BUSINESS_LOGIC_KEYS[0]];
 
-      await expect(businessLogicResolver.registerBusinessLogics(BUSINESS_LOGICS_TO_REGISTER)).to.be.rejectedWith(
-        "BusinessLogicKeyDuplicated",
-      );
+      await expect(
+        businessLogicResolver.registerBusinessLogics(BUSINESS_LOGICS_TO_REGISTER),
+      ).to.be.revertedWithCustomError(businessLogicResolver, "BusinessLogicKeyDuplicated");
     });
 
     it("GIVEN an empty registry WHEN registerBusinessLogics THEN queries responds with correct values", async () => {

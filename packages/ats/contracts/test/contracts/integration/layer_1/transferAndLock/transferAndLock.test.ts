@@ -141,14 +141,14 @@ describe("Transfer and lock Tests", () => {
             "0x",
             currentTimestamp,
           ),
-        ).to.be.rejectedWith("TokenIsPaused");
+        ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
       });
 
       it("GIVEN a paused Token WHEN transferAndLock THEN transaction fails with TokenIsPaused", async () => {
         // transfer from with data fails
         await expect(
           transferAndLockFacet.transferAndLock(signer_B.address, _AMOUNT, "0x", currentTimestamp),
-        ).to.be.rejectedWith("TokenIsPaused");
+        ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
       });
     });
 
@@ -159,14 +159,14 @@ describe("Transfer and lock Tests", () => {
           transferAndLockFacet
             .connect(signer_D)
             .transferAndLockByPartition(_NON_DEFAULT_PARTITION, signer_B.address, _AMOUNT, "0x", currentTimestamp),
-        ).to.be.rejectedWith("AccountHasNoRole");
+        ).to.be.revertedWithCustomError(transferAndLockFacet, "AccountHasNoRole");
       });
 
       it("GIVEN an account without LOCKER role WHEN transferAndLock THEN transaction fails with AccountHasNoRole", async () => {
         // add to list fails
         await expect(
           transferAndLockFacet.connect(signer_D).transferAndLock(signer_B.address, _AMOUNT, "0x", currentTimestamp),
-        ).to.be.rejectedWith("AccountHasNoRole");
+        ).to.be.revertedWithCustomError(transferAndLockFacet, "AccountHasNoRole");
       });
     });
 
@@ -188,7 +188,7 @@ describe("Transfer and lock Tests", () => {
             "0x",
             currentTimestamp - ONE_YEAR_IN_SECONDS,
           ),
-        ).to.be.rejectedWith("WrongExpirationTimestamp");
+        ).to.be.revertedWithCustomError(transferAndLockFacet, "WrongExpirationTimestamp");
       });
 
       it("GIVEN a non valid partition WHEN transferAndLockByPartition THEN transaction fails with InvalidPartition", async () => {
@@ -299,7 +299,7 @@ describe("Transfer and lock Tests", () => {
       it("GIVEN a expiration timestamp in past WHEN transferAndLock THEN transaction fails with WrongExpirationTimestamp", async () => {
         await expect(
           transferAndLockFacet.transferAndLock(signer_A.address, _AMOUNT, "0x", currentTimestamp - ONE_YEAR_IN_SECONDS),
-        ).to.be.rejectedWith("WrongExpirationTimestamp");
+        ).to.be.revertedWithCustomError(transferAndLockFacet, "WrongExpirationTimestamp");
       });
 
       it("GIVEN a valid partition WHEN transferAndLock with enough balance THEN transaction success", async () => {

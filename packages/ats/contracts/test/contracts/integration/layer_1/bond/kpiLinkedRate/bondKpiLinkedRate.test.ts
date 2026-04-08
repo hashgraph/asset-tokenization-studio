@@ -244,19 +244,28 @@ describe("Bond KpiLinked Rate Tests", () => {
     it("GIVEN a kpiLinked rate bond WHEN setting a coupon with non pending status THEN transaction fails with InterestRateIsKpiLinked", async () => {
       couponData.rateStatus = 1;
 
-      await expect(bondKpiLinkedRateFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsKpiLinked");
+      await expect(bondKpiLinkedRateFacet.setCoupon(couponData)).to.be.revertedWithCustomError(
+        bondKpiLinkedRateFacet,
+        "InterestRateIsKpiLinked",
+      );
     });
 
     it("GIVEN a kpiLinked rate bond WHEN setting a coupon with rate non 0 THEN transaction fails with InterestRateIsKpiLinked", async () => {
       couponData.rate = 1;
 
-      await expect(bondKpiLinkedRateFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsKpiLinked");
+      await expect(bondKpiLinkedRateFacet.setCoupon(couponData)).to.be.revertedWithCustomError(
+        bondKpiLinkedRateFacet,
+        "InterestRateIsKpiLinked",
+      );
     });
 
     it("GIVEN a kpiLinked rate bond WHEN setting a coupon with rate decimals non 0 THEN transaction fails with InterestRateIsKpiLinked", async () => {
       couponData.rateDecimals = 1;
 
-      await expect(bondKpiLinkedRateFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsKpiLinked");
+      await expect(bondKpiLinkedRateFacet.setCoupon(couponData)).to.be.revertedWithCustomError(
+        bondKpiLinkedRateFacet,
+        "InterestRateIsKpiLinked",
+      );
     });
 
     it("GIVEN a kpiLinked rate bond WHEN setting a coupon with pending status THEN transaction success", async () => {

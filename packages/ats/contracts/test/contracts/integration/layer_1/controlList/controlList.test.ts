@@ -41,19 +41,23 @@ describe("Control List Tests", () => {
   });
 
   it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-    await expect(controlListFacet.initializeControlList(true)).to.be.rejectedWith("AlreadyInitialized");
+    await expect(controlListFacet.initializeControlList(true)).to.be.revertedWithCustomError(
+      controlListFacet,
+      "AlreadyInitialized",
+    );
   });
 
   it("GIVEN an account without controlList role WHEN addToControlList THEN transaction fails with AccountHasNoRole", async () => {
-    await expect(controlListFacet.connect(signer_B).addToControlList(signer_C.address)).to.be.rejectedWith(
+    await expect(controlListFacet.connect(signer_B).addToControlList(signer_C.address)).to.be.revertedWithCustomError(
+      accessControlFacet,
       "AccountHasNoRole",
     );
   });
 
   it("GIVEN an account without controlList role WHEN removeFromControlList THEN transaction fails with AccountHasNoRole", async () => {
-    await expect(controlListFacet.connect(signer_B).removeFromControlList(signer_C.address)).to.be.rejectedWith(
-      "AccountHasNoRole",
-    );
+    await expect(
+      controlListFacet.connect(signer_B).removeFromControlList(signer_C.address),
+    ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
   });
 
   it("GIVEN a paused Token WHEN addToControlList THEN transaction fails with TokenIsPaused", async () => {
@@ -66,7 +70,8 @@ describe("Control List Tests", () => {
       signer_C.address,
     );
 
-    await expect(controlListFacet.connect(signer_C).addToControlList(signer_D.address)).to.be.rejectedWith(
+    await expect(controlListFacet.connect(signer_C).addToControlList(signer_D.address)).to.be.revertedWithCustomError(
+      pauseFacet,
       "TokenIsPaused",
     );
   });
@@ -81,9 +86,9 @@ describe("Control List Tests", () => {
       signer_C.address,
     );
 
-    await expect(controlListFacet.connect(signer_C).removeFromControlList(signer_D.address)).to.be.rejectedWith(
-      "TokenIsPaused",
-    );
+    await expect(
+      controlListFacet.connect(signer_C).removeFromControlList(signer_D.address),
+    ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
   });
 
   it("GIVEN an account with controlList role WHEN addToControlList and removeFromControlList THEN transaction succeeds", async () => {

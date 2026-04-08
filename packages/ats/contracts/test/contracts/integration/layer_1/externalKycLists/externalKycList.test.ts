@@ -6,7 +6,13 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT } from "@scripts";
 import { deployEquityTokenFixture } from "@test";
 
-import { ResolverProxy, ExternalKycListManagementFacet, MockedExternalKycList, Pause } from "@contract-types";
+import {
+  ResolverProxy,
+  ExternalKycListManagementFacet,
+  MockedExternalKycList,
+  Pause,
+  AccessControl,
+} from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 describe("ExternalKycList Management Tests", () => {
@@ -16,6 +22,7 @@ describe("ExternalKycList Management Tests", () => {
 
   let externalKycListManagement: ExternalKycListManagementFacet;
   let pauseFacet: Pause;
+  let accessControlFacet: AccessControl;
   let initMock1: MockedExternalKycList;
   let initMock2: MockedExternalKycList;
   let externalKycListMock1: MockedExternalKycList;
@@ -44,8 +51,9 @@ describe("ExternalKycList Management Tests", () => {
 
     externalKycListManagement = await ethers.getContractAt("ExternalKycListManagementFacet", diamond.target, signer_A);
     pauseFacet = await ethers.getContractAt("Pause", diamond.target, signer_A);
-    await base.accessControlFacet.grantRole(ATS_ROLES._KYC_MANAGER_ROLE, signer_A.address);
-    await base.accessControlFacet.grantRole(ATS_ROLES._PAUSER_ROLE, signer_A.address);
+    accessControlFacet = base.accessControlFacet;
+    await accessControlFacet.grantRole(ATS_ROLES._KYC_MANAGER_ROLE, signer_A.address);
+    await accessControlFacet.grantRole(ATS_ROLES._PAUSER_ROLE, signer_A.address);
 
     externalKycListMock1 = await (await ethers.getContractFactory("MockedExternalKycList", signer_A)).deploy();
     await externalKycListMock1.waitForDeployment();
@@ -308,7 +316,7 @@ describe("ExternalKycList Management Tests", () => {
         externalKycListManagement.connect(signer_B).addExternalKycList(newKycList, {
           gasLimit: GAS_LIMIT.default,
         }),
-      ).to.be.rejectedWith("AccountHasNoRole");
+      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
     });
 
     it("GIVEN an account with ATS_ROLES._KYC_MANAGER_ROLE WHEN adding an external kyc list THEN it succeeds", async () => {
@@ -330,7 +338,7 @@ describe("ExternalKycList Management Tests", () => {
         externalKycListManagement.connect(signer_B).removeExternalKycList(externalKycListMock1.target as string, {
           gasLimit: GAS_LIMIT.default,
         }),
-      ).to.be.rejectedWith("AccountHasNoRole");
+      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
     });
 
     it("GIVEN an account with ATS_ROLES._KYC_MANAGER_ROLE WHEN removing an external kyc list THEN it succeeds", async () => {
@@ -353,7 +361,7 @@ describe("ExternalKycList Management Tests", () => {
         externalKycListManagement.connect(signer_B).updateExternalKycLists(kycLists, actives, {
           gasLimit: GAS_LIMIT.high,
         }),
-      ).to.be.rejectedWith("AccountHasNoRole");
+      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
     });
 
     it("GIVEN an account with ATS_ROLES._KYC_MANAGER_ROLE WHEN updating external kyc lists THEN it succeeds", async () => {

@@ -1071,7 +1071,7 @@ describe("ERC1410 Tests", () => {
         );
 
       operatorTransferData.value = 2 * balanceOf_E_Original;
-      await expect(erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData)).to.be.rejected;
+      await expect(erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData)).to.be.reverted;
       expect(canTransfer_2[0]).to.be.equal(false);
       expect(canTransfer_2[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS);
     });
@@ -1083,7 +1083,7 @@ describe("ERC1410 Tests", () => {
         .canRedeemByPartition(signer_C.address, _PARTITION_ID_1, 2 * balanceOf_C_Original, data, operatorData);
 
       await expect(erc1410Facet.connect(signer_C).redeemByPartition(_PARTITION_ID_1, 2 * balanceOf_C_Original, data)).to
-        .be.rejected;
+        .be.reverted;
       expect(canRedeem[0]).to.be.equal(false);
       expect(canRedeem[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS);
 
@@ -1096,7 +1096,7 @@ describe("ERC1410 Tests", () => {
         erc1410Facet
           .connect(signer_E)
           .operatorRedeemByPartition(_PARTITION_ID_1, signer_C.address, 2 * balanceOf_C_Original, data, operatorData),
-      ).to.be.rejected;
+      ).to.be.reverted;
       expect(canRedeem_2[0]).to.be.equal(false);
       expect(canRedeem_2[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS);
     });
@@ -1116,9 +1116,9 @@ describe("ERC1410 Tests", () => {
       operatorTransferData.from = ADDRESS_ZERO;
       basicTransferInfo.to = ADDRESS_ZERO;
 
-      await expect(erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData)).to.be.rejected;
+      await expect(erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData)).to.be.reverted;
       await expect(erc1410Facet.connect(signer_C).transferByPartition(_PARTITION_ID_1, basicTransferInfo, data)).to.be
-        .rejected;
+        .reverted;
       expect(canTransfer[0]).to.be.equal(false);
       expect(canTransfer[1]).to.be.equal(EIP1066_CODES.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE);
     });
@@ -1132,7 +1132,7 @@ describe("ERC1410 Tests", () => {
         erc1410Facet
           .connect(signer_E)
           .operatorRedeemByPartition(_PARTITION_ID_1, ADDRESS_ZERO, balanceOf_E_Original, data, operatorData),
-      ).to.be.rejected;
+      ).to.be.reverted;
       expect(canRedeem[0]).to.be.equal(false);
       expect(canRedeem[1]).to.be.equal(EIP1066_CODES.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE);
     });
@@ -1305,7 +1305,7 @@ describe("ERC1410 Tests", () => {
           value: 3 * amount,
           data: data,
         }),
-      ).to.be.rejectedWith("MaxSupplyReached");
+      ).to.be.revertedWithCustomError(capFacet, "MaxSupplyReached");
 
       await expect(
         erc1410Facet.issueByPartition({
@@ -1314,7 +1314,7 @@ describe("ERC1410 Tests", () => {
           value: 2 * amount,
           data: data,
         }),
-      ).to.be.rejectedWith("MaxSupplyReachedForPartition");
+      ).to.be.revertedWithCustomError(capFacet, "MaxSupplyReachedForPartition");
     });
 
     it("GIVEN an account WHEN issue THEN transaction succeeds", async () => {

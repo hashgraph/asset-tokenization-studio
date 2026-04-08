@@ -43,25 +43,25 @@ describe("Access Control Tests", () => {
   it("GIVEN an account without administrative role WHEN grantRole THEN transaction fails with AccountHasNoRole", async () => {
     await expect(
       accessControlFacet.connect(signer_C).grantRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address),
-    ).to.be.rejectedWith("AccountHasNoRole");
+    ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
   });
 
   it("GIVEN an account without administrative role WHEN revokeRole THEN transaction fails with AccountHasNoRole", async () => {
     await expect(
       accessControlFacet.connect(signer_C).revokeRole(ATS_ROLES._DEFAULT_ADMIN_ROLE, unknownSigner.address),
-    ).to.be.rejectedWith("AccountHasNoRole");
+    ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
   });
 
   it("GIVEN an account without administrative role WHEN applyRoles THEN transaction fails with AccountHasNoRole", async () => {
     await expect(
       accessControlFacet.connect(signer_C).applyRoles([ATS_ROLES._DEFAULT_ADMIN_ROLE], [true], unknownSigner.address),
-    ).to.be.rejectedWith("AccountHasNoRole");
+    ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
   });
 
   it("GIVEN a list of roles and actives that is not equally long WHEN applyRoles THEN transaction fails with RolesAndActivesLengthMismatch", async () => {
     await expect(
       accessControlFacet.connect(signer_C).applyRoles([ATS_ROLES._DEFAULT_ADMIN_ROLE], [], unknownSigner.address),
-    ).to.be.rejectedWith("RolesAndActivesLengthMismatch");
+    ).to.be.revertedWithCustomError(accessControlFacet, "RolesAndActivesLengthMismatch");
   });
 
   it("GIVEN a list of contradictory roles (enable and disbale) role WHEN applyRoles THEN transaction fails with ApplyRoleContradiction", async () => {
@@ -94,7 +94,7 @@ describe("Access Control Tests", () => {
 
     await expect(
       accessControlFacet.connect(deployer).grantRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address),
-    ).to.be.rejectedWith("TokenIsPaused");
+    ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
   });
 
   it("GIVEN a paused Token WHEN revokeRole THEN transaction fails with TokenIsPaused", async () => {
@@ -102,7 +102,7 @@ describe("Access Control Tests", () => {
 
     await expect(
       accessControlFacet.connect(deployer).revokeRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address),
-    ).to.be.rejectedWith("TokenIsPaused");
+    ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
   });
 
   it("GIVEN a paused Token WHEN renounce THEN transaction fails with TokenIsPaused", async () => {
@@ -110,9 +110,9 @@ describe("Access Control Tests", () => {
     await pauseFacet.connect(signer_B).pause();
 
     // revoke role fails
-    await expect(accessControlFacet.connect(deployer).renounceRole(ATS_ROLES._PAUSER_ROLE)).to.be.rejectedWith(
-      "TokenIsPaused",
-    );
+    await expect(
+      accessControlFacet.connect(deployer).renounceRole(ATS_ROLES._PAUSER_ROLE),
+    ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
   });
 
   it("GIVEN an paused Token WHEN applyRoles THEN transaction fails with TokenIsPaused", async () => {
@@ -122,7 +122,7 @@ describe("Access Control Tests", () => {
     // revoke role fails
     await expect(
       accessControlFacet.connect(signer_B).applyRoles([ATS_ROLES._DEFAULT_ADMIN_ROLE], [true], unknownSigner.address),
-    ).to.be.rejectedWith("TokenIsPaused");
+    ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
   });
 
   it("GIVEN an account with administrative role WHEN grantRole THEN transaction succeeds", async () => {
