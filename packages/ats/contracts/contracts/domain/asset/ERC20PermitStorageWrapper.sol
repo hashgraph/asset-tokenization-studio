@@ -21,8 +21,6 @@ struct ERC20PermitStorage {
 }
 
 library ERC20PermitStorageWrapper {
-    // --- State-changing functions ---
-
     function permit(
         address owner,
         address spender,
@@ -48,8 +46,6 @@ library ERC20PermitStorageWrapper {
         }
         ERC20StorageWrapper.approve(owner, spender, value);
     }
-
-    // --- Internal view functions ---
 
     // solhint-disable-next-line func-name-mixedcase
     function DOMAIN_SEPARATOR() internal view returns (bytes32) {

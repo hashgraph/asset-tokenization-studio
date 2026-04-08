@@ -77,8 +77,6 @@ library AccessControlStorageWrapper {
         }
     }
 
-    // --- Pure functions ---
-
     function checkSameRolesAndActivesLength(uint256 _rolesLength, uint256 _activesLength) internal pure {
         if (_rolesLength != _activesLength) {
             revert RolesAndActivesLengthMismatch(_rolesLength, _activesLength);
@@ -89,8 +87,6 @@ library AccessControlStorageWrapper {
         ArrayValidation.checkUniqueValues(_roles, _actives);
     }
 
-    // --- Private view helpers ---
-
     function has(
         RoleDataStorage storage _rolesStorageData,
         bytes32 _role,
@@ -98,8 +94,6 @@ library AccessControlStorageWrapper {
     ) private view returns (bool hasRole_) {
         hasRole_ = _rolesStorageData.memberRoles[_account].contains(_role);
     }
-
-    // --- Role management ---
 
     // solhint-disable-next-line ordering
     function grantRole(bytes32 _role, address _account) internal returns (bool success_) {
@@ -147,8 +141,6 @@ library AccessControlStorageWrapper {
         success_ = true;
     }
 
-    // --- Guard functions ---
-
     function checkRole(bytes32 _role, address _account) internal view {
         if (!hasRole(_role, _account)) {
             revert AccountHasNoRole(_account, _role);
@@ -160,8 +152,6 @@ library AccessControlStorageWrapper {
             revert AccountHasNoRoles(_account, _roles);
         }
     }
-
-    // --- Read functions ---
 
     function getRoleAdmin(bytes32 _role) internal view returns (bytes32) {
         return rolesStorage().roles[_role].roleAdmin;

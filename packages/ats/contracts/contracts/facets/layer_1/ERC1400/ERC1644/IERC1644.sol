@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 interface IERC1644 {
-    // Events
     event FinalizedControllerFeature(address operator);
     event ControllerTransfer(
         address _controller,
@@ -20,7 +19,6 @@ interface IERC1644 {
         bytes _operatorData
     );
 
-    // Errors
     error TokenIsNotControllable();
 
     // Controller Events

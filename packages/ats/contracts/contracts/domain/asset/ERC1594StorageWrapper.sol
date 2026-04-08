@@ -37,8 +37,6 @@ struct ERC1594Storage {
 library ERC1594StorageWrapper {
     using LowLevelCall for address;
 
-    // --- External functions ---
-
     function initialize() internal {
         ERC1594Storage storage ds = erc1594Storage();
         ds.issuance = true;
@@ -97,8 +95,6 @@ library ERC1594StorageWrapper {
             revert IERC3643Types.WalletRecovered();
         }
     }
-
-    // --- Internal functions ---
 
     function checkCanRedeemFromByPartition(
         address from,
@@ -232,8 +228,6 @@ library ERC1594StorageWrapper {
         }
     }
 
-    // --- Internal Pure Functions ---
-
     function erc1594Storage() internal pure returns (ERC1594Storage storage ds) {
         bytes32 position = _ERC1594_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
@@ -241,8 +235,6 @@ library ERC1594StorageWrapper {
             ds.slot := position
         }
     }
-
-    // --- Private helper functions ---
 
     function _genericChecks() private view returns (bool, bytes1, bytes32, bytes memory) {
         if (ClearingStorageWrapper.isClearingActivated()) {

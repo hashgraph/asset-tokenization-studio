@@ -15,8 +15,6 @@ struct CapDataStorage {
 }
 
 library CapStorageWrapper {
-    // --- Initialization ---
-
     // solhint-disable-next-line func-name-mixedcase
     function initialize_Cap(uint256 maxSupply, ICap.PartitionCap[] calldata partitionCap) internal {
         CapDataStorage storage cs = capStorage();
@@ -26,8 +24,6 @@ library CapStorageWrapper {
         }
         cs.initialized = true;
     }
-
-    // --- State-changing functions ---
 
     function setMaxSupply(uint256 _maxSupply, uint256 _timestamp) internal {
         uint256 previousMaxSupply = getMaxSupplyAdjustedAt(_timestamp);
@@ -59,8 +55,6 @@ library CapStorageWrapper {
         if (cs.maxSupplyByPartition[partition] > limit) cs.maxSupplyByPartition[partition] = MAX_UINT256;
         else cs.maxSupplyByPartition[partition] *= factor;
     }
-
-    // --- Guard functions ---
 
     function requireWithinMaxSupply(uint256 _amount, uint256 _timestamp) internal view {
         uint256 maxSupply = getMaxSupplyAdjustedAt(_timestamp);
@@ -110,8 +104,6 @@ library CapStorageWrapper {
         }
     }
 
-    // --- Read functions ---
-
     function getMaxSupplyAdjustedAt(uint256 timestamp) internal view returns (uint256) {
         CapDataStorage storage cs = capStorage();
         (uint256 pendingAbaf, ) = AdjustBalancesStorageWrapper.getPendingScheduledBalanceAdjustmentsAt(timestamp);
@@ -136,8 +128,6 @@ library CapStorageWrapper {
     function isCapInitialized() internal view returns (bool) {
         return capStorage().initialized;
     }
-
-    // --- Storage accessor and pure helpers ---
 
     function capStorage() internal pure returns (CapDataStorage storage cap_) {
         bytes32 position = _CAP_STORAGE_POSITION;

@@ -36,27 +36,17 @@ struct AdjustBalancesStorage {
 }
 
 library AdjustBalancesStorageWrapper {
-    // --- INTERNAL STATE-CHANGING FUNCTIONS ---
-
-    // --- ABAF core functions ---
-
     function updateAbaf(uint256 factor) internal {
         _adjustBalancesStorage().abaf = getAbaf() * factor;
     }
-
-    // --- LABAF by user ---
 
     function updateLabafByTokenHolder(uint256 labaf, address tokenHolder) internal {
         _adjustBalancesStorage().labaf[tokenHolder] = labaf;
     }
 
-    // --- LABAF by partition ---
-
     function updateLabafByPartition(bytes32 partition) internal {
         _adjustBalancesStorage().labafByPartition[partition] = getAbaf();
     }
-
-    // --- LABAF by user and partition ---
 
     function pushLabafUserPartition(address _tokenHolder, uint256 _labaf) internal {
         _adjustBalancesStorage().labafUserPartition[_tokenHolder].push(_labaf);
@@ -70,13 +60,9 @@ library AdjustBalancesStorageWrapper {
         _adjustBalancesStorage().labafUserPartition[tokenHolder][partitionIndex - 1] = labaf;
     }
 
-    // --- Allowance LABAF ---
-
     function updateAllowanceLabaf(address _owner, address _spender, uint256 _labaf) internal {
         _adjustBalancesStorage().labafsAllowances[_owner][_spender] = _labaf;
     }
-
-    // --- Lock LABAF ---
 
     function setLockLabafById(bytes32 _partition, address _tokenHolder, uint256 _lockId, uint256 _labaf) internal {
         _adjustBalancesStorage().labafLockedAmountByAccountPartitionAndId[_tokenHolder][_partition][_lockId] = _labaf;
@@ -94,8 +80,6 @@ library AdjustBalancesStorageWrapper {
         delete _adjustBalancesStorage().labafLockedAmountByAccountPartitionAndId[_tokenHolder][_partition][_lockId];
     }
 
-    // --- Hold LABAF ---
-
     function setHeldLabafById(bytes32 _partition, address _tokenHolder, uint256 _holdId, uint256 _labaf) internal {
         _adjustBalancesStorage().labafHeldAmountByAccountPartitionAndId[_tokenHolder][_partition][_holdId] = _labaf;
     }
@@ -112,8 +96,6 @@ library AdjustBalancesStorageWrapper {
         delete _adjustBalancesStorage().labafHeldAmountByAccountPartitionAndId[_tokenHolder][_partition][_holdId];
     }
 
-    // --- Freeze LABAF ---
-
     function setTotalFreezeLabaf(address _tokenHolder, uint256 _labaf) internal {
         _adjustBalancesStorage().labafFrozenAmountByAccount[_tokenHolder] = _labaf;
     }
@@ -121,8 +103,6 @@ library AdjustBalancesStorageWrapper {
     function setTotalFreezeLabafByPartition(bytes32 _partition, address _tokenHolder, uint256 _labaf) internal {
         _adjustBalancesStorage().labafFrozenAmountByAccountAndPartition[_tokenHolder][_partition] = _labaf;
     }
-
-    // --- Clearing LABAF ---
 
     function setClearedLabafById(
         IClearingTypes.ClearingOperationIdentifier memory _clearingOperationIdentifier,
@@ -153,8 +133,6 @@ library AdjustBalancesStorageWrapper {
             ];
     }
 
-    // --- Balance adjustment operations (from AdjustBalancesStorageWrapper2) ---
-
     function adjustBalances(uint256 _factor, uint8 _decimals) internal {
         SnapshotsStorageWrapper.updateDecimalsSnapshot();
         SnapshotsStorageWrapper.updateAbafSnapshot();
@@ -179,8 +157,6 @@ library AdjustBalancesStorageWrapper {
         CapStorageWrapper.adjustMaxSupplyByPartition(_partition, factor);
         updateLabafByPartition(_partition);
     }
-
-    // --- INTERNAL VIEW FUNCTIONS ---
 
     function getLabafByUser(address _account) internal view returns (uint256) {
         return zeroToOne(_adjustBalancesStorage().labaf[_account]);
@@ -275,8 +251,6 @@ library AdjustBalancesStorageWrapper {
             );
     }
 
-    // --- Factor calculation helpers ---
-
     function calculateFactorByAbafAndTokenHolder(
         uint256 abaf,
         address tokenHolder
@@ -362,8 +336,6 @@ library AdjustBalancesStorageWrapper {
         (uint256 pendingAbaf, ) = getPendingScheduledBalanceAdjustmentsAt(_timestamp);
         return abaf * pendingAbaf;
     }
-
-    // --- INTERNAL PURE FUNCTIONS ---
 
     function calculateFactor(uint256 _abaf, uint256 _labaf) internal pure returns (uint256 factor_) {
         factor_ = _abaf / _labaf;

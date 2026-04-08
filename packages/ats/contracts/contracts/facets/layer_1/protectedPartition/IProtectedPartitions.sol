@@ -10,7 +10,6 @@ interface IProtectedPartitions {
         bytes signature;
     }
 
-    // Events
     event PartitionsProtected(address indexed operator);
     event PartitionsUnProtected(address indexed operator);
     event ProtectedTransferFrom(
@@ -33,7 +32,6 @@ interface IProtectedPartitions {
         bytes signature
     );
 
-    // Errors
     error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
     error PartitionsAreUnProtected();
 

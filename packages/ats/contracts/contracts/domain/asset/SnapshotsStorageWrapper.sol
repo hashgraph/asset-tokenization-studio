@@ -67,8 +67,6 @@ library SnapshotsStorageWrapper {
     using ArraysUpgradeable for uint256[];
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
-    // --- Snapshot Creation and Update (state-changing functions) ---
-
     function takeSnapshot() internal returns (uint256 snapshotID_) {
         snapshotStorage().currentSnapshotId.increment();
         return getCurrentSnapshotId();
@@ -107,8 +105,6 @@ library SnapshotsStorageWrapper {
             partitionSnapshots.values.push(listOfPartitions);
         }
     }
-
-    // --- Snapshot Updates for Balance Types ---
 
     function updateAbafSnapshot() internal {
         updateSnapshot(snapshotStorage().abafSnapshots, AdjustBalancesStorageWrapper.getAbaf());
@@ -244,8 +240,6 @@ library SnapshotsStorageWrapper {
     function updateTotalTokenHolderSnapshot() internal {
         updateSnapshot(snapshotStorage().totalTokenHoldersSnapshots, ERC1410StorageWrapper.getTotalTokenHolders());
     }
-
-    // --- Snapshot Value Queries ---
 
     function abafAtSnapshot(uint256 snapshotID) internal view returns (uint256 abaf_) {
         (bool snapshotted, uint256 value) = valueAt(snapshotID, snapshotStorage().abafSnapshots);
@@ -538,8 +532,6 @@ library SnapshotsStorageWrapper {
         return snapshotted ? value : ERC20StorageWrapper.totalSupply();
     }
 
-    // --- Snapshot ID and Lookup Helpers ---
-
     function getCurrentSnapshotId() internal view returns (uint256) {
         return snapshotStorage().currentSnapshotId.current();
     }
@@ -581,8 +573,6 @@ library SnapshotsStorageWrapper {
             return ids[ids.length - 1];
         }
     }
-
-    // --- Storage Access (pure function - must come last) ---
 
     function snapshotStorage() internal pure returns (SnapshotStorage storage snapshotStorage_) {
         bytes32 position = _SNAPSHOT_STORAGE_POSITION;

@@ -29,8 +29,6 @@ library LockStorageWrapper {
     error WrongLockId();
     error LockExpirationNotReached();
 
-    // --- Lock operation functions ---
-
     function lockByPartition(
         bytes32 partition,
         uint256 amount,
@@ -171,8 +169,6 @@ library LockStorageWrapper {
         SnapshotsStorageWrapper.updateAccountLockedBalancesSnapshot(tokenHolder, partition);
     }
 
-    // --- View functions ---
-
     function getLockedAmountFor(address tokenHolder) internal view returns (uint256 amount_) {
         return lockStorage().totalLockedAmountByAccount[tokenHolder];
     }
@@ -200,8 +196,6 @@ library LockStorageWrapper {
     function isLockIdValid(bytes32 partition, address tokenHolder, uint256 lockId) internal view returns (bool) {
         return lockStorage().lockIdsByAccountAndPartition[tokenHolder][partition].contains(lockId);
     }
-
-    // --- Guard functions ---
 
     function requireValidExpirationTimestamp(uint256 expirationTimestamp) internal view {
         if (expirationTimestamp < TimeTravelStorageWrapper.getBlockTimestamp()) revert WrongExpirationTimestamp();
@@ -297,8 +291,6 @@ library LockStorageWrapper {
             pageLength
         );
     }
-
-    // --- Storage accessor ---
 
     function lockStorage() internal pure returns (LockDataStorage storage lock_) {
         bytes32 position = _LOCK_STORAGE_POSITION;

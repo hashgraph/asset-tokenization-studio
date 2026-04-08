@@ -33,8 +33,6 @@ library BondStorageWrapper {
         uint256[] couponsOrderedListByIds;
     }
 
-    // --- State Modifying Functions ---
-
     // solhint-disable-next-line func-name-mixedcase
     function initialize_bond(IBondTypes.BondDetailsData calldata bondDetailsData) internal {
         BondDataStorage storage bs = bondStorage();
@@ -115,8 +113,6 @@ library BondStorageWrapper {
 
         CorporateActionsStorageWrapper.updateCorporateActionData(actionId, abi.encode(coupon));
     }
-
-    // --- View Functions ---
 
     function getBondDetails() internal view returns (IBondTypes.BondDetailsData memory bondDetails_) {
         BondDataStorage storage bs = bondStorage();
@@ -334,13 +330,9 @@ library BondStorageWrapper {
         return previousCouponId;
     }
 
-    // --- Guard functions ---
-
     function requireValidMaturityDate(uint256 maturityDate) internal view {
         if (maturityDate <= getMaturityDate()) revert IBondTypes.BondMaturityDateWrong();
     }
-
-    // --- Pure Functions ---
 
     function bondStorage() internal pure returns (BondDataStorage storage bondData_) {
         bytes32 position = _BOND_STORAGE_POSITION;

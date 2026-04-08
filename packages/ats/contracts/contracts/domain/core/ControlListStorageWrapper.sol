@@ -42,8 +42,6 @@ library ControlListStorageWrapper {
         }
     }
 
-    // --- Initialization ---
-
     // solhint-disable-next-line ordering
     function initializeControlList(bool _isWhiteList) internal {
         ControlListStorage storage cls = controlListStorage();
@@ -55,16 +53,12 @@ library ControlListStorageWrapper {
         return controlListStorage().initialized;
     }
 
-    // --- Guard functions ---
-
     // solhint-disable-next-line ordering
     function checkControlList(address _account) internal view {
         if (!isAbleToAccess(_account)) {
             revert AccountIsBlocked(_account);
         }
     }
-
-    // --- Control list operations ---
 
     function addToControlList(address _account) internal returns (bool success_) {
         success_ = controlListStorage().list.add(_account);
@@ -85,8 +79,6 @@ library ControlListStorageWrapper {
         return (cls.isWhiteList == cls.list.contains(_account) &&
             ExternalListManagementStorageWrapper.isExternallyAuthorized(_account));
     }
-
-    // --- Read functions ---
 
     function getControlListType() internal view returns (bool) {
         return controlListStorage().isWhiteList;

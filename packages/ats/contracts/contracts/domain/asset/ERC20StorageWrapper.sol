@@ -25,8 +25,6 @@ struct ERC20Storage {
 }
 
 library ERC20StorageWrapper {
-    // --- Initialization ---
-
     function initializeERC20(IERC20.ERC20Metadata calldata erc20Metadata) internal {
         ERC20Storage storage erc20Stor = erc20Storage();
         erc20Stor.name = erc20Metadata.info.name;
@@ -36,8 +34,6 @@ library ERC20StorageWrapper {
         erc20Stor.securityType = erc20Metadata.securityType;
         erc20Stor.initialized = true;
     }
-
-    // --- Balance operations ---
 
     function increaseBalance(address to, uint256 value) internal {
         migrateBalanceIfNeeded(to);
@@ -52,8 +48,6 @@ library ERC20StorageWrapper {
             erc20Storage().balances[from] -= value;
         }
     }
-
-    // --- Total supply operations ---
 
     function increaseTotalSupply(uint256 value) internal {
         migrateTotalSupplyIfNeeded();
@@ -78,8 +72,6 @@ library ERC20StorageWrapper {
         erc20Storage().decimals += decimals;
     }
 
-    // --- Balance adjustments ---
-
     function adjustTotalBalanceFor(uint256 abaf, address account) internal {
         migrateBalanceIfNeeded(account);
         uint256 factor = AdjustBalancesStorageWrapper.calculateFactorByAbafAndTokenHolder(abaf, account);
@@ -93,8 +85,6 @@ library ERC20StorageWrapper {
         }
         AdjustBalancesStorageWrapper.updateLabafByTokenHolder(abaf, account);
     }
-
-    // --- Allowance updates ---
 
     function beforeAllowanceUpdate(address owner, address spender) internal {
         ERC1410StorageWrapper.triggerAndSyncAll(_DEFAULT_PARTITION, owner, address(0));
@@ -112,8 +102,6 @@ library ERC20StorageWrapper {
         erc20Storage().allowed[owner][spender] *= factor;
         AdjustBalancesStorageWrapper.updateAllowanceLabaf(owner, spender, abaf);
     }
-
-    // --- Approval and transfers ---
 
     function approve(address owner, address spender, uint256 value) internal returns (bool) {
         assert(owner != address(0));
@@ -214,8 +202,6 @@ library ERC20StorageWrapper {
         emit IERC20.Approval(from, spender, erc20Storage().allowed[from][spender]);
     }
 
-    // --- Migration functions ---
-
     function migrateTotalSupplyIfNeeded() internal {
         ERC1410BasicStorage storage $ = ERC1410StorageWrapper.erc1410BasicStorage();
         if ($.DEPRECATED_totalSupply == 0) return;
@@ -229,8 +215,6 @@ library ERC20StorageWrapper {
         erc20Storage().balances[tokenHolder] = $.DEPRECATED_balances[tokenHolder];
         $.DEPRECATED_balances[tokenHolder] = 0;
     }
-
-    // --- View functions ---
 
     function totalSupply() internal view returns (uint256 totalSupply_) {
         totalSupply_ = ERC1410StorageWrapper.erc1410BasicStorage().DEPRECATED_totalSupply;

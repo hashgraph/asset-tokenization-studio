@@ -50,8 +50,6 @@ library PauseStorageWrapper {
      */
     error TokenIsUnpaused();
 
-    // --- Storage accessor (pure) ---
-
     function pauseStorage() internal pure returns (PauseDataStorage storage pause_) {
         bytes32 position = _PAUSE_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
@@ -59,8 +57,6 @@ library PauseStorageWrapper {
             pause_.slot := position
         }
     }
-
-    // --- State-changing functions ---
 
     // solhint-disable-next-line ordering
     function setPause(bool _paused) internal {
@@ -85,8 +81,6 @@ library PauseStorageWrapper {
         ExternalListManagementStorageWrapper.setExternalListInitialized(_PAUSE_MANAGEMENT_STORAGE_POSITION);
     }
 
-    // --- Read functions ---
-
     // solhint-disable-next-line ordering
     function isPaused() internal view returns (bool) {
         return pauseStorage().paused || isExternallyPaused();
@@ -108,8 +102,6 @@ library PauseStorageWrapper {
     function isExternalPauseInitialized() internal view returns (bool) {
         return ExternalListManagementStorageWrapper.externalListStorage(_PAUSE_MANAGEMENT_STORAGE_POSITION).initialized;
     }
-
-    // --- Guard functions for modifiers ---
 
     function _checkUnpaused() internal view {
         if (isPaused()) revert TokenIsPaused();

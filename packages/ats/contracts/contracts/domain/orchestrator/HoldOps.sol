@@ -9,9 +9,7 @@ import { ThirdPartyType } from "../asset/types/ThirdPartyType.sol";
 /// @notice Deployed once as a separate contract. Facets call via DELEGATECALL, keeping
 /// facet bytecode thin. HoldStorageWrapper `internal` functions are inlined here, not in facets.
 library HoldOps {
-    // ============================================================================
     // Public functions — Hold Creation (deployed, called via DELEGATECALL)
-    // ============================================================================
 
     /// @notice Create a hold by partition — orchestrates ABAF sync, snapshots, and balance
     function createHoldByPartition(
@@ -34,9 +32,7 @@ library HoldOps {
         return HoldStorageWrapper.protectedCreateHoldByPartition(_partition, _from, _protectedHold, _signature);
     }
 
-    // ============================================================================
     // Public functions — Hold Execution
-    // ============================================================================
 
     /// @notice Execute a hold — transfer held amount to recipient
     function executeHoldByPartition(
@@ -62,9 +58,7 @@ library HoldOps {
         return HoldStorageWrapper.reclaimHoldByPartition(_holdIdentifier);
     }
 
-    // ============================================================================
     // Public functions — Hold Allowance
-    // ============================================================================
 
     /// @notice Decrease allowed balance for an authorized third-party hold
     function decreaseAllowedBalanceForHold(bytes32 _partition, address _from, uint256 _amount, uint256 _holdId) public {

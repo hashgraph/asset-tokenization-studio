@@ -28,10 +28,6 @@ import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 library ClearingOps {
     using LowLevelCall for address;
 
-    // ============================================================================
-    // CLEARING CREATION OPERATIONS
-    // ============================================================================
-
     function clearingTransferCreation(
         IClearingTypes.ClearingOperation memory _clearingOperation,
         uint256 _amount,
@@ -198,9 +194,7 @@ library ClearingOps {
         success_ = true;
     }
 
-    // ============================================================================
     // CLEARING ACTIONS (approve / cancel / reclaim)
-    // ============================================================================
 
     function approveClearingOperationByPartition(
         IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier
@@ -227,9 +221,7 @@ library ClearingOps {
         );
     }
 
-    // ============================================================================
     // PROTECTED CLEARING OPERATIONS (EIP-712)
-    // ============================================================================
 
     function protectedClearingTransferByPartition(
         IClearingTypes.ProtectedClearingOperation calldata _protectedClearingOperation,
@@ -336,10 +328,6 @@ library ClearingOps {
         );
     }
 
-    // ============================================================================
-    // ALLOWANCE OPERATIONS
-    // ============================================================================
-
     function decreaseAllowedBalanceForClearing(
         bytes32 _partition,
         uint256 _clearingId,
@@ -351,10 +339,6 @@ library ClearingOps {
         TokenCoreOps.decreaseAllowedBalance(_from, spender, _amount);
         ClearingStorageWrapper.setClearingThirdParty(_partition, _from, _clearingOperationType, _clearingId, spender);
     }
-
-    // ============================================================================
-    // INTERNAL: CLEARING OPERATION HANDLING
-    // ============================================================================
 
     function handleClearingOperationByPartition(
         IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
@@ -534,10 +518,6 @@ library ClearingOps {
         // removeClearing is now handled in handleClearingOperationByPartition
     }
 
-    // ============================================================================
-    // INTERNAL: BALANCE ADJUSTMENTS
-    // ============================================================================
-
     function adjustClearingBalances(
         IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
         address _to,
@@ -605,10 +585,6 @@ library ClearingOps {
             TokenCoreOps.emitTransfer(address(0), _to, _amount);
         }
     }
-
-    // ============================================================================
-    // INTERNAL: BEFORE/AFTER OPERATIONS
-    // ============================================================================
 
     function beforeClearingOperation(
         IClearingTypes.ClearingOperationIdentifier memory _clearingOperationIdentifier,
@@ -747,10 +723,6 @@ library ClearingOps {
             TokenCoreOps.increaseAllowedBalance(_clearingOperationIdentifier.tokenHolder, spender, _amount);
         }
     }
-
-    // ============================================================================
-    // INTERNAL: EVENT EMISSIONS
-    // ============================================================================
 
     function emitClearedTransferEvent(
         address _from,

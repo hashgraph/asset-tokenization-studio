@@ -15,10 +15,6 @@ library SsiManagementStorageWrapper {
     using Pagination for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    // --- Guard functions ---
-
-    // --- State-changing functions ---
-
     function setRevocationRegistryAddress(address _revocationRegistryAddress) internal returns (bool success_) {
         ssiManagementStorage().revocationRegistry = _revocationRegistryAddress;
         return true;
@@ -31,8 +27,6 @@ library SsiManagementStorageWrapper {
     function removeIssuer(address _issuer) internal returns (bool success_) {
         success_ = ssiManagementStorage().issuerList.remove(_issuer);
     }
-
-    // --- Read functions ---
 
     function getRevocationRegistryAddress() internal view returns (address revocationRegistryAddress_) {
         revocationRegistryAddress_ = ssiManagementStorage().revocationRegistry;
@@ -56,8 +50,6 @@ library SsiManagementStorageWrapper {
     function requireIssuer(address _issuer) internal view {
         if (!isIssuer(_issuer)) revert ISsiManagement.AccountIsNotIssuer(_issuer);
     }
-
-    // --- Storage accessor (pure) ---
 
     function ssiManagementStorage() internal pure returns (SsiManagementStorage storage ssiManagement_) {
         bytes32 position = _SSI_MANAGEMENT_STORAGE_POSITION;

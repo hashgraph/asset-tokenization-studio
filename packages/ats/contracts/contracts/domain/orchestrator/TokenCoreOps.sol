@@ -18,10 +18,6 @@ import { IProtectedPartitions } from "../../facets/layer_1/protectedPartition/IP
 /// @notice Deployed once as a separate contract. Facets call via DELEGATECALL.
 /// @dev Contains balance operations for ClearingOps to avoid inlining.
 library TokenCoreOps {
-    // ============================================================================
-    // Public functions — Transfer Operations
-    // ============================================================================
-
     function transferByPartition(
         address _from,
         IERC1410Types.BasicTransferInfo memory _basicTransferInfo,
@@ -57,10 +53,6 @@ library TokenCoreOps {
         return ERC1410StorageWrapper.protectedTransferFromByPartition(_partition, _from, _to, _amount, _protectionData);
     }
 
-    // ============================================================================
-    // Public functions — Issue / Redeem
-    // ============================================================================
-
     function issueByPartition(IERC1410Types.IssueData memory _issueData) public {
         ERC1410StorageWrapper.issueByPartition(_issueData);
     }
@@ -85,10 +77,6 @@ library TokenCoreOps {
         ERC1410StorageWrapper.protectedRedeemFromByPartition(_partition, _from, _amount, _protectionData);
     }
 
-    // ============================================================================
-    // Public functions — ERC20 Operations
-    // ============================================================================
-
     function transfer(address _from, address _to, uint256 _value) public returns (bool) {
         return ERC20StorageWrapper.transfer(_from, _to, _value);
     }
@@ -109,10 +97,6 @@ library TokenCoreOps {
         ERC20StorageWrapper.burnFrom(_account, _value);
     }
 
-    // ============================================================================
-    // Public functions — Approval Operations
-    // ============================================================================
-
     function approve(address _owner, address _spender, uint256 _value) public returns (bool) {
         return ERC20StorageWrapper.approve(_owner, _spender, _value);
     }
@@ -129,9 +113,7 @@ library TokenCoreOps {
         ERC20StorageWrapper.beforeAllowanceUpdate(_owner, _spender);
     }
 
-    // ============================================================================
     // Public functions — Balance Operations (for ClearingOps)
-    // ============================================================================
 
     function reduceBalanceByPartition(address _from, uint256 _amount, bytes32 _partition) public {
         ERC1410StorageWrapper.reduceBalanceByPartition(_from, _amount, _partition);
@@ -186,10 +168,6 @@ library TokenCoreOps {
         emit IERC20.Transfer(_from, _to, _amount);
     }
 
-    // ============================================================================
-    // Public view functions
-    // ============================================================================
-
     function validPartitionForReceiver(bytes32 _partition, address _receiver) public view returns (bool) {
         return ERC1410StorageWrapper.validPartitionForReceiver(_partition, _receiver);
     }
@@ -206,9 +184,7 @@ library TokenCoreOps {
         ERC1594StorageWrapper.checkCompliance(_from, _to, _checkSender);
     }
 
-    // ============================================================================
     // Internal functions (inlined into calling StorageWrappers)
-    // ============================================================================
 
     function getTotalBalanceForAdjustedAt(
         address _tokenHolder,

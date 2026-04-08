@@ -40,8 +40,6 @@ library ClearingStorageWrapper {
     }
     // solhint-enable max-line-length
 
-    // ============ Init & Config (internal first) ============
-
     function initializeClearing(bool clearingActive) internal {
         ClearingDataStorage storage clearingStorage_ = clearingStorage();
         clearingStorage_.initialized = true;
@@ -53,8 +51,6 @@ library ClearingStorageWrapper {
         return true;
     }
 
-    // ============ State Checks (internal view) ============
-
     function isClearingInitialized() internal view returns (bool) {
         return clearingStorage().initialized;
     }
@@ -62,8 +58,6 @@ library ClearingStorageWrapper {
     function isClearingActivated() internal view returns (bool) {
         return clearingStorage().activated;
     }
-
-    // ============ Storage Accessor (internal pure last) ============
 
     function clearingStorage() internal pure returns (ClearingDataStorage storage clearing_) {
         bytes32 position = _CLEARING_STORAGE_POSITION;
@@ -83,8 +77,6 @@ library ClearingStorageWrapper {
                 clearingOperationIdentifier.partition
             ][clearingOperationIdentifier.clearingOperationType].contains(clearingOperationIdentifier.clearingId);
     }
-
-    // ============ Pure Storage Write Functions ============
 
     /// @notice Get next clearing ID and increment - pure storage operation
     function increaseClearingId(
@@ -276,8 +268,6 @@ library ClearingStorageWrapper {
         AdjustBalancesStorageWrapper.removeLabafClearing(_clearingOperationIdentifier);
     }
 
-    // ============ Read Functions (Pure) ============
-
     /// @notice Get clearing basic info (calldata version for external calls)
     function isClearingBasicInfo(
         IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier
@@ -378,8 +368,6 @@ library ClearingStorageWrapper {
                 );
     }
 
-    // ============ Build Functions ============
-
     function buildClearingOperationIdentifier(
         address _tokenHolder,
         bytes32 _partition,
@@ -454,8 +442,6 @@ library ClearingStorageWrapper {
                 operatorType: _operatorType
             });
     }
-
-    // ============ Guard Functions ============
 
     function requireValidClearingId(
         IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier

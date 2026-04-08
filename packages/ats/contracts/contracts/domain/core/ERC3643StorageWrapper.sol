@@ -40,8 +40,6 @@ library ERC3643StorageWrapper {
         bool initialized;
     }
 
-    // --- Initialization ---
-
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC3643(address _compliance, address _identityRegistry) internal {
         ERC3643Storage storage st = erc3643Storage();
@@ -49,8 +47,6 @@ library ERC3643StorageWrapper {
         setCompliance(_compliance);
         setIdentityRegistry(_identityRegistry);
     }
-
-    // --- State-changing functions ---
 
     function setAddressFrozen(address _userAddress, bool _freezeStatus) internal {
         if (_freezeStatus) {
@@ -227,8 +223,6 @@ library ERC3643StorageWrapper {
         return true;
     }
 
-    // --- Internal view functions ---
-
     function requireUnrecoveredAddress(address _account) internal view {
         if (isRecovered(_account)) revert IERC3643Types.WalletRecovered();
     }
@@ -330,8 +324,6 @@ library ERC3643StorageWrapper {
             0;
     }
 
-    // --- Internal pure functions (storage accessors) ---
-
     function _rolesStorage() internal pure returns (RoleDataStorage storage roles_) {
         bytes32 position = _ACCESS_CONTROL_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
@@ -359,8 +351,6 @@ library ERC3643StorageWrapper {
             revert IERC3643Types.InputBoolArrayLengthMismatch();
         }
     }
-
-    // --- Private view functions ---
 
     function checkUnfreezeAmount(
         bytes32 _partition,

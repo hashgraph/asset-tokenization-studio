@@ -24,8 +24,6 @@ library CorporateActionsStorageWrapper {
     using Pagination for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    // --- State-changing functions ---
-
     function addCorporateAction(
         bytes32 _actionType,
         bytes memory _data

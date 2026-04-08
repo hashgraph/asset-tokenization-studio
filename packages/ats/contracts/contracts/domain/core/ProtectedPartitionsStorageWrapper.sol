@@ -34,8 +34,6 @@ struct ProtectedPartitionsDataStorage {
 }
 
 library ProtectedPartitionsStorageWrapper {
-    // --- Initialization ---
-
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ProtectedPartitions(bool _protectPartitions) internal returns (bool success_) {
         ProtectedPartitionsDataStorage storage pps = protectedPartitionsStorage();
@@ -43,8 +41,6 @@ library ProtectedPartitionsStorageWrapper {
         pps.initialized = true;
         success_ = true;
     }
-
-    // --- State-changing functions ---
 
     function setProtectedPartitions(bool _protected) internal {
         protectedPartitionsStorage().arePartitionsProtected = _protected;
@@ -54,8 +50,6 @@ library ProtectedPartitionsStorageWrapper {
         }
         emit IProtectedPartitions.PartitionsUnProtected(EvmAccessors.getMsgSender());
     }
-
-    // --- Internal view functions ---
 
     function requireProtectedPartitions() internal view {
         if (!arePartitionsProtected()) revert IProtectedPartitions.PartitionsAreUnProtected();
@@ -271,8 +265,6 @@ library ProtectedPartitionsStorageWrapper {
                 address(this)
             );
     }
-
-    // --- Internal pure functions ---
 
     function protectedPartitionsRole(bytes32 _partition) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(_PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _partition));

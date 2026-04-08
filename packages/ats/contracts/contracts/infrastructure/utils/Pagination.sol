@@ -10,7 +10,6 @@ library Pagination {
     using EnumerableSet for EnumerableSet.UintSet;
     using EnumerableSetBytes4 for EnumerableSetBytes4.Bytes4Set;
 
-    // functions for set
     function getFromSet(
         EnumerableSet.Bytes32Set storage _set,
         uint256 _pageIndex,

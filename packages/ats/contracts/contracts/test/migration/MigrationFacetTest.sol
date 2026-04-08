@@ -12,9 +12,7 @@ import { ERC20StorageWrapper } from "../../domain/asset/ERC20StorageWrapper.sol"
  * This facet is for testing purposes only and should not be deployed to production.
  */
 contract MigrationFacetTest is IStaticFunctionSelectors {
-    // ========================================
     // Legacy Storage Setters (for test setup)
-    // ========================================
 
     /**
      * @dev Sets the legacy totalSupply in ERC1410BasicStorage (for testing).
@@ -33,9 +31,7 @@ contract MigrationFacetTest is IStaticFunctionSelectors {
         ERC1410StorageWrapper.erc1410BasicStorage().DEPRECATED_balances[_tokenHolder] = _value;
     }
 
-    // ========================================
     // Migration Functions (for test verification)
-    // ========================================
 
     /**
      * @dev Migrates the totalSupply from legacy to new storage (manually trigger for testing).
@@ -71,9 +67,7 @@ contract MigrationFacetTest is IStaticFunctionSelectors {
         }
     }
 
-    // ========================================
     // Legacy Storage Getters (for test verification)
-    // ========================================
 
     /**
      * @dev Gets the legacy totalSupply from ERC1410BasicStorage.
@@ -92,9 +86,7 @@ contract MigrationFacetTest is IStaticFunctionSelectors {
         legacyBalance_ = ERC1410StorageWrapper.erc1410BasicStorage().DEPRECATED_balances[_tokenHolder];
     }
 
-    // ========================================
     // New Storage Getters (for test verification)
-    // ========================================
 
     /**
      * @dev Gets the new totalSupply from ERC20Storage.
@@ -136,10 +128,6 @@ contract MigrationFacetTest is IStaticFunctionSelectors {
 
         return true;
     }
-
-    // ========================================
-    // IStaticFunctionSelectors Implementation
-    // ========================================
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         staticFunctionSelectors_ = new bytes4[](10);

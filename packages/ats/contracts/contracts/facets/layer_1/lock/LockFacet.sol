@@ -12,9 +12,7 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 contract LockFacet is Lock, IStaticFunctionSelectors {
-    // ========================================================================
     // State changing functions (external - must come first)
-    // ========================================================================
 
     function lock(
         uint256 _amount,
@@ -72,9 +70,7 @@ contract LockFacet is Lock, IStaticFunctionSelectors {
         emit LockByPartitionReleased(EvmAccessors.getMsgSender(), _tokenHolder, _DEFAULT_PARTITION, _lockId);
     }
 
-    // ========================================================================
     // View functions (external view - after external)
-    // ========================================================================
 
     function getLockByPartition(
         bytes32 _partition,
@@ -155,9 +151,7 @@ contract LockFacet is Lock, IStaticFunctionSelectors {
         );
     }
 
-    // ========================================================================
     // IStaticFunctionSelectors implementation (external pure - must come last)
-    // ========================================================================
 
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _LOCK_RESOLVER_KEY;

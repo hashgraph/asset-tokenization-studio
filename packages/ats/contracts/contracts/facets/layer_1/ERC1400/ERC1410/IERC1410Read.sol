@@ -9,7 +9,6 @@ import { IERC1410Types } from "./IERC1410Types.sol";
  * for ERC1410 tokens including balance queries, partition information, and operator queries.
  */
 interface IERC1410Read is IERC1410Types {
-    // Balance and supply functions
     function balanceOf(address _tokenHolder) external view returns (uint256);
 
     function balanceOfAt(address _tokenHolder, uint256 _timestamp) external view returns (uint256);

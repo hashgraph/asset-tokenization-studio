@@ -37,10 +37,6 @@ import { KpiLinkedRateLib } from "./KpiLinkedRateLib.sol";
 library ScheduledTasksStorageWrapper {
     error WrongTimestamp(uint256 timeStamp);
 
-    // ============================================================================
-    // Internal State-Changing Functions
-    // ============================================================================
-
     function triggerScheduledTasks(
         ScheduledTasksDataStorage storage _scheduledTasks,
         bytes32 callbackType,
@@ -141,10 +137,6 @@ library ScheduledTasksStorageWrapper {
     function callTriggerPendingScheduledCrossOrderedTasks() internal returns (uint256) {
         return IScheduledCrossOrderedTasks(address(this)).triggerPendingScheduledCrossOrderedTasks();
     }
-
-    // ============================================================================
-    // Internal View Functions
-    // ============================================================================
 
     function requireValidTimestamp(uint256 _timestamp) internal view {
         if (_timestamp <= TimeTravelStorageWrapper.getBlockTimestamp()) revert WrongTimestamp(_timestamp);
@@ -270,9 +262,7 @@ library ScheduledTasksStorageWrapper {
         return ScheduledTasksLib.getScheduledTasks(scheduledCrossOrderedTaskStorage(), _pageIndex, _pageLength);
     }
 
-    // ============================================================================
     // Internal Pure Functions (Storage Accessors)
-    // ============================================================================
 
     function scheduledSnapshotStorage() internal pure returns (ScheduledTasksDataStorage storage scheduledSnapshots_) {
         bytes32 position = _SCHEDULED_SNAPSHOTS_STORAGE_POSITION;
@@ -313,10 +303,6 @@ library ScheduledTasksStorageWrapper {
             scheduledCrossOrderedTasks_.slot := position
         }
     }
-
-    // ============================================================================
-    // Private Callback Functions
-    // ============================================================================
 
     function onScheduledSnapshotTriggered(
         uint256 /*_pos*/,

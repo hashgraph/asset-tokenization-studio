@@ -13,9 +13,7 @@ import { WrongExpirationTimestamp } from "../../infrastructure/errors/CommonErro
 /// @notice Clearing read operations library - deployed once and called via DELEGATECALL
 /// @dev Contains read-only clearing operations with ABAF adjustments
 library ClearingReadOps {
-    // ==========================================================================
     // CLEARING READ OPERATIONS (ABAF-adjusted)
-    // ==========================================================================
 
     /// @notice Get cleared amount for token holder adjusted at timestamp
     /// @dev Uses ABAF factor to adjust the cleared amount for balance adjustments
@@ -123,9 +121,7 @@ library ClearingReadOps {
         clearingHoldCreationData_.amount *= factor;
     }
 
-    // ==========================================================================
     // TIMESTAMP VALIDATION
-    // ==========================================================================
 
     /// @notice Check clearing operation expiration timestamp
     function checkClearingExpirationTimestamp(

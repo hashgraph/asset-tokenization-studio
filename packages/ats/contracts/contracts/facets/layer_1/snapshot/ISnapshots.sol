@@ -27,11 +27,9 @@ struct HolderBalance {
 }
 
 interface ISnapshots {
-    // Events
     event SnapshotTaken(address indexed operator, uint256 indexed snapshotID);
     event SnapshotTriggered(uint256 snapshotId, bytes metadata);
 
-    // Errors
     error SnapshotIdNull();
     error SnapshotIdDoesNotExists(uint256 snapshotId);
     /**

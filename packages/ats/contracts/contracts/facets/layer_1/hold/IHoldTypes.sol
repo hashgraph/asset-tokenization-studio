@@ -7,15 +7,11 @@ import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 /// @title IHoldTypes
 /// @notice Single source of truth for all Hold domain types (structs, enums, events, errors)
 interface IHoldTypes {
-    // ============ ENUMS ============
-
     enum OperationType {
         Execute,
         Release,
         Reclaim
     }
-
-    // ============ STRUCTS ============
 
     struct HoldIdentifier {
         bytes32 partition;
@@ -43,8 +39,6 @@ interface IHoldTypes {
         bytes operatorData;
         ThirdPartyType thirdPartyType;
     }
-
-    // ============ EVENTS ============
 
     event HeldByPartition(
         address indexed operator,
@@ -113,8 +107,6 @@ interface IHoldTypes {
         Hold hold,
         bytes operatorData
     );
-
-    // ============ ERRORS ============
 
     error HoldExpirationNotReached();
     error WrongHoldId();

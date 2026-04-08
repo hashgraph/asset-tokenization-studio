@@ -36,7 +36,6 @@ function _getDomainHash(
         );
 }
 
-// function hashes
 function _getMessageHashTransfer(
     bytes32 _partition,
     address _from,
@@ -194,7 +193,6 @@ function _getMessageHashClearingRedeem(
         );
 }
 
-// checks
 function _checkNounceAndDeadline(
     uint256 _nounce,
     address _account,

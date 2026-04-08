@@ -349,8 +349,6 @@ library EquityStorageWrapper {
         return equityStorage().initialized;
     }
 
-    // --- Pure functions (storage accessors) ---
-
     function equityStorage() internal pure returns (EquityDataStorage storage equityData_) {
         bytes32 position = _EQUITY_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly

@@ -16,8 +16,6 @@ struct KpisDataStorage {
 library KpisStorageWrapper {
     using Checkpoints for Checkpoints.Checkpoint[];
 
-    // --- State-changing functions ---
-
     function addKpiData(uint256 date, uint256 value, address project) internal {
         assert(!isCheckpointDate(date, project));
         setCheckpointDate(date, project);
@@ -83,8 +81,6 @@ library KpisStorageWrapper {
         kpisDataStorage().checkpointsDatesByProject[project][date] = true;
     }
 
-    // --- View functions ---
-
     function requireValidDate(uint256 date, address project) internal view {
         uint256 minDate = getMinDateAdjusted();
         if (date <= minDate || date > TimeTravelStorageWrapper.getBlockTimestamp()) {
@@ -127,8 +123,6 @@ library KpisStorageWrapper {
     function isCheckpointDate(uint256 date, address project) internal view returns (bool) {
         return kpisDataStorage().checkpointsDatesByProject[project][date];
     }
-
-    // --- Pure functions ---
 
     function kpisDataStorage() internal pure returns (KpisDataStorage storage kpisDataStorage_) {
         bytes32 position = _KPIS_STORAGE_POSITION;
