@@ -7,7 +7,7 @@ import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
-import { IERC3643Management } from "../../facets/layer_1/ERC3643/IERC3643Management.sol";
+import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
 import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
@@ -245,7 +245,7 @@ library HoldStorageWrapper {
             if (_holdIdentifier.tokenHolder != _to && _holdIdentifier.partition == _DEFAULT_PARTITION) {
                 (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
                     abi.encodeWithSelector(ICompliance.transferred.selector, _holdIdentifier.tokenHolder, _to, _amount),
-                    IERC3643Management.ComplianceCallFailed.selector
+                    IERC3643Types.ComplianceCallFailed.selector
                 );
             }
             emit IERC1410Types.TransferByPartition(
@@ -264,7 +264,7 @@ library HoldStorageWrapper {
         if (_holdIdentifier.tokenHolder != _to && _holdIdentifier.partition == _DEFAULT_PARTITION) {
             (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
                 abi.encodeWithSelector(ICompliance.transferred.selector, _holdIdentifier.tokenHolder, _to, _amount),
-                IERC3643Management.ComplianceCallFailed.selector
+                IERC3643Types.ComplianceCallFailed.selector
             );
         }
         emit IERC1410Types.TransferByPartition(

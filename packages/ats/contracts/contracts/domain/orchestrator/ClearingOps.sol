@@ -12,7 +12,7 @@ import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol
 import { IClearingActions } from "../../facets/layer_1/clearing/IClearingActions.sol";
 import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
-import { IERC3643Management } from "../../facets/layer_1/ERC3643/IERC3643Management.sol";
+import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
 import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
 import { ThirdPartyType } from "../asset/types/ThirdPartyType.sol";
 import { HoldOps } from "./HoldOps.sol";
@@ -454,7 +454,7 @@ library ClearingOps {
                         destination,
                         transferData.amount
                     ),
-                    IERC3643Management.ComplianceCallFailed.selector
+                    IERC3643Types.ComplianceCallFailed.selector
                 );
             }
         }

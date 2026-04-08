@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-07T12:51:12.426Z
+ * Generated: 2026-04-08T09:47:17.937Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -2159,52 +2159,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "setName", signature: "function setName(string _name)", selector: "0xc47f0027" },
       { name: "setOnchainID", signature: "function setOnchainID(address _onchainID)", selector: "0x3d1ddc5b" },
       { name: "setSymbol", signature: "function setSymbol(string _symbol)", selector: "0xb84c8246" },
-    ],
-    events: [
-      {
-        name: "AgentAdded",
-        signature: "AgentAdded(address)",
-        topic0: "0xf68e73cec97f2d70aa641fb26e87a4383686e2efacb648f2165aeb02ac562ec5",
-      },
-      {
-        name: "AgentRemoved",
-        signature: "AgentRemoved(address)",
-        topic0: "0xed9c8ad8d5a0a66898ea49d2956929c93ae2e8bd50281b2ed897c5d1a6737e0b",
-      },
-      {
-        name: "IdentityRegistryAdded",
-        signature: "IdentityRegistryAdded(address)",
-        topic0: "0xd2be862d755bca7e0d39772b2cab3a5578da9c285f69199f4c063c2294a7f36c",
-      },
-      {
-        name: "is",
-        signature: "is(string,string,uint8,string,address)",
-        topic0: "0x854cacca0af9cc4c26ced55e5812e85d9e301a50ef5829c787566862b7129af6",
-      },
-      {
-        name: "RecoverySuccess",
-        signature: "RecoverySuccess(address,address,address)",
-        topic0: "0xf0c9129a94f30f1caaceb63e44b9811d0a3edf1d6c23757f346093af5553fed0",
-      },
-      {
-        name: "UpdatedTokenInformation",
-        signature: "UpdatedTokenInformation(string,string,uint8,string,address)",
-        topic0: "0x6a1105ac8148a3c319adbc369f9072573e8a11d3a3d195e067e7c40767ec54d1",
-      },
-    ],
-    errors: [
-      { name: "AddressNotVerified", signature: "AddressNotVerified()", selector: "0x209d2853" },
-      { name: "CannotRecoverWallet", signature: "CannotRecoverWallet()", selector: "0x505389ae" },
-      { name: "ComplianceCallFailed", signature: "ComplianceCallFailed()", selector: "0x67fba102" },
-      { name: "ComplianceNotAllowed", signature: "ComplianceNotAllowed()", selector: "0x66eb1b54" },
-      { name: "IdentityRegistryCallFailed", signature: "IdentityRegistryCallFailed()", selector: "0xad87849e" },
-      {
-        name: "InputAmountsArrayLengthMismatch",
-        signature: "InputAmountsArrayLengthMismatch()",
-        selector: "0x64f13710",
-      },
-      { name: "InputBoolArrayLengthMismatch", signature: "InputBoolArrayLengthMismatch()", selector: "0x07ac0eb9" },
-      { name: "WalletRecovered", signature: "WalletRecovered()", selector: "0xf9f9bcf9" },
     ],
     factory: (signer) => new ERC3643ManagementFacet__factory(signer),
     timeTravelFactory: (signer) => new ERC3643ManagementFacetTimeTravel__factory(signer),
@@ -4508,25 +4462,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
   ERC3643StorageWrapper: {
     name: "ERC3643StorageWrapper",
     methods: [],
-    events: [
-      {
-        name: "ComplianceAdded",
-        signature: "ComplianceAdded(address)",
-        topic0: "0x7f3a888862559648ec01d97deb7b5012bff86dc91e654a1de397170db40e35b6",
-      },
-      {
-        name: "is",
-        signature: "is(address)",
-        topic0: "0x1a8030f045b4b86aca291b7682629fa4281d012c81c6751df3fad982d767b3e0",
-      },
-    ],
-    errors: [
-      {
-        name: "InsufficientFrozenBalance",
-        signature: "InsufficientFrozenBalance(address,uint256,uint256,bytes32)",
-        selector: "0xefafde54",
-      },
-    ],
   },
 
   ExternalListManagementStorageWrapper: {

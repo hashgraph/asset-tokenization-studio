@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _ERC3643_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { _AGENT_ROLE } from "../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
-import { IERC3643Management } from "../../facets/layer_1/ERC3643/IERC3643Management.sol";
+import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
 import { IAccessControl } from "../../facets/layer_1/accessControl/IAccessControl.sol";
 import { IIdentityRegistry } from "../../facets/layer_1/ERC3643/IIdentityRegistry.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
@@ -30,26 +30,21 @@ library ERC3643StorageWrapper {
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    /**
-     *  @notice This event is emitted when the Compliance has been set for the token
-     */
-    event ComplianceAdded(address indexed compliance);
-
-    /*
-     *   @notice Thrown when unfreezing more than what is frozen
-     */
-    error InsufficientFrozenBalance(
-        address user,
-        uint256 requestedUnfreeze,
-        uint256 availableFrozen,
-        bytes32 partition
-    );
+    struct ERC3643Storage {
+        address onchainID;
+        address identityRegistry;
+        address compliance;
+        mapping(address => uint256) frozenTokens;
+        mapping(address => mapping(bytes32 => uint256)) frozenTokensByPartition;
+        mapping(address => bool) addressRecovered;
+        bool initialized;
+    }
 
     // --- Initialization ---
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC3643(address _compliance, address _identityRegistry) internal {
-        IERC3643Management.ERC3643Storage storage st = erc3643Storage();
+        ERC3643Storage storage st = erc3643Storage();
         st.initialized = true;
         setCompliance(_compliance);
         setIdentityRegistry(_identityRegistry);
@@ -83,18 +78,18 @@ library ERC3643StorageWrapper {
 
     function setCompliance(address _compliance) internal {
         erc3643Storage().compliance = _compliance;
-        emit ComplianceAdded(_compliance);
+        emit IERC3643Types.ComplianceAdded(_compliance);
     }
 
     function setIdentityRegistry(address _identityRegistry) internal {
         erc3643Storage().identityRegistry = _identityRegistry;
-        emit IERC3643Management.IdentityRegistryAdded(_identityRegistry);
+        emit IERC3643Types.IdentityRegistryAdded(_identityRegistry);
     }
 
     function setName(string calldata _name) internal {
         ERC20Storage storage erc20Storage_ = ERC20StorageWrapper.erc20Storage();
         erc20Storage_.name = _name;
-        emit IERC3643Management.UpdatedTokenInformation(
+        emit IERC3643Types.UpdatedTokenInformation(
             erc20Storage_.name,
             erc20Storage_.symbol,
             erc20Storage_.decimals,
@@ -106,7 +101,7 @@ library ERC3643StorageWrapper {
     function setSymbol(string calldata _symbol) internal {
         ERC20Storage storage erc20Storage_ = ERC20StorageWrapper.erc20Storage();
         erc20Storage_.symbol = _symbol;
-        emit IERC3643Management.UpdatedTokenInformation(
+        emit IERC3643Types.UpdatedTokenInformation(
             erc20Storage_.name,
             erc20Storage_.symbol,
             erc20Storage_.decimals,
@@ -118,7 +113,7 @@ library ERC3643StorageWrapper {
     function setOnchainID(address _onchainID) internal {
         ERC20Storage storage erc20Storage_ = ERC20StorageWrapper.erc20Storage();
         erc3643Storage().onchainID = _onchainID;
-        emit IERC3643Management.UpdatedTokenInformation(
+        emit IERC3643Types.UpdatedTokenInformation(
             erc20Storage_.name,
             erc20Storage_.symbol,
             erc20Storage_.decimals,
@@ -142,7 +137,7 @@ library ERC3643StorageWrapper {
         SnapshotsStorageWrapper.updateAccountSnapshot(_account, _partition);
         SnapshotsStorageWrapper.updateAccountFrozenBalancesSnapshot(_account, _partition);
 
-        IERC3643Management.ERC3643Storage storage st = erc3643Storage();
+        ERC3643Storage storage st = erc3643Storage();
         st.frozenTokens[_account] += _amount;
         st.frozenTokensByPartition[_account][_partition] += _amount;
 
@@ -155,7 +150,7 @@ library ERC3643StorageWrapper {
         SnapshotsStorageWrapper.updateAccountSnapshot(_account, _partition);
         SnapshotsStorageWrapper.updateAccountFrozenBalancesSnapshot(_account, _partition);
 
-        IERC3643Management.ERC3643Storage storage st = erc3643Storage();
+        ERC3643Storage storage st = erc3643Storage();
         st.frozenTokens[_account] -= _amount;
         st.frozenTokensByPartition[_account][_partition] -= _amount;
 
@@ -228,18 +223,18 @@ library ERC3643StorageWrapper {
         erc3643Storage().addressRecovered[_lostWallet] = true;
         erc3643Storage().addressRecovered[_newWallet] = false;
 
-        emit IERC3643Management.RecoverySuccess(_lostWallet, _newWallet, _investorOnchainID);
+        emit IERC3643Types.RecoverySuccess(_lostWallet, _newWallet, _investorOnchainID);
         return true;
     }
 
     // --- Internal view functions ---
 
     function requireUnrecoveredAddress(address _account) internal view {
-        if (isRecovered(_account)) revert IERC3643Management.WalletRecovered();
+        if (isRecovered(_account)) revert IERC3643Types.WalletRecovered();
     }
 
     function requireEmptyWallet(address _tokenHolder) internal view {
-        if (!canRecover(_tokenHolder)) revert IERC3643Management.CannotRecoverWallet();
+        if (!canRecover(_tokenHolder)) revert IERC3643Types.CannotRecoverWallet();
     }
 
     function getFrozenAmountFor(address _userAddress) internal view returns (uint256) {
@@ -345,7 +340,7 @@ library ERC3643StorageWrapper {
         }
     }
 
-    function erc3643Storage() internal pure returns (IERC3643Management.ERC3643Storage storage erc3643Storage_) {
+    function erc3643Storage() internal pure returns (ERC3643Storage storage erc3643Storage_) {
         bytes32 position = _ERC3643_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -355,13 +350,13 @@ library ERC3643StorageWrapper {
 
     function requireValidInputAmountsArrayLength(address[] memory _addresses, uint256[] memory _amounts) internal pure {
         if (_addresses.length != _amounts.length) {
-            revert IERC3643Management.InputAmountsArrayLengthMismatch();
+            revert IERC3643Types.InputAmountsArrayLengthMismatch();
         }
     }
 
     function requireValidInputBoolArrayLength(address[] memory _addresses, bool[] memory _status) internal pure {
         if (_addresses.length != _status.length) {
-            revert IERC3643Management.InputBoolArrayLengthMismatch();
+            revert IERC3643Types.InputBoolArrayLengthMismatch();
         }
     }
 
@@ -375,7 +370,7 @@ library ERC3643StorageWrapper {
     ) private view {
         uint256 frozenAmount = getFrozenAmountForByPartitionAdjustedAt(_partition, _userAddress, _timestamp);
         if (frozenAmount < _amount) {
-            revert InsufficientFrozenBalance(_userAddress, _amount, frozenAmount, _partition);
+            revert IERC3643Types.InsufficientFrozenBalance(_userAddress, _amount, frozenAmount, _partition);
         }
     }
 }

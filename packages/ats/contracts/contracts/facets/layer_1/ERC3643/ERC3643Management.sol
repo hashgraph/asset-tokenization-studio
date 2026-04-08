@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 // solhint-disable max-line-length
 
 import { _AGENT_ROLE, _TREX_OWNER_ROLE } from "../../../constants/roles.sol";
+import { IERC3643Types } from "./IERC3643Types.sol";
 import { IERC3643Management } from "./IERC3643Management.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
@@ -42,14 +43,14 @@ abstract contract ERC3643Management is IERC3643Management, Modifiers {
         address _agent
     ) external onlyUnpaused onlyRole(AccessControlStorageWrapper.getRoleAdmin(_AGENT_ROLE)) {
         ERC3643StorageWrapper.addAgent(_agent);
-        emit AgentAdded(_agent);
+        emit IERC3643Types.AgentAdded(_agent);
     }
 
     function removeAgent(
         address _agent
     ) external onlyUnpaused onlyRole(AccessControlStorageWrapper.getRoleAdmin(_AGENT_ROLE)) {
         ERC3643StorageWrapper.removeAgent(_agent);
-        emit AgentRemoved(_agent);
+        emit IERC3643Types.AgentRemoved(_agent);
     }
 
     function recoveryAddress(

@@ -9,7 +9,7 @@ import { IKyc } from "../../facets/layer_1/kyc/IKyc.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { Eip1066 } from "../../constants/eip1066.sol";
 import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
-import { IERC3643Management } from "../../facets/layer_1/ERC3643/IERC3643Management.sol";
+import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { IIdentityRegistry } from "../../facets/layer_1/ERC3643/IIdentityRegistry.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
@@ -91,10 +91,10 @@ library ERC1594StorageWrapper {
 
     function requireNotRecoveredAddresses(address from, address to) internal view {
         if (from != address(0) && ERC3643StorageWrapper.isRecovered(from)) {
-            revert IERC3643Management.WalletRecovered();
+            revert IERC3643Types.WalletRecovered();
         }
         if (to != address(0) && ERC3643StorageWrapper.isRecovered(to)) {
-            revert IERC3643Management.WalletRecovered();
+            revert IERC3643Types.WalletRecovered();
         }
     }
 
@@ -282,7 +282,7 @@ library ERC1594StorageWrapper {
                 return (
                     false,
                     Eip1066.REVOKED_OR_BANNED,
-                    IERC3643Management.WalletRecovered.selector,
+                    IERC3643Types.WalletRecovered.selector,
                     abi.encode(EvmAccessors.getMsgSender())
                 );
             }
@@ -295,26 +295,21 @@ library ERC1594StorageWrapper {
                         address(0),
                         0
                     ),
-                    IERC3643Management.ComplianceCallFailed.selector
+                    IERC3643Types.ComplianceCallFailed.selector
                 );
 
             if (complianceResultSender.length > 0 && !abi.decode(complianceResultSender, (bool))) {
                 return (
                     false,
                     Eip1066.DISALLOWED_OR_STOP,
-                    IERC3643Management.ComplianceNotAllowed.selector,
+                    IERC3643Types.ComplianceNotAllowed.selector,
                     abi.encode(from, to, value)
                 );
             }
         }
         if (from != address(0)) {
             if (ERC3643StorageWrapper.isRecovered(from)) {
-                return (
-                    false,
-                    Eip1066.REVOKED_OR_BANNED,
-                    IERC3643Management.WalletRecovered.selector,
-                    abi.encode(from)
-                );
+                return (false, Eip1066.REVOKED_OR_BANNED, IERC3643Types.WalletRecovered.selector, abi.encode(from));
             }
 
             if (!ControlListStorageWrapper.isAbleToAccess(from)) {
@@ -328,7 +323,7 @@ library ERC1594StorageWrapper {
         }
         if (to != address(0)) {
             if (ERC3643StorageWrapper.isRecovered(to)) {
-                return (false, Eip1066.REVOKED_OR_BANNED, IERC3643Management.WalletRecovered.selector, abi.encode(to));
+                return (false, Eip1066.REVOKED_OR_BANNED, IERC3643Types.WalletRecovered.selector, abi.encode(to));
             }
 
             if (!ControlListStorageWrapper.isAbleToAccess(to)) {
@@ -344,14 +339,14 @@ library ERC1594StorageWrapper {
         // Compliance module check
         bytes memory complianceResult = (ERC3643StorageWrapper.erc3643Storage().compliance).functionStaticCall(
             abi.encodeWithSelector(ICompliance.canTransfer.selector, from, to, value),
-            IERC3643Management.ComplianceCallFailed.selector
+            IERC3643Types.ComplianceCallFailed.selector
         );
 
         if (complianceResult.length > 0 && !abi.decode(complianceResult, (bool))) {
             return (
                 false,
                 Eip1066.DISALLOWED_OR_STOP,
-                IERC3643Management.ComplianceNotAllowed.selector,
+                IERC3643Types.ComplianceNotAllowed.selector,
                 abi.encode(from, to, value)
             );
         }
@@ -370,16 +365,11 @@ library ERC1594StorageWrapper {
 
             bytes memory isVerifiedFrom = (ERC3643StorageWrapper.erc3643Storage().identityRegistry).functionStaticCall(
                 abi.encodeWithSelector(IIdentityRegistry.isVerified.selector, from),
-                IERC3643Management.IdentityRegistryCallFailed.selector
+                IERC3643Types.IdentityRegistryCallFailed.selector
             );
 
             if (isVerifiedFrom.length > 0 && !abi.decode(isVerifiedFrom, (bool))) {
-                return (
-                    false,
-                    Eip1066.DISALLOWED_OR_STOP,
-                    IERC3643Management.AddressNotVerified.selector,
-                    abi.encode(from)
-                );
+                return (false, Eip1066.DISALLOWED_OR_STOP, IERC3643Types.AddressNotVerified.selector, abi.encode(from));
             }
         }
 
@@ -390,16 +380,11 @@ library ERC1594StorageWrapper {
 
             bytes memory isVerifiedTo = (ERC3643StorageWrapper.erc3643Storage().identityRegistry).functionStaticCall(
                 abi.encodeWithSelector(IIdentityRegistry.isVerified.selector, to),
-                IERC3643Management.IdentityRegistryCallFailed.selector
+                IERC3643Types.IdentityRegistryCallFailed.selector
             );
 
             if (isVerifiedTo.length > 0 && !abi.decode(isVerifiedTo, (bool))) {
-                return (
-                    false,
-                    Eip1066.DISALLOWED_OR_STOP,
-                    IERC3643Management.AddressNotVerified.selector,
-                    abi.encode(to)
-                );
+                return (false, Eip1066.DISALLOWED_OR_STOP, IERC3643Types.AddressNotVerified.selector, abi.encode(to));
             }
         }
 

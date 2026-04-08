@@ -10,7 +10,7 @@ import {
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
-import { IERC3643Management } from "../../facets/layer_1/ERC3643/IERC3643Management.sol";
+import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
 import { IProtectedPartitions } from "../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 import { _checkNounceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
@@ -243,7 +243,7 @@ library ERC1410StorageWrapper {
                     basicTransferInfo.to,
                     basicTransferInfo.value
                 ),
-                IERC3643Management.ComplianceCallFailed.selector
+                IERC3643Types.ComplianceCallFailed.selector
             );
         }
 
@@ -286,7 +286,7 @@ library ERC1410StorageWrapper {
         if (issueData.partition == _DEFAULT_PARTITION) {
             ERC3643StorageWrapper.erc3643Storage().compliance.functionCall(
                 abi.encodeWithSelector(ICompliance.created.selector, issueData.tokenHolder, issueData.value),
-                IERC3643Management.ComplianceCallFailed.selector
+                IERC3643Types.ComplianceCallFailed.selector
             );
         }
 
@@ -332,7 +332,7 @@ library ERC1410StorageWrapper {
         if (partition == _DEFAULT_PARTITION) {
             ERC3643StorageWrapper.erc3643Storage().compliance.functionCall(
                 abi.encodeWithSelector(ICompliance.destroyed.selector, from, value),
-                IERC3643Management.ComplianceCallFailed.selector
+                IERC3643Types.ComplianceCallFailed.selector
             );
         }
 

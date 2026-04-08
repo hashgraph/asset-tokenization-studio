@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-interface IERC3643Operations {
+import { IERC3643Types } from "./IERC3643Types.sol";
+
+interface IERC3643Operations is IERC3643Types {
     /**
      * @dev Burns `_amount` tokens from the address `_userAddress`.
      *
