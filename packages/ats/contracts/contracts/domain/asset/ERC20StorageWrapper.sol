@@ -68,8 +68,8 @@ library ERC20StorageWrapper {
         erc20Storage().totalSupply *= factor;
     }
 
-    function adjustDecimals(uint8 decimals) internal {
-        erc20Storage().decimals += decimals;
+    function adjustDecimals(uint8 adjustedDecimals) internal {
+        erc20Storage().decimals += adjustedDecimals;
     }
 
     function adjustTotalBalanceFor(uint256 abaf, address account) internal {

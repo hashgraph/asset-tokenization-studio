@@ -123,7 +123,7 @@ library ERC3643StorageWrapper {
     }
 
     function unfreezeTokens(address _account, uint256 _amount, uint256 _timestamp) internal {
-        checkUnfreezeAmount(_DEFAULT_PARTITION, _account, _amount, _timestamp);
+        _checkUnfreezeAmount(_DEFAULT_PARTITION, _account, _amount, _timestamp);
         unfreezeTokensByPartition(_DEFAULT_PARTITION, _account, _amount);
     }
 
@@ -324,7 +324,9 @@ library ERC3643StorageWrapper {
             0;
     }
 
-    function _rolesStorage() internal pure returns (RoleDataStorage storage roles_) {
+    // --- Internal pure functions (storage accessors) ---
+
+    function rolesStorage() internal pure returns (RoleDataStorage storage roles_) {
         bytes32 position = _ACCESS_CONTROL_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -352,7 +354,9 @@ library ERC3643StorageWrapper {
         }
     }
 
-    function checkUnfreezeAmount(
+    // --- Private view functions ---
+
+    function _checkUnfreezeAmount(
         bytes32 _partition,
         address _userAddress,
         uint256 _amount,

@@ -19,7 +19,7 @@ abstract contract Security is ISecurity {
 
     function getSecurityRegulationData()
         external
-        view
+        pure
         override
         returns (SecurityRegulationData memory securityRegulationData_)
     {

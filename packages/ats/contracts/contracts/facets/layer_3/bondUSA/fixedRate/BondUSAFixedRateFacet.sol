@@ -14,7 +14,7 @@ contract BondUSAFixedRateFacet is BondUSAFacetBase {
 
     function _prepareCoupon(
         IBondTypes.Coupon calldata _newCoupon
-    ) internal override returns (IBondTypes.Coupon memory coupon_) {
+    ) internal view override returns (IBondTypes.Coupon memory coupon_) {
         if (
             _newCoupon.rateStatus != IBondTypes.RateCalculationStatus.PENDING ||
             _newCoupon.rate != 0 ||
