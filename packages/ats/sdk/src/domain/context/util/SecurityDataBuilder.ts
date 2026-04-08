@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BondDetails } from "../bond/BondDetails";
+import { LoanDetails } from "../loan/LoanDetails";
+import { LoanDetailsData } from "../factory/LoanDetailsData";
 import { BondFixedRateDetails } from "../bond/BondFixedRateDetails";
 import { BondKpiLinkedRateDetails } from "../bond/BondKpiLinkedRateDetails";
 import { ImpactData } from "../bond/ImpactData";
@@ -89,6 +91,39 @@ export class SecurityDataBuilder {
       nominalValue: equityInfo.nominalValue.toString(),
       nominalValueDecimals: equityInfo.nominalValueDecimals,
     };
+  }
+
+  static buildLoanDetails(loanInfo: LoanDetails): LoanDetailsData {
+    return new LoanDetailsData(
+      loanInfo.currency,
+      loanInfo.startingDate.toString(),
+      loanInfo.maturityDate.toString(),
+      loanInfo.loanStructureType,
+      loanInfo.repaymentType,
+      loanInfo.interestType,
+      loanInfo.signingDate.toString(),
+      loanInfo.originatorAccount,
+      loanInfo.servicerAccount,
+      loanInfo.baseReferenceRate,
+      loanInfo.floorRate.toString(),
+      loanInfo.capRate.toString(),
+      loanInfo.rateMargin.toString(),
+      loanInfo.dayCount,
+      loanInfo.paymentFrequency,
+      loanInfo.firstAccrualDate.toString(),
+      loanInfo.prepaymentPenalty.toString(),
+      loanInfo.commitmentFee.toString(),
+      loanInfo.utilizationFee.toString(),
+      loanInfo.utilizationFeeType,
+      loanInfo.servicingFee.toString(),
+      loanInfo.internalRiskGrade,
+      loanInfo.defaultProbability.toString(),
+      loanInfo.lossGivenDefault.toString(),
+      loanInfo.totalCollateralValue.toString(),
+      loanInfo.loanToValue.toString(),
+      loanInfo.performanceStatus,
+      loanInfo.daysPastDue.toString(),
+    );
   }
 
   static buildBondDetails(bondInfo: BondDetails): BondDetailsData {

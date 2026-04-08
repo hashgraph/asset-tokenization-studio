@@ -13,6 +13,7 @@ import { BondDetails } from "@domain/context/bond/BondDetails";
 import { BondFixedRateDetails } from "@domain/context/bond/BondFixedRateDetails";
 import { BondKpiLinkedRateDetails } from "@domain/context/bond/BondKpiLinkedRateDetails";
 import { EquityDetails } from "@domain/context/equity/EquityDetails";
+import { LoanDetails } from "@domain/context/loan/LoanDetails";
 import HWCSettings from "@core/settings/walletConnect/HWCSettings";
 import { ContractId } from "@hiero-ledger/sdk";
 import DfnsSettings from "@core/settings/custodialWalletSettings/DfnsSettings";
@@ -126,6 +127,25 @@ interface ITransactionAdapter {
     proceedRecipientsData?: string[],
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
+
+  createLoan(
+    security: Security,
+    loanDetails: LoanDetails,
+    nominalValue: string,
+    nominalValueDecimals: number,
+    factory: EvmAddress,
+    resolver: EvmAddress,
+    configId: string,
+    configVersion: number,
+    compliance: EvmAddress,
+    identityRegistryAddress: EvmAddress,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
+    diamondOwnerAccount?: EvmAddress,
+  ): Promise<TransactionResponse>;
+
+  setLoanDetails(security: EvmAddress, loanDetails: LoanDetails): Promise<TransactionResponse>;
 
   addKpiData(
     security: EvmAddress,
@@ -1037,6 +1057,23 @@ export default abstract class TransactionAdapter
     proceedRecipientsData?: string[],
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
+  abstract createLoan(
+    security: Security,
+    loanDetails: LoanDetails,
+    nominalValue: string,
+    nominalValueDecimals: number,
+    factory: EvmAddress,
+    resolver: EvmAddress,
+    configId: string,
+    configVersion: number,
+    compliance: EvmAddress,
+    identityRegistryAddress: EvmAddress,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
+    diamondOwnerAccount?: EvmAddress,
+  ): Promise<TransactionResponse>;
+  abstract setLoanDetails(security: EvmAddress, loanDetails: LoanDetails): Promise<TransactionResponse>;
   abstract grantRole(
     security: EvmAddress,
     targetId: EvmAddress,

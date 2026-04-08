@@ -14,6 +14,7 @@ import EvmAddress from "@domain/context/contract/EvmAddress";
 import { MirrorNodeAdapter } from "../mirror/MirrorNodeAdapter";
 import { Security } from "@domain/context/security/Security";
 import { BondDetails } from "@domain/context/bond/BondDetails";
+import { LoanDetails } from "@domain/context/loan/LoanDetails";
 import { Dividend } from "@domain/context/dividend/Dividend";
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import { HederaId } from "@domain/context/shared/HederaId";
@@ -66,6 +67,7 @@ import {
   ScheduledCouponListingFacet__factory,
   NominalValue__factory,
   VotingFacet__factory,
+  Loan__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { ScheduledSnapshot } from "@domain/context/security/ScheduledSnapshot";
 import { VotingRights } from "@domain/context/equity/VotingRights";
@@ -343,6 +345,43 @@ export class RPCQueryAdapter {
       Number(res.nominalValueDecimals),
       Number(res.startingDate),
       Number(res.maturityDate),
+    );
+  }
+
+  async getLoanDetails(address: EvmAddress): Promise<LoanDetails> {
+    LogService.logTrace(`Requesting loan details for loan: ${address.toString()}`);
+
+    const res = await this.connect(Loan__factory, address.toString()).getLoanDetails();
+
+    return new LoanDetails(
+      res.loanBasicData.currency,
+      Number(res.loanBasicData.startingDate),
+      Number(res.loanBasicData.maturityDate),
+      Number(res.loanBasicData.loanStructureType),
+      Number(res.loanBasicData.repaymentType),
+      Number(res.loanBasicData.interestType),
+      Number(res.loanBasicData.signingDate),
+      res.loanBasicData.originatorAccount,
+      res.loanBasicData.servicerAccount,
+      Number(res.loanInterestData.baseReferenceRate),
+      Number(res.loanInterestData.floorRate),
+      Number(res.loanInterestData.capRate),
+      Number(res.loanInterestData.rateMargin),
+      Number(res.loanInterestData.dayCount),
+      Number(res.loanInterestData.paymentFrequency),
+      Number(res.loanInterestData.firstAccrualDate),
+      Number(res.loanInterestData.prepaymentPenalty),
+      Number(res.loanInterestData.commitmentFee),
+      Number(res.loanInterestData.utilizationFee),
+      Number(res.loanInterestData.utilizationFeeType),
+      Number(res.loanInterestData.servicingFee),
+      res.riskData.internalRiskGrade,
+      Number(res.riskData.defaultProbability),
+      Number(res.riskData.lossGivenDefault),
+      Number(res.collateral.totalCollateralValue),
+      Number(res.collateral.loanToValue),
+      Number(res.loanPerformanceStatus.performanceStatus),
+      Number(res.loanPerformanceStatus.daysPastDue),
     );
   }
 
