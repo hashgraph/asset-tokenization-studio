@@ -243,8 +243,8 @@ describe("ERC3643 Tests", () => {
     it("GIVEN a paused token WHEN attempting to update name or symbol THEN transactions revert with TokenIsPaused error", async () => {
       await pauseFacet.connect(signer_B).pause();
 
-      await expect(erc3643Facet.setName(newName)).to.be.rejectedWith("TokenIsPaused");
-      await expect(erc3643Facet.setName(newSymbol)).to.be.rejectedWith("TokenIsPaused");
+      await expect(erc3643Facet.setName(newName)).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
+      await expect(erc3643Facet.setName(newSymbol)).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
     });
 
     it("GIVEN an initialized token WHEN retrieving the version THEN returns the right version", async () => {
@@ -262,7 +262,7 @@ describe("ERC3643 Tests", () => {
       it("GIVEN an already initialized token WHEN attempting to initialize again THEN transaction fails with AlreadyInitialized", async () => {
         await expect(
           erc3643Facet.initialize_ERC3643(complianceMock.target as string, identityRegistryMock.target as string),
-        ).to.be.rejectedWith("AlreadyInitialized");
+        ).to.be.revertedWithCustomError(kycFacet, "AlreadyInitialized");
       });
     });
 
@@ -291,9 +291,9 @@ describe("ERC3643 Tests", () => {
         );
       });
       it("GIVEN a max supply WHEN mint more than the max supply THEN transaction fails with MaxSupplyReached", async () => {
-        await expect(erc3643Facet.connect(signer_A).mint(signer_E.address, MAX_SUPPLY + 1)).to.be.rejectedWith(
-          "MaxSupplyReached",
-        );
+        await expect(
+          erc3643Facet.connect(signer_A).mint(signer_E.address, MAX_SUPPLY + 1),
+        ).to.be.revertedWithCustomError(capFacet, "MaxSupplyReached");
       });
       it("GIVEN blocked account USING WHITELIST WHEN mint THEN transaction fails with AccountIsBlocked", async () => {
         // Blacklisting accounts
@@ -338,7 +338,10 @@ describe("ERC3643 Tests", () => {
       it("GIVEN a paused token WHEN attempting to burn TokenIsPaused error", async () => {
         await pauseFacet.connect(signer_B).pause();
 
-        await expect(erc3643Facet.burn(signer_A.address, AMOUNT)).to.be.rejectedWith("TokenIsPaused");
+        await expect(erc3643Facet.burn(signer_A.address, AMOUNT)).to.be.revertedWithCustomError(
+          pauseFacet,
+          "TokenIsPaused",
+        );
       });
     });
 
@@ -371,14 +374,14 @@ describe("ERC3643 Tests", () => {
       it("GIVEN a paused token WHEN attempting to forcedTransfer TokenIsPaused error", async () => {
         await pauseFacet.connect(signer_B).pause();
 
-        await expect(erc3643Facet.forcedTransfer(signer_A.address, signer_B.address, AMOUNT - 1)).to.be.rejectedWith(
-          "TokenIsPaused",
-        );
+        await expect(
+          erc3643Facet.forcedTransfer(signer_A.address, signer_B.address, AMOUNT - 1),
+        ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
       });
       it("GIVEN an account without ATS_ROLES._CONTROLLER_ROLE WHEN forcedTransfer is called THEN transaction fails with AccountHasNoRole", async () => {
         await expect(
           erc3643Facet.connect(signer_B).forcedTransfer(signer_D.address, signer_E.address, AMOUNT),
-        ).to.be.rejectedWith("AccountHasNoRole");
+        ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRoles");
       });
     });
 
@@ -500,7 +503,10 @@ describe("ERC3643 Tests", () => {
       });
 
       it("GIVEN a invalid address WHEN attempting to setAddressFrozen THEN transactions revert with ZeroAddressNotAllowed error", async () => {
-        await expect(freezeFacet.setAddressFrozen(ADDRESS_ZERO, true)).to.be.rejectedWith("ZeroAddressNotAllowed");
+        await expect(freezeFacet.setAddressFrozen(ADDRESS_ZERO, true)).to.be.revertedWithCustomError(
+          freezeFacet,
+          "ZeroAddressNotAllowed",
+        );
       });
 
       it("GIVEN a valid address WHEN setAddressFrozen AND blacklist THEN address should be added (freeze) and removed (unfreeze) from control list", async () => {
@@ -554,7 +560,10 @@ describe("ERC3643 Tests", () => {
       });
 
       it("GIVEN a invalid address WHEN attempting to freezePartialTokens THEN transactions revert with ZeroAddressNotAllowed error", async () => {
-        await expect(freezeFacet.freezePartialTokens(ADDRESS_ZERO, 10)).to.be.rejectedWith("ZeroAddressNotAllowed");
+        await expect(freezeFacet.freezePartialTokens(ADDRESS_ZERO, 10)).to.be.revertedWithCustomError(
+          freezeFacet,
+          "ZeroAddressNotAllowed",
+        );
       });
 
       it("GIVEN a valid address WHEN attempting to freezePartialTokens THEN transactions succeed", async () => {
@@ -588,7 +597,10 @@ describe("ERC3643 Tests", () => {
       });
 
       it("GIVEN a invalid address WHEN attempting to unfreezePartialTokens THEN transactions revert with ZeroAddressNotAllowed error", async () => {
-        await expect(freezeFacet.unfreezePartialTokens(ADDRESS_ZERO, 10)).to.be.rejectedWith("ZeroAddressNotAllowed");
+        await expect(freezeFacet.unfreezePartialTokens(ADDRESS_ZERO, 10)).to.be.revertedWithCustomError(
+          freezeFacet,
+          "ZeroAddressNotAllowed",
+        );
       });
 
       it("GIVEN a valid address WHEN attempting to unfreezePartialTokens THEN transactions succeed", async () => {
@@ -1041,31 +1053,48 @@ describe("ERC3643 Tests", () => {
         expect(await complianceMock.destroyedHit()).to.be.equal(burnCounter);
       });
 
+      // The diamond reverts wrapped low-level errors via LowLevelCall.revertWithData,
+      // which builds `[ComplianceCallFailed selector][raw inner returndata]` by hand
+      // (no ABI encoding overhead). Standard chai-matchers .revertedWithCustomError
+      // can't decode this shape because ComplianceCallFailed is declared with no
+      // arguments, so we compare the raw revert payload directly.
+      async function expectComplianceCallFailedWith(
+        promise: Promise<unknown>,
+        innerErrorName: string,
+        innerArgs: { types: ReadonlyArray<string>; values: ReadonlyArray<unknown> },
+      ): Promise<void> {
+        let caught: { data?: string } | undefined;
+        try {
+          await promise;
+        } catch (err: unknown) {
+          caught = err as { data?: string };
+        }
+        expect(caught?.data, "expected the call to revert with hex data").to.be.a("string");
+
+        const outerSelector = erc3643Facet.interface.getError("ComplianceCallFailed")!.selector;
+        const innerSelector = complianceMock.interface.getError(innerErrorName)!.selector;
+        const innerEncoded = ethers.AbiCoder.defaultAbiCoder().encode(innerArgs.types as string[], innerArgs.values);
+        const expectedRevert = ethers.solidityPacked(
+          ["bytes4", "bytes4", "bytes"],
+          [outerSelector, innerSelector, innerEncoded],
+        );
+
+        expect(caught!.data).to.equal(expectedRevert);
+      }
+
       it("GIVEN a failed mint call THEN transaction reverts with custom error", async () => {
         const hash = ethers.keccak256(ethers.toUtf8Bytes("created"));
         await complianceMock.setFlagsByMethod([], [], [true], [hash]);
-        let caught;
-        try {
-          await erc1410Facet.issueByPartition({
+        await expectComplianceCallFailedWith(
+          erc1410Facet.issueByPartition({
             partition: DEFAULT_PARTITION,
             tokenHolder: signer_E.address,
             value: AMOUNT,
             data: "0x",
-          });
-        } catch (err: any) {
-          caught = err;
-        }
-        const returnedSelector = (caught.data as string).slice(0, 10);
-        const outerSelector = erc3643Facet.interface.getError("ComplianceCallFailed")!.selector;
-        expect(returnedSelector).to.equal(outerSelector);
-        const targetErrorSelector = complianceMock.interface.getError("MockErrorMint")!.selector;
-        const targetErrorArgs = ethers.AbiCoder.defaultAbiCoder().encode(
-          ["address", "uint256"],
-          [signer_E.address, AMOUNT],
+          }),
+          "MockErrorMint",
+          { types: ["address", "uint256"], values: [signer_E.address, AMOUNT] },
         );
-        const args = ethers.solidityPacked(["bytes4", "bytes"], [targetErrorSelector, targetErrorArgs]);
-        const returnedArgs = (caught.data as string).slice(10); // Skip custom error selector
-        expect(returnedArgs).to.equal(args.slice(2));
       });
 
       it("GIVEN a failed transfer call THEN transaction reverts with custom error", async () => {
@@ -1081,25 +1110,14 @@ describe("ERC3643 Tests", () => {
           to: signer_D.address,
           value: AMOUNT,
         };
-        let caught;
-        try {
-          await erc1410Facet
-            .connect(signer_E)
-            .transferByPartition(DEFAULT_PARTITION, basicTransferInfo, EMPTY_HEX_BYTES);
-        } catch (err: any) {
-          caught = err;
-        }
-        const returnedSelector = (caught.data as string).slice(0, 10);
-        const outerSelector = erc3643Facet.interface.getError("ComplianceCallFailed")!.selector;
-        expect(returnedSelector).to.equal(outerSelector);
-        const targetErrorSelector = complianceMock.interface.getError("MockErrorTransfer")!.selector;
-        const targetErrorArgs = ethers.AbiCoder.defaultAbiCoder().encode(
-          ["address", "address", "uint256"],
-          [signer_E.address, signer_D.address, AMOUNT],
+        await expectComplianceCallFailedWith(
+          erc1410Facet.connect(signer_E).transferByPartition(DEFAULT_PARTITION, basicTransferInfo, EMPTY_HEX_BYTES),
+          "MockErrorTransfer",
+          {
+            types: ["address", "address", "uint256"],
+            values: [signer_E.address, signer_D.address, AMOUNT],
+          },
         );
-        const args = ethers.solidityPacked(["bytes4", "bytes"], [targetErrorSelector, targetErrorArgs]);
-        const returnedArgs = (caught.data as string).slice(10); // Skip custom error selector
-        expect(returnedArgs).to.equal(args.slice(2));
       });
 
       it("GIVEN a failed burn call THEN transaction reverts with custom error", async () => {
@@ -1111,45 +1129,25 @@ describe("ERC3643 Tests", () => {
         });
         const hash = ethers.keccak256(ethers.toUtf8Bytes("destroyed"));
         await complianceMock.setFlagsByMethod([], [], [true], [hash]);
-        let caught;
-        try {
-          await erc1410Facet.connect(signer_E).redeemByPartition(DEFAULT_PARTITION, AMOUNT, EMPTY_HEX_BYTES);
-        } catch (err: any) {
-          caught = err;
-        }
-        const returnedSelector = (caught.data as string).slice(0, 10);
-        const outerSelector = erc3643Facet.interface.getError("ComplianceCallFailed")!.selector;
-        expect(returnedSelector).to.equal(outerSelector);
-        const targetErrorSelector = complianceMock.interface.getError("MockErrorBurn")!.selector;
-        const targetErrorArgs = ethers.AbiCoder.defaultAbiCoder().encode(
-          ["address", "uint256"],
-          [signer_E.address, AMOUNT],
+        await expectComplianceCallFailedWith(
+          erc1410Facet.connect(signer_E).redeemByPartition(DEFAULT_PARTITION, AMOUNT, EMPTY_HEX_BYTES),
+          "MockErrorBurn",
+          { types: ["address", "uint256"], values: [signer_E.address, AMOUNT] },
         );
-        const args = ethers.solidityPacked(["bytes4", "bytes"], [targetErrorSelector, targetErrorArgs]);
-        const returnedArgs = (caught.data as string).slice(10); // Skip custom error selector
-        expect(returnedArgs).to.equal(args.slice(2));
       });
 
       it("GIVEN a failed canTransfer call THEN transaction reverts with custom error", async () => {
         const hash = ethers.keccak256(ethers.toUtf8Bytes("canTransfer"));
         await complianceMock.setFlagsByMethod([], [], [true], [hash]);
-        let caught;
-        try {
-          await erc20Facet.connect(signer_E).approve(signer_D.address, AMOUNT);
-        } catch (err: any) {
-          caught = err;
-        }
-        const returnedSelector = (caught.data as string).slice(0, 10);
-        const outerSelector = erc3643Facet.interface.getError("ComplianceCallFailed")!.selector;
-        expect(returnedSelector).to.equal(outerSelector);
-        const targetErrorSelector = complianceMock.interface.getError("MockErrorCanTransfer")!.selector;
-        const targetErrorArgs = ethers.AbiCoder.defaultAbiCoder().encode(
-          ["address", "address", "uint256"],
-          [signer_E.address, signer_D.address, ZERO], // During approvals amount is not checked
+        await expectComplianceCallFailedWith(
+          erc20Facet.connect(signer_E).approve(signer_D.address, AMOUNT),
+          "MockErrorCanTransfer",
+          {
+            types: ["address", "address", "uint256"],
+            // During approvals the amount is not checked
+            values: [signer_E.address, signer_D.address, ZERO],
+          },
         );
-        const args = ethers.solidityPacked(["bytes4", "bytes"], [targetErrorSelector, targetErrorArgs]);
-        const returnedArgs = (caught.data as string).slice(10);
-        expect(returnedArgs).to.equal(args.slice(2));
       });
 
       //TODO: we should test when canTransfer returns false for the FROM, TO and SENDER separately
@@ -1324,8 +1322,9 @@ describe("ERC3643 Tests", () => {
           const amounts = [mintAmount, mintAmount];
 
           // signer_B does not have ATS_ROLES._ISSUER_ROLE
-          await expect(erc3643Facet.connect(signer_B).batchMint(toList, amounts)).to.be.rejectedWith(
-            "AccountHasNoRole",
+          await expect(erc3643Facet.connect(signer_B).batchMint(toList, amounts)).to.be.revertedWithCustomError(
+            accessControlFacet,
+            "AccountHasNoRoles",
           );
         });
 
@@ -1334,7 +1333,10 @@ describe("ERC3643 Tests", () => {
           const toList = [signer_D.address];
           const amounts = [mintAmount, mintAmount];
 
-          await expect(erc3643Facet.batchMint(toList, amounts)).to.be.rejectedWith("InputAmountsArrayLengthMismatch");
+          await expect(erc3643Facet.batchMint(toList, amounts)).to.be.revertedWithCustomError(
+            erc3643Facet,
+            "InputAmountsArrayLengthMismatch",
+          );
         });
 
         it("GIVEN a paused token WHEN batchMint THEN transaction fails with TokenIsPaused", async () => {
@@ -1395,7 +1397,8 @@ describe("ERC3643 Tests", () => {
           const toList = [signer_D.address];
           const amounts = [mintAmount, mintAmount];
 
-          await expect(erc3643Facet.batchTransfer(toList, amounts)).to.be.rejectedWith(
+          await expect(erc3643Facet.batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
+            erc3643Facet,
             "InputAmountsArrayLengthMismatch",
           );
         });
@@ -1500,7 +1503,7 @@ describe("ERC3643 Tests", () => {
           // signer_B does not have ATS_ROLES._CONTROLLER_ROLE
           await expect(
             erc3643Facet.connect(signer_B).batchForcedTransfer(fromList, toList, amounts),
-          ).to.be.rejectedWith("AccountHasNoRole");
+          ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRoles");
         });
 
         it("GIVEN an invalid input amounts array THEN transaction fails with InputAmountsArrayLengthMismatch", async () => {
@@ -1509,7 +1512,8 @@ describe("ERC3643 Tests", () => {
           const fromList = [signer_F.address, signer_D.address];
           const amounts = [mintAmount, mintAmount];
 
-          await expect(erc3643Facet.batchForcedTransfer(fromList, toList, amounts)).to.be.rejectedWith(
+          await expect(erc3643Facet.batchForcedTransfer(fromList, toList, amounts)).to.be.revertedWithCustomError(
+            erc3643Facet,
             "InputAmountsArrayLengthMismatch",
           );
         });
@@ -1520,7 +1524,8 @@ describe("ERC3643 Tests", () => {
           const toList = [signer_D.address, signer_E.address];
           const amounts = [mintAmount];
 
-          await expect(erc3643Facet.batchForcedTransfer(fromList, toList, amounts)).to.be.rejectedWith(
+          await expect(erc3643Facet.batchForcedTransfer(fromList, toList, amounts)).to.be.revertedWithCustomError(
+            erc3643Facet,
             "InputAmountsArrayLengthMismatch",
           );
         });
@@ -1573,7 +1578,8 @@ describe("ERC3643 Tests", () => {
           const userAddresses = [signer_D.address];
           const amounts = [burnAmount, burnAmount];
 
-          await expect(erc3643Facet.connect(signer_A).batchBurn(userAddresses, amounts)).to.be.rejectedWith(
+          await expect(erc3643Facet.connect(signer_A).batchBurn(userAddresses, amounts)).to.be.revertedWithCustomError(
+            erc3643Facet,
             "InputAmountsArrayLengthMismatch",
           );
         });
@@ -1677,7 +1683,8 @@ describe("ERC3643 Tests", () => {
           const toList = [signer_D.address];
           const status = [true, true];
 
-          await expect(freezeFacet.batchSetAddressFrozen(toList, status)).to.be.rejectedWith(
+          await expect(freezeFacet.batchSetAddressFrozen(toList, status)).to.be.revertedWithCustomError(
+            freezeFacet,
             "InputBoolArrayLengthMismatch",
           );
         });
@@ -1711,7 +1718,8 @@ describe("ERC3643 Tests", () => {
           const toList = [signer_D.address];
           const amounts = [mintAmount, mintAmount];
 
-          await expect(freezeFacet.batchFreezePartialTokens(toList, amounts)).to.be.rejectedWith(
+          await expect(freezeFacet.batchFreezePartialTokens(toList, amounts)).to.be.revertedWithCustomError(
+            freezeFacet,
             "InputAmountsArrayLengthMismatch",
           );
         });
@@ -1761,7 +1769,8 @@ describe("ERC3643 Tests", () => {
           const toList = [signer_D.address];
           const amounts = [mintAmount, mintAmount];
 
-          await expect(freezeFacet.batchUnfreezePartialTokens(toList, amounts)).to.be.rejectedWith(
+          await expect(freezeFacet.batchUnfreezePartialTokens(toList, amounts)).to.be.revertedWithCustomError(
+            freezeFacet,
             "InputAmountsArrayLengthMismatch",
           );
         });
@@ -1871,56 +1880,69 @@ describe("ERC3643 Tests", () => {
     describe("AccessControl", () => {
       it("GIVEN an account without TREX_OWNER role WHEN setName THEN transaction fails with AccountHasNoRole", async () => {
         // set name fails
-        await expect(erc3643Facet.connect(signer_C).setName(newName)).to.be.rejectedWith("AccountHasNoRole");
+        await expect(erc3643Facet.connect(signer_C).setName(newName)).to.be.revertedWithCustomError(
+          accessControlFacet,
+          "AccountHasNoRole",
+        );
       });
       it("GIVEN an account without TREX_OWNER role WHEN setSymbol THEN transaction fails with AccountHasNoRole", async () => {
         // set symbol fails
-        await expect(erc3643Facet.connect(signer_C).setSymbol(newSymbol)).to.be.rejectedWith("AccountHasNoRole");
+        await expect(erc3643Facet.connect(signer_C).setSymbol(newSymbol)).to.be.revertedWithCustomError(
+          accessControlFacet,
+          "AccountHasNoRole",
+        );
       });
       it("GIVEN an account without TREX_OWNER role WHEN setOnchainID THEN transaction fails with AccountHasNoRole", async () => {
         // set onchainID fails
-        await expect(erc3643Facet.connect(signer_C).setOnchainID(onchainId)).to.be.rejectedWith("AccountHasNoRole");
+        await expect(erc3643Facet.connect(signer_C).setOnchainID(onchainId)).to.be.revertedWithCustomError(
+          accessControlFacet,
+          "AccountHasNoRole",
+        );
       });
       it("GIVEN an account without TREX_OWNER role WHEN setIdentityRegistry THEN transaction fails with AccountHasNoRole", async () => {
         // set IdentityRegistry fails
         await expect(
           erc3643Facet.connect(signer_C).setIdentityRegistry(identityRegistryMock.target as string),
-        ).to.be.rejectedWith("AccountHasNoRole");
+        ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
       });
       it("GIVEN an account without TREX_OWNER role WHEN setCompliance THEN transaction fails with AccountHasNoRole", async () => {
-        await expect(erc3643Facet.connect(signer_C).setCompliance(complianceMock.target as string)).to.be.rejectedWith(
-          "AccountHasNoRole",
-        );
+        await expect(
+          erc3643Facet.connect(signer_C).setCompliance(complianceMock.target as string),
+        ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
       });
 
       it("GIVEN an account without FREEZE MANAGER role WHEN freezePartialTokens THEN transaction fails with AccountHasNoRole", async () => {
-        await expect(freezeFacet.connect(signer_C).freezePartialTokens(signer_A.address, 10)).to.be.rejectedWith(
-          "AccountHasNoRole",
-        );
+        await expect(
+          freezeFacet.connect(signer_C).freezePartialTokens(signer_A.address, 10),
+        ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRoles");
       });
 
       it("GIVEN an account without FREEZE MANAGER role WHEN unfreezePartialTokens THEN transaction fails with AccountHasNoRole", async () => {
-        await expect(freezeFacet.connect(signer_C).unfreezePartialTokens(signer_A.address, 10)).to.be.rejectedWith(
-          "AccountHasNoRole",
-        );
+        await expect(
+          freezeFacet.connect(signer_C).unfreezePartialTokens(signer_A.address, 10),
+        ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRoles");
       });
 
       it("GIVEN an account without FREEZE MANAGER role WHEN setAddressFrozen THEN transaction fails with AccountHasNoRole", async () => {
-        await expect(freezeFacet.connect(signer_C).setAddressFrozen(signer_A.address, true)).to.be.rejectedWith(
-          "AccountHasNoRole",
-        );
+        await expect(
+          freezeFacet.connect(signer_C).setAddressFrozen(signer_A.address, true),
+        ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRoles");
       });
 
       it("GIVEN an account without admin role WHEN addAgent or removeAgent THEN transaction fails with AccountHasNoRole", async () => {
-        await expect(erc3643Facet.connect(signer_C).addAgent(signer_A.address)).to.be.rejectedWith("AccountHasNoRole");
-        await expect(erc3643Facet.connect(signer_C).removeAgent(signer_A.address)).to.be.rejectedWith(
+        await expect(erc3643Facet.connect(signer_C).addAgent(signer_A.address)).to.be.revertedWithCustomError(
+          accessControlFacet,
+          "AccountHasNoRole",
+        );
+        await expect(erc3643Facet.connect(signer_C).removeAgent(signer_A.address)).to.be.revertedWithCustomError(
+          accessControlFacet,
           "AccountHasNoRole",
         );
       });
       it("GIVEN an account without AGENT_ROLE role WHEN recoveryAddress THEN transaction fails with AccountHasNoRole", async () => {
         await expect(
           erc3643Facet.connect(signer_C).recoveryAddress(signer_A.address, signer_B.address, signer_C.address),
-        ).to.be.rejectedWith("AccountHasNoRole");
+        ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
       });
     });
 
@@ -1972,18 +1994,27 @@ describe("ERC3643 Tests", () => {
       });
 
       it("GIVEN a paused token WHEN attempting to addAgent or removeAgent THEN transactions revert with TokenIsPaused error", async () => {
-        await expect(erc3643Facet.addAgent(signer_A.address)).to.be.rejectedWith("TokenIsPaused");
-        await expect(erc3643Facet.removeAgent(signer_A.address)).to.be.rejectedWith("TokenIsPaused");
+        await expect(erc3643Facet.addAgent(signer_A.address)).to.be.revertedWithCustomError(
+          pauseFacet,
+          "TokenIsPaused",
+        );
+        await expect(erc3643Facet.removeAgent(signer_A.address)).to.be.revertedWithCustomError(
+          pauseFacet,
+          "TokenIsPaused",
+        );
       });
 
       it("GIVEN a paused token WHEN attempting to update name or symbol THEN transactions revert with TokenIsPaused error", async () => {
-        await expect(erc3643Facet.setName(newName)).to.be.rejectedWith("TokenIsPaused");
-        await expect(erc3643Facet.setSymbol(newSymbol)).to.be.rejectedWith("TokenIsPaused");
-        await expect(erc3643Facet.setOnchainID(onchainId)).to.be.rejectedWith("TokenIsPaused");
-        await expect(erc3643Facet.setIdentityRegistry(identityRegistryMock.target as string)).to.be.rejectedWith(
+        await expect(erc3643Facet.setName(newName)).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
+        await expect(erc3643Facet.setSymbol(newSymbol)).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
+        await expect(erc3643Facet.setOnchainID(onchainId)).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
+        await expect(
+          erc3643Facet.setIdentityRegistry(identityRegistryMock.target as string),
+        ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
+        await expect(erc3643Facet.setCompliance(complianceMock.target as string)).to.be.revertedWithCustomError(
+          pauseFacet,
           "TokenIsPaused",
         );
-        await expect(erc3643Facet.setCompliance(complianceMock.target as string)).to.be.rejectedWith("TokenIsPaused");
       });
     });
     describe("Adjust balances", () => {
