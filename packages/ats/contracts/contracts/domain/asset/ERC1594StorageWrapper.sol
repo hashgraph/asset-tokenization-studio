@@ -13,7 +13,8 @@ import { IERC3643Management } from "../../facets/layer_1/ERC3643/IERC3643Managem
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { IIdentityRegistry } from "../../facets/layer_1/ERC3643/IIdentityRegistry.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
-import { IERC1410 } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
+import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
@@ -421,7 +422,7 @@ library ERC1594StorageWrapper {
                 return (
                     false,
                     Eip1066.INSUFFICIENT_FUNDS,
-                    IERC1410.InsufficientAllowance.selector,
+                    IERC20.InsufficientAllowance.selector,
                     abi.encode(EvmAccessors.getMsgSender(), from, currentAllowance, value, _DEFAULT_PARTITION)
                 );
             }
@@ -429,7 +430,12 @@ library ERC1594StorageWrapper {
 
         // Partition validation check
         if (!ERC1410StorageWrapper.validPartition(partition, from)) {
-            return (false, Eip1066.INSUFFICIENT_FUNDS, IERC1410.InvalidPartition.selector, abi.encode(from, partition));
+            return (
+                false,
+                Eip1066.INSUFFICIENT_FUNDS,
+                IERC1410Types.InvalidPartition.selector,
+                abi.encode(from, partition)
+            );
         }
 
         // Balance check - check partition-specific balance
@@ -442,7 +448,7 @@ library ERC1594StorageWrapper {
             return (
                 false,
                 Eip1066.INSUFFICIENT_FUNDS,
-                IERC1410.InsufficientBalance.selector,
+                IERC20.InsufficientBalance.selector,
                 abi.encode(from, currentPartitionBalance, value, partition)
             );
         }

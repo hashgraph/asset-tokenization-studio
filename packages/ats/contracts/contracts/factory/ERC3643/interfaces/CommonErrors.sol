@@ -30,3 +30,15 @@ error ZeroAddressNotAllowed();
 
 /// @notice Thrown when an EIP-712 / partition signature fails verification.
 error WrongSignature();
+
+/// @notice Thrown when an EIP-712 signed payload is presented after its deadline.
+error ExpiredDeadline(uint256 deadline);
+
+/// @notice Thrown when an EIP-712 signature payload has an invalid byte length.
+error WrongSignatureLength();
+
+/// @notice Thrown when an EIP-712 nonce does not match the expected next nonce for the account.
+error WrongNounce(uint256 nounce, address account);
+
+/// @notice Thrown when a contract or facet initializer is invoked after it has already been initialized.
+error AlreadyInitialized();

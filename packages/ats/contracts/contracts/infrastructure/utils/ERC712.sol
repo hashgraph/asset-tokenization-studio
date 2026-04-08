@@ -16,10 +16,7 @@ import {
 } from "../../constants/values.sol";
 import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
 import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
-
-error WrongSignatureLength();
-error WrongNounce(uint256 nounce, address account);
-error ExpiredDeadline(uint256 deadline);
+import { ExpiredDeadline, WrongNounce, WrongSignatureLength } from "../errors/CommonErrors.sol";
 
 function _getDomainHash(
     string memory _contractName,

@@ -5,7 +5,7 @@ import { _ERC20_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
 // IERC20StorageWrapper is now merged into IERC20
-import { BasicTransferInfo, IssueData } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
+import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { IFactory } from "../../factory/IFactory.sol";
 import { ERC1410BasicStorage, ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
@@ -154,7 +154,7 @@ library ERC20StorageWrapper {
         decreaseAllowedBalance(from, spender, value);
         ERC1410StorageWrapper.transferByPartition(
             from,
-            BasicTransferInfo(to, value),
+            IERC1410Types.BasicTransferInfo(to, value),
             _DEFAULT_PARTITION,
             "",
             spender,
@@ -167,7 +167,7 @@ library ERC20StorageWrapper {
     function transfer(address from, address to, uint256 value) internal returns (bool) {
         ERC1410StorageWrapper.transferByPartition(
             from,
-            BasicTransferInfo(to, value),
+            IERC1410Types.BasicTransferInfo(to, value),
             _DEFAULT_PARTITION,
             "",
             address(0),
@@ -178,7 +178,7 @@ library ERC20StorageWrapper {
     }
 
     function mint(address to, uint256 value) internal {
-        ERC1410StorageWrapper.issueByPartition(IssueData(_DEFAULT_PARTITION, to, value, ""));
+        ERC1410StorageWrapper.issueByPartition(IERC1410Types.IssueData(_DEFAULT_PARTITION, to, value, ""));
         emit IERC20.Transfer(address(0), to, value);
     }
 

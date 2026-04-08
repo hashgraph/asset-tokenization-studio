@@ -10,7 +10,7 @@ import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { IERC3643Management } from "../../facets/layer_1/ERC3643/IERC3643Management.sol";
 import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
-import { IERC1410 } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
+import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { ThirdPartyType } from "./types/ThirdPartyType.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { _checkNounceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
@@ -66,7 +66,7 @@ library HoldStorageWrapper {
         holdStorageRef.totalHeldAmountByAccountAndPartition[_from][_partition] += _hold.amount;
         holdStorageRef.totalHeldAmountByAccount[_from] += _hold.amount;
 
-        emit IERC1410.TransferByPartition(
+        emit IERC1410Types.TransferByPartition(
             _partition,
             EvmAccessors.getMsgSender(),
             _from,
@@ -248,7 +248,7 @@ library HoldStorageWrapper {
                     IERC3643Management.ComplianceCallFailed.selector
                 );
             }
-            emit IERC1410.TransferByPartition(
+            emit IERC1410Types.TransferByPartition(
                 _holdIdentifier.partition,
                 EvmAccessors.getMsgSender(),
                 address(0),
@@ -267,7 +267,7 @@ library HoldStorageWrapper {
                 IERC3643Management.ComplianceCallFailed.selector
             );
         }
-        emit IERC1410.TransferByPartition(
+        emit IERC1410Types.TransferByPartition(
             _holdIdentifier.partition,
             EvmAccessors.getMsgSender(),
             address(0),

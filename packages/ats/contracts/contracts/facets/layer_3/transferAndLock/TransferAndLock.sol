@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
 import { _LOCKER_ROLE, _WILD_CARD_ROLE } from "../../../constants/roles.sol";
 import { ITransferAndLock } from "./ITransferAndLock.sol";
-import { BasicTransferInfo } from "../../layer_1/ERC1400/ERC1410/IERC1410.sol";
+import { IERC1410Types } from "../../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
@@ -32,7 +32,7 @@ abstract contract TransferAndLock is ITransferAndLock, Modifiers {
     {
         ERC1410StorageWrapper.transferByPartition(
             EvmAccessors.getMsgSender(),
-            BasicTransferInfo(_to, _amount),
+            IERC1410Types.BasicTransferInfo(_to, _amount),
             _partition,
             _data,
             EvmAccessors.getMsgSender(),
@@ -73,7 +73,7 @@ abstract contract TransferAndLock is ITransferAndLock, Modifiers {
     {
         ERC1410StorageWrapper.transferByPartition(
             EvmAccessors.getMsgSender(),
-            BasicTransferInfo(_to, _amount),
+            IERC1410Types.BasicTransferInfo(_to, _amount),
             _DEFAULT_PARTITION,
             _data,
             EvmAccessors.getMsgSender(),

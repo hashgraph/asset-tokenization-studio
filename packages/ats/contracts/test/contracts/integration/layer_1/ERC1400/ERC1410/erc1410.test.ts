@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers, network } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
@@ -14,6 +15,7 @@ import {
   ERC1644Facet,
   ERC20Facet,
   IClearing,
+  IProtectedPartitions,
   type PauseFacet,
   ProtectedPartitionsFacet,
   type ResolverProxy,
@@ -112,6 +114,8 @@ describe("ERC1410 Tests", () => {
   let snapshotsFacet: SnapshotsFacet;
   let timeTravelFacet: TimeTravelFacet;
   let diamondCutFacet: DiamondFacet;
+  let protectedPartitionsInterface: IProtectedPartitions;
+  let commonErrors: Contract;
 
   async function setPreBalanceAdjustment(singlePartition?: boolean) {
     await grantRolesToAccounts();
@@ -451,11 +455,13 @@ describe("ERC1410 Tests", () => {
 
       await erc1410Facet.connect(signer_E).authorizeOperatorByPartition(_PARTITION_ID_1, signer_C.address);
       clearingInterface = await ethers.getContractAt("IClearing", diamond.target);
+      protectedPartitionsInterface = await ethers.getContractAt("IProtectedPartitions", diamond.target);
+      commonErrors = getCommonErrors(diamond.target);
     });
 
     it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
       await expect(erc1410Facet.initialize_ERC1410(true)).to.be.revertedWithCustomError(
-        erc1410Facet,
+        commonErrors,
         "AlreadyInitialized",
       );
     });
@@ -1146,7 +1152,7 @@ describe("ERC1410 Tests", () => {
 
       await expect(
         erc1410Facet.connect(signer_C).transferByPartition(_PARTITION_ID_1, basicTransferInfo, data),
-      ).to.be.revertedWithCustomError(erc1410Facet, "PartitionsAreProtectedAndNoRole");
+      ).to.be.revertedWithCustomError(protectedPartitionsInterface, "PartitionsAreProtectedAndNoRole");
     });
 
     it("GIVEN protected partitions without wildcard role WHEN redeemByPartition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
@@ -1157,7 +1163,7 @@ describe("ERC1410 Tests", () => {
 
       await expect(
         erc1410Facet.connect(signer_C).redeemByPartition(_PARTITION_ID_1, amount, data),
-      ).to.be.revertedWithCustomError(erc1410Facet, "PartitionsAreProtectedAndNoRole");
+      ).to.be.revertedWithCustomError(protectedPartitionsInterface, "PartitionsAreProtectedAndNoRole");
     });
 
     it("GIVEN an account WHEN transfer THEN transaction succeeds", async () => {
@@ -2059,7 +2065,7 @@ describe("ERC1410 Tests", () => {
             nounce: 0,
             signature: "0x1234",
           }),
-      ).to.be.revertedWithCustomError(erc1410Facet, "PartitionsAreUnProtected");
+      ).to.be.revertedWithCustomError(protectedPartitionsInterface, "PartitionsAreUnProtected");
     });
 
     it("GIVEN an unprotected partitions equity WHEN performing a protected redeem THEN transaction fails with PartitionsAreUnProtected", async () => {
@@ -2069,7 +2075,7 @@ describe("ERC1410 Tests", () => {
           nounce: 0,
           signature: "0x1234",
         }),
-      ).to.be.revertedWithCustomError(erc1410Facet, "PartitionsAreUnProtected");
+      ).to.be.revertedWithCustomError(protectedPartitionsInterface, "PartitionsAreUnProtected");
     });
     describe("Protected Partitions Tests", () => {
       let protectedPartitionsFacet: ProtectedPartitionsFacet;
@@ -2110,7 +2116,7 @@ describe("ERC1410 Tests", () => {
       it("GIVEN protected partitions without wildcard role WHEN operatorTransferByPartition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
         await expect(
           erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData),
-        ).to.be.revertedWithCustomError(erc1410Facet, "PartitionsAreProtectedAndNoRole");
+        ).to.be.revertedWithCustomError(protectedPartitionsInterface, "PartitionsAreProtectedAndNoRole");
       });
 
       it("GIVEN protected partitions without wildcard role WHEN operatorRedeemByPartition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
@@ -2120,7 +2126,7 @@ describe("ERC1410 Tests", () => {
           erc1410Facet
             .connect(signer_C)
             .operatorRedeemByPartition(_PARTITION_ID_1, signer_E.address, amount, data, operatorData),
-        ).to.be.revertedWithCustomError(erc1410Facet, "PartitionsAreProtectedAndNoRole");
+        ).to.be.revertedWithCustomError(protectedPartitionsInterface, "PartitionsAreProtectedAndNoRole");
       });
       describe("protectedTransferFromByPartition", () => {
         it("GIVEN a paused security role WHEN performing a protected transfer THEN transaction fails with Paused", async () => {
@@ -2241,7 +2247,7 @@ describe("ERC1410 Tests", () => {
                 nounce: 1,
                 signature: "0x1234",
               }),
-          ).to.be.revertedWithCustomError(erc1410Facet, "ExpiredDeadline");
+          ).to.be.revertedWithCustomError(commonErrors, "ExpiredDeadline");
         });
 
         it("GIVEN a wrong signature length WHEN performing a protected transfer THEN transaction fails with WrongSignatureLength", async () => {
@@ -2259,7 +2265,7 @@ describe("ERC1410 Tests", () => {
                 nounce: 1,
                 signature: "0x01",
               }),
-          ).to.be.revertedWithCustomError(erc1410Facet, "WrongSignatureLength");
+          ).to.be.revertedWithCustomError(commonErrors, "WrongSignatureLength");
         });
 
         it("GIVEN a wrong signature WHEN performing a protected transfer THEN transaction fails with WrongSignature", async () => {
@@ -2298,7 +2304,7 @@ describe("ERC1410 Tests", () => {
                 nounce: 0,
                 signature: "0x1234",
               }),
-          ).to.be.revertedWithCustomError(erc1410Facet, "WrongNounce");
+          ).to.be.revertedWithCustomError(commonErrors, "WrongNounce");
         });
       });
 
@@ -2376,7 +2382,7 @@ describe("ERC1410 Tests", () => {
               nounce: 0,
               signature: "0x1234",
             }),
-          ).to.be.revertedWithCustomError(erc1410Facet, "ExpiredDeadline");
+          ).to.be.revertedWithCustomError(commonErrors, "ExpiredDeadline");
         });
         it("GIVEN a wrong signature length WHEN performing a protected redeem THEN transaction fails with WrongSignatureLength", async () => {
           await erc1410Facet.issueByPartition({
@@ -2391,7 +2397,7 @@ describe("ERC1410 Tests", () => {
               nounce: 1,
               signature: "0x01",
             }),
-          ).to.be.revertedWithCustomError(erc1410Facet, "WrongSignatureLength");
+          ).to.be.revertedWithCustomError(commonErrors, "WrongSignatureLength");
         });
 
         it("GIVEN a wrong signature WHEN performing a protected redeem THEN transaction fails with WrongSignature", async () => {
@@ -2426,7 +2432,7 @@ describe("ERC1410 Tests", () => {
               nounce: 0,
               signature: "0x1234",
             }),
-          ).to.be.revertedWithCustomError(erc1410Facet, "WrongNounce");
+          ).to.be.revertedWithCustomError(commonErrors, "WrongNounce");
         });
 
         it("GIVEN a correct signature WHEN performing a protected redeem THEN transaction succeeds", async () => {
@@ -2488,11 +2494,13 @@ describe("ERC1410 Tests", () => {
   describe("Single partition ", () => {
     beforeEach(async () => {
       await loadFixture(deploySecurityFixtureSinglePartition);
+      protectedPartitionsInterface = await ethers.getContractAt("IProtectedPartitions", diamond.target);
+      commonErrors = getCommonErrors(diamond.target);
     });
 
     it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
       await expect(erc1410Facet.initialize_ERC1410(false)).to.be.revertedWithCustomError(
-        erc1410Facet,
+        commonErrors,
         "AlreadyInitialized",
       );
     });

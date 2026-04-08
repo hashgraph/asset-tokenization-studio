@@ -10,12 +10,8 @@ import { ERC20StorageWrapper } from "../asset/ERC20StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../asset/ERC1594StorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
 import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
-import {
-    BasicTransferInfo,
-    IssueData,
-    OperatorTransferData,
-    IERC1410
-} from "../../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
+import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { IERC1410 } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
 import { IProtectedPartitions } from "../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 
 /// @title TokenCoreOps - Orchestrator for core token operations
@@ -28,7 +24,7 @@ library TokenCoreOps {
 
     function transferByPartition(
         address _from,
-        BasicTransferInfo memory _basicTransferInfo,
+        IERC1410Types.BasicTransferInfo memory _basicTransferInfo,
         bytes32 _partition,
         bytes memory _data,
         address _operator,
@@ -45,7 +41,9 @@ library TokenCoreOps {
             );
     }
 
-    function operatorTransferByPartition(OperatorTransferData calldata _operatorTransferData) public returns (bytes32) {
+    function operatorTransferByPartition(
+        IERC1410Types.OperatorTransferData calldata _operatorTransferData
+    ) public returns (bytes32) {
         return ERC1410StorageWrapper.operatorTransferByPartition(_operatorTransferData);
     }
 
@@ -63,7 +61,7 @@ library TokenCoreOps {
     // Public functions — Issue / Redeem
     // ============================================================================
 
-    function issueByPartition(IssueData memory _issueData) public {
+    function issueByPartition(IERC1410Types.IssueData memory _issueData) public {
         ERC1410StorageWrapper.issueByPartition(_issueData);
     }
 
@@ -181,7 +179,7 @@ library TokenCoreOps {
         bytes memory _data,
         bytes memory _operatorData
     ) public {
-        emit IERC1410.TransferByPartition(_partition, _operator, _from, _to, _amount, _data, _operatorData);
+        emit IERC1410Types.TransferByPartition(_partition, _operator, _from, _to, _amount, _data, _operatorData);
     }
 
     function emitTransfer(address _from, address _to, uint256 _amount) public {

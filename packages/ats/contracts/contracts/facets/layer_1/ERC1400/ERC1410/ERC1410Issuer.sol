@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _AGENT_ROLE, _ISSUER_ROLE } from "../../../../constants/roles.sol";
 import { IERC1410Issuer } from "./IERC1410Issuer.sol";
-import { IssueData } from "./IERC1410.sol";
+import { IERC1410Types } from "./IERC1410Types.sol";
 import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../../../domain/core/CapStorageWrapper.sol";
@@ -15,7 +15,7 @@ import { TimestampProvider } from "../../../../infrastructure/utils/TimestampPro
 
 abstract contract ERC1410Issuer is IERC1410Issuer, TimestampProvider, Modifiers {
     function issueByPartition(
-        IssueData calldata _issueData
+        IERC1410Types.IssueData calldata _issueData
     )
         external
         onlyUnpaused

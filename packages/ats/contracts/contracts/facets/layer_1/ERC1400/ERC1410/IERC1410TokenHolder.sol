@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { BasicTransferInfo } from "./IERC1410.sol";
+import { IERC1410Types } from "./IERC1410Types.sol";
 
 /**
  * @title IERC1410TokenHolder
  * @dev Interface for the ERC1410TokenHolder contract providing all transfer operations
  * for ERC1410 tokens including transfers, operator transfers, redemptions, and issuance.
  */
-interface IERC1410TokenHolder {
+interface IERC1410TokenHolder is IERC1410Types {
     /**
      * @notice Transfers the ownership of tokens from a specified partition from one address to another address
      * @param _partition The partition from which to transfer tokens

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { BasicTransferInfo } from "./IERC1410.sol";
+import { IERC1410Types } from "./IERC1410Types.sol";
 import { IERC1410TokenHolder } from "./IERC1410TokenHolder.sol";
 import { _WILD_CARD_ROLE } from "../../../../constants/roles.sol";
 
@@ -17,7 +17,7 @@ import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Modifiers {
     function transferByPartition(
         bytes32 _partition,
-        BasicTransferInfo calldata _basicTransferInfo,
+        IERC1410Types.BasicTransferInfo calldata _basicTransferInfo,
         bytes memory _data
     )
         external
