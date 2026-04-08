@@ -17,6 +17,18 @@ import {
   TimeTravelFacet,
   FreezeFacet,
   ClearingTransferFacet,
+  AccessControl__factory,
+  IERC1410__factory,
+  Snapshots__factory,
+  Pause__factory,
+  Lock__factory,
+  IHold__factory,
+  Kyc__factory,
+  SsiManagement__factory,
+  Equity__factory,
+  TimeTravelFacet__factory,
+  FreezeFacet__factory,
+  ClearingTransferFacet__factory,
 } from "@contract-types";
 import { ZERO, EMPTY_STRING, ADDRESS_ZERO, dateToUnixTimestamp, ATS_ROLES } from "@scripts";
 import { grantRoleAndPauseToken } from "@test";
@@ -75,24 +87,25 @@ describe("Snapshots Tests", () => {
   }
 
   async function setFacets(diamond: ResolverProxy) {
-    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
+    accessControlFacet = AccessControl__factory.connect(diamond.target.toString(), ethers.provider);
 
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target);
+    erc1410Facet = IERC1410__factory.connect(diamond.target.toString(), ethers.provider);
 
-    snapshotFacet = await ethers.getContractAt("Snapshots", diamond.target);
+    snapshotFacet = Snapshots__factory.connect(diamond.target.toString(), ethers.provider);
 
-    pauseFacet = await ethers.getContractAt("Pause", diamond.target);
+    pauseFacet = Pause__factory.connect(diamond.target.toString(), ethers.provider);
 
-    lockFacet = await ethers.getContractAt("Lock", diamond.target);
-    holdFacet = await ethers.getContractAt("IHold", diamond.target);
-    kycFacet = await ethers.getContractAt("Kyc", diamond.target, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.target, signer_A);
-    equityFacet = await ethers.getContractAt("Equity", diamond.target);
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
-    freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.target);
-    clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.target);
+    lockFacet = Lock__factory.connect(diamond.target.toString(), ethers.provider);
+    holdFacet = IHold__factory.connect(diamond.target.toString(), ethers.provider);
+    kycFacet = Kyc__factory.connect(diamond.target.toString(), signer_B);
+    ssiManagementFacet = SsiManagement__factory.connect(diamond.target.toString(), signer_A);
+    equityFacet = Equity__factory.connect(diamond.target.toString(), ethers.provider);
+    timeTravelFacet = TimeTravelFacet__factory.connect(diamond.target.toString(), signer_A);
+    freezeFacet = FreezeFacet__factory.connect(diamond.target.toString(), ethers.provider);
+    clearingTransferFacet = ClearingTransferFacet__factory.connect(diamond.target.toString(), ethers.provider);
   }
 
+  // TODO(phase-5): type as Rbac[]
   function set_initRbacs(): any[] {
     return [
       {

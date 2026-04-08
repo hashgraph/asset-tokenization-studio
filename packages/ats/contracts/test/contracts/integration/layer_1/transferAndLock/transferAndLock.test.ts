@@ -11,6 +11,12 @@ import {
   type TransferAndLockFacet,
   type SsiManagementFacet,
   type KycFacet,
+  LockFacet__factory,
+  TransferAndLockFacet__factory,
+  PauseFacet__factory,
+  IERC1410__factory,
+  KycFacet__factory,
+  SsiManagementFacet__factory,
 } from "@contract-types";
 import { ZERO, EMPTY_STRING, ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -40,6 +46,7 @@ describe("Transfer and lock Tests", () => {
   let currentTimestamp = 0;
   let expirationTimestamp = 0;
 
+  // TODO(phase-5): type as Rbac[]
   function set_initRbacs(): any[] {
     return [
       {
@@ -66,12 +73,12 @@ describe("Transfer and lock Tests", () => {
   }
 
   async function setFacets({ diamond }: { diamond: ResolverProxy }) {
-    lockFacet = await ethers.getContractAt("LockFacet", diamond.target, signer_C);
-    transferAndLockFacet = await ethers.getContractAt("TransferAndLockFacet", diamond.target, signer_C);
-    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target, signer_D);
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target);
-    kycFacet = await ethers.getContractAt("KycFacet", diamond.target, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.target, signer_A);
+    lockFacet = LockFacet__factory.connect(diamond.target.toString(), signer_C);
+    transferAndLockFacet = TransferAndLockFacet__factory.connect(diamond.target.toString(), signer_C);
+    pauseFacet = PauseFacet__factory.connect(diamond.target.toString(), signer_D);
+    erc1410Facet = IERC1410__factory.connect(diamond.target.toString(), ethers.provider);
+    kycFacet = KycFacet__factory.connect(diamond.target.toString(), signer_B);
+    ssiManagementFacet = SsiManagementFacet__factory.connect(diamond.target.toString(), signer_A);
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
     await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
     await kycFacet.grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
