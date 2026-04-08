@@ -102,10 +102,15 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   // TokenCoreOps dependencies - ERC20 and ERC1410 token operations
   ERC20Facet: ["tokenCoreOps"],
   ERC20ReadFacet: ["tokenCoreOps"],
+  ERC20VotesFacet: ["clearingReadOps"],
   ERC1410ManagementFacet: ["tokenCoreOps"],
   ERC1410TokenHolderFacet: ["tokenCoreOps"],
   ERC1410ReadFacet: ["tokenCoreOps"],
+  ERC1410IssuerFacet: ["tokenCoreOps"],
   ERC1594Facet: ["tokenCoreOps"],
+  ERC1644Facet: ["tokenCoreOps"],
+  ERC3643BatchFacet: ["tokenCoreOps"],
+  ERC3643OperationsFacet: ["tokenCoreOps"],
   // HoldOps dependencies - hold/lock operations
   HoldManagementFacet: ["holdOps"],
   HoldReadFacet: ["holdOps"],
@@ -117,8 +122,16 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   ClearingHoldCreationFacet: ["clearingOps"],
   // ClearingReadOps dependencies - clearing read operations
   ClearingReadFacet: ["clearingReadOps"],
-  // SnapshotsFacet dependencies - uses ClearingReadOps in SnapshotsStorageWrapper
+  // SnapshotsFacet + TotalBalanceFacet depend on SnapshotsStorageWrapper which uses ClearingReadOps
   SnapshotsFacet: ["clearingReadOps"],
+  TotalBalanceFacet: ["clearingReadOps"],
+  // Layer 2/3 Bond read facets transitively reach ClearingReadOps via SnapshotsStorageWrapper
+  BondUSAReadFacet: ["clearingReadOps"],
+  BondUSAReadFixedRateFacet: ["clearingReadOps"],
+  BondUSAReadKpiLinkedRateFacet: ["clearingReadOps"],
+  BondUSAReadSustainabilityPerformanceTargetRateFacet: ["clearingReadOps"],
+  // Layer 3 EquityUSA — same transitive dependency
+  EquityUSAFacet: ["clearingReadOps"],
 };
 
 /**
