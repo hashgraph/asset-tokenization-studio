@@ -18,12 +18,10 @@ import {
   extractSolidityVersion,
   extractFacetResolverKeyImport,
   extractEvents,
-  extractEventsWithInheritance,
   extractErrors,
-  extractErrorsWithInheritance,
   extractNatspecDescription,
 } from "../utils/solidityParser";
-import { extractMethodsFromABI } from "../utils/abiExtractor";
+import { extractAbiDefinitions, extractMethodsFromABI } from "../utils/abiExtractor";
 
 /**
  * Extract metadata from a contract file.
@@ -53,26 +51,20 @@ export function extractMetadata(
   const upgradeable = detectUpgradeable(contract);
   const description = extractNatspecDescription(contract.source, name);
 
-  // Extract methods from ABI (most accurate - compiled output)
-  const methods = extractMethodsFromABI(contract.artifactData.abi);
-
-  // Extract events based on contract type:
-  // - Facets: Extract from entire inheritance chain
-  // - Other contracts: Extract only from current contract
-  let events = [];
-  if (name.endsWith("Facet") && allContracts) {
-    events = extractEventsWithInheritance(contract.source, name, allContracts);
+  // For facets, parse the compiled ABI exactly once and pull methods, events,
+  // and errors from the same Interface — the ABI naturally flattens inheritance,
+  // and a single parse is materially faster than three separate ones.
+  let methods;
+  let events;
+  let errors;
+  if (name.endsWith("Facet")) {
+    const abiDefs = extractAbiDefinitions(contract.artifactData.abi);
+    methods = abiDefs.methods;
+    events = abiDefs.events;
+    errors = abiDefs.errors;
   } else {
+    methods = extractMethodsFromABI(contract.artifactData.abi);
     events = extractEvents(contract.source);
-  }
-
-  // Extract errors based on contract type:
-  // - Facets: Extract from entire inheritance chain
-  // - Other contracts: Extract only from current contract
-  let errors = [];
-  if (name.endsWith("Facet") && allContracts) {
-    errors = extractErrorsWithInheritance(contract.source, name, allContracts);
-  } else {
     errors = extractErrors(contract.source);
   }
 

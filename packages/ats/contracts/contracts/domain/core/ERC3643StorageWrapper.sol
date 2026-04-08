@@ -324,8 +324,6 @@ library ERC3643StorageWrapper {
             0;
     }
 
-    // --- Internal pure functions (storage accessors) ---
-
     function rolesStorage() internal pure returns (RoleDataStorage storage roles_) {
         bytes32 position = _ACCESS_CONTROL_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
@@ -353,8 +351,6 @@ library ERC3643StorageWrapper {
             revert IERC3643Types.InputBoolArrayLengthMismatch();
         }
     }
-
-    // --- Private view functions ---
 
     function _checkUnfreezeAmount(
         bytes32 _partition,
