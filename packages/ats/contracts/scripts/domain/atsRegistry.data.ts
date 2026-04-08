@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-08T12:07:36.512Z
+ * Generated: 2026-04-08T16:37:55.691Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -421,6 +421,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
         selector: "0x649815a5",
       },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
+      },
     ],
     factory: (signer) => new AdjustBalancesFacet__factory(signer),
     timeTravelFactory: (signer) => new AdjustBalancesFacetTimeTravel__factory(signer),
@@ -622,6 +627,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "TokenIsPaused",
         signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
         selector: "0x649815a5",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
       },
       {
         name: "WalletRecovered",
@@ -844,6 +854,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x649815a5",
       },
       {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
+      },
+      {
         name: "WalletRecovered",
         signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
         selector: "0xf9f9bcf9",
@@ -1064,6 +1079,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x649815a5",
       },
       {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
+      },
+      {
         name: "WalletRecovered",
         signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
         selector: "0xf9f9bcf9",
@@ -1258,6 +1278,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf128004d",
       },
       {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
+      },
+      {
         name: "WrongIndexForAction",
         signature: {
           full: "error WrongIndexForAction(uint256 index, bytes32 actionType)",
@@ -1441,6 +1466,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
       },
       {
         name: "WrongIndexForAction",
@@ -1628,6 +1658,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf128004d",
       },
       {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
+      },
+      {
         name: "WrongIndexForAction",
         signature: {
           full: "error WrongIndexForAction(uint256 index, bytes32 actionType)",
@@ -1811,6 +1846,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
       },
       {
         name: "WrongIndexForAction",
@@ -2026,6 +2066,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "TokenIsPaused",
         signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
         selector: "0x649815a5",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
       },
       {
         name: "WalletRecovered",
@@ -3791,6 +3836,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x649815a5",
       },
       {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
+      },
+      {
         name: "WrongDates",
         signature: {
           full: "error WrongDates(uint256 firstDate, uint256 secondDate)",
@@ -4233,6 +4283,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "TokenIsPaused",
         signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
         selector: "0x649815a5",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
       },
       {
         name: "VotingRightsCreationFailed",
@@ -5266,6 +5321,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x649815a5",
       },
       {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
+      },
+      {
         name: "WalletRecovered",
         signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
         selector: "0xf9f9bcf9",
@@ -5661,6 +5721,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x649815a5",
       },
       {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
+      },
+      {
         name: "WalletRecovered",
         signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
         selector: "0xf9f9bcf9",
@@ -5751,6 +5816,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "TokenIsPaused",
         signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
         selector: "0x649815a5",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
       },
       {
         name: "WalletRecovered",
@@ -5909,9 +5979,27 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x0dc149f0",
       },
       {
+        name: "BrokenClockMode",
+        signature: { full: "error BrokenClockMode()", canonical: "BrokenClockMode()" },
+        selector: "0xb2b9e563",
+      },
+      {
+        name: "FutureLookup",
+        signature: {
+          full: "error FutureLookup(uint256 timepoint, uint256 currentClock)",
+          canonical: "FutureLookup(uint256,uint256)",
+        },
+        selector: "0x7f07449b",
+      },
+      {
         name: "TokenIsPaused",
         signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
         selector: "0x649815a5",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
       },
     ],
     factory: (signer) => new ERC20VotesFacet__factory(getLibLinks("clearingReadOps") as any, signer),
@@ -6178,6 +6266,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "TokenIsPaused",
         signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
         selector: "0x649815a5",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
       },
       {
         name: "WalletRecovered",
@@ -6452,6 +6545,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x649815a5",
       },
       {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
+      },
+      {
         name: "WalletRecovered",
         signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
         selector: "0xf9f9bcf9",
@@ -6693,6 +6791,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "TokenIsPaused",
         signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
         selector: "0x649815a5",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
       },
       {
         name: "WalletRecovered",
@@ -8535,6 +8638,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
         selector: "0x649815a5",
       },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
+      },
     ],
     factory: (signer) => new KpisKpiLinkedRateFacet__factory(signer),
     timeTravelFactory: (signer) => new KpisKpiLinkedRateFacetTimeTravel__factory(signer),
@@ -8630,6 +8738,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "TokenIsPaused",
         signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
         selector: "0x649815a5",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
       },
     ],
     factory: (signer) => new KpisSustainabilityPerformanceTargetRateFacet__factory(signer),
@@ -9859,6 +9972,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
         selector: "0x649815a5",
       },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
+      },
     ],
     factory: (signer) => new ScheduledCrossOrderedTasksFacet__factory(signer),
     timeTravelFactory: (signer) => new ScheduledCrossOrderedTasksFacetTimeTravel__factory(signer),
@@ -9937,6 +10055,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
         selector: "0x649815a5",
       },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
+      },
     ],
     factory: (signer) => new ScheduledCrossOrderedTasksKpiLinkedRateFacet__factory(signer),
     timeTravelFactory: (signer) => new ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel__factory(signer),
@@ -10013,6 +10136,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "TokenIsPaused",
         signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
         selector: "0x649815a5",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
       },
     ],
     factory: (signer) => new ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet__factory(signer),
@@ -10269,6 +10397,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "TokenIsPaused",
         signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
         selector: "0x649815a5",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
       },
     ],
     factory: (signer) => new SnapshotsFacet__factory(getLibLinks("clearingReadOps") as any, signer),
@@ -10795,6 +10928,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x649815a5",
       },
       {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
+      },
+      {
         name: "WrongExpirationTimestamp",
         signature: { full: "error WrongExpirationTimestamp()", canonical: "WrongExpirationTimestamp()" },
         selector: "0xe39f4776",
@@ -10950,6 +11088,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "TokenIsPaused",
         signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
         selector: "0x649815a5",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
       },
       {
         name: "WrongExpirationTimestamp",
@@ -11109,6 +11252,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x649815a5",
       },
       {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
+      },
+      {
         name: "WrongExpirationTimestamp",
         signature: { full: "error WrongExpirationTimestamp()", canonical: "WrongExpirationTimestamp()" },
         selector: "0xe39f4776",
@@ -11264,6 +11412,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "TokenIsPaused",
         signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
         selector: "0x649815a5",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
       },
       {
         name: "WrongExpirationTimestamp",

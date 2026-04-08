@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { AccessControlStorageWrapper, RoleDataStorage } from "../../domain/core/AccessControlStorageWrapper.sol";
 import { _FREEZE_MANAGER_ROLE, _AGENT_ROLE } from "../../constants/roles.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title AccessControlModifiers
@@ -32,7 +33,7 @@ abstract contract AccessControlModifiers {
      * @param _role The role to check for
      */
     modifier onlyRole(bytes32 _role) virtual {
-        AccessControlStorageWrapper.checkRole(_role, msg.sender);
+        AccessControlStorageWrapper.checkRole(_role, EvmAccessors.getMsgSender());
         _;
     }
 
@@ -45,7 +46,7 @@ abstract contract AccessControlModifiers {
      * @param _roles Array of roles to check for
      */
     modifier onlyAnyRole(bytes32[] memory _roles) virtual {
-        AccessControlStorageWrapper.checkAnyRole(_roles, msg.sender);
+        AccessControlStorageWrapper.checkAnyRole(_roles, EvmAccessors.getMsgSender());
         _;
     }
 

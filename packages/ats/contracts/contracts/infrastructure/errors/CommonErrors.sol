@@ -37,3 +37,7 @@ error WrongNounce(uint256 nounce, address account);
 
 /// @notice Thrown when a contract or facet initializer is invoked after it has already been initialized.
 error AlreadyInitialized();
+
+/// @notice Thrown when an impossible validation state is detected (defensive programming).
+/// @dev Used to replace assert statements for logically impossible conditions.
+error UnexpectedError(bytes4 _errorId);

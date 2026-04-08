@@ -176,8 +176,10 @@ library AdjustBalancesStorageWrapper {
         uint256 _partitionIndex,
         address _account
     ) internal view returns (uint256) {
-        if (_partitionIndex == 0) return 1;
-        return zeroToOne(adjustBalancesStorage().labafUserPartition[_account][_partitionIndex - 1]);
+        return
+            _partitionIndex == 0
+                ? 1
+                : zeroToOne(adjustBalancesStorage().labafUserPartition[_account][_partitionIndex - 1]);
     }
 
     function getAllowanceLabaf(address _owner, address _spender) internal view returns (uint256) {
@@ -300,13 +302,15 @@ library AdjustBalancesStorageWrapper {
     }
 
     function totalSupplyByPartitionAdjustedAt(bytes32 _partition, uint256 _timestamp) internal view returns (uint256) {
-        uint256 factor = calculateFactor(getAbafAdjustedAt(_timestamp), getLabafByPartition(_partition));
-        return ERC1410StorageWrapper.totalSupplyByPartition(_partition) * factor;
+        return
+            ERC1410StorageWrapper.totalSupplyByPartition(_partition) *
+            calculateFactor(getAbafAdjustedAt(_timestamp), getLabafByPartition(_partition));
     }
 
     function balanceOfAdjustedAt(address _tokenHolder, uint256 _timestamp) internal view returns (uint256) {
-        uint256 factor = calculateFactor(getAbafAdjustedAt(_timestamp), getLabafByUser(_tokenHolder));
-        return ERC1410StorageWrapper.balanceOf(_tokenHolder) * factor;
+        return
+            ERC1410StorageWrapper.balanceOf(_tokenHolder) *
+            calculateFactor(getAbafAdjustedAt(_timestamp), getLabafByUser(_tokenHolder));
     }
 
     function balanceOfByPartitionAdjustedAt(
@@ -314,11 +318,9 @@ library AdjustBalancesStorageWrapper {
         address _tokenHolder,
         uint256 _timestamp
     ) internal view returns (uint256) {
-        uint256 factor = calculateFactor(
-            getAbafAdjustedAt(_timestamp),
-            getLabafByUserAndPartition(_partition, _tokenHolder)
-        );
-        return ERC1410StorageWrapper.balanceOfByPartition(_partition, _tokenHolder) * factor;
+        return
+            ERC1410StorageWrapper.balanceOfByPartition(_partition, _tokenHolder) *
+            calculateFactor(getAbafAdjustedAt(_timestamp), getLabafByUserAndPartition(_partition, _tokenHolder));
     }
 
     function getPendingScheduledBalanceAdjustmentsAt(
@@ -332,9 +334,8 @@ library AdjustBalancesStorageWrapper {
     }
 
     function getAbafAdjustedAt(uint256 _timestamp) internal view returns (uint256) {
-        uint256 abaf = getAbaf();
         (uint256 pendingAbaf, ) = getPendingScheduledBalanceAdjustmentsAt(_timestamp);
-        return abaf * pendingAbaf;
+        return getAbaf() * pendingAbaf;
     }
 
     function calculateFactor(uint256 _abaf, uint256 _labaf) internal pure returns (uint256 factor_) {
@@ -345,7 +346,7 @@ library AdjustBalancesStorageWrapper {
         return _input == 0 ? 1 : _input;
     }
 
-    function requireValidFactor(uint256 _factor) internal pure {
+    function checkValidFactor(uint256 _factor) internal pure {
         if (_factor == 0) revert IAdjustBalances.FactorIsZero();
     }
 

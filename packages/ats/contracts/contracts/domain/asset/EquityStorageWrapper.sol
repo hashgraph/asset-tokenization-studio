@@ -8,7 +8,10 @@ import {
     BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
     SNAPSHOT_RESULT_ID,
     SNAPSHOT_TASK_TYPE,
-    BALANCE_ADJUSTMENT_TASK_TYPE
+    BALANCE_ADJUSTMENT_TASK_TYPE,
+    KPI_EQUITY_DIVIDEND_DATA,
+    KPI_EQUITY_VOTING_DATA,
+    KPI_EQUITY_BALANCE_ADJ
 } from "../../constants/values.sol";
 import { IEquity } from "../../facets/layer_2/equity/IEquity.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
@@ -18,6 +21,7 @@ import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 
 struct EquityDataStorage {
     bool votingRight;
@@ -158,7 +162,7 @@ library EquityStorageWrapper {
 
         (, , bytes memory data) = CorporateActionsStorageWrapper.getCorporateAction(actionId);
 
-        assert(data.length > 0);
+        _checkUnexpectedError(data.length == 0, KPI_EQUITY_DIVIDEND_DATA);
         (registeredDividend_.dividend) = abi.decode(data, (IEquity.Dividend));
 
         registeredDividend_.snapshotId = CorporateActionsStorageWrapper.getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
@@ -218,8 +222,7 @@ library EquityStorageWrapper {
     ) internal view returns (address[] memory holders_) {
         IEquity.RegisteredDividend memory registeredDividend = getDividends(dividendID);
 
-        if (registeredDividend.dividend.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp())
-            return new address[](0);
+        if (registeredDividend.dividend.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return holders_;
 
         if (registeredDividend.snapshotId != 0)
             return SnapshotsStorageWrapper.tokenHoldersAt(registeredDividend.snapshotId, pageIndex, pageLength);
@@ -246,7 +249,7 @@ library EquityStorageWrapper {
 
         (, , bytes memory data) = CorporateActionsStorageWrapper.getCorporateAction(actionId);
 
-        assert(data.length > 0);
+        _checkUnexpectedError(data.length == 0, KPI_EQUITY_VOTING_DATA);
         (registeredVoting_.voting) = abi.decode(data, (IEquity.Voting));
 
         registeredVoting_.snapshotId = CorporateActionsStorageWrapper.getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
@@ -286,7 +289,7 @@ library EquityStorageWrapper {
     ) internal view returns (address[] memory holders_) {
         IEquity.RegisteredVoting memory registeredVoting = getVoting(voteID);
 
-        if (registeredVoting.voting.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return new address[](0);
+        if (registeredVoting.voting.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return holders_;
 
         if (registeredVoting.snapshotId != 0)
             return SnapshotsStorageWrapper.tokenHoldersAt(registeredVoting.snapshotId, pageIndex, pageLength);
@@ -308,14 +311,14 @@ library EquityStorageWrapper {
     function getScheduledBalanceAdjustment(
         uint256 balanceAdjustmentID
     ) internal view returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_) {
-        bytes32 actionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
-            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
-            balanceAdjustmentID - 1
+        (, , bytes memory data) = CorporateActionsStorageWrapper.getCorporateAction(
+            CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
+                BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
+                balanceAdjustmentID - 1
+            )
         );
 
-        (, , bytes memory data) = CorporateActionsStorageWrapper.getCorporateAction(actionId);
-
-        assert(data.length > 0);
+        _checkUnexpectedError(data.length == 0, KPI_EQUITY_BALANCE_ADJ);
         (balanceAdjustment_) = abi.decode(data, (IEquity.ScheduledBalanceAdjustment));
     }
 
@@ -328,17 +331,16 @@ library EquityStorageWrapper {
         uint256 snapshotId,
         address account
     ) internal view returns (uint256 balance_, uint8 decimals_, bool dateReached_) {
-        if (date < TimeTravelStorageWrapper.getBlockTimestamp()) {
-            dateReached_ = true;
+        if (date >= TimeTravelStorageWrapper.getBlockTimestamp()) return (balance_, decimals_, dateReached_);
+        dateReached_ = true;
 
-            balance_ = (snapshotId != 0)
-                ? SnapshotsStorageWrapper.getTotalBalanceOfAtSnapshot(snapshotId, account)
-                : ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(account, date);
+        balance_ = (snapshotId != 0)
+            ? SnapshotsStorageWrapper.getTotalBalanceOfAtSnapshot(snapshotId, account)
+            : ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(account, date);
 
-            decimals_ = (snapshotId != 0)
-                ? SnapshotsStorageWrapper.decimalsAtSnapshot(snapshotId)
-                : ERC20StorageWrapper.decimalsAdjustedAt(date);
-        }
+        decimals_ = (snapshotId != 0)
+            ? SnapshotsStorageWrapper.decimalsAtSnapshot(snapshotId)
+            : ERC20StorageWrapper.decimalsAdjustedAt(date);
     }
 
     function isEquityInitialized() internal view returns (bool) {

@@ -1,30 +1,31 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { AddressValidation } from "../../infrastructure/utils/AddressValidation.sol";
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
+import { IERC1410 } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
+import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import {
     _ERC1410_BASIC_STORAGE_POSITION,
     _ERC1410_OPERATOR_STORAGE_POSITION
 } from "../../constants/storagePositions.sol";
-import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
-import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
+import { AddressValidation } from "../../infrastructure/utils/AddressValidation.sol";
+import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
+import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
+import { ERC20VotesStorageWrapper } from "./ERC20VotesStorageWrapper.sol";
+import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
 import { IProtectedPartitions } from "../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
-import { _checkNounceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
-import { Pagination } from "../../infrastructure/utils/Pagination.sol";
-import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
-import { ERC20VotesStorageWrapper } from "./ERC20VotesStorageWrapper.sol";
-import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
-import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
-import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
-import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
+import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
+import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
+import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { _checkNounceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
 
 /// @dev Represents a fungible set of tokens.
 struct Partition {
@@ -96,10 +97,9 @@ library ERC1410StorageWrapper {
 
     function deletePartitionForHolder(address holder, bytes32 partition, uint256 index) internal {
         ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
-        if (index != erc1410Storage.partitions[holder].length - 1) {
-            erc1410Storage.partitions[holder][index] = erc1410Storage.partitions[holder][
-                erc1410Storage.partitions[holder].length - 1
-            ];
+        uint256 lastIndex = erc1410Storage.partitions[holder].length - 1;
+        if (index != lastIndex) {
+            erc1410Storage.partitions[holder][index] = erc1410Storage.partitions[holder][lastIndex];
             erc1410Storage.partitionToIndex[holder][erc1410Storage.partitions[holder][index].partition] = index + 1;
         }
         delete erc1410Storage.partitionToIndex[holder][partition];
@@ -113,9 +113,7 @@ library ERC1410StorageWrapper {
 
         ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
 
-        uint256 index = erc1410Storage.partitionToIndex[from][partition] - 1;
-
-        erc1410Storage.partitions[from][index].amount += value;
+        erc1410Storage.partitions[from][erc1410Storage.partitionToIndex[from][partition] - 1].amount += value;
         ERC20StorageWrapper.increaseBalance(from, value);
     }
 
@@ -142,9 +140,11 @@ library ERC1410StorageWrapper {
     function addNewTokenHolder(address tokenHolder) internal {
         ERC1410BasicStorage storage basicStorage = erc1410BasicStorage();
 
-        uint256 nextIndex = ++basicStorage.totalTokenHolders;
-        basicStorage.tokenHolders[nextIndex] = tokenHolder;
-        basicStorage.tokenHolderIndex[tokenHolder] = nextIndex;
+        unchecked {
+            uint256 nextIndex = ++basicStorage.totalTokenHolders;
+            basicStorage.tokenHolders[nextIndex] = tokenHolder;
+            basicStorage.tokenHolderIndex[tokenHolder] = nextIndex;
+        }
     }
 
     function removeTokenHolder(address tokenHolder) internal {
@@ -162,7 +162,9 @@ library ERC1410StorageWrapper {
         }
 
         basicStorage.tokenHolderIndex[tokenHolder] = 0;
-        basicStorage.totalTokenHolders--;
+        unchecked {
+            --basicStorage.totalTokenHolders;
+        }
     }
 
     function authorizeOperator(address operator) internal {
@@ -415,6 +417,7 @@ library ERC1410StorageWrapper {
             ) removeFrom = true;
         }
 
+        if (!(addTo || removeFrom)) return;
         if (addTo && removeFrom) {
             SnapshotsStorageWrapper.updateTokenHolderSnapshot(from);
             replaceTokenHolder(to, from);
@@ -425,12 +428,10 @@ library ERC1410StorageWrapper {
             addNewTokenHolder(to);
             return;
         }
-        if (removeFrom) {
-            SnapshotsStorageWrapper.updateTokenHolderSnapshot(from);
-            SnapshotsStorageWrapper.updateTokenHolderSnapshot(getTokenHolder(getTotalTokenHolders()));
-            SnapshotsStorageWrapper.updateTotalTokenHolderSnapshot();
-            removeTokenHolder(from);
-        }
+        SnapshotsStorageWrapper.updateTokenHolderSnapshot(from);
+        SnapshotsStorageWrapper.updateTokenHolderSnapshot(getTokenHolder(getTotalTokenHolders()));
+        SnapshotsStorageWrapper.updateTotalTokenHolderSnapshot();
+        removeTokenHolder(from);
     }
 
     function afterTokenTransfer(bytes32 partition, address from, address to, uint256 amount) internal {
@@ -497,11 +498,12 @@ library ERC1410StorageWrapper {
     }
 
     function totalSupplyByPartitionAdjustedAt(bytes32 partition, uint256 timestamp) internal view returns (uint256) {
-        uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(
-            AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
-            AdjustBalancesStorageWrapper.getLabafByPartition(partition)
-        );
-        return totalSupplyByPartition(partition) * factor;
+        return
+            totalSupplyByPartition(partition) *
+            AdjustBalancesStorageWrapper.calculateFactor(
+                AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
+                AdjustBalancesStorageWrapper.getLabafByPartition(partition)
+            );
     }
 
     function balanceOf(address tokenHolder) internal view returns (uint256) {
@@ -509,22 +511,19 @@ library ERC1410StorageWrapper {
     }
 
     function balanceOfByPartition(bytes32 partition, address tokenHolder) internal view returns (uint256) {
-        if (validPartition(partition, tokenHolder)) {
-            ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
-            return
-                erc1410Storage
-                .partitions[tokenHolder][erc1410Storage.partitionToIndex[tokenHolder][partition] - 1].amount;
-        } else {
-            return 0;
-        }
+        if (!validPartition(partition, tokenHolder)) return 0;
+        ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
+        return
+            erc1410Storage.partitions[tokenHolder][erc1410Storage.partitionToIndex[tokenHolder][partition] - 1].amount;
     }
 
     function balanceOfAdjustedAt(address tokenHolder, uint256 timestamp) internal view returns (uint256) {
-        uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(
-            AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
-            AdjustBalancesStorageWrapper.getLabafByUser(tokenHolder)
-        );
-        return balanceOf(tokenHolder) * factor;
+        return
+            balanceOf(tokenHolder) *
+            AdjustBalancesStorageWrapper.calculateFactor(
+                AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
+                AdjustBalancesStorageWrapper.getLabafByUser(tokenHolder)
+            );
     }
 
     function balanceOfByPartitionAdjustedAt(
@@ -532,18 +531,23 @@ library ERC1410StorageWrapper {
         address tokenHolder,
         uint256 timestamp
     ) internal view returns (uint256) {
-        uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(
-            AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
-            AdjustBalancesStorageWrapper.getLabafByUserAndPartition(partition, tokenHolder)
-        );
-        return balanceOfByPartition(partition, tokenHolder) * factor;
+        return
+            balanceOfByPartition(partition, tokenHolder) *
+            AdjustBalancesStorageWrapper.calculateFactor(
+                AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
+                AdjustBalancesStorageWrapper.getLabafByUserAndPartition(partition, tokenHolder)
+            );
     }
 
-    function partitionsOf(address tokenHolder) internal view returns (bytes32[] memory) {
+    function partitionsOf(address tokenHolder) internal view returns (bytes32[] memory partitionsList) {
         ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
-        bytes32[] memory partitionsList = new bytes32[](erc1410Storage.partitions[tokenHolder].length);
-        for (uint256 i = 0; i < erc1410Storage.partitions[tokenHolder].length; i++) {
+        uint256 length = erc1410Storage.partitions[tokenHolder].length;
+        partitionsList = new bytes32[](length);
+        for (uint256 i; i < length; ) {
             partitionsList[i] = erc1410Storage.partitions[tokenHolder][i].partition;
+            unchecked {
+                ++i;
+            }
         }
         return partitionsList;
     }
@@ -553,24 +557,16 @@ library ERC1410StorageWrapper {
     }
 
     function validPartitionForReceiver(bytes32 partition, address to) internal view returns (bool) {
-        ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
-
-        uint256 index = erc1410Storage.partitionToIndex[to][partition];
-
-        return index != 0;
+        return erc1410BasicStorage().partitionToIndex[to][partition] != 0;
     }
 
     function getTokenHolders(uint256 pageIndex, uint256 pageLength) internal view returns (address[] memory holders_) {
         (uint256 start, uint256 end) = Pagination.getStartAndEnd(pageIndex, pageLength);
-
-        holders_ = new address[](Pagination.getSize(start, end, getTotalTokenHolders()));
-
-        start++; // because tokenHolders starts from 1
-
+        uint256 size = Pagination.getSize(start, end, getTotalTokenHolders());
+        holders_ = new address[](size);
         ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
-
-        for (uint256 i = 0; i < holders_.length; i++) {
-            holders_[i] = erc1410Storage.tokenHolders[start + i];
+        unchecked {
+            for (uint256 i; i < size; ++i) holders_[i] = erc1410Storage.tokenHolders[++start];
         }
     }
 
@@ -627,7 +623,7 @@ library ERC1410StorageWrapper {
     }
 
     function validateParams(bytes32 partition, uint256 value) internal pure {
-        if (value == uint256(0)) {
+        if (value == 0) {
             revert IERC1410Types.ZeroValue();
         }
         if (partition == bytes32(0)) {

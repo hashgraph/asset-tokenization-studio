@@ -69,7 +69,7 @@ library PauseStorageWrapper {
         ExternalListDataStorage storage externalPauseDataStorage = ExternalListManagementStorageWrapper
             .externalListStorage(_PAUSE_MANAGEMENT_STORAGE_POSITION);
         uint256 length = ExternalListManagementStorageWrapper.getExternalListsCount(_PAUSE_MANAGEMENT_STORAGE_POSITION);
-        for (uint256 index = 0; index < length; ) {
+        for (uint256 index; index < length; ) {
             if (IExternalPause(externalPauseDataStorage.list.at(index)).isPaused()) return true;
             unchecked {
                 ++index;

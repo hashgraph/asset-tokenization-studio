@@ -5,11 +5,9 @@ import { IClearingActions } from "./IClearingActions.sol";
 import { IClearingTypes } from "./IClearingTypes.sol";
 import { _CLEARING_VALIDATOR_ROLE, _CLEARING_ROLE } from "../../../constants/roles.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
-import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../../domain/asset/ERC1594StorageWrapper.sol";
 import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWrapper.sol";
 import { ClearingOps } from "../../../domain/orchestrator/ClearingOps.sol";
-import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ClearingActions is IClearingActions, Modifiers {
@@ -18,13 +16,13 @@ abstract contract ClearingActions is IClearingActions, Modifiers {
     }
 
     function activateClearing() external onlyUnpaused onlyRole(_CLEARING_ROLE) returns (bool success_) {
-        success_ = ClearingStorageWrapper.setClearing(true);
         emit ClearingActivated(EvmAccessors.getMsgSender());
+        success_ = ClearingStorageWrapper.setClearing(true);
     }
 
     function deactivateClearing() external onlyUnpaused onlyRole(_CLEARING_ROLE) returns (bool success_) {
-        success_ = ClearingStorageWrapper.setClearing(false);
         emit ClearingDeactivated(EvmAccessors.getMsgSender());
+        success_ = ClearingStorageWrapper.setClearing(false);
     }
 
     function approveClearingOperationByPartition(
@@ -47,7 +45,7 @@ abstract contract ClearingActions is IClearingActions, Modifiers {
         );
 
         emit ClearingOperationApproved(
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             _clearingOperationIdentifier.tokenHolder,
             _clearingOperationIdentifier.partition,
             _clearingOperationIdentifier.clearingId,
@@ -71,7 +69,7 @@ abstract contract ClearingActions is IClearingActions, Modifiers {
     {
         success_ = ClearingOps.cancelClearingOperationByPartition(_clearingOperationIdentifier);
         emit ClearingOperationCanceled(
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             _clearingOperationIdentifier.tokenHolder,
             _clearingOperationIdentifier.partition,
             _clearingOperationIdentifier.clearingId,
@@ -94,7 +92,7 @@ abstract contract ClearingActions is IClearingActions, Modifiers {
     {
         success_ = ClearingOps.reclaimClearingOperationByPartition(_clearingOperationIdentifier);
         emit ClearingOperationReclaimed(
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             _clearingOperationIdentifier.tokenHolder,
             _clearingOperationIdentifier.partition,
             _clearingOperationIdentifier.clearingId,

@@ -2,17 +2,10 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC20 } from "./IERC20.sol";
-import { _WILD_CARD_ROLE } from "../../../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../../../constants/values.sol";
-import { IProtectedPartitions } from "../../../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
-import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
-import { ERC3643StorageWrapper } from "../../../../domain/core/ERC3643StorageWrapper.sol";
-import { ProtectedPartitionsStorageWrapper } from "../../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
-import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../../../../domain/asset/ERC20StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
-import { _checkNotInitialized } from "../../../../services/InitializationErrors.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 

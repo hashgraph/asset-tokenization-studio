@@ -8,8 +8,10 @@ import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlS
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../../domain/core/CapStorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../../domain/asset/ERC1594StorageWrapper.sol";
+import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWrapper.sol";
 import { TokenCoreOps } from "../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, Modifiers {
     function batchTransfer(
@@ -22,15 +24,15 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, Modifiers {
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         onlyClearingDisabled
-        onlyIdentifiedAddresses(msg.sender, address(0))
-        onlyCompliant(msg.sender, address(0), false)
+        onlyIdentifiedAddresses(EvmAccessors.getMsgSender(), address(0))
+        onlyCompliant(EvmAccessors.getMsgSender(), address(0), false)
     {
         for (uint256 i = 0; i < _toList.length; i++) {
             ERC1594StorageWrapper.checkIdentity(address(0), _toList[i]);
             ERC1594StorageWrapper.checkCompliance(address(0), _toList[i], false);
         }
         for (uint256 i = 0; i < _toList.length; i++) {
-            TokenCoreOps.transfer(msg.sender, _toList[i], _amounts[i]);
+            TokenCoreOps.transfer(EvmAccessors.getMsgSender(), _toList[i], _amounts[i]);
         }
     }
 

@@ -82,10 +82,9 @@ library SnapshotsStorageWrapper {
 
     function updateSnapshotAddress(SnapshotsAddress storage snapshots, address currentValue) internal {
         uint256 currentId = getCurrentSnapshotId();
-        if (lastSnapshotId(snapshots.ids) < currentId) {
-            snapshots.ids.push(currentId);
-            snapshots.values.push(currentValue);
-        }
+        if (lastSnapshotId(snapshots.ids) >= currentId) return;
+        snapshots.ids.push(currentId);
+        snapshots.values.push(currentValue);
     }
 
     function updateSnapshotPartitions(
@@ -101,8 +100,7 @@ library SnapshotsStorageWrapper {
         }
         if (lastSnapshotId(partitionSnapshots.ids) < currentId) {
             partitionSnapshots.ids.push(currentId);
-            ListOfPartitions memory listOfPartitions = ListOfPartitions(partitionIds);
-            partitionSnapshots.values.push(listOfPartitions);
+            partitionSnapshots.values.push(ListOfPartitions(partitionIds));
         }
     }
 
@@ -179,53 +177,46 @@ library SnapshotsStorageWrapper {
     }
 
     function updateAccountLockedBalancesSnapshot(address account, bytes32 partition) internal {
+        SnapshotStorage storage $ = snapshotStorage();
+        updateSnapshot($.accountLockedBalanceSnapshots[account], LockStorageWrapper.getLockedAmountFor(account));
         updateSnapshot(
-            snapshotStorage().accountLockedBalanceSnapshots[account],
-            LockStorageWrapper.getLockedAmountFor(account)
-        );
-        updateSnapshot(
-            snapshotStorage().accountPartitionLockedBalanceSnapshots[account][partition],
+            $.accountPartitionLockedBalanceSnapshots[account][partition],
             LockStorageWrapper.getLockedAmountForByPartition(partition, account)
         );
     }
 
     function updateAccountHeldBalancesSnapshot(address account, bytes32 partition) internal {
+        SnapshotStorage storage $ = snapshotStorage();
+        updateSnapshot($.accountHeldBalanceSnapshots[account], HoldStorageWrapper.getHeldAmountFor(account));
         updateSnapshot(
-            snapshotStorage().accountHeldBalanceSnapshots[account],
-            HoldStorageWrapper.getHeldAmountFor(account)
-        );
-        updateSnapshot(
-            snapshotStorage().accountPartitionHeldBalanceSnapshots[account][partition],
+            $.accountPartitionHeldBalanceSnapshots[account][partition],
             HoldStorageWrapper.getHeldAmountForByPartition(partition, account)
         );
     }
 
     function updateAccountFrozenBalancesSnapshot(address account, bytes32 partition) internal {
+        SnapshotStorage storage $ = snapshotStorage();
+        updateSnapshot($.accountFrozenBalanceSnapshots[account], ERC3643StorageWrapper.getFrozenAmountFor(account));
         updateSnapshot(
-            snapshotStorage().accountFrozenBalanceSnapshots[account],
-            ERC3643StorageWrapper.getFrozenAmountFor(account)
-        );
-        updateSnapshot(
-            snapshotStorage().accountPartitionFrozenBalanceSnapshots[account][partition],
+            $.accountPartitionFrozenBalanceSnapshots[account][partition],
             ERC3643StorageWrapper.getFrozenAmountForByPartition(partition, account)
         );
     }
 
     function updateAccountClearedBalancesSnapshot(address account, bytes32 partition) internal {
+        SnapshotStorage storage $ = snapshotStorage();
+        updateSnapshot($.accountClearedBalanceSnapshots[account], ClearingStorageWrapper.getClearedAmountFor(account));
         updateSnapshot(
-            snapshotStorage().accountClearedBalanceSnapshots[account],
-            ClearingStorageWrapper.getClearedAmountFor(account)
-        );
-        updateSnapshot(
-            snapshotStorage().accountPartitionClearedBalanceSnapshots[account][partition],
+            $.accountPartitionClearedBalanceSnapshots[account][partition],
             ClearingStorageWrapper.getClearedAmountForByPartition(partition, account)
         );
     }
 
     function updateTotalSupplySnapshot(bytes32 partition) internal {
-        updateSnapshot(snapshotStorage().totalSupplySnapshots, ERC20StorageWrapper.totalSupply());
+        SnapshotStorage storage $ = snapshotStorage();
+        updateSnapshot($.totalSupplySnapshots, ERC20StorageWrapper.totalSupply());
         updateSnapshot(
-            snapshotStorage().totalSupplyByPartitionSnapshots[partition],
+            $.totalSupplyByPartitionSnapshots[partition],
             ERC1410StorageWrapper.totalSupplyByPartition(partition)
         );
     }
@@ -269,7 +260,7 @@ library SnapshotsStorageWrapper {
         address[] memory tokenHolders = tokenHoldersAt(snapshotID, pageIndex, pageLength);
         uint256 length = tokenHolders.length;
         balances_ = new HolderBalance[](length);
-        for (uint256 i = 0; i < length; ) {
+        for (uint256 i; i < length; ) {
             address tokenHolder = tokenHolders[i];
             balances_[i] = HolderBalance({
                 holder: tokenHolder,
@@ -332,13 +323,12 @@ library SnapshotsStorageWrapper {
         uint256 snapshotId,
         uint256 pageIndex,
         uint256 pageLength
-    ) internal view returns (address[] memory) {
+    ) internal view returns (address[] memory tk) {
         (uint256 start, uint256 end) = Pagination.getStartAndEnd(pageIndex, pageLength);
-
-        address[] memory tk = new address[](Pagination.getSize(start, end, totalTokenHoldersAt(snapshotId)));
-        uint256 length = tk.length;
-        for (uint256 i = 0; i < length; ) {
-            uint256 index = i + 1;
+        uint256 length = Pagination.getSize(start, end, totalTokenHoldersAt(snapshotId));
+        tk = new address[](length);
+        uint256 index = 1;
+        for (uint256 i; i < length; ) {
             (bool snapshotted, address value) = addressValueAt(
                 snapshotId,
                 snapshotStorage().tokenHoldersSnapshots[index]
@@ -347,10 +337,9 @@ library SnapshotsStorageWrapper {
             tk[i] = snapshotted ? value : ERC1410StorageWrapper.getTokenHolder(index);
             unchecked {
                 ++i;
+                ++index;
             }
         }
-
-        return tk;
     }
 
     function totalTokenHoldersAt(uint256 snapshotId) internal view returns (uint256) {
@@ -522,9 +511,7 @@ library SnapshotsStorageWrapper {
 
         if (abafAtSnapshot_ == abaf) return currentBalanceAdjusted;
 
-        uint256 factor = abaf / abafAtSnapshot_;
-
-        return currentBalanceAdjusted / factor;
+        return currentBalanceAdjusted / (abaf / abafAtSnapshot_);
     }
 
     function totalSupplyAt(uint256 snapshotId) internal view returns (uint256) {
@@ -567,11 +554,7 @@ library SnapshotsStorageWrapper {
     }
 
     function lastSnapshotId(uint256[] storage ids) internal view returns (uint256) {
-        if (ids.length == 0) {
-            return 0;
-        } else {
-            return ids[ids.length - 1];
-        }
+        return (ids.length == 0) ? 0 : ids[ids.length - 1];
     }
 
     function snapshotStorage() internal pure returns (SnapshotStorage storage snapshotStorage_) {

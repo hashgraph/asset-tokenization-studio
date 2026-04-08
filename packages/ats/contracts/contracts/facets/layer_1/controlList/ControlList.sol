@@ -5,6 +5,8 @@ import { IControlList } from "./IControlList.sol";
 import { _CONTROL_LIST_ROLE } from "../../../constants/roles.sol";
 import { ControlListStorageWrapper } from "../../../domain/core/ControlListStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+
 abstract contract ControlList is IControlList, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
     function initializeControlList(bool _isWhiteList) external override onlyNotControlListInitialized {
@@ -18,7 +20,7 @@ abstract contract ControlList is IControlList, Modifiers {
         if (!success_) {
             revert ListedAccount(_account);
         }
-        emit AddedToControlList(msg.sender, _account);
+        emit AddedToControlList(EvmAccessors.getMsgSender(), _account);
     }
 
     function removeFromControlList(
@@ -28,7 +30,7 @@ abstract contract ControlList is IControlList, Modifiers {
         if (!success_) {
             revert UnlistedAccount(_account);
         }
-        emit RemovedFromControlList(msg.sender, _account);
+        emit RemovedFromControlList(EvmAccessors.getMsgSender(), _account);
     }
 
     function getControlListType() external view override returns (bool) {

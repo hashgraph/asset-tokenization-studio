@@ -9,7 +9,6 @@
 pragma solidity ^0.8.17;
 
 import { TRexIFactory as IFactory } from "./IFactory.sol";
-import { ZeroAddressNotAllowed } from "./CommonErrors.sol";
 
 interface TRexIERC20 {
     struct ERC20MetadataInfo {

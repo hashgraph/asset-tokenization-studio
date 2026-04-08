@@ -5,7 +5,6 @@ import { IBusinessLogicResolver } from "./IBusinessLogicResolver.sol";
 import { DiamondCutManager } from "./DiamondCutManager.sol";
 import { _DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
-import { _checkNotInitialized } from "../../services/InitializationErrors.sol";
 
 contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     error Unimplemented();

@@ -9,8 +9,6 @@ import { IERC3643Management } from "./IERC3643Management.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
-import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
-import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 abstract contract ERC3643Management is IERC3643Management, Modifiers {

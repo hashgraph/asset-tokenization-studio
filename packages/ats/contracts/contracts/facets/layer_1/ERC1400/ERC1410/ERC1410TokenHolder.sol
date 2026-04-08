@@ -3,16 +3,12 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC1410Types } from "./IERC1410Types.sol";
 import { IERC1410TokenHolder } from "./IERC1410TokenHolder.sol";
-import { _WILD_CARD_ROLE } from "../../../../constants/roles.sol";
 
-import { IProtectedPartitions } from "../../../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
-
-import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
-import { ProtectedPartitionsStorageWrapper } from "../../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
+import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Modifiers {
     function transferByPartition(
@@ -24,10 +20,23 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Modifiers {
         override
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanTransferFromByPartition(msg.sender, _basicTransferInfo.to, _partition, _basicTransferInfo.value)
+        onlyCanTransferFromByPartition(
+            EvmAccessors.getMsgSender(),
+            _basicTransferInfo.to,
+            _partition,
+            _basicTransferInfo.value
+        )
         returns (bytes32)
     {
-        return TokenCoreOps.transferByPartition(msg.sender, _basicTransferInfo, _partition, _data, address(0), "");
+        return
+            TokenCoreOps.transferByPartition(
+                EvmAccessors.getMsgSender(),
+                _basicTransferInfo,
+                _partition,
+                _data,
+                address(0),
+                ""
+            );
     }
 
     function redeemByPartition(
@@ -39,9 +48,9 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Modifiers {
         override
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanRedeemFromByPartition(msg.sender, _partition, _value)
+        onlyCanRedeemFromByPartition(EvmAccessors.getMsgSender(), _partition, _value)
     {
-        TokenCoreOps.redeemByPartition(_partition, msg.sender, address(0), _value, _data, "");
+        TokenCoreOps.redeemByPartition(_partition, EvmAccessors.getMsgSender(), address(0), _value, _data, "");
     }
 
     function triggerAndSyncAll(bytes32 _partition, address _from, address _to) external onlyUnpaused {
@@ -50,7 +59,7 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Modifiers {
 
     function authorizeOperator(
         address _operator
-    ) external override onlyUnpaused onlyCompliant(msg.sender, _operator, false) {
+    ) external override onlyUnpaused onlyCompliant(EvmAccessors.getMsgSender(), _operator, false) {
         ERC1410StorageWrapper.authorizeOperator(_operator);
     }
 
@@ -60,8 +69,8 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Modifiers {
         external
         override
         onlyUnpaused
-        onlyIdentifiedAddresses(msg.sender, _operator)
-        onlyCompliant(msg.sender, _operator, false)
+        onlyIdentifiedAddresses(EvmAccessors.getMsgSender(), _operator)
+        onlyCompliant(EvmAccessors.getMsgSender(), _operator, false)
     {
         ERC1410StorageWrapper.revokeOperator(_operator);
     }
@@ -74,7 +83,7 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Modifiers {
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyCompliant(msg.sender, _operator, false)
+        onlyCompliant(EvmAccessors.getMsgSender(), _operator, false)
     {
         ERC1410StorageWrapper.authorizeOperatorByPartition(_partition, _operator);
     }

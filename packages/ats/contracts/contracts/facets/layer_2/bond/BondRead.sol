@@ -3,7 +3,6 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IBondRead } from "./IBondRead.sol";
 import { COUPON_CORPORATE_ACTION_TYPE } from "../../../constants/values.sol";
-import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateActionsStorageWrapper.sol";
 import { BondStorageWrapper } from "../../../domain/asset/BondStorageWrapper.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";

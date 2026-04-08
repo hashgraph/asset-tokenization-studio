@@ -8,6 +8,7 @@ import { ExternalListManagementStorageWrapper } from "../../../domain/core/Exter
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ArrayValidation } from "../../../infrastructure/utils/ArrayValidation.sol";
 import { IKyc } from "../kyc/IKyc.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ExternalKycListManagement is IExternalKycListManagement, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
@@ -28,7 +29,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
         if (!success_) {
             revert ExternalKycListsNotUpdated(_kycLists, _actives);
         }
-        emit ExternalKycListsUpdated(msg.sender, _kycLists, _actives);
+        emit ExternalKycListsUpdated(EvmAccessors.getMsgSender(), _kycLists, _actives);
     }
 
     function addExternalKycList(
@@ -38,7 +39,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
         if (!success_) {
             revert ListedKycList(_kycLists);
         }
-        emit AddedToExternalKycLists(msg.sender, _kycLists);
+        emit AddedToExternalKycLists(EvmAccessors.getMsgSender(), _kycLists);
     }
 
     function removeExternalKycList(

@@ -5,11 +5,14 @@ import { IBondManagement } from "./IBondManagement.sol";
 import { IBondTypes } from "./IBondTypes.sol";
 import { IKyc } from "../../layer_1/kyc/IKyc.sol";
 import { _CORPORATE_ACTION_ROLE, _BOND_MANAGER_ROLE, _MATURITY_REDEEMER_ROLE } from "../../../constants/roles.sol";
+import { KPI_BOND_REDEEM_BALANCE } from "../../../constants/values.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { BondStorageWrapper } from "../../../domain/asset/BondStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { InterestRateStorageWrapper } from "../../../domain/asset/InterestRateStorageWrapper.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+import { _checkUnexpectedError } from "../../../infrastructure/utils/UnexpectedError.sol";
 
 error InterestRateIsKpiLinked();
 
@@ -58,8 +61,15 @@ abstract contract Bond is IBondManagement, TimestampProvider, Modifiers {
         for (uint256 i = 0; i < partitions.length; i++) {
             bytes32 partition = partitions[i];
             uint256 balance = ERC1410StorageWrapper.balanceOfByPartition(partition, _tokenHolder);
-            assert(balance > 0);
-            ERC1410StorageWrapper.redeemByPartition(partition, _tokenHolder, msg.sender, balance, "", "");
+            _checkUnexpectedError(balance == 0, KPI_BOND_REDEEM_BALANCE);
+            ERC1410StorageWrapper.redeemByPartition(
+                partition,
+                _tokenHolder,
+                EvmAccessors.getMsgSender(),
+                balance,
+                "",
+                ""
+            );
         }
     }
 
@@ -100,7 +110,7 @@ abstract contract Bond is IBondManagement, TimestampProvider, Modifiers {
         onlyValidMaturityDate(_getBlockTimestamp())
         onlyValidMaturityDate(_getBlockTimestamp())
     {
-        ERC1410StorageWrapper.redeemByPartition(_partition, _tokenHolder, msg.sender, _amount, "", "");
+        ERC1410StorageWrapper.redeemByPartition(_partition, _tokenHolder, EvmAccessors.getMsgSender(), _amount, "", "");
     }
 
     /**
@@ -160,21 +170,18 @@ abstract contract Bond is IBondManagement, TimestampProvider, Modifiers {
         returns (bool success_)
     {
         emit MaturityDateUpdated(address(this), _newMaturityDate, BondStorageWrapper.getMaturityDate());
-        success_ = BondStorageWrapper.setMaturityDate(_newMaturityDate);
-        return success_;
+        BondStorageWrapper.setMaturityDate(_newMaturityDate);
+        return true;
     }
 
     function _prepareCoupon(IBondTypes.Coupon calldata _newCoupon) internal virtual returns (IBondTypes.Coupon memory) {
         // For KPI-linked rate bonds, rate must be PENDING (0), rate must be 0, and rateDecimals must be 0
-        if (InterestRateStorageWrapper.isKpiLinkedRateInitialized()) {
-            if (
-                _newCoupon.rateStatus != IBondTypes.RateCalculationStatus.PENDING ||
+        if (
+            InterestRateStorageWrapper.isKpiLinkedRateInitialized() &&
+            (_newCoupon.rateStatus != IBondTypes.RateCalculationStatus.PENDING ||
                 _newCoupon.rate != 0 ||
-                _newCoupon.rateDecimals != 0
-            ) {
-                revert InterestRateIsKpiLinked();
-            }
-        }
+                _newCoupon.rateDecimals != 0)
+        ) revert InterestRateIsKpiLinked();
         return _newCoupon;
     }
 }

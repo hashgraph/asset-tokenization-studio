@@ -328,19 +328,19 @@ library ClearingStorageWrapper {
                 .clearingTransferByAccountPartitionAndId[_clearingOperationIdentifier.tokenHolder][
                     _clearingOperationIdentifier.partition
                 ][_clearingOperationIdentifier.clearingId].operatorType;
-        } else if (_clearingOperationIdentifier.clearingOperationType == IClearingTypes.ClearingOperationType.Redeem) {
+        }
+        if (_clearingOperationIdentifier.clearingOperationType == IClearingTypes.ClearingOperationType.Redeem) {
             return
                 clearingStorage()
                 .clearingRedeemByAccountPartitionAndId[_clearingOperationIdentifier.tokenHolder][
                     _clearingOperationIdentifier.partition
                 ][_clearingOperationIdentifier.clearingId].operatorType;
-        } else {
-            return
-                clearingStorage()
-                .clearingHoldCreationByAccountPartitionAndId[_clearingOperationIdentifier.tokenHolder][
-                    _clearingOperationIdentifier.partition
-                ][_clearingOperationIdentifier.clearingId].operatorType;
         }
+        return
+            clearingStorage()
+            .clearingHoldCreationByAccountPartitionAndId[_clearingOperationIdentifier.tokenHolder][
+                _clearingOperationIdentifier.partition
+            ][_clearingOperationIdentifier.clearingId].operatorType;
     }
 
     function getClearingCountForByPartition(
@@ -468,9 +468,7 @@ library ClearingStorageWrapper {
     }
 
     function checkClearingDisabled() internal view {
-        if (isClearingActivated()) {
-            revert IClearingTypes.ClearingIsActivated();
-        }
+        if (isClearingActivated()) revert IClearingTypes.ClearingIsActivated();
     }
 
     function checkOperatorClearingTransferByPartition(

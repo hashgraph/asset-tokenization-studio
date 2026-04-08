@@ -11,7 +11,6 @@ import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { _ACCESS_CONTROL_STORAGE_POSITION, RoleDataStorage } from "./AccessControlStorageWrapper.sol";
 import { AccessControlStorageWrapper } from "./AccessControlStorageWrapper.sol";
 import { ControlListStorageWrapper } from "./ControlListStorageWrapper.sol";
 import { ResolverProxyStorageWrapper } from "./ResolverProxyStorageWrapper.sol";
@@ -42,8 +41,7 @@ library ERC3643StorageWrapper {
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC3643(address _compliance, address _identityRegistry) internal {
-        ERC3643Storage storage st = erc3643Storage();
-        st.initialized = true;
+        erc3643Storage().initialized = true;
         setCompliance(_compliance);
         setIdentityRegistry(_identityRegistry);
     }
@@ -171,13 +169,20 @@ library ERC3643StorageWrapper {
         );
 
         if (abaf_ != labaf) {
-            uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(abaf_, labaf);
-            updateTotalFreezeAmountAndLabaf(_tokenHolder, factor, abaf_);
+            updateTotalFreezeAmountAndLabaf(
+                _tokenHolder,
+                AdjustBalancesStorageWrapper.calculateFactor(abaf_, labaf),
+                abaf_
+            );
         }
 
         if (abaf_ != labafByPartition) {
-            uint256 factorByPartition = AdjustBalancesStorageWrapper.calculateFactor(abaf_, labafByPartition);
-            updateTotalFreezeAmountAndLabafByPartition(_partition, _tokenHolder, factorByPartition, abaf_);
+            updateTotalFreezeAmountAndLabafByPartition(
+                _partition,
+                _tokenHolder,
+                AdjustBalancesStorageWrapper.calculateFactor(abaf_, labafByPartition),
+                abaf_
+            );
         }
     }
 
@@ -216,8 +221,9 @@ library ERC3643StorageWrapper {
         if (ControlListStorageWrapper.isInControlList(_lostWallet)) {
             ControlListStorageWrapper.addToControlList(_newWallet);
         }
-        erc3643Storage().addressRecovered[_lostWallet] = true;
-        erc3643Storage().addressRecovered[_newWallet] = false;
+        ERC3643Storage storage $ = erc3643Storage();
+        $.addressRecovered[_lostWallet] = true;
+        $.addressRecovered[_newWallet] = false;
 
         emit IERC3643Types.RecoverySuccess(_lostWallet, _newWallet, _investorOnchainID);
         return true;
@@ -281,11 +287,12 @@ library ERC3643StorageWrapper {
     }
 
     function getFrozenAmountForAdjustedAt(address _tokenHolder, uint256 _timestamp) internal view returns (uint256) {
-        uint256 factor = AdjustBalancesStorageWrapper.calculateFactorForFrozenAmountByTokenHolderAdjustedAt(
-            _tokenHolder,
-            _timestamp
-        );
-        return getFrozenAmountFor(_tokenHolder) * factor;
+        return
+            getFrozenAmountFor(_tokenHolder) *
+            AdjustBalancesStorageWrapper.calculateFactorForFrozenAmountByTokenHolderAdjustedAt(
+                _tokenHolder,
+                _timestamp
+            );
     }
 
     function getFrozenAmountForByPartitionAdjustedAt(
@@ -293,11 +300,12 @@ library ERC3643StorageWrapper {
         address _tokenHolder,
         uint256 _timestamp
     ) internal view returns (uint256) {
-        uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(
-            AdjustBalancesStorageWrapper.getAbafAdjustedAt(_timestamp),
-            AdjustBalancesStorageWrapper.getTotalFrozenLabafByPartition(_partition, _tokenHolder)
-        );
-        return getFrozenAmountForByPartition(_partition, _tokenHolder) * factor;
+        return
+            getFrozenAmountForByPartition(_partition, _tokenHolder) *
+            AdjustBalancesStorageWrapper.calculateFactor(
+                AdjustBalancesStorageWrapper.getAbafAdjustedAt(_timestamp),
+                AdjustBalancesStorageWrapper.getTotalFrozenLabafByPartition(_partition, _tokenHolder)
+            );
     }
 
     function getTotalBalanceForByPartitionAdjustedAt(
@@ -322,14 +330,6 @@ library ERC3643StorageWrapper {
                 HoldStorageWrapper.getHeldAmountFor(_tokenHolder) +
                 ClearingStorageWrapper.getClearedAmountFor(_tokenHolder) ==
             0;
-    }
-
-    function rolesStorage() internal pure returns (RoleDataStorage storage roles_) {
-        bytes32 position = _ACCESS_CONTROL_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            roles_.slot := position
-        }
     }
 
     function erc3643Storage() internal pure returns (ERC3643Storage storage erc3643Storage_) {

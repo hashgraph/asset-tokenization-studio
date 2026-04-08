@@ -20,7 +20,7 @@ abstract contract AdjustBalancesModifiers {
      * @param _factor The adjustment factor to validate
      */
     modifier onlyValidFactor(uint256 _factor) {
-        AdjustBalancesStorageWrapper.requireValidFactor(_factor);
+        AdjustBalancesStorageWrapper.checkValidFactor(_factor);
         _;
     }
 }

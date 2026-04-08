@@ -7,6 +7,7 @@ import { _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION } from "../../../constants/st
 import { ExternalListManagementStorageWrapper } from "../../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ArrayValidation } from "../../../infrastructure/utils/ArrayValidation.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ExternalControlListManagement is IExternalControlListManagement, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
@@ -29,7 +30,7 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
         if (!success_) {
             revert ExternalControlListsNotUpdated(_controlLists, _actives);
         }
-        emit ExternalControlListsUpdated(msg.sender, _controlLists, _actives);
+        emit ExternalControlListsUpdated(EvmAccessors.getMsgSender(), _controlLists, _actives);
     }
 
     function addExternalControlList(

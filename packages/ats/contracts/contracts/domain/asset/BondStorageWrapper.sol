@@ -1,26 +1,26 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _BOND_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import {
     COUPON_CORPORATE_ACTION_TYPE,
     COUPON_LISTING_TASK_TYPE,
     SNAPSHOT_RESULT_ID,
     SNAPSHOT_TASK_TYPE
 } from "../../constants/values.sol";
-import { IBondTypes } from "../../facets/layer_2/bond/IBondTypes.sol";
-import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
-import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
-import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { IBondTypes } from "../../facets/layer_2/bond/IBondTypes.sol";
 import { InterestRateStorageWrapper } from "./InterestRateStorageWrapper.sol";
-import { SustainabilityPerformanceTargetRateLib } from "./SustainabilityPerformanceTargetRateLib.sol";
 import { KpiLinkedRateLib } from "./KpiLinkedRateLib.sol";
+import { Pagination } from "../../infrastructure/utils/Pagination.sol";
+import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
+import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
+import { SustainabilityPerformanceTargetRateLib } from "./SustainabilityPerformanceTargetRateLib.sol";
+import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { _BOND_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 
 library BondStorageWrapper {
     struct BondDataStorage {
@@ -60,11 +60,9 @@ library BondStorageWrapper {
     function setCoupon(
         IBondTypes.Coupon memory newCoupon
     ) internal returns (bytes32 corporateActionId_, uint256 couponID_) {
-        bytes memory data = abi.encode(newCoupon);
-
         (corporateActionId_, couponID_) = CorporateActionsStorageWrapper.addCorporateAction(
             COUPON_CORPORATE_ACTION_TYPE,
-            data
+            abi.encode(newCoupon)
         );
 
         initCoupon(corporateActionId_, newCoupon);
@@ -81,15 +79,13 @@ library BondStorageWrapper {
         ScheduledTasksStorageWrapper.addScheduledSnapshot(newCoupon.recordDate, actionId);
 
         // For fixing date rate bonds, add coupon listing task
-        if (newCoupon.fixingDate != 0) {
-            ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newCoupon.fixingDate, COUPON_LISTING_TASK_TYPE);
-            ScheduledTasksStorageWrapper.addScheduledCouponListing(newCoupon.fixingDate, actionId);
-        }
+        if (newCoupon.fixingDate == 0) return;
+        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newCoupon.fixingDate, COUPON_LISTING_TASK_TYPE);
+        ScheduledTasksStorageWrapper.addScheduledCouponListing(newCoupon.fixingDate, actionId);
     }
 
-    function setMaturityDate(uint256 maturityDate) internal returns (bool success_) {
+    function setMaturityDate(uint256 maturityDate) internal {
         bondStorage().maturityDate = maturityDate;
-        return true;
     }
 
     function addToCouponsOrderedList(uint256 couponID) internal {
@@ -102,16 +98,14 @@ library BondStorageWrapper {
         uint256 rate,
         uint8 rateDecimals
     ) internal {
-        bytes32 actionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
-            COUPON_CORPORATE_ACTION_TYPE,
-            couponID - 1
-        );
-
         coupon.rate = rate;
         coupon.rateDecimals = rateDecimals;
         coupon.rateStatus = IBondTypes.RateCalculationStatus.SET;
 
-        CorporateActionsStorageWrapper.updateCorporateActionData(actionId, abi.encode(coupon));
+        CorporateActionsStorageWrapper.updateCorporateActionData(
+            CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(COUPON_CORPORATE_ACTION_TYPE, couponID - 1),
+            abi.encode(coupon)
+        );
     }
 
     function getBondDetails() internal view returns (IBondTypes.BondDetailsData memory bondDetails_) {
@@ -138,19 +132,21 @@ library BondStorageWrapper {
         (, , bytes memory data) = CorporateActionsStorageWrapper.getCorporateAction(actionId);
 
         if (data.length > 0) {
-            (registeredCoupon_.coupon) = abi.decode(data, (IBondTypes.Coupon));
+            registeredCoupon_.coupon = abi.decode(data, (IBondTypes.Coupon));
         }
 
         registeredCoupon_.snapshotId = CorporateActionsStorageWrapper.getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
 
+        if (
+            InterestRateStorageWrapper.isFixedRateInitialized() ||
+            registeredCoupon_.coupon.fixingDate == 0 ||
+            registeredCoupon_.coupon.rateStatus == IBondTypes.RateCalculationStatus.SET ||
+            registeredCoupon_.coupon.fixingDate > TimeTravelStorageWrapper.getBlockTimestamp()
+        ) return registeredCoupon_;
+
         // Calculate SPT rate on-the-fly if needed (similar to _getCouponAdjustedAt pattern in inheritance-based impl)
         // This ensures the rate is available when getCoupon is called, not just during scheduled task triggers
-        if (
-            registeredCoupon_.coupon.fixingDate != 0 &&
-            registeredCoupon_.coupon.rateStatus != IBondTypes.RateCalculationStatus.SET &&
-            registeredCoupon_.coupon.fixingDate <= TimeTravelStorageWrapper.getBlockTimestamp() &&
-            InterestRateStorageWrapper.isSustainabilityPerformanceTargetRateInitialized()
-        ) {
+        if (InterestRateStorageWrapper.isSustainabilityPerformanceTargetRateInitialized()) {
             (
                 registeredCoupon_.coupon.rate,
                 registeredCoupon_.coupon.rateDecimals
@@ -159,19 +155,12 @@ library BondStorageWrapper {
                 registeredCoupon_.coupon
             );
             registeredCoupon_.coupon.rateStatus = IBondTypes.RateCalculationStatus.SET;
+            return registeredCoupon_;
         }
-
         // Calculate KPI Linked rate on-the-fly if needed
-        if (
-            registeredCoupon_.coupon.fixingDate != 0 &&
-            registeredCoupon_.coupon.rateStatus != IBondTypes.RateCalculationStatus.SET &&
-            registeredCoupon_.coupon.fixingDate <= TimeTravelStorageWrapper.getBlockTimestamp() &&
-            InterestRateStorageWrapper.isKpiLinkedRateInitialized()
-        ) {
-            (registeredCoupon_.coupon.rate, registeredCoupon_.coupon.rateDecimals) = KpiLinkedRateLib
-                .calculateKpiLinkedInterestRate(couponID, registeredCoupon_.coupon);
-            registeredCoupon_.coupon.rateStatus = IBondTypes.RateCalculationStatus.SET;
-        }
+        (registeredCoupon_.coupon.rate, registeredCoupon_.coupon.rateDecimals) = KpiLinkedRateLib
+            .calculateKpiLinkedInterestRate(couponID, registeredCoupon_.coupon);
+        registeredCoupon_.coupon.rateStatus = IBondTypes.RateCalculationStatus.SET;
     }
 
     function getCouponFor(
@@ -182,18 +171,15 @@ library BondStorageWrapper {
 
         couponFor_.coupon = registeredCoupon.coupon;
 
-        if (registeredCoupon.coupon.recordDate < TimeTravelStorageWrapper.getBlockTimestamp()) {
-            couponFor_.recordDateReached = true;
+        if (registeredCoupon.coupon.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return couponFor_;
 
-            couponFor_.tokenBalance = (registeredCoupon.snapshotId != 0)
-                ? SnapshotsStorageWrapper.getTotalBalanceOfAtSnapshot(registeredCoupon.snapshotId, account)
-                : ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(
-                    account,
-                    TimeTravelStorageWrapper.getBlockTimestamp()
-                );
+        couponFor_.recordDateReached = true;
 
-            couponFor_.decimals = ERC20StorageWrapper.decimalsAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
-        }
+        couponFor_.tokenBalance = (registeredCoupon.snapshotId != 0)
+            ? SnapshotsStorageWrapper.getTotalBalanceOfAtSnapshot(registeredCoupon.snapshotId, account)
+            : ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(account, TimeTravelStorageWrapper.getBlockTimestamp());
+
+        couponFor_.decimals = ERC20StorageWrapper.decimalsAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
     }
 
     function getCouponAmountFor(
@@ -208,9 +194,11 @@ library BondStorageWrapper {
 
         couponAmountFor_.recordDateReached = true;
 
-        uint256 period = couponFor.coupon.endDate - couponFor.coupon.startDate;
-
-        couponAmountFor_.numerator = couponFor.tokenBalance * bondDetails.nominalValue * couponFor.coupon.rate * period;
+        couponAmountFor_.numerator =
+            couponFor.tokenBalance *
+            bondDetails.nominalValue *
+            couponFor.coupon.rate *
+            (couponFor.coupon.endDate - couponFor.coupon.startDate);
         couponAmountFor_.denominator =
             10 ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals) *
             365 days;
@@ -239,7 +227,7 @@ library BondStorageWrapper {
     ) internal view returns (address[] memory holders_) {
         IBondTypes.RegisteredCoupon memory registeredCoupon = getCoupon(couponID);
 
-        if (registeredCoupon.coupon.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return new address[](0);
+        if (registeredCoupon.coupon.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return holders_;
 
         if (registeredCoupon.snapshotId != 0)
             return SnapshotsStorageWrapper.tokenHoldersAt(registeredCoupon.snapshotId, pageIndex, pageLength);
@@ -269,11 +257,10 @@ library BondStorageWrapper {
 
         if (pos < actualOrderedListLengthTotal) return bondStorage().couponsOrderedListByIds[pos];
 
-        uint256 pendingIndexOffset = pos - actualOrderedListLengthTotal;
-
-        uint256 index = ScheduledTasksStorageWrapper.getScheduledCouponListingCount() - 1 - pendingIndexOffset;
-
-        return ScheduledTasksStorageWrapper.getScheduledCouponListingIdAtIndex(index);
+        return
+            ScheduledTasksStorageWrapper.getScheduledCouponListingIdAtIndex(
+                ScheduledTasksStorageWrapper.getScheduledCouponListingCount() + actualOrderedListLengthTotal - 1 - pos
+            );
     }
 
     function getCouponsOrderedList(
@@ -290,8 +277,12 @@ library BondStorageWrapper {
             )
         );
 
-        for (uint256 i = 0; i < couponIDs_.length; i++) {
-            couponIDs_[i] = getCouponFromOrderedListAt(start + i);
+        uint256 length = couponIDs_.length;
+        for (uint256 i; i < length; ) {
+            unchecked {
+                couponIDs_[i] = getCouponFromOrderedListAt(start + i);
+                ++i;
+            }
         }
     }
 
@@ -308,26 +299,15 @@ library BondStorageWrapper {
     function getPreviousCouponInOrderedList(uint256 couponID) internal view returns (uint256 previousCouponID_) {
         uint256 orderedListLength = getCouponsOrderedListTotalAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
 
-        if (orderedListLength < 2) {
-            return 0;
-        }
+        if (orderedListLength < 2 || getCouponFromOrderedListAt(0) == couponID) return 0;
 
-        if (getCouponFromOrderedListAt(0) == couponID) {
-            return 0;
-        }
-
-        orderedListLength--;
-        uint256 previousCouponId;
-
-        for (uint256 index = 0; index < orderedListLength; index++) {
-            previousCouponId = getCouponFromOrderedListAt(index);
-            uint256 couponIdAtNext = getCouponFromOrderedListAt(index + 1);
-            if (couponIdAtNext == couponID) {
-                break;
+        unchecked {
+            --orderedListLength;
+            for (uint256 index; index < orderedListLength; ) {
+                previousCouponID_ = getCouponFromOrderedListAt(index);
+                if (getCouponFromOrderedListAt(++index) == couponID) return previousCouponID_;
             }
         }
-
-        return previousCouponId;
     }
 
     function requireValidMaturityDate(uint256 maturityDate) internal view {

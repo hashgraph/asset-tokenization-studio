@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _ISSUER_ROLE, _AGENT_ROLE, _WILD_CARD_ROLE } from "../../../../constants/roles.sol";
+import { _ISSUER_ROLE, _AGENT_ROLE } from "../../../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../../../constants/values.sol";
 import { IERC1594 } from "./IERC1594.sol";
-import { IProtectedPartitions } from "../../../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 
 import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
@@ -12,12 +11,12 @@ import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper
 import { IPause } from "../../../../facets/layer_1/pause/IPause.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { CapStorageWrapper } from "../../../../domain/core/CapStorageWrapper.sol";
-import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 import { Eip1066 } from "../../../../constants/eip1066.sol";
 import { ProtectedPartitionRoleValidator } from "../../../../infrastructure/utils/ProtectedPartitionRoleValidator.sol";
+import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPartitionRoleValidator {
     // solhint-disable-next-line func-name-mixedcase
@@ -34,10 +33,10 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
         override
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanTransferFromByPartition(msg.sender, _to, _DEFAULT_PARTITION, _value)
+        onlyCanTransferFromByPartition(EvmAccessors.getMsgSender(), _to, _DEFAULT_PARTITION, _value)
     {
-        TokenCoreOps.transfer(msg.sender, _to, _value);
-        emit TransferWithData(msg.sender, _to, _value, _data);
+        TokenCoreOps.transfer(EvmAccessors.getMsgSender(), _to, _value);
+        emit TransferWithData(EvmAccessors.getMsgSender(), _to, _value, _data);
     }
 
     function transferFromWithData(
@@ -48,7 +47,7 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
     )
         external
         override
-        onlyUnrecoveredAddress(msg.sender)
+        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(_to)
         onlyUnrecoveredAddress(_from)
         onlyWithoutMultiPartition

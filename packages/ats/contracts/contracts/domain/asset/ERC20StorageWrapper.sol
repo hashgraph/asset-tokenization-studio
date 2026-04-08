@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _ERC20_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { _DEFAULT_PARTITION, KPI_ERC20_APPROVE_OWNER } from "../../constants/values.sol";
 import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
 // IERC20StorageWrapper is now merged into IERC20
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
@@ -11,6 +11,7 @@ import { ERC1410BasicStorage, ERC1410StorageWrapper } from "./ERC1410StorageWrap
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 
 struct ERC20Storage {
     string name;
@@ -74,9 +75,9 @@ library ERC20StorageWrapper {
 
     function adjustTotalBalanceFor(uint256 abaf, address account) internal {
         migrateBalanceIfNeeded(account);
-        uint256 factor = AdjustBalancesStorageWrapper.calculateFactorByAbafAndTokenHolder(abaf, account);
         uint256 oldBalance = erc20Storage().balances[account];
-        uint256 newBalance = oldBalance * factor;
+        uint256 newBalance = oldBalance *
+            AdjustBalancesStorageWrapper.calculateFactorByAbafAndTokenHolder(abaf, account);
         if (newBalance != oldBalance) {
             erc20Storage().balances[account] = newBalance;
             unchecked {
@@ -97,14 +98,12 @@ library ERC20StorageWrapper {
 
         if (abaf == labaf) return;
 
-        uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(abaf, labaf);
-
-        erc20Storage().allowed[owner][spender] *= factor;
+        erc20Storage().allowed[owner][spender] *= AdjustBalancesStorageWrapper.calculateFactor(abaf, labaf);
         AdjustBalancesStorageWrapper.updateAllowanceLabaf(owner, spender, abaf);
     }
 
     function approve(address owner, address spender, uint256 value) internal returns (bool) {
-        assert(owner != address(0));
+        _checkUnexpectedError(owner == address(0), KPI_ERC20_APPROVE_OWNER);
 
         if (spender == address(0)) {
             revert IERC20.SpenderWithZeroAddress();
@@ -266,11 +265,12 @@ library ERC20StorageWrapper {
     }
 
     function allowanceAdjustedAt(address owner, address spender, uint256 timestamp) internal view returns (uint256) {
-        uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(
-            AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
-            AdjustBalancesStorageWrapper.getAllowanceLabaf(owner, spender)
-        );
-        return allowance(owner, spender) * factor;
+        return
+            allowance(owner, spender) *
+            AdjustBalancesStorageWrapper.calculateFactor(
+                AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
+                AdjustBalancesStorageWrapper.getAllowanceLabaf(owner, spender)
+            );
     }
 
     function erc20Storage() internal pure returns (ERC20Storage storage erc20Storage_) {

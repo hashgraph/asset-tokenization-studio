@@ -5,10 +5,9 @@ import { IERC1644 } from "./IERC1644.sol";
 import { _DEFAULT_ADMIN_ROLE, _CONTROLLER_ROLE, _AGENT_ROLE } from "../../../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
-import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC1644StorageWrapper } from "../../../../domain/asset/ERC1644StorageWrapper.sol";
-import { _checkNotInitialized } from "../../../../services/InitializationErrors.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
+import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ERC1644 is IERC1644, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
@@ -27,10 +26,10 @@ abstract contract ERC1644 is IERC1644, Modifiers {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
+            AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         }
         TokenCoreOps.transfer(_from, _to, _value);
-        emit IERC1644.ControllerTransfer(msg.sender, _from, _to, _value, _data, _operatorData);
+        emit IERC1644.ControllerTransfer(EvmAccessors.getMsgSender(), _from, _to, _value, _data, _operatorData);
     }
 
     function controllerRedeem(
@@ -43,10 +42,10 @@ abstract contract ERC1644 is IERC1644, Modifiers {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
+            AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         }
         TokenCoreOps.burn(_tokenHolder, _value);
-        emit IERC1644.ControllerRedemption(msg.sender, _tokenHolder, _value, _data, _operatorData);
+        emit IERC1644.ControllerRedemption(EvmAccessors.getMsgSender(), _tokenHolder, _value, _data, _operatorData);
     }
 
     function finalizeControllable() external override onlyRole(_DEFAULT_ADMIN_ROLE) onlyControllable {

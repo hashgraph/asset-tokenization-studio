@@ -5,7 +5,6 @@ import { ICap } from "./ICap.sol";
 import { _CAP_ROLE } from "../../../constants/roles.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../../domain/core/CapStorageWrapper.sol";
-import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
 abstract contract Cap is ICap, TimestampProvider, Modifiers {

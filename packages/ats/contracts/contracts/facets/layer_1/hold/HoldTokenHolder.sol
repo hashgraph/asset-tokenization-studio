@@ -5,13 +5,10 @@ import { HoldStorageWrapper } from "../../../domain/asset/HoldStorageWrapper.sol
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 import { IHoldTypes } from "./IHoldTypes.sol";
 import { IHoldTokenHolder } from "./IHoldTokenHolder.sol";
-import { IProtectedPartitions } from "../../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
-import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
-import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../../domain/asset/ERC1594StorageWrapper.sol";
-import { _WILD_CARD_ROLE } from "../../../constants/roles.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title HoldTokenHolder
@@ -50,7 +47,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
         onlyUnpaused
         onlyClearingDisabled
         onlyValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyUnrecoveredAddress(msg.sender)
+        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(_hold.to)
         notZeroAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
@@ -59,13 +56,13 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
     {
         (success_, holdId_) = HoldStorageWrapper.createHoldByPartition(
             _partition,
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             _hold,
             "",
             ThirdPartyType.NULL
         );
 
-        emit HeldByPartition(msg.sender, msg.sender, _partition, holdId_, _hold, "");
+        emit HeldByPartition(EvmAccessors.getMsgSender(), EvmAccessors.getMsgSender(), _partition, holdId_, _hold, "");
     }
 
     /**
@@ -98,7 +95,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
         onlyUnProtectedPartitionsOrWildCardRole
         onlyValidCreateHoldFromByPartition(
             _hold.expirationTimestamp,
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             _hold.to,
             _from,
             _hold.escrow,

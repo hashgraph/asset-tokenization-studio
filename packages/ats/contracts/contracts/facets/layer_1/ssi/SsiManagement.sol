@@ -5,6 +5,7 @@ import { ISsiManagement } from "./ISsiManagement.sol";
 import { _SSI_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { SsiManagementStorageWrapper } from "../../../domain/core/SsiManagementStorageWrapper.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract SsiManagement is ISsiManagement, Modifiers {
     function setRevocationRegistryAddress(
@@ -25,7 +26,7 @@ abstract contract SsiManagement is ISsiManagement, Modifiers {
         if (!success_) {
             revert ListedIssuer(_issuer);
         }
-        emit AddedToIssuerList(msg.sender, _issuer);
+        emit AddedToIssuerList(EvmAccessors.getMsgSender(), _issuer);
     }
 
     function removeIssuer(
@@ -35,7 +36,7 @@ abstract contract SsiManagement is ISsiManagement, Modifiers {
         if (!success_) {
             revert UnlistedIssuer(_issuer);
         }
-        emit RemovedFromIssuerList(msg.sender, _issuer);
+        emit RemovedFromIssuerList(EvmAccessors.getMsgSender(), _issuer);
     }
 
     function getRevocationRegistryAddress() external view override returns (address revocationRegistryAddress_) {

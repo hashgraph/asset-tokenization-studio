@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _ERC20VOTES_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { KPI_VOTES_CALC_FACTOR } from "../../constants/values.sol";
 import { IERC20Votes } from "../../facets/layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Checkpoints } from "../../infrastructure/utils/Checkpoints.sol";
@@ -10,8 +11,9 @@ import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 
-// solhint-disable custom-errors
+//TODO: Remove revert reasons.
 
 struct ERC20VotesStorage {
     bool activated;
@@ -35,9 +37,8 @@ library ERC20VotesStorageWrapper {
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20Votes(bool activated) internal {
-        ERC20VotesStorage storage erc20VotesStorage = erc20VotesStorage_();
         setActivate(activated);
-        erc20VotesStorage.initialized = true;
+        erc20VotesStorage_().initialized = true;
     }
 
     function setActivate(bool activated) internal {
@@ -54,30 +55,32 @@ library ERC20VotesStorageWrapper {
         uint256 abaf = AdjustBalancesStorageWrapper.getAbaf();
 
         uint256 pos = erc20VotesStorage.abafCheckpoints.length;
+        uint256 clockAddress = clock();
 
-        if (pos != 0)
-            if (erc20VotesStorage.abafCheckpoints[pos - 1].from == clock()) {
-                if (erc20VotesStorage.abafCheckpoints[pos - 1].value != abaf)
-                    revert IERC20Votes.AbafChangeForBlockForbidden(clock());
-                return;
-            }
-
-        erc20VotesStorage_().abafCheckpoints.push(Checkpoints.Checkpoint({ from: clock(), value: abaf }));
+        if (pos != 0 && erc20VotesStorage.abafCheckpoints[pos - 1].from == clockAddress) {
+            if (erc20VotesStorage.abafCheckpoints[pos - 1].value != abaf)
+                revert IERC20Votes.AbafChangeForBlockForbidden(clockAddress);
+            return;
+        }
+        erc20VotesStorage.abafCheckpoints.push(Checkpoints.Checkpoint({ from: clockAddress, value: abaf }));
     }
 
     function afterTokenTransfer(bytes32 /*partition*/, address from, address to, uint256 amount) internal {
         ERC20VotesStorage storage erc20VotesStorage = erc20VotesStorage_();
 
-        if (isActivated()) {
-            takeAbafCheckpoint();
-            if (from == address(0)) {
-                writeCheckpoint(erc20VotesStorage.totalSupplyCheckpoints, true, amount);
-                moveVotingPower(address(0), delegates(to), amount);
-            } else if (to == address(0)) {
-                writeCheckpoint(erc20VotesStorage.totalSupplyCheckpoints, false, amount);
-                moveVotingPower(delegates(from), address(0), amount);
-            } else moveVotingPower(delegates(from), delegates(to), amount);
+        if (!isActivated()) return;
+        takeAbafCheckpoint();
+        if (from == address(0)) {
+            writeCheckpoint(erc20VotesStorage.totalSupplyCheckpoints, true, amount);
+            moveVotingPower(address(0), delegates(to), amount);
+            return;
         }
+        if (to == address(0)) {
+            writeCheckpoint(erc20VotesStorage.totalSupplyCheckpoints, false, amount);
+            moveVotingPower(delegates(from), address(0), amount);
+            return;
+        }
+        moveVotingPower(delegates(from), delegates(to), amount);
     }
 
     function delegate(address delegator, address delegatee) internal {
@@ -93,27 +96,26 @@ library ERC20VotesStorageWrapper {
 
         takeAbafCheckpoint();
 
-        uint256 delegatorBalance = ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(
-            delegator,
-            TimeTravelStorageWrapper.getBlockTimestamp()
-        );
-
         erc20VotesStorage_().delegates[delegator] = delegatee;
 
         emit DelegateChanged(delegator, currentDelegate, delegatee);
 
-        moveVotingPower(currentDelegate, delegatee, delegatorBalance);
+        moveVotingPower(
+            currentDelegate,
+            delegatee,
+            ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(delegator, TimeTravelStorageWrapper.getBlockTimestamp())
+        );
     }
 
     function moveVotingPower(address src, address dst, uint256 amount) internal {
-        if (src != dst && amount > 0) {
-            if (src != address(0)) {
-                moveVotingPower(src, false, amount); // subtract from src
-            }
+        if (src == dst || amount == 0) return;
 
-            if (dst != address(0)) {
-                moveVotingPower(dst, true, amount); // add to dst
-            }
+        if (src != address(0)) {
+            moveVotingPower(src, false, amount); // subtract from src
+        }
+
+        if (dst != address(0)) {
+            moveVotingPower(dst, true, amount); // add to dst
         }
     }
 
@@ -141,9 +143,9 @@ library ERC20VotesStorageWrapper {
 
             if (pos > 0 && oldCkpt.from == clock()) {
                 ckpts[pos - 1].value = newWeight;
-            } else {
-                ckpts.push(Checkpoints.Checkpoint({ from: clock(), value: newWeight }));
+                return (oldWeight, newWeight);
             }
+            ckpts.push(Checkpoints.Checkpoint({ from: clock(), value: newWeight }));
         }
     }
 
@@ -154,7 +156,7 @@ library ERC20VotesStorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
     function CLOCK_MODE() internal view returns (string memory) {
         // Check that the clock was not modified
-        require(clock() == TimeTravelStorageWrapper.getBlockNumber(), "ERC20Votes: broken clock mode");
+        if (clock() != TimeTravelStorageWrapper.getBlockNumber()) revert IERC20Votes.BrokenClockMode();
         return "mode=blocknumber&from=default";
     }
 
@@ -175,12 +177,12 @@ library ERC20VotesStorageWrapper {
     }
 
     function getPastVotes(address account, uint256 timepoint) internal view returns (uint256) {
-        require(timepoint < clock(), "ERC20Votes: future lookup");
+        if (timepoint >= clock()) revert IERC20Votes.FutureLookup(timepoint, clock());
         return getVotesAdjustedAt(timepoint, erc20VotesStorage_().checkpoints[account]);
     }
 
     function getPastTotalSupply(uint256 timepoint) internal view returns (uint256) {
-        require(timepoint < clock(), "ERC20Votes: future lookup");
+        if (timepoint >= clock()) revert IERC20Votes.FutureLookup(timepoint, clock());
         return getVotesAdjustedAt(timepoint, erc20VotesStorage_().totalSupplyCheckpoints);
     }
 
@@ -196,7 +198,7 @@ library ERC20VotesStorageWrapper {
     function calculateFactorBetween(uint256 fromBlock, uint256 toBlock) internal view returns (uint256) {
         (, uint256 abafAtBlockFrom) = erc20VotesStorage_().abafCheckpoints.checkpointsLookup(fromBlock);
         (, uint256 abafAtBlockTo) = erc20VotesStorage_().abafCheckpoints.checkpointsLookup(toBlock);
-        assert(abafAtBlockFrom <= abafAtBlockTo);
+        _checkUnexpectedError(abafAtBlockFrom > abafAtBlockTo, KPI_VOTES_CALC_FACTOR);
 
         if (abafAtBlockFrom == 0) return 1;
 

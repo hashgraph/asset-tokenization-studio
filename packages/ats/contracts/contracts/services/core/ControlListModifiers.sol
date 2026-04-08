@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ControlListStorageWrapper } from "../../domain/core/ControlListStorageWrapper.sol";
 import { _checkNotInitialized } from "../InitializationErrors.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title ControlListModifiers
@@ -27,7 +28,7 @@ abstract contract ControlListModifiers {
      * @dev Reverts if msg.sender is blocked by the control list
      */
     modifier onlySenderListedAllowed() {
-        ControlListStorageWrapper.checkControlList(msg.sender);
+        ControlListStorageWrapper.checkControlList(EvmAccessors.getMsgSender());
         _;
     }
 

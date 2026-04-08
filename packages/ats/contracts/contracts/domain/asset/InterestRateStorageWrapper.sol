@@ -79,10 +79,14 @@ library InterestRateStorageWrapper {
         function(address) view returns (bool) _isProceedRecipient
     ) internal {
         setSPTInterestRate(_interestRate);
-        for (uint256 index = 0; index < _impactData.length; index++) {
-            if (!_isProceedRecipient(_projects[index]))
-                revert ISustainabilityPerformanceTargetRate.NotExistingProject(_projects[index]);
-            setSPTImpactData(_impactData[index], _projects[index]);
+        uint256 length = _impactData.length;
+        for (uint256 index; index < length; ) {
+            address project = _projects[index];
+            if (!_isProceedRecipient(project)) revert ISustainabilityPerformanceTargetRate.NotExistingProject(project);
+            setSPTImpactData(_impactData[index], project);
+            unchecked {
+                ++index;
+            }
         }
 
         sustainabilityPerformanceTargetRateStorage().initialized = true;

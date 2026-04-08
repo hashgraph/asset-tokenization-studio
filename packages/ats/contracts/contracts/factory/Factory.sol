@@ -47,6 +47,7 @@ import { CorporateActionsStorageWrapper } from "../domain/core/CorporateActionsS
 import {
     ISustainabilityPerformanceTargetRate
 } from "../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+import { EvmAccessors } from "../infrastructure/utils/EvmAccessors.sol";
 /* solhint-enable max-line-length */
 
 contract Factory is IFactory {
@@ -133,7 +134,7 @@ contract Factory is IFactory {
             _factoryRegulationData.additionalSecurityData
         );
 
-        emit EquityDeployed(msg.sender, equityAddress_, _equityData, _factoryRegulationData);
+        emit EquityDeployed(EvmAccessors.getMsgSender(), equityAddress_, _equityData, _factoryRegulationData);
     }
 
     function deployBond(
@@ -150,7 +151,7 @@ contract Factory is IFactory {
     {
         bondAddress_ = _deployBond(_bondData, _factoryRegulationData, SecurityType.BondVariableRate);
 
-        emit BondDeployed(msg.sender, bondAddress_, _bondData, _factoryRegulationData);
+        emit BondDeployed(EvmAccessors.getMsgSender(), bondAddress_, _bondData, _factoryRegulationData);
     }
 
     function deployBondFixedRate(
@@ -179,7 +180,7 @@ contract Factory is IFactory {
         // Initialize fixed rate (FixedRateFacet may not be present)
         _tryInitialize_FixedRate(bondAddress_, _bondFixedRateData.fixedRateData);
 
-        emit BondFixedRateDeployed(msg.sender, bondAddress_, _bondFixedRateData);
+        emit BondFixedRateDeployed(EvmAccessors.getMsgSender(), bondAddress_, _bondFixedRateData);
     }
 
     function deployBondKpiLinkedRate(
@@ -224,7 +225,7 @@ contract Factory is IFactory {
     {
         bondAddress_ = _deployBondSustainabilityPerformanceTargetRate(_bondSustainabilityPerformanceTargetRateData);
         emit BondSustainabilityPerformanceTargetRateDeployed(
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             bondAddress_,
             _bondSustainabilityPerformanceTargetRateData
         );

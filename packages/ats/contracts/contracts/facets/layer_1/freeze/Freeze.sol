@@ -9,6 +9,7 @@ import { ExternalListManagementStorageWrapper } from "../../../domain/core/Exter
 import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title Freeze
@@ -40,10 +41,10 @@ abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
         onlyUnpaused
         notZeroAddress(_userAddress)
         onlyUnrecoveredAddress(_userAddress)
-        onlyFreezeRoles(msg.sender)
+        onlyFreezeRoles(EvmAccessors.getMsgSender())
     {
         ERC3643StorageWrapper.setAddressFrozen(_userAddress, _freezStatus);
-        emit AddressFrozen(_userAddress, _freezStatus, msg.sender);
+        emit AddressFrozen(_userAddress, _freezStatus, EvmAccessors.getMsgSender());
     }
 
     /**
@@ -68,7 +69,7 @@ abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
         onlyUnrecoveredAddress(_userAddress)
         notZeroAddress(_userAddress)
         onlyWithoutMultiPartition
-        onlyFreezeRoles(msg.sender)
+        onlyFreezeRoles(EvmAccessors.getMsgSender())
     {
         ERC3643StorageWrapper.freezeTokens(_userAddress, _amount);
         emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
@@ -96,7 +97,7 @@ abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
         onlyUnrecoveredAddress(_userAddress)
         notZeroAddress(_userAddress)
         onlyWithoutMultiPartition
-        onlyFreezeRoles(msg.sender)
+        onlyFreezeRoles(EvmAccessors.getMsgSender())
     {
         ERC3643StorageWrapper.unfreezeTokens(_userAddress, _amount, 0);
         emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
@@ -116,12 +117,17 @@ abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
     function batchSetAddressFrozen(
         address[] calldata _userAddresses,
         bool[] calldata _freeze
-    ) external onlyUnpaused onlyValidInputBoolArrayLength(_userAddresses, _freeze) onlyFreezeRoles(msg.sender) {
+    )
+        external
+        onlyUnpaused
+        onlyValidInputBoolArrayLength(_userAddresses, _freeze)
+        onlyFreezeRoles(EvmAccessors.getMsgSender())
+    {
         for (uint256 i = 0; i < _userAddresses.length; ++i) {
             ExternalListManagementStorageWrapper.checkValidAddress(_userAddresses[i]);
             ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
             ERC3643StorageWrapper.setAddressFrozen(_userAddresses[i], _freeze[i]);
-            emit AddressFrozen(_userAddresses[i], _freeze[i], msg.sender);
+            emit AddressFrozen(_userAddresses[i], _freeze[i], EvmAccessors.getMsgSender());
         }
     }
 

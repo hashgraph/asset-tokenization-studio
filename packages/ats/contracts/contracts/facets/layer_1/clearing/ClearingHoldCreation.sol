@@ -1,21 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _WILD_CARD_ROLE } from "../../../constants/roles.sol";
 import { IClearingHoldCreation } from "./IClearingHoldCreation.sol";
 import { IHoldTypes } from "../hold/IHoldTypes.sol";
-import { IProtectedPartitions } from "../../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
-import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
-import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
-import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWrapper.sol";
 import { ClearingOps } from "../../../domain/orchestrator/ClearingOps.sol";
 import { ClearingReadOps } from "../../../domain/orchestrator/ClearingReadOps.sol";
-import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ClearingHoldCreation is IClearingHoldCreation, Modifiers {
     function clearingCreateHoldByPartition(
@@ -28,7 +23,7 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, Modifiers {
         onlyClearingActivated
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
-        onlyUnrecoveredAddress(msg.sender)
+        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(_hold.to)
         notZeroAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
@@ -37,7 +32,7 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, Modifiers {
     {
         (success_, clearingId_) = ClearingOps.clearingHoldCreationCreation(
             _clearingOperation,
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             _hold,
             "",
             ThirdPartyType.NULL
@@ -55,7 +50,7 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, Modifiers {
         onlyValidClearingCreateHoldByPartition(
             _hold.expirationTimestamp,
             _clearingOperationFrom.clearingOperation.expirationTimestamp,
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             _hold.to,
             _clearingOperationFrom.from,
             _hold.escrow,
@@ -92,7 +87,7 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, Modifiers {
         onlyValidOperatorClearingCreateHoldByPartition(
             _hold.expirationTimestamp,
             _clearingOperationFrom.clearingOperation.expirationTimestamp,
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             _hold.to,
             _clearingOperationFrom.from,
             _hold.escrow,

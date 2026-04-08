@@ -2,12 +2,13 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IBondTypes } from "../../facets/layer_2/bond/IBondTypes.sol";
-import { IKpiLinkedRate } from "../../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
 import { InterestRateStorageWrapper, KpiLinkedRateDataStorage } from "./InterestRateStorageWrapper.sol";
 import { KpisStorageWrapper } from "./KpisStorageWrapper.sol";
 import { ProceedRecipientsStorageWrapper } from "./ProceedRecipientsStorageWrapper.sol";
 import { BondStorageWrapper } from "./BondStorageWrapper.sol";
 import { DecimalsLib } from "../../infrastructure/utils/DecimalsLib.sol";
+import { KPI_LINKED_RATE_COUPON } from "../../constants/values.sol";
+import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 
 /**
  * @title KpiLinkedRateLib
@@ -38,88 +39,65 @@ library KpiLinkedRateLib {
         uint256 couponID,
         IBondTypes.Coupon memory coupon
     ) internal view returns (uint256 rate_, uint8 rateDecimals_) {
-        // Get KPI interest rate configuration
         KpiLinkedRateDataStorage memory kpiData = InterestRateStorageWrapper.kpiLinkedRateStorage();
 
-        // Before start period → use start rate
         if (coupon.fixingDate < kpiData.startPeriod) {
-            return (kpiData.startRate, kpiData.rateDecimals);
+            return _getStartRate(kpiData);
         }
 
-        // Gather KPI data from all projects
-        uint256 projectCount = ProceedRecipientsStorageWrapper.getProceedRecipientsCount();
-        uint256 impactData = 0;
-        bool reportFound = false;
+        (uint256 impactData, bool reportFound) = _collectImpactData(coupon.fixingDate, kpiData.reportPeriod);
 
-        for (uint256 index = 0; index < projectCount; ) {
-            // Get project address
+        if (!reportFound) {
+            return _getRateWhenNoReport(couponID, kpiData);
+        }
+
+        return _getRateFromImpact(impactData, kpiData);
+    }
+
+    function _getRateWhenNoReport(
+        uint256 couponID,
+        KpiLinkedRateDataStorage memory kpiData
+    ) private view returns (uint256 rate_, uint8 rateDecimals_) {
+        (uint256 previousRate, uint8 previousRateDecimals) = _previousRate(couponID);
+
+        uint256 adjustedPreviousRate = DecimalsLib.calculateDecimalsAdjustment(
+            previousRate,
+            previousRateDecimals,
+            kpiData.rateDecimals
+        );
+
+        rate_ = adjustedPreviousRate + kpiData.missedPenalty;
+        if (rate_ > kpiData.maxRate) {
+            rate_ = kpiData.maxRate;
+        }
+
+        return (rate_, kpiData.rateDecimals);
+    }
+
+    function _collectImpactData(
+        uint256 fixingDate,
+        uint256 reportPeriod
+    ) private view returns (uint256 impactData_, bool reportFound_) {
+        uint256 projectCount = ProceedRecipientsStorageWrapper.getProceedRecipientsCount();
+
+        for (uint256 index; index < projectCount; ) {
             address[] memory projects = ProceedRecipientsStorageWrapper.getProceedRecipients(index, 1);
 
-            // Get latest KPI data within the report period
             (uint256 value, bool exists) = KpisStorageWrapper.getLatestKpiData(
-                coupon.fixingDate - kpiData.reportPeriod,
-                coupon.fixingDate,
+                fixingDate - reportPeriod,
+                fixingDate,
                 projects[0]
             );
 
             if (exists) {
-                impactData += value;
-                if (!reportFound) reportFound = true;
+                impactData_ += value;
+                reportFound_ = true;
             }
 
             unchecked {
                 ++index;
             }
         }
-
-        // No report → previousRate + missedPenalty (capped at maxRate)
-        if (!reportFound) {
-            (uint256 previousRate, uint8 previousRateDecimals) = _previousRate(couponID);
-
-            // Adjust decimals to match current rate decimals
-            uint256 adjustedPreviousRate = DecimalsLib.calculateDecimalsAdjustment(
-                previousRate,
-                previousRateDecimals,
-                kpiData.rateDecimals
-            );
-
-            rate_ = adjustedPreviousRate + kpiData.missedPenalty;
-
-            // Cap at maxRate
-            if (rate_ > kpiData.maxRate) {
-                rate_ = kpiData.maxRate;
-            }
-
-            return (rate_, kpiData.rateDecimals);
-        }
-
-        // Report found → calculate based on impact vs baseline
-        uint256 factor = 10 ** kpiData.adjustmentPrecision;
-        uint256 impactDeltaRate;
-
-        if (kpiData.baseLine > impactData) {
-            // Below baseline: rate decreases from baseRate toward minRate
-            impactDeltaRate =
-                (factor * (kpiData.baseLine - impactData)) /
-                (kpiData.baseLine - kpiData.maxDeviationFloor);
-
-            if (impactDeltaRate > factor) {
-                impactDeltaRate = factor;
-            }
-
-            rate_ = kpiData.baseRate - (((kpiData.baseRate - kpiData.minRate) * impactDeltaRate) / factor);
-        } else {
-            // Above baseline: rate increases from baseRate toward maxRate
-            impactDeltaRate = (factor * (impactData - kpiData.baseLine)) / (kpiData.maxDeviationCap - kpiData.baseLine);
-
-            if (impactDeltaRate > factor) {
-                impactDeltaRate = factor;
-            }
-
-            rate_ = kpiData.baseRate + (((kpiData.maxRate - kpiData.baseRate) * impactDeltaRate) / factor);
-        }
-
-        rateDecimals_ = kpiData.rateDecimals;
     }
 
     /**
@@ -138,8 +116,62 @@ library KpiLinkedRateLib {
         IBondTypes.RegisteredCoupon memory previousCoupon = BondStorageWrapper.getCoupon(previousCouponId);
 
         // Previous coupon rate must be set
-        assert(previousCoupon.coupon.rateStatus == IBondTypes.RateCalculationStatus.SET);
+        _checkUnexpectedError(
+            previousCoupon.coupon.rateStatus != IBondTypes.RateCalculationStatus.SET,
+            KPI_LINKED_RATE_COUPON
+        );
 
         return (previousCoupon.coupon.rate, previousCoupon.coupon.rateDecimals);
+    }
+
+    function _getStartRate(
+        KpiLinkedRateDataStorage memory kpiData
+    ) private pure returns (uint256 rate_, uint8 rateDecimals_) {
+        return (kpiData.startRate, kpiData.rateDecimals);
+    }
+
+    function _getRateFromImpact(
+        uint256 impactData,
+        KpiLinkedRateDataStorage memory kpiData
+    ) private pure returns (uint256 rate_, uint8 rateDecimals_) {
+        uint256 factor = 10 ** kpiData.adjustmentPrecision;
+
+        if (impactData < kpiData.baseLine) {
+            return _getDecreasedRate(impactData, kpiData, factor);
+        }
+
+        return _getIncreasedRate(impactData, kpiData, factor);
+    }
+
+    function _getDecreasedRate(
+        uint256 impactData,
+        KpiLinkedRateDataStorage memory kpiData,
+        uint256 factor
+    ) private pure returns (uint256 rate_, uint8 rateDecimals_) {
+        uint256 impactDeltaRate = (factor * (kpiData.baseLine - impactData)) /
+            (kpiData.baseLine - kpiData.maxDeviationFloor);
+
+        if (impactDeltaRate > factor) {
+            impactDeltaRate = factor;
+        }
+
+        rate_ = kpiData.baseRate - (((kpiData.baseRate - kpiData.minRate) * impactDeltaRate) / factor);
+        return (rate_, kpiData.rateDecimals);
+    }
+
+    function _getIncreasedRate(
+        uint256 impactData,
+        KpiLinkedRateDataStorage memory kpiData,
+        uint256 factor
+    ) private pure returns (uint256 rate_, uint8 rateDecimals_) {
+        uint256 impactDeltaRate = (factor * (impactData - kpiData.baseLine)) /
+            (kpiData.maxDeviationCap - kpiData.baseLine);
+
+        if (impactDeltaRate > factor) {
+            impactDeltaRate = factor;
+        }
+
+        rate_ = kpiData.baseRate + (((kpiData.maxRate - kpiData.baseRate) * impactDeltaRate) / factor);
+        return (rate_, kpiData.rateDecimals);
     }
 }

@@ -1,19 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _WILD_CARD_ROLE } from "../../../constants/roles.sol";
 import { IClearingRedeem } from "./IClearingRedeem.sol";
-import { IProtectedPartitions } from "../../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
-import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
-import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ClearingOps } from "../../../domain/orchestrator/ClearingOps.sol";
 import { ClearingReadOps } from "../../../domain/orchestrator/ClearingReadOps.sol";
-import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider, Modifiers {
     function clearingRedeemByPartition(
@@ -25,7 +21,7 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider, Modifier
         onlyUnpaused
         onlyClearingActivated
         onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
-        onlyUnrecoveredAddress(msg.sender)
+        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 clearingId_)
@@ -33,7 +29,7 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider, Modifier
         (success_, clearingId_) = ClearingOps.clearingRedeemCreation(
             _clearingOperation,
             _amount,
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             "",
             ThirdPartyType.NULL
         );
@@ -46,7 +42,7 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider, Modifier
         external
         override
         onlyUnpaused
-        onlyUnrecoveredAddress(msg.sender)
+        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(_clearingOperationFrom.from)
         onlyClearingActivated
         onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
@@ -80,7 +76,7 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider, Modifier
         onlyUnpaused
         onlyClearingActivated
         onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
-        onlyUnrecoveredAddress(msg.sender)
+        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(_clearingOperationFrom.from)
         notZeroAddress(_clearingOperationFrom.from)
         onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)

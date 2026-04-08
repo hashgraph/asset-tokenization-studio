@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { AddressValidation } from "../../infrastructure/utils/AddressValidation.sol";
 import { ZeroAddressNotAllowed } from "../../infrastructure/errors/CommonErrors.sol";
 import { ZERO_ADDRESS, EMPTY_BYTES, _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { _ERC1594_STORAGE_POSITION } from "../../constants/storagePositions.sol";
@@ -25,8 +24,7 @@ import { IControlList } from "../../facets/layer_1/controlList/IControlList.sol"
 import { KycStorageWrapper } from "../core/KycStorageWrapper.sol";
 
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
-import { _ACCESS_CONTROL_STORAGE_POSITION, RoleDataStorage } from "../core/AccessControlStorageWrapper.sol";
-import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import { AccessControlStorageWrapper } from "../core/AccessControlStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { IERC1594 } from "../../facets/layer_1/ERC1400/ERC1594/IERC1594.sol";
 
@@ -124,9 +122,7 @@ library ERC1594StorageWrapper {
         bytes memory /*_operatorData*/
     ) internal view returns (bool isAbleToRedeemFrom, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
         (isAbleToRedeemFrom, statusCode, reasonCode, details) = _genericChecks();
-        if (!isAbleToRedeemFrom) {
-            return (isAbleToRedeemFrom, statusCode, reasonCode, details);
-        }
+        if (!isAbleToRedeemFrom) return (isAbleToRedeemFrom, statusCode, reasonCode, details);
 
         // Format validation
         if (from == ZERO_ADDRESS) {
@@ -138,21 +134,23 @@ library ERC1594StorageWrapper {
             );
         }
 
-        bool checkSender = from != EvmAccessors.getMsgSender() && !_checkSenderHasProtectedPartitionRole(partition);
+        address sender = EvmAccessors.getMsgSender();
+        bool checkSender = _checkSenderHasProtectedPartitionRole(from, sender, partition);
 
-        (isAbleToRedeemFrom, statusCode, reasonCode, details) = _isCompliant(from, address(0), value, checkSender);
-        if (!isAbleToRedeemFrom) {
-            return (isAbleToRedeemFrom, statusCode, reasonCode, details);
-        }
+        (isAbleToRedeemFrom, statusCode, reasonCode, details) = _isCompliant(
+            from,
+            address(0),
+            value,
+            sender,
+            checkSender
+        );
+        if (!isAbleToRedeemFrom) return (isAbleToRedeemFrom, statusCode, reasonCode, details);
 
         (isAbleToRedeemFrom, statusCode, reasonCode, details) = _isIdentified(from, address(0));
-        if (!isAbleToRedeemFrom) {
-            return (isAbleToRedeemFrom, statusCode, reasonCode, details);
-        }
+        if (!isAbleToRedeemFrom) return (isAbleToRedeemFrom, statusCode, reasonCode, details);
 
         // Allowance check for the 'from' methods
-        bool checkAllowance = checkSender &&
-            !ERC1410StorageWrapper.isAuthorized(partition, EvmAccessors.getMsgSender(), from);
+        bool checkAllowance = checkSender && !ERC1410StorageWrapper.isAuthorized(partition, sender, from);
 
         return _businessLogicChecks(checkAllowance, from, value, partition);
     }
@@ -173,9 +171,7 @@ library ERC1594StorageWrapper {
             EMPTY_BYTES,
             EMPTY_BYTES
         );
-        if (!isAbleToTransfer) {
-            LowLevelCall.revertWithData(bytes4(reasonCode), details);
-        }
+        if (!isAbleToTransfer) LowLevelCall.revertWithData(bytes4(reasonCode), details);
     }
 
     function isAbleToTransferFromByPartition(
@@ -187,46 +183,42 @@ library ERC1594StorageWrapper {
         bytes memory /*_operatorData*/
     ) internal view returns (bool isAbleToTransfer, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
         (isAbleToTransfer, statusCode, reasonCode, details) = _genericChecks();
-        if (!isAbleToTransfer) {
-            return (isAbleToTransfer, statusCode, reasonCode, details);
-        }
+        if (!isAbleToTransfer) return (isAbleToTransfer, statusCode, reasonCode, details);
 
         // Format validation
         if (from == ZERO_ADDRESS || to == ZERO_ADDRESS) {
             return (false, Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE, ZeroAddressNotAllowed.selector, EMPTY_BYTES);
         }
 
-        bool checkSender = from != EvmAccessors.getMsgSender() && !_checkSenderHasProtectedPartitionRole(partition);
+        address sender = EvmAccessors.getMsgSender();
+        bool checkSender = _checkSenderHasProtectedPartitionRole(from, sender, partition);
 
-        (isAbleToTransfer, statusCode, reasonCode, details) = _isCompliant(from, to, value, checkSender);
-        if (!isAbleToTransfer) {
-            return (isAbleToTransfer, statusCode, reasonCode, details);
-        }
+        (isAbleToTransfer, statusCode, reasonCode, details) = _isCompliant(from, to, value, sender, checkSender);
+        if (!isAbleToTransfer) return (isAbleToTransfer, statusCode, reasonCode, details);
 
         (isAbleToTransfer, statusCode, reasonCode, details) = _isIdentified(from, to);
-        if (!isAbleToTransfer) {
-            return (isAbleToTransfer, statusCode, reasonCode, details);
-        }
+        if (!isAbleToTransfer) return (isAbleToTransfer, statusCode, reasonCode, details);
 
         // Allowance check for the 'from' methods
-        bool checkAllowance = checkSender &&
-            !ERC1410StorageWrapper.isAuthorized(partition, EvmAccessors.getMsgSender(), from);
+        bool checkAllowance = checkSender && !ERC1410StorageWrapper.isAuthorized(partition, sender, from);
 
         return _businessLogicChecks(checkAllowance, from, value, partition);
     }
 
     function checkIdentity(address from, address to) internal view {
         (bool isIdentified_, , bytes32 reasonCode, bytes memory details) = _isIdentified(from, to);
-        if (!isIdentified_) {
-            LowLevelCall.revertWithData(bytes4(reasonCode), details);
-        }
+        if (!isIdentified_) LowLevelCall.revertWithData(bytes4(reasonCode), details);
     }
 
     function checkCompliance(address from, address to, bool checkSender) internal view {
-        (bool isCompliant_, , bytes32 reasonCode, bytes memory details) = _isCompliant(from, to, 0, checkSender);
-        if (!isCompliant_) {
-            LowLevelCall.revertWithData(bytes4(reasonCode), details);
-        }
+        (bool isCompliant_, , bytes32 reasonCode, bytes memory details) = _isCompliant(
+            from,
+            to,
+            0,
+            EvmAccessors.getMsgSender(),
+            checkSender
+        );
+        if (!isCompliant_) LowLevelCall.revertWithData(bytes4(reasonCode), details);
     }
 
     function erc1594Storage() internal pure returns (ERC1594Storage storage ds) {
@@ -238,94 +230,104 @@ library ERC1594StorageWrapper {
     }
 
     function _genericChecks() private view returns (bool, bytes1, bytes32, bytes memory) {
-        if (ClearingStorageWrapper.isClearingActivated()) {
+        if (ClearingStorageWrapper.isClearingActivated())
             return (false, Eip1066.UNAVAILABLE, IClearingTypes.ClearingIsActivated.selector, EMPTY_BYTES);
-        }
-
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
     }
-    function _checkSenderHasProtectedPartitionRole(bytes32 partition) private view returns (bool hasRole_) {
-        bytes32 role = ProtectedPartitionsStorageWrapper.protectedPartitionsRole(partition);
-        bytes32 position = _ACCESS_CONTROL_STORAGE_POSITION;
-        RoleDataStorage storage roleDataStorage;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            roleDataStorage.slot := position
-        }
-        hasRole_ = EnumerableSet.contains(roleDataStorage.roles[role].roleMembers, EvmAccessors.getMsgSender());
+
+    function _checkSenderHasProtectedPartitionRole(
+        address _from,
+        address _sender,
+        bytes32 _partition
+    ) private view returns (bool checkSender_) {
+        checkSender_ =
+            _from != _sender &&
+            !AccessControlStorageWrapper.hasRole(
+                ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition),
+                _sender
+            );
     }
 
     function _isCompliant(
         address from,
         address to,
         uint256 value,
+        address sender,
         bool checkSender
     ) private view returns (bool status, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
-        // Check sender for blocked status and recovery status when required
         if (checkSender) {
-            if (!ControlListStorageWrapper.isAbleToAccess(EvmAccessors.getMsgSender())) {
-                return (
-                    false,
-                    Eip1066.DISALLOWED_OR_STOP,
-                    IControlList.AccountIsBlocked.selector,
-                    abi.encode(EvmAccessors.getMsgSender())
-                );
-            }
-            if (ERC3643StorageWrapper.isRecovered(EvmAccessors.getMsgSender())) {
-                return (
-                    false,
-                    Eip1066.REVOKED_OR_BANNED,
-                    IERC3643Types.WalletRecovered.selector,
-                    abi.encode(EvmAccessors.getMsgSender())
-                );
-            }
-            // Compliance check for sender in compliance module (amount is 0)
-            bytes memory complianceResultSender = (ERC3643StorageWrapper.erc3643Storage().compliance)
-                .functionStaticCall(
-                    abi.encodeWithSelector(
-                        ICompliance.canTransfer.selector,
-                        EvmAccessors.getMsgSender(),
-                        address(0),
-                        0
-                    ),
-                    IERC3643Types.ComplianceCallFailed.selector
-                );
+            (status, statusCode, reasonCode, details) = _validateAccountForTransfer(sender, abi.encode(sender));
+            if (!status) return (status, statusCode, reasonCode, details);
 
-            if (complianceResultSender.length > 0 && !abi.decode(complianceResultSender, (bool))) {
-                return (
-                    false,
-                    Eip1066.DISALLOWED_OR_STOP,
-                    IERC3643Types.ComplianceNotAllowed.selector,
-                    abi.encode(from, to, value)
-                );
-            }
+            (status, statusCode, reasonCode, details) = _validateSenderCompliance(sender, from, to, value);
+            if (!status) return (status, statusCode, reasonCode, details);
         }
+
         if (from != address(0)) {
-            if (ERC3643StorageWrapper.isRecovered(from)) {
-                return (false, Eip1066.REVOKED_OR_BANNED, IERC3643Types.WalletRecovered.selector, abi.encode(from));
-            }
-
-            if (!ControlListStorageWrapper.isAbleToAccess(from)) {
-                return (false, Eip1066.DISALLOWED_OR_STOP, IControlList.AccountIsBlocked.selector, abi.encode(from));
-            }
+            (status, statusCode, reasonCode, details) = _validateAccountForTransfer(from, abi.encode(from));
+            if (!status) return (status, statusCode, reasonCode, details);
         }
+
         if (to != address(0)) {
-            if (ERC3643StorageWrapper.isRecovered(to)) {
-                return (false, Eip1066.REVOKED_OR_BANNED, IERC3643Types.WalletRecovered.selector, abi.encode(to));
-            }
-
-            if (!ControlListStorageWrapper.isAbleToAccess(to)) {
-                return (false, Eip1066.DISALLOWED_OR_STOP, IControlList.AccountIsBlocked.selector, abi.encode(to));
-            }
+            (status, statusCode, reasonCode, details) = _validateAccountForTransfer(to, abi.encode(to));
+            if (!status) return (status, statusCode, reasonCode, details);
         }
 
-        // Compliance module check
-        bytes memory complianceResult = (ERC3643StorageWrapper.erc3643Storage().compliance).functionStaticCall(
+        (status, statusCode, reasonCode, details) = _validateTransferCompliance(from, to, value);
+        if (!status) return (status, statusCode, reasonCode, details);
+
+        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
+    }
+
+    function _validateAccountForTransfer(
+        address account,
+        bytes memory details
+    ) private view returns (bool status, bytes1 statusCode, bytes32 reasonCode, bytes memory outDetails) {
+        if (ERC3643StorageWrapper.isRecovered(account)) {
+            return (false, Eip1066.REVOKED_OR_BANNED, IERC3643Types.WalletRecovered.selector, details);
+        }
+
+        if (!ControlListStorageWrapper.isAbleToAccess(account)) {
+            return (false, Eip1066.DISALLOWED_OR_STOP, IControlList.AccountIsBlocked.selector, details);
+        }
+
+        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
+    }
+
+    function _validateSenderCompliance(
+        address sender,
+        address from,
+        address to,
+        uint256 value
+    ) private view returns (bool status, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
+        bytes memory result = ERC3643StorageWrapper.erc3643Storage().compliance.functionStaticCall(
+            abi.encodeWithSelector(ICompliance.canTransfer.selector, sender, address(0), 0),
+            IERC3643Types.ComplianceCallFailed.selector
+        );
+
+        if (result.length > 0 && !abi.decode(result, (bool))) {
+            return (
+                false,
+                Eip1066.DISALLOWED_OR_STOP,
+                IERC3643Types.ComplianceNotAllowed.selector,
+                abi.encode(from, to, value)
+            );
+        }
+
+        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
+    }
+
+    function _validateTransferCompliance(
+        address from,
+        address to,
+        uint256 value
+    ) private view returns (bool status, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
+        bytes memory result = ERC3643StorageWrapper.erc3643Storage().compliance.functionStaticCall(
             abi.encodeWithSelector(ICompliance.canTransfer.selector, from, to, value),
             IERC3643Types.ComplianceCallFailed.selector
         );
 
-        if (complianceResult.length > 0 && !abi.decode(complianceResult, (bool))) {
+        if (result.length > 0 && !abi.decode(result, (bool))) {
             return (
                 false,
                 Eip1066.DISALLOWED_OR_STOP,
@@ -342,33 +344,32 @@ library ERC1594StorageWrapper {
         address to
     ) private view returns (bool status, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
         if (from != address(0)) {
-            if (!KycStorageWrapper.verifyKycStatus(IKyc.KycStatus.GRANTED, from)) {
-                return (false, Eip1066.DISALLOWED_OR_STOP, IKyc.InvalidKycStatus.selector, abi.encode(from));
-            }
-
-            bytes memory isVerifiedFrom = (ERC3643StorageWrapper.erc3643Storage().identityRegistry).functionStaticCall(
-                abi.encodeWithSelector(IIdentityRegistry.isVerified.selector, from),
-                IERC3643Types.IdentityRegistryCallFailed.selector
-            );
-
-            if (isVerifiedFrom.length > 0 && !abi.decode(isVerifiedFrom, (bool))) {
-                return (false, Eip1066.DISALLOWED_OR_STOP, IERC3643Types.AddressNotVerified.selector, abi.encode(from));
-            }
+            (status, statusCode, reasonCode, details) = _validateIdentifiedAccount(from);
+            if (!status) return (status, statusCode, reasonCode, details);
         }
 
         if (to != address(0)) {
-            if (!KycStorageWrapper.verifyKycStatus(IKyc.KycStatus.GRANTED, to)) {
-                return (false, Eip1066.DISALLOWED_OR_STOP, IKyc.InvalidKycStatus.selector, abi.encode(to));
-            }
+            (status, statusCode, reasonCode, details) = _validateIdentifiedAccount(to);
+            if (!status) return (status, statusCode, reasonCode, details);
+        }
 
-            bytes memory isVerifiedTo = (ERC3643StorageWrapper.erc3643Storage().identityRegistry).functionStaticCall(
-                abi.encodeWithSelector(IIdentityRegistry.isVerified.selector, to),
-                IERC3643Types.IdentityRegistryCallFailed.selector
-            );
+        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
+    }
 
-            if (isVerifiedTo.length > 0 && !abi.decode(isVerifiedTo, (bool))) {
-                return (false, Eip1066.DISALLOWED_OR_STOP, IERC3643Types.AddressNotVerified.selector, abi.encode(to));
-            }
+    function _validateIdentifiedAccount(
+        address account
+    ) private view returns (bool status, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
+        if (!KycStorageWrapper.verifyKycStatus(IKyc.KycStatus.GRANTED, account)) {
+            return (false, Eip1066.DISALLOWED_OR_STOP, IKyc.InvalidKycStatus.selector, abi.encode(account));
+        }
+
+        bytes memory isVerified = (ERC3643StorageWrapper.erc3643Storage().identityRegistry).functionStaticCall(
+            abi.encodeWithSelector(IIdentityRegistry.isVerified.selector, account),
+            IERC3643Types.IdentityRegistryCallFailed.selector
+        );
+
+        if (isVerified.length > 0 && !abi.decode(isVerified, (bool))) {
+            return (false, Eip1066.DISALLOWED_OR_STOP, IERC3643Types.AddressNotVerified.selector, abi.encode(account));
         }
 
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
@@ -381,22 +382,43 @@ library ERC1594StorageWrapper {
         bytes32 partition
     ) private view returns (bool isAbleToTransfer, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
         if (checkAllowance) {
-            uint256 currentAllowance = ERC20StorageWrapper.allowanceAdjustedAt(
-                from,
-                EvmAccessors.getMsgSender(),
-                TimeTravelStorageWrapper.getBlockTimestamp()
-            );
-            if (currentAllowance < value) {
-                return (
-                    false,
-                    Eip1066.INSUFFICIENT_FUNDS,
-                    IERC20.InsufficientAllowance.selector,
-                    abi.encode(EvmAccessors.getMsgSender(), from, currentAllowance, value, _DEFAULT_PARTITION)
-                );
-            }
+            (isAbleToTransfer, statusCode, reasonCode, details) = _checkAllowance(from, value);
+            if (!isAbleToTransfer) return (isAbleToTransfer, statusCode, reasonCode, details);
         }
 
-        // Partition validation check
+        (isAbleToTransfer, statusCode, reasonCode, details) = _checkPartitionValidity(from, partition);
+        if (!isAbleToTransfer) return (isAbleToTransfer, statusCode, reasonCode, details);
+
+        (isAbleToTransfer, statusCode, reasonCode, details) = _checkPartitionBalance(from, value, partition);
+        if (!isAbleToTransfer) return (isAbleToTransfer, statusCode, reasonCode, details);
+
+        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
+    }
+
+    function _checkAllowance(address from, uint256 value) private view returns (bool, bytes1, bytes32, bytes memory) {
+        address sender = EvmAccessors.getMsgSender();
+        uint256 currentAllowance = ERC20StorageWrapper.allowanceAdjustedAt(
+            from,
+            sender,
+            TimeTravelStorageWrapper.getBlockTimestamp()
+        );
+
+        if (currentAllowance < value) {
+            return (
+                false,
+                Eip1066.INSUFFICIENT_FUNDS,
+                IERC20.InsufficientAllowance.selector,
+                abi.encode(sender, from, currentAllowance, value, _DEFAULT_PARTITION)
+            );
+        }
+
+        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
+    }
+
+    function _checkPartitionValidity(
+        address from,
+        bytes32 partition
+    ) private view returns (bool, bytes1, bytes32, bytes memory) {
         if (!ERC1410StorageWrapper.validPartition(partition, from)) {
             return (
                 false,
@@ -406,12 +428,20 @@ library ERC1594StorageWrapper {
             );
         }
 
-        // Balance check - check partition-specific balance
+        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
+    }
+
+    function _checkPartitionBalance(
+        address from,
+        uint256 value,
+        bytes32 partition
+    ) private view returns (bool, bytes1, bytes32, bytes memory) {
         uint256 currentPartitionBalance = AdjustBalancesStorageWrapper.balanceOfByPartitionAdjustedAt(
             partition,
             from,
             TimeTravelStorageWrapper.getBlockTimestamp()
         );
+
         if (currentPartitionBalance < value) {
             return (
                 false,

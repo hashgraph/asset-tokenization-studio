@@ -19,8 +19,12 @@ library CapStorageWrapper {
     function initialize_Cap(uint256 maxSupply, ICap.PartitionCap[] calldata partitionCap) internal {
         CapDataStorage storage cs = capStorage();
         cs.maxSupply = maxSupply;
-        for (uint256 i = 0; i < partitionCap.length; i++) {
+        uint256 length = partitionCap.length;
+        for (uint256 i; i < length; ) {
             cs.maxSupplyByPartition[partitionCap[i].partition] = partitionCap[i].maxSupply;
+            unchecked {
+                ++i;
+            }
         }
         cs.initialized = true;
     }
@@ -45,22 +49,21 @@ library CapStorageWrapper {
     function adjustMaxSupply(uint256 factor) internal {
         CapDataStorage storage cs = capStorage();
         uint256 limit = MAX_UINT256 / factor;
-        if (cs.maxSupply > limit) cs.maxSupply = MAX_UINT256;
-        else cs.maxSupply *= factor;
+        cs.maxSupply = (cs.maxSupply > limit) ? MAX_UINT256 : cs.maxSupply * factor;
     }
 
     function adjustMaxSupplyByPartition(bytes32 partition, uint256 factor) internal {
         CapDataStorage storage cs = capStorage();
         uint256 limit = MAX_UINT256 / factor;
-        if (cs.maxSupplyByPartition[partition] > limit) cs.maxSupplyByPartition[partition] = MAX_UINT256;
-        else cs.maxSupplyByPartition[partition] *= factor;
+        cs.maxSupplyByPartition[partition] = (cs.maxSupplyByPartition[partition] > limit)
+            ? MAX_UINT256
+            : cs.maxSupplyByPartition[partition] * factor;
     }
 
     function requireWithinMaxSupply(uint256 _amount, uint256 _timestamp) internal view {
         uint256 maxSupply = getMaxSupplyAdjustedAt(_timestamp);
-        if (!isCorrectMaxSupply(ERC1410StorageWrapper.totalSupply() + _amount, maxSupply)) {
+        if (!isCorrectMaxSupply(ERC1410StorageWrapper.totalSupply() + _amount, maxSupply))
             revert ICap.MaxSupplyReached(maxSupply);
-        }
     }
 
     function requireWithinMaxSupplyByPartition(bytes32 _partition, uint256 _amount, uint256 _timestamp) internal view {
@@ -107,10 +110,7 @@ library CapStorageWrapper {
     function getMaxSupplyAdjustedAt(uint256 timestamp) internal view returns (uint256) {
         CapDataStorage storage cs = capStorage();
         (uint256 pendingAbaf, ) = AdjustBalancesStorageWrapper.getPendingScheduledBalanceAdjustmentsAt(timestamp);
-
-        uint256 limit = MAX_UINT256 / pendingAbaf;
-        if (cs.maxSupply > limit) return MAX_UINT256;
-        return cs.maxSupply * pendingAbaf;
+        return (cs.maxSupply > (MAX_UINT256 / pendingAbaf)) ? MAX_UINT256 : cs.maxSupply * pendingAbaf;
     }
 
     function getMaxSupplyByPartitionAdjustedAt(bytes32 partition, uint256 timestamp) internal view returns (uint256) {
@@ -121,8 +121,7 @@ library CapStorageWrapper {
         );
 
         uint256 limit = MAX_UINT256 / factor;
-        if (cs.maxSupplyByPartition[partition] > limit) return MAX_UINT256;
-        return cs.maxSupplyByPartition[partition] * factor;
+        return (cs.maxSupplyByPartition[partition] > limit) ? MAX_UINT256 : cs.maxSupplyByPartition[partition] * factor;
     }
 
     function isCapInitialized() internal view returns (bool) {

@@ -5,7 +5,6 @@ import { IERC20Votes } from "./IERC20Votes.sol";
 import { Checkpoints } from "../../../../infrastructure/utils/Checkpoints.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
 import { ERC20VotesStorageWrapper } from "../../../../domain/asset/ERC20VotesStorageWrapper.sol";
-import { _checkNotInitialized } from "../../../../services/InitializationErrors.sol";
 
 abstract contract ERC20Votes is IERC20Votes, Modifiers {
     // solhint-disable-next-line func-name-mixedcase

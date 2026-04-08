@@ -1,17 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _CONTROLLER_ROLE, _WILD_CARD_ROLE } from "../../../constants/roles.sol";
+import { _CONTROLLER_ROLE } from "../../../constants/roles.sol";
 import { IHoldTypes } from "./IHoldTypes.sol";
 import { IHoldManagement } from "./IHoldManagement.sol";
-import { IProtectedPartitions } from "../../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
-import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
-import { ERC1644StorageWrapper } from "../../../domain/asset/ERC1644StorageWrapper.sol";
 import { HoldStorageWrapper } from "../../../domain/asset/HoldStorageWrapper.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title HoldManagement
@@ -60,7 +58,7 @@ abstract contract HoldManagement is IHoldManagement, Modifiers {
         onlyClearingDisabled
         onlyValidOperatorCreateHoldByPartition(
             _hold.expirationTimestamp,
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             _hold.to,
             _from,
             _hold.escrow,
@@ -77,7 +75,7 @@ abstract contract HoldManagement is IHoldManagement, Modifiers {
             ThirdPartyType.OPERATOR
         );
 
-        emit OperatorHeldByPartition(msg.sender, _from, _partition, holdId_, _hold, _operatorData);
+        emit OperatorHeldByPartition(EvmAccessors.getMsgSender(), _from, _partition, holdId_, _hold, _operatorData);
     }
 
     /**
@@ -126,7 +124,7 @@ abstract contract HoldManagement is IHoldManagement, Modifiers {
             ThirdPartyType.CONTROLLER
         );
 
-        emit ControllerHeldByPartition(msg.sender, _from, _partition, holdId_, _hold, _operatorData);
+        emit ControllerHeldByPartition(EvmAccessors.getMsgSender(), _from, _partition, holdId_, _hold, _operatorData);
     }
 
     /**
@@ -178,6 +176,6 @@ abstract contract HoldManagement is IHoldManagement, Modifiers {
             _signature
         );
 
-        emit ProtectedHeldByPartition(msg.sender, _from, _partition, holdId_, _protectedHold.hold, "");
+        emit ProtectedHeldByPartition(EvmAccessors.getMsgSender(), _from, _partition, holdId_, _protectedHold.hold, "");
     }
 }

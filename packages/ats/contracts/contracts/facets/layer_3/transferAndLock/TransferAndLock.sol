@@ -2,13 +2,10 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
-import { _LOCKER_ROLE, _WILD_CARD_ROLE } from "../../../constants/roles.sol";
+import { _LOCKER_ROLE } from "../../../constants/roles.sol";
 import { ITransferAndLock } from "./ITransferAndLock.sol";
 import { IERC1410Types } from "../../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
-import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
-import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
-import { IProtectedPartitions } from "../../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";

@@ -8,6 +8,7 @@ import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.so
 import { ExternalListManagementStorageWrapper } from "../../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ArrayValidation } from "../../../infrastructure/utils/ArrayValidation.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
@@ -28,7 +29,7 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers
         if (!success_) {
             revert ExternalPausesNotUpdated(_pauses, _actives);
         }
-        emit ExternalPausesUpdated(msg.sender, _pauses, _actives);
+        emit ExternalPausesUpdated(EvmAccessors.getMsgSender(), _pauses, _actives);
     }
 
     function addExternalPause(
@@ -38,7 +39,7 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers
         if (!success_) {
             revert ListedPause(_pause);
         }
-        emit AddedToExternalPauses(msg.sender, _pause);
+        emit AddedToExternalPauses(EvmAccessors.getMsgSender(), _pause);
     }
 
     function removeExternalPause(

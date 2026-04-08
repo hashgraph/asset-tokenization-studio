@@ -91,22 +91,21 @@ library ProtectedPartitionsStorageWrapper {
         IProtectedPartitions.ProtectionData calldata _protectionData,
         string memory _name
     ) internal view returns (bool) {
-        bytes32 functionHash = _getMessageHashTransfer(
-            _partition,
-            _from,
-            _to,
-            _amount,
-            _protectionData.deadline,
-            _protectionData.nounce
-        );
         return
             _verify(
                 _from,
-                functionHash,
+                _getMessageHashTransfer(
+                    _partition,
+                    _from,
+                    _to,
+                    _amount,
+                    _protectionData.deadline,
+                    _protectionData.nounce
+                ),
                 _protectionData.signature,
                 _name,
                 Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
-                block.chainid,
+                EvmAccessors.getChainId(),
                 address(this)
             );
     }
@@ -128,21 +127,14 @@ library ProtectedPartitionsStorageWrapper {
         IProtectedPartitions.ProtectionData calldata _protectionData,
         string memory _name
     ) internal view returns (bool) {
-        bytes32 functionHash = _getMessageHashRedeem(
-            _partition,
-            _from,
-            _amount,
-            _protectionData.deadline,
-            _protectionData.nounce
-        );
         return
             _verify(
                 _from,
-                functionHash,
+                _getMessageHashRedeem(_partition, _from, _amount, _protectionData.deadline, _protectionData.nounce),
                 _protectionData.signature,
                 _name,
                 Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
-                block.chainid,
+                EvmAccessors.getChainId(),
                 address(this)
             );
     }
@@ -164,15 +156,14 @@ library ProtectedPartitionsStorageWrapper {
         bytes calldata _signature,
         string memory _name
     ) internal view returns (bool) {
-        bytes32 functionHash = _getMessageHashCreateHold(_partition, _from, _protectedHold);
         return
             _verify(
                 _from,
-                functionHash,
+                _getMessageHashCreateHold(_partition, _from, _protectedHold),
                 _signature,
                 _name,
                 Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
-                block.chainid,
+                EvmAccessors.getChainId(),
                 address(this)
             );
     }
@@ -193,15 +184,14 @@ library ProtectedPartitionsStorageWrapper {
         bytes calldata _signature,
         string memory _name
     ) internal view returns (bool) {
-        bytes32 functionHash = _getMessageHashClearingCreateHold(_protectedClearingOperation, _hold);
         return
             _verify(
                 _protectedClearingOperation.from,
-                functionHash,
+                _getMessageHashClearingCreateHold(_protectedClearingOperation, _hold),
                 _signature,
                 _name,
                 Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
-                block.chainid,
+                EvmAccessors.getChainId(),
                 address(this)
             );
     }
@@ -224,15 +214,14 @@ library ProtectedPartitionsStorageWrapper {
         bytes calldata _signature,
         string memory _name
     ) internal view returns (bool) {
-        bytes32 functionHash = _getMessageHashClearingTransfer(_protectedClearingOperation, _to, _amount);
         return
             _verify(
                 _protectedClearingOperation.from,
-                functionHash,
+                _getMessageHashClearingTransfer(_protectedClearingOperation, _to, _amount),
                 _signature,
                 _name,
                 Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
-                block.chainid,
+                EvmAccessors.getChainId(),
                 address(this)
             );
     }
@@ -253,15 +242,14 @@ library ProtectedPartitionsStorageWrapper {
         bytes calldata _signature,
         string memory _name
     ) internal view returns (bool) {
-        bytes32 functionHash = _getMessageHashClearingRedeem(_protectedClearingOperation, _amount);
         return
             _verify(
                 _protectedClearingOperation.from,
-                functionHash,
+                _getMessageHashClearingRedeem(_protectedClearingOperation, _amount),
                 _signature,
                 _name,
                 Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
-                block.chainid,
+                EvmAccessors.getChainId(),
                 address(this)
             );
     }

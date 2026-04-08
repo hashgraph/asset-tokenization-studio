@@ -108,15 +108,11 @@ library AccessControlStorageWrapper {
     }
 
     function checkRole(bytes32 _role, address _account) internal view {
-        if (!hasRole(_role, _account)) {
-            revert IAccessControl.AccountHasNoRole(_account, _role);
-        }
+        if (!hasRole(_role, _account)) revert IAccessControl.AccountHasNoRole(_account, _role);
     }
 
     function checkAnyRole(bytes32[] memory _roles, address _account) internal view {
-        if (!hasAnyRole(_roles, _account)) {
-            revert IAccessControl.AccountHasNoRoles(_account, _roles);
-        }
+        if (!hasAnyRole(_roles, _account)) revert IAccessControl.AccountHasNoRoles(_account, _roles);
     }
 
     function getRoleAdmin(bytes32 _role) internal view returns (bytes32) {
@@ -129,9 +125,12 @@ library AccessControlStorageWrapper {
 
     function hasAnyRole(bytes32[] memory _roles, address _account) internal view returns (bool) {
         RoleDataStorage storage roleDataStorage = rolesStorage();
-        for (uint256 i; i < _roles.length; ++i) {
+        for (uint256 i; i < _roles.length; ) {
             if (has(roleDataStorage, _roles[i], _account)) {
                 return true;
+            }
+            unchecked {
+                ++i;
             }
         }
         return false;

@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { TimeTravelProvider } from "./TimeTravelProvider.sol";
-import { TimeTravelStorageWrapper } from "./TimeTravelStorageWrapper.sol";
+import "../../../infrastructure/utils/EvmAccessors.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { ITimeTravel } from "../ITimeTravel.sol";
+import { TimeTravelProvider } from "./TimeTravelProvider.sol";
+import { TimeTravelStorageWrapper } from "./TimeTravelStorageWrapper.sol";
 import { _TIME_TRAVEL_RESOLVER_KEY } from "../constants/resolverKeys.sol";
 
 contract TimeTravelFacet is IStaticFunctionSelectors, ITimeTravel, TimeTravelProvider {
@@ -49,7 +50,7 @@ contract TimeTravelFacet is IStaticFunctionSelectors, ITimeTravel, TimeTravelPro
      * @param chainId The chainId to check
      */
     function checkBlockChainid(uint256 chainId) external view {
-        if (block.chainid != chainId) revert WrongChainId();
+        if (EvmAccessors.getChainId() != chainId) revert WrongChainId();
     }
 
     function getStaticResolverKey() external pure virtual override returns (bytes32 staticResolverKey_) {

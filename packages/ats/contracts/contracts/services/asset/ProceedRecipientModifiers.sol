@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IProceedRecipients } from "../../facets/layer_2/proceedRecipient/IProceedRecipients.sol";
 import { ProceedRecipientsStorageWrapper } from "../../domain/asset/ProceedRecipientsStorageWrapper.sol";
 import { _checkNotInitialized } from "../InitializationErrors.sol";
 

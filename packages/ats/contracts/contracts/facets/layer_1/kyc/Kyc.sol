@@ -7,7 +7,6 @@ import { Modifiers } from "../../../services/Modifiers.sol";
 import { KycStorageWrapper } from "../../../domain/core/KycStorageWrapper.sol";
 import { SsiManagementStorageWrapper } from "../../../domain/core/SsiManagementStorageWrapper.sol";
 import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";
-import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
 abstract contract Kyc is IKyc, TimestampProvider, Modifiers {

@@ -39,8 +39,9 @@ library KycStorageWrapper {
         uint256 _validTo,
         address _issuer
     ) internal returns (bool success_) {
-        kycStorage().kyc[_account] = IKyc.KycData(_validFrom, _validTo, _vcId, _issuer, IKyc.KycStatus.GRANTED);
-        kycStorage().kycAddressesByStatus[IKyc.KycStatus.GRANTED].add(_account);
+        KycStorage storage $ = kycStorage();
+        $.kyc[_account] = IKyc.KycData(_validFrom, _validTo, _vcId, _issuer, IKyc.KycStatus.GRANTED);
+        $.kycAddressesByStatus[IKyc.KycStatus.GRANTED].add(_account);
         success_ = true;
     }
 
@@ -98,8 +99,7 @@ library KycStorageWrapper {
     }
 
     function verifyKycStatus(IKyc.KycStatus _kycStatus, address _account) internal view returns (bool) {
-        KycStorage storage ks = kycStorage();
-        bool internalKycValid = !ks.internalKycActivated ||
+        bool internalKycValid = !kycStorage().internalKycActivated ||
             getKycStatusFor(_account, TimeTravelStorageWrapper.getBlockTimestamp()) == _kycStatus;
         return internalKycValid && ExternalListManagementStorageWrapper.isExternallyGranted(_account, _kycStatus);
     }
