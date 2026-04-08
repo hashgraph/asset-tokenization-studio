@@ -21,15 +21,11 @@ abstract contract ERC1410Issuer is IERC1410Issuer, TimestampProvider, Modifiers 
         onlyUnpaused
         onlyUnrecoveredAddress(msg.sender)
         onlyDefaultPartitionWithSinglePartition(_issueData.partition)
+        onlyWithinMaxSupply(_issueData.value, _getBlockTimestamp())
+        onlyWithinMaxSupplyByPartition(_issueData.partition, _issueData.value, _getBlockTimestamp())
+        onlyIdentifiedAddresses(address(0), _issueData.tokenHolder)
+        onlyCompliant(address(0), _issueData.tokenHolder, false)
     {
-        CapStorageWrapper.requireWithinMaxSupply(_issueData.value, _getBlockTimestamp());
-        CapStorageWrapper.requireWithinMaxSupplyByPartition(
-            _issueData.partition,
-            _issueData.value,
-            _getBlockTimestamp()
-        );
-        ERC1594StorageWrapper.requireIdentified(address(0), _issueData.tokenHolder);
-        ERC1594StorageWrapper.requireCompliant(address(0), _issueData.tokenHolder, false);
         bytes32[] memory roles = new bytes32[](2);
         roles[0] = _ISSUER_ROLE;
         roles[1] = _AGENT_ROLE;

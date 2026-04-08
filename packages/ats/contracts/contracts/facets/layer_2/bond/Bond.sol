@@ -124,11 +124,11 @@ abstract contract Bond is IBondManagement, TimestampProvider, Modifiers {
         override
         onlyUnpaused
         onlyRole(_CORPORATE_ACTION_ROLE)
-        requireValidDates(_newCoupon.startDate, _newCoupon.endDate)
-        requireValidDates(_newCoupon.recordDate, _newCoupon.executionDate)
-        requireValidDates(_newCoupon.fixingDate, _newCoupon.executionDate)
-        requireValidTimestamp(_newCoupon.recordDate)
-        requireValidTimestamp(_newCoupon.fixingDate)
+        onlyValidDates(_newCoupon.startDate, _newCoupon.endDate)
+        onlyValidDates(_newCoupon.recordDate, _newCoupon.executionDate)
+        onlyValidDates(_newCoupon.fixingDate, _newCoupon.executionDate)
+        onlyValidTimestamp(_newCoupon.recordDate)
+        onlyValidTimestamp(_newCoupon.fixingDate)
         returns (uint256 couponID_)
     {
         IBondTypes.Coupon memory coupon = _prepareCoupon(_newCoupon);

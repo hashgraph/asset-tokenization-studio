@@ -883,7 +883,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       {
         name: "setMaxSupply",
-        signature: "function setMaxSupply(uint256 _maxSupply) returns (bool success_)",
+        signature: "function setMaxSupply(uint256 maxSupply) returns (bool success_)",
         selector: "0x6f8b44b0",
       },
       {

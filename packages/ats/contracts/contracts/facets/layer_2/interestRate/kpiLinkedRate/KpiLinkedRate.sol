@@ -20,8 +20,7 @@ contract KpiLinkedRate is IKpiLinkedRate, Modifiers {
 
     function setInterestRate(
         InterestRate calldata _newInterestRate
-    ) external onlyUnpaused onlyRole(_INTEREST_RATE_MANAGER_ROLE) {
-        InterestRateStorageWrapper.requireValidInterestRate(_newInterestRate);
+    ) external onlyUnpaused onlyRole(_INTEREST_RATE_MANAGER_ROLE) onlyValidInterestRate(_newInterestRate) {
         ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();
         InterestRateStorageWrapper.setInterestRate(_newInterestRate);
         emit InterestRateUpdated(msg.sender, _newInterestRate);
@@ -29,8 +28,7 @@ contract KpiLinkedRate is IKpiLinkedRate, Modifiers {
 
     function setImpactData(
         ImpactData calldata _newImpactData
-    ) external onlyUnpaused onlyRole(_INTEREST_RATE_MANAGER_ROLE) {
-        InterestRateStorageWrapper.requireValidImpactData(_newImpactData);
+    ) external onlyUnpaused onlyRole(_INTEREST_RATE_MANAGER_ROLE) onlyValidImpactData(_newImpactData) {
         ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();
         InterestRateStorageWrapper.setImpactData(_newImpactData);
         emit ImpactDataUpdated(msg.sender, _newImpactData);

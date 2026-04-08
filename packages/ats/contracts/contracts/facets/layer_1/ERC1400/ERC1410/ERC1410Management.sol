@@ -78,9 +78,9 @@ abstract contract ERC1410Management is IERC1410Management, Modifiers {
             _operatorTransferData.partition,
             _operatorTransferData.value
         )
+        onlyOperator(_operatorTransferData.partition, _operatorTransferData.from)
         returns (bytes32)
     {
-        ERC1410StorageWrapper.requireOperator(_operatorTransferData.partition, _operatorTransferData.from);
         return TokenCoreOps.operatorTransferByPartition(_operatorTransferData);
     }
 
@@ -96,8 +96,8 @@ abstract contract ERC1410Management is IERC1410Management, Modifiers {
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnProtectedPartitionsOrWildCardRole
         onlyCanRedeemFromByPartition(_tokenHolder, _partition, _value)
+        onlyOperator(_partition, _tokenHolder)
     {
-        ERC1410StorageWrapper.requireOperator(_partition, _tokenHolder);
         TokenCoreOps.redeemByPartition(_partition, _tokenHolder, msg.sender, _value, _data, _operatorData);
     }
 

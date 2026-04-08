@@ -33,8 +33,7 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers
 
     function addExternalPause(
         address _pause
-    ) external override onlyUnpaused onlyRole(_PAUSE_MANAGER_ROLE) returns (bool success_) {
-        ExternalListManagementStorageWrapper.checkValidAddress(_pause);
+    ) external override onlyUnpaused onlyRole(_PAUSE_MANAGER_ROLE) onlyValidAddress(_pause) returns (bool success_) {
         success_ = ExternalListManagementStorageWrapper.addExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
         if (!success_) {
             revert ListedPause(_pause);

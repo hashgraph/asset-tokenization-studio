@@ -17,9 +17,15 @@ import { EquityStorageWrapper, EquityDataStorage } from "../../../domain/asset/E
 abstract contract Equity is IEquity, Modifiers {
     function setDividends(
         Dividend calldata _newDividend
-    ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (uint256 dividendID_) {
-        CorporateActionsStorageWrapper.requireValidDates(_newDividend.recordDate, _newDividend.executionDate);
-        ScheduledTasksStorageWrapper.requireValidTimestamp(_newDividend.recordDate);
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_CORPORATE_ACTION_ROLE)
+        onlyValidDates(_newDividend.recordDate, _newDividend.executionDate)
+        onlyValidTimestamp(_newDividend.recordDate)
+        returns (uint256 dividendID_)
+    {
         bytes32 corporateActionID;
         (corporateActionID, dividendID_) = EquityStorageWrapper.setDividends(_newDividend);
         emit IEquity.DividendSet(
@@ -35,8 +41,14 @@ abstract contract Equity is IEquity, Modifiers {
 
     function setVoting(
         Voting calldata _newVoting
-    ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (uint256 voteID_) {
-        ScheduledTasksStorageWrapper.requireValidTimestamp(_newVoting.recordDate);
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_CORPORATE_ACTION_ROLE)
+        onlyValidTimestamp(_newVoting.recordDate)
+        returns (uint256 voteID_)
+    {
         bytes32 corporateActionID;
         (corporateActionID, voteID_) = EquityStorageWrapper.setVoting(_newVoting);
         emit IEquity.VotingSet(corporateActionID, voteID_, msg.sender, _newVoting.recordDate, _newVoting.data);
@@ -44,9 +56,15 @@ abstract contract Equity is IEquity, Modifiers {
 
     function setScheduledBalanceAdjustment(
         ScheduledBalanceAdjustment calldata _newBalanceAdjustment
-    ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (uint256 balanceAdjustmentID_) {
-        ScheduledTasksStorageWrapper.requireValidTimestamp(_newBalanceAdjustment.executionDate);
-        AdjustBalancesStorageWrapper.requireValidFactor(_newBalanceAdjustment.factor);
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_CORPORATE_ACTION_ROLE)
+        onlyValidTimestamp(_newBalanceAdjustment.executionDate)
+        onlyValidFactor(_newBalanceAdjustment.factor)
+        returns (uint256 balanceAdjustmentID_)
+    {
         bytes32 corporateActionID;
         (corporateActionID, balanceAdjustmentID_) = EquityStorageWrapper.setScheduledBalanceAdjustment(
             _newBalanceAdjustment

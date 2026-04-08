@@ -37,10 +37,18 @@ abstract contract Kyc is IKyc, TimestampProvider, Modifiers {
         uint256 _validFrom,
         uint256 _validTo,
         address _issuer
-    ) external virtual override onlyUnpaused onlyRole(_KYC_ROLE) notZeroAddress(_account) returns (bool success_) {
-        KycStorageWrapper.requireValidKycStatus(KycStatus.NOT_GRANTED, _account);
-        KycStorageWrapper.requireValidDates(_validFrom, _validTo, _getBlockTimestamp());
-        SsiManagementStorageWrapper.requireIssuer(_issuer);
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyRole(_KYC_ROLE)
+        notZeroAddress(_account)
+        onlyValidKycStatus(KycStatus.NOT_GRANTED, _account)
+        onlyThreeValidDates(_validFrom, _validTo, _getBlockTimestamp())
+        onlyValidIssuer(_issuer)
+        returns (bool success_)
+    {
         success_ = KycStorageWrapper.grantKyc(_account, _vcId, _validFrom, _validTo, _issuer);
         emit KycGranted(_account, msg.sender);
     }

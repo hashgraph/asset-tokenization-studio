@@ -27,6 +27,9 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, Modifiers {
         onlyValidInputAmountsArrayLength(_toList, _amounts)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingDisabled
+        onlyIdentifiedAddresses(msg.sender, address(0))
+        onlyCompliant(msg.sender, address(0), false)
     {
         if (ClearingStorageWrapper.isClearingActivated()) revert IClearingTypes.ClearingIsActivated();
         ERC1594StorageWrapper.requireIdentified(msg.sender, address(0));

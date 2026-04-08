@@ -32,9 +32,9 @@ abstract contract ERC20 is IERC20, TimestampProvider, Modifiers {
         onlyUnrecoveredAddress(msg.sender)
         onlyUnrecoveredAddress(spender)
         onlyWithoutMultiPartition
+        onlyCompliant(msg.sender, spender, false)
         returns (bool)
     {
-        ERC1594StorageWrapper.requireCompliant(msg.sender, spender, false);
         return ERC20StorageWrapper.approve(msg.sender, spender, value);
     }
 
@@ -72,16 +72,14 @@ abstract contract ERC20 is IERC20, TimestampProvider, Modifiers {
     function increaseAllowance(
         address spender,
         uint256 addedValue
-    ) external onlyUnpaused onlyWithoutMultiPartition returns (bool) {
-        ERC1594StorageWrapper.requireCompliant(msg.sender, spender, false);
+    ) external onlyUnpaused onlyWithoutMultiPartition onlyCompliant(msg.sender, spender, false) returns (bool) {
         return ERC20StorageWrapper.increaseAllowance(spender, addedValue);
     }
 
     function decreaseAllowance(
         address spender,
         uint256 subtractedValue
-    ) external onlyUnpaused onlyWithoutMultiPartition returns (bool) {
-        ERC1594StorageWrapper.requireCompliant(msg.sender, spender, false);
+    ) external onlyUnpaused onlyWithoutMultiPartition onlyCompliant(msg.sender, spender, false) returns (bool) {
         return ERC20StorageWrapper.decreaseAllowance(spender, subtractedValue);
     }
 

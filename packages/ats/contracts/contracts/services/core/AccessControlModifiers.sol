@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { AccessControlStorageWrapper, RoleDataStorage } from "../../domain/core/AccessControlStorageWrapper.sol";
+import { _FREEZE_MANAGER_ROLE, _AGENT_ROLE } from "../../constants/roles.sol";
 
 /**
  * @title AccessControlModifiers
@@ -73,6 +74,24 @@ abstract contract AccessControlModifiers {
      */
     modifier onlyConsistentRoles(bytes32[] calldata _roles, bool[] calldata _actives) virtual {
         AccessControlStorageWrapper.checkConsistentRoles(_roles, _actives);
+        _;
+    }
+
+    /**
+     * @dev Modifier that verifies the given account holds at least one of the
+     * roles authorized to perform freeze operations: FREEZE_MANAGER_ROLE or
+     * AGENT_ROLE.
+     *
+     * Requirements:
+     * - `_account` must have either FREEZE_MANAGER_ROLE or AGENT_ROLE.
+     *
+     * @param _account The address to check roles for.
+     */
+    modifier onlyFreezeRoles(address _account) virtual {
+        bytes32[] memory roles = new bytes32[](2);
+        roles[0] = _FREEZE_MANAGER_ROLE;
+        roles[1] = _AGENT_ROLE;
+        AccessControlStorageWrapper.checkAnyRole(roles, _account);
         _;
     }
 }

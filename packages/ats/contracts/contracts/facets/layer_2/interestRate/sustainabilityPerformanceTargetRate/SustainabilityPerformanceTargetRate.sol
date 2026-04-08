@@ -13,8 +13,12 @@ contract SustainabilityPerformanceTargetRate is ISustainabilityPerformanceTarget
         InterestRate calldata _interestRate,
         ImpactData[] calldata _impactData,
         address[] calldata _projects
-    ) external override onlyNotSustainabilityPerformanceTargetRateInitialized {
-        InterestRateStorageWrapper.requireEqualLength(_impactData.length, _projects.length);
+    )
+        external
+        override
+        onlyNotSustainabilityPerformanceTargetRateInitialized
+        onlyValidEqualLength(_impactData.length, _projects.length)
+    {
         InterestRateStorageWrapper.initialize_SustainabilityPerformanceTargetRate(
             _interestRate,
             _impactData,
@@ -33,8 +37,12 @@ contract SustainabilityPerformanceTargetRate is ISustainabilityPerformanceTarget
     function setImpactData(
         ImpactData[] calldata _newImpactData,
         address[] calldata _projects
-    ) external onlyUnpaused onlyRole(_INTEREST_RATE_MANAGER_ROLE) {
-        InterestRateStorageWrapper.requireEqualLength(_newImpactData.length, _projects.length);
+    )
+        external
+        onlyUnpaused
+        onlyRole(_INTEREST_RATE_MANAGER_ROLE)
+        onlyValidEqualLength(_newImpactData.length, _projects.length)
+    {
         for (uint256 index = 0; index < _newImpactData.length; index++) {
             if (!ProceedRecipientsStorageWrapper.isProceedRecipient(_projects[index])) {
                 revert NotExistingProject(_projects[index]);

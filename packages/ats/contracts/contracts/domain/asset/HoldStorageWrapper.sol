@@ -18,6 +18,7 @@ import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
+import { LockStorageWrapper } from "../asset/LockStorageWrapper.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { ControlListStorageWrapper } from "../core/ControlListStorageWrapper.sol";
@@ -155,7 +156,7 @@ library HoldStorageWrapper {
 
         IHoldTypes.HoldData memory holdData = getHold(_holdIdentifier);
 
-        restoreHoldAllowance(holdData.thirdPartyType, _holdIdentifier, _amount);
+        _restoreHoldAllowance(holdData.thirdPartyType, _holdIdentifier, _amount);
 
         success_ = operateHoldByPartition(
             _holdIdentifier,
@@ -185,7 +186,7 @@ library HoldStorageWrapper {
         IHoldTypes.HoldData memory holdData = getHold(_holdIdentifier);
         amount_ = holdData.hold.amount;
 
-        restoreHoldAllowance(holdData.thirdPartyType, _holdIdentifier, amount_);
+        _restoreHoldAllowance(holdData.thirdPartyType, _holdIdentifier, amount_);
 
         success_ = operateHoldByPartition(
             _holdIdentifier,
@@ -570,6 +571,35 @@ library HoldStorageWrapper {
         return TimeTravelStorageWrapper.getBlockTimestamp() > _hold.expirationTimestamp;
     }
 
+    function checkOperatorCreateHoldByPartition(
+        uint256 _expirationTimestamp,
+        address _account,
+        address _to,
+        address _from,
+        address _escrow,
+        bytes32 _partition
+    ) internal view {
+        checkCreateHoldFromByPartition(_expirationTimestamp, _account, _to, _from, _escrow, _partition);
+        ERC1410StorageWrapper.requireOperator(_partition, _from);
+    }
+
+    function checkCreateHoldFromByPartition(
+        uint256 _expirationTimestamp,
+        address _account,
+        address _to,
+        address _from,
+        address _escrow,
+        bytes32 _partition
+    ) internal view {
+        LockStorageWrapper.requireValidExpirationTimestamp(_expirationTimestamp);
+        ERC3643StorageWrapper.requireUnrecoveredAddress(_account);
+        ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
+        ERC3643StorageWrapper.requireUnrecoveredAddress(_from);
+        ERC1410StorageWrapper.requireValidAddress(_from);
+        ERC1410StorageWrapper.requireValidAddress(_escrow);
+        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
+    }
+
     function isEscrow(IHoldTypes.Hold memory _hold, address _escrow) internal pure returns (bool) {
         return _escrow == _hold.escrow;
     }
@@ -590,7 +620,7 @@ library HoldStorageWrapper {
 
     // --- Private helper ---
 
-    function restoreHoldAllowance(
+    function _restoreHoldAllowance(
         ThirdPartyType _thirdPartyType,
         IHoldTypes.HoldIdentifier calldata _holdIdentifier,
         uint256 _amount

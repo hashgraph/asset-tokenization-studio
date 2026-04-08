@@ -49,4 +49,22 @@ abstract contract ComplianceModifiers {
         ERC1594StorageWrapper.requireCanRedeemFromByPartition(from, partition, value);
         _;
     }
+
+    /**
+     * @dev Modifier that verifies the transfer between two addresses satisfies
+     * all compliance rules enforced by the compliance module.
+     *
+     * Requirements:
+     * - The transfer from `from` to `to` must pass the compliance check.
+     * - If `checkSender` is true, the caller (msg.sender) is also validated
+     *   against compliance rules.
+     *
+     * @param from The sender/source address to validate.
+     * @param to The recipient/target address to validate.
+     * @param checkSender Whether to also validate msg.sender against compliance rules.
+     */
+    modifier onlyCompliant(address from, address to, bool checkSender) {
+        ERC1594StorageWrapper.checkCompliance(from, to, checkSender);
+        _;
+    }
 }

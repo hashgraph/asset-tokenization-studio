@@ -11,8 +11,14 @@ abstract contract AdjustBalances is IAdjustBalances, Modifiers {
     function adjustBalances(
         uint256 factor,
         uint8 decimals
-    ) external override onlyUnpaused onlyRole(_ADJUSTMENT_BALANCE_ROLE) returns (bool success_) {
-        AdjustBalancesStorageWrapper.requireValidFactor(factor);
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_ADJUSTMENT_BALANCE_ROLE)
+        onlyValidFactor(factor)
+        returns (bool success_)
+    {
         ScheduledTasksStorageWrapper.triggerScheduledCrossOrderedTasks(0);
         AdjustBalancesStorageWrapper.adjustBalances(factor, decimals);
         success_ = true;

@@ -8,9 +8,11 @@ import { Modifiers } from "../../../../services/Modifiers.sol";
 import { KpisStorageWrapper } from "../../../../domain/asset/KpisStorageWrapper.sol";
 
 abstract contract Kpis is IKpis, Modifiers {
-    function addKpiData(uint256 _date, uint256 _value, address _project) external onlyUnpaused {
-        AccessControlStorageWrapper.checkRole(_KPI_MANAGER_ROLE, msg.sender);
-        KpisStorageWrapper.requireValidDate(_date, _project);
+    function addKpiData(
+        uint256 _date,
+        uint256 _value,
+        address _project
+    ) external onlyUnpaused onlyRole(_KPI_MANAGER_ROLE) onlyValidDate(_date, _project) {
         KpisStorageWrapper.addKpiData(_date, _value, _project);
     }
 

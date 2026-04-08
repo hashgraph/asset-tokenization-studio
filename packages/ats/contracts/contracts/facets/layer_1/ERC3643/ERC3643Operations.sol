@@ -28,10 +28,17 @@ abstract contract ERC3643Operations is IERC3643Operations, TimestampProvider, Mo
         emit IERC1644.ControllerRedemption(msg.sender, _userAddress, _amount, "", "");
     }
 
-    function mint(address _to, uint256 _amount) external onlyUnpaused onlyWithoutMultiPartition {
-        CapStorageWrapper.requireWithinMaxSupply(_amount, _getBlockTimestamp());
-        ERC1594StorageWrapper.requireIdentified(address(0), _to);
-        ERC1594StorageWrapper.requireCompliant(address(0), _to, false);
+    function mint(
+        address _to,
+        uint256 _amount
+    )
+        external
+        onlyUnpaused
+        onlyWithoutMultiPartition
+        onlyWithinMaxSupply(_amount, _getBlockTimestamp())
+        onlyIdentifiedAddresses(address(0), _to)
+        onlyCompliant(address(0), _to, false)
+    {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _ISSUER_ROLE;

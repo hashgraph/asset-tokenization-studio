@@ -48,31 +48,48 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Modifiers {
         ERC1410StorageWrapper.triggerAndSyncAll(_partition, _from, _to);
     }
 
-    function authorizeOperator(address _operator) external override onlyUnpaused {
-        ERC1594StorageWrapper.requireCompliant(msg.sender, _operator, false);
+    function authorizeOperator(
+        address _operator
+    ) external override onlyUnpaused onlyCompliant(msg.sender, _operator, false) {
         ERC1410StorageWrapper.authorizeOperator(_operator);
     }
 
-    function revokeOperator(address _operator) external override onlyUnpaused {
-        ERC1594StorageWrapper.requireIdentified(msg.sender, _operator);
-        ERC1594StorageWrapper.requireCompliant(msg.sender, _operator, false);
+    function revokeOperator(
+        address _operator
+    )
+        external
+        override
+        onlyUnpaused
+        onlyIdentifiedAddresses(msg.sender, _operator)
+        onlyCompliant(msg.sender, _operator, false)
+    {
         ERC1410StorageWrapper.revokeOperator(_operator);
     }
 
     function authorizeOperatorByPartition(
         bytes32 _partition,
         address _operator
-    ) external override onlyUnpaused onlyDefaultPartitionWithSinglePartition(_partition) {
-        ERC1594StorageWrapper.requireCompliant(msg.sender, _operator, false);
+    )
+        external
+        override
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyCompliant(msg.sender, _operator, false)
+    {
         ERC1410StorageWrapper.authorizeOperatorByPartition(_partition, _operator);
     }
 
     function revokeOperatorByPartition(
         bytes32 _partition,
         address _operator
-    ) external override onlyUnpaused onlyDefaultPartitionWithSinglePartition(_partition) {
-        ERC1594StorageWrapper.requireIdentified(msg.sender, _operator);
-        ERC1594StorageWrapper.requireCompliant(msg.sender, _operator, false);
+    )
+        external
+        override
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyIdentifiedAddresses(msg.sender, _operator)
+        onlyCompliant(msg.sender, _operator, false)
+    {
         ERC1410StorageWrapper.revokeOperatorByPartition(_partition, _operator);
     }
 }

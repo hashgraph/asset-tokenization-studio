@@ -62,10 +62,15 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
         address _tokenHolder,
         uint256 _value,
         bytes calldata _data
-    ) external override onlyUnpaused onlyWithoutMultiPartition {
-        CapStorageWrapper.requireWithinMaxSupply(_value, _getBlockTimestamp());
-        ERC1594StorageWrapper.requireIdentified(address(0), _tokenHolder);
-        ERC1594StorageWrapper.requireCompliant(address(0), _tokenHolder, false);
+    )
+        external
+        override
+        onlyUnpaused
+        onlyWithoutMultiPartition
+        onlyWithinMaxSupply(_value, _getBlockTimestamp())
+        onlyIdentifiedAddresses(address(0), _tokenHolder)
+        onlyCompliant(address(0), _tokenHolder, false)
+    {
         bytes32[] memory roles = new bytes32[](2);
         roles[0] = _ISSUER_ROLE;
         roles[1] = _AGENT_ROLE;

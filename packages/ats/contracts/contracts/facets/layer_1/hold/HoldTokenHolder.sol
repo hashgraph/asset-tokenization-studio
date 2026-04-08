@@ -95,16 +95,17 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
         override
         onlyUnpaused
         onlyClearingDisabled
-        onlyValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyUnrecoveredAddress(msg.sender)
-        onlyUnrecoveredAddress(_hold.to)
-        onlyUnrecoveredAddress(_from)
-        notZeroAddress(_from)
-        notZeroAddress(_hold.escrow)
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyValidCreateHoldFromByPartition(
+            _hold.expirationTimestamp,
+            msg.sender,
+            _hold.to,
+            _from,
+            _hold.escrow,
+            _partition
+        )
         returns (bool success_, uint256 holdId_)
     {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
         (success_, holdId_) = HoldStorageWrapper.createHoldByPartition(
             _partition,
             _from,
@@ -142,11 +143,11 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
+        onlyIdentifiedAddresses(_holdIdentifier.tokenHolder, _to)
+        onlyCompliant(address(0), _to, false)
+        onlyValidHoldId(_holdIdentifier)
         returns (bool success_, bytes32 partition_)
     {
-        ERC1594StorageWrapper.requireIdentified(_holdIdentifier.tokenHolder, _to);
-        ERC1594StorageWrapper.requireCompliant(address(0), _to, false);
-        HoldStorageWrapper.requireValidHoldId(_holdIdentifier);
         (success_, partition_) = HoldStorageWrapper.executeHoldByPartition(_holdIdentifier, _to, _amount);
 
         emit HoldByPartitionExecuted(
@@ -178,9 +179,9 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
+        onlyValidHoldId(_holdIdentifier)
         returns (bool success_)
     {
-        HoldStorageWrapper.requireValidHoldId(_holdIdentifier);
         success_ = HoldStorageWrapper.releaseHoldByPartition(_holdIdentifier, _amount);
         emit HoldByPartitionReleased(
             _holdIdentifier.tokenHolder,
@@ -208,9 +209,9 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
+        onlyValidHoldId(_holdIdentifier)
         returns (bool success_)
     {
-        HoldStorageWrapper.requireValidHoldId(_holdIdentifier);
         uint256 amount;
         (success_, amount) = HoldStorageWrapper.reclaimHoldByPartition(_holdIdentifier);
         emit HoldByPartitionReclaimed(

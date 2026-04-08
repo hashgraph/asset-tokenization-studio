@@ -58,18 +58,17 @@ abstract contract HoldManagement is IHoldManagement, Modifiers {
         override
         onlyUnpaused
         onlyClearingDisabled
-        onlyValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyUnrecoveredAddress(msg.sender)
-        onlyUnrecoveredAddress(_hold.to)
-        onlyUnrecoveredAddress(_from)
-        notZeroAddress(_from)
-        notZeroAddress(_hold.escrow)
+        onlyValidOperatorCreateHoldByPartition(
+            _hold.expirationTimestamp,
+            msg.sender,
+            _hold.to,
+            _from,
+            _hold.escrow,
+            _partition
+        )
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
-        ERC1410StorageWrapper.requireOperator(_partition, _from);
-
         (success_, holdId_) = HoldStorageWrapper.createHoldByPartition(
             _partition,
             _from,

@@ -13,24 +13,35 @@ abstract contract Cap is ICap, TimestampProvider, Modifiers {
     function initialize_Cap(
         uint256 maxSupply,
         PartitionCap[] calldata partitionCap
-    ) external override onlyNotCapInitialized {
-        CapStorageWrapper.requireValidNewMaxSupply(maxSupply, _getBlockTimestamp());
+    ) external override onlyNotCapInitialized onlyValidNewMaxSupply(maxSupply, _getBlockTimestamp()) {
         CapStorageWrapper.initialize_Cap(maxSupply, partitionCap);
     }
 
     function setMaxSupply(
-        uint256 _maxSupply
-    ) external override onlyUnpaused onlyRole(_CAP_ROLE) returns (bool success_) {
-        CapStorageWrapper.requireValidNewMaxSupply(_maxSupply, _getBlockTimestamp());
-        CapStorageWrapper.setMaxSupply(_maxSupply, _getBlockTimestamp());
+        uint256 maxSupply
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_CAP_ROLE)
+        onlyValidNewMaxSupply(maxSupply, _getBlockTimestamp())
+        returns (bool success_)
+    {
+        CapStorageWrapper.setMaxSupply(maxSupply, _getBlockTimestamp());
         success_ = true;
     }
 
     function setMaxSupplyByPartition(
         bytes32 _partition,
         uint256 _maxSupply
-    ) external override onlyUnpaused onlyRole(_CAP_ROLE) returns (bool success_) {
-        CapStorageWrapper.requireValidNewMaxSupplyByPartition(_partition, _maxSupply, _getBlockTimestamp());
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_CAP_ROLE)
+        onlyValidNewMaxSupplyByPartition(_partition, _maxSupply, _getBlockTimestamp())
+        returns (bool success_)
+    {
         CapStorageWrapper.setMaxSupplyByPartition(_partition, _maxSupply, _getBlockTimestamp());
         success_ = true;
     }

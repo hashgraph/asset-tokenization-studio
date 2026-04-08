@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IKyc } from "../../facets/layer_1/kyc/IKyc.sol";
 import { KycStorageWrapper } from "../../domain/core/KycStorageWrapper.sol";
+import { SsiManagementStorageWrapper } from "../../domain/core/SsiManagementStorageWrapper.sol";
 
 /**
  * @title KycModifiers
@@ -29,6 +30,19 @@ abstract contract KycModifiers {
      */
     modifier onlyValidKycStatus(IKyc.KycStatus _kycStatus, address _account) {
         KycStorageWrapper.requireValidKycStatus(_kycStatus, _account);
+        _;
+    }
+
+    /**
+     * @dev Modifier that validates that an address is a registered SSI issuer
+     *
+     * Requirements:
+     * - The address must be present in the issuer list
+     *
+     * @param _issuer The address to validate as an issuer
+     */
+    modifier onlyValidIssuer(address _issuer) {
+        SsiManagementStorageWrapper.requireIssuer(_issuer);
         _;
     }
 }
