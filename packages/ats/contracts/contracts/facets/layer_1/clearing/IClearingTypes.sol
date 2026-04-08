@@ -88,27 +88,6 @@ interface IClearingTypes {
         ThirdPartyType operatorType;
     }
 
-    // solhint-disable max-line-length
-    struct ClearingDataStorage {
-        bool initialized;
-        bool activated;
-        mapping(address => uint256) totalClearedAmountByAccount;
-        mapping(address => mapping(bytes32 => uint256)) totalClearedAmountByAccountAndPartition;
-        // solhint-disable-next-line max-line-length
-        mapping(address => mapping(bytes32 => mapping(ClearingOperationType => EnumerableSet.UintSet))) clearingIdsByAccountAndPartitionAndTypes;
-        // solhint-disable-next-line max-line-length
-        mapping(address => mapping(bytes32 => mapping(ClearingOperationType => uint256))) nextClearingIdByAccountPartitionAndType;
-        // solhint-disable-next-line max-line-length
-        mapping(address => mapping(bytes32 => mapping(uint256 => ClearingTransferData))) clearingTransferByAccountPartitionAndId;
-        // solhint-disable-next-line max-line-length
-        mapping(address => mapping(bytes32 => mapping(uint256 => ClearingRedeemData))) clearingRedeemByAccountPartitionAndId;
-        // solhint-disable-next-line max-line-length
-        mapping(address => mapping(bytes32 => mapping(uint256 => ClearingHoldCreationData))) clearingHoldCreationByAccountPartitionAndId;
-        // solhint-disable-next-line max-line-length
-        mapping(address => mapping(bytes32 => mapping(ClearingOperationType => mapping(uint256 => address)))) clearingThirdPartyByAccountPartitionTypeAndId;
-    }
-    // solhint-enable max-line-length
-
     event ClearedRedeemByPartition(
         address indexed operator,
         address indexed tokenHolder,

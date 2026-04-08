@@ -23,11 +23,21 @@ import { SustainabilityPerformanceTargetRateLib } from "./SustainabilityPerforma
 import { KpiLinkedRateLib } from "./KpiLinkedRateLib.sol";
 
 library BondStorageWrapper {
+    struct BondDataStorage {
+        bytes3 currency;
+        uint256 nominalValue;
+        uint256 startingDate;
+        uint256 maturityDate;
+        bool initialized;
+        uint8 nominalValueDecimals;
+        uint256[] couponsOrderedListByIds;
+    }
+
     // --- State Modifying Functions ---
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_bond(IBondTypes.BondDetailsData calldata bondDetailsData) internal {
-        IBondTypes.BondDataStorage storage bs = bondStorage();
+        BondDataStorage storage bs = bondStorage();
         bs.initialized = true;
         storeBondDetails(
             IBondTypes.BondDetailsData({
@@ -41,7 +51,7 @@ library BondStorageWrapper {
     }
 
     function storeBondDetails(IBondTypes.BondDetailsData memory bondDetails) internal {
-        IBondTypes.BondDataStorage storage bs = bondStorage();
+        BondDataStorage storage bs = bondStorage();
         bs.currency = bondDetails.currency;
         bs.nominalValue = bondDetails.nominalValue;
         bs.nominalValueDecimals = bondDetails.nominalValueDecimals;
@@ -109,7 +119,7 @@ library BondStorageWrapper {
     // --- View Functions ---
 
     function getBondDetails() internal view returns (IBondTypes.BondDetailsData memory bondDetails_) {
-        IBondTypes.BondDataStorage storage bs = bondStorage();
+        BondDataStorage storage bs = bondStorage();
         bondDetails_ = IBondTypes.BondDetailsData({
             currency: bs.currency,
             nominalValue: bs.nominalValue,
@@ -332,7 +342,7 @@ library BondStorageWrapper {
 
     // --- Pure Functions ---
 
-    function bondStorage() internal pure returns (IBondTypes.BondDataStorage storage bondData_) {
+    function bondStorage() internal pure returns (BondDataStorage storage bondData_) {
         bytes32 position = _BOND_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {

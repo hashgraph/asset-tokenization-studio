@@ -44,15 +44,6 @@ interface IHoldTypes {
         ThirdPartyType thirdPartyType;
     }
 
-    struct HoldDataStorage {
-        mapping(address => uint256) totalHeldAmountByAccount;
-        mapping(address => mapping(bytes32 => uint256)) totalHeldAmountByAccountAndPartition;
-        mapping(address => mapping(bytes32 => mapping(uint256 => HoldData))) holdsByAccountPartitionAndId;
-        mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) holdIdsByAccountAndPartition;
-        mapping(address => mapping(bytes32 => uint256)) nextHoldIdByAccountAndPartition;
-        mapping(address => mapping(bytes32 => mapping(uint256 => address))) holdThirdPartyByAccountPartitionAndId;
-    }
-
     // ============ EVENTS ============
 
     event HeldByPartition(

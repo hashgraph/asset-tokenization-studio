@@ -29,6 +29,15 @@ library HoldStorageWrapper {
     using EnumerableSet for EnumerableSet.UintSet;
     using LowLevelCall for address;
 
+    struct HoldDataStorage {
+        mapping(address => uint256) totalHeldAmountByAccount;
+        mapping(address => mapping(bytes32 => uint256)) totalHeldAmountByAccountAndPartition;
+        mapping(address => mapping(bytes32 => mapping(uint256 => IHoldTypes.HoldData))) holdsByAccountPartitionAndId;
+        mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) holdIdsByAccountAndPartition;
+        mapping(address => mapping(bytes32 => uint256)) nextHoldIdByAccountAndPartition;
+        mapping(address => mapping(bytes32 => mapping(uint256 => address))) holdThirdPartyByAccountPartitionAndId;
+    }
+
     // --- Create hold ---
 
     function createHoldByPartition(
@@ -45,7 +54,7 @@ library HoldStorageWrapper {
         beforeHold(_partition, _from);
         ERC1410StorageWrapper.reduceBalanceByPartition(_from, _hold.amount, _partition);
 
-        IHoldTypes.HoldDataStorage storage holdStorageRef = holdStorage();
+        HoldDataStorage storage holdStorageRef = holdStorage();
 
         holdId_ = ++holdStorageRef.nextHoldIdByAccountAndPartition[_from][_partition];
 
@@ -276,7 +285,7 @@ library HoldStorageWrapper {
         IHoldTypes.HoldIdentifier calldata _holdIdentifier,
         uint256 _amount
     ) internal returns (uint256 newHoldBalance_) {
-        IHoldTypes.HoldDataStorage storage holdStorageRef = holdStorage();
+        HoldDataStorage storage holdStorageRef = holdStorage();
 
         holdStorageRef.totalHeldAmountByAccount[_holdIdentifier.tokenHolder] -= _amount;
         holdStorageRef.totalHeldAmountByAccountAndPartition[_holdIdentifier.tokenHolder][
@@ -296,7 +305,7 @@ library HoldStorageWrapper {
     // --- Remove hold ---
 
     function removeHold(IHoldTypes.HoldIdentifier calldata _holdIdentifier) internal {
-        IHoldTypes.HoldDataStorage storage holdStorageRef = holdStorage();
+        HoldDataStorage storage holdStorageRef = holdStorage();
 
         holdStorageRef.holdIdsByAccountAndPartition[_holdIdentifier.tokenHolder][_holdIdentifier.partition].remove(
             _holdIdentifier.holdId
@@ -375,7 +384,7 @@ library HoldStorageWrapper {
     }
 
     function updateHoldAmountById(bytes32 _partition, uint256 _holdId, address _tokenHolder, uint256 _factor) internal {
-        IHoldTypes.HoldDataStorage storage holdStorageRef = holdStorage();
+        HoldDataStorage storage holdStorageRef = holdStorage();
 
         holdStorageRef.holdsByAccountPartitionAndId[_tokenHolder][_partition][_holdId].hold.amount *= _factor;
     }
@@ -542,7 +551,7 @@ library HoldStorageWrapper {
     function getHoldThirdParty(
         IHoldTypes.HoldIdentifier calldata _holdIdentifier
     ) internal view returns (address thirdParty_) {
-        IHoldTypes.HoldDataStorage storage holdStorageRef = holdStorage();
+        HoldDataStorage storage holdStorageRef = holdStorage();
 
         thirdParty_ = holdStorageRef.holdThirdPartyByAccountPartitionAndId[_holdIdentifier.tokenHolder][
             _holdIdentifier.partition
@@ -571,7 +580,7 @@ library HoldStorageWrapper {
 
     // --- Storage access ---
 
-    function holdStorage() internal pure returns (IHoldTypes.HoldDataStorage storage hold_) {
+    function holdStorage() internal pure returns (HoldDataStorage storage hold_) {
         bytes32 position = _HOLD_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {

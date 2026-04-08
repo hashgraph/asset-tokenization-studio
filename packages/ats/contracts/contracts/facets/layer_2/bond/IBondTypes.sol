@@ -17,16 +17,6 @@ interface IBondTypes {
         uint256 maturityDate;
     }
 
-    struct BondDataStorage {
-        bytes3 currency;
-        uint256 nominalValue;
-        uint256 startingDate;
-        uint256 maturityDate;
-        bool initialized;
-        uint8 nominalValueDecimals;
-        uint256[] couponsOrderedListByIds;
-    }
-
     struct Coupon {
         uint256 recordDate;
         uint256 executionDate;

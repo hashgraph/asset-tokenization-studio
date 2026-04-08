@@ -19,10 +19,31 @@ library ClearingStorageWrapper {
     using Pagination for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
+    // solhint-disable max-line-length
+    struct ClearingDataStorage {
+        bool initialized;
+        bool activated;
+        mapping(address => uint256) totalClearedAmountByAccount;
+        mapping(address => mapping(bytes32 => uint256)) totalClearedAmountByAccountAndPartition;
+        // solhint-disable-next-line max-line-length
+        mapping(address => mapping(bytes32 => mapping(IClearingTypes.ClearingOperationType => EnumerableSet.UintSet))) clearingIdsByAccountAndPartitionAndTypes;
+        // solhint-disable-next-line max-line-length
+        mapping(address => mapping(bytes32 => mapping(IClearingTypes.ClearingOperationType => uint256))) nextClearingIdByAccountPartitionAndType;
+        // solhint-disable-next-line max-line-length
+        mapping(address => mapping(bytes32 => mapping(uint256 => IClearingTypes.ClearingTransferData))) clearingTransferByAccountPartitionAndId;
+        // solhint-disable-next-line max-line-length
+        mapping(address => mapping(bytes32 => mapping(uint256 => IClearingTypes.ClearingRedeemData))) clearingRedeemByAccountPartitionAndId;
+        // solhint-disable-next-line max-line-length
+        mapping(address => mapping(bytes32 => mapping(uint256 => IClearingTypes.ClearingHoldCreationData))) clearingHoldCreationByAccountPartitionAndId;
+        // solhint-disable-next-line max-line-length
+        mapping(address => mapping(bytes32 => mapping(IClearingTypes.ClearingOperationType => mapping(uint256 => address)))) clearingThirdPartyByAccountPartitionTypeAndId;
+    }
+    // solhint-enable max-line-length
+
     // ============ Init & Config (internal first) ============
 
     function initializeClearing(bool clearingActive) internal {
-        IClearingTypes.ClearingDataStorage storage clearingStorage_ = clearingStorage();
+        ClearingDataStorage storage clearingStorage_ = clearingStorage();
         clearingStorage_.initialized = true;
         clearingStorage_.activated = clearingActive;
     }
@@ -44,7 +65,7 @@ library ClearingStorageWrapper {
 
     // ============ Storage Accessor (internal pure last) ============
 
-    function clearingStorage() internal pure returns (IClearingTypes.ClearingDataStorage storage clearing_) {
+    function clearingStorage() internal pure returns (ClearingDataStorage storage clearing_) {
         bytes32 position = _CLEARING_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -71,7 +92,7 @@ library ClearingStorageWrapper {
         bytes32 _partition,
         IClearingTypes.ClearingOperationType _operationType
     ) internal returns (uint256 clearingId_) {
-        IClearingTypes.ClearingDataStorage storage clearingDataStorage = clearingStorage();
+        ClearingDataStorage storage clearingDataStorage = clearingStorage();
         unchecked {
             clearingId_ = ++clearingDataStorage.nextClearingIdByAccountPartitionAndType[_from][_partition][
                 _operationType
@@ -178,7 +199,7 @@ library ClearingStorageWrapper {
 
     /// @notice Set clearing ID by partition and type - pure storage operation
     function setClearingIdByPartitionAndType(
-        IClearingTypes.ClearingDataStorage storage clearingDataStorage,
+        ClearingDataStorage storage clearingDataStorage,
         address _tokenHolder,
         bytes32 _partition,
         uint256 _clearingId,
@@ -222,7 +243,7 @@ library ClearingStorageWrapper {
 
     /// @notice Remove clearing - pure storage operation
     function removeClearing(IClearingTypes.ClearingOperationIdentifier memory _clearingOperationIdentifier) internal {
-        IClearingTypes.ClearingDataStorage storage clearingStorage_ = clearingStorage();
+        ClearingDataStorage storage clearingStorage_ = clearingStorage();
         uint256 amount = _isClearingBasicInfo(_clearingOperationIdentifier).amount;
 
         clearingStorage_.totalClearedAmountByAccount[_clearingOperationIdentifier.tokenHolder] -= amount;
