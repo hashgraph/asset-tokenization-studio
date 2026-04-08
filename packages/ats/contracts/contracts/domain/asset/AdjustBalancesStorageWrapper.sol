@@ -37,19 +37,19 @@ struct AdjustBalancesStorage {
 
 library AdjustBalancesStorageWrapper {
     function updateAbaf(uint256 factor) internal {
-        _adjustBalancesStorage().abaf = getAbaf() * factor;
+        adjustBalancesStorage().abaf = getAbaf() * factor;
     }
 
     function updateLabafByTokenHolder(uint256 labaf, address tokenHolder) internal {
-        _adjustBalancesStorage().labaf[tokenHolder] = labaf;
+        adjustBalancesStorage().labaf[tokenHolder] = labaf;
     }
 
     function updateLabafByPartition(bytes32 partition) internal {
-        _adjustBalancesStorage().labafByPartition[partition] = getAbaf();
+        adjustBalancesStorage().labafByPartition[partition] = getAbaf();
     }
 
     function pushLabafUserPartition(address _tokenHolder, uint256 _labaf) internal {
-        _adjustBalancesStorage().labafUserPartition[_tokenHolder].push(_labaf);
+        adjustBalancesStorage().labafUserPartition[_tokenHolder].push(_labaf);
     }
 
     function updateLabafByTokenHolderAndPartitionIndex(
@@ -57,76 +57,74 @@ library AdjustBalancesStorageWrapper {
         address tokenHolder,
         uint256 partitionIndex
     ) internal {
-        _adjustBalancesStorage().labafUserPartition[tokenHolder][partitionIndex - 1] = labaf;
+        adjustBalancesStorage().labafUserPartition[tokenHolder][partitionIndex - 1] = labaf;
     }
 
     function updateAllowanceLabaf(address _owner, address _spender, uint256 _labaf) internal {
-        _adjustBalancesStorage().labafsAllowances[_owner][_spender] = _labaf;
+        adjustBalancesStorage().labafsAllowances[_owner][_spender] = _labaf;
     }
 
     function setLockLabafById(bytes32 _partition, address _tokenHolder, uint256 _lockId, uint256 _labaf) internal {
-        _adjustBalancesStorage().labafLockedAmountByAccountPartitionAndId[_tokenHolder][_partition][_lockId] = _labaf;
+        adjustBalancesStorage().labafLockedAmountByAccountPartitionAndId[_tokenHolder][_partition][_lockId] = _labaf;
     }
 
     function setTotalLockLabaf(address _tokenHolder, uint256 _labaf) internal {
-        _adjustBalancesStorage().labafLockedAmountByAccount[_tokenHolder] = _labaf;
+        adjustBalancesStorage().labafLockedAmountByAccount[_tokenHolder] = _labaf;
     }
 
     function setTotalLockLabafByPartition(bytes32 _partition, address _tokenHolder, uint256 _labaf) internal {
-        _adjustBalancesStorage().labafLockedAmountByAccountAndPartition[_tokenHolder][_partition] = _labaf;
+        adjustBalancesStorage().labafLockedAmountByAccountAndPartition[_tokenHolder][_partition] = _labaf;
     }
 
     function removeLabafLock(bytes32 _partition, address _tokenHolder, uint256 _lockId) internal {
-        delete _adjustBalancesStorage().labafLockedAmountByAccountPartitionAndId[_tokenHolder][_partition][_lockId];
+        delete adjustBalancesStorage().labafLockedAmountByAccountPartitionAndId[_tokenHolder][_partition][_lockId];
     }
 
     function setHeldLabafById(bytes32 _partition, address _tokenHolder, uint256 _holdId, uint256 _labaf) internal {
-        _adjustBalancesStorage().labafHeldAmountByAccountPartitionAndId[_tokenHolder][_partition][_holdId] = _labaf;
+        adjustBalancesStorage().labafHeldAmountByAccountPartitionAndId[_tokenHolder][_partition][_holdId] = _labaf;
     }
 
     function setTotalHeldLabaf(address _tokenHolder, uint256 _labaf) internal {
-        _adjustBalancesStorage().labafHeldAmountByAccount[_tokenHolder] = _labaf;
+        adjustBalancesStorage().labafHeldAmountByAccount[_tokenHolder] = _labaf;
     }
 
     function setTotalHeldLabafByPartition(bytes32 _partition, address _tokenHolder, uint256 _labaf) internal {
-        _adjustBalancesStorage().labafHeldAmountByAccountAndPartition[_tokenHolder][_partition] = _labaf;
+        adjustBalancesStorage().labafHeldAmountByAccountAndPartition[_tokenHolder][_partition] = _labaf;
     }
 
     function removeLabafHold(bytes32 _partition, address _tokenHolder, uint256 _holdId) internal {
-        delete _adjustBalancesStorage().labafHeldAmountByAccountPartitionAndId[_tokenHolder][_partition][_holdId];
+        delete adjustBalancesStorage().labafHeldAmountByAccountPartitionAndId[_tokenHolder][_partition][_holdId];
     }
 
     function setTotalFreezeLabaf(address _tokenHolder, uint256 _labaf) internal {
-        _adjustBalancesStorage().labafFrozenAmountByAccount[_tokenHolder] = _labaf;
+        adjustBalancesStorage().labafFrozenAmountByAccount[_tokenHolder] = _labaf;
     }
 
     function setTotalFreezeLabafByPartition(bytes32 _partition, address _tokenHolder, uint256 _labaf) internal {
-        _adjustBalancesStorage().labafFrozenAmountByAccountAndPartition[_tokenHolder][_partition] = _labaf;
+        adjustBalancesStorage().labafFrozenAmountByAccountAndPartition[_tokenHolder][_partition] = _labaf;
     }
 
     function setClearedLabafById(
         IClearingTypes.ClearingOperationIdentifier memory _clearingOperationIdentifier,
         uint256 _labaf
     ) internal {
-        _adjustBalancesStorage().labafClearedAmountByAccountPartitionTypeAndId[
-            _clearingOperationIdentifier.tokenHolder
-        ][_clearingOperationIdentifier.partition][_clearingOperationIdentifier.clearingOperationType][
-                _clearingOperationIdentifier.clearingId
-            ] = _labaf;
+        adjustBalancesStorage().labafClearedAmountByAccountPartitionTypeAndId[_clearingOperationIdentifier.tokenHolder][
+            _clearingOperationIdentifier.partition
+        ][_clearingOperationIdentifier.clearingOperationType][_clearingOperationIdentifier.clearingId] = _labaf;
     }
 
     function setTotalClearedLabaf(address _tokenHolder, uint256 _labaf) internal {
-        _adjustBalancesStorage().labafClearedAmountByAccount[_tokenHolder] = _labaf;
+        adjustBalancesStorage().labafClearedAmountByAccount[_tokenHolder] = _labaf;
     }
 
     function setTotalClearedLabafByPartition(bytes32 _partition, address _tokenHolder, uint256 _labaf) internal {
-        _adjustBalancesStorage().labafClearedAmountByAccountAndPartition[_tokenHolder][_partition] = _labaf;
+        adjustBalancesStorage().labafClearedAmountByAccountAndPartition[_tokenHolder][_partition] = _labaf;
     }
 
     function removeLabafClearing(
         IClearingTypes.ClearingOperationIdentifier memory _clearingOperationIdentifier
     ) internal {
-        delete _adjustBalancesStorage().labafClearedAmountByAccountPartitionTypeAndId[
+        delete adjustBalancesStorage().labafClearedAmountByAccountPartitionTypeAndId[
             _clearingOperationIdentifier.tokenHolder
         ][_clearingOperationIdentifier.partition][_clearingOperationIdentifier.clearingOperationType][
                 _clearingOperationIdentifier.clearingId
@@ -159,17 +157,19 @@ library AdjustBalancesStorageWrapper {
     }
 
     function getLabafByUser(address _account) internal view returns (uint256) {
-        return zeroToOne(_adjustBalancesStorage().labaf[_account]);
+        return zeroToOne(adjustBalancesStorage().labaf[_account]);
     }
 
     function getLabafByPartition(bytes32 _partition) internal view returns (uint256) {
-        return zeroToOne(_adjustBalancesStorage().labafByPartition[_partition]);
+        return zeroToOne(adjustBalancesStorage().labafByPartition[_partition]);
     }
 
     function getLabafByUserAndPartition(bytes32 _partition, address _account) internal view returns (uint256) {
-        uint256 partitionsIndex = ERC1410StorageWrapper.erc1410BasicStorage().partitionToIndex[_account][_partition];
-        if (partitionsIndex == 0) return 1;
-        return zeroToOne(_adjustBalancesStorage().labafUserPartition[_account][partitionsIndex - 1]);
+        return
+            getLabafByUserAndPartitionIndex(
+                ERC1410StorageWrapper.erc1410BasicStorage().partitionToIndex[_account][_partition],
+                _account
+            );
     }
 
     function getLabafByUserAndPartitionIndex(
@@ -177,19 +177,19 @@ library AdjustBalancesStorageWrapper {
         address _account
     ) internal view returns (uint256) {
         if (_partitionIndex == 0) return 1;
-        return zeroToOne(_adjustBalancesStorage().labafUserPartition[_account][_partitionIndex - 1]);
+        return zeroToOne(adjustBalancesStorage().labafUserPartition[_account][_partitionIndex - 1]);
     }
 
     function getAllowanceLabaf(address _owner, address _spender) internal view returns (uint256) {
-        return zeroToOne(_adjustBalancesStorage().labafsAllowances[_owner][_spender]);
+        return zeroToOne(adjustBalancesStorage().labafsAllowances[_owner][_spender]);
     }
 
     function getTotalLockLabaf(address _tokenHolder) internal view returns (uint256) {
-        return zeroToOne(_adjustBalancesStorage().labafLockedAmountByAccount[_tokenHolder]);
+        return zeroToOne(adjustBalancesStorage().labafLockedAmountByAccount[_tokenHolder]);
     }
 
     function getTotalLockLabafByPartition(bytes32 _partition, address _tokenHolder) internal view returns (uint256) {
-        return zeroToOne(_adjustBalancesStorage().labafLockedAmountByAccountAndPartition[_tokenHolder][_partition]);
+        return zeroToOne(adjustBalancesStorage().labafLockedAmountByAccountAndPartition[_tokenHolder][_partition]);
     }
 
     function getLockLabafById(
@@ -199,16 +199,16 @@ library AdjustBalancesStorageWrapper {
     ) internal view returns (uint256) {
         return
             zeroToOne(
-                _adjustBalancesStorage().labafLockedAmountByAccountPartitionAndId[_tokenHolder][_partition][_lockId]
+                adjustBalancesStorage().labafLockedAmountByAccountPartitionAndId[_tokenHolder][_partition][_lockId]
             );
     }
 
     function getTotalHeldLabaf(address _tokenHolder) internal view returns (uint256) {
-        return zeroToOne(_adjustBalancesStorage().labafHeldAmountByAccount[_tokenHolder]);
+        return zeroToOne(adjustBalancesStorage().labafHeldAmountByAccount[_tokenHolder]);
     }
 
     function getTotalHeldLabafByPartition(bytes32 _partition, address _tokenHolder) internal view returns (uint256) {
-        return zeroToOne(_adjustBalancesStorage().labafHeldAmountByAccountAndPartition[_tokenHolder][_partition]);
+        return zeroToOne(adjustBalancesStorage().labafHeldAmountByAccountAndPartition[_tokenHolder][_partition]);
     }
 
     function getHoldLabafById(
@@ -218,24 +218,24 @@ library AdjustBalancesStorageWrapper {
     ) internal view returns (uint256) {
         return
             zeroToOne(
-                _adjustBalancesStorage().labafHeldAmountByAccountPartitionAndId[_tokenHolder][_partition][_holdId]
+                adjustBalancesStorage().labafHeldAmountByAccountPartitionAndId[_tokenHolder][_partition][_holdId]
             );
     }
 
     function getTotalFrozenLabaf(address _tokenHolder) internal view returns (uint256) {
-        return zeroToOne(_adjustBalancesStorage().labafFrozenAmountByAccount[_tokenHolder]);
+        return zeroToOne(adjustBalancesStorage().labafFrozenAmountByAccount[_tokenHolder]);
     }
 
     function getTotalFrozenLabafByPartition(bytes32 _partition, address _tokenHolder) internal view returns (uint256) {
-        return zeroToOne(_adjustBalancesStorage().labafFrozenAmountByAccountAndPartition[_tokenHolder][_partition]);
+        return zeroToOne(adjustBalancesStorage().labafFrozenAmountByAccountAndPartition[_tokenHolder][_partition]);
     }
 
     function getTotalClearedLabaf(address _tokenHolder) internal view returns (uint256) {
-        return zeroToOne(_adjustBalancesStorage().labafClearedAmountByAccount[_tokenHolder]);
+        return zeroToOne(adjustBalancesStorage().labafClearedAmountByAccount[_tokenHolder]);
     }
 
     function getTotalClearedLabafByPartition(bytes32 _partition, address _tokenHolder) internal view returns (uint256) {
-        return zeroToOne(_adjustBalancesStorage().labafClearedAmountByAccountAndPartition[_tokenHolder][_partition]);
+        return zeroToOne(adjustBalancesStorage().labafClearedAmountByAccountAndPartition[_tokenHolder][_partition]);
     }
 
     function getClearingLabafById(
@@ -243,7 +243,7 @@ library AdjustBalancesStorageWrapper {
     ) internal view returns (uint256) {
         return
             zeroToOne(
-                _adjustBalancesStorage().labafClearedAmountByAccountPartitionTypeAndId[
+                adjustBalancesStorage().labafClearedAmountByAccountPartitionTypeAndId[
                     _clearingOperationIdentifier.tokenHolder
                 ][_clearingOperationIdentifier.partition][_clearingOperationIdentifier.clearingOperationType][
                         _clearingOperationIdentifier.clearingId
@@ -328,7 +328,7 @@ library AdjustBalancesStorageWrapper {
     }
 
     function getAbaf() internal view returns (uint256) {
-        return zeroToOne(_adjustBalancesStorage().abaf);
+        return zeroToOne(adjustBalancesStorage().abaf);
     }
 
     function getAbafAdjustedAt(uint256 _timestamp) internal view returns (uint256) {
@@ -349,7 +349,7 @@ library AdjustBalancesStorageWrapper {
         if (_factor == 0) revert IAdjustBalances.FactorIsZero();
     }
 
-    function _adjustBalancesStorage() internal pure returns (AdjustBalancesStorage storage adjustBalancesStorage_) {
+    function adjustBalancesStorage() internal pure returns (AdjustBalancesStorage storage adjustBalancesStorage_) {
         bytes32 position = _ADJUST_BALANCES_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {

@@ -461,7 +461,7 @@ library ERC1410StorageWrapper {
     function adjustTotalBalanceAndPartitionBalanceFor(bytes32 partition, address account) internal {
         uint256 abaf = AdjustBalancesStorageWrapper.getAbaf();
         ERC1410BasicStorage storage basicStorage = erc1410BasicStorage();
-        adjustPartitionBalanceFor(basicStorage, abaf, partition, account);
+        _adjustPartitionBalanceFor(basicStorage, abaf, partition, account);
         ERC20StorageWrapper.adjustTotalBalanceFor(abaf, account);
     }
 
@@ -549,12 +549,7 @@ library ERC1410StorageWrapper {
     }
 
     function validPartition(bytes32 partition, address holder) internal view returns (bool) {
-        ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
-        if (erc1410Storage.partitionToIndex[holder][partition] == 0) {
-            return false;
-        } else {
-            return true;
-        }
+        return validPartitionForReceiver(partition, holder);
     }
 
     function validPartitionForReceiver(bytes32 partition, address to) internal view returns (bool) {
@@ -660,7 +655,7 @@ library ERC1410StorageWrapper {
         }
     }
 
-    function adjustPartitionBalanceFor(
+    function _adjustPartitionBalanceFor(
         ERC1410BasicStorage storage basicStorage,
         uint256 abaf,
         bytes32 partition,
