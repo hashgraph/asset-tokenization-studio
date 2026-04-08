@@ -30,7 +30,6 @@ interface TRexIERC20 {
     error ZeroOwnerAddress();
     error InsufficientAllowance(address spender, address from);
     error SpenderWithZeroAddress();
-    error AccountIsBlocked(address account);
     error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
 
     // Initialization function

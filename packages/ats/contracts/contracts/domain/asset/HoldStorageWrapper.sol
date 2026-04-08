@@ -22,6 +22,7 @@ import { LockStorageWrapper } from "../asset/LockStorageWrapper.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { ControlListStorageWrapper } from "../core/ControlListStorageWrapper.sol";
+import { IControlList } from "../../facets/layer_1/controlList/IControlList.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
@@ -200,7 +201,7 @@ library HoldStorageWrapper {
 
         if (_operation == IHoldTypes.OperationType.Execute) {
             if (!ControlListStorageWrapper.isAbleToAccess(_holdIdentifier.tokenHolder)) {
-                revert ControlListStorageWrapper.AccountIsBlocked(_holdIdentifier.tokenHolder);
+                revert IControlList.AccountIsBlocked(_holdIdentifier.tokenHolder);
             }
 
             if (holdData.hold.to != address(0) && _to != holdData.hold.to) {

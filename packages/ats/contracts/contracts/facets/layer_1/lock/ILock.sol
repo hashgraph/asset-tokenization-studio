@@ -24,8 +24,9 @@ interface ILock {
         uint256 lockId
     );
 
-    // Re-export error from LockStorageWrapper for test compatibility
     error LockExpirationNotReached();
+
+    error WrongLockId();
 
     /**
      * @dev Locks a certain amount of tokens held by a tokenHolder, until the expirationTimestamp

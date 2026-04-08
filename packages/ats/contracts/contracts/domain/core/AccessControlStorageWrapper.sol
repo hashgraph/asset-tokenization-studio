@@ -6,6 +6,7 @@ import { ArrayValidation } from "../../infrastructure/utils/ArrayValidation.sol"
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { _ACCESS_CONTROL_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { IAccessControl } from "../../facets/layer_1/accessControl/IAccessControl.sol";
 
 /**
  * @title AccessControlStorageWrapper
@@ -33,41 +34,6 @@ library AccessControlStorageWrapper {
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    /**
-     * @dev Emitted when a default admin role is replaced
-     *
-     * @param role The role that replace its administrative role.
-     * @param previousAdminRole The legacy administrative role.
-     * @param newAdminRole The new administrative role.
-     */
-    event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);
-
-    /**
-     * @dev Emitted when the provided account is not granted the role
-     *
-     * @param account The account for which the role is checked for granted
-     * @param role The role that is checked to see if the account has been granted
-     *
-     */
-    error AccountHasNoRole(address account, bytes32 role);
-
-    /**
-     * @dev Emitted when the provided account is not granted any of the roles
-     *
-     * @param account The account for which the role is checked for granted
-     * @param roles The roles that are checked to see if the account has been granted
-     *
-     */
-    error AccountHasNoRoles(address account, bytes32[] roles);
-
-    /**
-     * @dev Emitted when the roles length and actives length are not the same
-     *
-     * @param rolesLength The length of roles array
-     * @param activesLength The length of actives array
-     */
-    error RolesAndActivesLengthMismatch(uint256 rolesLength, uint256 activesLength);
-
     // ✅ Diamond storage pattern
     function rolesStorage() internal pure returns (RoleDataStorage storage roles_) {
         bytes32 position = _ACCESS_CONTROL_STORAGE_POSITION;
@@ -79,7 +45,7 @@ library AccessControlStorageWrapper {
 
     function checkSameRolesAndActivesLength(uint256 _rolesLength, uint256 _activesLength) internal pure {
         if (_rolesLength != _activesLength) {
-            revert RolesAndActivesLengthMismatch(_rolesLength, _activesLength);
+            revert IAccessControl.RolesAndActivesLengthMismatch(_rolesLength, _activesLength);
         }
     }
 
@@ -143,13 +109,13 @@ library AccessControlStorageWrapper {
 
     function checkRole(bytes32 _role, address _account) internal view {
         if (!hasRole(_role, _account)) {
-            revert AccountHasNoRole(_account, _role);
+            revert IAccessControl.AccountHasNoRole(_account, _role);
         }
     }
 
     function checkAnyRole(bytes32[] memory _roles, address _account) internal view {
         if (!hasAnyRole(_roles, _account)) {
-            revert AccountHasNoRoles(_account, _roles);
+            revert IAccessControl.AccountHasNoRoles(_account, _roles);
         }
     }
 

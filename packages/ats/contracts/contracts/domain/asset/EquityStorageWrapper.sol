@@ -35,10 +35,6 @@ struct EquityDataStorage {
 }
 
 library EquityStorageWrapper {
-    error DividendCreationFailed();
-    error VotingRightsCreationFailed();
-    error BalanceAdjustmentCreationFailed();
-
     function storeEquityDetails(IEquity.EquityDetailsData memory equityDetailsData) internal {
         equityStorage().votingRight = equityDetailsData.votingRight;
         equityStorage().informationRight = equityDetailsData.informationRight;
@@ -68,7 +64,7 @@ library EquityStorageWrapper {
 
     function initDividend(bytes32 actionId, bytes memory data) internal {
         if (actionId == bytes32(0)) {
-            revert DividendCreationFailed();
+            revert IEquity.DividendCreationFailed();
         }
 
         IEquity.Dividend memory newDividend = abi.decode(data, (IEquity.Dividend));
@@ -92,7 +88,7 @@ library EquityStorageWrapper {
 
     function initVotingRights(bytes32 actionId, bytes memory data) internal {
         if (actionId == bytes32(0)) {
-            revert VotingRightsCreationFailed();
+            revert IEquity.VotingRightsCreationFailed();
         }
 
         IEquity.Voting memory newVoting = abi.decode(data, (IEquity.Voting));
@@ -116,7 +112,7 @@ library EquityStorageWrapper {
 
     function initBalanceAdjustment(bytes32 actionId, bytes memory data) internal {
         if (actionId == bytes32(0)) {
-            revert BalanceAdjustmentCreationFailed();
+            revert IEquity.BalanceAdjustmentCreationFailed();
         }
 
         IEquity.ScheduledBalanceAdjustment memory newBalanceAdjustment = abi.decode(

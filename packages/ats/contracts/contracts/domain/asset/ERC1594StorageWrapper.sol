@@ -21,6 +21,7 @@ import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol
 import { ClearingStorageWrapper } from "./ClearingStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { ControlListStorageWrapper } from "../core/ControlListStorageWrapper.sol";
+import { IControlList } from "../../facets/layer_1/controlList/IControlList.sol";
 import { KycStorageWrapper } from "../core/KycStorageWrapper.sol";
 
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
@@ -132,7 +133,7 @@ library ERC1594StorageWrapper {
             return (
                 false,
                 Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-                ControlListStorageWrapper.AccountIsBlocked.selector,
+                IControlList.AccountIsBlocked.selector,
                 EMPTY_BYTES
             );
         }
@@ -266,7 +267,7 @@ library ERC1594StorageWrapper {
                 return (
                     false,
                     Eip1066.DISALLOWED_OR_STOP,
-                    ControlListStorageWrapper.AccountIsBlocked.selector,
+                    IControlList.AccountIsBlocked.selector,
                     abi.encode(EvmAccessors.getMsgSender())
                 );
             }
@@ -305,12 +306,7 @@ library ERC1594StorageWrapper {
             }
 
             if (!ControlListStorageWrapper.isAbleToAccess(from)) {
-                return (
-                    false,
-                    Eip1066.DISALLOWED_OR_STOP,
-                    ControlListStorageWrapper.AccountIsBlocked.selector,
-                    abi.encode(from)
-                );
+                return (false, Eip1066.DISALLOWED_OR_STOP, IControlList.AccountIsBlocked.selector, abi.encode(from));
             }
         }
         if (to != address(0)) {
@@ -319,12 +315,7 @@ library ERC1594StorageWrapper {
             }
 
             if (!ControlListStorageWrapper.isAbleToAccess(to)) {
-                return (
-                    false,
-                    Eip1066.DISALLOWED_OR_STOP,
-                    ControlListStorageWrapper.AccountIsBlocked.selector,
-                    abi.encode(to)
-                );
+                return (false, Eip1066.DISALLOWED_OR_STOP, IControlList.AccountIsBlocked.selector, abi.encode(to));
             }
         }
 

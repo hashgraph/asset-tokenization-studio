@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-08T09:47:17.937Z
+ * Generated: 2026-04-08T11:05:53.195Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -1994,7 +1994,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "AccountIsBlocked", signature: "AccountIsBlocked(address)", selector: "0x796c1f0d" },
       { name: "InsufficientAllowance", signature: "InsufficientAllowance(address,address)", selector: "0xf180d8f9" },
       {
         name: "InsufficientBalance",
@@ -3020,7 +3019,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x1f36cfc418f72043825aa85b5d279c03191ab83364af0ec5f170d67f1a7ba152",
       },
     ],
-    errors: [{ name: "LockExpirationNotReached", signature: "LockExpirationNotReached()", selector: "0xe8232ac2" }],
+    errors: [
+      { name: "LockExpirationNotReached", signature: "LockExpirationNotReached()", selector: "0xe8232ac2" },
+      { name: "WrongLockId", signature: "WrongLockId()", selector: "0x039be1dd" },
+    ],
     factory: (signer) => new LockFacet__factory(signer),
     timeTravelFactory: (signer) => new LockFacetTimeTravel__factory(signer),
   },
@@ -4353,22 +4355,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     name: "AccessControlStorageWrapper",
     description: "Use with `using AccessControlStorageWrapper for RoleDataStorage;` or call functions directly",
     methods: [],
-    events: [
-      {
-        name: "RoleAdminChanged",
-        signature: "RoleAdminChanged(bytes32,bytes32,bytes32)",
-        topic0: "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff",
-      },
-    ],
-    errors: [
-      { name: "AccountHasNoRole", signature: "AccountHasNoRole(address,bytes32)", selector: "0xa1180aad" },
-      { name: "AccountHasNoRoles", signature: "AccountHasNoRoles(address,bytes32[])", selector: "0x90e55392" },
-      {
-        name: "RolesAndActivesLengthMismatch",
-        signature: "RolesAndActivesLengthMismatch(uint256,uint256)",
-        selector: "0x365ff1a4",
-      },
-    ],
   },
 
   AdjustBalancesStorageWrapper: {
@@ -4395,7 +4381,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     name: "ControlListStorageWrapper",
     description: "Call these library functions to manage control list",
     methods: [],
-    errors: [{ name: "AccountIsBlocked", signature: "AccountIsBlocked(address)", selector: "0x796c1f0d" }],
   },
 
   CorporateActionsStorageWrapper: {
@@ -4406,15 +4391,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
   EquityStorageWrapper: {
     name: "EquityStorageWrapper",
     methods: [],
-    errors: [
-      {
-        name: "BalanceAdjustmentCreationFailed",
-        signature: "BalanceAdjustmentCreationFailed()",
-        selector: "0x0c68e660",
-      },
-      { name: "DividendCreationFailed", signature: "DividendCreationFailed()", selector: "0x409bf2d2" },
-      { name: "VotingRightsCreationFailed", signature: "VotingRightsCreationFailed()", selector: "0x0cc16600" },
-    ],
   },
 
   ERC1410StorageWrapper: {
@@ -4492,10 +4468,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
   LockStorageWrapper: {
     name: "LockStorageWrapper",
     methods: [],
-    errors: [
-      { name: "LockExpirationNotReached", signature: "LockExpirationNotReached()", selector: "0xe8232ac2" },
-      { name: "WrongLockId", signature: "WrongLockId()", selector: "0x039be1dd" },
-    ],
   },
 
   NonceStorageWrapper: {
@@ -4507,22 +4479,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     name: "PauseStorageWrapper",
     description: "Use PauseModifiers for modifiers, or call functions directly",
     methods: [],
-    events: [
-      {
-        name: "TokenPaused",
-        signature: "TokenPaused(address)",
-        topic0: "0xf017c0de579727a3cd3ee18077ee8b4c43bf21892985952d1d5a0d52f983502d",
-      },
-      {
-        name: "TokenUnpaused",
-        signature: "TokenUnpaused(address)",
-        topic0: "0xf38578ed892ce2ce655ca8ae03c73464ad74915a1331a9b4085e637534daeedf",
-      },
-    ],
-    errors: [
-      { name: "TokenIsPaused", signature: "TokenIsPaused()", selector: "0x649815a5" },
-      { name: "TokenIsUnpaused", signature: "TokenIsUnpaused()", selector: "0x72058d69" },
-    ],
   },
 
   ProceedRecipientsStorageWrapper: {

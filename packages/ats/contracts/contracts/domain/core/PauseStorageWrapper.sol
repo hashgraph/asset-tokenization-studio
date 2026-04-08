@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _PAUSE_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { _PAUSE_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IExternalPause } from "../../facets/layer_1/externalPause/IExternalPause.sol";
+import { IPause } from "../../facets/layer_1/pause/IPause.sol";
 import {
     ExternalListManagementStorageWrapper,
     ExternalListDataStorage
@@ -28,28 +29,6 @@ struct PauseDataStorage {
 library PauseStorageWrapper {
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    /**
-     * @dev Emitted when the token is paused
-     * @param operator The caller of the function that emitted the event
-     */
-    event TokenPaused(address indexed operator);
-
-    /**
-     * @dev Emitted when the token is unpaused
-     * @param operator The caller of the function that emitted the event
-     */
-    event TokenUnpaused(address indexed operator);
-
-    /**
-     * @dev Emitted when the token is paused and it should not
-     */
-    error TokenIsPaused();
-
-    /**
-     * @dev Error thrown when the token is unpaused and it should not
-     */
-    error TokenIsUnpaused();
-
     function pauseStorage() internal pure returns (PauseDataStorage storage pause_) {
         bytes32 position = _PAUSE_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
@@ -62,10 +41,10 @@ library PauseStorageWrapper {
     function setPause(bool _paused) internal {
         pauseStorage().paused = _paused;
         if (_paused) {
-            emit TokenPaused(EvmAccessors.getMsgSender());
+            emit IPause.TokenPaused(EvmAccessors.getMsgSender());
             return;
         }
-        emit TokenUnpaused(EvmAccessors.getMsgSender());
+        emit IPause.TokenUnpaused(EvmAccessors.getMsgSender());
     }
 
     // solhint-disable-next-line func-name-mixedcase
@@ -104,10 +83,10 @@ library PauseStorageWrapper {
     }
 
     function _checkUnpaused() internal view {
-        if (isPaused()) revert TokenIsPaused();
+        if (isPaused()) revert IPause.TokenIsPaused();
     }
 
     function _checkPaused() internal view {
-        if (!isPaused()) revert TokenIsUnpaused();
+        if (!isPaused()) revert IPause.TokenIsUnpaused();
     }
 }

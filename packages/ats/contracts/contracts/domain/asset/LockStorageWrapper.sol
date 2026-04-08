@@ -26,9 +26,6 @@ library LockStorageWrapper {
     using Pagination for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
-    error WrongLockId();
-    error LockExpirationNotReached();
-
     function lockByPartition(
         bytes32 partition,
         uint256 amount,
@@ -202,11 +199,11 @@ library LockStorageWrapper {
     }
 
     function requireValidLockId(bytes32 partition, address tokenHolder, uint256 lockId) internal view {
-        if (!isLockIdValid(partition, tokenHolder, lockId)) revert WrongLockId();
+        if (!isLockIdValid(partition, tokenHolder, lockId)) revert ILock.WrongLockId();
     }
 
     function requireLockedExpirationTimestamp(bytes32 partition, address tokenHolder, uint256 lockId) internal view {
-        if (!isLockedExpirationTimestamp(partition, tokenHolder, lockId)) revert LockExpirationNotReached();
+        if (!isLockedExpirationTimestamp(partition, tokenHolder, lockId)) revert ILock.LockExpirationNotReached();
     }
 
     function getLockedAmountForByPartition(bytes32 partition, address tokenHolder) internal view returns (uint256) {

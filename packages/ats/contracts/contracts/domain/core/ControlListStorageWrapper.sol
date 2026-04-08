@@ -5,6 +5,7 @@ import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { ExternalListManagementStorageWrapper } from "./ExternalListManagementStorageWrapper.sol";
 import { _CONTROL_LIST_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { IControlList } from "../../facets/layer_1/controlList/IControlList.sol";
 
 struct ControlListStorage {
     bool isWhiteList;
@@ -25,14 +26,6 @@ struct ControlListStorage {
 library ControlListStorageWrapper {
     using Pagination for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
-
-    /**
-     * @dev Emitted when the account is blocked by the control list:
-     *  - whitelist = not in the list
-     *  - blakclist = in the list
-     *
-     */
-    error AccountIsBlocked(address account);
 
     function controlListStorage() internal pure returns (ControlListStorage storage controlList_) {
         bytes32 position = _CONTROL_LIST_STORAGE_POSITION;
@@ -56,7 +49,7 @@ library ControlListStorageWrapper {
     // solhint-disable-next-line ordering
     function checkControlList(address _account) internal view {
         if (!isAbleToAccess(_account)) {
-            revert AccountIsBlocked(_account);
+            revert IControlList.AccountIsBlocked(_account);
         }
     }
 
