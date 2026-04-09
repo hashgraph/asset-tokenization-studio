@@ -1,48 +1,40 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _WILD_CARD_ROLE } from "../../../constants/roles.sol";
 import { IClearingTransfer } from "./IClearingTransfer.sol";
-import {
-    IProtectedPartitionsStorageWrapper
-} from "../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
-import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
-import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
-import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWrapper.sol";
 import { ClearingOps } from "../../../domain/orchestrator/ClearingOps.sol";
+import { ClearingProtectedOps } from "../../../domain/orchestrator/ClearingProtectedOps.sol";
 import { ClearingReadOps } from "../../../domain/orchestrator/ClearingReadOps.sol";
-import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
-import { ClearingModifiers } from "../../../infrastructure/utils/ClearingModifiers.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
-abstract contract ClearingTransfer is
-    IClearingTransfer,
-    AccessControlModifiers,
-    TimestampProvider,
-    PauseModifiers,
-    ClearingModifiers
-{
+abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider, Modifiers {
     function clearingTransferByPartition(
         ClearingOperation calldata _clearingOperation,
         uint256 _amount,
         address _to
-    ) external override onlyUnpaused onlyClearingActivated returns (bool success_, uint256 clearingId_) {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_clearingOperation.partition);
-        _requireUnProtectedPartitionsOrWildCardRole();
-        LockStorageWrapper.requireValidExpirationTimestamp(_clearingOperation.expirationTimestamp);
-        ERC1410StorageWrapper.requireValidAddress(_to);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
+    )
+        external
+        override
+        onlyUnpaused
+        onlyClearingActivated
+        onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
+        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
+        onlyUnrecoveredAddress(_to)
+        notZeroAddress(_to)
+        onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
+        onlyUnProtectedPartitionsOrWildCardRole
+        returns (bool success_, uint256 clearingId_)
+    {
         (success_, clearingId_) = ClearingOps.clearingTransferCreation(
             _clearingOperation,
             _amount,
             _to,
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             "",
             ThirdPartyType.NULL
         );
@@ -52,62 +44,41 @@ abstract contract ClearingTransfer is
         ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount,
         address _to
-    ) external override onlyUnpaused onlyClearingActivated returns (bool success_, uint256 clearingId_) {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        );
-        _requireUnProtectedPartitionsOrWildCardRole();
-        LockStorageWrapper.requireValidExpirationTimestamp(
-            _clearingOperationFrom.clearingOperation.expirationTimestamp
-        );
-        {
-            ERC1410StorageWrapper.requireValidAddress(_clearingOperationFrom.from);
-            ERC1410StorageWrapper.requireValidAddress(_to);
-            ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
-            ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
-            ERC3643StorageWrapper.requireUnrecoveredAddress(_clearingOperationFrom.from);
-        }
-        (success_, clearingId_) = ClearingOps.clearingTransferCreation(
-            _clearingOperationFrom.clearingOperation,
-            _amount,
-            _to,
-            _clearingOperationFrom.from,
-            _clearingOperationFrom.operatorData,
-            ThirdPartyType.AUTHORIZED
-        );
-        ClearingOps.decreaseAllowedBalanceForClearing(
-            _clearingOperationFrom.clearingOperation.partition,
-            clearingId_,
-            ClearingOperationType.Transfer,
-            _clearingOperationFrom.from,
-            _amount
-        );
+    )
+        external
+        override
+        onlyUnpaused
+        onlyClearingActivated
+        onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
+        notZeroAddress(_clearingOperationFrom.from)
+        notZeroAddress(_to)
+        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
+        onlyUnrecoveredAddress(_to)
+        onlyUnrecoveredAddress(_clearingOperationFrom.from)
+        returns (bool success_, uint256 clearingId_)
+    {
+        return _clearingTransferFromByPartition(_clearingOperationFrom, _amount, _to);
     }
 
     function operatorClearingTransferByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount,
         address _to
-    ) external override onlyUnpaused onlyClearingActivated returns (bool success_, uint256 clearingId_) {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
+    )
+        external
+        override
+        onlyUnpaused
+        onlyClearingActivated
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyValidOperatorClearingTransferByPartition(
+            _clearingOperationFrom.clearingOperation.expirationTimestamp,
+            EvmAccessors.getMsgSender(),
+            _to,
+            _clearingOperationFrom.from,
             _clearingOperationFrom.clearingOperation.partition
-        );
-        _requireUnProtectedPartitionsOrWildCardRole();
-        LockStorageWrapper.requireValidExpirationTimestamp(
-            _clearingOperationFrom.clearingOperation.expirationTimestamp
-        );
-        {
-            ERC1410StorageWrapper.requireValidAddress(_clearingOperationFrom.from);
-            ERC1410StorageWrapper.requireValidAddress(_to);
-            ERC1410StorageWrapper.requireOperator(
-                _clearingOperationFrom.clearingOperation.partition,
-                _clearingOperationFrom.from
-            );
-            ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
-            ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
-            ERC3643StorageWrapper.requireUnrecoveredAddress(_clearingOperationFrom.from);
-        }
-
+        )
+        returns (bool success_, uint256 clearingId_)
+    {
         (success_, clearingId_) = ClearingOps.clearingTransferCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
@@ -127,23 +98,21 @@ abstract contract ClearingTransfer is
         external
         override
         onlyUnpaused
+        onlyProtectedPartitions
+        notZeroAddress(_protectedClearingOperation.from)
+        notZeroAddress(_to)
+        onlyUnrecoveredAddress(_protectedClearingOperation.from)
+        onlyUnrecoveredAddress(_to)
+        onlyWithValidExpirationTimestamp(_protectedClearingOperation.clearingOperation.expirationTimestamp)
         onlyRole(
             ProtectedPartitionsStorageWrapper.protectedPartitionsRole(
                 _protectedClearingOperation.clearingOperation.partition
             )
         )
+        onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        ProtectedPartitionsStorageWrapper.requireProtectedPartitions();
-        ERC1410StorageWrapper.requireValidAddress(_protectedClearingOperation.from);
-        ERC1410StorageWrapper.requireValidAddress(_to);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_protectedClearingOperation.from);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
-        LockStorageWrapper.requireValidExpirationTimestamp(
-            _protectedClearingOperation.clearingOperation.expirationTimestamp
-        );
-        ClearingStorageWrapper.requireClearingActivated();
-        (success_, clearingId_) = ClearingOps.protectedClearingTransferByPartition(
+        (success_, clearingId_) = ClearingProtectedOps.protectedClearingTransferByPartition(
             _protectedClearingOperation,
             _amount,
             _to,
@@ -165,12 +134,29 @@ abstract contract ClearingTransfer is
             );
     }
 
-    function _requireUnProtectedPartitionsOrWildCardRole() internal view {
-        if (
-            ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
-            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, msg.sender)
-        ) {
-            revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(msg.sender, _WILD_CARD_ROLE);
-        }
+    function _clearingTransferFromByPartition(
+        ClearingOperationFrom calldata _clearingOperationFrom,
+        uint256 _amount,
+        address _to
+    ) internal returns (bool success_, uint256 clearingId_) {
+        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
+            _clearingOperationFrom.clearingOperation.partition
+        );
+        ProtectedPartitionsStorageWrapper.requireUnProtectedPartitionsOrWildCardRole();
+        (success_, clearingId_) = ClearingOps.clearingTransferCreation(
+            _clearingOperationFrom.clearingOperation,
+            _amount,
+            _to,
+            _clearingOperationFrom.from,
+            _clearingOperationFrom.operatorData,
+            ThirdPartyType.AUTHORIZED
+        );
+        ClearingOps.decreaseAllowedBalanceForClearing(
+            _clearingOperationFrom.clearingOperation.partition,
+            clearingId_,
+            ClearingOperationType.Transfer,
+            _clearingOperationFrom.from,
+            _amount
+        );
     }
 }

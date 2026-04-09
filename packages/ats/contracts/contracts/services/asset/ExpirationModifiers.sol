@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IClearing } from "../../facets/layer_1/clearing/IClearing.sol";
+import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
 import { LockStorageWrapper } from "../../domain/asset/LockStorageWrapper.sol";
 import { ClearingStorageWrapper } from "../../domain/asset/ClearingStorageWrapper.sol";
 
@@ -40,8 +40,8 @@ abstract contract ExpirationModifiers {
      * @param _clearingOperationIdentifier The clearing operation identifier
      * @param _mustBeExpired Whether the operation must be expired
      */
-    modifier validateExpirationTimestamp(
-        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
+    modifier onlyValidExpirationTimestampForClearing(
+        IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
         bool _mustBeExpired
     ) {
         ClearingStorageWrapper.requireExpirationTimestamp(_clearingOperationIdentifier, _mustBeExpired);

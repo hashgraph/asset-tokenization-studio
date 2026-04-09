@@ -1,4 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
+// AUTO-GENERATED — DO NOT EDIT.
+// Source: contracts/facets/layer_1/ERC1400/ERC20/IERC20.sol
+// Regenerated on every `npx hardhat compile` by the
+// `erc3643-clone-interfaces` task in `tasks/compile.ts`.
+// Edits to this file will be silently overwritten.
 // Contract copy-pasted form OZ and extended
 
 pragma solidity ^0.8.17;
@@ -18,9 +23,13 @@ interface TRexIERC20 {
         IFactory.SecurityType securityType;
     }
 
-    // Re-export errors from libraries used by ERC20
-    error ZeroAddressNotAllowed();
-    error AccountIsBlocked(address account);
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+
+    error ZeroOwnerAddress();
+    error InsufficientAllowance(address spender, address from);
+    error SpenderWithZeroAddress();
+    error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
 
     // Initialization function
     // solhint-disable-next-line func-name-mixedcase

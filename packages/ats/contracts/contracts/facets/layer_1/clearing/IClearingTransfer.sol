@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IClearing } from "./IClearing.sol";
+import { IClearingTypes } from "./IClearingTypes.sol";
 
-interface IClearingTransfer is IClearing {
+interface IClearingTransfer is IClearingTypes {
     /**
      * @notice Creates a transfer clearing operation for a partition
      *
@@ -12,7 +12,7 @@ interface IClearingTransfer is IClearing {
      * @param _to The address to transfer the tokens to
      */
     function clearingTransferByPartition(
-        ClearingOperation calldata _clearingOperation,
+        IClearingTypes.ClearingOperation calldata _clearingOperation,
         uint256 _amount,
         address _to
     ) external returns (bool success_, uint256 clearingId_);
@@ -26,7 +26,7 @@ interface IClearingTransfer is IClearing {
      * @param _to The address to transfer the tokens to
      */
     function clearingTransferFromByPartition(
-        ClearingOperationFrom calldata _clearingOperationFrom,
+        IClearingTypes.ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount,
         address _to
     ) external returns (bool success_, uint256 clearingId_);
@@ -40,7 +40,7 @@ interface IClearingTransfer is IClearing {
      * @param _to The address to transfer the tokens to
      */
     function operatorClearingTransferByPartition(
-        ClearingOperationFrom calldata _clearingOperationFrom,
+        IClearingTypes.ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount,
         address _to
     ) external returns (bool success_, uint256 clearingId_);
@@ -54,7 +54,7 @@ interface IClearingTransfer is IClearing {
      * @param _to The address to transfer the tokens to
      */
     function protectedClearingTransferByPartition(
-        ProtectedClearingOperation calldata _protectedClearingOperation,
+        IClearingTypes.ProtectedClearingOperation calldata _protectedClearingOperation,
         uint256 _amount,
         address _to,
         bytes calldata _signature
@@ -73,5 +73,5 @@ interface IClearingTransfer is IClearing {
         bytes32 _partition,
         address _tokenHolder,
         uint256 _clearingId
-    ) external view returns (ClearingTransferData memory clearingTransferData_);
+    ) external view returns (IClearingTypes.ClearingTransferData memory clearingTransferData_);
 }

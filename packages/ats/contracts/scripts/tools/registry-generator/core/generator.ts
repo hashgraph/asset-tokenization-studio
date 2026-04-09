@@ -23,6 +23,7 @@ const LINK_REF_TO_LIB_NAME: Record<string, string> = {
   "contracts/domain/orchestrator/HoldOps.sol:HoldOps": "holdOps",
   "contracts/domain/orchestrator/ClearingOps.sol:ClearingOps": "clearingOps",
   "contracts/domain/orchestrator/ClearingReadOps.sol:ClearingReadOps": "clearingReadOps",
+  "contracts/domain/orchestrator/ClearingProtectedOps.sol:ClearingProtectedOps": "clearingProtectedOps",
 };
 
 /**

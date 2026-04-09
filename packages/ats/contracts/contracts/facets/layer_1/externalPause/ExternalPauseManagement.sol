@@ -2,14 +2,13 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalPauseManagement } from "./IExternalPauseManagement.sol";
-import { IPauseStorageWrapper } from "../../../domain/core/pause/IPauseStorageWrapper.sol";
 import { _PAUSE_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { _PAUSE_MANAGEMENT_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
-import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
 import { ExternalListManagementStorageWrapper } from "../../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ArrayValidation } from "../../../infrastructure/utils/ArrayValidation.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
@@ -30,18 +29,17 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers
         if (!success_) {
             revert ExternalPausesNotUpdated(_pauses, _actives);
         }
-        emit ExternalPausesUpdated(msg.sender, _pauses, _actives);
+        emit ExternalPausesUpdated(EvmAccessors.getMsgSender(), _pauses, _actives);
     }
 
     function addExternalPause(
         address _pause
-    ) external override onlyUnpaused onlyRole(_PAUSE_MANAGER_ROLE) returns (bool success_) {
-        ExternalListManagementStorageWrapper.checkValidAddress(_pause);
+    ) external override onlyUnpaused onlyRole(_PAUSE_MANAGER_ROLE) onlyValidAddress(_pause) returns (bool success_) {
         success_ = ExternalListManagementStorageWrapper.addExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
         if (!success_) {
             revert ListedPause(_pause);
         }
-        emit AddedToExternalPauses(msg.sender, _pause);
+        emit AddedToExternalPauses(EvmAccessors.getMsgSender(), _pause);
     }
 
     function removeExternalPause(

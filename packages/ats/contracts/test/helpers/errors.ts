@@ -1,6 +1,55 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { Contract, ContractTransactionReceipt, EventLog } from "ethers";
+import { AddressLike, Contract, ContractTransactionReceipt, EventLog, Signer, ethers } from "ethers";
+
+/**
+ * ABI for the file-level errors declared in
+ * `contracts/interfaces/errors/CommonErrors.sol`. These errors are not part of any
+ * Solidity interface, so TypeChain doesn't generate a typed factory for them.
+ * Tests use {@link getCommonErrors} to obtain a `Contract` handle whose ABI exposes
+ * these errors so chai matchers like `revertedWithCustomError` can resolve them.
+ *
+ * Keep in sync with `contracts/interfaces/errors/CommonErrors.sol`.
+ */
+export const COMMON_ERRORS_ABI = [
+  "error WrongExpirationTimestamp()",
+  "error ZeroAddressNotAllowed()",
+  "error WrongSignature()",
+  "error ExpiredDeadline(uint256 deadline)",
+  "error WrongSignatureLength()",
+  "error WrongNounce(uint256 nounce, address account)",
+  "error AlreadyInitialized()",
+] as const;
+
+/**
+ * Build a `Contract` handle that exposes the file-level errors from
+ * `CommonErrors.sol` in its ABI. The address is arbitrary — the contract
+ * isn't called, only its `interface` is used by chai's `revertedWithCustomError`
+ * to look up the error name and compute its selector.
+ *
+ * @example
+ *   const commonErrors = getCommonErrors(diamond.target);
+ *   await expect(facet.connect(signer).doIt(...))
+ *     .to.be.revertedWithCustomError(commonErrors, "WrongSignature");
+ */
+export function getCommonErrors(addr: AddressLike, signer?: Signer): Contract {
+  return new Contract(addr as string, COMMON_ERRORS_ABI as readonly string[], signer);
+}
+
+/**
+ * Compute the 4-byte selector (or bytes32-padded) for one of the file-level
+ * common errors by signature string. Use this when a test needs the raw selector
+ * (e.g. asserting against `canTransfer`'s returned reason code) and the error is
+ * declared in `CommonErrors.sol` rather than in any contract's interface.
+ *
+ * @example
+ *   getCommonErrorSelector("ZeroAddressNotAllowed()") // "0x8579befe"
+ */
+export function getCommonErrorSelector(errorSignature: string, asBytes4: boolean = false): string {
+  const sigHash = ethers.id(errorSignature).slice(0, 10);
+  if (asBytes4) return sigHash;
+  return sigHash.padEnd(66, "0");
+}
 
 export const ERROR_SELECTOR_MAP: Record<string, string> = {
   "0x649815a5": "TokenIsPaused",

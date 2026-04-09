@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
+// AUTO-GENERATED — DO NOT EDIT.
+// Source: contracts/infrastructure/diamond/IBusinessLogicResolver.sol
+// Regenerated on every `npx hardhat compile` by the
+// `erc3643-clone-interfaces` task in `tasks/compile.ts`.
+// Edits to this file will be silently overwritten.
 pragma solidity ^0.8.17;
+import { TRexIDiamondCutManager as IDiamondCutManager } from "./IDiamondCutManager.sol";
 
 /**
  * @title Contracts Repository
@@ -14,7 +20,7 @@ pragma solidity ^0.8.17;
  *			Registering a business logic (register = update its latest version or add it to the registry) will increase the
  *			latest version for all Business Logics by 1.
  */
-interface TRexIBusinessLogicResolver {
+interface TRexIBusinessLogicResolver is IDiamondCutManager {
     enum VersionStatus {
         NONE,
         ACTIVATED,
@@ -42,6 +48,15 @@ interface TRexIBusinessLogicResolver {
     /// @param businessLogics list of registered Business Logics.
     /// @param newLatestVersion new latest version = previous latest version + 1.
     event BusinessLogicsRegistered(BusinessLogicRegistryData[] businessLogics, uint256 newLatestVersion);
+
+    error BusinessLogicVersionDoesNotExist(uint256 version);
+    error BusinessLogicKeyDuplicated(bytes32 businessLogicKey);
+    error ZeroKeyNotValidForBusinessLogic();
+    error BusinessLogicKeyMismatch(
+        address providedBusinessLogicAddress,
+        bytes32 providedBusinessLogicKey,
+        bytes32 actualBusinessLogicKey
+    );
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_BusinessLogicResolver() external returns (bool success_);

@@ -3,11 +3,11 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ICorporateActions } from "./ICorporateActions.sol";
 import { _CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
-import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateActionsStorageWrapper.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
-abstract contract CorporateActions is ICorporateActions, PauseModifiers, AccessControlModifiers {
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+
+abstract contract CorporateActions is ICorporateActions, Modifiers {
     function addCorporateAction(
         bytes32 _actionType,
         bytes memory _data
@@ -26,7 +26,13 @@ abstract contract CorporateActions is ICorporateActions, PauseModifiers, AccessC
         if (corporateActionId_ == bytes32(0)) {
             revert DuplicatedCorporateAction(_actionType, _data);
         }
-        emit CorporateActionAdded(msg.sender, _actionType, corporateActionId_, corporateActionIdByType_, _data);
+        emit CorporateActionAdded(
+            EvmAccessors.getMsgSender(),
+            _actionType,
+            corporateActionId_,
+            corporateActionIdByType_,
+            _data
+        );
     }
 
     function getCorporateAction(

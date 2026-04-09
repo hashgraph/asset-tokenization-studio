@@ -3,16 +3,13 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _KYC_ROLE, _INTERNAL_KYC_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { IKyc } from "./IKyc.sol";
-import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { KycStorageWrapper } from "../../../domain/core/KycStorageWrapper.sol";
 import { SsiManagementStorageWrapper } from "../../../domain/core/SsiManagementStorageWrapper.sol";
 import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";
-import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
-abstract contract Kyc is IKyc, AccessControlModifiers, TimestampProvider, PauseModifiers {
+abstract contract Kyc is IKyc, TimestampProvider, Modifiers {
     function initializeInternalKyc(bool _internalKycActivated) external {
         _checkNotInitialized(KycStorageWrapper.isKycInitialized());
         KycStorageWrapper.initializeInternalKyc(_internalKycActivated);
@@ -39,19 +36,25 @@ abstract contract Kyc is IKyc, AccessControlModifiers, TimestampProvider, PauseM
         uint256 _validFrom,
         uint256 _validTo,
         address _issuer
-    ) external virtual override onlyUnpaused onlyRole(_KYC_ROLE) returns (bool success_) {
-        ERC1410StorageWrapper.requireValidAddress(_account);
-        KycStorageWrapper.requireValidKycStatus(KycStatus.NOT_GRANTED, _account);
-        KycStorageWrapper.requireValidDates(_validFrom, _validTo, _getBlockTimestamp());
-        SsiManagementStorageWrapper.requireIssuer(_issuer);
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyRole(_KYC_ROLE)
+        notZeroAddress(_account)
+        onlyValidKycStatus(KycStatus.NOT_GRANTED, _account)
+        onlyThreeValidDates(_validFrom, _validTo, _getBlockTimestamp())
+        onlyValidIssuer(_issuer)
+        returns (bool success_)
+    {
         success_ = KycStorageWrapper.grantKyc(_account, _vcId, _validFrom, _validTo, _issuer);
         emit KycGranted(_account, msg.sender);
     }
 
     function revokeKyc(
         address _account
-    ) external virtual override onlyUnpaused onlyRole(_KYC_ROLE) returns (bool success_) {
-        ERC1410StorageWrapper.requireValidAddress(_account);
+    ) external virtual override onlyUnpaused onlyRole(_KYC_ROLE) notZeroAddress(_account) returns (bool success_) {
         success_ = KycStorageWrapper.revokeKyc(_account);
         emit KycRevoked(_account, msg.sender);
     }

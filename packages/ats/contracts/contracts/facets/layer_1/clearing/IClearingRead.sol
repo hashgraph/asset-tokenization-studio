@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IClearing } from "./IClearing.sol";
+import { IClearingTypes } from "./IClearingTypes.sol";
 
-interface IClearingRead is IClearing {
+interface IClearingRead is IClearingTypes {
     /**
      * @notice Gets the total cleared amount for a token holder across all partitions
      */
@@ -23,7 +23,7 @@ interface IClearingRead is IClearing {
     function getClearingCountForByPartition(
         bytes32 _partition,
         address _tokenHolder,
-        ClearingOperationType _clearingOperationType
+        IClearingTypes.ClearingOperationType _clearingOperationType
     ) external view returns (uint256 clearingCount_);
 
     /**
@@ -32,7 +32,7 @@ interface IClearingRead is IClearing {
     function getClearingsIdForByPartition(
         bytes32 _partition,
         address _tokenHolder,
-        ClearingOperationType _clearingOperationType,
+        IClearingTypes.ClearingOperationType _clearingOperationType,
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view returns (uint256[] memory clearingsId_);
@@ -43,7 +43,7 @@ interface IClearingRead is IClearing {
     function getClearingThirdParty(
         bytes32 _partition,
         address _tokenHolder,
-        ClearingOperationType _clearingOperationType,
+        IClearingTypes.ClearingOperationType _clearingOperationType,
         uint256 clearingId_
     ) external view returns (address thirdParty_);
 }

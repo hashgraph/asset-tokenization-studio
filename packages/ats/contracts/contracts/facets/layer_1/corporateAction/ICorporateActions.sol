@@ -20,6 +20,8 @@ interface ICorporateActions {
     );
 
     error DuplicatedCorporateAction(bytes32 actionType, bytes data);
+    error WrongIndexForAction(uint256 index, bytes32 actionType);
+    error WrongDates(uint256 firstDate, uint256 secondDate);
 
     function addCorporateAction(
         bytes32 _actionType,

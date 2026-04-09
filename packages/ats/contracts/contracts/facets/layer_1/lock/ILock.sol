@@ -24,6 +24,10 @@ interface ILock {
         uint256 lockId
     );
 
+    error LockExpirationNotReached();
+
+    error WrongLockId();
+
     /**
      * @dev Locks a certain amount of tokens held by a tokenHolder, until the expirationTimestamp
      * @param _partition The partition to lock the tokens from

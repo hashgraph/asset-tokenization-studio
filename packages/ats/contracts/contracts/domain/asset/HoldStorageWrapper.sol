@@ -5,86 +5,66 @@ import { _HOLD_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {
-    IHold,
-    Hold,
-    ProtectedHold,
-    HoldIdentifier,
-    HoldData,
-    OperationType,
-    HoldDataStorage
-} from "../../facets/layer_1/hold/IHold.sol";
+import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
-import { IERC3643Management } from "../../facets/layer_1/ERC3643/IERC3643Management.sol";
-import { IERC20StorageWrapper } from "./ERC1400/ERC20/IERC20StorageWrapper.sol";
+import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
+import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
-import { IERC1410StorageWrapper } from "./ERC1400/ERC1410/IERC1410StorageWrapper.sol";
+import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { ThirdPartyType } from "./types/ThirdPartyType.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { _checkNounceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
-import { IControlListStorageWrapper } from "../core/controlList/IControlListStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
+import { LockStorageWrapper } from "../asset/LockStorageWrapper.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { ControlListStorageWrapper } from "../core/ControlListStorageWrapper.sol";
+import { IControlList } from "../../facets/layer_1/controlList/IControlList.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 library HoldStorageWrapper {
     using Pagination for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.UintSet;
     using LowLevelCall for address;
 
-    // --- Create hold ---
+    struct HoldDataStorage {
+        mapping(address => uint256) totalHeldAmountByAccount;
+        mapping(address => mapping(bytes32 => uint256)) totalHeldAmountByAccountAndPartition;
+        mapping(address => mapping(bytes32 => mapping(uint256 => IHoldTypes.HoldData))) holdsByAccountPartitionAndId;
+        mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) holdIdsByAccountAndPartition;
+        mapping(address => mapping(bytes32 => uint256)) nextHoldIdByAccountAndPartition;
+        mapping(address => mapping(bytes32 => mapping(uint256 => address))) holdThirdPartyByAccountPartitionAndId;
+    }
 
     function createHoldByPartition(
         bytes32 _partition,
         address _from,
-        Hold memory _hold,
+        IHoldTypes.Hold memory _hold,
         bytes memory _operatorData,
         ThirdPartyType _thirdPartyType
     ) internal returns (bool success_, uint256 holdId_) {
-        ERC1410StorageWrapper.triggerAndSyncAll(_partition, _from, address(0));
+        _prepareHoldCreation(_partition, _from);
 
         uint256 abaf = updateTotalHold(_partition, _from);
 
         beforeHold(_partition, _from);
         ERC1410StorageWrapper.reduceBalanceByPartition(_from, _hold.amount, _partition);
 
-        HoldDataStorage storage holdStorageRef = holdStorage();
+        holdId_ = _storeHold(_partition, _from, _hold, _operatorData, _thirdPartyType, abaf);
 
-        holdId_ = ++holdStorageRef.nextHoldIdByAccountAndPartition[_from][_partition];
+        _emitHoldCreationEvents(_partition, _from, _hold.amount, _operatorData);
 
-        HoldData memory hold = HoldData(holdId_, _hold, _operatorData, _thirdPartyType);
-        AdjustBalancesStorageWrapper.setHeldLabafById(_partition, _from, holdId_, abaf);
-
-        holdStorageRef.holdsByAccountPartitionAndId[_from][_partition][holdId_] = hold;
-        holdStorageRef.holdIdsByAccountAndPartition[_from][_partition].add(holdId_);
-        holdStorageRef.totalHeldAmountByAccountAndPartition[_from][_partition] += _hold.amount;
-        holdStorageRef.totalHeldAmountByAccount[_from] += _hold.amount;
-
-        emit IERC1410StorageWrapper.TransferByPartition(
-            _partition,
-            msg.sender,
-            _from,
-            address(0),
-            _hold.amount,
-            _operatorData,
-            ""
-        );
-        emit IERC20StorageWrapper.Transfer(_from, address(0), _hold.amount);
-
-        success_ = true;
+        return (true, holdId_);
     }
-
-    // --- Protected create hold ---
 
     function protectedCreateHoldByPartition(
         bytes32 _partition,
         address _from,
-        ProtectedHold memory _protectedHold,
+        IHoldTypes.ProtectedHold memory _protectedHold,
         bytes calldata _signature
     ) internal returns (bool success_, uint256 holdId_) {
         _checkNounceAndDeadline(
@@ -108,34 +88,28 @@ library HoldStorageWrapper {
         return createHoldByPartition(_partition, _from, _protectedHold.hold, "", ThirdPartyType.PROTECTED);
     }
 
-    // --- Decrease allowance for hold ---
-
     function decreaseAllowedBalanceForHold(
         bytes32 _partition,
         address _from,
         uint256 _amount,
         uint256 _holdId
     ) internal {
-        address thirdPartyAddress = msg.sender;
+        address thirdPartyAddress = EvmAccessors.getMsgSender();
         ERC20StorageWrapper.decreaseAllowedBalance(_from, thirdPartyAddress, _amount);
         holdStorage().holdThirdPartyByAccountPartitionAndId[_from][_partition][_holdId] = thirdPartyAddress;
     }
 
-    // --- Execute hold ---
-
     function executeHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier,
+        IHoldTypes.HoldIdentifier calldata _holdIdentifier,
         address _to,
         uint256 _amount
     ) internal returns (bool success_, bytes32 partition_) {
         beforeExecuteHold(_holdIdentifier, _to);
 
-        success_ = operateHoldByPartition(_holdIdentifier, _to, _amount, OperationType.Execute);
+        success_ = operateHoldByPartition(_holdIdentifier, _to, _amount, IHoldTypes.OperationType.Execute);
         partition_ = _holdIdentifier.partition;
 
-        HoldData memory holdData = getHold(_holdIdentifier);
-
-        if (holdData.hold.amount == 0) {
+        if (getHold(_holdIdentifier).hold.amount == 0) {
             AdjustBalancesStorageWrapper.removeLabafHold(
                 _holdIdentifier.partition,
                 _holdIdentifier.tokenHolder,
@@ -144,23 +118,22 @@ library HoldStorageWrapper {
         }
     }
 
-    // --- Release hold ---
-
     function releaseHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier,
+        IHoldTypes.HoldIdentifier calldata _holdIdentifier,
         uint256 _amount
     ) internal returns (bool success_) {
         beforeReleaseHold(_holdIdentifier);
 
-        HoldData memory holdData = getHold(_holdIdentifier);
+        _restoreHoldAllowance(getHold(_holdIdentifier).thirdPartyType, _holdIdentifier, _amount);
 
-        restoreHoldAllowance(holdData.thirdPartyType, _holdIdentifier, _amount);
+        success_ = operateHoldByPartition(
+            _holdIdentifier,
+            _holdIdentifier.tokenHolder,
+            _amount,
+            IHoldTypes.OperationType.Release
+        );
 
-        success_ = operateHoldByPartition(_holdIdentifier, _holdIdentifier.tokenHolder, _amount, OperationType.Release);
-
-        holdData = getHold(_holdIdentifier);
-
-        if (holdData.hold.amount == 0) {
+        if (getHold(_holdIdentifier).hold.amount == 0) {
             AdjustBalancesStorageWrapper.removeLabafHold(
                 _holdIdentifier.partition,
                 _holdIdentifier.tokenHolder,
@@ -169,19 +142,22 @@ library HoldStorageWrapper {
         }
     }
 
-    // --- Reclaim hold ---
-
     function reclaimHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier
+        IHoldTypes.HoldIdentifier calldata _holdIdentifier
     ) internal returns (bool success_, uint256 amount_) {
         beforeReclaimHold(_holdIdentifier);
 
-        HoldData memory holdData = getHold(_holdIdentifier);
+        IHoldTypes.HoldData memory holdData = getHold(_holdIdentifier);
         amount_ = holdData.hold.amount;
 
-        restoreHoldAllowance(holdData.thirdPartyType, _holdIdentifier, amount_);
+        _restoreHoldAllowance(holdData.thirdPartyType, _holdIdentifier, amount_);
 
-        success_ = operateHoldByPartition(_holdIdentifier, _holdIdentifier.tokenHolder, amount_, OperationType.Reclaim);
+        success_ = operateHoldByPartition(
+            _holdIdentifier,
+            _holdIdentifier.tokenHolder,
+            amount_,
+            IHoldTypes.OperationType.Reclaim
+        );
 
         AdjustBalancesStorageWrapper.removeLabafHold(
             _holdIdentifier.partition,
@@ -190,88 +166,34 @@ library HoldStorageWrapper {
         );
     }
 
-    // --- Operate hold (core hold processing) ---
-
     function operateHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier,
+        IHoldTypes.HoldIdentifier calldata _holdIdentifier,
         address _to,
         uint256 _amount,
-        OperationType _operation
+        IHoldTypes.OperationType _operation
     ) internal returns (bool success_) {
-        HoldData memory holdData = getHold(_holdIdentifier);
+        IHoldTypes.HoldData memory holdData = getHold(_holdIdentifier);
 
-        if (_operation == OperationType.Execute) {
-            if (!ControlListStorageWrapper.isAbleToAccess(_holdIdentifier.tokenHolder)) {
-                revert IControlListStorageWrapper.AccountIsBlocked(_holdIdentifier.tokenHolder);
-            }
-
-            if (holdData.hold.to != address(0) && _to != holdData.hold.to) {
-                revert IHold.InvalidDestinationAddress(holdData.hold.to, _to);
-            }
-        }
-        if (_operation != OperationType.Reclaim) {
-            if (isHoldExpired(holdData.hold)) revert IHold.HoldExpirationReached();
-            if (!isEscrow(holdData.hold, msg.sender)) revert IHold.IsNotEscrow();
-        } else if (_operation == OperationType.Reclaim && !isHoldExpired(holdData.hold)) {
-            revert IHold.HoldExpirationNotReached();
-        }
-
+        _validateHoldOperation(_holdIdentifier, holdData, _to, _operation);
         checkHoldAmount(_amount, holdData);
 
         transferHold(_holdIdentifier, _to, _amount);
 
-        success_ = true;
+        return true;
     }
 
-    // --- Transfer hold to recipient ---
+    function transferHold(IHoldTypes.HoldIdentifier calldata _holdIdentifier, address _to, uint256 _amount) internal {
+        _decreaseOrRemoveHold(_holdIdentifier, _amount);
 
-    function transferHold(HoldIdentifier calldata _holdIdentifier, address _to, uint256 _amount) internal {
-        if (decreaseHeldAmount(_holdIdentifier, _amount) == 0) {
-            removeHold(_holdIdentifier);
-        }
-        if (ERC1410StorageWrapper.validPartitionForReceiver(_holdIdentifier.partition, _to)) {
-            ERC1410StorageWrapper.increaseBalanceByPartition(_to, _amount, _holdIdentifier.partition);
-            if (_holdIdentifier.tokenHolder != _to && _holdIdentifier.partition == _DEFAULT_PARTITION) {
-                (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
-                    abi.encodeWithSelector(ICompliance.transferred.selector, _holdIdentifier.tokenHolder, _to, _amount),
-                    IERC3643Management.ComplianceCallFailed.selector
-                );
-            }
-            emit IERC1410StorageWrapper.TransferByPartition(
-                _holdIdentifier.partition,
-                msg.sender,
-                address(0),
-                _to,
-                _amount,
-                "",
-                ""
-            );
-            emit IERC20StorageWrapper.Transfer(address(0), _to, _amount);
-            return;
-        }
-        ERC1410StorageWrapper.addPartitionTo(_amount, _to, _holdIdentifier.partition);
-        if (_holdIdentifier.tokenHolder != _to && _holdIdentifier.partition == _DEFAULT_PARTITION) {
-            (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
-                abi.encodeWithSelector(ICompliance.transferred.selector, _holdIdentifier.tokenHolder, _to, _amount),
-                IERC3643Management.ComplianceCallFailed.selector
-            );
-        }
-        emit IERC1410StorageWrapper.TransferByPartition(
-            _holdIdentifier.partition,
-            msg.sender,
-            address(0),
-            _to,
-            _amount,
-            "",
-            ""
-        );
-        emit IERC20StorageWrapper.Transfer(address(0), _to, _amount);
+        _transferHoldBalance(_holdIdentifier, _to, _amount);
+
+        _notifyTransferComplianceIfNeeded(_holdIdentifier, _to, _amount);
+
+        _emitHoldTransfer(_holdIdentifier, _to, _amount);
     }
-
-    // --- Hold amount operations ---
 
     function decreaseHeldAmount(
-        HoldIdentifier calldata _holdIdentifier,
+        IHoldTypes.HoldIdentifier calldata _holdIdentifier,
         uint256 _amount
     ) internal returns (uint256 newHoldBalance_) {
         HoldDataStorage storage holdStorageRef = holdStorage();
@@ -291,9 +213,7 @@ library HoldStorageWrapper {
             .amount;
     }
 
-    // --- Remove hold ---
-
-    function removeHold(HoldIdentifier calldata _holdIdentifier) internal {
+    function removeHold(IHoldTypes.HoldIdentifier calldata _holdIdentifier) internal {
         HoldDataStorage storage holdStorageRef = holdStorage();
 
         holdStorageRef.holdIdsByAccountAndPartition[_holdIdentifier.tokenHolder][_holdIdentifier.partition].remove(
@@ -315,8 +235,6 @@ library HoldStorageWrapper {
         );
     }
 
-    // --- Update total hold balances ---
-
     function updateTotalHold(bytes32 _partition, address _tokenHolder) internal returns (uint256 abaf_) {
         abaf_ = AdjustBalancesStorageWrapper.getAbaf();
 
@@ -324,15 +242,20 @@ library HoldStorageWrapper {
         uint256 labafByPartition = AdjustBalancesStorageWrapper.getTotalHeldLabafByPartition(_partition, _tokenHolder);
 
         if (abaf_ != labaf) {
-            uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(abaf_, labaf);
-
-            updateTotalHeldAmountAndLabaf(_tokenHolder, factor, abaf_);
+            updateTotalHeldAmountAndLabaf(
+                _tokenHolder,
+                AdjustBalancesStorageWrapper.calculateFactor(abaf_, labaf),
+                abaf_
+            );
         }
 
         if (abaf_ != labafByPartition) {
-            uint256 factorByPartition = AdjustBalancesStorageWrapper.calculateFactor(abaf_, labafByPartition);
-
-            updateTotalHeldAmountAndLabafByPartition(_partition, _tokenHolder, factorByPartition, abaf_);
+            updateTotalHeldAmountAndLabafByPartition(
+                _partition,
+                _tokenHolder,
+                AdjustBalancesStorageWrapper.calculateFactor(abaf_, labafByPartition),
+                abaf_
+            );
         }
     }
 
@@ -351,41 +274,40 @@ library HoldStorageWrapper {
         AdjustBalancesStorageWrapper.setTotalHeldLabafByPartition(_partition, _tokenHolder, _abaf);
     }
 
-    // --- Adjust hold balances ---
-
-    function adjustHoldBalances(HoldIdentifier calldata _holdIdentifier, address _to) internal {
+    function adjustHoldBalances(IHoldTypes.HoldIdentifier calldata _holdIdentifier, address _to) internal {
         ERC1410StorageWrapper.triggerAndSyncAll(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _to);
 
-        uint256 abaf = updateTotalHold(_holdIdentifier.partition, _holdIdentifier.tokenHolder);
-
-        updateHold(_holdIdentifier.partition, _holdIdentifier.holdId, _holdIdentifier.tokenHolder, abaf);
+        updateHold(
+            _holdIdentifier.partition,
+            _holdIdentifier.holdId,
+            _holdIdentifier.tokenHolder,
+            updateTotalHold(_holdIdentifier.partition, _holdIdentifier.tokenHolder)
+        );
     }
 
     function updateHold(bytes32 _partition, uint256 _holdId, address _tokenHolder, uint256 _abaf) internal {
         uint256 holdLabaf = AdjustBalancesStorageWrapper.getHoldLabafById(_partition, _tokenHolder, _holdId);
 
-        if (_abaf != holdLabaf) {
-            uint256 holdFactor = AdjustBalancesStorageWrapper.calculateFactor(_abaf, holdLabaf);
-
-            updateHoldAmountById(_partition, _holdId, _tokenHolder, holdFactor);
-            AdjustBalancesStorageWrapper.setHeldLabafById(_partition, _tokenHolder, _holdId, _abaf);
-        }
+        if (_abaf == holdLabaf) return;
+        updateHoldAmountById(
+            _partition,
+            _holdId,
+            _tokenHolder,
+            AdjustBalancesStorageWrapper.calculateFactor(_abaf, holdLabaf)
+        );
+        AdjustBalancesStorageWrapper.setHeldLabafById(_partition, _tokenHolder, _holdId, _abaf);
     }
 
     function updateHoldAmountById(bytes32 _partition, uint256 _holdId, address _tokenHolder, uint256 _factor) internal {
-        HoldDataStorage storage holdStorageRef = holdStorage();
-
-        holdStorageRef.holdsByAccountPartitionAndId[_tokenHolder][_partition][_holdId].hold.amount *= _factor;
+        holdStorage().holdsByAccountPartitionAndId[_tokenHolder][_partition][_holdId].hold.amount *= _factor;
     }
-
-    // --- Before-hook callbacks ---
 
     function beforeHold(bytes32 _partition, address _tokenHolder) internal {
         SnapshotsStorageWrapper.updateAccountSnapshot(_tokenHolder, _partition);
         SnapshotsStorageWrapper.updateAccountHeldBalancesSnapshot(_tokenHolder, _partition);
     }
 
-    function beforeExecuteHold(HoldIdentifier calldata _holdIdentifier, address _to) internal {
+    function beforeExecuteHold(IHoldTypes.HoldIdentifier calldata _holdIdentifier, address _to) internal {
         adjustHoldBalances(_holdIdentifier, _to);
         SnapshotsStorageWrapper.updateAccountSnapshot(_to, _holdIdentifier.partition);
         SnapshotsStorageWrapper.updateAccountHeldBalancesSnapshot(
@@ -394,26 +316,21 @@ library HoldStorageWrapper {
         );
     }
 
-    function beforeReleaseHold(HoldIdentifier calldata _holdIdentifier) internal {
+    function beforeReleaseHold(IHoldTypes.HoldIdentifier calldata _holdIdentifier) internal {
         beforeExecuteHold(_holdIdentifier, _holdIdentifier.tokenHolder);
     }
 
-    function beforeReclaimHold(HoldIdentifier calldata _holdIdentifier) internal {
+    function beforeReclaimHold(IHoldTypes.HoldIdentifier calldata _holdIdentifier) internal {
         beforeExecuteHold(_holdIdentifier, _holdIdentifier.tokenHolder);
     }
-
-    // --- Adjusted-at queries ---
 
     function getHeldAmountForAdjustedAt(
         address _tokenHolder,
         uint256 _timestamp
     ) internal view returns (uint256 amount_) {
-        uint256 factor = AdjustBalancesStorageWrapper.calculateFactorForHeldAmountByTokenHolderAdjustedAt(
-            _tokenHolder,
-            _timestamp
-        );
-
-        return getHeldAmountFor(_tokenHolder) * factor;
+        return
+            getHeldAmountFor(_tokenHolder) *
+            AdjustBalancesStorageWrapper.calculateFactorForHeldAmountByTokenHolderAdjustedAt(_tokenHolder, _timestamp);
     }
 
     function getHeldAmountForByPartitionAdjustedAt(
@@ -421,31 +338,30 @@ library HoldStorageWrapper {
         address _tokenHolder,
         uint256 _timestamp
     ) internal view returns (uint256 amount_) {
-        uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(
-            AdjustBalancesStorageWrapper.getAbafAdjustedAt(_timestamp),
-            AdjustBalancesStorageWrapper.getTotalHeldLabafByPartition(_partition, _tokenHolder)
-        );
-        return getHeldAmountForByPartition(_partition, _tokenHolder) * factor;
+        return
+            getHeldAmountForByPartition(_partition, _tokenHolder) *
+            AdjustBalancesStorageWrapper.calculateFactor(
+                AdjustBalancesStorageWrapper.getAbafAdjustedAt(_timestamp),
+                AdjustBalancesStorageWrapper.getTotalHeldLabafByPartition(_partition, _tokenHolder)
+            );
     }
 
-    // --- Hold ID validation and retrieval ---
-
-    function requireValidHoldId(HoldIdentifier memory _holdIdentifier) internal view {
-        if (!isHoldIdValid(_holdIdentifier)) revert IHold.WrongHoldId();
+    function requireValidHoldId(IHoldTypes.HoldIdentifier memory _holdIdentifier) internal view {
+        if (!isHoldIdValid(_holdIdentifier)) revert IHoldTypes.WrongHoldId();
     }
 
-    function isHoldIdValid(HoldIdentifier memory _holdIdentifier) internal view returns (bool) {
+    function isHoldIdValid(IHoldTypes.HoldIdentifier memory _holdIdentifier) internal view returns (bool) {
         return getHold(_holdIdentifier).id != 0;
     }
 
-    function getHold(HoldIdentifier memory _holdIdentifier) internal view returns (HoldData memory) {
+    function getHold(
+        IHoldTypes.HoldIdentifier memory _holdIdentifier
+    ) internal view returns (IHoldTypes.HoldData memory) {
         return
             holdStorage().holdsByAccountPartitionAndId[_holdIdentifier.tokenHolder][_holdIdentifier.partition][
                 _holdIdentifier.holdId
             ];
     }
-
-    // --- Hold amount queries ---
 
     function getHeldAmountFor(address _tokenHolder) internal view returns (uint256 amount_) {
         return holdStorage().totalHeldAmountByAccount[_tokenHolder];
@@ -458,8 +374,6 @@ library HoldStorageWrapper {
         return holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][_partition];
     }
 
-    // --- Hold pagination ---
-
     function getHoldsIdForByPartition(
         bytes32 _partition,
         address _tokenHolder,
@@ -469,10 +383,8 @@ library HoldStorageWrapper {
         return holdStorage().holdIdsByAccountAndPartition[_tokenHolder][_partition].getFromSet(_pageIndex, _pageLength);
     }
 
-    // --- Hold details ---
-
     function getHoldForByPartition(
-        HoldIdentifier calldata _holdIdentifier
+        IHoldTypes.HoldIdentifier calldata _holdIdentifier
     )
         internal
         view
@@ -486,7 +398,7 @@ library HoldStorageWrapper {
             ThirdPartyType thirdPartType_
         )
     {
-        HoldData memory holdData = getHold(_holdIdentifier);
+        IHoldTypes.HoldData memory holdData = getHold(_holdIdentifier);
         return (
             holdData.hold.amount,
             holdData.hold.expirationTimestamp,
@@ -499,7 +411,7 @@ library HoldStorageWrapper {
     }
 
     function getHoldForByPartitionAdjustedAt(
-        HoldIdentifier calldata _holdIdentifier,
+        IHoldTypes.HoldIdentifier calldata _holdIdentifier,
         uint256 _timestamp
     )
         internal
@@ -514,15 +426,6 @@ library HoldStorageWrapper {
             ThirdPartyType thirdPartType_
         )
     {
-        uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(
-            AdjustBalancesStorageWrapper.getAbafAdjustedAt(_timestamp),
-            AdjustBalancesStorageWrapper.getHoldLabafById(
-                _holdIdentifier.partition,
-                _holdIdentifier.tokenHolder,
-                _holdIdentifier.holdId
-            )
-        );
-
         (
             amount_,
             expirationTimestamp_,
@@ -532,38 +435,68 @@ library HoldStorageWrapper {
             operatorData_,
             thirdPartType_
         ) = getHoldForByPartition(_holdIdentifier);
-        amount_ *= factor;
+        amount_ *= AdjustBalancesStorageWrapper.calculateFactor(
+            AdjustBalancesStorageWrapper.getAbafAdjustedAt(_timestamp),
+            AdjustBalancesStorageWrapper.getHoldLabafById(
+                _holdIdentifier.partition,
+                _holdIdentifier.tokenHolder,
+                _holdIdentifier.holdId
+            )
+        );
     }
 
-    function getHoldThirdParty(HoldIdentifier calldata _holdIdentifier) internal view returns (address thirdParty_) {
-        HoldDataStorage storage holdStorageRef = holdStorage();
-
-        thirdParty_ = holdStorageRef.holdThirdPartyByAccountPartitionAndId[_holdIdentifier.tokenHolder][
+    function getHoldThirdParty(
+        IHoldTypes.HoldIdentifier calldata _holdIdentifier
+    ) internal view returns (address thirdParty_) {
+        thirdParty_ = holdStorage().holdThirdPartyByAccountPartitionAndId[_holdIdentifier.tokenHolder][
             _holdIdentifier.partition
         ][_holdIdentifier.holdId];
     }
-
-    // --- Hold count ---
 
     function getHoldCountForByPartition(bytes32 _partition, address _tokenHolder) internal view returns (uint256) {
         return holdStorage().holdIdsByAccountAndPartition[_tokenHolder][_partition].length();
     }
 
-    // --- Hold validation checks ---
-
-    function isHoldExpired(Hold memory _hold) internal view returns (bool) {
+    function isHoldExpired(IHoldTypes.Hold memory _hold) internal view returns (bool) {
         return TimeTravelStorageWrapper.getBlockTimestamp() > _hold.expirationTimestamp;
     }
 
-    function isEscrow(Hold memory _hold, address _escrow) internal pure returns (bool) {
+    function checkOperatorCreateHoldByPartition(
+        uint256 _expirationTimestamp,
+        address _account,
+        address _to,
+        address _from,
+        address _escrow,
+        bytes32 _partition
+    ) internal view {
+        checkCreateHoldFromByPartition(_expirationTimestamp, _account, _to, _from, _escrow, _partition);
+        ERC1410StorageWrapper.requireOperator(_partition, _from);
+    }
+
+    function checkCreateHoldFromByPartition(
+        uint256 _expirationTimestamp,
+        address _account,
+        address _to,
+        address _from,
+        address _escrow,
+        bytes32 _partition
+    ) internal view {
+        LockStorageWrapper.requireValidExpirationTimestamp(_expirationTimestamp);
+        ERC3643StorageWrapper.requireUnrecoveredAddress(_account);
+        ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
+        ERC3643StorageWrapper.requireUnrecoveredAddress(_from);
+        ERC1410StorageWrapper.requireValidAddress(_from);
+        ERC1410StorageWrapper.requireValidAddress(_escrow);
+        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
+    }
+
+    function isEscrow(IHoldTypes.Hold memory _hold, address _escrow) internal pure returns (bool) {
         return _escrow == _hold.escrow;
     }
 
-    function checkHoldAmount(uint256 _amount, HoldData memory holdData) internal pure {
-        if (_amount > holdData.hold.amount) revert IHold.InsufficientHoldBalance(holdData.hold.amount, _amount);
+    function checkHoldAmount(uint256 _amount, IHoldTypes.HoldData memory holdData) internal pure {
+        if (_amount > holdData.hold.amount) revert IHoldTypes.InsufficientHoldBalance(holdData.hold.amount, _amount);
     }
-
-    // --- Storage access ---
 
     function holdStorage() internal pure returns (HoldDataStorage storage hold_) {
         bytes32 position = _HOLD_STORAGE_POSITION;
@@ -573,11 +506,9 @@ library HoldStorageWrapper {
         }
     }
 
-    // --- Private helper ---
-
-    function restoreHoldAllowance(
+    function _restoreHoldAllowance(
         ThirdPartyType _thirdPartyType,
-        HoldIdentifier calldata _holdIdentifier,
+        IHoldTypes.HoldIdentifier calldata _holdIdentifier,
         uint256 _amount
     ) private {
         if (_thirdPartyType != ThirdPartyType.AUTHORIZED) return;
@@ -588,5 +519,155 @@ library HoldStorageWrapper {
             ],
             _amount
         );
+    }
+
+    function _prepareHoldCreation(bytes32 _partition, address _from) private {
+        ERC1410StorageWrapper.triggerAndSyncAll(_partition, _from, address(0));
+    }
+
+    function _storeHold(
+        bytes32 _partition,
+        address _from,
+        IHoldTypes.Hold memory _hold,
+        bytes memory _operatorData,
+        ThirdPartyType _thirdPartyType,
+        uint256 abaf
+    ) private returns (uint256 holdId_) {
+        HoldDataStorage storage holdStorageRef = holdStorage();
+
+        holdId_ = ++holdStorageRef.nextHoldIdByAccountAndPartition[_from][_partition];
+
+        IHoldTypes.HoldData memory hold = IHoldTypes.HoldData(holdId_, _hold, _operatorData, _thirdPartyType);
+
+        AdjustBalancesStorageWrapper.setHeldLabafById(_partition, _from, holdId_, abaf);
+
+        holdStorageRef.holdsByAccountPartitionAndId[_from][_partition][holdId_] = hold;
+        holdStorageRef.holdIdsByAccountAndPartition[_from][_partition].add(holdId_);
+        holdStorageRef.totalHeldAmountByAccountAndPartition[_from][_partition] += _hold.amount;
+        holdStorageRef.totalHeldAmountByAccount[_from] += _hold.amount;
+    }
+
+    function _emitHoldCreationEvents(
+        bytes32 _partition,
+        address _from,
+        uint256 amount,
+        bytes memory _operatorData
+    ) private {
+        emit IERC1410Types.TransferByPartition(
+            _partition,
+            EvmAccessors.getMsgSender(),
+            _from,
+            address(0),
+            amount,
+            _operatorData,
+            ""
+        );
+        emit IERC20.Transfer(_from, address(0), amount);
+    }
+
+    function _decreaseOrRemoveHold(IHoldTypes.HoldIdentifier calldata _holdIdentifier, uint256 _amount) private {
+        if (decreaseHeldAmount(_holdIdentifier, _amount) == 0) {
+            removeHold(_holdIdentifier);
+        }
+    }
+
+    function _transferHoldBalance(
+        IHoldTypes.HoldIdentifier calldata _holdIdentifier,
+        address _to,
+        uint256 _amount
+    ) private {
+        if (ERC1410StorageWrapper.validPartitionForReceiver(_holdIdentifier.partition, _to)) {
+            ERC1410StorageWrapper.increaseBalanceByPartition(_to, _amount, _holdIdentifier.partition);
+            return;
+        }
+
+        ERC1410StorageWrapper.addPartitionTo(_amount, _to, _holdIdentifier.partition);
+    }
+
+    function _notifyTransferComplianceIfNeeded(
+        IHoldTypes.HoldIdentifier calldata _holdIdentifier,
+        address _to,
+        uint256 _amount
+    ) private {
+        if (_holdIdentifier.tokenHolder == _to || _holdIdentifier.partition != _DEFAULT_PARTITION) return;
+
+        (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
+            abi.encodeWithSelector(ICompliance.transferred.selector, _holdIdentifier.tokenHolder, _to, _amount),
+            IERC3643Types.ComplianceCallFailed.selector
+        );
+    }
+
+    function _emitHoldTransfer(
+        IHoldTypes.HoldIdentifier calldata _holdIdentifier,
+        address _to,
+        uint256 _amount
+    ) private {
+        emit IERC1410Types.TransferByPartition(
+            _holdIdentifier.partition,
+            EvmAccessors.getMsgSender(),
+            address(0),
+            _to,
+            _amount,
+            "",
+            ""
+        );
+        emit IERC20.Transfer(address(0), _to, _amount);
+    }
+
+    function _validateHoldOperation(
+        IHoldTypes.HoldIdentifier calldata _holdIdentifier,
+        IHoldTypes.HoldData memory holdData,
+        address _to,
+        IHoldTypes.OperationType _operation
+    ) private view {
+        if (_operation == IHoldTypes.OperationType.Execute) {
+            _validateExecuteHold(_holdIdentifier, holdData, _to);
+            return;
+        }
+
+        if (_operation == IHoldTypes.OperationType.Reclaim) {
+            _validateReclaimHold(holdData);
+            return;
+        }
+
+        _validateNonReclaimHold(holdData);
+    }
+
+    function _validateExecuteHold(
+        IHoldTypes.HoldIdentifier calldata _holdIdentifier,
+        IHoldTypes.HoldData memory holdData,
+        address _to
+    ) private view {
+        if (!ControlListStorageWrapper.isAbleToAccess(_holdIdentifier.tokenHolder)) {
+            revert IControlList.AccountIsBlocked(_holdIdentifier.tokenHolder);
+        }
+
+        if (holdData.hold.to != address(0) && _to != holdData.hold.to) {
+            revert IHoldTypes.InvalidDestinationAddress(holdData.hold.to, _to);
+        }
+
+        if (isHoldExpired(holdData.hold)) {
+            revert IHoldTypes.HoldExpirationReached();
+        }
+
+        if (!isEscrow(holdData.hold, EvmAccessors.getMsgSender())) {
+            revert IHoldTypes.IsNotEscrow();
+        }
+    }
+
+    function _validateReclaimHold(IHoldTypes.HoldData memory holdData) private view {
+        if (!isHoldExpired(holdData.hold)) {
+            revert IHoldTypes.HoldExpirationNotReached();
+        }
+    }
+
+    function _validateNonReclaimHold(IHoldTypes.HoldData memory holdData) private view {
+        if (isHoldExpired(holdData.hold)) {
+            revert IHoldTypes.HoldExpirationReached();
+        }
+
+        if (!isEscrow(holdData.hold, EvmAccessors.getMsgSender())) {
+            revert IHoldTypes.IsNotEscrow();
+        }
     }
 }

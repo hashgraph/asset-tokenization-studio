@@ -26,7 +26,9 @@ import { CapModifiers } from "./CapModifiers.sol";
 import { ControlListModifiers } from "./ControlListModifiers.sol";
 import { DateValidationModifiers } from "./DateValidationModifiers.sol";
 import { ExternalListModifiers } from "./ExternalListModifiers.sol";
+import { KycModifiers } from "./KycModifiers.sol";
 import { PartitionModifiers } from "./PartitionModifiers.sol";
+import { PartitionValidationModifiers } from "./PartitionValidationModifiers.sol";
 import { PauseModifiers } from "./PauseModifiers.sol";
 
 abstract contract CoreModifiers is
@@ -36,7 +38,9 @@ abstract contract CoreModifiers is
     ControlListModifiers,
     DateValidationModifiers,
     ExternalListModifiers,
+    KycModifiers,
     PartitionModifiers,
+    PartitionValidationModifiers,
     PauseModifiers
 {
     // This contract aggregates all core modifiers through inheritance

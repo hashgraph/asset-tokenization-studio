@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IClearing } from "../../facets/layer_1/clearing/IClearing.sol";
+import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
 import { ClearingStorageWrapper } from "../../domain/asset/ClearingStorageWrapper.sol";
 import { _checkNotInitialized } from "../InitializationErrors.sol";
 
@@ -18,7 +18,7 @@ abstract contract ClearingModifiers {
      * @dev Reverts if clearing is activated
      */
     modifier onlyClearingDisabled() {
-        ClearingStorageWrapper._checkClearingDisabled();
+        ClearingStorageWrapper.checkClearingDisabled();
         _;
     }
 
@@ -36,7 +36,7 @@ abstract contract ClearingModifiers {
      * @dev Reverts if clearing ID is invalid
      * @param _clearingOperationIdentifier The clearing operation identifier to validate
      */
-    modifier onlyWithValidClearingId(IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier) {
+    modifier onlyWithValidClearingId(IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier) {
         ClearingStorageWrapper.requireValidClearingId(_clearingOperationIdentifier);
         _;
     }
@@ -47,6 +47,65 @@ abstract contract ClearingModifiers {
      */
     modifier onlyNotClearingInitialized() {
         _checkNotInitialized(ClearingStorageWrapper.isClearingInitialized());
+        _;
+    }
+
+    modifier onlyValidOperatorClearingTransferByPartition(
+        uint256 _expirationTimestamp,
+        address _account,
+        address _to,
+        address _from,
+        bytes32 _partition
+    ) {
+        ClearingStorageWrapper.checkOperatorClearingTransferByPartition(
+            _expirationTimestamp,
+            _account,
+            _to,
+            _from,
+            _partition
+        );
+        _;
+    }
+
+    modifier onlyValidClearingCreateHoldByPartition(
+        uint256 _holdExpirationTimestamp,
+        uint256 _operationExpirationTimestamp,
+        address _account,
+        address _to,
+        address _from,
+        address _escrow,
+        bytes32 _partition
+    ) {
+        ClearingStorageWrapper.checkClearingCreateHoldByPartition(
+            _holdExpirationTimestamp,
+            _operationExpirationTimestamp,
+            _account,
+            _to,
+            _from,
+            _escrow,
+            _partition
+        );
+        _;
+    }
+
+    modifier onlyValidOperatorClearingCreateHoldByPartition(
+        uint256 _holdExpirationTimestamp,
+        uint256 _operationExpirationTimestamp,
+        address _account,
+        address _to,
+        address _from,
+        address _escrow,
+        bytes32 _partition
+    ) {
+        ClearingStorageWrapper.checkOperatorClearingCreateHoldByPartition(
+            _holdExpirationTimestamp,
+            _operationExpirationTimestamp,
+            _account,
+            _to,
+            _from,
+            _escrow,
+            _partition
+        );
         _;
     }
 }

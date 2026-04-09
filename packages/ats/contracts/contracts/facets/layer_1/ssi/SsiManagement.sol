@@ -3,12 +3,11 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ISsiManagement } from "./ISsiManagement.sol";
 import { _SSI_MANAGER_ROLE } from "../../../constants/roles.sol";
-import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { SsiManagementStorageWrapper } from "../../../domain/core/SsiManagementStorageWrapper.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
-abstract contract SsiManagement is ISsiManagement, AccessControlModifiers, PauseModifiers {
+abstract contract SsiManagement is ISsiManagement, Modifiers {
     function setRevocationRegistryAddress(
         address _revocationRegistryAddress
     ) external override onlyUnpaused onlyRole(_SSI_MANAGER_ROLE) returns (bool success_) {
@@ -27,7 +26,7 @@ abstract contract SsiManagement is ISsiManagement, AccessControlModifiers, Pause
         if (!success_) {
             revert ListedIssuer(_issuer);
         }
-        emit AddedToIssuerList(msg.sender, _issuer);
+        emit AddedToIssuerList(EvmAccessors.getMsgSender(), _issuer);
     }
 
     function removeIssuer(
@@ -37,7 +36,7 @@ abstract contract SsiManagement is ISsiManagement, AccessControlModifiers, Pause
         if (!success_) {
             revert UnlistedIssuer(_issuer);
         }
-        emit RemovedFromIssuerList(msg.sender, _issuer);
+        emit RemovedFromIssuerList(EvmAccessors.getMsgSender(), _issuer);
     }
 
     function getRevocationRegistryAddress() external view override returns (address revocationRegistryAddress_) {

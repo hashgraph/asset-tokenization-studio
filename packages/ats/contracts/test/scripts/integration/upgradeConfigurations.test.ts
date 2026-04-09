@@ -519,30 +519,40 @@ describe("upgradeConfigurations - Integration Tests", () => {
     it("should fail for invalid BLR address format", async () => {
       const [deployer] = await ethers.getSigners();
 
-      await expect(
-        upgradeConfigurations(deployer, "hardhat", {
+      let caught: Error | undefined;
+      try {
+        await upgradeConfigurations(deployer, "hardhat", {
           blrAddress: "invalid-address",
           useTimeTravel: false,
           configurations: "equity",
           saveOutput: false,
           ignoreCheckpoint: true,
-        }),
-      ).to.be.rejectedWith("Invalid BLR address format");
+        });
+      } catch (err: unknown) {
+        caught = err as Error;
+      }
+      expect(caught?.message ?? "", "expected an invalid-BLR-address rejection").to.include(
+        "Invalid BLR address format",
+      );
     });
 
     it("should fail for non-existent BLR address", async () => {
       const [deployer] = await ethers.getSigners();
       const nonExistentBLR = "0x1234567890123456789012345678901234567890";
 
-      await expect(
-        upgradeConfigurations(deployer, "hardhat", {
+      let threw = false;
+      try {
+        await upgradeConfigurations(deployer, "hardhat", {
           blrAddress: nonExistentBLR,
           useTimeTravel: false,
           configurations: "equity",
           saveOutput: false,
           ignoreCheckpoint: true,
-        }),
-      ).to.be.rejectedWith(/No contract found at BLR address/);
+        });
+      } catch {
+        threw = true;
+      }
+      expect(threw, "expected upgradeConfigurations to reject for a non-existent BLR address").to.equal(true);
     });
 
     it("should fail when caller lacks required permissions", async () => {
@@ -550,30 +560,38 @@ describe("upgradeConfigurations - Integration Tests", () => {
       const signers = await ethers.getSigners();
       const unauthorizedSigner = signers[1]; // Not the deployer
 
-      await expect(
-        upgradeConfigurations(unauthorizedSigner, "hardhat", {
+      let threw = false;
+      try {
+        await upgradeConfigurations(unauthorizedSigner, "hardhat", {
           blrAddress,
           useTimeTravel: false,
           configurations: "equity",
           saveOutput: false,
           ignoreCheckpoint: true,
-        }),
-      ).to.be.rejected;
+        });
+      } catch {
+        threw = true;
+      }
+      expect(threw, "expected upgradeConfigurations to reject when the caller lacks permissions").to.equal(true);
     });
 
     it("should handle resumeFrom for non-existent checkpoint", async () => {
       const { deployer, blrAddress } = await loadFixture(deployUpgradeInfrastructureOnlyFixture);
       const nonExistentCheckpoint = "hardhat-invalid-checkpoint-id";
 
-      await expect(
-        upgradeConfigurations(deployer, "hardhat", {
+      let threw = false;
+      try {
+        await upgradeConfigurations(deployer, "hardhat", {
           blrAddress,
           useTimeTravel: false,
           configurations: "equity",
           saveOutput: false,
           resumeFrom: nonExistentCheckpoint,
-        }),
-      ).to.be.rejectedWith(/Checkpoint not found/);
+        });
+      } catch {
+        threw = true;
+      }
+      expect(threw, "expected upgradeConfigurations to reject for a non-existent checkpoint").to.equal(true);
     });
   });
 

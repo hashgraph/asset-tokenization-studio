@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IERC3643 } from "../../facets/layer_1/ERC3643/IERC3643.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
@@ -115,6 +114,20 @@ abstract contract ERC3643Modifiers {
      */
     modifier onlyValidInputBoolArrayLength(address[] memory _addresses, bool[] memory _status) {
         ERC3643StorageWrapper.requireValidInputBoolArrayLength(_addresses, _status);
+        _;
+    }
+
+    /**
+     * @dev Modifier that verifies both addresses have a registered identity.
+     *
+     * Requirements:
+     * - Both `from` and `to` must be registered in the identity registry.
+     *
+     * @param _from The sender/source address to verify.
+     * @param _to The recipient/target address to verify.
+     */
+    modifier onlyIdentifiedAddresses(address _from, address _to) {
+        ERC1594StorageWrapper.requireIdentified(_from, _to);
         _;
     }
 }

@@ -3,9 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { IControlListStorageWrapper } from "./controlList/IControlListStorageWrapper.sol";
 import { ExternalListManagementStorageWrapper } from "./ExternalListManagementStorageWrapper.sol";
 import { _CONTROL_LIST_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { IControlList } from "../../facets/layer_1/controlList/IControlList.sol";
 
 struct ControlListStorage {
     bool isWhiteList;
@@ -35,8 +35,6 @@ library ControlListStorageWrapper {
         }
     }
 
-    // --- Initialization ---
-
     // solhint-disable-next-line ordering
     function initializeControlList(bool _isWhiteList) internal {
         ControlListStorage storage cls = controlListStorage();
@@ -48,22 +46,12 @@ library ControlListStorageWrapper {
         return controlListStorage().initialized;
     }
 
-    // --- Guard functions ---
-
+    // solhint-disable-next-line ordering
     function checkControlList(address _account) internal view {
         if (!isAbleToAccess(_account)) {
-            revert IControlListStorageWrapper.AccountIsBlocked(_account);
+            revert IControlList.AccountIsBlocked(_account);
         }
     }
-
-    // solhint-disable-next-line ordering
-    function _checkControlList(address _account) internal view {
-        if (!isAbleToAccess(_account)) {
-            revert IControlListStorageWrapper.AccountIsBlocked(_account);
-        }
-    }
-
-    // --- Control list operations ---
 
     function addToControlList(address _account) internal returns (bool success_) {
         success_ = controlListStorage().list.add(_account);
@@ -84,8 +72,6 @@ library ControlListStorageWrapper {
         return (cls.isWhiteList == cls.list.contains(_account) &&
             ExternalListManagementStorageWrapper.isExternallyAuthorized(_account));
     }
-
-    // --- Read functions ---
 
     function getControlListType() internal view returns (bool) {
         return controlListStorage().isWhiteList;

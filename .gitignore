@@ -136,7 +136,9 @@ asset-tokenization-studio.iml
 # AI files
 .kiro/
 .claude/
+.opencode/
 CLAUDE.md
+AGENTS.md
 
 .tasks
 

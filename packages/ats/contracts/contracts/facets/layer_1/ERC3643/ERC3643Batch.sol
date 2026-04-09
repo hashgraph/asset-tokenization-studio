@@ -1,42 +1,38 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _CONTROLLER_ROLE, _ISSUER_ROLE, _AGENT_ROLE, _WILD_CARD_ROLE } from "../../../constants/roles.sol";
+import { _CONTROLLER_ROLE, _ISSUER_ROLE, _AGENT_ROLE } from "../../../constants/roles.sol";
 import { IERC3643Batch } from "./IERC3643Batch.sol";
-import { IClearing } from "../clearing/IClearing.sol";
-import { IERC1644StorageWrapper } from "../../../domain/asset/ERC1400/ERC1644/IERC1644StorageWrapper.sol";
-import {
-    IProtectedPartitionsStorageWrapper
-} from "../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
+import { IERC1644 } from "../ERC1400/ERC1644/IERC1644.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../../domain/core/CapStorageWrapper.sol";
-import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
-import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
-import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../../domain/asset/ERC1594StorageWrapper.sol";
-import { ERC1644StorageWrapper } from "../../../domain/asset/ERC1644StorageWrapper.sol";
 import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWrapper.sol";
 import { TokenCoreOps } from "../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
-import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
-abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, PauseModifiers, ERC3643Modifiers {
+abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, Modifiers {
     function batchTransfer(
         address[] calldata _toList,
         uint256[] calldata _amounts
-    ) external onlyUnpaused onlyValidInputAmountsArrayLength(_toList, _amounts) {
-        if (ClearingStorageWrapper.isClearingActivated()) revert IClearing.ClearingIsActivated();
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
-        _requireUnProtectedPartitionsOrWildCardRole();
-        ERC1594StorageWrapper.requireIdentified(msg.sender, address(0));
-        ERC1594StorageWrapper.requireCompliant(msg.sender, address(0), false);
+    )
+        external
+        onlyUnpaused
+        onlyValidInputAmountsArrayLength(_toList, _amounts)
+        onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingDisabled
+        onlyIdentifiedAddresses(EvmAccessors.getMsgSender(), address(0))
+        onlyCompliant(EvmAccessors.getMsgSender(), address(0), false)
+    {
         for (uint256 i = 0; i < _toList.length; i++) {
             ERC1594StorageWrapper.checkIdentity(address(0), _toList[i]);
             ERC1594StorageWrapper.checkCompliance(address(0), _toList[i], false);
         }
         for (uint256 i = 0; i < _toList.length; i++) {
-            TokenCoreOps.transfer(msg.sender, _toList[i], _amounts[i]);
+            TokenCoreOps.transfer(EvmAccessors.getMsgSender(), _toList[i], _amounts[i]);
         }
     }
 
@@ -50,9 +46,9 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, PauseModifie
         onlyUnpaused
         onlyValidInputAmountsArrayLength(_fromList, _amounts)
         onlyValidInputAmountsArrayLength(_toList, _amounts)
+        onlyWithoutMultiPartition
+        onlyControllable
     {
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
-        ERC1644StorageWrapper.requireControllable();
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
@@ -61,15 +57,14 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, PauseModifie
         }
         for (uint256 i = 0; i < _fromList.length; i++) {
             TokenCoreOps.transfer(_fromList[i], _toList[i], _amounts[i]);
-            emit IERC1644StorageWrapper.ControllerTransfer(msg.sender, _fromList[i], _toList[i], _amounts[i], "", "");
+            emit IERC1644.ControllerTransfer(msg.sender, _fromList[i], _toList[i], _amounts[i], "", "");
         }
     }
 
     function batchMint(
         address[] calldata _toList,
         uint256[] calldata _amounts
-    ) external onlyUnpaused onlyValidInputAmountsArrayLength(_toList, _amounts) {
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
+    ) external onlyUnpaused onlyValidInputAmountsArrayLength(_toList, _amounts) onlyWithoutMultiPartition {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _ISSUER_ROLE;
@@ -89,9 +84,13 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, PauseModifie
     function batchBurn(
         address[] calldata _userAddresses,
         uint256[] calldata _amounts
-    ) external onlyUnpaused onlyValidInputAmountsArrayLength(_userAddresses, _amounts) {
-        ERC1644StorageWrapper.requireControllable();
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
+    )
+        external
+        onlyUnpaused
+        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
+        onlyWithoutMultiPartition
+        onlyControllable
+    {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
@@ -100,16 +99,7 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, PauseModifie
         }
         for (uint256 i = 0; i < _userAddresses.length; i++) {
             TokenCoreOps.burn(_userAddresses[i], _amounts[i]);
-            emit IERC1644StorageWrapper.ControllerRedemption(msg.sender, _userAddresses[i], _amounts[i], "", "");
-        }
-    }
-
-    function _requireUnProtectedPartitionsOrWildCardRole() internal view {
-        if (
-            ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
-            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, msg.sender)
-        ) {
-            revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(msg.sender, _WILD_CARD_ROLE);
+            emit IERC1644.ControllerRedemption(msg.sender, _userAddresses[i], _amounts[i], "", "");
         }
     }
 }

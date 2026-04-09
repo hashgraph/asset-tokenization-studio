@@ -171,7 +171,7 @@ describe("Equity Tests", () => {
 
       await expect(
         equityFacet._initialize_equityUSA(getEquityDetails(), regulationData, additionalSecurityData),
-      ).to.be.rejectedWith("AlreadyInitialized");
+      ).to.be.revertedWithCustomError(equityFacet, "AlreadyInitialized");
     });
 
     it("GIVEN an equity token WHEN getEquityDetails is called THEN returns correct equity details", async () => {
@@ -276,7 +276,10 @@ describe("Equity Tests", () => {
 
     it("GIVEN an account without corporateActions role WHEN setDividends THEN transaction fails with AccountHasNoRole", async () => {
       // set dividend fails
-      await expect(equityFacet.connect(signer_C).setDividends(dividendData)).to.be.rejectedWith("AccountHasNoRole");
+      await expect(equityFacet.connect(signer_C).setDividends(dividendData)).to.be.revertedWithCustomError(
+        accessControlFacet,
+        "AccountHasNoRole",
+      );
     });
 
     it("GIVEN a paused Token WHEN setDividends THEN transaction fails with TokenIsPaused", async () => {
@@ -291,7 +294,10 @@ describe("Equity Tests", () => {
       );
 
       // set dividend fails
-      await expect(equityFacet.connect(signer_C).setDividends(dividendData)).to.be.rejectedWith("TokenIsPaused");
+      await expect(equityFacet.connect(signer_C).setDividends(dividendData)).to.be.revertedWithCustomError(
+        pauseFacet,
+        "TokenIsPaused",
+      );
     });
 
     it("GIVEN an account with corporateActions role WHEN setDividends with wrong dates THEN transaction fails", async () => {
@@ -344,7 +350,7 @@ describe("Equity Tests", () => {
         );
 
       // check list members
-      await expect(equityFacet.getDividends(1000)).to.be.rejectedWith("WrongIndexForAction");
+      await expect(equityFacet.getDividends(1000)).to.be.revertedWithCustomError(equityFacet, "WrongIndexForAction");
 
       const listCount = await equityFacet.getDividendsCount();
       const dividend = await equityFacet.getDividends(1);
@@ -679,7 +685,10 @@ describe("Equity Tests", () => {
 
     it("GIVEN an account without corporateActions role WHEN setVoting THEN transaction fails with AccountHasNoRole", async () => {
       // set voting fails
-      await expect(equityFacet.connect(signer_C).setVoting(votingData)).to.be.rejectedWith("AccountHasNoRole");
+      await expect(equityFacet.connect(signer_C).setVoting(votingData)).to.be.revertedWithCustomError(
+        accessControlFacet,
+        "AccountHasNoRole",
+      );
     });
 
     it("GIVEN a paused Token WHEN setVoting THEN transaction fails with TokenIsPaused", async () => {
@@ -694,7 +703,10 @@ describe("Equity Tests", () => {
       );
 
       // set voting fails
-      await expect(equityFacet.connect(signer_C).setVoting(votingData)).to.be.rejectedWith("TokenIsPaused");
+      await expect(equityFacet.connect(signer_C).setVoting(votingData)).to.be.revertedWithCustomError(
+        pauseFacet,
+        "TokenIsPaused",
+      );
     });
 
     it("GIVEN an account with corporateActions role WHEN setVoting with invalid timestamp THEN transaction fails with WrongTimestamp", async () => {
@@ -723,10 +735,13 @@ describe("Equity Tests", () => {
       await equityFacet.connect(signer_C).setDividends(dividendData);
 
       // Try to access voting with dividend ID (should fail)
-      await expect(equityFacet.getVoting(2)).to.be.rejectedWith("WrongIndexForAction");
+      await expect(equityFacet.getVoting(2)).to.be.revertedWithCustomError(equityFacet, "WrongIndexForAction");
 
       // Try to access voting details with wrong ID (getVotingFor has the modifier)
-      await expect(equityFacet.getVotingFor(2, signer_A.address)).to.be.rejectedWith("WrongIndexForAction");
+      await expect(equityFacet.getVotingFor(2, signer_A.address)).to.be.revertedWithCustomError(
+        equityFacet,
+        "WrongIndexForAction",
+      );
 
       // Note: getVotingHolders and getTotalVotingHolders don't have onlyMatchingActionType modifier
     });
@@ -741,13 +756,22 @@ describe("Equity Tests", () => {
       await equityFacet.connect(signer_C).setVoting(votingData);
 
       // Try to access dividend with voting ID (should fail)
-      await expect(equityFacet.getDividends(2)).to.be.rejectedWith("WrongIndexForAction");
-      await expect(equityFacet.getDividendsFor(2, signer_A.address)).to.be.rejectedWith("WrongIndexForAction");
-      await expect(equityFacet.getDividendAmountFor(2, signer_A.address)).to.be.rejectedWith("WrongIndexForAction");
+      await expect(equityFacet.getDividends(2)).to.be.revertedWithCustomError(equityFacet, "WrongIndexForAction");
+      await expect(equityFacet.getDividendsFor(2, signer_A.address)).to.be.revertedWithCustomError(
+        equityFacet,
+        "WrongIndexForAction",
+      );
+      await expect(equityFacet.getDividendAmountFor(2, signer_A.address)).to.be.revertedWithCustomError(
+        equityFacet,
+        "WrongIndexForAction",
+      );
     });
     it("GIVEN an account without corporateActions role WHEN setVoting THEN transaction fails with AccountHasNoRole", async () => {
       // set dividend fails
-      await expect(equityFacet.connect(signer_C).setVoting(votingData)).to.be.rejectedWith("AccountHasNoRole");
+      await expect(equityFacet.connect(signer_C).setVoting(votingData)).to.be.revertedWithCustomError(
+        accessControlFacet,
+        "AccountHasNoRole",
+      );
     });
 
     it("GIVEN a paused Token WHEN setVoting THEN transaction fails with TokenIsPaused", async () => {
@@ -762,7 +786,10 @@ describe("Equity Tests", () => {
       );
 
       // set dividend fails
-      await expect(equityFacet.connect(signer_C).setVoting(votingData)).to.be.rejectedWith("TokenIsPaused");
+      await expect(equityFacet.connect(signer_C).setVoting(votingData)).to.be.revertedWithCustomError(
+        pauseFacet,
+        "TokenIsPaused",
+      );
     });
 
     it("GIVEN an account with corporateActions role WHEN setVoting THEN transaction succeeds", async () => {
@@ -850,7 +877,7 @@ describe("Equity Tests", () => {
       // set dividend fails
       await expect(
         equityFacet.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData),
-      ).to.be.rejectedWith("AccountHasNoRole");
+      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
     });
 
     it("GIVEN a paused Token WHEN setBalanceAdjustment THEN transaction fails with TokenIsPaused", async () => {
@@ -867,7 +894,7 @@ describe("Equity Tests", () => {
       // set dividend fails
       await expect(
         equityFacet.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData),
-      ).to.be.rejectedWith("TokenIsPaused");
+      ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
     });
 
     it("GIVEN an account with corporateActions role WHEN setScheduledBalanceAdjustment with invalid timestamp THEN transaction fails with WrongTimestamp", async () => {
@@ -910,7 +937,10 @@ describe("Equity Tests", () => {
       await equityFacet.connect(signer_C).setDividends(dividendData);
 
       // Try to access balance adjustment with dividend ID (should fail)
-      await expect(equityFacet.getScheduledBalanceAdjustment(2)).to.be.rejectedWith("WrongIndexForAction");
+      await expect(equityFacet.getScheduledBalanceAdjustment(2)).to.be.revertedWithCustomError(
+        equityFacet,
+        "WrongIndexForAction",
+      );
     });
 
     it("GIVEN an account with corporateActions role WHEN setBalanceAdjustment THEN transaction succeeds", async () => {

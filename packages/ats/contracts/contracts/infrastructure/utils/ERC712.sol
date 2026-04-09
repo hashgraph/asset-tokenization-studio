@@ -14,12 +14,9 @@ import {
     _PROTECTED_CLEARING_OPERATION_TYPEHASH,
     _PROTECTED_CLEARING_CREATE_HOLD_FROM_PARTITION_TYPEHASH
 } from "../../constants/values.sol";
-import { Hold, ProtectedHold } from "../../facets/layer_1/hold/IHold.sol";
-import { IClearing } from "../../facets/layer_1/clearing/IClearing.sol";
-
-error WrongSignatureLength();
-error WrongNounce(uint256 nounce, address account);
-error ExpiredDeadline(uint256 deadline);
+import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
+import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
+import { ExpiredDeadline, WrongNounce, WrongSignatureLength } from "../errors/CommonErrors.sol";
 
 function _getDomainHash(
     string memory _contractName,
@@ -39,7 +36,6 @@ function _getDomainHash(
         );
 }
 
-// function hashes
 function _getMessageHashTransfer(
     bytes32 _partition,
     address _from,
@@ -70,7 +66,7 @@ function _getMessageHashRedeem(
 function _getMessageHashCreateHold(
     bytes32 _partition,
     address _from,
-    ProtectedHold memory _protectedHold
+    IHoldTypes.ProtectedHold memory _protectedHold
 ) pure returns (bytes32) {
     return
         keccak256(
@@ -100,7 +96,7 @@ function _getMessageHashCreateHold(
 }
 
 function _getMessageHashClearingTransfer(
-    IClearing.ProtectedClearingOperation memory _protectedClearing,
+    IClearingTypes.ProtectedClearingOperation memory _protectedClearing,
     address _to,
     uint256 _amount
 ) pure returns (bytes32) {
@@ -131,8 +127,8 @@ function _getMessageHashClearingTransfer(
 }
 
 function _getMessageHashClearingCreateHold(
-    IClearing.ProtectedClearingOperation memory _protectedClearingOperation,
-    Hold memory _hold
+    IClearingTypes.ProtectedClearingOperation memory _protectedClearingOperation,
+    IHoldTypes.Hold memory _hold
 ) pure returns (bytes32) {
     return
         keccak256(
@@ -169,7 +165,7 @@ function _getMessageHashClearingCreateHold(
 }
 
 function _getMessageHashClearingRedeem(
-    IClearing.ProtectedClearingOperation memory _protectedClearing,
+    IClearingTypes.ProtectedClearingOperation memory _protectedClearing,
     uint256 _amount
 ) pure returns (bytes32) {
     return
@@ -197,7 +193,6 @@ function _getMessageHashClearingRedeem(
         );
 }
 
-// checks
 function _checkNounceAndDeadline(
     uint256 _nounce,
     address _account,

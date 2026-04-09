@@ -1,4 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
+// AUTO-GENERATED — DO NOT EDIT.
+// Source: contracts/facets/layer_2/equity/IEquity.sol
+// Regenerated on every `npx hardhat compile` by the
+// `erc3643-clone-interfaces` task in `tasks/compile.ts`.
+// Edits to this file will be silently overwritten.
 pragma solidity ^0.8.17;
 
 interface TRexIEquity {
@@ -73,6 +78,37 @@ interface TRexIEquity {
         uint256 factor;
         uint8 decimals;
     }
+
+    event VotingSet(
+        bytes32 corporateActionId,
+        uint256 voteId,
+        address indexed operator,
+        uint256 indexed recordDate,
+        bytes data
+    );
+
+    event DividendSet(
+        bytes32 corporateActionId,
+        uint256 dividendId,
+        address indexed operator,
+        uint256 indexed recordDate,
+        uint256 indexed executionDate,
+        uint256 amount,
+        uint8 amountDecimals
+    );
+
+    event ScheduledBalanceAdjustmentSet(
+        bytes32 corporateActionId,
+        uint256 balanceAdjustmentId,
+        address indexed operator,
+        uint256 indexed executionDate,
+        uint256 factor,
+        uint256 decimals
+    );
+
+    error DividendCreationFailed();
+    error VotingRightsCreationFailed();
+    error BalanceAdjustmentCreationFailed();
 
     /**
      * @notice Sets a new dividend

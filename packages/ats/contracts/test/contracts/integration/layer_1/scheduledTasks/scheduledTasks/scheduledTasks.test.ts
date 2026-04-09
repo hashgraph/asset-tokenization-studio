@@ -90,12 +90,12 @@ describe("Scheduled Tasks Tests", () => {
     await pauseFacet.connect(signer_B).pause();
 
     // trigger scheduled snapshots
-    await expect(scheduledTasksFacet.connect(signer_C).triggerPendingScheduledCrossOrderedTasks()).to.be.rejectedWith(
-      "TokenIsPaused",
-    );
-    await expect(scheduledTasksFacet.connect(signer_C).triggerScheduledCrossOrderedTasks(1)).to.be.rejectedWith(
-      "TokenIsPaused",
-    );
+    await expect(
+      scheduledTasksFacet.connect(signer_C).triggerPendingScheduledCrossOrderedTasks(),
+    ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
+    await expect(
+      scheduledTasksFacet.connect(signer_C).triggerScheduledCrossOrderedTasks(1),
+    ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
   });
 
   it("GIVEN a token WHEN triggerTasks THEN transaction succeeds", async () => {

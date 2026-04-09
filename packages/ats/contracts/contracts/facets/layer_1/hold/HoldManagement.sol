@@ -1,23 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _CONTROLLER_ROLE, _WILD_CARD_ROLE } from "../../../constants/roles.sol";
-import { Hold, ProtectedHold } from "./IHold.sol";
+import { _CONTROLLER_ROLE } from "../../../constants/roles.sol";
+import { IHoldTypes } from "./IHoldTypes.sol";
 import { IHoldManagement } from "./IHoldManagement.sol";
-import { IClearing } from "../clearing/IClearing.sol";
-import {
-    IProtectedPartitionsStorageWrapper
-} from "../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
-import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
-import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
-import { ERC1644StorageWrapper } from "../../../domain/asset/ERC1644StorageWrapper.sol";
-import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWrapper.sol";
-import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { HoldStorageWrapper } from "../../../domain/asset/HoldStorageWrapper.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title HoldManagement
@@ -57,25 +49,24 @@ abstract contract HoldManagement is IHoldManagement, Modifiers {
     function operatorCreateHoldByPartition(
         bytes32 _partition,
         address _from,
-        Hold calldata _hold,
+        IHoldTypes.Hold calldata _hold,
         bytes calldata _operatorData
     )
         external
         override
         onlyUnpaused
         onlyClearingDisabled
-        onlyValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyUnrecoveredAddress(msg.sender)
-        onlyUnrecoveredAddress(_hold.to)
-        onlyUnrecoveredAddress(_from)
+        onlyValidOperatorCreateHoldByPartition(
+            _hold.expirationTimestamp,
+            EvmAccessors.getMsgSender(),
+            _hold.to,
+            _from,
+            _hold.escrow,
+            _partition
+        )
+        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
-        ERC1410StorageWrapper.requireValidAddress(_from);
-        ERC1410StorageWrapper.requireValidAddress(_hold.escrow);
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
-        ERC1410StorageWrapper.requireOperator(_partition, _from);
-        _requireUnProtectedPartitionsOrWildCardRole();
-
         (success_, holdId_) = HoldStorageWrapper.createHoldByPartition(
             _partition,
             _from,
@@ -84,7 +75,7 @@ abstract contract HoldManagement is IHoldManagement, Modifiers {
             ThirdPartyType.OPERATOR
         );
 
-        emit OperatorHeldByPartition(msg.sender, _from, _partition, holdId_, _hold, _operatorData);
+        emit OperatorHeldByPartition(EvmAccessors.getMsgSender(), _from, _partition, holdId_, _hold, _operatorData);
     }
 
     /**
@@ -111,7 +102,7 @@ abstract contract HoldManagement is IHoldManagement, Modifiers {
     function controllerCreateHoldByPartition(
         bytes32 _partition,
         address _from,
-        Hold calldata _hold,
+        IHoldTypes.Hold calldata _hold,
         bytes calldata _operatorData
     )
         external
@@ -121,11 +112,10 @@ abstract contract HoldManagement is IHoldManagement, Modifiers {
         notZeroAddress(_from)
         notZeroAddress(_hold.escrow)
         onlyValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyControllable
         returns (bool success_, uint256 holdId_)
     {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
-        ERC1644StorageWrapper.requireControllable();
-
         (success_, holdId_) = HoldStorageWrapper.createHoldByPartition(
             _partition,
             _from,
@@ -134,7 +124,7 @@ abstract contract HoldManagement is IHoldManagement, Modifiers {
             ThirdPartyType.CONTROLLER
         );
 
-        emit ControllerHeldByPartition(msg.sender, _from, _partition, holdId_, _hold, _operatorData);
+        emit ControllerHeldByPartition(EvmAccessors.getMsgSender(), _from, _partition, holdId_, _hold, _operatorData);
     }
 
     /**
@@ -163,7 +153,7 @@ abstract contract HoldManagement is IHoldManagement, Modifiers {
     function protectedCreateHoldByPartition(
         bytes32 _partition,
         address _from,
-        ProtectedHold memory _protectedHold,
+        IHoldTypes.ProtectedHold memory _protectedHold,
         bytes calldata _signature
     )
         external
@@ -179,9 +169,6 @@ abstract contract HoldManagement is IHoldManagement, Modifiers {
         onlyProtectedPartitions
         returns (bool success_, uint256 holdId_)
     {
-        ERC1410StorageWrapper.requireValidAddress(_from);
-        ERC1410StorageWrapper.requireValidAddress(_protectedHold.hold.escrow);
-
         (success_, holdId_) = HoldStorageWrapper.protectedCreateHoldByPartition(
             _partition,
             _from,
@@ -189,25 +176,6 @@ abstract contract HoldManagement is IHoldManagement, Modifiers {
             _signature
         );
 
-        emit ProtectedHeldByPartition(msg.sender, _from, _partition, holdId_, _protectedHold.hold, "");
-    }
-
-    /**
-     * @dev Internal function to require un-protected partitions or wildcard role
-     *
-     * Reverts if partitions are protected and caller does not have WILD_CARD_ROLE
-     *
-     * Requirements:
-     * - Either partitions are not protected OR caller has WILD_CARD_ROLE
-     *
-     * Reverts with PartitionsAreProtectedAndNoRole if requirements not met
-     */
-    function _requireUnProtectedPartitionsOrWildCardRole() internal view {
-        if (
-            ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
-            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, msg.sender)
-        ) {
-            revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(msg.sender, _WILD_CARD_ROLE);
-        }
+        emit ProtectedHeldByPartition(EvmAccessors.getMsgSender(), _from, _partition, holdId_, _protectedHold.hold, "");
     }
 }

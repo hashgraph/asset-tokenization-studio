@@ -295,11 +295,17 @@ describe("ERC20Votes Tests", () => {
     });
 
     it("GIVEN current time WHEN getPastVotes with future timepoint THEN reverts", async () => {
-      await expect(erc20VotesFacet.getPastVotes(signer_A.address, 100)).to.be.revertedWith("ERC20Votes: future lookup");
+      await expect(erc20VotesFacet.getPastVotes(signer_A.address, 100)).to.be.revertedWithCustomError(
+        erc20VotesFacet,
+        "FutureLookup",
+      );
     });
 
     it("GIVEN current time WHEN getPastTotalSupply with future timepoint THEN reverts", async () => {
-      await expect(erc20VotesFacet.getPastTotalSupply(100)).to.be.revertedWith("ERC20Votes: future lookup");
+      await expect(erc20VotesFacet.getPastTotalSupply(100)).to.be.revertedWithCustomError(
+        erc20VotesFacet,
+        "FutureLookup",
+      );
     });
 
     it("GIVEN delegation at specific block WHEN getPastVotes THEN returns correct historical votes", async () => {

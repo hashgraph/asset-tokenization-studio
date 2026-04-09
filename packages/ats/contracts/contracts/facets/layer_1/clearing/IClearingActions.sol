@@ -1,43 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IClearing } from "./IClearing.sol";
+import { IClearingTypes } from "./IClearingTypes.sol";
 
-interface IClearingActions {
-    enum ClearingActionType {
-        Approve,
-        Cancel,
-        Reclaim
-    }
-
-    event ClearingActivated(address indexed operator);
-    event ClearingDeactivated(address indexed operator);
-
-    event ClearingOperationApproved(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 indexed partition,
-        uint256 clearingId,
-        IClearing.ClearingOperationType clearingOperationType,
-        bytes operationData
-    );
-
-    event ClearingOperationCanceled(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 indexed partition,
-        uint256 clearingId,
-        IClearing.ClearingOperationType clearingOperationType
-    );
-
-    event ClearingOperationReclaimed(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 indexed partition,
-        uint256 clearingId,
-        IClearing.ClearingOperationType clearingOperationType
-    );
-
+interface IClearingActions is IClearingTypes {
     function initializeClearing(bool _activateClearing) external;
 
     /**
@@ -57,7 +23,7 @@ interface IClearingActions {
      * @param _clearingOperationIdentifier Struct containing the parameters that identify the clearing operation
      */
     function approveClearingOperationByPartition(
-        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
+        IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) external returns (bool success_, bytes32 partition_);
 
     /**
@@ -67,14 +33,14 @@ interface IClearingActions {
      * @param _clearingOperationIdentifier Struct containing the parameters that identify the clearing operation
      */
     function cancelClearingOperationByPartition(
-        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
+        IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) external returns (bool success_);
 
     /**
      * @notice Reclaims a clearing operation returning funds back to the token holder
      */
     function reclaimClearingOperationByPartition(
-        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
+        IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) external returns (bool success_);
 
     /**

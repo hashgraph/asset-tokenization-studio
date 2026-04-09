@@ -14,7 +14,7 @@
 
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import type { Signer } from "ethers";
+import type { Signer, ContractFactory } from "ethers";
 
 // Infrastructure layer
 import {
@@ -369,7 +369,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
       expect(proxyAdminResult.success).to.be.true;
 
       // Step 2: Deploy facets
-      const facets: Array<{ name: string; factory: any }> = [
+      const facets: Array<{ name: string; factory: ContractFactory }> = [
         {
           name: "AccessControlFacet",
           factory: new AccessControlFacet__factory(deployer),

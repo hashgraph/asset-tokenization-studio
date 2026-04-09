@@ -12,18 +12,21 @@ library ScheduledTasksLib {
     ) internal {
         ScheduledTask memory newScheduledTask = ScheduledTask(_newScheduledTimestamp, _newData);
 
-        uint256 scheduledTasksLength = getScheduledTaskCount(_scheduledTasks);
+        uint256 length = getScheduledTaskCount(_scheduledTasks);
 
-        uint256 newScheduledTaskId = scheduledTasksLength;
+        uint256 newScheduledTaskId = length;
 
         bool added = false;
 
-        if (scheduledTasksLength > 0) {
-            for (uint256 index = 1; index <= scheduledTasksLength; index++) {
-                uint256 scheduledTaskPosition = scheduledTasksLength - index;
+        if (length > 0) {
+            for (uint256 index; index < length; ) {
+                uint256 scheduledTaskPosition = length - 1 - index;
 
                 if (_scheduledTasks.scheduledTasks[scheduledTaskPosition].scheduledTimestamp < _newScheduledTimestamp) {
                     _slideScheduledTasks(_scheduledTasks, scheduledTaskPosition);
+                    unchecked {
+                        ++index;
+                    }
                 } else {
                     newScheduledTaskId = scheduledTaskPosition + 1;
                     _insertScheduledTask(_scheduledTasks, newScheduledTaskId, newScheduledTask);
@@ -66,8 +69,12 @@ library ScheduledTasksLib {
 
         scheduledTask_ = new ScheduledTask[](Pagination.getSize(start, end, getScheduledTaskCount(_scheduledTasks)));
 
-        for (uint256 i = 0; i < scheduledTask_.length; i++) {
+        uint256 length = scheduledTask_.length;
+        for (uint256 i; i < length; ) {
             scheduledTask_[i] = getScheduledTasksByIndex(_scheduledTasks, start + i);
+            unchecked {
+                ++i;
+            }
         }
     }
 

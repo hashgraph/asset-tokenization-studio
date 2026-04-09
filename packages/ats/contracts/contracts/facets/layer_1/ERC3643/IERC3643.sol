@@ -1,19 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
-import { IERC3643StorageWrapper } from "../../../domain/asset/ERC3643/IERC3643StorageWrapper.sol";
-import { IERC3643Operations } from "./IERC3643Operations.sol";
-import { IERC3643Management } from "./IERC3643Management.sol";
-import { IERC3643Read } from "./IERC3643Read.sol";
-import { IERC3643Batch } from "./IERC3643Batch.sol";
 
-// solhint-disable no-empty-blocks
+import { IERC3643Types } from "./IERC3643Types.sol";
+import { IERC3643Batch } from "./IERC3643Batch.sol";
+import { IERC3643Management } from "./IERC3643Management.sol";
+import { IERC3643Operations } from "./IERC3643Operations.sol";
+import { IERC3643Read } from "./IERC3643Read.sol";
+
 /**
  * @title IERC3643
- * @dev Unified interface for ERC3643 functionality combining all facets.
- * This interface provides external access to all ERC3643 functions through the Diamond pattern,
- * enabling interaction with all ERC3643 functions from external calls, tests, and SDK.
- * This interface is NOT meant to be inherited by any contract - it's only for external interaction.
+ * @notice Off-chain/SDK/test umbrella interface aggregating every ERC3643 facet.
+ * @dev DO NOT inherit from any facet contract. Per-facet contracts must `is` only
+ *      their corresponding IERC3643<Facet> interface. Inheriting the umbrella from
+ *      a concrete facet forces that facet to implement functions it does not own.
  */
-interface IERC3643 is IERC3643StorageWrapper, IERC3643Operations, IERC3643Management, IERC3643Read, IERC3643Batch {
-    // This interface combines all ERC3643 facets for external access
-}
+// solhint-disable no-empty-blocks
+interface IERC3643 is IERC3643Types, IERC3643Batch, IERC3643Management, IERC3643Operations, IERC3643Read {}

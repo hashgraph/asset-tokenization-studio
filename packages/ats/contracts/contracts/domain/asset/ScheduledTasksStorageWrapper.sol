@@ -10,7 +10,8 @@ import {
     IScheduledCrossOrderedTasks
 } from "../../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
 import { IEquity } from "../../facets/layer_2/equity/IEquity.sol";
-import { ISnapshotsStorageWrapper } from "../../facets/layer_1/snapshot/ISnapshots.sol";
+import { IBondRead } from "../../facets/layer_2/bond/IBondRead.sol";
+import { ISnapshots } from "../../facets/layer_1/snapshot/ISnapshots.sol";
 import {
     _SCHEDULED_SNAPSHOTS_STORAGE_POSITION,
     _SCHEDULED_COUPON_LISTING_STORAGE_POSITION,
@@ -21,64 +22,55 @@ import {
     SNAPSHOT_RESULT_ID,
     COUPON_LISTING_RESULT_ID,
     SNAPSHOT_TASK_TYPE,
-    BALANCE_ADJUSTMENT_TASK_TYPE
+    BALANCE_ADJUSTMENT_TASK_TYPE,
+    COUPON_LISTING_TASK_TYPE
 } from "../../constants/values.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { BondStorageWrapper } from "./BondStorageWrapper.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { InterestRateStorageWrapper } from "./InterestRateStorageWrapper.sol";
+import { SustainabilityPerformanceTargetRateLib } from "./SustainabilityPerformanceTargetRateLib.sol";
+import { KpiLinkedRateLib } from "./KpiLinkedRateLib.sol";
 
 library ScheduledTasksStorageWrapper {
     error WrongTimestamp(uint256 timeStamp);
-
-    // ============================================================================
-    // Internal State-Changing Functions
-    // ============================================================================
 
     function triggerScheduledTasks(
         ScheduledTasksDataStorage storage _scheduledTasks,
         bytes32 callbackType,
         uint256 _max
-    ) internal returns (uint256) {
+    ) internal returns (uint256 processed_) {
         uint256 scheduledTasksLength = ScheduledTasksLib.getScheduledTaskCount(_scheduledTasks);
+        if (scheduledTasksLength == 0) return 0;
 
-        if (scheduledTasksLength == 0) {
-            return 0;
+        uint256 limit;
+        uint256 currentBlockTimestamp = TimeTravelStorageWrapper.getBlockTimestamp();
+        uint256 pos;
+        unchecked {
+            limit = (_max == 0 || _max > scheduledTasksLength ? scheduledTasksLength : _max) + 1;
         }
-
-        uint256 max = _max;
-
-        if (max > scheduledTasksLength || max == 0) {
-            max = scheduledTasksLength;
-        }
-
-        for (uint256 j = 1; j <= max; j++) {
-            uint256 pos = scheduledTasksLength - j;
+        for (uint256 j = 1; j < limit; ) {
+            unchecked {
+                pos = scheduledTasksLength - j;
+            }
 
             ScheduledTask memory currentScheduledTask = ScheduledTasksLib.getScheduledTasksByIndex(
                 _scheduledTasks,
                 pos
             );
 
-            if (currentScheduledTask.scheduledTimestamp < TimeTravelStorageWrapper.getBlockTimestamp()) {
-                ScheduledTasksLib.popScheduledTask(_scheduledTasks);
+            if (currentScheduledTask.scheduledTimestamp >= currentBlockTimestamp) break;
 
-                if (callbackType == bytes32("snapshot")) {
-                    onScheduledSnapshotTriggered(pos, scheduledTasksLength, currentScheduledTask);
-                } else if (callbackType == bytes32("coupon")) {
-                    onScheduledCouponListingTriggered(pos, scheduledTasksLength, currentScheduledTask);
-                } else if (callbackType == bytes32("balance")) {
-                    onScheduledBalanceAdjustmentTriggered(pos, scheduledTasksLength, currentScheduledTask);
-                } else if (callbackType == bytes32("crossOrdered")) {
-                    onScheduledCrossOrderedTaskTriggered(pos, scheduledTasksLength, currentScheduledTask);
-                }
-            } else {
-                break;
+            ScheduledTasksLib.popScheduledTask(_scheduledTasks);
+            _dispatchScheduledTask(callbackType, pos, scheduledTasksLength, currentScheduledTask);
+
+            unchecked {
+                ++processed_;
+                ++j;
             }
         }
-
-        return 0;
     }
 
     function addScheduledSnapshot(uint256 _newScheduledTimestamp, bytes32 _actionId) internal {
@@ -130,10 +122,6 @@ library ScheduledTasksStorageWrapper {
         return IScheduledCrossOrderedTasks(address(this)).triggerPendingScheduledCrossOrderedTasks();
     }
 
-    // ============================================================================
-    // Internal View Functions
-    // ============================================================================
-
     function requireValidTimestamp(uint256 _timestamp) internal view {
         if (_timestamp <= TimeTravelStorageWrapper.getBlockTimestamp()) revert WrongTimestamp(_timestamp);
     }
@@ -161,14 +149,15 @@ library ScheduledTasksStorageWrapper {
     }
 
     function getPendingScheduledCouponListingTotalAt(uint256 _timestamp) internal view returns (uint256 total_) {
-        total_ = 0;
-
         ScheduledTasksDataStorage storage scheduledCouponListing = scheduledCouponListingStorage();
 
-        uint256 scheduledTaskCount = ScheduledTasksLib.getScheduledTaskCount(scheduledCouponListing);
+        uint256 length = ScheduledTasksLib.getScheduledTaskCount(scheduledCouponListing);
+        uint256 pos;
 
-        for (uint256 i = 1; i <= scheduledTaskCount; i++) {
-            uint256 pos = scheduledTaskCount - i;
+        for (uint256 i; i < length; ) {
+            unchecked {
+                pos = length - 1 - i;
+            }
 
             ScheduledTask memory scheduledTask = ScheduledTasksLib.getScheduledTasksByIndex(
                 scheduledCouponListing,
@@ -176,10 +165,13 @@ library ScheduledTasksStorageWrapper {
             );
 
             if (scheduledTask.scheduledTimestamp < _timestamp) {
-                total_++;
-            } else {
-                break;
+                unchecked {
+                    ++total_;
+                    ++i;
+                }
+                continue;
             }
+            break;
         }
     }
 
@@ -189,9 +181,7 @@ library ScheduledTasksStorageWrapper {
             _index
         );
 
-        bytes32 actionId = abi.decode(couponListing.data, (bytes32));
-
-        (, couponID_, ) = CorporateActionsStorageWrapper.getCorporateAction(actionId);
+        (, couponID_, ) = CorporateActionsStorageWrapper.getCorporateAction(abi.decode(couponListing.data, (bytes32)));
     }
 
     function getScheduledBalanceAdjustmentCount() internal view returns (uint256) {
@@ -210,24 +200,25 @@ library ScheduledTasksStorageWrapper {
     ) internal view returns (uint256 pendingABAF_, uint8 pendingDecimals_) {
         // * Initialization
         pendingABAF_ = 1;
-        pendingDecimals_ = 0;
 
         ScheduledTasksDataStorage storage scheduledBalanceAdjustments = scheduledBalanceAdjustmentStorage();
 
-        uint256 scheduledTaskCount = ScheduledTasksLib.getScheduledTaskCount(scheduledBalanceAdjustments);
+        uint256 length = ScheduledTasksLib.getScheduledTaskCount(scheduledBalanceAdjustments);
+        uint256 pos;
 
-        for (uint256 i = 1; i <= scheduledTaskCount; i++) {
-            uint256 pos = scheduledTaskCount - i;
-
+        for (uint256 i; i < length; ) {
+            unchecked {
+                pos = length - 1 - i;
+            }
             ScheduledTask memory scheduledTask = ScheduledTasksLib.getScheduledTasksByIndex(
                 scheduledBalanceAdjustments,
                 pos
             );
 
             if (scheduledTask.scheduledTimestamp < _timestamp) {
-                bytes32 actionId = abi.decode(scheduledTask.data, (bytes32));
-
-                bytes memory balanceAdjustmentData = CorporateActionsStorageWrapper.getCorporateActionData(actionId);
+                bytes memory balanceAdjustmentData = CorporateActionsStorageWrapper.getCorporateActionData(
+                    abi.decode(scheduledTask.data, (bytes32))
+                );
 
                 IEquity.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
                     balanceAdjustmentData,
@@ -235,9 +226,12 @@ library ScheduledTasksStorageWrapper {
                 );
                 pendingABAF_ *= balanceAdjustment.factor;
                 pendingDecimals_ += balanceAdjustment.decimals;
-            } else {
-                break;
+                unchecked {
+                    ++i;
+                }
+                continue;
             }
+            break;
         }
     }
 
@@ -252,9 +246,7 @@ library ScheduledTasksStorageWrapper {
         return ScheduledTasksLib.getScheduledTasks(scheduledCrossOrderedTaskStorage(), _pageIndex, _pageLength);
     }
 
-    // ============================================================================
     // Internal Pure Functions (Storage Accessors)
-    // ============================================================================
 
     function scheduledSnapshotStorage() internal pure returns (ScheduledTasksDataStorage storage scheduledSnapshots_) {
         bytes32 position = _SCHEDULED_SNAPSHOTS_STORAGE_POSITION;
@@ -300,16 +292,41 @@ library ScheduledTasksStorageWrapper {
     // Private Callback Functions
     // ============================================================================
 
+    function _dispatchScheduledTask(
+        bytes32 callbackType,
+        uint256 pos,
+        uint256 scheduledTasksLength,
+        ScheduledTask memory currentScheduledTask
+    ) private {
+        if (callbackType == bytes32("snapshot")) {
+            onScheduledSnapshotTriggered(pos, scheduledTasksLength, currentScheduledTask);
+            return;
+        }
+
+        if (callbackType == bytes32("coupon")) {
+            onScheduledCouponListingTriggered(pos, scheduledTasksLength, currentScheduledTask);
+            return;
+        }
+
+        if (callbackType == bytes32("balance")) {
+            onScheduledBalanceAdjustmentTriggered(pos, scheduledTasksLength, currentScheduledTask);
+            return;
+        }
+
+        if (callbackType == bytes32("crossOrdered")) {
+            onScheduledCrossOrderedTaskTriggered(pos, scheduledTasksLength, currentScheduledTask);
+        }
+    }
+
     function onScheduledSnapshotTriggered(
         uint256 /*_pos*/,
         uint256 /*_scheduledTasksLength*/,
         ScheduledTask memory _scheduledTask
     ) private {
-        bytes memory data = _scheduledTask.data;
-        bytes32 actionId = abi.decode(data, (bytes32));
+        bytes32 actionId = abi.decode(_scheduledTask.data, (bytes32));
 
         uint256 newSnapShotID = SnapshotsStorageWrapper.takeSnapshot();
-        emit ISnapshotsStorageWrapper.SnapshotTriggered(newSnapShotID, abi.encodePacked(actionId));
+        emit ISnapshots.SnapshotTriggered(newSnapShotID, abi.encodePacked(actionId));
         CorporateActionsStorageWrapper.updateCorporateActionResult(
             actionId,
             SNAPSHOT_RESULT_ID,
@@ -322,17 +339,19 @@ library ScheduledTasksStorageWrapper {
         uint256 /*_scheduledTasksLength*/,
         ScheduledTask memory _scheduledTask
     ) private {
-        bytes memory data = _scheduledTask.data;
+        bytes32 actionId = _getActionIdFromScheduledTask(_scheduledTask);
 
-        bytes32 actionId = abi.decode(data, (bytes32));
+        uint256 couponID = _getCouponIdFromAction(actionId);
 
-        BondStorageWrapper.addToCouponsOrderedList(uint256(actionId));
-        uint256 pos = BondStorageWrapper.getCouponsOrderedListTotal();
+        BondStorageWrapper.addToCouponsOrderedList(couponID);
+        uint256 orderedListPos = BondStorageWrapper.getCouponsOrderedListTotal();
+
+        _updateCouponRatesIfNeeded(couponID);
 
         CorporateActionsStorageWrapper.updateCorporateActionResult(
             actionId,
             COUPON_LISTING_RESULT_ID,
-            abi.encodePacked(pos)
+            abi.encodePacked(orderedListPos)
         );
     }
 
@@ -341,15 +360,14 @@ library ScheduledTasksStorageWrapper {
         uint256 /*_scheduledTasksLength*/,
         ScheduledTask memory _scheduledTask
     ) private {
-        bytes memory data = _scheduledTask.data;
-
         (, , bytes memory balanceAdjustmentData) = CorporateActionsStorageWrapper.getCorporateAction(
-            abi.decode(data, (bytes32))
+            _getActionIdFromScheduledTask(_scheduledTask)
         );
         IEquity.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
             balanceAdjustmentData,
             (IEquity.ScheduledBalanceAdjustment)
         );
+
         AdjustBalancesStorageWrapper.adjustBalances(balanceAdjustment.factor, balanceAdjustment.decimals);
     }
 
@@ -358,17 +376,50 @@ library ScheduledTasksStorageWrapper {
         uint256 /*_scheduledTasksLength*/,
         ScheduledTask memory _scheduledTask
     ) private {
-        bytes memory data = _scheduledTask.data;
-
-        bytes32 taskType = abi.decode(data, (bytes32));
+        bytes32 taskType = _getActionIdFromScheduledTask(_scheduledTask);
 
         if (taskType == SNAPSHOT_TASK_TYPE) {
             triggerScheduledSnapshots(1);
             return;
         }
+
         if (taskType == BALANCE_ADJUSTMENT_TASK_TYPE) {
             triggerScheduledBalanceAdjustments(1);
             return;
         }
+
+        if (taskType == COUPON_LISTING_TASK_TYPE) {
+            triggerScheduledCouponListing(1);
+        }
+    }
+
+    function _updateCouponRatesIfNeeded(uint256 couponID) private {
+        IBondRead.RegisteredCoupon memory registeredCoupon = BondStorageWrapper.getCoupon(couponID);
+
+        if (InterestRateStorageWrapper.isSustainabilityPerformanceTargetRateInitialized()) {
+            (uint256 rate, uint8 rateDecimals) = SustainabilityPerformanceTargetRateLib
+                .calculateSustainabilityPerformanceTargetInterestRate(couponID, registeredCoupon.coupon);
+
+            BondStorageWrapper.updateCouponRate(couponID, registeredCoupon.coupon, rate, rateDecimals);
+        }
+
+        if (InterestRateStorageWrapper.isKpiLinkedRateInitialized()) {
+            (uint256 rate, uint8 rateDecimals) = KpiLinkedRateLib.calculateKpiLinkedInterestRate(
+                couponID,
+                registeredCoupon.coupon
+            );
+
+            BondStorageWrapper.updateCouponRate(couponID, registeredCoupon.coupon, rate, rateDecimals);
+        }
+    }
+
+    function _getCouponIdFromAction(bytes32 actionId) private view returns (uint256 couponID_) {
+        (, couponID_, ) = CorporateActionsStorageWrapper.getCorporateAction(actionId);
+    }
+
+    function _getActionIdFromScheduledTask(
+        ScheduledTask memory _scheduledTask
+    ) private pure returns (bytes32 actionId_) {
+        return abi.decode(_scheduledTask.data, (bytes32));
     }
 }

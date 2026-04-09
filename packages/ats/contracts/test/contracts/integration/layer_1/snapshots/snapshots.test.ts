@@ -17,6 +17,18 @@ import {
   TimeTravelFacet,
   FreezeFacet,
   ClearingTransferFacet,
+  AccessControl__factory,
+  IERC1410__factory,
+  Snapshots__factory,
+  Pause__factory,
+  Lock__factory,
+  IHold__factory,
+  Kyc__factory,
+  SsiManagement__factory,
+  Equity__factory,
+  TimeTravelFacet__factory,
+  FreezeFacet__factory,
+  ClearingTransferFacet__factory,
 } from "@contract-types";
 import { ZERO, EMPTY_STRING, ADDRESS_ZERO, dateToUnixTimestamp, ATS_ROLES } from "@scripts";
 import { grantRoleAndPauseToken } from "@test";
@@ -75,24 +87,25 @@ describe("Snapshots Tests", () => {
   }
 
   async function setFacets(diamond: ResolverProxy) {
-    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
+    accessControlFacet = AccessControl__factory.connect(diamond.target.toString(), ethers.provider);
 
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target);
+    erc1410Facet = IERC1410__factory.connect(diamond.target.toString(), ethers.provider);
 
-    snapshotFacet = await ethers.getContractAt("Snapshots", diamond.target);
+    snapshotFacet = Snapshots__factory.connect(diamond.target.toString(), ethers.provider);
 
-    pauseFacet = await ethers.getContractAt("Pause", diamond.target);
+    pauseFacet = Pause__factory.connect(diamond.target.toString(), ethers.provider);
 
-    lockFacet = await ethers.getContractAt("Lock", diamond.target);
-    holdFacet = await ethers.getContractAt("IHold", diamond.target);
-    kycFacet = await ethers.getContractAt("Kyc", diamond.target, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.target, signer_A);
-    equityFacet = await ethers.getContractAt("Equity", diamond.target);
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
-    freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.target);
-    clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.target);
+    lockFacet = Lock__factory.connect(diamond.target.toString(), ethers.provider);
+    holdFacet = IHold__factory.connect(diamond.target.toString(), ethers.provider);
+    kycFacet = Kyc__factory.connect(diamond.target.toString(), signer_B);
+    ssiManagementFacet = SsiManagement__factory.connect(diamond.target.toString(), signer_A);
+    equityFacet = Equity__factory.connect(diamond.target.toString(), ethers.provider);
+    timeTravelFacet = TimeTravelFacet__factory.connect(diamond.target.toString(), signer_A);
+    freezeFacet = FreezeFacet__factory.connect(diamond.target.toString(), ethers.provider);
+    clearingTransferFacet = ClearingTransferFacet__factory.connect(diamond.target.toString(), ethers.provider);
   }
 
+  // TODO(phase-5): type as Rbac[]
   function set_initRbacs(): any[] {
     return [
       {
@@ -136,7 +149,10 @@ describe("Snapshots Tests", () => {
 
   it("GIVEN an account without snapshot role WHEN takeSnapshot THEN transaction fails with AccountHasNoRole", async () => {
     // snapshot fails
-    await expect(snapshotFacet.connect(signer_C).takeSnapshot()).to.be.rejectedWith("AccountHasNoRole");
+    await expect(snapshotFacet.connect(signer_C).takeSnapshot()).to.be.revertedWithCustomError(
+      accessControlFacet,
+      "AccountHasNoRole",
+    );
   });
 
   it("GIVEN a paused Token WHEN takeSnapshot THEN transaction fails with TokenIsPaused", async () => {
@@ -150,30 +166,58 @@ describe("Snapshots Tests", () => {
       signer_C.address,
     );
 
-    await expect(snapshotFacet.connect(signer_C).takeSnapshot()).to.be.rejectedWith("TokenIsPaused");
+    await expect(snapshotFacet.connect(signer_C).takeSnapshot()).to.be.revertedWithCustomError(
+      pauseFacet,
+      "TokenIsPaused",
+    );
   });
 
   it("GIVEN no snapshot WHEN reading snapshot values THEN transaction fails", async () => {
     // check snapshot
-    await expect(snapshotFacet.balanceOfAtSnapshot(1, signer_A.address)).to.be.rejectedWith("SnapshotIdDoesNotExists");
-    await expect(snapshotFacet.balanceOfAtSnapshot(0, signer_A.address)).to.be.rejectedWith("SnapshotIdNull");
-    await expect(snapshotFacet.totalSupplyAtSnapshot(1)).to.be.rejectedWith("SnapshotIdDoesNotExists");
-    await expect(snapshotFacet.totalSupplyAtSnapshot(0)).to.be.rejectedWith("SnapshotIdNull");
-    await expect(snapshotFacet.balanceOfAtSnapshotByPartition(_PARTITION_ID_1, 1, signer_A.address)).to.be.rejectedWith(
+    await expect(snapshotFacet.balanceOfAtSnapshot(1, signer_A.address)).to.be.revertedWithCustomError(
+      snapshotFacet,
       "SnapshotIdDoesNotExists",
     );
-    await expect(snapshotFacet.balanceOfAtSnapshotByPartition(_PARTITION_ID_1, 0, signer_A.address)).to.be.rejectedWith(
+    await expect(snapshotFacet.balanceOfAtSnapshot(0, signer_A.address)).to.be.revertedWithCustomError(
+      snapshotFacet,
       "SnapshotIdNull",
     );
-    await expect(snapshotFacet.partitionsOfAtSnapshot(1, signer_A.address)).to.be.rejectedWith(
+    await expect(snapshotFacet.totalSupplyAtSnapshot(1)).to.be.revertedWithCustomError(
+      snapshotFacet,
       "SnapshotIdDoesNotExists",
     );
-    await expect(snapshotFacet.partitionsOfAtSnapshot(0, signer_A.address)).to.be.rejectedWith("SnapshotIdNull");
+    await expect(snapshotFacet.totalSupplyAtSnapshot(0)).to.be.revertedWithCustomError(snapshotFacet, "SnapshotIdNull");
+    await expect(
+      snapshotFacet.balanceOfAtSnapshotByPartition(_PARTITION_ID_1, 1, signer_A.address),
+    ).to.be.revertedWithCustomError(snapshotFacet, "SnapshotIdDoesNotExists");
+    await expect(
+      snapshotFacet.balanceOfAtSnapshotByPartition(_PARTITION_ID_1, 0, signer_A.address),
+    ).to.be.revertedWithCustomError(snapshotFacet, "SnapshotIdNull");
+    await expect(snapshotFacet.partitionsOfAtSnapshot(1, signer_A.address)).to.be.revertedWithCustomError(
+      snapshotFacet,
+      "SnapshotIdDoesNotExists",
+    );
+    await expect(snapshotFacet.partitionsOfAtSnapshot(0, signer_A.address)).to.be.revertedWithCustomError(
+      snapshotFacet,
+      "SnapshotIdNull",
+    );
 
-    await expect(snapshotFacet.getTokenHoldersAtSnapshot(1, 0, 1)).to.be.rejectedWith("SnapshotIdDoesNotExists");
-    await expect(snapshotFacet.getTokenHoldersAtSnapshot(0, 0, 1)).to.be.rejectedWith("SnapshotIdNull");
-    await expect(snapshotFacet.getTotalTokenHoldersAtSnapshot(1)).to.be.rejectedWith("SnapshotIdDoesNotExists");
-    await expect(snapshotFacet.getTotalTokenHoldersAtSnapshot(0)).to.be.rejectedWith("SnapshotIdNull");
+    await expect(snapshotFacet.getTokenHoldersAtSnapshot(1, 0, 1)).to.be.revertedWithCustomError(
+      snapshotFacet,
+      "SnapshotIdDoesNotExists",
+    );
+    await expect(snapshotFacet.getTokenHoldersAtSnapshot(0, 0, 1)).to.be.revertedWithCustomError(
+      snapshotFacet,
+      "SnapshotIdNull",
+    );
+    await expect(snapshotFacet.getTotalTokenHoldersAtSnapshot(1)).to.be.revertedWithCustomError(
+      snapshotFacet,
+      "SnapshotIdDoesNotExists",
+    );
+    await expect(snapshotFacet.getTotalTokenHoldersAtSnapshot(0)).to.be.revertedWithCustomError(
+      snapshotFacet,
+      "SnapshotIdNull",
+    );
   });
 
   it("GIVEN an account with snapshot role WHEN takeSnapshot THEN transaction succeeds", async () => {

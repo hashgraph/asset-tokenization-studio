@@ -553,7 +553,7 @@ describe("Hold Tests", () => {
           holdFacet
             .connect(signer_B)
             .operatorCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, operatorData),
-        ).to.be.rejectedWith("PartitionsAreProtectedAndNoRole");
+        ).to.be.revertedWithCustomError(holdFacet, "PartitionsAreProtectedAndNoRole");
       });
 
       it("Given a invalid _from address when controllerCreateHoldByPartition THEN transaction fails with ZeroAddressNotAllowed", async () => {
@@ -1365,7 +1365,7 @@ describe("Hold Tests", () => {
             .attach(base.diamond.target)
             .connect(signer_B)
             .protectedCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, protectedHold, signature),
-        ).to.rejectedWith("PartitionsAreUnProtected");
+        ).to.be.revertedWithCustomError(holdFacet, "PartitionsAreUnProtected");
       });
     });
   });
@@ -1398,7 +1398,8 @@ describe("Hold Tests", () => {
         data: _DATA,
       };
 
-      await expect(holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)).to.be.rejectedWith(
+      await expect(holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)).to.be.revertedWithCustomError(
+        holdFacet,
         "PartitionsAreProtectedAndNoRole",
       );
     });
@@ -1430,7 +1431,7 @@ describe("Hold Tests", () => {
         holdFacet
           .connect(signer_B)
           .createHoldFromByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
-      ).to.be.rejectedWith("PartitionsAreProtectedAndNoRole");
+      ).to.be.revertedWithCustomError(holdFacet, "PartitionsAreProtectedAndNoRole");
     });
 
     it("GIVEN a Token WHEN createHoldByPartition for wrong partition THEN transaction fails with InvalidPartition", async () => {

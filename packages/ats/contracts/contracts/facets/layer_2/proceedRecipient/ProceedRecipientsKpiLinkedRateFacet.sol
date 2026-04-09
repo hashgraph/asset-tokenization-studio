@@ -5,8 +5,25 @@ import { IProceedRecipients } from "./IProceedRecipients.sol";
 import { ProceedRecipients } from "./ProceedRecipients.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { _PROCEED_RECIPIENTS_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
+import { _PROCEED_RECIPIENT_MANAGER_ROLE } from "../../../constants/roles.sol";
+import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";
 
 contract ProceedRecipientsKpiLinkedRateFacet is ProceedRecipients, IStaticFunctionSelectors {
+    function addProceedRecipient(
+        address _proceedRecipient,
+        bytes calldata _data
+    ) external override onlyUnpaused onlyRole(_PROCEED_RECIPIENT_MANAGER_ROLE) {
+        ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();
+        _addProceedRecipientInternal(_proceedRecipient, _data);
+    }
+
+    function removeProceedRecipient(
+        address _proceedRecipient
+    ) external override onlyUnpaused onlyRole(_PROCEED_RECIPIENT_MANAGER_ROLE) {
+        ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();
+        _removeProceedRecipientInternal(_proceedRecipient);
+    }
+
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _PROCEED_RECIPIENTS_KPI_LINKED_RATE_RESOLVER_KEY;
     }

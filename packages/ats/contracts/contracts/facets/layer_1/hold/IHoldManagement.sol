@@ -1,36 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Hold, ProtectedHold } from "./IHold.sol";
+import { IHoldTypes } from "./IHoldTypes.sol";
 
-interface IHoldManagement {
-    event OperatorHeldByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 holdId,
-        Hold hold,
-        bytes operatorData
-    );
-
-    event ControllerHeldByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 holdId,
-        Hold hold,
-        bytes operatorData
-    );
-
-    event ProtectedHeldByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 holdId,
-        Hold hold,
-        bytes operatorData
-    );
-
+interface IHoldManagement is IHoldTypes {
     /**
      * @notice Creates a hold on the tokens of a token holder, by an operator, on a specific partition
      * @param _partition The partition on which the hold is created
@@ -41,7 +14,7 @@ interface IHoldManagement {
     function operatorCreateHoldByPartition(
         bytes32 _partition,
         address _from,
-        Hold calldata _hold,
+        IHoldTypes.Hold calldata _hold,
         bytes calldata _operatorData
     ) external returns (bool success_, uint256 holdId_);
 
@@ -56,7 +29,7 @@ interface IHoldManagement {
     function controllerCreateHoldByPartition(
         bytes32 _partition,
         address _from,
-        Hold calldata _hold,
+        IHoldTypes.Hold calldata _hold,
         bytes calldata _operatorData
     ) external returns (bool success_, uint256 holdId_);
 
@@ -71,7 +44,7 @@ interface IHoldManagement {
     function protectedCreateHoldByPartition(
         bytes32 _partition,
         address _from,
-        ProtectedHold memory _protectedHold,
+        IHoldTypes.ProtectedHold memory _protectedHold,
         bytes calldata _signature
     ) external returns (bool success_, uint256 holdId_);
 }

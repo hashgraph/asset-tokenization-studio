@@ -7,6 +7,7 @@ import "@nomicfoundation/hardhat-ethers";
 import "@typechain/hardhat";
 import "hardhat-contract-sizer";
 import "hardhat-gas-reporter";
+import "solidity-coverage";
 import Configuration from "@configuration";
 import "@tasks";
 import "hardhat-dependency-compiler";

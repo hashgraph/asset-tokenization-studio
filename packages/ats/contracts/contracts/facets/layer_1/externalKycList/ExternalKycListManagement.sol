@@ -4,11 +4,11 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IExternalKycListManagement } from "./IExternalKycListManagement.sol";
 import { _KYC_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { _KYC_MANAGEMENT_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
-import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { ExternalListManagementStorageWrapper } from "../../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ArrayValidation } from "../../../infrastructure/utils/ArrayValidation.sol";
 import { IKyc } from "../kyc/IKyc.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ExternalKycListManagement is IExternalKycListManagement, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
@@ -29,18 +29,17 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
         if (!success_) {
             revert ExternalKycListsNotUpdated(_kycLists, _actives);
         }
-        emit ExternalKycListsUpdated(msg.sender, _kycLists, _actives);
+        emit ExternalKycListsUpdated(EvmAccessors.getMsgSender(), _kycLists, _actives);
     }
 
     function addExternalKycList(
         address _kycLists
-    ) external override onlyUnpaused onlyRole(_KYC_MANAGER_ROLE) returns (bool success_) {
-        ExternalListManagementStorageWrapper.checkValidAddress(_kycLists);
+    ) external override onlyUnpaused onlyRole(_KYC_MANAGER_ROLE) onlyValidAddress(_kycLists) returns (bool success_) {
         success_ = ExternalListManagementStorageWrapper.addExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists);
         if (!success_) {
             revert ListedKycList(_kycLists);
         }
-        emit AddedToExternalKycLists(msg.sender, _kycLists);
+        emit AddedToExternalKycLists(EvmAccessors.getMsgSender(), _kycLists);
     }
 
     function removeExternalKycList(

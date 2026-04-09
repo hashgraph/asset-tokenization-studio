@@ -17,7 +17,6 @@ interface IERC1643 {
         bytes32[] docNames;
     }
 
-    // Document Events
     event DocumentRemoved(bytes32 indexed name, string uri, bytes32 documentHash);
     event DocumentUpdated(bytes32 indexed name, string uri, bytes32 documentHash);
 

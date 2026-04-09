@@ -4,6 +4,9 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ScheduledTask } from "../scheduledTasksCommon/IScheduledTasksCommon.sol";
 
 interface IScheduledSnapshots {
+    // Re-export events from storage wrappers for test compatibility
+    event SnapshotTriggered(uint256 snapshotId, bytes metadata);
+
     function scheduledSnapshotCount() external view returns (uint256);
 
     function getScheduledSnapshots(

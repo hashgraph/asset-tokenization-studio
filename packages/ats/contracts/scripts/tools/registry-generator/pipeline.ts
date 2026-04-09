@@ -182,7 +182,7 @@ export async function generateRegistryPipeline(
 
     // Extract fresh metadata
     cacheMisses++;
-    const metadata = extractMetadata(contract, hasTimeTravel, allResolverKeys, contractsMap);
+    const metadata = extractMetadata(contract, hasTimeTravel, allResolverKeys);
 
     // Cache the result
     if (cache) {

@@ -65,7 +65,7 @@ describe("Kpi Linked Rate Tests", () => {
           adjustmentPrecision: 3,
         },
       ),
-    ).to.be.rejectedWith("AlreadyInitialized");
+    ).to.be.revertedWithCustomError(kpiLinkedRateFacet, "AlreadyInitialized");
   });
 
   describe("Paused", () => {
@@ -87,7 +87,7 @@ describe("Kpi Linked Rate Tests", () => {
           reportPeriod: 5000,
           rateDecimals: 1,
         }),
-      ).to.be.rejectedWith("TokenIsPaused");
+      ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
     });
 
     it("GIVEN a paused Token WHEN setImpactData THEN transaction fails with TokenIsPaused", async () => {
@@ -100,7 +100,7 @@ describe("Kpi Linked Rate Tests", () => {
           impactDataDecimals: 1,
           adjustmentPrecision: 3,
         }),
-      ).to.be.rejectedWith("TokenIsPaused");
+      ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
     });
   });
 
@@ -118,7 +118,7 @@ describe("Kpi Linked Rate Tests", () => {
           reportPeriod: 5000,
           rateDecimals: 1,
         }),
-      ).to.be.rejectedWith("AccountHasNoRole");
+      ).to.be.revertedWithCustomError(kpiLinkedRateFacet, "AccountHasNoRole");
     });
 
     it("GIVEN an account without interest rate manager role WHEN setImpactData THEN transaction fails with AccountHasNoRole", async () => {
@@ -131,7 +131,7 @@ describe("Kpi Linked Rate Tests", () => {
           impactDataDecimals: 1,
           adjustmentPrecision: 3,
         }),
-      ).to.be.rejectedWith("AccountHasNoRole");
+      ).to.be.revertedWithCustomError(kpiLinkedRateFacet, "AccountHasNoRole");
     });
   });
 
@@ -149,7 +149,7 @@ describe("Kpi Linked Rate Tests", () => {
           reportPeriod: 5000,
           rateDecimals: 1,
         }),
-      ).to.be.rejectedWith("WrongInterestRateValues");
+      ).to.be.revertedWithCustomError(kpiLinkedRateFacet, "WrongInterestRateValues");
     });
 
     it("GIVEN Base Rate larger than Max Rate WHEN setInterestRate THEN transaction fails with WrongInterestRateValues", async () => {
@@ -165,7 +165,7 @@ describe("Kpi Linked Rate Tests", () => {
           reportPeriod: 5000,
           rateDecimals: 1,
         }),
-      ).to.be.rejectedWith("WrongInterestRateValues");
+      ).to.be.revertedWithCustomError(kpiLinkedRateFacet, "WrongInterestRateValues");
     });
 
     it("GIVEN correct interest rate WHEN setInterestRate THEN transaction succeeds", async () => {
@@ -217,7 +217,7 @@ describe("Kpi Linked Rate Tests", () => {
           impactDataDecimals: 1,
           adjustmentPrecision: 8,
         }),
-      ).to.be.rejectedWith("WrongImpactDataValues");
+      ).to.be.revertedWithCustomError(kpiLinkedRateFacet, "WrongImpactDataValues");
     });
 
     it("GIVEN Base Line larger than Max Deviation Cap WHEN setImpactData THEN transaction fails with WrongImpactDataValues", async () => {
@@ -230,7 +230,7 @@ describe("Kpi Linked Rate Tests", () => {
           impactDataDecimals: 1,
           adjustmentPrecision: 8,
         }),
-      ).to.be.rejectedWith("WrongImpactDataValues");
+      ).to.be.revertedWithCustomError(kpiLinkedRateFacet, "WrongImpactDataValues");
     });
 
     it("GIVEN correct impact data WHEN setImpactData THEN transaction succeeds", async () => {

@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ControlListStorageWrapper } from "../../domain/core/ControlListStorageWrapper.sol";
 import { _checkNotInitialized } from "../InitializationErrors.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title ControlListModifiers
@@ -18,7 +19,7 @@ abstract contract ControlListModifiers {
      * @param _account The account to check
      */
     modifier onlyListedAllowed(address _account) {
-        ControlListStorageWrapper._checkControlList(_account);
+        ControlListStorageWrapper.checkControlList(_account);
         _;
     }
 
@@ -27,7 +28,7 @@ abstract contract ControlListModifiers {
      * @dev Reverts if msg.sender is blocked by the control list
      */
     modifier onlySenderListedAllowed() {
-        ControlListStorageWrapper._checkControlList(msg.sender);
+        ControlListStorageWrapper.checkControlList(EvmAccessors.getMsgSender());
         _;
     }
 

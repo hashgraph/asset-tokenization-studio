@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { IERC3643Types } from "./IERC3643Types.sol";
 import { ICompliance } from "./ICompliance.sol";
 import { IIdentityRegistry } from "./IIdentityRegistry.sol";
 
-interface IERC3643Read {
+interface IERC3643Read is IERC3643Types {
     /**
      * @dev Checks if an account has the agent role
      */

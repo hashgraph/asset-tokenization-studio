@@ -45,7 +45,8 @@ describe("Fixed Rate Tests", () => {
   });
 
   it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-    await expect(fixedRateFacet.initialize_FixedRate({ rate: 1, rateDecimals: 0 })).to.be.rejectedWith(
+    await expect(fixedRateFacet.initialize_FixedRate({ rate: 1, rateDecimals: 0 })).to.be.revertedWithCustomError(
+      fixedRateFacet,
       "AlreadyInitialized",
     );
   });
@@ -58,14 +59,20 @@ describe("Fixed Rate Tests", () => {
 
     it("GIVEN a paused Token WHEN setFixedRate THEN transaction fails with TokenIsPaused", async () => {
       // transfer with data fails
-      await expect(fixedRateFacet.connect(signer_A).setRate(1, 2)).to.be.rejectedWith("TokenIsPaused");
+      await expect(fixedRateFacet.connect(signer_A).setRate(1, 2)).to.be.revertedWithCustomError(
+        pauseFacet,
+        "TokenIsPaused",
+      );
     });
   });
 
   describe("AccessControl", () => {
     it("GIVEN an account without interest rate manager role WHEN setFixedRate THEN transaction fails with AccountHasNoRole", async () => {
       // add to list fails
-      await expect(fixedRateFacet.connect(signer_C).setRate(1, 2)).to.be.rejectedWith("AccountHasNoRole");
+      await expect(fixedRateFacet.connect(signer_C).setRate(1, 2)).to.be.revertedWithCustomError(
+        fixedRateFacet,
+        "AccountHasNoRole",
+      );
     });
   });
 

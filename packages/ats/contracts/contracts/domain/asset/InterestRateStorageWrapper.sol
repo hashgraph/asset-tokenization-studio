@@ -10,9 +10,6 @@ import {
     ISustainabilityPerformanceTargetRate
 } from "../../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 /* solhint-enable max-line-length */
-import { IInterestRateStorageWrapper } from "./interestRate/IInterestRateStorageWrapper.sol";
-
-// --- Storage structs ---
 
 struct FixedRateDataStorage {
     uint256 rate;
@@ -47,15 +44,11 @@ struct SustainabilityPerformanceTargetRateDataStorage {
 }
 
 library InterestRateStorageWrapper {
-    // --- Fixed Rate functions ---
-
     function setRate(uint256 _newRate, uint8 _newRateDecimals) internal {
         FixedRateDataStorage storage frs = fixedRateStorage();
         frs.rate = _newRate;
         frs.decimals = _newRateDecimals;
     }
-
-    // --- KPI Linked Rate functions ---
 
     function setInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) internal {
         KpiLinkedRateDataStorage storage kpiRateStorage = kpiLinkedRateStorage();
@@ -78,8 +71,6 @@ library InterestRateStorageWrapper {
         kpiRateStorage.adjustmentPrecision = _newImpactData.adjustmentPrecision;
     }
 
-    // --- SPT Rate functions ---
-
     // solhint-disable-next-line func-name-mixedcase
     function initialize_SustainabilityPerformanceTargetRate(
         ISustainabilityPerformanceTargetRate.InterestRate calldata _interestRate,
@@ -88,10 +79,14 @@ library InterestRateStorageWrapper {
         function(address) view returns (bool) _isProceedRecipient
     ) internal {
         setSPTInterestRate(_interestRate);
-        for (uint256 index = 0; index < _impactData.length; index++) {
-            if (!_isProceedRecipient(_projects[index]))
-                revert ISustainabilityPerformanceTargetRate.NotExistingProject(_projects[index]);
-            setSPTImpactData(_impactData[index], _projects[index]);
+        uint256 length = _impactData.length;
+        for (uint256 index; index < length; ) {
+            address project = _projects[index];
+            if (!_isProceedRecipient(project)) revert ISustainabilityPerformanceTargetRate.NotExistingProject(project);
+            setSPTImpactData(_impactData[index], project);
+            unchecked {
+                ++index;
+            }
         }
 
         sustainabilityPerformanceTargetRateStorage().initialized = true;
@@ -151,8 +146,6 @@ library InterestRateStorageWrapper {
         return kpiLinkedRateStorage().initialized;
     }
 
-    // --- View functions ---
-
     function getRate() internal view returns (uint256 rate_, uint8 decimals_) {
         rate_ = fixedRateStorage().rate;
         decimals_ = fixedRateStorage().decimals;
@@ -183,8 +176,6 @@ library InterestRateStorageWrapper {
         });
     }
 
-    // --- Pure functions ---
-
     function requireValidInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) internal pure {
         if (
             _newInterestRate.minRate > _newInterestRate.baseRate || _newInterestRate.baseRate > _newInterestRate.maxRate
@@ -207,8 +198,6 @@ library InterestRateStorageWrapper {
             revert ISustainabilityPerformanceTargetRate.ProvidedListsLengthMismatch(len1, len2);
         }
     }
-
-    // --- Storage accessors (pure) ---
 
     function fixedRateStorage() internal pure returns (FixedRateDataStorage storage fixedRateDataStorage_) {
         bytes32 position = _FIXED_RATE_STORAGE_POSITION;

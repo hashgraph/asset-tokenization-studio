@@ -26,6 +26,7 @@ export interface OrchestratorLibraryAddresses {
   holdOps: string;
   clearingOps: string;
   clearingReadOps: string;
+  clearingProtectedOps: string;
 }
 
 /**
@@ -37,6 +38,7 @@ export const LIBRARY_KEYS = {
   holdOps: "contracts/domain/orchestrator/HoldOps.sol:HoldOps",
   clearingOps: "contracts/domain/orchestrator/ClearingOps.sol:ClearingOps",
   clearingReadOps: "contracts/domain/orchestrator/ClearingReadOps.sol:ClearingReadOps",
+  clearingProtectedOps: "contracts/domain/orchestrator/ClearingProtectedOps.sol:ClearingProtectedOps",
 } as const;
 
 /**
@@ -102,23 +104,36 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   // TokenCoreOps dependencies - ERC20 and ERC1410 token operations
   ERC20Facet: ["tokenCoreOps"],
   ERC20ReadFacet: ["tokenCoreOps"],
+  ERC20VotesFacet: ["clearingReadOps"],
   ERC1410ManagementFacet: ["tokenCoreOps"],
   ERC1410TokenHolderFacet: ["tokenCoreOps"],
   ERC1410ReadFacet: ["tokenCoreOps"],
+  ERC1410IssuerFacet: ["tokenCoreOps"],
   ERC1594Facet: ["tokenCoreOps"],
+  ERC1644Facet: ["tokenCoreOps"],
+  ERC3643BatchFacet: ["tokenCoreOps"],
+  ERC3643OperationsFacet: ["tokenCoreOps"],
   // HoldOps dependencies - hold/lock operations
   HoldManagementFacet: ["holdOps"],
   HoldReadFacet: ["holdOps"],
   HoldTokenHolderFacet: ["holdOps"],
   // ClearingOps dependencies - clearing transfer operations
-  ClearingActionsFacet: ["clearingOps", "clearingReadOps"],
-  ClearingTransferFacet: ["clearingOps"],
-  ClearingRedeemFacet: ["clearingOps"],
-  ClearingHoldCreationFacet: ["clearingOps"],
+  ClearingActionsFacet: ["clearingOps"],
+  ClearingTransferFacet: ["clearingOps", "clearingProtectedOps"],
+  ClearingRedeemFacet: ["clearingOps", "clearingProtectedOps"],
+  ClearingHoldCreationFacet: ["clearingOps", "clearingProtectedOps"],
   // ClearingReadOps dependencies - clearing read operations
   ClearingReadFacet: ["clearingReadOps"],
-  // SnapshotsFacet dependencies - uses ClearingReadOps in SnapshotsStorageWrapper
+  // SnapshotsFacet + TotalBalanceFacet depend on SnapshotsStorageWrapper which uses ClearingReadOps
   SnapshotsFacet: ["clearingReadOps"],
+  TotalBalanceFacet: ["clearingReadOps"],
+  // Layer 2/3 Bond read facets transitively reach ClearingReadOps via SnapshotsStorageWrapper
+  BondUSAReadFacet: ["clearingReadOps"],
+  BondUSAReadFixedRateFacet: ["clearingReadOps"],
+  BondUSAReadKpiLinkedRateFacet: ["clearingReadOps"],
+  BondUSAReadSustainabilityPerformanceTargetRateFacet: ["clearingReadOps"],
+  // Layer 3 EquityUSA — same transitive dependency
+  EquityUSAFacet: ["clearingReadOps"],
 };
 
 /**
@@ -181,6 +196,7 @@ export function toTypeChainLibraryAddresses(addresses?: OrchestratorLibraryAddre
     [LIBRARY_KEYS.holdOps]: addrs.holdOps,
     [LIBRARY_KEYS.clearingOps]: addrs.clearingOps,
     [LIBRARY_KEYS.clearingReadOps]: addrs.clearingReadOps,
+    [LIBRARY_KEYS.clearingProtectedOps]: addrs.clearingProtectedOps,
   };
 }
 
@@ -198,8 +214,13 @@ export function toTypeChainLibraryAddresses(addresses?: OrchestratorLibraryAddre
  */
 export async function deployOrchestratorLibraries(signer: Signer): Promise<OrchestratorLibraryAddresses> {
   // Dynamic import to avoid eager loading of typechain
-  const { TokenCoreOps__factory, HoldOps__factory, ClearingReadOps__factory, ClearingOps__factory } =
-    await import("@contract-types");
+  const {
+    TokenCoreOps__factory,
+    HoldOps__factory,
+    ClearingReadOps__factory,
+    ClearingOps__factory,
+    ClearingProtectedOps__factory,
+  } = await import("@contract-types");
 
   info("   Deploying orchestrator libraries...");
 
@@ -224,22 +245,37 @@ export async function deployOrchestratorLibraries(signer: Signer): Promise<Orche
   info(`   ✓ HoldOps deployed at ${holdOpsAddr}`);
   info(`   ✓ ClearingReadOps deployed at ${clearingReadOpsAddr}`);
 
-  // Phase 2: Deploy ClearingOps (depends on TokenCoreOps)
+  // Phase 2: Deploy ClearingOps (depends on TokenCoreOps and HoldOps)
   const clearingOps = await new ClearingOps__factory(
     {
       [LIBRARY_KEYS.tokenCoreOps]: tokenCoreOpsAddr,
+      [LIBRARY_KEYS.holdOps]: holdOpsAddr,
     } as any,
     signer,
   ).deploy();
   await clearingOps.waitForDeployment();
 
-  info(`   ✓ ClearingOps deployed at ${await clearingOps.getAddress()}`);
+  const clearingOpsAddr = await clearingOps.getAddress();
+  info(`   ✓ ClearingOps deployed at ${clearingOpsAddr}`);
+
+  // Phase 3: Deploy ClearingProtectedOps (depends on ClearingOps via internal calls)
+  const clearingProtectedOps = await new ClearingProtectedOps__factory(
+    {
+      [LIBRARY_KEYS.clearingOps]: clearingOpsAddr,
+    } as any,
+    signer,
+  ).deploy();
+  await clearingProtectedOps.waitForDeployment();
+
+  const clearingProtectedOpsAddr = await clearingProtectedOps.getAddress();
+  info(`   ✓ ClearingProtectedOps deployed at ${clearingProtectedOpsAddr}`);
 
   const addresses: OrchestratorLibraryAddresses = {
     tokenCoreOps: tokenCoreOpsAddr,
     holdOps: holdOpsAddr,
-    clearingOps: await clearingOps.getAddress(),
+    clearingOps: clearingOpsAddr,
     clearingReadOps: clearingReadOpsAddr,
+    clearingProtectedOps: clearingProtectedOpsAddr,
   };
 
   setOrchestratorLibraryAddresses(addresses);

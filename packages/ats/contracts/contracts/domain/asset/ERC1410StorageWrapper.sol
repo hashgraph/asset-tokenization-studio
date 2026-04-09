@@ -1,29 +1,31 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { AddressValidation } from "../../infrastructure/utils/AddressValidation.sol";
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
+import { IERC1410 } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
+import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import {
     _ERC1410_BASIC_STORAGE_POSITION,
     _ERC1410_OPERATOR_STORAGE_POSITION
 } from "../../constants/storagePositions.sol";
-import { IERC1410StorageWrapper } from "./ERC1400/ERC1410/IERC1410StorageWrapper.sol";
-import { BasicTransferInfo, IssueData, OperatorTransferData } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
-import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
-import { IERC3643Management } from "../../facets/layer_1/ERC3643/IERC3643Management.sol";
-import { IProtectedPartitionsStorageWrapper } from "../core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
-import { _checkNounceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
-import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
-import { Pagination } from "../../infrastructure/utils/Pagination.sol";
+import { AddressValidation } from "../../infrastructure/utils/AddressValidation.sol";
+import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC20VotesStorageWrapper } from "./ERC20VotesStorageWrapper.sol";
-import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
-import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
-import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
+import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
+import { IProtectedPartitions } from "../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
+import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
+import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
+import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
+import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { _checkNounceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
 
 /// @dev Represents a fungible set of tokens.
 struct Partition {
@@ -60,13 +62,9 @@ struct ERC1410OperatorStorage {
 library ERC1410StorageWrapper {
     using LowLevelCall for address;
 
-    // ============================================================================
     // Guard Functions
-    // ============================================================================
 
-    // ============================================================================
     // Initialization
-    // ============================================================================
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1410(bool multiPartition) internal {
@@ -74,19 +72,15 @@ library ERC1410StorageWrapper {
         erc1410BasicStorage().initialized = true;
     }
 
-    // ============================================================================
-    // Core Partition Operations
-    // ============================================================================
-
     function reduceBalanceByPartition(address from, uint256 value, bytes32 partition) internal {
         if (!validPartition(partition, from)) {
-            revert IERC1410StorageWrapper.InvalidPartition(from, partition);
+            revert IERC1410Types.InvalidPartition(from, partition);
         }
 
         uint256 fromBalance = balanceOfByPartition(partition, from);
 
         if (fromBalance < value) {
-            revert IERC1410StorageWrapper.InsufficientBalance(from, fromBalance, value, partition);
+            revert IERC20.InsufficientBalance(from, fromBalance, value, partition);
         }
 
         ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
@@ -103,10 +97,9 @@ library ERC1410StorageWrapper {
 
     function deletePartitionForHolder(address holder, bytes32 partition, uint256 index) internal {
         ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
-        if (index != erc1410Storage.partitions[holder].length - 1) {
-            erc1410Storage.partitions[holder][index] = erc1410Storage.partitions[holder][
-                erc1410Storage.partitions[holder].length - 1
-            ];
+        uint256 lastIndex = erc1410Storage.partitions[holder].length - 1;
+        if (index != lastIndex) {
+            erc1410Storage.partitions[holder][index] = erc1410Storage.partitions[holder][lastIndex];
             erc1410Storage.partitionToIndex[holder][erc1410Storage.partitions[holder][index].partition] = index + 1;
         }
         delete erc1410Storage.partitionToIndex[holder][partition];
@@ -115,14 +108,12 @@ library ERC1410StorageWrapper {
 
     function increaseBalanceByPartition(address from, uint256 value, bytes32 partition) internal {
         if (!validPartition(partition, from)) {
-            revert IERC1410StorageWrapper.InvalidPartition(from, partition);
+            revert IERC1410Types.InvalidPartition(from, partition);
         }
 
         ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
 
-        uint256 index = erc1410Storage.partitionToIndex[from][partition] - 1;
-
-        erc1410Storage.partitions[from][index].amount += value;
+        erc1410Storage.partitions[from][erc1410Storage.partitionToIndex[from][partition] - 1].amount += value;
         ERC20StorageWrapper.increaseBalance(from, value);
     }
 
@@ -137,10 +128,6 @@ library ERC1410StorageWrapper {
         if (value != 0) ERC20StorageWrapper.increaseBalance(account, value);
     }
 
-    // ============================================================================
-    // Token Holder Management
-    // ============================================================================
-
     function replaceTokenHolder(address newTokenHolder, address oldTokenHolder) internal {
         ERC1410BasicStorage storage basicStorage = erc1410BasicStorage();
 
@@ -153,9 +140,11 @@ library ERC1410StorageWrapper {
     function addNewTokenHolder(address tokenHolder) internal {
         ERC1410BasicStorage storage basicStorage = erc1410BasicStorage();
 
-        uint256 nextIndex = ++basicStorage.totalTokenHolders;
-        basicStorage.tokenHolders[nextIndex] = tokenHolder;
-        basicStorage.tokenHolderIndex[tokenHolder] = nextIndex;
+        unchecked {
+            uint256 nextIndex = ++basicStorage.totalTokenHolders;
+            basicStorage.tokenHolders[nextIndex] = tokenHolder;
+            basicStorage.tokenHolderIndex[tokenHolder] = nextIndex;
+        }
     }
 
     function removeTokenHolder(address tokenHolder) internal {
@@ -173,40 +162,34 @@ library ERC1410StorageWrapper {
         }
 
         basicStorage.tokenHolderIndex[tokenHolder] = 0;
-        basicStorage.totalTokenHolders--;
+        unchecked {
+            --basicStorage.totalTokenHolders;
+        }
     }
 
-    // ============================================================================
-    // Operator Functions
-    // ============================================================================
-
     function authorizeOperator(address operator) internal {
-        erc1410OperatorStorage().approvals[msg.sender][operator] = true;
-        emit IERC1410StorageWrapper.AuthorizedOperator(operator, msg.sender);
+        erc1410OperatorStorage().approvals[EvmAccessors.getMsgSender()][operator] = true;
+        emit IERC1410Types.AuthorizedOperator(operator, EvmAccessors.getMsgSender());
     }
 
     function revokeOperator(address operator) internal {
-        erc1410OperatorStorage().approvals[msg.sender][operator] = false;
-        emit IERC1410StorageWrapper.RevokedOperator(operator, msg.sender);
+        erc1410OperatorStorage().approvals[EvmAccessors.getMsgSender()][operator] = false;
+        emit IERC1410Types.RevokedOperator(operator, EvmAccessors.getMsgSender());
     }
 
     function authorizeOperatorByPartition(bytes32 partition, address operator) internal {
-        erc1410OperatorStorage().partitionApprovals[msg.sender][partition][operator] = true;
-        emit IERC1410StorageWrapper.AuthorizedOperatorByPartition(partition, operator, msg.sender);
+        erc1410OperatorStorage().partitionApprovals[EvmAccessors.getMsgSender()][partition][operator] = true;
+        emit IERC1410Types.AuthorizedOperatorByPartition(partition, operator, EvmAccessors.getMsgSender());
     }
 
     function revokeOperatorByPartition(bytes32 partition, address operator) internal {
-        erc1410OperatorStorage().partitionApprovals[msg.sender][partition][operator] = false;
-        emit IERC1410StorageWrapper.RevokedOperatorByPartition(partition, operator, msg.sender);
+        erc1410OperatorStorage().partitionApprovals[EvmAccessors.getMsgSender()][partition][operator] = false;
+        emit IERC1410Types.RevokedOperatorByPartition(partition, operator, EvmAccessors.getMsgSender());
     }
-
-    // ============================================================================
-    // Transfer Operations
-    // ============================================================================
 
     function transferByPartition(
         address from,
-        BasicTransferInfo memory basicTransferInfo,
+        IERC1410Types.BasicTransferInfo memory basicTransferInfo,
         bytes32 partition,
         bytes memory data,
         address operator,
@@ -224,7 +207,7 @@ library ERC1410StorageWrapper {
 
         // Emit transfer event AFTER all partition balance changes are complete.
         // This ensures TransferByPartition is emitted when partitions[] changes.
-        emit IERC1410StorageWrapper.TransferByPartition(
+        emit IERC1410Types.TransferByPartition(
             partition,
             operator,
             from,
@@ -242,7 +225,7 @@ library ERC1410StorageWrapper {
                     basicTransferInfo.to,
                     basicTransferInfo.value
                 ),
-                IERC3643Management.ComplianceCallFailed.selector
+                IERC3643Types.ComplianceCallFailed.selector
             );
         }
 
@@ -252,24 +235,20 @@ library ERC1410StorageWrapper {
     }
 
     function operatorTransferByPartition(
-        OperatorTransferData calldata operatorTransferData
+        IERC1410Types.OperatorTransferData calldata operatorTransferData
     ) internal returns (bytes32) {
         return
             transferByPartition(
                 operatorTransferData.from,
-                BasicTransferInfo(operatorTransferData.to, operatorTransferData.value),
+                IERC1410Types.BasicTransferInfo(operatorTransferData.to, operatorTransferData.value),
                 operatorTransferData.partition,
                 operatorTransferData.data,
-                msg.sender,
+                EvmAccessors.getMsgSender(),
                 operatorTransferData.operatorData
             );
     }
 
-    // ============================================================================
-    // Issue / Redeem Operations
-    // ============================================================================
-
-    function issueByPartition(IssueData memory issueData) internal {
+    function issueByPartition(IERC1410Types.IssueData memory issueData) internal {
         validateParams(issueData.partition, issueData.value);
 
         beforeTokenTransfer(issueData.partition, address(0), issueData.tokenHolder, issueData.value);
@@ -285,16 +264,16 @@ library ERC1410StorageWrapper {
         if (issueData.partition == _DEFAULT_PARTITION) {
             ERC3643StorageWrapper.erc3643Storage().compliance.functionCall(
                 abi.encodeWithSelector(ICompliance.created.selector, issueData.tokenHolder, issueData.value),
-                IERC3643Management.ComplianceCallFailed.selector
+                IERC3643Types.ComplianceCallFailed.selector
             );
         }
 
         afterTokenTransfer(issueData.partition, address(0), issueData.tokenHolder, issueData.value);
 
         // RULE 2: Emit TransferByPartition when ERC1410BasicStorage.partitions change
-        emit IERC1410StorageWrapper.TransferByPartition(
+        emit IERC1410Types.TransferByPartition(
             issueData.partition,
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             address(0),
             issueData.tokenHolder,
             issueData.value,
@@ -302,9 +281,9 @@ library ERC1410StorageWrapper {
             ""
         );
 
-        emit IERC1410StorageWrapper.IssuedByPartition(
+        emit IERC1410Types.IssuedByPartition(
             issueData.partition,
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             issueData.tokenHolder,
             issueData.value,
             issueData.data
@@ -324,40 +303,28 @@ library ERC1410StorageWrapper {
         reduceBalanceByPartition(from, value, partition);
 
         // RULE 2: Emit TransferByPartition when ERC1410BasicStorage.partitions change
-        emit IERC1410StorageWrapper.TransferByPartition(
-            partition,
-            operator,
-            from,
-            address(0),
-            value,
-            data,
-            operatorData
-        );
+        emit IERC1410Types.TransferByPartition(partition, operator, from, address(0), value, data, operatorData);
 
         reduceTotalSupplyByPartition(partition, value);
 
         if (partition == _DEFAULT_PARTITION) {
             ERC3643StorageWrapper.erc3643Storage().compliance.functionCall(
                 abi.encodeWithSelector(ICompliance.destroyed.selector, from, value),
-                IERC3643Management.ComplianceCallFailed.selector
+                IERC3643Types.ComplianceCallFailed.selector
             );
         }
 
         afterTokenTransfer(partition, from, address(0), value);
 
-        emit IERC1410StorageWrapper.RedeemedByPartition(partition, operator, from, value, data, operatorData);
+        emit IERC1410Types.RedeemedByPartition(partition, operator, from, value, data, operatorData);
     }
-
-    // ============================================================================
-    // Protected Partitions Operations
-    // ============================================================================
 
     function protectedTransferFromByPartition(
         bytes32 partition,
         address from,
         address to,
         uint256 amount,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata protectionData
+        IProtectedPartitions.ProtectionData calldata protectionData
     ) internal returns (bytes32) {
         _checkNounceAndDeadline(
             protectionData.nounce,
@@ -378,14 +345,22 @@ library ERC1410StorageWrapper {
 
         NonceStorageWrapper.setNonceFor(protectionData.nounce, from);
 
-        return transferByPartition(from, BasicTransferInfo(to, amount), partition, "", msg.sender, "");
+        return
+            transferByPartition(
+                from,
+                IERC1410Types.BasicTransferInfo(to, amount),
+                partition,
+                "",
+                EvmAccessors.getMsgSender(),
+                ""
+            );
     }
 
     function protectedRedeemFromByPartition(
         bytes32 partition,
         address from,
         uint256 amount,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata protectionData
+        IProtectedPartitions.ProtectionData calldata protectionData
     ) internal {
         _checkNounceAndDeadline(
             protectionData.nounce,
@@ -404,12 +379,8 @@ library ERC1410StorageWrapper {
         );
         NonceStorageWrapper.setNonceFor(protectionData.nounce, from);
 
-        redeemByPartition(partition, from, msg.sender, amount, "", "");
+        redeemByPartition(partition, from, EvmAccessors.getMsgSender(), amount, "", "");
     }
-
-    // ============================================================================
-    // Sync / Trigger Functions
-    // ============================================================================
 
     function beforeTokenTransfer(bytes32 partition, address from, address to, uint256 amount) internal {
         triggerAndSyncAll(partition, from, to);
@@ -446,6 +417,7 @@ library ERC1410StorageWrapper {
             ) removeFrom = true;
         }
 
+        if (!(addTo || removeFrom)) return;
         if (addTo && removeFrom) {
             SnapshotsStorageWrapper.updateTokenHolderSnapshot(from);
             replaceTokenHolder(to, from);
@@ -456,12 +428,10 @@ library ERC1410StorageWrapper {
             addNewTokenHolder(to);
             return;
         }
-        if (removeFrom) {
-            SnapshotsStorageWrapper.updateTokenHolderSnapshot(from);
-            SnapshotsStorageWrapper.updateTokenHolderSnapshot(getTokenHolder(getTotalTokenHolders()));
-            SnapshotsStorageWrapper.updateTotalTokenHolderSnapshot();
-            removeTokenHolder(from);
-        }
+        SnapshotsStorageWrapper.updateTokenHolderSnapshot(from);
+        SnapshotsStorageWrapper.updateTokenHolderSnapshot(getTokenHolder(getTotalTokenHolders()));
+        SnapshotsStorageWrapper.updateTotalTokenHolderSnapshot();
+        removeTokenHolder(from);
     }
 
     function afterTokenTransfer(bytes32 partition, address from, address to, uint256 amount) internal {
@@ -485,10 +455,6 @@ library ERC1410StorageWrapper {
         if (to != address(0)) adjustTotalBalanceAndPartitionBalanceFor(partition, to);
     }
 
-    // ============================================================================
-    // Adjustment Functions
-    // ============================================================================
-
     function adjustTotalSupplyByPartition(bytes32 partition, uint256 factor) internal {
         erc1410BasicStorage().totalSupplyByPartition[partition] *= factor;
     }
@@ -496,7 +462,7 @@ library ERC1410StorageWrapper {
     function adjustTotalBalanceAndPartitionBalanceFor(bytes32 partition, address account) internal {
         uint256 abaf = AdjustBalancesStorageWrapper.getAbaf();
         ERC1410BasicStorage storage basicStorage = erc1410BasicStorage();
-        adjustPartitionBalanceFor(basicStorage, abaf, partition, account);
+        _adjustPartitionBalanceFor(basicStorage, abaf, partition, account);
         ERC20StorageWrapper.adjustTotalBalanceFor(abaf, account);
     }
 
@@ -518,10 +484,6 @@ library ERC1410StorageWrapper {
         ERC20StorageWrapper.increaseTotalSupply(value);
     }
 
-    // ============================================================================
-    // Read Functions - Supply
-    // ============================================================================
-
     function totalSupply() internal view returns (uint256) {
         return ERC20StorageWrapper.totalSupply();
     }
@@ -536,38 +498,32 @@ library ERC1410StorageWrapper {
     }
 
     function totalSupplyByPartitionAdjustedAt(bytes32 partition, uint256 timestamp) internal view returns (uint256) {
-        uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(
-            AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
-            AdjustBalancesStorageWrapper.getLabafByPartition(partition)
-        );
-        return totalSupplyByPartition(partition) * factor;
+        return
+            totalSupplyByPartition(partition) *
+            AdjustBalancesStorageWrapper.calculateFactor(
+                AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
+                AdjustBalancesStorageWrapper.getLabafByPartition(partition)
+            );
     }
-
-    // ============================================================================
-    // Read Functions - Balance
-    // ============================================================================
 
     function balanceOf(address tokenHolder) internal view returns (uint256) {
         return ERC20StorageWrapper.balanceOf(tokenHolder);
     }
 
     function balanceOfByPartition(bytes32 partition, address tokenHolder) internal view returns (uint256) {
-        if (validPartition(partition, tokenHolder)) {
-            ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
-            return
-                erc1410Storage
-                .partitions[tokenHolder][erc1410Storage.partitionToIndex[tokenHolder][partition] - 1].amount;
-        } else {
-            return 0;
-        }
+        if (!validPartition(partition, tokenHolder)) return 0;
+        ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
+        return
+            erc1410Storage.partitions[tokenHolder][erc1410Storage.partitionToIndex[tokenHolder][partition] - 1].amount;
     }
 
     function balanceOfAdjustedAt(address tokenHolder, uint256 timestamp) internal view returns (uint256) {
-        uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(
-            AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
-            AdjustBalancesStorageWrapper.getLabafByUser(tokenHolder)
-        );
-        return balanceOf(tokenHolder) * factor;
+        return
+            balanceOf(tokenHolder) *
+            AdjustBalancesStorageWrapper.calculateFactor(
+                AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
+                AdjustBalancesStorageWrapper.getLabafByUser(tokenHolder)
+            );
     }
 
     function balanceOfByPartitionAdjustedAt(
@@ -575,58 +531,42 @@ library ERC1410StorageWrapper {
         address tokenHolder,
         uint256 timestamp
     ) internal view returns (uint256) {
-        uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(
-            AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
-            AdjustBalancesStorageWrapper.getLabafByUserAndPartition(partition, tokenHolder)
-        );
-        return balanceOfByPartition(partition, tokenHolder) * factor;
+        return
+            balanceOfByPartition(partition, tokenHolder) *
+            AdjustBalancesStorageWrapper.calculateFactor(
+                AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
+                AdjustBalancesStorageWrapper.getLabafByUserAndPartition(partition, tokenHolder)
+            );
     }
 
-    // ============================================================================
-    // Read Functions - Partitions
-    // ============================================================================
-
-    function partitionsOf(address tokenHolder) internal view returns (bytes32[] memory) {
+    function partitionsOf(address tokenHolder) internal view returns (bytes32[] memory partitionsList) {
         ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
-        bytes32[] memory partitionsList = new bytes32[](erc1410Storage.partitions[tokenHolder].length);
-        for (uint256 i = 0; i < erc1410Storage.partitions[tokenHolder].length; i++) {
+        uint256 length = erc1410Storage.partitions[tokenHolder].length;
+        partitionsList = new bytes32[](length);
+        for (uint256 i; i < length; ) {
             partitionsList[i] = erc1410Storage.partitions[tokenHolder][i].partition;
+            unchecked {
+                ++i;
+            }
         }
         return partitionsList;
     }
 
     function validPartition(bytes32 partition, address holder) internal view returns (bool) {
-        ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
-        if (erc1410Storage.partitionToIndex[holder][partition] == 0) {
-            return false;
-        } else {
-            return true;
-        }
+        return validPartitionForReceiver(partition, holder);
     }
 
     function validPartitionForReceiver(bytes32 partition, address to) internal view returns (bool) {
-        ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
-
-        uint256 index = erc1410Storage.partitionToIndex[to][partition];
-
-        return index != 0;
+        return erc1410BasicStorage().partitionToIndex[to][partition] != 0;
     }
-
-    // ============================================================================
-    // Read Functions - Token Holders
-    // ============================================================================
 
     function getTokenHolders(uint256 pageIndex, uint256 pageLength) internal view returns (address[] memory holders_) {
         (uint256 start, uint256 end) = Pagination.getStartAndEnd(pageIndex, pageLength);
-
-        holders_ = new address[](Pagination.getSize(start, end, getTotalTokenHolders()));
-
-        start++; // because tokenHolders starts from 1
-
+        uint256 size = Pagination.getSize(start, end, getTotalTokenHolders());
+        holders_ = new address[](size);
         ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
-
-        for (uint256 i = 0; i < holders_.length; i++) {
-            holders_[i] = erc1410Storage.tokenHolders[start + i];
+        unchecked {
+            for (uint256 i; i < size; ++i) holders_[i] = erc1410Storage.tokenHolders[++start];
         }
     }
 
@@ -641,10 +581,6 @@ library ERC1410StorageWrapper {
     function getTokenHolderIndex(address tokenHolder) internal view returns (uint256) {
         return erc1410BasicStorage().tokenHolderIndex[tokenHolder];
     }
-
-    // ============================================================================
-    // Read Functions - Mode & State
-    // ============================================================================
 
     function isMultiPartition() internal view returns (bool) {
         return erc1410BasicStorage().multiPartition;
@@ -670,34 +606,28 @@ library ERC1410StorageWrapper {
         return isOperator(operator, tokenHolder) || isOperatorForPartition(partition, operator, tokenHolder);
     }
 
-    // ============================================================================
     // Guard functions (internal view)
-    // ============================================================================
 
     function requireOperator(bytes32 partition, address from) internal view {
-        if (!isAuthorized(partition, msg.sender, from))
-            revert IERC1410StorageWrapper.Unauthorized(msg.sender, from, partition);
+        if (!isAuthorized(partition, EvmAccessors.getMsgSender(), from))
+            revert IERC1410Types.Unauthorized(EvmAccessors.getMsgSender(), from, partition);
     }
 
     function requireWithoutMultiPartition() internal view {
-        if (isMultiPartition()) revert IERC1410StorageWrapper.NotAllowedInMultiPartitionMode();
+        if (isMultiPartition()) revert IERC1410Types.NotAllowedInMultiPartitionMode();
     }
 
     function requireDefaultPartitionWithSinglePartition(bytes32 partition) internal view {
         if (!isMultiPartition() && partition != _DEFAULT_PARTITION)
-            revert IERC1410StorageWrapper.PartitionNotAllowedInSinglePartitionMode(partition);
+            revert IERC1410Types.PartitionNotAllowedInSinglePartitionMode(partition);
     }
 
-    // ============================================================================
-    // Internal Pure Functions
-    // ============================================================================
-
     function validateParams(bytes32 partition, uint256 value) internal pure {
-        if (value == uint256(0)) {
-            revert IERC1410StorageWrapper.ZeroValue();
+        if (value == 0) {
+            revert IERC1410Types.ZeroValue();
         }
         if (partition == bytes32(0)) {
-            revert IERC1410StorageWrapper.ZeroPartition();
+            revert IERC1410Types.ZeroPartition();
         }
     }
 
@@ -721,11 +651,7 @@ library ERC1410StorageWrapper {
         }
     }
 
-    // ============================================================================
-    // Private Helpers
-    // ============================================================================
-
-    function adjustPartitionBalanceFor(
+    function _adjustPartitionBalanceFor(
         ERC1410BasicStorage storage basicStorage,
         uint256 abaf,
         bytes32 partition,
@@ -743,9 +669,9 @@ library ERC1410StorageWrapper {
         if (newAmount != oldAmount) {
             basicStorage.partitions[account][partitionsIndex - 1].amount = newAmount;
             unchecked {
-                emit IERC1410StorageWrapper.TransferByPartition(
+                emit IERC1410Types.TransferByPartition(
                     partition,
-                    msg.sender,
+                    EvmAccessors.getMsgSender(),
                     address(0),
                     address(0),
                     newAmount - oldAmount,

@@ -48,9 +48,9 @@ describe("Corporate Actions Tests", () => {
 
   it("GIVEN an account without corporateActions role WHEN addCorporateAction THEN transaction fails with AccountHasNoRole", async () => {
     // add to list fails
-    await expect(corporateActionsFacet.connect(signer_C).addCorporateAction(actionType, actionData)).to.be.rejectedWith(
-      "AccountHasNoRole",
-    );
+    await expect(
+      corporateActionsFacet.connect(signer_C).addCorporateAction(actionType, actionData),
+    ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
   });
 
   it("GIVEN a paused Token WHEN addCorporateAction THEN transaction fails with TokenIsPaused", async () => {
@@ -65,9 +65,9 @@ describe("Corporate Actions Tests", () => {
     );
 
     // add to list fails
-    await expect(corporateActionsFacet.connect(signer_C).addCorporateAction(actionType, actionData)).to.be.rejectedWith(
-      "TokenIsPaused",
-    );
+    await expect(
+      corporateActionsFacet.connect(signer_C).addCorporateAction(actionType, actionData),
+    ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
   });
 
   it("GIVEN an account with corporateActions role WHEN addCorporateAction (two identical CA) THEN transaction first succeeds but second fails with DuplicatedCorporateAction", async () => {

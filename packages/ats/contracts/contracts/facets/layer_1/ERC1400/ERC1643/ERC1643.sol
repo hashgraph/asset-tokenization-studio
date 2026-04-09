@@ -4,12 +4,10 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IERC1643 } from "./IERC1643.sol";
 import { _DOCUMENTER_ROLE } from "../../../../constants/roles.sol";
 import { _ERC1643_STORAGE_POSITION } from "../../../../constants/storagePositions.sol";
-import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
-import { AccessControlModifiers } from "../../../../infrastructure/utils/AccessControlModifiers.sol";
-import { PauseModifiers } from "../../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../../services/Modifiers.sol";
 import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 
-abstract contract ERC1643 is IERC1643, AccessControlModifiers, TimestampProvider, PauseModifiers {
+abstract contract ERC1643 is IERC1643, TimestampProvider, Modifiers {
     function setDocument(
         bytes32 _name,
         string calldata _uri,

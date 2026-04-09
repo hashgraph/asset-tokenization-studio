@@ -3,7 +3,21 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { BusinessLogicResolver, TREXFactoryAts, ITREXFactory, AccessControl, ERC20, IFactory } from "@contract-types";
+import {
+  BusinessLogicResolver,
+  TREXFactoryAts,
+  ITREXFactory,
+  AccessControl,
+  ERC20,
+  IFactory,
+  AccessControl__factory,
+  ERC20__factory,
+  ModularCompliance__factory,
+  IdentityRegistryStorage__factory,
+  IERC3643__factory,
+  OwnableUpgradeable__factory,
+  IIdentityRegistry__factory,
+} from "@contract-types";
 
 import { deployFullSuiteFixture } from "./fixtures/deploy-full-suite.fixture";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -27,17 +41,16 @@ describe("TREX Factory Tests", () => {
   let factoryAts: TREXFactoryAts;
   const tokenDetails: ITREXFactory.TokenDetailsStruct = {} as ITREXFactory.TokenDetailsStruct;
   const claimDetails: ITREXFactory.ClaimDetailsStruct = {} as ITREXFactory.ClaimDetailsStruct;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let trexDeployment: any;
+  let trexDeployment: Awaited<ReturnType<typeof deployFullSuiteFixture>>;
 
   let accessControlFacet: AccessControl;
   let erc20Facet: ERC20;
   let factory: IFactory;
 
   async function setFacets(diamond: string) {
-    accessControlFacet = await ethers.getContractAt("AccessControl", diamond);
+    accessControlFacet = AccessControl__factory.connect(diamond.toString(), ethers.provider);
 
-    erc20Facet = await ethers.getContractAt("ERC20", diamond);
+    erc20Facet = ERC20__factory.connect(diamond.toString(), ethers.provider);
   }
   async function deployAtsFactoryFixture() {
     const base = await deployAtsInfrastructureFixture();
@@ -497,7 +510,7 @@ describe("TREX Factory Tests", () => {
       await compliance.waitForDeployment();
 
       // Transfer ownership to factory so it can manage the uninitialized compliance
-      const complianceContract = await ethers.getContractAt("ModularCompliance", compliance.target);
+      const complianceContract = ModularCompliance__factory.connect(compliance.target.toString(), deployer);
       await complianceContract.transferOwnership(factoryAts.target);
 
       const equityData = {
@@ -546,7 +559,7 @@ describe("TREX Factory Tests", () => {
       await irs.waitForDeployment();
 
       // Transfer ownership to factory so it can bind the identity registry
-      const irsContract = await ethers.getContractAt("IdentityRegistryStorage", irs.target);
+      const irsContract = IdentityRegistryStorage__factory.connect(irs.target.toString(), deployer);
       await irsContract.transferOwnership(factoryAts.target);
 
       tokenDetails.irs = irs.target as string;
@@ -619,7 +632,7 @@ describe("TREX Factory Tests", () => {
 
       // Get the token address from factory and query its IR
       const firstToken = await factoryAts.getToken("salt-equity-first-for-ir");
-      const firstTokenContract = await ethers.getContractAt("IERC3643", firstToken);
+      const firstTokenContract = IERC3643__factory.connect(firstToken.toString(), ethers.provider);
       const firstIR = await firstTokenContract.identityRegistry();
 
       // Verify firstIR is valid
@@ -627,20 +640,17 @@ describe("TREX Factory Tests", () => {
       expect(firstIR).to.not.be.undefined;
 
       // Transfer ownership of the IR and its components to factory so they can be reused
-      const firstIRContract = await ethers.getContractAt("OwnableUpgradeable", firstIR);
+      const firstIRContract = OwnableUpgradeable__factory.connect(firstIR.toString(), deployer);
       await firstIRContract.connect(deployer).transferOwnership(factoryAts.target);
 
       // Get TIR and CTR from the IR and transfer their ownership too
-      const ir = await ethers.getContractAt(
-        "@tokenysolutions/t-rex/contracts/registry/interface/IIdentityRegistry.sol:IIdentityRegistry",
-        firstIR,
-      );
+      const ir = IIdentityRegistry__factory.connect(firstIR.toString(), ethers.provider);
       const tirAddress = await ir.issuersRegistry();
       const ctrAddress = await ir.topicsRegistry();
       const irsAddress = await ir.identityStorage();
-      const tirContract = await ethers.getContractAt("OwnableUpgradeable", tirAddress);
-      const ctrContract = await ethers.getContractAt("OwnableUpgradeable", ctrAddress);
-      const irsContract = await ethers.getContractAt("OwnableUpgradeable", irsAddress);
+      const tirContract = OwnableUpgradeable__factory.connect(tirAddress.toString(), deployer);
+      const ctrContract = OwnableUpgradeable__factory.connect(ctrAddress.toString(), deployer);
+      const irsContract = OwnableUpgradeable__factory.connect(irsAddress.toString(), deployer);
       await tirContract.connect(deployer).transferOwnership(factoryAts.target);
       await ctrContract.connect(deployer).transferOwnership(factoryAts.target);
       await irsContract.connect(deployer).transferOwnership(factoryAts.target);
@@ -1108,12 +1118,12 @@ describe("TREX Factory Tests", () => {
         .deployTREXSuiteAtsBond("salt-bond-first-module", tokenDetails, claimDetails, bondData, factoryRegulationData);
 
       const firstToken = await factoryAts.getToken("salt-bond-first-module");
-      const firstTokenContract = await ethers.getContractAt("IERC3643", firstToken);
+      const firstTokenContract = IERC3643__factory.connect(firstToken.toString(), ethers.provider);
       const compliance = await firstTokenContract.compliance();
 
       // Transfer compliance ownership to factory so it can be reused
-      const complianceContract = await ethers.getContractAt("OwnableUpgradeable", compliance);
-      await complianceContract.connect(deployer).transferOwnership(factoryAts.target);
+      const complianceContract = OwnableUpgradeable__factory.connect(compliance.toString(), deployer);
+      await complianceContract.transferOwnership(factoryAts.target);
 
       // Now deploy second bond reusing the same compliance and same module
       const secondBondData = {
@@ -1145,7 +1155,7 @@ describe("TREX Factory Tests", () => {
       expect(secondToken).to.not.equal(ADDRESS_ZERO);
 
       // Verify both tokens use same compliance
-      const secondTokenContract = await ethers.getContractAt("IERC3643", secondToken);
+      const secondTokenContract = IERC3643__factory.connect(secondToken.toString(), ethers.provider);
       const secondCompliance = await secondTokenContract.compliance();
       expect(secondCompliance).to.equal(compliance);
     });
@@ -1359,7 +1369,7 @@ describe("TREX Factory Tests", () => {
       await compliance.waitForDeployment();
 
       // Transfer ownership to factory so it can manage the uninitialized compliance
-      const complianceContract = await ethers.getContractAt("ModularCompliance", compliance.target);
+      const complianceContract = ModularCompliance__factory.connect(compliance.target.toString(), deployer);
       await complianceContract.transferOwnership(factoryAts.target);
 
       const bondData = {
@@ -1410,7 +1420,7 @@ describe("TREX Factory Tests", () => {
       await irs.waitForDeployment();
 
       // Transfer ownership to factory so it can bind the identity registry
-      const irsContract = await ethers.getContractAt("IdentityRegistryStorage", irs.target);
+      const irsContract = IdentityRegistryStorage__factory.connect(irs.target.toString(), deployer);
       await irsContract.transferOwnership(factoryAts.target);
 
       tokenDetails.irs = irs.target as string;
@@ -1481,7 +1491,7 @@ describe("TREX Factory Tests", () => {
 
       // Get the token address from factory and query its IR
       const firstToken = await factoryAts.getToken("salt-bond-first-for-ir");
-      const firstTokenContract = await ethers.getContractAt("IERC3643", firstToken);
+      const firstTokenContract = IERC3643__factory.connect(firstToken.toString(), ethers.provider);
       const firstIR = await firstTokenContract.identityRegistry();
 
       // Verify firstIR is valid
@@ -1489,20 +1499,17 @@ describe("TREX Factory Tests", () => {
       expect(firstIR).to.not.be.undefined;
 
       // Transfer ownership of the IR and its components to factory so they can be reused
-      const firstIRContract = await ethers.getContractAt("OwnableUpgradeable", firstIR);
+      const firstIRContract = OwnableUpgradeable__factory.connect(firstIR.toString(), deployer);
       await firstIRContract.connect(deployer).transferOwnership(factoryAts.target);
 
       // Get TIR and CTR from the IR and transfer their ownership too
-      const ir = await ethers.getContractAt(
-        "@tokenysolutions/t-rex/contracts/registry/interface/IIdentityRegistry.sol:IIdentityRegistry",
-        firstIR,
-      );
+      const ir = IIdentityRegistry__factory.connect(firstIR.toString(), ethers.provider);
       const tirAddress = await ir.issuersRegistry();
       const ctrAddress = await ir.topicsRegistry();
       const irsAddress = await ir.identityStorage();
-      const tirContract = await ethers.getContractAt("OwnableUpgradeable", tirAddress);
-      const ctrContract = await ethers.getContractAt("OwnableUpgradeable", ctrAddress);
-      const irsContract = await ethers.getContractAt("OwnableUpgradeable", irsAddress);
+      const tirContract = OwnableUpgradeable__factory.connect(tirAddress.toString(), deployer);
+      const ctrContract = OwnableUpgradeable__factory.connect(ctrAddress.toString(), deployer);
+      const irsContract = OwnableUpgradeable__factory.connect(irsAddress.toString(), deployer);
       await tirContract.connect(deployer).transferOwnership(factoryAts.target);
       await ctrContract.connect(deployer).transferOwnership(factoryAts.target);
       await irsContract.connect(deployer).transferOwnership(factoryAts.target);

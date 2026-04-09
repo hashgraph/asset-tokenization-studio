@@ -5,12 +5,9 @@ import { IEquityUSA } from "./IEquityUSA.sol";
 import { Equity } from "../../layer_2/equity/Equity.sol";
 import { Security } from "../../layer_2/security/Security.sol";
 import { RegulationData, AdditionalSecurityData } from "../../../constants/regulation.sol";
-import { EquityStorageWrapper } from "../../../domain/asset/EquityStorageWrapper.sol";
 import { SecurityStorageWrapper } from "../../../domain/asset/SecurityStorageWrapper.sol";
-import { EquityModifiers } from "../../../services/asset/EquityModifiers.sol";
-import { IEquityStorageWrapper } from "../../../domain/asset/equity/IEquityStorageWrapper.sol";
 
-abstract contract EquityUSA is IEquityUSA, Equity, Security, EquityModifiers {
+abstract contract EquityUSA is IEquityUSA, Equity, Security {
     // solhint-disable func-name-mixedcase
     // solhint-disable-next-line private-vars-leading-underscore
     function _initialize_equityUSA(

@@ -10,7 +10,6 @@ library EnumerableSetBytes4 {
         mapping(bytes4 => uint256) _indexes;
     }
 
-    // Bytes4Set
     struct Bytes4Set {
         Set _inner;
     }

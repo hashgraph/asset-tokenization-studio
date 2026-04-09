@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+// CANONICAL SOURCE — single source of truth for ATS regulation types.
+// A pragma-rewritten copy is auto-generated to
+// `contracts/factory/ERC3643/interfaces/regulation.sol` on every compile by the
+// `erc3643-clone-interfaces` task in `tasks/compile.ts` for T-REX ABI compatibility.
+// Do NOT edit the generated copy — it is rewritten on every `npx hardhat compile`.
+
 uint256 constant _REGS_DEAL_SIZE = 0;
 AccreditedInvestors constant _REGS_ACCREDITED_INVESTORS = AccreditedInvestors.ACCREDITATION_REQUIRED;
 uint256 constant _REGS_MAX_NON_ACCREDITED_INVESTORS = 0;

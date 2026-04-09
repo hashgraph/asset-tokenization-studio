@@ -3,10 +3,9 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IERC20StorageWrapper } from "../../../../domain/asset/ERC1400/ERC20/IERC20StorageWrapper.sol";
 import { IFactory } from "../../../../factory/IFactory.sol";
 
-interface IERC20 is IERC20StorageWrapper {
+interface IERC20 {
     struct ERC20MetadataInfo {
         string name;
         string symbol;
@@ -19,9 +18,13 @@ interface IERC20 is IERC20StorageWrapper {
         IFactory.SecurityType securityType;
     }
 
-    // Re-export errors from libraries used by ERC20
-    error ZeroAddressNotAllowed();
-    error AccountIsBlocked(address account);
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+
+    error ZeroOwnerAddress();
+    error InsufficientAllowance(address spender, address from);
+    error SpenderWithZeroAddress();
+    error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
 
     // Initialization function
     // solhint-disable-next-line func-name-mixedcase

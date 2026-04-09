@@ -1,26 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBond } from "./IBond.sol";
-import { IBondRead } from "./IBondRead.sol";
+import { IBondManagement } from "./IBondManagement.sol";
+import { IBondTypes } from "./IBondTypes.sol";
 import { IKyc } from "../../layer_1/kyc/IKyc.sol";
 import { _CORPORATE_ACTION_ROLE, _BOND_MANAGER_ROLE, _MATURITY_REDEEMER_ROLE } from "../../../constants/roles.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
-import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateActionsStorageWrapper.sol";
-import { ControlListModifiers } from "../../../infrastructure/utils/ControlListModifiers.sol";
-import { KycModifiers } from "../../../infrastructure/utils/KycModifiers.sol";
-import { MaturityModifiers } from "../../../infrastructure/utils/MaturityModifiers.sol";
-import { DateValidationModifiers } from "../../../infrastructure/utils/DateValidationModifiers.sol";
-import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
+import { KPI_BOND_REDEEM_BALANCE } from "../../../constants/values.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { BondStorageWrapper } from "../../../domain/asset/BondStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
-import { ERC1410Modifiers } from "../../../infrastructure/utils/ERC1410Modifiers.sol";
-import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers.sol";
-import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";
-import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWrapper.sol";
-import { IClearing } from "../../layer_1/clearing/IClearing.sol";
+import { InterestRateStorageWrapper } from "../../../domain/asset/InterestRateStorageWrapper.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+import { _checkUnexpectedError } from "../../../infrastructure/utils/UnexpectedError.sol";
+
+error InterestRateIsKpiLinked();
 
 /**
  * @title Bond
@@ -32,18 +26,7 @@ import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvid
  * @notice Inherit from this contract to gain access to bond management functions
  * @author Asset Tokenization Studio Team
  */
-abstract contract Bond is
-    IBond,
-    TimestampProvider,
-    PauseModifiers,
-    AccessControlModifiers,
-    ControlListModifiers,
-    KycModifiers,
-    MaturityModifiers,
-    DateValidationModifiers,
-    ERC1410Modifiers,
-    ERC3643Modifiers
-{
+abstract contract Bond is IBondManagement, TimestampProvider, Modifiers {
     /**
      * @dev Redeems all tokens at maturity for a token holder
      *
@@ -74,13 +57,19 @@ abstract contract Bond is
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
         onlyValidMaturityDate(_getBlockTimestamp())
     {
-        BondStorageWrapper.requireValidMaturityDate(_getBlockTimestamp());
         bytes32[] memory partitions = ERC1410StorageWrapper.partitionsOf(_tokenHolder);
         for (uint256 i = 0; i < partitions.length; i++) {
             bytes32 partition = partitions[i];
             uint256 balance = ERC1410StorageWrapper.balanceOfByPartition(partition, _tokenHolder);
-            assert(balance > 0);
-            ERC1410StorageWrapper.redeemByPartition(partition, _tokenHolder, msg.sender, balance, "", "");
+            _checkUnexpectedError(balance == 0, KPI_BOND_REDEEM_BALANCE);
+            ERC1410StorageWrapper.redeemByPartition(
+                partition,
+                _tokenHolder,
+                EvmAccessors.getMsgSender(),
+                balance,
+                "",
+                ""
+            );
         }
     }
 
@@ -114,14 +103,14 @@ abstract contract Bond is
         onlyUnpaused
         onlyRole(_MATURITY_REDEEMER_ROLE)
         onlyValidAddress(_tokenHolder)
-        onlyDefaultPartition(_partition)
+        onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnrecoveredAddress(_tokenHolder)
         onlyListedAllowed(_tokenHolder)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
         onlyValidMaturityDate(_getBlockTimestamp())
+        onlyValidMaturityDate(_getBlockTimestamp())
     {
-        BondStorageWrapper.requireValidMaturityDate(_getBlockTimestamp());
-        ERC1410StorageWrapper.redeemByPartition(_partition, _tokenHolder, msg.sender, _amount, "", "");
+        ERC1410StorageWrapper.redeemByPartition(_partition, _tokenHolder, EvmAccessors.getMsgSender(), _amount, "", "");
     }
 
     /**
@@ -139,21 +128,22 @@ abstract contract Bond is
      * Emits CouponSet event on success
      */
     function setCoupon(
-        IBondRead.Coupon calldata _newCoupon
+        IBondTypes.Coupon calldata _newCoupon
     )
         external
         override
         onlyUnpaused
         onlyRole(_CORPORATE_ACTION_ROLE)
-        requireValidDates(_newCoupon.startDate, _newCoupon.endDate)
-        requireValidDates(_newCoupon.recordDate, _newCoupon.executionDate)
-        requireValidDates(_newCoupon.fixingDate, _newCoupon.executionDate)
-        requireValidTimestamp(_newCoupon.recordDate)
-        requireValidTimestamp(_newCoupon.fixingDate)
+        onlyValidDates(_newCoupon.startDate, _newCoupon.endDate)
+        onlyValidDates(_newCoupon.recordDate, _newCoupon.executionDate)
+        onlyValidDates(_newCoupon.fixingDate, _newCoupon.executionDate)
+        onlyValidTimestamp(_newCoupon.recordDate)
+        onlyValidTimestamp(_newCoupon.fixingDate)
         returns (uint256 couponID_)
     {
+        IBondTypes.Coupon memory coupon = _prepareCoupon(_newCoupon);
         bytes32 corporateActionID;
-        (corporateActionID, couponID_) = BondStorageWrapper.setCoupon(_newCoupon);
+        (corporateActionID, couponID_) = BondStorageWrapper.setCoupon(coupon);
     }
 
     /**
@@ -171,10 +161,27 @@ abstract contract Bond is
      */
     function updateMaturityDate(
         uint256 _newMaturityDate
-    ) external override onlyUnpaused onlyRole(_BOND_MANAGER_ROLE) returns (bool success_) {
-        BondStorageWrapper.requireValidMaturityDate(_newMaturityDate);
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_BOND_MANAGER_ROLE)
+        onlyValidMaturityDate(_newMaturityDate)
+        returns (bool success_)
+    {
         emit MaturityDateUpdated(address(this), _newMaturityDate, BondStorageWrapper.getMaturityDate());
-        success_ = BondStorageWrapper.setMaturityDate(_newMaturityDate);
-        return success_;
+        BondStorageWrapper.setMaturityDate(_newMaturityDate);
+        return true;
+    }
+
+    function _prepareCoupon(IBondTypes.Coupon calldata _newCoupon) internal virtual returns (IBondTypes.Coupon memory) {
+        // For KPI-linked rate bonds, rate must be PENDING (0), rate must be 0, and rateDecimals must be 0
+        if (
+            InterestRateStorageWrapper.isKpiLinkedRateInitialized() &&
+            (_newCoupon.rateStatus != IBondTypes.RateCalculationStatus.PENDING ||
+                _newCoupon.rate != 0 ||
+                _newCoupon.rateDecimals != 0)
+        ) revert InterestRateIsKpiLinked();
+        return _newCoupon;
     }
 }

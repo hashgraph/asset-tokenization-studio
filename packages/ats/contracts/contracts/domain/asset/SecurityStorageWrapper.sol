@@ -6,8 +6,6 @@ import { _SECURITY_STORAGE_POSITION } from "../../constants/storagePositions.sol
 import { ISecurity } from "../../facets/layer_2/security/ISecurity.sol";
 
 library SecurityStorageWrapper {
-    // --- State-changing functions ---
-
     function initializeSecurity(
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
@@ -24,17 +22,13 @@ library SecurityStorageWrapper {
         data.additionalSecurityData = _additionalSecurityData;
     }
 
-    // --- View functions ---
-
     function getSecurityRegulationData()
         internal
-        view
+        pure
         returns (ISecurity.SecurityRegulationData memory securityRegulationData_)
     {
         securityRegulationData_ = securityStorage();
     }
-
-    // --- Pure functions ---
 
     function securityStorage() internal pure returns (ISecurity.SecurityRegulationData storage securityStorage_) {
         bytes32 position = _SECURITY_STORAGE_POSITION;

@@ -5,13 +5,14 @@ import { _LOCK_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { ILock } from "../../facets/layer_1/lock/ILock.sol";
-import { IERC20StorageWrapper } from "./ERC1400/ERC20/IERC20StorageWrapper.sol";
-import { IERC1410StorageWrapper } from "./ERC1400/ERC1410/IERC1410StorageWrapper.sol";
+import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
+import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { WrongExpirationTimestamp } from "../../infrastructure/errors/CommonErrors.sol";
 
 struct LockDataStorage {
     mapping(address => uint256) totalLockedAmountByAccount;
@@ -25,12 +26,6 @@ library LockStorageWrapper {
     using Pagination for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
-    error WrongLockId();
-    error WrongExpirationTimestamp();
-    error LockExpirationNotReached();
-
-    // --- Lock operation functions ---
-
     function lockByPartition(
         bytes32 partition,
         uint256 amount,
@@ -38,29 +33,16 @@ library LockStorageWrapper {
         uint256 expirationTimestamp,
         address operator
     ) internal returns (bool success_, uint256 lockId_) {
-        ERC1410StorageWrapper.triggerAndSyncAll(partition, tokenHolder, address(0));
+        _prepareLock(partition, tokenHolder);
 
         uint256 abaf = updateTotalLock(partition, tokenHolder);
 
-        updateLockedBalancesBeforeLock(partition, amount, tokenHolder, expirationTimestamp);
-        ERC1410StorageWrapper.reduceBalanceByPartition(tokenHolder, amount, partition);
+        _applyLockBeforePersistence(partition, amount, tokenHolder, expirationTimestamp);
+        lockId_ = _storeLock(partition, amount, tokenHolder, expirationTimestamp, abaf);
 
-        LockDataStorage storage lockStorageRef = lockStorage();
+        _emitLockEvents(partition, operator, tokenHolder, amount);
 
-        lockId_ = ++lockStorageRef.nextLockIdByAccountAndPartition[tokenHolder][partition];
-
-        ILock.LockData memory lock = ILock.LockData(lockId_, amount, expirationTimestamp);
-        AdjustBalancesStorageWrapper.setLockLabafById(partition, tokenHolder, lockId_, abaf);
-
-        lockStorageRef.locksByAccountPartitionAndId[tokenHolder][partition][lockId_] = lock;
-        lockStorageRef.lockIdsByAccountAndPartition[tokenHolder][partition].add(lockId_);
-        lockStorageRef.totalLockedAmountByAccountAndPartition[tokenHolder][partition] += amount;
-        lockStorageRef.totalLockedAmountByAccount[tokenHolder] += amount;
-
-        emit IERC1410StorageWrapper.TransferByPartition(partition, operator, tokenHolder, address(0), amount, "", "");
-        emit IERC20StorageWrapper.Transfer(tokenHolder, address(0), amount);
-
-        success_ = true;
+        return (true, lockId_);
     }
 
     function releaseByPartition(
@@ -69,42 +51,19 @@ library LockStorageWrapper {
         address tokenHolder,
         address operator
     ) internal returns (bool success_) {
-        ERC1410StorageWrapper.triggerAndSyncAll(partition, address(0), tokenHolder);
+        _prepareRelease(partition, tokenHolder);
 
         uint256 abaf = updateTotalLock(partition, tokenHolder);
-
         updateLockByIndex(partition, lockId, tokenHolder, abaf);
 
         updateLockedBalancesBeforeRelease(partition, lockId, tokenHolder);
 
-        uint256 lockAmount = getLock(partition, tokenHolder, lockId).amount;
+        uint256 lockAmount = _removeLock(partition, tokenHolder, lockId);
+        _restoreReleasedAmount(partition, tokenHolder, lockAmount);
 
-        LockDataStorage storage lockStorageRef = lockStorage();
-        lockStorageRef.totalLockedAmountByAccountAndPartition[tokenHolder][partition] -= lockAmount;
-        lockStorageRef.totalLockedAmountByAccount[tokenHolder] -= lockAmount;
-        lockStorageRef.lockIdsByAccountAndPartition[tokenHolder][partition].remove(lockId);
+        _emitReleaseEvents(partition, operator, tokenHolder, lockAmount);
 
-        delete lockStorageRef.locksByAccountPartitionAndId[tokenHolder][partition][lockId];
-        AdjustBalancesStorageWrapper.removeLabafLock(partition, tokenHolder, lockId);
-
-        if (!ERC1410StorageWrapper.validPartitionForReceiver(partition, tokenHolder)) {
-            ERC1410StorageWrapper.addPartitionTo(lockAmount, tokenHolder, partition);
-        } else {
-            ERC1410StorageWrapper.increaseBalanceByPartition(tokenHolder, lockAmount, partition);
-        }
-
-        emit IERC1410StorageWrapper.TransferByPartition(
-            partition,
-            operator,
-            address(0),
-            tokenHolder,
-            lockAmount,
-            "",
-            ""
-        );
-        emit IERC20StorageWrapper.Transfer(address(0), tokenHolder, lockAmount);
-
-        success_ = true;
+        return true;
     }
 
     function updateTotalLock(bytes32 partition, address tokenHolder) internal returns (uint256 abaf_) {
@@ -114,15 +73,20 @@ library LockStorageWrapper {
         uint256 labafByPartition = AdjustBalancesStorageWrapper.getTotalLockLabafByPartition(partition, tokenHolder);
 
         if (abaf_ != labaf) {
-            uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(abaf_, labaf);
-
-            updateTotalLockedAmountAndLabaf(tokenHolder, factor, abaf_);
+            updateTotalLockedAmountAndLabaf(
+                tokenHolder,
+                AdjustBalancesStorageWrapper.calculateFactor(abaf_, labaf),
+                abaf_
+            );
         }
 
         if (abaf_ != labafByPartition) {
-            uint256 factorByPartition = AdjustBalancesStorageWrapper.calculateFactor(abaf_, labafByPartition);
-
-            updateTotalLockedAmountAndLabafByPartition(partition, tokenHolder, factorByPartition, abaf_);
+            updateTotalLockedAmountAndLabafByPartition(
+                partition,
+                tokenHolder,
+                AdjustBalancesStorageWrapper.calculateFactor(abaf_, labafByPartition),
+                abaf_
+            );
         }
     }
 
@@ -134,11 +98,13 @@ library LockStorageWrapper {
     function updateLockByIndex(bytes32 partition, uint256 lockId, address tokenHolder, uint256 abaf) internal {
         uint256 lockLabaf = AdjustBalancesStorageWrapper.getLockLabafById(partition, tokenHolder, lockId);
 
-        if (abaf != lockLabaf) {
-            uint256 factorLock = AdjustBalancesStorageWrapper.calculateFactor(abaf, lockLabaf);
-
-            updateLockAmountById(partition, lockId, tokenHolder, factorLock);
-        }
+        if (abaf == lockLabaf) return;
+        updateLockAmountById(
+            partition,
+            lockId,
+            tokenHolder,
+            AdjustBalancesStorageWrapper.calculateFactor(abaf, lockLabaf)
+        );
     }
 
     function updateLockAmountById(bytes32 partition, uint256 lockId, address tokenHolder, uint256 factor) internal {
@@ -146,9 +112,7 @@ library LockStorageWrapper {
     }
 
     function updateTotalLockedAmountAndLabaf(address tokenHolder, uint256 factor, uint256 abaf) internal {
-        LockDataStorage storage lockStorageRef = lockStorage();
-
-        lockStorageRef.totalLockedAmountByAccount[tokenHolder] *= factor;
+        lockStorage().totalLockedAmountByAccount[tokenHolder] *= factor;
         AdjustBalancesStorageWrapper.setTotalLockLabaf(tokenHolder, abaf);
     }
 
@@ -158,9 +122,7 @@ library LockStorageWrapper {
         uint256 factor,
         uint256 abaf
     ) internal {
-        LockDataStorage storage lockStorageRef = lockStorage();
-
-        lockStorageRef.totalLockedAmountByAccountAndPartition[tokenHolder][partition] *= factor;
+        lockStorage().totalLockedAmountByAccountAndPartition[tokenHolder][partition] *= factor;
         AdjustBalancesStorageWrapper.setTotalLockLabafByPartition(partition, tokenHolder, abaf);
     }
 
@@ -179,8 +141,6 @@ library LockStorageWrapper {
         SnapshotsStorageWrapper.updateAccountLockedBalancesSnapshot(tokenHolder, partition);
     }
 
-    // --- View functions ---
-
     function getLockedAmountFor(address tokenHolder) internal view returns (uint256 amount_) {
         return lockStorage().totalLockedAmountByAccount[tokenHolder];
     }
@@ -198,29 +158,24 @@ library LockStorageWrapper {
         address tokenHolder,
         uint256 lockId
     ) internal view returns (bool) {
-        ILock.LockData memory lock = getLock(partition, tokenHolder, lockId);
-
-        if (lock.expirationTimestamp > TimeTravelStorageWrapper.getBlockTimestamp()) return false;
-
-        return true;
+        return
+            getLock(partition, tokenHolder, lockId).expirationTimestamp <= TimeTravelStorageWrapper.getBlockTimestamp();
     }
 
     function isLockIdValid(bytes32 partition, address tokenHolder, uint256 lockId) internal view returns (bool) {
         return lockStorage().lockIdsByAccountAndPartition[tokenHolder][partition].contains(lockId);
     }
 
-    // --- Guard functions ---
-
     function requireValidExpirationTimestamp(uint256 expirationTimestamp) internal view {
         if (expirationTimestamp < TimeTravelStorageWrapper.getBlockTimestamp()) revert WrongExpirationTimestamp();
     }
 
     function requireValidLockId(bytes32 partition, address tokenHolder, uint256 lockId) internal view {
-        if (!isLockIdValid(partition, tokenHolder, lockId)) revert WrongLockId();
+        if (!isLockIdValid(partition, tokenHolder, lockId)) revert ILock.WrongLockId();
     }
 
     function requireLockedExpirationTimestamp(bytes32 partition, address tokenHolder, uint256 lockId) internal view {
-        if (!isLockedExpirationTimestamp(partition, tokenHolder, lockId)) revert LockExpirationNotReached();
+        if (!isLockedExpirationTimestamp(partition, tokenHolder, lockId)) revert ILock.LockExpirationNotReached();
     }
 
     function getLockedAmountForByPartition(bytes32 partition, address tokenHolder) internal view returns (uint256) {
@@ -259,24 +214,23 @@ library LockStorageWrapper {
         uint256 lockId,
         uint256 timestamp
     ) internal view returns (uint256 amount_, uint256 expirationTimestamp_) {
-        uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(
+        (amount_, expirationTimestamp_) = getLockForByPartition(partition, tokenHolder, lockId);
+        amount_ *= AdjustBalancesStorageWrapper.calculateFactor(
             AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
             AdjustBalancesStorageWrapper.getLockLabafById(partition, tokenHolder, lockId)
         );
-
-        (amount_, expirationTimestamp_) = getLockForByPartition(partition, tokenHolder, lockId);
-        amount_ *= factor;
     }
 
     function getLockedAmountForAdjustedAt(
         address tokenHolder,
         uint256 timestamp
     ) internal view returns (uint256 amount_) {
-        uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(
-            AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
-            AdjustBalancesStorageWrapper.getTotalLockLabaf(tokenHolder)
-        );
-        return getLockedAmountFor(tokenHolder) * factor;
+        return
+            getLockedAmountFor(tokenHolder) *
+            AdjustBalancesStorageWrapper.calculateFactor(
+                AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
+                AdjustBalancesStorageWrapper.getTotalLockLabaf(tokenHolder)
+            );
     }
 
     function getLockedAmountForByPartitionAdjustedAt(
@@ -284,11 +238,12 @@ library LockStorageWrapper {
         address tokenHolder,
         uint256 timestamp
     ) internal view returns (uint256 amount_) {
-        uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(
-            AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
-            AdjustBalancesStorageWrapper.getTotalLockLabafByPartition(partition, tokenHolder)
-        );
-        return getLockedAmountForByPartition(partition, tokenHolder) * factor;
+        return
+            getLockedAmountForByPartition(partition, tokenHolder) *
+            AdjustBalancesStorageWrapper.calculateFactor(
+                AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
+                AdjustBalancesStorageWrapper.getTotalLockLabafByPartition(partition, tokenHolder)
+            );
     }
 
     function getLockCountFor(address tokenHolder) internal view returns (uint256 lockCount_) {
@@ -306,13 +261,86 @@ library LockStorageWrapper {
         );
     }
 
-    // --- Storage accessor ---
-
     function lockStorage() internal pure returns (LockDataStorage storage lock_) {
         bytes32 position = _LOCK_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             lock_.slot := position
         }
+    }
+
+    // --- Private helper functions ---
+
+    function _prepareLock(bytes32 partition, address tokenHolder) private {
+        ERC1410StorageWrapper.triggerAndSyncAll(partition, tokenHolder, address(0));
+    }
+
+    function _prepareRelease(bytes32 partition, address tokenHolder) private {
+        ERC1410StorageWrapper.triggerAndSyncAll(partition, address(0), tokenHolder);
+    }
+
+    function _applyLockBeforePersistence(
+        bytes32 partition,
+        uint256 amount,
+        address tokenHolder,
+        uint256 expirationTimestamp
+    ) private {
+        updateLockedBalancesBeforeLock(partition, amount, tokenHolder, expirationTimestamp);
+        ERC1410StorageWrapper.reduceBalanceByPartition(tokenHolder, amount, partition);
+    }
+
+    function _storeLock(
+        bytes32 partition,
+        uint256 amount,
+        address tokenHolder,
+        uint256 expirationTimestamp,
+        uint256 abaf
+    ) private returns (uint256 lockId_) {
+        LockDataStorage storage lockStorageRef = lockStorage();
+
+        lockId_ = ++lockStorageRef.nextLockIdByAccountAndPartition[tokenHolder][partition];
+
+        AdjustBalancesStorageWrapper.setLockLabafById(partition, tokenHolder, lockId_, abaf);
+
+        lockStorageRef.locksByAccountPartitionAndId[tokenHolder][partition][lockId_] = ILock.LockData(
+            lockId_,
+            amount,
+            expirationTimestamp
+        );
+        lockStorageRef.lockIdsByAccountAndPartition[tokenHolder][partition].add(lockId_);
+        lockStorageRef.totalLockedAmountByAccountAndPartition[tokenHolder][partition] += amount;
+        lockStorageRef.totalLockedAmountByAccount[tokenHolder] += amount;
+    }
+
+    function _removeLock(bytes32 partition, address tokenHolder, uint256 lockId) private returns (uint256 lockAmount_) {
+        LockDataStorage storage lockStorageRef = lockStorage();
+
+        lockAmount_ = lockStorageRef.locksByAccountPartitionAndId[tokenHolder][partition][lockId].amount;
+
+        lockStorageRef.totalLockedAmountByAccountAndPartition[tokenHolder][partition] -= lockAmount_;
+        lockStorageRef.totalLockedAmountByAccount[tokenHolder] -= lockAmount_;
+        lockStorageRef.lockIdsByAccountAndPartition[tokenHolder][partition].remove(lockId);
+
+        delete lockStorageRef.locksByAccountPartitionAndId[tokenHolder][partition][lockId];
+        AdjustBalancesStorageWrapper.removeLabafLock(partition, tokenHolder, lockId);
+    }
+
+    function _restoreReleasedAmount(bytes32 partition, address tokenHolder, uint256 lockAmount) private {
+        if (!ERC1410StorageWrapper.validPartitionForReceiver(partition, tokenHolder)) {
+            ERC1410StorageWrapper.addPartitionTo(lockAmount, tokenHolder, partition);
+            return;
+        }
+
+        ERC1410StorageWrapper.increaseBalanceByPartition(tokenHolder, lockAmount, partition);
+    }
+
+    function _emitLockEvents(bytes32 partition, address operator, address tokenHolder, uint256 amount) private {
+        emit IERC1410Types.TransferByPartition(partition, operator, tokenHolder, address(0), amount, "", "");
+        emit IERC20.Transfer(tokenHolder, address(0), amount);
+    }
+
+    function _emitReleaseEvents(bytes32 partition, address operator, address tokenHolder, uint256 lockAmount) private {
+        emit IERC1410Types.TransferByPartition(partition, operator, address(0), tokenHolder, lockAmount, "", "");
+        emit IERC20.Transfer(address(0), tokenHolder, lockAmount);
     }
 }

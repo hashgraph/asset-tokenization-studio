@@ -47,6 +47,7 @@ import { CorporateActionsStorageWrapper } from "../domain/core/CorporateActionsS
 import {
     ISustainabilityPerformanceTargetRate
 } from "../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+import { EvmAccessors } from "../infrastructure/utils/EvmAccessors.sol";
 /* solhint-enable max-line-length */
 
 contract Factory is IFactory {
@@ -112,6 +113,16 @@ contract Factory is IFactory {
         _;
     }
 
+    function deployProxy(
+        IBusinessLogicResolver _resolver,
+        bytes32 _configKey,
+        uint256 _version,
+        IResolverProxy.Rbac[] calldata _rbacs
+    ) external checkResolver(_resolver) checkAdmins(_rbacs) returns (address proxyAddress_) {
+        proxyAddress_ = address(new ResolverProxy(_resolver, _configKey, _version, _rbacs));
+        emit ProxyDeployed(proxyAddress_, _resolver, _configKey, _version, _rbacs);
+    }
+
     function deployEquity(
         EquityData calldata _equityData,
         FactoryRegulationData calldata _factoryRegulationData
@@ -133,7 +144,7 @@ contract Factory is IFactory {
             _factoryRegulationData.additionalSecurityData
         );
 
-        emit EquityDeployed(msg.sender, equityAddress_, _equityData, _factoryRegulationData);
+        emit EquityDeployed(EvmAccessors.getMsgSender(), equityAddress_, _equityData, _factoryRegulationData);
     }
 
     function deployBond(
@@ -150,7 +161,7 @@ contract Factory is IFactory {
     {
         bondAddress_ = _deployBond(_bondData, _factoryRegulationData, SecurityType.BondVariableRate);
 
-        emit BondDeployed(msg.sender, bondAddress_, _bondData, _factoryRegulationData);
+        emit BondDeployed(EvmAccessors.getMsgSender(), bondAddress_, _bondData, _factoryRegulationData);
     }
 
     function deployBondFixedRate(
@@ -179,7 +190,7 @@ contract Factory is IFactory {
         // Initialize fixed rate (FixedRateFacet may not be present)
         _tryInitialize_FixedRate(bondAddress_, _bondFixedRateData.fixedRateData);
 
-        emit BondFixedRateDeployed(msg.sender, bondAddress_, _bondFixedRateData);
+        emit BondFixedRateDeployed(EvmAccessors.getMsgSender(), bondAddress_, _bondFixedRateData);
     }
 
     function deployBondKpiLinkedRate(
@@ -224,7 +235,7 @@ contract Factory is IFactory {
     {
         bondAddress_ = _deployBondSustainabilityPerformanceTargetRate(_bondSustainabilityPerformanceTargetRateData);
         emit BondSustainabilityPerformanceTargetRateDeployed(
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             bondAddress_,
             _bondSustainabilityPerformanceTargetRateData
         );
@@ -457,8 +468,15 @@ contract Factory is IFactory {
             )
         {
             // success
-        } catch {
-            // facet not present - skip initialization
+        } catch (bytes memory reason) {
+            // Re-revert if the facet is present but initialization failed (non-empty revert data)
+            if (reason.length > 0) {
+                // solhint-disable-next-line no-inline-assembly
+                assembly {
+                    revert(add(reason, 32), mload(reason))
+                }
+            }
+            // Empty revert data means facet not present - skip initialization
         }
     }
 

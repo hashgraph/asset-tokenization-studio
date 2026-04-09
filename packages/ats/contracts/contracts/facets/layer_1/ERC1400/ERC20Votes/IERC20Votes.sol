@@ -8,6 +8,8 @@ import { Checkpoints } from "../../../../infrastructure/utils/Checkpoints.sol";
 
 interface IERC20Votes is IERC5805 {
     error AbafChangeForBlockForbidden(uint256 blockNumber);
+    error BrokenClockMode();
+    error FutureLookup(uint256 timepoint, uint256 currentClock);
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20Votes(bool _activated) external;

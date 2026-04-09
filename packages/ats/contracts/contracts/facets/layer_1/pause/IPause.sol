@@ -1,9 +1,29 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IPauseStorageWrapper } from "../../../domain/core/pause/IPauseStorageWrapper.sol";
+interface IPause {
+    /**
+     * @dev Emitted when the token is paused
+     * @param operator The caller of the function that emitted the event
+     */
+    event TokenPaused(address indexed operator);
 
-interface IPause is IPauseStorageWrapper {
+    /**
+     * @dev Emitted when the token is unpaused
+     * @param operator The caller of the function that emitted the event
+     */
+    event TokenUnpaused(address indexed operator);
+
+    /**
+     * @dev Emitted when the token is paused and it should not
+     */
+    error TokenIsPaused();
+
+    /**
+     * @dev Error thrown when the token is unpaused and it should not
+     */
+    error TokenIsUnpaused();
+
     /**
      * @dev Pauses the token
      * @return success_ true or false

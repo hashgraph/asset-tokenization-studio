@@ -1,5 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
+// AUTO-GENERATED — DO NOT EDIT.
+// Source: contracts/constants/roles.sol
+// Regenerated on every `npx hardhat compile` by the
+// `erc3643-clone-interfaces` task in `tasks/compile.ts`.
+// Edits to this file will be silently overwritten.
 pragma solidity ^0.8.17;
+
+// CANONICAL SOURCE — single source of truth for ATS role identifiers.
+// A pragma-rewritten copy is auto-generated to
+// `contracts/factory/ERC3643/interfaces/roles.sol` on every compile by the
+// `erc3643-clone-interfaces` task in `tasks/compile.ts` for T-REX ABI compatibility.
+// Do NOT edit the generated copy — it is rewritten on every `npx hardhat compile`.
 
 // solhint-disable max-line-length
 

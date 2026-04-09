@@ -28,4 +28,36 @@ abstract contract LockModifiers {
         LockStorageWrapper.requireValidExpirationTimestamp(_expirationTimestamp);
         _;
     }
+
+    /**
+     * @dev Modifier that validates lock ID exists for the given partition and token holder
+     *
+     * Requirements:
+     * - Lock ID must be valid for the partition and token holder
+     * - Used for release operations to ensure lock exists
+     *
+     * @param _partition The partition identifier
+     * @param _tokenHolder The token holder address
+     * @param _lockId The lock identifier to validate
+     */
+    modifier onlyWithValidLockId(bytes32 _partition, address _tokenHolder, uint256 _lockId) {
+        LockStorageWrapper.requireValidLockId(_partition, _tokenHolder, _lockId);
+        _;
+    }
+
+    /**
+     * @dev Modifier that validates lock expiration timestamp has been reached
+     *
+     * Requirements:
+     * - Lock expiration timestamp must be less than or equal to current block timestamp
+     * - Used for release operations to ensure lock can be released
+     *
+     * @param _partition The partition identifier
+     * @param _tokenHolder The token holder address
+     * @param _lockId The lock identifier to validate
+     */
+    modifier onlyWithLockedExpirationTimestamp(bytes32 _partition, address _tokenHolder, uint256 _lockId) {
+        LockStorageWrapper.requireLockedExpirationTimestamp(_partition, _tokenHolder, _lockId);
+        _;
+    }
 }

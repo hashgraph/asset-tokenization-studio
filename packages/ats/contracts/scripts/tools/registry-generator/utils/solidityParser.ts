@@ -814,19 +814,12 @@ export function extractPublicMethods(source: string): MethodDefinition[] {
 
     // Avoid duplicates (overloaded functions)
     if (!seen.has(methodName)) {
-      // Extract full signature
-      const signature = extractFunctionSignature(source, methodName);
-      if (signature) {
-        const selector = calculateSelector(signature);
-        methods.push({ name: methodName, signature, selector });
-      } else {
-        // Fallback: signature extraction failed, use name-only
-        methods.push({
-          name: methodName,
-          signature: `${methodName}()`,
-          selector: calculateSelector(`${methodName}()`),
-        });
-      }
+      const canonical = extractFunctionSignature(source, methodName) ?? `${methodName}()`;
+      methods.push({
+        name: methodName,
+        signature: { full: canonical, canonical },
+        selector: calculateSelector(canonical),
+      });
       seen.add(methodName);
     }
   }
@@ -897,18 +890,12 @@ export function extractAllMethods(source: string): MethodDefinition[] {
 
     // Avoid duplicates (overloaded functions)
     if (!seen.has(methodName)) {
-      const signature = extractFunctionSignature(source, methodName);
-      if (signature) {
-        const selector = calculateSelector(signature);
-        methods.push({ name: methodName, signature, selector });
-      } else {
-        // Fallback if signature extraction fails
-        methods.push({
-          name: methodName,
-          signature: `${methodName}()`,
-          selector: calculateSelector(`${methodName}()`),
-        });
-      }
+      const canonical = extractFunctionSignature(source, methodName) ?? `${methodName}()`;
+      methods.push({
+        name: methodName,
+        signature: { full: canonical, canonical },
+        selector: calculateSelector(canonical),
+      });
       seen.add(methodName);
     }
   }
@@ -1234,18 +1221,12 @@ export function extractEvents(source: string): EventDefinition[] {
       continue;
     }
 
-    const signature = extractEventSignature(source, eventName);
-    if (signature) {
-      const topic0 = calculateTopic0(signature);
-      events.push({ name: eventName, signature, topic0 });
-    } else {
-      // Fallback if signature extraction fails
-      events.push({
-        name: eventName,
-        signature: `${eventName}()`,
-        topic0: calculateTopic0(`${eventName}()`),
-      });
-    }
+    const canonical = extractEventSignature(source, eventName) ?? `${eventName}()`;
+    events.push({
+      name: eventName,
+      signature: { full: canonical, canonical },
+      topic0: calculateTopic0(canonical),
+    });
     seen.add(eventName);
   }
 
@@ -1254,11 +1235,44 @@ export function extractEvents(source: string): EventDefinition[] {
 
 /**
  * Parse an event or error name from a line using string operations.
+ *
+ * Skips lines that are not declarations (e.g. `import { Foo } from "..../errors/Bar.sol";`
+ * which contains the substring "error" inside a path segment, not as a keyword).
+ * The keyword must be a standalone word — preceded by start-of-line or whitespace,
+ * and followed by whitespace before the identifier.
  */
 function parseEventOrErrorName(line: string, keyword: string): string | null {
-  const keywordIdx = line.indexOf(keyword);
-  if (keywordIdx === -1) {
+  // Skip import / pragma / using / contract / interface / library declaration lines
+  // — none of these declare events or errors and several of them contain the
+  //   substring "error" in paths or other identifiers.
+  const trimmed = line.trimStart();
+  if (
+    trimmed.startsWith("import ") ||
+    trimmed.startsWith("import{") ||
+    trimmed.startsWith("pragma ") ||
+    trimmed.startsWith("using ") ||
+    trimmed.startsWith("//")
+  ) {
     return null;
+  }
+
+  // Find a STANDALONE occurrence of the keyword: must be at start-of-line (after
+  // optional whitespace) OR preceded by whitespace, and followed by whitespace.
+  let keywordIdx = -1;
+  let searchFrom = 0;
+  for (;;) {
+    const idx = line.indexOf(keyword, searchFrom);
+    if (idx === -1) {
+      return null;
+    }
+    const before = idx === 0 ? " " : line[idx - 1];
+    const after = line[idx + keyword.length] ?? "";
+    const isStandalone = (before === " " || before === "\t") && (after === " " || after === "\t");
+    if (isStandalone) {
+      keywordIdx = idx;
+      break;
+    }
+    searchFrom = idx + 1;
   }
 
   // Skip keyword and whitespace
@@ -1403,18 +1417,12 @@ export function extractErrors(source: string): ErrorDefinition[] {
       continue;
     }
 
-    const signature = extractErrorSignature(source, errorName);
-    if (signature) {
-      const selector = calculateSelector(signature);
-      errors.push({ name: errorName, signature, selector });
-    } else {
-      // Fallback if signature extraction fails
-      errors.push({
-        name: errorName,
-        signature: `${errorName}()`,
-        selector: calculateSelector(`${errorName}()`),
-      });
-    }
+    const canonical = extractErrorSignature(source, errorName) ?? `${errorName}()`;
+    errors.push({
+      name: errorName,
+      signature: { full: canonical, canonical },
+      selector: calculateSelector(canonical),
+    });
     seen.add(errorName);
   }
 

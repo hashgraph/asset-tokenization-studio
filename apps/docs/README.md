@@ -50,7 +50,7 @@ Runs TypeScript type checking on the documentation site.
 
 ## Deployment
 
-The documentation site is automatically deployed to GitHub Pages when changes are pushed to the main branch.
+The documentation site is automatically deployed to GitHub Pages or Netlifty when changes are pushed to the main branch.
 
 For manual deployment using SSH:
 

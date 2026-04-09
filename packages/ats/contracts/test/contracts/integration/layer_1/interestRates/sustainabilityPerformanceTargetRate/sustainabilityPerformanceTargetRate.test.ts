@@ -91,7 +91,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
         ],
         [project1],
       ),
-    ).to.be.rejectedWith("AlreadyInitialized");
+    ).to.be.revertedWithCustomError(sustainabilityPerformanceTargetRateFacet, "AlreadyInitialized");
   });
 
   it("GIVEN mismatched array lengths WHEN initializing THEN transaction fails with ProvidedListsLengthMismatch", async () => {
@@ -169,7 +169,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
         ],
         [project1], // Only one project but two impact data entries
       ),
-    ).to.be.rejectedWith("ProvidedListsLengthMismatch");
+    ).to.be.revertedWithCustomError(sustainabilityPerformanceTargetRateFacet, "ProvidedListsLengthMismatch");
   });
 
   describe("Paused", () => {
@@ -186,7 +186,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
           startRate: 60,
           rateDecimals: 2,
         }),
-      ).to.be.rejectedWith("TokenIsPaused");
+      ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
     });
 
     it("GIVEN a paused Token WHEN setImpactData THEN transaction fails with TokenIsPaused", async () => {
@@ -202,7 +202,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
           ],
           [project1],
         ),
-      ).to.be.rejectedWith("TokenIsPaused");
+      ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
     });
   });
 
@@ -215,7 +215,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
           startRate: 60,
           rateDecimals: 2,
         }),
-      ).to.be.rejectedWith("AccountHasNoRole");
+      ).to.be.revertedWithCustomError(sustainabilityPerformanceTargetRateFacet, "AccountHasNoRole");
     });
 
     it("GIVEN an account without interest rate manager role WHEN setImpactData THEN transaction fails with AccountHasNoRole", async () => {
@@ -231,7 +231,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
           ],
           [project1],
         ),
-      ).to.be.rejectedWith("AccountHasNoRole");
+      ).to.be.revertedWithCustomError(sustainabilityPerformanceTargetRateFacet, "AccountHasNoRole");
     });
   });
 
@@ -282,7 +282,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
           ],
           [project1], // Only one project but two impact data entries
         ),
-      ).to.be.rejectedWith("ProvidedListsLengthMismatch");
+      ).to.be.revertedWithCustomError(sustainabilityPerformanceTargetRateFacet, "ProvidedListsLengthMismatch");
     });
 
     it("GIVEN non-existing project WHEN setImpactData THEN transaction fails with NotExistingProject", async () => {
@@ -300,7 +300,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
           ],
           [nonExistingProject],
         ),
-      ).to.be.rejectedWith("NotExistingProject");
+      ).to.be.revertedWithCustomError(sustainabilityPerformanceTargetRateFacet, "NotExistingProject");
     });
 
     it("GIVEN correct impact data for existing project WHEN setImpactData THEN transaction succeeds", async () => {

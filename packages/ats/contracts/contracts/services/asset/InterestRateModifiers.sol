@@ -13,6 +13,7 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 import { InterestRateStorageWrapper } from "../../domain/asset/InterestRateStorageWrapper.sol";
 import { _checkNotInitialized } from "../InitializationErrors.sol";
+import { IKpiLinkedRate } from "../../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
 
 abstract contract InterestRateModifiers {
     /// @notice Modifier that ensures fixed rate has not been initialized
@@ -33,6 +34,30 @@ abstract contract InterestRateModifiers {
     /// @dev Calls _checkNotSustainabilityPerformanceTargetRateInitialized from InterestRateStorageWrapper
     modifier onlyNotSustainabilityPerformanceTargetRateInitialized() {
         _checkNotInitialized(InterestRateStorageWrapper.isSustainabilityPerformanceTargetRateInitialized());
+        _;
+    }
+
+    modifier onlyValidInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) {
+        InterestRateStorageWrapper.requireValidInterestRate(_newInterestRate);
+        _;
+    }
+
+    modifier onlyValidImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) {
+        InterestRateStorageWrapper.requireValidImpactData(_newImpactData);
+        _;
+    }
+
+    /**
+     * @dev Modifier that validates that two array lengths are equal
+     *
+     * Requirements:
+     * - Both lengths must be identical
+     *
+     * @param _length1 Length of the first array
+     * @param _length2 Length of the second array
+     */
+    modifier onlyValidEqualLength(uint256 _length1, uint256 _length2) {
+        InterestRateStorageWrapper.requireEqualLength(_length1, _length2);
         _;
     }
 }

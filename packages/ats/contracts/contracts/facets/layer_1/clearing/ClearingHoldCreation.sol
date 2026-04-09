@@ -1,41 +1,39 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _WILD_CARD_ROLE } from "../../../constants/roles.sol";
 import { IClearingHoldCreation } from "./IClearingHoldCreation.sol";
-import { Hold } from "../hold/IHold.sol";
-import {
-    IProtectedPartitionsStorageWrapper
-} from "../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
-import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { IHoldTypes } from "../hold/IHoldTypes.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
-import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
-import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWrapper.sol";
 import { ClearingOps } from "../../../domain/orchestrator/ClearingOps.sol";
+import { ClearingProtectedOps } from "../../../domain/orchestrator/ClearingProtectedOps.sol";
 import { ClearingReadOps } from "../../../domain/orchestrator/ClearingReadOps.sol";
-import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
-abstract contract ClearingHoldCreation is IClearingHoldCreation, AccessControlModifiers, PauseModifiers {
+abstract contract ClearingHoldCreation is IClearingHoldCreation, Modifiers {
     function clearingCreateHoldByPartition(
         ClearingOperation calldata _clearingOperation,
-        Hold calldata _hold
-    ) external override onlyUnpaused returns (bool success_, uint256 clearingId_) {
-        ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_hold.to);
-        ERC1410StorageWrapper.requireValidAddress(_hold.escrow);
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_clearingOperation.partition);
-        LockStorageWrapper.requireValidExpirationTimestamp(_clearingOperation.expirationTimestamp);
-        LockStorageWrapper.requireValidExpirationTimestamp(_hold.expirationTimestamp);
-        _requireUnProtectedPartitionsOrWildCardRole();
-        ClearingStorageWrapper.requireClearingActivated();
+        IHoldTypes.Hold calldata _hold
+    )
+        external
+        override
+        onlyUnpaused
+        onlyClearingActivated
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
+        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
+        onlyUnrecoveredAddress(_hold.to)
+        notZeroAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
+        onlyUnProtectedPartitionsOrWildCardRole
+        returns (bool success_, uint256 clearingId_)
+    {
         (success_, clearingId_) = ClearingOps.clearingHoldCreationCreation(
             _clearingOperation,
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             _hold,
             "",
             ThirdPartyType.NULL
@@ -44,25 +42,24 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, AccessControlMo
 
     function clearingCreateHoldFromByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
-        Hold calldata _hold
-    ) external override onlyUnpaused returns (bool success_, uint256 clearingId_) {
-        ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_hold.to);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_clearingOperationFrom.from);
-        ERC1410StorageWrapper.requireValidAddress(_hold.escrow);
-        ERC1410StorageWrapper.requireValidAddress(_clearingOperationFrom.from);
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
+        IHoldTypes.Hold calldata _hold
+    )
+        external
+        override
+        onlyUnpaused
+        onlyClearingActivated
+        onlyValidClearingCreateHoldByPartition(
+            _hold.expirationTimestamp,
+            _clearingOperationFrom.clearingOperation.expirationTimestamp,
+            EvmAccessors.getMsgSender(),
+            _hold.to,
+            _clearingOperationFrom.from,
+            _hold.escrow,
             _clearingOperationFrom.clearingOperation.partition
-        );
-        LockStorageWrapper.requireValidExpirationTimestamp(
-            _clearingOperationFrom.clearingOperation.expirationTimestamp
-        );
-        ClearingStorageWrapper.requireClearingActivated();
-        {
-            LockStorageWrapper.requireValidExpirationTimestamp(_hold.expirationTimestamp);
-            _requireUnProtectedPartitionsOrWildCardRole();
-        }
-
+        )
+        onlyUnProtectedPartitionsOrWildCardRole
+        returns (bool success_, uint256 clearingId_)
+    {
         (success_, clearingId_) = ClearingOps.clearingHoldCreationCreation(
             _clearingOperationFrom.clearingOperation,
             _clearingOperationFrom.from,
@@ -82,29 +79,24 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, AccessControlMo
 
     function operatorClearingCreateHoldByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
-        Hold calldata _hold
-    ) external override onlyUnpaused returns (bool success_, uint256 clearingId_) {
-        ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_clearingOperationFrom.from);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_hold.to);
-        ERC1410StorageWrapper.requireValidAddress(_hold.escrow);
-        ERC1410StorageWrapper.requireValidAddress(_clearingOperationFrom.from);
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
+        IHoldTypes.Hold calldata _hold
+    )
+        external
+        override
+        onlyUnpaused
+        onlyClearingActivated
+        onlyValidOperatorClearingCreateHoldByPartition(
+            _hold.expirationTimestamp,
+            _clearingOperationFrom.clearingOperation.expirationTimestamp,
+            EvmAccessors.getMsgSender(),
+            _hold.to,
+            _clearingOperationFrom.from,
+            _hold.escrow,
             _clearingOperationFrom.clearingOperation.partition
-        );
-        LockStorageWrapper.requireValidExpirationTimestamp(
-            _clearingOperationFrom.clearingOperation.expirationTimestamp
-        );
-        ClearingStorageWrapper.requireClearingActivated();
-        {
-            ERC1410StorageWrapper.requireOperator(
-                _clearingOperationFrom.clearingOperation.partition,
-                _clearingOperationFrom.from
-            );
-            LockStorageWrapper.requireValidExpirationTimestamp(_hold.expirationTimestamp);
-            _requireUnProtectedPartitionsOrWildCardRole();
-        }
-
+        )
+        onlyUnProtectedPartitionsOrWildCardRole
+        returns (bool success_, uint256 clearingId_)
+    {
         (success_, clearingId_) = ClearingOps.clearingHoldCreationCreation(
             _clearingOperationFrom.clearingOperation,
             _clearingOperationFrom.from,
@@ -116,28 +108,26 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, AccessControlMo
 
     function protectedClearingCreateHoldByPartition(
         ProtectedClearingOperation calldata _protectedClearingOperation,
-        Hold calldata _hold,
+        IHoldTypes.Hold calldata _hold,
         bytes calldata _signature
     )
         external
         override
         onlyUnpaused
+        onlyUnrecoveredAddress(_protectedClearingOperation.from)
+        onlyUnrecoveredAddress(_hold.to)
+        onlyProtectedPartitions
+        onlyValidAddress(_protectedClearingOperation.from)
+        onlyWithValidExpirationTimestamp(_protectedClearingOperation.clearingOperation.expirationTimestamp)
         onlyRole(
             ProtectedPartitionsStorageWrapper.protectedPartitionsRole(
                 _protectedClearingOperation.clearingOperation.partition
             )
         )
+        onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_protectedClearingOperation.from);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_hold.to);
-        ProtectedPartitionsStorageWrapper.requireProtectedPartitions();
-        ERC1410StorageWrapper.requireValidAddress(_protectedClearingOperation.from);
-        LockStorageWrapper.requireValidExpirationTimestamp(
-            _protectedClearingOperation.clearingOperation.expirationTimestamp
-        );
-        ClearingStorageWrapper.requireClearingActivated();
-        (success_, clearingId_) = ClearingOps.protectedClearingCreateHoldByPartition(
+        (success_, clearingId_) = ClearingProtectedOps.protectedClearingCreateHoldByPartition(
             _protectedClearingOperation,
             _hold,
             _signature
@@ -156,14 +146,5 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, AccessControlMo
                 _clearingId,
                 TimeTravelStorageWrapper.getBlockTimestamp()
             );
-    }
-
-    function _requireUnProtectedPartitionsOrWildCardRole() internal view {
-        if (
-            ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
-            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, msg.sender)
-        ) {
-            revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(msg.sender, _WILD_CARD_ROLE);
-        }
     }
 }

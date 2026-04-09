@@ -220,7 +220,7 @@ describe("ResolverProxy Tests", () => {
 
     const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target);
 
-    await expect(diamondCut.updateConfigVersion(0)).to.be.rejectedWith("AccountHasNoRole");
+    await expect(diamondCut.updateConfigVersion(0)).to.be.revertedWithCustomError(diamondCut, "AccountHasNoRole");
   });
 
   it("GIVEN resolverProxy and admin user WHEN updating to non existing version THEN fails with ResolverProxyConfigurationNoRegistered", async () => {
@@ -250,7 +250,10 @@ describe("ResolverProxy Tests", () => {
 
     const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target, signer_A);
 
-    await expect(diamondCut.updateConfigVersion(100)).to.be.rejectedWith("ResolverProxyConfigurationNoRegistered");
+    await expect(diamondCut.updateConfigVersion(100)).to.be.revertedWithCustomError(
+      resolver,
+      "ResolverProxyConfigurationNoRegistered",
+    );
   });
 
   it("GIVEN resolverProxy and admin user WHEN updating version THEN succeeds", async () => {
@@ -319,7 +322,7 @@ describe("ResolverProxy Tests", () => {
 
     const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target);
 
-    await expect(diamondCut.updateConfig(CONFIG_ID_2, 1)).to.be.rejectedWith("AccountHasNoRole");
+    await expect(diamondCut.updateConfig(CONFIG_ID_2, 1)).to.be.revertedWithCustomError(diamondCut, "AccountHasNoRole");
   });
 
   it("GIVEN resolverProxy and admin user WHEN updating to non existing configID THEN fails with ResolverProxyConfigurationNoRegistered", async () => {
@@ -349,7 +352,10 @@ describe("ResolverProxy Tests", () => {
 
     const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target, signer_A);
 
-    await expect(diamondCut.updateConfig(CONFIG_ID_2, 1)).to.be.rejectedWith("ResolverProxyConfigurationNoRegistered");
+    await expect(diamondCut.updateConfig(CONFIG_ID_2, 1)).to.be.revertedWithCustomError(
+      resolver,
+      "ResolverProxyConfigurationNoRegistered",
+    );
   });
 
   it("GIVEN resolverProxy and admin user WHEN updating configID THEN succeeds", async () => {
@@ -421,7 +427,10 @@ describe("ResolverProxy Tests", () => {
 
     const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target);
 
-    await expect(diamondCut.updateResolver(resolver_2.target, CONFIG_ID_2, 1)).to.be.rejectedWith("AccountHasNoRole");
+    await expect(diamondCut.updateResolver(resolver_2.target, CONFIG_ID_2, 1)).to.be.revertedWithCustomError(
+      diamondCut,
+      "AccountHasNoRole",
+    );
   });
 
   it("GIVEN resolverProxy and admin user WHEN updating to non existing resolver THEN fails with ResolverProxyConfigurationNoRegistered", async () => {
@@ -453,7 +462,8 @@ describe("ResolverProxy Tests", () => {
 
     const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target, signer_A);
 
-    await expect(diamondCut.updateResolver(resolver_2.target, CONFIG_ID_2, 1)).to.be.rejectedWith(
+    await expect(diamondCut.updateResolver(resolver_2.target, CONFIG_ID_2, 1)).to.be.revertedWithCustomError(
+      resolver,
       "ResolverProxyConfigurationNoRegistered",
     );
   });

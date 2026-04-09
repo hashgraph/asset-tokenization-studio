@@ -11,6 +11,12 @@ import {
   type TransferAndLockFacet,
   type SsiManagementFacet,
   type KycFacet,
+  LockFacet__factory,
+  TransferAndLockFacet__factory,
+  PauseFacet__factory,
+  IERC1410__factory,
+  KycFacet__factory,
+  SsiManagementFacet__factory,
 } from "@contract-types";
 import { ZERO, EMPTY_STRING, ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -40,6 +46,7 @@ describe("Transfer and lock Tests", () => {
   let currentTimestamp = 0;
   let expirationTimestamp = 0;
 
+  // TODO(phase-5): type as Rbac[]
   function set_initRbacs(): any[] {
     return [
       {
@@ -66,12 +73,12 @@ describe("Transfer and lock Tests", () => {
   }
 
   async function setFacets({ diamond }: { diamond: ResolverProxy }) {
-    lockFacet = await ethers.getContractAt("LockFacet", diamond.target, signer_C);
-    transferAndLockFacet = await ethers.getContractAt("TransferAndLockFacet", diamond.target, signer_C);
-    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target, signer_D);
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target);
-    kycFacet = await ethers.getContractAt("KycFacet", diamond.target, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.target, signer_A);
+    lockFacet = LockFacet__factory.connect(diamond.target.toString(), signer_C);
+    transferAndLockFacet = TransferAndLockFacet__factory.connect(diamond.target.toString(), signer_C);
+    pauseFacet = PauseFacet__factory.connect(diamond.target.toString(), signer_D);
+    erc1410Facet = IERC1410__factory.connect(diamond.target.toString(), ethers.provider);
+    kycFacet = KycFacet__factory.connect(diamond.target.toString(), signer_B);
+    ssiManagementFacet = SsiManagementFacet__factory.connect(diamond.target.toString(), signer_A);
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
     await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
     await kycFacet.grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -134,14 +141,14 @@ describe("Transfer and lock Tests", () => {
             "0x",
             currentTimestamp,
           ),
-        ).to.be.rejectedWith("TokenIsPaused");
+        ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
       });
 
       it("GIVEN a paused Token WHEN transferAndLock THEN transaction fails with TokenIsPaused", async () => {
         // transfer from with data fails
         await expect(
           transferAndLockFacet.transferAndLock(signer_B.address, _AMOUNT, "0x", currentTimestamp),
-        ).to.be.rejectedWith("TokenIsPaused");
+        ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
       });
     });
 
@@ -152,14 +159,14 @@ describe("Transfer and lock Tests", () => {
           transferAndLockFacet
             .connect(signer_D)
             .transferAndLockByPartition(_NON_DEFAULT_PARTITION, signer_B.address, _AMOUNT, "0x", currentTimestamp),
-        ).to.be.rejectedWith("AccountHasNoRole");
+        ).to.be.revertedWithCustomError(transferAndLockFacet, "AccountHasNoRole");
       });
 
       it("GIVEN an account without LOCKER role WHEN transferAndLock THEN transaction fails with AccountHasNoRole", async () => {
         // add to list fails
         await expect(
           transferAndLockFacet.connect(signer_D).transferAndLock(signer_B.address, _AMOUNT, "0x", currentTimestamp),
-        ).to.be.rejectedWith("AccountHasNoRole");
+        ).to.be.revertedWithCustomError(transferAndLockFacet, "AccountHasNoRole");
       });
     });
 
@@ -181,7 +188,7 @@ describe("Transfer and lock Tests", () => {
             "0x",
             currentTimestamp - ONE_YEAR_IN_SECONDS,
           ),
-        ).to.be.rejectedWith("WrongExpirationTimestamp");
+        ).to.be.revertedWithCustomError(transferAndLockFacet, "WrongExpirationTimestamp");
       });
 
       it("GIVEN a non valid partition WHEN transferAndLockByPartition THEN transaction fails with InvalidPartition", async () => {
@@ -292,7 +299,7 @@ describe("Transfer and lock Tests", () => {
       it("GIVEN a expiration timestamp in past WHEN transferAndLock THEN transaction fails with WrongExpirationTimestamp", async () => {
         await expect(
           transferAndLockFacet.transferAndLock(signer_A.address, _AMOUNT, "0x", currentTimestamp - ONE_YEAR_IN_SECONDS),
-        ).to.be.rejectedWith("WrongExpirationTimestamp");
+        ).to.be.revertedWithCustomError(transferAndLockFacet, "WrongExpirationTimestamp");
       });
 
       it("GIVEN a valid partition WHEN transferAndLock with enough balance THEN transaction success", async () => {

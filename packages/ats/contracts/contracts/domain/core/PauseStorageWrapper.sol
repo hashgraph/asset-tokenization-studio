@@ -3,13 +3,14 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _PAUSE_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { _PAUSE_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { IPauseStorageWrapper } from "./pause/IPauseStorageWrapper.sol";
 import { IExternalPause } from "../../facets/layer_1/externalPause/IExternalPause.sol";
+import { IPause } from "../../facets/layer_1/pause/IPause.sol";
 import {
     ExternalListManagementStorageWrapper,
     ExternalListDataStorage
 } from "./ExternalListManagementStorageWrapper.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 struct PauseDataStorage {
     bool paused;
@@ -28,8 +29,6 @@ struct PauseDataStorage {
 library PauseStorageWrapper {
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    // --- Storage accessor (pure) ---
-
     function pauseStorage() internal pure returns (PauseDataStorage storage pause_) {
         bytes32 position = _PAUSE_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
@@ -38,16 +37,14 @@ library PauseStorageWrapper {
         }
     }
 
-    // --- State-changing functions ---
-
     // solhint-disable-next-line ordering
     function setPause(bool _paused) internal {
         pauseStorage().paused = _paused;
         if (_paused) {
-            emit IPauseStorageWrapper.TokenPaused(msg.sender);
+            emit IPause.TokenPaused(EvmAccessors.getMsgSender());
             return;
         }
-        emit IPauseStorageWrapper.TokenUnpaused(msg.sender);
+        emit IPause.TokenUnpaused(EvmAccessors.getMsgSender());
     }
 
     // solhint-disable-next-line func-name-mixedcase
@@ -63,8 +60,6 @@ library PauseStorageWrapper {
         ExternalListManagementStorageWrapper.setExternalListInitialized(_PAUSE_MANAGEMENT_STORAGE_POSITION);
     }
 
-    // --- Read functions ---
-
     // solhint-disable-next-line ordering
     function isPaused() internal view returns (bool) {
         return pauseStorage().paused || isExternallyPaused();
@@ -74,7 +69,7 @@ library PauseStorageWrapper {
         ExternalListDataStorage storage externalPauseDataStorage = ExternalListManagementStorageWrapper
             .externalListStorage(_PAUSE_MANAGEMENT_STORAGE_POSITION);
         uint256 length = ExternalListManagementStorageWrapper.getExternalListsCount(_PAUSE_MANAGEMENT_STORAGE_POSITION);
-        for (uint256 index = 0; index < length; ) {
+        for (uint256 index; index < length; ) {
             if (IExternalPause(externalPauseDataStorage.list.at(index)).isPaused()) return true;
             unchecked {
                 ++index;
@@ -87,13 +82,11 @@ library PauseStorageWrapper {
         return ExternalListManagementStorageWrapper.externalListStorage(_PAUSE_MANAGEMENT_STORAGE_POSITION).initialized;
     }
 
-    // --- Guard functions for modifiers ---
-
     function _checkUnpaused() internal view {
-        if (isPaused()) revert IPauseStorageWrapper.TokenIsPaused();
+        if (isPaused()) revert IPause.TokenIsPaused();
     }
 
     function _checkPaused() internal view {
-        if (!isPaused()) revert IPauseStorageWrapper.TokenIsUnpaused();
+        if (!isPaused()) revert IPause.TokenIsUnpaused();
     }
 }

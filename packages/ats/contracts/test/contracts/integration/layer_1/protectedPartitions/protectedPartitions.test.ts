@@ -464,7 +464,8 @@ describe("ProtectedPartitions Tests", () => {
 
   it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
     await setProtected();
-    await expect(protectedPartitionsFacet.initialize_ProtectedPartitions(true)).to.be.rejectedWith(
+    await expect(protectedPartitionsFacet.initialize_ProtectedPartitions(true)).to.be.revertedWithCustomError(
+      protectedPartitionsFacet,
       "AlreadyInitialized",
     );
   });
@@ -543,17 +544,29 @@ describe("ProtectedPartitions Tests", () => {
 
       protectedPartitionsFacet = protectedPartitionsFacet.connect(signer_B);
 
-      await expect(protectedPartitionsFacet.protectPartitions()).to.be.rejectedWith("TokenIsPaused");
+      await expect(protectedPartitionsFacet.protectPartitions()).to.be.revertedWithCustomError(
+        pauseFacet,
+        "TokenIsPaused",
+      );
 
-      await expect(protectedPartitionsFacet.unprotectPartitions()).to.be.rejectedWith("TokenIsPaused");
+      await expect(protectedPartitionsFacet.unprotectPartitions()).to.be.revertedWithCustomError(
+        pauseFacet,
+        "TokenIsPaused",
+      );
     });
 
     it("GIVEN a account without the protected partition role WHEN protecting or unprotecting partitions THEN transaction fails with AccountHasNoRole", async () => {
       await setProtected();
 
-      await expect(protectedPartitionsFacet.protectPartitions()).to.be.rejectedWith("AccountHasNoRole");
+      await expect(protectedPartitionsFacet.protectPartitions()).to.be.revertedWithCustomError(
+        accessControlFacet,
+        "AccountHasNoRole",
+      );
 
-      await expect(protectedPartitionsFacet.unprotectPartitions()).to.be.rejectedWith("AccountHasNoRole");
+      await expect(protectedPartitionsFacet.unprotectPartitions()).to.be.revertedWithCustomError(
+        accessControlFacet,
+        "AccountHasNoRole",
+      );
     });
   });
 
@@ -582,7 +595,7 @@ describe("ProtectedPartitions Tests", () => {
         holdFacet
           .connect(signer_B)
           .protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
-      ).to.be.rejectedWith("PartitionsAreUnProtected");
+      ).to.be.revertedWithCustomError(protectedPartitionsFacet, "PartitionsAreUnProtected");
     });
   });
 
@@ -612,11 +625,12 @@ describe("ProtectedPartitions Tests", () => {
       it("GIVEN a protected token WHEN performing a ERC1410 transfer By partition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
         await expect(
           erc1410Facet.transferByPartition(DEFAULT_PARTITION, basicTransferInfo, "0x1234"),
-        ).to.be.rejectedWith("PartitionsAreProtectedAndNoRole");
+        ).to.be.revertedWithCustomError(protectedPartitionsFacet, "PartitionsAreProtectedAndNoRole");
       });
 
       it("GIVEN a protected token WHEN performing a ERC1594 transfer with Data THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
-        await expect(erc1594Facet.transferWithData(signer_B.address, amount, "0x1234")).to.be.rejectedWith(
+        await expect(erc1594Facet.transferWithData(signer_B.address, amount, "0x1234")).to.be.revertedWithCustomError(
+          protectedPartitionsFacet,
           "PartitionsAreProtectedAndNoRole",
         );
       });
@@ -624,17 +638,19 @@ describe("ProtectedPartitions Tests", () => {
       it("GIVEN a protected token WHEN performing a ERC1594 transfer From with Data THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
         await expect(
           erc1594Facet.transferFromWithData(signer_A.address, signer_B.address, amount, "0x1234"),
-        ).to.be.rejectedWith("PartitionsAreProtectedAndNoRole");
+        ).to.be.revertedWithCustomError(protectedPartitionsFacet, "PartitionsAreProtectedAndNoRole");
       });
 
       it("GIVEN a protected token WHEN performing a ERC20 transfer THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
-        await expect(erc20Facet.transfer(signer_B.address, amount)).to.be.rejectedWith(
+        await expect(erc20Facet.transfer(signer_B.address, amount)).to.be.revertedWithCustomError(
+          protectedPartitionsFacet,
           "PartitionsAreProtectedAndNoRole",
         );
       });
 
       it("GIVEN a protected token WHEN performing a ERC20 transfer From THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
-        await expect(erc20Facet.transferFrom(signer_A.address, signer_B.address, amount)).to.be.rejectedWith(
+        await expect(erc20Facet.transferFrom(signer_A.address, signer_B.address, amount)).to.be.revertedWithCustomError(
+          protectedPartitionsFacet,
           "PartitionsAreProtectedAndNoRole",
         );
       });
@@ -644,13 +660,13 @@ describe("ProtectedPartitions Tests", () => {
           transferAndLockFacet
             .connect(signer_B)
             .transferAndLockByPartition(DEFAULT_PARTITION, signer_B.address, amount, "0x1234", MAX_UINT256),
-        ).to.be.rejectedWith("PartitionsAreProtectedAndNoRole");
+        ).to.be.revertedWithCustomError(protectedPartitionsFacet, "PartitionsAreProtectedAndNoRole");
       });
 
       it("GIVEN a protected token WHEN performing a transferAndLock THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
         await expect(
           transferAndLockFacet.connect(signer_B).transferAndLock(signer_B.address, amount, "0x1234", MAX_UINT256),
-        ).to.be.rejectedWith("PartitionsAreProtectedAndNoRole");
+        ).to.be.revertedWithCustomError(protectedPartitionsFacet, "PartitionsAreProtectedAndNoRole");
       });
 
       it("GIVEN a protected token and a WILD CARD account WHEN performing a ERC1410 transfer By partition THEN transaction succeeds", async () => {
@@ -753,8 +769,9 @@ describe("ProtectedPartitions Tests", () => {
 
     describe("Redeem Tests", () => {
       it("GIVEN a protected token WHEN performing a ERC1410 redeem By partition THEN transaction fails with PartitionsAreProtected", async () => {
-        await expect(erc1410Facet.redeemByPartition(DEFAULT_PARTITION, amount, "0x1234")).to.be.rejectedWith(
-          "PartitionsAreProtected",
+        await expect(erc1410Facet.redeemByPartition(DEFAULT_PARTITION, amount, "0x1234")).to.be.revertedWithCustomError(
+          protectedPartitionsFacet,
+          "PartitionsAreProtectedAndNoRole",
         );
       });
 
@@ -765,31 +782,36 @@ describe("ProtectedPartitions Tests", () => {
           erc1410Facet
             .connect(signer_C)
             .operatorRedeemByPartition(DEFAULT_PARTITION, signer_A.address, amount, "0x1234", "0x1234"),
-        ).to.be.rejectedWith("PartitionsAreProtected");
+        ).to.be.revertedWithCustomError(protectedPartitionsFacet, "PartitionsAreProtectedAndNoRole");
       });
 
       it("GIVEN a protected token WHEN performing a ERC1594 redeem THEN transaction fails with PartitionsAreProtected", async () => {
-        await expect(erc1594Facet.redeem(amount, "0x1234")).to.be.rejectedWith("PartitionsAreProtected");
+        await expect(erc1594Facet.redeem(amount, "0x1234")).to.be.revertedWithCustomError(
+          protectedPartitionsFacet,
+          "PartitionsAreProtectedAndNoRole",
+        );
       });
 
       it("GIVEN a protected token WHEN performing a ERC1594 redeem From with Data THEN transaction fails with PartitionsAreProtected", async () => {
-        await expect(erc1594Facet.redeemFrom(signer_B.address, amount, "0x1234")).to.be.rejectedWith(
-          "PartitionsAreProtected",
+        await expect(erc1594Facet.redeemFrom(signer_B.address, amount, "0x1234")).to.be.revertedWithCustomError(
+          protectedPartitionsFacet,
+          "PartitionsAreProtectedAndNoRole",
         );
       });
     });
 
     describe("Hold Tests", () => {
       it("GIVEN a protected token WHEN performing a createHoldByPartition THEN transaction fails with PartitionsAreProtected", async () => {
-        await expect(holdFacet.createHoldByPartition(DEFAULT_PARTITION, hold)).to.be.rejectedWith(
-          "PartitionsAreProtected",
+        await expect(holdFacet.createHoldByPartition(DEFAULT_PARTITION, hold)).to.be.revertedWithCustomError(
+          protectedPartitionsFacet,
+          "PartitionsAreProtectedAndNoRole",
         );
       });
 
       it("GIVEN a protected token WHEN performing a createHoldFromByPartition THEN transaction fails with PartitionsAreProtected", async () => {
         await expect(
           holdFacet.connect(signer_B).createHoldFromByPartition(DEFAULT_PARTITION, signer_A.address, hold, "0x"),
-        ).to.be.rejectedWith("PartitionsAreProtected");
+        ).to.be.revertedWithCustomError(protectedPartitionsFacet, "PartitionsAreProtectedAndNoRole");
       });
 
       it("GIVEN a protected token WHEN performing a operatorCreateHoldByPartition THEN transaction fails with PartitionsAreProtected", async () => {
@@ -797,7 +819,7 @@ describe("ProtectedPartitions Tests", () => {
 
         await expect(
           holdFacet.connect(signer_B).operatorCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, hold, "0x"),
-        ).to.be.rejectedWith("PartitionsAreProtected");
+        ).to.be.revertedWithCustomError(protectedPartitionsFacet, "PartitionsAreProtectedAndNoRole");
 
         await erc1410Facet.connect(signer_A).revokeOperator(signer_B.address);
       });
@@ -809,7 +831,7 @@ describe("ProtectedPartitions Tests", () => {
           holdFacet
             .connect(signer_B)
             .protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
-        ).to.be.rejectedWith("ExpiredDeadline");
+        ).to.be.revertedWithCustomError(holdFacet, "ExpiredDeadline");
       });
 
       it("GIVEN a wrong signature length WHEN performing a protected hold THEN transaction fails with WrongSignatureLength", async () => {
@@ -817,7 +839,7 @@ describe("ProtectedPartitions Tests", () => {
           holdFacet
             .connect(signer_B)
             .protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x12"),
-        ).to.be.rejectedWith("WrongSignatureLength");
+        ).to.be.revertedWithCustomError(holdFacet, "WrongSignatureLength");
       });
 
       it("GIVEN a wrong signature WHEN performing a protected hold THEN transaction fails with WrongSignature", async () => {
@@ -830,7 +852,7 @@ describe("ProtectedPartitions Tests", () => {
               protectedHold,
               "0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344",
             ),
-        ).to.be.rejectedWith("WrongSignature");
+        ).to.be.revertedWithCustomError(holdFacet, "WrongSignature");
       });
 
       it("GIVEN a wrong nounce WHEN performing a protected hold THEN transaction fails with WrongNounce", async () => {
@@ -840,7 +862,7 @@ describe("ProtectedPartitions Tests", () => {
           holdFacet
             .connect(signer_B)
             .protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
-        ).to.be.rejectedWith("WrongNounce");
+        ).to.be.revertedWithCustomError(holdFacet, "WrongNounce");
       });
 
       it("GIVEN a correct signature WHEN performing a protected hold THEN transaction succeeds", async () => {
@@ -881,38 +903,38 @@ describe("ProtectedPartitions Tests", () => {
         // TRANSFERS
         await expect(
           clearingFacet.connect(signer_A).clearingTransferByPartition(clearingOperation, amount, signer_C.address),
-        ).to.be.rejectedWith("PartitionsAreProtected");
+        ).to.be.revertedWithCustomError(protectedPartitionsFacet, "PartitionsAreProtectedAndNoRole");
         await expect(
           clearingFacet
             .connect(signer_B)
             .clearingTransferFromByPartition(clearingOperationFrom, amount, signer_C.address),
-        ).to.be.rejectedWith("PartitionsAreProtected");
+        ).to.be.revertedWithCustomError(protectedPartitionsFacet, "PartitionsAreProtectedAndNoRole");
         await erc1410Facet.authorizeOperator(signer_B.address);
         await expect(
           clearingFacet
             .connect(signer_B)
             .operatorClearingTransferByPartition(clearingOperationFrom, amount, signer_C.address),
-        ).to.be.rejectedWith("PartitionsAreProtected");
+        ).to.be.revertedWithCustomError(protectedPartitionsFacet, "PartitionsAreProtectedAndNoRole");
         // CLEARING CREATE HOLD
         await expect(
           clearingFacet.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold),
-        ).to.be.rejectedWith("PartitionsAreProtected");
+        ).to.be.revertedWithCustomError(protectedPartitionsFacet, "PartitionsAreProtectedAndNoRole");
         await expect(
           clearingFacet.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold),
-        ).to.be.rejectedWith("PartitionsAreProtected");
+        ).to.be.revertedWithCustomError(protectedPartitionsFacet, "PartitionsAreProtectedAndNoRole");
         await expect(
           clearingFacet.connect(signer_B).operatorClearingCreateHoldByPartition(clearingOperationFrom, hold),
-        ).to.be.rejectedWith("PartitionsAreProtected");
+        ).to.be.revertedWithCustomError(protectedPartitionsFacet, "PartitionsAreProtectedAndNoRole");
         // CLEARING REDEEM
         await expect(
           clearingFacet.connect(signer_A).clearingRedeemByPartition(clearingOperation, amount),
-        ).to.be.rejectedWith("PartitionsAreProtected");
+        ).to.be.revertedWithCustomError(protectedPartitionsFacet, "PartitionsAreProtectedAndNoRole");
         await expect(
           clearingFacet.connect(signer_B).clearingRedeemFromByPartition(clearingOperationFrom, amount),
-        ).to.be.rejectedWith("PartitionsAreProtected");
+        ).to.be.revertedWithCustomError(protectedPartitionsFacet, "PartitionsAreProtectedAndNoRole");
         await expect(
           clearingFacet.connect(signer_B).operatorClearingRedeemByPartition(clearingOperationFrom, amount),
-        ).to.be.rejectedWith("PartitionsAreProtected");
+        ).to.be.revertedWithCustomError(protectedPartitionsFacet, "PartitionsAreProtectedAndNoRole");
       });
 
       it("GIVEN a wrong deadline WHEN performing a protected clearing THEN transaction fails with ExpiredDeadline", async () => {
@@ -922,19 +944,19 @@ describe("ProtectedPartitions Tests", () => {
           clearingFacet
             .connect(signer_B)
             .protectedClearingTransferByPartition(protectedClearingOperation, amount, signer_C.address, "0x1234"),
-        ).to.be.rejectedWith("ExpiredDeadline");
+        ).to.be.revertedWithCustomError(holdFacet, "ExpiredDeadline");
         // HOLD
         await expect(
           clearingFacet
             .connect(signer_B)
             .protectedClearingCreateHoldByPartition(protectedClearingOperation, hold, "0x1234"),
-        ).to.be.rejectedWith("ExpiredDeadline");
+        ).to.be.revertedWithCustomError(holdFacet, "ExpiredDeadline");
         //REDEEM
         await expect(
           clearingFacet
             .connect(signer_B)
             .protectedClearingRedeemByPartition(protectedClearingOperation, amount, "0x1234"),
-        ).to.be.rejectedWith("ExpiredDeadline");
+        ).to.be.revertedWithCustomError(holdFacet, "ExpiredDeadline");
       });
 
       it("GIVEN a wrong signature length WHEN performing a protected clearing THEN transaction fails with WrongSignatureLength", async () => {
@@ -943,19 +965,19 @@ describe("ProtectedPartitions Tests", () => {
           clearingFacet
             .connect(signer_B)
             .protectedClearingTransferByPartition(protectedClearingOperation, amount, signer_C.address, "0x1234"),
-        ).to.be.rejectedWith("WrongSignatureLength");
+        ).to.be.revertedWithCustomError(holdFacet, "WrongSignatureLength");
         // HOLD
         await expect(
           clearingFacet
             .connect(signer_B)
             .protectedClearingCreateHoldByPartition(protectedClearingOperation, hold, "0x1234"),
-        ).to.be.rejectedWith("WrongSignatureLength");
+        ).to.be.revertedWithCustomError(holdFacet, "WrongSignatureLength");
         //REDEEM
         await expect(
           clearingFacet
             .connect(signer_B)
             .protectedClearingRedeemByPartition(protectedClearingOperation, amount, "0x1234"),
-        ).to.be.rejectedWith("WrongSignatureLength");
+        ).to.be.revertedWithCustomError(holdFacet, "WrongSignatureLength");
       });
 
       it("GIVEN a wrong signature WHEN performing a protected clearing THEN transaction fails with WrongSignature", async () => {
@@ -969,7 +991,7 @@ describe("ProtectedPartitions Tests", () => {
               signer_C.address,
               "0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344",
             ),
-        ).to.be.rejectedWith("WrongSignature");
+        ).to.be.revertedWithCustomError(holdFacet, "WrongSignature");
         // HOLD
         await expect(
           clearingFacet
@@ -979,7 +1001,7 @@ describe("ProtectedPartitions Tests", () => {
               hold,
               "0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344",
             ),
-        ).to.be.rejectedWith("WrongSignature");
+        ).to.be.revertedWithCustomError(holdFacet, "WrongSignature");
         //REDEEM
         await expect(
           clearingFacet
@@ -989,7 +1011,7 @@ describe("ProtectedPartitions Tests", () => {
               amount,
               "0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344",
             ),
-        ).to.be.rejectedWith("WrongSignature");
+        ).to.be.revertedWithCustomError(holdFacet, "WrongSignature");
       });
 
       it("GIVEN a wrong nounce WHEN performing a protected clearing THEN transaction fails with WrongNounce", async () => {
@@ -1000,19 +1022,19 @@ describe("ProtectedPartitions Tests", () => {
           clearingFacet
             .connect(signer_B)
             .protectedClearingTransferByPartition(protectedClearingOperation, amount, signer_C.address, "0x1234"),
-        ).to.be.rejectedWith("WrongNounce");
+        ).to.be.revertedWithCustomError(holdFacet, "WrongNounce");
         // HOLD
         await expect(
           clearingFacet
             .connect(signer_B)
             .protectedClearingCreateHoldByPartition(protectedClearingOperation, hold, "0x1234"),
-        ).to.be.rejectedWith("WrongNounce");
+        ).to.be.revertedWithCustomError(holdFacet, "WrongNounce");
         //REDEEM
         await expect(
           clearingFacet
             .connect(signer_B)
             .protectedClearingRedeemByPartition(protectedClearingOperation, amount, "0x1234"),
-        ).to.be.rejectedWith("WrongNounce");
+        ).to.be.revertedWithCustomError(holdFacet, "WrongNounce");
       });
 
       it("GIVEN a correct signature WHEN performing a protected clearing THEN transaction succeeds", async () => {

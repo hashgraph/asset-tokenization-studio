@@ -39,6 +39,25 @@ function patchTypeChainFiles(pattern: string) {
   });
 }
 
+function autoGenHeader(sourcePath: string): string {
+  return [
+    "// AUTO-GENERATED — DO NOT EDIT.",
+    `// Source: ${sourcePath}`,
+    "// Regenerated on every `npx hardhat compile` by the",
+    "// `erc3643-clone-interfaces` task in `tasks/compile.ts`.",
+    "// Edits to this file will be silently overwritten.",
+  ].join("\n");
+}
+
+function injectHeader(source: string, header: string): string {
+  // Insert the header immediately after the SPDX line if present, otherwise at the top.
+  const spdxMatch = source.match(/^(\/\/\s*SPDX-License-Identifier:[^\n]*\n)/);
+  if (spdxMatch) {
+    return source.replace(spdxMatch[0], `${spdxMatch[0]}${header}\n`);
+  }
+  return `${header}\n${source}`;
+}
+
 task("erc3643-clone-interfaces", async (_, hre) => {
   interface DataSustitution {
     original: string;
@@ -49,9 +68,11 @@ task("erc3643-clone-interfaces", async (_, hre) => {
   const targetDir = hre.config.paths.sources + "/factory/ERC3643/interfaces";
   const interfacesToClone: DataSustitution[] = [
     { original: "IAccessControl" },
-    { original: "IBondRead" },
+    { original: "IBondTypes" },
+    { original: "IBondRead", removeImports: false, removeHierarchy: false },
     {
       original: "IBusinessLogicResolver",
+      removeImports: false,
       removeHierarchy: false,
     },
     {
@@ -60,6 +81,7 @@ task("erc3643-clone-interfaces", async (_, hre) => {
     },
     {
       original: "IDiamondLoupe",
+      removeImports: false,
       removeHierarchy: false,
     },
     { original: "IEquity" },
@@ -93,6 +115,7 @@ task("erc3643-clone-interfaces", async (_, hre) => {
       src: "facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon",
       dst: "IScheduledTasksCommon",
     },
+    { src: "infrastructure/errors/CommonErrors", dst: "CommonErrors" },
   ];
 
   function rewriteImports(source: string): string {
@@ -151,14 +174,15 @@ task("erc3643-clone-interfaces", async (_, hre) => {
         source = source.replace(/^pragma solidity\s+[^;]+;/m, "pragma solidity ^0.8.17;");
       }
 
-      // Rename interface/contract and remove inheritance in a single step
+      // Rename interface/contract; optionally preserve inheritance clause
       source = source.replace(
         new RegExp(`(contract|interface)\\s+${originalArtifact.contractName}\\b(\\s+is[^\\{]+)?`, "m"),
-        `$1 TRex${originalArtifact.contractName}`,
+        i.removeHierarchy ? `$1 TRex${originalArtifact.contractName}` : `$1 TRex${originalArtifact.contractName}$2`,
       );
 
       const targetPath = `${targetDir}/${originalArtifact.contractName}.sol`;
-      fs.writeFileSync(targetPath, source, "utf8");
+      const header = autoGenHeader(originalArtifact.sourceName);
+      fs.writeFileSync(targetPath, injectHeader(source, header), "utf8");
       console.log(`Generated: ${targetPath}`);
     }),
   );
@@ -172,7 +196,8 @@ task("erc3643-clone-interfaces", async (_, hre) => {
 
       content = content.replace(/^pragma solidity\s+[^;]+;/m, "pragma solidity ^0.8.17;");
 
-      fs.writeFileSync(dst, content, "utf8");
+      const header = autoGenHeader(`contracts/${c.src}.sol`);
+      fs.writeFileSync(dst, injectHeader(content, header), "utf8");
       console.log(`Copied constant with updated pragma: ${dst}`);
     } else {
       console.warn(`Not found: ${src}`);

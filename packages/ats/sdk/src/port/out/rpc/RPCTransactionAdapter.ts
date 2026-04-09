@@ -73,7 +73,7 @@ import {
   FreezeFacet__factory,
   HoldManagementFacet__factory,
   HoldTokenHolderFacet__factory,
-  IBondRead,
+  IBondTypes,
   IEquity,
   KpiLinkedRate__factory,
   Kpis__factory,
@@ -627,7 +627,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       endDate: ${endDate},
       fixingDate: ${fixingDate}`,
     );
-    const couponStruct: IBondRead.CouponStruct = {
+    const couponStruct: IBondTypes.CouponStruct = {
       recordDate: recordDate.toBigInt(),
       executionDate: executionDate.toBigInt(),
       rate: rate.toBigInt(),

@@ -55,12 +55,15 @@ describe("ERC1643 Tests", () => {
     // add document fails
     await expect(
       erc1643Facet.connect(signer_C).setDocument(documentName_1, documentURI_1, documentHASH_1),
-    ).to.be.rejectedWith("AccountHasNoRole");
+    ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
   });
 
   it("GIVEN an account without documenter role WHEN removeDocument THEN transaction fails with AccountHasNoRole", async () => {
     // add document fails
-    await expect(erc1643Facet.connect(signer_C).removeDocument(documentName_1)).to.be.rejectedWith("AccountHasNoRole");
+    await expect(erc1643Facet.connect(signer_C).removeDocument(documentName_1)).to.be.revertedWithCustomError(
+      accessControlFacet,
+      "AccountHasNoRole",
+    );
   });
 
   it("GIVEN a paused Token WHEN setDocument THEN transaction fails with TokenIsPaused", async () => {
@@ -110,15 +113,15 @@ describe("ERC1643 Tests", () => {
           documentURI_1,
           documentHASH_1,
         ),
-    ).to.be.rejectedWith("EmptyName");
+    ).to.be.revertedWithCustomError(erc1643Facet, "EmptyName");
   });
 
   it("GIVEN a document with no URI WHEN setDocument THEN transaction fails with EmptyURI", async () => {
     await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._DOCUMENTER_ROLE, signer_C.address);
     // add document fails
-    await expect(erc1643Facet.connect(signer_C).setDocument(documentName_1, "", documentHASH_1)).to.be.rejectedWith(
-      "EmptyURI",
-    );
+    await expect(
+      erc1643Facet.connect(signer_C).setDocument(documentName_1, "", documentHASH_1),
+    ).to.be.revertedWithCustomError(erc1643Facet, "EmptyURI");
   });
 
   it("GIVEN a document with no HASH WHEN setDocument THEN transaction fails with EmptyHASH", async () => {
@@ -133,14 +136,15 @@ describe("ERC1643 Tests", () => {
           documentURI_1,
           "0x0000000000000000000000000000000000000000000000000000000000000000",
         ),
-    ).to.be.rejectedWith("EmptyHASH");
+    ).to.be.revertedWithCustomError(erc1643Facet, "EmptyHASH");
   });
 
   it("GIVEN a document that does not exist WHEN removeDocument THEN transaction fails with DocumentDoesNotExist", async () => {
     await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._DOCUMENTER_ROLE, signer_C.address);
 
     // add document fails
-    await expect(erc1643Facet.connect(signer_C).removeDocument(documentName_1)).to.be.rejectedWith(
+    await expect(erc1643Facet.connect(signer_C).removeDocument(documentName_1)).to.be.revertedWithCustomError(
+      erc1643Facet,
       "DocumentDoesNotExist",
     );
   });

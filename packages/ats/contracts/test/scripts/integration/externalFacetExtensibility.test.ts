@@ -36,6 +36,7 @@ import { TEST_SIZES, silenceScriptLogging } from "@test";
 
 // Contract types
 import {
+  BusinessLogicResolver,
   BusinessLogicResolver__factory,
   AccessControlFacet__factory,
   KycFacet__factory,
@@ -47,7 +48,7 @@ import {
 describe("External Facet Extensibility - Integration Tests", () => {
   let deployer: Signer;
   let blrAddress: string;
-  let blrContract: any;
+  let blrContract: BusinessLogicResolver;
 
   before(silenceScriptLogging);
 

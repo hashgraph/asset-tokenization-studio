@@ -124,3 +124,37 @@ bytes32 constant _PROTECTED_CLEARING_TRANSFER_PARTITION_TYPEHASH = 0x9ac8bf58d69
 //keccak256('protectedClearingRedeemByPartition(ProtectedClearingOperation _protectedClearingOperation,uint256 _amount)ClearingOperation(bytes32 partition,uint256 expirationTimestamp,bytes data)ProtectedClearingOperation(ClearingOperation clearingOperation,address from,uint256 deadline,uint256 nonce)');
 // solhint-disable-next-line max-line-length
 bytes32 constant _PROTECTED_CLEARING_REDEEM_TYPEHASH = 0x9800252304972e5a6e126479147b31373237346ee6c2c4cdbfd4ee18a138477e;
+
+// ============================================================================
+// UnexpectedError IDs - Defensive programming constants for impossible states
+// ============================================================================
+
+/// @dev ID for CorporateActionsStorageWrapper.addCorporateAction()
+bytes4 constant KPI_CA_ADD_ACTION = 0x00000001;
+
+/// @dev ID for ERC20StorageWrapper.approve()
+bytes4 constant KPI_ERC20_APPROVE_OWNER = 0x00000002;
+
+/// @dev ID for KpisStorageWrapper.addToCouponsOrderedList()
+bytes4 constant KPI_KPIS_ADD_COUPON_DATE = 0x00000003;
+
+/// @dev ID for KpisStorageWrapper.setMinDate()
+bytes4 constant KPI_KPIS_SET_MINDATE = 0x00000004;
+
+/// @dev ID for ERC20VotesStorageWrapper.calculateFactorBetween()
+bytes4 constant KPI_VOTES_CALC_FACTOR = 0x00000005;
+
+/// @dev ID for EquityStorageWrapper.getDividend()
+bytes4 constant KPI_EQUITY_DIVIDEND_DATA = 0x00000006;
+
+/// @dev ID for EquityStorageWrapper.getVoting()
+bytes4 constant KPI_EQUITY_VOTING_DATA = 0x00000007;
+
+/// @dev ID for EquityStorageWrapper.getScheduledBalanceAdjustment()
+bytes4 constant KPI_EQUITY_BALANCE_ADJ = 0x00000008;
+
+/// @dev ID for Bond.redeemAtMaturity()
+bytes4 constant KPI_BOND_REDEEM_BALANCE = 0x00000009;
+
+/// @dev ID for KpiLinkedRateLib._getPreviousCouponRate()
+bytes4 constant KPI_LINKED_RATE_COUPON = 0x0000000A;

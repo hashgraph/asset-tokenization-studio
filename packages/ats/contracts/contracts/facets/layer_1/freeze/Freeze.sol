@@ -2,14 +2,14 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IFreeze } from "./IFreeze.sol";
-import { _FREEZE_MANAGER_ROLE, _AGENT_ROLE } from "../../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { ExternalListManagementStorageWrapper } from "../../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title Freeze
@@ -35,10 +35,16 @@ abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
     function setAddressFrozen(
         address _userAddress,
         bool _freezStatus
-    ) external override onlyUnpaused notZeroAddress(_userAddress) onlyUnrecoveredAddress(_userAddress) {
-        _requireFreezeRoles();
+    )
+        external
+        override
+        onlyUnpaused
+        notZeroAddress(_userAddress)
+        onlyUnrecoveredAddress(_userAddress)
+        onlyFreezeRoles(EvmAccessors.getMsgSender())
+    {
         ERC3643StorageWrapper.setAddressFrozen(_userAddress, _freezStatus);
-        emit AddressFrozen(_userAddress, _freezStatus, msg.sender);
+        emit AddressFrozen(_userAddress, _freezStatus, EvmAccessors.getMsgSender());
     }
 
     /**
@@ -56,9 +62,15 @@ abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
     function freezePartialTokens(
         address _userAddress,
         uint256 _amount
-    ) external override onlyUnpaused onlyUnrecoveredAddress(_userAddress) {
-        ERC1410StorageWrapper.requireValidAddress(_userAddress);
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
+    )
+        external
+        override
+        onlyUnpaused
+        onlyUnrecoveredAddress(_userAddress)
+        notZeroAddress(_userAddress)
+        onlyWithoutMultiPartition
+        onlyFreezeRoles(EvmAccessors.getMsgSender())
+    {
         ERC3643StorageWrapper.freezeTokens(_userAddress, _amount);
         emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
     }
@@ -78,9 +90,15 @@ abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
     function unfreezePartialTokens(
         address _userAddress,
         uint256 _amount
-    ) external override onlyUnpaused onlyUnrecoveredAddress(_userAddress) {
-        ERC1410StorageWrapper.requireValidAddress(_userAddress);
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
+    )
+        external
+        override
+        onlyUnpaused
+        onlyUnrecoveredAddress(_userAddress)
+        notZeroAddress(_userAddress)
+        onlyWithoutMultiPartition
+        onlyFreezeRoles(EvmAccessors.getMsgSender())
+    {
         ERC3643StorageWrapper.unfreezeTokens(_userAddress, _amount, 0);
         emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
     }
@@ -96,12 +114,20 @@ abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
      * @param _userAddresses Array of addresses to freeze/unfreeze
      * @param _freeze Array of freeze statuses
      */
-    function batchSetAddressFrozen(address[] calldata _userAddresses, bool[] calldata _freeze) external onlyUnpaused {
-        require(_userAddresses.length == _freeze.length, "Freeze: arrays length mismatch");
+    function batchSetAddressFrozen(
+        address[] calldata _userAddresses,
+        bool[] calldata _freeze
+    )
+        external
+        onlyUnpaused
+        onlyValidInputBoolArrayLength(_userAddresses, _freeze)
+        onlyFreezeRoles(EvmAccessors.getMsgSender())
+    {
         for (uint256 i = 0; i < _userAddresses.length; ++i) {
+            ExternalListManagementStorageWrapper.checkValidAddress(_userAddresses[i]);
             ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
             ERC3643StorageWrapper.setAddressFrozen(_userAddresses[i], _freeze[i]);
-            emit AddressFrozen(_userAddresses[i], _freeze[i], msg.sender);
+            emit AddressFrozen(_userAddresses[i], _freeze[i], EvmAccessors.getMsgSender());
         }
     }
 
@@ -119,11 +145,15 @@ abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
     function batchFreezePartialTokens(
         address[] calldata _userAddresses,
         uint256[] calldata _amounts
-    ) external onlyUnpaused {
-        require(_userAddresses.length == _amounts.length, "Freeze: arrays length mismatch");
+    )
+        external
+        onlyUnpaused
+        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
+        onlyWithoutMultiPartition
+        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
+    {
         for (uint256 i = 0; i < _userAddresses.length; ++i) {
             ERC1410StorageWrapper.requireValidAddress(_userAddresses[i]);
-            ERC1410StorageWrapper.requireWithoutMultiPartition();
             ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
             ERC3643StorageWrapper.freezeTokens(_userAddresses[i], _amounts[i]);
             emit TokensFrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);
@@ -144,11 +174,15 @@ abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
     function batchUnfreezePartialTokens(
         address[] calldata _userAddresses,
         uint256[] calldata _amounts
-    ) external onlyUnpaused {
-        require(_userAddresses.length == _amounts.length, "Freeze: arrays length mismatch");
+    )
+        external
+        onlyUnpaused
+        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
+        onlyWithoutMultiPartition
+        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
+    {
         for (uint256 i = 0; i < _userAddresses.length; ++i) {
             ERC1410StorageWrapper.requireValidAddress(_userAddresses[i]);
-            ERC1410StorageWrapper.requireWithoutMultiPartition();
             ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
             ERC3643StorageWrapper.unfreezeTokens(_userAddresses[i], _amounts[i], 0);
             emit TokensUnfrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);
@@ -161,19 +195,6 @@ abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
      * @return Frozen token amount
      */
     function getFrozenTokens(address _userAddress) external view override returns (uint256) {
-        return ERC3643StorageWrapper.getFrozenAmountFor(_userAddress);
-    }
-
-    /**
-     * @dev Internal function to check freeze roles
-     *
-     * Requirements:
-     * - Caller must have FREEZE_MANAGER_ROLE or AGENT_ROLE
-     */
-    function _requireFreezeRoles() internal view {
-        bytes32[] memory roles = new bytes32[](2);
-        roles[0] = _FREEZE_MANAGER_ROLE;
-        roles[1] = _AGENT_ROLE;
-        AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
+        return ERC3643StorageWrapper.getFrozenAmountForAdjustedAt(_userAddress, _getBlockTimestamp());
     }
 }

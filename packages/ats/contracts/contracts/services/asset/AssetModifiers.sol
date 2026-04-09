@@ -10,6 +10,7 @@ pragma solidity >=0.8.0 <0.9.0;
  *
  * Asset Modifiers:
  * - ActionValidationModifiers: Action validation
+ * - AdjustBalancesModifiers: Adjust balances validation
  * - BondModifiers: Bond-specific validation
  * - ClearingModifiers: Clearing state validation
  * - ComplianceModifiers: Compliance validation
@@ -17,7 +18,9 @@ pragma solidity >=0.8.0 <0.9.0;
  * - ERC20Modifiers: ERC20 initialization validation
  * - ERC3643Modifiers: ERC3643 initialization validation
  * - ExpirationModifiers: Expiration validation
+ * - HoldModifiers: Hold validation
  * - InterestRateModifiers: Interest rate initialization validation
+ * - KpisModifiers: Kpis validation
  * - LockModifiers: Lock validation
  * - MaturityModifiers: Maturity validation
  * - ProceedRecipientModifiers: Proceed recipients validation
@@ -27,14 +30,18 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 
 import { ActionValidationModifiers } from "./ActionValidationModifiers.sol";
+import { AdjustBalancesModifiers } from "./AdjustBalancesModifiers.sol";
 import { BondModifiers } from "./BondModifiers.sol";
 import { ClearingModifiers } from "./ClearingModifiers.sol";
 import { ComplianceModifiers } from "./ComplianceModifiers.sol";
 import { EquityModifiers } from "./EquityModifiers.sol";
 import { ERC20Modifiers } from "./ERC20Modifiers.sol";
+import { ERC1410Modifiers } from "./ERC1410Modifiers.sol";
 import { ERC3643Modifiers } from "./ERC3643Modifiers.sol";
 import { ExpirationModifiers } from "./ExpirationModifiers.sol";
+import { HoldModifiers } from "./HoldModifiers.sol";
 import { InterestRateModifiers } from "./InterestRateModifiers.sol";
+import { KpisModifiers } from "./KpisModifiers.sol";
 import { LockModifiers } from "./LockModifiers.sol";
 import { MaturityModifiers } from "./MaturityModifiers.sol";
 import { ProceedRecipientModifiers } from "./ProceedRecipientModifiers.sol";
@@ -42,14 +49,18 @@ import { StateModifiers } from "./StateModifiers.sol";
 
 abstract contract AssetModifiers is
     ActionValidationModifiers,
+    AdjustBalancesModifiers,
     BondModifiers,
     ClearingModifiers,
     ComplianceModifiers,
     EquityModifiers,
+    ERC1410Modifiers,
     ERC20Modifiers,
     ERC3643Modifiers,
     ExpirationModifiers,
+    HoldModifiers,
     InterestRateModifiers,
+    KpisModifiers,
     LockModifiers,
     MaturityModifiers,
     ProceedRecipientModifiers,

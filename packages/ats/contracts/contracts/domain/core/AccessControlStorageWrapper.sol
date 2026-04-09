@@ -4,8 +4,9 @@ pragma solidity >=0.8.0 <0.9.0;
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { ArrayValidation } from "../../infrastructure/utils/ArrayValidation.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { IAccessControlStorageWrapper } from "./accessControl/IAccessControlStorageWrapper.sol";
 import { _ACCESS_CONTROL_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { IAccessControl } from "../../facets/layer_1/accessControl/IAccessControl.sol";
 
 /**
  * @title AccessControlStorageWrapper
@@ -42,19 +43,15 @@ library AccessControlStorageWrapper {
         }
     }
 
-    // --- Pure functions ---
-
     function checkSameRolesAndActivesLength(uint256 _rolesLength, uint256 _activesLength) internal pure {
         if (_rolesLength != _activesLength) {
-            revert IAccessControlStorageWrapper.RolesAndActivesLengthMismatch(_rolesLength, _activesLength);
+            revert IAccessControl.RolesAndActivesLengthMismatch(_rolesLength, _activesLength);
         }
     }
 
     function checkConsistentRoles(bytes32[] calldata _roles, bool[] calldata _actives) internal pure {
         ArrayValidation.checkUniqueValues(_roles, _actives);
     }
-
-    // --- Private view helpers ---
 
     function has(
         RoleDataStorage storage _rolesStorageData,
@@ -63,8 +60,6 @@ library AccessControlStorageWrapper {
     ) private view returns (bool hasRole_) {
         hasRole_ = _rolesStorageData.memberRoles[_account].contains(_role);
     }
-
-    // --- Role management ---
 
     // solhint-disable-next-line ordering
     function grantRole(bytes32 _role, address _account) internal returns (bool success_) {
@@ -87,7 +82,7 @@ library AccessControlStorageWrapper {
         address _account
     ) internal returns (bool success_) {
         RoleDataStorage storage roleDataStorage = rolesStorage();
-        address sender = msg.sender;
+        address sender = EvmAccessors.getMsgSender();
         uint256 length = _roles.length;
         for (uint256 index; index < length; ) {
             checkRole(getRoleAdmin(_roles[index]), sender);
@@ -112,21 +107,13 @@ library AccessControlStorageWrapper {
         success_ = true;
     }
 
-    // --- Guard functions ---
-
     function checkRole(bytes32 _role, address _account) internal view {
-        if (!hasRole(_role, _account)) {
-            revert IAccessControlStorageWrapper.AccountHasNoRole(_account, _role);
-        }
+        if (!hasRole(_role, _account)) revert IAccessControl.AccountHasNoRole(_account, _role);
     }
 
     function checkAnyRole(bytes32[] memory _roles, address _account) internal view {
-        if (!hasAnyRole(_roles, _account)) {
-            revert IAccessControlStorageWrapper.AccountHasNoRoles(_account, _roles);
-        }
+        if (!hasAnyRole(_roles, _account)) revert IAccessControl.AccountHasNoRoles(_account, _roles);
     }
-
-    // --- Read functions ---
 
     function getRoleAdmin(bytes32 _role) internal view returns (bytes32) {
         return rolesStorage().roles[_role].roleAdmin;
@@ -138,9 +125,12 @@ library AccessControlStorageWrapper {
 
     function hasAnyRole(bytes32[] memory _roles, address _account) internal view returns (bool) {
         RoleDataStorage storage roleDataStorage = rolesStorage();
-        for (uint256 i; i < _roles.length; ++i) {
+        for (uint256 i; i < _roles.length; ) {
             if (has(roleDataStorage, _roles[i], _account)) {
                 return true;
+            }
+            unchecked {
+                ++i;
             }
         }
         return false;

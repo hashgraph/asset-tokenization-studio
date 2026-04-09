@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfill";
 import commonjs from "@rollup/plugin-commonjs";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
@@ -28,7 +27,7 @@ export default {
       overrides: {
         fs: "memfs",
       },
-      include: ["buffer", "process", "util", "stream", "crypto", "os", "vm", "path"],
+      include: ["buffer", "process", "util", "stream", "crypto", "os", "vm"],
       exclude: ["http", "https", "url", "querystring", "path", "fs"],
     }),
   ],
@@ -38,6 +37,7 @@ export default {
   resolve: {
     alias: {
       events: path.resolve(__dirname, "../../../node_modules/events/events.js"),
+      dotenv: "/src/dotenv-mock.js",
       winston: "/src/winston-mock.js",
       "winston-daily-rotate-file": "/src/winston-mock.js",
       "winston-transport": "/src/winston-mock.js",
@@ -52,11 +52,14 @@ export default {
       "@emotion/react",
       "@emotion/styled",
       "framer-motion",
+      "buffer",
+      "readable-stream",
     ],
-    exclude: ["winston", "winston-daily-rotate-file", "winston-transport"],
+    exclude: ["dotenv", "winston", "winston-daily-rotate-file", "winston-transport"],
     esbuildOptions: {
       define: {
         global: "globalThis",
+        "process.browser": "true",
       },
       plugins: [
         {
@@ -67,10 +70,14 @@ export default {
             }));
           },
         },
-        NodeGlobalsPolyfillPlugin({
-          process: true,
-          buffer: true,
-        }),
+        {
+          name: "fix-dotenv-browser",
+          setup(build: any) {
+            build.onResolve({ filter: /^dotenv(\/|$)/ }, () => ({
+              path: path.resolve(__dirname, "src/dotenv-mock.js"),
+            }));
+          },
+        },
       ],
     },
   },

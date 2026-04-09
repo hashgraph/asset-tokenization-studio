@@ -3,50 +3,91 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ILock } from "./ILock.sol";
 import { Lock } from "./Lock.sol";
+import { _LOCKER_ROLE } from "../../../constants/roles.sol";
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { _LOCK_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 contract LockFacet is Lock, IStaticFunctionSelectors {
-    // ========================================================================
     // State changing functions (external - must come first)
-    // ========================================================================
 
     function lock(
         uint256 _amount,
         address _tokenHolder,
         uint256 _expirationTimestamp
-    ) external override returns (bool success_, uint256 lockId_) {
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_LOCKER_ROLE)
+        onlyUnrecoveredAddress(_tokenHolder)
+        onlyValidExpirationTimestamp(_expirationTimestamp)
+        returns (bool success_, uint256 lockId_)
+    {
         (success_, lockId_) = LockStorageWrapper.lockByPartition(
             _DEFAULT_PARTITION,
             _amount,
             _tokenHolder,
             _expirationTimestamp,
-            msg.sender
+            EvmAccessors.getMsgSender()
+        );
+        emit LockedByPartition(
+            EvmAccessors.getMsgSender(),
+            _tokenHolder,
+            _DEFAULT_PARTITION,
+            lockId_,
+            _amount,
+            _expirationTimestamp
         );
     }
 
-    function release(uint256 _lockId, address _tokenHolder) external override returns (bool success_) {
-        success_ = LockStorageWrapper.releaseByPartition(_DEFAULT_PARTITION, _lockId, _tokenHolder, msg.sender);
+    /**
+     * @notice Release tokens (default partition)
+     * @param _lockId The lock identifier
+     * @param _tokenHolder The token holder address
+     * @return success_ Boolean indicating success
+     */
+    function release(
+        uint256 _lockId,
+        address _tokenHolder
+    )
+        external
+        override
+        onlyUnpaused
+        onlyWithValidLockId(_DEFAULT_PARTITION, _tokenHolder, _lockId)
+        onlyWithLockedExpirationTimestamp(_DEFAULT_PARTITION, _tokenHolder, _lockId)
+        returns (bool success_)
+    {
+        success_ = LockStorageWrapper.releaseByPartition(
+            _DEFAULT_PARTITION,
+            _lockId,
+            _tokenHolder,
+            EvmAccessors.getMsgSender()
+        );
+        emit LockByPartitionReleased(EvmAccessors.getMsgSender(), _tokenHolder, _DEFAULT_PARTITION, _lockId);
     }
 
-    // ========================================================================
     // View functions (external view - after external)
-    // ========================================================================
 
     function getLockByPartition(
         bytes32 _partition,
         uint256 _lockId
     ) external view override returns (LockData memory lockData_) {
-        lockData_ = LockStorageWrapper.getLock(_partition, msg.sender, _lockId);
+        lockData_ = LockStorageWrapper.getLock(_partition, EvmAccessors.getMsgSender(), _lockId);
     }
 
     function getLockedAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
     ) external view override returns (uint256 amount_) {
-        amount_ = LockStorageWrapper.getLockedAmountForByPartition(_partition, _tokenHolder);
+        amount_ = LockStorageWrapper.getLockedAmountForByPartitionAdjustedAt(
+            _partition,
+            _tokenHolder,
+            TimeTravelStorageWrapper.getBlockTimestamp()
+        );
     }
 
     function getLockCountForByPartition(
@@ -70,11 +111,20 @@ contract LockFacet is Lock, IStaticFunctionSelectors {
         address _tokenHolder,
         uint256 _lockId
     ) external view override returns (uint256 amount_, uint256 expirationTimestamp_) {
-        (amount_, expirationTimestamp_) = LockStorageWrapper.getLockForByPartition(_partition, _tokenHolder, _lockId);
+        (amount_, expirationTimestamp_) = LockStorageWrapper.getLockForByPartitionAdjustedAt(
+            _partition,
+            _tokenHolder,
+            _lockId,
+            TimeTravelStorageWrapper.getBlockTimestamp()
+        );
     }
 
     function getLockedAmountFor(address _tokenHolder) external view override returns (uint256 amount_) {
-        amount_ = LockStorageWrapper.getLockedAmountFor(_tokenHolder);
+        amount_ = LockStorageWrapper.getLockedAmountForByPartitionAdjustedAt(
+            _DEFAULT_PARTITION,
+            _tokenHolder,
+            TimeTravelStorageWrapper.getBlockTimestamp()
+        );
     }
 
     function getLockCountFor(address _tokenHolder) external view override returns (uint256 lockCount_) {
@@ -93,15 +143,15 @@ contract LockFacet is Lock, IStaticFunctionSelectors {
         address _tokenHolder,
         uint256 _lockId
     ) external view override returns (uint256 amount_, uint256 expirationTimestamp_) {
-        LockStorageWrapper.requireValidLockId(_DEFAULT_PARTITION, _tokenHolder, _lockId);
-        ILock.LockData memory lock = LockStorageWrapper.getLock(_DEFAULT_PARTITION, _tokenHolder, _lockId);
-        amount_ = lock.amount;
-        expirationTimestamp_ = lock.expirationTimestamp;
+        (amount_, expirationTimestamp_) = LockStorageWrapper.getLockForByPartitionAdjustedAt(
+            _DEFAULT_PARTITION,
+            _tokenHolder,
+            _lockId,
+            TimeTravelStorageWrapper.getBlockTimestamp()
+        );
     }
 
-    // ========================================================================
     // IStaticFunctionSelectors implementation (external pure - must come last)
-    // ========================================================================
 
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _LOCK_RESOLVER_KEY;

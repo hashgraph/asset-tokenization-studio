@@ -4,13 +4,13 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IERC1410Read } from "./IERC1410Read.sol";
 import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
-import { PauseModifiers } from "../../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../../services/Modifiers.sol";
 import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
-import { IPauseStorageWrapper } from "../../../../domain/core/pause/IPauseStorageWrapper.sol";
+import { IPause } from "../../../../facets/layer_1/pause/IPause.sol";
 import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 import { Eip1066 } from "../../../../constants/eip1066.sol";
 
-abstract contract ERC1410Read is IERC1410Read, TimestampProvider, PauseModifiers {
+abstract contract ERC1410Read is IERC1410Read, TimestampProvider, Modifiers {
     function balanceOf(address _tokenHolder) external view returns (uint256) {
         return ERC1410StorageWrapper.balanceOfAdjustedAt(_tokenHolder, _getBlockTimestamp());
     }
@@ -48,7 +48,7 @@ abstract contract ERC1410Read is IERC1410Read, TimestampProvider, PauseModifiers
         bytes calldata _operatorData
     ) external view returns (bool, bytes1, bytes32) {
         if (PauseStorageWrapper.isPaused()) {
-            return (false, Eip1066.PAUSED, IPauseStorageWrapper.TokenIsPaused.selector);
+            return (false, Eip1066.PAUSED, IPause.TokenIsPaused.selector);
         }
         (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToTransferFromByPartition(
             _from,
@@ -69,7 +69,7 @@ abstract contract ERC1410Read is IERC1410Read, TimestampProvider, PauseModifiers
         bytes calldata _operatorData
     ) external view override returns (bool, bytes1, bytes32) {
         if (PauseStorageWrapper.isPaused()) {
-            return (false, Eip1066.PAUSED, IPauseStorageWrapper.TokenIsPaused.selector);
+            return (false, Eip1066.PAUSED, IPause.TokenIsPaused.selector);
         }
         (bool status, bytes1 code, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToRedeemFromByPartition(
             _from,

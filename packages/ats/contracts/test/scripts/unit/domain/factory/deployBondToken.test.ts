@@ -363,7 +363,14 @@ describe("Bond Token Deployment", () => {
       const params = createDeployBondParams(mockFactory);
       const regulationData = createMockRegulationData();
 
-      await expect(deployBondFromFactory(params, regulationData)).to.be.rejectedWith("BondDeployed event not found");
+      let threw = false;
+      try {
+        await deployBondFromFactory(params, regulationData);
+      } catch (err: unknown) {
+        threw = true;
+        expect((err as Error).message).to.include("BondDeployed event not found");
+      }
+      expect(threw).to.equal(true);
     });
 
     it("should throw if BondDeployed event not found", async () => {
@@ -372,7 +379,14 @@ describe("Bond Token Deployment", () => {
       const params = createDeployBondParams(mockFactory);
       const regulationData = createMockRegulationData();
 
-      await expect(deployBondFromFactory(params, regulationData)).to.be.rejectedWith("BondDeployed event not found");
+      let threw = false;
+      try {
+        await deployBondFromFactory(params, regulationData);
+      } catch (err: unknown) {
+        threw = true;
+        expect((err as Error).message).to.include("BondDeployed event not found");
+      }
+      expect(threw).to.equal(true);
     });
 
     it("should throw if event has no args", async () => {
@@ -380,7 +394,14 @@ describe("Bond Token Deployment", () => {
       const params = createDeployBondParams(mockFactory);
       const regulationData = createMockRegulationData();
 
-      await expect(deployBondFromFactory(params, regulationData)).to.be.rejectedWith("BondDeployed event not found");
+      let threw = false;
+      try {
+        await deployBondFromFactory(params, regulationData);
+      } catch (err: unknown) {
+        threw = true;
+        expect((err as Error).message).to.include("BondDeployed event not found");
+      }
+      expect(threw).to.equal(true);
     });
 
     it("should throw if diamondAddress is zero address", async () => {
@@ -388,7 +409,14 @@ describe("Bond Token Deployment", () => {
       const params = createDeployBondParams(mockFactory);
       const regulationData = createMockRegulationData();
 
-      await expect(deployBondFromFactory(params, regulationData)).to.be.rejectedWith("Invalid diamond address");
+      let threw = false;
+      try {
+        await deployBondFromFactory(params, regulationData);
+      } catch (err: unknown) {
+        threw = true;
+        expect((err as Error).message).to.include("Invalid diamond address");
+      }
+      expect(threw).to.equal(true);
     });
 
     it("should extract diamondProxyAddress from event args", async () => {

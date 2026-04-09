@@ -86,7 +86,10 @@ describe("ERC1644 Tests", () => {
     });
 
     it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-      await expect(erc1644Facet.initialize_ERC1644(false)).to.be.rejectedWith("AlreadyInitialized");
+      await expect(erc1644Facet.initialize_ERC1644(false)).to.be.revertedWithCustomError(
+        erc1644Facet,
+        "AlreadyInitialized",
+      );
     });
 
     describe("Paused", () => {
@@ -119,7 +122,10 @@ describe("ERC1644 Tests", () => {
     describe("AccessControl", () => {
       it("GIVEN an account without admin role WHEN finalizeControllable THEN transaction fails with AccountHasNoRole", async () => {
         // controller finalize fails
-        await expect(erc1644Facet.connect(signer_C).finalizeControllable()).to.be.rejectedWith("AccountHasNoRole");
+        await expect(erc1644Facet.connect(signer_C).finalizeControllable()).to.be.revertedWithCustomError(
+          accessControlFacet,
+          "AccountHasNoRole",
+        );
       });
 
       it("GIVEN an account without controller role WHEN controllerTransfer THEN transaction fails with AccountHasNoRole", async () => {
@@ -128,14 +134,14 @@ describe("ERC1644 Tests", () => {
           erc1644Facet
             .connect(signer_C)
             .controllerTransfer(signer_D.address, signer_E.address, amount, data, operatorData),
-        ).to.be.rejectedWith("AccountHasNoRole");
+        ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRoles");
       });
 
       it("GIVEN an account without controller role WHEN controllerRedeem THEN transaction fails with AccountHasNoRole", async () => {
         // controller redeem fails
         await expect(
           erc1644Facet.connect(signer_C).controllerRedeem(signer_D.address, amount, data, operatorData),
-        ).to.be.rejectedWith("AccountHasNoRole");
+        ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRoles");
       });
     });
 

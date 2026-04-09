@@ -1,4 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
+// AUTO-GENERATED — DO NOT EDIT.
+// Source: contracts/factory/IFactory.sol
+// Regenerated on every `npx hardhat compile` by the
+// `erc3643-clone-interfaces` task in `tasks/compile.ts`.
+// Edits to this file will be silently overwritten.
 pragma solidity ^0.8.17;
 
 import { TRexIResolverProxy as IResolverProxy } from "./IResolverProxy.sol";
@@ -109,8 +114,26 @@ interface TRexIFactory {
         BondSustainabilityPerformanceTargetRateData bondSustainabilityPerformanceTargetRateData
     );
 
+    event ProxyDeployed(
+        address indexed proxyAddress,
+        IBusinessLogicResolver resolver,
+        bytes32 configKey,
+        uint256 version,
+        IResolverProxy.Rbac[] rbac
+    );
+
     error EmptyResolver(IBusinessLogicResolver resolver);
     error NoInitialAdmins();
+
+    /**
+     * @notice Deploys a new resolver proxy and initializes its rbac
+     */
+    function deployProxy(
+        IBusinessLogicResolver _resolver,
+        bytes32 _configKey,
+        uint256 _version,
+        IResolverProxy.Rbac[] memory _rbacs
+    ) external returns (address);
 
     /**
      * @notice Deploys a new equity given the input equity data

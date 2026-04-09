@@ -3,10 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IAccessControl } from "./IAccessControl.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
-abstract contract AccessControl is IAccessControl, PauseModifiers, AccessControlModifiers {
+abstract contract AccessControl is IAccessControl, Modifiers {
     function grantRole(
         bytes32 _role,
         address _account
@@ -14,7 +14,7 @@ abstract contract AccessControl is IAccessControl, PauseModifiers, AccessControl
         if (!AccessControlStorageWrapper.grantRole(_role, _account)) {
             revert AccountAssignedToRole(_role, _account);
         }
-        emit RoleGranted(msg.sender, _account, _role);
+        emit RoleGranted(EvmAccessors.getMsgSender(), _account, _role);
         return true;
     }
 
@@ -26,7 +26,7 @@ abstract contract AccessControl is IAccessControl, PauseModifiers, AccessControl
         if (!success_) {
             revert AccountNotAssignedToRole(_role, _account);
         }
-        emit RoleRevoked(msg.sender, _account, _role);
+        emit RoleRevoked(EvmAccessors.getMsgSender(), _account, _role);
     }
 
     function applyRoles(
@@ -49,7 +49,7 @@ abstract contract AccessControl is IAccessControl, PauseModifiers, AccessControl
     }
 
     function renounceRole(bytes32 _role) external override onlyUnpaused returns (bool success_) {
-        address account = msg.sender;
+        address account = EvmAccessors.getMsgSender();
         success_ = AccessControlStorageWrapper.revokeRole(_role, account);
         if (!success_) {
             revert AccountNotAssignedToRole(_role, account);

@@ -2,14 +2,16 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _ERC20_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { _DEFAULT_PARTITION, KPI_ERC20_APPROVE_OWNER } from "../../constants/values.sol";
 import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
-import { IERC20StorageWrapper } from "./ERC1400/ERC20/IERC20StorageWrapper.sol";
-import { BasicTransferInfo, IssueData } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
+// IERC20StorageWrapper is now merged into IERC20
+import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { IFactory } from "../../factory/IFactory.sol";
 import { ERC1410BasicStorage, ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 
 struct ERC20Storage {
     string name;
@@ -24,8 +26,6 @@ struct ERC20Storage {
 }
 
 library ERC20StorageWrapper {
-    // --- Initialization ---
-
     function initializeERC20(IERC20.ERC20Metadata calldata erc20Metadata) internal {
         ERC20Storage storage erc20Stor = erc20Storage();
         erc20Stor.name = erc20Metadata.info.name;
@@ -35,8 +35,6 @@ library ERC20StorageWrapper {
         erc20Stor.securityType = erc20Metadata.securityType;
         erc20Stor.initialized = true;
     }
-
-    // --- Balance operations ---
 
     function increaseBalance(address to, uint256 value) internal {
         migrateBalanceIfNeeded(to);
@@ -51,8 +49,6 @@ library ERC20StorageWrapper {
             erc20Storage().balances[from] -= value;
         }
     }
-
-    // --- Total supply operations ---
 
     function increaseTotalSupply(uint256 value) internal {
         migrateTotalSupplyIfNeeded();
@@ -73,27 +69,23 @@ library ERC20StorageWrapper {
         erc20Storage().totalSupply *= factor;
     }
 
-    function adjustDecimals(uint8 decimals) internal {
-        erc20Storage().decimals += decimals;
+    function adjustDecimals(uint8 adjustedDecimals) internal {
+        erc20Storage().decimals += adjustedDecimals;
     }
-
-    // --- Balance adjustments ---
 
     function adjustTotalBalanceFor(uint256 abaf, address account) internal {
         migrateBalanceIfNeeded(account);
-        uint256 factor = AdjustBalancesStorageWrapper.calculateFactorByAbafAndTokenHolder(abaf, account);
         uint256 oldBalance = erc20Storage().balances[account];
-        uint256 newBalance = oldBalance * factor;
+        uint256 newBalance = oldBalance *
+            AdjustBalancesStorageWrapper.calculateFactorByAbafAndTokenHolder(abaf, account);
         if (newBalance != oldBalance) {
             erc20Storage().balances[account] = newBalance;
             unchecked {
-                emit IERC20StorageWrapper.Transfer(address(0), address(0), newBalance - oldBalance);
+                emit IERC20.Transfer(address(0), address(0), newBalance - oldBalance);
             }
         }
         AdjustBalancesStorageWrapper.updateLabafByTokenHolder(abaf, account);
     }
-
-    // --- Allowance updates ---
 
     function beforeAllowanceUpdate(address owner, address spender) internal {
         ERC1410StorageWrapper.triggerAndSyncAll(_DEFAULT_PARTITION, owner, address(0));
@@ -106,42 +98,42 @@ library ERC20StorageWrapper {
 
         if (abaf == labaf) return;
 
-        uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(abaf, labaf);
-
-        erc20Storage().allowed[owner][spender] *= factor;
+        erc20Storage().allowed[owner][spender] *= AdjustBalancesStorageWrapper.calculateFactor(abaf, labaf);
         AdjustBalancesStorageWrapper.updateAllowanceLabaf(owner, spender, abaf);
     }
 
-    // --- Approval and transfers ---
-
     function approve(address owner, address spender, uint256 value) internal returns (bool) {
-        assert(owner != address(0));
+        _checkUnexpectedError(owner == address(0), KPI_ERC20_APPROVE_OWNER);
 
         if (spender == address(0)) {
-            revert IERC20StorageWrapper.SpenderWithZeroAddress();
+            revert IERC20.SpenderWithZeroAddress();
         }
 
         erc20Storage().allowed[owner][spender] = value;
-        emit IERC20StorageWrapper.Approval(owner, spender, value);
+        emit IERC20.Approval(owner, spender, value);
         return true;
     }
 
     function increaseAllowance(address spender, uint256 addedValue) internal returns (bool) {
         if (spender == address(0)) {
-            revert IERC20StorageWrapper.SpenderWithZeroAddress();
+            revert IERC20.SpenderWithZeroAddress();
         }
 
-        increaseAllowedBalance(msg.sender, spender, addedValue);
+        increaseAllowedBalance(EvmAccessors.getMsgSender(), spender, addedValue);
 
         return true;
     }
 
     function decreaseAllowance(address spender, uint256 subtractedValue) internal returns (bool) {
         if (spender == address(0)) {
-            revert IERC20StorageWrapper.SpenderWithZeroAddress();
+            revert IERC20.SpenderWithZeroAddress();
         }
-        decreaseAllowedBalance(msg.sender, spender, subtractedValue);
-        emit IERC20StorageWrapper.Approval(msg.sender, spender, erc20Storage().allowed[msg.sender][spender]);
+        decreaseAllowedBalance(EvmAccessors.getMsgSender(), spender, subtractedValue);
+        emit IERC20.Approval(
+            EvmAccessors.getMsgSender(),
+            spender,
+            erc20Storage().allowed[EvmAccessors.getMsgSender()][spender]
+        );
         return true;
     }
 
@@ -149,41 +141,41 @@ library ERC20StorageWrapper {
         decreaseAllowedBalance(from, spender, value);
         ERC1410StorageWrapper.transferByPartition(
             from,
-            BasicTransferInfo(to, value),
+            IERC1410Types.BasicTransferInfo(to, value),
             _DEFAULT_PARTITION,
             "",
             spender,
             ""
         );
-        emit IERC20StorageWrapper.Transfer(from, to, value);
+        emit IERC20.Transfer(from, to, value);
         return true;
     }
 
     function transfer(address from, address to, uint256 value) internal returns (bool) {
         ERC1410StorageWrapper.transferByPartition(
             from,
-            BasicTransferInfo(to, value),
+            IERC1410Types.BasicTransferInfo(to, value),
             _DEFAULT_PARTITION,
             "",
             address(0),
             ""
         );
-        emit IERC20StorageWrapper.Transfer(from, to, value);
+        emit IERC20.Transfer(from, to, value);
         return true;
     }
 
     function mint(address to, uint256 value) internal {
-        ERC1410StorageWrapper.issueByPartition(IssueData(_DEFAULT_PARTITION, to, value, ""));
-        emit IERC20StorageWrapper.Transfer(address(0), to, value);
+        ERC1410StorageWrapper.issueByPartition(IERC1410Types.IssueData(_DEFAULT_PARTITION, to, value, ""));
+        emit IERC20.Transfer(address(0), to, value);
     }
 
     function burn(address from, uint256 value) internal {
         ERC1410StorageWrapper.redeemByPartition(_DEFAULT_PARTITION, from, address(0), value, "", "");
-        emit IERC20StorageWrapper.Transfer(from, address(0), value);
+        emit IERC20.Transfer(from, address(0), value);
     }
 
     function burnFrom(address account, uint256 value) internal {
-        decreaseAllowedBalance(account, msg.sender, value);
+        decreaseAllowedBalance(account, EvmAccessors.getMsgSender(), value);
         burn(account, value);
     }
 
@@ -193,7 +185,7 @@ library ERC20StorageWrapper {
         ERC20Storage storage erc20Stor = erc20Storage();
 
         if (value > erc20Stor.allowed[from][spender]) {
-            revert IERC20StorageWrapper.InsufficientAllowance(spender, from);
+            revert IERC20.InsufficientAllowance(spender, from);
         }
 
         erc20Stor.allowed[from][spender] -= value;
@@ -206,10 +198,8 @@ library ERC20StorageWrapper {
 
         erc20Stor.allowed[from][spender] += value;
 
-        emit IERC20StorageWrapper.Approval(from, spender, erc20Storage().allowed[from][spender]);
+        emit IERC20.Approval(from, spender, erc20Storage().allowed[from][spender]);
     }
-
-    // --- Migration functions ---
 
     function migrateTotalSupplyIfNeeded() internal {
         ERC1410BasicStorage storage $ = ERC1410StorageWrapper.erc1410BasicStorage();
@@ -224,8 +214,6 @@ library ERC20StorageWrapper {
         erc20Storage().balances[tokenHolder] = $.DEPRECATED_balances[tokenHolder];
         $.DEPRECATED_balances[tokenHolder] = 0;
     }
-
-    // --- View functions ---
 
     function totalSupply() internal view returns (uint256 totalSupply_) {
         totalSupply_ = ERC1410StorageWrapper.erc1410BasicStorage().DEPRECATED_totalSupply;
@@ -277,11 +265,12 @@ library ERC20StorageWrapper {
     }
 
     function allowanceAdjustedAt(address owner, address spender, uint256 timestamp) internal view returns (uint256) {
-        uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(
-            AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
-            AdjustBalancesStorageWrapper.getAllowanceLabaf(owner, spender)
-        );
-        return allowance(owner, spender) * factor;
+        return
+            allowance(owner, spender) *
+            AdjustBalancesStorageWrapper.calculateFactor(
+                AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
+                AdjustBalancesStorageWrapper.getAllowanceLabaf(owner, spender)
+            );
     }
 
     function erc20Storage() internal pure returns (ERC20Storage storage erc20Storage_) {

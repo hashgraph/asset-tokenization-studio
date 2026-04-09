@@ -24,8 +24,8 @@ abstract contract PartitionModifiers {
         _;
     }
 
-    modifier onlyUnProtectedPartitionsOrWildCardRole(bytes32 partition, bool isWildCardRole) {
-        ProtectedPartitionsStorageWrapper._checkUnProtectedPartitionsOrWildCardRole(partition, isWildCardRole);
+    modifier onlyUnProtectedPartitionsOrWildCardRole() {
+        ProtectedPartitionsStorageWrapper.requireUnProtectedPartitionsOrWildCardRole();
         _;
     }
 }

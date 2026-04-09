@@ -3,8 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IKpiLinkedRate } from "./IKpiLinkedRate.sol";
 import { _INTEREST_RATE_MANAGER_ROLE } from "../../../../constants/roles.sol";
-import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
 import { InterestRateStorageWrapper } from "../../../../domain/asset/InterestRateStorageWrapper.sol";
+import { ScheduledTasksStorageWrapper } from "../../../../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
 
 contract KpiLinkedRate is IKpiLinkedRate, Modifiers {
@@ -20,16 +20,16 @@ contract KpiLinkedRate is IKpiLinkedRate, Modifiers {
 
     function setInterestRate(
         InterestRate calldata _newInterestRate
-    ) external onlyUnpaused onlyRole(_INTEREST_RATE_MANAGER_ROLE) {
-        InterestRateStorageWrapper.requireValidInterestRate(_newInterestRate);
+    ) external onlyUnpaused onlyRole(_INTEREST_RATE_MANAGER_ROLE) onlyValidInterestRate(_newInterestRate) {
+        ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();
         InterestRateStorageWrapper.setInterestRate(_newInterestRate);
         emit InterestRateUpdated(msg.sender, _newInterestRate);
     }
 
     function setImpactData(
         ImpactData calldata _newImpactData
-    ) external onlyUnpaused onlyRole(_INTEREST_RATE_MANAGER_ROLE) {
-        InterestRateStorageWrapper.requireValidImpactData(_newImpactData);
+    ) external onlyUnpaused onlyRole(_INTEREST_RATE_MANAGER_ROLE) onlyValidImpactData(_newImpactData) {
+        ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();
         InterestRateStorageWrapper.setImpactData(_newImpactData);
         emit ImpactDataUpdated(msg.sender, _newImpactData);
     }

@@ -3,16 +3,16 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ISnapshots, HolderBalance } from "./ISnapshots.sol";
 import { _SNAPSHOT_ROLE } from "../../../constants/roles.sol";
-import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { SnapshotsStorageWrapper } from "../../../domain/asset/SnapshotsStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
-abstract contract Snapshots is ISnapshots, PauseModifiers, AccessControlModifiers {
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+
+abstract contract Snapshots is ISnapshots, Modifiers {
     function takeSnapshot() external override onlyUnpaused onlyRole(_SNAPSHOT_ROLE) returns (uint256 snapshotID_) {
         ScheduledTasksStorageWrapper.triggerScheduledCrossOrderedTasks(0);
         snapshotID_ = SnapshotsStorageWrapper.takeSnapshot();
-        emit SnapshotTaken(msg.sender, snapshotID_);
+        emit SnapshotTaken(EvmAccessors.getMsgSender(), snapshotID_);
     }
 
     function decimalsAtSnapshot(uint256 _snapshotID) external view returns (uint8 decimals_) {

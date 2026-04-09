@@ -13,8 +13,6 @@ struct ProceedRecipientsDataStorage {
 }
 
 library ProceedRecipientsStorageWrapper {
-    // --- Initialization ---
-
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ProceedRecipients(address[] calldata _proceedRecipients, bytes[] calldata _data) internal {
         uint256 length = _proceedRecipients.length;
@@ -32,8 +30,6 @@ library ProceedRecipientsStorageWrapper {
 
         ExternalListManagementStorageWrapper.setExternalListInitialized(_PROCEED_RECIPIENTS_STORAGE_POSITION);
     }
-
-    // --- State-changing functions ---
 
     function addProceedRecipient(address _proceedRecipient, bytes calldata _data) internal {
         ExternalListManagementStorageWrapper.addExternalList(_PROCEED_RECIPIENTS_STORAGE_POSITION, _proceedRecipient);
@@ -56,8 +52,6 @@ library ProceedRecipientsStorageWrapper {
         delete proceedRecipientsDataStorage().proceedRecipientData[_proceedRecipient];
     }
 
-    // --- Guard functions ---
-
     function requireProceedRecipient(address _proceedRecipient) internal view {
         if (!isProceedRecipient(_proceedRecipient)) {
             revert IProceedRecipients.ProceedRecipientNotFound(_proceedRecipient);
@@ -69,8 +63,6 @@ library ProceedRecipientsStorageWrapper {
             revert IProceedRecipients.ProceedRecipientAlreadyExists(_proceedRecipient);
         }
     }
-
-    // --- Read functions ---
 
     function getProceedRecipientData(address _proceedRecipient) internal view returns (bytes memory) {
         return proceedRecipientsDataStorage().proceedRecipientData[_proceedRecipient];
@@ -104,8 +96,6 @@ library ProceedRecipientsStorageWrapper {
         return
             ExternalListManagementStorageWrapper.externalListStorage(_PROCEED_RECIPIENTS_STORAGE_POSITION).initialized;
     }
-
-    // --- Accessor functions ---
 
     function proceedRecipientsDataStorage()
         internal

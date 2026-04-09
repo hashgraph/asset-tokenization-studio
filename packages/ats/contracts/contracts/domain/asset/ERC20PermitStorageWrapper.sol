@@ -10,6 +10,7 @@ import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ResolverProxyStorageWrapper } from "../core/ResolverProxyStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 struct ERC20PermitStorage {
     // solhint-disable-next-line var-name-mixedcase
@@ -21,8 +22,6 @@ struct ERC20PermitStorage {
 }
 
 library ERC20PermitStorageWrapper {
-    // --- State-changing functions ---
-
     function permit(
         address owner,
         address spender,
@@ -38,18 +37,21 @@ library ERC20PermitStorageWrapper {
 
         uint256 currentNonce = NonceStorageWrapper.getNonceFor(owner);
 
-        bytes32 structHash = keccak256(abi.encode(ERC20PERMIT_TYPEHASH, owner, spender, value, currentNonce, deadline));
         NonceStorageWrapper.setNonceFor(currentNonce + 1, owner);
         // solhint-disable-next-line func-name-mixedcase
-        address signer = ECDSA.recover(ECDSA.toTypedDataHash(DOMAIN_SEPARATOR(), structHash), v, r, s);
+        address signer = ECDSA.recover(
+            ECDSA.toTypedDataHash(
+                DOMAIN_SEPARATOR(),
+                keccak256(abi.encode(ERC20PERMIT_TYPEHASH, owner, spender, value, currentNonce, deadline))
+            ),
+            v,
+            r,
+            s
+        );
 
-        if (signer != owner) {
-            revert IERC20Permit.ERC2612InvalidSigner(signer, owner);
-        }
+        if (signer != owner) revert IERC20Permit.ERC2612InvalidSigner(signer, owner);
         ERC20StorageWrapper.approve(owner, spender, value);
     }
-
-    // --- Internal view functions ---
 
     // solhint-disable-next-line func-name-mixedcase
     function DOMAIN_SEPARATOR() internal view returns (bytes32) {
@@ -57,7 +59,7 @@ library ERC20PermitStorageWrapper {
             _getDomainHash(
                 ERC20StorageWrapper.getName(),
                 Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
-                block.chainid,
+                EvmAccessors.getChainId(),
                 address(this)
             );
     }

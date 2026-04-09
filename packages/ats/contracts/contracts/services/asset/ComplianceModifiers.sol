@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IERC1594 } from "../../facets/layer_1/ERC1400/ERC1594/IERC1594.sol";
 import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
-import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 
 /**
  * @title ComplianceModifiers
@@ -49,6 +47,24 @@ abstract contract ComplianceModifiers {
      */
     modifier onlyCanRedeemFromByPartition(address from, bytes32 partition, uint256 value) {
         ERC1594StorageWrapper.requireCanRedeemFromByPartition(from, partition, value);
+        _;
+    }
+
+    /**
+     * @dev Modifier that verifies the transfer between two addresses satisfies
+     * all compliance rules enforced by the compliance module.
+     *
+     * Requirements:
+     * - The transfer from `from` to `to` must pass the compliance check.
+     * - If `checkSender` is true, the caller (msg.sender) is also validated
+     *   against compliance rules.
+     *
+     * @param from The sender/source address to validate.
+     * @param to The recipient/target address to validate.
+     * @param checkSender Whether to also validate msg.sender against compliance rules.
+     */
+    modifier onlyCompliant(address from, address to, bool checkSender) {
+        ERC1594StorageWrapper.checkCompliance(from, to, checkSender);
         _;
     }
 }

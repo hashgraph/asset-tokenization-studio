@@ -21,15 +21,11 @@ library KycStorageWrapper {
     using Pagination for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    // --- Initialization ---
-
     function initializeInternalKyc(bool _internalKycActivated) internal {
         KycStorage storage ks = kycStorage();
         ks.initialized = true;
         ks.internalKycActivated = _internalKycActivated;
     }
-
-    // --- State-changing functions ---
 
     function setInternalKyc(bool _activated) internal returns (bool success_) {
         kycStorage().internalKycActivated = _activated;
@@ -43,8 +39,9 @@ library KycStorageWrapper {
         uint256 _validTo,
         address _issuer
     ) internal returns (bool success_) {
-        kycStorage().kyc[_account] = IKyc.KycData(_validFrom, _validTo, _vcId, _issuer, IKyc.KycStatus.GRANTED);
-        kycStorage().kycAddressesByStatus[IKyc.KycStatus.GRANTED].add(_account);
+        KycStorage storage $ = kycStorage();
+        $.kyc[_account] = IKyc.KycData(_validFrom, _validTo, _vcId, _issuer, IKyc.KycStatus.GRANTED);
+        $.kycAddressesByStatus[IKyc.KycStatus.GRANTED].add(_account);
         success_ = true;
     }
 
@@ -54,17 +51,9 @@ library KycStorageWrapper {
         success_ = true;
     }
 
-    // --- Guard functions ---
-
     function requireValidKycStatus(IKyc.KycStatus _kycStatus, address _account) internal view {
         if (!verifyKycStatus(_kycStatus, _account)) revert IKyc.InvalidKycStatus();
     }
-
-    function _checkValidKycStatus(IKyc.KycStatus _kycStatus, address _account) internal view {
-        if (!verifyKycStatus(_kycStatus, _account)) revert IKyc.InvalidKycStatus();
-    }
-
-    // --- Read functions ---
 
     function getKycStatusFor(address _account, uint256 _timestamp) internal view returns (IKyc.KycStatus) {
         IKyc.KycData memory kycFor = getKycFor(_account);
@@ -110,8 +99,7 @@ library KycStorageWrapper {
     }
 
     function verifyKycStatus(IKyc.KycStatus _kycStatus, address _account) internal view returns (bool) {
-        KycStorage storage ks = kycStorage();
-        bool internalKycValid = !ks.internalKycActivated ||
+        bool internalKycValid = !kycStorage().internalKycActivated ||
             getKycStatusFor(_account, TimeTravelStorageWrapper.getBlockTimestamp()) == _kycStatus;
         return internalKycValid && ExternalListManagementStorageWrapper.isExternallyGranted(_account, _kycStatus);
     }
@@ -123,8 +111,6 @@ library KycStorageWrapper {
     function isKycInitialized() internal view returns (bool) {
         return kycStorage().initialized;
     }
-
-    // --- Pure functions ---
 
     function requireValidDates(uint256 _validFrom, uint256 _validTo, uint256 _timestamp) internal pure {
         if (_validFrom > _validTo || _validTo < _timestamp) revert IKyc.InvalidDates();
