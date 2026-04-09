@@ -17,7 +17,14 @@ import { ethers } from "hardhat";
 import { ZeroAddress, ethers as ethersTypes } from "ethers";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture } from "../infrastructure.fixture";
-import { ATS_ROLES, createLoanConfiguration, LOAN_CONFIG_ID } from "@scripts/domain";
+import {
+  ATS_ROLES,
+  buildRegulationData,
+  createLoanConfiguration,
+  FactoryRegulationDataParams,
+  LOAN_CONFIG_ID,
+  SecurityDataParams,
+} from "@scripts/domain";
 import {
   AccessControlFacet__factory,
   CapFacet__factory,
@@ -40,32 +47,19 @@ import {
   ExternalPauseManagementFacet__factory,
   ProceedRecipientsFacet__factory,
   TimeTravelFacet__factory,
-  Factory__factory,
   Loan__factory,
 } from "@contract-types";
-
 import { decodeEvent } from "@scripts/infrastructure";
-import { DeepPartial } from "@scripts";
+import { DeepPartial, TIME_PERIODS_S } from "@scripts";
 import { getDltTimestamp } from "../hardhatHelpers";
+import { DEFAULT_BOND_PARAMS, getRegulationData, getSecurityData } from "@test";
 
 /**
  * Default loan token parameters for test fixtures.
  */
 export const DEFAULT_LOAN_PARAMS = {
-  name: "TESTLOAN",
-  symbol: "TLN",
-  isin: isinGenerator(),
-  decimals: 0,
-  maxSupply: ethers.MaxUint256,
-  isWhiteList: false,
-  isControllable: true,
-  arePartitionsProtected: false,
-  isMultiPartition: false,
-  clearingActive: false,
-  internalKycActivated: true,
   nominalValue: 100,
   nominalValueDecimals: 2,
-  erc20VotesActivated: false,
   // Loan-specific defaults
   currency: "0x555344", // USD
   loanStructureType: 1, // TERM_LOAN
@@ -89,6 +83,14 @@ export const DEFAULT_LOAN_PARAMS = {
   loanToValue: 0,
   performanceStatus: 0, // PERFORMING
   daysPastDue: 0,
+  originatorAccount: async () => {
+    const wallet = ethers.Wallet.createRandom();
+    return wallet.address;
+  },
+  servicerAccount: async () => {
+    const wallet = ethers.Wallet.createRandom();
+    return wallet.address;
+  },
   startingDate: async () => {
     return (await getDltTimestamp()) + 3600; // block.timestamp + 1 hour
   },
@@ -131,20 +133,62 @@ interface LoanInitData {
 }
 
 interface DeployLoanTokenFixtureParams {
-  name: string;
-  symbol: string;
-  isin: string;
-  decimals: number;
-  maxSupply: ethersTypes.BigNumberish;
-  isWhiteList: boolean;
-  isControllable: boolean;
-  arePartitionsProtected: boolean;
-  isMultiPartition: boolean;
-  clearingActive: boolean;
-  internalKycActivated: boolean;
-  nominalValueDecimals: number;
-  erc20VotesActivated: boolean;
+  nominalValue: 100;
+  nominalValueDecimals: 2;
   loanInit: LoanInitData;
+  securityDataParams: SecurityDataParams;
+}
+
+export async function getLoanDetails(params?: DeepPartial<LoanInitData>) {
+  const maturityDate =
+    params?.maturityDate ??
+    (params?.startingDate
+      ? params.startingDate + TIME_PERIODS_S.YEAR
+      : (await DEFAULT_BOND_PARAMS.startingDate()) + TIME_PERIODS_S.YEAR);
+  return {
+    collateral: {
+      loanToValue: params?.loanToValue ?? DEFAULT_LOAN_PARAMS.loanToValue,
+      totalCollateralValue: params?.totalCollateralValue ?? DEFAULT_LOAN_PARAMS.totalCollateralValue,
+    },
+    riskData: {
+      internalRiskGrade: params?.internalRiskGrade ?? DEFAULT_LOAN_PARAMS.internalRiskGrade,
+      defaultProbability: params?.defaultProbability ?? DEFAULT_LOAN_PARAMS.defaultProbability,
+      lossGivenDefault: params?.lossGivenDefault ?? DEFAULT_LOAN_PARAMS.lossGivenDefault,
+    },
+    loanBasicData: {
+      currency: params?.currency ?? DEFAULT_LOAN_PARAMS.currency,
+      startingDate: params?.startingDate ?? (await DEFAULT_LOAN_PARAMS.startingDate()),
+      maturityDate: maturityDate,
+      loanStructureType: params?.loanStructureType ?? DEFAULT_LOAN_PARAMS.loanStructureType,
+      repaymentType: params?.repaymentType ?? DEFAULT_LOAN_PARAMS.repaymentType,
+      interestType: params?.interestType ?? DEFAULT_LOAN_PARAMS.interestType,
+      originatorAccount: params?.originatorAccount ?? (await DEFAULT_LOAN_PARAMS.originatorAccount()),
+      servicerAccount: params?.servicerAccount ?? (await DEFAULT_LOAN_PARAMS.servicerAccount()),
+      signingDate:
+        params?.signingDate ??
+        (params?.startingDate ? params.startingDate - 1800 : await DEFAULT_LOAN_PARAMS.startingDate()),
+    },
+    loanInterestData: {
+      baseReferenceRate: params?.baseReferenceRate ?? DEFAULT_LOAN_PARAMS.baseReferenceRate,
+      floorRate: params?.floorRate ?? DEFAULT_LOAN_PARAMS.floorRate,
+      capRate: params?.capRate ?? DEFAULT_LOAN_PARAMS.capRate,
+      rateMargin: params?.rateMargin ?? DEFAULT_LOAN_PARAMS.rateMargin,
+      dayCount: params?.dayCount ?? DEFAULT_LOAN_PARAMS.dayCount,
+      paymentFrequency: params?.paymentFrequency ?? DEFAULT_LOAN_PARAMS.paymentFrequency,
+      firstAccrualDate:
+        params?.firstAccrualDate ??
+        (params?.startingDate ? params.startingDate : await DEFAULT_LOAN_PARAMS.startingDate()),
+      prepaymentPenalty: params?.prepaymentPenalty ?? DEFAULT_LOAN_PARAMS.prepaymentPenalty,
+      commitmentFee: params?.commitmentFee ?? DEFAULT_LOAN_PARAMS.commitmentFee,
+      utilizationFee: params?.utilizationFee ?? DEFAULT_LOAN_PARAMS.utilizationFee,
+      utilizationFeeType: params?.utilizationFeeType ?? DEFAULT_LOAN_PARAMS.utilizationFeeType,
+      servicingFee: params?.servicingFee ?? DEFAULT_LOAN_PARAMS.servicingFee,
+    },
+    loanPerformanceStatus: {
+      performanceStatus: params?.performanceStatus ?? DEFAULT_LOAN_PARAMS.performanceStatus,
+      daysPastDue: params?.daysPastDue ?? DEFAULT_LOAN_PARAMS.daysPastDue,
+    },
+  };
 }
 
 /**
@@ -159,17 +203,31 @@ interface DeployLoanTokenFixtureParams {
  * @param params - Optional custom loan token parameters
  * @returns Infrastructure + deployed loan token + connected facets
  */
-export async function deployLoanTokenFixture(params: DeepPartial<DeployLoanTokenFixtureParams> = {}) {
-  // Merge with defaults
-  const p = {
-    ...DEFAULT_LOAN_PARAMS,
-    ...params,
-  };
-
+export async function deployLoanTokenFixture({
+  loanParams,
+  regulationTypeParams,
+  useLoadFixture = true,
+}: {
+  loanParams?: DeepPartial<DeployLoanTokenFixtureParams>;
+  regulationTypeParams?: DeepPartial<FactoryRegulationDataParams>;
+  useLoadFixture?: boolean;
+} = {}) {
   // Load base infrastructure (BLR + all facets deployed)
-  const infrastructure = await loadFixture(deployAtsInfrastructureFixture);
-  const { blr, deployer, factory } = infrastructure;
+  const infrastructure = useLoadFixture
+    ? await loadFixture(deployAtsInfrastructureFixture)
+    : await deployAtsInfrastructureFixture();
+  const { factory, blr, deployer } = infrastructure;
 
+  const securityData = getSecurityData(blr, {
+    ...loanParams?.securityDataParams,
+    resolverProxyConfiguration: {
+      key: LOAN_CONFIG_ID,
+      version: 1,
+    },
+  });
+
+  const loanDetails = await getLoanDetails(loanParams?.loanInit);
+  const regulationData = getRegulationData(regulationTypeParams);
   // Build facet addresses map from deployment.facets array
   const facetAddresses: Record<string, string> = {};
   for (const facet of infrastructure.deployment.facets) {
@@ -218,85 +276,42 @@ export async function deployLoanTokenFixture(params: DeepPartial<DeployLoanToken
   const timeTravelFacet = TimeTravelFacet__factory.connect(proxyAddress, deployer);
   const loanFacet = Loan__factory.connect(proxyAddress, deployer);
 
-  await controlListFacet.initialize_ControlList(p.isWhiteList);
-  await erc1410ManagementFacet.initialize_ERC1410(p.isMultiPartition);
-  await erc1644Facet.initialize_ERC1644(p.isControllable);
+  await controlListFacet.initialize_ControlList(securityData.isWhiteList);
+  await erc1410ManagementFacet.initialize_ERC1410(securityData.isMultiPartition);
+  await erc1644Facet.initialize_ERC1644(securityData.isControllable);
   await erc20Facet.initialize_ERC20({
-    info: { name: p.name, symbol: p.symbol, decimals: p.decimals, isin: p.isin },
+    info: {
+      name: securityData.erc20MetadataInfo.name,
+      symbol: securityData.erc20MetadataInfo.symbol,
+      decimals: securityData.erc20MetadataInfo.decimals,
+      isin: securityData.erc20MetadataInfo.isin,
+    },
     securityType: 1, // SecurityType.Equity (reuse for loan)
   });
   await erc1594Facet.initialize_ERC1594();
-  await capFacet.initialize_Cap(p.maxSupply, []);
-  await protectedPartitionsFacet.initialize_ProtectedPartitions(p.arePartitionsProtected);
-  await clearingActionsFacet.initializeClearing(p.clearingActive);
+  await capFacet.initialize_Cap(securityData.maxSupply, []);
+  await protectedPartitionsFacet.initialize_ProtectedPartitions(securityData.arePartitionsProtected);
+  await clearingActionsFacet.initializeClearing(securityData.clearingActive);
   await externalPauseManagementFacet.initialize_ExternalPauses([]);
   await externalControlListManagementFacet.initialize_ExternalControlLists([]);
-  await kycFacet.initializeInternalKyc(p.internalKycActivated);
+  await kycFacet.initializeInternalKyc(securityData.internalKycActivated);
   await externalKycListManagementFacet.initialize_ExternalKycLists([]);
-  await erc20VotesFacet.initialize_ERC20Votes(p.erc20VotesActivated);
+  await erc20VotesFacet.initialize_ERC20Votes(securityData.erc20VotesActivated);
   await erc3643ManagementFacet.initialize_ERC3643(ZeroAddress, ZeroAddress);
-  await nominalValueFacet.initialize_NominalValue(p.nominalValue, p.nominalValueDecimals);
-  const li = p.loanInit;
-  const startingDate = li?.startingDate ?? (await DEFAULT_LOAN_PARAMS.startingDate());
-  const maturityDate = li?.maturityDate ?? startingDate + 100_000;
-  const signingDate = li?.signingDate ?? startingDate - 1800;
-  const loanDetailsData = {
-    loanBasicData: {
-      currency: li?.currency ?? DEFAULT_LOAN_PARAMS.currency,
-      startingDate,
-      maturityDate,
-      loanStructureType: li?.loanStructureType ?? DEFAULT_LOAN_PARAMS.loanStructureType,
-      repaymentType: li?.repaymentType ?? DEFAULT_LOAN_PARAMS.repaymentType,
-      interestType: li?.interestType ?? DEFAULT_LOAN_PARAMS.interestType,
-      signingDate,
-      originatorAccount: li?.originatorAccount ?? deployer.address,
-      servicerAccount: li?.servicerAccount ?? deployer.address,
+  await nominalValueFacet.initialize_NominalValue(
+    loanParams?.nominalValue ?? DEFAULT_LOAN_PARAMS.nominalValue,
+    loanParams?.nominalValueDecimals ?? DEFAULT_LOAN_PARAMS.nominalValueDecimals,
+  );
+
+  await loanFacet.initialize_Loan(
+    loanDetails,
+    buildRegulationData(regulationData.regulationType, regulationData.regulationSubType),
+    {
+      countriesControlListType: regulationData.additionalSecurityData.countriesControlListType,
+      listOfCountries: regulationData.additionalSecurityData.listOfCountries,
+      info: regulationData.additionalSecurityData.info,
     },
-    loanInterestData: {
-      baseReferenceRate: li?.baseReferenceRate ?? DEFAULT_LOAN_PARAMS.baseReferenceRate,
-      floorRate: li?.floorRate ?? DEFAULT_LOAN_PARAMS.floorRate,
-      capRate: li?.capRate ?? DEFAULT_LOAN_PARAMS.capRate,
-      rateMargin: li?.rateMargin ?? DEFAULT_LOAN_PARAMS.rateMargin,
-      dayCount: li?.dayCount ?? DEFAULT_LOAN_PARAMS.dayCount,
-      paymentFrequency: li?.paymentFrequency ?? DEFAULT_LOAN_PARAMS.paymentFrequency,
-      firstAccrualDate: li?.firstAccrualDate ?? startingDate,
-      prepaymentPenalty: li?.prepaymentPenalty ?? DEFAULT_LOAN_PARAMS.prepaymentPenalty,
-      commitmentFee: li?.commitmentFee ?? DEFAULT_LOAN_PARAMS.commitmentFee,
-      utilizationFee: li?.utilizationFee ?? DEFAULT_LOAN_PARAMS.utilizationFee,
-      utilizationFeeType: li?.utilizationFeeType ?? DEFAULT_LOAN_PARAMS.utilizationFeeType,
-      servicingFee: li?.servicingFee ?? DEFAULT_LOAN_PARAMS.servicingFee,
-    },
-    riskData: {
-      internalRiskGrade: li?.internalRiskGrade ?? DEFAULT_LOAN_PARAMS.internalRiskGrade,
-      defaultProbability: li?.defaultProbability ?? DEFAULT_LOAN_PARAMS.defaultProbability,
-      lossGivenDefault: li?.lossGivenDefault ?? DEFAULT_LOAN_PARAMS.lossGivenDefault,
-    },
-    collateral: {
-      totalCollateralValue: li?.totalCollateralValue ?? DEFAULT_LOAN_PARAMS.totalCollateralValue,
-      loanToValue: li?.loanToValue ?? DEFAULT_LOAN_PARAMS.loanToValue,
-    },
-    loanPerformanceStatus: {
-      performanceStatus: li?.performanceStatus ?? DEFAULT_LOAN_PARAMS.performanceStatus,
-      daysPastDue: li?.daysPastDue ?? DEFAULT_LOAN_PARAMS.daysPastDue,
-    },
-  };
-  const regulationData = {
-    regulationType: 1,
-    regulationSubType: 0,
-    dealSize: 0,
-    accreditedInvestors: 1,
-    maxNonAccreditedInvestors: 0,
-    manualInvestorVerification: 1,
-    internationalInvestors: 1,
-    resaleHoldPeriod: 0,
-  };
-  const additionalSecurityData = {
-    countriesControlListType: true,
-    listOfCountries: "US",
-    info: "test",
-    country: "US",
-  };
-  await loanFacet.initialize_Loan(loanDetailsData, regulationData, additionalSecurityData);
+  );
 
   return {
     ...infrastructure,

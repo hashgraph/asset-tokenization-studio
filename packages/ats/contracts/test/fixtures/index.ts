@@ -42,7 +42,7 @@ export {
 } from "./tokens/bondSustainabilityPerformanceTargetRate.fixture";
 
 // Loan token fixtures
-export { deployLoanTokenFixture, DEFAULT_LOAN_PARAMS } from "./tokens/loan.fixture";
+export { deployLoanTokenFixture, DEFAULT_LOAN_PARAMS, getLoanDetails } from "./tokens/loan.fixture";
 
 // Loan Portfolio token fixtures
 export { deployLoanPortfolioTokenFixture, DEFAULT_LOAN_PORTFOLIO_PARAMS } from "./tokens/loanPortfolio.fixture";

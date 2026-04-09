@@ -7,6 +7,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { type IAsset } from "@contract-types";
 import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES } from "@scripts";
 import { deployLoanTokenFixture, getDltTimestamp } from "@test";
+import { DEFAULT_SECURITY_PARAMS } from "test/fixtures/tokens/common.fixture";
 
 const TOTAL_UNITS = 1_000;
 const TOKENS_TO_REDEEM = 500;
@@ -30,7 +31,7 @@ describe("AmortizationFacet", () => {
   }
 
   async function deployAmortizationLoanFixture() {
-    const base = await deployLoanTokenFixture({ internalKycActivated: false });
+    const base = await deployLoanTokenFixture({ loanParams: { securityDataParams: { internalKycActivated: false } } });
     const { tokenAddress, deployer } = base;
 
     const asset = await ethers.getContractAt("IAsset", tokenAddress, deployer);
@@ -432,7 +433,7 @@ describe("AmortizationFacet", () => {
       const [tokenAmount, decimals] = await asset.getAmortizationPaymentAmount(1, deployer.address);
 
       expect(tokenAmount).to.equal(BigInt(TOKENS_TO_REDEEM));
-      expect(decimals).to.equal(0);
+      expect(decimals).to.equal(DEFAULT_SECURITY_PARAMS.decimals);
     });
   });
 
@@ -471,7 +472,7 @@ describe("AmortizationFacet", () => {
 
       const amForDeployer = await asset.getAmortizationFor(1, deployer.address);
       expect(amForDeployer.tokenBalance).to.equal(BigInt(TOTAL_UNITS / 2));
-      expect(amForDeployer.decimalsBalance).to.equal(0);
+      expect(amForDeployer.decimalsBalance).to.equal(DEFAULT_SECURITY_PARAMS.decimals);
       expect(amForDeployer.recordDateReached).to.equal(true);
       expect(amForDeployer.abafAtSnapshot).to.equal(1n);
       expect(amForDeployer.nominalValueDecimals).to.equal(2);
@@ -479,7 +480,7 @@ describe("AmortizationFacet", () => {
 
       const amForUser1 = await asset.getAmortizationFor(1, user1.address);
       expect(amForUser1.tokenBalance).to.equal(BigInt(TOTAL_UNITS / 2));
-      expect(amForUser1.decimalsBalance).to.equal(0);
+      expect(amForUser1.decimalsBalance).to.equal(DEFAULT_SECURITY_PARAMS.decimals);
       expect(amForUser1.recordDateReached).to.equal(true);
       expect(amForUser1.abafAtSnapshot).to.equal(1n);
       expect(amForUser1.nominalValueDecimals).to.equal(2);
@@ -657,12 +658,12 @@ describe("AmortizationFacet", () => {
       const amortizationFor = await asset.getAmortizationFor(1, deployer.address);
       expect(amortizationFor.holdId).to.be.equal(1);
       expect(amortizationFor.holdActive).to.equal(true);
-      // hold fields — adjusted at current block (no adjustBalance → decimals=0, abaf=1)
+      // hold fields — adjusted at current block (no adjustBalance → decimals=6, abaf=1)
       expect(amortizationFor.tokenHeldAmount).to.equal(holdAmount);
-      expect(amortizationFor.decimalsHeld).to.equal(0);
+      expect(amortizationFor.decimalsHeld).to.equal(DEFAULT_SECURITY_PARAMS.decimals);
       expect(amortizationFor.abafAtHold).to.equal(1n);
       // snapshot fields — snapshotId != 0
-      expect(amortizationFor.decimalsBalance).to.equal(0);
+      expect(amortizationFor.decimalsBalance).to.equal(DEFAULT_SECURITY_PARAMS.decimals);
       expect(amortizationFor.recordDateReached).to.equal(true);
       expect(amortizationFor.abafAtSnapshot).to.equal(1n); // snapshotId != 0, no adjustBalance → _abafAtSnapshot fallback = 1
     });
@@ -705,7 +706,7 @@ describe("AmortizationFacet", () => {
       expect(secondAmortizationFor.holdId).to.not.equal(firstHoldId);
       expect(secondAmortizationFor.holdActive).to.equal(true);
       expect(secondAmortizationFor.tokenHeldAmount).to.equal(newAmount);
-      expect(secondAmortizationFor.decimalsHeld).to.equal(0);
+      expect(secondAmortizationFor.decimalsHeld).to.equal(DEFAULT_SECURITY_PARAMS.decimals);
       expect(secondAmortizationFor.abafAtHold).to.equal(1n);
     });
 
@@ -946,7 +947,7 @@ describe("AmortizationFacet", () => {
       const afterAdjust = await asset.getAmortizationFor(1, deployer.address);
       // hold amount adjusted: raw 500 * (abaf=2 / holdLabaf=1) = 1000
       expect(afterAdjust.tokenHeldAmount).to.equal(holdAmount * 2n);
-      expect(afterAdjust.decimalsHeld).to.equal(0);
+      expect(afterAdjust.decimalsHeld).to.equal(DEFAULT_SECURITY_PARAMS.decimals);
       // abafAtHold reflects current abaf
       expect(afterAdjust.abafAtHold).to.equal(2n);
       // abafAtSnapshot preserved — snapshotId != 0 → _abafAtSnapshot returns 1 (abaf stored at snapshot time, before adjustment)
@@ -1290,7 +1291,9 @@ describe("AmortizationFacet", () => {
     let mpAsset: IAsset;
 
     async function deployMultiPartitionLoanFixture() {
-      const base = await deployLoanTokenFixture({ isMultiPartition: true, internalKycActivated: false });
+      const base = await deployLoanTokenFixture({
+        loanParams: { securityDataParams: { isMultiPartition: true, internalKycActivated: false } },
+      });
       const { tokenAddress, deployer } = base;
 
       const mpAsset = await ethers.getContractAt("IAsset", tokenAddress, deployer);
