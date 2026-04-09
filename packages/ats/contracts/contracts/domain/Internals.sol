@@ -22,6 +22,7 @@ import { ILoan } from "../facets/layer_2/loan/ILoan.sol";
 import { ICoupon } from "../facets/layer_2/coupon/ICoupon.sol";
 import { IDividend } from "../facets/layer_2/dividend/IDividend.sol";
 import { IAmortization } from "../facets/layer_2/amortization/IAmortization.sol";
+import { ILoansPortfolio } from "../facets/layer_2/loansPortfolio/ILoansPortfolio.sol";
 import { RegulationData, AdditionalSecurityData } from "../constants/regulation.sol";
 import { ICap } from "../facets/layer_1/cap/ICap.sol";
 import { IERC20 } from "../facets/layer_1/ERC1400/ERC20/IERC20.sol";
@@ -650,6 +651,18 @@ abstract contract Internals is Modifiers {
         ISustainabilityPerformanceTargetRate.ImpactData[] calldata _impactData,
         address[] calldata _projects
     ) internal virtual;
+		// solhint-disable-next-line func-name-mixedcase
+    function _initialize_LoansPortfolio(
+        ILoansPortfolio.LoansPortfolioDetailsData calldata _loansPortfolioData
+    ) internal virtual;
+    function _addHoldingsAsset(ILoansPortfolio.HoldingsAsset memory _holdingsAsset) internal virtual;
+    function _removeHoldingsAsset(ILoansPortfolio.HoldingsAsset memory _holdingsAsset) internal virtual;
+    function _notifyLoanHoldingsAssetUpdate(address _holdingsAssetAddress) internal virtual;
+    function _loansPortfolioWithdraw(
+        address assetAddress,
+        address to,
+        uint256 amount
+    ) internal virtual returns (bool success_);
     // solhint-disable-next-line func-name-mixedcase
     function _CLOCK_MODE() internal view virtual returns (string memory);
     // solhint-disable-next-line func-name-mixedcase
@@ -1415,6 +1428,40 @@ abstract contract Internals is Modifiers {
     function _isBondInitialized() internal view virtual returns (bool);
     function _isCapInitialized() internal view virtual returns (bool);
     function _isLoanInitialized() internal view virtual returns (bool);
+    function _isLoansPortfolioInitialized() internal view virtual returns (bool);
+    function _checkHoldingAssetExists(address assetAddress) internal view virtual;
+    function _getLoansPortfolioDetails()
+        internal
+        view
+        virtual
+        returns (ILoansPortfolio.LoansPortfolioDetailsData memory);
+    function _getHoldingsAssets(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (address[] memory);
+    function _getLoanHoldingsAssetsPaginated(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (address[] memory);
+    function _getHoldingsAssetBalances(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (address[] memory assets_, uint256[] memory tokenBalances_);
+    function _getNumberOfAssets() internal view virtual returns (uint256);
+    function _getNumberOfLoans() internal view virtual returns (uint256);
+    function _getNumberOfCash() internal view virtual returns (uint256);
+    function _getNumberOfPerformingLoans() internal view virtual returns (uint256);
+    function _getNumberOfNonPerformingLoans() internal view virtual returns (uint256);
+    function _getNumberDefaultedLoans() internal view virtual returns (uint256);
+    function _getSecuredLoansRatio() internal view virtual returns (uint256 numerator_, uint256 denominator_);
+    function _getPerformingLoansRatio() internal view virtual returns (uint256 numerator_, uint256 denominator_);
+    function _getNonPerformingLoansRatio() internal view virtual returns (uint256 numerator_, uint256 denominator_);
+    function _getDefaultedLoansRatio() internal view virtual returns (uint256 numerator_, uint256 denominator_);
+    function _getGeographicalExposure()
+        internal
+        view
+        virtual
+        returns (ILoansPortfolio.GeographicalExposureData[] memory);
     function _getLoanDetails() internal view virtual returns (ILoan.LoanDetailsData memory);
     function _isClearingActivated() internal view virtual returns (bool);
     function _isClearingCreateHoldSignatureValid(

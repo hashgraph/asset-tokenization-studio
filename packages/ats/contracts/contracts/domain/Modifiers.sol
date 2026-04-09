@@ -6,6 +6,7 @@ import { IKyc } from "../facets/layer_1/kyc/IKyc.sol";
 import { IKpiLinkedRate } from "../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
 import { IClearing } from "../facets/layer_1/clearing/IClearing.sol";
 import { HoldIdentifier } from "../facets/layer_1/hold/IHold.sol";
+import { ILoansPortfolio } from "../facets/layer_2/loansPortfolio/ILoansPortfolio.sol";
 
 abstract contract Modifiers is LocalContext {
     // ===== ControlList Modifiers =====
@@ -112,4 +113,7 @@ abstract contract Modifiers is LocalContext {
 
     // ===== AdjustBalances Modifiers =====
     modifier validateFactor(uint256 _factor) virtual;
+
+    // ===== LoansPortfolio Modifiers =====
+    modifier onlySupportedHoldingsAssetType(ILoansPortfolio.HoldingsAsset memory _holdingsAsset) virtual;
 }

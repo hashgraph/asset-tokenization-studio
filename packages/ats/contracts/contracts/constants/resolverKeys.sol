@@ -660,3 +660,6 @@ bytes32 constant _TRANSFER_AND_LOCK_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOL
 
 // keccak256("security.token.standard.loan.resolverKey");
 bytes32 constant _LOAN_RESOLVER_KEY = 0x99001f821b750d64e6a82cf207800dc005acf93b2880abe9f1cdbbfb5e996b86;
+
+// keccak256("security.token.standard.loansPortfolio.resolverKey");
+bytes32 constant _LOANS_PORTFOLIO_RESOLVER_KEY = 0x364410ebf7978001f91cfe2189e143fa8d75bb7365901fbc3d071ece7f86bd46;

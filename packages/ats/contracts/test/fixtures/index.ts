@@ -45,7 +45,11 @@ export {
 export { deployLoanTokenFixture, DEFAULT_LOAN_PARAMS, getLoanDetails } from "./tokens/loan.fixture";
 
 // Loan Portfolio token fixtures
-export { deployLoanPortfolioTokenFixture, DEFAULT_LOAN_PORTFOLIO_PARAMS } from "./tokens/loanPortfolio.fixture";
+export {
+  deployLoansPortfolioTokenFixture,
+  DEFAULT_LOANS_PORTFOLIO_PARAMS,
+  getLoansPortfolioDetails,
+} from "./tokens/loansPortfolio.fixture";
 
 // Common token utilities
 export {

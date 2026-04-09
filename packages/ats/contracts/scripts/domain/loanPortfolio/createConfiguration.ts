@@ -39,7 +39,8 @@ import { BusinessLogicResolver } from "@contract-types";
  * Note: Loan Portfolio does NOT include TimeTravel variants (per spec). TimeTravelFacet
  * is injected automatically by the deploy script in test environments.
  */
-const LOAN_PORTFOLIO_FACETS = [
+const LOANS_PORTFOLIO_FACETS = [
+  "LoansPortfolioFacet",
   // Core Functionality
   "AccessControlFacet",
   "CapFacet",
@@ -72,7 +73,6 @@ const LOAN_PORTFOLIO_FACETS = [
 
   // Nominal Value
   "NominalValueFacet",
-  "AmortizationFacet",
 
   // Hold
   "HoldReadFacet",
@@ -151,7 +151,7 @@ const LOAN_PORTFOLIO_FACETS = [
  * }
  * ```
  */
-export async function createLoanPortfolioConfiguration(
+export async function createLoansPortfolioConfiguration(
   blrContract: BusinessLogicResolver,
   facetAddresses: Record<string, string>,
   useTimeTravel: boolean = false,
@@ -159,7 +159,7 @@ export async function createLoanPortfolioConfiguration(
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  const baseFacets = useTimeTravel ? [...LOAN_PORTFOLIO_FACETS, "TimeTravelFacet"] : LOAN_PORTFOLIO_FACETS;
+  const baseFacets = useTimeTravel ? [...LOANS_PORTFOLIO_FACETS, "TimeTravelFacet"] : LOANS_PORTFOLIO_FACETS;
   const facetNames = useTimeTravel
     ? baseFacets.map((name) => (name === "TimeTravelFacet" || name.endsWith("TimeTravel") ? name : `${name}TimeTravel`))
     : baseFacets;

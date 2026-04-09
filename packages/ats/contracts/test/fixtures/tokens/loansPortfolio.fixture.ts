@@ -12,12 +12,16 @@
  * @see https://hardhat.org/hardhat-network-helpers/docs/reference#loadfixture
  */
 
-import { isinGenerator } from "@thomaschaplin/isin-generator";
-import { ethers } from "hardhat";
 import { ZeroAddress } from "ethers";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture } from "../infrastructure.fixture";
-import { ATS_ROLES, createLoanPortfolioConfiguration, LOAN_PORTFOLIO_CONFIG_ID } from "@scripts/domain";
+import {
+  ATS_ROLES,
+  buildRegulationData,
+  createLoansPortfolioConfiguration,
+  FactoryRegulationDataParams,
+  LOAN_PORTFOLIO_CONFIG_ID,
+} from "@scripts/domain";
 import {
   AccessControlFacet__factory,
   CapFacet__factory,
@@ -38,29 +42,36 @@ import {
   ExternalControlListManagementFacet__factory,
   ExternalPauseManagementFacet__factory,
   TimeTravelFacet__factory,
-  Factory__factory,
+  ILoansPortfolio__factory,
+  ILoansPortfolio,
 } from "@contract-types";
 
 import { decodeEvent } from "@scripts/infrastructure";
+import { DeepPartial } from "@scripts";
+import { getRegulationData, getSecurityData } from "@test";
 
+type LoansPortfolioDefaultParamsType = ILoansPortfolio.LoansPortfolioDetailsDataStruct & {
+  nominalValue: bigint;
+  nominalValueDecimals: number;
+};
 /**
  * Default loan portfolio token parameters for test fixtures.
  */
-export const DEFAULT_LOAN_PORTFOLIO_PARAMS = {
-  name: "TESTLOANPORTFOLIO",
-  symbol: "TLNP",
-  isin: isinGenerator(),
-  decimals: 0,
-  maxSupply: ethers.MaxUint256,
-  isWhiteList: false,
-  isControllable: true,
-  arePartitionsProtected: false,
-  isMultiPartition: false,
-  clearingActive: false,
-  internalKycActivated: true,
+export const DEFAULT_LOANS_PORTFOLIO_PARAMS = {
   nominalValue: 100,
   nominalValueDecimals: 2,
+  portfolioType: 1, // STATIC
+  distributionPolicy: 1, // DIRECT_PASSTHROUGH
 } as const;
+
+export function getLoansPortfolioDetails(params?: DeepPartial<LoansPortfolioDefaultParamsType>) {
+  return {
+    portfolioType: params?.portfolioType ?? DEFAULT_LOANS_PORTFOLIO_PARAMS.portfolioType,
+    distributionPolicy: params?.distributionPolicy ?? DEFAULT_LOANS_PORTFOLIO_PARAMS.distributionPolicy,
+    nominalValue: params?.nominalValue ?? DEFAULT_LOANS_PORTFOLIO_PARAMS.nominalValue,
+    nominalValueDecimals: params?.nominalValueDecimals ?? DEFAULT_LOANS_PORTFOLIO_PARAMS.nominalValueDecimals,
+  };
+}
 
 /**
  * Fixture: Deploy ATS infrastructure + single Loan Portfolio token via TestFactory
@@ -74,30 +85,40 @@ export const DEFAULT_LOAN_PORTFOLIO_PARAMS = {
  * @param params - Optional custom loan portfolio token parameters
  * @returns Infrastructure + deployed loan portfolio token + connected facets
  */
-export async function deployLoanPortfolioTokenFixture(params: Partial<typeof DEFAULT_LOAN_PORTFOLIO_PARAMS> = {}) {
-  // Merge with defaults
-  const p = {
-    ...DEFAULT_LOAN_PORTFOLIO_PARAMS,
-    ...params,
-  };
-
+export async function deployLoansPortfolioTokenFixture({
+  loanPortfolioParams,
+  regulationTypeParams,
+  useLoadFixture = true,
+}: {
+  loanPortfolioParams?: DeepPartial<LoansPortfolioDefaultParamsType>;
+  regulationTypeParams?: DeepPartial<FactoryRegulationDataParams>;
+  useLoadFixture?: boolean;
+} = {}) {
   // Load base infrastructure (BLR + all facets deployed)
-  const infrastructure = await loadFixture(deployAtsInfrastructureFixture);
-  const { blr, deployer, factory } = infrastructure;
+  const infrastructure = useLoadFixture
+    ? await loadFixture(deployAtsInfrastructureFixture)
+    : await deployAtsInfrastructureFixture();
+  const { factory, blr, deployer } = infrastructure;
+  const securityData = getSecurityData(blr, {
+    resolverProxyConfiguration: {
+      key: LOAN_PORTFOLIO_CONFIG_ID,
+      version: 1,
+    },
+  });
 
+  // Merge with defaults
+  const loanPortfolioDetails = getLoansPortfolioDetails(loanPortfolioParams);
+  const regulationData = getRegulationData(regulationTypeParams);
   // Build facet addresses map from deployment.facets array
   const facetAddresses: Record<string, string> = {};
   for (const facet of infrastructure.deployment.facets) {
     facetAddresses[facet.name] = facet.address;
   }
 
-  // Create Loan Portfolio configuration in BLR (registers all 49 facets)
-  await createLoanPortfolioConfiguration(blr, facetAddresses, true);
+  await createLoansPortfolioConfiguration(blr, facetAddresses, true);
 
-  // Deploy ResolverProxy via TestFactory
   const rbacs = [{ role: ATS_ROLES._DEFAULT_ADMIN_ROLE, members: [deployer.address] }];
 
-  // Get BLR proxy address (use deployment data to avoid TypeScript type mismatch)
   const blrProxyAddress = infrastructure.deployment.infrastructure.blr.proxy;
 
   const tx = await factory.deployProxy(blrProxyAddress, LOAN_PORTFOLIO_CONFIG_ID, 1, rbacs);
@@ -126,26 +147,47 @@ export async function deployLoanPortfolioTokenFixture(params: Partial<typeof DEF
     deployer,
   );
   const externalPauseManagementFacet = ExternalPauseManagementFacet__factory.connect(proxyAddress, deployer);
+  const loanPortfolioFacet = ILoansPortfolio__factory.connect(proxyAddress, deployer);
   const timeTravelFacet = TimeTravelFacet__factory.connect(proxyAddress, deployer);
 
-  await controlListFacet.initialize_ControlList(p.isWhiteList);
-  await erc1410ManagementFacet.initialize_ERC1410(p.isMultiPartition);
-  await erc1644Facet.initialize_ERC1644(p.isControllable);
+  await controlListFacet.initialize_ControlList(securityData.isWhiteList);
+  await erc1410ManagementFacet.initialize_ERC1410(securityData.isMultiPartition);
+  await erc1644Facet.initialize_ERC1644(securityData.isControllable);
   await erc20Facet.initialize_ERC20({
-    info: { name: p.name, symbol: p.symbol, decimals: p.decimals, isin: p.isin },
+    info: {
+      name: securityData.erc20MetadataInfo.name,
+      symbol: securityData.erc20MetadataInfo.symbol,
+      decimals: securityData.erc20MetadataInfo.decimals,
+      isin: securityData.erc20MetadataInfo.isin,
+    },
     securityType: 1, // SecurityType.Equity (reuse for loan portfolio)
   });
   await erc1594Facet.initialize_ERC1594();
-  await capFacet.initialize_Cap(p.maxSupply, []);
-  await protectedPartitionsFacet.initialize_ProtectedPartitions(p.arePartitionsProtected);
-  await clearingActionsFacet.initializeClearing(p.clearingActive);
+  await capFacet.initialize_Cap(securityData.maxSupply, []);
+  await protectedPartitionsFacet.initialize_ProtectedPartitions(securityData.arePartitionsProtected);
+  await clearingActionsFacet.initializeClearing(securityData.clearingActive);
   await externalPauseManagementFacet.initialize_ExternalPauses([]);
   await externalControlListManagementFacet.initialize_ExternalControlLists([]);
-  await kycFacet.initializeInternalKyc(p.internalKycActivated);
+  await kycFacet.initializeInternalKyc(securityData.internalKycActivated);
   await externalKycListManagementFacet.initialize_ExternalKycLists([]);
   await erc20VotesFacet.initialize_ERC20Votes(false);
   await erc3643ManagementFacet.initialize_ERC3643(ZeroAddress, ZeroAddress);
-  await nominalValueFacet.initialize_NominalValue(p.nominalValue, p.nominalValueDecimals);
+  await nominalValueFacet.initialize_NominalValue(
+    loanPortfolioDetails.nominalValue,
+    loanPortfolioDetails.nominalValueDecimals,
+  );
+  await loanPortfolioFacet.initialize_LoansPortfolio(
+    {
+      portfolioType: loanPortfolioDetails.portfolioType,
+      distributionPolicy: loanPortfolioDetails.distributionPolicy,
+    },
+    buildRegulationData(regulationData.regulationType, regulationData.regulationSubType),
+    {
+      countriesControlListType: regulationData.additionalSecurityData.countriesControlListType,
+      listOfCountries: regulationData.additionalSecurityData.listOfCountries,
+      info: regulationData.additionalSecurityData.info,
+    },
+  );
 
   return {
     ...infrastructure,

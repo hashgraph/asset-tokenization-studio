@@ -100,3 +100,6 @@ bytes32 constant _LOAN_MANAGER_ROLE = 0xc085daff7cbf912b30437b0b95363f3920f33cbd
 
 // keccak256('security.token.standard.role.nominalValue');
 bytes32 constant _NOMINAL_VALUE_ROLE = 0x127c185a9f04723376575bc896cc0d3cf15a32dd0db17f01168dcac5d2de6102;
+
+// keccak256('security.token.standard.role.loansPortfolioManager');
+bytes32 constant _LOANS_PORTFOLIO_MANAGER_ROLE = 0xa6b5c56eb64684d38c620773854f4720f1c51c63e6fa070641fff03465904e6c;

@@ -71,6 +71,7 @@ import {
 import { IScheduledSnapshots } from "./layer_2/scheduledTask/scheduledSnapshot/IScheduledSnapshots.sol";
 import { ISecurity } from "./layer_2/security/ISecurity.sol";
 import { ILoan } from "./layer_2/loan/ILoan.sol";
+import { ILoansPortfolio } from "./layer_2/loansPortfolio/ILoansPortfolio.sol";
 import { IVoting } from "./layer_2/voting/IVoting.sol";
 import { IAmortization } from "./layer_2/amortization/IAmortization.sol";
 
@@ -153,6 +154,7 @@ interface IAsset is
     IScheduledSnapshots,
     ISecurity,
     ILoan,
+    ILoansPortfolio,
     IVoting,
     IBondUSA,
     IEquityUSA,

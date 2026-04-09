@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-06T14:08:20.749Z
- * Facets: 205
+ * Generated: 2026-04-09T08:35:28.644Z
+ * Facets: 206
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -317,6 +317,8 @@ import {
   KycSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   LoanFacet__factory,
   LoanFacetTimeTravel__factory,
+  LoansPortfolioFacet__factory,
+  LoansPortfolioFacetTimeTravel__factory,
   LockFacet__factory,
   LockFacetTimeTravel__factory,
   LockFixedRateFacet__factory,
@@ -8355,6 +8357,150 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       useTimeTravel ? new LoanFacetTimeTravel__factory(signer) : new LoanFacet__factory(signer),
   },
 
+  LoansPortfolioFacet: {
+    name: "LoansPortfolioFacet",
+    resolverKey: {
+      name: "_LOANS_PORTFOLIO_RESOLVER_KEY",
+      value: "0x364410ebf7978001f91cfe2189e143fa8d75bb7365901fbc3d071ece7f86bd46",
+    },
+    inheritance: ["LoansPortfolio", "IStaticFunctionSelectors", "Common"],
+    methods: [
+      {
+        name: "addHoldingsAsset",
+        signature:
+          "function addHoldingsAsset((address assetAddress, uint8 holdingsAssetType, string country) _holdingsAsset) returns (bool success_)",
+        selector: "0xc8737c29",
+      },
+      {
+        name: "getDefaultedLoansRatio",
+        signature: "function getDefaultedLoansRatio() view returns (uint256 numerator_, uint256 denominator_)",
+        selector: "0x73de875c",
+      },
+      {
+        name: "getGeographicalExposure",
+        signature:
+          "function getGeographicalExposure() view returns ((string country, uint256 count)[] geographicalExposure_)",
+        selector: "0x200e1ac3",
+      },
+      {
+        name: "getHoldingsAssetOwnership",
+        signature:
+          "function getHoldingsAssetOwnership(uint256 _pageIndex, uint256 _pageLength) view returns (address[] assets_, uint256[] balances_)",
+        selector: "0x97eed8df",
+      },
+      {
+        name: "getHoldingsAssets",
+        signature:
+          "function getHoldingsAssets(uint256 _pageIndex, uint256 _pageLength) view returns (address[] assets_)",
+        selector: "0xc9f8f88b",
+      },
+      {
+        name: "getLoanHoldingsAssets",
+        signature:
+          "function getLoanHoldingsAssets(uint256 _pageIndex, uint256 _pageLength) view returns (address[] assets_)",
+        selector: "0x6735d61e",
+      },
+      {
+        name: "getLoansPortfolioData",
+        signature:
+          "function getLoansPortfolioData() view returns ((uint8 portfolioType, uint8 distributionPolicy) loansPortfolioData_)",
+        selector: "0xfcf9912d",
+      },
+      {
+        name: "getNonPerformingLoansRatio",
+        signature: "function getNonPerformingLoansRatio() view returns (uint256 numerator_, uint256 denominator_)",
+        selector: "0xd2a20035",
+      },
+      {
+        name: "getNumberDefaultedLoans",
+        signature: "function getNumberDefaultedLoans() view returns (uint256 numberDefaultedLoans_)",
+        selector: "0x22c11e97",
+      },
+      {
+        name: "getNumberOfAssets",
+        signature: "function getNumberOfAssets() view returns (uint256 numberOfAssets_)",
+        selector: "0xe269053a",
+      },
+      {
+        name: "getNumberOfCash",
+        signature: "function getNumberOfCash() view returns (uint256 numberOfCash_)",
+        selector: "0xa76562dd",
+      },
+      {
+        name: "getNumberOfLoans",
+        signature: "function getNumberOfLoans() view returns (uint256 numberOfLoans_)",
+        selector: "0xf8b492f6",
+      },
+      {
+        name: "getNumberOfNonPerformingLoans",
+        signature: "function getNumberOfNonPerformingLoans() view returns (uint256 numberOfNonPerformingLoans_)",
+        selector: "0x1a336a2a",
+      },
+      {
+        name: "getNumberOfPerformingLoans",
+        signature: "function getNumberOfPerformingLoans() view returns (uint256 numberOfPerformingLoans_)",
+        selector: "0xcffd4f35",
+      },
+      {
+        name: "getPerformingLoansRatio",
+        signature: "function getPerformingLoansRatio() view returns (uint256 numerator_, uint256 denominator_)",
+        selector: "0xbb644e3b",
+      },
+      {
+        name: "getSecuredLoansRatio",
+        signature: "function getSecuredLoansRatio() view returns (uint256 numerator_, uint256 denominator_)",
+        selector: "0x03306b84",
+      },
+      {
+        name: "initialize_LoansPortfolio",
+        signature:
+          "function initialize_LoansPortfolio((uint8 portfolioType, uint8 distributionPolicy) _loansPortfolioData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
+        selector: "0x664ab041",
+      },
+      {
+        name: "loansPortfolioWithdraw",
+        signature:
+          "function loansPortfolioWithdraw(address assetAddress, address to, uint256 amount) returns (bool success_)",
+        selector: "0x3790c60f",
+      },
+      {
+        name: "notifyLoanHoldingsAssetUpdate",
+        signature: "function notifyLoanHoldingsAssetUpdate(address _holdingsAssetAddress) returns (bool success_)",
+        selector: "0x6b8370d0",
+      },
+      {
+        name: "removeHoldingsAsset",
+        signature:
+          "function removeHoldingsAsset((address assetAddress, uint8 holdingsAssetType, string country) _holdingsAsset) returns (bool success_)",
+        selector: "0xa5f7becc",
+      },
+    ],
+    events: [
+      {
+        name: "HoldingsAssetAdded",
+        signature: "HoldingsAssetAdded(HoldingsAsset)",
+        topic0: "0xf7846bb8ebfac0192377020d9e4de8b9349c9ff10a5a5016a801e0af53726c19",
+      },
+      {
+        name: "HoldingsAssetRemoved",
+        signature: "HoldingsAssetRemoved(HoldingsAsset)",
+        topic0: "0xd0888c3f0044f12bfe0f00da5d50acbe774a989da3faca09b8014a37cd534d26",
+      },
+      {
+        name: "LoanHoldingsAssetUpdated",
+        signature: "LoanHoldingsAssetUpdated(address)",
+        topic0: "0xa75a9d5e89faf0645d0835c5b596fc8521dec3429395fde1f40c0d77dc8baf3f",
+      },
+      {
+        name: "LoansPortfolioWithdrawn",
+        signature: "LoansPortfolioWithdrawn(address,address,uint256)",
+        topic0: "0x478242a340ff39588a860534e9d38247a01d93823315fae6c50341621e898b26",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new LoansPortfolioFacetTimeTravel__factory(signer) : new LoansPortfolioFacet__factory(signer),
+  },
+
   LockFacet: {
     name: "LockFacet",
     resolverKey: {
@@ -10947,7 +11093,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 205 as const;
+export const TOTAL_FACETS = 206 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -11837,6 +11983,20 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     ],
   },
 
+  ILoansPortfolioStorageWrapper: {
+    name: "ILoansPortfolioStorageWrapper",
+    methods: [],
+    errors: [
+      { name: "HoldingAssetNotFound", signature: "HoldingAssetNotFound(address)", selector: "0x2a8dc4de" },
+      { name: "HoldingsAssetAlreadyExists", signature: "HoldingsAssetAlreadyExists(address)", selector: "0x4e8e344f" },
+      {
+        name: "HoldingsAssetTypeNotSupported",
+        signature: "HoldingsAssetTypeNotSupported(uint8)",
+        selector: "0xfc6c68ca",
+      },
+    ],
+  },
+
   IPauseStorageWrapper: {
     name: "IPauseStorageWrapper",
     methods: [],
@@ -11987,6 +12147,12 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [],
   },
 
+  LoansPortfolioStorageWrapper: {
+    name: "LoansPortfolioStorageWrapper",
+    inheritance: ["ILoansPortfolioStorageWrapper", "AmortizationStorageWrapper"],
+    methods: [],
+  },
+
   LoanStorageWrapper: {
     name: "LoanStorageWrapper",
     inheritance: ["BondStorageWrapper"],
@@ -12105,7 +12271,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 67 as const;
+export const TOTAL_STORAGE_WRAPPERS = 69 as const;
 
 /**
  * All role identifiers extracted from contracts.
@@ -12132,6 +12298,7 @@ export const ROLES = {
   _KYC_MANAGER_ROLE: "0x8ebae577938c1afa7fb3dc7b06459c79c86ffd2ac9805b6da92ee4cbbf080449",
   _KYC_ROLE: "0x6fbd421e041603fa367357d79ffc3b2f9fd37a6fc4eec661aa5537a9ae75f93d",
   _LOAN_MANAGER_ROLE: "0xc085daff7cbf912b30437b0b95363f3920f33cbd53213a269a2fc5d44ee8289d",
+  _LOANS_PORTFOLIO_MANAGER_ROLE: "0xa6b5c56eb64684d38c620773854f4720f1c51c63e6fa070641fff03465904e6c",
   _LOCKER_ROLE: "0xd8aa8c6f92fe8ac3f3c0f88216e25f7c08b3a6c374b4452a04d200c29786ce88",
   _MATURITY_REDEEMER_ROLE: "0xa0d696902e9ed231892dc96649f0c62b808a1cb9dd1269e78e0adc1cc4b8358c",
   _NOMINAL_VALUE_ROLE: "0x127c185a9f04723376575bc896cc0d3cf15a32dd0db17f01168dcac5d2de6102",
@@ -12149,4 +12316,4 @@ export const ROLES = {
 /**
  * Total number of unique roles in the registry.
  */
-export const TOTAL_ROLES = 33 as const;
+export const TOTAL_ROLES = 34 as const;
