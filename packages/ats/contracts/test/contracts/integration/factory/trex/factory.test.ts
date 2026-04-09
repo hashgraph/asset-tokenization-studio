@@ -12,15 +12,10 @@ import {
   IFactory,
   AccessControl__factory,
   ERC20__factory,
-  ModularCompliance,
   ModularCompliance__factory,
-  IdentityRegistryStorage,
   IdentityRegistryStorage__factory,
-  IERC3643,
   IERC3643__factory,
-  OwnableUpgradeable,
   OwnableUpgradeable__factory,
-  IIdentityRegistry,
   IIdentityRegistry__factory,
 } from "@contract-types";
 

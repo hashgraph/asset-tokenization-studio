@@ -1260,7 +1260,7 @@ function parseEventOrErrorName(line: string, keyword: string): string | null {
   // optional whitespace) OR preceded by whitespace, and followed by whitespace.
   let keywordIdx = -1;
   let searchFrom = 0;
-  while (true) {
+  for (;;) {
     const idx = line.indexOf(keyword, searchFrom);
     if (idx === -1) {
       return null;
