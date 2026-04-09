@@ -78,6 +78,7 @@ const BOND_FIXED_RATE_FACETS = [
   // Advanced Features
   "AdjustBalancesFacet",
   "LockFacet",
+  "NominalValueFacet",
   "ProceedRecipientsFacet",
   "ProtectedPartitionsFacet",
   "ScheduledBalanceAdjustmentsFacet",

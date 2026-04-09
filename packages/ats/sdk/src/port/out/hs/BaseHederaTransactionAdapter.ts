@@ -3,12 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import {
-  ContractCreateTransaction,
-  ContractExecuteTransaction,
-  Signer,
-  Transaction,
-} from "@hiero-ledger/sdk";
+import { ContractCreateTransaction, ContractExecuteTransaction, Signer, Transaction } from "@hiero-ledger/sdk";
 import { ethers } from "ethers";
 import TransactionAdapter from "../TransactionAdapter";
 import { MirrorNodeAdapter } from "../mirror/MirrorNodeAdapter";
@@ -115,10 +110,7 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
   ): Promise<TransactionResponse> {
     const encodedHex = iface.encodeFunctionData(functionName, params as any[]);
     const encoded = Uint8Array.from(Buffer.from(encodedHex.slice(2), "hex"));
-    let tx = new ContractExecuteTransaction()
-      .setContractId(contractId)
-      .setFunctionParameters(encoded)
-      .setGas(gasLimit);
+    let tx = new ContractExecuteTransaction().setContractId(contractId).setFunctionParameters(encoded).setGas(gasLimit);
     if (payableAmountHbar) tx = tx.setPayableAmount(parseFloat(payableAmountHbar));
     return this.processTransaction(tx, transactionType, startDate);
   }
@@ -173,19 +165,27 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.factoryOps.createBond(...args);
   }
 
-  async createBondFixedRate(...args: Parameters<FactoryOperations["createBondFixedRate"]>): Promise<TransactionResponse> {
+  async createBondFixedRate(
+    ...args: Parameters<FactoryOperations["createBondFixedRate"]>
+  ): Promise<TransactionResponse> {
     return this.factoryOps.createBondFixedRate(...args);
   }
 
-  async createBondKpiLinkedRate(...args: Parameters<FactoryOperations["createBondKpiLinkedRate"]>): Promise<TransactionResponse> {
+  async createBondKpiLinkedRate(
+    ...args: Parameters<FactoryOperations["createBondKpiLinkedRate"]>
+  ): Promise<TransactionResponse> {
     return this.factoryOps.createBondKpiLinkedRate(...args);
   }
 
-  async createTrexSuiteBond(...args: Parameters<FactoryOperations["createTrexSuiteBond"]>): Promise<TransactionResponse> {
+  async createTrexSuiteBond(
+    ...args: Parameters<FactoryOperations["createTrexSuiteBond"]>
+  ): Promise<TransactionResponse> {
     return this.factoryOps.createTrexSuiteBond(...args);
   }
 
-  async createTrexSuiteEquity(...args: Parameters<FactoryOperations["createTrexSuiteEquity"]>): Promise<TransactionResponse> {
+  async createTrexSuiteEquity(
+    ...args: Parameters<FactoryOperations["createTrexSuiteEquity"]>
+  ): Promise<TransactionResponse> {
     return this.factoryOps.createTrexSuiteEquity(...args);
   }
 
@@ -207,7 +207,9 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.transferOps.burn(...args);
   }
 
-  async controllerTransfer(...args: Parameters<TransferOperations["controllerTransfer"]>): Promise<TransactionResponse> {
+  async controllerTransfer(
+    ...args: Parameters<TransferOperations["controllerTransfer"]>
+  ): Promise<TransactionResponse> {
     return this.transferOps.controllerTransfer(...args);
   }
 
@@ -219,7 +221,9 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.transferOps.controllerRedeem(...args);
   }
 
-  async operatorTransferByPartition(...args: Parameters<TransferOperations["operatorTransferByPartition"]>): Promise<TransactionResponse> {
+  async operatorTransferByPartition(
+    ...args: Parameters<TransferOperations["operatorTransferByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.transferOps.operatorTransferByPartition(...args);
   }
 
@@ -227,7 +231,9 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.transferOps.batchTransfer(...args);
   }
 
-  async batchForcedTransfer(...args: Parameters<TransferOperations["batchForcedTransfer"]>): Promise<TransactionResponse> {
+  async batchForcedTransfer(
+    ...args: Parameters<TransferOperations["batchForcedTransfer"]>
+  ): Promise<TransactionResponse> {
     return this.transferOps.batchForcedTransfer(...args);
   }
 
@@ -249,11 +255,15 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.issuanceOps.batchMint(...args);
   }
 
-  async redeemAtMaturityByPartition(...args: Parameters<IssuanceOperations["redeemAtMaturityByPartition"]>): Promise<TransactionResponse> {
+  async redeemAtMaturityByPartition(
+    ...args: Parameters<IssuanceOperations["redeemAtMaturityByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.issuanceOps.redeemAtMaturityByPartition(...args);
   }
 
-  async fullRedeemAtMaturity(...args: Parameters<IssuanceOperations["fullRedeemAtMaturity"]>): Promise<TransactionResponse> {
+  async fullRedeemAtMaturity(
+    ...args: Parameters<IssuanceOperations["fullRedeemAtMaturity"]>
+  ): Promise<TransactionResponse> {
     return this.issuanceOps.fullRedeemAtMaturity(...args);
   }
 
@@ -283,41 +293,59 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.roleOps.revokeOperator(...args);
   }
 
-  async authorizeOperatorByPartition(...args: Parameters<RoleOperations["authorizeOperatorByPartition"]>): Promise<TransactionResponse> {
+  async authorizeOperatorByPartition(
+    ...args: Parameters<RoleOperations["authorizeOperatorByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.roleOps.authorizeOperatorByPartition(...args);
   }
 
-  async revokeOperatorByPartition(...args: Parameters<RoleOperations["revokeOperatorByPartition"]>): Promise<TransactionResponse> {
+  async revokeOperatorByPartition(
+    ...args: Parameters<RoleOperations["revokeOperatorByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.roleOps.revokeOperatorByPartition(...args);
   }
 
   // ===== Hold Operations =====
 
-  async createHoldByPartition(...args: Parameters<HoldOperations["createHoldByPartition"]>): Promise<TransactionResponse> {
+  async createHoldByPartition(
+    ...args: Parameters<HoldOperations["createHoldByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.holdOps.createHoldByPartition(...args);
   }
 
-  async createHoldFromByPartition(...args: Parameters<HoldOperations["createHoldFromByPartition"]>): Promise<TransactionResponse> {
+  async createHoldFromByPartition(
+    ...args: Parameters<HoldOperations["createHoldFromByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.holdOps.createHoldFromByPartition(...args);
   }
 
-  async controllerCreateHoldByPartition(...args: Parameters<HoldOperations["controllerCreateHoldByPartition"]>): Promise<TransactionResponse> {
+  async controllerCreateHoldByPartition(
+    ...args: Parameters<HoldOperations["controllerCreateHoldByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.holdOps.controllerCreateHoldByPartition(...args);
   }
 
-  async protectedCreateHoldByPartition(...args: Parameters<HoldOperations["protectedCreateHoldByPartition"]>): Promise<TransactionResponse> {
+  async protectedCreateHoldByPartition(
+    ...args: Parameters<HoldOperations["protectedCreateHoldByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.holdOps.protectedCreateHoldByPartition(...args);
   }
 
-  async releaseHoldByPartition(...args: Parameters<HoldOperations["releaseHoldByPartition"]>): Promise<TransactionResponse> {
+  async releaseHoldByPartition(
+    ...args: Parameters<HoldOperations["releaseHoldByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.holdOps.releaseHoldByPartition(...args);
   }
 
-  async reclaimHoldByPartition(...args: Parameters<HoldOperations["reclaimHoldByPartition"]>): Promise<TransactionResponse> {
+  async reclaimHoldByPartition(
+    ...args: Parameters<HoldOperations["reclaimHoldByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.holdOps.reclaimHoldByPartition(...args);
   }
 
-  async executeHoldByPartition(...args: Parameters<HoldOperations["executeHoldByPartition"]>): Promise<TransactionResponse> {
+  async executeHoldByPartition(
+    ...args: Parameters<HoldOperations["executeHoldByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.holdOps.executeHoldByPartition(...args);
   }
 
@@ -327,67 +355,99 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.clearingOps.activateClearing(...args);
   }
 
-  async deactivateClearing(...args: Parameters<ClearingOperations["deactivateClearing"]>): Promise<TransactionResponse> {
+  async deactivateClearing(
+    ...args: Parameters<ClearingOperations["deactivateClearing"]>
+  ): Promise<TransactionResponse> {
     return this.clearingOps.deactivateClearing(...args);
   }
 
-  async clearingTransferByPartition(...args: Parameters<ClearingOperations["clearingTransferByPartition"]>): Promise<TransactionResponse> {
+  async clearingTransferByPartition(
+    ...args: Parameters<ClearingOperations["clearingTransferByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.clearingOps.clearingTransferByPartition(...args);
   }
 
-  async clearingTransferFromByPartition(...args: Parameters<ClearingOperations["clearingTransferFromByPartition"]>): Promise<TransactionResponse> {
+  async clearingTransferFromByPartition(
+    ...args: Parameters<ClearingOperations["clearingTransferFromByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.clearingOps.clearingTransferFromByPartition(...args);
   }
 
-  async protectedClearingTransferByPartition(...args: Parameters<ClearingOperations["protectedClearingTransferByPartition"]>): Promise<TransactionResponse> {
+  async protectedClearingTransferByPartition(
+    ...args: Parameters<ClearingOperations["protectedClearingTransferByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.clearingOps.protectedClearingTransferByPartition(...args);
   }
 
-  async approveClearingOperationByPartition(...args: Parameters<ClearingOperations["approveClearingOperationByPartition"]>): Promise<TransactionResponse> {
+  async approveClearingOperationByPartition(
+    ...args: Parameters<ClearingOperations["approveClearingOperationByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.clearingOps.approveClearingOperationByPartition(...args);
   }
 
-  async cancelClearingOperationByPartition(...args: Parameters<ClearingOperations["cancelClearingOperationByPartition"]>): Promise<TransactionResponse> {
+  async cancelClearingOperationByPartition(
+    ...args: Parameters<ClearingOperations["cancelClearingOperationByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.clearingOps.cancelClearingOperationByPartition(...args);
   }
 
-  async reclaimClearingOperationByPartition(...args: Parameters<ClearingOperations["reclaimClearingOperationByPartition"]>): Promise<TransactionResponse> {
+  async reclaimClearingOperationByPartition(
+    ...args: Parameters<ClearingOperations["reclaimClearingOperationByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.clearingOps.reclaimClearingOperationByPartition(...args);
   }
 
-  async clearingRedeemByPartition(...args: Parameters<ClearingOperations["clearingRedeemByPartition"]>): Promise<TransactionResponse> {
+  async clearingRedeemByPartition(
+    ...args: Parameters<ClearingOperations["clearingRedeemByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.clearingOps.clearingRedeemByPartition(...args);
   }
 
-  async clearingRedeemFromByPartition(...args: Parameters<ClearingOperations["clearingRedeemFromByPartition"]>): Promise<TransactionResponse> {
+  async clearingRedeemFromByPartition(
+    ...args: Parameters<ClearingOperations["clearingRedeemFromByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.clearingOps.clearingRedeemFromByPartition(...args);
   }
 
-  async protectedClearingRedeemByPartition(...args: Parameters<ClearingOperations["protectedClearingRedeemByPartition"]>): Promise<TransactionResponse> {
+  async protectedClearingRedeemByPartition(
+    ...args: Parameters<ClearingOperations["protectedClearingRedeemByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.clearingOps.protectedClearingRedeemByPartition(...args);
   }
 
-  async clearingCreateHoldByPartition(...args: Parameters<ClearingOperations["clearingCreateHoldByPartition"]>): Promise<TransactionResponse> {
+  async clearingCreateHoldByPartition(
+    ...args: Parameters<ClearingOperations["clearingCreateHoldByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.clearingOps.clearingCreateHoldByPartition(...args);
   }
 
-  async clearingCreateHoldFromByPartition(...args: Parameters<ClearingOperations["clearingCreateHoldFromByPartition"]>): Promise<TransactionResponse> {
+  async clearingCreateHoldFromByPartition(
+    ...args: Parameters<ClearingOperations["clearingCreateHoldFromByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.clearingOps.clearingCreateHoldFromByPartition(...args);
   }
 
-  async protectedClearingCreateHoldByPartition(...args: Parameters<ClearingOperations["protectedClearingCreateHoldByPartition"]>): Promise<TransactionResponse> {
+  async protectedClearingCreateHoldByPartition(
+    ...args: Parameters<ClearingOperations["protectedClearingCreateHoldByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.clearingOps.protectedClearingCreateHoldByPartition(...args);
   }
 
-  async operatorClearingCreateHoldByPartition(...args: Parameters<ClearingOperations["operatorClearingCreateHoldByPartition"]>): Promise<TransactionResponse> {
+  async operatorClearingCreateHoldByPartition(
+    ...args: Parameters<ClearingOperations["operatorClearingCreateHoldByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.clearingOps.operatorClearingCreateHoldByPartition(...args);
   }
 
-  async operatorClearingRedeemByPartition(...args: Parameters<ClearingOperations["operatorClearingRedeemByPartition"]>): Promise<TransactionResponse> {
+  async operatorClearingRedeemByPartition(
+    ...args: Parameters<ClearingOperations["operatorClearingRedeemByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.clearingOps.operatorClearingRedeemByPartition(...args);
   }
 
-  async operatorClearingTransferByPartition(...args: Parameters<ClearingOperations["operatorClearingTransferByPartition"]>): Promise<TransactionResponse> {
+  async operatorClearingTransferByPartition(
+    ...args: Parameters<ClearingOperations["operatorClearingTransferByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.clearingOps.operatorClearingTransferByPartition(...args);
   }
 
@@ -409,15 +469,21 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.complianceOps.removeIssuer(...args);
   }
 
-  async setRevocationRegistryAddress(...args: Parameters<ComplianceOperations["setRevocationRegistryAddress"]>): Promise<TransactionResponse> {
+  async setRevocationRegistryAddress(
+    ...args: Parameters<ComplianceOperations["setRevocationRegistryAddress"]>
+  ): Promise<TransactionResponse> {
     return this.complianceOps.setRevocationRegistryAddress(...args);
   }
 
-  async activateInternalKyc(...args: Parameters<ComplianceOperations["activateInternalKyc"]>): Promise<TransactionResponse> {
+  async activateInternalKyc(
+    ...args: Parameters<ComplianceOperations["activateInternalKyc"]>
+  ): Promise<TransactionResponse> {
     return this.complianceOps.activateInternalKyc(...args);
   }
 
-  async deactivateInternalKyc(...args: Parameters<ComplianceOperations["deactivateInternalKyc"]>): Promise<TransactionResponse> {
+  async deactivateInternalKyc(
+    ...args: Parameters<ComplianceOperations["deactivateInternalKyc"]>
+  ): Promise<TransactionResponse> {
     return this.complianceOps.deactivateInternalKyc(...args);
   }
 
@@ -425,7 +491,9 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.complianceOps.setOnchainID(...args);
   }
 
-  async setIdentityRegistry(...args: Parameters<ComplianceOperations["setIdentityRegistry"]>): Promise<TransactionResponse> {
+  async setIdentityRegistry(
+    ...args: Parameters<ComplianceOperations["setIdentityRegistry"]>
+  ): Promise<TransactionResponse> {
     return this.complianceOps.setIdentityRegistry(...args);
   }
 
@@ -433,15 +501,21 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.complianceOps.setCompliance(...args);
   }
 
-  async updateExternalKycLists(...args: Parameters<ComplianceOperations["updateExternalKycLists"]>): Promise<TransactionResponse> {
+  async updateExternalKycLists(
+    ...args: Parameters<ComplianceOperations["updateExternalKycLists"]>
+  ): Promise<TransactionResponse> {
     return this.complianceOps.updateExternalKycLists(...args);
   }
 
-  async addExternalKycList(...args: Parameters<ComplianceOperations["addExternalKycList"]>): Promise<TransactionResponse> {
+  async addExternalKycList(
+    ...args: Parameters<ComplianceOperations["addExternalKycList"]>
+  ): Promise<TransactionResponse> {
     return this.complianceOps.addExternalKycList(...args);
   }
 
-  async removeExternalKycList(...args: Parameters<ComplianceOperations["removeExternalKycList"]>): Promise<TransactionResponse> {
+  async removeExternalKycList(
+    ...args: Parameters<ComplianceOperations["removeExternalKycList"]>
+  ): Promise<TransactionResponse> {
     return this.complianceOps.removeExternalKycList(...args);
   }
 
@@ -463,35 +537,51 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.controlListOps.addToControlList(...args);
   }
 
-  async removeFromControlList(...args: Parameters<ControlListOperations["removeFromControlList"]>): Promise<TransactionResponse> {
+  async removeFromControlList(
+    ...args: Parameters<ControlListOperations["removeFromControlList"]>
+  ): Promise<TransactionResponse> {
     return this.controlListOps.removeFromControlList(...args);
   }
 
-  async updateExternalControlLists(...args: Parameters<ControlListOperations["updateExternalControlLists"]>): Promise<TransactionResponse> {
+  async updateExternalControlLists(
+    ...args: Parameters<ControlListOperations["updateExternalControlLists"]>
+  ): Promise<TransactionResponse> {
     return this.controlListOps.updateExternalControlLists(...args);
   }
 
-  async addExternalControlList(...args: Parameters<ControlListOperations["addExternalControlList"]>): Promise<TransactionResponse> {
+  async addExternalControlList(
+    ...args: Parameters<ControlListOperations["addExternalControlList"]>
+  ): Promise<TransactionResponse> {
     return this.controlListOps.addExternalControlList(...args);
   }
 
-  async removeExternalControlList(...args: Parameters<ControlListOperations["removeExternalControlList"]>): Promise<TransactionResponse> {
+  async removeExternalControlList(
+    ...args: Parameters<ControlListOperations["removeExternalControlList"]>
+  ): Promise<TransactionResponse> {
     return this.controlListOps.removeExternalControlList(...args);
   }
 
-  async addToBlackListMock(...args: Parameters<ControlListOperations["addToBlackListMock"]>): Promise<TransactionResponse> {
+  async addToBlackListMock(
+    ...args: Parameters<ControlListOperations["addToBlackListMock"]>
+  ): Promise<TransactionResponse> {
     return this.controlListOps.addToBlackListMock(...args);
   }
 
-  async addToWhiteListMock(...args: Parameters<ControlListOperations["addToWhiteListMock"]>): Promise<TransactionResponse> {
+  async addToWhiteListMock(
+    ...args: Parameters<ControlListOperations["addToWhiteListMock"]>
+  ): Promise<TransactionResponse> {
     return this.controlListOps.addToWhiteListMock(...args);
   }
 
-  async removeFromBlackListMock(...args: Parameters<ControlListOperations["removeFromBlackListMock"]>): Promise<TransactionResponse> {
+  async removeFromBlackListMock(
+    ...args: Parameters<ControlListOperations["removeFromBlackListMock"]>
+  ): Promise<TransactionResponse> {
     return this.controlListOps.removeFromBlackListMock(...args);
   }
 
-  async removeFromWhiteListMock(...args: Parameters<ControlListOperations["removeFromWhiteListMock"]>): Promise<TransactionResponse> {
+  async removeFromWhiteListMock(
+    ...args: Parameters<ControlListOperations["removeFromWhiteListMock"]>
+  ): Promise<TransactionResponse> {
     return this.controlListOps.removeFromWhiteListMock(...args);
   }
 
@@ -513,7 +603,9 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.pauseOps.unpause(...args);
   }
 
-  async updateExternalPauses(...args: Parameters<PauseOperations["updateExternalPauses"]>): Promise<TransactionResponse> {
+  async updateExternalPauses(
+    ...args: Parameters<PauseOperations["updateExternalPauses"]>
+  ): Promise<TransactionResponse> {
     return this.pauseOps.updateExternalPauses(...args);
   }
 
@@ -549,6 +641,10 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.securityOps.setCoupon(...args);
   }
 
+  async cancelCoupon(...args: Parameters<SecurityOperations["cancelCoupon"]>): Promise<TransactionResponse> {
+    return this.securityOps.cancelCoupon(...args);
+  }
+
   setRate(...args: Parameters<SecurityOperations["setRate"]>): Promise<TransactionResponse> {
     return this.securityOps.setRate(...args);
   }
@@ -565,7 +661,9 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.securityOps.addKpiData(...args);
   }
 
-  async updateMaturityDate(...args: Parameters<SecurityOperations["updateMaturityDate"]>): Promise<TransactionResponse> {
+  async updateMaturityDate(
+    ...args: Parameters<SecurityOperations["updateMaturityDate"]>
+  ): Promise<TransactionResponse> {
     return this.securityOps.updateMaturityDate(...args);
   }
 
@@ -573,35 +671,59 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.securityOps.addProceedRecipient(...args);
   }
 
-  removeProceedRecipient(...args: Parameters<SecurityOperations["removeProceedRecipient"]>): Promise<TransactionResponse> {
+  removeProceedRecipient(
+    ...args: Parameters<SecurityOperations["removeProceedRecipient"]>
+  ): Promise<TransactionResponse> {
     return this.securityOps.removeProceedRecipient(...args);
   }
 
-  updateProceedRecipientData(...args: Parameters<SecurityOperations["updateProceedRecipientData"]>): Promise<TransactionResponse> {
+  updateProceedRecipientData(
+    ...args: Parameters<SecurityOperations["updateProceedRecipientData"]>
+  ): Promise<TransactionResponse> {
     return this.securityOps.updateProceedRecipientData(...args);
   }
 
-  async setDividends(...args: Parameters<SecurityOperations["setDividends"]>): Promise<TransactionResponse> {
-    return this.securityOps.setDividends(...args);
+  async setDividend(...args: Parameters<SecurityOperations["setDividend"]>): Promise<TransactionResponse> {
+    return this.securityOps.setDividend(...args);
+  }
+
+  async cancelDividend(...args: Parameters<SecurityOperations["cancelDividend"]>): Promise<TransactionResponse> {
+    return this.securityOps.cancelDividend(...args);
   }
 
   async setVotingRights(...args: Parameters<SecurityOperations["setVotingRights"]>): Promise<TransactionResponse> {
     return this.securityOps.setVotingRights(...args);
   }
 
-  async setScheduledBalanceAdjustment(...args: Parameters<SecurityOperations["setScheduledBalanceAdjustment"]>): Promise<TransactionResponse> {
+  async cancelVoting(...args: Parameters<SecurityOperations["cancelVoting"]>): Promise<TransactionResponse> {
+    return this.securityOps.cancelVoting(...args);
+  }
+
+  async setScheduledBalanceAdjustment(
+    ...args: Parameters<SecurityOperations["setScheduledBalanceAdjustment"]>
+  ): Promise<TransactionResponse> {
     return this.securityOps.setScheduledBalanceAdjustment(...args);
+  }
+
+  async cancelScheduledBalanceAdjustment(
+    ...args: Parameters<SecurityOperations["cancelScheduledBalanceAdjustment"]>
+  ): Promise<TransactionResponse> {
+    return this.securityOps.cancelScheduledBalanceAdjustment(...args);
   }
 
   async takeSnapshot(...args: Parameters<SecurityOperations["takeSnapshot"]>): Promise<TransactionResponse> {
     return this.securityOps.takeSnapshot(...args);
   }
 
-  async triggerPendingScheduledSnapshots(...args: Parameters<SecurityOperations["triggerPendingScheduledSnapshots"]>): Promise<TransactionResponse> {
+  async triggerPendingScheduledSnapshots(
+    ...args: Parameters<SecurityOperations["triggerPendingScheduledSnapshots"]>
+  ): Promise<TransactionResponse> {
     return this.securityOps.triggerPendingScheduledSnapshots(...args);
   }
 
-  async triggerScheduledSnapshots(...args: Parameters<SecurityOperations["triggerScheduledSnapshots"]>): Promise<TransactionResponse> {
+  async triggerScheduledSnapshots(
+    ...args: Parameters<SecurityOperations["triggerScheduledSnapshots"]>
+  ): Promise<TransactionResponse> {
     return this.securityOps.triggerScheduledSnapshots(...args);
   }
 
@@ -615,15 +737,25 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.securityMetadataOps.setSymbol(...args);
   }
 
+  async setNominalValue(
+    ...args: Parameters<SecurityMetadataOperations["setNominalValue"]>
+  ): Promise<TransactionResponse> {
+    return this.securityMetadataOps.setNominalValue(...args);
+  }
+
   async setDocument(...args: Parameters<SecurityMetadataOperations["setDocument"]>): Promise<TransactionResponse> {
     return this.securityMetadataOps.setDocument(...args);
   }
 
-  async removeDocument(...args: Parameters<SecurityMetadataOperations["removeDocument"]>): Promise<TransactionResponse> {
+  async removeDocument(
+    ...args: Parameters<SecurityMetadataOperations["removeDocument"]>
+  ): Promise<TransactionResponse> {
     return this.securityMetadataOps.removeDocument(...args);
   }
 
-  async updateConfigVersion(...args: Parameters<SecurityMetadataOperations["updateConfigVersion"]>): Promise<TransactionResponse> {
+  async updateConfigVersion(
+    ...args: Parameters<SecurityMetadataOperations["updateConfigVersion"]>
+  ): Promise<TransactionResponse> {
     return this.securityMetadataOps.updateConfigVersion(...args);
   }
 
@@ -631,51 +763,75 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.securityMetadataOps.updateConfig(...args);
   }
 
-  async updateResolver(...args: Parameters<SecurityMetadataOperations["updateResolver"]>): Promise<TransactionResponse> {
+  async updateResolver(
+    ...args: Parameters<SecurityMetadataOperations["updateResolver"]>
+  ): Promise<TransactionResponse> {
     return this.securityMetadataOps.updateResolver(...args);
   }
 
-  async protectPartitions(...args: Parameters<SecurityMetadataOperations["protectPartitions"]>): Promise<TransactionResponse> {
+  async protectPartitions(
+    ...args: Parameters<SecurityMetadataOperations["protectPartitions"]>
+  ): Promise<TransactionResponse> {
     return this.securityMetadataOps.protectPartitions(...args);
   }
 
-  async unprotectPartitions(...args: Parameters<SecurityMetadataOperations["unprotectPartitions"]>): Promise<TransactionResponse> {
+  async unprotectPartitions(
+    ...args: Parameters<SecurityMetadataOperations["unprotectPartitions"]>
+  ): Promise<TransactionResponse> {
     return this.securityMetadataOps.unprotectPartitions(...args);
   }
 
-  async protectedRedeemFromByPartition(...args: Parameters<SecurityMetadataOperations["protectedRedeemFromByPartition"]>): Promise<TransactionResponse> {
+  async protectedRedeemFromByPartition(
+    ...args: Parameters<SecurityMetadataOperations["protectedRedeemFromByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.securityMetadataOps.protectedRedeemFromByPartition(...args);
   }
 
-  async protectedTransferFromByPartition(...args: Parameters<SecurityMetadataOperations["protectedTransferFromByPartition"]>): Promise<TransactionResponse> {
+  async protectedTransferFromByPartition(
+    ...args: Parameters<SecurityMetadataOperations["protectedTransferFromByPartition"]>
+  ): Promise<TransactionResponse> {
     return this.securityMetadataOps.protectedTransferFromByPartition(...args);
   }
 
-  async freezePartialTokens(...args: Parameters<SecurityMetadataOperations["freezePartialTokens"]>): Promise<TransactionResponse> {
+  async freezePartialTokens(
+    ...args: Parameters<SecurityMetadataOperations["freezePartialTokens"]>
+  ): Promise<TransactionResponse> {
     return this.securityMetadataOps.freezePartialTokens(...args);
   }
 
-  async unfreezePartialTokens(...args: Parameters<SecurityMetadataOperations["unfreezePartialTokens"]>): Promise<TransactionResponse> {
+  async unfreezePartialTokens(
+    ...args: Parameters<SecurityMetadataOperations["unfreezePartialTokens"]>
+  ): Promise<TransactionResponse> {
     return this.securityMetadataOps.unfreezePartialTokens(...args);
   }
 
-  async setAddressFrozen(...args: Parameters<SecurityMetadataOperations["setAddressFrozen"]>): Promise<TransactionResponse> {
+  async setAddressFrozen(
+    ...args: Parameters<SecurityMetadataOperations["setAddressFrozen"]>
+  ): Promise<TransactionResponse> {
     return this.securityMetadataOps.setAddressFrozen(...args);
   }
 
-  async batchSetAddressFrozen(...args: Parameters<SecurityMetadataOperations["batchSetAddressFrozen"]>): Promise<TransactionResponse> {
+  async batchSetAddressFrozen(
+    ...args: Parameters<SecurityMetadataOperations["batchSetAddressFrozen"]>
+  ): Promise<TransactionResponse> {
     return this.securityMetadataOps.batchSetAddressFrozen(...args);
   }
 
-  async batchFreezePartialTokens(...args: Parameters<SecurityMetadataOperations["batchFreezePartialTokens"]>): Promise<TransactionResponse> {
+  async batchFreezePartialTokens(
+    ...args: Parameters<SecurityMetadataOperations["batchFreezePartialTokens"]>
+  ): Promise<TransactionResponse> {
     return this.securityMetadataOps.batchFreezePartialTokens(...args);
   }
 
-  async batchUnfreezePartialTokens(...args: Parameters<SecurityMetadataOperations["batchUnfreezePartialTokens"]>): Promise<TransactionResponse> {
+  async batchUnfreezePartialTokens(
+    ...args: Parameters<SecurityMetadataOperations["batchUnfreezePartialTokens"]>
+  ): Promise<TransactionResponse> {
     return this.securityMetadataOps.batchUnfreezePartialTokens(...args);
   }
 
-  async recoveryAddress(...args: Parameters<SecurityMetadataOperations["recoveryAddress"]>): Promise<TransactionResponse> {
+  async recoveryAddress(
+    ...args: Parameters<SecurityMetadataOperations["recoveryAddress"]>
+  ): Promise<TransactionResponse> {
     return this.securityMetadataOps.recoveryAddress(...args);
   }
 

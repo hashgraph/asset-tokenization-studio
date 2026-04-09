@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
-import { IERC1410 } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import {
     _ERC1410_BASIC_STORAGE_POSITION,

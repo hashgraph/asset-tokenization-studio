@@ -6,7 +6,6 @@ import { IERC1410TokenHolder } from "./IERC1410TokenHolder.sol";
 
 import { Modifiers } from "../../../../services/Modifiers.sol";
 import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
-import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 

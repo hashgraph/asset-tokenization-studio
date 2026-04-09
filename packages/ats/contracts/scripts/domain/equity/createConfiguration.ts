@@ -79,9 +79,10 @@ const EQUITY_FACETS = [
   "ExternalKycListManagementFacet",
   "ExternalPauseManagementFacet",
 
-  // Advanced Features (9)
+  // Advanced Features (10)
   "AdjustBalancesFacet",
   "LockFacet",
+  "NominalValueFacet",
   "ProtectedPartitionsFacet",
   "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
