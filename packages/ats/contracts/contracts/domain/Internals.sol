@@ -1319,7 +1319,7 @@ abstract contract Internals is Modifiers {
         uint256 _amortizationID,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view virtual returns (IAmortization.AmortizationFor[] memory amortizationsFor_);
+    ) internal view virtual returns (IAmortization.AmortizationFor[] memory amortizationsFor_, address[] memory holders_);
     function _getAmortizationsCount() internal view virtual returns (uint256 amortizationCount_);
     function _getAmortizationHolders(
         uint256 _amortizationID,
@@ -1327,16 +1327,13 @@ abstract contract Internals is Modifiers {
         uint256 _pageLength
     ) internal view virtual returns (address[] memory holders_);
     function _getTotalAmortizationHolders(uint256 _amortizationID) internal view virtual returns (uint256);
-    function _getActiveAmortizationHoldHolders(
+    function _getAmortizationActiveHolders(
         uint256 _amortizationID,
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view virtual returns (address[] memory holders_);
-    function _getTotalActiveAmortizationHoldHolders(uint256 _amortizationID) internal view virtual returns (uint256);
-    function _getAmortizationPaymentAmount(
-        uint256 _amortizationID,
-        address _tokenHolder
-    ) internal view virtual returns (uint256 tokenAmount_, uint8 decimals_);
+    function _getTotalAmortizationActiveHolders(uint256 _amortizationID) internal view virtual returns (uint256);
+    function _getTotalHoldByAmortizationId(uint256 _amortizationID) internal view virtual returns (uint256);
     function _getActiveAmortizationIds(
         uint256 _pageIndex,
         uint256 _pageLength

@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-09T08:35:28.644Z
+ * Generated: 2026-04-09T12:50:01.792Z
  * Facets: 206
  * Infrastructure: 2
  *
@@ -869,12 +869,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x99c50121",
       },
       {
-        name: "getActiveAmortizationHoldHolders",
-        signature:
-          "function getActiveAmortizationHoldHolders(uint256 _amortizationID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
-        selector: "0x3c819d06",
-      },
-      {
         name: "getActiveAmortizationIds",
         signature:
           "function getActiveAmortizationIds(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] activeIds_)",
@@ -887,9 +881,15 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x52347466",
       },
       {
+        name: "getAmortizationActiveHolders",
+        signature:
+          "function getAmortizationActiveHolders(uint256 _amortizationID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+        selector: "0x255e8d81",
+      },
+      {
         name: "getAmortizationFor",
         signature:
-          "function getAmortizationFor(uint256 _amortizationID, address _account) view returns ((address account, uint256 recordDate, uint256 executionDate, uint256 holdId, bool holdActive, uint256 tokenHeldAmount, uint8 decimalsHeld, uint256 abafAtHold, uint256 tokenBalance, uint8 decimalsBalance, bool recordDateReached, uint256 abafAtSnapshot, uint256 nominalValue, uint8 nominalValueDecimals) amortizationFor_)",
+          "function getAmortizationFor(uint256 _amortizationID, address _account) view returns ((uint256 recordDate, uint256 executionDate, uint256 holdId, bool holdActive, uint256 tokenHeldAmount, uint8 decimalsHeld, uint256 abafAtHold, uint256 tokenBalance, uint8 decimalsBalance, bool recordDateReached, uint256 abafAtSnapshot, uint256 nominalValue, uint8 nominalValueDecimals) amortizationFor_)",
         selector: "0x57cc97ee",
       },
       {
@@ -899,12 +899,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x695453e3",
       },
       {
-        name: "getAmortizationPaymentAmount",
-        signature:
-          "function getAmortizationPaymentAmount(uint256 _amortizationID, address _tokenHolder) view returns (uint256 tokenAmount_, uint8 decimals_)",
-        selector: "0xbc4cd5c9",
-      },
-      {
         name: "getAmortizationsCount",
         signature: "function getAmortizationsCount() view returns (uint256 amortizationCount_)",
         selector: "0x0d9d3cd5",
@@ -912,13 +906,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getAmortizationsFor",
         signature:
-          "function getAmortizationsFor(uint256 _amortizationID, uint256 _pageIndex, uint256 _pageLength) view returns ((address account, uint256 recordDate, uint256 executionDate, uint256 holdId, bool holdActive, uint256 tokenHeldAmount, uint8 decimalsHeld, uint256 abafAtHold, uint256 tokenBalance, uint8 decimalsBalance, bool recordDateReached, uint256 abafAtSnapshot, uint256 nominalValue, uint8 nominalValueDecimals)[] amortizationsFor_)",
+          "function getAmortizationsFor(uint256 _amortizationID, uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 recordDate, uint256 executionDate, uint256 holdId, bool holdActive, uint256 tokenHeldAmount, uint8 decimalsHeld, uint256 abafAtHold, uint256 tokenBalance, uint8 decimalsBalance, bool recordDateReached, uint256 abafAtSnapshot, uint256 nominalValue, uint8 nominalValueDecimals)[] amortizationsFor_, address[] holders_)",
         selector: "0xed73a37e",
-      },
-      {
-        name: "getTotalActiveAmortizationHoldHolders",
-        signature: "function getTotalActiveAmortizationHoldHolders(uint256 _amortizationID) view returns (uint256)",
-        selector: "0xa18237e7",
       },
       {
         name: "getTotalActiveAmortizationIds",
@@ -926,9 +915,19 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x23099a13",
       },
       {
+        name: "getTotalAmortizationActiveHolders",
+        signature: "function getTotalAmortizationActiveHolders(uint256 _amortizationID) view returns (uint256)",
+        selector: "0x5a88c5c5",
+      },
+      {
         name: "getTotalAmortizationHolders",
         signature: "function getTotalAmortizationHolders(uint256 _amortizationID) view returns (uint256)",
         selector: "0x8bd49432",
+      },
+      {
+        name: "getTotalHoldByAmortizationId",
+        signature: "function getTotalHoldByAmortizationId(uint256 _amortizationID) view returns (uint256)",
+        selector: "0x6ee0f18a",
       },
       {
         name: "releaseAmortizationHold",

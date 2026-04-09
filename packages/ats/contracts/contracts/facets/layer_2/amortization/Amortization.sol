@@ -106,7 +106,7 @@ abstract contract Amortization is IAmortization, Internals {
         override
         onlyWithoutMultiPartition
         onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
-        returns (AmortizationFor[] memory amortizationsFor_)
+        returns (AmortizationFor[] memory amortizationsFor_, address[] memory holders_)
     {
         return _getAmortizationsFor(_amortizationID, _pageIndex, _pageLength);
     }
@@ -149,21 +149,7 @@ abstract contract Amortization is IAmortization, Internals {
         return _getTotalAmortizationHolders(_amortizationID);
     }
 
-    function getAmortizationPaymentAmount(
-        uint256 _amortizationID,
-        address _tokenHolder
-    )
-        external
-        view
-        override
-        onlyWithoutMultiPartition
-        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
-        returns (uint256 tokenAmount_, uint8 decimals_)
-    {
-        return _getAmortizationPaymentAmount(_amortizationID, _tokenHolder);
-    }
-
-    function getActiveAmortizationHoldHolders(
+    function getAmortizationActiveHolders(
         uint256 _amortizationID,
         uint256 _pageIndex,
         uint256 _pageLength
@@ -175,10 +161,10 @@ abstract contract Amortization is IAmortization, Internals {
         onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
         returns (address[] memory holders_)
     {
-        return _getActiveAmortizationHoldHolders(_amortizationID, _pageIndex, _pageLength);
+        return _getAmortizationActiveHolders(_amortizationID, _pageIndex, _pageLength);
     }
 
-    function getTotalActiveAmortizationHoldHolders(
+    function getTotalAmortizationActiveHolders(
         uint256 _amortizationID
     )
         external
@@ -188,7 +174,20 @@ abstract contract Amortization is IAmortization, Internals {
         onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
         returns (uint256)
     {
-        return _getTotalActiveAmortizationHoldHolders(_amortizationID);
+        return _getTotalAmortizationActiveHolders(_amortizationID);
+    }
+
+    function getTotalHoldByAmortizationId(
+        uint256 _amortizationID
+    )
+        external
+        view
+        override
+        onlyWithoutMultiPartition
+        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        returns (uint256)
+    {
+        return _getTotalHoldByAmortizationId(_amortizationID);
     }
 
     function getActiveAmortizationIds(

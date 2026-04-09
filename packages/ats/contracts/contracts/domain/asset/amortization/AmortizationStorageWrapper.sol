@@ -25,6 +25,7 @@ abstract contract AmortizationStorageWrapper is IAmortizationStorageWrapper, Sec
         mapping(bytes32 corporateActionId => mapping(address tokenHolder => IAmortizationStorageWrapper.AmortizationHoldInfo)) amortizationHolds;
         mapping(bytes32 corporateActionId => EnumerableSet.AddressSet) activeHoldHolders;
         EnumerableSet.UintSet activeAmortizationIds;
+        mapping(bytes32 corporateActionId => uint256) totalHoldByAmortizationId;
     }
 
     modifier onlyNoActiveAmortizationHolds(uint256 _amortizationID) override {
@@ -107,6 +108,7 @@ abstract contract AmortizationStorageWrapper is IAmortizationStorageWrapper, Sec
             });
             uint256 existingAmount = _getHold(identifier).hold.amount;
             _releaseHoldByPartition(identifier, existingAmount);
+            s.totalHoldByAmortizationId[corporateActionId] -= existingAmount;
         }
 
         Hold memory hold = Hold({
@@ -133,6 +135,7 @@ abstract contract AmortizationStorageWrapper is IAmortizationStorageWrapper, Sec
         });
 
         s.activeHoldHolders[corporateActionId].add(_tokenHolder);
+        s.totalHoldByAmortizationId[corporateActionId] += _tokenAmount;
 
         holdId_ = newHoldId;
 
@@ -166,6 +169,7 @@ abstract contract AmortizationStorageWrapper is IAmortizationStorageWrapper, Sec
         uint256 releasedHoldId = holdInfo.holdId;
         holdInfo.holdActive = false;
         s.activeHoldHolders[corporateActionId].remove(_tokenHolder);
+        s.totalHoldByAmortizationId[corporateActionId] -= holdAmount;
 
         emit AmortizationHoldReleased(corporateActionId, _amortizationID, _tokenHolder, releasedHoldId);
     }
@@ -204,7 +208,6 @@ abstract contract AmortizationStorageWrapper is IAmortizationStorageWrapper, Sec
 
         ) = _getAmortization(_amortizationID);
 
-        amortizationFor_.account = _account;
         amortizationFor_.recordDate = registeredAmortization.amortization.recordDate;
         amortizationFor_.executionDate = registeredAmortization.amortization.executionDate;
 
@@ -251,12 +254,12 @@ abstract contract AmortizationStorageWrapper is IAmortizationStorageWrapper, Sec
         uint256 _amortizationID,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view override returns (IAmortization.AmortizationFor[] memory amortizationsFor_) {
-        address[] memory holders = _getAmortizationHolders(_amortizationID, _pageIndex, _pageLength);
-        uint256 length = holders.length;
+    ) internal view override returns (IAmortization.AmortizationFor[] memory amortizationsFor_, address[] memory holders_) {
+        holders_ = _getAmortizationHolders(_amortizationID, _pageIndex, _pageLength);
+        uint256 length = holders_.length;
         amortizationsFor_ = new IAmortization.AmortizationFor[](length);
         for (uint256 i; i < length; ) {
-            amortizationsFor_[i] = _getAmortizationFor(_amortizationID, holders[i]);
+            amortizationsFor_[i] = _getAmortizationFor(_amortizationID, holders_[i]);
             unchecked {
                 ++i;
             }
@@ -300,16 +303,7 @@ abstract contract AmortizationStorageWrapper is IAmortizationStorageWrapper, Sec
         return _getTotalTokenHolders();
     }
 
-    function _getAmortizationPaymentAmount(
-        uint256 _amortizationID,
-        address _tokenHolder
-    ) internal view override returns (uint256 tokenAmount_, uint8 decimals_) {
-        IAmortization.AmortizationFor memory amortizationFor = _getAmortizationFor(_amortizationID, _tokenHolder);
-        tokenAmount_ = amortizationFor.tokenHeldAmount;
-        decimals_ = amortizationFor.decimalsHeld;
-    }
-
-    function _getActiveAmortizationHoldHolders(
+    function _getAmortizationActiveHolders(
         uint256 _amortizationID,
         uint256 _pageIndex,
         uint256 _pageLength
@@ -322,12 +316,20 @@ abstract contract AmortizationStorageWrapper is IAmortizationStorageWrapper, Sec
             LibCommon.getFromSet(_amortizationStorage().activeHoldHolders[corporateActionId], _pageIndex, _pageLength);
     }
 
-    function _getTotalActiveAmortizationHoldHolders(uint256 _amortizationID) internal view override returns (uint256) {
+    function _getTotalAmortizationActiveHolders(uint256 _amortizationID) internal view override returns (uint256) {
         bytes32 corporateActionId = _getCorporateActionIdByTypeIndex(
             AMORTIZATION_CORPORATE_ACTION_TYPE,
             _amortizationID - 1
         );
         return _amortizationStorage().activeHoldHolders[corporateActionId].length();
+    }
+
+    function _getTotalHoldByAmortizationId(uint256 _amortizationID) internal view override returns (uint256) {
+        bytes32 corporateActionId = _getCorporateActionIdByTypeIndex(
+            AMORTIZATION_CORPORATE_ACTION_TYPE,
+            _amortizationID - 1
+        );
+        return _amortizationStorage().totalHoldByAmortizationId[corporateActionId];
     }
 
     function _getActiveAmortizationIds(

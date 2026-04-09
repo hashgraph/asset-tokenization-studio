@@ -326,24 +326,24 @@ describe("AmortizationFacet", () => {
       const expectedAddresses = [deployer.address, user1.address];
 
       // pageLength=1, pageIndex=0 → 1 result with a valid holder and correct balance
-      const page0 = await asset.getAmortizationsFor(1, 0, 1);
+      const [page0, page0Holders] = await asset.getAmortizationsFor(1, 0, 1);
       expect(page0.length).to.equal(1);
-      expect(expectedAddresses).to.include(page0[0].account);
+      expect(expectedAddresses).to.include(page0Holders[0]);
       expect(page0[0].tokenBalance).to.equal(BigInt(TOTAL_UNITS / 2));
       expect(page0[0].holdId).to.equal(0n);
 
       // pageLength=1, pageIndex=1 → the other holder
-      const page1 = await asset.getAmortizationsFor(1, 1, 1);
+      const [page1, page1Holders] = await asset.getAmortizationsFor(1, 1, 1);
       expect(page1.length).to.equal(1);
-      expect(expectedAddresses).to.include(page1[0].account);
+      expect(expectedAddresses).to.include(page1Holders[0]);
 
-      expect(page1[0].account).to.not.equal(page0[0].account);
+      expect(page1Holders[0]).to.not.equal(page0Holders[0]);
       expect(page1[0].tokenBalance).to.equal(BigInt(TOTAL_UNITS / 2));
 
       // pageLength=2, pageIndex=0 → both holders
-      const allEntries = await asset.getAmortizationsFor(1, 0, 2);
+      const [allEntries, allHolders] = await asset.getAmortizationsFor(1, 0, 2);
       expect(allEntries.length).to.equal(2);
-      expect(allEntries.map((e) => e.account)).to.have.members(expectedAddresses);
+      expect([...allHolders]).to.have.members(expectedAddresses);
     });
 
     it("GIVEN 2 holders and snapshot WHEN getAmortizationHolders with pageIndex=0 and pageIndex=1 THEN returns 1 holder per page", async () => {
@@ -387,53 +387,6 @@ describe("AmortizationFacet", () => {
   describe("getTotalAmortizationHolders", () => {
     it("GIVEN invalid amortization ID WHEN getTotalAmortizationHolders THEN reverts with WrongIndexForAction", async () => {
       await expect(asset.getTotalAmortizationHolders(999)).to.be.revertedWithCustomError(asset, "WrongIndexForAction");
-    });
-  });
-
-  describe("getAmortizationPaymentAmount", () => {
-    it("GIVEN invalid amortization ID WHEN getAmortizationPaymentAmount THEN reverts with WrongIndexForAction", async () => {
-      await expect(asset.getAmortizationPaymentAmount(999, deployer.address)).to.be.revertedWithCustomError(
-        asset,
-        "WrongIndexForAction",
-      );
-    });
-
-    it("GIVEN no hold created for holder WHEN getAmortizationPaymentAmount THEN returns (tokenAmount=0, decimals=0)", async () => {
-      await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, user2.address);
-
-      const data = await makeAmortizationData();
-      await asset.connect(user2).setAmortization(data);
-
-      const [tokenAmount, decimals] = await asset.getAmortizationPaymentAmount(1, deployer.address);
-
-      expect(tokenAmount).to.equal(0n);
-      expect(decimals).to.equal(0);
-    });
-
-    it("GIVEN active hold for holder WHEN getAmortizationPaymentAmount THEN returns (holdAmount, decimals)", async () => {
-      await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, user2.address);
-      await asset.grantRole(ATS_ROLES._AMORTIZATION_ROLE, user2.address);
-      await asset.grantRole(ATS_ROLES._ISSUER_ROLE, user2.address);
-
-      await asset.connect(user2).issueByPartition({
-        partition: DEFAULT_PARTITION,
-        tokenHolder: deployer.address,
-        value: TOTAL_UNITS,
-        data: EMPTY_HEX_BYTES,
-      });
-
-      const data = await makeAmortizationData();
-      await asset.connect(user2).setAmortization(data);
-
-      await asset.changeSystemTimestamp(data.recordDate + 1);
-      await asset.triggerPendingScheduledCrossOrderedTasks();
-
-      await asset.connect(user2).setAmortizationHold(1, deployer.address, BigInt(TOKENS_TO_REDEEM));
-
-      const [tokenAmount, decimals] = await asset.getAmortizationPaymentAmount(1, deployer.address);
-
-      expect(tokenAmount).to.equal(BigInt(TOKENS_TO_REDEEM));
-      expect(decimals).to.equal(DEFAULT_SECURITY_PARAMS.decimals);
     });
   });
 
@@ -815,7 +768,7 @@ describe("AmortizationFacet", () => {
       expect(result.holdId).to.equal(2n);
       expect(result.holdActive).to.equal(true);
       expect(result.tokenHeldAmount).to.equal(newAmount);
-      expect(await asset.getTotalActiveAmortizationHoldHolders(1)).to.equal(1n);
+      expect(await asset.getTotalAmortizationActiveHolders(1)).to.equal(1n);
     });
 
     it("GIVEN tokenAmount = 0 WHEN setAmortizationHold THEN reverts with InvalidAmortizationHoldAmount", async () => {
@@ -958,28 +911,28 @@ describe("AmortizationFacet", () => {
     });
   });
 
-  describe("getActiveAmortizationHoldHolders", () => {
+  describe("getAmortizationActiveHolders", () => {
     beforeEach(async () => {
       await asset.grantRole(ATS_ROLES._AMORTIZATION_ROLE, user2.address);
       await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, user2.address);
       await asset.grantRole(ATS_ROLES._ISSUER_ROLE, user2.address);
     });
 
-    it("GIVEN invalid amortization ID WHEN getActiveAmortizationHoldHolders THEN reverts with WrongIndexForAction", async () => {
-      await expect(asset.getActiveAmortizationHoldHolders(999, 0, 10)).to.be.revertedWithCustomError(
+    it("GIVEN invalid amortization ID WHEN getAmortizationActiveHolders THEN reverts with WrongIndexForAction", async () => {
+      await expect(asset.getAmortizationActiveHolders(999, 0, 10)).to.be.revertedWithCustomError(
         asset,
         "WrongIndexForAction",
       );
     });
 
-    it("GIVEN amortization with no holds WHEN getActiveAmortizationHoldHolders THEN returns empty array", async () => {
+    it("GIVEN amortization with no holds WHEN getAmortizationActiveHolders THEN returns empty array", async () => {
       const data = await makeAmortizationData();
       await asset.connect(user2).setAmortization(data);
 
-      expect(await asset.getActiveAmortizationHoldHolders(1, 0, 10)).to.have.length(0);
+      expect(await asset.getAmortizationActiveHolders(1, 0, 10)).to.have.length(0);
     });
 
-    it("GIVEN 1 active hold WHEN getActiveAmortizationHoldHolders THEN returns list with that holder", async () => {
+    it("GIVEN 1 active hold WHEN getAmortizationActiveHolders THEN returns list with that holder", async () => {
       const data = await makeAmortizationData();
 
       await asset.connect(user2).issueByPartition({
@@ -992,12 +945,12 @@ describe("AmortizationFacet", () => {
       await asset.connect(user2).setAmortization(data);
       await asset.connect(user2).setAmortizationHold(1, deployer.address, BigInt(TOKENS_TO_REDEEM));
 
-      const holders = await asset.getActiveAmortizationHoldHolders(1, 0, 10);
+      const holders = await asset.getAmortizationActiveHolders(1, 0, 10);
       expect(holders.length).to.equal(1);
       expect(holders[0]).to.equal(deployer.address);
     });
 
-    it("GIVEN active hold released WHEN getActiveAmortizationHoldHolders THEN returns empty array", async () => {
+    it("GIVEN active hold released WHEN getAmortizationActiveHolders THEN returns empty array", async () => {
       const data = await makeAmortizationData();
 
       await asset.connect(user2).issueByPartition({
@@ -1011,10 +964,10 @@ describe("AmortizationFacet", () => {
       await asset.connect(user2).setAmortizationHold(1, deployer.address, BigInt(TOKENS_TO_REDEEM));
       await asset.connect(user2).releaseAmortizationHold(1, deployer.address);
 
-      expect(await asset.getActiveAmortizationHoldHolders(1, 0, 10)).to.have.length(0);
+      expect(await asset.getAmortizationActiveHolders(1, 0, 10)).to.have.length(0);
     });
 
-    it("GIVEN 2 active holds, 1 released WHEN getActiveAmortizationHoldHolders THEN returns only the unreleased holder", async () => {
+    it("GIVEN 2 active holds, 1 released WHEN getAmortizationActiveHolders THEN returns only the unreleased holder", async () => {
       const data = await makeAmortizationData();
 
       await asset.connect(user2).issueByPartition({
@@ -1035,12 +988,12 @@ describe("AmortizationFacet", () => {
       await asset.connect(user2).setAmortizationHold(1, user1.address, BigInt(TOKENS_TO_REDEEM));
       await asset.connect(user2).releaseAmortizationHold(1, deployer.address);
 
-      const holders = await asset.getActiveAmortizationHoldHolders(1, 0, 10);
+      const holders = await asset.getAmortizationActiveHolders(1, 0, 10);
       expect(holders.length).to.equal(1);
       expect(holders[0]).to.equal(user1.address);
     });
 
-    it("GIVEN 2 active holds WHEN getActiveAmortizationHoldHolders with pageLength=1 THEN returns 1 holder per page and pages are disjoint", async () => {
+    it("GIVEN 2 active holds WHEN getAmortizationActiveHolders with pageLength=1 THEN returns 1 holder per page and pages are disjoint", async () => {
       const data = await makeAmortizationData();
 
       await asset.connect(user2).issueByPartition({
@@ -1060,8 +1013,8 @@ describe("AmortizationFacet", () => {
       await asset.connect(user2).setAmortizationHold(1, deployer.address, BigInt(TOKENS_TO_REDEEM));
       await asset.connect(user2).setAmortizationHold(1, user1.address, BigInt(TOKENS_TO_REDEEM));
 
-      const page0 = await asset.getActiveAmortizationHoldHolders(1, 0, 1);
-      const page1 = await asset.getActiveAmortizationHoldHolders(1, 1, 1);
+      const page0 = await asset.getAmortizationActiveHolders(1, 0, 1);
+      const page1 = await asset.getAmortizationActiveHolders(1, 1, 1);
 
       expect(page0.length).to.equal(1);
       expect(page1.length).to.equal(1);
@@ -1069,7 +1022,7 @@ describe("AmortizationFacet", () => {
       expect([page0[0], page1[0]]).to.have.members([deployer.address, user1.address]);
     });
 
-    it("GIVEN 1 active hold WHEN getActiveAmortizationHoldHolders with out-of-range pageIndex THEN returns empty array", async () => {
+    it("GIVEN 1 active hold WHEN getAmortizationActiveHolders with out-of-range pageIndex THEN returns empty array", async () => {
       const data = await makeAmortizationData();
 
       await asset.connect(user2).issueByPartition({
@@ -1082,7 +1035,7 @@ describe("AmortizationFacet", () => {
       await asset.connect(user2).setAmortization(data);
       await asset.connect(user2).setAmortizationHold(1, deployer.address, BigInt(TOKENS_TO_REDEEM));
 
-      const outOfRange = await asset.getActiveAmortizationHoldHolders(1, 99, 10);
+      const outOfRange = await asset.getAmortizationActiveHolders(1, 99, 10);
       expect(outOfRange).to.have.length(0);
     });
 
@@ -1102,33 +1055,33 @@ describe("AmortizationFacet", () => {
 
       await asset.connect(user2).setAmortizationHold(1, deployer.address, BigInt(TOKENS_TO_REDEEM));
 
-      expect(await asset.getTotalActiveAmortizationHoldHolders(2)).to.equal(0n);
-      expect(await asset.getActiveAmortizationHoldHolders(2, 0, 10)).to.have.length(0);
+      expect(await asset.getTotalAmortizationActiveHolders(2)).to.equal(0n);
+      expect(await asset.getAmortizationActiveHolders(2, 0, 10)).to.have.length(0);
     });
   });
 
-  describe("getTotalActiveAmortizationHoldHolders", () => {
+  describe("getTotalAmortizationActiveHolders", () => {
     beforeEach(async () => {
       await asset.grantRole(ATS_ROLES._AMORTIZATION_ROLE, user2.address);
       await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, user2.address);
       await asset.grantRole(ATS_ROLES._ISSUER_ROLE, user2.address);
     });
 
-    it("GIVEN invalid amortization ID WHEN getTotalActiveAmortizationHoldHolders THEN reverts with WrongIndexForAction", async () => {
-      await expect(asset.getTotalActiveAmortizationHoldHolders(999)).to.be.revertedWithCustomError(
+    it("GIVEN invalid amortization ID WHEN getTotalAmortizationActiveHolders THEN reverts with WrongIndexForAction", async () => {
+      await expect(asset.getTotalAmortizationActiveHolders(999)).to.be.revertedWithCustomError(
         asset,
         "WrongIndexForAction",
       );
     });
 
-    it("GIVEN amortization with no holds WHEN getTotalActiveAmortizationHoldHolders THEN returns 0", async () => {
+    it("GIVEN amortization with no holds WHEN getTotalAmortizationActiveHolders THEN returns 0", async () => {
       const data = await makeAmortizationData();
       await asset.connect(user2).setAmortization(data);
 
-      expect(await asset.getTotalActiveAmortizationHoldHolders(1)).to.equal(0n);
+      expect(await asset.getTotalAmortizationActiveHolders(1)).to.equal(0n);
     });
 
-    it("GIVEN 1 active hold WHEN getTotalActiveAmortizationHoldHolders THEN returns 1", async () => {
+    it("GIVEN 1 active hold WHEN getTotalAmortizationActiveHolders THEN returns 1", async () => {
       const data = await makeAmortizationData();
 
       await asset.connect(user2).issueByPartition({
@@ -1141,10 +1094,10 @@ describe("AmortizationFacet", () => {
       await asset.connect(user2).setAmortization(data);
       await asset.connect(user2).setAmortizationHold(1, deployer.address, BigInt(TOKENS_TO_REDEEM));
 
-      expect(await asset.getTotalActiveAmortizationHoldHolders(1)).to.equal(1n);
+      expect(await asset.getTotalAmortizationActiveHolders(1)).to.equal(1n);
     });
 
-    it("GIVEN 2 active holds WHEN getTotalActiveAmortizationHoldHolders THEN returns 2", async () => {
+    it("GIVEN 2 active holds WHEN getTotalAmortizationActiveHolders THEN returns 2", async () => {
       const data = await makeAmortizationData();
 
       await asset.connect(user2).issueByPartition({
@@ -1164,10 +1117,10 @@ describe("AmortizationFacet", () => {
       await asset.connect(user2).setAmortizationHold(1, deployer.address, BigInt(TOKENS_TO_REDEEM));
       await asset.connect(user2).setAmortizationHold(1, user1.address, BigInt(TOKENS_TO_REDEEM));
 
-      expect(await asset.getTotalActiveAmortizationHoldHolders(1)).to.equal(2n);
+      expect(await asset.getTotalAmortizationActiveHolders(1)).to.equal(2n);
     });
 
-    it("GIVEN 2 active holds, 1 released WHEN getTotalActiveAmortizationHoldHolders THEN returns 1", async () => {
+    it("GIVEN 2 active holds, 1 released WHEN getTotalAmortizationActiveHolders THEN returns 1", async () => {
       const data = await makeAmortizationData();
 
       await asset.connect(user2).issueByPartition({
@@ -1188,7 +1141,107 @@ describe("AmortizationFacet", () => {
       await asset.connect(user2).setAmortizationHold(1, user1.address, BigInt(TOKENS_TO_REDEEM));
       await asset.connect(user2).releaseAmortizationHold(1, deployer.address);
 
-      expect(await asset.getTotalActiveAmortizationHoldHolders(1)).to.equal(1n);
+      expect(await asset.getTotalAmortizationActiveHolders(1)).to.equal(1n);
+    });
+  });
+
+  describe("getTotalHoldByAmortizationId", () => {
+    beforeEach(async () => {
+      await asset.grantRole(ATS_ROLES._AMORTIZATION_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES._ISSUER_ROLE, user2.address);
+    });
+
+    it("GIVEN invalid amortization ID WHEN getTotalHoldByAmortizationId THEN reverts with WrongIndexForAction", async () => {
+      await expect(asset.getTotalHoldByAmortizationId(999)).to.be.revertedWithCustomError(asset, "WrongIndexForAction");
+    });
+
+    it("GIVEN amortization with no holds WHEN getTotalHoldByAmortizationId THEN returns 0", async () => {
+      const data = await makeAmortizationData();
+      await asset.connect(user2).setAmortization(data);
+
+      expect(await asset.getTotalHoldByAmortizationId(1)).to.equal(0n);
+    });
+
+    it("GIVEN 1 active hold WHEN getTotalHoldByAmortizationId THEN returns hold amount", async () => {
+      const data = await makeAmortizationData();
+
+      await asset.connect(user2).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: deployer.address,
+        value: TOTAL_UNITS,
+        data: EMPTY_HEX_BYTES,
+      });
+
+      await asset.connect(user2).setAmortization(data);
+      await asset.connect(user2).setAmortizationHold(1, deployer.address, BigInt(TOKENS_TO_REDEEM));
+
+      expect(await asset.getTotalHoldByAmortizationId(1)).to.equal(BigInt(TOKENS_TO_REDEEM));
+    });
+
+    it("GIVEN 2 active holds WHEN getTotalHoldByAmortizationId THEN returns sum of both amounts", async () => {
+      const data = await makeAmortizationData();
+
+      await asset.connect(user2).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: deployer.address,
+        value: TOTAL_UNITS,
+        data: EMPTY_HEX_BYTES,
+      });
+      await asset.connect(user2).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: user1.address,
+        value: TOTAL_UNITS,
+        data: EMPTY_HEX_BYTES,
+      });
+
+      await asset.connect(user2).setAmortization(data);
+      await asset.connect(user2).setAmortizationHold(1, deployer.address, BigInt(TOKENS_TO_REDEEM));
+      await asset.connect(user2).setAmortizationHold(1, user1.address, BigInt(TOKENS_TO_REDEEM));
+
+      expect(await asset.getTotalHoldByAmortizationId(1)).to.equal(BigInt(TOKENS_TO_REDEEM * 2));
+    });
+
+    it("GIVEN 2 active holds, 1 released WHEN getTotalHoldByAmortizationId THEN returns only remaining hold amount", async () => {
+      const data = await makeAmortizationData();
+
+      await asset.connect(user2).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: deployer.address,
+        value: TOTAL_UNITS,
+        data: EMPTY_HEX_BYTES,
+      });
+      await asset.connect(user2).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: user1.address,
+        value: TOTAL_UNITS,
+        data: EMPTY_HEX_BYTES,
+      });
+
+      await asset.connect(user2).setAmortization(data);
+      await asset.connect(user2).setAmortizationHold(1, deployer.address, BigInt(TOKENS_TO_REDEEM));
+      await asset.connect(user2).setAmortizationHold(1, user1.address, BigInt(TOKENS_TO_REDEEM));
+      await asset.connect(user2).releaseAmortizationHold(1, deployer.address);
+
+      expect(await asset.getTotalHoldByAmortizationId(1)).to.equal(BigInt(TOKENS_TO_REDEEM));
+    });
+
+    it("GIVEN hold replaced with new amount WHEN getTotalHoldByAmortizationId THEN reflects updated total", async () => {
+      const data = await makeAmortizationData();
+      const newAmount = TOKENS_TO_REDEEM + 100;
+
+      await asset.connect(user2).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: deployer.address,
+        value: TOTAL_UNITS,
+        data: EMPTY_HEX_BYTES,
+      });
+
+      await asset.connect(user2).setAmortization(data);
+      await asset.connect(user2).setAmortizationHold(1, deployer.address, BigInt(TOKENS_TO_REDEEM));
+      await asset.connect(user2).setAmortizationHold(1, deployer.address, BigInt(newAmount));
+
+      expect(await asset.getTotalHoldByAmortizationId(1)).to.equal(BigInt(newAmount));
     });
   });
 
@@ -1381,22 +1434,15 @@ describe("AmortizationFacet", () => {
       );
     });
 
-    it("GIVEN multiPartition token WHEN getAmortizationPaymentAmount THEN reverts with NotAllowedInMultiPartitionMode", async () => {
-      await expect(mpAsset.getAmortizationPaymentAmount(1, deployer.address)).to.be.revertedWithCustomError(
+    it("GIVEN multiPartition token WHEN getAmortizationActiveHolders THEN reverts with NotAllowedInMultiPartitionMode", async () => {
+      await expect(mpAsset.getAmortizationActiveHolders(1, 0, 10)).to.be.revertedWithCustomError(
         mpAsset,
         "NotAllowedInMultiPartitionMode",
       );
     });
 
-    it("GIVEN multiPartition token WHEN getActiveAmortizationHoldHolders THEN reverts with NotAllowedInMultiPartitionMode", async () => {
-      await expect(mpAsset.getActiveAmortizationHoldHolders(1, 0, 10)).to.be.revertedWithCustomError(
-        mpAsset,
-        "NotAllowedInMultiPartitionMode",
-      );
-    });
-
-    it("GIVEN multiPartition token WHEN getTotalActiveAmortizationHoldHolders THEN reverts with NotAllowedInMultiPartitionMode", async () => {
-      await expect(mpAsset.getTotalActiveAmortizationHoldHolders(1)).to.be.revertedWithCustomError(
+    it("GIVEN multiPartition token WHEN getTotalAmortizationActiveHolders THEN reverts with NotAllowedInMultiPartitionMode", async () => {
+      await expect(mpAsset.getTotalAmortizationActiveHolders(1)).to.be.revertedWithCustomError(
         mpAsset,
         "NotAllowedInMultiPartitionMode",
       );
@@ -1411,6 +1457,13 @@ describe("AmortizationFacet", () => {
 
     it("GIVEN multiPartition token WHEN getTotalActiveAmortizationIds THEN reverts with NotAllowedInMultiPartitionMode", async () => {
       await expect(mpAsset.getTotalActiveAmortizationIds()).to.be.revertedWithCustomError(
+        mpAsset,
+        "NotAllowedInMultiPartitionMode",
+      );
+    });
+
+    it("GIVEN multiPartition token WHEN getTotalHoldByAmortizationId THEN reverts with NotAllowedInMultiPartitionMode", async () => {
+      await expect(mpAsset.getTotalHoldByAmortizationId(1)).to.be.revertedWithCustomError(
         mpAsset,
         "NotAllowedInMultiPartitionMode",
       );
