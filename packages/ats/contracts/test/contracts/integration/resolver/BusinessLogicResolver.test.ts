@@ -3,7 +3,7 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ethers } from "hardhat";
 import { expect } from "chai";
-import { AccessControl, Pause, BusinessLogicResolver } from "@contract-types";
+import { AccessControl, FreezeFacet, Pause, BusinessLogicResolver } from "@contract-types";
 import { EQUITY_CONFIG_ID, ATS_ROLES } from "@scripts";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 
@@ -15,6 +15,7 @@ describe("BusinessLogicResolver", () => {
   let businessLogicResolver: BusinessLogicResolver;
   let accessControl: AccessControl;
   let pause: Pause;
+  let freezeFacet: FreezeFacet;
 
   enum VersionStatus {
     NONE = 0,
@@ -50,6 +51,7 @@ describe("BusinessLogicResolver", () => {
     await accessControl.grantRole(ATS_ROLES._PAUSER_ROLE, signer_B.address);
 
     pause = await ethers.getContractAt("Pause", businessLogicResolver.target);
+    freezeFacet = await (await ethers.getContractFactory("FreezeFacet", signer_A)).deploy();
   }
 
   beforeEach(async () => {
@@ -265,5 +267,21 @@ describe("BusinessLogicResolver", () => {
       await businessLogicResolver.removeSelectorsFromBlacklist(EQUITY_CONFIG_ID, blackListedSelectors);
       expect(await businessLogicResolver.getSelectorsBlacklist(EQUITY_CONFIG_ID, 0, 100)).to.deep.equal([]);
     });
+  });
+
+  it("GIVEN a facet registered with a mismatched key WHEN registerBusinessLogics THEN fails with BusinessLogicKeyMismatch", async () => {
+    const actualResolverKey = await freezeFacet.getStaticResolverKey();
+    const lastChar = actualResolverKey.slice(-1);
+    const mutatedChar = lastChar === "0" ? "1" : "0";
+
+    const wrongKey = actualResolverKey.slice(0, -1) + mutatedChar;
+
+    await expect(
+      businessLogicResolver.registerBusinessLogics([
+        { businessLogicKey: wrongKey, businessLogicAddress: freezeFacet.target },
+      ]),
+    )
+      .to.be.revertedWithCustomError(businessLogicResolver, "BusinessLogicKeyMismatch")
+      .withArgs(freezeFacet.target, actualResolverKey, wrongKey);
   });
 });
