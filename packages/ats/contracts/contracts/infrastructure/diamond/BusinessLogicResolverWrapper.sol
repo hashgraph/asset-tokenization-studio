@@ -5,6 +5,7 @@ import { IBusinessLogicResolver } from "./IBusinessLogicResolver.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSetBytes4 } from "../../infrastructure/utils/EnumerableSetBytes4.sol";
 import { _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 
 abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
     struct BusinessLogicResolverDataStorage {
@@ -43,6 +44,17 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         uint256 businessLogicsRegistryDatasLength = _businessLogicsRegistryDatas.length;
         for (uint256 index; index < businessLogicsRegistryDatasLength; ) {
             _businessLogicsRegistryData = _businessLogicsRegistryDatas[index];
+
+            bytes32 actualBLKey = IStaticFunctionSelectors(_businessLogicsRegistryData.businessLogicAddress)
+                .getStaticResolverKey();
+
+            if (actualBLKey != _businessLogicsRegistryData.businessLogicKey) {
+                revert BusinessLogicKeyMismatch(
+                    _businessLogicsRegistryData.businessLogicAddress,
+                    actualBLKey,
+                    _businessLogicsRegistryData.businessLogicKey
+                );
+            }
 
             if (!businessLogicResolverDataStorage.businessLogicActive[_businessLogicsRegistryData.businessLogicKey]) {
                 businessLogicResolverDataStorage.businessLogicActive[

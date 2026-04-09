@@ -46,6 +46,7 @@ interface IBusinessLogicResolver is IDiamondCutManager {
 
     error BusinessLogicVersionDoesNotExist(uint256 version);
     error BusinessLogicKeyDuplicated(bytes32 businessLogicKey);
+    error BusinessLogicKeyMismatch(address implementation, bytes32 actualKey, bytes32 expectedKey);
     error ZeroKeyNotValidForBusinessLogic();
 
     // solhint-disable-next-line func-name-mixedcase

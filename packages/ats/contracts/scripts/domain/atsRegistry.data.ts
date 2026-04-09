@@ -11893,6 +11893,14 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
         selector: "0xfb3c59d8",
       },
       {
+        name: "deployProxy",
+        signature: {
+          full: "function deployProxy(address _resolver, bytes32 _configKey, uint256 _version, (bytes32 role, address[] members)[] _rbacs) returns (address proxyAddress_)",
+          canonical: "deployProxy(address,bytes32,uint256,(bytes32,address[])[])",
+        },
+        selector: "0x8d0672db",
+      },
+      {
         name: "getAppliedRegulationData",
         signature: {
           full: "function getAppliedRegulationData(uint8 _regulationType, uint8 _regulationSubType) pure returns ((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData_)",

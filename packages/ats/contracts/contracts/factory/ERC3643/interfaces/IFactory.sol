@@ -114,8 +114,26 @@ interface TRexIFactory {
         BondSustainabilityPerformanceTargetRateData bondSustainabilityPerformanceTargetRateData
     );
 
+    event ProxyDeployed(
+        address indexed proxyAddress,
+        IBusinessLogicResolver resolver,
+        bytes32 configKey,
+        uint256 version,
+        IResolverProxy.Rbac[] rbac
+    );
+
     error EmptyResolver(IBusinessLogicResolver resolver);
     error NoInitialAdmins();
+
+    /**
+     * @notice Deploys a new resolver proxy and initializes its rbac
+     */
+    function deployProxy(
+        IBusinessLogicResolver _resolver,
+        bytes32 _configKey,
+        uint256 _version,
+        IResolverProxy.Rbac[] memory _rbacs
+    ) external returns (address);
 
     /**
      * @notice Deploys a new equity given the input equity data
