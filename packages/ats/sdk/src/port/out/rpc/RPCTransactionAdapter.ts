@@ -350,7 +350,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       identityRegistryAddress,
     );
   }
-
+  // TODO: Method not implemented yet
   async createLoan(
     securityInfo: Security,
     loanDetails: LoanDetails,
