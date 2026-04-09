@@ -116,6 +116,7 @@ const config: Config = {
       logo: {
         alt: "Asset Tokenization Studio Logo",
         src: "img/logo.svg",
+        srcDark: "img/logo-dark.svg",
       },
       items: [
         {
