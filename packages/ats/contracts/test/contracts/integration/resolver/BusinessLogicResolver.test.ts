@@ -3,7 +3,21 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ethers } from "hardhat";
 import { expect } from "chai";
-import { AccessControl, FreezeFacet, Pause, BusinessLogicResolver } from "@contract-types";
+import {
+  AccessControl,
+  FreezeFacet,
+  FreezeFacet__factory,
+  Pause,
+  BusinessLogicResolver,
+  PauseFacet,
+  PauseFacet__factory,
+  NoncesFacet,
+  NoncesFacet__factory,
+  KycFacet,
+  KycFacet__factory,
+  LockFacet,
+  LockFacet__factory,
+} from "@contract-types";
 import { EQUITY_CONFIG_ID, ATS_ROLES } from "@scripts";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 
@@ -17,30 +31,13 @@ describe("BusinessLogicResolver", () => {
   let pause: Pause;
   let freezeFacet: FreezeFacet;
 
+  let BUSINESS_LOGIC_KEYS: { businessLogicKey: string; businessLogicAddress: string }[];
+
   enum VersionStatus {
     NONE = 0,
     ACTIVATED = 1,
     DEACTIVATED = 2,
   }
-
-  const BUSINESS_LOGIC_KEYS = [
-    {
-      businessLogicKey: "0xc09e617fd889212115dfeb9cc200796d756bdf992e7402dfa183ec179329e774",
-      businessLogicAddress: "0x7773334dc2Db6F14aAF0C1D17c1B3F1769Cf31b9",
-    },
-    {
-      businessLogicKey: "0x67cad3aaf0e0886c201f150fada758afb90ba6fb1d000459d64ea7625c4d31a5",
-      businessLogicAddress: "0x7e6bf6542E1471206E0209330f091755ce5da81c",
-    },
-    {
-      businessLogicKey: "0x474674736567e4f596b05ac260f4b8fe268139ecc92dcf67e0248e729235be5e",
-      businessLogicAddress: "0x50CA271780151A9Da8895d7629f932A3f8897EFc",
-    },
-    {
-      businessLogicKey: "0x2a271dec87b7552f37d532385985700dca633511feb45860d02d80937f63f1b9",
-      businessLogicAddress: "0xE6F13EF90Acfa7CCad117328C1828449e7f5fe2B",
-    },
-  ];
 
   async function deployBusinessLogicResolverFixture() {
     [signer_A, signer_B, signer_C] = await ethers.getSigners();
@@ -51,7 +48,31 @@ describe("BusinessLogicResolver", () => {
     await accessControl.grantRole(ATS_ROLES._PAUSER_ROLE, signer_B.address);
 
     pause = await ethers.getContractAt("Pause", businessLogicResolver.target);
-    freezeFacet = await (await ethers.getContractFactory("FreezeFacet", signer_A)).deploy();
+    freezeFacet = await new FreezeFacet__factory(signer_A).deploy();
+
+    const pauseFacet: PauseFacet = await new PauseFacet__factory(signer_A).deploy();
+    const noncesFacet: NoncesFacet = await new NoncesFacet__factory(signer_A).deploy();
+    const kycFacet: KycFacet = await new KycFacet__factory(signer_A).deploy();
+    const lockFacet: LockFacet = await new LockFacet__factory(signer_A).deploy();
+
+    BUSINESS_LOGIC_KEYS = [
+      {
+        businessLogicKey: await pauseFacet.getStaticResolverKey(),
+        businessLogicAddress: (await pauseFacet.getAddress()).toString(),
+      },
+      {
+        businessLogicKey: await noncesFacet.getStaticResolverKey(),
+        businessLogicAddress: (await noncesFacet.getAddress()).toString(),
+      },
+      {
+        businessLogicKey: await kycFacet.getStaticResolverKey(),
+        businessLogicAddress: (await kycFacet.getAddress()).toString(),
+      },
+      {
+        businessLogicKey: await lockFacet.getStaticResolverKey(),
+        businessLogicAddress: (await lockFacet.getAddress()).toString(),
+      },
+    ];
   }
 
   beforeEach(async () => {
@@ -128,7 +149,7 @@ describe("BusinessLogicResolver", () => {
       const BUSINESS_LOGICS_TO_REGISTER = [
         {
           businessLogicKey: ethers.ZeroHash,
-          businessLogicAddress: "0x7773334dc2Db6F14aAF0C1D17c1B3F1769Cf31b9",
+          businessLogicAddress: BUSINESS_LOGIC_KEYS[0].businessLogicAddress,
         },
       ];
 
