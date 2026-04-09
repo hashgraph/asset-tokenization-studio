@@ -7,7 +7,7 @@ import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../asset/ERC1594StorageWrapper.sol";
-import { TokenCoreOps } from "./TokenCoreOps.sol";
+import { ERC20StorageWrapper } from "../asset/ERC20StorageWrapper.sol";
 import { ThirdPartyType } from "../asset/types/ThirdPartyType.sol";
 import { _checkNounceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
@@ -37,7 +37,7 @@ library ClearingProtectedOps {
             _amount,
             _to,
             _signature,
-            TokenCoreOps.getTokenName()
+            ERC20StorageWrapper.getName()
         );
 
         NonceStorageWrapper.setNonceFor(_protectedClearingOperation.nonce, _protectedClearingOperation.from);
@@ -71,7 +71,7 @@ library ClearingProtectedOps {
             _protectedClearingOperation,
             _amount,
             _signature,
-            TokenCoreOps.getTokenName()
+            ERC20StorageWrapper.getName()
         );
 
         NonceStorageWrapper.setNonceFor(_protectedClearingOperation.nonce, _protectedClearingOperation.from);
@@ -104,7 +104,7 @@ library ClearingProtectedOps {
             _protectedClearingOperation,
             _hold,
             _signature,
-            TokenCoreOps.getTokenName()
+            ERC20StorageWrapper.getName()
         );
 
         NonceStorageWrapper.setNonceFor(_protectedClearingOperation.nonce, _protectedClearingOperation.from);

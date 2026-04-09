@@ -6,6 +6,7 @@ import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ClearingOps } from "../../../domain/orchestrator/ClearingOps.sol";
+import { ClearingProtectedOps } from "../../../domain/orchestrator/ClearingProtectedOps.sol";
 import { ClearingReadOps } from "../../../domain/orchestrator/ClearingReadOps.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
@@ -111,7 +112,7 @@ abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider, Modi
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        (success_, clearingId_) = ClearingOps.protectedClearingTransferByPartition(
+        (success_, clearingId_) = ClearingProtectedOps.protectedClearingTransferByPartition(
             _protectedClearingOperation,
             _amount,
             _to,
