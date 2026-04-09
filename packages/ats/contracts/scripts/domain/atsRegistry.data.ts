@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-09T08:26:35.695Z
+ * Generated: 2026-04-09T08:58:02.052Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -2787,9 +2787,15 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     factory: (signer) =>
-      new ClearingHoldCreationFacet__factory(getLibLinks("clearingOps", "clearingReadOps") as any, signer),
+      new ClearingHoldCreationFacet__factory(
+        getLibLinks("clearingOps", "clearingProtectedOps", "clearingReadOps") as any,
+        signer,
+      ),
     timeTravelFactory: (signer) =>
-      new ClearingHoldCreationFacetTimeTravel__factory(getLibLinks("clearingOps", "clearingReadOps") as any, signer),
+      new ClearingHoldCreationFacetTimeTravel__factory(
+        getLibLinks("clearingOps", "clearingProtectedOps", "clearingReadOps") as any,
+        signer,
+      ),
   },
 
   ClearingReadFacet: {
@@ -3305,9 +3311,16 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x8579befe",
       },
     ],
-    factory: (signer) => new ClearingRedeemFacet__factory(getLibLinks("clearingOps", "clearingReadOps") as any, signer),
+    factory: (signer) =>
+      new ClearingRedeemFacet__factory(
+        getLibLinks("clearingOps", "clearingProtectedOps", "clearingReadOps") as any,
+        signer,
+      ),
     timeTravelFactory: (signer) =>
-      new ClearingRedeemFacetTimeTravel__factory(getLibLinks("clearingOps", "clearingReadOps") as any, signer),
+      new ClearingRedeemFacetTimeTravel__factory(
+        getLibLinks("clearingOps", "clearingProtectedOps", "clearingReadOps") as any,
+        signer,
+      ),
   },
 
   ClearingTransferFacet: {
@@ -3598,9 +3611,15 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     factory: (signer) =>
-      new ClearingTransferFacet__factory(getLibLinks("clearingOps", "clearingReadOps") as any, signer),
+      new ClearingTransferFacet__factory(
+        getLibLinks("clearingOps", "clearingProtectedOps", "clearingReadOps") as any,
+        signer,
+      ),
     timeTravelFactory: (signer) =>
-      new ClearingTransferFacetTimeTravel__factory(getLibLinks("clearingOps", "clearingReadOps") as any, signer),
+      new ClearingTransferFacetTimeTravel__factory(
+        getLibLinks("clearingOps", "clearingProtectedOps", "clearingReadOps") as any,
+        signer,
+      ),
   },
 
   ControlListFacet: {

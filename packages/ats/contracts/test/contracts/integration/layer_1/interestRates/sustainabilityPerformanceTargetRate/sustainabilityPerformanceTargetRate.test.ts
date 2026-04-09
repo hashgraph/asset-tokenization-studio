@@ -8,6 +8,7 @@ import {
   PauseFacet,
   SustainabilityPerformanceTargetRateFacet,
   ProceedRecipientsFacet,
+  AccessControl,
 } from "@contract-types";
 import { ATS_ROLES, BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -20,6 +21,8 @@ import { executeRbac } from "@test";
 
 describe("Sustainability Performance Target Rate Tests", () => {
   let diamond: ResolverProxy;
+  let sptRateFacet: SustainabilityPerformanceTargetRateFacet;
+  let accessControlFacet: AccessControl;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;

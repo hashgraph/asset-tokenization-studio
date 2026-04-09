@@ -8,6 +8,7 @@ import {
   PauseFacet,
   ProceedRecipientsFacet,
   type ResolverProxy,
+  AccessControl,
 } from "@contract-types";
 import { ATS_ROLES, dateToUnixTimestamp } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -16,6 +17,7 @@ import { executeRbac } from "@test";
 
 describe("Kpi Latest Tests", () => {
   let diamond: ResolverProxy;
+  let accessControlFacet: AccessControl;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
