@@ -2,7 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
-import { BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE } from "../../../constants/values.sol";
+import {
+    BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
+} from "../../../constants/values.sol";
 import { IEquity } from "./IEquity.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { EquityStorageWrapper } from "../../../domain/asset/EquityStorageWrapper.sol";

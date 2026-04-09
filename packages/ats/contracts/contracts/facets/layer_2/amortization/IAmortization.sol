@@ -23,7 +23,6 @@ interface IAmortization is IAmortizationStorageWrapper {
     /// @notice Amortization payment information for a specific account
     /// @dev Contains amortization details and account-specific payment data
     struct AmortizationFor {
-        address account;
         uint256 recordDate;
         uint256 executionDate;
         // Hold info (current values, adjusted as of now)
@@ -115,7 +114,7 @@ interface IAmortization is IAmortizationStorageWrapper {
         uint256 _amortizationID,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) external view returns (AmortizationFor[] memory amortizationsFor_);
+    ) external view returns (AmortizationFor[] memory amortizationsFor_, address[] memory holders_);
 
     /**
      * @notice Retrieves the total number of amortizations set for the security.
@@ -146,18 +145,6 @@ interface IAmortization is IAmortizationStorageWrapper {
     function getTotalAmortizationHolders(uint256 _amortizationID) external view returns (uint256);
 
     /**
-     * @notice Retrieves the hold token data for a specific token holder in an amortization.
-     * @param _amortizationID The ID of the amortization.
-     * @param _tokenHolder The address of the token holder.
-     * @return tokenAmount_ The amount of tokens locked in the hold for this token holder.
-     * @return decimals_ The number of decimals used for the token balance (balance decimals).
-     */
-    function getAmortizationPaymentAmount(
-        uint256 _amortizationID,
-        address _tokenHolder
-    ) external view returns (uint256 tokenAmount_, uint8 decimals_);
-
-    /**
      * @notice Retrieves a paginated list of token holders that still have an active hold for a given amortization.
      * @dev Use this to identify which holders must have their hold released before `cancelAmortization` can succeed.
      * @param _amortizationID The ID of the amortization.
@@ -165,7 +152,7 @@ interface IAmortization is IAmortizationStorageWrapper {
      * @param _pageLength The number of holders per page.
      * @return holders_ Array of addresses with an active hold for this amortization.
      */
-    function getActiveAmortizationHoldHolders(
+    function getAmortizationActiveHolders(
         uint256 _amortizationID,
         uint256 _pageIndex,
         uint256 _pageLength
@@ -176,7 +163,14 @@ interface IAmortization is IAmortizationStorageWrapper {
      * @param _amortizationID The ID of the amortization.
      * @return The total count of holders with an active hold.
      */
-    function getTotalActiveAmortizationHoldHolders(uint256 _amortizationID) external view returns (uint256);
+    function getTotalAmortizationActiveHolders(uint256 _amortizationID) external view returns (uint256);
+
+    /**
+     * @notice Retrieves the total amount of tokens locked in holds for a given amortization.
+     * @param _amortizationID The ID of the amortization.
+     * @return The total token amount held across all active holds for this amortization.
+     */
+    function getTotalHoldByAmortizationId(uint256 _amortizationID) external view returns (uint256);
 
     /**
      * @notice Retrieves a paginated list of non-cancelled amortization IDs.

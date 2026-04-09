@@ -19,6 +19,7 @@ import { MaturityModifiers } from "./MaturityModifiers.sol";
 import { ProceedRecipientModifiers } from "./ProceedRecipientModifiers.sol";
 import { StateModifiers } from "./StateModifiers.sol";
 import { AmortizationModifiers } from "./AmortizationModifiers.sol";
+import { LoansPortfolioModifiers } from "./LoansPortfolioModifiers.sol";
 
 /**
  * @title AssetModifiers
@@ -63,6 +64,7 @@ abstract contract AssetModifiers is
     InterestRateModifiers,
     KpisModifiers,
     LockModifiers,
+    LoansPortfolioModifiers,
     MaturityModifiers,
     ProceedRecipientModifiers,
     StateModifiers

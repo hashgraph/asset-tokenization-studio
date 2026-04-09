@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * Loans Portfolio token configuration module.
+ * Loan Portfolio token configuration module.
  *
- * Creates loans portfolio token configuration in BusinessLogicResolver by calling
- * the generic infrastructure operation with loans-portfolio-specific facet list and config ID.
+ * Creates loan portfolio token configuration in BusinessLogicResolver by calling
+ * the generic infrastructure operation with loan portfolio-specific facet list and config ID.
+ *
+ * This is a thin wrapper around the generic createConfiguration() operation,
+ * providing loan portfolio-specific facet list and configuration ID.
  *
  * @module domain/loanPortfolio/createConfiguration
  */
@@ -12,21 +15,33 @@
 import {
   ConfigurationData,
   ConfigurationError,
-  OperationResult,
   createBatchConfiguration,
+  OperationResult,
   DEFAULT_BATCH_SIZE,
 } from "@scripts/infrastructure";
-import { BusinessLogicResolver } from "@contract-types";
 import { LOANS_PORTFOLIO_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
+import { BusinessLogicResolver } from "@contract-types";
 
 /**
- * Loans Portfolio-specific facets list.
+ * Loan Portfolio Facets
  *
- * Includes core ERC1400/ERC3643 facets plus LoansPortfolio-specific facets.
+ * This is an explicit positive list of all facets required for loan portfolio tokens.
+ * Includes all infrastructure facets EXCEPT:
+ * - BondUSAReadFacet
+ * - ProceedRecipientsFacet
+ * - EquityUSAFacet
+ * - CouponFacet
+ *
+ * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
+ * so we only include DiamondFacet to avoid selector collisions.
+ *
+ * Note: Loan Portfolio does NOT include TimeTravel variants (per spec). TimeTravelFacet
+ * is injected automatically by the deploy script in test environments.
  */
 const LOANS_PORTFOLIO_FACETS = [
-  // Core Functionality (10)
+  "LoansPortfolioFacet",
+  // Core Functionality
   "AccessControlFacet",
   "CapFacet",
   "ControlListFacet",
@@ -37,9 +52,10 @@ const LOANS_PORTFOLIO_FACETS = [
   "KycFacet",
   "PauseFacet",
   "SnapshotsFacet",
+  "SsiManagementFacet",
   "TotalBalanceFacet",
 
-  // ERC Standards (13)
+  // ERC Standards
   "ERC1410IssuerFacet",
   "ERC1410ManagementFacet",
   "ERC1410ReadFacet",
@@ -55,45 +71,39 @@ const LOANS_PORTFOLIO_FACETS = [
   "ERC3643OperationsFacet",
   "ERC3643ReadFacet",
 
-  // Clearing & Settlement (8)
-  "ClearingActionsFacet",
-  "ClearingHoldCreationFacet",
-  "ClearingReadFacet",
-  "ClearingRedeemFacet",
-  "ClearingTransferFacet",
-  "HoldManagementFacet",
+  // Nominal Value
+  "NominalValueFacet",
+
+  // Hold
   "HoldReadFacet",
+  "HoldManagementFacet",
   "HoldTokenHolderFacet",
 
-  // External Management (3)
-  "ExternalControlListManagementFacet",
-  "ExternalKycListManagementFacet",
-  "ExternalPauseManagementFacet",
+  // Clearing & Settlement
+  "ClearingTransferFacet",
+  "ClearingRedeemFacet",
+  "ClearingHoldCreationFacet",
+  "ClearingReadFacet",
+  "ClearingActionsFacet",
 
-  // Advanced Features (6)
-  "AdjustBalancesFacet",
-  "LockFacet",
-  "NominalValueFacet",
+  // Scheduled Tasks
+  "ScheduledSnapshotsFacet",
   "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
-  "ScheduledSnapshotsFacet",
+  "ScheduledCouponListingFacet",
 
-  // Loans Portfolio-specific (2)
-  "LoanFacet",
-  //  "LoansPortfolioFacet",
+  // External Management
+  "ExternalPauseManagementFacet",
+  "ExternalControlListManagementFacet",
+  "ExternalKycListManagementFacet",
+
+  // Advanced Features
+  "AdjustBalancesFacet",
+  "LockFacet",
+  "ProtectedPartitionsFacet",
+  "TransferAndLockFacet",
 ] as const;
 
-/**
- * Create loans portfolio token configuration in BusinessLogicResolver.
- *
- * @param blrContract - BusinessLogicResolver contract instance
- * @param facetAddresses - Map of facet names to their deployed addresses
- * @param useTimeTravel - Whether to use TimeTravel variants (default: false)
- * @param partialBatchDeploy - Whether this is a partial batch deployment (default: false)
- * @param batchSize - Number of facets per batch (default: DEFAULT_BATCH_SIZE)
- * @param confirmations - Number of confirmations to wait for (default: 0 for test environments)
- * @returns Promise resolving to operation result
- */
 export async function createLoansPortfolioConfiguration(
   blrContract: BusinessLogicResolver,
   facetAddresses: Record<string, string>,
@@ -106,6 +116,7 @@ export async function createLoansPortfolioConfiguration(
     ? [...LOANS_PORTFOLIO_FACETS.map((name) => `${name}TimeTravel`), "TimeTravelFacet"]
     : [...LOANS_PORTFOLIO_FACETS];
 
+  // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {
     const baseName = name.replace(/TimeTravel$/, "");
     const facetDef = atsRegistry.getFacetDefinition(baseName);

@@ -115,9 +115,6 @@ bytes32 constant _WILD_CARD_ROLE = 0x96658f163b67573bbf1e3f9e9330b199b3ac2f6ec01
 // keccak256('security.token.standard.role.nominalValue');
 bytes32 constant _NOMINAL_VALUE_ROLE = 0x127c185a9f04723376575bc896cc0d3cf15a32dd0db17f01168dcac5d2de6102;
 
-// keccak256('security.token.standard.role.loanOriginator');
-bytes32 constant _LOAN_ORIGINATOR_ROLE = 0x2c535291a6d0dde45c902f1589f13425a81654fd732c65147b4decf85c17e707;
-
 // keccak256('security.token.standard.role.loanManager');
 bytes32 constant _LOAN_MANAGER_ROLE = 0xc085daff7cbf912b30437b0b95363f3920f33cbd53213a269a2fc5d44ee8289d;
 

@@ -2,11 +2,10 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ILoan } from "./ILoan.sol";
-import { _LOAN_MANAGER_ROLE, _LOAN_ORIGINATOR_ROLE } from "../../../constants/roles.sol";
+import { _LOAN_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { LoanStorageWrapper } from "../../../domain/asset/loan/LoanStorageWrapper.sol";
 import { RegulationData, AdditionalSecurityData } from "../../../constants/regulation.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
-import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 import { SecurityStorageWrapper } from "../../../domain/asset/SecurityStorageWrapper.sol";
 
 /**

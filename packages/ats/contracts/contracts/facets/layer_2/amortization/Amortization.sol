@@ -5,8 +5,6 @@ import { IAmortization } from "./IAmortization.sol";
 import { _AMORTIZATION_ROLE, _CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
 import { AMORTIZATION_CORPORATE_ACTION_TYPE } from "../../../constants/values.sol";
 import { AmortizationStorageWrapper } from "../../../domain/asset/amortization/AmortizationStorageWrapper.sol";
-import { IAmortizationStorageWrapper } from "../../../domain/asset/amortization/IAmortizationStorageWrapper.sol";
-import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateActionsStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 
 abstract contract Amortization is IAmortization, Modifiers {
@@ -109,7 +107,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         override
         onlyWithoutMultiPartition
         onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
-        returns (AmortizationFor[] memory amortizationsFor_)
+        returns (AmortizationFor[] memory amortizationsFor_, address[] memory holders_)
     {
         return AmortizationStorageWrapper.getAmortizationsFor(_amortizationID, _pageIndex, _pageLength);
     }
@@ -152,21 +150,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         return AmortizationStorageWrapper.getTotalAmortizationHolders(_amortizationID);
     }
 
-    function getAmortizationPaymentAmount(
-        uint256 _amortizationID,
-        address _tokenHolder
-    )
-        external
-        view
-        override
-        onlyWithoutMultiPartition
-        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
-        returns (uint256 tokenAmount_, uint8 decimals_)
-    {
-        return AmortizationStorageWrapper.getAmortizationPaymentAmount(_amortizationID, _tokenHolder);
-    }
-
-    function getActiveAmortizationHoldHolders(
+    function getAmortizationActiveHolders(
         uint256 _amortizationID,
         uint256 _pageIndex,
         uint256 _pageLength
@@ -181,7 +165,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         return AmortizationStorageWrapper.getAmortizationActiveHolders(_amortizationID, _pageIndex, _pageLength);
     }
 
-    function getTotalActiveAmortizationHoldHolders(
+    function getTotalAmortizationActiveHolders(
         uint256 _amortizationID
     )
         external
@@ -192,6 +176,19 @@ abstract contract Amortization is IAmortization, Modifiers {
         returns (uint256)
     {
         return AmortizationStorageWrapper.getTotalAmortizationActiveHolders(_amortizationID);
+    }
+
+    function getTotalHoldByAmortizationId(
+        uint256 _amortizationID
+    )
+        external
+        view
+        override
+        onlyWithoutMultiPartition
+        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        returns (uint256)
+    {
+        return AmortizationStorageWrapper.getTotalHoldByAmortizationId(_amortizationID);
     }
 
     function getActiveAmortizationIds(

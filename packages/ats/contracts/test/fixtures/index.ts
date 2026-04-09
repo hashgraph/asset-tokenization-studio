@@ -31,10 +31,6 @@ export { deployBondTokenFixture, DEFAULT_BOND_PARAMS, getBondDetails } from "./t
 
 export { deployBondFixedRateTokenFixture, DEFAULT_BOND_FIXED_RATE_PARAMS } from "./tokens/bondFixedRate.fixture";
 
-export { deployLoanTokenFixture, DEFAULT_LOAN_PARAMS } from "./tokens/loan.fixture";
-
-export { deployLoansPortfolioTokenFixture, DEFAULT_LOANS_PORTFOLIO_PARAMS } from "./tokens/loansPortfolio.fixture";
-
 export {
   deployBondKpiLinkedRateTokenFixture,
   DEFAULT_BOND_KPI_LINKED_RATE_PARAMS,
@@ -44,6 +40,16 @@ export {
   deployBondSustainabilityPerformanceTargetRateTokenFixture,
   DEFAULT_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_PARAMS,
 } from "./tokens/bondSustainabilityPerformanceTargetRate.fixture";
+
+// Loan token fixtures
+export { deployLoanTokenFixture, DEFAULT_LOAN_PARAMS, getLoanDetails } from "./tokens/loan.fixture";
+
+// Loan Portfolio token fixtures
+export {
+  deployLoansPortfolioTokenFixture,
+  DEFAULT_LOANS_PORTFOLIO_PARAMS,
+  getLoansPortfolioDetails,
+} from "./tokens/loansPortfolio.fixture";
 
 // Common token utilities
 export {

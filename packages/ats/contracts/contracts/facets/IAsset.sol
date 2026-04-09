@@ -70,6 +70,8 @@ import { IProtectedPartitions } from "./layer_1/protectedPartition/IProtectedPar
 import { IRevocationList } from "./layer_1/kyc/IRevocationList.sol";
 import { IScheduledCouponListing } from "./layer_2/scheduledTask/scheduledCouponListing/IScheduledCouponListing.sol";
 import { IScheduledSnapshots } from "./layer_2/scheduledTask/scheduledSnapshot/IScheduledSnapshots.sol";
+import { ILoansPortfolio } from "./layer_2/loansPortfolio/ILoansPortfolio.sol";
+import { IVoting } from "./layer_2/voting/IVoting.sol";
 
 // Layer 3
 import { ISecurity } from "./layer_2/security/ISecurity.sol";
@@ -115,6 +117,8 @@ interface IAsset is
     IAmortization,
     ILoan,
     IAdjustBalances,
+    ILoansPortfolio,
+    IVoting,
     IBondUSA,
     IEquityUSA,
     ITransferAndLock

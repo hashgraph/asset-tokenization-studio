@@ -653,11 +653,11 @@ bytes32 constant _DIVIDEND_RESOLVER_KEY = 0x63752e3f4bd54d9fec1ad1667ef4de4f80e9
 // keccak256('security.token.standard.amortization.resolverKey');
 bytes32 constant _AMORTIZATION_RESOLVER_KEY = 0xe45d89550ef8988da0d14267142ce98f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d;
 
-// keccak256('security.token.standard.loansPortfolio.resolverKey');
-bytes32 constant _LOANS_PORTFOLIO_RESOLVER_KEY = 0x9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d;
+// keccak256("security.token.standard.loan.resolverKey");
+bytes32 constant _LOAN_RESOLVER_KEY = 0x99001f821b750d64e6a82cf207800dc005acf93b2880abe9f1cdbbfb5e996b86;
 
-// keccak256('security.token.standard.loan.resolverKey');
-bytes32 constant _LOAN_RESOLVER_KEY = 0x0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e;
+// keccak256("security.token.standard.loansPortfolio.resolverKey");
+bytes32 constant _LOANS_PORTFOLIO_RESOLVER_KEY = 0x364410ebf7978001f91cfe2189e143fa8d75bb7365901fbc3d071ece7f86bd46;
 
 // Layer 3 Resolver Keys
 
@@ -672,3 +672,5 @@ bytes32 constant _TRANSFER_AND_LOCK_KPI_LINKED_RATE_RESOLVER_KEY = 0x3e5f7a9b1c2
 
 // keccak256("security.token.standard.transferandlock.SustainabilityPerformanceTarget.rate.resolverKey");
 bytes32 constant _TRANSFER_AND_LOCK_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x9d1e3f5a7b9c0d2e4f6a8b0c1d3e5f7a9b0c2d4e6f8a9b1c3d5e7f9a0b2c4d6e;
+
+
