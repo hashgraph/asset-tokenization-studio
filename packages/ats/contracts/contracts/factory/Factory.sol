@@ -113,6 +113,16 @@ contract Factory is IFactory {
         _;
     }
 
+    function deployProxy(
+        IBusinessLogicResolver _resolver,
+        bytes32 _configKey,
+        uint256 _version,
+        IResolverProxy.Rbac[] calldata _rbacs
+    ) external checkResolver(_resolver) checkAdmins(_rbacs) returns (address proxyAddress_) {
+        proxyAddress_ = address(new ResolverProxy(_resolver, _configKey, _version, _rbacs));
+        emit ProxyDeployed(proxyAddress_, _resolver, _configKey, _version, _rbacs);
+    }
+
     function deployEquity(
         EquityData calldata _equityData,
         FactoryRegulationData calldata _factoryRegulationData

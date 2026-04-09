@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-09T08:58:02.052Z
+ * Generated: 2026-04-09T10:43:08.466Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -11816,6 +11816,14 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
             "deployEquity(((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bool,bool,bool,bool,bool,bool,bool,uint8,bytes3,uint256,uint8)),(uint8,uint8,(bool,string,string)))",
         },
         selector: "0xfb3c59d8",
+      },
+      {
+        name: "deployProxy",
+        signature: {
+          full: "function deployProxy(address _resolver, bytes32 _configKey, uint256 _version, (bytes32 role, address[] members)[] _rbacs) returns (address proxyAddress_)",
+          canonical: "deployProxy(address,bytes32,uint256,(bytes32,address[])[])",
+        },
+        selector: "0x8d0672db",
       },
       {
         name: "getAppliedRegulationData",
