@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, Pause, FixedRate, AccessControl } from "@contract-types";
+import { type ResolverProxy, Pause, FixedRate } from "@contract-types";
 import { ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { DEFAULT_BOND_FIXED_RATE_PARAMS, deployBondFixedRateTokenFixture } from "@test";
@@ -11,7 +11,6 @@ import { executeRbac } from "@test";
 
 describe("Fixed Rate Tests", () => {
   let diamond: ResolverProxy;
-  let accessControlFacet: AccessControl;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
