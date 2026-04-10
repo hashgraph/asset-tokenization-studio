@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-09T17:43:25.938Z
+ * Generated: 2026-04-10T08:44:19.550Z
  * Facets: 68
  * Infrastructure: 2
  *
