@@ -5,6 +5,9 @@ import { TOKENS } from "../Tokens";
 import { GetRegulationDetailsQueryHandler } from "@query/factory/get/GetRegulationDetailsQueryHandler";
 import { GetSecurityHoldersQueryHandler } from "@query/security/security/getSecurityHolders/GetSecurityHoldersQueryHandler";
 import { GetTotalSecurityHoldersQueryHandler } from "@query/security/security/getTotalSecurityHolders/GetTotalSecurityHoldersQueryHandler";
+import { GetCorporateActionQueryHandler } from "@query/security/getCorporateAction/GetCorporateActionQueryHandler";
+import { GetCorporateActionsQueryHandler } from "@query/security/getCorporateActions/GetCorporateActionsQueryHandler";
+import { GetCorporateActionsByTypeQueryHandler } from "@query/security/getCorporateActionsByType/GetCorporateActionsByTypeQueryHandler";
 
 export const QUERY_HANDLERS_SECURITY_DETAILS = [
   {
@@ -22,5 +25,17 @@ export const QUERY_HANDLERS_SECURITY_DETAILS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetTotalSecurityHoldersQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetCorporateActionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetCorporateActionsQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetCorporateActionsByTypeQueryHandler,
   },
 ];

@@ -823,9 +823,9 @@ describe("Snapshots Tests", () => {
         amount: dividendsAmountPerEquity,
         amountDecimals: dividendAmountDecimalsPerEquity,
       };
-      await equityFacet.connect(signer_A).setDividends(dividendData_1);
-      await equityFacet.connect(signer_A).setDividends(dividendData_2);
-      await equityFacet.connect(signer_A).setDividends(dividendData_3);
+      await equityFacet.connect(signer_A).setDividend(dividendData_1);
+      await equityFacet.connect(signer_A).setDividend(dividendData_2);
+      await equityFacet.connect(signer_A).setDividend(dividendData_3);
 
       const balanceAdjustmentExecutionDateInSeconds_1 = dateToUnixTimestamp("2030-01-01T00:00:07Z");
       const balanceAdjustmentExecutionDateInSeconds_2 = dateToUnixTimestamp("2030-01-01T00:00:13Z");
@@ -872,9 +872,9 @@ describe("Snapshots Tests", () => {
       const decimalFactor_3 = decimalFactor_2 + balanceAdjustmentsDecimals_3;
 
       // check
-      const dividendFor_C_1 = await equityFacet.getDividendsFor(1, signer_C.address);
-      const dividendFor_C_2 = await equityFacet.getDividendsFor(2, signer_C.address);
-      const dividendFor_C_3 = await equityFacet.getDividendsFor(3, signer_C.address);
+      const dividendFor_C_1 = await equityFacet.getDividendFor(1, signer_C.address);
+      const dividendFor_C_2 = await equityFacet.getDividendFor(2, signer_C.address);
+      const dividendFor_C_3 = await equityFacet.getDividendFor(3, signer_C.address);
       const balance_C_At_Snapshot_4 = await snapshotFacet.balanceOfAtSnapshot(4, signer_C.address);
 
       expect(dividendFor_C_1.tokenBalance).to.be.equal(balanceOf_C_Original);

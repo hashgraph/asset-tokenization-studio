@@ -140,7 +140,7 @@ asset-tokenization-studio.iml
 CLAUDE.md
 AGENTS.md
 
-.tasks
+.tasks/
 
 # Auto-generated MCP server context (added automatically)
 .mcp-server-context.md

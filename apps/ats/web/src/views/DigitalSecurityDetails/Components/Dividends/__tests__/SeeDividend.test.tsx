@@ -3,11 +3,7 @@
 import { SeeDividend } from "../SeeDividend";
 import { render } from "../../../../../test-utils";
 import { screen, fireEvent, waitFor } from "@testing-library/react";
-import {
-  useGetDividends,
-  useGetDividendsFor,
-  useGetDividendsAmountFor,
-} from "../../../../../hooks/queries/useDividends";
+import { useGetDividend, useGetDividendFor, useGetDividendsAmountFor } from "../../../../../hooks/queries/useDividends";
 
 jest.mock("../../../../../hooks/queries/useDividends");
 jest.mock("react-router-dom", () => ({
@@ -15,9 +11,9 @@ jest.mock("react-router-dom", () => ({
   useParams: () => ({ id: "0.0.12345" }),
 }));
 
-const mockUseGetDividendsFor = useGetDividendsFor as jest.Mock;
-const mockUseGetDividends = useGetDividends as jest.Mock;
-const mockUseGetDividendsAmountFor = useGetDividendsAmountFor as jest.Mock;
+const mockUseGetDividendFor = useGetDividendFor as jest.Mock;
+const mockUseGetDividend = useGetDividend as jest.Mock;
+const mockUseGetDividendAmountFor = useGetDividendsAmountFor as jest.Mock;
 
 const mockRefetchDividendsFor = jest.fn();
 const mockRefetchDividends = jest.fn();
@@ -56,17 +52,17 @@ describe(`${SeeDividend.name}`, () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockUseGetDividendsFor.mockReturnValue({
+    mockUseGetDividendFor.mockReturnValue({
       ...defaultHookResponse,
       refetch: mockRefetchDividendsFor,
     });
 
-    mockUseGetDividends.mockReturnValue({
+    mockUseGetDividend.mockReturnValue({
       ...defaultHookResponse,
       refetch: mockRefetchDividends,
     });
 
-    mockUseGetDividendsAmountFor.mockReturnValue({
+    mockUseGetDividendAmountFor.mockReturnValue({
       ...defaultHookResponse,
       refetch: mockRefetchDividendsAmountFor,
     });
@@ -130,19 +126,19 @@ describe(`${SeeDividend.name}`, () => {
   });
 
   test("should display dividend details when all data is loaded", async () => {
-    mockUseGetDividendsFor.mockReturnValue({
+    mockUseGetDividendFor.mockReturnValue({
       ...defaultHookResponse,
       data: mockDividendsForData,
       refetch: mockRefetchDividendsFor,
     });
 
-    mockUseGetDividends.mockReturnValue({
+    mockUseGetDividend.mockReturnValue({
       ...defaultHookResponse,
       data: mockDividendsData,
       refetch: mockRefetchDividends,
     });
 
-    mockUseGetDividendsAmountFor.mockReturnValue({
+    mockUseGetDividendAmountFor.mockReturnValue({
       ...defaultHookResponse,
       data: mockDividendsAmountForData,
       refetch: mockRefetchDividendsAmountFor,
@@ -163,19 +159,19 @@ describe(`${SeeDividend.name}`, () => {
   });
 
   test("should display recordDateReached as No when it is false", async () => {
-    mockUseGetDividendsFor.mockReturnValue({
+    mockUseGetDividendFor.mockReturnValue({
       ...defaultHookResponse,
       data: mockDividendsForData,
       refetch: mockRefetchDividendsFor,
     });
 
-    mockUseGetDividends.mockReturnValue({
+    mockUseGetDividend.mockReturnValue({
       ...defaultHookResponse,
       data: mockDividendsData,
       refetch: mockRefetchDividends,
     });
 
-    mockUseGetDividendsAmountFor.mockReturnValue({
+    mockUseGetDividendAmountFor.mockReturnValue({
       ...defaultHookResponse,
       data: {
         numerator: "500",
@@ -195,19 +191,19 @@ describe(`${SeeDividend.name}`, () => {
   });
 
   test("should display 0 for amount when numerator is 0", async () => {
-    mockUseGetDividendsFor.mockReturnValue({
+    mockUseGetDividendFor.mockReturnValue({
       ...defaultHookResponse,
       data: mockDividendsForData,
       refetch: mockRefetchDividendsFor,
     });
 
-    mockUseGetDividends.mockReturnValue({
+    mockUseGetDividend.mockReturnValue({
       ...defaultHookResponse,
       data: mockDividendsData,
       refetch: mockRefetchDividends,
     });
 
-    mockUseGetDividendsAmountFor.mockReturnValue({
+    mockUseGetDividendAmountFor.mockReturnValue({
       ...defaultHookResponse,
       data: {
         numerator: "0",
@@ -227,19 +223,19 @@ describe(`${SeeDividend.name}`, () => {
   });
 
   test("should display 0 for amount when denominator is 0", async () => {
-    mockUseGetDividendsFor.mockReturnValue({
+    mockUseGetDividendFor.mockReturnValue({
       ...defaultHookResponse,
       data: mockDividendsForData,
       refetch: mockRefetchDividendsFor,
     });
 
-    mockUseGetDividends.mockReturnValue({
+    mockUseGetDividend.mockReturnValue({
       ...defaultHookResponse,
       data: mockDividendsData,
       refetch: mockRefetchDividends,
     });
 
-    mockUseGetDividendsAmountFor.mockReturnValue({
+    mockUseGetDividendAmountFor.mockReturnValue({
       ...defaultHookResponse,
       data: {
         numerator: "100",
@@ -268,13 +264,13 @@ describe(`${SeeDividend.name}`, () => {
   });
 
   test("should not display details when dividendsFor is missing", () => {
-    mockUseGetDividends.mockReturnValue({
+    mockUseGetDividend.mockReturnValue({
       ...defaultHookResponse,
       data: mockDividendsData,
       refetch: mockRefetchDividends,
     });
 
-    mockUseGetDividendsAmountFor.mockReturnValue({
+    mockUseGetDividendAmountFor.mockReturnValue({
       ...defaultHookResponse,
       data: mockDividendsAmountForData,
       refetch: mockRefetchDividendsAmountFor,
@@ -287,13 +283,13 @@ describe(`${SeeDividend.name}`, () => {
   });
 
   test("should not display details when dividends is missing", () => {
-    mockUseGetDividendsFor.mockReturnValue({
+    mockUseGetDividendFor.mockReturnValue({
       ...defaultHookResponse,
       data: mockDividendsForData,
       refetch: mockRefetchDividendsFor,
     });
 
-    mockUseGetDividendsAmountFor.mockReturnValue({
+    mockUseGetDividendAmountFor.mockReturnValue({
       ...defaultHookResponse,
       data: mockDividendsAmountForData,
       refetch: mockRefetchDividendsAmountFor,
@@ -306,13 +302,13 @@ describe(`${SeeDividend.name}`, () => {
   });
 
   test("should not display details when dividendsAmountFor is missing", () => {
-    mockUseGetDividendsFor.mockReturnValue({
+    mockUseGetDividendFor.mockReturnValue({
       ...defaultHookResponse,
       data: mockDividendsForData,
       refetch: mockRefetchDividendsFor,
     });
 
-    mockUseGetDividends.mockReturnValue({
+    mockUseGetDividend.mockReturnValue({
       ...defaultHookResponse,
       data: mockDividendsData,
       refetch: mockRefetchDividends,
@@ -375,19 +371,19 @@ describe(`${SeeDividend.name}`, () => {
   });
 
   test("should calculate amount with 3 decimal places", async () => {
-    mockUseGetDividendsFor.mockReturnValue({
+    mockUseGetDividendFor.mockReturnValue({
       ...defaultHookResponse,
       data: mockDividendsForData,
       refetch: mockRefetchDividendsFor,
     });
 
-    mockUseGetDividends.mockReturnValue({
+    mockUseGetDividend.mockReturnValue({
       ...defaultHookResponse,
       data: mockDividendsData,
       refetch: mockRefetchDividends,
     });
 
-    mockUseGetDividendsAmountFor.mockReturnValue({
+    mockUseGetDividendAmountFor.mockReturnValue({
       ...defaultHookResponse,
       data: {
         numerator: "1",

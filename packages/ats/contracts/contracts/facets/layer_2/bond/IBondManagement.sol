@@ -32,4 +32,10 @@ interface IBondManagement is IBondTypes {
      * @param _maturityDate The new maturity date to be set.
      */
     function updateMaturityDate(uint256 _maturityDate) external returns (bool success_);
+
+    /**
+     * @notice Cancels a certain coupon of the bond.
+     * @param _couponID The coupon to be cancelled.
+     */
+    function cancelCoupon(uint256 _couponID) external returns (bool success_);
 }

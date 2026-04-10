@@ -13,6 +13,7 @@ struct ActionData {
     bytes data;
     bytes[] results;
     uint256 actionIdByType;
+    bool isDisabled;
 }
 
 struct CorporateActionDataStorage {
@@ -50,8 +51,12 @@ library CorporateActionsStorageWrapper {
         ca.actionsData[corporateActionId_].actionIdByType = corporateActionIdByType_;
     }
 
-    function updateCorporateActionData(bytes32 _actionId, bytes memory _newData) internal {
-        corporateActionsStorage().actionsData[_actionId].data = _newData;
+    function cancelCorporateAction(bytes32 actionId) internal {
+        corporateActionsStorage().actionsData[actionId].isDisabled = true;
+    }
+
+    function updateCorporateActionData(bytes32 actionId, bytes memory newData) internal {
+        corporateActionsStorage().actionsData[actionId].data = newData;
     }
 
     function updateCorporateActionResult(bytes32 actionId, uint256 resultId, bytes memory newResult) internal {
@@ -73,6 +78,10 @@ library CorporateActionsStorageWrapper {
         ca.actionsData[actionId].results.push(newResult);
     }
 
+    function isCorporateActionDisabled(bytes32 actionId) internal view returns (bool) {
+        return corporateActionsStorage().actionsData[actionId].isDisabled;
+    }
+
     function requireMatchingActionType(bytes32 _actionType, uint256 _index) internal view {
         if (getCorporateActionCountByType(_actionType) <= _index)
             revert ICorporateActions.WrongIndexForAction(_index, _actionType);
@@ -80,11 +89,12 @@ library CorporateActionsStorageWrapper {
 
     function getCorporateAction(
         bytes32 _corporateActionId
-    ) internal view returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_) {
+    ) internal view returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_, bool isDisabled_) {
         CorporateActionDataStorage storage ca = corporateActionsStorage();
         actionType_ = ca.actionsData[_corporateActionId].actionType;
         data_ = ca.actionsData[_corporateActionId].data;
         actionTypeId_ = ca.actionsData[_corporateActionId].actionIdByType;
+        isDisabled_ = ca.actionsData[_corporateActionId].isDisabled;
     }
 
     function getCorporateActionCount() internal view returns (uint256 corporateActionCount_) {
@@ -137,6 +147,65 @@ library CorporateActionsStorageWrapper {
 
     function getCorporateActionData(bytes32 actionId) internal view returns (bytes memory) {
         return corporateActionsStorage().actionsData[actionId].data;
+    }
+
+    function getCorporateActions(
+        uint256 pageIndex,
+        uint256 pageLength
+    )
+        internal
+        view
+        returns (
+            bytes32[] memory actionTypes_,
+            uint256[] memory actionTypeIds_,
+            bytes[] memory datas_,
+            bool[] memory isDisabled_
+        )
+    {
+        bytes32[] memory corporateActionIds = getCorporateActionIds(pageIndex, pageLength);
+        uint256 totalCorporateActions = corporateActionIds.length;
+
+        actionTypes_ = new bytes32[](totalCorporateActions);
+        actionTypeIds_ = new uint256[](totalCorporateActions);
+        datas_ = new bytes[](totalCorporateActions);
+        isDisabled_ = new bool[](totalCorporateActions);
+
+        for (uint256 i = 0; i < totalCorporateActions; ) {
+            (actionTypes_[i], actionTypeIds_[i], datas_[i], isDisabled_[i]) = getCorporateAction(corporateActionIds[i]);
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    function getCorporateActionsByType(
+        bytes32 actionType,
+        uint256 pageIndex,
+        uint256 pageLength
+    )
+        internal
+        view
+        returns (
+            bytes32[] memory actionTypes_,
+            uint256[] memory actionTypeIds_,
+            bytes[] memory datas_,
+            bool[] memory isDisabled_
+        )
+    {
+        bytes32[] memory corporateActionIds = getCorporateActionIdsByType(actionType, pageIndex, pageLength);
+        uint256 totalCorporateActions = corporateActionIds.length;
+
+        actionTypes_ = new bytes32[](totalCorporateActions);
+        actionTypeIds_ = new uint256[](totalCorporateActions);
+        datas_ = new bytes[](totalCorporateActions);
+        isDisabled_ = new bool[](totalCorporateActions);
+
+        for (uint256 i = 0; i < totalCorporateActions; ) {
+            (actionTypes_[i], actionTypeIds_[i], datas_[i], isDisabled_[i]) = getCorporateAction(corporateActionIds[i]);
+            unchecked {
+                ++i;
+            }
+        }
     }
 
     function getUintResultAt(bytes32 _actionId, uint256 resultId) internal view returns (uint256 value) {

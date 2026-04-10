@@ -4,8 +4,9 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IBondManagement } from "./IBondManagement.sol";
 import { IBondTypes } from "./IBondTypes.sol";
 import { IKyc } from "../../layer_1/kyc/IKyc.sol";
+import { IBond } from "../../layer_2/bond/IBond.sol";
 import { _CORPORATE_ACTION_ROLE, _BOND_MANAGER_ROLE, _MATURITY_REDEEMER_ROLE } from "../../../constants/roles.sol";
-import { KPI_BOND_REDEEM_BALANCE } from "../../../constants/values.sol";
+import { COUPON_CORPORATE_ACTION_TYPE, KPI_BOND_REDEEM_BALANCE } from "../../../constants/values.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { BondStorageWrapper } from "../../../domain/asset/BondStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
@@ -144,6 +145,22 @@ abstract contract Bond is IBondManagement, TimestampProvider, Modifiers {
         IBondTypes.Coupon memory coupon = _prepareCoupon(_newCoupon);
         bytes32 corporateActionID;
         (corporateActionID, couponID_) = BondStorageWrapper.setCoupon(coupon);
+    }
+
+    function cancelCoupon(
+        uint256 _couponId
+    )
+        external
+        override
+        onlyUnpaused
+        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponId - 1)
+        onlyRole(_CORPORATE_ACTION_ROLE)
+        returns (bool success_)
+    {
+        (success_) = BondStorageWrapper.cancelCoupon(_couponId);
+        if (success_) {
+            emit IBond.CouponCancelled(_couponId, EvmAccessors.getMsgSender());
+        }
     }
 
     /**

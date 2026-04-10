@@ -19,14 +19,20 @@ interface ICorporateActions {
         bytes data
     );
 
+    event CorporateActionCancelled(bytes32 indexed corporateActionId);
+
     error DuplicatedCorporateAction(bytes32 actionType, bytes data);
     error WrongIndexForAction(uint256 index, bytes32 actionType);
     error WrongDates(uint256 firstDate, uint256 secondDate);
+    error CorporateActionNotFound(bytes32 corporateActionId);
+    error CorporateActionAlreadyDisabled(bytes32 corporateActionId);
 
     function addCorporateAction(
         bytes32 _actionType,
         bytes memory _data
     ) external returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_);
+
+    function cancelCorporateAction(bytes32 _corporateActionId) external;
 
     /**
      * @dev Returns a corporate action info
@@ -38,7 +44,7 @@ interface ICorporateActions {
      */
     function getCorporateAction(
         bytes32 _corporateActionId
-    ) external view returns (bytes32 actionType_, uint256 actionTypeIndex_, bytes memory data_);
+    ) external view returns (bytes32 actionType_, uint256 actionTypeIndex_, bytes memory data_, bool isDisabled_);
 
     /**
      * @dev Returns the number of corporate actions the token currently has
@@ -58,6 +64,29 @@ interface ICorporateActions {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view returns (bytes32[] memory corporateActionIds_);
+
+    /**
+     * @dev Returns an array of corporte actions the token currently has
+     *
+     * @param _pageIndex members to skip : _pageIndex * _pageLength
+     * @param _pageLength number of members to return
+     * @return actionTypes_ The array of corporate action types
+     * @return actionTypeIndex_ The array of corporate action type index
+     * @return datas_ The array of corporate action related data (body and anything else)
+     * @return isDisabled_ The array of corporate action disabled status
+     */
+    function getCorporateActions(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    )
+        external
+        view
+        returns (
+            bytes32[] memory actionTypes_,
+            uint256[] memory actionTypeIndex_,
+            bytes[] memory datas_,
+            bool[] memory isDisabled_
+        );
 
     /**
      * @dev Returns the number of corporate actions of a specific type the token currently has
@@ -80,6 +109,31 @@ interface ICorporateActions {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view returns (bytes32[] memory corporateActionIds_);
+
+    /**
+     * @dev Returns an array of corporate actions by type the token currently has
+     *
+     * @param _actionType The corporate action type
+     * @param _pageIndex members to skip : _pageIndex * _pageLength
+     * @param _pageLength number of members to return
+     * @return actionTypes_ The array of corporate action types
+     * @return actionTypeIndex_ The array of corporate action type index
+     * @return datas_ The array of corporate action related data (body and anything else)
+     * @return isDisabled_ The array of corporate action disabled status
+     */
+    function getCorporateActionsByType(
+        bytes32 _actionType,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    )
+        external
+        view
+        returns (
+            bytes32[] memory actionTypes_,
+            uint256[] memory actionTypeIndex_,
+            bytes[] memory datas_,
+            bool[] memory isDisabled_
+        );
 
     function actionContentHashExists(bytes32 _contentHash) external view returns (bool);
 }

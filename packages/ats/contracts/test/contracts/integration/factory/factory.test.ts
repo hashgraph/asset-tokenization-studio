@@ -228,6 +228,22 @@ describe("Factory Tests", () => {
         );
       });
 
+      it("GIVEN invalid ISIN checksum WHEN deploying equity THEN reverts with WrongISIN", async () => {
+        const equityData = {
+          security: getSecurityData(businessLogicResolver, {
+            erc20MetadataInfo: { isin: "US0378331009" }, // Wrong checksum digit
+            rbacs: init_rbacs,
+          }),
+          equityDetails: getEquityDetails(),
+        };
+        equityData.security.resolverProxyConfiguration = {
+          key: EQUITY_CONFIG_ID,
+          version: 1,
+        };
+
+        await expect(factory.deployEquity(equityData, getRegulationData())).to.be.rejectedWith("WrongISIN");
+      });
+
       it("GIVEN valid ISIN WHEN deploying bond THEN passes checkISIN validation", async () => {
         const bondData = {
           security: getSecurityData(businessLogicResolver, {

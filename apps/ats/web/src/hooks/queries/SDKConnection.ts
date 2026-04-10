@@ -44,12 +44,10 @@ export const useSDKDisconnectFromMetamask = () => {
     onSuccess: (data) => {
       console.log("SDK message --> Connected to Metamask", data);
       reset();
-      window.location.reload();
     },
     onError: (error) => {
       console.log("SDK message --> Error connecting to Metamask: ", error);
       reset();
-      window.location.reload();
     },
   });
 };

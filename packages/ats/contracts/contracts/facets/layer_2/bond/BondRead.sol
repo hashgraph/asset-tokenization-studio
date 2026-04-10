@@ -19,9 +19,9 @@ abstract contract BondRead is IBondRead, TimestampProvider, Modifiers {
         view
         override
         onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
-        returns (RegisteredCoupon memory registeredCoupon_)
+        returns (RegisteredCoupon memory registeredCoupon_, bool isDisabled_)
     {
-        return BondStorageWrapper.getCoupon(_couponID);
+        (registeredCoupon_, , isDisabled_) = BondStorageWrapper.getCoupon(_couponID);
     }
 
     function getCouponFor(

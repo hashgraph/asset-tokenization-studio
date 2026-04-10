@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 import {
   ApplyRolesRequest,
@@ -13,8 +13,8 @@ import {
   CouponViewModel,
   CreateBondRequest,
   CreateEquityRequest,
-  DividendsForViewModel,
-  DividendsViewModel,
+  DividendForViewModel,
+  DividendViewModel,
   Equity,
   EquityDetailsViewModel,
   Factory,
@@ -31,8 +31,8 @@ import {
   GetCouponForRequest,
   GetPrincipalForRequest,
   GetCouponRequest,
-  GetDividendsForRequest,
-  GetDividendsRequest,
+  GetDividendForRequest,
+  GetDividendRequest,
   GetEquityDetailsRequest,
   GetLockedBalanceRequest,
   GetMaxSupplyRequest,
@@ -60,7 +60,7 @@ import {
   SecurityControlListType,
   SecurityViewModel,
   SetCouponRequest,
-  SetDividendsRequest,
+  SetDividendRequest,
   SetMaxSupplyRequest,
   SetVotingRightsRequest,
   SupportedWallets,
@@ -525,24 +525,24 @@ export class SDKService {
   }
 
   // DIVIDENDS ////////////////////////////////////////////
-  public static async setDividends(req: SetDividendsRequest): Promise<number> {
-    const response = await Equity.setDividends(req);
+  public static async setDividend(req: SetDividendRequest): Promise<number> {
+    const response = await Equity.setDividend(req);
     return response.payload;
   }
 
-  public static async getDividendsFor(req: GetDividendsForRequest): Promise<DividendsForViewModel> {
-    return await Equity.getDividendsFor(req);
+  public static async getDividendFor(req: GetDividendForRequest): Promise<DividendForViewModel> {
+    return await Equity.getDividendFor(req);
   }
 
-  public static async getDividendAmountFor(req: GetDividendsForRequest): Promise<DividendAmountForViewModel> {
+  public static async getDividendAmountFor(req: GetDividendForRequest): Promise<DividendAmountForViewModel> {
     return await Equity.getDividendAmountFor(req);
   }
 
-  public static async getDividends(req: GetDividendsRequest): Promise<DividendsViewModel> {
-    return await Equity.getDividends(req);
+  public static async getDividend(req: GetDividendRequest): Promise<DividendViewModel> {
+    return await Equity.getDividend(req);
   }
 
-  public static async getAllDividends(req: GetAllDividendsRequest): Promise<DividendsViewModel[]> {
+  public static async getAllDividends(req: GetAllDividendsRequest): Promise<DividendViewModel[]> {
     return await Equity.getAllDividends(req);
   }
 

@@ -35,10 +35,44 @@ abstract contract CorporateActions is ICorporateActions, Modifiers {
         );
     }
 
+    function cancelCorporateAction(
+        bytes32 _corporateActionId
+    ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) {
+        CorporateActionsStorageWrapper.cancelCorporateAction(_corporateActionId);
+        emit CorporateActionCancelled(_corporateActionId);
+    }
+
     function getCorporateAction(
         bytes32 _corporateActionId
-    ) external view override returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_) {
-        (actionType_, actionTypeId_, data_) = CorporateActionsStorageWrapper.getCorporateAction(_corporateActionId);
+    )
+        external
+        view
+        override
+        returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_, bool isDisabled_)
+    {
+        (actionType_, actionTypeId_, data_, isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(
+            _corporateActionId
+        );
+    }
+
+    function getCorporateActions(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    )
+        external
+        view
+        override
+        returns (
+            bytes32[] memory actionTypes_,
+            uint256[] memory actionTypeIds_,
+            bytes[] memory datas_,
+            bool[] memory isDisabled_
+        )
+    {
+        (actionTypes_, actionTypeIds_, datas_, isDisabled_) = CorporateActionsStorageWrapper.getCorporateActions(
+            _pageIndex,
+            _pageLength
+        );
     }
 
     function getCorporateActionCount() external view override returns (uint256 corporateActionCount_) {
@@ -56,6 +90,28 @@ abstract contract CorporateActions is ICorporateActions, Modifiers {
         bytes32 _actionType
     ) external view override returns (uint256 corporateActionCount_) {
         corporateActionCount_ = CorporateActionsStorageWrapper.getCorporateActionCountByType(_actionType);
+    }
+
+    function getCorporateActionsByType(
+        bytes32 actionType,
+        uint256 pageIndex,
+        uint256 pageLength
+    )
+        external
+        view
+        override
+        returns (
+            bytes32[] memory actionTypes_,
+            uint256[] memory actionTypeIds_,
+            bytes[] memory datas_,
+            bool[] memory isDisabled_
+        )
+    {
+        (actionTypes_, actionTypeIds_, datas_, isDisabled_) = CorporateActionsStorageWrapper.getCorporateActionsByType(
+            actionType,
+            pageIndex,
+            pageLength
+        );
     }
 
     function getCorporateActionIdsByType(

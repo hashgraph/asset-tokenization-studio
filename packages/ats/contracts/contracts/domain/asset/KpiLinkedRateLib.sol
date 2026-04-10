@@ -113,7 +113,7 @@ library KpiLinkedRateLib {
             return (0, 0);
         }
 
-        IBondTypes.RegisteredCoupon memory previousCoupon = BondStorageWrapper.getCoupon(previousCouponId);
+        (IBondTypes.RegisteredCoupon memory previousCoupon, , ) = BondStorageWrapper.getCoupon(previousCouponId);
 
         // Previous coupon rate must be set
         _checkUnexpectedError(

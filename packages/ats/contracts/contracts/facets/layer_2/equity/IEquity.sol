@@ -101,15 +101,24 @@ interface IEquity {
         uint256 decimals
     );
 
+    event DividendCancelled(uint256 dividendId, address indexed operator);
+
+    event VotingCancelled(uint256 voteId, address indexed operator);
+
+    event ScheduledBalanceAdjustmentCancelled(uint256 balanceAdjustmentId, address indexed operator);
+
     error DividendCreationFailed();
     error VotingRightsCreationFailed();
     error BalanceAdjustmentCreationFailed();
+    error DividendAlreadyExecuted(bytes32 corporateActionId, uint256 dividendId);
+    error VotingAlreadyRecorded(bytes32 corporateActionId, uint256 voteId);
+    error BalanceAdjustmentAlreadyExecuted(bytes32 corporateActionId, uint256 balanceAdjustmentId);
 
     /**
      * @notice Sets a new dividend
      * @dev Can only be called by an account with the corporate actions role
      */
-    function setDividends(Dividend calldata _newDividend) external returns (uint256 dividendID_);
+    function setDividend(Dividend calldata _newDividend) external returns (uint256 dividendID_);
 
     /**
      * @notice Sets a new voting
@@ -125,6 +134,10 @@ interface IEquity {
         ScheduledBalanceAdjustment calldata _newBalanceAdjustment
     ) external returns (uint256 balanceAdjustmentID_);
 
+    function cancelDividend(uint256 _dividendID) external returns (bool success_);
+    function cancelVoting(uint256 _voteID) external returns (bool success_);
+    function cancelScheduledBalanceAdjustment(uint256 _balanceAdjustmentID) external returns (bool success_);
+
     function getEquityDetails() external view returns (EquityDetailsData memory equityDetailsData_);
 
     /**
@@ -132,7 +145,9 @@ interface IEquity {
      *
      * @param _dividendID The dividend Id
      */
-    function getDividends(uint256 _dividendID) external view returns (RegisteredDividend memory registeredDividend_);
+    function getDividend(
+        uint256 _dividendID
+    ) external view returns (RegisteredDividend memory registeredDividend_, bool isDisabled_);
 
     /**
      * @dev returns the dividends for an account.
@@ -140,7 +155,7 @@ interface IEquity {
      * @param _dividendID The dividend Id
      * @param _account The account
      */
-    function getDividendsFor(
+    function getDividendFor(
         uint256 _dividendID,
         address _account
     ) external view returns (DividendFor memory dividendFor_);
@@ -175,7 +190,9 @@ interface IEquity {
     /**
      * @notice Returns the details of a previously registered voting
      */
-    function getVoting(uint256 _voteID) external view returns (RegisteredVoting memory registeredVoting_);
+    function getVoting(
+        uint256 _voteID
+    ) external view returns (RegisteredVoting memory registeredVoting_, bool isDisabled_);
 
     /**
      * @notice Returns the voting details for an account
@@ -206,7 +223,7 @@ interface IEquity {
      */
     function getScheduledBalanceAdjustment(
         uint256 _balanceAdjustmentID
-    ) external view returns (ScheduledBalanceAdjustment memory balanceAdjustment_);
+    ) external view returns (ScheduledBalanceAdjustment memory balanceAdjustment_, bool isDisabled_);
 
     /**
      * @notice Returns the total number of scheduled balance adjustments
