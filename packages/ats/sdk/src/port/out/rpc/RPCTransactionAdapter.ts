@@ -22,6 +22,7 @@ import {
 import { lazyInject } from "@core/decorator/LazyInjectDecorator";
 import Account from "@domain/context/account/Account";
 import { BondDetails } from "@domain/context/bond/BondDetails";
+import { LoanDetails } from "@domain/context/loan/LoanDetails";
 import { BondFixedRateDetails } from "@domain/context/bond/BondFixedRateDetails";
 import { BondKpiLinkedRateDetails } from "@domain/context/bond/BondKpiLinkedRateDetails";
 import { CastRateStatus, RateStatus } from "@domain/context/bond/RateStatus";
@@ -34,6 +35,7 @@ import {
   FactoryBondKpiLinkedRateToken,
   FactoryBondToken,
   FactoryEquityToken,
+  FactoryLoanToken,
 } from "@domain/context/factory/FactorySecurityToken";
 import { ProtectionData } from "@domain/context/factory/ProtectionData";
 import { Resolvers } from "@domain/context/factory/Resolvers";
@@ -104,6 +106,7 @@ import {
   TransferAndLockFacet__factory,
   TREXFactoryAts__factory,
   NominalValue__factory,
+  Loan__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { ContractId } from "@hiero-ledger/sdk";
 import EventService from "@service/event/EventService";
@@ -345,6 +348,99 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       "BondKpiLinkedRateDeployed",
       compliance,
       identityRegistryAddress,
+    );
+  }
+  // TODO: Method not implemented yet
+  async createLoan(
+    securityInfo: Security,
+    loanDetails: LoanDetails,
+    nominalValue: string,
+    nominalValueDecimals: number,
+    factory: EvmAddress,
+    resolver: EvmAddress,
+    configId: string,
+    configVersion: number,
+    compliance: EvmAddress,
+    identityRegistryAddress: EvmAddress,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
+    diamondOwnerAccount?: EvmAddress,
+  ): Promise<TransactionResponse> {
+    return this.createSecurity(
+      securityInfo,
+      {
+        loanDetails: SecurityDataBuilder.buildLoanDetails(loanDetails),
+        nominalValue,
+        nominalValueDecimals,
+      },
+      factory,
+      resolver,
+      configId,
+      configVersion,
+      externalPauses,
+      externalControlLists,
+      externalKycLists,
+      diamondOwnerAccount!,
+      (security, details) =>
+        new FactoryLoanToken(security, details.loanDetails, details.nominalValue, details.nominalValueDecimals),
+      "deployLoan",
+      GAS.CREATE_LOAN_ST,
+      "LoanDeployed",
+      compliance,
+      identityRegistryAddress,
+    );
+  }
+
+  async setLoanDetails(security: EvmAddress, loanDetails: LoanDetails): Promise<TransactionResponse> {
+    LogService.logTrace(`Setting loan details for security ${security.toString()}`);
+
+    const loanDetailsStruct = {
+      loanBasicData: {
+        currency: loanDetails.currency,
+        startingDate: loanDetails.startingDate,
+        maturityDate: loanDetails.maturityDate,
+        loanStructureType: loanDetails.loanStructureType,
+        repaymentType: loanDetails.repaymentType,
+        interestType: loanDetails.interestType,
+        signingDate: loanDetails.signingDate,
+        originatorAccount: loanDetails.originatorAccount,
+        servicerAccount: loanDetails.servicerAccount,
+      },
+      loanInterestData: {
+        baseReferenceRate: loanDetails.baseReferenceRate,
+        floorRate: loanDetails.floorRate,
+        capRate: loanDetails.capRate,
+        rateMargin: loanDetails.rateMargin,
+        dayCount: loanDetails.dayCount,
+        paymentFrequency: loanDetails.paymentFrequency,
+        firstAccrualDate: loanDetails.firstAccrualDate,
+        prepaymentPenalty: loanDetails.prepaymentPenalty,
+        commitmentFee: loanDetails.commitmentFee,
+        utilizationFee: loanDetails.utilizationFee,
+        utilizationFeeType: loanDetails.utilizationFeeType,
+        servicingFee: loanDetails.servicingFee,
+      },
+      riskData: {
+        internalRiskGrade: loanDetails.internalRiskGrade,
+        defaultProbability: loanDetails.defaultProbability,
+        lossGivenDefault: loanDetails.lossGivenDefault,
+      },
+      collateral: {
+        totalCollateralValue: loanDetails.totalCollateralValue,
+        loanToValue: loanDetails.loanToValue,
+      },
+      loanPerformanceStatus: {
+        performanceStatus: loanDetails.performanceStatus,
+        daysPastDue: loanDetails.daysPastDue,
+      },
+    };
+
+    return this.executeTransaction(
+      Loan__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "setLoanDetails",
+      [loanDetailsStruct],
+      GAS.SET_LOAN_DETAILS,
     );
   }
 

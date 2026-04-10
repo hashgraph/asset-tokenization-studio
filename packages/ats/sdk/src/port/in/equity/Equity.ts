@@ -88,6 +88,7 @@ class EquityInPort implements IEquityInPort {
     private readonly networkService: NetworkService = Injectable.resolve(NetworkService),
   ) {}
 
+  // TODO: Refactor SecurityProps mapping to use toSecurityProps() from "../security/SecurityPropsMapper"
   @LogError
   async createTrexSuite(req: CreateTrexSuiteEquityRequest): Promise<{
     security: SecurityViewModel;

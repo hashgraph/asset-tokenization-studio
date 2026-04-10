@@ -227,6 +227,9 @@ import GetScheduledCouponListingRequest from "./scheduledTasks/GetScheduledCoupo
 import CancelCouponRequest from "./bond/CancelCouponRequest";
 import CancelScheduledBalanceAdjustmentRequest from "./equity/CancelScheduledBalanceAdjustmentRequest";
 import CancelVotingRequest from "./equity/CancelVotingRequest";
+import CreateLoanRequest from "./loan/CreateLoanRequest";
+import GetLoanDetailsRequest from "./loan/GetLoanDetailsRequest";
+import SetLoanDetailsRequest from "./loan/SetLoanDetailsRequest";
 
 export {
   CreateEquityRequest,
@@ -455,4 +458,7 @@ export {
   SetNominalValueRequest,
   GetNominalValueRequest,
   GetNominalValueDecimalsRequest,
+  CreateLoanRequest,
+  GetLoanDetailsRequest,
+  SetLoanDetailsRequest,
 };

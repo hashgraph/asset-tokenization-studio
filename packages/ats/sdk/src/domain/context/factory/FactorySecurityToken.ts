@@ -6,6 +6,7 @@ import { EquityDetailsData } from "./EquityDetailsData";
 import { AdditionalSecurityData } from "./AdditionalSecurityData";
 import { BondFixedRateDetailsData } from "./BondFixedRateDetailsData";
 import { BondKpiLinkedRateDetailsData } from "./BondKpiLinkedRateDetailsData";
+import { LoanDetailsData } from "./LoanDetailsData";
 
 export class FactoryEquityToken {
   public security: SecurityData;
@@ -71,6 +72,25 @@ export class FactoryBondKpiLinkedRateToken {
     this.bondKpiLinkedRateDetails = bondKpiLinkedRateDetails;
     this.proceedRecipients = proceedRecipients;
     this.proceedRecipientsData = proceedRecipientsData;
+  }
+}
+
+export class FactoryLoanToken {
+  public security: SecurityData;
+  public loanDetails: LoanDetailsData;
+  public nominalValue: string;
+  public nominalValueDecimals: number;
+
+  constructor(
+    security: SecurityData,
+    loanDetails: LoanDetailsData,
+    nominalValue: string,
+    nominalValueDecimals: number,
+  ) {
+    this.security = security;
+    this.loanDetails = loanDetails;
+    this.nominalValue = nominalValue;
+    this.nominalValueDecimals = nominalValueDecimals;
   }
 }
 

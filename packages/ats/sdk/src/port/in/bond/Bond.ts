@@ -86,6 +86,7 @@ class BondInPort implements IBondInPort {
     private readonly networkService: NetworkService = Injectable.resolve(NetworkService),
   ) {}
 
+  // TODO: Refactor SecurityProps mapping to use toSecurityProps() from "../security/SecurityPropsMapper"
   @LogError
   async create(req: CreateBondRequest): Promise<{ security: SecurityViewModel; transactionId: string }> {
     ValidatedRequest.handleValidation("CreateBondRequest", req);

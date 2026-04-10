@@ -18,6 +18,7 @@ import ExternalControlListsManagement from "./externalControlListsManagement/Ext
 import ExternalKycListsManagement from "./externalKycListsManagement/ExternalKycListsManagement";
 import FixedRate from "./interestRates/fixedRate/FixedRate";
 import KpiLinkedRate from "./interestRates/kpiLinkedRate/KpiLinkedRate";
+import Loan from "./loan/Loan";
 
 export {
   Security,
@@ -38,6 +39,7 @@ export {
   ExternalKycListsManagement,
   FixedRate,
   KpiLinkedRate,
+  Loan,
 };
 
 export * from "./request";
@@ -62,3 +64,4 @@ export * from "./externalControlListsManagement/ExternalControlListsManagement";
 export * from "./externalKycListsManagement/ExternalKycListsManagement";
 export * from "./interestRates/fixedRate/FixedRate";
 export * from "./interestRates/kpiLinkedRate/KpiLinkedRate";
+export * from "./loan/Loan";

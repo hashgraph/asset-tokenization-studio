@@ -42,6 +42,7 @@ import {
 } from "./proceedRecipient/ProceedRecipientInjectable";
 import { COMMAND_HANDLERS_KPI, QUERY_HANDLERS_KPI } from "./kpis/InjectableKpis";
 import { COMMAND_HANDLERS_NOMINAL_VALUE, QUERY_HANDLERS_NOMINAL_VALUE } from "./security/InjectableNominalValue";
+import { COMMAND_HANDLERS_LOAN, QUERY_HANDLERS_LOAN } from "./loan/InjectableLoan";
 
 export const COMMAND_HANDLERS = [
   ...COMMAND_HANDLERS_AGENT,
@@ -74,6 +75,7 @@ export const COMMAND_HANDLERS = [
   ...COMMAND_HANDLERS_PROCEED_RECIPIENT,
   ...COMMAND_HANDLERS_KPI,
   ...COMMAND_HANDLERS_NOMINAL_VALUE,
+  ...COMMAND_HANDLERS_LOAN,
 ];
 
 export const QUERY_HANDLERS = [
@@ -106,6 +108,7 @@ export const QUERY_HANDLERS = [
   ...QUERY_HANDLERS_PROCEED_RECIPIENT,
   ...QUERY_HANDLERS_KPI,
   ...QUERY_HANDLERS_NOMINAL_VALUE,
+  ...QUERY_HANDLERS_LOAN,
 ];
 
 export const TRANSACTION_HANDLER = [

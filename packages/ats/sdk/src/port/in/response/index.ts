@@ -30,6 +30,7 @@ import ClearingRedeemViewModel from "./ClearingRedeemViewModel";
 import ClearingTransferViewModel from "./ClearingTransferViewModel";
 import GetCorporateActionResponse from "./corporateActions/GetCorporateActionResponse";
 import GetCorporateActionsResponse from "./corporateActions/GetCorporateActionsResponse";
+import LoanDetailsViewModel from "./LoanDetailsViewModel";
 
 export {
   AccountViewModel,
@@ -62,4 +63,5 @@ export {
   ClearingTransferViewModel,
   GetCorporateActionResponse,
   GetCorporateActionsResponse,
+  LoanDetailsViewModel,
 };

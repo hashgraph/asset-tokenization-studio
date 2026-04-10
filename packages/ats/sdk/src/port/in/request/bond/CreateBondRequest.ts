@@ -9,6 +9,7 @@ import { SecurityDate } from "@domain/context/shared/SecurityDate";
 import { Factory } from "@domain/context/factory/Factories";
 import { InvalidValue } from "../error/InvalidValue";
 
+// TODO: Refactor to use SecurityParams from "../security/SecurityParams" for security fields composition
 export default class CreateBondRequest extends ValidatedRequest<CreateBondRequest> {
   name: string;
   symbol: string;

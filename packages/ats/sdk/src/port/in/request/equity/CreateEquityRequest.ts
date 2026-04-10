@@ -8,6 +8,7 @@ import FormatValidation from "../FormatValidation";
 
 import { Factory } from "@domain/context/factory/Factories";
 
+// TODO: Refactor to use SecurityParams from "../security/SecurityParams" for security fields composition
 export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRequest> {
   name: string;
   symbol: string;

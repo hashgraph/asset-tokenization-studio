@@ -177,6 +177,15 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.factoryOps.createBondKpiLinkedRate(...args);
   }
 
+  // TODO: Implement createLoan and setLoanDetails via FactoryOperations when custodial support is needed
+  async createLoan(..._args: any[]): Promise<TransactionResponse> {
+    throw new Error("createLoan not yet implemented for this adapter");
+  }
+
+  async setLoanDetails(..._args: any[]): Promise<TransactionResponse> {
+    throw new Error("setLoanDetails not yet implemented for this adapter");
+  }
+
   async createTrexSuiteBond(
     ...args: Parameters<FactoryOperations["createTrexSuiteBond"]>
   ): Promise<TransactionResponse> {
