@@ -82,6 +82,21 @@ const config: Config = {
         editUrl: "https://github.com/hashgraph/asset-tokenization-studio/tree/main/",
       },
     ],
+    [
+      require.resolve("@easyops-cn/docusaurus-search-local"),
+      {
+        hashed: true,
+        language: ["en"],
+        indexDocs: true,
+        indexBlog: false,
+        indexPages: true,
+        docsPluginIdForPreferredVersion: "ats",
+        docsRouteBasePath: ["/ats", "/mass-payout", "/references"],
+        highlightSearchTermsOnTargetPage: true,
+        searchResultLimits: 8,
+        searchResultContextMaxLength: 50,
+      },
+    ],
   ],
 
   markdown: {
@@ -101,6 +116,7 @@ const config: Config = {
       logo: {
         alt: "Asset Tokenization Studio Logo",
         src: "img/logo.svg",
+        srcDark: "img/logo-dark.svg",
       },
       items: [
         {
