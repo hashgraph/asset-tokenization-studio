@@ -62,7 +62,7 @@
  * @module cli/deployEquityInstance
  */
 
-import { ethers } from "ethers";
+import { ethers, MaxUint256 } from "ethers";
 import { deployEquityInstance } from "../workflows/deployEquityInstance";
 import { info, success, error } from "@scripts/infrastructure";
 import { requireNetworkSigner, requireValidAddress } from "./shared";
@@ -90,11 +90,11 @@ async function main() {
   const factoryAddress = requireValidAddress(process.env.FACTORY_PROXY, "FACTORY_PROXY");
   const blrAddress = requireValidAddress(process.env.BLR_PROXY, "BLR_PROXY");
 
-  const tokenName = "AcmeCorpEquity";
-  const tokenSymbol = "ACME";
-  const tokenIsin = "US0231351067";
+  const tokenName = "Fidelity Treasury Digital Fund ";
+  const tokenSymbol = "FDIT";
+  const tokenIsin = "US31617H8135";
   const tokenDecimals = 18;
-  const maxSupply = 1000000000;
+  const maxSupply = MaxUint256;
 
   // Token features
   const isWhiteList = false;
