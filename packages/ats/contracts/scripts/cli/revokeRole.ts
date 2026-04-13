@@ -2,10 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * CLI entry point for deploying a new equity token equity instance.
- *
- * Usage:
- *   npm run deploy:equityInstance:hedera:testnet
  *
  * @module cli/revokeRole
  */

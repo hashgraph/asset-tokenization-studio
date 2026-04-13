@@ -2,10 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * CLI entry point for deploying a new equity token equity instance.
- *
- * Usage:
- *   npm run deploy:equityInstance:hedera:testnet
  *
  * @module cli/grantRole
  */
@@ -22,7 +18,7 @@ import { ATS_ROLES } from "@scripts";
 async function main() {
   const { network, signer, address } = await requireNetworkSigner();
 
-  const tokenEVMAddress = "0x1F4ca0570AFaED33E68c4e7f0278326E4B184C5A";
+  const tokenEVMAddress = "0x8e74Af5b9fc792079254a5bf70972F16453Ce908";
   const accountToGrantRoleTo = "0xc58DE1d126426cF75a046317aD7338F083bb782a";
   const roleToGrant = ATS_ROLES._ISSUER_ROLE;
 
