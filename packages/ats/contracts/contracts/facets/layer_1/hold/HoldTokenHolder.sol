@@ -6,8 +6,6 @@ import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 import { IHoldTypes } from "./IHoldTypes.sol";
 import { IHoldTokenHolder } from "./IHoldTokenHolder.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
-import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
-import { ERC1594StorageWrapper } from "../../../domain/asset/ERC1594StorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 /**

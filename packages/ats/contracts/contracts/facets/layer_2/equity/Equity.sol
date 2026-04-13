@@ -230,8 +230,6 @@ abstract contract Equity is IEquity, Modifiers {
 
     // solhint-disable-next-line func-name-mixedcase
     function _initializeEquity(EquityDetailsData calldata _equityDetailsData) internal {
-        EquityDataStorage storage equityStorage = EquityStorageWrapper.equityStorage();
-        equityStorage.initialized = true;
-        EquityStorageWrapper.storeEquityDetails(_equityDetailsData);
+        EquityStorageWrapper.initializeEquityDetails(_equityDetailsData);
     }
 }

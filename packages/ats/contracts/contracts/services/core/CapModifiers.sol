@@ -30,7 +30,7 @@ abstract contract CapModifiers {
      * @param _value The amount to be issued.
      * @param _timestamp The timestamp at which the max supply cap is evaluated.
      */
-    modifier onlyWithinMaxSupply(uint _value, uint256 _timestamp) {
+    modifier onlyWithinMaxSupply(uint256 _value, uint256 _timestamp) {
         CapStorageWrapper.requireWithinMaxSupply(_value, _timestamp);
         _;
     }

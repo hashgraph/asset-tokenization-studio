@@ -5,7 +5,6 @@ import { _KYC_ROLE, _INTERNAL_KYC_MANAGER_ROLE } from "../../../constants/roles.
 import { IKyc } from "./IKyc.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { KycStorageWrapper } from "../../../domain/core/KycStorageWrapper.sol";
-import { SsiManagementStorageWrapper } from "../../../domain/core/SsiManagementStorageWrapper.sol";
 import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 

@@ -30,6 +30,7 @@ import { IEquityUSA } from "../facets/layer_3/equityUSA/IEquityUSA.sol";
 import { IBondUSA } from "../facets/layer_3/bondUSA/IBondUSA.sol";
 import { IBondRead } from "../facets/layer_2/bond/IBondRead.sol";
 import { IProceedRecipients } from "../facets/layer_2/proceedRecipient/IProceedRecipients.sol";
+import { INominalValue } from "../facets/layer_2/nominalValue/INominalValue.sol";
 import { IProtectedPartitions } from "../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 import { IExternalPauseManagement } from "../facets/layer_1/externalPause/IExternalPauseManagement.sol";
 import {
@@ -142,6 +143,12 @@ contract Factory is IFactory {
             _equityData.equityDetails,
             _buildRegulationData(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType),
             _factoryRegulationData.additionalSecurityData
+        );
+
+        _tryInitialize_NominalValue(
+            equityAddress_,
+            _equityData.equityDetails.nominalValue,
+            _equityData.equityDetails.nominalValueDecimals
         );
 
         emit EquityDeployed(EvmAccessors.getMsgSender(), equityAddress_, _equityData, _factoryRegulationData);
@@ -265,6 +272,12 @@ contract Factory is IFactory {
 
         // Initialize proceed recipients (ProceedRecipientsFacet may not be present)
         _tryInitialize_ProceedRecipients(bondAddress_, _bondData.proceedRecipients, _bondData.proceedRecipientsData);
+
+        _tryInitialize_NominalValue(
+            bondAddress_,
+            _bondData.bondDetails.nominalValue,
+            _bondData.bondDetails.nominalValueDecimals
+        );
     }
 
     function _deployBondKpiLinkedRate(BondKpiLinkedRateData calldata _data) internal returns (address bondAddress_) {
@@ -486,6 +499,18 @@ contract Factory is IFactory {
         bytes[] calldata data
     ) private {
         try IProceedRecipients(securityAddress_).initialize_ProceedRecipients(proceedRecipients, data) {
+            // success
+        } catch {
+            // facet not present - skip initialization
+        }
+    }
+
+    function _tryInitialize_NominalValue(
+        address securityAddress_,
+        uint256 nominalValue,
+        uint8 nominalValueDecimals
+    ) private {
+        try INominalValue(securityAddress_).initialize_NominalValue(nominalValue, nominalValueDecimals) {
             // success
         } catch {
             // facet not present - skip initialization
