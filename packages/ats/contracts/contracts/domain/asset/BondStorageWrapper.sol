@@ -248,7 +248,7 @@ library BondStorageWrapper {
         uint256 pageIndex,
         uint256 pageLength
     ) internal view returns (address[] memory holders_) {
-        (IBondTypes.RegisteredCoupon memory registeredCoupon, , bool isDisabled) = getCoupon(couponID);
+        (IBondTypes.RegisteredCoupon memory registeredCoupon, , ) = getCoupon(couponID);
 
         if (registeredCoupon.coupon.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return holders_;
 
@@ -259,7 +259,7 @@ library BondStorageWrapper {
     }
 
     function getTotalCouponHolders(uint256 couponID) internal view returns (uint256) {
-        (IBondTypes.RegisteredCoupon memory registeredCoupon, , bool isDisabled) = getCoupon(couponID);
+        (IBondTypes.RegisteredCoupon memory registeredCoupon, , ) = getCoupon(couponID);
 
         if (registeredCoupon.coupon.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return 0;
 
