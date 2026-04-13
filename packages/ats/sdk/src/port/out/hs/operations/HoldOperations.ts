@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ContractId } from "@hiero-ledger/sdk";
-import {
-  HoldTokenHolderFacet__factory,
-  HoldManagementFacet__factory,
-} from "@hashgraph/asset-tokenization-contracts";
+import { HoldTokenHolderFacet__factory, HoldManagementFacet__factory } from "@hashgraph/asset-tokenization-contracts";
 import { GAS } from "@core/Constants";
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import EvmAddress from "@domain/context/contract/EvmAddress";

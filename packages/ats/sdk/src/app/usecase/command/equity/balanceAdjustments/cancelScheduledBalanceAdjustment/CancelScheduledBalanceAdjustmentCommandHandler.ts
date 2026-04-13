@@ -17,9 +17,7 @@ import ContractService from "@service/contract/ContractService";
 import { CancelScheduledBalanceAdjustmentCommandError } from "./error/CancelScheduledBalanceAdjustmentCommandError";
 
 @CommandHandler(CancelScheduledBalanceAdjustmentCommand)
-export class CancelScheduledBalanceAdjustmentCommandHandler
-  implements ICommandHandler<CancelScheduledBalanceAdjustmentCommand>
-{
+export class CancelScheduledBalanceAdjustmentCommandHandler implements ICommandHandler<CancelScheduledBalanceAdjustmentCommand> {
   constructor(
     @lazyInject(TransactionService)
     private readonly transactionService: TransactionService,

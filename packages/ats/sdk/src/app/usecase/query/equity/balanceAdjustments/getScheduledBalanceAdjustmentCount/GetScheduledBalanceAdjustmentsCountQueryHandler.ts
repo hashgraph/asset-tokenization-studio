@@ -13,9 +13,7 @@ import {
 import { GetScheduledBalanceAdjustmentsCountQueryError } from "./error/GetScheduledBalanceAdjustmentsCountQueryError";
 
 @QueryHandler(GetScheduledBalanceAdjustmentCountQuery)
-export class GetScheduledBalanceAdjustmentCountQueryHandler
-  implements IQueryHandler<GetScheduledBalanceAdjustmentCountQuery>
-{
+export class GetScheduledBalanceAdjustmentCountQueryHandler implements IQueryHandler<GetScheduledBalanceAdjustmentCountQuery> {
   constructor(
     @lazyInject(RPCQueryAdapter)
     private readonly queryAdapter: RPCQueryAdapter,

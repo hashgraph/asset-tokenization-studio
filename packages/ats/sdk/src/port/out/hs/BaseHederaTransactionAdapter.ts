@@ -29,6 +29,7 @@ import { PauseOperations } from "./operations/PauseOperations";
 import { LockOperations } from "./operations/LockOperations";
 import { SecurityOperations } from "./operations/SecurityOperations";
 import { SecurityMetadataOperations } from "./operations/SecurityMetadataOperations";
+import { AmortizationOperations } from "./operations/AmortizationOperations";
 
 export abstract class BaseHederaTransactionAdapter extends TransactionAdapter implements TransactionExecutor {
   mirrorNodes: MirrorNodes;
@@ -53,6 +54,7 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
   protected lockOps!: LockOperations;
   protected securityOps!: SecurityOperations;
   protected securityMetadataOps!: SecurityMetadataOperations;
+  protected amortizationOps!: AmortizationOperations;
 
   constructor(
     protected readonly mirrorNodeAdapter: MirrorNodeAdapter,
@@ -71,6 +73,7 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     this.lockOps = new LockOperations(this);
     this.securityOps = new SecurityOperations(this);
     this.securityMetadataOps = new SecurityMetadataOperations(this);
+    this.amortizationOps = new AmortizationOperations(this);
   }
 
   // ===== Abstract methods (implemented by concrete adapters) =====
@@ -845,5 +848,27 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
 
   async setMaxSupply(...args: Parameters<SecurityMetadataOperations["setMaxSupply"]>): Promise<TransactionResponse> {
     return this.securityMetadataOps.setMaxSupply(...args);
+  }
+
+  async setAmortization(...args: Parameters<AmortizationOperations["setAmortization"]>): Promise<TransactionResponse> {
+    return this.amortizationOps.setAmortization(...args);
+  }
+
+  async cancelAmortization(
+    ...args: Parameters<AmortizationOperations["cancelAmortization"]>
+  ): Promise<TransactionResponse> {
+    return this.amortizationOps.cancelAmortization(...args);
+  }
+
+  async setAmortizationHold(
+    ...args: Parameters<AmortizationOperations["setAmortizationHold"]>
+  ): Promise<TransactionResponse> {
+    return this.amortizationOps.setAmortizationHold(...args);
+  }
+
+  async releaseAmortizationHold(
+    ...args: Parameters<AmortizationOperations["releaseAmortizationHold"]>
+  ): Promise<TransactionResponse> {
+    return this.amortizationOps.releaseAmortizationHold(...args);
   }
 }

@@ -15,6 +15,10 @@ import { MirrorNodeAdapter } from "../mirror/MirrorNodeAdapter";
 import { Security } from "@domain/context/security/Security";
 import { BondDetails } from "@domain/context/bond/BondDetails";
 import { Dividend } from "@domain/context/dividend/Dividend";
+import { RegisteredAmortization } from "@domain/context/amortization/RegisteredAmortization";
+import { Amortization } from "@domain/context/amortization/Amortization";
+import { AmortizationFor } from "@domain/context/amortization/AmortizationFor";
+import { AmortizationPaymentAmount } from "@domain/context/amortization/AmortizationPaymentAmount";
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import { HederaId } from "@domain/context/shared/HederaId";
 import {
@@ -66,6 +70,7 @@ import {
   ScheduledCouponListingFacet__factory,
   NominalValue__factory,
   VotingFacet__factory,
+  AmortizationFacet__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { ScheduledSnapshot } from "@domain/context/security/ScheduledSnapshot";
 import { VotingRights } from "@domain/context/equity/VotingRights";
@@ -430,7 +435,10 @@ export class RPCQueryAdapter {
   async getVotingFor(address: EvmAddress, target: EvmAddress, voting: number): Promise<VotingFor> {
     LogService.logTrace(`Getting voting for`);
 
-    const votingFor = await this.connect(VotingFacet__factory, address.toString()).getVotingFor(voting, target.toString());
+    const votingFor = await this.connect(VotingFacet__factory, address.toString()).getVotingFor(
+      voting,
+      target.toString(),
+    );
 
     return new VotingFor(new BigDecimal(votingFor.tokenBalance), Number(votingFor.decimals), votingFor.isDisabled);
   }
@@ -1651,5 +1659,177 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting nominal value decimals for security: ${address.toString()}`);
     const result = await this.connect(NominalValue__factory, address.toString()).getNominalValueDecimals();
     return Number(result);
+  }
+
+  async getAmortization(address: EvmAddress, amortizationId: number): Promise<RegisteredAmortization> {
+    LogService.logTrace(`Getting amortization: ${amortizationId}`);
+
+    const { registeredAmortization_, isDisabled_ } = await this.connect(
+      AmortizationFacet__factory,
+      address.toString(),
+    ).getAmortization(amortizationId);
+
+    return new RegisteredAmortization(
+      new Amortization(
+        Number(registeredAmortization_.amortization.recordDate),
+        Number(registeredAmortization_.amortization.executionDate),
+        new BigDecimal(registeredAmortization_.amortization.tokensToRedeem.toString()),
+      ),
+      Number(registeredAmortization_.snapshotId),
+      isDisabled_,
+    );
+  }
+
+  async getAmortizationFor(address: EvmAddress, target: EvmAddress, amortizationId: number): Promise<AmortizationFor> {
+    LogService.logTrace(`Getting amortization for: ${target.toString()}, amortizationId: ${amortizationId}`);
+
+    const af = await this.connect(AmortizationFacet__factory, address.toString()).getAmortizationFor(
+      amortizationId,
+      target.toString(),
+    );
+
+    return new AmortizationFor(
+      af.account,
+      Number(af.recordDate),
+      Number(af.executionDate),
+      Number(af.holdId),
+      af.holdActive,
+      new BigDecimal(af.tokenHeldAmount.toString()),
+      Number(af.decimalsHeld),
+      new BigDecimal(af.abafAtHold.toString()),
+      new BigDecimal(af.tokenBalance.toString()),
+      Number(af.decimalsBalance),
+      af.recordDateReached,
+      new BigDecimal(af.abafAtSnapshot.toString()),
+      new BigDecimal(af.nominalValue.toString()),
+      Number(af.nominalValueDecimals),
+    );
+  }
+
+  async getAmortizationsFor(
+    address: EvmAddress,
+    amortizationId: number,
+    start: number,
+    end: number,
+  ): Promise<AmortizationFor[]> {
+    LogService.logTrace(`Getting amortizations for: amortizationId=${amortizationId}`);
+
+    const result = await this.connect(AmortizationFacet__factory, address.toString()).getAmortizationsFor(
+      amortizationId,
+      start,
+      end,
+    );
+
+    return result.map(
+      (af) =>
+        new AmortizationFor(
+          af.account,
+          Number(af.recordDate),
+          Number(af.executionDate),
+          Number(af.holdId),
+          af.holdActive,
+          new BigDecimal(af.tokenHeldAmount.toString()),
+          Number(af.decimalsHeld),
+          new BigDecimal(af.abafAtHold.toString()),
+          new BigDecimal(af.tokenBalance.toString()),
+          Number(af.decimalsBalance),
+          af.recordDateReached,
+          new BigDecimal(af.abafAtSnapshot.toString()),
+          new BigDecimal(af.nominalValue.toString()),
+          Number(af.nominalValueDecimals),
+        ),
+    );
+  }
+
+  async getAmortizationsCount(address: EvmAddress): Promise<number> {
+    LogService.logTrace(`Getting amortizations count`);
+
+    const count = await this.connect(AmortizationFacet__factory, address.toString()).getAmortizationsCount();
+
+    return Number(count);
+  }
+
+  async getAmortizationHolders(
+    address: EvmAddress,
+    amortizationId: number,
+    start: number,
+    end: number,
+  ): Promise<string[]> {
+    LogService.logTrace(`Getting amortization holders for amortizationId: ${amortizationId}`);
+
+    return await this.connect(AmortizationFacet__factory, address.toString()).getAmortizationHolders(
+      amortizationId,
+      start,
+      end,
+    );
+  }
+
+  async getTotalAmortizationHolders(address: EvmAddress, amortizationId: number): Promise<number> {
+    LogService.logTrace(`Getting total amortization holders for amortizationId: ${amortizationId}`);
+
+    const total = await this.connect(AmortizationFacet__factory, address.toString()).getTotalAmortizationHolders(
+      amortizationId,
+    );
+
+    return Number(total);
+  }
+
+  async getAmortizationPaymentAmount(
+    address: EvmAddress,
+    amortizationId: number,
+    tokenHolder: EvmAddress,
+  ): Promise<AmortizationPaymentAmount> {
+    LogService.logTrace(
+      `Getting amortization payment amount: amortizationId=${amortizationId}, tokenHolder=${tokenHolder.toString()}`,
+    );
+
+    const { tokenAmount_, decimals_ } = await this.connect(
+      AmortizationFacet__factory,
+      address.toString(),
+    ).getAmortizationPaymentAmount(amortizationId, tokenHolder.toString());
+
+    return new AmortizationPaymentAmount(new BigDecimal(tokenAmount_.toString()), Number(decimals_));
+  }
+
+  async getActiveAmortizationHoldHolders(
+    address: EvmAddress,
+    amortizationId: number,
+    start: number,
+    end: number,
+  ): Promise<string[]> {
+    LogService.logTrace(`Getting active amortization hold holders for amortizationId: ${amortizationId}`);
+
+    return await this.connect(AmortizationFacet__factory, address.toString()).getActiveAmortizationHoldHolders(
+      amortizationId,
+      start,
+      end,
+    );
+  }
+
+  async getTotalActiveAmortizationHoldHolders(address: EvmAddress, amortizationId: number): Promise<number> {
+    LogService.logTrace(`Getting total active amortization hold holders for amortizationId: ${amortizationId}`);
+
+    const total = await this.connect(
+      AmortizationFacet__factory,
+      address.toString(),
+    ).getTotalActiveAmortizationHoldHolders(amortizationId);
+
+    return Number(total);
+  }
+
+  async getActiveAmortizationIds(address: EvmAddress, start: number, end: number): Promise<number[]> {
+    LogService.logTrace(`Getting active amortization IDs`);
+
+    const ids = await this.connect(AmortizationFacet__factory, address.toString()).getActiveAmortizationIds(start, end);
+
+    return ids.map(Number);
+  }
+
+  async getTotalActiveAmortizationIds(address: EvmAddress): Promise<number> {
+    LogService.logTrace(`Getting total active amortization IDs`);
+
+    const total = await this.connect(AmortizationFacet__factory, address.toString()).getTotalActiveAmortizationIds();
+
+    return Number(total);
   }
 }
