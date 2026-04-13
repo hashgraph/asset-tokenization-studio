@@ -25,6 +25,9 @@ bytes32 constant COUPON_CORPORATE_ACTION_TYPE = 0x4657b10f3cac57d39d628d52e74738
 // keccak256('security.token.standard.balanceAdjustment.corporateAction');
 bytes32 constant BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE = 0x1256aa1b36483ca651f5d8cbafb7033dcb54872ae7d24442b8ee4baa3f49aa2f;
 
+// keccak256('security.token.standard.amortization.corporateActionType');
+bytes32 constant AMORTIZATION_CORPORATE_ACTION_TYPE = 0xd50dd756b70910558bc278c0ccbd8c01d444a4178c07a5baf8e2578c8ec6034b;
+
 // keccak256('security.token.standard.balanceAdjustment.scheduledTasks');
 bytes32 constant BALANCE_ADJUSTMENT_TASK_TYPE = 0x9ce9cffaccaf68fc544ce4df9e5e2774249df2f0b3c9cf940a53a6827465db9d;
 

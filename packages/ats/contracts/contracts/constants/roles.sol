@@ -17,6 +17,9 @@ bytes32 constant _ADJUSTMENT_BALANCE_ROLE = 0x6d0d63b623e69df3a6ea8aebd01f360a02
 // keccak256('security.token.standard.role.agent');
 bytes32 constant _AGENT_ROLE = 0xc4aed0454da9bde6defa5baf93bb49d4690626fc243d138104e12d1def783ea6;
 
+// keccak256('security.token.standard.role.amortization');
+bytes32 constant _AMORTIZATION_ROLE = 0x29b3565c49b924f0c461060cea1eabe7d7136c83f454f891574239e9f8ee9431;
+
 // keccak256('security.token.standard.role.bondManager');
 bytes32 constant _BOND_MANAGER_ROLE = 0x8e99f55d84328dd46dd7790df91f368b44ea448d246199c88b97896b3f83f65d;
 
