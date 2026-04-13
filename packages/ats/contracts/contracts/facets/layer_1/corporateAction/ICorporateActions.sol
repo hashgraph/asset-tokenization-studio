@@ -27,13 +27,6 @@ interface ICorporateActions {
     error CorporateActionNotFound(bytes32 corporateActionId);
     error CorporateActionAlreadyDisabled(bytes32 corporateActionId);
 
-    function addCorporateAction(
-        bytes32 _actionType,
-        bytes memory _data
-    ) external returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_);
-
-    function cancelCorporateAction(bytes32 _corporateActionId) external;
-
     /**
      * @dev Returns a corporate action info
      *

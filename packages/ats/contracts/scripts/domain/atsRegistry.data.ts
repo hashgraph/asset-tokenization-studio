@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-13T09:43:06.261Z
+ * Generated: 2026-04-13T14:42:21.004Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -3894,22 +3894,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x14f1d784",
       },
       {
-        name: "addCorporateAction",
-        signature: {
-          full: "function addCorporateAction(bytes32 _actionType, bytes _data) returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_)",
-          canonical: "addCorporateAction(bytes32,bytes)",
-        },
-        selector: "0xd9e4d92c",
-      },
-      {
-        name: "cancelCorporateAction",
-        signature: {
-          full: "function cancelCorporateAction(bytes32 _corporateActionId)",
-          canonical: "cancelCorporateAction(bytes32)",
-        },
-        selector: "0x98f95705",
-      },
-      {
         name: "getCorporateAction",
         signature: {
           full: "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionTypeId_, bytes data_, bool isDisabled_)",
@@ -3994,14 +3978,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x10210dec",
       },
       {
-        name: "AccountHasNoRole",
-        signature: {
-          full: "error AccountHasNoRole(address account, bytes32 role)",
-          canonical: "AccountHasNoRole(address,bytes32)",
-        },
-        selector: "0xa1180aad",
-      },
-      {
         name: "CorporateActionAlreadyDisabled",
         signature: {
           full: "error CorporateActionAlreadyDisabled(bytes32 corporateActionId)",
@@ -4024,16 +4000,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "DuplicatedCorporateAction(bytes32,bytes)",
         },
         selector: "0x3266e9e3",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
-      {
-        name: "UnexpectedError",
-        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
-        selector: "0xc9622656",
       },
       {
         name: "WrongDates",

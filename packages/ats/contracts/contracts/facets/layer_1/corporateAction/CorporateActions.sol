@@ -8,40 +8,6 @@ import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateAc
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract CorporateActions is ICorporateActions, Modifiers {
-    function addCorporateAction(
-        bytes32 _actionType,
-        bytes memory _data
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_CORPORATE_ACTION_ROLE)
-        returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_)
-    {
-        (corporateActionId_, corporateActionIdByType_) = CorporateActionsStorageWrapper.addCorporateAction(
-            _actionType,
-            _data
-        );
-
-        if (corporateActionId_ == bytes32(0)) {
-            revert DuplicatedCorporateAction(_actionType, _data);
-        }
-        emit CorporateActionAdded(
-            EvmAccessors.getMsgSender(),
-            _actionType,
-            corporateActionId_,
-            corporateActionIdByType_,
-            _data
-        );
-    }
-
-    function cancelCorporateAction(
-        bytes32 _corporateActionId
-    ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) {
-        CorporateActionsStorageWrapper.cancelCorporateAction(_corporateActionId);
-        emit CorporateActionCancelled(_corporateActionId);
-    }
-
     function getCorporateAction(
         bytes32 _corporateActionId
     )
