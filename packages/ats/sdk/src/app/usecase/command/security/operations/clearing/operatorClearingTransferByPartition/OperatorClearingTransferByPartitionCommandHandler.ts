@@ -18,9 +18,7 @@ import { OperatorClearingTransferByPartitionCommandError } from "./error/Operato
 import { KycStatus } from "@domain/context/kyc/Kyc";
 
 @CommandHandler(OperatorClearingTransferByPartitionCommand)
-export class OperatorClearingTransferByPartitionCommandHandler
-  implements ICommandHandler<OperatorClearingTransferByPartitionCommand>
-{
+export class OperatorClearingTransferByPartitionCommandHandler implements ICommandHandler<OperatorClearingTransferByPartitionCommand> {
   constructor(
     @lazyInject(SecurityService)
     private readonly securityService: SecurityService,

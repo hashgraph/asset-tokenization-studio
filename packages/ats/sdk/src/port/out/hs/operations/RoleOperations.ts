@@ -2,10 +2,7 @@
 
 import { ContractId } from "@hiero-ledger/sdk";
 import { ethers } from "ethers";
-import {
-  AccessControlFacet__factory,
-  ERC1410TokenHolderFacet__factory,
-} from "@hashgraph/asset-tokenization-contracts";
+import { AccessControlFacet__factory, ERC1410TokenHolderFacet__factory } from "@hashgraph/asset-tokenization-contracts";
 import { GAS } from "@core/Constants";
 import EvmAddress from "@domain/context/contract/EvmAddress";
 import TransactionResponse from "@domain/context/transaction/TransactionResponse";

@@ -16,9 +16,7 @@ import ContractService from "@service/contract/ContractService";
 import { SetRevocationRegistryAddressCommandError } from "./error/SetRevocationRegistryAddressCommandError";
 
 @CommandHandler(SetRevocationRegistryAddressCommand)
-export class SetRevocationRegistryAddressCommandHandler
-  implements ICommandHandler<SetRevocationRegistryAddressCommand>
-{
+export class SetRevocationRegistryAddressCommandHandler implements ICommandHandler<SetRevocationRegistryAddressCommand> {
   constructor(
     @lazyInject(AccountService)
     private readonly accountService: AccountService,
