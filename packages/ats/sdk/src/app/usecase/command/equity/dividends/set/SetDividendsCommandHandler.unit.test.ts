@@ -9,7 +9,7 @@ import EvmAddress from "@domain/context/contract/EvmAddress";
 import { ErrorMsgFixture, EvmAddressPropsFixture, TransactionIdFixture } from "@test/fixtures/shared/DataFixture";
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import { faker } from "@faker-js/faker/.";
-import { SetDividendsCommandFixture } from "@test/fixtures/equity/EquityFixture";
+import { SetDividendCommandFixture } from "@test/fixtures/equity/EquityFixture";
 import { SetDividendsCommandError } from "./error/SetDividendsCommandError";
 import { ErrorCode } from "@core/error/BaseError";
 
@@ -27,7 +27,7 @@ describe("SetDividendsCommandHandler", () => {
 
   beforeEach(() => {
     handler = new SetDividendsCommandHandler(transactionServiceMock, contractServiceMock);
-    command = SetDividendsCommandFixture.create();
+    command = SetDividendCommandFixture.create();
   });
 
   afterEach(() => {
@@ -55,7 +55,7 @@ describe("SetDividendsCommandHandler", () => {
       it("should successfully set dividends", async () => {
         contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
 
-        transactionServiceMock.getHandler().setDividends.mockResolvedValue({
+        transactionServiceMock.getHandler().setDividend.mockResolvedValue({
           id: transactionId,
           response: dividendId,
         });
@@ -76,8 +76,8 @@ describe("SetDividendsCommandHandler", () => {
             numberOfResultsItems: 1,
           }),
         );
-        expect(transactionServiceMock.getHandler().setDividends).toHaveBeenCalledTimes(1);
-        expect(transactionServiceMock.getHandler().setDividends).toHaveBeenCalledWith(
+        expect(transactionServiceMock.getHandler().setDividend).toHaveBeenCalledTimes(1);
+        expect(transactionServiceMock.getHandler().setDividend).toHaveBeenCalledWith(
           evmAddress,
           BigDecimal.fromString(command.recordDate),
           BigDecimal.fromString(command.executionDate),

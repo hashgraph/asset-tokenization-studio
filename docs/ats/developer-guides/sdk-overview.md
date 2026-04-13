@@ -232,7 +232,7 @@ const dividendRequest = new SetDividendsRequest({
   paymentDate: Math.floor(Date.now() / 1000) + 172800, // 2 days from now
 });
 
-await Equity.setDividends(dividendRequest);
+await Equity.setDividend(dividendRequest);
 ```
 
 ### Setting Coupon Payments

@@ -485,7 +485,7 @@ describe("Bond Tests", () => {
           ]);
 
         // Verify coupon data includes period
-        const registeredCoupon = await bondReadFacet.getCoupon(1);
+        const [registeredCoupon] = await bondReadFacet.getCoupon(1);
         expect(registeredCoupon.coupon.endDate).to.equal(couponEndDateInSeconds);
         expect(registeredCoupon.coupon.startDate).to.equal(customStartDate);
 
@@ -549,22 +549,22 @@ describe("Bond Tests", () => {
         await expect(bondReadFacet.getCoupon(1000)).to.be.revertedWithCustomError(bondReadFacet, "WrongIndexForAction");
 
         const listCount = await bondReadFacet.getCouponCount();
-        const coupon = await bondReadFacet.getCoupon(1);
+        const [registeredCoupon] = await bondReadFacet.getCoupon(1);
         const couponFor = await bondReadFacet.getCouponFor(1, signer_A.address);
         const couponAmountFor = await bondReadFacet.getCouponAmountFor(1, signer_A.address);
         const couponTotalHolders = await bondReadFacet.getTotalCouponHolders(1);
         const couponHolders = await bondReadFacet.getCouponHolders(1, 0, couponTotalHolders);
 
         expect(listCount).to.equal(1);
-        expect(coupon.snapshotId).to.equal(0);
-        expect(coupon.coupon.recordDate).to.equal(couponRecordDateInSeconds);
-        expect(coupon.coupon.executionDate).to.equal(couponExecutionDateInSeconds);
-        expect(coupon.coupon.rate).to.equal(couponRate);
-        expect(coupon.coupon.rateDecimals).to.equal(couponRateDecimals);
-        expect(coupon.coupon.startDate).to.equal(couponStartDateInSeconds);
-        expect(coupon.coupon.endDate).to.equal(couponEndDateInSeconds);
-        expect(coupon.coupon.fixingDate).to.equal(couponFixingDateInSeconds);
-        expect(coupon.coupon.rateStatus).to.equal(couponRateStatus);
+        expect(registeredCoupon.snapshotId).to.equal(0);
+        expect(registeredCoupon.coupon.recordDate).to.equal(couponRecordDateInSeconds);
+        expect(registeredCoupon.coupon.executionDate).to.equal(couponExecutionDateInSeconds);
+        expect(registeredCoupon.coupon.rate).to.equal(couponRate);
+        expect(registeredCoupon.coupon.rateDecimals).to.equal(couponRateDecimals);
+        expect(registeredCoupon.coupon.startDate).to.equal(couponStartDateInSeconds);
+        expect(registeredCoupon.coupon.endDate).to.equal(couponEndDateInSeconds);
+        expect(registeredCoupon.coupon.fixingDate).to.equal(couponFixingDateInSeconds);
+        expect(registeredCoupon.coupon.rateStatus).to.equal(couponRateStatus);
 
         expect(couponFor.coupon.recordDate).to.equal(couponRecordDateInSeconds);
         expect(couponFor.coupon.executionDate).to.equal(couponExecutionDateInSeconds);
@@ -874,6 +874,74 @@ describe("Bond Tests", () => {
       });
     });
   });
+  describe("Cancel Coupon", () => {
+    it("GIVEN an account with corporateActions role WHEN cancelling a coupon THEN transaction succeeds", async () => {
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+
+      await bondFacet.connect(signer_C).setCoupon(couponData);
+
+      await expect(bondFacet.connect(signer_C).cancelCoupon(1))
+        .to.emit(bondFacet, "CouponCancelled")
+        .withArgs(1, signer_C.address);
+      const isDisabled = (await bondReadFacet.getCoupon(1)).isDisabled_;
+      expect(isDisabled).to.equal(true);
+      const couponFor = await bondReadFacet.getCouponFor(1, signer_A.address);
+      expect(couponFor.isDisabled).to.equal(true);
+    });
+
+    it("GIVEN a coupon after execution date WHEN cancelCoupon THEN transaction fails with CorporateActionAlreadyExecuted", async () => {
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+
+      await bondFacet.connect(signer_C).setCoupon(couponData);
+
+      // Time travel past execution date
+      await timeTravelFacet.changeSystemTimestamp(couponExecutionDateInSeconds + 1);
+
+      // Attempt to cancel after execution date
+      await expect(bondFacet.connect(signer_C).cancelCoupon(1)).to.be.revertedWithCustomError(
+        bondFacet,
+        "CouponAlreadyExecuted",
+      );
+    });
+
+    it("GIVEN a coupon after record date but before execution date WHEN cancelCoupon THEN transaction succeeds", async () => {
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+
+      await bondFacet.connect(signer_C).setCoupon(couponData);
+
+      // Time travel past record date but before execution date
+      await timeTravelFacet.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+
+      // Cancel should succeed as execution date hasn't passed
+      await expect(bondFacet.connect(signer_C).cancelCoupon(1))
+        .to.emit(bondFacet, "CouponCancelled")
+        .withArgs(1, signer_C.address);
+    });
+
+    it("GIVEN an account without corporateActions role WHEN cancelCoupon THEN transaction fails with AccountHasNoRole", async () => {
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+
+      await bondFacet.connect(signer_C).setCoupon(couponData);
+
+      await expect(bondFacet.connect(signer_D).cancelCoupon(1)).to.be.rejectedWith("AccountHasNoRole");
+    });
+
+    it("GIVEN a paused Token WHEN cancelCoupon THEN transaction fails with TokenIsPaused", async () => {
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+
+      await bondFacet.connect(signer_C).setCoupon(couponData);
+
+      await pauseFacet.connect(signer_B).pause();
+
+      await expect(bondFacet.connect(signer_C).cancelCoupon(1)).to.be.rejectedWith("TokenIsPaused");
+    });
+
+    it("GIVEN no existing coupon WHEN cancelCoupon with invalid ID THEN transaction fails", async () => {
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+
+      await expect(bondFacet.connect(signer_C).cancelCoupon(999)).to.be.reverted;
+    });
+  });
   describe("Multi Partition", () => {
     it("GIVEN token holder WHEN getting principal For THEN succeeds", async () => {
       await deploySecurityFixture(true);
@@ -987,11 +1055,11 @@ describe("Bond Tests", () => {
         data: "0x",
       });
 
-      const coupon = await bondReadFacet.getCoupon(1);
+      const [registeredCoupon] = await bondReadFacet.getCoupon(1);
       const couponTotalHolders = await bondReadFacet.getTotalCouponHolders(1);
       const couponHolders = await bondReadFacet.getCouponHolders(1, 0, couponTotalHolders);
 
-      expect(coupon.snapshotId).to.be.greaterThan(0); // Snapshot should have been taken
+      expect(registeredCoupon.snapshotId).to.be.greaterThan(0); // Snapshot should have been taken
       expect(couponTotalHolders).to.equal(1);
       expect([...couponHolders]).to.have.members([signer_A.address]);
     });
@@ -1031,9 +1099,9 @@ describe("Bond Tests", () => {
 
       // Query couponFor without triggering snapshot - should use current balance path
       const couponFor = await bondReadFacet.getCouponFor(1, signer_A.address);
-      const coupon = await bondReadFacet.getCoupon(1);
+      const [registeredCoupon] = await bondReadFacet.getCoupon(1);
 
-      expect(coupon.snapshotId).to.equal(0); // No snapshot taken
+      expect(registeredCoupon.snapshotId).to.equal(0); // No snapshot taken
       expect(couponFor.recordDateReached).to.be.true;
       expect(couponFor.tokenBalance).to.equal(TotalAmount);
     });
@@ -1059,16 +1127,16 @@ describe("Bond Tests", () => {
 
       await bondFacet.connect(signer_A).setCoupon(couponData);
 
-      const coupon = await bondReadFacet.getCoupon(1);
+      const [registeredCoupon] = await bondReadFacet.getCoupon(1);
 
-      expect(coupon.coupon.recordDate).to.equal(couponRecordDateInSeconds);
-      expect(coupon.coupon.executionDate).to.equal(couponExecutionDateInSeconds);
-      expect(coupon.coupon.rate).to.equal(couponRate);
-      expect(coupon.coupon.rateDecimals).to.equal(couponRateDecimals);
-      expect(coupon.coupon.startDate).to.equal(couponStartDateInSeconds);
-      expect(coupon.coupon.endDate).to.equal(couponEndDateInSeconds);
-      expect(coupon.coupon.fixingDate).to.equal(couponFixingDateInSeconds);
-      expect(coupon.coupon.rateStatus).to.equal(couponRateStatus);
+      expect(registeredCoupon.coupon.recordDate).to.equal(couponRecordDateInSeconds);
+      expect(registeredCoupon.coupon.executionDate).to.equal(couponExecutionDateInSeconds);
+      expect(registeredCoupon.coupon.rate).to.equal(couponRate);
+      expect(registeredCoupon.coupon.rateDecimals).to.equal(couponRateDecimals);
+      expect(registeredCoupon.coupon.startDate).to.equal(couponStartDateInSeconds);
+      expect(registeredCoupon.coupon.endDate).to.equal(couponEndDateInSeconds);
+      expect(registeredCoupon.coupon.fixingDate).to.equal(couponFixingDateInSeconds);
+      expect(registeredCoupon.coupon.rateStatus).to.equal(couponRateStatus);
     });
 
     it("GIVEN a non-coupon corporate action WHEN getCouponFor is called THEN transaction fails with WrongActionType", async () => {

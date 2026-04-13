@@ -12,7 +12,7 @@ import { RouterManager } from "../router/RouterManager";
 export const SDKConnection = () => {
   const { mutate: init } = useSDKInit();
   const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
-  const { reset, setPairedWallet, data, network, setConnectionStatus } = useWalletStore();
+  const { reset, setPairedWallet, data, network, connectionStatus, setConnectionStatus } = useWalletStore();
   const toast = useToast();
   const { t } = useTranslation("globals");
   const [currentNetworkName, setCurrentNetworkName] = useState<string>("");
@@ -107,12 +107,11 @@ export const SDKConnection = () => {
 
   const walletDisconnect = (event: EventParameter<"walletDisconnect">) => {
     console.log("SDK messege --> Wallet disconnected", event);
-    // Read fresh state from the store to avoid stale closure issues —
-    // the connectionStatus captured at init time may be outdated.
-    const currentStatus = useWalletStore.getState().connectionStatus;
-    const isNotConnecting = currentStatus !== WalletStatus.connecting;
+    // We need to check if we are waiting on connection process, due if we cancel connection on Landing Page
+    // and we try again then reset() put connection status on DISCONNECTED and we loose the Connecting transition page
+    const isNotConnecting = connectionStatus !== WalletStatus.connecting;
     if (isNotConnecting) {
-      console.log("ESTAMOS ENTRANDO AQUI", currentStatus);
+      console.log("ESTAMOS ENTRANDO AQUI", connectionStatus);
       reset();
     }
   };

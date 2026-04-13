@@ -55,13 +55,18 @@ describe("GetCouponForQueryHandler", () => {
     it("should successfully get coupon for", async () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);
       accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(targetEvmAddress);
-      queryAdapterServiceMock.getCouponFor.mockResolvedValue({ tokenBalance: amount, decimals: decimals });
+      queryAdapterServiceMock.getCouponFor.mockResolvedValue({
+        tokenBalance: amount,
+        decimals: decimals,
+        isDisabled: false,
+      });
 
       const result = await handler.execute(query);
 
       expect(result).toBeInstanceOf(GetCouponForQueryResponse);
       expect(result.tokenBalance).toStrictEqual(amount);
       expect(result.decimals).toStrictEqual(decimals);
+      expect(result.isDisabled).toBe(false);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
       expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(query.securityId);
