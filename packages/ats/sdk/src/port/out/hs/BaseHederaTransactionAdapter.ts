@@ -615,6 +615,12 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.securityMetadataOps.setSymbol(...args);
   }
 
+  async setNominalValue(
+    ...args: Parameters<SecurityMetadataOperations["setNominalValue"]>
+  ): Promise<TransactionResponse> {
+    return this.securityMetadataOps.setNominalValue(...args);
+  }
+
   async setDocument(...args: Parameters<SecurityMetadataOperations["setDocument"]>): Promise<TransactionResponse> {
     return this.securityMetadataOps.setDocument(...args);
   }

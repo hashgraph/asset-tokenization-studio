@@ -59,8 +59,10 @@ import {
   ProceedRecipientsFacet__factory,
   CorporateActionsFacet__factory,
   NoncesFacet__factory,
-  Kpis__factory, KpiLinkedRate__factory,
-  ScheduledCouponListingFacet__factory
+  Kpis__factory,
+  KpiLinkedRate__factory,
+  ScheduledCouponListingFacet__factory,
+  NominalValue__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { ScheduledSnapshot } from "@domain/context/security/ScheduledSnapshot";
 import { VotingRights } from "@domain/context/equity/VotingRights";
@@ -1415,7 +1417,6 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting actionContentHashExists for ${contentHash} for the security: ${address.toString()}`);
     return await this.connect(CorporateActionsFacet__factory, address.toString()).actionContentHashExists(contentHash);
   }
-
   async getRate(address: EvmAddress): Promise<[bigint, number]> {
       const result = await this.connect(FixedRate__factory, address.toString()).getRate();
       return [result.rate_, Number(result.decimals_)];
@@ -1473,6 +1474,21 @@ export class RPCQueryAdapter {
 
     async getScheduledCouponListing(address: EvmAddress, pageIndex: number, pageLength: number): Promise<any> {
       LogService.logTrace(`Getting scheduled coupon listing for security: ${address.toString()}`);
-      return await this.connect(ScheduledCouponListingFacet__factory, address.toString()).getScheduledCouponListing(pageIndex, pageLength);
+      return await this.connect(ScheduledCouponListingFacet__factory, address.toString()).getScheduledCouponListing(
+        pageIndex,
+        pageLength,
+      );
+    }
+
+    async getNominalValue(address: EvmAddress): Promise<BigDecimal> {
+      LogService.logTrace(`Getting nominal value for security: ${address.toString()}`);
+      const result = await this.connect(NominalValue__factory, address.toString()).getNominalValue();
+      return new BigDecimal(result.toString());
+    }
+
+    async getNominalValueDecimals(address: EvmAddress): Promise<number> {
+      LogService.logTrace(`Getting nominal value decimals for security: ${address.toString()}`);
+      const result = await this.connect(NominalValue__factory, address.toString()).getNominalValueDecimals();
+      return Number(result);
     }
 }
