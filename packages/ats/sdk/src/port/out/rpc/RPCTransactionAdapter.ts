@@ -13,6 +13,7 @@ import {
   CANCEL_VOTING_EVENT,
   EVM_ZERO_ADDRESS,
   GAS,
+  NOMINAL_VALUE_SET_EVENT,
   SET_COUPON_EVENT,
   SET_DIVIDEND_EVENT,
   SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
@@ -97,6 +98,7 @@ import {
   SsiManagementFacet__factory,
   TransferAndLockFacet__factory,
   TREXFactoryAts__factory,
+  NominalValue__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { ContractId } from "@hiero-ledger/sdk";
 import EventService from "@service/event/EventService";
@@ -2716,6 +2718,22 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       "addKpiData",
       [date, value, project.toString()],
       GAS.ADD_KPI_DATA,
+    );
+  }
+
+  async setNominalValue(
+    security: EvmAddress,
+    nominalValue: string,
+    nominalValueDecimals: number,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Setting nominal value for security: ${security.toString()}`);
+
+    return this.executeTransaction(
+      NominalValue__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "setNominalValue",
+      [nominalValue, nominalValueDecimals],
+      GAS.SET_NOMINAL_VALUE,
+      NOMINAL_VALUE_SET_EVENT,
     );
   }
 

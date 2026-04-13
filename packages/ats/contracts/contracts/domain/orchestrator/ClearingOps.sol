@@ -3,10 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ClearingStorageWrapper } from "../asset/ClearingStorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";
-import { ERC1594StorageWrapper } from "../asset/ERC1594StorageWrapper.sol";
 import { TokenCoreOps } from "./TokenCoreOps.sol";
-import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
-import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
@@ -14,9 +11,10 @@ import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
 import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
 import { ThirdPartyType } from "../asset/types/ThirdPartyType.sol";
 import { HoldOps } from "./HoldOps.sol";
-import { _checkNounceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
+import { HoldOps } from "./HoldOps.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 

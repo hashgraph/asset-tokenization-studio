@@ -6,7 +6,6 @@ import { IERC3643Operations } from "./IERC3643Operations.sol";
 import { IERC1644 } from "../ERC1400/ERC1644/IERC1644.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
-import { CapStorageWrapper } from "../../../domain/core/CapStorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../../domain/asset/ERC1594StorageWrapper.sol";
 import { TokenCoreOps } from "../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";

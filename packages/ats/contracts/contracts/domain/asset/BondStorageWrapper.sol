@@ -16,6 +16,7 @@ import { IBond } from "../../facets/layer_2/bond/IBond.sol";
 import { IBondTypes } from "../../facets/layer_2/bond/IBondTypes.sol";
 import { InterestRateStorageWrapper } from "./InterestRateStorageWrapper.sol";
 import { KpiLinkedRateLib } from "./KpiLinkedRateLib.sol";
+import { NominalValueStorageWrapper } from "./nominalValue/NominalValueStorageWrapper.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
@@ -23,39 +24,31 @@ import { SustainabilityPerformanceTargetRateLib } from "./SustainabilityPerforma
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { _BOND_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 
+/// @title Bond Storage Wrapper
+/// @notice Library for managing Bond token storage operations.
+/// @dev Provides structured access to BondDataStorage with migration support for NominalValue.
 library BondStorageWrapper {
     struct BondDataStorage {
         bytes3 currency;
-        uint256 nominalValue;
+        /// @deprecated Kept for storage layout compatibility. Use NominalValueStorageWrapper instead.
+        // solhint-disable-next-line var-name-mixedcase
+        uint256 DEPRECATED_nominalValue;
         uint256 startingDate;
         uint256 maturityDate;
         bool initialized;
-        uint8 nominalValueDecimals;
+        /// @deprecated Kept for storage layout compatibility. Use NominalValueStorageWrapper instead.
+        // solhint-disable-next-line var-name-mixedcase
+        uint8 DEPRECATED_nominalValueDecimals;
         uint256[] couponsOrderedListByIds;
     }
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_bond(IBondTypes.BondDetailsData calldata bondDetailsData) internal {
-        BondDataStorage storage bs = bondStorage();
+        BondDataStorage storage bs = _bondStorage();
         bs.initialized = true;
-        storeBondDetails(
-            IBondTypes.BondDetailsData({
-                currency: bondDetailsData.currency,
-                nominalValue: bondDetailsData.nominalValue,
-                nominalValueDecimals: bondDetailsData.nominalValueDecimals,
-                startingDate: bondDetailsData.startingDate,
-                maturityDate: bondDetailsData.maturityDate
-            })
-        );
-    }
-
-    function storeBondDetails(IBondTypes.BondDetailsData memory bondDetails) internal {
-        BondDataStorage storage bs = bondStorage();
-        bs.currency = bondDetails.currency;
-        bs.nominalValue = bondDetails.nominalValue;
-        bs.nominalValueDecimals = bondDetails.nominalValueDecimals;
-        bs.startingDate = bondDetails.startingDate;
-        bs.maturityDate = bondDetails.maturityDate;
+        bs.currency = bondDetailsData.currency;
+        bs.startingDate = bondDetailsData.startingDate;
+        bs.maturityDate = bondDetailsData.maturityDate;
     }
 
     function setCoupon(
@@ -97,11 +90,11 @@ library BondStorageWrapper {
     }
 
     function setMaturityDate(uint256 maturityDate) internal {
-        bondStorage().maturityDate = maturityDate;
+        _bondStorage().maturityDate = maturityDate;
     }
 
     function addToCouponsOrderedList(uint256 couponID) internal {
-        bondStorage().couponsOrderedListByIds.push(couponID);
+        _bondStorage().couponsOrderedListByIds.push(couponID);
     }
 
     function updateCouponRate(
@@ -120,19 +113,42 @@ library BondStorageWrapper {
         );
     }
 
+    /// @dev DEPRECATED – MIGRATION: Remove this function and the DEPRECATED_ fields from
+    /// BondDataStorage once all legacy tokens have been migrated.
+    function clearNominalValue() internal {
+        BondDataStorage storage $ = _bondStorage();
+        $.DEPRECATED_nominalValue = 0;
+        $.DEPRECATED_nominalValueDecimals = 0;
+    }
+
+    // This is for testing only
+    function setDeprecatedNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) internal {
+        BondDataStorage storage $ = _bondStorage();
+        $.DEPRECATED_nominalValue = _nominalValue;
+        $.DEPRECATED_nominalValueDecimals = _nominalValueDecimals;
+    }
+
+    function getDeprecatedNominalValue() internal view returns (uint256 nominalValue_) {
+        nominalValue_ = _bondStorage().DEPRECATED_nominalValue;
+    }
+
+    function getDeprecatedNominalValueDecimals() internal view returns (uint8 nominalValueDecimals_) {
+        nominalValueDecimals_ = _bondStorage().DEPRECATED_nominalValueDecimals;
+    }
+
     function getBondDetails() internal view returns (IBondTypes.BondDetailsData memory bondDetails_) {
-        BondDataStorage storage bs = bondStorage();
+        BondDataStorage storage bs = _bondStorage();
         bondDetails_ = IBondTypes.BondDetailsData({
             currency: bs.currency,
-            nominalValue: bs.nominalValue,
-            nominalValueDecimals: bs.nominalValueDecimals,
+            nominalValue: NominalValueStorageWrapper._getNominalValue(),
+            nominalValueDecimals: NominalValueStorageWrapper._getNominalValueDecimals(),
             startingDate: bs.startingDate,
             maturityDate: bs.maturityDate
         });
     }
 
     function getMaturityDate() internal view returns (uint256 maturityDate_) {
-        return bondStorage().maturityDate;
+        return _bondStorage().maturityDate;
     }
 
     function getCoupon(
@@ -270,7 +286,7 @@ library BondStorageWrapper {
     }
 
     function isBondInitialized() internal view returns (bool) {
-        return bondStorage().initialized;
+        return _bondStorage().initialized;
     }
 
     function getCouponFromOrderedListAt(uint256 pos) internal view returns (uint256 couponID_) {
@@ -278,7 +294,7 @@ library BondStorageWrapper {
 
         uint256 actualOrderedListLengthTotal = getCouponsOrderedListTotal();
 
-        if (pos < actualOrderedListLengthTotal) return bondStorage().couponsOrderedListByIds[pos];
+        if (pos < actualOrderedListLengthTotal) return _bondStorage().couponsOrderedListByIds[pos];
 
         return
             ScheduledTasksStorageWrapper.getScheduledCouponListingIdAtIndex(
@@ -316,7 +332,7 @@ library BondStorageWrapper {
     }
 
     function getCouponsOrderedListTotal() internal view returns (uint256 total_) {
-        return bondStorage().couponsOrderedListByIds.length;
+        return _bondStorage().couponsOrderedListByIds.length;
     }
 
     function getPreviousCouponInOrderedList(uint256 couponID) internal view returns (uint256 previousCouponID_) {
@@ -337,7 +353,7 @@ library BondStorageWrapper {
         if (maturityDate <= getMaturityDate()) revert IBondTypes.BondMaturityDateWrong();
     }
 
-    function bondStorage() internal pure returns (BondDataStorage storage bondData_) {
+    function _bondStorage() private pure returns (BondDataStorage storage bondData_) {
         bytes32 position = _BOND_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {

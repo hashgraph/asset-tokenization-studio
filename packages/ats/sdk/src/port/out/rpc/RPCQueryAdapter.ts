@@ -62,6 +62,7 @@ import {
   Kpis__factory,
   KpiLinkedRate__factory,
   ScheduledCouponListingFacet__factory,
+  NominalValue__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { ScheduledSnapshot } from "@domain/context/security/ScheduledSnapshot";
 import { VotingRights } from "@domain/context/equity/VotingRights";
@@ -1554,5 +1555,17 @@ export class RPCQueryAdapter {
       pageIndex,
       pageLength,
     );
+  }
+
+  async getNominalValue(address: EvmAddress): Promise<BigDecimal> {
+    LogService.logTrace(`Getting nominal value for security: ${address.toString()}`);
+    const result = await this.connect(NominalValue__factory, address.toString()).getNominalValue();
+    return new BigDecimal(result.toString());
+  }
+
+  async getNominalValueDecimals(address: EvmAddress): Promise<number> {
+    LogService.logTrace(`Getting nominal value decimals for security: ${address.toString()}`);
+    const result = await this.connect(NominalValue__factory, address.toString()).getNominalValueDecimals();
+    return Number(result);
   }
 }
