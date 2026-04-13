@@ -9,10 +9,7 @@ import {
 } from "../../../constants/values.sol";
 import { IEquity } from "./IEquity.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
-import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateActionsStorageWrapper.sol";
-import { AdjustBalancesStorageWrapper } from "../../../domain/asset/AdjustBalancesStorageWrapper.sol";
-import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";
-import { EquityStorageWrapper, EquityDataStorage } from "../../../domain/asset/EquityStorageWrapper.sol";
+import { EquityStorageWrapper } from "../../../domain/asset/EquityStorageWrapper.sol";
 
 abstract contract Equity is IEquity, Modifiers {
     function setDividends(
@@ -196,8 +193,6 @@ abstract contract Equity is IEquity, Modifiers {
 
     // solhint-disable-next-line func-name-mixedcase
     function _initializeEquity(EquityDetailsData calldata _equityDetailsData) internal {
-        EquityDataStorage storage equityStorage = EquityStorageWrapper.equityStorage();
-        equityStorage.initialized = true;
-        EquityStorageWrapper.storeEquityDetails(_equityDetailsData);
+        EquityStorageWrapper.initializeEquityDetails(_equityDetailsData);
     }
 }

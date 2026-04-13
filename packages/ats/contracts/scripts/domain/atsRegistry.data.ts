@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-09T10:43:08.466Z
- * Facets: 68
+ * Generated: 2026-04-09T12:58:10.606Z
+ * Facets: 69
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -66,6 +66,7 @@ import {
   KpisSustainabilityPerformanceTargetRateFacet__factory,
   KycFacet__factory,
   LockFacet__factory,
+  NominalValueFacet__factory,
   NoncesFacet__factory,
   PauseFacet__factory,
   ProceedRecipientsFacet__factory,
@@ -9192,6 +9193,80 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) => new LockFacetTimeTravel__factory(signer),
   },
 
+  NominalValueFacet: {
+    name: "NominalValueFacet",
+    resolverKey: {
+      name: "_NOMINAL_VALUE_RESOLVER_KEY",
+      value: "0x48903d4da8b1f0a5e9a9874be74ec5d2f8043d4d5b65cc093173c3dae103df8f",
+    },
+    inheritance: ["NominalValue", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "getNominalValue",
+        signature: { full: "function getNominalValue() view returns (uint256)", canonical: "getNominalValue()" },
+        selector: "0xbd4ff0a9",
+      },
+      {
+        name: "getNominalValueDecimals",
+        signature: {
+          full: "function getNominalValueDecimals() view returns (uint8)",
+          canonical: "getNominalValueDecimals()",
+        },
+        selector: "0x27e4bb51",
+      },
+      {
+        name: "initialize_NominalValue",
+        signature: {
+          full: "function initialize_NominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals)",
+          canonical: "initialize_NominalValue(uint256,uint8)",
+        },
+        selector: "0x0c0e65af",
+      },
+      {
+        name: "setNominalValue",
+        signature: {
+          full: "function setNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals)",
+          canonical: "setNominalValue(uint256,uint8)",
+        },
+        selector: "0x40ba1a0d",
+      },
+    ],
+    events: [
+      {
+        name: "NominalValueSet",
+        signature: {
+          full: "event NominalValueSet(address indexed operator, uint256 nominalValue, uint8 nominalValueDecimals)",
+          canonical: "NominalValueSet(address,uint256,uint8)",
+        },
+        topic0: "0x82c69cdf3dea5ac004c2c46c4184c1f5e39bc3268e2b12d3ed05a03a96706f3a",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRole",
+        signature: {
+          full: "error AccountHasNoRole(address account, bytes32 role)",
+          canonical: "AccountHasNoRole(address,bytes32)",
+        },
+        selector: "0xa1180aad",
+      },
+      {
+        name: "AlreadyInitialized",
+        signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
+        selector: "0x0dc149f0",
+      },
+    ],
+    factory: (signer) => new NominalValueFacet__factory(signer),
+  },
+
   NoncesFacet: {
     name: "NoncesFacet",
     resolverKey: {
@@ -11420,7 +11495,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 68 as const;
+export const TOTAL_FACETS = 69 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -11974,6 +12049,11 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [],
   },
 
+  NominalValueStorageWrapper: {
+    name: "NominalValueStorageWrapper",
+    methods: [],
+  },
+
   NonceStorageWrapper: {
     name: "NonceStorageWrapper",
     methods: [],
@@ -12036,7 +12116,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 31 as const;
+export const TOTAL_STORAGE_WRAPPERS = 32 as const;
 
 /**
  * All role identifiers extracted from contracts.
@@ -12063,6 +12143,7 @@ export const ROLES = {
   _KYC_ROLE: "0x6fbd421e041603fa367357d79ffc3b2f9fd37a6fc4eec661aa5537a9ae75f93d",
   _LOCKER_ROLE: "0xd8aa8c6f92fe8ac3f3c0f88216e25f7c08b3a6c374b4452a04d200c29786ce88",
   _MATURITY_REDEEMER_ROLE: "0xa0d696902e9ed231892dc96649f0c62b808a1cb9dd1269e78e0adc1cc4b8358c",
+  _NOMINAL_VALUE_ROLE: "0x127c185a9f04723376575bc896cc0d3cf15a32dd0db17f01168dcac5d2de6102",
   _PAUSE_MANAGER_ROLE: "0xbc36fbd776e95c4811506a63b650c876b4159cb152d827a5f717968b67c69b84",
   _PAUSER_ROLE: "0x6f65556918c1422809d0d567462eafeb371be30159d74b38ac958dc58864faeb",
   _PROCEED_RECIPIENT_MANAGER_ROLE: "0xebc53fe99fea28c7aa9476a714959af5b931f34a8a8734365ec63113198d512f",
@@ -12077,4 +12158,4 @@ export const ROLES = {
 /**
  * Total number of unique roles in the registry.
  */
-export const TOTAL_ROLES = 30 as const;
+export const TOTAL_ROLES = 31 as const;

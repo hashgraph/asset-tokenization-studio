@@ -83,6 +83,7 @@ const BOND_FACETS = [
   // Advanced Features
   "AdjustBalancesFacet",
   "LockFacet",
+  "NominalValueFacet",
   "ProceedRecipientsFacet",
   "ProtectedPartitionsFacet",
   "ScheduledBalanceAdjustmentsFacet",

@@ -5,7 +5,6 @@ import { IERC20 } from "./IERC20.sol";
 import { _DEFAULT_PARTITION } from "../../../../constants/values.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
 import { ERC20StorageWrapper } from "../../../../domain/asset/ERC20StorageWrapper.sol";
-import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 

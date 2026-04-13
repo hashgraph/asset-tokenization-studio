@@ -51,12 +51,8 @@ interface TRexIBusinessLogicResolver is IDiamondCutManager {
 
     error BusinessLogicVersionDoesNotExist(uint256 version);
     error BusinessLogicKeyDuplicated(bytes32 businessLogicKey);
+    error BusinessLogicKeyMismatch(address implementation, bytes32 actualKey, bytes32 expectedKey);
     error ZeroKeyNotValidForBusinessLogic();
-    error BusinessLogicKeyMismatch(
-        address providedBusinessLogicAddress,
-        bytes32 providedBusinessLogicKey,
-        bytes32 actualBusinessLogicKey
-    );
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_BusinessLogicResolver() external returns (bool success_);

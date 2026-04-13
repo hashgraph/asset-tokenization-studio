@@ -6,7 +6,6 @@ import { IHoldTypes } from "./IHoldTypes.sol";
 import { IHoldManagement } from "./IHoldManagement.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
-import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { HoldStorageWrapper } from "../../../domain/asset/HoldStorageWrapper.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";

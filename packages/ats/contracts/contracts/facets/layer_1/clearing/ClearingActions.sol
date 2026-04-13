@@ -5,7 +5,6 @@ import { IClearingActions } from "./IClearingActions.sol";
 import { IClearingTypes } from "./IClearingTypes.sol";
 import { _CLEARING_VALIDATOR_ROLE, _CLEARING_ROLE } from "../../../constants/roles.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
-import { ERC1594StorageWrapper } from "../../../domain/asset/ERC1594StorageWrapper.sol";
 import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWrapper.sol";
 import { ClearingOps } from "../../../domain/orchestrator/ClearingOps.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
