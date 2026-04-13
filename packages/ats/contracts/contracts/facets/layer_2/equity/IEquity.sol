@@ -52,6 +52,7 @@ interface IEquity {
         uint256 executionDate;
         uint8 decimals;
         bool recordDateReached;
+        bool isDisabled;
     }
 
     struct DividendAmountFor {
@@ -66,6 +67,7 @@ interface IEquity {
         bytes data;
         uint8 decimals;
         bool recordDateReached;
+        bool isDisabled;
     }
 
     struct ScheduledBalanceAdjustment {

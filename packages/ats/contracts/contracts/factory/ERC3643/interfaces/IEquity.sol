@@ -57,6 +57,7 @@ interface TRexIEquity {
         uint256 executionDate;
         uint8 decimals;
         bool recordDateReached;
+        bool isDisabled;
     }
 
     struct DividendAmountFor {
@@ -71,6 +72,7 @@ interface TRexIEquity {
         bytes data;
         uint8 decimals;
         bool recordDateReached;
+        bool isDisabled;
     }
 
     struct ScheduledBalanceAdjustment {

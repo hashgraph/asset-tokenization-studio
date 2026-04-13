@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-10T08:44:19.550Z
+ * Generated: 2026-04-13T09:43:06.261Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -4280,7 +4280,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getDividendFor",
         signature: {
-          full: "function getDividendFor(uint256 _dividendID, address _account) view returns ((uint256 tokenBalance, uint256 amount, uint8 amountDecimals, uint256 recordDate, uint256 executionDate, uint8 decimals, bool recordDateReached) dividendFor_)",
+          full: "function getDividendFor(uint256 _dividendID, address _account) view returns ((uint256 tokenBalance, uint256 amount, uint8 amountDecimals, uint256 recordDate, uint256 executionDate, uint8 decimals, bool recordDateReached, bool isDisabled) dividendFor_)",
           canonical: "getDividendFor(uint256,address)",
         },
         selector: "0x85f196b0",
@@ -4384,7 +4384,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getVotingFor",
         signature: {
-          full: "function getVotingFor(uint256 _voteID, address _account) view returns ((uint256 tokenBalance, uint256 recordDate, bytes data, uint8 decimals, bool recordDateReached) votingFor_)",
+          full: "function getVotingFor(uint256 _voteID, address _account) view returns ((uint256 tokenBalance, uint256 recordDate, bytes data, uint8 decimals, bool recordDateReached, bool isDisabled) votingFor_)",
           canonical: "getVotingFor(uint256,address)",
         },
         selector: "0x7633eccf",
