@@ -269,7 +269,13 @@ export {
 } from "./utils/logging";
 export type { LoggerConfig } from "./utils/logging";
 
-export { isTimeTravelFacet } from "./utils/naming";
+export {
+  resolveContractName,
+  getTimeTravelVariant,
+  hasTimeTravelVariant,
+  getBaseContractName,
+  isTimeTravelVariant,
+} from "./utils/naming";
 
 export { fetchHederaContractId, getMirrorNodeUrl, isHederaNetwork } from "./utils/hedera";
 

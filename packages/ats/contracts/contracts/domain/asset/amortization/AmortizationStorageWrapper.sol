@@ -208,7 +208,7 @@ library AmortizationStorageWrapper {
             _amortizationID - 1
         );
 
-        (, , bytes memory data) = CorporateActionsStorageWrapper.getCorporateAction(corporateActionId_);
+        (, , bytes memory data, ) = CorporateActionsStorageWrapper.getCorporateAction(corporateActionId_);
         assert(data.length > 0);
         registeredAmortization_.amortization = abi.decode(data, (IAmortization.Amortization));
         registeredAmortization_.snapshotId = CorporateActionsStorageWrapper.getUintResultAt(

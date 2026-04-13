@@ -6,6 +6,7 @@ import { KPI_KPIS_ADD_COUPON_DATE, KPI_KPIS_SET_MINDATE } from "../../constants/
 import { IKpis } from "../../facets/layer_2/kpi/kpiLatest/IKpis.sol";
 import { Checkpoints } from "../../infrastructure/utils/Checkpoints.sol";
 import { BondStorageWrapper } from "./BondStorageWrapper.sol";
+import { IBondTypes } from "../../facets/layer_2/bond/IBondTypes.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 
@@ -55,7 +56,8 @@ library KpisStorageWrapper {
     function addToCouponsOrderedList(uint256 couponID) internal {
         BondStorageWrapper.addToCouponsOrderedList(couponID);
 
-        uint256 lastFixingDate = BondStorageWrapper.getCoupon(couponID).coupon.fixingDate;
+        (IBondTypes.RegisteredCoupon memory registeredCoupon, , ) = BondStorageWrapper.getCoupon(couponID);
+        uint256 lastFixingDate = registeredCoupon.coupon.fixingDate;
 
         _checkUnexpectedError(lastFixingDate < kpisDataStorage().minDate, KPI_KPIS_ADD_COUPON_DATE);
 
@@ -111,10 +113,10 @@ library KpisStorageWrapper {
 
         if (total == 0) return minDate_;
 
-        uint256 lastFixingDate = BondStorageWrapper
-            .getCoupon(BondStorageWrapper.getCouponFromOrderedListAt(total - 1))
-            .coupon
-            .fixingDate;
+        (IBondTypes.RegisteredCoupon memory registeredCoupon, , ) = BondStorageWrapper.getCoupon(
+            BondStorageWrapper.getCouponFromOrderedListAt(total - 1)
+        );
+        uint256 lastFixingDate = registeredCoupon.coupon.fixingDate;
 
         _checkUnexpectedError(lastFixingDate < minDate_, KPI_KPIS_SET_MINDATE);
 

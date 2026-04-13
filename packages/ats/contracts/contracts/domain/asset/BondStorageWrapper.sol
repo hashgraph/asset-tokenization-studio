@@ -12,6 +12,7 @@ import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { IBond } from "../../facets/layer_2/bond/IBond.sol";
 import { IBondTypes } from "../../facets/layer_2/bond/IBondTypes.sol";
 import { InterestRateStorageWrapper } from "./InterestRateStorageWrapper.sol";
 import { KpiLinkedRateLib } from "./KpiLinkedRateLib.sol";
@@ -70,6 +71,17 @@ library BondStorageWrapper {
         emit IBondTypes.CouponSet(corporateActionId_, couponID_, EvmAccessors.getMsgSender(), newCoupon);
     }
 
+    function cancelCoupon(uint256 couponId) internal returns (bool success_) {
+        IBondTypes.RegisteredCoupon memory registeredCoupon;
+        bytes32 corporateActionId;
+        (registeredCoupon, corporateActionId, ) = getCoupon(couponId);
+        if (registeredCoupon.coupon.executionDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
+            revert IBond.CouponAlreadyExecuted(corporateActionId, couponId);
+        }
+        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
+        success_ = true;
+    }
+
     function initCoupon(bytes32 actionId, IBondTypes.Coupon memory newCoupon) internal {
         if (actionId == bytes32(0)) {
             revert IBondTypes.CouponCreationFailed();
@@ -123,26 +135,36 @@ library BondStorageWrapper {
         return bondStorage().maturityDate;
     }
 
-    function getCoupon(uint256 couponID) internal view returns (IBondTypes.RegisteredCoupon memory registeredCoupon_) {
-        bytes32 actionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
+    function getCoupon(
+        uint256 couponID
+    )
+        internal
+        view
+        returns (IBondTypes.RegisteredCoupon memory registeredCoupon_, bytes32 corporateActionId_, bool isDisabled_)
+    {
+        corporateActionId_ = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
             COUPON_CORPORATE_ACTION_TYPE,
             couponID - 1
         );
 
-        (, , bytes memory data) = CorporateActionsStorageWrapper.getCorporateAction(actionId);
+        bytes memory data;
+        (, , data, isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(corporateActionId_);
 
         if (data.length > 0) {
             registeredCoupon_.coupon = abi.decode(data, (IBondTypes.Coupon));
         }
 
-        registeredCoupon_.snapshotId = CorporateActionsStorageWrapper.getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
+        registeredCoupon_.snapshotId = CorporateActionsStorageWrapper.getUintResultAt(
+            corporateActionId_,
+            SNAPSHOT_RESULT_ID
+        );
 
         if (
             InterestRateStorageWrapper.isFixedRateInitialized() ||
             registeredCoupon_.coupon.fixingDate == 0 ||
             registeredCoupon_.coupon.rateStatus == IBondTypes.RateCalculationStatus.SET ||
             registeredCoupon_.coupon.fixingDate > TimeTravelStorageWrapper.getBlockTimestamp()
-        ) return registeredCoupon_;
+        ) return (registeredCoupon_, corporateActionId_, isDisabled_);
 
         // Calculate SPT rate on-the-fly if needed (similar to _getCouponAdjustedAt pattern in inheritance-based impl)
         // This ensures the rate is available when getCoupon is called, not just during scheduled task triggers
@@ -155,7 +177,7 @@ library BondStorageWrapper {
                 registeredCoupon_.coupon
             );
             registeredCoupon_.coupon.rateStatus = IBondTypes.RateCalculationStatus.SET;
-            return registeredCoupon_;
+            return (registeredCoupon_, corporateActionId_, isDisabled_);
         }
         // Calculate KPI Linked rate on-the-fly if needed
         (registeredCoupon_.coupon.rate, registeredCoupon_.coupon.rateDecimals) = KpiLinkedRateLib
@@ -167,9 +189,10 @@ library BondStorageWrapper {
         uint256 couponID,
         address account
     ) internal view returns (IBondTypes.CouponFor memory couponFor_) {
-        IBondTypes.RegisteredCoupon memory registeredCoupon = getCoupon(couponID);
+        (IBondTypes.RegisteredCoupon memory registeredCoupon, , bool isDisabled) = getCoupon(couponID);
 
         couponFor_.coupon = registeredCoupon.coupon;
+        couponFor_.isDisabled = isDisabled;
 
         if (registeredCoupon.coupon.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return couponFor_;
 
@@ -225,7 +248,7 @@ library BondStorageWrapper {
         uint256 pageIndex,
         uint256 pageLength
     ) internal view returns (address[] memory holders_) {
-        IBondTypes.RegisteredCoupon memory registeredCoupon = getCoupon(couponID);
+        (IBondTypes.RegisteredCoupon memory registeredCoupon, , ) = getCoupon(couponID);
 
         if (registeredCoupon.coupon.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return holders_;
 
@@ -236,7 +259,7 @@ library BondStorageWrapper {
     }
 
     function getTotalCouponHolders(uint256 couponID) internal view returns (uint256) {
-        IBondTypes.RegisteredCoupon memory registeredCoupon = getCoupon(couponID);
+        (IBondTypes.RegisteredCoupon memory registeredCoupon, , ) = getCoupon(couponID);
 
         if (registeredCoupon.coupon.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return 0;
 

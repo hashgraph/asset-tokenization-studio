@@ -28,7 +28,7 @@ export class GetDividendsForQueryHandler implements IQueryHandler<GetDividendsFo
       const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
       const targetEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddress(targetId);
 
-      const res = await this.queryAdapter.getDividendsFor(securityEvmAddress, targetEvmAddress, dividendId);
+      const res = await this.queryAdapter.getDividendFor(securityEvmAddress, targetEvmAddress, dividendId);
 
       return new GetDividendsForQueryResponse(res.tokenBalance, res.decimals);
     } catch (error) {

@@ -34,14 +34,7 @@ export const Header = () => {
                 {address}
               </MenuButton>
               <Dropdown w="180px">
-                <DropdownItem
-                  label={t("walletDisconnect")}
-                  icon={SignOut}
-                  onClick={() => {
-                    reset();
-                    window.location.reload();
-                  }}
-                />
+                <DropdownItem label={t("walletDisconnect")} icon={SignOut} onClick={() => reset()} />
               </Dropdown>
             </Menu>
           ) : (

@@ -172,7 +172,7 @@ describe("Bond KpiLinked Rate Tests", () => {
     couponID: number,
     accountAddress: string,
   ) {
-    const registeredCouponPostFixingDate = await bondReadFacet.getCoupon(couponID);
+    const [registeredCouponPostFixingDate] = await bondReadFacet.getCoupon(couponID);
     const couponForPostFixingDate = await bondReadFacet.getCouponFor(couponID, accountAddress);
     const couponAmountForPostFixingDate = await bondReadFacet.getCouponAmountFor(couponID, accountAddress);
 
@@ -285,7 +285,7 @@ describe("Bond KpiLinked Rate Tests", () => {
       const couponCount = await bondReadFacet.getCouponCount();
       expect(couponCount).to.equal(1);
 
-      const registeredCoupon = await bondReadFacet.getCoupon(1);
+      const [registeredCoupon] = await bondReadFacet.getCoupon(1);
       expect(registeredCoupon.coupon.recordDate).to.equal(couponRecordDateInSeconds);
       expect(registeredCoupon.coupon.executionDate).to.equal(couponExecutionDateInSeconds);
       expect(registeredCoupon.coupon.startDate).to.equal(couponStartDateInSeconds);
@@ -301,7 +301,7 @@ describe("Bond KpiLinked Rate Tests", () => {
 
       await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
 
-      const registeredCouponPreFixingDate = await bondReadFacet.getCoupon(1);
+      const [registeredCouponPreFixingDate] = await bondReadFacet.getCoupon(1);
       const couponForPreFixingDate = await bondReadFacet.getCouponFor(1, signer_A.address);
       const couponAmountForPreFixingDate = await bondReadFacet.getCouponAmountFor(1, signer_A.address);
 
@@ -517,6 +517,45 @@ describe("Bond KpiLinked Rate Tests", () => {
 
       await checkMinDates(originalFixingDate);
     });
+  });
+
+  it("GIVEN a cancelled coupon WHEN triggerScheduledCrossOrderedTasks executes THEN coupon is not added in ordered list", async () => {
+    const timestamp = await getDltTimestamp();
+
+    const coupon1 = {
+      recordDate: (timestamp + TIME_PERIODS_S.WEEK).toString(),
+      executionDate: (timestamp + TIME_PERIODS_S.WEEK * 2).toString(),
+      rate: 0,
+      rateDecimals: 0,
+      startDate: timestamp.toString(),
+      endDate: (timestamp + TIME_PERIODS_S.DAY * 7).toString(),
+      fixingDate: (timestamp + TIME_PERIODS_S.WEEK).toString(),
+      rateStatus: 0,
+    };
+
+    const coupon2 = {
+      recordDate: (timestamp + TIME_PERIODS_S.WEEK * 2).toString(),
+      executionDate: (timestamp + TIME_PERIODS_S.WEEK * 3).toString(),
+      rate: 0,
+      rateDecimals: 0,
+      startDate: timestamp.toString(),
+      endDate: (timestamp + TIME_PERIODS_S.WEEK * 2).toString(),
+      fixingDate: (timestamp + TIME_PERIODS_S.WEEK * 2).toString(),
+      rateStatus: 0,
+    };
+
+    await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(coupon1);
+    await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(coupon2);
+
+    await bondKpiLinkedRateFacet.connect(signer_A).cancelCoupon(1);
+
+    await timeTravelFacet.changeSystemTimestamp(timestamp + TIME_PERIODS_S.WEEK * 3);
+
+    await scheduledTasksFacet.connect(signer_A).triggerScheduledCrossOrderedTasks(100);
+
+    const orderedList = await bondReadFacet.getCouponsOrderedList(0, 10);
+    expect(orderedList).to.be.an("array").with.lengthOf(1);
+    expect(orderedList[0]).to.equal(2); // couponId 2 is the only one in the ordered list
   });
 
   describe("Bond Read - Ordered List", () => {

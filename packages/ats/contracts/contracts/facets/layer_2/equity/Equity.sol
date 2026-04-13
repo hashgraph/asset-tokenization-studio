@@ -13,9 +13,10 @@ import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateAc
 import { AdjustBalancesStorageWrapper } from "../../../domain/asset/AdjustBalancesStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { EquityStorageWrapper, EquityDataStorage } from "../../../domain/asset/EquityStorageWrapper.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract Equity is IEquity, Modifiers {
-    function setDividends(
+    function setDividend(
         Dividend calldata _newDividend
     )
         external
@@ -31,7 +32,7 @@ abstract contract Equity is IEquity, Modifiers {
         emit IEquity.DividendSet(
             corporateActionID,
             dividendID_,
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             _newDividend.recordDate,
             _newDividend.executionDate,
             _newDividend.amount,
@@ -51,7 +52,13 @@ abstract contract Equity is IEquity, Modifiers {
     {
         bytes32 corporateActionID;
         (corporateActionID, voteID_) = EquityStorageWrapper.setVoting(_newVoting);
-        emit IEquity.VotingSet(corporateActionID, voteID_, msg.sender, _newVoting.recordDate, _newVoting.data);
+        emit IEquity.VotingSet(
+            corporateActionID,
+            voteID_,
+            EvmAccessors.getMsgSender(),
+            _newVoting.recordDate,
+            _newVoting.data
+        );
     }
 
     function setScheduledBalanceAdjustment(
@@ -72,30 +79,57 @@ abstract contract Equity is IEquity, Modifiers {
         emit IEquity.ScheduledBalanceAdjustmentSet(
             corporateActionID,
             balanceAdjustmentID_,
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             _newBalanceAdjustment.executionDate,
             _newBalanceAdjustment.factor,
             _newBalanceAdjustment.decimals
         );
     }
 
+    function cancelDividend(
+        uint256 _dividendId
+    ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (bool success_) {
+        (success_) = EquityStorageWrapper.cancelDividend(_dividendId);
+        if (success_) {
+            emit IEquity.DividendCancelled(_dividendId, EvmAccessors.getMsgSender());
+        }
+    }
+
+    function cancelVoting(
+        uint256 _voteId
+    ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (bool success_) {
+        (success_) = EquityStorageWrapper.cancelVoting(_voteId);
+        if (success_) {
+            emit IEquity.VotingCancelled(_voteId, EvmAccessors.getMsgSender());
+        }
+    }
+
+    function cancelScheduledBalanceAdjustment(
+        uint256 _balanceAdjustmentId
+    ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (bool success_) {
+        (success_) = EquityStorageWrapper.cancelScheduledBalanceAdjustment(_balanceAdjustmentId);
+        if (success_) {
+            emit IEquity.ScheduledBalanceAdjustmentCancelled(_balanceAdjustmentId, EvmAccessors.getMsgSender());
+        }
+    }
+
     function getEquityDetails() external view override returns (EquityDetailsData memory equityDetailsData_) {
         return EquityStorageWrapper.getEquityDetails();
     }
 
-    function getDividends(
+    function getDividend(
         uint256 _dividendID
     )
         external
         view
         override
         onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1)
-        returns (RegisteredDividend memory registeredDividend_)
+        returns (RegisteredDividend memory registeredDividend_, bool isDisabled_)
     {
-        return EquityStorageWrapper.getDividends(_dividendID);
+        (registeredDividend_, , isDisabled_) = EquityStorageWrapper.getDividends(_dividendID);
     }
 
-    function getDividendsFor(
+    function getDividendFor(
         uint256 _dividendID,
         address _account
     )
@@ -144,9 +178,9 @@ abstract contract Equity is IEquity, Modifiers {
         view
         override
         onlyMatchingActionType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1)
-        returns (RegisteredVoting memory registeredVoting_)
+        returns (RegisteredVoting memory registeredVoting_, bool isDisabled_)
     {
-        return EquityStorageWrapper.getVoting(_voteID);
+        (registeredVoting_, , isDisabled_) = EquityStorageWrapper.getVoting(_voteID);
     }
 
     function getVotingFor(
@@ -185,9 +219,9 @@ abstract contract Equity is IEquity, Modifiers {
         view
         override
         onlyMatchingActionType(BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE, _balanceAdjustmentID - 1)
-        returns (ScheduledBalanceAdjustment memory balanceAdjustment_)
+        returns (ScheduledBalanceAdjustment memory balanceAdjustment_, bool isDisabled_)
     {
-        return EquityStorageWrapper.getScheduledBalanceAdjustment(_balanceAdjustmentID);
+        (balanceAdjustment_, , isDisabled_) = EquityStorageWrapper.getScheduledBalanceAdjustment(_balanceAdjustmentID);
     }
 
     function getScheduledBalanceAdjustmentCount() external view override returns (uint256 balanceAdjustmentCount_) {

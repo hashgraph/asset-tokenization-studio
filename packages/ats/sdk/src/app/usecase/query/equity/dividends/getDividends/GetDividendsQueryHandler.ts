@@ -23,7 +23,7 @@ export class GetDividendsQueryHandler implements IQueryHandler<GetDividendsQuery
       const { securityId, dividendId } = query;
 
       const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
-      const res = await this.queryAdapter.getDividends(securityEvmAddress, dividendId);
+      const res = await this.queryAdapter.getDividend(securityEvmAddress, dividendId);
 
       return Promise.resolve(new GetDividendsQueryResponse(res));
     } catch (error) {

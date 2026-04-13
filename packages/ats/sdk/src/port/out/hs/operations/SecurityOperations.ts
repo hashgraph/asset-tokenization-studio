@@ -56,6 +56,21 @@ export class SecurityOperations {
       GAS.SET_COUPON,
     );
   }
+  async cancelCoupon(
+    security: EvmAddress,
+    couponId: number,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(`Cancelling coupon: ${couponId} for bond: ${security}`);
+
+    return this.executor.executeContractCall(
+      securityId.toString(),
+      BondUSAFacet__factory.createInterface(),
+      "cancelCoupon",
+      [couponId],
+      GAS.CANCEL_COUPON,
+    );
+  }
 
   setRate(
     security: EvmAddress,
@@ -216,7 +231,7 @@ export class SecurityOperations {
     );
   }
 
-  async setDividends(
+  async setDividend(
     security: EvmAddress,
     recordDate: BigDecimal,
     executionDate: BigDecimal,
@@ -235,12 +250,25 @@ export class SecurityOperations {
     return this.executor.executeContractCall(
       securityId.toString(),
       EquityUSAFacet__factory.createInterface(),
-      "setDividends",
+      "setDividend",
       [dividend],
       GAS.SET_DIVIDENDS,
     );
   }
 
+  async cancelDividend(
+    security: EvmAddress,
+    dividendId: number,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    return this.executor.executeContractCall(
+      securityId.toString(),
+      EquityUSAFacet__factory.createInterface(),
+      "cancelDividend",
+      [dividendId],
+      GAS.CANCEL_DIVIDEND,
+    );
+  }
   async setVotingRights(
     security: EvmAddress,
     recordDate: BigDecimal,
@@ -258,6 +286,21 @@ export class SecurityOperations {
       "setVoting",
       [voting],
       GAS.SET_VOTING_RIGHTS,
+    );
+  }
+  async cancelVoting(
+    security: EvmAddress,
+    votingId: number,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(`Cancelling voting: ${votingId} for equity: ${security}`);
+
+    return this.executor.executeContractCall(
+      securityId.toString(),
+      EquityUSAFacet__factory.createInterface(),
+      "cancelVoting",
+      [votingId],
+      GAS.CANCEL_VOTING,
     );
   }
 
@@ -282,6 +325,20 @@ export class SecurityOperations {
       "setScheduledBalanceAdjustment",
       [scheduleBalanceAdjustment],
       GAS.SET_SCHEDULED_BALANCE_ADJUSTMENT,
+    );
+  }
+
+  async cancelScheduledBalanceAdjustment(
+    security: EvmAddress,
+    balanceAdjustmentId: number,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    return this.executor.executeContractCall(
+      securityId.toString(),
+      EquityUSAFacet__factory.createInterface(),
+      "cancelScheduledBalanceAdjustment",
+      [balanceAdjustmentId],
+      GAS.CANCEL_SCHEDULED_BALANCE_ADJUSTMENT,
     );
   }
 

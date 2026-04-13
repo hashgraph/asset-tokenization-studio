@@ -14,7 +14,9 @@ interface IBondRead is IBondTypes {
     /**
      * @notice Retrieves a registered coupon by its ID
      */
-    function getCoupon(uint256 _couponID) external view returns (IBondTypes.RegisteredCoupon memory registeredCoupon_);
+    function getCoupon(
+        uint256 _couponID
+    ) external view returns (IBondTypes.RegisteredCoupon memory registeredCoupon_, bool isDisabled_);
 
     /**
      * @notice Retrieves coupon information for a specific account and coupon ID

@@ -38,6 +38,7 @@ interface IBondTypes {
         uint8 decimals;
         bool recordDateReached;
         Coupon coupon;
+        bool isDisabled;
     }
 
     struct CouponAmountFor {

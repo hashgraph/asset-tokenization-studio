@@ -10,14 +10,15 @@ import {
   RoleRequest,
   Role,
   Equity,
-  SetDividendsRequest,
-  GetDividendsRequest,
+  SetDividendRequest,
+  GetDividendRequest,
   GetAllDividendsRequest,
   SetVotingRightsRequest,
   GetVotingRightsRequest,
   GetAllVotingRightsRequest,
-  GetDividendsForRequest,
+  GetDividendForRequest,
   GetVotingRightsForRequest,
+  CancelVotingRequest,
   SetScheduledBalanceAdjustmentRequest,
   PauseRequest,
   Security,
@@ -180,8 +181,8 @@ describe("🧪 Equity test", () => {
     const recordTimestamp = Math.ceil(new Date().getTime() / 1000) + 1000;
     const executionTimestamp = recordTimestamp + 1000;
 
-    await Equity.setDividends(
-      new SetDividendsRequest({
+    await Equity.setDividend(
+      new SetDividendRequest({
         securityId: equity.evmDiamondAddress!.toString(),
         amountPerUnitOfSecurity: amount,
         recordTimestamp: recordTimestamp.toString(),
@@ -189,8 +190,8 @@ describe("🧪 Equity test", () => {
       }),
     );
 
-    const dividend = await Equity.getDividends(
-      new GetDividendsRequest({
+    const dividend = await Equity.getDividend(
+      new GetDividendRequest({
         securityId: equity.evmDiamondAddress!.toString(),
         dividendId: 1,
       }),
@@ -202,8 +203,8 @@ describe("🧪 Equity test", () => {
       }),
     );
 
-    const dividendFor = await Equity.getDividendsFor(
-      new GetDividendsForRequest({
+    const dividendFor = await Equity.getDividendFor(
+      new GetDividendForRequest({
         securityId: equity.evmDiamondAddress!.toString(),
         targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
         dividendId: 1,
@@ -314,6 +315,7 @@ describe("🧪 Equity test", () => {
     expect(scheduledBalanceAdjustment.executionDate.getTime() / 1000).toEqual(recordTimestamp);
     expect(scheduledBalanceAdjustment.factor).toEqual(factor);
     expect(scheduledBalanceAdjustment.decimals).toEqual(decimals.toString());
+    expect(scheduledBalanceAdjustment.isDisabled).toEqual(false);
 
     await Role.revokeRole(
       new RoleRequest({
@@ -364,6 +366,134 @@ describe("🧪 Equity test", () => {
           executionDate: recordTimestamp.toString(),
           factor,
           decimals: decimals.toString(),
+        }),
+      );
+    } catch (error) {
+      thrownError = error;
+    }
+    expect(thrownError).toBeInstanceOf(Error);
+
+    await Security.unpause(
+      new PauseRequest({
+        securityId: equity.evmDiamondAddress!,
+      }),
+    );
+  }, 600_000);
+
+  it("Should cancel a scheduled balance adjustment correctly", async () => {
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CORPORATEACTIONS_ROLE,
+      }),
+    );
+
+    await Equity.setScheduledBalanceAdjustment(
+      new SetScheduledBalanceAdjustmentRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        executionDate: recordTimestamp.toString(),
+        factor,
+        decimals: decimals.toString(),
+      }),
+    );
+
+    const result = await Equity.cancelScheduledBalanceAdjustment(
+      new GetScheduledBalanceAdjustmentRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        balanceAdjustmentId: 1,
+      }),
+    );
+
+    expect(result.payload).toEqual(true);
+
+    await Role.revokeRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CORPORATEACTIONS_ROLE,
+      }),
+    );
+  }, 60_000);
+
+  it("Should return error if try to cancel a scheduled balance adjust and do not have the role", async () => {
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CORPORATEACTIONS_ROLE,
+      }),
+    );
+
+    await Equity.setScheduledBalanceAdjustment(
+      new SetScheduledBalanceAdjustmentRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        executionDate: recordTimestamp.toString(),
+        factor,
+        decimals: decimals.toString(),
+      }),
+    );
+
+    await Role.revokeRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CORPORATEACTIONS_ROLE,
+      }),
+    );
+
+    let thrownError;
+    try {
+      await Equity.cancelScheduledBalanceAdjustment(
+        new GetScheduledBalanceAdjustmentRequest({
+          securityId: equity.evmDiamondAddress!.toString(),
+          balanceAdjustmentId: 1,
+        }),
+      );
+    } catch (error) {
+      thrownError = error;
+    }
+    expect(thrownError).toBeInstanceOf(Error);
+  }, 600_000);
+
+  it("Should return error if try to cancel a scheduled balance adjust and the token is paused", async () => {
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CORPORATEACTIONS_ROLE,
+      }),
+    );
+
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._PAUSER_ROLE,
+      }),
+    );
+
+    await Equity.setScheduledBalanceAdjustment(
+      new SetScheduledBalanceAdjustmentRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        executionDate: recordTimestamp.toString(),
+        factor,
+        decimals: decimals.toString(),
+      }),
+    );
+
+    await Security.pause(
+      new PauseRequest({
+        securityId: equity.evmDiamondAddress!,
+      }),
+    );
+
+    let thrownError;
+    try {
+      const result = await Equity.cancelScheduledBalanceAdjustment(
+        new GetScheduledBalanceAdjustmentRequest({
+          securityId: equity.evmDiamondAddress!.toString(),
+          balanceAdjustmentId: 1,
         }),
       );
     } catch (error) {
@@ -437,6 +567,47 @@ describe("🧪 Equity test", () => {
     expect(allScheduledAdjustments[0].factor).toEqual(factor);
     expect(allScheduledAdjustments[0].decimals).toEqual(decimals);
     expect(allScheduledAdjustments[0].executionDate.getTime() / 1000).toEqual(executionTimestamp);
+    expect(allScheduledAdjustments[0].isDisabled).toEqual(false);
+
+    await Role.revokeRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CORPORATEACTIONS_ROLE,
+      }),
+    );
+  }, 60_000);
+
+  it("cancelVoting", async () => {
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CORPORATEACTIONS_ROLE,
+      }),
+    );
+
+    const recordTimestamp = Math.ceil(new Date().getTime() / 1000) + 1000;
+    const data = "0x0123456789ABCDEF";
+
+    const { payload: votingId } = await Equity.setVotingRights(
+      new SetVotingRightsRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        recordTimestamp: recordTimestamp.toString(),
+        data: data,
+      }),
+    );
+
+    const result = await Equity.cancelVoting(
+      new CancelVotingRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        votingId,
+      }),
+    );
+
+    expect(result).toHaveProperty("transactionId");
+    expect(typeof result.transactionId).toBe("string");
+    expect(result.payload).toBe(true);
 
     await Role.revokeRole(
       new RoleRequest({
