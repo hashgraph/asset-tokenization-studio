@@ -860,10 +860,13 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      * @returns The coupon or dividend execution date
      */
     function _getDistributionExecutionDate(address _asset, uint256 _distributionID) private view returns (uint256) {
-        return
-            (_lifeCycleCashFlowStorage().assetType == ILifeCycleCashFlow.AssetType.Equity)
-                ? IEquity(_asset).getDividends(_distributionID).dividend.executionDate
-                : IBondRead(_asset).getCoupon(_distributionID).coupon.executionDate;
+        if (_lifeCycleCashFlowStorage().assetType == ILifeCycleCashFlow.AssetType.Equity) {
+            (IEquity.RegisteredDividend memory registeredDividend_, ) = IEquity(_asset).getDividend(_distributionID);
+            return registeredDividend_.dividend.executionDate;
+        } else {
+            (IBondRead.RegisteredCoupon memory registeredCoupon_, ) = IBondRead(_asset).getCoupon(_distributionID);
+            return registeredCoupon_.coupon.executionDate;
+        }
     }
 
     /*

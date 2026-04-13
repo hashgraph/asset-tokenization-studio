@@ -8,37 +8,37 @@ import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateAc
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract CorporateActions is ICorporateActions, Modifiers {
-    function addCorporateAction(
-        bytes32 _actionType,
-        bytes memory _data
+    function getCorporateAction(
+        bytes32 _corporateActionId
     )
         external
+        view
         override
-        onlyUnpaused
-        onlyRole(_CORPORATE_ACTION_ROLE)
-        returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_)
+        returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_, bool isDisabled_)
     {
-        (corporateActionId_, corporateActionIdByType_) = CorporateActionsStorageWrapper.addCorporateAction(
-            _actionType,
-            _data
-        );
-
-        if (corporateActionId_ == bytes32(0)) {
-            revert DuplicatedCorporateAction(_actionType, _data);
-        }
-        emit CorporateActionAdded(
-            EvmAccessors.getMsgSender(),
-            _actionType,
-            corporateActionId_,
-            corporateActionIdByType_,
-            _data
+        (actionType_, actionTypeId_, data_, isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(
+            _corporateActionId
         );
     }
 
-    function getCorporateAction(
-        bytes32 _corporateActionId
-    ) external view override returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_) {
-        (actionType_, actionTypeId_, data_) = CorporateActionsStorageWrapper.getCorporateAction(_corporateActionId);
+    function getCorporateActions(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    )
+        external
+        view
+        override
+        returns (
+            bytes32[] memory actionTypes_,
+            uint256[] memory actionTypeIds_,
+            bytes[] memory datas_,
+            bool[] memory isDisabled_
+        )
+    {
+        (actionTypes_, actionTypeIds_, datas_, isDisabled_) = CorporateActionsStorageWrapper.getCorporateActions(
+            _pageIndex,
+            _pageLength
+        );
     }
 
     function getCorporateActionCount() external view override returns (uint256 corporateActionCount_) {
@@ -56,6 +56,28 @@ abstract contract CorporateActions is ICorporateActions, Modifiers {
         bytes32 _actionType
     ) external view override returns (uint256 corporateActionCount_) {
         corporateActionCount_ = CorporateActionsStorageWrapper.getCorporateActionCountByType(_actionType);
+    }
+
+    function getCorporateActionsByType(
+        bytes32 actionType,
+        uint256 pageIndex,
+        uint256 pageLength
+    )
+        external
+        view
+        override
+        returns (
+            bytes32[] memory actionTypes_,
+            uint256[] memory actionTypeIds_,
+            bytes[] memory datas_,
+            bool[] memory isDisabled_
+        )
+    {
+        (actionTypes_, actionTypeIds_, datas_, isDisabled_) = CorporateActionsStorageWrapper.getCorporateActionsByType(
+            actionType,
+            pageIndex,
+            pageLength
+        );
     }
 
     function getCorporateActionIdsByType(

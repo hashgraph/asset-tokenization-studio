@@ -15,12 +15,12 @@ contract EquityUSAFacet is EquityUSA, IStaticFunctionSelectors {
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](21);
+        staticFunctionSelectors_ = new bytes4[](24);
         staticFunctionSelectors_[selectorIndex++] = this._initialize_equityUSA.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getEquityDetails.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.setDividends.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getDividends.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getDividendsFor.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.setDividend.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getDividend.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getDividendFor.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getDividendAmountFor.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getDividendsCount.selector;
         staticFunctionSelectors_[selectorIndex++] = this.setVoting.selector;
@@ -37,6 +37,9 @@ contract EquityUSAFacet is EquityUSA, IStaticFunctionSelectors {
         staticFunctionSelectors_[selectorIndex++] = this.getTotalDividendHolders.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getVotingHolders.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getTotalVotingHolders.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.cancelDividend.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.cancelVoting.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.cancelScheduledBalanceAdjustment.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {

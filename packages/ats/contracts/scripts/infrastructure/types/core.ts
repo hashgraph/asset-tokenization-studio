@@ -178,7 +178,7 @@ export interface FacetDefinition {
    *
    * The registry stores the factory reference; deployment code handles library linking.
    */
-  factory?: (signer: Signer) => unknown;
+  factory?: (signer: Signer, useTimeTravel?: boolean) => ContractFactory;
 
   /**
    * TypeChain factory for the TimeTravel variant of this facet (test-only).

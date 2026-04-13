@@ -96,6 +96,30 @@ describe("atsRegistry.data - Factory Functions", () => {
     });
   });
 
+  describe("Factory default parameter behavior", () => {
+    it("should default to normal factory when useTimeTravel is omitted", () => {
+      // Find any facet with a factory function
+      const facetWithFactory = facetNames.find((name) => {
+        const facet = FACET_REGISTRY[name as keyof typeof FACET_REGISTRY];
+        return typeof facet.factory === "function";
+      });
+
+      expect(facetWithFactory).to.not.be.undefined;
+
+      const facet = FACET_REGISTRY[facetWithFactory as keyof typeof FACET_REGISTRY];
+
+      // Without second parameter - should use normal factory
+      const defaultFactory = facet.factory!(signer);
+      const normalFactory = facet.factory!(signer, false);
+
+      // Both should be the same type of factory
+      expect(defaultFactory).to.not.be.undefined;
+      expect(normalFactory).to.not.be.undefined;
+      expect(defaultFactory).to.have.property("deploy");
+      expect(normalFactory).to.have.property("deploy");
+    });
+  });
+
   describe("Registry structure validation", () => {
     it("should have expected number of facets with factory functions", () => {
       const facetsWithFactory = facetNames.filter((name) => {

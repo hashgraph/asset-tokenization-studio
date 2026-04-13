@@ -18,8 +18,8 @@ import PauseRequest from "./security/operations/pause/PauseRequest";
 import ControlListRequest from "./security/operations/controlList/ControlListRequest";
 import GetControlListCountRequest from "./security/operations/controlList/GetControlListCountRequest";
 import GetControlListMembersRequest from "./security/operations/controlList/GetControlListMembersRequest";
-import GetDividendsForRequest from "./equity/GetDividendsForRequest";
-import GetDividendsRequest from "./equity/GetDividendsRequest";
+import GetDividendForRequest from "./equity/GetDividendForRequest";
+import GetDividendRequest from "./equity/GetDividendRequest";
 import GetAllDividendsRequest from "./equity/GetAllDividendsRequest";
 import GetVotingRightsForRequest from "./equity/GetVotingRightsForRequest";
 import GetVotingRightsRequest from "./equity/GetVotingRightsRequest";
@@ -34,7 +34,8 @@ import GetRolesForRequest from "./security/roles/GetRolesForRequest";
 import GetRoleMemberCountRequest from "./security/roles/GetRoleMemberCountRequest";
 import GetRoleMembersRequest from "./security/roles/GetRoleMembersRequest";
 import GetSecurityDetailsRequest from "./security/GetSecurityDetailsRequest";
-import SetDividendsRequest from "./equity/SetDividendsRequest";
+import SetDividendRequest from "./equity/SetDividendRequest";
+import CancelDividendRequest from "./equity/CancelDividendRequest";
 import SetCouponRequest from "./bond/SetCouponRequest";
 import SetVotingRightsRequest from "./equity/SetVotingRightsRequest";
 import GetBondDetailsRequest from "./bond/GetBondDetailsRequest";
@@ -206,6 +207,9 @@ import IsProceedRecipientRequest from "./bond/IsProceedRecipientRequest";
 import GetCouponFromOrderedListAtRequest from "./bond/GetCouponFromOrderedListAtRequest";
 import GetPrincipalForRequest from "./bond/GetPrincipalForRequest";
 import ActionContentHashExistsRequest from "./security/operations/corporateActions/ActionContentHashExistsRequest";
+import GetCorporateActionRequest from "./security/operations/corporateActions/GetCorporateActionRequest";
+import GetCorporateActionsRequest from "./security/operations/corporateActions/GetCorporateActionsRequest";
+import GetCorporateActionsByTypeRequest from "./security/operations/corporateActions/GetCorporateActionsByTypeRequest";
 import SetRateRequest from "@port/in/request/interestRates/SetRateRequest";
 import GetRateRequest from "@port/in/request/interestRates/GetRateRequest";
 import SetInterestRateRequest from "./interestRates/SetInterestRateRequest";
@@ -219,6 +223,9 @@ import { AddKpiDataRequest } from "./kpis/AddKpiDataRequest";
 import GetImpactDataRequest from "./kpiLinkedRate/GetImpactDataRequest";
 import SetImpactDataRequest from "./interestRates/SetImpactDataRequest";
 import GetScheduledCouponListingRequest from "./scheduledTasks/GetScheduledCouponListingRequest";
+import CancelCouponRequest from "./bond/CancelCouponRequest";
+import CancelScheduledBalanceAdjustmentRequest from "./equity/CancelScheduledBalanceAdjustmentRequest";
+import CancelVotingRequest from "./equity/CancelVotingRequest";
 
 export {
   CreateEquityRequest,
@@ -239,8 +246,8 @@ export {
   ControlListRequest,
   GetControlListCountRequest,
   GetControlListMembersRequest,
-  GetDividendsForRequest,
-  GetDividendsRequest,
+  GetDividendForRequest,
+  GetDividendRequest,
   GetAllDividendsRequest,
   GetVotingRightsForRequest,
   GetVotingRightsRequest,
@@ -256,7 +263,8 @@ export {
   GetRolesForRequest,
   GetRoleMemberCountRequest,
   GetRoleMembersRequest,
-  SetDividendsRequest,
+  SetDividendRequest,
+  CancelDividendRequest,
   SetCouponRequest,
   SetVotingRightsRequest,
   GetAccountBalanceRequest,
@@ -424,6 +432,9 @@ export {
   GetProceedRecipientsCountRequest,
   GetProceedRecipientsRequest,
   ActionContentHashExistsRequest,
+  GetCorporateActionRequest,
+  GetCorporateActionsRequest,
+  GetCorporateActionsByTypeRequest,
   SetRateRequest,
   SetInterestRateRequest,
   SetImpactDataRequest,
@@ -439,4 +450,7 @@ export {
   SetNominalValueRequest,
   GetNominalValueRequest,
   GetNominalValueDecimalsRequest,
+  CancelCouponRequest,
+  CancelScheduledBalanceAdjustmentRequest,
+  CancelVotingRequest,
 };

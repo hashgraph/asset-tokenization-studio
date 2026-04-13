@@ -187,7 +187,7 @@ const request = new SetDividendsRequest({
   executionTimestamp: "1735430400",
 });
 
-const dividendId = await Equity.setDividends(request);
+const dividendId = await Equity.setDividend(request);
 ```
 
 ### SetVotingRightsRequest

@@ -7,4 +7,5 @@ export default interface VotingRightsViewModel extends QueryResponse {
   recordDate: Date;
   data: string;
   snapshotId?: number;
+  isDisabled: boolean;
 }

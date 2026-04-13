@@ -51,8 +51,8 @@ contract MockBond is IBondRead {
     function getBondDetails() external view override returns (BondDetailsData memory) {
         return _bondDetails;
     }
-    function getCoupon(uint256 id) external view override returns (RegisteredCoupon memory) {
-        return _coupons[id];
+    function getCoupon(uint256 id) external view override returns (RegisteredCoupon memory, bool) {
+        return (_coupons[id], false);
     }
     function getCouponFor(uint256 id, address account) external view override returns (CouponFor memory) {
         return _couponFor[id][account];

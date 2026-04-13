@@ -6,7 +6,7 @@ import { ErrorCode } from "@core/error/BaseError";
 import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
 import EvmAddress from "@domain/context/contract/EvmAddress";
 import ContractService from "@service/contract/ContractService";
-import { DividendForFixture, GetDividendsForQueryFixture } from "@test/fixtures/equity/EquityFixture";
+import { DividendForFixture, GetDividendForQueryFixture } from "@test/fixtures/equity/EquityFixture";
 import { GetDividendsForQueryHandler } from "./GetDividendsForQueryHandler";
 import { GetDividendsForQuery, GetDividendsForQueryResponse } from "./GetDividendsForQuery";
 import AccountService from "@service/account/AccountService";
@@ -28,7 +28,7 @@ describe("GetDividendsForQueryHandler", () => {
 
   beforeEach(() => {
     handler = new GetDividendsForQueryHandler(queryAdapterServiceMock, accountServiceMock, contractServiceMock);
-    query = GetDividendsForQueryFixture.create();
+    query = GetDividendForQueryFixture.create();
   });
 
   afterEach(() => {
@@ -53,7 +53,7 @@ describe("GetDividendsForQueryHandler", () => {
     it("should successfully get dividends for", async () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);
       accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(targetEvmAddress);
-      queryAdapterServiceMock.getDividendsFor.mockResolvedValue(dividendFor);
+      queryAdapterServiceMock.getDividendFor.mockResolvedValue(dividendFor);
 
       const result = await handler.execute(query);
 
@@ -64,7 +64,7 @@ describe("GetDividendsForQueryHandler", () => {
       expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(query.securityId);
       expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(query.targetId);
-      expect(queryAdapterServiceMock.getDividendsFor).toHaveBeenCalledWith(
+      expect(queryAdapterServiceMock.getDividendFor).toHaveBeenCalledWith(
         evmAddress,
         targetEvmAddress,
         query.dividendId,

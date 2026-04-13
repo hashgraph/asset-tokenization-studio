@@ -10,6 +10,7 @@ export class Dividend extends ValidatedDomain<Dividend> {
   recordTimeStamp: number;
   executionTimeStamp: number;
   snapshotId?: number;
+  isDisabled: boolean;
 
   constructor(
     amountPerUnitOfSecurity: BigDecimal,
@@ -17,6 +18,7 @@ export class Dividend extends ValidatedDomain<Dividend> {
     recordTimeStamp: number,
     executionTimeStamp: number,
     snapshotId?: number,
+    isDisabled: boolean = false,
   ) {
     super({
       executionTimeStamp: (val) => {
@@ -29,6 +31,7 @@ export class Dividend extends ValidatedDomain<Dividend> {
     this.recordTimeStamp = recordTimeStamp;
     this.executionTimeStamp = executionTimeStamp;
     this.snapshotId = snapshotId ? snapshotId : undefined;
+    this.isDisabled = isDisabled;
 
     ValidatedDomain.handleValidation(Dividend.name, this);
   }

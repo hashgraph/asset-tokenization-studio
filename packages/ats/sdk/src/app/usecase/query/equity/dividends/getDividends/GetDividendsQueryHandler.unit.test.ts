@@ -6,7 +6,7 @@ import { ErrorCode } from "@core/error/BaseError";
 import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
 import EvmAddress from "@domain/context/contract/EvmAddress";
 import ContractService from "@service/contract/ContractService";
-import { DividendFixture, GetDividendsQueryFixture } from "@test/fixtures/equity/EquityFixture";
+import { DividendFixture, GetDividendQueryFixture } from "@test/fixtures/equity/EquityFixture";
 import { GetDividendsQueryHandler } from "./GetDividendsQueryHandler";
 import { GetDividendsQuery, GetDividendsQueryResponse } from "./GetDividendsQuery";
 import { GetDividendsQueryError } from "./error/GetDividendsQueryError";
@@ -25,7 +25,7 @@ describe("GetDividendsQueryHandler", () => {
 
   beforeEach(() => {
     handler = new GetDividendsQueryHandler(queryAdapterServiceMock, contractServiceMock);
-    query = GetDividendsQueryFixture.create();
+    query = GetDividendQueryFixture.create();
   });
 
   afterEach(() => {
@@ -49,7 +49,7 @@ describe("GetDividendsQueryHandler", () => {
     });
     it("should successfully get dividends", async () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);
-      queryAdapterServiceMock.getDividends.mockResolvedValue(dividend);
+      queryAdapterServiceMock.getDividend.mockResolvedValue(dividend);
 
       const result = await handler.execute(query);
 
@@ -57,7 +57,7 @@ describe("GetDividendsQueryHandler", () => {
       expect(result.dividend).toBe(dividend);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(query.securityId);
-      expect(queryAdapterServiceMock.getDividends).toHaveBeenCalledWith(evmAddress, query.dividendId);
+      expect(queryAdapterServiceMock.getDividend).toHaveBeenCalledWith(evmAddress, query.dividendId);
     });
   });
 });

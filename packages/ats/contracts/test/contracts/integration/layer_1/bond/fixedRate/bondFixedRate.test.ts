@@ -125,7 +125,7 @@ describe("Bond Fixed Rate Tests", () => {
     const couponCount = await bondReadFacet.getCouponCount();
     expect(couponCount).to.equal(1);
 
-    const registeredCoupon = await bondReadFacet.getCoupon(1);
+    const [registeredCoupon] = await bondReadFacet.getCoupon(1);
     expect(registeredCoupon.coupon.recordDate).to.equal(couponRecordDateInSeconds);
     expect(registeredCoupon.coupon.executionDate).to.equal(couponExecutionDateInSeconds);
     expect(registeredCoupon.coupon.startDate).to.equal(couponStartDateInSeconds);

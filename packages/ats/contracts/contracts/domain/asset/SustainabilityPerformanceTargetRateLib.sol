@@ -9,6 +9,7 @@ import { InterestRateStorageWrapper } from "./InterestRateStorageWrapper.sol";
 import { KpisStorageWrapper } from "./KpisStorageWrapper.sol";
 import { ProceedRecipientsStorageWrapper } from "./ProceedRecipientsStorageWrapper.sol";
 import { BondStorageWrapper } from "./BondStorageWrapper.sol";
+import { IBondTypes } from "../../facets/layer_2/bond/IBondTypes.sol";
 
 /**
  * @title SustainabilityPerformanceTargetRateLib
@@ -132,6 +133,7 @@ library SustainabilityPerformanceTargetRateLib {
     function _getPreviousFixingDate(uint256 couponID) private view returns (uint256 fixingDate_) {
         uint256 previousCouponId = BondStorageWrapper.getPreviousCouponInOrderedList(couponID);
         if (previousCouponId == 0) return 0;
-        return BondStorageWrapper.getCoupon(previousCouponId).coupon.fixingDate;
+        (IBondTypes.RegisteredCoupon memory registeredCoupon, , ) = BondStorageWrapper.getCoupon(previousCouponId);
+        return registeredCoupon.coupon.fixingDate;
     }
 }

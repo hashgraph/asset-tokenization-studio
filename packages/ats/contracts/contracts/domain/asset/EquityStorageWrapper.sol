@@ -21,6 +21,7 @@ import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 
@@ -74,6 +75,17 @@ library EquityStorageWrapper {
         initDividend(corporateActionId_, data);
     }
 
+    function cancelDividend(uint256 dividendId) internal returns (bool success_) {
+        IEquity.RegisteredDividend memory registeredDividend;
+        bytes32 corporateActionId;
+        (registeredDividend, corporateActionId, ) = getDividends(dividendId);
+        if (registeredDividend.dividend.executionDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
+            revert IEquity.DividendAlreadyExecuted(corporateActionId, dividendId);
+        }
+        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
+        success_ = true;
+    }
+
     function initDividend(bytes32 actionId, bytes memory data) internal {
         if (actionId == bytes32(0)) {
             revert IEquity.DividendCreationFailed();
@@ -98,6 +110,17 @@ library EquityStorageWrapper {
         initVotingRights(corporateActionId_, data);
     }
 
+    function cancelVoting(uint256 voteId) internal returns (bool success_) {
+        IEquity.RegisteredVoting memory registeredVoting;
+        bytes32 corporateActionId;
+        (registeredVoting, corporateActionId, ) = getVoting(voteId);
+        if (registeredVoting.voting.recordDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
+            revert IEquity.VotingAlreadyRecorded(corporateActionId, voteId);
+        }
+        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
+        success_ = true;
+    }
+
     function initVotingRights(bytes32 actionId, bytes memory data) internal {
         if (actionId == bytes32(0)) {
             revert IEquity.VotingRightsCreationFailed();
@@ -120,6 +143,17 @@ library EquityStorageWrapper {
         );
 
         initBalanceAdjustment(corporateActionId_, data);
+    }
+
+    function cancelScheduledBalanceAdjustment(uint256 balanceAdjustmentId) internal returns (bool success_) {
+        IEquity.ScheduledBalanceAdjustment memory balanceAdjustment;
+        bytes32 corporateActionId;
+        (balanceAdjustment, corporateActionId, ) = getScheduledBalanceAdjustment(balanceAdjustmentId);
+        if (balanceAdjustment.executionDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
+            revert IEquity.BalanceAdjustmentAlreadyExecuted(corporateActionId, balanceAdjustmentId);
+        }
+        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
+        success_ = true;
     }
 
     function initBalanceAdjustment(bytes32 actionId, bytes memory data) internal {
@@ -185,18 +219,26 @@ library EquityStorageWrapper {
      */
     function getDividends(
         uint256 dividendID
-    ) internal view returns (IEquity.RegisteredDividend memory registeredDividend_) {
-        bytes32 actionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
+    )
+        internal
+        view
+        returns (IEquity.RegisteredDividend memory registeredDividend_, bytes32 corporateActionId_, bool isDisabled_)
+    {
+        corporateActionId_ = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
             DIVIDEND_CORPORATE_ACTION_TYPE,
             dividendID - 1
         );
 
-        (, , bytes memory data) = CorporateActionsStorageWrapper.getCorporateAction(actionId);
+        bytes memory data;
+        (, , data, isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(corporateActionId_);
 
         _checkUnexpectedError(data.length == 0, KPI_EQUITY_DIVIDEND_DATA);
         (registeredDividend_.dividend) = abi.decode(data, (IEquity.Dividend));
 
-        registeredDividend_.snapshotId = CorporateActionsStorageWrapper.getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
+        registeredDividend_.snapshotId = CorporateActionsStorageWrapper.getUintResultAt(
+            corporateActionId_,
+            SNAPSHOT_RESULT_ID
+        );
     }
 
     /**
@@ -209,7 +251,7 @@ library EquityStorageWrapper {
         uint256 dividendID,
         address account
     ) internal view returns (IEquity.DividendFor memory dividendFor_) {
-        IEquity.RegisteredDividend memory registeredDividend = getDividends(dividendID);
+        (IEquity.RegisteredDividend memory registeredDividend, , ) = getDividends(dividendID);
 
         dividendFor_.amount = registeredDividend.dividend.amount;
         dividendFor_.amountDecimals = registeredDividend.dividend.amountDecimals;
@@ -251,7 +293,7 @@ library EquityStorageWrapper {
         uint256 pageIndex,
         uint256 pageLength
     ) internal view returns (address[] memory holders_) {
-        IEquity.RegisteredDividend memory registeredDividend = getDividends(dividendID);
+        (IEquity.RegisteredDividend memory registeredDividend, , ) = getDividends(dividendID);
 
         if (registeredDividend.dividend.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return holders_;
 
@@ -262,7 +304,7 @@ library EquityStorageWrapper {
     }
 
     function getTotalDividendHolders(uint256 dividendID) internal view returns (uint256) {
-        IEquity.RegisteredDividend memory registeredDividend = getDividends(dividendID);
+        (IEquity.RegisteredDividend memory registeredDividend, , ) = getDividends(dividendID);
 
         if (registeredDividend.dividend.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return 0;
 
@@ -272,18 +314,28 @@ library EquityStorageWrapper {
         return ERC1410StorageWrapper.getTotalTokenHolders();
     }
 
-    function getVoting(uint256 voteID) internal view returns (IEquity.RegisteredVoting memory registeredVoting_) {
-        bytes32 actionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
+    function getVoting(
+        uint256 voteID
+    )
+        internal
+        view
+        returns (IEquity.RegisteredVoting memory registeredVoting_, bytes32 corporateActionId_, bool isDisabled_)
+    {
+        corporateActionId_ = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
             VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
             voteID - 1
         );
 
-        (, , bytes memory data) = CorporateActionsStorageWrapper.getCorporateAction(actionId);
+        bytes memory data;
+        (, , data, isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(corporateActionId_);
 
         _checkUnexpectedError(data.length == 0, KPI_EQUITY_VOTING_DATA);
         (registeredVoting_.voting) = abi.decode(data, (IEquity.Voting));
 
-        registeredVoting_.snapshotId = CorporateActionsStorageWrapper.getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
+        registeredVoting_.snapshotId = CorporateActionsStorageWrapper.getUintResultAt(
+            corporateActionId_,
+            SNAPSHOT_RESULT_ID
+        );
     }
 
     /**
@@ -293,7 +345,7 @@ library EquityStorageWrapper {
      * @param account The account
      */
     function getVotingFor(uint256 voteID, address account) internal view returns (IEquity.VotingFor memory votingFor_) {
-        IEquity.RegisteredVoting memory registeredVoting = getVoting(voteID);
+        (IEquity.RegisteredVoting memory registeredVoting, , ) = getVoting(voteID);
 
         votingFor_.recordDate = registeredVoting.voting.recordDate;
         votingFor_.data = registeredVoting.voting.data;
@@ -318,7 +370,7 @@ library EquityStorageWrapper {
         uint256 pageIndex,
         uint256 pageLength
     ) internal view returns (address[] memory holders_) {
-        IEquity.RegisteredVoting memory registeredVoting = getVoting(voteID);
+        (IEquity.RegisteredVoting memory registeredVoting, , ) = getVoting(voteID);
 
         if (registeredVoting.voting.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return holders_;
 
@@ -329,7 +381,7 @@ library EquityStorageWrapper {
     }
 
     function getTotalVotingHolders(uint256 voteID) internal view returns (uint256) {
-        IEquity.RegisteredVoting memory registeredVoting = getVoting(voteID);
+        (IEquity.RegisteredVoting memory registeredVoting, , ) = getVoting(voteID);
 
         if (registeredVoting.voting.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return 0;
 
@@ -341,13 +393,22 @@ library EquityStorageWrapper {
 
     function getScheduledBalanceAdjustment(
         uint256 balanceAdjustmentID
-    ) internal view returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_) {
-        (, , bytes memory data) = CorporateActionsStorageWrapper.getCorporateAction(
-            CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
-                BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
-                balanceAdjustmentID - 1
-            )
+    )
+        internal
+        view
+        returns (
+            IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_,
+            bytes32 corporateActionId_,
+            bool isDisabled_
+        )
+    {
+        corporateActionId_ = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
+            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
+            balanceAdjustmentID - 1
         );
+
+        bytes memory data;
+        (, , data, isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(corporateActionId_);
 
         _checkUnexpectedError(data.length == 0, KPI_EQUITY_BALANCE_ADJ);
         (balanceAdjustment_) = abi.decode(data, (IEquity.ScheduledBalanceAdjustment));

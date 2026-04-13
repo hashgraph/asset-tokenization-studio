@@ -32,6 +32,7 @@ import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageW
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { InterestRateStorageWrapper } from "./InterestRateStorageWrapper.sol";
 import { SustainabilityPerformanceTargetRateLib } from "./SustainabilityPerformanceTargetRateLib.sol";
+import { IBondTypes } from "../../facets/layer_2/bond/IBondTypes.sol";
 import { KpiLinkedRateLib } from "./KpiLinkedRateLib.sol";
 
 library ScheduledTasksStorageWrapper {
@@ -181,7 +182,9 @@ library ScheduledTasksStorageWrapper {
             _index
         );
 
-        (, couponID_, ) = CorporateActionsStorageWrapper.getCorporateAction(abi.decode(couponListing.data, (bytes32)));
+        (, couponID_, , ) = CorporateActionsStorageWrapper.getCorporateAction(
+            abi.decode(couponListing.data, (bytes32))
+        );
     }
 
     function getScheduledBalanceAdjustmentCount() internal view returns (uint256) {
@@ -324,6 +327,9 @@ library ScheduledTasksStorageWrapper {
         ScheduledTask memory _scheduledTask
     ) private {
         bytes32 actionId = abi.decode(_scheduledTask.data, (bytes32));
+        if (CorporateActionsStorageWrapper.isCorporateActionDisabled(actionId)) {
+            return;
+        }
 
         uint256 newSnapShotID = SnapshotsStorageWrapper.takeSnapshot();
         emit ISnapshots.SnapshotTriggered(newSnapShotID, abi.encodePacked(actionId));
@@ -340,6 +346,9 @@ library ScheduledTasksStorageWrapper {
         ScheduledTask memory _scheduledTask
     ) private {
         bytes32 actionId = _getActionIdFromScheduledTask(_scheduledTask);
+        if (CorporateActionsStorageWrapper.isCorporateActionDisabled(actionId)) {
+            return;
+        }
 
         uint256 couponID = _getCouponIdFromAction(actionId);
 
@@ -360,9 +369,12 @@ library ScheduledTasksStorageWrapper {
         uint256 /*_scheduledTasksLength*/,
         ScheduledTask memory _scheduledTask
     ) private {
-        (, , bytes memory balanceAdjustmentData) = CorporateActionsStorageWrapper.getCorporateAction(
+        (, , bytes memory balanceAdjustmentData, bool isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(
             _getActionIdFromScheduledTask(_scheduledTask)
         );
+
+        if (isDisabled_) return;
+
         IEquity.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
             balanceAdjustmentData,
             (IEquity.ScheduledBalanceAdjustment)
@@ -394,7 +406,7 @@ library ScheduledTasksStorageWrapper {
     }
 
     function _updateCouponRatesIfNeeded(uint256 couponID) private {
-        IBondRead.RegisteredCoupon memory registeredCoupon = BondStorageWrapper.getCoupon(couponID);
+        (IBondTypes.RegisteredCoupon memory registeredCoupon, , ) = BondStorageWrapper.getCoupon(couponID);
 
         if (InterestRateStorageWrapper.isSustainabilityPerformanceTargetRateInitialized()) {
             (uint256 rate, uint8 rateDecimals) = SustainabilityPerformanceTargetRateLib
@@ -414,7 +426,7 @@ library ScheduledTasksStorageWrapper {
     }
 
     function _getCouponIdFromAction(bytes32 actionId) private view returns (uint256 couponID_) {
-        (, couponID_, ) = CorporateActionsStorageWrapper.getCorporateAction(actionId);
+        (, couponID_, , ) = CorporateActionsStorageWrapper.getCorporateAction(actionId);
     }
 
     function _getActionIdFromScheduledTask(

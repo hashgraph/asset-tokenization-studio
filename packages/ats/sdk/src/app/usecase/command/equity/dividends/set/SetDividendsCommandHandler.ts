@@ -24,7 +24,7 @@ export class SetDividendsCommandHandler implements ICommandHandler<SetDividendsC
       const handler = this.transactionService.getHandler();
 
       const securityEvmAddress = await this.contractService.getContractEvmAddress(address);
-      const res = await handler.setDividends(
+      const res = await handler.setDividend(
         securityEvmAddress,
         BigDecimal.fromString(recordDate),
         BigDecimal.fromString(executionDate),
