@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { expect } from "chai";
-import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
-  type EquityUSAFacet,
   type ScheduledSnapshotsFacet,
   type AccessControl,
+  type DividendFacet,
   ScheduledCrossOrderedTasksFacet,
   TimeTravelFacet,
 } from "@contract-types";
@@ -22,7 +21,7 @@ describe("Scheduled Snapshots Tests", () => {
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
 
-  let equityFacet: EquityUSAFacet;
+  let dividendFacet: DividendFacet;
   let scheduledSnapshotsFacet: ScheduledSnapshotsFacet;
   let scheduledTasksFacet: ScheduledCrossOrderedTasksFacet;
   let accessControlFacet: AccessControl;
@@ -46,8 +45,8 @@ describe("Scheduled Snapshots Tests", () => {
   }
 
   async function setFacets(diamond: ResolverProxy) {
-    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
-    equityFacet = await ethers.getContractAt("EquityUSAFacet", diamond.target, signer_A);
+    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target, signer_A);
+    dividendFacet = await ethers.getContractAt("DividendFacet", diamond.target, signer_A);
     scheduledSnapshotsFacet = await ethers.getContractAt("ScheduledSnapshotsFacet", diamond.target, signer_A);
     scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasksFacet", diamond.target, signer_A);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
@@ -85,9 +84,9 @@ describe("Scheduled Snapshots Tests", () => {
       amount: dividendsAmountPerEquity,
       amountDecimals: dividendAmountDecimalsPerEquity,
     };
-    await equityFacet.connect(signer_C).setDividend(dividendData_2);
-    await equityFacet.connect(signer_C).setDividend(dividendData_3);
-    await equityFacet.connect(signer_C).setDividend(dividendData_1);
+    await dividendFacet.connect(signer_C).setDividend(dividendData_2);
+    await dividendFacet.connect(signer_C).setDividend(dividendData_3);
+    await dividendFacet.connect(signer_C).setDividend(dividendData_1);
 
     const dividend_2_Id = "0x0000000000000000000000000000000000000000000000000000000000000001";
     const dividend_3_Id = "0x0000000000000000000000000000000000000000000000000000000000000002";
@@ -147,41 +146,5 @@ describe("Scheduled Snapshots Tests", () => {
 
     expect(scheduledSnapshotCount).to.equal(0);
     expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount);
-  });
-
-  it("GIVEN a disabled corporate action WHEN triggerSnapshots is called THEN snapshot is not executed", async () => {
-    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-
-    const dividendsRecordDateInSeconds = dateToUnixTimestamp("2030-01-01T00:00:06Z");
-    const dividendsExecutionDateInSeconds = dateToUnixTimestamp("2030-01-01T00:01:00Z");
-    const dividendsAmountPerEquity = 1;
-    const dividendAmountDecimalsPerEquity = 3;
-    const dividendData = {
-      recordDate: dividendsRecordDateInSeconds.toString(),
-      executionDate: dividendsExecutionDateInSeconds.toString(),
-      amount: dividendsAmountPerEquity,
-      amountDecimals: dividendAmountDecimalsPerEquity,
-    };
-    await equityFacet.connect(signer_C).setDividend(dividendData);
-
-    let scheduledSnapshotCount = await scheduledSnapshotsFacet.scheduledSnapshotCount();
-    expect(scheduledSnapshotCount).to.equal(1);
-
-    const [dividendBefore] = await equityFacet.getDividend(1);
-    expect(dividendBefore.snapshotId).to.equal(0);
-
-    await equityFacet.connect(signer_C).cancelDividend(1);
-    await timeTravelFacet.changeSystemTimestamp(dividendsRecordDateInSeconds + 1);
-
-    await expect(scheduledTasksFacet.connect(signer_A).triggerPendingScheduledCrossOrderedTasks()).not.to.emit(
-      scheduledSnapshotsFacet,
-      "SnapshotTriggered",
-    );
-
-    scheduledSnapshotCount = await scheduledSnapshotsFacet.scheduledSnapshotCount();
-    expect(scheduledSnapshotCount).to.equal(0);
-
-    const [dividendAfter] = await equityFacet.getDividend(1);
-    expect(dividendAfter.snapshotId).to.equal(0);
   });
 });

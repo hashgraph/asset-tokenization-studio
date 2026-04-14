@@ -9,6 +9,7 @@ import {
   type Pause,
   type IERC1410,
   type AccessControl,
+  type DividendFacet,
   Equity,
   ScheduledCrossOrderedTasks,
   Kyc,
@@ -39,6 +40,7 @@ describe("Adjust Balances Tests", () => {
   let accessControlFacet: AccessControl;
   let pauseFacet: Pause;
   let equityFacet: Equity;
+  let dividendFacet: DividendFacet;
   let scheduledTasksFacet: ScheduledCrossOrderedTasks;
   let timeTravelFacet: TimeTravel;
   let kycFacet: Kyc;
@@ -72,19 +74,13 @@ describe("Adjust Balances Tests", () => {
     ]);
 
     accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
-
     erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target);
-
     adjustBalancesFacet = await ethers.getContractAt("AdjustBalancesFacet", diamond.target);
-
     pauseFacet = await ethers.getContractAt("Pause", diamond.target);
-
     equityFacet = await ethers.getContractAt("Equity", diamond.target);
-
-    scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasksFacetTimeTravel", diamond.target);
-
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
-
+    dividendFacet = await ethers.getContractAt("DividendFacet", diamond.target, signer_A);
+    scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasks", diamond.target);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
     kycFacet = await ethers.getContractAt("Kyc", diamond.target);
     ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.target);
   }
@@ -154,7 +150,7 @@ describe("Adjust Balances Tests", () => {
       amountDecimals: dividendAmountDecimalsPerEquity,
     };
 
-    await equityFacet.connect(signer_A).setDividend(dividendData_1);
+    await dividendFacet.connect(signer_A).setDividend(dividendData_1);
 
     const balanceAdjustmentExecutionDateInSeconds_1 = dateToUnixTimestamp(`2030-01-01T00:00:07Z`);
 
@@ -242,17 +238,15 @@ describe("Adjust Balances Tests", () => {
         { role: ATS_ROLES._SSI_MANAGER_ROLE, members: [base.deployer.address] },
       ]);
 
+      const baseDiamondAddress = baseDiamond.target;
       return {
         ...base,
-        migrationFacet: (await ethers.getContractAt("MigrationFacetTest", baseDiamond.target)) as MigrationFacetTest,
-        adjustBalancesFacet: (await ethers.getContractAt(
-          "AdjustBalancesFacet",
-          baseDiamond.target,
-        )) as AdjustBalancesFacet,
-        erc1410Facet: (await ethers.getContractAt("IERC1410", baseDiamond.target)) as IERC1410,
-        kycFacet: (await ethers.getContractAt("Kyc", baseDiamond.target)) as Kyc,
-        ssiManagementFacet: (await ethers.getContractAt("SsiManagement", baseDiamond.target)) as SsiManagement,
-        accessControlFacet: (await ethers.getContractAt("AccessControl", baseDiamond.target)) as AccessControl,
+        migrationFacet: await ethers.getContractAt("MigrationFacetTest", baseDiamondAddress, deployer),
+        adjustBalancesFacet: await ethers.getContractAt("AdjustBalancesFacet", baseDiamondAddress),
+        erc1410Facet: await ethers.getContractAt("IERC1410", baseDiamondAddress),
+        kycFacet: await ethers.getContractAt("Kyc", baseDiamondAddress),
+        ssiManagementFacet: await ethers.getContractAt("SsiManagement", baseDiamondAddress),
+        accessControlFacet: await ethers.getContractAt("AccessControl", baseDiamondAddress),
       };
     }
 

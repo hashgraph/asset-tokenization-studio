@@ -3,7 +3,12 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type CorporateActions, EquityUSA, TimeTravelFacet } from "@contract-types";
+import {
+  type ResolverProxy,
+  type CorporateActions,
+  type DividendFacetTimeTravel,
+  TimeTravelFacet,
+} from "@contract-types";
 import { ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
@@ -18,7 +23,7 @@ describe("Corporate Actions Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let corporateActionsFacet: CorporateActions;
-  let equityFacet: EquityUSA;
+  let dividendFacet: DividendFacetTimeTravel;
   let timeTravelFacet: TimeTravelFacet;
 
   async function deploySecurityFixtureSinglePartition() {
@@ -39,7 +44,7 @@ describe("Corporate Actions Tests", () => {
     ]);
 
     corporateActionsFacet = await ethers.getContractAt("CorporateActionsFacet", diamond.target, signer_A);
-    equityFacet = await ethers.getContractAt("EquityUSAFacetTimeTravel", diamond.target, signer_A);
+    dividendFacet = await ethers.getContractAt("DividendFacetTimeTravel", diamond.target, signer_A);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
   }
 
@@ -51,7 +56,7 @@ describe("Corporate Actions Tests", () => {
     const currentTimestamp = await timeTravelFacet.blockTimestamp();
     const ONE_DAY = 86400n; // 24 hours in seconds
 
-    let dividendData = {
+    const dividendData = {
       recordDate: Number(currentTimestamp + ONE_DAY),
       executionDate: Number(currentTimestamp + ONE_DAY + 1000n),
       amount: 10,
@@ -68,7 +73,7 @@ describe("Corporate Actions Tests", () => {
 
     const actionContentHashExistsBefore = await corporateActionsFacet.actionContentHashExists(contentHash);
 
-    await equityFacet.connect(signer_C).setDividend(dividendData);
+    await dividendFacet.connect(signer_C).setDividend(dividendData);
 
     // check list members
     const listCount = await corporateActionsFacet.getCorporateActionCount();

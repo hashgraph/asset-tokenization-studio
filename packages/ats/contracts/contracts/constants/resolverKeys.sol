@@ -500,6 +500,12 @@ bytes32 constant _TOTAL_BALANCE_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_
 // keccak256('security.token.standard.equity.resolverKey');
 bytes32 constant _EQUITY_RESOLVER_KEY = 0xfe85fe0513f5a5676011f59495ae16b2b93c981c190e99e61903e5603542c810;
 
+// keccak256('security.token.standard.voting.resolverKey');
+bytes32 constant _VOTING_RESOLVER_KEY = 0x97e0ffc69e5d5dd7c4635bfce0a5cf15b1c313433d49edbd55813da224b03768;
+
+// keccak256('security.token.standard.dividend.resolverKey');
+bytes32 constant _DIVIDEND_RESOLVER_KEY = 0x63752e3f4bd54d9fec1ad1667ef4de4f80e9a6484fb94f93ea4312aef9c19bea;
+
 // keccak256('security.token.standard.bond.variable.rate.resolverKey');
 bytes32 constant _BOND_VARIABLE_RATE_RESOLVER_KEY = 0xe6594ee8f54f346ab25268fdc7955031a6b06102355e1446353d89ab1d593de3;
 

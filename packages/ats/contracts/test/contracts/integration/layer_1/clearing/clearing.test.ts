@@ -7,26 +7,26 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 import {
-  AccessControl,
-  AdjustBalances,
+  type AccessControl,
+  type AdjustBalances,
   type ClearingActionsFacet,
-  ClearingActionsFacet__factory,
-  ControlListFacet,
-  DiamondFacet,
-  Equity,
-  ERC20Facet,
-  ERC3643Management,
+  type ControlListFacet,
+  type DiamondFacet,
+  type Dividend,
+  type Equity,
+  type ERC20Facet,
+  type ERC3643Management,
   type IERC1410,
   type IERC3643,
   type IHold,
-  Kyc,
-  NoncesFacet,
-  Pause,
-  ProtectedPartitions,
+  type Kyc,
+  type NoncesFacet,
+  type Pause,
+  type ProtectedPartitions,
   type ResolverProxy,
-  Snapshots,
-  SsiManagement,
-  TimeTravelFacet,
+  type Snapshots,
+  type SsiManagement,
+  type TimeTravelFacet,
 } from "@contract-types";
 import { ADDRESS_ZERO, ATS_ROLES, dateToUnixTimestamp, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
@@ -160,6 +160,7 @@ describe("Clearing Tests", () => {
   let accessControlFacet: AccessControl;
   let adjustBalancesFacet: AdjustBalances;
   let equityFacet: Equity;
+  let dividendFacet: Dividend;
   let pauseFacet: Pause;
   let erc1410Facet: IERC1410;
   let controlListFacet: ControlListFacet;
@@ -184,7 +185,7 @@ describe("Clearing Tests", () => {
     const clearingRedeemFacet = await ethers.getContractAt("ClearingRedeemFacet", diamond.target, signer_A);
     const clearingHoldCreationFacet = await ethers.getContractAt("ClearingHoldCreationFacet", diamond.target, signer_A);
     const clearingReadFacet = await ethers.getContractAt("ClearingReadFacet", diamond.target, signer_A);
-    clearingActionsFacet = ClearingActionsFacet__factory.connect(diamond.target.toString(), signer_A);
+    clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.target, signer_A);
 
     const fragmentMap = new Map<string, any>();
     [
@@ -206,6 +207,7 @@ describe("Clearing Tests", () => {
 
     holdFacet = await ethers.getContractAt("IHold", diamond.target, signer_A);
     equityFacet = await ethers.getContractAt("Equity", diamond.target, signer_A);
+    dividendFacet = await ethers.getContractAt("Dividend", diamond.target, signer_A);
     accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
     adjustBalancesFacet = await ethers.getContractAt("AdjustBalances", diamond.target, signer_A);
     pauseFacet = await ethers.getContractAt("Pause", diamond.target, signer_D);
@@ -643,12 +645,12 @@ describe("Clearing Tests", () => {
           amountDecimals: 0,
         };
 
-        const dividendId = await equityFacet.connect(signer_A).setDividend.staticCall(dividendInput);
-        await equityFacet.connect(signer_A).setDividend(dividendInput);
+        const dividendId = await dividendFacet.connect(signer_A).setDividend.staticCall(dividendInput);
+        await dividendFacet.connect(signer_A).setDividend(dividendInput);
 
         await timeTravelFacet.changeSystemTimestamp(recordDate + 1n);
 
-        const dividendFor = await equityFacet.getDividendFor(dividendId, signer_A.address);
+        const dividendFor = await dividendFacet.getDividendFor(dividendId, signer_A.address);
 
         const currentBalance = await erc1410Facet.balanceOf(signer_A.address);
         const clearedAmount = await clearingFacet.getClearedAmountFor(signer_A.address);

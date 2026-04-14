@@ -28,7 +28,9 @@ import {
   ClearingTransferFacet__factory,
   ControlListFacet__factory,
   DiamondFacet__factory,
+  Dividend__factory,
   Equity__factory,
+  Voting__factory,
   ERC1410ReadFacet__factory,
   ERC20Votes__factory,
   ERC1594Facet__factory,
@@ -372,7 +374,7 @@ export class RPCQueryAdapter {
   async getDividendFor(address: EvmAddress, target: EvmAddress, dividend: number): Promise<DividendFor> {
     LogService.logTrace(`Getting dividends for`);
 
-    const dividendFor = await this.connect(Equity__factory, address.toString()).getDividendFor(
+    const dividendFor = await this.connect(Dividend__factory, address.toString()).getDividendFor(
       dividend,
       target.toString(),
     );
@@ -380,14 +382,13 @@ export class RPCQueryAdapter {
     return new DividendFor(
       new BigDecimal(dividendFor.tokenBalance),
       Number(dividendFor.decimals),
-      dividendFor.isDisabled,
     );
   }
 
   async getDividendAmountFor(address: EvmAddress, target: EvmAddress, dividend: number): Promise<DividendAmountFor> {
     LogService.logTrace(`Getting dividends amount for`);
 
-    const dividendAmountFor = await this.connect(Equity__factory, address.toString()).getDividendAmountFor(
+    const dividendAmountFor = await this.connect(Dividend__factory, address.toString()).getDividendAmountFor(
       dividend,
       target.toString(),
     );
@@ -402,24 +403,23 @@ export class RPCQueryAdapter {
   async getDividend(address: EvmAddress, dividend: number): Promise<Dividend> {
     LogService.logTrace(`Getting dividends`);
 
-    const { registeredDividend_, isDisabled_ } = await this.connect(Equity__factory, address.toString()).getDividend(
+    const [registeredDividend] = await this.connect(Dividend__factory, address.toString()).getDividend(
       dividend,
     );
 
     return new Dividend(
-      new BigDecimal(registeredDividend_.dividend.amount.toString()),
-      Number(registeredDividend_.dividend.amountDecimals),
-      Number(registeredDividend_.dividend.recordDate),
-      Number(registeredDividend_.dividend.executionDate),
-      Number(registeredDividend_.snapshotId),
-      isDisabled_,
+      new BigDecimal(registeredDividend.dividend.amount.toString()),
+      Number(registeredDividend.dividend.amountDecimals),
+      Number(registeredDividend.dividend.recordDate),
+      Number(registeredDividend.dividend.executionDate),
+      Number(registeredDividend.snapshotId),
     );
   }
 
   async getDividendsCount(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting dividends count`);
 
-    const dividendsCount = await this.connect(Equity__factory, address.toString()).getDividendsCount();
+    const dividendsCount = await this.connect(Dividend__factory, address.toString()).getDividendsCount();
 
     return Number(dividendsCount);
   }
@@ -427,28 +427,27 @@ export class RPCQueryAdapter {
   async getVotingFor(address: EvmAddress, target: EvmAddress, voting: number): Promise<VotingFor> {
     LogService.logTrace(`Getting voting for`);
 
-    const votingFor = await this.connect(Equity__factory, address.toString()).getVotingFor(voting, target.toString());
+    const votingFor = await this.connect(Voting__factory, address.toString()).getVotingFor(voting, target.toString());
 
-    return new VotingFor(new BigDecimal(votingFor.tokenBalance), Number(votingFor.decimals), votingFor.isDisabled);
+    return new VotingFor(new BigDecimal(votingFor.tokenBalance), Number(votingFor.decimals));
   }
 
   async getVoting(address: EvmAddress, voting: number): Promise<VotingRights> {
     LogService.logTrace(`Getting voting`);
 
-    const { registeredVoting_, isDisabled_ } = await this.connect(Equity__factory, address.toString()).getVoting(voting);
+    const [registeredVoting] = await this.connect(Voting__factory, address.toString()).getVoting(voting);
 
     return new VotingRights(
-      Number(registeredVoting_.voting.recordDate),
-      registeredVoting_.voting.data,
-      Number(registeredVoting_.snapshotId),
-      isDisabled_,
+      Number(registeredVoting.voting.recordDate),
+      registeredVoting.voting.data,
+      Number(registeredVoting.snapshotId),
     );
   }
 
   async getVotingsCount(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting votings count`);
 
-    const votingsCount = await this.connect(Equity__factory, address.toString()).getVotingCount();
+    const votingsCount = await this.connect(Voting__factory, address.toString()).getVotingCount();
 
     return Number(votingsCount);
   }
@@ -1352,26 +1351,26 @@ export class RPCQueryAdapter {
 
   async getDividendHolders(address: EvmAddress, dividendId: number, start: number, end: number): Promise<string[]> {
     LogService.logTrace(`Getting dividend holders for dividend ${dividendId} for security ${address.toString()}`);
-    return await this.connect(Equity__factory, address.toString()).getDividendHolders(dividendId, start, end);
+    return await this.connect(Dividend__factory, address.toString()).getDividendHolders(dividendId, start, end);
   }
 
   async getTotalDividendHolders(address: EvmAddress, dividendId: number): Promise<number> {
     LogService.logTrace(`Getting total dividend holders for dividend ${dividendId} for security ${address.toString()}`);
 
-    const total = await this.connect(Equity__factory, address.toString()).getTotalDividendHolders(dividendId);
+    const total = await this.connect(Dividend__factory, address.toString()).getTotalDividendHolders(dividendId);
 
     return Number(total);
   }
 
   async getVotingHolders(address: EvmAddress, voteId: number, start: number, end: number): Promise<string[]> {
     LogService.logTrace(`Getting voting holders for vote ${voteId} for security ${address.toString()}`);
-    return await this.connect(Equity__factory, address.toString()).getVotingHolders(voteId, start, end);
+    return await this.connect(Voting__factory, address.toString()).getVotingHolders(voteId, start, end);
   }
 
   async getTotalVotingHolders(address: EvmAddress, voteId: number): Promise<number> {
     LogService.logTrace(`Getting total voting holders for vote ${voteId} for security ${address.toString()}`);
 
-    const total = await this.connect(Equity__factory, address.toString()).getTotalVotingHolders(voteId);
+    const total = await this.connect(Voting__factory, address.toString()).getTotalVotingHolders(voteId);
 
     return Number(total);
   }

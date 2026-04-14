@@ -64,8 +64,12 @@ import {
   ClearingTransferFacet__factory,
   ControlListFacet__factory,
   DiamondFacet__factory,
+  Dividend__factory,
   Equity__factory,
   ERC1410IssuerFacet__factory,
+  IDividend,
+  IVoting,
+  Voting__factory,
   ERC1410ManagementFacet__factory,
   ERC1410TokenHolderFacet__factory,
   ERC1643Facet__factory,
@@ -105,7 +109,7 @@ import EventService from "@service/event/EventService";
 import LogService from "@service/log/LogService";
 import NetworkService from "@service/network/NetworkService";
 import MetamaskService from "@service/wallet/metamask/MetamaskService";
-import { BaseContract, ContractTransactionResponse, Provider, Signer } from "ethers";
+import { BaseContract, Contract, ContractTransactionResponse, Provider, Signer } from "ethers";
 import { singleton } from "tsyringe";
 import { SigningError } from "../error/SigningError";
 import { MirrorNodeAdapter } from "../mirror/MirrorNodeAdapter";
@@ -579,7 +583,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       executionDate: ${executionDate},
       amount : ${amount}  `,
     );
-    const dividendStruct: IEquity.DividendStruct = {
+    const dividendStruct: IDividend.DividendStruct = {
       recordDate: recordDate.toBigInt(),
       executionDate: executionDate.toBigInt(),
       amount: amount.toBigInt(),
@@ -587,7 +591,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return this.executeTransaction(
-      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      Dividend__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setDividend",
       [dividendStruct],
       GAS.SET_DIVIDENDS,
@@ -596,8 +600,9 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   }
 
   async cancelDividend(security: EvmAddress, dividendId: number): Promise<TransactionResponse> {
+    // TODO: P4 — cancelDividend will be added to DividendFacet contract
     return this.executeTransaction(
-      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      Dividend__factory.connect(security.toString(), this.getSignerOrProvider()) as unknown as Contract,
       "cancelDividend",
       [dividendId],
       GAS.CANCEL_DIVIDEND,
@@ -610,13 +615,13 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `equity: ${security} ,
       recordDate :${recordDate} , `,
     );
-    const votingStruct: IEquity.VotingStruct = {
+    const votingStruct: IVoting.VotingStruct = {
       recordDate: recordDate.toBigInt(),
       data: data,
     };
 
     return this.executeTransaction(
-      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      Voting__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setVoting",
       [votingStruct],
       GAS.SET_VOTING_RIGHTS,
@@ -680,8 +685,9 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   async cancelVoting(security: EvmAddress, votingId: number): Promise<TransactionResponse> {
     LogService.logTrace(`Cancelling voting: ${votingId} for equity: ${security}`);
 
+    // TODO: P4 — cancelVoting will be added to VotingFacet contract
     return this.executeTransaction(
-      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      Voting__factory.connect(security.toString(), this.getSignerOrProvider()) as unknown as Contract,
       "cancelVoting",
       [votingId],
       GAS.CANCEL_VOTING,

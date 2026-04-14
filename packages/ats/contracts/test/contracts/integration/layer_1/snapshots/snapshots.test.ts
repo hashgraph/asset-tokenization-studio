@@ -11,24 +11,13 @@ import {
   type AccessControl,
   type Lock,
   type IHold,
-  SsiManagement,
-  Kyc,
-  Equity,
-  TimeTravelFacet,
-  FreezeFacet,
-  ClearingTransferFacet,
-  AccessControl__factory,
-  IERC1410__factory,
-  Snapshots__factory,
-  Pause__factory,
-  Lock__factory,
-  IHold__factory,
-  Kyc__factory,
-  SsiManagement__factory,
-  Equity__factory,
-  TimeTravelFacet__factory,
-  FreezeFacet__factory,
-  ClearingTransferFacet__factory,
+  type DividendFacet,
+  type SsiManagement,
+  type Kyc,
+  type Equity,
+  type TimeTravelFacet,
+  type FreezeFacet,
+  type ClearingTransferFacet,
 } from "@contract-types";
 import { ZERO, EMPTY_STRING, ADDRESS_ZERO, dateToUnixTimestamp, ATS_ROLES } from "@scripts";
 import { grantRoleAndPauseToken } from "@test";
@@ -65,6 +54,7 @@ describe("Snapshots Tests", () => {
   let kycFacet: Kyc;
   let ssiManagementFacet: SsiManagement;
   let equityFacet: Equity;
+  let dividendFacet: DividendFacet;
   let timeTravelFacet: TimeTravelFacet;
   let freezeFacet: FreezeFacet;
   let clearingTransferFacet: ClearingTransferFacet;
@@ -87,22 +77,23 @@ describe("Snapshots Tests", () => {
   }
 
   async function setFacets(diamond: ResolverProxy) {
-    accessControlFacet = AccessControl__factory.connect(diamond.target.toString(), ethers.provider);
+    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
 
-    erc1410Facet = IERC1410__factory.connect(diamond.target.toString(), ethers.provider);
+    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target);
 
-    snapshotFacet = Snapshots__factory.connect(diamond.target.toString(), ethers.provider);
+    snapshotFacet = await ethers.getContractAt("Snapshots", diamond.target);
 
-    pauseFacet = Pause__factory.connect(diamond.target.toString(), ethers.provider);
+    pauseFacet = await ethers.getContractAt("Pause", diamond.target);
 
-    lockFacet = Lock__factory.connect(diamond.target.toString(), ethers.provider);
-    holdFacet = IHold__factory.connect(diamond.target.toString(), ethers.provider);
-    kycFacet = Kyc__factory.connect(diamond.target.toString(), signer_B);
-    ssiManagementFacet = SsiManagement__factory.connect(diamond.target.toString(), signer_A);
-    equityFacet = Equity__factory.connect(diamond.target.toString(), ethers.provider);
-    timeTravelFacet = TimeTravelFacet__factory.connect(diamond.target.toString(), signer_A);
-    freezeFacet = FreezeFacet__factory.connect(diamond.target.toString(), ethers.provider);
-    clearingTransferFacet = ClearingTransferFacet__factory.connect(diamond.target.toString(), ethers.provider);
+    lockFacet = await ethers.getContractAt("Lock", diamond.target);
+    holdFacet = await ethers.getContractAt("IHold", diamond.target);
+    kycFacet = await ethers.getContractAt("Kyc", diamond.target, signer_B);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.target, signer_A);
+    equityFacet = await ethers.getContractAt("Equity", diamond.target);
+    dividendFacet = await ethers.getContractAt("DividendFacet", diamond.target, signer_A);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
+    freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.target);
+    clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.target);
   }
 
   // TODO(phase-5): type as Rbac[]
@@ -823,9 +814,9 @@ describe("Snapshots Tests", () => {
         amount: dividendsAmountPerEquity,
         amountDecimals: dividendAmountDecimalsPerEquity,
       };
-      await equityFacet.connect(signer_A).setDividend(dividendData_1);
-      await equityFacet.connect(signer_A).setDividend(dividendData_2);
-      await equityFacet.connect(signer_A).setDividend(dividendData_3);
+      await dividendFacet.connect(signer_A).setDividend(dividendData_1);
+      await dividendFacet.connect(signer_A).setDividend(dividendData_2);
+      await dividendFacet.connect(signer_A).setDividend(dividendData_3);
 
       const balanceAdjustmentExecutionDateInSeconds_1 = dateToUnixTimestamp("2030-01-01T00:00:07Z");
       const balanceAdjustmentExecutionDateInSeconds_2 = dateToUnixTimestamp("2030-01-01T00:00:13Z");
@@ -872,9 +863,9 @@ describe("Snapshots Tests", () => {
       const decimalFactor_3 = decimalFactor_2 + balanceAdjustmentsDecimals_3;
 
       // check
-      const dividendFor_C_1 = await equityFacet.getDividendFor(1, signer_C.address);
-      const dividendFor_C_2 = await equityFacet.getDividendFor(2, signer_C.address);
-      const dividendFor_C_3 = await equityFacet.getDividendFor(3, signer_C.address);
+      const dividendFor_C_1 = await dividendFacet.getDividendFor(1, signer_C.address);
+      const dividendFor_C_2 = await dividendFacet.getDividendFor(2, signer_C.address);
+      const dividendFor_C_3 = await dividendFacet.getDividendFor(3, signer_C.address);
       const balance_C_At_Snapshot_4 = await snapshotFacet.balanceOfAtSnapshot(4, signer_C.address);
 
       expect(dividendFor_C_1.tokenBalance).to.be.equal(balanceOf_C_Original);

@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-13T16:54:56.424Z
- * Facets: 69
+ * Generated: 2026-04-14T06:15:32.359Z
+ * Facets: 71
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -38,6 +38,7 @@ import {
   ControlListFacet__factory,
   CorporateActionsFacet__factory,
   DiamondFacet__factory,
+  DividendFacet__factory,
   ERC1410IssuerFacet__factory,
   ERC1410ManagementFacet__factory,
   ERC1410ReadFacet__factory,
@@ -88,6 +89,7 @@ import {
   TransferAndLockFixedRateFacet__factory,
   TransferAndLockKpiLinkedRateFacet__factory,
   TransferAndLockSustainabilityPerformanceTargetRateFacet__factory,
+  VotingFacet__factory,
   AccessControlFacetTimeTravel__factory,
   AdjustBalancesFacetTimeTravel__factory,
   BondUSAFacetTimeTravel__factory,
@@ -107,6 +109,7 @@ import {
   ControlListFacetTimeTravel__factory,
   CorporateActionsFacetTimeTravel__factory,
   DiamondFacetTimeTravel__factory,
+  DividendFacetTimeTravel__factory,
   ERC1410IssuerFacetTimeTravel__factory,
   ERC1410ManagementFacetTimeTravel__factory,
   ERC1410ReadFacetTimeTravel__factory,
@@ -155,6 +158,7 @@ import {
   TransferAndLockFixedRateFacetTimeTravel__factory,
   TransferAndLockKpiLinkedRateFacetTimeTravel__factory,
   TransferAndLockSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
+  VotingFacetTimeTravel__factory,
 } from "@contract-types";
 import { getLibLinks } from "./orchestratorLibraries";
 
@@ -4187,23 +4191,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) => new DiamondFacetTimeTravel__factory(signer),
   },
 
-  EquityUSAFacet: {
-    name: "EquityUSAFacet",
+  DividendFacet: {
+    name: "DividendFacet",
     resolverKey: {
-      name: "_EQUITY_RESOLVER_KEY",
-      value: "0xfe85fe0513f5a5676011f59495ae16b2b93c981c190e99e61903e5603542c810",
+      name: "_DIVIDEND_RESOLVER_KEY",
+      value: "0x63752e3f4bd54d9fec1ad1667ef4de4f80e9a6484fb94f93ea4312aef9c19bea",
     },
-    inheritance: ["EquityUSA", "IStaticFunctionSelectors"],
+    inheritance: ["Dividend", "IStaticFunctionSelectors"],
     methods: [
-      {
-        name: "_initialize_equityUSA",
-        signature: {
-          full: "function _initialize_equityUSA((bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) _equityDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
-          canonical:
-            "_initialize_equityUSA((bool,bool,bool,bool,bool,bool,bool,uint8,bytes3,uint256,uint8),(uint8,uint8,uint256,uint8,uint256,uint8,uint8,uint8),(bool,string,string))",
-        },
-        selector: "0x8c505179",
-      },
       {
         name: "cancelDividend",
         signature: {
@@ -4211,22 +4206,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "cancelDividend(uint256)",
         },
         selector: "0xd1869b7c",
-      },
-      {
-        name: "cancelScheduledBalanceAdjustment",
-        signature: {
-          full: "function cancelScheduledBalanceAdjustment(uint256 _balanceAdjustmentId) returns (bool success_)",
-          canonical: "cancelScheduledBalanceAdjustment(uint256)",
-        },
-        selector: "0x564387f9",
-      },
-      {
-        name: "cancelVoting",
-        signature: {
-          full: "function cancelVoting(uint256 _voteId) returns (bool success_)",
-          canonical: "cancelVoting(uint256)",
-        },
-        selector: "0x549bdd6e",
       },
       {
         name: "getDividend",
@@ -4247,7 +4226,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getDividendFor",
         signature: {
-          full: "function getDividendFor(uint256 _dividendID, address _account) view returns ((uint256 tokenBalance, uint256 amount, uint8 amountDecimals, uint256 recordDate, uint256 executionDate, uint8 decimals, bool recordDateReached, bool isDisabled) dividendFor_)",
+          full: "function getDividendFor(uint256 _dividendID, address _account) view returns ((uint256 tokenBalance, uint256 amount, uint8 amountDecimals, uint256 recordDate, uint256 executionDate, uint8 decimals, bool recordDateReached) dividendFor_)",
           canonical: "getDividendFor(uint256,address)",
         },
         selector: "0x85f196b0",
@@ -4267,6 +4246,140 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "getDividendsCount()",
         },
         selector: "0x9e676952",
+      },
+      {
+        name: "getTotalDividendHolders",
+        signature: {
+          full: "function getTotalDividendHolders(uint256 _dividendID) view returns (uint256)",
+          canonical: "getTotalDividendHolders(uint256)",
+        },
+        selector: "0xd61a022b",
+      },
+      {
+        name: "setDividend",
+        signature: {
+          full: "function setDividend((uint256 recordDate, uint256 executionDate, uint256 amount, uint8 amountDecimals) _newDividend) returns (uint256 dividendID_)",
+          canonical: "setDividend((uint256,uint256,uint256,uint8))",
+        },
+        selector: "0xe7686a05",
+      },
+    ],
+    events: [
+      {
+        name: "DividendCancelled",
+        signature: {
+          full: "event DividendCancelled(uint256 dividendId, address indexed operator)",
+          canonical: "DividendCancelled(uint256,address)",
+        },
+        topic0: "0x188bc828dca3e79fc15106a0bd0347c4fa4c9be522391b586199a133d1ed28c8",
+      },
+      {
+        name: "DividendSet",
+        signature: {
+          full: "event DividendSet(bytes32 corporateActionId, uint256 dividendId, address indexed operator, uint256 indexed recordDate, uint256 indexed executionDate, uint256 amount, uint8 amountDecimals)",
+          canonical: "DividendSet(bytes32,uint256,address,uint256,uint256,uint256,uint8)",
+        },
+        topic0: "0xc849cd6d345b059ab830e5aa8ab5e38bd118833e14bcdfea70231b0e5c072a12",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRole",
+        signature: {
+          full: "error AccountHasNoRole(address account, bytes32 role)",
+          canonical: "AccountHasNoRole(address,bytes32)",
+        },
+        selector: "0xa1180aad",
+      },
+      {
+        name: "DividendAlreadyExecuted",
+        signature: {
+          full: "error DividendAlreadyExecuted(bytes32 corporateActionId, uint256 dividendId)",
+          canonical: "DividendAlreadyExecuted(bytes32,uint256)",
+        },
+        selector: "0x50fe6757",
+      },
+      {
+        name: "DividendCreationFailed",
+        signature: { full: "error DividendCreationFailed()", canonical: "DividendCreationFailed()" },
+        selector: "0x409bf2d2",
+      },
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
+      },
+      {
+        name: "WrongDates",
+        signature: {
+          full: "error WrongDates(uint256 firstDate, uint256 secondDate)",
+          canonical: "WrongDates(uint256,uint256)",
+        },
+        selector: "0x1c94559c",
+      },
+      {
+        name: "WrongIndexForAction",
+        signature: {
+          full: "error WrongIndexForAction(uint256 index, bytes32 actionType)",
+          canonical: "WrongIndexForAction(uint256,bytes32)",
+        },
+        selector: "0xd3924f4e",
+      },
+    ],
+    factory: (signer) => new DividendFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) => new DividendFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
+  },
+
+  EquityUSAFacet: {
+    name: "EquityUSAFacet",
+    resolverKey: {
+      name: "_EQUITY_RESOLVER_KEY",
+      value: "0xfe85fe0513f5a5676011f59495ae16b2b93c981c190e99e61903e5603542c810",
+    },
+    inheritance: ["EquityUSA", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "_initialize_equityUSA",
+        signature: {
+          full: "function _initialize_equityUSA((bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) _equityDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
+          canonical:
+            "_initialize_equityUSA((bool,bool,bool,bool,bool,bool,bool,uint8,bytes3,uint256,uint8),(uint8,uint8,uint256,uint8,uint256,uint8,uint8,uint8),(bool,string,string))",
+        },
+        selector: "0x8c505179",
+      },
+      {
+        name: "cancelScheduledBalanceAdjustment",
+        signature: {
+          full: "function cancelScheduledBalanceAdjustment(uint256 _balanceAdjustmentId) returns (bool success_)",
+          canonical: "cancelScheduledBalanceAdjustment(uint256)",
+        },
+        selector: "0x564387f9",
       },
       {
         name: "getEquityDetails",
@@ -4309,68 +4422,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x8fda5afe",
       },
       {
-        name: "getTotalDividendHolders",
-        signature: {
-          full: "function getTotalDividendHolders(uint256 _dividendID) view returns (uint256)",
-          canonical: "getTotalDividendHolders(uint256)",
-        },
-        selector: "0xd61a022b",
-      },
-      {
         name: "getTotalSecurityHolders",
         signature: {
           full: "function getTotalSecurityHolders() view returns (uint256)",
           canonical: "getTotalSecurityHolders()",
         },
         selector: "0xbd007c8f",
-      },
-      {
-        name: "getTotalVotingHolders",
-        signature: {
-          full: "function getTotalVotingHolders(uint256 _voteID) view returns (uint256)",
-          canonical: "getTotalVotingHolders(uint256)",
-        },
-        selector: "0x92c51818",
-      },
-      {
-        name: "getVoting",
-        signature: {
-          full: "function getVoting(uint256 _voteID) view returns (((uint256 recordDate, bytes data) voting, uint256 snapshotId) registeredVoting_, bool isDisabled_)",
-          canonical: "getVoting(uint256)",
-        },
-        selector: "0x3afc7282",
-      },
-      {
-        name: "getVotingCount",
-        signature: {
-          full: "function getVotingCount() view returns (uint256 votingCount_)",
-          canonical: "getVotingCount()",
-        },
-        selector: "0x9c2aab5e",
-      },
-      {
-        name: "getVotingFor",
-        signature: {
-          full: "function getVotingFor(uint256 _voteID, address _account) view returns ((uint256 tokenBalance, uint256 recordDate, bytes data, uint8 decimals, bool recordDateReached, bool isDisabled) votingFor_)",
-          canonical: "getVotingFor(uint256,address)",
-        },
-        selector: "0x7633eccf",
-      },
-      {
-        name: "getVotingHolders",
-        signature: {
-          full: "function getVotingHolders(uint256 _voteID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
-          canonical: "getVotingHolders(uint256,uint256,uint256)",
-        },
-        selector: "0x009f64ac",
-      },
-      {
-        name: "setDividend",
-        signature: {
-          full: "function setDividend((uint256 recordDate, uint256 executionDate, uint256 amount, uint8 amountDecimals) _newDividend) returns (uint256 dividendID_)",
-          canonical: "setDividend((uint256,uint256,uint256,uint8))",
-        },
-        selector: "0xe7686a05",
       },
       {
         name: "setScheduledBalanceAdjustment",
@@ -4380,32 +4437,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xd1661084",
       },
-      {
-        name: "setVoting",
-        signature: {
-          full: "function setVoting((uint256 recordDate, bytes data) _newVoting) returns (uint256 voteID_)",
-          canonical: "setVoting((uint256,bytes))",
-        },
-        selector: "0x5adaa49e",
-      },
     ],
     events: [
-      {
-        name: "DividendCancelled",
-        signature: {
-          full: "event DividendCancelled(uint256 dividendId, address indexed operator)",
-          canonical: "DividendCancelled(uint256,address)",
-        },
-        topic0: "0x188bc828dca3e79fc15106a0bd0347c4fa4c9be522391b586199a133d1ed28c8",
-      },
-      {
-        name: "DividendSet",
-        signature: {
-          full: "event DividendSet(bytes32 corporateActionId, uint256 dividendId, address indexed operator, uint256 indexed recordDate, uint256 indexed executionDate, uint256 amount, uint8 amountDecimals)",
-          canonical: "DividendSet(bytes32,uint256,address,uint256,uint256,uint256,uint8)",
-        },
-        topic0: "0xc849cd6d345b059ab830e5aa8ab5e38bd118833e14bcdfea70231b0e5c072a12",
-      },
       {
         name: "ScheduledBalanceAdjustmentCancelled",
         signature: {
@@ -4421,22 +4454,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "ScheduledBalanceAdjustmentSet(bytes32,uint256,address,uint256,uint256,uint256)",
         },
         topic0: "0x71cd63a6f86ff487645dcceb29d3eac904f16d7006cfa7b1da3ea951a77a9666",
-      },
-      {
-        name: "VotingCancelled",
-        signature: {
-          full: "event VotingCancelled(uint256 voteId, address indexed operator)",
-          canonical: "VotingCancelled(uint256,address)",
-        },
-        topic0: "0x0ca8f69518859b63e253a165f70a3ef3ad0db94215d1703ebcadd269c4c860bc",
-      },
-      {
-        name: "VotingSet",
-        signature: {
-          full: "event VotingSet(bytes32 corporateActionId, uint256 voteId, address indexed operator, uint256 indexed recordDate, bytes data)",
-          canonical: "VotingSet(bytes32,uint256,address,uint256,bytes)",
-        },
-        topic0: "0x5ca20e6ec9818c8d574ae3452d46ed4c9dc9d8df2ffa263150507c7e9124ac2f",
       },
     ],
     errors: [
@@ -4475,35 +4492,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x0c68e660",
       },
       {
-        name: "DividendAlreadyExecuted",
-        signature: {
-          full: "error DividendAlreadyExecuted(bytes32 corporateActionId, uint256 dividendId)",
-          canonical: "DividendAlreadyExecuted(bytes32,uint256)",
-        },
-        selector: "0x50fe6757",
-      },
-      {
-        name: "DividendCreationFailed",
-        signature: { full: "error DividendCreationFailed()", canonical: "DividendCreationFailed()" },
-        selector: "0x409bf2d2",
-      },
-      {
         name: "FactorIsZero",
         signature: { full: "error FactorIsZero()", canonical: "FactorIsZero()" },
         selector: "0x936e9b6d",
-      },
-      {
-        name: "SnapshotIdDoesNotExists",
-        signature: {
-          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
-          canonical: "SnapshotIdDoesNotExists(uint256)",
-        },
-        selector: "0x8e81eb83",
-      },
-      {
-        name: "SnapshotIdNull",
-        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
-        selector: "0xf128004d",
       },
       {
         name: "TokenIsPaused",
@@ -4516,27 +4507,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xc9622656",
       },
       {
-        name: "VotingAlreadyRecorded",
-        signature: {
-          full: "error VotingAlreadyRecorded(bytes32 corporateActionId, uint256 voteId)",
-          canonical: "VotingAlreadyRecorded(bytes32,uint256)",
-        },
-        selector: "0x7a2e2617",
-      },
-      {
-        name: "VotingRightsCreationFailed",
-        signature: { full: "error VotingRightsCreationFailed()", canonical: "VotingRightsCreationFailed()" },
-        selector: "0x0cc16600",
-      },
-      {
-        name: "WrongDates",
-        signature: {
-          full: "error WrongDates(uint256 firstDate, uint256 secondDate)",
-          canonical: "WrongDates(uint256,uint256)",
-        },
-        selector: "0x1c94559c",
-      },
-      {
         name: "WrongIndexForAction",
         signature: {
           full: "error WrongIndexForAction(uint256 index, bytes32 actionType)",
@@ -4545,8 +4515,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xd3924f4e",
       },
     ],
-    factory: (signer) => new EquityUSAFacet__factory(getLibLinks("clearingReadOps") as any, signer),
-    timeTravelFactory: (signer) => new EquityUSAFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
+    factory: (signer) => new EquityUSAFacet__factory(signer),
+    timeTravelFactory: (signer) => new EquityUSAFacetTimeTravel__factory(signer),
   },
 
   ERC1410IssuerFacet: {
@@ -11704,12 +11674,161 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) =>
       new TransferAndLockSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
   },
+
+  VotingFacet: {
+    name: "VotingFacet",
+    resolverKey: {
+      name: "_VOTING_RESOLVER_KEY",
+      value: "0x97e0ffc69e5d5dd7c4635bfce0a5cf15b1c313433d49edbd55813da224b03768",
+    },
+    inheritance: ["Voting", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "cancelVoting",
+        signature: {
+          full: "function cancelVoting(uint256 _voteId) returns (bool success_)",
+          canonical: "cancelVoting(uint256)",
+        },
+        selector: "0x549bdd6e",
+      },
+      {
+        name: "getTotalVotingHolders",
+        signature: {
+          full: "function getTotalVotingHolders(uint256 _voteID) view returns (uint256)",
+          canonical: "getTotalVotingHolders(uint256)",
+        },
+        selector: "0x92c51818",
+      },
+      {
+        name: "getVoting",
+        signature: {
+          full: "function getVoting(uint256 _voteID) view returns (((uint256 recordDate, bytes data) voting, uint256 snapshotId) registeredVoting_, bool isDisabled_)",
+          canonical: "getVoting(uint256)",
+        },
+        selector: "0x3afc7282",
+      },
+      {
+        name: "getVotingCount",
+        signature: {
+          full: "function getVotingCount() view returns (uint256 votingCount_)",
+          canonical: "getVotingCount()",
+        },
+        selector: "0x9c2aab5e",
+      },
+      {
+        name: "getVotingFor",
+        signature: {
+          full: "function getVotingFor(uint256 _voteID, address _account) view returns ((uint256 tokenBalance, uint256 recordDate, bytes data, uint8 decimals, bool recordDateReached) votingFor_)",
+          canonical: "getVotingFor(uint256,address)",
+        },
+        selector: "0x7633eccf",
+      },
+      {
+        name: "getVotingHolders",
+        signature: {
+          full: "function getVotingHolders(uint256 _voteID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+          canonical: "getVotingHolders(uint256,uint256,uint256)",
+        },
+        selector: "0x009f64ac",
+      },
+      {
+        name: "setVoting",
+        signature: {
+          full: "function setVoting((uint256 recordDate, bytes data) _newVoting) returns (uint256 voteID_)",
+          canonical: "setVoting((uint256,bytes))",
+        },
+        selector: "0x5adaa49e",
+      },
+    ],
+    events: [
+      {
+        name: "VotingCancelled",
+        signature: {
+          full: "event VotingCancelled(uint256 voteId, address indexed operator)",
+          canonical: "VotingCancelled(uint256,address)",
+        },
+        topic0: "0x0ca8f69518859b63e253a165f70a3ef3ad0db94215d1703ebcadd269c4c860bc",
+      },
+      {
+        name: "VotingSet",
+        signature: {
+          full: "event VotingSet(bytes32 corporateActionId, uint256 voteId, address indexed operator, uint256 indexed recordDate, bytes data)",
+          canonical: "VotingSet(bytes32,uint256,address,uint256,bytes)",
+        },
+        topic0: "0x5ca20e6ec9818c8d574ae3452d46ed4c9dc9d8df2ffa263150507c7e9124ac2f",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRole",
+        signature: {
+          full: "error AccountHasNoRole(address account, bytes32 role)",
+          canonical: "AccountHasNoRole(address,bytes32)",
+        },
+        selector: "0xa1180aad",
+      },
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
+      },
+      {
+        name: "VotingAlreadyRecorded",
+        signature: {
+          full: "error VotingAlreadyRecorded(bytes32 corporateActionId, uint256 voteId)",
+          canonical: "VotingAlreadyRecorded(bytes32,uint256)",
+        },
+        selector: "0x7a2e2617",
+      },
+      {
+        name: "VotingRightsCreationFailed",
+        signature: { full: "error VotingRightsCreationFailed()", canonical: "VotingRightsCreationFailed()" },
+        selector: "0x0cc16600",
+      },
+      {
+        name: "WrongIndexForAction",
+        signature: {
+          full: "error WrongIndexForAction(uint256 index, bytes32 actionType)",
+          canonical: "WrongIndexForAction(uint256,bytes32)",
+        },
+        selector: "0xd3924f4e",
+      },
+    ],
+    factory: (signer) => new VotingFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) => new VotingFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
+  },
 };
 
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 69 as const;
+export const TOTAL_FACETS = 71 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -12175,6 +12294,11 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [],
   },
 
+  DividendStorageWrapper: {
+    name: "DividendStorageWrapper",
+    methods: [],
+  },
+
   EquityStorageWrapper: {
     name: "EquityStorageWrapper",
     methods: [],
@@ -12325,12 +12449,17 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     name: "TimeTravelStorageWrapper",
     methods: [],
   },
+
+  VotingStorageWrapper: {
+    name: "VotingStorageWrapper",
+    methods: [],
+  },
 };
 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 32 as const;
+export const TOTAL_STORAGE_WRAPPERS = 34 as const;
 
 /**
  * All role identifiers extracted from contracts.

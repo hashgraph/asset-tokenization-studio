@@ -10,6 +10,7 @@ import {
   ClearingActionsFacet,
   ControlListFacet,
   DiamondFacet,
+  type Dividend,
   type Equity,
   ERC1594Facet,
   ERC1644Facet,
@@ -102,6 +103,7 @@ describe("ERC1410 Tests", () => {
   let accessControlFacet: any;
   let pauseFacet: PauseFacet;
   let equityFacet: Equity;
+  let dividendFacet: Dividend;
   let controlList: any;
   let capFacet: Cap;
   let erc20Facet: ERC20Facet;
@@ -363,6 +365,7 @@ describe("ERC1410 Tests", () => {
     erc1594Facet = await ethers.getContractAt("ERC1594Facet", diamond.target);
     erc1644Facet = await ethers.getContractAt("ERC1644Facet", diamond.target);
     equityFacet = await ethers.getContractAt("Equity", diamond.target);
+    dividendFacet = await ethers.getContractAt("Dividend", diamond.target);
     kycFacet = await ethers.getContractAt("KycFacet", diamond.target, signer_B);
     ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.target);
     controlList = await ethers.getContractAt("ControlListFacet", diamond.target, signer_A);
@@ -1187,8 +1190,8 @@ describe("ERC1410 Tests", () => {
         amount: 1,
         amountDecimals: 0,
       };
-      await equityFacet.connect(signer_C).setDividend(dividendData_1);
-      await equityFacet.connect(signer_C).setDividend(dividendData);
+      await dividendFacet.connect(signer_C).setDividend(dividendData_1);
+      await dividendFacet.connect(signer_C).setDividend(dividendData);
 
       //  transfer
       const canTransfer = await erc1410Facet
@@ -1215,13 +1218,13 @@ describe("ERC1410 Tests", () => {
       expect(balanceOf_E).to.equal(balanceOf_E_Original - amount);
       const balanceOf_D = await erc1410Facet.balanceOf(signer_D.address);
       expect(balanceOf_D).to.equal(2 * amount);
-      let [dividend_1] = await equityFacet.getDividend(1);
-      let [dividend] = await equityFacet.getDividend(2);
+      let [dividend_1] = await dividendFacet.getDividend(1);
+      let [dividend] = await dividendFacet.getDividend(2);
       expect(dividend_1.snapshotId).to.equal(0);
       expect(dividend.snapshotId).to.equal(0);
-      let dividend_1_For_C = await equityFacet.getDividendFor(1, signer_C.address);
-      let dividend_1_For_E = await equityFacet.getDividendFor(1, signer_E.address);
-      let dividend_1_For_D = await equityFacet.getDividendFor(1, signer_D.address);
+      let dividend_1_For_C = await dividendFacet.getDividendFor(1, signer_C.address);
+      let dividend_1_For_E = await dividendFacet.getDividendFor(1, signer_E.address);
+      let dividend_1_For_D = await dividendFacet.getDividendFor(1, signer_D.address);
       expect(dividend_1_For_C.tokenBalance).to.equal(0);
       expect(dividend_1_For_E.tokenBalance).to.equal(0);
       expect(dividend_1_For_D.tokenBalance).to.equal(0);
@@ -1234,12 +1237,12 @@ describe("ERC1410 Tests", () => {
       // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
       await timeTravelFacet.changeSystemTimestamp(dividendsRecordDateInSeconds_1 + 1);
 
-      [dividend_1] = await equityFacet.getDividend(1);
+      [dividend_1] = await dividendFacet.getDividend(1);
       expect(dividend_1.snapshotId).to.equal(0);
 
-      dividend_1_For_C = await equityFacet.getDividendFor(1, signer_C.address);
-      dividend_1_For_E = await equityFacet.getDividendFor(1, signer_E.address);
-      dividend_1_For_D = await equityFacet.getDividendFor(1, signer_D.address);
+      dividend_1_For_C = await dividendFacet.getDividendFor(1, signer_C.address);
+      dividend_1_For_E = await dividendFacet.getDividendFor(1, signer_E.address);
+      dividend_1_For_D = await dividendFacet.getDividendFor(1, signer_D.address);
 
       expect(dividend_1_For_C.tokenBalance).to.equal(balanceOf_C);
       expect(dividend_1_For_E.tokenBalance).to.equal(balanceOf_E);
@@ -1256,13 +1259,13 @@ describe("ERC1410 Tests", () => {
         .to.emit(snapshotsFacet, "SnapshotTriggered")
         .withArgs(1, ethers.toBeHex(1, 32));
       // check that scheduled snapshots was triggered
-      [dividend_1] = await equityFacet.getDividend(1);
-      [dividend] = await equityFacet.getDividend(2);
+      [dividend_1] = await dividendFacet.getDividend(1);
+      [dividend] = await dividendFacet.getDividend(2);
       expect(dividend_1.snapshotId).to.equal(1);
       expect(dividend.snapshotId).to.equal(0);
-      dividend_1_For_C = await equityFacet.getDividendFor(1, signer_C.address);
-      dividend_1_For_E = await equityFacet.getDividendFor(1, signer_E.address);
-      dividend_1_For_D = await equityFacet.getDividendFor(1, signer_D.address);
+      dividend_1_For_C = await dividendFacet.getDividendFor(1, signer_C.address);
+      dividend_1_For_E = await dividendFacet.getDividendFor(1, signer_E.address);
+      dividend_1_For_D = await dividendFacet.getDividendFor(1, signer_D.address);
 
       expect(dividend_1_For_C.tokenBalance).to.equal(balanceOf_C);
       expect(dividend_1_For_E.tokenBalance).to.equal(balanceOf_E);
@@ -1283,8 +1286,8 @@ describe("ERC1410 Tests", () => {
         .withArgs(2, ethers.toBeHex(2, 32));
 
       // check that scheduled snapshots was triggered
-      [dividend_1] = await equityFacet.getDividend(1);
-      [dividend] = await equityFacet.getDividend(2);
+      [dividend_1] = await dividendFacet.getDividend(1);
+      [dividend] = await dividendFacet.getDividend(2);
       expect(dividend_1.snapshotId).to.equal(1);
       expect(dividend.snapshotId).to.equal(2);
     });
@@ -1338,8 +1341,8 @@ describe("ERC1410 Tests", () => {
         amount: 1,
         amountDecimals: 0,
       };
-      await equityFacet.connect(signer_C).setDividend(dividendData_1);
-      await equityFacet.connect(signer_C).setDividend(dividendData);
+      await dividendFacet.connect(signer_C).setDividend(dividendData_1);
+      await dividendFacet.connect(signer_C).setDividend(dividendData);
 
       //  transfer
       await expect(
@@ -1365,8 +1368,8 @@ describe("ERC1410 Tests", () => {
       const totalSupplyByPartition = await erc1410Facet.totalSupplyByPartition(_PARTITION_ID_1);
       expect(totalSupply).to.equal(BigInt(balanceOf_C_Original) + BigInt(balanceOf_E_Original) + balanceOf_D);
       expect(totalSupplyByPartition.toString()).to.equal(totalSupply.toString());
-      let [dividend_1] = await equityFacet.getDividend(1);
-      let [dividend] = await equityFacet.getDividend(2);
+      let [dividend_1] = await dividendFacet.getDividend(1);
+      let [dividend] = await dividendFacet.getDividend(2);
       expect(dividend_1.snapshotId).to.equal(0);
       expect(dividend.snapshotId).to.equal(0);
 
@@ -1394,8 +1397,8 @@ describe("ERC1410 Tests", () => {
         .withArgs(1, ethers.toBeHex(1, 32));
 
       // check that scheduled snapshots was triggered
-      [dividend_1] = await equityFacet.getDividend(1);
-      [dividend] = await equityFacet.getDividend(2);
+      [dividend_1] = await dividendFacet.getDividend(1);
+      [dividend] = await dividendFacet.getDividend(2);
       expect(dividend_1.snapshotId).to.equal(1);
       expect(dividend.snapshotId).to.equal(0);
     });
@@ -1420,8 +1423,8 @@ describe("ERC1410 Tests", () => {
         amount: 1,
         amountDecimals: 0,
       };
-      await equityFacet.connect(signer_C).setDividend(dividendData_1);
-      await equityFacet.connect(signer_C).setDividend(dividendData);
+      await dividendFacet.connect(signer_C).setDividend(dividendData_1);
+      await dividendFacet.connect(signer_C).setDividend(dividendData);
 
       //  transfer
       const canRedeem = await erc1410Facet
@@ -1467,8 +1470,8 @@ describe("ERC1410 Tests", () => {
       expect(partitionsOf_E[0]).to.equal(_PARTITION_ID_1);
       expect(balanceOf_E).to.equal(balanceOf_E_Original - amount);
       expect(balanceOf_E_Partition_1).to.equal(balanceOf_E);
-      let [dividend_1] = await equityFacet.getDividend(1);
-      let [dividend] = await equityFacet.getDividend(2);
+      let [dividend_1] = await dividendFacet.getDividend(1);
+      let [dividend] = await dividendFacet.getDividend(2);
       expect(dividend_1.snapshotId).to.equal(0);
       expect(dividend.snapshotId).to.equal(0);
       expect(totalSupply).to.be.equal(balanceOf_C_Original + balanceOf_E_Original - 2 * amount);
@@ -1483,8 +1486,8 @@ describe("ERC1410 Tests", () => {
         .withArgs(1, ethers.toBeHex(1, 32));
 
       // check that scheduled snapshots was triggered
-      [dividend_1] = await equityFacet.getDividend(1);
-      [dividend] = await equityFacet.getDividend(2);
+      [dividend_1] = await dividendFacet.getDividend(1);
+      [dividend] = await dividendFacet.getDividend(2);
       expect(dividend_1.snapshotId).to.equal(1);
       expect(dividend.snapshotId).to.equal(0);
 
@@ -1501,8 +1504,8 @@ describe("ERC1410 Tests", () => {
         .withArgs(2, ethers.toBeHex(2, 32));
 
       // check that scheduled snapshots was triggered
-      [dividend_1] = await equityFacet.getDividend(1);
-      [dividend] = await equityFacet.getDividend(2);
+      [dividend_1] = await dividendFacet.getDividend(1);
+      [dividend] = await dividendFacet.getDividend(2);
       expect(dividend_1.snapshotId).to.equal(1);
       expect(dividend.snapshotId).to.equal(2);
     });
@@ -1680,8 +1683,8 @@ describe("ERC1410 Tests", () => {
         amount: 1,
         amountDecimals: 0,
       };
-      await equityFacet.connect(signer_C).setDividend(dividendData_1);
-      await equityFacet.connect(signer_C).setDividend(dividendData);
+      await dividendFacet.connect(signer_C).setDividend(dividendData_1);
+      await dividendFacet.connect(signer_C).setDividend(dividendData);
 
       // controller transfer
       await expect(
@@ -1716,8 +1719,8 @@ describe("ERC1410 Tests", () => {
       const balanceOf_E_Partition_1 = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_E.address);
       expect(balanceOf_E).to.equal(balanceOf_E_Original + amount);
       expect(balanceOf_E_Partition_1).to.equal(balanceOf_E);
-      let [dividend_1] = await equityFacet.getDividend(1);
-      let [dividend] = await equityFacet.getDividend(2);
+      let [dividend_1] = await dividendFacet.getDividend(1);
+      let [dividend] = await dividendFacet.getDividend(2);
       expect(dividend_1.snapshotId).to.equal(0);
       expect(dividend.snapshotId).to.equal(0);
 
@@ -1741,8 +1744,8 @@ describe("ERC1410 Tests", () => {
         .withArgs(1, ethers.toBeHex(1, 32));
 
       // check that scheduled snapshots was triggered
-      [dividend_1] = await equityFacet.getDividend(1);
-      [dividend] = await equityFacet.getDividend(2);
+      [dividend_1] = await dividendFacet.getDividend(1);
+      [dividend] = await dividendFacet.getDividend(2);
       expect(dividend_1.snapshotId).to.equal(1);
       expect(dividend.snapshotId).to.equal(0);
 
@@ -1759,8 +1762,8 @@ describe("ERC1410 Tests", () => {
         .withArgs(2, ethers.toBeHex(2, 32));
 
       // check that scheduled snapshots was triggered
-      [dividend_1] = await equityFacet.getDividend(1);
-      [dividend] = await equityFacet.getDividend(2);
+      [dividend_1] = await dividendFacet.getDividend(1);
+      [dividend] = await dividendFacet.getDividend(2);
       expect(dividend_1.snapshotId).to.equal(1);
       expect(dividend.snapshotId).to.equal(2);
     });

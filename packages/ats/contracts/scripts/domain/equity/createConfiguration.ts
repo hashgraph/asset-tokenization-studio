@@ -24,7 +24,7 @@ import { EQUITY_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
 
 /**
- * Equity-specific facets list (41 facets total).
+ * Equity-specific facets list (43 facets total).
  *
  * This is an explicit positive list of all facets required for equity tokens.
  * Includes all common facets plus EquityUSAFacet.
@@ -79,8 +79,9 @@ const EQUITY_FACETS = [
   "ExternalKycListManagementFacet",
   "ExternalPauseManagementFacet",
 
-  // Advanced Features (10)
+  // Advanced Features (11)
   "AdjustBalancesFacet",
+  "DividendFacet",
   "LockFacet",
   "NominalValueFacet",
   "ProtectedPartitionsFacet",
@@ -89,6 +90,7 @@ const EQUITY_FACETS = [
   "ScheduledSnapshotsFacet",
   "SsiManagementFacet",
   "TransferAndLockFacet",
+  "VotingFacet",
 
   // Jurisdiction-Specific (1)
   "EquityUSAFacet",

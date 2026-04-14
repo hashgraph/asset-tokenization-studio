@@ -2,65 +2,13 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
-import {
-    DIVIDEND_CORPORATE_ACTION_TYPE,
-    VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
-    BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
-} from "../../../constants/values.sol";
+import { BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE } from "../../../constants/values.sol";
 import { IEquity } from "./IEquity.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
-import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateActionsStorageWrapper.sol";
-import { AdjustBalancesStorageWrapper } from "../../../domain/asset/AdjustBalancesStorageWrapper.sol";
-import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { EquityStorageWrapper, EquityDataStorage } from "../../../domain/asset/EquityStorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract Equity is IEquity, Modifiers {
-    function setDividend(
-        Dividend calldata _newDividend
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_CORPORATE_ACTION_ROLE)
-        onlyValidDates(_newDividend.recordDate, _newDividend.executionDate)
-        onlyValidTimestamp(_newDividend.recordDate)
-        returns (uint256 dividendID_)
-    {
-        bytes32 corporateActionID;
-        (corporateActionID, dividendID_) = EquityStorageWrapper.setDividends(_newDividend);
-        emit IEquity.DividendSet(
-            corporateActionID,
-            dividendID_,
-            EvmAccessors.getMsgSender(),
-            _newDividend.recordDate,
-            _newDividend.executionDate,
-            _newDividend.amount,
-            _newDividend.amountDecimals
-        );
-    }
-
-    function setVoting(
-        Voting calldata _newVoting
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_CORPORATE_ACTION_ROLE)
-        onlyValidTimestamp(_newVoting.recordDate)
-        returns (uint256 voteID_)
-    {
-        bytes32 corporateActionID;
-        (corporateActionID, voteID_) = EquityStorageWrapper.setVoting(_newVoting);
-        emit IEquity.VotingSet(
-            corporateActionID,
-            voteID_,
-            EvmAccessors.getMsgSender(),
-            _newVoting.recordDate,
-            _newVoting.data
-        );
-    }
-
     function setScheduledBalanceAdjustment(
         ScheduledBalanceAdjustment calldata _newBalanceAdjustment
     )
@@ -86,24 +34,6 @@ abstract contract Equity is IEquity, Modifiers {
         );
     }
 
-    function cancelDividend(
-        uint256 _dividendId
-    ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (bool success_) {
-        (success_) = EquityStorageWrapper.cancelDividend(_dividendId);
-        if (success_) {
-            emit IEquity.DividendCancelled(_dividendId, EvmAccessors.getMsgSender());
-        }
-    }
-
-    function cancelVoting(
-        uint256 _voteId
-    ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (bool success_) {
-        (success_) = EquityStorageWrapper.cancelVoting(_voteId);
-        if (success_) {
-            emit IEquity.VotingCancelled(_voteId, EvmAccessors.getMsgSender());
-        }
-    }
-
     function cancelScheduledBalanceAdjustment(
         uint256 _balanceAdjustmentId
     ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (bool success_) {
@@ -115,101 +45,6 @@ abstract contract Equity is IEquity, Modifiers {
 
     function getEquityDetails() external view override returns (EquityDetailsData memory equityDetailsData_) {
         return EquityStorageWrapper.getEquityDetails();
-    }
-
-    function getDividend(
-        uint256 _dividendID
-    )
-        external
-        view
-        override
-        onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1)
-        returns (RegisteredDividend memory registeredDividend_, bool isDisabled_)
-    {
-        (registeredDividend_, , isDisabled_) = EquityStorageWrapper.getDividends(_dividendID);
-    }
-
-    function getDividendFor(
-        uint256 _dividendID,
-        address _account
-    )
-        external
-        view
-        override
-        onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1)
-        returns (DividendFor memory dividendFor_)
-    {
-        return EquityStorageWrapper.getDividendsFor(_dividendID, _account);
-    }
-
-    function getDividendAmountFor(
-        uint256 _dividendID,
-        address _account
-    )
-        external
-        view
-        override
-        onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1)
-        returns (DividendAmountFor memory dividendAmountFor_)
-    {
-        return EquityStorageWrapper.getDividendAmountFor(_dividendID, _account);
-    }
-
-    function getDividendsCount() external view override returns (uint256 dividendCount_) {
-        return EquityStorageWrapper.getDividendsCount();
-    }
-
-    function getDividendHolders(
-        uint256 _dividendID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (address[] memory holders_) {
-        return EquityStorageWrapper.getDividendHolders(_dividendID, _pageIndex, _pageLength);
-    }
-
-    function getTotalDividendHolders(uint256 _dividendID) external view returns (uint256) {
-        return EquityStorageWrapper.getTotalDividendHolders(_dividendID);
-    }
-
-    function getVoting(
-        uint256 _voteID
-    )
-        external
-        view
-        override
-        onlyMatchingActionType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1)
-        returns (RegisteredVoting memory registeredVoting_, bool isDisabled_)
-    {
-        (registeredVoting_, , isDisabled_) = EquityStorageWrapper.getVoting(_voteID);
-    }
-
-    function getVotingFor(
-        uint256 _voteID,
-        address _account
-    )
-        external
-        view
-        override
-        onlyMatchingActionType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1)
-        returns (VotingFor memory votingFor_)
-    {
-        return EquityStorageWrapper.getVotingFor(_voteID, _account);
-    }
-
-    function getVotingCount() external view override returns (uint256 votingCount_) {
-        return EquityStorageWrapper.getVotingCount();
-    }
-
-    function getVotingHolders(
-        uint256 _voteID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (address[] memory holders_) {
-        return EquityStorageWrapper.getVotingHolders(_voteID, _pageIndex, _pageLength);
-    }
-
-    function getTotalVotingHolders(uint256 _voteID) external view returns (uint256) {
-        return EquityStorageWrapper.getTotalVotingHolders(_voteID);
     }
 
     function getScheduledBalanceAdjustment(
