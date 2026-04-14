@@ -4,13 +4,11 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _EQUITY_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import {
     DIVIDEND_CORPORATE_ACTION_TYPE,
-    VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
     BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
     SNAPSHOT_RESULT_ID,
     SNAPSHOT_TASK_TYPE,
     BALANCE_ADJUSTMENT_TASK_TYPE,
     KPI_EQUITY_DIVIDEND_DATA,
-    KPI_EQUITY_VOTING_DATA,
     KPI_EQUITY_BALANCE_ADJ
 } from "../../constants/values.sol";
 import { IEquity } from "../../facets/layer_2/equity/IEquity.sol";
@@ -94,41 +92,6 @@ library EquityStorageWrapper {
 
         ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newDividend.recordDate, SNAPSHOT_TASK_TYPE);
         ScheduledTasksStorageWrapper.addScheduledSnapshot(newDividend.recordDate, actionId);
-    }
-
-    function setVoting(
-        IEquity.Voting calldata newVoting
-    ) internal returns (bytes32 corporateActionId_, uint256 voteID_) {
-        bytes memory data = abi.encode(newVoting);
-
-        (corporateActionId_, voteID_) = CorporateActionsStorageWrapper.addCorporateAction(
-            VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
-            data
-        );
-
-        initVotingRights(corporateActionId_, data);
-    }
-
-    function cancelVoting(uint256 voteId) internal returns (bool success_) {
-        IEquity.RegisteredVoting memory registeredVoting;
-        bytes32 corporateActionId;
-        (registeredVoting, corporateActionId, ) = getVoting(voteId);
-        if (registeredVoting.voting.recordDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
-            revert IEquity.VotingAlreadyRecorded(corporateActionId, voteId);
-        }
-        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
-        success_ = true;
-    }
-
-    function initVotingRights(bytes32 actionId, bytes memory data) internal {
-        if (actionId == bytes32(0)) {
-            revert IEquity.VotingRightsCreationFailed();
-        }
-
-        IEquity.Voting memory newVoting = abi.decode(data, (IEquity.Voting));
-
-        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newVoting.recordDate, SNAPSHOT_TASK_TYPE);
-        ScheduledTasksStorageWrapper.addScheduledSnapshot(newVoting.recordDate, actionId);
     }
 
     function setScheduledBalanceAdjustment(
@@ -250,12 +213,13 @@ library EquityStorageWrapper {
         uint256 dividendID,
         address account
     ) internal view returns (IEquity.DividendFor memory dividendFor_) {
-        (IEquity.RegisteredDividend memory registeredDividend, , ) = getDividends(dividendID);
+        (IEquity.RegisteredDividend memory registeredDividend, , bool isDisabled) = getDividends(dividendID);
 
         dividendFor_.amount = registeredDividend.dividend.amount;
         dividendFor_.amountDecimals = registeredDividend.dividend.amountDecimals;
         dividendFor_.recordDate = registeredDividend.dividend.recordDate;
         dividendFor_.executionDate = registeredDividend.dividend.executionDate;
+        dividendFor_.isDisabled = isDisabled;
 
         (
             dividendFor_.tokenBalance,
@@ -309,83 +273,6 @@ library EquityStorageWrapper {
 
         if (registeredDividend.snapshotId != 0)
             return SnapshotsStorageWrapper.totalTokenHoldersAt(registeredDividend.snapshotId);
-
-        return ERC1410StorageWrapper.getTotalTokenHolders();
-    }
-
-    function getVoting(
-        uint256 voteID
-    )
-        internal
-        view
-        returns (IEquity.RegisteredVoting memory registeredVoting_, bytes32 corporateActionId_, bool isDisabled_)
-    {
-        corporateActionId_ = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
-            VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
-            voteID - 1
-        );
-
-        bytes memory data;
-        (, , data, isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(corporateActionId_);
-
-        _checkUnexpectedError(data.length == 0, KPI_EQUITY_VOTING_DATA);
-        (registeredVoting_.voting) = abi.decode(data, (IEquity.Voting));
-
-        registeredVoting_.snapshotId = CorporateActionsStorageWrapper.getUintResultAt(
-            corporateActionId_,
-            SNAPSHOT_RESULT_ID
-        );
-    }
-
-    /**
-     * @dev returns the properties and related snapshots (if any) of a voting.
-     *
-     * @param voteID The vote Id
-     * @param account The account
-     */
-    function getVotingFor(uint256 voteID, address account) internal view returns (IEquity.VotingFor memory votingFor_) {
-        (IEquity.RegisteredVoting memory registeredVoting, , ) = getVoting(voteID);
-
-        votingFor_.recordDate = registeredVoting.voting.recordDate;
-        votingFor_.data = registeredVoting.voting.data;
-
-        (
-            votingFor_.tokenBalance,
-            votingFor_.decimals,
-            votingFor_.recordDateReached
-        ) = getSnapshotBalanceForIfDateReached(
-            registeredVoting.voting.recordDate,
-            registeredVoting.snapshotId,
-            account
-        );
-    }
-
-    function getVotingCount() internal view returns (uint256 votingCount_) {
-        return CorporateActionsStorageWrapper.getCorporateActionCountByType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE);
-    }
-
-    function getVotingHolders(
-        uint256 voteID,
-        uint256 pageIndex,
-        uint256 pageLength
-    ) internal view returns (address[] memory holders_) {
-        (IEquity.RegisteredVoting memory registeredVoting, , ) = getVoting(voteID);
-
-        if (registeredVoting.voting.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return holders_;
-
-        if (registeredVoting.snapshotId != 0)
-            return SnapshotsStorageWrapper.tokenHoldersAt(registeredVoting.snapshotId, pageIndex, pageLength);
-
-        return ERC1410StorageWrapper.getTokenHolders(pageIndex, pageLength);
-    }
-
-    function getTotalVotingHolders(uint256 voteID) internal view returns (uint256) {
-        (IEquity.RegisteredVoting memory registeredVoting, , ) = getVoting(voteID);
-
-        if (registeredVoting.voting.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return 0;
-
-        if (registeredVoting.snapshotId != 0)
-            return SnapshotsStorageWrapper.totalTokenHoldersAt(registeredVoting.snapshotId);
 
         return ERC1410StorageWrapper.getTotalTokenHolders();
     }

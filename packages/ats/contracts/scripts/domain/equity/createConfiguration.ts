@@ -24,10 +24,10 @@ import { EQUITY_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
 
 /**
- * Equity-specific facets list (41 facets total).
+ * Equity-specific facets list (42 facets total).
  *
  * This is an explicit positive list of all facets required for equity tokens.
- * Includes all common facets plus EquityUSAFacet.
+ * Includes all common facets plus EquityUSAFacet and VotingFacet.
  *
  * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
  * so we only include DiamondFacet to avoid selector collisions.
@@ -89,6 +89,7 @@ const EQUITY_FACETS = [
   "ScheduledSnapshotsFacet",
   "SsiManagementFacet",
   "TransferAndLockFacet",
+  "VotingFacet",
 
   // Jurisdiction-Specific (1)
   "EquityUSAFacet",
@@ -99,7 +100,7 @@ const EQUITY_FACETS = [
  *
  * Thin wrapper that calls the generic core operation with equity-specific data:
  * - Configuration ID: EQUITY_CONFIG_ID
- * - Facet list: EQUITY_FACETS (43 facets)
+ * - Facet list: EQUITY_FACETS (42 facets)
  *
  * All implementation logic is handled by the generic createConfiguration()
  * operation in core/operations/blrConfigurations.ts.

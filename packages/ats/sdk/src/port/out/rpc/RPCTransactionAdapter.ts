@@ -83,6 +83,7 @@ import {
   HoldTokenHolderFacet__factory,
   IBondTypes,
   IEquity,
+  IVoting,
   KpiLinkedRate__factory,
   Kpis__factory,
   KycFacet__factory,
@@ -100,6 +101,7 @@ import {
   TransferAndLockFacet__factory,
   TREXFactoryAts__factory,
   NominalValue__factory,
+  Voting__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { ContractId } from "@hiero-ledger/sdk";
 import EventService from "@service/event/EventService";
@@ -611,13 +613,13 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `equity: ${security} ,
       recordDate :${recordDate} , `,
     );
-    const votingStruct: IEquity.VotingStruct = {
+    const votingStruct = {
       recordDate: recordDate.toBigInt(),
       data: data,
     };
 
     return this.executeTransaction(
-      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      Voting__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setVoting",
       [votingStruct],
       GAS.SET_VOTING_RIGHTS,
@@ -682,7 +684,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Cancelling voting: ${votingId} for equity: ${security}`);
 
     return this.executeTransaction(
-      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      Voting__factory.connect(security.toString(), this.getSignerOrProvider()),
       "cancelVoting",
       [votingId],
       GAS.CANCEL_VOTING,

@@ -27,16 +27,6 @@ interface TRexIEquity {
         uint8 nominalValueDecimals;
     }
 
-    struct Voting {
-        uint256 recordDate;
-        bytes data;
-    }
-
-    struct RegisteredVoting {
-        Voting voting;
-        uint256 snapshotId;
-    }
-
     struct Dividend {
         uint256 recordDate;
         uint256 executionDate;
@@ -66,28 +56,11 @@ interface TRexIEquity {
         bool recordDateReached;
     }
 
-    struct VotingFor {
-        uint256 tokenBalance;
-        uint256 recordDate;
-        bytes data;
-        uint8 decimals;
-        bool recordDateReached;
-        bool isDisabled;
-    }
-
     struct ScheduledBalanceAdjustment {
         uint256 executionDate;
         uint256 factor;
         uint8 decimals;
     }
-
-    event VotingSet(
-        bytes32 corporateActionId,
-        uint256 voteId,
-        address indexed operator,
-        uint256 indexed recordDate,
-        bytes data
-    );
 
     event DividendSet(
         bytes32 corporateActionId,
@@ -110,15 +83,11 @@ interface TRexIEquity {
 
     event DividendCancelled(uint256 dividendId, address indexed operator);
 
-    event VotingCancelled(uint256 voteId, address indexed operator);
-
     event ScheduledBalanceAdjustmentCancelled(uint256 balanceAdjustmentId, address indexed operator);
 
     error DividendCreationFailed();
-    error VotingRightsCreationFailed();
     error BalanceAdjustmentCreationFailed();
     error DividendAlreadyExecuted(bytes32 corporateActionId, uint256 dividendId);
-    error VotingAlreadyRecorded(bytes32 corporateActionId, uint256 voteId);
     error BalanceAdjustmentAlreadyExecuted(bytes32 corporateActionId, uint256 balanceAdjustmentId);
 
     /**
@@ -126,12 +95,6 @@ interface TRexIEquity {
      * @dev Can only be called by an account with the corporate actions role
      */
     function setDividend(Dividend calldata _newDividend) external returns (uint256 dividendID_);
-
-    /**
-     * @notice Sets a new voting
-     * @dev Can only be called by an account with the corporate actions role
-     */
-    function setVoting(Voting calldata _newVoting) external returns (uint256 voteID_);
 
     /**
      * @notice Sets a new scheduled balance adjustment
@@ -142,7 +105,6 @@ interface TRexIEquity {
     ) external returns (uint256 balanceAdjustmentID_);
 
     function cancelDividend(uint256 _dividendID) external returns (bool success_);
-    function cancelVoting(uint256 _voteID) external returns (bool success_);
     function cancelScheduledBalanceAdjustment(uint256 _balanceAdjustmentID) external returns (bool success_);
 
     function getEquityDetails() external view returns (EquityDetailsData memory equityDetailsData_);
@@ -193,37 +155,6 @@ interface TRexIEquity {
      * @notice Returns the total number of token holders for a given dividend
      */
     function getTotalDividendHolders(uint256 _dividendID) external view returns (uint256);
-
-    /**
-     * @notice Returns the details of a previously registered voting
-     */
-    function getVoting(
-        uint256 _voteID
-    ) external view returns (RegisteredVoting memory registeredVoting_, bool isDisabled_);
-
-    /**
-     * @notice Returns the voting details for an account
-     */
-    function getVotingFor(uint256 _voteID, address _account) external view returns (VotingFor memory votingFor_);
-
-    /**
-     * @notice Returns the total number of votings
-     */
-    function getVotingCount() external view returns (uint256 votingCount_);
-
-    /**
-     * @notice Returns the list of token holders for a given voting
-     */
-    function getVotingHolders(
-        uint256 _voteID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (address[] memory holders_);
-
-    /**
-     * @notice Returns the total number of token holders for a given voting
-     */
-    function getTotalVotingHolders(uint256 _voteID) external view returns (uint256);
 
     /**
      * @notice Returns the details of a previously scheduled balance adjustment
