@@ -2,10 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ICorporateActions } from "./ICorporateActions.sol";
-import { _CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateActionsStorageWrapper.sol";
-import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract CorporateActions is ICorporateActions, Modifiers {
     function getCorporateAction(

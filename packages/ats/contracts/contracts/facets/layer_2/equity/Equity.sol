@@ -9,10 +9,7 @@ import {
 } from "../../../constants/values.sol";
 import { IEquity } from "./IEquity.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
-import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateActionsStorageWrapper.sol";
-import { AdjustBalancesStorageWrapper } from "../../../domain/asset/AdjustBalancesStorageWrapper.sol";
-import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";
-import { EquityStorageWrapper, EquityDataStorage } from "../../../domain/asset/EquityStorageWrapper.sol";
+import { EquityStorageWrapper } from "../../../domain/asset/EquityStorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract Equity is IEquity, Modifiers {

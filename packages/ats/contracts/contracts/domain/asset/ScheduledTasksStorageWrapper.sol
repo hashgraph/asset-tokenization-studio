@@ -10,7 +10,6 @@ import {
     IScheduledCrossOrderedTasks
 } from "../../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
 import { IEquity } from "../../facets/layer_2/equity/IEquity.sol";
-import { IBondRead } from "../../facets/layer_2/bond/IBondRead.sol";
 import { ISnapshots } from "../../facets/layer_1/snapshot/ISnapshots.sol";
 import {
     _SCHEDULED_SNAPSHOTS_STORAGE_POSITION,
@@ -27,12 +26,12 @@ import {
 } from "../../constants/values.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
-import { BondStorageWrapper } from "./BondStorageWrapper.sol";
+import { CouponStorageWrapper } from "./coupon/CouponStorageWrapper.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { InterestRateStorageWrapper } from "./InterestRateStorageWrapper.sol";
 import { SustainabilityPerformanceTargetRateLib } from "./SustainabilityPerformanceTargetRateLib.sol";
-import { IBondTypes } from "../../facets/layer_2/bond/IBondTypes.sol";
+import { ICouponTypes } from "../../facets/layer_2/coupon/ICouponTypes.sol";
 import { KpiLinkedRateLib } from "./KpiLinkedRateLib.sol";
 
 library ScheduledTasksStorageWrapper {
@@ -352,8 +351,8 @@ library ScheduledTasksStorageWrapper {
 
         uint256 couponID = _getCouponIdFromAction(actionId);
 
-        BondStorageWrapper.addToCouponsOrderedList(couponID);
-        uint256 orderedListPos = BondStorageWrapper.getCouponsOrderedListTotal();
+        CouponStorageWrapper.addToCouponsOrderedList(couponID);
+        uint256 orderedListPos = CouponStorageWrapper.getCouponsOrderedListTotal();
 
         _updateCouponRatesIfNeeded(couponID);
 
@@ -406,13 +405,13 @@ library ScheduledTasksStorageWrapper {
     }
 
     function _updateCouponRatesIfNeeded(uint256 couponID) private {
-        (IBondTypes.RegisteredCoupon memory registeredCoupon, , ) = BondStorageWrapper.getCoupon(couponID);
+        (ICouponTypes.RegisteredCoupon memory registeredCoupon, , ) = CouponStorageWrapper.getCoupon(couponID);
 
         if (InterestRateStorageWrapper.isSustainabilityPerformanceTargetRateInitialized()) {
             (uint256 rate, uint8 rateDecimals) = SustainabilityPerformanceTargetRateLib
                 .calculateSustainabilityPerformanceTargetInterestRate(couponID, registeredCoupon.coupon);
 
-            BondStorageWrapper.updateCouponRate(couponID, registeredCoupon.coupon, rate, rateDecimals);
+            CouponStorageWrapper.updateCouponRate(couponID, registeredCoupon.coupon, rate, rateDecimals);
         }
 
         if (InterestRateStorageWrapper.isKpiLinkedRateInitialized()) {
@@ -421,7 +420,7 @@ library ScheduledTasksStorageWrapper {
                 registeredCoupon.coupon
             );
 
-            BondStorageWrapper.updateCouponRate(couponID, registeredCoupon.coupon, rate, rateDecimals);
+            CouponStorageWrapper.updateCouponRate(couponID, registeredCoupon.coupon, rate, rateDecimals);
         }
     }
 

@@ -92,6 +92,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "TransferAndLockFacet",
 
   // Interest Rate (rate-specific - keep variant names)
+  "CouponKpiLinkedRateFacet",
   "KpiLinkedRateFacet",
   "KpisKpiLinkedRateFacet",
 
