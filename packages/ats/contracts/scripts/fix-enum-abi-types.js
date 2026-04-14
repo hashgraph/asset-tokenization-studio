@@ -9,16 +9,23 @@
  * of the canonical ABI type "uint8".  ethers.js v6 strictly validates ABI types
  * and rejects these fragments as invalid, breaking deployments.
  *
- * This script walks the artifacts/ directory and rewrites every artifact whose
- * ABI contains such non-canonical enum types, replacing them with "uint8".
- * It then exits so that "npx hardhat typechain" can regenerate types from the
- * corrected artifacts.
+ * This script:
+ *  1. Walks artifacts/ and rewrites every artifact whose ABI contains such
+ *     non-canonical enum types, replacing them with "uint8".
+ *  2. Walks typechain-types/ and applies the same fix directly to the
+ *     hardcoded _abi objects inside the generated factory .ts files, so
+ *     the TypeChain cache cannot serve stale data.
  */
 
 const fs = require("fs");
 const path = require("path");
 
 const ARTIFACTS_DIR = path.resolve(__dirname, "../artifacts");
+const TYPECHAIN_DIR = path.resolve(__dirname, "../typechain-types");
+
+// ---------------------------------------------------------------------------
+// Artifact JSON patching
+// ---------------------------------------------------------------------------
 
 /**
  * Recursively fix param descriptors: wherever internalType starts with "enum "
@@ -71,13 +78,13 @@ function fixAbi(abi) {
  * @param {string} dir
  * @returns {string[]}
  */
-function collectArtifacts(dir) {
+function collectJsonArtifacts(dir) {
   const results = [];
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
       if (entry.name === "build-info") continue;
-      results.push(...collectArtifacts(full));
+      results.push(...collectJsonArtifacts(full));
     } else if (entry.isFile() && entry.name.endsWith(".json") && !entry.name.endsWith(".dbg.json")) {
       results.push(full);
     }
@@ -85,24 +92,90 @@ function collectArtifacts(dir) {
   return results;
 }
 
-let patchedCount = 0;
+// ---------------------------------------------------------------------------
+// TypeChain .ts factory patching
+// ---------------------------------------------------------------------------
 
-for (const artifactPath of collectArtifacts(ARTIFACTS_DIR)) {
-  let artifact;
-  try {
-    artifact = JSON.parse(fs.readFileSync(artifactPath, "utf8"));
-  } catch {
-    continue;
+/**
+ * Match an ABI param object inside a TypeChain factory TypeScript source where
+ * internalType is an enum but type is not "uint8", e.g.:
+ *
+ *   internalType: "enum IClearingTypes.ClearingOperationType",
+ *   name: "clearingOperationType",
+ *   type: "IClearingTypes.ClearingOperationType",
+ *
+ * The regex captures everything up to and including the bad type value so we
+ * can replace only the type field while keeping the surrounding text intact.
+ *
+ * Breakdown:
+ *   internalType: "enum [^"]+"  — the internalType with "enum " prefix
+ *   ,\s*\n                      — trailing comma + newline
+ *   (?:[ \t]+\w+: "[^"]*",\s*\n)* — zero or more intermediate string props
+ *   [ \t]+type: "              — the type field indent + key
+ *   (?!uint8")                 — negative lookahead: skip already-correct values
+ *   ([^"]+)"                   — capture the wrong type name
+ */
+const TYPECHAIN_ENUM_PATTERN =
+  /(internalType: "enum [^"]+",\s*\n(?:[ \t]+\w+: "[^"]*",\s*\n)*[ \t]+type: ")(?!uint8")([^"]+)"/g;
+
+/**
+ * Recursively collect all .ts files under a directory.
+ * @param {string} dir
+ * @returns {string[]}
+ */
+function collectTsFiles(dir) {
+  if (!fs.existsSync(dir)) return [];
+  const results = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      results.push(...collectTsFiles(full));
+    } else if (entry.isFile() && entry.name.endsWith(".ts")) {
+      results.push(full);
+    }
   }
-  if (!Array.isArray(artifact.abi)) continue;
-
-  const { abi, changed } = fixAbi(artifact.abi);
-  if (!changed) continue;
-
-  artifact.abi = abi;
-  fs.writeFileSync(artifactPath, JSON.stringify(artifact, null, 2) + "\n", "utf8");
-  console.log(`[fix-enum-abi-types] Patched: ${path.relative(ARTIFACTS_DIR, artifactPath)}`);
-  patchedCount++;
+  return results;
 }
 
-console.log(`[fix-enum-abi-types] Done. ${patchedCount} artifact(s) patched.`);
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+
+let artifactPatched = 0;
+let typechainPatched = 0;
+
+// Pass 1: patch artifact JSON files
+if (fs.existsSync(ARTIFACTS_DIR)) {
+  for (const artifactPath of collectJsonArtifacts(ARTIFACTS_DIR)) {
+    let artifact;
+    try {
+      artifact = JSON.parse(fs.readFileSync(artifactPath, "utf8"));
+    } catch {
+      continue;
+    }
+    if (!Array.isArray(artifact.abi)) continue;
+
+    const { abi, changed } = fixAbi(artifact.abi);
+    if (!changed) continue;
+
+    artifact.abi = abi;
+    fs.writeFileSync(artifactPath, JSON.stringify(artifact, null, 2) + "\n", "utf8");
+    console.log(`[fix-enum-abi-types] Patched artifact: ${path.relative(ARTIFACTS_DIR, artifactPath)}`);
+    artifactPatched++;
+  }
+}
+
+// Pass 2: patch TypeChain factory .ts files (bypasses TypeChain cache)
+for (const tsPath of collectTsFiles(TYPECHAIN_DIR)) {
+  const content = fs.readFileSync(tsPath, "utf8");
+  const fixed = content.replace(TYPECHAIN_ENUM_PATTERN, '$1uint8"');
+  if (fixed === content) continue;
+
+  fs.writeFileSync(tsPath, fixed, "utf8");
+  console.log(`[fix-enum-abi-types] Patched typechain: ${path.relative(TYPECHAIN_DIR, tsPath)}`);
+  typechainPatched++;
+}
+
+console.log(
+  `[fix-enum-abi-types] Done. ${artifactPatched} artifact(s) patched, ${typechainPatched} typechain file(s) patched.`,
+);
