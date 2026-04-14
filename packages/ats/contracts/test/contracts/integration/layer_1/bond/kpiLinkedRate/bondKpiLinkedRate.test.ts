@@ -5,7 +5,6 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   ResolverProxy,
-  BondUSAKpiLinkedRateFacetTimeTravel,
   KpiLinkedRateFacetTimeTravel,
   TimeTravelFacet,
   ERC1594KpiLinkedRateFacetTimeTravel,
@@ -54,7 +53,6 @@ describe("Bond KpiLinked Rate Tests", () => {
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
 
-  let bondKpiLinkedRateFacet: BondUSAKpiLinkedRateFacetTimeTravel;
   let couponKpiLinkedRateFacet: CouponFacetTimeTravel;
   let kpiLinkedRateFacet: KpiLinkedRateFacetTimeTravel;
   let timeTravelFacet: TimeTravelFacet;
@@ -105,11 +103,6 @@ describe("Bond KpiLinked Rate Tests", () => {
       },
     ]);
 
-    bondKpiLinkedRateFacet = await ethers.getContractAt(
-      "BondUSAKpiLinkedRateFacetTimeTravel",
-      diamond.target,
-      signer_A,
-    );
     couponKpiLinkedRateFacet = await ethers.getContractAt(
       "CouponKpiLinkedRateFacetTimeTravel",
       diamond.target,
@@ -265,7 +258,7 @@ describe("Bond KpiLinked Rate Tests", () => {
 
     it("GIVEN a kpiLinked rate bond WHEN setting a coupon with pending status THEN transaction success", async () => {
       await expect(couponKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData))
-        .to.emit(bondKpiLinkedRateFacet, "CouponSet")
+        .to.emit(couponKpiLinkedRateFacet, "CouponSet")
         .withArgs("0x0000000000000000000000000000000000000000000000000000000000000001", 1, signer_A.address, [
           couponRecordDateInSeconds,
           couponExecutionDateInSeconds,

@@ -701,7 +701,7 @@ describe("Coupon Tests", () => {
     await timeTravelFacet.changeSystemTimestamp(couponExecutionDateInSeconds + 1);
 
     await expect(couponFacet.connect(signer_C).cancelCoupon(1)).to.be.revertedWithCustomError(
-      bondFacet,
+      couponFacet,
       "CouponAlreadyExecuted",
     );
   });

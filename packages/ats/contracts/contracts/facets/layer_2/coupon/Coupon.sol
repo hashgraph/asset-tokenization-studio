@@ -7,6 +7,7 @@ import { _CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
 import { COUPON_CORPORATE_ACTION_TYPE } from "../../../constants/values.sol";
 import { CouponStorageWrapper } from "../../../domain/asset/coupon/CouponStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
+import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 abstract contract Coupon is ICoupon, Modifiers {
     function setCoupon(
@@ -136,7 +137,9 @@ abstract contract Coupon is ICoupon, Modifiers {
     }
 
     function getCouponsOrderedListTotal() external view override returns (uint256 total_) {
-        total_ = CouponStorageWrapper.getCouponsOrderedListTotal();
+        total_ = CouponStorageWrapper.getCouponsOrderedListTotalAdjustedAt(
+            TimeTravelStorageWrapper.getBlockTimestamp()
+        );
     }
 
     function _prepareCoupon(

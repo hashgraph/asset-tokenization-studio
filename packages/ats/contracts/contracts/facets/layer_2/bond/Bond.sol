@@ -104,7 +104,6 @@ abstract contract Bond is IBondManagement, TimestampProvider, Modifiers {
         onlyListedAllowed(_tokenHolder)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
         onlyValidMaturityDate(_getBlockTimestamp())
-        onlyValidMaturityDate(_getBlockTimestamp())
     {
         ERC1410StorageWrapper.redeemByPartition(_partition, _tokenHolder, EvmAccessors.getMsgSender(), _amount, "", "");
     }

@@ -16,8 +16,11 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 import { IBondTypes } from "../../../facets/layer_2/bond/IBondTypes.sol";
 import { ICoupon } from "../../../facets/layer_2/coupon/ICoupon.sol";
 import { ICouponTypes } from "../../../facets/layer_2/coupon/ICouponTypes.sol";
+import { InterestRateStorageWrapper } from "../InterestRateStorageWrapper.sol";
+import { KpiLinkedRateLib } from "../KpiLinkedRateLib.sol";
 import { NominalValueStorageWrapper } from "../nominalValue/NominalValueStorageWrapper.sol";
 import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
+import { SustainabilityPerformanceTargetRateLib } from "../SustainabilityPerformanceTargetRateLib.sol";
 import { ScheduledTasksStorageWrapper } from "../ScheduledTasksStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "../SnapshotsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
@@ -48,7 +51,10 @@ library CouponStorageWrapper {
         ICouponTypes.RegisteredCoupon memory registeredCoupon;
         bytes32 corporateActionId;
         (registeredCoupon, corporateActionId, ) = getCoupon(couponId);
-        if (registeredCoupon.coupon.executionDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
+        if (
+            registeredCoupon.coupon.executionDate != 0 &&
+            registeredCoupon.coupon.executionDate <= TimeTravelStorageWrapper.getBlockTimestamp()
+        ) {
             revert ICoupon.CouponAlreadyExecuted(corporateActionId, couponId);
         }
         CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
@@ -101,13 +107,37 @@ library CouponStorageWrapper {
         bytes memory data;
         (, , data, isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(corporateActionId_);
 
-        require(data.length > 0, "ICouponTypes: Coupon not found");
+        if (data.length == 0) revert ICoupon.CouponNotFound(couponID);
         (registeredCoupon_.coupon) = abi.decode(data, (ICouponTypes.Coupon));
 
         registeredCoupon_.snapshotId = CorporateActionsStorageWrapper.getUintResultAt(
             corporateActionId_,
             SNAPSHOT_RESULT_ID
         );
+
+        if (
+            registeredCoupon_.coupon.fixingDate == 0 ||
+            registeredCoupon_.coupon.rateStatus == ICouponTypes.RateCalculationStatus.SET ||
+            registeredCoupon_.coupon.fixingDate > TimeTravelStorageWrapper.getBlockTimestamp()
+        ) return (registeredCoupon_, corporateActionId_, isDisabled_);
+
+        if (InterestRateStorageWrapper.isSustainabilityPerformanceTargetRateInitialized()) {
+            (
+                registeredCoupon_.coupon.rate,
+                registeredCoupon_.coupon.rateDecimals
+            ) = SustainabilityPerformanceTargetRateLib.calculateSustainabilityPerformanceTargetInterestRate(
+                couponID,
+                registeredCoupon_.coupon
+            );
+            registeredCoupon_.coupon.rateStatus = ICouponTypes.RateCalculationStatus.SET;
+            return (registeredCoupon_, corporateActionId_, isDisabled_);
+        }
+
+        if (InterestRateStorageWrapper.isKpiLinkedRateInitialized()) {
+            (registeredCoupon_.coupon.rate, registeredCoupon_.coupon.rateDecimals) = KpiLinkedRateLib
+                .calculateKpiLinkedInterestRate(couponID, registeredCoupon_.coupon);
+            registeredCoupon_.coupon.rateStatus = ICouponTypes.RateCalculationStatus.SET;
+        }
     }
 
     function getCouponFor(
@@ -229,20 +259,19 @@ library CouponStorageWrapper {
     }
 
     function getPreviousCouponInOrderedList(uint256 couponID) internal view returns (uint256 previousCouponID_) {
-        uint256 orderedListLength = getCouponsOrderedListTotal();
+        uint256 orderedListLength = getCouponsOrderedListTotalAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
 
         if (orderedListLength < 2) return (0);
 
         if (getCouponFromOrderedListAt(0) == couponID) return (0);
 
+        orderedListLength--;
         uint256 previousCouponId = 0;
 
         for (uint256 index = 0; index < orderedListLength; index++) {
             previousCouponId = getCouponFromOrderedListAt(index);
-            if (index + 1 < orderedListLength) {
-                uint256 couponId = getCouponFromOrderedListAt(index + 1);
-                if (couponId == couponID) break;
-            }
+            uint256 couponId = getCouponFromOrderedListAt(index + 1);
+            if (couponId == couponID) break;
         }
 
         return previousCouponId;

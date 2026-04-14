@@ -31,6 +31,10 @@ interface ICoupon is ICouponTypes {
     /// @notice Raised when coupon creation fails
     error CouponCreationFailed();
 
+    /// @notice Raised when a coupon ID does not resolve to an existing corporate action
+    /// @param couponID The coupon identifier that was not found
+    error CouponNotFound(uint256 couponID);
+
     /// @notice Sets a new coupon for the security
     /// @param _newCoupon The new coupon to be set
     /// @return couponID_ The created coupon identifier

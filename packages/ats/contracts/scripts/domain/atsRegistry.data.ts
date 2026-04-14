@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-14T13:14:03.761Z
+ * Generated: 2026-04-14T15:09:42.335Z
  * Facets: 73
  * Infrastructure: 2
  *
@@ -419,6 +419,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountHasNoRole(address,bytes32)",
         },
         selector: "0xa1180aad",
+      },
+      {
+        name: "CouponNotFound",
+        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
+        selector: "0x69a80e75",
       },
       {
         name: "FactorIsZero",
@@ -3445,6 +3450,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x3a11c78b",
       },
       {
+        name: "CouponNotFound",
+        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
+        selector: "0x69a80e75",
+      },
+      {
         name: "SnapshotIdDoesNotExists",
         signature: {
           full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
@@ -3640,6 +3650,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "CouponCreationFailed",
         signature: { full: "error CouponCreationFailed()", canonical: "CouponCreationFailed()" },
         selector: "0x3a11c78b",
+      },
+      {
+        name: "CouponNotFound",
+        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
+        selector: "0x69a80e75",
       },
       {
         name: "InterestRateIsFixed",
@@ -3845,6 +3860,16 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x3a11c78b",
       },
       {
+        name: "CouponNotFound",
+        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
+        selector: "0x69a80e75",
+      },
+      {
+        name: "InterestRateIsKpiLinked",
+        signature: { full: "error InterestRateIsKpiLinked()", canonical: "InterestRateIsKpiLinked()" },
+        selector: "0x68eba14f",
+      },
+      {
         name: "SnapshotIdDoesNotExists",
         signature: {
           full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
@@ -4041,6 +4066,19 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "CouponCreationFailed",
         signature: { full: "error CouponCreationFailed()", canonical: "CouponCreationFailed()" },
         selector: "0x3a11c78b",
+      },
+      {
+        name: "CouponNotFound",
+        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
+        selector: "0x69a80e75",
+      },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTargetRate",
+        signature: {
+          full: "error InterestRateIsSustainabilityPerformanceTargetRate()",
+          canonical: "InterestRateIsSustainabilityPerformanceTargetRate()",
+        },
+        selector: "0x4f56f79f",
       },
       {
         name: "SnapshotIdDoesNotExists",
@@ -6284,6 +6322,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "BrokenClockMode",
         signature: { full: "error BrokenClockMode()", canonical: "BrokenClockMode()" },
         selector: "0xb2b9e563",
+      },
+      {
+        name: "CouponNotFound",
+        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
+        selector: "0x69a80e75",
       },
       {
         name: "FutureLookup",
@@ -8824,6 +8867,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x0dc149f0",
       },
       {
+        name: "InterestRateIsKpiLinked",
+        signature: { full: "error InterestRateIsKpiLinked()", canonical: "InterestRateIsKpiLinked()" },
+        selector: "0x68eba14f",
+      },
+      {
         name: "TokenIsPaused",
         signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
         selector: "0x649815a5",
@@ -8913,6 +8961,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountHasNoRole(address,bytes32)",
         },
         selector: "0xa1180aad",
+      },
+      {
+        name: "CouponNotFound",
+        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
+        selector: "0x69a80e75",
       },
       {
         name: "InvalidDate",
@@ -9014,6 +9067,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountHasNoRole(address,bytes32)",
         },
         selector: "0xa1180aad",
+      },
+      {
+        name: "CouponNotFound",
+        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
+        selector: "0x69a80e75",
       },
       {
         name: "InvalidDate",
@@ -10344,6 +10402,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x10210dec",
       },
       {
+        name: "CouponNotFound",
+        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
+        selector: "0x69a80e75",
+      },
+      {
         name: "TokenIsPaused",
         signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
         selector: "0x649815a5",
@@ -10427,6 +10490,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x10210dec",
       },
       {
+        name: "CouponNotFound",
+        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
+        selector: "0x69a80e75",
+      },
+      {
         name: "TokenIsPaused",
         signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
         selector: "0x649815a5",
@@ -10507,6 +10575,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccessControlRequired(bytes32,address)",
         },
         selector: "0x10210dec",
+      },
+      {
+        name: "CouponNotFound",
+        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
+        selector: "0x69a80e75",
       },
       {
         name: "TokenIsPaused",
@@ -10757,6 +10830,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
+        name: "CouponNotFound",
+        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
+        selector: "0x69a80e75",
+      },
+      {
         name: "SnapshotIdDoesNotExists",
         signature: {
           full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
@@ -11003,6 +11081,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
+      },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTargetRate",
+        signature: {
+          full: "error InterestRateIsSustainabilityPerformanceTargetRate()",
+          canonical: "InterestRateIsSustainabilityPerformanceTargetRate()",
+        },
+        selector: "0x4f56f79f",
       },
       {
         name: "NotExistingProject",
