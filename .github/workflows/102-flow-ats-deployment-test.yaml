@@ -77,7 +77,7 @@ jobs:
             packages/ats/contracts/build
             packages/ats/contracts/typechain-types
             packages/ats/contracts/cache
-          key: ${{ runner.os }}-contracts-build-${{ hashFiles('packages/ats/contracts/contracts/**/*.sol', 'packages/ats/contracts/hardhat.config.ts', 'package-lock.json') }}
+          key: ${{ runner.os }}-contracts-build-${{ hashFiles('packages/ats/contracts/contracts/**/*.sol', 'packages/ats/contracts/hardhat.config.ts', 'packages/ats/contracts/scripts/fix-enum-abi-types.js', 'package-lock.json') }}
 
       - name: Build contracts
         if: steps.build-cache.outputs.cache-hit != 'true'
@@ -139,7 +139,7 @@ jobs:
             packages/ats/contracts/build
             packages/ats/contracts/typechain-types
             packages/ats/contracts/cache
-          key: ${{ runner.os }}-contracts-build-${{ hashFiles('packages/ats/contracts/contracts/**/*.sol', 'packages/ats/contracts/hardhat.config.ts', 'package-lock.json') }}
+          key: ${{ runner.os }}-contracts-build-${{ hashFiles('packages/ats/contracts/contracts/**/*.sol', 'packages/ats/contracts/hardhat.config.ts', 'packages/ats/contracts/scripts/fix-enum-abi-types.js', 'package-lock.json') }}
           fail-on-cache-miss: true
 
       - name: Start Hardhat node
@@ -266,7 +266,7 @@ jobs:
             packages/ats/contracts/build
             packages/ats/contracts/typechain-types
             packages/ats/contracts/cache
-          key: ${{ runner.os }}-contracts-build-${{ hashFiles('packages/ats/contracts/contracts/**/*.sol', 'packages/ats/contracts/hardhat.config.ts', 'package-lock.json') }}
+          key: ${{ runner.os }}-contracts-build-${{ hashFiles('packages/ats/contracts/contracts/**/*.sol', 'packages/ats/contracts/hardhat.config.ts', 'packages/ats/contracts/scripts/fix-enum-abi-types.js', 'package-lock.json') }}
           fail-on-cache-miss: true
 
       - name: Setup Hiero Solo Network
