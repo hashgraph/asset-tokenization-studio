@@ -92,6 +92,10 @@ const EQUITY_FACETS = [
 
   // Jurisdiction-Specific (1)
   "EquityUSAFacet",
+
+  // Loan & Loans Portfolio (2)
+  "LoanFacet",
+  //"LoansPortfolioFacet",
 ] as const;
 
 /**

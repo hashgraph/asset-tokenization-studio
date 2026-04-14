@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ZeroAddressNotAllowed } from "../errors/CommonErrors.sol";
+import { ICommonErrors } from "../errors/ICommonErrors.sol";
 
 /**
  * @title Address Validation
@@ -14,7 +14,7 @@ library AddressValidation {
      */
     function checkZeroAddress(address _address) internal pure {
         if (_address == address(0)) {
-            revert ZeroAddressNotAllowed();
+            revert ICommonErrors.ZeroAddressNotAllowed();
         }
     }
 }

@@ -26,6 +26,12 @@ import { IControlList } from "../../facets/layer_1/controlList/IControlList.sol"
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
+/**
+ * @title HoldStorageWrapper
+ * @notice Storage wrapper for hold management operations
+ * @dev Manages hold data storage including holds by account, partition, and hold ID
+ * @author Hashgraph
+ */
 library HoldStorageWrapper {
     using Pagination for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.UintSet;
@@ -384,7 +390,7 @@ library HoldStorageWrapper {
     }
 
     function getHoldForByPartition(
-        IHoldTypes.HoldIdentifier calldata _holdIdentifier
+        IHoldTypes.HoldIdentifier memory _holdIdentifier
     )
         internal
         view
@@ -411,7 +417,7 @@ library HoldStorageWrapper {
     }
 
     function getHoldForByPartitionAdjustedAt(
-        IHoldTypes.HoldIdentifier calldata _holdIdentifier,
+        IHoldTypes.HoldIdentifier memory _holdIdentifier,
         uint256 _timestamp
     )
         internal

@@ -767,7 +767,7 @@ describe("Snapshots Tests", () => {
     // Combine all holders from both pages
     const allHolders = [...holders_page_0, ...holders_page_1];
     const uniqueHolders = [...new Set(allHolders)];
-    expect(uniqueHolders.length).to.equal(2);
+    expect(uniqueHolders.length).to.equal(3);
 
     // Get all holders in one call to verify consistency
     const allHolders_single_call = await snapshotFacet.getTokenHoldersAtSnapshot(1, 0, 10);

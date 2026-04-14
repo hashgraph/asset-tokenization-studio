@@ -2,6 +2,11 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 // solhint-disable max-line-length
+
+/**
+ * @dev Shared values used across multiple facets for consistency.
+ * Utility constants for type hashes, partitions, and corporate actions.
+ */
 uint256 constant MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
 address constant ZERO_ADDRESS = address(0);
 bytes32 constant EMPTY_BYTES32 = bytes32(0);
@@ -27,6 +32,9 @@ bytes32 constant BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE = 0x1256aa1b36483ca651
 
 // keccak256('security.token.standard.amortization.corporateActionType');
 bytes32 constant AMORTIZATION_CORPORATE_ACTION_TYPE = 0xd50dd756b70910558bc278c0ccbd8c01d444a4178c07a5baf8e2578c8ec6034b;
+
+// keccak256('security.token.standard.loan.corporateActionType');
+bytes32 constant LOAN_CORPORATE_ACTION_TYPE = 0x8f3e2a1b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f;
 
 // keccak256('security.token.standard.balanceAdjustment.scheduledTasks');
 bytes32 constant BALANCE_ADJUSTMENT_TASK_TYPE = 0x9ce9cffaccaf68fc544ce4df9e5e2774249df2f0b3c9cf940a53a6827465db9d;

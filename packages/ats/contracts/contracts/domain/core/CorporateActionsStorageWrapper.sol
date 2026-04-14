@@ -23,6 +23,12 @@ struct CorporateActionDataStorage {
     mapping(bytes32 => bool) actionsContentHashes;
 }
 
+/**
+ * @title CorporateActionsStorageWrapper
+ * @notice Storage wrapper for corporate action management operations
+ * @dev Manages corporate action data including actions, types, and execution results
+ * @author Hashgraph
+ */
 library CorporateActionsStorageWrapper {
     using Pagination for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.Bytes32Set;
@@ -222,12 +228,6 @@ library CorporateActionsStorageWrapper {
 
     function actionContentHashExists(bytes32 _contentHash) internal view returns (bool) {
         return corporateActionsStorage().actionsContentHashes[_contentHash];
-    }
-
-    function requireValidDates(uint256 _firstDate, uint256 _secondDate) internal pure {
-        if (_secondDate < _firstDate) {
-            revert ICorporateActions.WrongDates(_firstDate, _secondDate);
-        }
     }
 
     function corporateActionsStorage() internal pure returns (CorporateActionDataStorage storage corporateActions_) {

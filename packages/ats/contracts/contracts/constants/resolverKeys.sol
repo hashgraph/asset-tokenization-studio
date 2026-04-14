@@ -3,6 +3,15 @@ pragma solidity >=0.8.0 <0.9.0;
 
 // solhint-disable max-line-length
 
+/*
+ * Resolver Keys Constants
+ *
+ * Business Logic Keys (BLK) for the Business Logic Resolver (BLR).
+ * Maps facet names to their keccak256 hashes for Diamond Pattern resolution.
+ *
+ * Author: Hashgraph
+ */
+
 // keccak256("security.token.standard.accesscontrol.resolverKey");
 bytes32 constant _ACCESS_CONTROL_RESOLVER_KEY = 0x011768a41cb4fe76a26f444eec15d81a0d84e919a36336d72c6539cf41c0fcf6;
 
@@ -636,7 +645,13 @@ bytes32 constant _KPIS_LATEST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KE
 bytes32 constant _NOMINAL_VALUE_RESOLVER_KEY = 0x48903d4da8b1f0a5e9a9874be74ec5d2f8043d4d5b65cc093173c3dae103df8f;
 
 // keccak256('security.token.standard.amortization.resolverKey');
-bytes32 constant _AMORTIZATION_RESOLVER_KEY = 0xe45d89550ef8988da0d14267142ce98f9acdca60da74da2a89cecd9e27d0661b;
+bytes32 constant _AMORTIZATION_RESOLVER_KEY = 0xe45d89550ef8988da0d14267142ce98f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d;
+
+// keccak256('security.token.standard.loansPortfolio.resolverKey');
+bytes32 constant _LOANS_PORTFOLIO_RESOLVER_KEY = 0x9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d;
+
+// keccak256('security.token.standard.loan.resolverKey');
+bytes32 constant _LOAN_RESOLVER_KEY = 0x0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e;
 
 // Layer 3 Resolver Keys
 

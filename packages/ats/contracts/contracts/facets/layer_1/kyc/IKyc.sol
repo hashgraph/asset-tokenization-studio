@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/**
+ * @title IKyc Interface
+ * @notice Interface for KYC (Know Your Customer) management operations
+ * @dev Defines standard functions for granting, revoking, and checking KYC status
+ * @author Hashgraph
+ */
 interface IKyc {
     enum KycStatus {
         NOT_GRANTED,
@@ -39,7 +45,6 @@ interface IKyc {
      */
     event KycRevoked(address indexed account, address indexed issuer);
 
-    error InvalidDates();
     error InvalidKycStatus();
     error KycIsNotGranted();
     error InvalidZeroAddress();

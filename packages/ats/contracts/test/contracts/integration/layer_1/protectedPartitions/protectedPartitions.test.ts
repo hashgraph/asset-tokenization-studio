@@ -212,7 +212,7 @@ describe("ProtectedPartitions Tests", () => {
   let kycFacet: KycFacet;
   let ssiManagementFacet: SsiManagementFacet;
   let holdFacet: IHold;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   let clearingFacet: any;
   let protectedHold: ProtectedHoldData;
   let hold: HoldData;

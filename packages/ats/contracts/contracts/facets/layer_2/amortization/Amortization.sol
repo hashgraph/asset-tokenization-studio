@@ -18,10 +18,11 @@ abstract contract Amortization is IAmortization, Modifiers {
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyRole(_CORPORATE_ACTION_ROLE)
+        onlyValidDates(_amortization.recordDate, _amortization.executionDate)
         onlyValidTimestamp(_amortization.recordDate)
+        onlyValidDates(_amortization.recordDate, _amortization.executionDate)
         returns (bool success_, uint256 amortizationID_)
     {
-        CorporateActionsStorageWrapper.requireValidDates(_amortization.recordDate, _amortization.executionDate);
         (, amortizationID_) = AmortizationStorageWrapper.setAmortization(_amortization);
         success_ = true;
     }
@@ -35,8 +36,8 @@ abstract contract Amortization is IAmortization, Modifiers {
         onlyWithoutMultiPartition
         onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
         onlyRole(_CORPORATE_ACTION_ROLE)
+        onlyNoActiveAmortizationHolds(_amortizationID)
     {
-        AmortizationStorageWrapper.checkNoActiveAmortizationHolds(_amortizationID);
         AmortizationStorageWrapper.cancelAmortization(_amortizationID);
     }
 
@@ -65,9 +66,9 @@ abstract contract Amortization is IAmortization, Modifiers {
         onlyWithoutMultiPartition
         onlyRole(_AMORTIZATION_ROLE)
         onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        onlyPositiveTokenAmount(_tokenAmount, _amortizationID)
         returns (uint256 holdId_)
     {
-        if (_tokenAmount == 0) revert IAmortizationStorageWrapper.InvalidAmortizationHoldAmount(_amortizationID);
         return AmortizationStorageWrapper.setAmortizationHold(_amortizationID, _tokenHolder, _tokenAmount);
     }
 
@@ -108,7 +109,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         override
         onlyWithoutMultiPartition
         onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
-        returns (AmortizationFor[] memory amortizationsFor_, address[] memory holders_)
+        returns (AmortizationFor[] memory amortizationsFor_)
     {
         return AmortizationStorageWrapper.getAmortizationsFor(_amortizationID, _pageIndex, _pageLength);
     }
@@ -151,7 +152,21 @@ abstract contract Amortization is IAmortization, Modifiers {
         return AmortizationStorageWrapper.getTotalAmortizationHolders(_amortizationID);
     }
 
-    function getAmortizationActiveHolders(
+    function getAmortizationPaymentAmount(
+        uint256 _amortizationID,
+        address _tokenHolder
+    )
+        external
+        view
+        override
+        onlyWithoutMultiPartition
+        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        returns (uint256 tokenAmount_, uint8 decimals_)
+    {
+        return AmortizationStorageWrapper.getAmortizationPaymentAmount(_amortizationID, _tokenHolder);
+    }
+
+    function getActiveAmortizationHoldHolders(
         uint256 _amortizationID,
         uint256 _pageIndex,
         uint256 _pageLength
@@ -166,7 +181,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         return AmortizationStorageWrapper.getAmortizationActiveHolders(_amortizationID, _pageIndex, _pageLength);
     }
 
-    function getTotalAmortizationActiveHolders(
+    function getTotalActiveAmortizationHoldHolders(
         uint256 _amortizationID
     )
         external
@@ -177,19 +192,6 @@ abstract contract Amortization is IAmortization, Modifiers {
         returns (uint256)
     {
         return AmortizationStorageWrapper.getTotalAmortizationActiveHolders(_amortizationID);
-    }
-
-    function getTotalHoldByAmortizationId(
-        uint256 _amortizationID
-    )
-        external
-        view
-        override
-        onlyWithoutMultiPartition
-        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
-        returns (uint256)
-    {
-        return AmortizationStorageWrapper.getTotalHoldByAmortizationId(_amortizationID);
     }
 
     function getActiveAmortizationIds(

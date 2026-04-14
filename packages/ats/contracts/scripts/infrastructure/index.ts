@@ -280,7 +280,7 @@ export {
 export { fetchHederaContractId, getMirrorNodeUrl, isHederaNetwork } from "./utils/hedera";
 
 export { getSelector } from "./utils/selector";
-
+export { decodeEvent } from "./utils/decodeEvent";
 export { dateToUnixTimestamp, generateTimestamp } from "./utils/time";
 
 export { withRetry, withRetryFn, DEFAULT_RETRYABLE_ERRORS } from "./utils/retry";

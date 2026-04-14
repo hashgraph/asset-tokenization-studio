@@ -29,8 +29,10 @@ const WORKFLOW_STEPS: Record<string, readonly string[]> = {
     "Bond Fixed Rate Configuration",
     "Bond KpiLinked Rate Configuration",
     "Bond SPT Rate Configuration",
+    "Loan Configuration",
+    "Loans Portfolio Configuration",
     "Factory",
-  ] as const, // 10 steps (0-9)
+  ] as const,
   existingBlr: [
     "ProxyAdmin (Optional)",
     "Facets",
@@ -40,8 +42,10 @@ const WORKFLOW_STEPS: Record<string, readonly string[]> = {
     "Bond Fixed Rate Configuration",
     "Bond KpiLinked Rate Configuration",
     "Bond SPT Rate Configuration",
+    "Loan Configuration",
+    "Loans Portfolio Configuration",
     "Factory",
-  ] as const, // 9 steps (0-8)
+  ] as const,
   upgradeConfigurations: [
     "Facets",
     "Register Facets",
@@ -208,6 +212,8 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
       getBondFixedRateFacets: () => [],
       getBondKpiLinkedRateFacets: () => [],
       getBondSustainabilityPerformanceTargetRateFacets: () => [],
+      getLoanFacets: () => [],
+      getLoansPortfolioFacets: () => [],
     },
   };
 }

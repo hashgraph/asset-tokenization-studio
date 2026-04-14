@@ -73,7 +73,6 @@ function findCustomErrorInReceipt(
 }
 
 function patchRevertedWithCustomError(): void {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const originalMethod = (chai.Assertion.prototype as any).revertedWithCustomError;
 
   if (!originalMethod) {
@@ -81,7 +80,6 @@ function patchRevertedWithCustomError(): void {
     return;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (chai.Assertion.prototype as any).revertedWithCustomError = function (
     contract: ExtendedContract,
     errorName: string,
@@ -102,7 +100,6 @@ function patchRevertedWithCustomError(): void {
     const assertion = this as { _obj: Promise<unknown> };
     const promise = assertion._obj;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return new (chai.Assertion as any)(
       promise.then(async (txResponse: unknown) => {
         const tx = txResponse as { wait: () => Promise<TransactionReceipt | null> };

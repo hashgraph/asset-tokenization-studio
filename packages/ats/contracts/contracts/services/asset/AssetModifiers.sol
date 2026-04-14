@@ -1,6 +1,25 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { ActionValidationModifiers } from "./ActionValidationModifiers.sol";
+import { AdjustBalancesModifiers } from "./AdjustBalancesModifiers.sol";
+import { BondModifiers } from "./BondModifiers.sol";
+import { ClearingModifiers } from "./ClearingModifiers.sol";
+import { ComplianceModifiers } from "./ComplianceModifiers.sol";
+import { EquityModifiers } from "./EquityModifiers.sol";
+import { ERC20Modifiers } from "./ERC20Modifiers.sol";
+import { ERC1410Modifiers } from "./ERC1410Modifiers.sol";
+import { ERC3643Modifiers } from "./ERC3643Modifiers.sol";
+import { ExpirationModifiers } from "./ExpirationModifiers.sol";
+import { HoldModifiers } from "./HoldModifiers.sol";
+import { InterestRateModifiers } from "./InterestRateModifiers.sol";
+import { KpisModifiers } from "./KpisModifiers.sol";
+import { LockModifiers } from "./LockModifiers.sol";
+import { MaturityModifiers } from "./MaturityModifiers.sol";
+import { ProceedRecipientModifiers } from "./ProceedRecipientModifiers.sol";
+import { StateModifiers } from "./StateModifiers.sol";
+import { AmortizationModifiers } from "./AmortizationModifiers.sol";
+
 /**
  * @title AssetModifiers
  * @notice Aggregator contract that re-exports all asset domain modifiers
@@ -28,28 +47,10 @@ pragma solidity >=0.8.0 <0.9.0;
  *
  * @author Asset Tokenization Studio Team
  */
-
-import { ActionValidationModifiers } from "./ActionValidationModifiers.sol";
-import { AdjustBalancesModifiers } from "./AdjustBalancesModifiers.sol";
-import { BondModifiers } from "./BondModifiers.sol";
-import { ClearingModifiers } from "./ClearingModifiers.sol";
-import { ComplianceModifiers } from "./ComplianceModifiers.sol";
-import { EquityModifiers } from "./EquityModifiers.sol";
-import { ERC20Modifiers } from "./ERC20Modifiers.sol";
-import { ERC1410Modifiers } from "./ERC1410Modifiers.sol";
-import { ERC3643Modifiers } from "./ERC3643Modifiers.sol";
-import { ExpirationModifiers } from "./ExpirationModifiers.sol";
-import { HoldModifiers } from "./HoldModifiers.sol";
-import { InterestRateModifiers } from "./InterestRateModifiers.sol";
-import { KpisModifiers } from "./KpisModifiers.sol";
-import { LockModifiers } from "./LockModifiers.sol";
-import { MaturityModifiers } from "./MaturityModifiers.sol";
-import { ProceedRecipientModifiers } from "./ProceedRecipientModifiers.sol";
-import { StateModifiers } from "./StateModifiers.sol";
-
 abstract contract AssetModifiers is
     ActionValidationModifiers,
     AdjustBalancesModifiers,
+    AmortizationModifiers,
     BondModifiers,
     ClearingModifiers,
     ComplianceModifiers,

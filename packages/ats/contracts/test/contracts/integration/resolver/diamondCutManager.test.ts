@@ -20,6 +20,8 @@ import {
   BOND_KPI_LINKED_RATE_CONFIG_ID,
   BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
   EQUITY_CONFIG_ID,
+  LOAN_CONFIG_ID,
+  LOANS_PORTFOLIO_CONFIG_ID,
 } from "@scripts";
 import { deployAtsInfrastructureFixture, registerERC20FacetFixture } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -47,6 +49,8 @@ describe("DiamondCutManager", () => {
   let bondFixedRateFacetIdList: string[] = [];
   let bondKpiLinkedRateFacetIdList: string[] = [];
   let bondSustainabilityPerformanceTargetRateFacetIdList: string[] = [];
+  let loanFacetIdList: string[] = [];
+  let loansPortfolioFacetIdList: string[] = [];
   let equityFacetVersionList: number[] = [];
 
   async function atsInfrastructureFixture() {
@@ -75,6 +79,8 @@ describe("DiamondCutManager", () => {
     bondSustainabilityPerformanceTargetRateFacetIdList = Object.values(
       infrastructure.bondSustainabilityPerformanceTargetRateFacetKeys,
     );
+    loanFacetIdList = Object.values(infrastructure.loanFacetKeys);
+    loansPortfolioFacetIdList = Object.values(infrastructure.loansPortfolioFacetKeys);
     equityFacetVersionList = Array(equityFacetIdList.length).fill(1);
   });
 
@@ -298,7 +304,11 @@ describe("DiamondCutManager", () => {
               ? bondKpiLinkedRateFacetIdList
               : configId == BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID
                 ? bondSustainabilityPerformanceTargetRateFacetIdList
-                : null;
+                : configId == LOAN_CONFIG_ID
+                  ? loanFacetIdList
+                  : configId == LOANS_PORTFOLIO_CONFIG_ID
+                    ? loansPortfolioFacetIdList
+                    : null;
 
     if (!expectedFacetIdList) {
       expect.fail("Unknown configId");
@@ -310,7 +320,7 @@ describe("DiamondCutManager", () => {
 
   it("GIVEN a resolver WHEN reading configuration information THEN everything matches", async () => {
     const configLength = Number(await diamondCutManager.getConfigurationsLength());
-    expect(configLength).to.equal(5);
+    expect(configLength).to.equal(7);
 
     const configIds = await diamondCutManager.getConfigurations(0, configLength);
     expect([...configIds]).to.have.members([
@@ -319,6 +329,8 @@ describe("DiamondCutManager", () => {
       BOND_FIXED_RATE_CONFIG_ID,
       BOND_KPI_LINKED_RATE_CONFIG_ID,
       BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
+      LOAN_CONFIG_ID,
+      LOANS_PORTFOLIO_CONFIG_ID,
     ]);
 
     for (const configId of configIds) {

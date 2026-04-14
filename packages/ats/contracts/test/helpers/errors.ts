@@ -4,12 +4,12 @@ import { AddressLike, Contract, ContractTransactionReceipt, EventLog, Signer, et
 
 /**
  * ABI for the file-level errors declared in
- * `contracts/interfaces/errors/CommonErrors.sol`. These errors are not part of any
+ * `contracts/interfaces/errors/ICommonErrors.sol`. These errors are not part of any
  * Solidity interface, so TypeChain doesn't generate a typed factory for them.
  * Tests use {@link getCommonErrors} to obtain a `Contract` handle whose ABI exposes
  * these errors so chai matchers like `revertedWithCustomError` can resolve them.
  *
- * Keep in sync with `contracts/interfaces/errors/CommonErrors.sol`.
+ * Keep in sync with `contracts/interfaces/errors/ICommonErrors.sol`.
  */
 export const COMMON_ERRORS_ABI = [
   "error WrongExpirationTimestamp()",
@@ -23,7 +23,7 @@ export const COMMON_ERRORS_ABI = [
 
 /**
  * Build a `Contract` handle that exposes the file-level errors from
- * `CommonErrors.sol` in its ABI. The address is arbitrary — the contract
+ * `ICommonErrors.sol` in its ABI. The address is arbitrary — the contract
  * isn't called, only its `interface` is used by chai's `revertedWithCustomError`
  * to look up the error name and compute its selector.
  *
@@ -40,7 +40,7 @@ export function getCommonErrors(addr: AddressLike, signer?: Signer): Contract {
  * Compute the 4-byte selector (or bytes32-padded) for one of the file-level
  * common errors by signature string. Use this when a test needs the raw selector
  * (e.g. asserting against `canTransfer`'s returned reason code) and the error is
- * declared in `CommonErrors.sol` rather than in any contract's interface.
+ * declared in `ICommonErrors.sol` rather than in any contract's interface.
  *
  * @example
  *   getCommonErrorSelector("ZeroAddressNotAllowed()") // "0x8579befe"

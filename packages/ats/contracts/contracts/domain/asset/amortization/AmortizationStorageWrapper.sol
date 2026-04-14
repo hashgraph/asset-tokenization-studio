@@ -27,7 +27,14 @@ import { AdjustBalancesStorageWrapper } from "../AdjustBalancesStorageWrapper.so
 import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
 import { BondStorageWrapper } from "../BondStorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+import { NominalValueStorageWrapper } from "../nominalValue/NominalValueStorageWrapper.sol";
 
+/**
+ * @title AmortizationStorageWrapper
+ * @notice Storage wrapper for amortization management operations
+ * @dev Manages amortization schedules, payments, and related calculations
+ * @author Hashgraph
+ */
 library AmortizationStorageWrapper {
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.UintSet;
@@ -46,10 +53,9 @@ library AmortizationStorageWrapper {
     function setAmortization(
         IAmortization.Amortization memory _newAmortization
     ) internal returns (bytes32 corporateActionId_, uint256 amortizationID_) {
-        bytes memory data = abi.encode(_newAmortization);
         (corporateActionId_, amortizationID_) = CorporateActionsStorageWrapper.addCorporateAction(
             AMORTIZATION_CORPORATE_ACTION_TYPE,
-            data
+            abi.encode(_newAmortization)
         );
 
         if (corporateActionId_ == bytes32(0)) revert IAmortizationStorageWrapper.AmortizationCreationFailed();
@@ -82,6 +88,7 @@ library AmortizationStorageWrapper {
 
         _amortizationStorage().disabledAmortizations[corporateActionId] = true;
         _amortizationStorage().activeAmortizationIds.remove(_amortizationID);
+        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
 
         emit IAmortizationStorageWrapper.AmortizationCancelled(_amortizationID, EvmAccessors.getMsgSender());
         success_ = true;
@@ -228,6 +235,7 @@ library AmortizationStorageWrapper {
 
         ) = getAmortization(_amortizationID);
 
+        amortizationFor_.account = _account;
         amortizationFor_.recordDate = registeredAmortization.amortization.recordDate;
         amortizationFor_.executionDate = registeredAmortization.amortization.executionDate;
 
@@ -237,43 +245,48 @@ library AmortizationStorageWrapper {
         amortizationFor_.holdId = holdInfo.holdId;
         amortizationFor_.holdActive = holdInfo.holdActive;
 
-        uint256 snapshotId = registeredAmortization.snapshotId;
-        uint256 recordDate = registeredAmortization.amortization.recordDate;
-        uint256 now_ = TimeTravelStorageWrapper.getBlockTimestamp();
+        (
+            amortizationFor_.tokenBalance,
+            amortizationFor_.decimalsBalance,
+            amortizationFor_.recordDateReached
+        ) = SnapshotsStorageWrapper.getSnapshotTakenBalance(
+            registeredAmortization.amortization.recordDate,
+            registeredAmortization.snapshotId,
+            _account
+        );
 
-        if (snapshotId != 0) {
-            amortizationFor_.tokenBalance = SnapshotsStorageWrapper.balanceOfAt(_account, snapshotId);
-            amortizationFor_.decimalsBalance = ERC20StorageWrapper.decimalsAdjustedAt(recordDate);
-            amortizationFor_.recordDateReached = true;
-            amortizationFor_.abafAtSnapshot = SnapshotsStorageWrapper.abafAtSnapshot(snapshotId);
-        } else if (recordDate <= now_) {
-            amortizationFor_.tokenBalance = SnapshotsStorageWrapper.balanceOfAt(_account, snapshotId);
-            amortizationFor_.decimalsBalance = ERC20StorageWrapper.decimalsAdjustedAt(recordDate);
-            amortizationFor_.recordDateReached = true;
-            amortizationFor_.abafAtSnapshot = AdjustBalancesStorageWrapper.getAbafAdjustedAt(now_);
-        }
+        uint256 timestamp = TimeTravelStorageWrapper.getBlockTimestamp();
+        amortizationFor_.abafAtSnapshot = registeredAmortization.snapshotId != 0
+            ? SnapshotsStorageWrapper.abafAtSnapshot(registeredAmortization.snapshotId)
+            : amortizationFor_.abafAtSnapshot = AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp);
 
-        IBondTypes.BondDetailsData memory bondDetails = BondStorageWrapper.getBondDetails();
-        amortizationFor_.nominalValue = bondDetails.nominalValue;
-        amortizationFor_.nominalValueDecimals = bondDetails.nominalValueDecimals;
+        amortizationFor_.nominalValue = NominalValueStorageWrapper._getNominalValue();
+        amortizationFor_.nominalValueDecimals = NominalValueStorageWrapper._getNominalValueDecimals();
 
-        if (holdInfo.holdId != 0) {
-            amortizationFor_.tokenHeldAmount = _getHoldAdjustedAt(_account, holdInfo.holdId, now_);
-            amortizationFor_.decimalsHeld = ERC20StorageWrapper.decimalsAdjustedAt(now_);
-            amortizationFor_.abafAtHold = AdjustBalancesStorageWrapper.getAbafAdjustedAt(now_);
-        }
+        if (holdInfo.holdId == 0) return amortizationFor_;
+
+        (amortizationFor_.tokenHeldAmount, , , , , , ) = HoldStorageWrapper.getHoldForByPartitionAdjustedAt(
+            IHoldTypes.HoldIdentifier({
+                partition: _DEFAULT_PARTITION,
+                tokenHolder: _account,
+                holdId: holdInfo.holdId
+            }),
+            timestamp
+        );
+        amortizationFor_.decimalsHeld = ERC20StorageWrapper.decimalsAdjustedAt(timestamp);
+        amortizationFor_.abafAtHold = AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp);
     }
 
     function getAmortizationsFor(
         uint256 _amortizationID,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (IAmortization.AmortizationFor[] memory amortizationsFor_, address[] memory holders_) {
-        holders_ = getAmortizationHolders(_amortizationID, _pageIndex, _pageLength);
-        uint256 length = holders_.length;
+    ) internal view returns (IAmortization.AmortizationFor[] memory amortizationsFor_) {
+        address[] memory holders = getAmortizationHolders(_amortizationID, _pageIndex, _pageLength);
+        uint256 length = holders.length;
         amortizationsFor_ = new IAmortization.AmortizationFor[](length);
         for (uint256 i; i < length; ) {
-            amortizationsFor_[i] = getAmortizationFor(_amortizationID, holders_[i]);
+            amortizationsFor_[i] = getAmortizationFor(_amortizationID, holders[i]);
             unchecked {
                 ++i;
             }
@@ -322,32 +335,51 @@ library AmortizationStorageWrapper {
         return ERC1410StorageWrapper.getTotalTokenHolders();
     }
 
+    function getAmortizationPaymentAmount(
+        uint256 _amortizationID,
+        address _tokenHolder
+    ) internal view returns (uint256 tokenAmount_, uint8 decimals_) {
+        IAmortization.AmortizationFor memory amortizationFor = getAmortizationFor(_amortizationID, _tokenHolder);
+        tokenAmount_ = amortizationFor.tokenHeldAmount;
+        decimals_ = amortizationFor.decimalsHeld;
+    }
+
     function getAmortizationActiveHolders(
         uint256 _amortizationID,
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory holders_) {
-        bytes32 corporateActionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
-            AMORTIZATION_CORPORATE_ACTION_TYPE,
-            _amortizationID - 1
-        );
-        return _amortizationStorage().activeHoldHolders[corporateActionId].getFromSet(_pageIndex, _pageLength);
+        return
+            _amortizationStorage()
+                .activeHoldHolders[
+                    CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
+                        AMORTIZATION_CORPORATE_ACTION_TYPE,
+                        _amortizationID - 1
+                    )
+                ]
+                .getFromSet(_pageIndex, _pageLength);
     }
 
     function getTotalAmortizationActiveHolders(uint256 _amortizationID) internal view returns (uint256) {
-        bytes32 corporateActionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
-            AMORTIZATION_CORPORATE_ACTION_TYPE,
-            _amortizationID - 1
-        );
-        return _amortizationStorage().activeHoldHolders[corporateActionId].length();
+        return
+            _amortizationStorage()
+                .activeHoldHolders[
+                    CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
+                        AMORTIZATION_CORPORATE_ACTION_TYPE,
+                        _amortizationID - 1
+                    )
+                ]
+                .length();
     }
 
     function getTotalHoldByAmortizationId(uint256 _amortizationID) internal view returns (uint256) {
-        bytes32 corporateActionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
-            AMORTIZATION_CORPORATE_ACTION_TYPE,
-            _amortizationID - 1
-        );
-        return _amortizationStorage().totalHoldByAmortizationId[corporateActionId];
+        return
+            _amortizationStorage().totalHoldByAmortizationId[
+                CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
+                    AMORTIZATION_CORPORATE_ACTION_TYPE,
+                    _amortizationID - 1
+                )
+            ];
     }
 
     function getActiveAmortizationIds(
@@ -369,6 +401,10 @@ library AmortizationStorageWrapper {
         if (_amortizationStorage().activeHoldHolders[corporateActionId].length() > 0) {
             revert IAmortizationStorageWrapper.AmortizationHasActiveHolds(corporateActionId, _amortizationID);
         }
+    }
+
+    function checkPositiveTokenAmount(uint256 _tokenAmount, uint256 _amortizationID) internal pure {
+        if (_tokenAmount == 0) revert IAmortizationStorageWrapper.InvalidAmortizationHoldAmount(_amortizationID);
     }
 
     /// @dev Helper to release a hold by directly accessing Hold storage (no calldata conversion needed).

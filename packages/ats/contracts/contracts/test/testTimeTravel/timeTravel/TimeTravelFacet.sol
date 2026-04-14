@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../../../infrastructure/utils/EvmAccessors.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+import { DatesValidation } from "../../../infrastructure/utils/DatesValidation.sol";
 import { BondStorageWrapper } from "../../../domain/asset/BondStorageWrapper.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { ITimeTravel } from "../ITimeTravel.sol";
@@ -11,9 +12,7 @@ import { _TIME_TRAVEL_RESOLVER_KEY } from "../constants/resolverKeys.sol";
 
 contract TimeTravelFacet is IStaticFunctionSelectors, ITimeTravel, TimeTravelProvider {
     function changeSystemTimestamp(uint256 newTimestamp) external override {
-        if (newTimestamp == 0) {
-            revert InvalidTimestamp(newTimestamp);
-        }
+        DatesValidation.checkTimestamp(newTimestamp);
 
         uint256 oldTimestamp = TimeTravelStorageWrapper.getTimestampOverride();
         TimeTravelStorageWrapper.setTimestampOverride(newTimestamp);

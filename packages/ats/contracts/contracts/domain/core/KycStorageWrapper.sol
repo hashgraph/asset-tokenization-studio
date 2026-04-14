@@ -17,6 +17,12 @@ struct KycStorage {
     bool internalKycActivated;
 }
 
+/**
+ * @title KycStorageWrapper
+ * @notice Storage wrapper for KYC (Know Your Customer) management operations
+ * @dev Manages KYC data storage including status, validity periods, and issuer information
+ * @author Hashgraph
+ */
 library KycStorageWrapper {
     using Pagination for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -110,10 +116,6 @@ library KycStorageWrapper {
 
     function isKycInitialized() internal view returns (bool) {
         return kycStorage().initialized;
-    }
-
-    function requireValidDates(uint256 _validFrom, uint256 _validTo, uint256 _timestamp) internal pure {
-        if (_validFrom > _validTo || _validTo < _timestamp) revert IKyc.InvalidDates();
     }
 
     function kycStorage() internal pure returns (KycStorage storage kyc_) {

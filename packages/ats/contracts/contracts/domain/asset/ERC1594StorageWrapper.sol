@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ZeroAddressNotAllowed } from "../../infrastructure/errors/CommonErrors.sol";
+import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 import { ZERO_ADDRESS, EMPTY_BYTES, _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { _ERC1594_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IKyc } from "../../facets/layer_1/kyc/IKyc.sol";
@@ -187,7 +187,12 @@ library ERC1594StorageWrapper {
 
         // Format validation
         if (from == ZERO_ADDRESS || to == ZERO_ADDRESS) {
-            return (false, Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE, ZeroAddressNotAllowed.selector, EMPTY_BYTES);
+            return (
+                false,
+                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
+                ICommonErrors.ZeroAddressNotAllowed.selector,
+                EMPTY_BYTES
+            );
         }
 
         address sender = EvmAccessors.getMsgSender();

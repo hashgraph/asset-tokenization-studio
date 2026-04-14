@@ -22,10 +22,6 @@ interface ITimeTravel {
 
     // * Errors
 
-    /// @notice Error thrown when attempting to set an invalid new system timestamp
-    /// @param newSystemTime The new system timestamp that caused the error
-    error InvalidTimestamp(uint256 newSystemTime);
-
     /// @notice Emitted when using time travel out of test environment
     error WrongChainId();
 

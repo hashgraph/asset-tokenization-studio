@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-interface ICorporateActions {
+import { ICommonErrors } from "../../../infrastructure/errors/ICommonErrors.sol";
+
+interface ICorporateActions is ICommonErrors {
     /**
      * @dev Emitted when a corporate action gets added
      *
@@ -23,7 +25,6 @@ interface ICorporateActions {
 
     error DuplicatedCorporateAction(bytes32 actionType, bytes data);
     error WrongIndexForAction(uint256 index, bytes32 actionType);
-    error WrongDates(uint256 firstDate, uint256 secondDate);
     error CorporateActionNotFound(bytes32 corporateActionId);
     error CorporateActionAlreadyDisabled(bytes32 corporateActionId);
 
