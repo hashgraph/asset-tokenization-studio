@@ -57,6 +57,7 @@ import { SecurityDataBuilder } from "@domain/context/util/SecurityDataBuilder";
 import {
   AccessControlFacet__factory,
   Bond__factory,
+  Coupon__factory,
   CapFacet__factory,
   ClearingActionsFacet__factory,
   ClearingHoldCreationFacet__factory,
@@ -645,7 +646,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       endDate: ${endDate},
       fixingDate: ${fixingDate}`,
     );
-    const couponStruct: IBondTypes.CouponStruct = {
+    const couponStruct = {
       recordDate: recordDate.toBigInt(),
       executionDate: executionDate.toBigInt(),
       rate: rate.toBigInt(),
@@ -657,7 +658,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return this.executeTransaction(
-      Bond__factory.connect(security.toString(), this.getSignerOrProvider()),
+      Coupon__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setCoupon",
       [couponStruct],
       GAS.SET_COUPON,
@@ -669,7 +670,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Cancelling coupon: ${couponId} for bond: ${security}`);
 
     return this.executeTransaction(
-      Bond__factory.connect(security.toString(), this.getSignerOrProvider()),
+      Coupon__factory.connect(security.toString(), this.getSignerOrProvider()),
       "cancelCoupon",
       [couponId],
       GAS.CANCEL_COUPON,

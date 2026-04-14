@@ -46,7 +46,6 @@ describe("Corporate Actions Tests", () => {
   beforeEach(async () => {
     await loadFixture(deploySecurityFixtureSinglePartition);
   });
-
   it("GIVEN a token with a corporate action the functions returns the data", async () => {
     const currentTimestamp = await timeTravelFacet.blockTimestamp();
     const ONE_DAY = 86400n; // 24 hours in seconds

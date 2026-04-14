@@ -5,13 +5,8 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type INominalValue, type NominalValueMigrationFacetTest } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, BOND_CONFIG_ID, EQUITY_CONFIG_ID } from "@scripts";
+import { BOND_CONFIG_ID, EQUITY_CONFIG_ID } from "@scripts";
 import { deployBondTokenFixture, deployEquityTokenFixture } from "@test";
-
-async function grantNominalValueRole(diamond: ResolverProxy, admin: HardhatEthersSigner, account: string) {
-  const accessControl = await ethers.getContractAt("AccessControl", diamond.target, admin);
-  await accessControl.grantRole(ATS_ROLES._NOMINAL_VALUE_ROLE, account);
-}
 
 async function addMigrationFacetToDiamond(base: Awaited<ReturnType<typeof deployBondTokenFixture>>, configId: string) {
   const { blr, deployer, diamond: baseDiamond } = base;
@@ -47,9 +42,6 @@ async function addMigrationFacetToDiamond(base: Awaited<ReturnType<typeof deploy
 
   const newConfigVersion = Number(await blr.getLatestVersionByConfiguration(configId));
   await diamondFacet.connect(deployer).updateConfigVersion(newConfigVersion);
-
-  // Grant NOMINAL_VALUE_ROLE to deployer for testing
-  await grantNominalValueRole(baseDiamond, deployer, deployer.address);
 
   return base;
 }
@@ -293,7 +285,7 @@ describe("NominalValue Migration Tests", () => {
       // Reset initialized flag to simulate a legacy token
       await migrationFacet.resetNominalValueInitialized();
 
-      // setNominalValue should trigger _initializeNominalValue internally
+      // setNominalValue should trigger _initialize_NominalValue internally
       await nominalValueFacet.connect(signer_A).setNominalValue(600, 5);
 
       expect(await nominalValueFacet.getNominalValue()).to.equal(600);
@@ -345,8 +337,6 @@ describe("NominalValue Migration Tests", () => {
       signer_B = base.user1;
 
       nominalValueFacet = await ethers.getContractAt("INominalValue", diamond.target, signer_A);
-
-      await grantNominalValueRole(diamond, signer_A, signer_A.address);
     }
 
     beforeEach(async () => {

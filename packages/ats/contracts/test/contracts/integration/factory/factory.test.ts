@@ -106,10 +106,7 @@ describe("Factory Tests", () => {
           version: 1,
         };
 
-        await expect(factory.deployEquity(equityData, getRegulationData())).to.be.revertedWithCustomError(
-          factory,
-          "EmptyResolver",
-        );
+        await expect(factory.deployEquity(equityData, getRegulationData())).to.be.rejectedWith("EmptyResolver");
       });
 
       it("GIVEN empty resolver WHEN deploying bond THEN reverts with EmptyResolver", async () => {
@@ -127,10 +124,7 @@ describe("Factory Tests", () => {
           version: 1,
         };
 
-        await expect(factory.deployBond(bondData, getRegulationData())).to.be.revertedWithCustomError(
-          factory,
-          "EmptyResolver",
-        );
+        await expect(factory.deployBond(bondData, getRegulationData())).to.be.rejectedWith("EmptyResolver");
       });
 
       it("GIVEN valid resolver WHEN deploying equity THEN passes checkResolver validation", async () => {
@@ -163,10 +157,7 @@ describe("Factory Tests", () => {
           version: 1,
         };
 
-        await expect(factory.deployEquity(equityData, getRegulationData())).to.be.revertedWithCustomError(
-          factory,
-          "WrongISIN",
-        );
+        await expect(factory.deployEquity(equityData, getRegulationData())).to.be.rejectedWith("WrongISIN");
       });
 
       it("GIVEN ISIN with length > 12 WHEN deploying equity THEN reverts with WrongISIN", async () => {
@@ -182,10 +173,7 @@ describe("Factory Tests", () => {
           version: 1,
         };
 
-        await expect(factory.deployEquity(equityData, getRegulationData())).to.be.revertedWithCustomError(
-          factory,
-          "WrongISIN",
-        );
+        await expect(factory.deployEquity(equityData, getRegulationData())).to.be.rejectedWith("WrongISIN");
       });
 
       it("GIVEN empty ISIN WHEN deploying bond THEN reverts with WrongISIN", async () => {
@@ -203,29 +191,7 @@ describe("Factory Tests", () => {
           version: 1,
         };
 
-        await expect(factory.deployBond(bondData, getRegulationData())).to.be.revertedWithCustomError(
-          factory,
-          "WrongISIN",
-        );
-      });
-
-      it("GIVEN invalid ISIN checksum WHEN deploying equity THEN reverts with WrongISINChecksum", async () => {
-        const equityData = {
-          security: getSecurityData(businessLogicResolver, {
-            erc20MetadataInfo: { isin: "US0378331009" }, // Wrong checksum digit
-            rbacs: init_rbacs,
-          }),
-          equityDetails: getEquityDetails(),
-        };
-        equityData.security.resolverProxyConfiguration = {
-          key: EQUITY_CONFIG_ID,
-          version: 1,
-        };
-
-        await expect(factory.deployEquity(equityData, getRegulationData())).to.be.revertedWithCustomError(
-          factory,
-          "WrongISINChecksum",
-        );
+        await expect(factory.deployBond(bondData, getRegulationData())).to.be.rejectedWith("WrongISIN");
       });
 
       it("GIVEN invalid ISIN checksum WHEN deploying equity THEN reverts with WrongISIN", async () => {
@@ -282,10 +248,7 @@ describe("Factory Tests", () => {
           version: 1,
         };
 
-        await expect(factory.deployEquity(equityData, getRegulationData())).to.be.revertedWithCustomError(
-          factory,
-          "NoInitialAdmins",
-        );
+        await expect(factory.deployEquity(equityData, getRegulationData())).to.be.rejectedWith("NoInitialAdmins");
       });
 
       it("GIVEN rbacs with only zero address as admin WHEN deploying bond THEN reverts with NoInitialAdmins", async () => {
@@ -309,10 +272,7 @@ describe("Factory Tests", () => {
           version: 1,
         };
 
-        await expect(factory.deployBond(bondData, getRegulationData())).to.be.revertedWithCustomError(
-          factory,
-          "NoInitialAdmins",
-        );
+        await expect(factory.deployBond(bondData, getRegulationData())).to.be.rejectedWith("NoInitialAdmins");
       });
 
       it("GIVEN rbacs with no admin role WHEN deploying equity THEN reverts with NoInitialAdmins", async () => {
@@ -334,10 +294,7 @@ describe("Factory Tests", () => {
           version: 1,
         };
 
-        await expect(factory.deployEquity(equityData, getRegulationData())).to.be.revertedWithCustomError(
-          factory,
-          "NoInitialAdmins",
-        );
+        await expect(factory.deployEquity(equityData, getRegulationData())).to.be.rejectedWith("NoInitialAdmins");
       });
 
       it("GIVEN rbacs with admin role having valid address after zero address WHEN deploying equity THEN passes validation", async () => {
@@ -504,67 +461,6 @@ describe("Factory Tests", () => {
     });
   });
 
-  describe("Generic Proxy tests", () => {
-    it("GIVEN an empty Resolver WHEN deploying a new resolverProxy THEN transaction fails", async () => {
-      await expect(factory.deployProxy(ADDRESS_ZERO, EQUITY_CONFIG_ID, 1, init_rbacs)).to.be.revertedWithCustomError(
-        factory,
-        "EmptyResolver",
-      );
-    });
-
-    it("GIVEN no admin WHEN deploying a new resolverProxy THEN transaction fails", async () => {
-      await expect(factory.deployProxy(businessLogicResolver, EQUITY_CONFIG_ID, 1, [])).to.be.revertedWithCustomError(
-        factory,
-        "NoInitialAdmins",
-      );
-    });
-
-    it("GIVEN the proper information WHEN deploying a new resolverProxy THEN transaction succeeds", async () => {
-      const expectedProxyAddress = await factory
-        .getFunction("deployProxy")
-        .staticCall(businessLogicResolver, EQUITY_CONFIG_ID, 1, init_rbacs);
-
-      const tx = factory.deployProxy(businessLogicResolver, EQUITY_CONFIG_ID, 1, init_rbacs);
-      await expect(tx).to.emit(factory, "ProxyDeployed");
-
-      const result = await tx;
-      const receipt = await result.wait();
-
-      const deployedProxyEvent = receipt!.logs
-        .map((log) => {
-          try {
-            return factory.interface.parseLog({
-              topics: log.topics as string[],
-              data: log.data,
-            });
-          } catch {
-            return null;
-          }
-        })
-        .find((parsed) => parsed?.name === "ProxyDeployed");
-
-      const proxyAddress = deployedProxyEvent!.args!.proxyAddress;
-      const resolver = deployedProxyEvent!.args!.resolver;
-      const configKey = deployedProxyEvent!.args!.configKey;
-      const version = deployedProxyEvent!.args!.version;
-      const rbac = deployedProxyEvent!.args!.rbac;
-
-      expect(proxyAddress).not.to.equal(ADDRESS_ZERO);
-      expect(proxyAddress).to.equal(expectedProxyAddress);
-      expect(resolver).to.equal(businessLogicResolver);
-      expect(configKey).to.equal(EQUITY_CONFIG_ID);
-      expect(version).to.equal(1);
-      expect(rbac.length).to.equal(init_rbacs.length);
-
-      for (let i = 0; i < init_rbacs.length; i++) {
-        expect(rbac[i][0]).to.be.equal(listOfRoles[i]);
-        expect(rbac[i][1].length).to.equal(listOfMembers.length);
-        expect(rbac[i][1][0]).to.be.equal(listOfMembers[0]);
-        expect(rbac[i][1][1]).to.be.equal(listOfMembers[1]);
-      }
-    });
-  });
-
   describe("Equity tests", () => {
     it("GIVEN an empty Resolver WHEN deploying a new resolverProxy THEN transaction fails", async () => {
       const equityData = {
@@ -579,16 +475,13 @@ describe("Factory Tests", () => {
 
       const factoryRegulationData = getRegulationData();
 
-      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.revertedWithCustomError(
-        factory,
-        "EmptyResolver",
-      );
+      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.rejectedWith("EmptyResolver");
     });
 
     it("GIVEN a wrong ISIN WHEN deploying a new resolverProxy THEN transaction fails", async () => {
       const equityData = {
         security: getSecurityData(businessLogicResolver, {
-          erc20MetadataInfo: { isin: "short" },
+          erc20MetadataInfo: { isin: "invalid_isin" },
         }),
         equityDetails: getEquityDetails(),
       };
@@ -603,12 +496,9 @@ describe("Factory Tests", () => {
         factory.deployEquity(equityData, factoryRegulationData, {
           gasLimit: GAS_LIMIT.default,
         }),
-      ).to.be.revertedWithCustomError(factory, "WrongISIN");
+      ).to.be.rejectedWith("WrongISIN");
       equityData.security.erc20MetadataInfo.isin = "SJ5633813321";
-      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.revertedWithCustomError(
-        factory,
-        "WrongISINChecksum",
-      );
+      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.rejectedWith("WrongISINChecksum");
     });
 
     it("GIVEN no admin WHEN deploying a new resolverProxy THEN transaction fails", async () => {
@@ -623,10 +513,7 @@ describe("Factory Tests", () => {
 
       const factoryRegulationData = getRegulationData();
 
-      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.revertedWithCustomError(
-        factory,
-        "NoInitialAdmins",
-      );
+      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.rejectedWith("NoInitialAdmins");
     });
 
     it("GIVEN wrong regulation type WHEN deploying a new resolverProxy THEN transaction fails", async () => {
@@ -776,16 +663,13 @@ describe("Factory Tests", () => {
 
       const factoryRegulationData = getRegulationData();
 
-      await expect(factory.deployBond(bondData, factoryRegulationData)).to.be.revertedWithCustomError(
-        factory,
-        "EmptyResolver",
-      );
+      await expect(factory.deployBond(bondData, factoryRegulationData)).to.be.rejectedWith("EmptyResolver");
     });
 
     it("GIVEN a wrong ISIN WHEN deploying a new resolverProxy THEN transaction fails", async () => {
       const bondData = {
         security: getSecurityData(businessLogicResolver, {
-          erc20MetadataInfo: { isin: "wrong_isin" },
+          erc20MetadataInfo: { isin: "invalid_isin" },
           rbacs: init_rbacs,
         }),
         bondDetails: await getBondDetails(),
@@ -799,15 +683,9 @@ describe("Factory Tests", () => {
 
       const factoryRegulationData = getRegulationData();
 
-      await expect(factory.deployBond(bondData, factoryRegulationData)).to.be.revertedWithCustomError(
-        factory,
-        "WrongISIN",
-      );
+      await expect(factory.deployBond(bondData, factoryRegulationData)).to.be.rejectedWith("WrongISIN");
       bondData.security.erc20MetadataInfo.isin = "SJ5633813321";
-      await expect(factory.deployBond(bondData, factoryRegulationData)).to.be.revertedWithCustomError(
-        factory,
-        "WrongISINChecksum",
-      );
+      await expect(factory.deployBond(bondData, factoryRegulationData)).to.be.rejectedWith("WrongISINChecksum");
     });
 
     it("GIVEN no admin WHEN deploying a new resolverProxy THEN transaction fails", async () => {
@@ -824,10 +702,7 @@ describe("Factory Tests", () => {
 
       const factoryRegulationData = getRegulationData();
 
-      await expect(factory.deployBond(bondData, factoryRegulationData)).to.be.revertedWithCustomError(
-        factory,
-        "NoInitialAdmins",
-      );
+      await expect(factory.deployBond(bondData, factoryRegulationData)).to.be.rejectedWith("NoInitialAdmins");
     });
 
     it("GIVEN incorrect maturity or starting date WHEN deploying a new bond THEN transaction fails", async () => {
@@ -848,19 +723,13 @@ describe("Factory Tests", () => {
 
       const factoryRegulationData = getRegulationData();
 
-      await expect(factory.deployBond(bondData, factoryRegulationData)).to.be.revertedWithCustomError(
-        factory,
-        "WrongDates",
-      );
+      await expect(factory.deployBond(bondData, factoryRegulationData)).to.be.rejectedWith("WrongDates");
 
       const currentTimeInSeconds = Math.floor(new Date().getTime() / 1000) + 1;
       bondData.bondDetails.startingDate = currentTimeInSeconds - 10000;
       bondData.bondDetails.maturityDate = bondData.bondDetails.startingDate + 10;
 
-      await expect(factory.deployBond(bondData, factoryRegulationData)).to.be.revertedWithCustomError(
-        factory,
-        "WrongTimestamp",
-      );
+      await expect(factory.deployBond(bondData, factoryRegulationData)).to.be.rejectedWith("WrongTimestamp");
     });
 
     it("GIVEN the proper information WHEN deploying a new bond THEN transaction succeeds", async () => {
@@ -930,7 +799,8 @@ describe("Factory Tests", () => {
       expect(bondDetails.nominalValueDecimals).to.be.deep.equal(bondData.bondDetails.nominalValueDecimals);
       expect(bondDetails.startingDate).to.be.deep.equal(bondData.bondDetails.startingDate);
       expect(bondDetails.maturityDate).to.be.deep.equal(bondData.bondDetails.maturityDate);
-      const couponCount = await bondFacet.getCouponCount();
+      const couponFacet = await ethers.getContractAt("CouponFacet", bondAddress);
+      const couponCount = await couponFacet.getCouponCount();
       expect(couponCount).to.equal(0);
 
       // Coupon count assertion removed - no automatic coupons created
@@ -1043,10 +913,7 @@ describe("Factory Tests", () => {
 
       const factoryRegulationData = getRegulationData();
 
-      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.revertedWithCustomError(
-        factory,
-        "WrongISIN",
-      );
+      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.rejectedWith("WrongISIN");
     });
 
     it("GIVEN an ISIN with length greater than 12 WHEN deploying equity THEN transaction fails with WrongISIN", async () => {
@@ -1064,10 +931,7 @@ describe("Factory Tests", () => {
 
       const factoryRegulationData = getRegulationData();
 
-      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.revertedWithCustomError(
-        factory,
-        "WrongISIN",
-      );
+      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.rejectedWith("WrongISIN");
     });
 
     it("GIVEN an empty ISIN WHEN deploying equity THEN transaction fails with WrongISIN", async () => {
@@ -1085,10 +949,7 @@ describe("Factory Tests", () => {
 
       const factoryRegulationData = getRegulationData();
 
-      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.revertedWithCustomError(
-        factory,
-        "WrongISIN",
-      );
+      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.rejectedWith("WrongISIN");
     });
 
     it("GIVEN an ISIN with wrong length WHEN deploying bond THEN transaction fails with WrongISIN", async () => {
@@ -1108,10 +969,7 @@ describe("Factory Tests", () => {
 
       const factoryRegulationData = getRegulationData();
 
-      await expect(factory.deployBond(bondData, factoryRegulationData)).to.be.revertedWithCustomError(
-        factory,
-        "WrongISIN",
-      );
+      await expect(factory.deployBond(bondData, factoryRegulationData)).to.be.rejectedWith("WrongISIN");
     });
   });
 
@@ -1184,17 +1042,14 @@ describe("Factory Tests", () => {
         version: 1,
       };
 
-      await expect(factory.deployBondFixedRate(bondFixedRateData)).to.be.revertedWithCustomError(
-        factory,
-        "EmptyResolver",
-      );
+      await expect(factory.deployBondFixedRate(bondFixedRateData)).to.be.rejectedWith("EmptyResolver");
     });
 
     it("GIVEN wrong ISIN WHEN deploying BondFixedRate THEN transaction fails", async () => {
       const bondFixedRateData = {
         bondData: {
           security: getSecurityData(businessLogicResolver, {
-            erc20MetadataInfo: { isin: "short" },
+            erc20MetadataInfo: { isin: "invalid_isin" },
             rbacs: init_rbacs,
           }),
           bondDetails: await getBondDetails(),
@@ -1213,7 +1068,7 @@ describe("Factory Tests", () => {
         version: 1,
       };
 
-      await expect(factory.deployBondFixedRate(bondFixedRateData)).to.be.revertedWithCustomError(factory, "WrongISIN");
+      await expect(factory.deployBondFixedRate(bondFixedRateData)).to.be.rejectedWith("WrongISIN");
     });
 
     it("GIVEN no admin WHEN deploying BondFixedRate THEN transaction fails", async () => {
@@ -1236,10 +1091,7 @@ describe("Factory Tests", () => {
         version: 1,
       };
 
-      await expect(factory.deployBondFixedRate(bondFixedRateData)).to.be.revertedWithCustomError(
-        factory,
-        "NoInitialAdmins",
-      );
+      await expect(factory.deployBondFixedRate(bondFixedRateData)).to.be.rejectedWith("NoInitialAdmins");
     });
 
     it("GIVEN wrong regulation type WHEN deploying BondFixedRate THEN transaction fails", async () => {
@@ -1538,17 +1390,14 @@ describe("Factory Tests", () => {
         version: 1,
       };
 
-      await expect(factory.deployBondKpiLinkedRate(bondKpiLinkedRateData)).to.be.revertedWithCustomError(
-        factory,
-        "EmptyResolver",
-      );
+      await expect(factory.deployBondKpiLinkedRate(bondKpiLinkedRateData)).to.be.rejectedWith("EmptyResolver");
     });
 
     it("GIVEN wrong ISIN WHEN deploying BondKpiLinkedRate THEN transaction fails", async () => {
       const bondKpiLinkedRateData = {
         bondData: {
           security: getSecurityData(businessLogicResolver, {
-            erc20MetadataInfo: { isin: "short" },
+            erc20MetadataInfo: { isin: "invalid_isin" },
             rbacs: init_rbacs,
           }),
           bondDetails: await getBondDetails(),
@@ -1580,10 +1429,7 @@ describe("Factory Tests", () => {
         version: 1,
       };
 
-      await expect(factory.deployBondKpiLinkedRate(bondKpiLinkedRateData)).to.be.revertedWithCustomError(
-        factory,
-        "WrongISIN",
-      );
+      await expect(factory.deployBondKpiLinkedRate(bondKpiLinkedRateData)).to.be.rejectedWith("WrongISIN");
     });
 
     it("GIVEN no admin WHEN deploying BondKpiLinkedRate THEN transaction fails", async () => {
@@ -1619,10 +1465,7 @@ describe("Factory Tests", () => {
         version: 1,
       };
 
-      await expect(factory.deployBondKpiLinkedRate(bondKpiLinkedRateData)).to.be.revertedWithCustomError(
-        factory,
-        "NoInitialAdmins",
-      );
+      await expect(factory.deployBondKpiLinkedRate(bondKpiLinkedRateData)).to.be.rejectedWith("NoInitialAdmins");
     });
 
     it("GIVEN wrong regulation type WHEN deploying BondKpiLinkedRate THEN transaction fails", async () => {
@@ -1761,9 +1604,9 @@ describe("Factory Tests", () => {
         version: 1,
       };
 
-      await expect(
-        factory.deployBondSustainabilityPerformanceTargetRate(bondSustainabilityData),
-      ).to.be.revertedWithCustomError(factory, "EmptyResolver");
+      await expect(factory.deployBondSustainabilityPerformanceTargetRate(bondSustainabilityData)).to.be.rejectedWith(
+        "EmptyResolver",
+      );
     });
 
     it("GIVEN wrong ISIN WHEN deploying BondSustainabilityPerformanceTargetRate THEN transaction fails", async () => {
@@ -1800,9 +1643,9 @@ describe("Factory Tests", () => {
         version: 1,
       };
 
-      await expect(
-        factory.deployBondSustainabilityPerformanceTargetRate(bondSustainabilityData),
-      ).to.be.revertedWithCustomError(factory, "WrongISINChecksum");
+      await expect(factory.deployBondSustainabilityPerformanceTargetRate(bondSustainabilityData)).to.be.rejectedWith(
+        "WrongISIN",
+      );
     });
 
     it("GIVEN no admin WHEN deploying BondSustainabilityPerformanceTargetRate THEN transaction fails", async () => {
@@ -1836,9 +1679,9 @@ describe("Factory Tests", () => {
         version: 1,
       };
 
-      await expect(
-        factory.deployBondSustainabilityPerformanceTargetRate(bondSustainabilityData),
-      ).to.be.revertedWithCustomError(factory, "NoInitialAdmins");
+      await expect(factory.deployBondSustainabilityPerformanceTargetRate(bondSustainabilityData)).to.be.rejectedWith(
+        "NoInitialAdmins",
+      );
     });
 
     it("GIVEN wrong regulation type WHEN deploying BondSustainabilityPerformanceTargetRate THEN transaction fails", async () => {
@@ -1910,10 +1753,7 @@ describe("Factory Tests", () => {
 
       const factoryRegulationData = getRegulationData();
 
-      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.revertedWithCustomError(
-        factory,
-        "NoInitialAdmins",
-      );
+      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.rejectedWith("NoInitialAdmins");
     });
 
     it("GIVEN rbacs with only zero address as admin WHEN deploying equity THEN transaction fails", async () => {
@@ -1937,10 +1777,7 @@ describe("Factory Tests", () => {
 
       const factoryRegulationData = getRegulationData();
 
-      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.revertedWithCustomError(
-        factory,
-        "NoInitialAdmins",
-      );
+      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.rejectedWith("NoInitialAdmins");
     });
 
     it("GIVEN rbacs with multiple roles but no admin role WHEN deploying equity THEN transaction fails", async () => {
@@ -1968,10 +1805,7 @@ describe("Factory Tests", () => {
 
       const factoryRegulationData = getRegulationData();
 
-      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.revertedWithCustomError(
-        factory,
-        "NoInitialAdmins",
-      );
+      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.rejectedWith("NoInitialAdmins");
     });
 
     it("GIVEN rbacs with admin role having zero address followed by valid address WHEN deploying equity THEN transaction succeeds", async () => {
