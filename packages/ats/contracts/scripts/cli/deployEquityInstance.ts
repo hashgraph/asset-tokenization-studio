@@ -90,10 +90,10 @@ async function main() {
   const factoryAddress = requireValidAddress(process.env.FACTORY_PROXY, "FACTORY_PROXY");
   const blrAddress = requireValidAddress(process.env.BLR_PROXY, "BLR_PROXY");
 
-  const tokenName = "Fidelity Treasury Digital Fund ";
-  const tokenSymbol = "FDIT";
-  const tokenIsin = "US31617H8135";
-  const tokenDecimals = 18;
+  const tokenName = "Federated Hermes Tokenized Treasury Test Fund";
+  const tokenSymbol = "FHTTFXX";
+  const tokenIsin = "XS0000FHTTF0";
+  const tokenDecimals = 2;
   const maxSupply = MaxUint256;
 
   // Token features
@@ -122,8 +122,8 @@ async function main() {
   const putRight = false;
   const dividendRight = 0;
   const currency = "0x555344";
-  const nominalValue = BigInt("0");
-  const nominalValueDecimals = 0;
+  const nominalValue = BigInt("100");
+  const nominalValueDecimals = 2;
 
   // Regulation
   const regulationType = 1;

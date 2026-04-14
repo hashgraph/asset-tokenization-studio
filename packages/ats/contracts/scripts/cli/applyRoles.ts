@@ -18,8 +18,8 @@ import { ATS_ROLES } from "@scripts";
 async function main() {
   const { network, signer, address } = await requireNetworkSigner();
 
-  const tokenEVMAddress = "0x1F4ca0570AFaED33E68c4e7f0278326E4B184C5A";
-  const accountToApplyRolesTo = "0xc58DE1d126426cF75a046317aD7338F083bb782a";
+  const tokenEVMAddress = "0x75871f3e866C96d83672414f613068E935762323";
+  const accountToApplyRolesTo = "0xD5BE4c50a2B499BdF20ce2722cc41d2c7F70CD3b";
   const rolesToGrant: string[] = [
     ATS_ROLES._DEFAULT_ADMIN_ROLE,
     ATS_ROLES._ISSUER_ROLE,

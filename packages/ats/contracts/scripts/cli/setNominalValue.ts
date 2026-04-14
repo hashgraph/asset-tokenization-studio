@@ -3,13 +3,12 @@
 
 /**
  *
- * @module cli/grantRole
+ * @module cli/setNominalValue
  */
 
 import { ethers } from "hardhat";
 import { info, success, error } from "@scripts/infrastructure";
 import { requireNetworkSigner } from "./shared";
-import { ATS_ROLES } from "@scripts";
 
 // ============================================================================
 // Main
@@ -18,30 +17,30 @@ import { ATS_ROLES } from "@scripts";
 async function main() {
   const { network, signer, address } = await requireNetworkSigner();
 
-  const tokenEVMAddress = "0x1F4ca0570AFaED33E68c4e7f0278326E4B184C5A";
-  const accountToGrantRoleTo = "0xDFdB83D90c9611adA2794052D214365EA0EbC7D2";
-  const roleToGrant = ATS_ROLES._NOMINAL_VALUE_ROLE;
+  const tokenEVMAddress = "0x3ef7C81Ec765466CFa7E4f985b063B4AfbC4A3f1";
+  const nominalValue = 100;
+  const nominalValueDecimals = 2;
 
-  info(`🚀 Starting granting Role`);
+  info(`🚀 Starting nominal value update`);
   info("---");
   info(`📡 Network: ${network}`);
   info(`👤 Admin: ${address}`);
   info(`🏭 Token Address: ${tokenEVMAddress}`);
-  info(`🔗 Account to grant Role to: ${accountToGrantRoleTo}`);
-  info(`🪙 Role to grant: ${roleToGrant}`);
+  info(`🔗 Nominal Value: ${nominalValue}`);
+  info(`🔗 Nominal Value Decimals: ${nominalValueDecimals}`);
   info("---");
 
   try {
     let asset = await ethers.getContractAt("IAsset", tokenEVMAddress, signer);
-    const response = await asset.grantRole(roleToGrant, accountToGrantRoleTo);
+    const response = await asset.setNominalValue(nominalValue, nominalValueDecimals);
 
     info("---");
-    success("✅ Role granted successfully!");
+    success("✅ Nominal Value updated successfully!");
     info(`📋Transaction hash: ${response.hash}`);
     info("---");
     process.exit(0);
   } catch (err) {
-    error("❌ Role grant failed:", err);
+    error("❌ Nominal value set failed:", err);
     process.exit(1);
   }
 }
