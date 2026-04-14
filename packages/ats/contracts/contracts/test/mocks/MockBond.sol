@@ -2,8 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IBondRead } from "../../facets/layer_2/bond/IBondRead.sol";
+import { ICoupon } from "../../facets/layer_2/coupon/ICoupon.sol";
 
-contract MockBond is IBondRead {
+contract MockBond is IBondRead, ICoupon {
     // --- Storage ---
     BondDetailsData private _bondDetails;
     mapping(uint256 => RegisteredCoupon) private _coupons;
@@ -104,5 +105,22 @@ contract MockBond is IBondRead {
         uint256[] memory page = new uint256[](end - start);
         for (uint256 i; i < page.length; i++) page[i] = _couponsOrderedList[start + i];
         return page;
+    }
+
+    function setCoupon(Coupon calldata) external pure override returns (uint256) {
+        return 0;
+    }
+
+    function cancelCoupon(uint256) external pure override returns (bool) {
+        return true;
+    }
+
+    function getCouponsFor(
+        uint256,
+        uint256,
+        uint256
+    ) external pure override returns (CouponFor[] memory couponsFor_, address[] memory accounts_) {
+        couponsFor_ = new CouponFor[](0);
+        accounts_ = new address[](0);
     }
 }

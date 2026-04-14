@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBondRead } from "../../facets/layer_2/bond/IBondRead.sol";
+import { CouponStorageWrapper } from "./CouponStorageWrapper.sol";
+import { ICoupon } from "../../facets/layer_2/coupon/ICoupon.sol";
 import {
     ISustainabilityPerformanceTargetRate
 } from "../../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 import { InterestRateStorageWrapper } from "./InterestRateStorageWrapper.sol";
 import { KpisStorageWrapper } from "./KpisStorageWrapper.sol";
 import { ProceedRecipientsStorageWrapper } from "./ProceedRecipientsStorageWrapper.sol";
-import { BondStorageWrapper } from "./BondStorageWrapper.sol";
-import { IBondTypes } from "../../facets/layer_2/bond/IBondTypes.sol";
 
 /**
  * @title SustainabilityPerformanceTargetRateLib
@@ -28,7 +27,7 @@ import { IBondTypes } from "../../facets/layer_2/bond/IBondTypes.sol";
 library SustainabilityPerformanceTargetRateLib {
     function calculateSustainabilityPerformanceTargetInterestRate(
         uint256 couponID,
-        IBondRead.Coupon memory coupon
+        ICoupon.Coupon memory coupon
     ) internal view returns (uint256, uint8) {
         ISustainabilityPerformanceTargetRate.InterestRate memory interestRate = InterestRateStorageWrapper
             .getSPTInterestRate();
@@ -131,9 +130,9 @@ library SustainabilityPerformanceTargetRateLib {
      * @return fixingDate_ The fixing date of the previous coupon in the ordered list, or 0 if this is the first coupon.
      */
     function _getPreviousFixingDate(uint256 couponID) private view returns (uint256 fixingDate_) {
-        uint256 previousCouponId = BondStorageWrapper.getPreviousCouponInOrderedList(couponID);
+        uint256 previousCouponId = CouponStorageWrapper.getPreviousCouponInOrderedList(couponID);
         if (previousCouponId == 0) return 0;
-        (IBondTypes.RegisteredCoupon memory registeredCoupon, , ) = BondStorageWrapper.getCoupon(previousCouponId);
-        return registeredCoupon.coupon.fixingDate;
+        (ICoupon.RegisteredCoupon memory prevCoupon, , ) = CouponStorageWrapper.getCoupon(previousCouponId);
+        return prevCoupon.coupon.fixingDate;
     }
 }

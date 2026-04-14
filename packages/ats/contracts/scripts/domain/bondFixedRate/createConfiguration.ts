@@ -83,6 +83,7 @@ const BOND_FIXED_RATE_FACETS = [
   "ProtectedPartitionsFacet",
   "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
+  "CouponFixedRateFacet",
   "ScheduledCouponListingFacet",
   "ScheduledSnapshotsFacet",
   "SsiManagementFacet",

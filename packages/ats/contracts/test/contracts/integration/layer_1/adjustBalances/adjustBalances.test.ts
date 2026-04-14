@@ -9,8 +9,8 @@ import {
   type Pause,
   type IERC1410,
   type AccessControl,
-  type DividendFacet,
   Equity,
+  DividendFacetTimeTravel,
   ScheduledCrossOrderedTasks,
   Kyc,
   SsiManagement,
@@ -40,7 +40,7 @@ describe("Adjust Balances Tests", () => {
   let accessControlFacet: AccessControl;
   let pauseFacet: Pause;
   let equityFacet: Equity;
-  let dividendFacet: DividendFacet;
+  let dividendFacet: DividendFacetTimeTravel;
   let scheduledTasksFacet: ScheduledCrossOrderedTasks;
   let timeTravelFacet: TimeTravel;
   let kycFacet: Kyc;

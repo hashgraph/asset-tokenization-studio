@@ -63,11 +63,11 @@ import {
   ClearingRedeemFacet__factory,
   ClearingTransferFacet__factory,
   ControlListFacet__factory,
+  Coupon__factory,
   DiamondFacet__factory,
   Dividend__factory,
   Equity__factory,
   ERC1410IssuerFacet__factory,
-  IDividend,
   IVoting,
   Voting__factory,
   ERC1410ManagementFacet__factory,
@@ -85,6 +85,8 @@ import {
   HoldManagementFacet__factory,
   HoldTokenHolderFacet__factory,
   IBondTypes,
+  ICoupon,
+  IDividend,
   IEquity,
   KpiLinkedRate__factory,
   Kpis__factory,
@@ -650,7 +652,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       endDate: ${endDate},
       fixingDate: ${fixingDate}`,
     );
-    const couponStruct: IBondTypes.CouponStruct = {
+    const couponStruct: ICoupon.CouponStruct = {
       recordDate: recordDate.toBigInt(),
       executionDate: executionDate.toBigInt(),
       rate: rate.toBigInt(),
@@ -662,7 +664,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return this.executeTransaction(
-      Bond__factory.connect(security.toString(), this.getSignerOrProvider()),
+      Coupon__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setCoupon",
       [couponStruct],
       GAS.SET_COUPON,
@@ -674,7 +676,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Cancelling coupon: ${couponId} for bond: ${security}`);
 
     return this.executeTransaction(
-      Bond__factory.connect(security.toString(), this.getSignerOrProvider()),
+      Coupon__factory.connect(security.toString(), this.getSignerOrProvider()),
       "cancelCoupon",
       [couponId],
       GAS.CANCEL_COUPON,

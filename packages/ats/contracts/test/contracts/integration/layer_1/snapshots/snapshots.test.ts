@@ -11,13 +11,13 @@ import {
   type AccessControl,
   type Lock,
   type IHold,
-  type DividendFacet,
   type SsiManagement,
   type Kyc,
   type Equity,
   type TimeTravelFacet,
   type FreezeFacet,
   type ClearingTransferFacet,
+  DividendFacetTimeTravel,
 } from "@contract-types";
 import { ZERO, EMPTY_STRING, ADDRESS_ZERO, dateToUnixTimestamp, ATS_ROLES } from "@scripts";
 import { grantRoleAndPauseToken } from "@test";
@@ -54,7 +54,7 @@ describe("Snapshots Tests", () => {
   let kycFacet: Kyc;
   let ssiManagementFacet: SsiManagement;
   let equityFacet: Equity;
-  let dividendFacet: DividendFacet;
+  let dividendFacet: DividendFacetTimeTravel;
   let timeTravelFacet: TimeTravelFacet;
   let freezeFacet: FreezeFacet;
   let clearingTransferFacet: ClearingTransferFacet;

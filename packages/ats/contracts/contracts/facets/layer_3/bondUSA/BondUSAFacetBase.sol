@@ -9,13 +9,11 @@ import { BondUSA } from "./BondUSA.sol";
 abstract contract BondUSAFacetBase is BondUSA, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](6);
+        staticFunctionSelectors_ = new bytes4[](4);
         staticFunctionSelectors_[selectorIndex++] = this._initialize_bondUSA.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.setCoupon.selector;
         staticFunctionSelectors_[selectorIndex++] = this.updateMaturityDate.selector;
         staticFunctionSelectors_[selectorIndex++] = this.redeemAtMaturityByPartition.selector;
         staticFunctionSelectors_[selectorIndex++] = this.fullRedeemAtMaturity.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.cancelCoupon.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {

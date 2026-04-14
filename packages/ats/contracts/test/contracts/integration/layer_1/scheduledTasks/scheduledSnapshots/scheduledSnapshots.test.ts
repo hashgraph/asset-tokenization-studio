@@ -6,7 +6,7 @@ import {
   type ResolverProxy,
   type ScheduledSnapshotsFacet,
   type AccessControl,
-  type DividendFacet,
+  DividendFacetTimeTravel,
   ScheduledCrossOrderedTasksFacet,
   TimeTravelFacet,
 } from "@contract-types";
@@ -21,7 +21,7 @@ describe("Scheduled Snapshots Tests", () => {
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
 
-  let dividendFacet: DividendFacet;
+  let dividendFacet: DividendFacetTimeTravel;
   let scheduledSnapshotsFacet: ScheduledSnapshotsFacet;
   let scheduledTasksFacet: ScheduledCrossOrderedTasksFacet;
   let accessControlFacet: AccessControl;

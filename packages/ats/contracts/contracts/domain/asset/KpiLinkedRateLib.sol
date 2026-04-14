@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBondTypes } from "../../facets/layer_2/bond/IBondTypes.sol";
+import { CouponStorageWrapper } from "./CouponStorageWrapper.sol";
+import { ICoupon } from "../../facets/layer_2/coupon/ICoupon.sol";
 import { InterestRateStorageWrapper, KpiLinkedRateDataStorage } from "./InterestRateStorageWrapper.sol";
 import { KpisStorageWrapper } from "./KpisStorageWrapper.sol";
 import { ProceedRecipientsStorageWrapper } from "./ProceedRecipientsStorageWrapper.sol";
@@ -37,7 +38,7 @@ library KpiLinkedRateLib {
      */
     function calculateKpiLinkedInterestRate(
         uint256 couponID,
-        IBondTypes.Coupon memory coupon
+        ICoupon.Coupon memory coupon
     ) internal view returns (uint256 rate_, uint8 rateDecimals_) {
         KpiLinkedRateDataStorage memory kpiData = InterestRateStorageWrapper.kpiLinkedRateStorage();
 
@@ -107,17 +108,17 @@ library KpiLinkedRateLib {
      * @return rateDecimals_ The decimals of the previous coupon rate.
      */
     function _previousRate(uint256 couponID) private view returns (uint256 rate_, uint8 rateDecimals_) {
-        uint256 previousCouponId = BondStorageWrapper.getPreviousCouponInOrderedList(couponID);
+        uint256 previousCouponId = CouponStorageWrapper.getPreviousCouponInOrderedList(couponID);
 
         if (previousCouponId == 0) {
             return (0, 0);
         }
 
-        (IBondTypes.RegisteredCoupon memory previousCoupon, , ) = BondStorageWrapper.getCoupon(previousCouponId);
+        (ICoupon.RegisteredCoupon memory previousCoupon, , ) = CouponStorageWrapper.getCoupon(previousCouponId);
 
         // Previous coupon rate must be set
         _checkUnexpectedError(
-            previousCoupon.coupon.rateStatus != IBondTypes.RateCalculationStatus.SET,
+            previousCoupon.coupon.rateStatus != ICoupon.RateCalculationStatus.SET,
             KPI_LINKED_RATE_COUPON
         );
 

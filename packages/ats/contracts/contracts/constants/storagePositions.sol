@@ -114,6 +114,9 @@ uint256 constant _PARTITION_AMOUNT_OFFSET = 0;
 uint256 constant _PARTITION_SIZE = 2;
 
 // Layer 2 Unique Constants
+// keccak256('security.token.standard.coupon.storage');
+bytes32 constant _COUPON_STORAGE_POSITION = 0x79c5b8f4968a14226894648408bdac3dd5ca35b5a2c206fad6dbd1aa25b6a774;
+
 // keccak256('security.token.standard.bond.storage');
 bytes32 constant _BOND_STORAGE_POSITION = 0x251123c390edd911567d4210605f2dfb26d83878c58bd871f56946d08ffd1f2b;
 

@@ -4,18 +4,14 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IBondManagement } from "./IBondManagement.sol";
 import { IBondTypes } from "./IBondTypes.sol";
 import { IKyc } from "../../layer_1/kyc/IKyc.sol";
-import { IBond } from "../../layer_2/bond/IBond.sol";
-import { _CORPORATE_ACTION_ROLE, _BOND_MANAGER_ROLE, _MATURITY_REDEEMER_ROLE } from "../../../constants/roles.sol";
-import { COUPON_CORPORATE_ACTION_TYPE, KPI_BOND_REDEEM_BALANCE } from "../../../constants/values.sol";
+import { _BOND_MANAGER_ROLE, _MATURITY_REDEEMER_ROLE } from "../../../constants/roles.sol";
+import { KPI_BOND_REDEEM_BALANCE } from "../../../constants/values.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { BondStorageWrapper } from "../../../domain/asset/BondStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
-import { InterestRateStorageWrapper } from "../../../domain/asset/InterestRateStorageWrapper.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 import { _checkUnexpectedError } from "../../../infrastructure/utils/UnexpectedError.sol";
-
-error InterestRateIsKpiLinked();
 
 /**
  * @title Bond
@@ -115,55 +111,6 @@ abstract contract Bond is IBondManagement, TimestampProvider, Modifiers {
     }
 
     /**
-     * @dev Sets a new coupon for the bond
-     *
-     * Requirements:
-     * - Contract must not be paused
-     * - Caller must have CORPORATE_ACTION_ROLE
-     * - Coupon dates must be valid
-     * - Record and fixing dates must be valid timestamps
-     *
-     * @param _newCoupon The new coupon data
-     * @return couponID_ The created coupon identifier
-     *
-     * Emits CouponSet event on success
-     */
-    function setCoupon(
-        IBondTypes.Coupon calldata _newCoupon
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_CORPORATE_ACTION_ROLE)
-        onlyValidDates(_newCoupon.startDate, _newCoupon.endDate)
-        onlyValidDates(_newCoupon.recordDate, _newCoupon.executionDate)
-        onlyValidDates(_newCoupon.fixingDate, _newCoupon.executionDate)
-        onlyValidTimestamp(_newCoupon.recordDate)
-        onlyValidTimestamp(_newCoupon.fixingDate)
-        returns (uint256 couponID_)
-    {
-        IBondTypes.Coupon memory coupon = _prepareCoupon(_newCoupon);
-        bytes32 corporateActionID;
-        (corporateActionID, couponID_) = BondStorageWrapper.setCoupon(coupon);
-    }
-
-    function cancelCoupon(
-        uint256 _couponId
-    )
-        external
-        override
-        onlyUnpaused
-        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponId - 1)
-        onlyRole(_CORPORATE_ACTION_ROLE)
-        returns (bool success_)
-    {
-        (success_) = BondStorageWrapper.cancelCoupon(_couponId);
-        if (success_) {
-            emit IBond.CouponCancelled(_couponId, EvmAccessors.getMsgSender());
-        }
-    }
-
-    /**
      * @dev Updates the bond maturity date
      *
      * Requirements:
@@ -189,16 +136,5 @@ abstract contract Bond is IBondManagement, TimestampProvider, Modifiers {
         emit MaturityDateUpdated(address(this), _newMaturityDate, BondStorageWrapper.getMaturityDate());
         BondStorageWrapper.setMaturityDate(_newMaturityDate);
         return true;
-    }
-
-    function _prepareCoupon(IBondTypes.Coupon calldata _newCoupon) internal virtual returns (IBondTypes.Coupon memory) {
-        // For KPI-linked rate bonds, rate must be PENDING (0), rate must be 0, and rateDecimals must be 0
-        if (
-            InterestRateStorageWrapper.isKpiLinkedRateInitialized() &&
-            (_newCoupon.rateStatus != IBondTypes.RateCalculationStatus.PENDING ||
-                _newCoupon.rate != 0 ||
-                _newCoupon.rateDecimals != 0)
-        ) revert InterestRateIsKpiLinked();
-        return _newCoupon;
     }
 }

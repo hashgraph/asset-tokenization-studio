@@ -10,21 +10,12 @@ import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticF
 abstract contract BondUSAReadFacetBase is BondRead, IStaticFunctionSelectors, Security {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](14);
+        staticFunctionSelectors_ = new bytes4[](5);
         staticFunctionSelectors_[selectorIndex++] = this.getBondDetails.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCoupon.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCouponFor.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getPrincipalFor.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCouponAmountFor.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCouponCount.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCouponHolders.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getTotalCouponHolders.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getSecurityRegulationData.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getSecurityHolders.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getTotalSecurityHolders.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCouponFromOrderedListAt.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCouponsOrderedList.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCouponsOrderedListTotal.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {

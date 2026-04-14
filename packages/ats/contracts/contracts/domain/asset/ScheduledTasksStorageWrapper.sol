@@ -10,7 +10,8 @@ import {
     IScheduledCrossOrderedTasks
 } from "../../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
 import { IEquity } from "../../facets/layer_2/equity/IEquity.sol";
-import { IBondRead } from "../../facets/layer_2/bond/IBondRead.sol";
+import { CouponStorageWrapper } from "./CouponStorageWrapper.sol";
+import { ICoupon } from "../../facets/layer_2/coupon/ICoupon.sol";
 import { ISnapshots } from "../../facets/layer_1/snapshot/ISnapshots.sol";
 import {
     _SCHEDULED_SNAPSHOTS_STORAGE_POSITION,
@@ -352,8 +353,8 @@ library ScheduledTasksStorageWrapper {
 
         uint256 couponID = _getCouponIdFromAction(actionId);
 
-        BondStorageWrapper.addToCouponsOrderedList(couponID);
-        uint256 orderedListPos = BondStorageWrapper.getCouponsOrderedListTotal();
+        CouponStorageWrapper.addToCouponsOrderedList(couponID);
+        uint256 orderedListPos = CouponStorageWrapper.getCouponsOrderedListTotal();
 
         _updateCouponRatesIfNeeded(couponID);
 
@@ -406,13 +407,13 @@ library ScheduledTasksStorageWrapper {
     }
 
     function _updateCouponRatesIfNeeded(uint256 couponID) private {
-        (IBondTypes.RegisteredCoupon memory registeredCoupon, , ) = BondStorageWrapper.getCoupon(couponID);
+        (ICoupon.RegisteredCoupon memory registeredCoupon, , ) = CouponStorageWrapper.getCoupon(couponID);
 
         if (InterestRateStorageWrapper.isSustainabilityPerformanceTargetRateInitialized()) {
             (uint256 rate, uint8 rateDecimals) = SustainabilityPerformanceTargetRateLib
                 .calculateSustainabilityPerformanceTargetInterestRate(couponID, registeredCoupon.coupon);
 
-            BondStorageWrapper.updateCouponRate(couponID, registeredCoupon.coupon, rate, rateDecimals);
+            CouponStorageWrapper.updateCouponRate(couponID, registeredCoupon.coupon, rate, rateDecimals);
         }
 
         if (InterestRateStorageWrapper.isKpiLinkedRateInitialized()) {
@@ -421,7 +422,7 @@ library ScheduledTasksStorageWrapper {
                 registeredCoupon.coupon
             );
 
-            BondStorageWrapper.updateCouponRate(couponID, registeredCoupon.coupon, rate, rateDecimals);
+            CouponStorageWrapper.updateCouponRate(couponID, registeredCoupon.coupon, rate, rateDecimals);
         }
     }
 

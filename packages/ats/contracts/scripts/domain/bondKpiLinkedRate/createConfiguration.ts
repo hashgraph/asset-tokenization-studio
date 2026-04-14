@@ -80,6 +80,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
 
   // Advanced Features
   "AdjustBalancesFacet",
+  "CouponFacet",
   "LockFacet",
   "NominalValueFacet",
   "ProceedRecipientsKpiLinkedRateFacet", // rate-specific: triggers scheduled tasks
