@@ -31,6 +31,7 @@ import { IBondUSA } from "../facets/layer_3/bondUSA/IBondUSA.sol";
 import { IBondRead } from "../facets/layer_2/bond/IBondRead.sol";
 import { IProceedRecipients } from "../facets/layer_2/proceedRecipient/IProceedRecipients.sol";
 import { INominalValue } from "../facets/layer_2/nominalValue/INominalValue.sol";
+import { ScheduledTasksStorageWrapper } from "../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { IProtectedPartitions } from "../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 import { IExternalPauseManagement } from "../facets/layer_1/externalPause/IExternalPauseManagement.sol";
 import {
@@ -111,6 +112,7 @@ contract Factory is IFactory {
 
     modifier checkBondDates(uint256 startingDate, uint256 maturityDate) {
         CorporateActionsStorageWrapper.requireValidDates(startingDate, maturityDate);
+        ScheduledTasksStorageWrapper.requireValidTimestamp(maturityDate);
         _;
     }
 

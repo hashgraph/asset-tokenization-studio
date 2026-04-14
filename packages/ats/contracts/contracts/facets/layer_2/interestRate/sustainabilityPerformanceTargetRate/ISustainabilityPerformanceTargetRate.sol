@@ -31,6 +31,7 @@ interface ISustainabilityPerformanceTargetRate {
 
     error NotExistingProject(address);
     error ProvidedListsLengthMismatch(uint256 impactDataLength, uint256 projectsLength);
+    error InterestRateIsSustainabilityPerformanceTargetRate();
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_SustainabilityPerformanceTargetRate(

@@ -88,6 +88,7 @@ const BOND_FIXED_RATE_FACETS = [
   "SsiManagementFacet",
 
   // Interest Rate (rate-specific)
+  "CouponFixedRateFacet",
   "FixedRateFacet",
 
   // Jurisdiction-Specific

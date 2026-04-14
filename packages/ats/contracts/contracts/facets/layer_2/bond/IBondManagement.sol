@@ -22,20 +22,8 @@ interface IBondManagement is IBondTypes {
     function redeemAtMaturityByPartition(address _tokenHolder, bytes32 _partition, uint256 _amount) external;
 
     /**
-     * @notice Sets a new coupon for the bond
-     * @param _newCoupon The new coupon to be set
-     */
-    function setCoupon(IBondTypes.Coupon calldata _newCoupon) external returns (uint256 couponID_);
-
-    /**
      * @notice Updates the maturity date of the bond.
      * @param _maturityDate The new maturity date to be set.
      */
     function updateMaturityDate(uint256 _maturityDate) external returns (bool success_);
-
-    /**
-     * @notice Cancels a certain coupon of the bond.
-     * @param _couponID The coupon to be cancelled.
-     */
-    function cancelCoupon(uint256 _couponID) external returns (bool success_);
 }

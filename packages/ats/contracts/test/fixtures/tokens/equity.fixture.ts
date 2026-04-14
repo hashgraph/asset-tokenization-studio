@@ -10,7 +10,13 @@
  */
 
 import { deployAtsInfrastructureFixture } from "../infrastructure.fixture";
-import { deployEquityFromFactory, CURRENCIES, DeployEquityFromFactoryParams, DeepPartial } from "../../../scripts";
+import {
+  ATS_ROLES,
+  deployEquityFromFactory,
+  CURRENCIES,
+  DeployEquityFromFactoryParams,
+  DeepPartial,
+} from "../../../scripts";
 import {
   AccessControlFacet__factory,
   PauseFacet__factory,
@@ -95,6 +101,8 @@ export async function deployEquityTokenFixture({
   const pauseFacet = PauseFacet__factory.connect(diamond.target as string, deployer);
   const kycFacet = KycFacet__factory.connect(diamond.target as string, deployer);
   const controlListFacet = ControlListFacet__factory.connect(diamond.target as string, deployer);
+
+  await accessControlFacet.grantRole(ATS_ROLES._NOMINAL_VALUE_ROLE, deployer.address);
 
   return {
     ...infrastructure,
