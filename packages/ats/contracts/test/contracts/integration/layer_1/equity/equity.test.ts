@@ -11,6 +11,7 @@ import {
   Lock,
   IHold,
   type IERC1410,
+  type VotingFacet,
   Kyc,
   SsiManagement,
   ClearingActionsFacet,
@@ -71,6 +72,7 @@ describe("Equity Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let equityFacet: EquityUSA;
+  let votingFacet: VotingFacet;
   let accessControlFacet: AccessControl;
   let pauseFacet: Pause;
   let lockFacet: Lock;
@@ -79,10 +81,10 @@ describe("Equity Tests", () => {
   let timeTravelFacet: TimeTravelFacet;
   let kycFacet: Kyc;
   let ssiManagementFacet: SsiManagement;
+  let scheduledTasksFacet: ScheduledCrossOrderedTasks;
   let clearingActionsFacet: ClearingActionsFacet;
   let clearingTransferFacet: ClearingTransferFacet;
   let freezeFacet: FreezeFacet;
-  let scheduledTasksFacet: ScheduledCrossOrderedTasks;
 
   async function deploySecurityFixtureSinglePartition() {
     const base = await deployEquityTokenFixture();
@@ -112,7 +114,8 @@ describe("Equity Tests", () => {
     erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target, signer_A);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
     accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target, signer_A);
-    equityFacet = await ethers.getContractAt("EquityUSAFacetTimeTravel", diamond.target, signer_A);
+    equityFacet = await ethers.getContractAt("EquityUSA", diamond.target, signer_A);
+    votingFacet = await ethers.getContractAt("VotingFacet", diamond.target, signer_A);
     kycFacet = await ethers.getContractAt("Kyc", diamond.target, signer_B);
     ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.target, signer_A);
     clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.target, signer_A);
@@ -174,7 +177,7 @@ describe("Equity Tests", () => {
 
       await expect(
         equityFacet._initialize_equityUSA(getEquityDetails(), regulationData, additionalSecurityData),
-      ).to.be.revertedWithCustomError(equityFacet, "AlreadyInitialized");
+      ).to.be.rejectedWith("AlreadyInitialized");
     });
 
     it("GIVEN an equity token WHEN getEquityDetails is called THEN returns correct equity details", async () => {
@@ -219,8 +222,9 @@ describe("Equity Tests", () => {
         data: "0x",
       });
 
-      const [dividend] = await equityFacet.getDividend(1);
+      const [dividend, isDisabled] = await equityFacet.getDividend(1);
       expect(dividend.snapshotId).to.not.equal(0);
+      expect(isDisabled).to.equal(false);
 
       // Verify getDividendHolders returns holders from snapshot (line 211-212)
       const dividendHolders = await equityFacet.getDividendHolders(1, 0, 99);
@@ -265,8 +269,9 @@ describe("Equity Tests", () => {
       await timeTravelFacet.changeSystemTimestamp(dividendsRecordDateInSeconds + 1);
 
       // Verify snapshot was NOT executed (snapshotId == 0)
-      const [dividend] = await equityFacet.getDividend(1);
+      const [dividend, isDisabled] = await equityFacet.getDividend(1);
       expect(dividend.snapshotId).to.equal(0);
+      expect(isDisabled).to.equal(false);
 
       // Get total dividend holders using _getTotalTokenHolders (line 224 in EquityStorageWrapper.sol)
       const totalHolders = await equityFacet.getTotalDividendHolders(1);
@@ -277,15 +282,12 @@ describe("Equity Tests", () => {
       expect([...holders]).to.have.members([signer_A.address]);
     });
 
-    it("GIVEN an account without corporateActions role WHEN setDividends THEN transaction fails with AccountHasNoRole", async () => {
+    it("GIVEN an account without corporateActions role WHEN setDividend THEN transaction fails with AccountHasNoRole", async () => {
       // set dividend fails
-      await expect(equityFacet.connect(signer_C).setDividend(dividendData)).to.be.revertedWithCustomError(
-        accessControlFacet,
-        "AccountHasNoRole",
-      );
+      await expect(equityFacet.connect(signer_C).setDividend(dividendData)).to.be.rejectedWith("AccountHasNoRole");
     });
 
-    it("GIVEN a paused Token WHEN setDividends THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused Token WHEN setDividend THEN transaction fails with TokenIsPaused", async () => {
       // Granting Role to account C and Pause
       await grantRoleAndPauseToken(
         accessControlFacet,
@@ -297,13 +299,10 @@ describe("Equity Tests", () => {
       );
 
       // set dividend fails
-      await expect(equityFacet.connect(signer_C).setDividend(dividendData)).to.be.revertedWithCustomError(
-        pauseFacet,
-        "TokenIsPaused",
-      );
+      await expect(equityFacet.connect(signer_C).setDividend(dividendData)).to.be.rejectedWith("TokenIsPaused");
     });
 
-    it("GIVEN an account with corporateActions role WHEN setDividends with wrong dates THEN transaction fails", async () => {
+    it("GIVEN an account with corporateActions role WHEN setDividend with wrong dates THEN transaction fails", async () => {
       const currentTimestamp = await timeTravelFacet.blockTimestamp();
       await timeTravelFacet.changeSystemTimestamp(currentTimestamp + 100n);
       // Granting Role to account C
@@ -335,7 +334,7 @@ describe("Equity Tests", () => {
       );
     });
 
-    it("GIVEN an account with corporateActions role WHEN setDividends THEN transaction succeeds", async () => {
+    it("GIVEN an account with corporateActions role WHEN setDividend THEN transaction succeeds", async () => {
       // Granting Role to account C
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
@@ -353,16 +352,17 @@ describe("Equity Tests", () => {
         );
 
       // check list members
-      await expect(equityFacet.getDividend(1000)).to.be.revertedWithCustomError(equityFacet, "WrongIndexForAction");
+      await expect(equityFacet.getDividend(1000)).to.be.rejectedWith("WrongIndexForAction");
 
       const listCount = await equityFacet.getDividendsCount();
-      const [dividend] = await equityFacet.getDividend(1);
+      const [dividend, isDisabled] = await equityFacet.getDividend(1);
       const dividendFor = await equityFacet.getDividendFor(1, signer_A.address);
       const dividendAmountFor = await equityFacet.getDividendAmountFor(1, signer_A.address);
       const dividendTotalHolder = await equityFacet.getTotalDividendHolders(1);
       const dividendHolders = await equityFacet.getDividendHolders(1, 0, dividendTotalHolder);
 
       expect(listCount).to.equal(1);
+      expect(isDisabled).to.equal(false);
       expect(dividend.snapshotId).to.equal(0);
       expect(dividend.dividend.recordDate).to.equal(dividendsRecordDateInSeconds);
       expect(dividend.dividend.executionDate).to.equal(dividendsExecutionDateInSeconds);
@@ -382,7 +382,7 @@ describe("Equity Tests", () => {
       expect(dividendAmountFor.denominator).to.equal(0);
     });
 
-    it("GIVEN an account with corporateActions role WHEN setDividends and lock THEN transaction succeeds", async () => {
+    it("GIVEN an account with corporateActions role WHEN setDividend and lock THEN transaction succeeds", async () => {
       // Granting Role to account C
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._LOCKER_ROLE, signer_C.address);
@@ -423,6 +423,7 @@ describe("Equity Tests", () => {
 
       expect(dividendFor.tokenBalance).to.equal(TotalAmount);
       expect(dividendFor.recordDateReached).to.equal(true);
+      expect(dividendFor.isDisabled).to.be.false;
       expect(dividendTotalHolder).to.equal(1);
       expect(dividendHolders.length).to.equal(dividendTotalHolder);
       expect([...dividendHolders]).to.have.members([signer_A.address]);
@@ -431,7 +432,7 @@ describe("Equity Tests", () => {
       expect(dividendAmountFor.denominator).to.equal(10n ** (dividendFor.decimals + dividendFor.amountDecimals));
     });
 
-    it("GIVEN an account with corporateActions role WHEN setDividends and hold THEN transaction succeeds", async () => {
+    it("GIVEN an account with corporateActions role WHEN setDividend and hold THEN transaction succeeds", async () => {
       // Granting Role to account C
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
@@ -596,122 +597,121 @@ describe("Equity Tests", () => {
       expect(dividendAmountFor.numerator).to.equal(expectedDividendNumerator);
       expect(dividendAmountFor.denominator).to.equal(expectedDividendDenominator);
     });
-  });
 
-  describe("Cancel Dividend", () => {
-    it("GIVEN an account without corporateActions role WHEN cancelDividend THEN transaction fails with AccountHasNoRole", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
-      await equityFacet.connect(signer_B).setDividend(dividendData);
-      await expect(equityFacet.connect(signer_C).cancelDividend(1)).to.be.rejectedWith("AccountHasNoRole");
-    });
-
-    it("GIVEN a paused Token WHEN cancelDividend THEN transaction fails with TokenIsPaused", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
-      await equityFacet.connect(signer_B).setDividend(dividendData);
-      await pauseFacet.connect(signer_B).pause();
-
-      await expect(equityFacet.connect(signer_B).cancelDividend(1)).to.be.rejectedWith("TokenIsPaused");
-    });
-
-    it("GIVEN a dividend already executed WHEN cancelDividend THEN transaction fails with DividendAlreadyExecuted", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-
-      await equityFacet.connect(signer_C).setDividend(dividendData);
-
-      await timeTravelFacet.changeSystemTimestamp(dividendsExecutionDateInSeconds + 1000);
-
-      await expect(equityFacet.connect(signer_C).cancelDividend(1)).to.be.revertedWithCustomError(
-        equityFacet,
-        "DividendAlreadyExecuted",
-      );
-    });
-
-    it("GIVEN a dividend not yet executed WHEN cancelDividend THEN transaction succeeds", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-
-      await equityFacet.connect(signer_C).setDividend(dividendData);
-
-      await expect(equityFacet.connect(signer_C).cancelDividend(1))
-        .to.emit(equityFacet, "DividendCancelled")
-        .withArgs(1, signer_C.address);
-      expect((await equityFacet.getDividend(1)).isDisabled_).to.equal(true);
-      const dividendFor = await equityFacet.getDividendFor(1, signer_A.address);
-      expect(dividendFor.amount).to.equal(dividendsAmountPerEquity);
-      expect(dividendFor.amountDecimals).to.equal(dividendsAmountDecimalsPerEquity);
-    });
-
-    it("GIVEN a cancelled dividend WHEN getDividend THEN isDisabled is true", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-
-      await equityFacet.connect(signer_C).setDividend(dividendData);
-
-      await equityFacet.connect(signer_C).cancelDividend(1);
-
-      const [dividend, isDisabled] = await equityFacet.getDividend(1);
-      expect(isDisabled).to.equal(true);
-      expect(dividend.dividend.recordDate).to.equal(dividendsRecordDateInSeconds);
-      expect(dividend.dividend.executionDate).to.equal(dividendsExecutionDateInSeconds);
-    });
-
-    it("GIVEN a cancelled dividend WHEN getDividendFor THEN isDisabled is true and amount is still available", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
-
-      await erc1410Facet.connect(signer_C).issueByPartition({
-        partition: DEFAULT_PARTITION,
-        tokenHolder: signer_A.address,
-        value: 1000n,
-        data: "0x",
+    describe("Cancel Dividend", () => {
+      it("GIVEN an account without corporateActions role WHEN cancelDividend THEN transaction fails with AccountHasNoRole", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
+        await equityFacet.connect(signer_B).setDividend(dividendData);
+        await expect(equityFacet.connect(signer_C).cancelDividend(1)).to.be.rejectedWith("AccountHasNoRole");
       });
 
-      await equityFacet.connect(signer_C).setDividend(dividendData);
+      it("GIVEN a paused Token WHEN cancelDividend THEN transaction fails with TokenIsPaused", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
+        await equityFacet.connect(signer_B).setDividend(dividendData);
+        await pauseFacet.connect(signer_B).pause();
 
-      await equityFacet.connect(signer_C).cancelDividend(1);
+        await expect(equityFacet.connect(signer_B).cancelDividend(1)).to.be.rejectedWith("TokenIsPaused");
+      });
 
-      const [, isDisabled] = await equityFacet.getDividend(1);
-      expect(isDisabled).to.equal(true);
-      const dividendFor = await equityFacet.getDividendFor(1, signer_A.address);
-      expect(dividendFor.amount).to.equal(dividendsAmountPerEquity);
-      expect(dividendFor.amountDecimals).to.equal(dividendsAmountDecimalsPerEquity);
-    });
+      it("GIVEN a dividend already executed WHEN cancelDividend THEN transaction fails with DividendAlreadyExecuted", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
-    it("GIVEN a non-existent dividend WHEN cancelDividend THEN transaction fails", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await equityFacet.connect(signer_C).setDividend(dividendData);
 
-      await expect(equityFacet.connect(signer_C).cancelDividend(999)).to.be.rejected;
-    });
+        await timeTravelFacet.changeSystemTimestamp(dividendsExecutionDateInSeconds + 1000);
 
-    it("GIVEN multiple dividends WHEN cancelDividend on one THEN only that dividend is cancelled", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await expect(equityFacet.connect(signer_C).cancelDividend(1)).to.be.revertedWithCustomError(
+          equityFacet,
+          "DividendAlreadyExecuted",
+        );
+      });
 
-      // Create first dividend
-      await equityFacet.connect(signer_C).setDividend(dividendData);
+      it("GIVEN a dividend not yet executed WHEN cancelDividend THEN transaction succeeds", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
-      // Create second dividend with different execution date
-      const secondDividendData = {
-        recordDate: dividendsRecordDateInSeconds.toString(),
-        executionDate: (dividendsExecutionDateInSeconds + 10000).toString(),
-        amount: 20,
-        amountDecimals: 0,
-      };
-      await equityFacet.connect(signer_C).setDividend(secondDividendData);
+        await equityFacet.connect(signer_C).setDividend(dividendData);
 
-      // Cancel only first dividend
-      await expect(equityFacet.connect(signer_C).cancelDividend(1))
-        .to.emit(equityFacet, "DividendCancelled")
-        .withArgs(1, signer_C.address);
+        await expect(equityFacet.connect(signer_C).cancelDividend(1))
+          .to.emit(equityFacet, "DividendCancelled")
+          .withArgs(1, signer_C.address);
+        expect((await equityFacet.getDividend(1)).isDisabled_).to.equal(true);
+        const dividendFor = await equityFacet.getDividendFor(1, signer_A.address);
+        expect(dividendFor.amount).to.equal(dividendsAmountPerEquity);
+        expect(dividendFor.amountDecimals).to.equal(dividendsAmountDecimalsPerEquity);
+        expect(dividendFor.isDisabled).to.be.true;
+      });
 
-      // Check first dividend is cancelled
-      const [, isDisabled1] = await equityFacet.getDividend(1);
-      expect(isDisabled1).to.equal(true);
+      it("GIVEN a cancelled dividend WHEN getDividend THEN isDisabled is true", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
-      // Check second dividend is still active
-      const [dividend2, isDisabled2] = await equityFacet.getDividend(2);
-      expect(isDisabled2).to.equal(false);
-      expect(dividend2.dividend.amount).to.equal(20);
+        await equityFacet.connect(signer_C).setDividend(dividendData);
+
+        await equityFacet.connect(signer_C).cancelDividend(1);
+
+        const [dividend, isDisabled] = await equityFacet.getDividend(1);
+        expect(isDisabled).to.equal(true);
+        expect(dividend.dividend.recordDate).to.equal(dividendsRecordDateInSeconds);
+        expect(dividend.dividend.executionDate).to.equal(dividendsExecutionDateInSeconds);
+      });
+
+      it("GIVEN a cancelled dividend WHEN getDividendFor THEN isDisabled is true and amount is still available", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+
+        await erc1410Facet.connect(signer_C).issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: 1000n,
+          data: "0x",
+        });
+
+        await equityFacet.connect(signer_C).setDividend(dividendData);
+
+        await equityFacet.connect(signer_C).cancelDividend(1);
+
+        const dividendFor = await equityFacet.getDividendFor(1, signer_A.address);
+        expect(dividendFor.isDisabled).to.equal(true);
+        expect(dividendFor.amount).to.equal(dividendsAmountPerEquity);
+        expect(dividendFor.amountDecimals).to.equal(dividendsAmountDecimalsPerEquity);
+      });
+
+      it("GIVEN a non-existent dividend WHEN cancelDividend THEN transaction fails", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+
+        await expect(equityFacet.connect(signer_C).cancelDividend(999)).to.be.rejected;
+      });
+
+      it("GIVEN multiple dividends WHEN cancelDividend on one THEN only that dividend is cancelled", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+
+        // Create first dividend
+        await equityFacet.connect(signer_C).setDividend(dividendData);
+
+        // Create second dividend with different execution date
+        const secondDividendData = {
+          recordDate: dividendsRecordDateInSeconds.toString(),
+          executionDate: (dividendsExecutionDateInSeconds + 10000).toString(),
+          amount: 20,
+          amountDecimals: 0,
+        };
+        await equityFacet.connect(signer_C).setDividend(secondDividendData);
+
+        // Cancel only first dividend
+        await expect(equityFacet.connect(signer_C).cancelDividend(1))
+          .to.emit(equityFacet, "DividendCancelled")
+          .withArgs(1, signer_C.address);
+
+        // Check first dividend is cancelled
+        const [, isDisabled1] = await equityFacet.getDividend(1);
+        expect(isDisabled1).to.equal(true);
+
+        // Check second dividend is still active
+        const [dividend2, isDisabled2] = await equityFacet.getDividend(2);
+        expect(isDisabled2).to.equal(false);
+        expect(dividend2.dividend.amount).to.equal(20);
+      });
     });
   });
-
   describe("Voting rights", () => {
     it("GIVEN voting with executed snapshot WHEN getting voting holders THEN returns holders from snapshot", async () => {
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
@@ -725,8 +725,8 @@ describe("Equity Tests", () => {
         data: "0x",
       });
 
-      await expect(equityFacet.connect(signer_C).setVoting(votingData))
-        .to.emit(equityFacet, "VotingSet")
+      await expect(votingFacet.connect(signer_C).setVoting(votingData))
+        .to.emit(votingFacet, "VotingSet")
         .withArgs(
           "0x0000000000000000000000000000000000000000000000000000000000000001",
           1,
@@ -744,20 +744,22 @@ describe("Equity Tests", () => {
         data: "0x",
       });
 
-      const [voting] = await equityFacet.getVoting(1);
+      const [voting, isDisabled] = await votingFacet.getVoting(1);
       expect(voting.snapshotId).to.not.equal(0);
+      expect(isDisabled).to.equal(false);
 
       // Verify getVotingHolders returns holders from snapshot (line 279)
-      const votingHolders = await equityFacet.getVotingHolders(1, 0, 99);
+      const votingHolders = await votingFacet.getVotingHolders(1, 0, 99);
       expect([...votingHolders]).to.have.members([signer_A.address]);
 
       // Verify getTotalVotingHolders returns count from snapshot (line 292)
-      const totalHolders = await equityFacet.getTotalVotingHolders(1);
+      const totalHolders = await votingFacet.getTotalVotingHolders(1);
       expect(totalHolders).to.equal(1);
 
-      const votingFor = await equityFacet.getVotingFor(1, signer_A.address);
+      const votingFor = await votingFacet.getVotingFor(1, signer_A.address);
       expect(votingFor.tokenBalance).to.equal(1000n);
       expect(votingFor.recordDateReached).to.equal(true);
+      expect(votingFor.isDisabled).to.be.false;
     });
 
     it("GIVEN voting without executed snapshot WHEN getting total voting holders THEN returns current total holders", async () => {
@@ -773,8 +775,8 @@ describe("Equity Tests", () => {
       });
 
       // Create voting (schedules a snapshot for recordDate)
-      await expect(equityFacet.connect(signer_C).setVoting(votingData))
-        .to.emit(equityFacet, "VotingSet")
+      await expect(votingFacet.connect(signer_C).setVoting(votingData))
+        .to.emit(votingFacet, "VotingSet")
         .withArgs(
           "0x0000000000000000000000000000000000000000000000000000000000000001",
           1,
@@ -788,24 +790,22 @@ describe("Equity Tests", () => {
       await timeTravelFacet.changeSystemTimestamp(votingRecordDateInSeconds + 1);
 
       // Verify snapshot was NOT executed (snapshotId == 0)
-      const [voting] = await equityFacet.getVoting(1);
+      const [voting, isDisabled] = await votingFacet.getVoting(1);
       expect(voting.snapshotId).to.equal(0);
+      expect(isDisabled).to.equal(false);
 
       // Get total voting holders using _getTotalTokenHolders (line 294 in EquityStorageWrapper.sol)
-      const totalHolders = await equityFacet.getTotalVotingHolders(1);
+      const totalHolders = await votingFacet.getTotalVotingHolders(1);
       expect(totalHolders).to.equal(1);
 
       // Also verify getVotingHolders returns current holders (line 281)
-      const holders = await equityFacet.getVotingHolders(1, 0, 99);
+      const holders = await votingFacet.getVotingHolders(1, 0, 99);
       expect([...holders]).to.have.members([signer_A.address]);
     });
 
     it("GIVEN an account without corporateActions role WHEN setVoting THEN transaction fails with AccountHasNoRole", async () => {
       // set voting fails
-      await expect(equityFacet.connect(signer_C).setVoting(votingData)).to.be.revertedWithCustomError(
-        accessControlFacet,
-        "AccountHasNoRole",
-      );
+      await expect(votingFacet.connect(signer_C).setVoting(votingData)).to.be.rejectedWith("AccountHasNoRole");
     });
 
     it("GIVEN a paused Token WHEN setVoting THEN transaction fails with TokenIsPaused", async () => {
@@ -820,10 +820,7 @@ describe("Equity Tests", () => {
       );
 
       // set voting fails
-      await expect(equityFacet.connect(signer_C).setVoting(votingData)).to.be.revertedWithCustomError(
-        pauseFacet,
-        "TokenIsPaused",
-      );
+      await expect(votingFacet.connect(signer_C).setVoting(votingData)).to.be.rejectedWith("TokenIsPaused");
     });
 
     it("GIVEN an account with corporateActions role WHEN setVoting with invalid timestamp THEN transaction fails with WrongTimestamp", async () => {
@@ -836,8 +833,8 @@ describe("Equity Tests", () => {
         data: voteData,
       };
 
-      await expect(equityFacet.connect(signer_C).setVoting(invalidVotingData)).to.be.revertedWithCustomError(
-        equityFacet,
+      await expect(votingFacet.connect(signer_C).setVoting(invalidVotingData)).to.be.revertedWithCustomError(
+        votingFacet,
         "WrongTimestamp",
       );
     });
@@ -846,19 +843,16 @@ describe("Equity Tests", () => {
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
       // Create a voting
-      await equityFacet.connect(signer_C).setVoting(votingData);
+      await votingFacet.connect(signer_C).setVoting(votingData);
 
       // Create a dividend to have different action types
       await equityFacet.connect(signer_C).setDividend(dividendData);
 
       // Try to access voting with dividend ID (should fail)
-      await expect(equityFacet.getVoting(2)).to.be.revertedWithCustomError(equityFacet, "WrongIndexForAction");
+      await expect(votingFacet.getVoting(2)).to.be.rejectedWith("WrongIndexForAction");
 
       // Try to access voting details with wrong ID (getVotingFor has the modifier)
-      await expect(equityFacet.getVotingFor(2, signer_A.address)).to.be.revertedWithCustomError(
-        equityFacet,
-        "WrongIndexForAction",
-      );
+      await expect(votingFacet.getVotingFor(2, signer_A.address)).to.be.rejectedWith("WrongIndexForAction");
 
       // Note: getVotingHolders and getTotalVotingHolders don't have onlyMatchingActionType modifier
     });
@@ -870,25 +864,16 @@ describe("Equity Tests", () => {
       await equityFacet.connect(signer_C).setDividend(dividendData);
 
       // Create a voting to have different action types
-      await equityFacet.connect(signer_C).setVoting(votingData);
+      await votingFacet.connect(signer_C).setVoting(votingData);
 
       // Try to access dividend with voting ID (should fail)
-      await expect(equityFacet.getDividend(2)).to.be.revertedWithCustomError(equityFacet, "WrongIndexForAction");
-      await expect(equityFacet.getDividendFor(2, signer_A.address)).to.be.revertedWithCustomError(
-        equityFacet,
-        "WrongIndexForAction",
-      );
-      await expect(equityFacet.getDividendAmountFor(2, signer_A.address)).to.be.revertedWithCustomError(
-        equityFacet,
-        "WrongIndexForAction",
-      );
+      await expect(equityFacet.getDividend(2)).to.be.rejectedWith("WrongIndexForAction");
+      await expect(equityFacet.getDividendFor(2, signer_A.address)).to.be.rejectedWith("WrongIndexForAction");
+      await expect(equityFacet.getDividendAmountFor(2, signer_A.address)).to.be.rejectedWith("WrongIndexForAction");
     });
     it("GIVEN an account without corporateActions role WHEN setVoting THEN transaction fails with AccountHasNoRole", async () => {
       // set dividend fails
-      await expect(equityFacet.connect(signer_C).setVoting(votingData)).to.be.revertedWithCustomError(
-        accessControlFacet,
-        "AccountHasNoRole",
-      );
+      await expect(votingFacet.connect(signer_C).setVoting(votingData)).to.be.rejectedWith("AccountHasNoRole");
     });
 
     it("GIVEN a paused Token WHEN setVoting THEN transaction fails with TokenIsPaused", async () => {
@@ -903,9 +888,17 @@ describe("Equity Tests", () => {
       );
 
       // set dividend fails
-      await expect(equityFacet.connect(signer_C).setVoting(votingData)).to.be.revertedWithCustomError(
-        pauseFacet,
-        "TokenIsPaused",
+      await expect(votingFacet.connect(signer_C).setVoting(votingData)).to.be.rejectedWith("TokenIsPaused");
+    });
+
+    it("GIVEN a duplicate voting WHEN setVoting THEN transaction fails with VotingRightsCreationFailed", async () => {
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+
+      await votingFacet.connect(signer_C).setVoting(votingData);
+
+      await expect(votingFacet.connect(signer_C).setVoting(votingData)).to.be.revertedWithCustomError(
+        votingFacet,
+        "VotingRightsCreationFailed",
       );
     });
 
@@ -914,8 +907,8 @@ describe("Equity Tests", () => {
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
       // set dividend
-      await expect(equityFacet.connect(signer_C).setVoting(votingData))
-        .to.emit(equityFacet, "VotingSet")
+      await expect(votingFacet.connect(signer_C).setVoting(votingData))
+        .to.emit(votingFacet, "VotingSet")
         .withArgs(
           "0x0000000000000000000000000000000000000000000000000000000000000001",
           1,
@@ -925,24 +918,24 @@ describe("Equity Tests", () => {
         );
 
       // check list members
-      // await expect(equityFacet.getVoting(1000)).to.be.rejectedWith(
+      // await expect(votingFacet.getVoting(1000)).to.be.rejectedWith(
       //     'WrongIndexForAction'
       // )
 
-      const listCount = await equityFacet.getVotingCount();
-      const [voting] = await equityFacet.getVoting(1);
-      const votingFor = await equityFacet.getVotingFor(1, signer_A.address);
-      const votingTotalHolder = await equityFacet.getTotalVotingHolders(1);
-      const votingHolders = await equityFacet.getVotingHolders(1, 0, votingTotalHolder);
+      const listCount = await votingFacet.getVotingCount();
+      const [voting, isDisabled] = await votingFacet.getVoting(1);
+      const votingFor = await votingFacet.getVotingFor(1, signer_A.address);
+      const votingTotalHolder = await votingFacet.getTotalVotingHolders(1);
+      const votingHolders = await votingFacet.getVotingHolders(1, 0, votingTotalHolder);
 
       expect(listCount).to.equal(1);
       expect(voting.snapshotId).to.equal(0);
       expect(voting.voting.recordDate).to.equal(votingRecordDateInSeconds);
       expect(voting.voting.data).to.equal(voteData);
-      expect(votingFor.recordDate).to.equal(dividendsRecordDateInSeconds);
-      expect(votingFor.data).to.equal(voteData);
+      expect(isDisabled).to.equal(false);
       expect(votingFor.tokenBalance).to.equal(0);
       expect(votingFor.recordDateReached).to.equal(false);
+      expect(votingFor.isDisabled).to.be.false;
       expect(votingTotalHolder).to.equal(0);
       expect(votingHolders.length).to.equal(votingTotalHolder);
     });
@@ -966,8 +959,8 @@ describe("Equity Tests", () => {
       await lockFacet.connect(signer_C).lock(LockedAmount, signer_A.address, 99999999999);
 
       // set dividend
-      await expect(equityFacet.connect(signer_C).setVoting(votingData))
-        .to.emit(equityFacet, "VotingSet")
+      await expect(votingFacet.connect(signer_C).setVoting(votingData))
+        .to.emit(votingFacet, "VotingSet")
         .withArgs(
           "0x0000000000000000000000000000000000000000000000000000000000000001",
           1,
@@ -977,86 +970,87 @@ describe("Equity Tests", () => {
         );
 
       await timeTravelFacet.changeSystemTimestamp(votingRecordDateInSeconds + 1);
-      const votingFor = await equityFacet.getVotingFor(1, signer_A.address);
-      const votingTotalHolder = await equityFacet.getTotalVotingHolders(1);
-      const votingHolders = await equityFacet.getVotingHolders(1, 0, votingTotalHolder);
+      const votingFor = await votingFacet.getVotingFor(1, signer_A.address);
+      const votingTotalHolder = await votingFacet.getTotalVotingHolders(1);
+      const votingHolders = await votingFacet.getVotingHolders(1, 0, votingTotalHolder);
 
       expect(votingFor.tokenBalance).to.equal(TotalAmount);
       expect(votingFor.recordDateReached).to.equal(true);
+      expect(votingFor.isDisabled).to.be.false;
       expect(votingTotalHolder).to.equal(1);
       expect(votingHolders.length).to.equal(votingTotalHolder);
       expect([...votingHolders]).to.have.members([signer_A.address]);
     });
-  });
+    describe("Cancel Voting", () => {
+      it("GIVEN an account without corporateActions role WHEN cancelVoting THEN transaction fails with AccountHasNoRole", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
+        await votingFacet.connect(signer_B).setVoting(votingData);
+        await expect(votingFacet.connect(signer_C).cancelVoting(1)).to.be.rejectedWith("AccountHasNoRole");
+      });
 
-  describe("Cancel Voting", () => {
-    it("GIVEN an account without corporateActions role WHEN cancelVoting THEN transaction fails with AccountHasNoRole", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
-      await equityFacet.connect(signer_B).setVoting(votingData);
-      await expect(equityFacet.connect(signer_C).cancelVoting(1)).to.be.rejectedWith("AccountHasNoRole");
-    });
+      it("GIVEN a paused Token WHEN cancelVoting THEN transaction fails with TokenIsPaused", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
+        await votingFacet.connect(signer_B).setVoting(votingData);
+        await pauseFacet.connect(signer_B).pause();
 
-    it("GIVEN a paused Token WHEN cancelVoting THEN transaction fails with TokenIsPaused", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
-      await equityFacet.connect(signer_B).setVoting(votingData);
-      await pauseFacet.connect(signer_B).pause();
+        await expect(votingFacet.connect(signer_B).cancelVoting(1)).to.be.rejectedWith("TokenIsPaused");
+      });
 
-      await expect(equityFacet.connect(signer_B).cancelVoting(1)).to.be.rejectedWith("TokenIsPaused");
-    });
+      it("GIVEN a voting already recorded WHEN cancelVoting THEN transaction fails with VotingAlreadyRecorded", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
-    it("GIVEN a voting already recorded WHEN cancelVoting THEN transaction fails with VotingAlreadyRecorded", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await votingFacet.connect(signer_C).setVoting(votingData);
 
-      await equityFacet.connect(signer_C).setVoting(votingData);
+        await timeTravelFacet.changeSystemTimestamp(votingRecordDateInSeconds + 1);
 
-      await timeTravelFacet.changeSystemTimestamp(votingRecordDateInSeconds + 1);
+        await expect(votingFacet.connect(signer_C).cancelVoting(1)).to.be.revertedWithCustomError(
+          votingFacet,
+          "VotingAlreadyRecorded",
+        );
+      });
 
-      await expect(equityFacet.connect(signer_C).cancelVoting(1)).to.be.revertedWithCustomError(
-        equityFacet,
-        "VotingAlreadyRecorded",
-      );
-    });
+      it("GIVEN a voting not yet recorded WHEN cancelVoting THEN transaction succeeds", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
-    it("GIVEN a voting not yet recorded WHEN cancelVoting THEN transaction succeeds", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await votingFacet.connect(signer_C).setVoting(votingData);
 
-      await equityFacet.connect(signer_C).setVoting(votingData);
+        await expect(votingFacet.connect(signer_C).cancelVoting(1))
+          .to.emit(votingFacet, "VotingCancelled")
+          .withArgs(1, signer_C.address);
+        expect((await votingFacet.getVoting(1)).isDisabled_).to.equal(true);
+        const votingFor = await votingFacet.getVotingFor(1, signer_A.address);
+        expect(votingFor.recordDate).to.equal(votingRecordDateInSeconds);
+        expect(votingFor.isDisabled).to.be.true;
+      });
 
-      await expect(equityFacet.connect(signer_C).cancelVoting(1))
-        .to.emit(equityFacet, "VotingCancelled")
-        .withArgs(1, signer_C.address);
-      expect((await equityFacet.getVoting(1)).isDisabled_).to.equal(true);
-      const votingFor = await equityFacet.getVotingFor(1, signer_A.address);
-      expect(votingFor.recordDate).to.equal(votingRecordDateInSeconds);
-    });
+      it("GIVEN a non-existent voting WHEN cancelVoting THEN transaction fails", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
-    it("GIVEN a non-existent voting WHEN cancelVoting THEN transaction fails", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await expect(votingFacet.connect(signer_C).cancelVoting(999)).to.be.rejected;
+      });
 
-      await expect(equityFacet.connect(signer_C).cancelVoting(999)).to.be.rejected;
-    });
+      it("GIVEN multiple votings WHEN cancelVoting on one THEN only that voting is cancelled", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
-    it("GIVEN multiple votings WHEN cancelVoting on one THEN only that voting is cancelled", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await votingFacet.connect(signer_C).setVoting(votingData);
 
-      await equityFacet.connect(signer_C).setVoting(votingData);
+        const secondVotingData = {
+          recordDate: (votingRecordDateInSeconds + 10000).toString(),
+          data: "0xAABBCC",
+        };
+        await votingFacet.connect(signer_C).setVoting(secondVotingData);
 
-      const secondVotingData = {
-        recordDate: (votingRecordDateInSeconds + 10000).toString(),
-        data: "0xAABBCC",
-      };
-      await equityFacet.connect(signer_C).setVoting(secondVotingData);
+        await expect(votingFacet.connect(signer_C).cancelVoting(1))
+          .to.emit(votingFacet, "VotingCancelled")
+          .withArgs(1, signer_C.address);
 
-      await expect(equityFacet.connect(signer_C).cancelVoting(1))
-        .to.emit(equityFacet, "VotingCancelled")
-        .withArgs(1, signer_C.address);
+        const [, isDisabled1] = await votingFacet.getVoting(1);
+        expect(isDisabled1).to.equal(true);
 
-      const [, isDisabled1] = await equityFacet.getVoting(1);
-      expect(isDisabled1).to.equal(true);
-
-      const [voting2, isDisabled2] = await equityFacet.getVoting(2);
-      expect(isDisabled2).to.equal(false);
-      expect(voting2.voting.recordDate).to.equal(votingRecordDateInSeconds + 10000);
+        const [voting2, isDisabled2] = await votingFacet.getVoting(2);
+        expect(isDisabled2).to.equal(false);
+        expect(voting2.voting.recordDate).to.equal(votingRecordDateInSeconds + 10000);
+      });
     });
   });
 
@@ -1085,30 +1079,6 @@ describe("Equity Tests", () => {
       ).to.be.rejectedWith("TokenIsPaused");
     });
 
-    it("GIVEN an account without corporateActions role WHEN setBalanceAdjustment THEN transaction fails with AccountHasNoRole", async () => {
-      // set dividend fails
-      await expect(
-        equityFacet.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData),
-      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
-    });
-
-    it("GIVEN a paused Token WHEN setBalanceAdjustment THEN transaction fails with TokenIsPaused", async () => {
-      // Granting Role to account C and Pause
-      await grantRoleAndPauseToken(
-        accessControlFacet,
-        pauseFacet,
-        ATS_ROLES._CORPORATE_ACTION_ROLE,
-        signer_A,
-        signer_B,
-        signer_C.address,
-      );
-
-      // set dividend fails
-      await expect(
-        equityFacet.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData),
-      ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
-    });
-
     it("GIVEN an account with corporateActions role WHEN setScheduledBalanceAdjustment with invalid timestamp THEN transaction fails with WrongTimestamp", async () => {
       const currentTimestamp = await timeTravelFacet.blockTimestamp();
       await timeTravelFacet.changeSystemTimestamp(currentTimestamp + 100n);
@@ -1123,6 +1093,33 @@ describe("Equity Tests", () => {
       await expect(
         equityFacet.connect(signer_C).setScheduledBalanceAdjustment(invalidBalanceAdjustmentData),
       ).to.be.revertedWithCustomError(equityFacet, "WrongTimestamp");
+    });
+
+    it("GIVEN an account with corporateActions role WHEN setScheduledBalanceAdjustment with invalid factor THEN transaction fails with FactorIsZero", async () => {
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+
+      const invalidBalanceAdjustmentData = {
+        executionDate: balanceAdjustmentExecutionDateInSeconds.toString(),
+        factor: 0, // Invalid factor: 0
+        decimals: balanceAdjustmentDecimals,
+      };
+
+      await expect(
+        equityFacet.connect(signer_C).setScheduledBalanceAdjustment(invalidBalanceAdjustmentData),
+      ).to.be.revertedWithCustomError(equityFacet, "FactorIsZero");
+    });
+
+    it("GIVEN balance adjustment created WHEN trying to get balance adjustment with wrong ID type THEN transaction fails with WrongIndexForAction", async () => {
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+
+      // Create a balance adjustment
+      await equityFacet.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
+
+      // Create a dividend to have different action types
+      await equityFacet.connect(signer_C).setDividend(dividendData);
+
+      // Try to access balance adjustment with dividend ID (should fail)
+      await expect(equityFacet.getScheduledBalanceAdjustment(2)).to.be.rejectedWith("WrongIndexForAction");
     });
 
     it("GIVEN an account with corporateActions role WHEN setScheduledBalanceAdjustment THEN transaction succeeds", async () => {
@@ -1151,172 +1148,118 @@ describe("Equity Tests", () => {
       expect(balanceAdjustment.decimals).to.equal(balanceAdjustmentDecimals);
     });
 
-    it("GIVEN an account with corporateActions role WHEN setScheduledBalanceAdjustment with invalid factor THEN transaction fails with FactorIsZero", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-
-      const invalidBalanceAdjustmentData = {
-        executionDate: balanceAdjustmentExecutionDateInSeconds.toString(),
-        factor: 0, // Invalid factor: 0
-        decimals: balanceAdjustmentDecimals,
-      };
-
-      await expect(
-        equityFacet.connect(signer_C).setScheduledBalanceAdjustment(invalidBalanceAdjustmentData),
-      ).to.be.revertedWithCustomError(equityFacet, "FactorIsZero");
-    });
-
-    it("GIVEN balance adjustment created WHEN trying to get balance adjustment with wrong ID type THEN transaction fails with WrongIndexForAction", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-
-      // Create a balance adjustment
-      await equityFacet.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
-
-      // Create a dividend to have different action types
-      await equityFacet.connect(signer_C).setDividend(dividendData);
-
-      // Try to access balance adjustment with dividend ID (should fail)
-      await expect(equityFacet.getScheduledBalanceAdjustment(2)).to.be.revertedWithCustomError(
-        equityFacet,
-        "WrongIndexForAction",
-      );
-    });
-
-    it("GIVEN an account with corporateActions role WHEN setBalanceAdjustment THEN transaction succeeds", async () => {
-      // Granting Role to account C
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-
-      // set dividend
-      await expect(equityFacet.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData))
-        .to.emit(equityFacet, "ScheduledBalanceAdjustmentSet")
-        .withArgs(
-          "0x0000000000000000000000000000000000000000000000000000000000000001",
-          1,
-          signer_C.address,
-          balanceAdjustmentExecutionDateInSeconds,
-          balanceAdjustmentFactor,
-          balanceAdjustmentDecimals,
+    describe("Cancel Scheduled Balance Adjustment", () => {
+      it("GIVEN an account without corporateActions role WHEN cancelScheduledBalanceAdjustment THEN transaction fails with AccountHasNoRole", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
+        await equityFacet.connect(signer_B).setScheduledBalanceAdjustment(balanceAdjustmentData);
+        await expect(equityFacet.connect(signer_C).cancelScheduledBalanceAdjustment(1)).to.be.rejectedWith(
+          "AccountHasNoRole",
         );
-
-      const listCount = await equityFacet.getScheduledBalanceAdjustmentCount();
-      const [balanceAdjustment] = await equityFacet.getScheduledBalanceAdjustment(1);
-
-      expect(listCount).to.equal(1);
-      expect(balanceAdjustment.executionDate).to.equal(balanceAdjustmentExecutionDateInSeconds);
-      expect(balanceAdjustment.factor).to.equal(balanceAdjustmentFactor);
-      expect(balanceAdjustment.decimals).to.equal(balanceAdjustmentDecimals);
-    });
-  });
-  describe("Cancel Scheduled Balance Adjustment", () => {
-    it("GIVEN an account without corporateActions role WHEN cancelScheduledBalanceAdjustment THEN transaction fails with AccountHasNoRole", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
-      await equityFacet.connect(signer_B).setScheduledBalanceAdjustment(balanceAdjustmentData);
-      await expect(equityFacet.connect(signer_C).cancelScheduledBalanceAdjustment(1)).to.be.rejectedWith(
-        "AccountHasNoRole",
-      );
-    });
-
-    it("GIVEN a paused Token WHEN cancelScheduledBalanceAdjustment THEN transaction fails with TokenIsPaused", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
-      await equityFacet.connect(signer_B).setScheduledBalanceAdjustment(balanceAdjustmentData);
-      await pauseFacet.connect(signer_B).pause();
-
-      await expect(equityFacet.connect(signer_B).cancelScheduledBalanceAdjustment(1)).to.be.rejectedWith(
-        "TokenIsPaused",
-      );
-    });
-
-    it("GIVEN a balance adjustment already executed WHEN cancelScheduledBalanceAdjustment THEN transaction fails with BalanceAdjustmentAlreadyExecuted", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-
-      await equityFacet.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
-
-      await timeTravelFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds + 1000);
-
-      await expect(equityFacet.connect(signer_C).cancelScheduledBalanceAdjustment(1)).to.be.revertedWithCustomError(
-        equityFacet,
-        "BalanceAdjustmentAlreadyExecuted",
-      );
-    });
-
-    it("GIVEN a balance adjustment not yet executed WHEN cancelScheduledBalanceAdjustment THEN transaction succeeds", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-
-      await equityFacet.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
-
-      await expect(equityFacet.connect(signer_C).cancelScheduledBalanceAdjustment(1))
-        .to.emit(equityFacet, "ScheduledBalanceAdjustmentCancelled")
-        .withArgs(1, signer_C.address);
-      const [balanceAdjustment, isDisabled] = await equityFacet.getScheduledBalanceAdjustment(1);
-      expect(isDisabled).to.equal(true);
-      expect(balanceAdjustment.factor).to.equal(balanceAdjustmentFactor);
-      expect(balanceAdjustment.decimals).to.equal(balanceAdjustmentDecimals);
-    });
-
-    it("GIVEN a non-existent balance adjustment WHEN cancelScheduledBalanceAdjustment THEN transaction fails", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-
-      await expect(equityFacet.connect(signer_C).cancelScheduledBalanceAdjustment(999)).to.be.rejected;
-    });
-
-    it("GIVEN multiple balance adjustments WHEN cancelScheduledBalanceAdjustment on one THEN only that adjustment is cancelled", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-
-      // Create first balance adjustment
-      await equityFacet.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
-
-      // Create second balance adjustment with different execution date
-      const secondBalanceAdjustmentData = {
-        executionDate: (balanceAdjustmentExecutionDateInSeconds + 10000).toString(),
-        factor: 500,
-        decimals: 3,
-      };
-      await equityFacet.connect(signer_C).setScheduledBalanceAdjustment(secondBalanceAdjustmentData);
-
-      // Cancel only first balance adjustment
-      await expect(equityFacet.connect(signer_C).cancelScheduledBalanceAdjustment(1))
-        .to.emit(equityFacet, "ScheduledBalanceAdjustmentCancelled")
-        .withArgs(1, signer_C.address);
-
-      // Verify first adjustment is cancelled by checking it still exists but with correct data
-      const [balanceAdjustment1, isDisabled1] = await equityFacet.getScheduledBalanceAdjustment(1);
-      expect(isDisabled1).to.equal(true);
-      expect(balanceAdjustment1.factor).to.equal(balanceAdjustmentFactor);
-
-      // Verify second adjustment is still active
-      const [balanceAdjustment2, isDisabled2] = await equityFacet.getScheduledBalanceAdjustment(2);
-      expect(isDisabled2).to.equal(false);
-      expect(balanceAdjustment2.factor).to.equal(500);
-      expect(balanceAdjustment2.decimals).to.equal(3);
-    });
-
-    it("GIVEN a cancelled balance adjustment WHEN triggerScheduledCrossOrderedTasks is called THEN scheduled task executes but token balance remains unchanged", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
-
-      const tokenAmount = 1000n;
-      await erc1410Facet.connect(signer_C).issueByPartition({
-        partition: DEFAULT_PARTITION,
-        tokenHolder: signer_A.address,
-        value: tokenAmount,
-        data: "0x",
       });
 
-      const balanceBeforeAdjustment = await erc1410Facet.balanceOfByPartition(DEFAULT_PARTITION, signer_A.address);
-      expect(balanceBeforeAdjustment).to.equal(tokenAmount);
+      it("GIVEN a paused Token WHEN cancelScheduledBalanceAdjustment THEN transaction fails with TokenIsPaused", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
+        await equityFacet.connect(signer_B).setScheduledBalanceAdjustment(balanceAdjustmentData);
+        await pauseFacet.connect(signer_B).pause();
 
-      await equityFacet.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
+        await expect(equityFacet.connect(signer_B).cancelScheduledBalanceAdjustment(1)).to.be.rejectedWith(
+          "TokenIsPaused",
+        );
+      });
 
-      await equityFacet.connect(signer_C).cancelScheduledBalanceAdjustment(1);
+      it("GIVEN a balance adjustment already executed WHEN cancelScheduledBalanceAdjustment THEN transaction fails with BalanceAdjustmentAlreadyExecuted", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
-      const balanceAfterCancel = await erc1410Facet.balanceOfByPartition(DEFAULT_PARTITION, signer_A.address);
-      expect(balanceAfterCancel).to.equal(balanceBeforeAdjustment);
+        await equityFacet.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
 
-      await timeTravelFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds + 1);
+        await timeTravelFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds + 1000);
 
-      await scheduledTasksFacet.connect(signer_A).triggerScheduledCrossOrderedTasks(100);
+        await expect(equityFacet.connect(signer_C).cancelScheduledBalanceAdjustment(1)).to.be.revertedWithCustomError(
+          equityFacet,
+          "BalanceAdjustmentAlreadyExecuted",
+        );
+      });
 
-      const balanceAfterTrigger = await erc1410Facet.balanceOfByPartition(DEFAULT_PARTITION, signer_A.address);
-      expect(balanceAfterTrigger).to.equal(balanceBeforeAdjustment);
+      it("GIVEN a balance adjustment not yet executed WHEN cancelScheduledBalanceAdjustment THEN transaction succeeds", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+
+        await equityFacet.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
+
+        await expect(equityFacet.connect(signer_C).cancelScheduledBalanceAdjustment(1))
+          .to.emit(equityFacet, "ScheduledBalanceAdjustmentCancelled")
+          .withArgs(1, signer_C.address);
+        const [balanceAdjustment, isDisabled] = await equityFacet.getScheduledBalanceAdjustment(1);
+        expect(isDisabled).to.equal(true);
+        expect(balanceAdjustment.factor).to.equal(balanceAdjustmentFactor);
+        expect(balanceAdjustment.decimals).to.equal(balanceAdjustmentDecimals);
+      });
+
+      it("GIVEN a non-existent balance adjustment WHEN cancelScheduledBalanceAdjustment THEN transaction fails", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+
+        await expect(equityFacet.connect(signer_C).cancelScheduledBalanceAdjustment(999)).to.be.rejected;
+      });
+
+      it("GIVEN multiple balance adjustments WHEN cancelScheduledBalanceAdjustment on one THEN only that adjustment is cancelled", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+
+        // Create first balance adjustment
+        await equityFacet.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
+
+        // Create second balance adjustment with different execution date
+        const secondBalanceAdjustmentData = {
+          executionDate: (balanceAdjustmentExecutionDateInSeconds + 10000).toString(),
+          factor: 500,
+          decimals: 3,
+        };
+        await equityFacet.connect(signer_C).setScheduledBalanceAdjustment(secondBalanceAdjustmentData);
+
+        // Cancel only first balance adjustment
+        await expect(equityFacet.connect(signer_C).cancelScheduledBalanceAdjustment(1))
+          .to.emit(equityFacet, "ScheduledBalanceAdjustmentCancelled")
+          .withArgs(1, signer_C.address);
+
+        // Verify first adjustment is cancelled by checking it still exists but with correct data
+        const [balanceAdjustment1, isDisabled1] = await equityFacet.getScheduledBalanceAdjustment(1);
+        expect(isDisabled1).to.equal(true);
+        expect(balanceAdjustment1.factor).to.equal(balanceAdjustmentFactor);
+
+        // Verify second adjustment is still active
+        const [balanceAdjustment2, isDisabled2] = await equityFacet.getScheduledBalanceAdjustment(2);
+        expect(isDisabled2).to.equal(false);
+        expect(balanceAdjustment2.factor).to.equal(500);
+        expect(balanceAdjustment2.decimals).to.equal(3);
+      });
+
+      it("GIVEN a cancelled balance adjustment WHEN triggerScheduledCrossOrderedTasks is called THEN scheduled task executes but token balance remains unchanged", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+
+        const tokenAmount = 1000n;
+        await erc1410Facet.connect(signer_C).issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: tokenAmount,
+          data: "0x",
+        });
+
+        const balanceBeforeAdjustment = await erc1410Facet.balanceOfByPartition(DEFAULT_PARTITION, signer_A.address);
+        expect(balanceBeforeAdjustment).to.equal(tokenAmount);
+
+        await equityFacet.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
+
+        await equityFacet.connect(signer_C).cancelScheduledBalanceAdjustment(1);
+
+        const balanceAfterCancel = await erc1410Facet.balanceOfByPartition(DEFAULT_PARTITION, signer_A.address);
+        expect(balanceAfterCancel).to.equal(balanceBeforeAdjustment);
+
+        await timeTravelFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds + 1);
+
+        await scheduledTasksFacet.connect(signer_A).triggerScheduledCrossOrderedTasks(100);
+
+        const balanceAfterTrigger = await erc1410Facet.balanceOfByPartition(DEFAULT_PARTITION, signer_A.address);
+        expect(balanceAfterTrigger).to.equal(balanceBeforeAdjustment);
+      });
     });
   });
 });

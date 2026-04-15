@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-14T23:30:46.394Z
- * Facets: 75
+ * Generated: 2026-04-15T10:24:09.201Z
+ * Facets: 76
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -94,6 +94,7 @@ import {
   TransferAndLockFixedRateFacet__factory,
   TransferAndLockKpiLinkedRateFacet__factory,
   TransferAndLockSustainabilityPerformanceTargetRateFacet__factory,
+  VotingFacet__factory,
   AccessControlFacetTimeTravel__factory,
   AdjustBalancesFacetTimeTravel__factory,
   BondUSAFacetTimeTravel__factory,
@@ -165,6 +166,7 @@ import {
   TransferAndLockFixedRateFacetTimeTravel__factory,
   TransferAndLockKpiLinkedRateFacetTimeTravel__factory,
   TransferAndLockSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
+  VotingFacetTimeTravel__factory,
 } from "@contract-types";
 import { getLibLinks } from "./orchestratorLibraries";
 
@@ -4736,14 +4738,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x564387f9",
       },
       {
-        name: "cancelVoting",
-        signature: {
-          full: "function cancelVoting(uint256 _voteId) returns (bool success_)",
-          canonical: "cancelVoting(uint256)",
-        },
-        selector: "0x549bdd6e",
-      },
-      {
         name: "getDividend",
         signature: {
           full: "function getDividend(uint256 _dividendID) view returns (((uint256 recordDate, uint256 executionDate, uint256 amount, uint8 amountDecimals) dividend, uint256 snapshotId) registeredDividend_, bool isDisabled_)",
@@ -4840,46 +4834,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbd007c8f",
       },
       {
-        name: "getTotalVotingHolders",
-        signature: {
-          full: "function getTotalVotingHolders(uint256 _voteID) view returns (uint256)",
-          canonical: "getTotalVotingHolders(uint256)",
-        },
-        selector: "0x92c51818",
-      },
-      {
-        name: "getVoting",
-        signature: {
-          full: "function getVoting(uint256 _voteID) view returns (((uint256 recordDate, bytes data) voting, uint256 snapshotId) registeredVoting_, bool isDisabled_)",
-          canonical: "getVoting(uint256)",
-        },
-        selector: "0x3afc7282",
-      },
-      {
-        name: "getVotingCount",
-        signature: {
-          full: "function getVotingCount() view returns (uint256 votingCount_)",
-          canonical: "getVotingCount()",
-        },
-        selector: "0x9c2aab5e",
-      },
-      {
-        name: "getVotingFor",
-        signature: {
-          full: "function getVotingFor(uint256 _voteID, address _account) view returns ((uint256 tokenBalance, uint256 recordDate, bytes data, uint8 decimals, bool recordDateReached, bool isDisabled) votingFor_)",
-          canonical: "getVotingFor(uint256,address)",
-        },
-        selector: "0x7633eccf",
-      },
-      {
-        name: "getVotingHolders",
-        signature: {
-          full: "function getVotingHolders(uint256 _voteID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
-          canonical: "getVotingHolders(uint256,uint256,uint256)",
-        },
-        selector: "0x009f64ac",
-      },
-      {
         name: "setDividend",
         signature: {
           full: "function setDividend((uint256 recordDate, uint256 executionDate, uint256 amount, uint8 amountDecimals) _newDividend) returns (uint256 dividendID_)",
@@ -4894,14 +4848,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "setScheduledBalanceAdjustment((uint256,uint256,uint8))",
         },
         selector: "0xd1661084",
-      },
-      {
-        name: "setVoting",
-        signature: {
-          full: "function setVoting((uint256 recordDate, bytes data) _newVoting) returns (uint256 voteID_)",
-          canonical: "setVoting((uint256,bytes))",
-        },
-        selector: "0x5adaa49e",
       },
     ],
     events: [
@@ -4936,22 +4882,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "ScheduledBalanceAdjustmentSet(bytes32,uint256,address,uint256,uint256,uint256)",
         },
         topic0: "0x71cd63a6f86ff487645dcceb29d3eac904f16d7006cfa7b1da3ea951a77a9666",
-      },
-      {
-        name: "VotingCancelled",
-        signature: {
-          full: "event VotingCancelled(uint256 voteId, address indexed operator)",
-          canonical: "VotingCancelled(uint256,address)",
-        },
-        topic0: "0x0ca8f69518859b63e253a165f70a3ef3ad0db94215d1703ebcadd269c4c860bc",
-      },
-      {
-        name: "VotingSet",
-        signature: {
-          full: "event VotingSet(bytes32 corporateActionId, uint256 voteId, address indexed operator, uint256 indexed recordDate, bytes data)",
-          canonical: "VotingSet(bytes32,uint256,address,uint256,bytes)",
-        },
-        topic0: "0x5ca20e6ec9818c8d574ae3452d46ed4c9dc9d8df2ffa263150507c7e9124ac2f",
       },
     ],
     errors: [
@@ -5034,19 +4964,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
         selector: "0xc9622656",
-      },
-      {
-        name: "VotingAlreadyRecorded",
-        signature: {
-          full: "error VotingAlreadyRecorded(bytes32 corporateActionId, uint256 voteId)",
-          canonical: "VotingAlreadyRecorded(bytes32,uint256)",
-        },
-        selector: "0x7a2e2617",
-      },
-      {
-        name: "VotingRightsCreationFailed",
-        signature: { full: "error VotingRightsCreationFailed()", canonical: "VotingRightsCreationFailed()" },
-        selector: "0x0cc16600",
       },
       {
         name: "WrongDates",
@@ -12376,12 +12293,166 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) =>
       new TransferAndLockSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
   },
+
+  VotingFacet: {
+    name: "VotingFacet",
+    resolverKey: {
+      name: "_VOTING_RESOLVER_KEY",
+      value: "0x97e0ffc69e5d5dd7c4635bfce0a5cf15b1c313433d49edbd55813da224b03768",
+    },
+    inheritance: ["Voting", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "cancelVoting",
+        signature: {
+          full: "function cancelVoting(uint256 _voteId) returns (bool success_)",
+          canonical: "cancelVoting(uint256)",
+        },
+        selector: "0x549bdd6e",
+      },
+      {
+        name: "getTotalVotingHolders",
+        signature: {
+          full: "function getTotalVotingHolders(uint256 _voteID) view returns (uint256 totalHolders_)",
+          canonical: "getTotalVotingHolders(uint256)",
+        },
+        selector: "0x92c51818",
+      },
+      {
+        name: "getVoting",
+        signature: {
+          full: "function getVoting(uint256 _voteID) view returns (((uint256 recordDate, bytes data) voting, uint256 snapshotId) registeredVoting_, bool isDisabled_)",
+          canonical: "getVoting(uint256)",
+        },
+        selector: "0x3afc7282",
+      },
+      {
+        name: "getVotingCount",
+        signature: {
+          full: "function getVotingCount() view returns (uint256 votingCount_)",
+          canonical: "getVotingCount()",
+        },
+        selector: "0x9c2aab5e",
+      },
+      {
+        name: "getVotingFor",
+        signature: {
+          full: "function getVotingFor(uint256 _voteID, address _account) view returns ((uint256 tokenBalance, uint256 recordDate, bytes data, uint8 decimals, bool recordDateReached, bool isDisabled) votingFor_)",
+          canonical: "getVotingFor(uint256,address)",
+        },
+        selector: "0x7633eccf",
+      },
+      {
+        name: "getVotingHolders",
+        signature: {
+          full: "function getVotingHolders(uint256 _voteID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+          canonical: "getVotingHolders(uint256,uint256,uint256)",
+        },
+        selector: "0x009f64ac",
+      },
+      {
+        name: "setVoting",
+        signature: {
+          full: "function setVoting((uint256 recordDate, bytes data) _newVoting) returns (uint256 voteID_)",
+          canonical: "setVoting((uint256,bytes))",
+        },
+        selector: "0x5adaa49e",
+      },
+    ],
+    events: [
+      {
+        name: "VotingCancelled",
+        signature: {
+          full: "event VotingCancelled(uint256 voteId, address indexed operator)",
+          canonical: "VotingCancelled(uint256,address)",
+        },
+        topic0: "0x0ca8f69518859b63e253a165f70a3ef3ad0db94215d1703ebcadd269c4c860bc",
+      },
+      {
+        name: "VotingSet",
+        signature: {
+          full: "event VotingSet(bytes32 corporateActionId, uint256 voteId, address indexed operator, uint256 indexed recordDate, bytes data)",
+          canonical: "VotingSet(bytes32,uint256,address,uint256,bytes)",
+        },
+        topic0: "0x5ca20e6ec9818c8d574ae3452d46ed4c9dc9d8df2ffa263150507c7e9124ac2f",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRole",
+        signature: {
+          full: "error AccountHasNoRole(address account, bytes32 role)",
+          canonical: "AccountHasNoRole(address,bytes32)",
+        },
+        selector: "0xa1180aad",
+      },
+      {
+        name: "InvalidTimestamp",
+        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
+        selector: "0xb7d09497",
+      },
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
+      },
+      {
+        name: "VotingAlreadyRecorded",
+        signature: {
+          full: "error VotingAlreadyRecorded(bytes32 corporateActionId, uint256 voteId)",
+          canonical: "VotingAlreadyRecorded(bytes32,uint256)",
+        },
+        selector: "0x7a2e2617",
+      },
+      {
+        name: "VotingRightsCreationFailed",
+        signature: { full: "error VotingRightsCreationFailed()", canonical: "VotingRightsCreationFailed()" },
+        selector: "0x0cc16600",
+      },
+      {
+        name: "WrongIndexForAction",
+        signature: {
+          full: "error WrongIndexForAction(uint256 index, bytes32 actionType)",
+          canonical: "WrongIndexForAction(uint256,bytes32)",
+        },
+        selector: "0xd3924f4e",
+      },
+    ],
+    factory: (signer) => new VotingFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) => new VotingFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
+  },
 };
 
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 75 as const;
+export const TOTAL_FACETS = 76 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -13200,12 +13271,17 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     name: "TimeTravelStorageWrapper",
     methods: [],
   },
+
+  VotingStorageWrapper: {
+    name: "VotingStorageWrapper",
+    methods: [],
+  },
 };
 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 38 as const;
+export const TOTAL_STORAGE_WRAPPERS = 39 as const;
 
 /**
  * All role identifiers extracted from contracts.
