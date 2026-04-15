@@ -3,12 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _EQUITY_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import {
-    DIVIDEND_CORPORATE_ACTION_TYPE,
     BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
     SNAPSHOT_RESULT_ID,
     SNAPSHOT_TASK_TYPE,
     BALANCE_ADJUSTMENT_TASK_TYPE,
-    KPI_EQUITY_DIVIDEND_DATA,
     KPI_EQUITY_BALANCE_ADJ
 } from "../../constants/values.sol";
 import { IEquity } from "../../facets/layer_2/equity/IEquity.sol";
@@ -57,41 +55,6 @@ library EquityStorageWrapper {
         $.dividendRight = equityDetailsData.dividendRight;
         $.currency = equityDetailsData.currency;
         $.initialized = true;
-    }
-
-    function setDividends(
-        IEquity.Dividend calldata newDividend
-    ) internal returns (bytes32 corporateActionId_, uint256 dividendId_) {
-        bytes memory data = abi.encode(newDividend);
-
-        (corporateActionId_, dividendId_) = CorporateActionsStorageWrapper.addCorporateAction(
-            DIVIDEND_CORPORATE_ACTION_TYPE,
-            data
-        );
-
-        initDividend(corporateActionId_, data);
-    }
-
-    function cancelDividend(uint256 dividendId) internal returns (bool success_) {
-        IEquity.RegisteredDividend memory registeredDividend;
-        bytes32 corporateActionId;
-        (registeredDividend, corporateActionId, ) = getDividends(dividendId);
-        if (registeredDividend.dividend.executionDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
-            revert IEquity.DividendAlreadyExecuted(corporateActionId, dividendId);
-        }
-        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
-        success_ = true;
-    }
-
-    function initDividend(bytes32 actionId, bytes memory data) internal {
-        if (actionId == bytes32(0)) {
-            revert IEquity.DividendCreationFailed();
-        }
-
-        IEquity.Dividend memory newDividend = abi.decode(data, (IEquity.Dividend));
-
-        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newDividend.recordDate, SNAPSHOT_TASK_TYPE);
-        ScheduledTasksStorageWrapper.addScheduledSnapshot(newDividend.recordDate, actionId);
     }
 
     function setScheduledBalanceAdjustment(
@@ -172,109 +135,6 @@ library EquityStorageWrapper {
             nominalValue: NominalValueStorageWrapper._getNominalValue(),
             nominalValueDecimals: NominalValueStorageWrapper._getNominalValueDecimals()
         });
-    }
-
-    /**
-     * @dev returns the properties and related snapshots (if any) of a dividend.
-     *
-     * @param dividendID The dividend Id
-     */
-    function getDividends(
-        uint256 dividendID
-    )
-        internal
-        view
-        returns (IEquity.RegisteredDividend memory registeredDividend_, bytes32 corporateActionId_, bool isDisabled_)
-    {
-        corporateActionId_ = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
-            DIVIDEND_CORPORATE_ACTION_TYPE,
-            dividendID - 1
-        );
-
-        bytes memory data;
-        (, , data, isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(corporateActionId_);
-
-        _checkUnexpectedError(data.length == 0, KPI_EQUITY_DIVIDEND_DATA);
-        (registeredDividend_.dividend) = abi.decode(data, (IEquity.Dividend));
-
-        registeredDividend_.snapshotId = CorporateActionsStorageWrapper.getUintResultAt(
-            corporateActionId_,
-            SNAPSHOT_RESULT_ID
-        );
-    }
-
-    /**
-     * @dev returns the properties and related snapshots (if any) of a dividend.
-     *
-     * @param dividendID The dividend Id
-     * @param account The account
-     */
-    function getDividendsFor(
-        uint256 dividendID,
-        address account
-    ) internal view returns (IEquity.DividendFor memory dividendFor_) {
-        (IEquity.RegisteredDividend memory registeredDividend, , bool isDisabled) = getDividends(dividendID);
-
-        dividendFor_.amount = registeredDividend.dividend.amount;
-        dividendFor_.amountDecimals = registeredDividend.dividend.amountDecimals;
-        dividendFor_.recordDate = registeredDividend.dividend.recordDate;
-        dividendFor_.executionDate = registeredDividend.dividend.executionDate;
-        dividendFor_.isDisabled = isDisabled;
-
-        (
-            dividendFor_.tokenBalance,
-            dividendFor_.decimals,
-            dividendFor_.recordDateReached
-        ) = getSnapshotBalanceForIfDateReached(
-            registeredDividend.dividend.recordDate,
-            registeredDividend.snapshotId,
-            account
-        );
-    }
-
-    function getDividendAmountFor(
-        uint256 dividendID,
-        address account
-    ) internal view returns (IEquity.DividendAmountFor memory dividendAmountFor_) {
-        IEquity.DividendFor memory dividendFor = getDividendsFor(dividendID, account);
-
-        if (!dividendFor.recordDateReached) return dividendAmountFor_;
-
-        dividendAmountFor_.recordDateReached = true;
-
-        dividendAmountFor_.numerator = dividendFor.tokenBalance * dividendFor.amount;
-
-        dividendAmountFor_.denominator = 10 ** (dividendFor.decimals + dividendFor.amountDecimals);
-    }
-
-    function getDividendsCount() internal view returns (uint256 dividendCount_) {
-        return CorporateActionsStorageWrapper.getCorporateActionCountByType(DIVIDEND_CORPORATE_ACTION_TYPE);
-    }
-
-    function getDividendHolders(
-        uint256 dividendID,
-        uint256 pageIndex,
-        uint256 pageLength
-    ) internal view returns (address[] memory holders_) {
-        (IEquity.RegisteredDividend memory registeredDividend, , ) = getDividends(dividendID);
-
-        if (registeredDividend.dividend.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return holders_;
-
-        if (registeredDividend.snapshotId != 0)
-            return SnapshotsStorageWrapper.tokenHoldersAt(registeredDividend.snapshotId, pageIndex, pageLength);
-
-        return ERC1410StorageWrapper.getTokenHolders(pageIndex, pageLength);
-    }
-
-    function getTotalDividendHolders(uint256 dividendID) internal view returns (uint256) {
-        (IEquity.RegisteredDividend memory registeredDividend, , ) = getDividends(dividendID);
-
-        if (registeredDividend.dividend.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return 0;
-
-        if (registeredDividend.snapshotId != 0)
-            return SnapshotsStorageWrapper.totalTokenHoldersAt(registeredDividend.snapshotId);
-
-        return ERC1410StorageWrapper.getTotalTokenHolders();
     }
 
     function getScheduledBalanceAdjustment(

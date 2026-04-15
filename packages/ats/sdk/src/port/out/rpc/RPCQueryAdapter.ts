@@ -14,7 +14,7 @@ import EvmAddress from "@domain/context/contract/EvmAddress";
 import { MirrorNodeAdapter } from "../mirror/MirrorNodeAdapter";
 import { Security } from "@domain/context/security/Security";
 import { BondDetails } from "@domain/context/bond/BondDetails";
-import { Dividend } from "@domain/context/equity/Dividend";
+import { Dividend } from "@domain/context/dividend/Dividend";
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import { HederaId } from "@domain/context/shared/HederaId";
 import {
@@ -29,6 +29,7 @@ import {
   ClearingTransferFacet__factory,
   ControlListFacet__factory,
   DiamondFacet__factory,
+  Dividend__factory,
   Equity__factory,
   ERC1410ReadFacet__factory,
   ERC20Votes__factory,
@@ -64,7 +65,7 @@ import {
   KpiLinkedRate__factory,
   ScheduledCouponListingFacet__factory,
   NominalValue__factory,
-  Voting__factory,
+  VotingFacet__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { ScheduledSnapshot } from "@domain/context/security/ScheduledSnapshot";
 import { VotingRights } from "@domain/context/equity/VotingRights";
@@ -83,7 +84,7 @@ import {
   CastResaleHoldPeriodorscation,
 } from "@domain/context/factory/RegulationType";
 import { ScheduledBalanceAdjustment } from "@domain/context/equity/ScheduledBalanceAdjustment";
-import { DividendFor } from "@domain/context/equity/DividendFor";
+import { DividendFor } from "@domain/context/dividend/DividendFor";
 import { VotingFor } from "@domain/context/equity/VotingFor";
 import { Kyc } from "@domain/context/kyc/Kyc";
 import { KycAccountData } from "@domain/context/kyc/KycAccountData";
@@ -97,7 +98,7 @@ import {
 import { HoldDetails } from "@domain/context/security/Hold";
 import { CouponAmountFor } from "@domain/context/bond/CouponAmountFor";
 import { PrincipalFor } from "@domain/context/bond/PrincipalFor";
-import { DividendAmountFor } from "@domain/context/equity/DividendAmountFor";
+import { DividendAmountFor } from "@domain/context/dividend/DividendAmountFor";
 import { CastRateStatus } from "@domain/context/bond/RateStatus";
 import { CouponFor } from "@domain/context/bond/CouponFor";
 
@@ -374,7 +375,7 @@ export class RPCQueryAdapter {
   async getDividendFor(address: EvmAddress, target: EvmAddress, dividend: number): Promise<DividendFor> {
     LogService.logTrace(`Getting dividends for`);
 
-    const dividendFor = await this.connect(Equity__factory, address.toString()).getDividendFor(
+    const dividendFor = await this.connect(Dividend__factory, address.toString()).getDividendFor(
       dividend,
       target.toString(),
     );
@@ -389,7 +390,7 @@ export class RPCQueryAdapter {
   async getDividendAmountFor(address: EvmAddress, target: EvmAddress, dividend: number): Promise<DividendAmountFor> {
     LogService.logTrace(`Getting dividends amount for`);
 
-    const dividendAmountFor = await this.connect(Equity__factory, address.toString()).getDividendAmountFor(
+    const dividendAmountFor = await this.connect(Dividend__factory, address.toString()).getDividendAmountFor(
       dividend,
       target.toString(),
     );
@@ -404,7 +405,7 @@ export class RPCQueryAdapter {
   async getDividend(address: EvmAddress, dividend: number): Promise<Dividend> {
     LogService.logTrace(`Getting dividends`);
 
-    const { registeredDividend_, isDisabled_ } = await this.connect(Equity__factory, address.toString()).getDividend(
+    const { registeredDividend_, isDisabled_ } = await this.connect(Dividend__factory, address.toString()).getDividend(
       dividend,
     );
 
@@ -421,7 +422,7 @@ export class RPCQueryAdapter {
   async getDividendsCount(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting dividends count`);
 
-    const dividendsCount = await this.connect(Equity__factory, address.toString()).getDividendsCount();
+    const dividendsCount = await this.connect(Dividend__factory, address.toString()).getDividendsCount();
 
     return Number(dividendsCount);
   }
@@ -429,7 +430,7 @@ export class RPCQueryAdapter {
   async getVotingFor(address: EvmAddress, target: EvmAddress, voting: number): Promise<VotingFor> {
     LogService.logTrace(`Getting voting for`);
 
-    const votingFor = await this.connect(Voting__factory, address.toString()).getVotingFor(voting, target.toString());
+    const votingFor = await this.connect(VotingFacet__factory, address.toString()).getVotingFor(voting, target.toString());
 
     return new VotingFor(new BigDecimal(votingFor.tokenBalance), Number(votingFor.decimals), votingFor.isDisabled);
   }
@@ -437,7 +438,9 @@ export class RPCQueryAdapter {
   async getVoting(address: EvmAddress, voting: number): Promise<VotingRights> {
     LogService.logTrace(`Getting voting`);
 
-    const { registeredVoting_, isDisabled_ } = await this.connect(Voting__factory, address.toString()).getVoting(voting);
+    const { registeredVoting_, isDisabled_ } = await this.connect(VotingFacet__factory, address.toString()).getVoting(
+      voting,
+    );
 
     return new VotingRights(
       Number(registeredVoting_.voting.recordDate),
@@ -450,7 +453,7 @@ export class RPCQueryAdapter {
   async getVotingsCount(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting votings count`);
 
-    const votingsCount = await this.connect(Voting__factory, address.toString()).getVotingCount();
+    const votingsCount = await this.connect(VotingFacet__factory, address.toString()).getVotingCount();
 
     return Number(votingsCount);
   }
@@ -1425,26 +1428,26 @@ export class RPCQueryAdapter {
 
   async getDividendHolders(address: EvmAddress, dividendId: number, start: number, end: number): Promise<string[]> {
     LogService.logTrace(`Getting dividend holders for dividend ${dividendId} for security ${address.toString()}`);
-    return await this.connect(Equity__factory, address.toString()).getDividendHolders(dividendId, start, end);
+    return await this.connect(Dividend__factory, address.toString()).getDividendHolders(dividendId, start, end);
   }
 
   async getTotalDividendHolders(address: EvmAddress, dividendId: number): Promise<number> {
     LogService.logTrace(`Getting total dividend holders for dividend ${dividendId} for security ${address.toString()}`);
 
-    const total = await this.connect(Equity__factory, address.toString()).getTotalDividendHolders(dividendId);
+    const total = await this.connect(Dividend__factory, address.toString()).getTotalDividendHolders(dividendId);
 
     return Number(total);
   }
 
   async getVotingHolders(address: EvmAddress, voteId: number, start: number, end: number): Promise<string[]> {
     LogService.logTrace(`Getting voting holders for vote ${voteId} for security ${address.toString()}`);
-    return await this.connect(Voting__factory, address.toString()).getVotingHolders(voteId, start, end);
+    return await this.connect(VotingFacet__factory, address.toString()).getVotingHolders(voteId, start, end);
   }
 
   async getTotalVotingHolders(address: EvmAddress, voteId: number): Promise<number> {
     LogService.logTrace(`Getting total voting holders for vote ${voteId} for security ${address.toString()}`);
 
-    const total = await this.connect(Voting__factory, address.toString()).getTotalVotingHolders(voteId);
+    const total = await this.connect(VotingFacet__factory, address.toString()).getTotalVotingHolders(voteId);
 
     return Number(total);
   }
@@ -1508,11 +1511,12 @@ export class RPCQueryAdapter {
 
   async getCorporateAction(
     address: EvmAddress,
-    corporateActionId: string
+    corporateActionId: string,
   ): Promise<{ actionType: string; actionTypeId: number; data: string; isDisabled: boolean }> {
     LogService.logTrace(`Getting corporate action ${corporateActionId} for security: ${address.toString()}`);
-    const result = await this.connect(CorporateActionsFacet__factory, address.toString())
-      .getCorporateAction(corporateActionId);
+    const result = await this.connect(CorporateActionsFacet__factory, address.toString()).getCorporateAction(
+      corporateActionId,
+    );
 
     return {
       actionType: result.actionType_,
@@ -1525,11 +1529,13 @@ export class RPCQueryAdapter {
   async getCorporateActions(
     address: EvmAddress,
     start: number,
-    end: number
+    end: number,
   ): Promise<{ actionTypes: string[]; actionTypeIds: number[]; datas: string[]; isDisabled: boolean[] }> {
     LogService.logTrace(`Getting corporate actions from ${start} to ${end} for security: ${address.toString()}`);
-    const result = await this.connect(CorporateActionsFacet__factory, address.toString())
-      .getCorporateActions(start, end);
+    const result = await this.connect(CorporateActionsFacet__factory, address.toString()).getCorporateActions(
+      start,
+      end,
+    );
 
     return {
       actionTypes: result.actionTypes_,
@@ -1543,11 +1549,16 @@ export class RPCQueryAdapter {
     address: EvmAddress,
     actionType: string,
     start: number,
-    end: number
+    end: number,
   ): Promise<{ actionTypes: string[]; actionTypeIds: number[]; datas: string[]; isDisabled: boolean[] }> {
-    LogService.logTrace(`Getting corporate actions of type ${actionType} from ${start} to ${end} for security: ${address.toString()}`);
-    const result = await this.connect(CorporateActionsFacet__factory, address.toString())
-      .getCorporateActionsByType(actionType, start, end);
+    LogService.logTrace(
+      `Getting corporate actions of type ${actionType} from ${start} to ${end} for security: ${address.toString()}`,
+    );
+    const result = await this.connect(CorporateActionsFacet__factory, address.toString()).getCorporateActionsByType(
+      actionType,
+      start,
+      end,
+    );
 
     return {
       actionTypes: result.actionTypes_,

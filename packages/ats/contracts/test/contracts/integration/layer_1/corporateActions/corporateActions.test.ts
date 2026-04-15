@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type CorporateActions, EquityUSA, TimeTravelFacet } from "@contract-types";
+import { type ResolverProxy, type CorporateActions, TimeTravelFacet, DividendFacet } from "@contract-types";
 import { ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
@@ -18,8 +18,8 @@ describe("Corporate Actions Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let corporateActionsFacet: CorporateActions;
-  let equityFacet: EquityUSA;
   let timeTravelFacet: TimeTravelFacet;
+  let dividendFacet: DividendFacet;
 
   async function deploySecurityFixtureSinglePartition() {
     const base = await deployEquityTokenFixture();
@@ -39,8 +39,8 @@ describe("Corporate Actions Tests", () => {
     ]);
 
     corporateActionsFacet = await ethers.getContractAt("CorporateActionsFacet", diamond.target, signer_A);
-    equityFacet = await ethers.getContractAt("EquityUSAFacetTimeTravel", diamond.target, signer_A);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
+    dividendFacet = await ethers.getContractAt("DividendFacet", diamond.target, signer_A);
   }
 
   beforeEach(async () => {
@@ -67,7 +67,7 @@ describe("Corporate Actions Tests", () => {
 
     const actionContentHashExistsBefore = await corporateActionsFacet.actionContentHashExists(contentHash);
 
-    await equityFacet.connect(signer_C).setDividend(dividendData);
+    await dividendFacet.connect(signer_C).setDividend(dividendData);
 
     // check list members
     const listCount = await corporateActionsFacet.getCorporateActionCount();
