@@ -57,14 +57,15 @@ import { SecurityDataBuilder } from "@domain/context/util/SecurityDataBuilder";
 import {
   AccessControlFacet__factory,
   Bond__factory,
-  Coupon__factory,
   CapFacet__factory,
+  Coupon__factory,
   ClearingActionsFacet__factory,
   ClearingHoldCreationFacet__factory,
   ClearingRedeemFacet__factory,
   ClearingTransferFacet__factory,
   ControlListFacet__factory,
   DiamondFacet__factory,
+  Dividend__factory,
   Equity__factory,
   ERC1410IssuerFacet__factory,
   ERC1410ManagementFacet__factory,
@@ -81,9 +82,8 @@ import {
   FreezeFacet__factory,
   HoldManagementFacet__factory,
   HoldTokenHolderFacet__factory,
-  IBondTypes,
   IEquity,
-  IVoting,
+  VotingFacet__factory,
   KpiLinkedRate__factory,
   Kpis__factory,
   KycFacet__factory,
@@ -101,7 +101,6 @@ import {
   TransferAndLockFacet__factory,
   TREXFactoryAts__factory,
   NominalValue__factory,
-  Voting__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { ContractId } from "@hiero-ledger/sdk";
 import EventService from "@service/event/EventService";
@@ -582,7 +581,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       executionDate: ${executionDate},
       amount : ${amount}  `,
     );
-    const dividendStruct: IEquity.DividendStruct = {
+    const dividendStruct = {
       recordDate: recordDate.toBigInt(),
       executionDate: executionDate.toBigInt(),
       amount: amount.toBigInt(),
@@ -590,7 +589,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return this.executeTransaction(
-      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      Dividend__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setDividend",
       [dividendStruct],
       GAS.SET_DIVIDENDS,
@@ -600,7 +599,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
 
   async cancelDividend(security: EvmAddress, dividendId: number): Promise<TransactionResponse> {
     return this.executeTransaction(
-      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      Dividend__factory.connect(security.toString(), this.getSignerOrProvider()),
       "cancelDividend",
       [dividendId],
       GAS.CANCEL_DIVIDEND,
@@ -619,7 +618,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return this.executeTransaction(
-      Voting__factory.connect(security.toString(), this.getSignerOrProvider()),
+      VotingFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setVoting",
       [votingStruct],
       GAS.SET_VOTING_RIGHTS,
@@ -684,7 +683,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Cancelling voting: ${votingId} for equity: ${security}`);
 
     return this.executeTransaction(
-      Voting__factory.connect(security.toString(), this.getSignerOrProvider()),
+      VotingFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "cancelVoting",
       [votingId],
       GAS.CANCEL_VOTING,
@@ -2724,6 +2723,19 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
+  async cancelScheduledBalanceAdjustment(
+    security: EvmAddress,
+    balanceAdjustmentId: number,
+  ): Promise<TransactionResponse> {
+    return this.executeTransaction(
+      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "cancelScheduledBalanceAdjustment",
+      [balanceAdjustmentId],
+      GAS.CANCEL_SCHEDULED_BALANCE_ADJUSTMENT,
+      CANCEL_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
+    );
+  }
+
   async setNominalValue(
     security: EvmAddress,
     nominalValue: string,
@@ -2737,16 +2749,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       [nominalValue, nominalValueDecimals],
       GAS.SET_NOMINAL_VALUE,
       NOMINAL_VALUE_SET_EVENT,
-    );
-  }
-
-  async cancelScheduledBalanceAdjustment(security: EvmAddress, balanceAdjustmentId: number): Promise<TransactionResponse> {
-    return this.executeTransaction(
-      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
-      "cancelScheduledBalanceAdjustment",
-      [balanceAdjustmentId],
-      GAS.CANCEL_SCHEDULED_BALANCE_ADJUSTMENT,
-      CANCEL_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
     );
   }
 }

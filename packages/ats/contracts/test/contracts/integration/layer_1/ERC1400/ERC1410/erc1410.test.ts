@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { expect } from "chai";
-import { Contract } from "ethers";
 import { ethers, network } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
@@ -10,19 +9,19 @@ import {
   ClearingActionsFacet,
   ControlListFacet,
   DiamondFacet,
+  DividendFacet,
   type Equity,
   ERC1594Facet,
   ERC1644Facet,
   ERC20Facet,
   IClearing,
-  IProtectedPartitions,
   type PauseFacet,
   ProtectedPartitionsFacet,
   type ResolverProxy,
   SnapshotsFacet,
   TimeTravelFacet,
 } from "@contract-types";
-import { deployEquityTokenFixture, executeRbac, getCommonErrors, grantRoleAndPauseToken, MAX_UINT256 } from "@test";
+import { deployEquityTokenFixture, executeRbac, grantRoleAndPauseToken, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import {
   ADDRESS_ZERO,
@@ -114,8 +113,7 @@ describe("ERC1410 Tests", () => {
   let snapshotsFacet: SnapshotsFacet;
   let timeTravelFacet: TimeTravelFacet;
   let diamondCutFacet: DiamondFacet;
-  let protectedPartitionsInterface: IProtectedPartitions;
-  let commonErrors: Contract;
+  let dividendFacet: DividendFacet;
 
   async function setPreBalanceAdjustment(singlePartition?: boolean) {
     await grantRolesToAccounts();
@@ -369,7 +367,7 @@ describe("ERC1410 Tests", () => {
     clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.target, signer_A);
     snapshotsFacet = await ethers.getContractAt("SnapshotsFacet", diamond.target);
     diamondCutFacet = await ethers.getContractAt("DiamondFacet", diamond.target);
-
+    dividendFacet = await ethers.getContractAt("DividendFacet", diamond.target, signer_A);
     capFacet = await ethers.getContractAt("Cap", diamond.target);
 
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
@@ -455,15 +453,10 @@ describe("ERC1410 Tests", () => {
 
       await erc1410Facet.connect(signer_E).authorizeOperatorByPartition(_PARTITION_ID_1, signer_C.address);
       clearingInterface = await ethers.getContractAt("IClearing", diamond.target);
-      protectedPartitionsInterface = await ethers.getContractAt("IProtectedPartitions", diamond.target);
-      commonErrors = getCommonErrors(diamond.target);
     });
 
     it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-      await expect(erc1410Facet.initialize_ERC1410(true)).to.be.revertedWithCustomError(
-        commonErrors,
-        "AlreadyInitialized",
-      );
+      await expect(erc1410Facet.initialize_ERC1410(true)).to.be.rejectedWith("AlreadyInitialized");
     });
 
     it("GIVEN a multi-partition token WHEN checking isMultiPartition THEN returns true", async () => {
@@ -657,14 +650,14 @@ describe("ERC1410 Tests", () => {
       // transfer with data fails
       await expect(
         erc1410Facet.connect(signer_C).transferByPartition(_PARTITION_ID_1, basicTransferInfo, data),
-      ).to.be.revertedWithCustomError(erc1410Facet, "TokenIsPaused");
+      ).to.be.rejectedWith("TokenIsPaused");
       expect(canTransfer[0]).to.be.equal(false);
       expect(canTransfer[1]).to.be.equal(EIP1066_CODES.PAUSED);
 
       // transfer from with data fails
-      await expect(
-        erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData),
-      ).to.be.revertedWithCustomError(erc1410Facet, "TokenIsPaused");
+      await expect(erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData)).to.be.rejectedWith(
+        "TokenIsPaused",
+      );
       expect(canTransfer[0]).to.be.equal(false);
       expect(canTransfer_2[1]).to.be.equal(EIP1066_CODES.PAUSED);
     });
@@ -716,7 +709,7 @@ describe("ERC1410 Tests", () => {
           value: amount,
           data: "0x",
         }),
-      ).to.be.revertedWithCustomError(erc1410Facet, "ZeroPartition");
+      ).to.be.rejectedWith("ZeroPartition");
     });
 
     it("GIVEN Token WHEN issue amount 0 THEN transaction fails with ZeroValue", async () => {
@@ -728,7 +721,7 @@ describe("ERC1410 Tests", () => {
           value: 0,
           data: data,
         }),
-      ).to.be.revertedWithCustomError(erc1410Facet, "ZeroValue");
+      ).to.be.rejectedWith("ZeroValue");
     });
 
     it("GIVEN a paused Token WHEN redeem THEN transaction fails with TokenIsPaused", async () => {
@@ -743,9 +736,9 @@ describe("ERC1410 Tests", () => {
         .canRedeemByPartition(signer_E.address, _PARTITION_ID_1, amount, data, operatorData);
 
       // transfer with data fails
-      await expect(
-        erc1410Facet.connect(signer_C).redeemByPartition(_PARTITION_ID_1, amount, data),
-      ).to.be.revertedWithCustomError(erc1410Facet, "TokenIsPaused");
+      await expect(erc1410Facet.connect(signer_C).redeemByPartition(_PARTITION_ID_1, amount, data)).to.be.rejectedWith(
+        "TokenIsPaused",
+      );
       expect(canRedeem[0]).to.be.equal(false);
       expect(canRedeem[1]).to.be.equal(EIP1066_CODES.PAUSED);
 
@@ -754,7 +747,7 @@ describe("ERC1410 Tests", () => {
         erc1410Facet
           .connect(signer_C)
           .operatorRedeemByPartition(_PARTITION_ID_1, signer_E.address, amount, data, operatorData),
-      ).to.be.revertedWithCustomError(erc1410Facet, "TokenIsPaused");
+      ).to.be.rejectedWith("TokenIsPaused");
       expect(canRedeem_2[0]).to.be.equal(false);
       expect(canRedeem_2[1]).to.be.equal(EIP1066_CODES.PAUSED);
     });
@@ -1008,7 +1001,7 @@ describe("ERC1410 Tests", () => {
       // transfer with data fails
       await expect(
         erc1410Facet.connect(signer_C).transferByPartition(_PARTITION_ID, basicTransferInfo, data),
-      ).to.be.revertedWithCustomError(erc1410Facet, "InvalidPartition");
+      ).to.be.rejectedWith("InvalidPartition");
       expect(canTransfer[0]).to.be.equal(false);
       expect(canTransfer[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS);
     });
@@ -1019,9 +1012,9 @@ describe("ERC1410 Tests", () => {
         .canRedeemByPartition(signer_C.address, _PARTITION_ID, amount, data, operatorData);
 
       // transfer with data fails
-      await expect(
-        erc1410Facet.connect(signer_C).redeemByPartition(_PARTITION_ID, amount, data),
-      ).to.be.revertedWithCustomError(erc1410Facet, "InvalidPartition");
+      await expect(erc1410Facet.connect(signer_C).redeemByPartition(_PARTITION_ID, amount, data)).to.be.rejectedWith(
+        "InvalidPartition",
+      );
       expect(canRedeem[0]).to.be.equal(false);
       expect(canRedeem[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS);
     });
@@ -1035,7 +1028,7 @@ describe("ERC1410 Tests", () => {
           value: amount,
           data: data,
         }),
-      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRoles");
+      ).to.be.rejectedWith("AccountHasNoRole");
     });
 
     it("GIVEN an account WHEN transfer more than its balance THEN transaction fails", async () => {
@@ -1071,7 +1064,7 @@ describe("ERC1410 Tests", () => {
         );
 
       operatorTransferData.value = 2 * balanceOf_E_Original;
-      await expect(erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData)).to.be.reverted;
+      await expect(erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData)).to.be.rejected;
       expect(canTransfer_2[0]).to.be.equal(false);
       expect(canTransfer_2[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS);
     });
@@ -1083,7 +1076,7 @@ describe("ERC1410 Tests", () => {
         .canRedeemByPartition(signer_C.address, _PARTITION_ID_1, 2 * balanceOf_C_Original, data, operatorData);
 
       await expect(erc1410Facet.connect(signer_C).redeemByPartition(_PARTITION_ID_1, 2 * balanceOf_C_Original, data)).to
-        .be.reverted;
+        .be.rejected;
       expect(canRedeem[0]).to.be.equal(false);
       expect(canRedeem[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS);
 
@@ -1096,7 +1089,7 @@ describe("ERC1410 Tests", () => {
         erc1410Facet
           .connect(signer_E)
           .operatorRedeemByPartition(_PARTITION_ID_1, signer_C.address, 2 * balanceOf_C_Original, data, operatorData),
-      ).to.be.reverted;
+      ).to.be.rejected;
       expect(canRedeem_2[0]).to.be.equal(false);
       expect(canRedeem_2[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS);
     });
@@ -1116,9 +1109,9 @@ describe("ERC1410 Tests", () => {
       operatorTransferData.from = ADDRESS_ZERO;
       basicTransferInfo.to = ADDRESS_ZERO;
 
-      await expect(erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData)).to.be.reverted;
+      await expect(erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData)).to.be.rejected;
       await expect(erc1410Facet.connect(signer_C).transferByPartition(_PARTITION_ID_1, basicTransferInfo, data)).to.be
-        .reverted;
+        .rejected;
       expect(canTransfer[0]).to.be.equal(false);
       expect(canTransfer[1]).to.be.equal(EIP1066_CODES.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE);
     });
@@ -1132,16 +1125,16 @@ describe("ERC1410 Tests", () => {
         erc1410Facet
           .connect(signer_E)
           .operatorRedeemByPartition(_PARTITION_ID_1, ADDRESS_ZERO, balanceOf_E_Original, data, operatorData),
-      ).to.be.reverted;
+      ).to.be.rejected;
       expect(canRedeem[0]).to.be.equal(false);
       expect(canRedeem[1]).to.be.equal(EIP1066_CODES.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE);
     });
 
     it("GIVEN an account WHEN operatorTransferByPartition to address 0 THEN transaction fails with ZeroAddressNotAllowed", async () => {
       operatorTransferData.to = ADDRESS_ZERO;
-      await expect(
-        erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData),
-      ).to.be.revertedWithCustomError(erc1410Facet, "ZeroAddressNotAllowed");
+      await expect(erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData)).to.be.rejectedWith(
+        "ZeroAddressNotAllowed",
+      );
     });
 
     it("GIVEN protected partitions without wildcard role WHEN transferByPartition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
@@ -1152,7 +1145,7 @@ describe("ERC1410 Tests", () => {
 
       await expect(
         erc1410Facet.connect(signer_C).transferByPartition(_PARTITION_ID_1, basicTransferInfo, data),
-      ).to.be.revertedWithCustomError(protectedPartitionsInterface, "PartitionsAreProtectedAndNoRole");
+      ).to.be.rejectedWith("PartitionsAreProtectedAndNoRole");
     });
 
     it("GIVEN protected partitions without wildcard role WHEN redeemByPartition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
@@ -1161,9 +1154,9 @@ describe("ERC1410 Tests", () => {
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
       await protectedPartitionsFacet.connect(signer_A).protectPartitions();
 
-      await expect(
-        erc1410Facet.connect(signer_C).redeemByPartition(_PARTITION_ID_1, amount, data),
-      ).to.be.revertedWithCustomError(protectedPartitionsInterface, "PartitionsAreProtectedAndNoRole");
+      await expect(erc1410Facet.connect(signer_C).redeemByPartition(_PARTITION_ID_1, amount, data)).to.be.rejectedWith(
+        "PartitionsAreProtectedAndNoRole",
+      );
     });
 
     it("GIVEN an account WHEN transfer THEN transaction succeeds", async () => {
@@ -1187,8 +1180,8 @@ describe("ERC1410 Tests", () => {
         amount: 1,
         amountDecimals: 0,
       };
-      await equityFacet.connect(signer_C).setDividend(dividendData_1);
-      await equityFacet.connect(signer_C).setDividend(dividendData);
+      await dividendFacet.connect(signer_C).setDividend(dividendData_1);
+      await dividendFacet.connect(signer_C).setDividend(dividendData);
 
       //  transfer
       const canTransfer = await erc1410Facet
@@ -1215,13 +1208,13 @@ describe("ERC1410 Tests", () => {
       expect(balanceOf_E).to.equal(balanceOf_E_Original - amount);
       const balanceOf_D = await erc1410Facet.balanceOf(signer_D.address);
       expect(balanceOf_D).to.equal(2 * amount);
-      let [dividend_1] = await equityFacet.getDividend(1);
-      let [dividend] = await equityFacet.getDividend(2);
+      let dividend_1 = (await dividendFacet.getDividend(1)).registeredDividend_;
+      let dividend = (await dividendFacet.getDividend(2)).registeredDividend_;
       expect(dividend_1.snapshotId).to.equal(0);
       expect(dividend.snapshotId).to.equal(0);
-      let dividend_1_For_C = await equityFacet.getDividendFor(1, signer_C.address);
-      let dividend_1_For_E = await equityFacet.getDividendFor(1, signer_E.address);
-      let dividend_1_For_D = await equityFacet.getDividendFor(1, signer_D.address);
+      let dividend_1_For_C = await dividendFacet.getDividendFor(1, signer_C.address);
+      let dividend_1_For_E = await dividendFacet.getDividendFor(1, signer_E.address);
+      let dividend_1_For_D = await dividendFacet.getDividendFor(1, signer_D.address);
       expect(dividend_1_For_C.tokenBalance).to.equal(0);
       expect(dividend_1_For_E.tokenBalance).to.equal(0);
       expect(dividend_1_For_D.tokenBalance).to.equal(0);
@@ -1234,12 +1227,12 @@ describe("ERC1410 Tests", () => {
       // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
       await timeTravelFacet.changeSystemTimestamp(dividendsRecordDateInSeconds_1 + 1);
 
-      [dividend_1] = await equityFacet.getDividend(1);
+      dividend_1 = (await dividendFacet.getDividend(1)).registeredDividend_;
       expect(dividend_1.snapshotId).to.equal(0);
 
-      dividend_1_For_C = await equityFacet.getDividendFor(1, signer_C.address);
-      dividend_1_For_E = await equityFacet.getDividendFor(1, signer_E.address);
-      dividend_1_For_D = await equityFacet.getDividendFor(1, signer_D.address);
+      dividend_1_For_C = await dividendFacet.getDividendFor(1, signer_C.address);
+      dividend_1_For_E = await dividendFacet.getDividendFor(1, signer_E.address);
+      dividend_1_For_D = await dividendFacet.getDividendFor(1, signer_D.address);
 
       expect(dividend_1_For_C.tokenBalance).to.equal(balanceOf_C);
       expect(dividend_1_For_E.tokenBalance).to.equal(balanceOf_E);
@@ -1256,13 +1249,13 @@ describe("ERC1410 Tests", () => {
         .to.emit(snapshotsFacet, "SnapshotTriggered")
         .withArgs(1, ethers.toBeHex(1, 32));
       // check that scheduled snapshots was triggered
-      [dividend_1] = await equityFacet.getDividend(1);
-      [dividend] = await equityFacet.getDividend(2);
+      dividend_1 = (await dividendFacet.getDividend(1)).registeredDividend_;
+      dividend = (await dividendFacet.getDividend(2)).registeredDividend_;
       expect(dividend_1.snapshotId).to.equal(1);
       expect(dividend.snapshotId).to.equal(0);
-      dividend_1_For_C = await equityFacet.getDividendFor(1, signer_C.address);
-      dividend_1_For_E = await equityFacet.getDividendFor(1, signer_E.address);
-      dividend_1_For_D = await equityFacet.getDividendFor(1, signer_D.address);
+      dividend_1_For_C = await dividendFacet.getDividendFor(1, signer_C.address);
+      dividend_1_For_E = await dividendFacet.getDividendFor(1, signer_E.address);
+      dividend_1_For_D = await dividendFacet.getDividendFor(1, signer_D.address);
 
       expect(dividend_1_For_C.tokenBalance).to.equal(balanceOf_C);
       expect(dividend_1_For_E.tokenBalance).to.equal(balanceOf_E);
@@ -1283,8 +1276,8 @@ describe("ERC1410 Tests", () => {
         .withArgs(2, ethers.toBeHex(2, 32));
 
       // check that scheduled snapshots was triggered
-      [dividend_1] = await equityFacet.getDividend(1);
-      [dividend] = await equityFacet.getDividend(2);
+      dividend_1 = (await dividendFacet.getDividend(1)).registeredDividend_;
+      dividend = (await dividendFacet.getDividend(2)).registeredDividend_;
       expect(dividend_1.snapshotId).to.equal(1);
       expect(dividend.snapshotId).to.equal(2);
     });
@@ -1305,7 +1298,7 @@ describe("ERC1410 Tests", () => {
           value: 3 * amount,
           data: data,
         }),
-      ).to.be.revertedWithCustomError(capFacet, "MaxSupplyReached");
+      ).to.be.rejectedWith("MaxSupplyReached");
 
       await expect(
         erc1410Facet.issueByPartition({
@@ -1314,7 +1307,7 @@ describe("ERC1410 Tests", () => {
           value: 2 * amount,
           data: data,
         }),
-      ).to.be.revertedWithCustomError(capFacet, "MaxSupplyReachedForPartition");
+      ).to.be.rejectedWith("MaxSupplyReachedForPartition");
     });
 
     it("GIVEN an account WHEN issue THEN transaction succeeds", async () => {
@@ -1338,8 +1331,8 @@ describe("ERC1410 Tests", () => {
         amount: 1,
         amountDecimals: 0,
       };
-      await equityFacet.connect(signer_C).setDividend(dividendData_1);
-      await equityFacet.connect(signer_C).setDividend(dividendData);
+      await dividendFacet.connect(signer_C).setDividend(dividendData_1);
+      await dividendFacet.connect(signer_C).setDividend(dividendData);
 
       //  transfer
       await expect(
@@ -1365,8 +1358,8 @@ describe("ERC1410 Tests", () => {
       const totalSupplyByPartition = await erc1410Facet.totalSupplyByPartition(_PARTITION_ID_1);
       expect(totalSupply).to.equal(BigInt(balanceOf_C_Original) + BigInt(balanceOf_E_Original) + balanceOf_D);
       expect(totalSupplyByPartition.toString()).to.equal(totalSupply.toString());
-      let [dividend_1] = await equityFacet.getDividend(1);
-      let [dividend] = await equityFacet.getDividend(2);
+      let dividend_1 = (await dividendFacet.getDividend(1)).registeredDividend_;
+      let dividend = (await dividendFacet.getDividend(2)).registeredDividend_;
       expect(dividend_1.snapshotId).to.equal(0);
       expect(dividend.snapshotId).to.equal(0);
 
@@ -1394,8 +1387,8 @@ describe("ERC1410 Tests", () => {
         .withArgs(1, ethers.toBeHex(1, 32));
 
       // check that scheduled snapshots was triggered
-      [dividend_1] = await equityFacet.getDividend(1);
-      [dividend] = await equityFacet.getDividend(2);
+      dividend_1 = (await dividendFacet.getDividend(1)).registeredDividend_;
+      dividend = (await dividendFacet.getDividend(2)).registeredDividend_;
       expect(dividend_1.snapshotId).to.equal(1);
       expect(dividend.snapshotId).to.equal(0);
     });
@@ -1420,8 +1413,8 @@ describe("ERC1410 Tests", () => {
         amount: 1,
         amountDecimals: 0,
       };
-      await equityFacet.connect(signer_C).setDividend(dividendData_1);
-      await equityFacet.connect(signer_C).setDividend(dividendData);
+      await dividendFacet.connect(signer_C).setDividend(dividendData_1);
+      await dividendFacet.connect(signer_C).setDividend(dividendData);
 
       //  transfer
       const canRedeem = await erc1410Facet
@@ -1467,8 +1460,8 @@ describe("ERC1410 Tests", () => {
       expect(partitionsOf_E[0]).to.equal(_PARTITION_ID_1);
       expect(balanceOf_E).to.equal(balanceOf_E_Original - amount);
       expect(balanceOf_E_Partition_1).to.equal(balanceOf_E);
-      let [dividend_1] = await equityFacet.getDividend(1);
-      let [dividend] = await equityFacet.getDividend(2);
+      let dividend_1 = (await dividendFacet.getDividend(1)).registeredDividend_;
+      let dividend = (await dividendFacet.getDividend(2)).registeredDividend_;
       expect(dividend_1.snapshotId).to.equal(0);
       expect(dividend.snapshotId).to.equal(0);
       expect(totalSupply).to.be.equal(balanceOf_C_Original + balanceOf_E_Original - 2 * amount);
@@ -1483,8 +1476,8 @@ describe("ERC1410 Tests", () => {
         .withArgs(1, ethers.toBeHex(1, 32));
 
       // check that scheduled snapshots was triggered
-      [dividend_1] = await equityFacet.getDividend(1);
-      [dividend] = await equityFacet.getDividend(2);
+      dividend_1 = (await dividendFacet.getDividend(1)).registeredDividend_;
+      dividend = (await dividendFacet.getDividend(2)).registeredDividend_;
       expect(dividend_1.snapshotId).to.equal(1);
       expect(dividend.snapshotId).to.equal(0);
 
@@ -1501,8 +1494,8 @@ describe("ERC1410 Tests", () => {
         .withArgs(2, ethers.toBeHex(2, 32));
 
       // check that scheduled snapshots was triggered
-      [dividend_1] = await equityFacet.getDividend(1);
-      [dividend] = await equityFacet.getDividend(2);
+      dividend_1 = (await dividendFacet.getDividend(1)).registeredDividend_;
+      dividend = (await dividendFacet.getDividend(2)).registeredDividend_;
       expect(dividend_1.snapshotId).to.equal(1);
       expect(dividend.snapshotId).to.equal(2);
     });
@@ -1581,7 +1574,7 @@ describe("ERC1410 Tests", () => {
             data,
             operatorData,
           ),
-      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRoles");
+      ).to.be.rejectedWith("AccountHasNoRole");
       expect(canTransfer[0]).to.be.equal(false);
       expect(canTransfer[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS);
     });
@@ -1606,7 +1599,7 @@ describe("ERC1410 Tests", () => {
         erc1410Facet
           .connect(signer_C)
           .controllerRedeemByPartition(_PARTITION_ID_1, signer_D.address, amount, data, operatorData),
-      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRoles");
+      ).to.be.rejectedWith("AccountHasNoRole");
       expect(canRedeem[0]).to.be.equal(false);
       expect(canRedeem[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS);
     });
@@ -1627,7 +1620,7 @@ describe("ERC1410 Tests", () => {
         erc1410Facet
           .connect(signer_C)
           .controllerTransferByPartition(_PARTITION_ID_1, signer_D.address, signer_E.address, amount, "0x", "0x"),
-      ).to.be.revertedWithCustomError(erc1410Facet, "TokenIsPaused");
+      ).to.be.rejectedWith("TokenIsPaused");
     });
 
     it("GIVEN a paused Token WHEN controllerRedeem THEN transaction fails with TokenIsPaused", async () => {
@@ -1646,7 +1639,7 @@ describe("ERC1410 Tests", () => {
         erc1410Facet
           .connect(signer_C)
           .controllerRedeemByPartition(_PARTITION_ID_1, signer_D.address, amount, "0x", "0x"),
-      ).to.be.revertedWithCustomError(erc1410Facet, "TokenIsPaused");
+      ).to.be.rejectedWith("TokenIsPaused");
     });
 
     it("GIVEN an account with controller role WHEN controllerTransfer and controllerRedeem THEN transaction succeeds", async () => {
@@ -1680,8 +1673,8 @@ describe("ERC1410 Tests", () => {
         amount: 1,
         amountDecimals: 0,
       };
-      await equityFacet.connect(signer_C).setDividend(dividendData_1);
-      await equityFacet.connect(signer_C).setDividend(dividendData);
+      await dividendFacet.connect(signer_C).setDividend(dividendData_1);
+      await dividendFacet.connect(signer_C).setDividend(dividendData);
 
       // controller transfer
       await expect(
@@ -1716,8 +1709,8 @@ describe("ERC1410 Tests", () => {
       const balanceOf_E_Partition_1 = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_E.address);
       expect(balanceOf_E).to.equal(balanceOf_E_Original + amount);
       expect(balanceOf_E_Partition_1).to.equal(balanceOf_E);
-      let [dividend_1] = await equityFacet.getDividend(1);
-      let [dividend] = await equityFacet.getDividend(2);
+      let dividend_1 = (await dividendFacet.getDividend(1)).registeredDividend_;
+      let dividend = (await dividendFacet.getDividend(2)).registeredDividend_;
       expect(dividend_1.snapshotId).to.equal(0);
       expect(dividend.snapshotId).to.equal(0);
 
@@ -1741,8 +1734,8 @@ describe("ERC1410 Tests", () => {
         .withArgs(1, ethers.toBeHex(1, 32));
 
       // check that scheduled snapshots was triggered
-      [dividend_1] = await equityFacet.getDividend(1);
-      [dividend] = await equityFacet.getDividend(2);
+      dividend_1 = (await dividendFacet.getDividend(1)).registeredDividend_;
+      dividend = (await dividendFacet.getDividend(2)).registeredDividend_;
       expect(dividend_1.snapshotId).to.equal(1);
       expect(dividend.snapshotId).to.equal(0);
 
@@ -1759,8 +1752,8 @@ describe("ERC1410 Tests", () => {
         .withArgs(2, ethers.toBeHex(2, 32));
 
       // check that scheduled snapshots was triggered
-      [dividend_1] = await equityFacet.getDividend(1);
-      [dividend] = await equityFacet.getDividend(2);
+      dividend_1 = (await dividendFacet.getDividend(1)).registeredDividend_;
+      dividend = (await dividendFacet.getDividend(2)).registeredDividend_;
       expect(dividend_1.snapshotId).to.equal(1);
       expect(dividend.snapshotId).to.equal(2);
     });
@@ -2065,7 +2058,7 @@ describe("ERC1410 Tests", () => {
             nounce: 0,
             signature: "0x1234",
           }),
-      ).to.be.revertedWithCustomError(protectedPartitionsInterface, "PartitionsAreUnProtected");
+      ).to.be.rejectedWith("PartitionsAreUnProtected");
     });
 
     it("GIVEN an unprotected partitions equity WHEN performing a protected redeem THEN transaction fails with PartitionsAreUnProtected", async () => {
@@ -2075,7 +2068,7 @@ describe("ERC1410 Tests", () => {
           nounce: 0,
           signature: "0x1234",
         }),
-      ).to.be.revertedWithCustomError(protectedPartitionsInterface, "PartitionsAreUnProtected");
+      ).to.be.rejectedWith("PartitionsAreUnProtected");
     });
     describe("Protected Partitions Tests", () => {
       let protectedPartitionsFacet: ProtectedPartitionsFacet;
@@ -2116,7 +2109,7 @@ describe("ERC1410 Tests", () => {
       it("GIVEN protected partitions without wildcard role WHEN operatorTransferByPartition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
         await expect(
           erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData),
-        ).to.be.revertedWithCustomError(protectedPartitionsInterface, "PartitionsAreProtectedAndNoRole");
+        ).to.be.rejectedWith("PartitionsAreProtectedAndNoRole");
       });
 
       it("GIVEN protected partitions without wildcard role WHEN operatorRedeemByPartition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
@@ -2126,7 +2119,7 @@ describe("ERC1410 Tests", () => {
           erc1410Facet
             .connect(signer_C)
             .operatorRedeemByPartition(_PARTITION_ID_1, signer_E.address, amount, data, operatorData),
-        ).to.be.revertedWithCustomError(protectedPartitionsInterface, "PartitionsAreProtectedAndNoRole");
+        ).to.be.rejectedWith("PartitionsAreProtectedAndNoRole");
       });
       describe("protectedTransferFromByPartition", () => {
         it("GIVEN a paused security role WHEN performing a protected transfer THEN transaction fails with Paused", async () => {
@@ -2177,7 +2170,7 @@ describe("ERC1410 Tests", () => {
                 nounce: 1,
                 signature: "0x1234",
               }),
-          ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
+          ).to.be.rejectedWith("AccountHasNoRole");
         });
 
         it("GIVEN a blacklisted account WHEN performing a protected transfer from it THEN transaction fails with AccountIsBlocked", async () => {
@@ -2247,7 +2240,7 @@ describe("ERC1410 Tests", () => {
                 nounce: 1,
                 signature: "0x1234",
               }),
-          ).to.be.revertedWithCustomError(commonErrors, "ExpiredDeadline");
+          ).to.be.rejectedWith("ExpiredDeadline");
         });
 
         it("GIVEN a wrong signature length WHEN performing a protected transfer THEN transaction fails with WrongSignatureLength", async () => {
@@ -2265,7 +2258,7 @@ describe("ERC1410 Tests", () => {
                 nounce: 1,
                 signature: "0x01",
               }),
-          ).to.be.revertedWithCustomError(commonErrors, "WrongSignatureLength");
+          ).to.be.rejectedWith("WrongSignatureLength");
         });
 
         it("GIVEN a wrong signature WHEN performing a protected transfer THEN transaction fails with WrongSignature", async () => {
@@ -2284,7 +2277,7 @@ describe("ERC1410 Tests", () => {
                 signature:
                   "0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344",
               }),
-          ).to.be.revertedWithCustomError(getCommonErrors(diamond.target), "WrongSignature");
+          ).to.be.rejectedWith("WrongSignature");
         });
 
         it("GIVEN a wrong nounce WHEN performing a protected transfer THEN transaction fails with WrongNounce", async () => {
@@ -2304,7 +2297,7 @@ describe("ERC1410 Tests", () => {
                 nounce: 0,
                 signature: "0x1234",
               }),
-          ).to.be.revertedWithCustomError(commonErrors, "WrongNounce");
+          ).to.be.rejectedWith("WrongNounce");
         });
       });
 
@@ -2319,7 +2312,7 @@ describe("ERC1410 Tests", () => {
               nounce: 1,
               signature: "0x1234",
             }),
-          ).to.be.revertedWithCustomError(erc1410Facet, "TokenIsPaused");
+          ).to.be.rejectedWith("TokenIsPaused");
         });
 
         it("GIVEN a security with clearing active WHEN performing a protected redeem THEN transaction fails with ClearingIsActivated", async () => {
@@ -2342,7 +2335,7 @@ describe("ERC1410 Tests", () => {
               nounce: 1,
               signature: "0x1234",
             }),
-          ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
+          ).to.be.rejectedWith("AccountHasNoRole");
         });
 
         it("GIVEN a blacklisted account WHEN performing a protected redeem from it THEN transaction fails with AccountIsBlocked", async () => {
@@ -2382,7 +2375,7 @@ describe("ERC1410 Tests", () => {
               nounce: 0,
               signature: "0x1234",
             }),
-          ).to.be.revertedWithCustomError(commonErrors, "ExpiredDeadline");
+          ).to.be.rejectedWith("ExpiredDeadline");
         });
         it("GIVEN a wrong signature length WHEN performing a protected redeem THEN transaction fails with WrongSignatureLength", async () => {
           await erc1410Facet.issueByPartition({
@@ -2397,7 +2390,7 @@ describe("ERC1410 Tests", () => {
               nounce: 1,
               signature: "0x01",
             }),
-          ).to.be.revertedWithCustomError(commonErrors, "WrongSignatureLength");
+          ).to.be.rejectedWith("WrongSignatureLength");
         });
 
         it("GIVEN a wrong signature WHEN performing a protected redeem THEN transaction fails with WrongSignature", async () => {
@@ -2414,7 +2407,7 @@ describe("ERC1410 Tests", () => {
               signature:
                 "0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344",
             }),
-          ).to.be.revertedWithCustomError(getCommonErrors(diamond.target), "WrongSignature");
+          ).to.be.rejectedWith("WrongSignature");
         });
 
         it("GIVEN a wrong nounce WHEN performing a protected redeem THEN transaction fails with WrongNounce", async () => {
@@ -2432,7 +2425,7 @@ describe("ERC1410 Tests", () => {
               nounce: 0,
               signature: "0x1234",
             }),
-          ).to.be.revertedWithCustomError(commonErrors, "WrongNounce");
+          ).to.be.rejectedWith("WrongNounce");
         });
 
         it("GIVEN a correct signature WHEN performing a protected redeem THEN transaction succeeds", async () => {
@@ -2494,15 +2487,10 @@ describe("ERC1410 Tests", () => {
   describe("Single partition ", () => {
     beforeEach(async () => {
       await loadFixture(deploySecurityFixtureSinglePartition);
-      protectedPartitionsInterface = await ethers.getContractAt("IProtectedPartitions", diamond.target);
-      commonErrors = getCommonErrors(diamond.target);
     });
 
     it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-      await expect(erc1410Facet.initialize_ERC1410(false)).to.be.revertedWithCustomError(
-        commonErrors,
-        "AlreadyInitialized",
-      );
+      await expect(erc1410Facet.initialize_ERC1410(false)).to.be.rejectedWith("AlreadyInitialized");
     });
 
     it("GIVEN a single-partition token WHEN checking isMultiPartition THEN returns false", async () => {

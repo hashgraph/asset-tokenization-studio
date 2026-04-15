@@ -9,27 +9,15 @@ import {
   type Pause,
   type AccessControl,
   Lock,
-  IHold,
   type IERC1410,
   type VotingFacet,
   Kyc,
   SsiManagement,
-  ClearingActionsFacet,
-  ClearingTransferFacet,
-  FreezeFacet,
   TimeTravelFacet,
   ScheduledCrossOrderedTasks,
+  DividendFacet,
 } from "@contract-types";
-import {
-  DEFAULT_PARTITION,
-  ADDRESS_ZERO,
-  dateToUnixTimestamp,
-  EMPTY_STRING,
-  ZERO,
-  EMPTY_HEX_BYTES,
-  ATS_ROLES,
-  CURRENCIES,
-} from "@scripts";
+import { DEFAULT_PARTITION, EMPTY_STRING, ZERO, ATS_ROLES, CURRENCIES } from "@scripts";
 import { getEquityDetails, grantRoleAndPauseToken } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
@@ -76,15 +64,12 @@ describe("Equity Tests", () => {
   let accessControlFacet: AccessControl;
   let pauseFacet: Pause;
   let lockFacet: Lock;
-  let holdFacet: IHold;
   let erc1410Facet: IERC1410;
   let timeTravelFacet: TimeTravelFacet;
   let kycFacet: Kyc;
   let ssiManagementFacet: SsiManagement;
   let scheduledTasksFacet: ScheduledCrossOrderedTasks;
-  let clearingActionsFacet: ClearingActionsFacet;
-  let clearingTransferFacet: ClearingTransferFacet;
-  let freezeFacet: FreezeFacet;
+  let dividendFacet: DividendFacet;
 
   async function deploySecurityFixtureSinglePartition() {
     const base = await deployEquityTokenFixture();
@@ -110,7 +95,6 @@ describe("Equity Tests", () => {
 
     pauseFacet = await ethers.getContractAt("Pause", diamond.target, signer_A);
     lockFacet = await ethers.getContractAt("Lock", diamond.target, signer_A);
-    holdFacet = await ethers.getContractAt("IHold", diamond.target, signer_A);
     erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target, signer_A);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
     accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target, signer_A);
@@ -118,10 +102,8 @@ describe("Equity Tests", () => {
     votingFacet = await ethers.getContractAt("VotingFacet", diamond.target, signer_A);
     kycFacet = await ethers.getContractAt("Kyc", diamond.target, signer_B);
     ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.target, signer_A);
-    clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.target, signer_A);
-    clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.target, signer_A);
-    freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.target, signer_A);
     scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasks", diamond.target, signer_A);
+    dividendFacet = await ethers.getContractAt("DividendFacet", diamond.target, signer_A);
 
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
     await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -188,530 +170,6 @@ describe("Equity Tests", () => {
     });
   });
 
-  describe("Dividends", () => {
-    it("GIVEN dividend with executed snapshot WHEN getting dividend holders THEN returns holders from snapshot", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
-      await kycFacet.grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-
-      await erc1410Facet.connect(signer_C).issueByPartition({
-        partition: DEFAULT_PARTITION,
-        tokenHolder: signer_A.address,
-        value: 1000n,
-        data: "0x",
-      });
-
-      await expect(equityFacet.connect(signer_C).setDividend(dividendData))
-        .to.emit(equityFacet, "DividendSet")
-        .withArgs(
-          "0x0000000000000000000000000000000000000000000000000000000000000001",
-          1,
-          signer_C.address,
-          dividendsRecordDateInSeconds,
-          dividendsExecutionDateInSeconds,
-          dividendsAmountPerEquity,
-          dividendsAmountDecimalsPerEquity,
-        );
-
-      await timeTravelFacet.changeSystemTimestamp(dividendsRecordDateInSeconds + 1);
-
-      await erc1410Facet.connect(signer_C).issueByPartition({
-        partition: DEFAULT_PARTITION,
-        tokenHolder: signer_B.address,
-        value: 500n,
-        data: "0x",
-      });
-
-      const [dividend, isDisabled] = await equityFacet.getDividend(1);
-      expect(dividend.snapshotId).to.not.equal(0);
-      expect(isDisabled).to.equal(false);
-
-      // Verify getDividendHolders returns holders from snapshot (line 211-212)
-      const dividendHolders = await equityFacet.getDividendHolders(1, 0, 99);
-      expect([...dividendHolders]).to.have.members([signer_A.address]);
-
-      // Verify getTotalDividendHolders returns count from snapshot (line 222)
-      const totalHolders = await equityFacet.getTotalDividendHolders(1);
-      expect(totalHolders).to.equal(1);
-
-      const dividendFor = await equityFacet.getDividendFor(1, signer_A.address);
-      expect(dividendFor.tokenBalance).to.equal(1000n);
-      expect(dividendFor.recordDateReached).to.equal(true);
-    });
-
-    it("GIVEN dividend without executed snapshot WHEN getting total dividend holders THEN returns current total holders", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
-
-      // Issue tokens before creating dividend
-      await erc1410Facet.connect(signer_C).issueByPartition({
-        partition: DEFAULT_PARTITION,
-        tokenHolder: signer_A.address,
-        value: 1000n,
-        data: "0x",
-      });
-
-      // Create dividend (schedules a snapshot for recordDate)
-      await expect(equityFacet.connect(signer_C).setDividend(dividendData))
-        .to.emit(equityFacet, "DividendSet")
-        .withArgs(
-          "0x0000000000000000000000000000000000000000000000000000000000000001",
-          1,
-          signer_C.address,
-          dividendsRecordDateInSeconds,
-          dividendsExecutionDateInSeconds,
-          dividendsAmountPerEquity,
-          dividendsAmountDecimalsPerEquity,
-        );
-
-      // Travel to after recordDate BUT DON'T trigger any operation
-      // This keeps snapshotId at 0
-      await timeTravelFacet.changeSystemTimestamp(dividendsRecordDateInSeconds + 1);
-
-      // Verify snapshot was NOT executed (snapshotId == 0)
-      const [dividend, isDisabled] = await equityFacet.getDividend(1);
-      expect(dividend.snapshotId).to.equal(0);
-      expect(isDisabled).to.equal(false);
-
-      // Get total dividend holders using _getTotalTokenHolders (line 224 in EquityStorageWrapper.sol)
-      const totalHolders = await equityFacet.getTotalDividendHolders(1);
-      expect(totalHolders).to.equal(1);
-
-      // Also verify getDividendHolders returns current holders (line 214)
-      const holders = await equityFacet.getDividendHolders(1, 0, 99);
-      expect([...holders]).to.have.members([signer_A.address]);
-    });
-
-    it("GIVEN an account without corporateActions role WHEN setDividend THEN transaction fails with AccountHasNoRole", async () => {
-      // set dividend fails
-      await expect(equityFacet.connect(signer_C).setDividend(dividendData)).to.be.rejectedWith("AccountHasNoRole");
-    });
-
-    it("GIVEN a paused Token WHEN setDividend THEN transaction fails with TokenIsPaused", async () => {
-      // Granting Role to account C and Pause
-      await grantRoleAndPauseToken(
-        accessControlFacet,
-        pauseFacet,
-        ATS_ROLES._CORPORATE_ACTION_ROLE,
-        signer_A,
-        signer_B,
-        signer_C.address,
-      );
-
-      // set dividend fails
-      await expect(equityFacet.connect(signer_C).setDividend(dividendData)).to.be.rejectedWith("TokenIsPaused");
-    });
-
-    it("GIVEN an account with corporateActions role WHEN setDividend with wrong dates THEN transaction fails", async () => {
-      const currentTimestamp = await timeTravelFacet.blockTimestamp();
-      await timeTravelFacet.changeSystemTimestamp(currentTimestamp + 100n);
-      // Granting Role to account C
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-
-      // set dividend
-      const wrongDividendData_1 = {
-        recordDate: dividendsExecutionDateInSeconds.toString(),
-        executionDate: dividendsRecordDateInSeconds.toString(),
-        amount: dividendsAmountPerEquity,
-        amountDecimals: dividendsAmountDecimalsPerEquity,
-      };
-
-      await expect(equityFacet.connect(signer_C).setDividend(wrongDividendData_1)).to.be.revertedWithCustomError(
-        equityFacet,
-        "WrongDates",
-      );
-
-      const wrongDividendData_2 = {
-        recordDate: (currentTimestamp - 100n).toString(), // Past timestamp
-        executionDate: dividendsExecutionDateInSeconds.toString(),
-        amount: dividendsAmountPerEquity,
-        amountDecimals: dividendsAmountDecimalsPerEquity,
-      };
-
-      await expect(equityFacet.connect(signer_C).setDividend(wrongDividendData_2)).to.be.revertedWithCustomError(
-        equityFacet,
-        "WrongTimestamp",
-      );
-    });
-
-    it("GIVEN an account with corporateActions role WHEN setDividend THEN transaction succeeds", async () => {
-      // Granting Role to account C
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-
-      // set dividend
-      await expect(equityFacet.connect(signer_C).setDividend(dividendData))
-        .to.emit(equityFacet, "DividendSet")
-        .withArgs(
-          "0x0000000000000000000000000000000000000000000000000000000000000001",
-          1,
-          signer_C.address,
-          dividendsRecordDateInSeconds,
-          dividendsExecutionDateInSeconds,
-          dividendsAmountPerEquity,
-          dividendsAmountDecimalsPerEquity,
-        );
-
-      // check list members
-      await expect(equityFacet.getDividend(1000)).to.be.rejectedWith("WrongIndexForAction");
-
-      const listCount = await equityFacet.getDividendsCount();
-      const [dividend, isDisabled] = await equityFacet.getDividend(1);
-      const dividendFor = await equityFacet.getDividendFor(1, signer_A.address);
-      const dividendAmountFor = await equityFacet.getDividendAmountFor(1, signer_A.address);
-      const dividendTotalHolder = await equityFacet.getTotalDividendHolders(1);
-      const dividendHolders = await equityFacet.getDividendHolders(1, 0, dividendTotalHolder);
-
-      expect(listCount).to.equal(1);
-      expect(isDisabled).to.equal(false);
-      expect(dividend.snapshotId).to.equal(0);
-      expect(dividend.dividend.recordDate).to.equal(dividendsRecordDateInSeconds);
-      expect(dividend.dividend.executionDate).to.equal(dividendsExecutionDateInSeconds);
-      expect(dividend.dividend.amount).to.equal(dividendsAmountPerEquity);
-      expect(dividend.dividend.amountDecimals).to.equal(dividendsAmountDecimalsPerEquity);
-      expect(dividendFor.recordDate).to.equal(dividendsRecordDateInSeconds);
-      expect(dividendFor.executionDate).to.equal(dividendsExecutionDateInSeconds);
-      expect(dividendFor.amount).to.equal(dividendsAmountPerEquity);
-      expect(dividendFor.amountDecimals).to.equal(dividendsAmountDecimalsPerEquity);
-      expect(dividendFor.tokenBalance).to.equal(0);
-      expect(dividendFor.recordDateReached).to.equal(false);
-      expect(dividendFor.decimals).to.equal(0);
-      expect(dividendTotalHolder).to.equal(0);
-      expect(dividendHolders.length).to.equal(dividendTotalHolder);
-      expect(dividendAmountFor.recordDateReached).to.equal(dividendFor.recordDateReached);
-      expect(dividendAmountFor.numerator).to.equal(0);
-      expect(dividendAmountFor.denominator).to.equal(0);
-    });
-
-    it("GIVEN an account with corporateActions role WHEN setDividend and lock THEN transaction succeeds", async () => {
-      // Granting Role to account C
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._LOCKER_ROLE, signer_C.address);
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
-
-      // issue and lock
-      const TotalAmount = number_Of_Shares;
-      const LockedAmount = TotalAmount - 5n;
-
-      await erc1410Facet.connect(signer_C).issueByPartition({
-        partition: DEFAULT_PARTITION,
-        tokenHolder: signer_A.address,
-        value: TotalAmount,
-        data: "0x",
-      });
-
-      await lockFacet.connect(signer_C).lock(LockedAmount, signer_A.address, 99999999999);
-
-      // set dividend
-      await expect(equityFacet.connect(signer_C).setDividend(dividendData))
-        .to.emit(equityFacet, "DividendSet")
-        .withArgs(
-          "0x0000000000000000000000000000000000000000000000000000000000000001",
-          1,
-          signer_C.address,
-          dividendsRecordDateInSeconds,
-          dividendsExecutionDateInSeconds,
-          dividendsAmountPerEquity,
-          dividendsAmountDecimalsPerEquity,
-        );
-
-      // check list members
-      await timeTravelFacet.changeSystemTimestamp(dividendsRecordDateInSeconds + 1);
-      const dividendFor = await equityFacet.getDividendFor(1, signer_A.address);
-      const dividendAmountFor = await equityFacet.getDividendAmountFor(1, signer_A.address);
-      const dividendTotalHolder = await equityFacet.getTotalDividendHolders(1);
-      const dividendHolders = await equityFacet.getDividendHolders(1, 0, dividendTotalHolder);
-
-      expect(dividendFor.tokenBalance).to.equal(TotalAmount);
-      expect(dividendFor.recordDateReached).to.equal(true);
-      expect(dividendFor.isDisabled).to.be.false;
-      expect(dividendTotalHolder).to.equal(1);
-      expect(dividendHolders.length).to.equal(dividendTotalHolder);
-      expect([...dividendHolders]).to.have.members([signer_A.address]);
-      expect(dividendAmountFor.recordDateReached).to.equal(dividendFor.recordDateReached);
-      expect(dividendAmountFor.numerator).to.equal(dividendFor.tokenBalance * dividendFor.amount);
-      expect(dividendAmountFor.denominator).to.equal(10n ** (dividendFor.decimals + dividendFor.amountDecimals));
-    });
-
-    it("GIVEN an account with corporateActions role WHEN setDividend and hold THEN transaction succeeds", async () => {
-      // Granting Role to account C
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
-
-      // issue and hold
-      const TotalAmount = number_Of_Shares;
-      const HeldAmount = TotalAmount - 5n;
-
-      await erc1410Facet.connect(signer_C).issueByPartition({
-        partition: DEFAULT_PARTITION,
-        tokenHolder: signer_A.address,
-        value: TotalAmount,
-        data: "0x",
-      });
-
-      const hold = {
-        amount: HeldAmount,
-        expirationTimestamp: 999999999999999,
-        escrow: signer_B.address,
-        to: ADDRESS_ZERO,
-        data: "0x",
-      };
-
-      await holdFacet.createHoldByPartition(DEFAULT_PARTITION, hold);
-
-      // set dividend
-      await expect(equityFacet.connect(signer_C).setDividend(dividendData))
-        .to.emit(equityFacet, "DividendSet")
-        .withArgs(
-          "0x0000000000000000000000000000000000000000000000000000000000000001",
-          1,
-          signer_C.address,
-          dividendsRecordDateInSeconds,
-          dividendsExecutionDateInSeconds,
-          dividendsAmountPerEquity,
-          dividendsAmountDecimalsPerEquity,
-        );
-
-      // check list members
-      await timeTravelFacet.changeSystemTimestamp(dividendsRecordDateInSeconds + 1);
-      const dividendFor = await equityFacet.getDividendFor(1, signer_A.address);
-      const dividendAmountFor = await equityFacet.getDividendAmountFor(1, signer_A.address);
-      const dividendTotalHolder = await equityFacet.getTotalDividendHolders(1);
-      const dividendHolders = await equityFacet.getDividendHolders(1, 0, dividendTotalHolder);
-
-      expect(dividendFor.tokenBalance).to.equal(TotalAmount);
-      expect(dividendFor.recordDateReached).to.equal(true);
-      expect(dividendTotalHolder).to.equal(1);
-      expect(dividendHolders.length).to.equal(dividendTotalHolder);
-      expect([...dividendHolders]).to.have.members([signer_A.address]);
-      expect(dividendAmountFor.recordDateReached).to.equal(dividendFor.recordDateReached);
-      expect(dividendAmountFor.numerator).to.equal(dividendFor.tokenBalance * dividendFor.amount);
-      expect(dividendAmountFor.denominator).to.equal(10n ** (dividendFor.decimals + dividendFor.amountDecimals));
-    });
-
-    it("GIVEN scheduled dividends WHEN record date is reached AND scheduled balance adjustments is set after record date THEN dividends are paid without adjusted balance", async () => {
-      await accessControlFacet.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-      await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
-      await accessControlFacet.grantRole(ATS_ROLES._LOCKER_ROLE, signer_C.address);
-      await accessControlFacet.grantRole(ATS_ROLES._CLEARING_ROLE, signer_C.address);
-      await accessControlFacet.grantRole(ATS_ROLES._FREEZE_MANAGER_ROLE, signer_C.address);
-
-      const TotalAmount = number_Of_Shares;
-      const amounts = TotalAmount / 5n;
-
-      await erc1410Facet.connect(signer_C).issueByPartition({
-        partition: DEFAULT_PARTITION,
-        tokenHolder: signer_A.address,
-        value: TotalAmount,
-        data: "0x",
-      });
-
-      const hold = {
-        amount: amounts,
-        expirationTimestamp: 999999999999999,
-        escrow: signer_B.address,
-        to: ADDRESS_ZERO,
-        data: "0x",
-      };
-
-      await lockFacet.connect(signer_C).lock(amounts, signer_A.address, 99999999999);
-
-      await holdFacet.createHoldByPartition(DEFAULT_PARTITION, hold);
-
-      await freezeFacet.connect(signer_C).freezePartialTokens(signer_A.address, amounts);
-
-      await clearingActionsFacet.connect(signer_C).activateClearing();
-
-      const clearingOperation = {
-        partition: DEFAULT_PARTITION,
-        expirationTimestamp: 99999999999,
-        data: EMPTY_HEX_BYTES,
-      };
-
-      await clearingTransferFacet.clearingTransferByPartition(clearingOperation, amounts, signer_B.address);
-
-      balanceAdjustmentData.executionDate = dateToUnixTimestamp("2030-01-01T00:00:15Z").toString(); // 5 seconds after dividend record date
-
-      await equityFacet.connect(signer_C).setDividend(dividendData);
-      await equityFacet.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
-
-      // Travel to 5 seconds after balance adjustment execution date
-      await timeTravelFacet.changeSystemTimestamp(dateToUnixTimestamp("2030-01-01T00:20Z").toString());
-
-      // Check user dividend balance does not include balance adjustment
-      const dividendFor = await equityFacet.getDividendFor(1, signer_A.address);
-      const dividendAmountFor = await equityFacet.getDividendAmountFor(1, signer_A.address);
-      expect(dividendFor.tokenBalance).to.equal(TotalAmount);
-      expect(dividendFor.recordDateReached).to.equal(true);
-      expect(dividendFor.amount).to.equal(dividendsAmountPerEquity);
-      expect(dividendFor.amountDecimals).to.equal(dividendsAmountDecimalsPerEquity);
-      expect(dividendAmountFor.recordDateReached).to.equal(dividendFor.recordDateReached);
-      expect(dividendAmountFor.numerator).to.equal(dividendFor.tokenBalance * dividendFor.amount);
-      expect(dividendAmountFor.denominator).to.equal(10n ** (dividendFor.decimals + dividendFor.amountDecimals));
-    });
-
-    it("GIVEN frozen tokens WHEN calculating dividends without snapshot THEN frozen tokens are included in dividend calculation", async () => {
-      await accessControlFacet.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
-      await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
-      await accessControlFacet.grantRole(ATS_ROLES._FREEZE_MANAGER_ROLE, signer_A.address);
-
-      const totalAmount = 1000n;
-      const frozenAmount = 300n;
-
-      // Issue tokens
-      await erc1410Facet.issueByPartition({
-        partition: DEFAULT_PARTITION,
-        tokenHolder: signer_A.address,
-        value: totalAmount,
-        data: "0x",
-      });
-
-      // Freeze some tokens
-      await freezeFacet.freezePartialTokens(signer_A.address, frozenAmount);
-
-      // Set dividend WITHOUT snapshot (snapshotId will be 0) - this will call _getTotalBalanceForAdjustedAt
-      const dividendDataNoSnapshot = {
-        recordDate: dateToUnixTimestamp("2030-01-01T00:00:10Z").toString(),
-        executionDate: dateToUnixTimestamp("2030-01-01T00:00:20Z").toString(),
-        amount: 10,
-        amountDecimals: 0,
-      };
-      await equityFacet.setDividend(dividendDataNoSnapshot);
-
-      // Travel to after record date but before execution date
-      await timeTravelFacet.changeSystemTimestamp(dateToUnixTimestamp("2030-01-01T00:00:15Z"));
-
-      // Get dividend - this triggers _getTotalBalanceForAdjustedAt which includes frozen tokens
-      const dividendFor = await equityFacet.getDividendFor(1, signer_A.address);
-
-      // The total balance should include frozen tokens (700 free + 300 frozen = 1000)
-      expect(dividendFor.tokenBalance).to.equal(totalAmount);
-      expect(dividendFor.recordDateReached).to.equal(true);
-
-      // Verify dividend calculation: (tokenBalance * amount) / (10^(decimals + amountDecimals))
-      const expectedDividendNumerator = dividendFor.tokenBalance * dividendFor.amount;
-      const expectedDividendDenominator = 10n ** (dividendFor.decimals + dividendFor.amountDecimals);
-      // Division result: expectedDividendNumerator / expectedDividendDenominator
-
-      // Also get the dividendAmountFor to verify
-      const dividendAmountFor = await equityFacet.getDividendAmountFor(1, signer_A.address);
-      expect(dividendAmountFor.numerator).to.equal(expectedDividendNumerator);
-      expect(dividendAmountFor.denominator).to.equal(expectedDividendDenominator);
-    });
-
-    describe("Cancel Dividend", () => {
-      it("GIVEN an account without corporateActions role WHEN cancelDividend THEN transaction fails with AccountHasNoRole", async () => {
-        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
-        await equityFacet.connect(signer_B).setDividend(dividendData);
-        await expect(equityFacet.connect(signer_C).cancelDividend(1)).to.be.rejectedWith("AccountHasNoRole");
-      });
-
-      it("GIVEN a paused Token WHEN cancelDividend THEN transaction fails with TokenIsPaused", async () => {
-        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
-        await equityFacet.connect(signer_B).setDividend(dividendData);
-        await pauseFacet.connect(signer_B).pause();
-
-        await expect(equityFacet.connect(signer_B).cancelDividend(1)).to.be.rejectedWith("TokenIsPaused");
-      });
-
-      it("GIVEN a dividend already executed WHEN cancelDividend THEN transaction fails with DividendAlreadyExecuted", async () => {
-        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-
-        await equityFacet.connect(signer_C).setDividend(dividendData);
-
-        await timeTravelFacet.changeSystemTimestamp(dividendsExecutionDateInSeconds + 1000);
-
-        await expect(equityFacet.connect(signer_C).cancelDividend(1)).to.be.revertedWithCustomError(
-          equityFacet,
-          "DividendAlreadyExecuted",
-        );
-      });
-
-      it("GIVEN a dividend not yet executed WHEN cancelDividend THEN transaction succeeds", async () => {
-        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-
-        await equityFacet.connect(signer_C).setDividend(dividendData);
-
-        await expect(equityFacet.connect(signer_C).cancelDividend(1))
-          .to.emit(equityFacet, "DividendCancelled")
-          .withArgs(1, signer_C.address);
-        expect((await equityFacet.getDividend(1)).isDisabled_).to.equal(true);
-        const dividendFor = await equityFacet.getDividendFor(1, signer_A.address);
-        expect(dividendFor.amount).to.equal(dividendsAmountPerEquity);
-        expect(dividendFor.amountDecimals).to.equal(dividendsAmountDecimalsPerEquity);
-        expect(dividendFor.isDisabled).to.be.true;
-      });
-
-      it("GIVEN a cancelled dividend WHEN getDividend THEN isDisabled is true", async () => {
-        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-
-        await equityFacet.connect(signer_C).setDividend(dividendData);
-
-        await equityFacet.connect(signer_C).cancelDividend(1);
-
-        const [dividend, isDisabled] = await equityFacet.getDividend(1);
-        expect(isDisabled).to.equal(true);
-        expect(dividend.dividend.recordDate).to.equal(dividendsRecordDateInSeconds);
-        expect(dividend.dividend.executionDate).to.equal(dividendsExecutionDateInSeconds);
-      });
-
-      it("GIVEN a cancelled dividend WHEN getDividendFor THEN isDisabled is true and amount is still available", async () => {
-        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
-
-        await erc1410Facet.connect(signer_C).issueByPartition({
-          partition: DEFAULT_PARTITION,
-          tokenHolder: signer_A.address,
-          value: 1000n,
-          data: "0x",
-        });
-
-        await equityFacet.connect(signer_C).setDividend(dividendData);
-
-        await equityFacet.connect(signer_C).cancelDividend(1);
-
-        const dividendFor = await equityFacet.getDividendFor(1, signer_A.address);
-        expect(dividendFor.isDisabled).to.equal(true);
-        expect(dividendFor.amount).to.equal(dividendsAmountPerEquity);
-        expect(dividendFor.amountDecimals).to.equal(dividendsAmountDecimalsPerEquity);
-      });
-
-      it("GIVEN a non-existent dividend WHEN cancelDividend THEN transaction fails", async () => {
-        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-
-        await expect(equityFacet.connect(signer_C).cancelDividend(999)).to.be.rejected;
-      });
-
-      it("GIVEN multiple dividends WHEN cancelDividend on one THEN only that dividend is cancelled", async () => {
-        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-
-        // Create first dividend
-        await equityFacet.connect(signer_C).setDividend(dividendData);
-
-        // Create second dividend with different execution date
-        const secondDividendData = {
-          recordDate: dividendsRecordDateInSeconds.toString(),
-          executionDate: (dividendsExecutionDateInSeconds + 10000).toString(),
-          amount: 20,
-          amountDecimals: 0,
-        };
-        await equityFacet.connect(signer_C).setDividend(secondDividendData);
-
-        // Cancel only first dividend
-        await expect(equityFacet.connect(signer_C).cancelDividend(1))
-          .to.emit(equityFacet, "DividendCancelled")
-          .withArgs(1, signer_C.address);
-
-        // Check first dividend is cancelled
-        const [, isDisabled1] = await equityFacet.getDividend(1);
-        expect(isDisabled1).to.equal(true);
-
-        // Check second dividend is still active
-        const [dividend2, isDisabled2] = await equityFacet.getDividend(2);
-        expect(isDisabled2).to.equal(false);
-        expect(dividend2.dividend.amount).to.equal(20);
-      });
-    });
-  });
   describe("Voting rights", () => {
     it("GIVEN voting with executed snapshot WHEN getting voting holders THEN returns holders from snapshot", async () => {
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
@@ -846,7 +304,7 @@ describe("Equity Tests", () => {
       await votingFacet.connect(signer_C).setVoting(votingData);
 
       // Create a dividend to have different action types
-      await equityFacet.connect(signer_C).setDividend(dividendData);
+      await dividendFacet.connect(signer_C).setDividend(dividendData);
 
       // Try to access voting with dividend ID (should fail)
       await expect(votingFacet.getVoting(2)).to.be.rejectedWith("WrongIndexForAction");
@@ -861,15 +319,15 @@ describe("Equity Tests", () => {
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
       // Create a dividend
-      await equityFacet.connect(signer_C).setDividend(dividendData);
+      await dividendFacet.connect(signer_C).setDividend(dividendData);
 
       // Create a voting to have different action types
       await votingFacet.connect(signer_C).setVoting(votingData);
 
       // Try to access dividend with voting ID (should fail)
-      await expect(equityFacet.getDividend(2)).to.be.rejectedWith("WrongIndexForAction");
-      await expect(equityFacet.getDividendFor(2, signer_A.address)).to.be.rejectedWith("WrongIndexForAction");
-      await expect(equityFacet.getDividendAmountFor(2, signer_A.address)).to.be.rejectedWith("WrongIndexForAction");
+      await expect(dividendFacet.getDividend(2)).to.be.rejectedWith("WrongIndexForAction");
+      await expect(dividendFacet.getDividendFor(2, signer_A.address)).to.be.rejectedWith("WrongIndexForAction");
+      await expect(dividendFacet.getDividendAmountFor(2, signer_A.address)).to.be.rejectedWith("WrongIndexForAction");
     });
     it("GIVEN an account without corporateActions role WHEN setVoting THEN transaction fails with AccountHasNoRole", async () => {
       // set dividend fails
@@ -1116,7 +574,7 @@ describe("Equity Tests", () => {
       await equityFacet.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
 
       // Create a dividend to have different action types
-      await equityFacet.connect(signer_C).setDividend(dividendData);
+      await dividendFacet.connect(signer_C).setDividend(dividendData);
 
       // Try to access balance adjustment with dividend ID (should fail)
       await expect(equityFacet.getScheduledBalanceAdjustment(2)).to.be.rejectedWith("WrongIndexForAction");

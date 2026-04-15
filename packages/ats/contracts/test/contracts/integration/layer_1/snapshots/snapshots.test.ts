@@ -17,18 +17,7 @@ import {
   TimeTravelFacet,
   FreezeFacet,
   ClearingTransferFacet,
-  AccessControl__factory,
-  IERC1410__factory,
-  Snapshots__factory,
-  Pause__factory,
-  Lock__factory,
-  IHold__factory,
-  Kyc__factory,
-  SsiManagement__factory,
-  Equity__factory,
-  TimeTravelFacet__factory,
-  FreezeFacet__factory,
-  ClearingTransferFacet__factory,
+  DividendFacet,
 } from "@contract-types";
 import { ZERO, EMPTY_STRING, ADDRESS_ZERO, dateToUnixTimestamp, ATS_ROLES } from "@scripts";
 import { grantRoleAndPauseToken } from "@test";
@@ -67,6 +56,7 @@ describe("Snapshots Tests", () => {
   let equityFacet: Equity;
   let timeTravelFacet: TimeTravelFacet;
   let freezeFacet: FreezeFacet;
+  let dividendFacet: DividendFacet;
   let clearingTransferFacet: ClearingTransferFacet;
 
   async function deploySecurityFixtureMultiPartition() {
@@ -87,25 +77,25 @@ describe("Snapshots Tests", () => {
   }
 
   async function setFacets(diamond: ResolverProxy) {
-    accessControlFacet = AccessControl__factory.connect(diamond.target.toString(), ethers.provider);
+    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
 
-    erc1410Facet = IERC1410__factory.connect(diamond.target.toString(), ethers.provider);
+    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target);
 
-    snapshotFacet = Snapshots__factory.connect(diamond.target.toString(), ethers.provider);
+    snapshotFacet = await ethers.getContractAt("Snapshots", diamond.target);
 
-    pauseFacet = Pause__factory.connect(diamond.target.toString(), ethers.provider);
+    pauseFacet = await ethers.getContractAt("Pause", diamond.target);
 
-    lockFacet = Lock__factory.connect(diamond.target.toString(), ethers.provider);
-    holdFacet = IHold__factory.connect(diamond.target.toString(), ethers.provider);
-    kycFacet = Kyc__factory.connect(diamond.target.toString(), signer_B);
-    ssiManagementFacet = SsiManagement__factory.connect(diamond.target.toString(), signer_A);
-    equityFacet = Equity__factory.connect(diamond.target.toString(), ethers.provider);
-    timeTravelFacet = TimeTravelFacet__factory.connect(diamond.target.toString(), signer_A);
-    freezeFacet = FreezeFacet__factory.connect(diamond.target.toString(), ethers.provider);
-    clearingTransferFacet = ClearingTransferFacet__factory.connect(diamond.target.toString(), ethers.provider);
+    lockFacet = await ethers.getContractAt("Lock", diamond.target);
+    holdFacet = await ethers.getContractAt("IHold", diamond.target);
+    kycFacet = await ethers.getContractAt("Kyc", diamond.target, signer_B);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.target, signer_A);
+    equityFacet = await ethers.getContractAt("Equity", diamond.target);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
+    freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.target);
+    clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.target);
+    dividendFacet = await ethers.getContractAt("DividendFacet", diamond.target);
   }
 
-  // TODO(phase-5): type as Rbac[]
   function set_initRbacs(): any[] {
     return [
       {
@@ -149,10 +139,7 @@ describe("Snapshots Tests", () => {
 
   it("GIVEN an account without snapshot role WHEN takeSnapshot THEN transaction fails with AccountHasNoRole", async () => {
     // snapshot fails
-    await expect(snapshotFacet.connect(signer_C).takeSnapshot()).to.be.revertedWithCustomError(
-      accessControlFacet,
-      "AccountHasNoRole",
-    );
+    await expect(snapshotFacet.connect(signer_C).takeSnapshot()).to.be.rejectedWith("AccountHasNoRole");
   });
 
   it("GIVEN a paused Token WHEN takeSnapshot THEN transaction fails with TokenIsPaused", async () => {
@@ -166,58 +153,30 @@ describe("Snapshots Tests", () => {
       signer_C.address,
     );
 
-    await expect(snapshotFacet.connect(signer_C).takeSnapshot()).to.be.revertedWithCustomError(
-      pauseFacet,
-      "TokenIsPaused",
-    );
+    await expect(snapshotFacet.connect(signer_C).takeSnapshot()).to.be.rejectedWith("TokenIsPaused");
   });
 
   it("GIVEN no snapshot WHEN reading snapshot values THEN transaction fails", async () => {
     // check snapshot
-    await expect(snapshotFacet.balanceOfAtSnapshot(1, signer_A.address)).to.be.revertedWithCustomError(
-      snapshotFacet,
+    await expect(snapshotFacet.balanceOfAtSnapshot(1, signer_A.address)).to.be.rejectedWith("SnapshotIdDoesNotExists");
+    await expect(snapshotFacet.balanceOfAtSnapshot(0, signer_A.address)).to.be.rejectedWith("SnapshotIdNull");
+    await expect(snapshotFacet.totalSupplyAtSnapshot(1)).to.be.rejectedWith("SnapshotIdDoesNotExists");
+    await expect(snapshotFacet.totalSupplyAtSnapshot(0)).to.be.rejectedWith("SnapshotIdNull");
+    await expect(snapshotFacet.balanceOfAtSnapshotByPartition(_PARTITION_ID_1, 1, signer_A.address)).to.be.rejectedWith(
       "SnapshotIdDoesNotExists",
     );
-    await expect(snapshotFacet.balanceOfAtSnapshot(0, signer_A.address)).to.be.revertedWithCustomError(
-      snapshotFacet,
+    await expect(snapshotFacet.balanceOfAtSnapshotByPartition(_PARTITION_ID_1, 0, signer_A.address)).to.be.rejectedWith(
       "SnapshotIdNull",
     );
-    await expect(snapshotFacet.totalSupplyAtSnapshot(1)).to.be.revertedWithCustomError(
-      snapshotFacet,
+    await expect(snapshotFacet.partitionsOfAtSnapshot(1, signer_A.address)).to.be.rejectedWith(
       "SnapshotIdDoesNotExists",
     );
-    await expect(snapshotFacet.totalSupplyAtSnapshot(0)).to.be.revertedWithCustomError(snapshotFacet, "SnapshotIdNull");
-    await expect(
-      snapshotFacet.balanceOfAtSnapshotByPartition(_PARTITION_ID_1, 1, signer_A.address),
-    ).to.be.revertedWithCustomError(snapshotFacet, "SnapshotIdDoesNotExists");
-    await expect(
-      snapshotFacet.balanceOfAtSnapshotByPartition(_PARTITION_ID_1, 0, signer_A.address),
-    ).to.be.revertedWithCustomError(snapshotFacet, "SnapshotIdNull");
-    await expect(snapshotFacet.partitionsOfAtSnapshot(1, signer_A.address)).to.be.revertedWithCustomError(
-      snapshotFacet,
-      "SnapshotIdDoesNotExists",
-    );
-    await expect(snapshotFacet.partitionsOfAtSnapshot(0, signer_A.address)).to.be.revertedWithCustomError(
-      snapshotFacet,
-      "SnapshotIdNull",
-    );
+    await expect(snapshotFacet.partitionsOfAtSnapshot(0, signer_A.address)).to.be.rejectedWith("SnapshotIdNull");
 
-    await expect(snapshotFacet.getTokenHoldersAtSnapshot(1, 0, 1)).to.be.revertedWithCustomError(
-      snapshotFacet,
-      "SnapshotIdDoesNotExists",
-    );
-    await expect(snapshotFacet.getTokenHoldersAtSnapshot(0, 0, 1)).to.be.revertedWithCustomError(
-      snapshotFacet,
-      "SnapshotIdNull",
-    );
-    await expect(snapshotFacet.getTotalTokenHoldersAtSnapshot(1)).to.be.revertedWithCustomError(
-      snapshotFacet,
-      "SnapshotIdDoesNotExists",
-    );
-    await expect(snapshotFacet.getTotalTokenHoldersAtSnapshot(0)).to.be.revertedWithCustomError(
-      snapshotFacet,
-      "SnapshotIdNull",
-    );
+    await expect(snapshotFacet.getTokenHoldersAtSnapshot(1, 0, 1)).to.be.rejectedWith("SnapshotIdDoesNotExists");
+    await expect(snapshotFacet.getTokenHoldersAtSnapshot(0, 0, 1)).to.be.rejectedWith("SnapshotIdNull");
+    await expect(snapshotFacet.getTotalTokenHoldersAtSnapshot(1)).to.be.rejectedWith("SnapshotIdDoesNotExists");
+    await expect(snapshotFacet.getTotalTokenHoldersAtSnapshot(0)).to.be.rejectedWith("SnapshotIdNull");
   });
 
   it("GIVEN an account with snapshot role WHEN takeSnapshot THEN transaction succeeds", async () => {
@@ -823,9 +782,9 @@ describe("Snapshots Tests", () => {
         amount: dividendsAmountPerEquity,
         amountDecimals: dividendAmountDecimalsPerEquity,
       };
-      await equityFacet.connect(signer_A).setDividend(dividendData_1);
-      await equityFacet.connect(signer_A).setDividend(dividendData_2);
-      await equityFacet.connect(signer_A).setDividend(dividendData_3);
+      await dividendFacet.connect(signer_A).setDividend(dividendData_1);
+      await dividendFacet.connect(signer_A).setDividend(dividendData_2);
+      await dividendFacet.connect(signer_A).setDividend(dividendData_3);
 
       const balanceAdjustmentExecutionDateInSeconds_1 = dateToUnixTimestamp("2030-01-01T00:00:07Z");
       const balanceAdjustmentExecutionDateInSeconds_2 = dateToUnixTimestamp("2030-01-01T00:00:13Z");
@@ -872,9 +831,9 @@ describe("Snapshots Tests", () => {
       const decimalFactor_3 = decimalFactor_2 + balanceAdjustmentsDecimals_3;
 
       // check
-      const dividendFor_C_1 = await equityFacet.getDividendFor(1, signer_C.address);
-      const dividendFor_C_2 = await equityFacet.getDividendFor(2, signer_C.address);
-      const dividendFor_C_3 = await equityFacet.getDividendFor(3, signer_C.address);
+      const dividendFor_C_1 = await dividendFacet.getDividendFor(1, signer_C.address);
+      const dividendFor_C_2 = await dividendFacet.getDividendFor(2, signer_C.address);
+      const dividendFor_C_3 = await dividendFacet.getDividendFor(3, signer_C.address);
       const balance_C_At_Snapshot_4 = await snapshotFacet.balanceOfAtSnapshot(4, signer_C.address);
 
       expect(dividendFor_C_1.tokenBalance).to.be.equal(balanceOf_C_Original);

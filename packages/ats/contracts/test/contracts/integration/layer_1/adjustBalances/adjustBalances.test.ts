@@ -15,6 +15,7 @@ import {
   SsiManagement,
   TimeTravelFacet as TimeTravel,
   type MigrationFacetTest,
+  DividendFacet,
 } from "@contract-types";
 import { grantRoleAndPauseToken } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -43,6 +44,7 @@ describe("Adjust Balances Tests", () => {
   let timeTravelFacet: TimeTravel;
   let kycFacet: Kyc;
   let ssiManagementFacet: SsiManagement;
+  let dividendFacet: DividendFacet;
 
   async function deploySecurityFixtureMultiPartition() {
     const base = await deployEquityTokenFixture({
@@ -87,6 +89,7 @@ describe("Adjust Balances Tests", () => {
 
     kycFacet = await ethers.getContractAt("Kyc", diamond.target);
     ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.target);
+    dividendFacet = await ethers.getContractAt("DividendFacet", diamond.target);
   }
 
   beforeEach(async () => {
@@ -95,9 +98,9 @@ describe("Adjust Balances Tests", () => {
 
   it("GIVEN an account without adjustBalances role WHEN adjustBalances THEN transaction fails with AccountHasNoRole", async () => {
     // adjustBalances fails
-    await expect(
-      adjustBalancesFacet.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals),
-    ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
+    await expect(adjustBalancesFacet.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals)).to.be.rejectedWith(
+      "AccountHasNoRole",
+    );
   });
 
   it("GIVEN a paused Token WHEN adjustBalances THEN transaction fails with TokenIsPaused", async () => {
@@ -112,9 +115,9 @@ describe("Adjust Balances Tests", () => {
     );
 
     // adjustBalances fails
-    await expect(
-      adjustBalancesFacet.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals),
-    ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
+    await expect(adjustBalancesFacet.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals)).to.be.rejectedWith(
+      "TokenIsPaused",
+    );
   });
 
   it("GIVEN a Token WHEN adjustBalances with factor set at 0 THEN transaction fails with FactorIsZero", async () => {
@@ -154,7 +157,7 @@ describe("Adjust Balances Tests", () => {
       amountDecimals: dividendAmountDecimalsPerEquity,
     };
 
-    await equityFacet.connect(signer_A).setDividend(dividendData_1);
+    await dividendFacet.connect(signer_A).setDividend(dividendData_1);
 
     const balanceAdjustmentExecutionDateInSeconds_1 = dateToUnixTimestamp(`2030-01-01T00:00:07Z`);
 

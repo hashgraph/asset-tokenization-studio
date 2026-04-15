@@ -4,7 +4,7 @@ import { OnChainDistributionRepository } from "@infrastructure/adapters/on-chain
 import { AssetType } from "@domain/model/asset-type.enum"
 import { Asset } from "@domain/model/asset"
 import { CorporateActionDetails, DistributionType, PayoutSubtype, AmountType } from "@domain/model/distribution"
-import { Bond, Equity } from "@hashgraph/asset-tokenization-sdk"
+import { Dividend, Coupon } from "@hashgraph/asset-tokenization-sdk"
 import { AssetUtils } from "@test/shared/asset.utils"
 import { DistributionUtils } from "@test/shared/distribution.utils"
 import { CorporateActionId } from "@domain/model/value-objects/corporate-action-id"
@@ -12,11 +12,12 @@ import { SnapshotId } from "@domain/model/value-objects/snapshot-id"
 import { faker } from "@faker-js/faker"
 
 jest.mock("@hashgraph/asset-tokenization-sdk", () => ({
-  Bond: {
+  Bond: {},
+  Coupon: {
     getAllCoupons: jest.fn(),
     getTotalCouponHolders: jest.fn(),
   },
-  Equity: {
+  Dividend: {
     getAllDividends: jest.fn(),
     getTotalDividendHolders: jest.fn(),
   },
@@ -30,8 +31,8 @@ jest.mock("@hashgraph/asset-tokenization-sdk", () => ({
   GetTotalTokenHoldersAtSnapshotRequest: jest.fn(),
 }))
 
-const mockBond = Bond as jest.Mocked<typeof Bond>
-const mockEquity = Equity as jest.Mocked<typeof Equity>
+const mockCoupon = Coupon as jest.Mocked<typeof Coupon>
+const mockDividend = Dividend as jest.Mocked<typeof Dividend>
 import { Security } from "@hashgraph/asset-tokenization-sdk"
 const mockSecurity = Security as jest.Mocked<typeof Security>
 
@@ -63,11 +64,11 @@ describe(OnChainDistributionRepository.name, () => {
           isDisabled: false,
         },
       ]
-      mockBond.getAllCoupons.mockResolvedValue(mockCoupons)
+      mockCoupon.getAllCoupons.mockResolvedValue(mockCoupons)
 
       await repository.getAllDistributionsByAsset(bondAsset)
 
-      expect(mockBond.getAllCoupons).toHaveBeenCalledWith(expect.any(Object))
+      expect(mockCoupon.getAllCoupons).toHaveBeenCalledWith(expect.any(Object))
     })
 
     it("should call getDividendsForAsset for EQUITY assets", async () => {
@@ -81,11 +82,11 @@ describe(OnChainDistributionRepository.name, () => {
           isDisabled: false,
         },
       ]
-      mockEquity.getAllDividends.mockResolvedValue(mockDividends)
+      mockDividend.getAllDividends.mockResolvedValue(mockDividends)
 
       await repository.getAllDistributionsByAsset(equityAsset)
 
-      expect(mockEquity.getAllDividends).toHaveBeenCalledWith(expect.any(Object))
+      expect(mockDividend.getAllDividends).toHaveBeenCalledWith(expect.any(Object))
     })
 
     it("should return empty array for unsupported asset types", async () => {
@@ -129,7 +130,7 @@ describe(OnChainDistributionRepository.name, () => {
           isDisabled: false,
         },
       ]
-      mockBond.getAllCoupons.mockResolvedValue(mockCoupons)
+      mockCoupon.getAllCoupons.mockResolvedValue(mockCoupons)
 
       const result = await repository.getAllDistributionsByAsset(bondAsset)
 
@@ -158,7 +159,7 @@ describe(OnChainDistributionRepository.name, () => {
           isDisabled: false,
         },
       ]
-      mockBond.getAllCoupons.mockResolvedValue(mockCoupons)
+      mockCoupon.getAllCoupons.mockResolvedValue(mockCoupons)
 
       const result = await repository.getAllDistributionsByAsset(bondAsset)
 
@@ -166,7 +167,7 @@ describe(OnChainDistributionRepository.name, () => {
     })
 
     it("should return empty array when no coupons exist", async () => {
-      mockBond.getAllCoupons.mockResolvedValue([])
+      mockCoupon.getAllCoupons.mockResolvedValue([])
 
       const result = await repository.getAllDistributionsByAsset(bondAsset)
 
@@ -217,7 +218,7 @@ describe(OnChainDistributionRepository.name, () => {
           isDisabled: false,
         },
       ]
-      mockBond.getAllCoupons.mockResolvedValue(mockCoupons)
+      mockCoupon.getAllCoupons.mockResolvedValue(mockCoupons)
 
       const result = await repository.getAllDistributionsByAsset(bondAsset)
 
@@ -253,7 +254,7 @@ describe(OnChainDistributionRepository.name, () => {
           isDisabled: false,
         },
       ]
-      mockEquity.getAllDividends.mockResolvedValue(mockDividends)
+      mockDividend.getAllDividends.mockResolvedValue(mockDividends)
 
       const result = await repository.getAllDistributionsByAsset(equityAsset)
 
@@ -278,7 +279,7 @@ describe(OnChainDistributionRepository.name, () => {
           isDisabled: false,
         },
       ]
-      mockEquity.getAllDividends.mockResolvedValue(mockDividends)
+      mockDividend.getAllDividends.mockResolvedValue(mockDividends)
 
       const result = await repository.getAllDistributionsByAsset(equityAsset)
 
@@ -286,7 +287,7 @@ describe(OnChainDistributionRepository.name, () => {
     })
 
     it("should return empty array when no dividends exist", async () => {
-      mockEquity.getAllDividends.mockResolvedValue([])
+      mockDividend.getAllDividends.mockResolvedValue([])
 
       const result = await repository.getAllDistributionsByAsset(equityAsset)
 
@@ -325,7 +326,7 @@ describe(OnChainDistributionRepository.name, () => {
           isDisabled: false,
         },
       ]
-      mockEquity.getAllDividends.mockResolvedValue(mockDividends)
+      mockDividend.getAllDividends.mockResolvedValue(mockDividends)
 
       const result = await repository.getAllDistributionsByAsset(equityAsset)
 
@@ -349,7 +350,7 @@ describe(OnChainDistributionRepository.name, () => {
         },
       })
       const expectedCount = 250
-      mockBond.getTotalCouponHolders.mockResolvedValue(expectedCount)
+      mockCoupon.getTotalCouponHolders.mockResolvedValue(expectedCount)
 
       const result = await repository.getHoldersCountForCorporateActionId(distribution)
 
@@ -367,7 +368,7 @@ describe(OnChainDistributionRepository.name, () => {
         },
       })
       const expectedCount = 180
-      mockEquity.getTotalDividendHolders.mockResolvedValue(expectedCount)
+      mockDividend.getTotalDividendHolders.mockResolvedValue(expectedCount)
 
       const result = await repository.getHoldersCountForCorporateActionId(distribution)
 

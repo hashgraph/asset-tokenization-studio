@@ -13,6 +13,7 @@ import {
   ClearingActionsFacet__factory,
   ControlListFacet,
   DiamondFacet,
+  DividendFacet,
   Equity,
   ERC20Facet,
   ERC3643Management,
@@ -173,6 +174,7 @@ describe("Clearing Tests", () => {
   let protectedPartitionsFacet: ProtectedPartitions;
   let noncesFacet: NoncesFacet;
   let diamondCutFacet: DiamondFacet;
+  let dividendFacet: DividendFacet;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;
@@ -221,6 +223,7 @@ describe("Clearing Tests", () => {
     protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitions", diamond.target, signer_A);
     noncesFacet = await ethers.getContractAt("NoncesFacet", diamond.target, signer_A);
     diamondCutFacet = await ethers.getContractAt("DiamondFacet", diamond.target, signer_A);
+    dividendFacet = await ethers.getContractAt("DividendFacet", diamond.target, signer_A);
 
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
     await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -643,12 +646,12 @@ describe("Clearing Tests", () => {
           amountDecimals: 0,
         };
 
-        const dividendId = await equityFacet.connect(signer_A).setDividend.staticCall(dividendInput);
-        await equityFacet.connect(signer_A).setDividend(dividendInput);
+        const dividendId = await dividendFacet.connect(signer_A).setDividend.staticCall(dividendInput);
+        await dividendFacet.connect(signer_A).setDividend(dividendInput);
 
         await timeTravelFacet.changeSystemTimestamp(recordDate + 1n);
 
-        const dividendFor = await equityFacet.getDividendFor(dividendId, signer_A.address);
+        const dividendFor = await dividendFacet.getDividendFor(dividendId, signer_A.address);
 
         const currentBalance = await erc1410Facet.balanceOf(signer_A.address);
         const clearedAmount = await clearingFacet.getClearedAmountFor(signer_A.address);
@@ -3047,13 +3050,11 @@ describe("Clearing Tests", () => {
         await clearingFacet
           .connect(signer_B)
           .operatorClearingTransferByPartition(clearingOperationFrom, _AMOUNT, signer_C.address);
-
         // CLEARING CREATE HOLD
         await clearingFacet.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold);
         await erc20Facet.increaseAllowance(signer_B.address, _AMOUNT);
         await clearingFacet.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold);
         await clearingFacet.connect(signer_B).operatorClearingCreateHoldByPartition(clearingOperationFrom, hold);
-
         // CLEARING REDEEM
         await clearingFacet.connect(signer_A).clearingRedeemByPartition(clearingOperation, _AMOUNT);
         await erc20Facet.increaseAllowance(signer_B.address, _AMOUNT);
@@ -3081,13 +3082,11 @@ describe("Clearing Tests", () => {
         await clearingFacet
           .connect(signer_B)
           .operatorClearingTransferByPartition(clearingOperationFrom, _AMOUNT, signer_C.address);
-
         // CLEARING CREATE HOLD
         await clearingFacet.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold);
         await erc20Facet.increaseAllowance(signer_B.address, _AMOUNT);
         await clearingFacet.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold);
         await clearingFacet.connect(signer_B).operatorClearingCreateHoldByPartition(clearingOperationFrom, hold);
-
         // CLEARING REDEEM
         await clearingFacet.connect(signer_A).clearingRedeemByPartition(clearingOperation, _AMOUNT);
         await erc20Facet.increaseAllowance(signer_B.address, _AMOUNT);
@@ -3954,19 +3953,6 @@ describe("Clearing Tests", () => {
       it("GIVEN a recovered from address WHEN calling protectedClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
         await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
         await erc3643ManagementFacet.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
-
-        // Enable protected partitions - grant role first
-        await accessControlFacet.grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
-        await protectedPartitionsFacet.protectPartitions();
-
-        // Grant role for protected partition
-        const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
-          ["bytes32", "bytes32"],
-          [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
-        );
-        const packedDataWithoutPrefix = packedData.slice(2);
-        const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
-        await accessControlFacet.grantRole(protectedPartitionRole, signer_A.address);
 
         const protectedClearingOperation = {
           clearingOperation: clearingOperation,
