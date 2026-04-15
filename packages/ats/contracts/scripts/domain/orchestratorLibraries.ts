@@ -224,25 +224,21 @@ export async function deployOrchestratorLibraries(signer: Signer): Promise<Orche
 
   info("   Deploying orchestrator libraries...");
 
-  // Phase 1: Deploy libraries with no dependencies (in parallel)
-  const [tokenCoreOps, holdOps, clearingReadOps] = await Promise.all([
-    new TokenCoreOps__factory(signer).deploy(),
-    new HoldOps__factory(signer).deploy(),
-    new ClearingReadOps__factory(signer).deploy(),
-  ]);
-
-  await Promise.all([
-    tokenCoreOps.waitForDeployment(),
-    holdOps.waitForDeployment(),
-    clearingReadOps.waitForDeployment(),
-  ]);
-
+  // Phase 1: Deploy libraries with no dependencies sequentially.
+  // Parallel deployment via Promise.all causes nonce collisions on the Hiero Solo
+  // JSON-RPC relay: all three deploy() calls fetch eth_getTransactionCount before
+  // any transaction lands, so they all receive the same nonce and two of them stall
+  // indefinitely waiting for a receipt that never arrives.
+  const tokenCoreOps = await (await new TokenCoreOps__factory(signer).deploy()).waitForDeployment();
   const tokenCoreOpsAddr = await tokenCoreOps.getAddress();
-  const holdOpsAddr = await holdOps.getAddress();
-  const clearingReadOpsAddr = await clearingReadOps.getAddress();
-
   info(`   ✓ TokenCoreOps deployed at ${tokenCoreOpsAddr}`);
+
+  const holdOps = await (await new HoldOps__factory(signer).deploy()).waitForDeployment();
+  const holdOpsAddr = await holdOps.getAddress();
   info(`   ✓ HoldOps deployed at ${holdOpsAddr}`);
+
+  const clearingReadOps = await (await new ClearingReadOps__factory(signer).deploy()).waitForDeployment();
+  const clearingReadOpsAddr = await clearingReadOps.getAddress();
   info(`   ✓ ClearingReadOps deployed at ${clearingReadOpsAddr}`);
 
   // Phase 2: Deploy ClearingOps (depends on TokenCoreOps and HoldOps)
