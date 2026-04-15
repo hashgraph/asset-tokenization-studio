@@ -129,7 +129,7 @@ export async function deployLoanFromFactory(
   };
 
   // Initialize ERC20
-  await erc20Facet.initialize_ERC20(erc20Metadata, { gasLimit: GAS_LIMIT.medium });
+  await erc20Facet.initialize_ERC20(erc20Metadata, { gasLimit: GAS_LIMIT.default });
 
   // Return diamond proxy as ResolverProxy contract
   return diamond;
