@@ -20,7 +20,7 @@ library KpisStorageWrapper {
     using Checkpoints for Checkpoints.Checkpoint[];
 
     function addKpiData(uint256 date, uint256 value, address project) internal {
-        require(!isCheckpointDate(date, project), IKpis.KpiDataAlreadyExists(date));
+        if (isCheckpointDate(date, project)) revert IKpis.KpiDataAlreadyExists(date);
         setCheckpointDate(date, project);
         Checkpoints.Checkpoint[] storage ckpt = kpisDataStorage().checkpointsByProject[project];
         uint256 length = ckpt.length;

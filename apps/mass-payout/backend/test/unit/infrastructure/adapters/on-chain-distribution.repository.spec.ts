@@ -12,7 +12,6 @@ import { SnapshotId } from "@domain/model/value-objects/snapshot-id"
 import { faker } from "@faker-js/faker"
 
 jest.mock("@hashgraph/asset-tokenization-sdk", () => ({
-  Bond: {},
   Coupon: {
     getAllCoupons: jest.fn(),
     getTotalCouponHolders: jest.fn(),

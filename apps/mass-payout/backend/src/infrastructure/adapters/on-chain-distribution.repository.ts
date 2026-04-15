@@ -6,6 +6,7 @@ import { AssetType } from "@domain/model/asset-type.enum"
 import { Asset } from "@domain/model/asset"
 import { CorporateActionId } from "@domain/model/value-objects/corporate-action-id"
 import {
+  Coupon,
   Dividend,
   Security,
   GetAllCouponsRequest,
@@ -13,7 +14,6 @@ import {
   GetTotalCouponHoldersRequest,
   GetTotalDividendHoldersRequest,
   GetTotalTokenHoldersAtSnapshotRequest,
-  Coupon,
 } from "@hashgraph/asset-tokenization-sdk"
 
 export class OnChainDistributionRepository implements OnChainDistributionRepositoryPort {
