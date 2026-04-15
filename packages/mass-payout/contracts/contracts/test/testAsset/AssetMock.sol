@@ -3,6 +3,7 @@ pragma solidity 0.8.22;
 
 import { IAssetMock } from "./interfaces/IAssetMock.sol";
 import { IFactory } from "@hashgraph/asset-tokenization-contracts/contracts/factory/IFactory.sol";
+import { ICouponTypes } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/coupon/ICouponTypes.sol";
 
 // solhint-disable no-unused-vars
 contract AssetMock is IAssetMock {
@@ -54,7 +55,10 @@ contract AssetMock is IAssetMock {
         principalFor_.denominator = 1;
     }
 
-    function getCouponAmountFor(uint256, address) external view returns (CouponAmountFor memory couponAmountFor_) {
+    function getCouponAmountFor(
+        uint256,
+        address
+    ) external view returns (ICouponTypes.CouponAmountFor memory couponAmountFor_) {
         couponAmountFor_.numerator = _numerator;
         couponAmountFor_.denominator = 1;
         couponAmountFor_.recordDateReached = true;
@@ -84,7 +88,7 @@ contract AssetMock is IAssetMock {
         return;
     }
 
-    function setCoupon(Coupon calldata) external pure returns (uint256) {
+    function setCoupon(ICouponTypes.Coupon calldata) external pure returns (uint256) {
         revert NotImplemented();
     }
 
@@ -100,7 +104,9 @@ contract AssetMock is IAssetMock {
         bondDetailsData_.maturityDate = 1761823607;
     }
 
-    function getCoupon(uint256) external pure returns (RegisteredCoupon memory registeredCoupon_, bool isDisabled_) {
+    function getCoupon(
+        uint256
+    ) external pure returns (ICouponTypes.RegisteredCoupon memory registeredCoupon_, bool isDisabled_) {
         registeredCoupon_.coupon.recordDate = 1753874807;
         registeredCoupon_.coupon.executionDate = 1753874807;
         registeredCoupon_.coupon.startDate = 1;
@@ -112,7 +118,7 @@ contract AssetMock is IAssetMock {
         isDisabled_ = false;
     }
 
-    function getCouponFor(uint256, address) external pure returns (CouponFor memory couponFor_) {
+    function getCouponFor(uint256, address) external pure returns (ICouponTypes.CouponFor memory couponFor_) {
         couponFor_.tokenBalance = 3;
         couponFor_.decimals = 2;
         couponFor_.recordDateReached = true;
