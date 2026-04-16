@@ -48,6 +48,7 @@ describe("Bond KpiLinked Rate Tests", () => {
     adjustmentPrecision: 0,
   };
 
+  let base: Awaited<ReturnType<typeof deployBondKpiLinkedRateTokenFixture>>;
   let diamond: ResolverProxy;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
@@ -73,7 +74,7 @@ describe("Bond KpiLinked Rate Tests", () => {
   };
 
   async function deploySecurityFixture() {
-    const base = await deployBondKpiLinkedRateTokenFixture();
+    base = await deployBondKpiLinkedRateTokenFixture();
 
     diamond = base.diamond;
     signer_A = base.deployer;
@@ -241,19 +242,28 @@ describe("Bond KpiLinked Rate Tests", () => {
     it("GIVEN a kpiLinked rate bond WHEN setting a coupon with non pending status THEN transaction fails with InterestRateIsKpiLinked", async () => {
       couponData.rateStatus = 1;
 
-      await expect(couponKpiLinkedRateFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsKpiLinked");
+      await expect(couponKpiLinkedRateFacet.setCoupon(couponData)).to.be.revertedWithCustomError(
+        couponKpiLinkedRateFacet,
+        "InterestRateIsKpiLinked",
+      );
     });
 
     it("GIVEN a kpiLinked rate bond WHEN setting a coupon with rate non 0 THEN transaction fails with InterestRateIsKpiLinked", async () => {
       couponData.rate = 1;
 
-      await expect(couponKpiLinkedRateFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsKpiLinked");
+      await expect(couponKpiLinkedRateFacet.setCoupon(couponData)).to.be.revertedWithCustomError(
+        couponKpiLinkedRateFacet,
+        "InterestRateIsKpiLinked",
+      );
     });
 
     it("GIVEN a kpiLinked rate bond WHEN setting a coupon with rate decimals non 0 THEN transaction fails with InterestRateIsKpiLinked", async () => {
       couponData.rateDecimals = 1;
 
-      await expect(couponKpiLinkedRateFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsKpiLinked");
+      await expect(couponKpiLinkedRateFacet.setCoupon(couponData)).to.be.revertedWithCustomError(
+        couponKpiLinkedRateFacet,
+        "InterestRateIsKpiLinked",
+      );
     });
 
     it("GIVEN a kpiLinked rate bond WHEN setting a coupon with pending status THEN transaction success", async () => {

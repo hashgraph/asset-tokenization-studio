@@ -46,8 +46,9 @@ async function addMigrationFacetToDiamond(base: Awaited<ReturnType<typeof deploy
   return base;
 }
 
-describe("NominalValue Migration Tests", () => {
+describe("nominalValue test", () => {
   describe("Bond NominalValue Migration", () => {
+    let base: Awaited<ReturnType<typeof deployBondTokenFixture>>;
     let diamond: ResolverProxy;
     let signer_A: HardhatEthersSigner;
 
@@ -55,7 +56,7 @@ describe("NominalValue Migration Tests", () => {
     let migrationFacet: NominalValueMigrationFacetTest;
 
     async function deployBondWithMigrationFacet() {
-      const base = await deployBondTokenFixture({ useLoadFixture: false });
+      base = await deployBondTokenFixture({ useLoadFixture: false });
       await addMigrationFacetToDiamond(base, BOND_CONFIG_ID);
 
       diamond = base.diamond;
@@ -125,6 +126,7 @@ describe("NominalValue Migration Tests", () => {
   });
 
   describe("Equity NominalValue Migration", () => {
+    let base: Awaited<ReturnType<typeof deployEquityTokenFixture>>;
     let diamond: ResolverProxy;
     let signer_A: HardhatEthersSigner;
 
@@ -132,7 +134,7 @@ describe("NominalValue Migration Tests", () => {
     let migrationFacet: NominalValueMigrationFacetTest;
 
     async function deployEquityWithMigrationFacet() {
-      const base = await deployEquityTokenFixture({ useLoadFixture: false });
+      base = await deployEquityTokenFixture({ useLoadFixture: false });
       await addMigrationFacetToDiamond(base, EQUITY_CONFIG_ID);
 
       diamond = base.diamond;
@@ -191,6 +193,7 @@ describe("NominalValue Migration Tests", () => {
   });
 
   describe("Cross-storage Migration", () => {
+    let base: Awaited<ReturnType<typeof deployBondTokenFixture>>;
     let diamond: ResolverProxy;
     let signer_A: HardhatEthersSigner;
 
@@ -198,7 +201,7 @@ describe("NominalValue Migration Tests", () => {
     let migrationFacet: NominalValueMigrationFacetTest;
 
     async function deployBondWithMigrationFacet() {
-      const base = await deployBondTokenFixture({ useLoadFixture: false });
+      base = await deployBondTokenFixture({ useLoadFixture: false });
       await addMigrationFacetToDiamond(base, BOND_CONFIG_ID);
 
       diamond = base.diamond;
@@ -254,13 +257,14 @@ describe("NominalValue Migration Tests", () => {
 
   describe("NominalValue Initialization", () => {
     let diamond: ResolverProxy;
+    let base: Awaited<ReturnType<typeof deployBondTokenFixture>>;
     let signer_A: HardhatEthersSigner;
 
     let nominalValueFacet: INominalValue;
     let migrationFacet: NominalValueMigrationFacetTest;
 
     async function deployBondWithMigrationFacet() {
-      const base = await deployBondTokenFixture({ useLoadFixture: false });
+      base = await deployBondTokenFixture({ useLoadFixture: false });
       await addMigrationFacetToDiamond(base, BOND_CONFIG_ID);
 
       diamond = base.diamond;
@@ -323,6 +327,7 @@ describe("NominalValue Migration Tests", () => {
   });
 
   describe("NominalValue Access Control", () => {
+    let base: Awaited<ReturnType<typeof deployBondTokenFixture>>;
     let diamond: ResolverProxy;
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
@@ -330,7 +335,7 @@ describe("NominalValue Migration Tests", () => {
     let nominalValueFacet: INominalValue;
 
     async function deployBondFixture() {
-      const base = await deployBondTokenFixture({ useLoadFixture: false });
+      base = await deployBondTokenFixture({ useLoadFixture: false });
 
       diamond = base.diamond;
       signer_A = base.deployer;
@@ -351,7 +356,10 @@ describe("NominalValue Migration Tests", () => {
     });
 
     it("GIVEN a user without _NOMINAL_VALUE_ROLE WHEN setNominalValue THEN reverts with AccountHasNoRole", async () => {
-      await expect(nominalValueFacet.connect(signer_B).setNominalValue(500, 4)).to.be.rejectedWith("AccountHasNoRole");
+      await expect(nominalValueFacet.connect(signer_B).setNominalValue(500, 4)).to.be.revertedWithCustomError(
+        base.asset,
+        "AccountHasNoRole",
+      );
     });
   });
 });

@@ -53,6 +53,7 @@ const number_Of_Shares = 100000n;
 const EMPTY_VC_ID = EMPTY_STRING;
 
 describe("Dividends", () => {
+  let base: Awaited<ReturnType<typeof deployEquityTokenFixture>>;
   let diamond: ResolverProxy;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
@@ -73,7 +74,7 @@ describe("Dividends", () => {
   let freezeFacet: FreezeFacet;
 
   async function deploySecurityFixtureSinglePartition() {
-    const base = await deployEquityTokenFixture();
+    base = await deployEquityTokenFixture();
     diamond = base.diamond;
     signer_A = base.deployer;
     signer_B = base.user1;
@@ -231,7 +232,10 @@ describe("Dividends", () => {
 
   it("GIVEN an account without corporateActions role WHEN setDividend THEN transaction fails with AccountHasNoRole", async () => {
     // set dividend fails
-    await expect(dividendFacet.connect(signer_C).setDividend(dividendData)).to.be.rejectedWith("AccountHasNoRole");
+    await expect(dividendFacet.connect(signer_C).setDividend(dividendData)).to.be.revertedWithCustomError(
+      base.asset,
+      "AccountHasNoRole",
+    );
   });
 
   it("GIVEN a paused Token WHEN setDividend THEN transaction fails with TokenIsPaused", async () => {
@@ -244,7 +248,10 @@ describe("Dividends", () => {
       signer_C.address,
     );
 
-    await expect(dividendFacet.connect(signer_C).setDividend(dividendData)).to.be.rejectedWith("TokenIsPaused");
+    await expect(dividendFacet.connect(signer_C).setDividend(dividendData)).to.be.revertedWithCustomError(
+      base.asset,
+      "TokenIsPaused",
+    );
   });
 
   it("GIVEN an account with corporateActions role WHEN setDividend with wrong dates THEN transaction fails", async () => {
@@ -560,7 +567,10 @@ describe("Dividends", () => {
     it("GIVEN an account without corporateActions role WHEN cancelDividend THEN transaction fails with AccountHasNoRole", async () => {
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
       await dividendFacet.connect(signer_B).setDividend(dividendData);
-      await expect(dividendFacet.connect(signer_C).cancelDividend(1)).to.be.rejectedWith("AccountHasNoRole");
+      await expect(dividendFacet.connect(signer_C).cancelDividend(1)).to.be.revertedWithCustomError(
+        base.asset,
+        "AccountHasNoRole",
+      );
     });
 
     it("GIVEN a paused Token WHEN cancelDividend THEN transaction fails with TokenIsPaused", async () => {
@@ -568,7 +578,10 @@ describe("Dividends", () => {
       await dividendFacet.connect(signer_B).setDividend(dividendData);
       await pauseFacet.connect(signer_B).pause();
 
-      await expect(dividendFacet.connect(signer_B).cancelDividend(1)).to.be.rejectedWith("TokenIsPaused");
+      await expect(dividendFacet.connect(signer_B).cancelDividend(1)).to.be.revertedWithCustomError(
+        base.asset,
+        "TokenIsPaused",
+      );
     });
 
     it("GIVEN a dividend already executed WHEN cancelDividend THEN transaction fails with DividendAlreadyExecuted", async () => {

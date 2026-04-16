@@ -260,7 +260,7 @@ describe("Loan Tests", () => {
 
       await expect(
         asset.connect(signer_A).initialize_Loan(loanDetails, regulationData, additionalSecurityData),
-      ).to.be.rejectedWith("AlreadyInitialized");
+      ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
     });
 
     it("GIVEN startingDate is 0 WHEN deploying loan THEN transaction fails with WrongTimestamp", async () => {
@@ -289,7 +289,7 @@ describe("Loan Tests", () => {
             servicerAccount: "0x1234567890123456789012345678901234567891",
           },
         }),
-      ).to.be.rejectedWith("WrongDates");
+      ).to.be.revertedWithCustomError(asset, "WrongDates");
     });
   });
 });

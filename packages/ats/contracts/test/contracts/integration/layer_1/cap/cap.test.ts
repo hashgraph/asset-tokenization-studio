@@ -7,6 +7,7 @@ import {
   type ResolverProxy,
   type CapFacet,
   type IERC1410,
+  type IAsset,
   AccessControl,
   Pause,
   Kyc,
@@ -36,6 +37,13 @@ interface Adjustment {
 
 describe("Cap Tests", () => {
   let diamond: ResolverProxy;
+  let base: {
+    asset: IAsset;
+    diamond: ResolverProxy;
+    deployer: HardhatEthersSigner;
+    user2: HardhatEthersSigner;
+    user3: HardhatEthersSigner;
+  };
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
@@ -51,7 +59,7 @@ describe("Cap Tests", () => {
   let timeTravelFacet: TimeTravelFacet;
 
   async function deploySecurityFixtureMultiPartition() {
-    const base = await deployEquityTokenFixture({
+    base = await deployEquityTokenFixture({
       equityDataParams: {
         securityData: {
           isMultiPartition: true,
@@ -210,7 +218,7 @@ describe("Cap Tests", () => {
       // add to list fails
       await expect(
         capFacet.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply * 100),
-      ).to.eventually.be.rejectedWith("NewMaxSupplyByPartitionTooHigh");
+      ).to.be.revertedWithCustomError(capFacet, "NewMaxSupplyByPartitionTooHigh");
     });
   });
 
@@ -322,7 +330,10 @@ describe("Cap Tests", () => {
       // Execute adjustments and verify reversion case
       await timeTravelFacet.changeSystemTimestamp(adjustments[0].executionDate + 1);
 
-      await expect(capFacet.setMaxSupply(maxSupplyByPartition)).to.eventually.be.rejectedWith("NewMaxSupplyTooLow");
+      await expect(capFacet.setMaxSupply(maxSupplyByPartition)).to.be.revertedWithCustomError(
+        capFacet,
+        "NewMaxSupplyTooLow",
+      );
     });
 
     it("GIVEN a token WHEN max supply and partition max supply are set THEN balance adjustments occur and resetting partition max supply fails with NewMaxSupplyForPartitionTooLow", async () => {
@@ -338,7 +349,7 @@ describe("Cap Tests", () => {
       // Attempt to change the max supply by partition with the same value as before
       await expect(
         capFacet.setMaxSupplyByPartition(_PARTITION_ID_1, maxSupplyByPartition),
-      ).to.eventually.be.rejectedWith("NewMaxSupplyForPartitionTooLow");
+      ).to.be.revertedWithCustomError(capFacet, "NewMaxSupplyForPartitionTooLow");
     });
 
     it("GIVEN a token with max supply equal to MAX_UINT THEN balance adjustment occurs but max supply remains unchanged", async () => {

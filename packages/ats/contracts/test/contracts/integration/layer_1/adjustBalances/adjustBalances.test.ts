@@ -3,6 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
+import { IAsset } from "@contract-types";
 import {
   type ResolverProxy,
   type AdjustBalancesFacet,
@@ -45,19 +46,21 @@ describe("Adjust Balances Tests", () => {
   let kycFacet: Kyc;
   let ssiManagementFacet: SsiManagement;
   let dividendFacet: DividendFacet;
+  let base: { asset: IAsset };
 
   async function deploySecurityFixtureMultiPartition() {
-    const base = await deployEquityTokenFixture({
+    const result = await deployEquityTokenFixture({
       equityDataParams: {
         securityData: {
           isMultiPartition: true,
         },
       },
     });
-    diamond = base.diamond;
-    signer_A = base.deployer;
-    signer_B = base.user1;
-    signer_C = base.user2;
+    diamond = result.diamond;
+    signer_A = result.deployer;
+    signer_B = result.user1;
+    signer_C = result.user2;
+    base = { asset: result.asset };
     await executeRbac(base.asset, [
       {
         role: ATS_ROLES._PAUSER_ROLE,
@@ -97,10 +100,9 @@ describe("Adjust Balances Tests", () => {
   });
 
   it("GIVEN an account without adjustBalances role WHEN adjustBalances THEN transaction fails with AccountHasNoRole", async () => {
-    // adjustBalances fails
-    await expect(adjustBalancesFacet.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals)).to.be.rejectedWith(
-      "AccountHasNoRole",
-    );
+    await expect(
+      adjustBalancesFacet.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals),
+    ).to.be.revertedWithCustomError(base.asset, "AccountHasNoRole");
   });
 
   it("GIVEN a paused Token WHEN adjustBalances THEN transaction fails with TokenIsPaused", async () => {
@@ -115,9 +117,9 @@ describe("Adjust Balances Tests", () => {
     );
 
     // adjustBalances fails
-    await expect(adjustBalancesFacet.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals)).to.be.rejectedWith(
-      "TokenIsPaused",
-    );
+    await expect(
+      adjustBalancesFacet.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals),
+    ).to.be.revertedWithCustomError(base.asset, "TokenIsPaused");
   });
 
   it("GIVEN a Token WHEN adjustBalances with factor set at 0 THEN transaction fails with FactorIsZero", async () => {
