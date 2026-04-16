@@ -70,7 +70,6 @@ export function getEquityDetails(params?: DeepPartial<EquityDetailsDataParams>) 
  * @param tokenParams - Optional custom token parameters (merged with defaults)
  * @returns Infrastructure + deployed equity token + connected facets
  */
-//1893456035
 export async function deployEquityTokenFixture({
   equityDataParams,
   regulationTypeParams,

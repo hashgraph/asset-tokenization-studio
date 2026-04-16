@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { AddressLike, Contract, ContractTransactionReceipt, EventLog, Signer, ethers } from "ethers";
+import { ethers } from "ethers";
 
 /**
  * ABI for the file-level errors declared in
  * `contracts/interfaces/errors/ICommonErrors.sol`. These errors are not part of any
  * Solidity interface, so TypeChain doesn't generate a typed factory for them.
- * Tests use {@link getCommonErrors} to obtain a `Contract` handle whose ABI exposes
- * these errors so chai matchers like `revertedWithCustomError` can resolve them.
+ * Use {@link getCommonErrorSelector} to compute selectors for these errors.
  *
  * Keep in sync with `contracts/interfaces/errors/ICommonErrors.sol`.
  */
@@ -20,21 +19,6 @@ export const COMMON_ERRORS_ABI = [
   "error WrongNounce(uint256 nounce, address account)",
   "error AlreadyInitialized()",
 ] as const;
-
-/**
- * Build a `Contract` handle that exposes the file-level errors from
- * `ICommonErrors.sol` in its ABI. The address is arbitrary — the contract
- * isn't called, only its `interface` is used by chai's `revertedWithCustomError`
- * to look up the error name and compute its selector.
- *
- * @example
- *   const commonErrors = getCommonErrors(diamond.target);
- *   await expect(facet.connect(signer).doIt(...))
- *     .to.be.revertedWithCustomError(commonErrors, "WrongSignature");
- */
-export function getCommonErrors(addr: AddressLike, signer?: Signer): Contract {
-  return new Contract(addr as string, COMMON_ERRORS_ABI as readonly string[], signer);
-}
 
 /**
  * Compute the 4-byte selector (or bytes32-padded) for one of the file-level
@@ -100,61 +84,4 @@ export function extractErrorSelector(revertData: string | Uint8Array): string {
   }
   const hex = Buffer.from(revertData).toString("hex");
   return "0x" + hex.slice(0, 8);
-}
-
-export function getErrorNameFromRevertData(revertData: string | Uint8Array): string {
-  const selector = extractErrorSelector(revertData);
-  return ERROR_SELECTOR_MAP[selector] || "Unknown";
-}
-
-export function assertCustomError(
-  receipt: ContractTransactionReceipt | null,
-  contract: Contract,
-  errorName: string,
-): void {
-  if (!receipt) {
-    throw new Error("Receipt is null");
-  }
-
-  if (!receipt.logs || receipt.logs.length === 0) {
-    throw new Error("No logs found in receipt");
-  }
-
-  const errorFragment = contract.interface.getError(errorName);
-
-  const revertError = receipt.logs.find((log) => {
-    try {
-      return (log as EventLog).fragment && (log as EventLog).fragment?.name === "Error";
-    } catch {
-      return false;
-    }
-  });
-
-  if (!revertError) {
-    throw new Error(`Expected custom error "${errorName}" but no error was found`);
-  }
-
-  if (errorFragment) {
-    try {
-      const decoded = contract.interface.parseLog({ topics: revertError.topics, data: revertError.data });
-      if (decoded && decoded.name === errorName) {
-        return;
-      }
-    } catch {
-      // Fall through
-    }
-  }
-
-  const expectedSelector = KNOWN_ERRORS[errorName];
-  if (expectedSelector) {
-    const actualSelector = extractErrorSelector(revertError.data);
-    if (actualSelector === expectedSelector) {
-      return;
-    }
-    throw new Error(
-      `Expected error "${errorName}" (selector: ${expectedSelector}) but got selector: ${actualSelector}`,
-    );
-  }
-
-  throw new Error(`Error "${errorName}" not found in contract interface and no known selector mapping`);
 }

@@ -409,7 +409,6 @@ describe("ProtectedPartitions Tests", () => {
   }
 
   beforeEach(async () => {
-    // await loadFixture(deploySecurityFixtureUnprotectedPartitions);
     await loadFixture(deploySecurityFixtureProtectedPartitions);
 
     const expirationTimestamp = MAX_UINT256;
