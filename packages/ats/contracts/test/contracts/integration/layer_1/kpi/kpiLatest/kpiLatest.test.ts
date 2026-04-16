@@ -37,7 +37,7 @@ describe("Kpi Latest Tests", () => {
     project1 = signer_A.address;
     project2 = signer_B.address;
 
-    await executeRbac(base.accessControlFacet, [
+    await executeRbac(base.asset, [
       {
         role: ATS_ROLES._PAUSER_ROLE,
         members: [signer_B.address],

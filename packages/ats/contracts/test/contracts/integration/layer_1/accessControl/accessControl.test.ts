@@ -21,7 +21,7 @@ describe("Access Control Tests", () => {
   async function deployFixture() {
     const base = await deployEquityTokenFixture();
     diamond = base.diamond;
-    await executeRbac(base.accessControlFacet, [
+    await executeRbac(base.asset, [
       {
         role: ATS_ROLES._PAUSER_ROLE,
         members: [base.user1.address],

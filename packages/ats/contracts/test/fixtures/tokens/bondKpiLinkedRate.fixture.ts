@@ -7,6 +7,7 @@ import {
   PauseFacet__factory,
   KycFacet__factory,
   ControlListFacet__factory,
+  IAsset__factory,
 } from "@contract-types";
 import {
   DeployBondFromFactoryParams,
@@ -121,6 +122,7 @@ export async function deployBondKpiLinkedRateTokenFixture({
   const pauseFacet = PauseFacet__factory.connect(diamond.target as string, deployer);
   const kycFacet = KycFacet__factory.connect(diamond.target as string, deployer);
   const controlListFacet = ControlListFacet__factory.connect(diamond.target as string, deployer);
+  const asset = IAsset__factory.connect(diamond.target as string, deployer);
 
   return {
     ...infrastructure,
@@ -134,5 +136,6 @@ export async function deployBondKpiLinkedRateTokenFixture({
     pauseFacet,
     kycFacet,
     controlListFacet,
+    asset,
   };
 }

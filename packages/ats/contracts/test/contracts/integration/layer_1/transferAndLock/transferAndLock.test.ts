@@ -98,7 +98,7 @@ describe("Transfer and lock Tests", () => {
     signer_C = base.user3;
     signer_D = base.user4;
 
-    await executeRbac(base.accessControlFacet, set_initRbacs());
+    await executeRbac(base.asset, set_initRbacs());
     await setFacets({ diamond });
   }
 
@@ -111,7 +111,7 @@ describe("Transfer and lock Tests", () => {
     signer_C = base.user3;
     signer_D = base.user4;
 
-    await executeRbac(base.accessControlFacet, set_initRbacs());
+    await executeRbac(base.asset, set_initRbacs());
     await setFacets({ diamond });
   }
 

@@ -72,7 +72,7 @@ describe("Snapshots Tests", () => {
     signer_B = base.user2;
     signer_C = base.user3;
 
-    await executeRbac(base.accessControlFacet, set_initRbacs());
+    await executeRbac(base.asset, set_initRbacs());
     await setFacets(diamond);
   }
 
@@ -508,7 +508,7 @@ describe("Snapshots Tests", () => {
     });
     const diamond = base.diamond;
 
-    await executeRbac(base.accessControlFacet, set_initRbacs());
+    await executeRbac(base.asset, set_initRbacs());
     await setFacets(diamond);
     await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_C.address);
     await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
@@ -617,7 +617,7 @@ describe("Snapshots Tests", () => {
     });
     const diamond = base.diamond;
 
-    await executeRbac(base.accessControlFacet, set_initRbacs());
+    await executeRbac(base.asset, set_initRbacs());
     await setFacets(diamond);
 
     await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_C.address);

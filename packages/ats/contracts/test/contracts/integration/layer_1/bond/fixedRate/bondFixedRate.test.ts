@@ -41,7 +41,7 @@ describe("Bond Fixed Rate Tests", () => {
     diamond = base.diamond;
     signer_A = base.deployer;
 
-    await executeRbac(base.accessControlFacet, [
+    await executeRbac(base.asset, [
       {
         role: ATS_ROLES._CORPORATE_ACTION_ROLE,
         members: [signer_A.address],

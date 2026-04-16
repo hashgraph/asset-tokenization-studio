@@ -23,7 +23,7 @@ describe("Scheduled Coupon Listing Tests", () => {
 
   let account_C: string;
 
-  let bondFacet: BondUSAKpiLinkedRateFacet;
+  let _bondFacet: BondUSAKpiLinkedRateFacet;
   let couponFacet: CouponFacetTimeTravel;
   let scheduledCouponListingFacet: ScheduledCouponListing;
   let scheduledTasksFacet: ScheduledCrossOrderedTasks;
@@ -56,7 +56,7 @@ describe("Scheduled Coupon Listing Tests", () => {
     account_C = signer_C.address;
 
     accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
-    bondFacet = await ethers.getContractAt("BondUSAKpiLinkedRateFacetTimeTravel", diamond.target);
+    _bondFacet = await ethers.getContractAt("BondUSAKpiLinkedRateFacetTimeTravel", diamond.target);
     couponFacet = await ethers.getContractAt("CouponFacetTimeTravel", diamond.target);
     scheduledCouponListingFacet = await ethers.getContractAt("ScheduledCouponListingFacet", diamond.target);
     scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasks", diamond.target);

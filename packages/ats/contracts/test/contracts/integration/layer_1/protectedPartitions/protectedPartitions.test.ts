@@ -378,7 +378,7 @@ describe("ProtectedPartitions Tests", () => {
     signer_A = base.deployer;
     signer_B = base.user2;
     signer_C = base.user3;
-    await executeRbac(base.accessControlFacet, set_initRbacs());
+    await executeRbac(base.asset, set_initRbacs());
 
     await setFacets(diamond_UnprotectedPartitions.target as string);
   }
@@ -403,7 +403,7 @@ describe("ProtectedPartitions Tests", () => {
     signer_A = base.deployer;
     signer_B = base.user2;
     signer_C = base.user3;
-    await executeRbac(base.accessControlFacet, set_initRbacs());
+    await executeRbac(base.asset, set_initRbacs());
 
     await setFacets(diamond_ProtectedPartitions.target as string, complianceMockAddress);
   }

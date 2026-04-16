@@ -72,7 +72,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
     project1 = signer_B.address;
     project2 = signer_C.address;
 
-    await executeRbac(base.accessControlFacet, [
+    await executeRbac(base.asset, [
       {
         role: ATS_ROLES._KPI_MANAGER_ROLE,
         members: [signer_A.address],
