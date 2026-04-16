@@ -133,7 +133,7 @@ describe("ERC3643 Tests", () => {
       signer_E = base.user4;
       signer_F = base.user5;
 
-      await executeRbac(base.accessControlFacet, [
+      await executeRbac(base.asset, [
         {
           role: ATS_ROLES._PAUSER_ROLE,
           members: [signer_B.address],
@@ -532,7 +532,7 @@ describe("ERC3643 Tests", () => {
             },
           },
         });
-        await executeRbac(newTokenFixture.accessControlFacet, [
+        await executeRbac(newTokenFixture.asset, [
           {
             role: ATS_ROLES._FREEZE_MANAGER_ROLE,
             members: [signer_A.address],
@@ -808,7 +808,7 @@ describe("ERC3643 Tests", () => {
       it("GIVEN zero address compliance THEN transfers succeed without compliance checks", async () => {
         // Deploy token without compliance contract (zero address)
         const newTokenFixture = await deployEquityTokenFixture();
-        await executeRbac(newTokenFixture.accessControlFacet, [
+        await executeRbac(newTokenFixture.asset, [
           {
             role: ATS_ROLES._ISSUER_ROLE,
             members: [signer_A.address],
@@ -859,7 +859,7 @@ describe("ERC3643 Tests", () => {
 
       it("GIVEN zero address compliance THEN transfers succeed without compliance checks", async () => {
         const newTokenFixture = await deployEquityTokenFixture();
-        await executeRbac(newTokenFixture.accessControlFacet, [
+        await executeRbac(newTokenFixture.asset, [
           {
             role: ATS_ROLES._ISSUER_ROLE,
             members: [signer_A.address],
@@ -2821,7 +2821,7 @@ describe("ERC3643 Tests", () => {
       signer_D = base.user3;
       signer_E = base.user4;
       signer_F = base.user5;
-      await executeRbac(base.accessControlFacet, [
+      await executeRbac(base.asset, [
         {
           role: ATS_ROLES._PAUSER_ROLE,
           members: [signer_B.address],
@@ -2955,7 +2955,7 @@ describe("ERC3643 Tests", () => {
       signer_D = base.user3;
       signer_E = base.user4;
       signer_F = base.user5;
-      await executeRbac(base.accessControlFacet, [
+      await executeRbac(base.asset, [
         {
           role: ATS_ROLES._CONTROLLER_ROLE,
           members: [signer_A.address],

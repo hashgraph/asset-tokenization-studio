@@ -58,7 +58,7 @@ describe("Adjust Balances Tests", () => {
     signer_A = base.deployer;
     signer_B = base.user1;
     signer_C = base.user2;
-    await executeRbac(base.accessControlFacet, [
+    await executeRbac(base.asset, [
       {
         role: ATS_ROLES._PAUSER_ROLE,
         members: [signer_B.address],
@@ -239,7 +239,7 @@ describe("Adjust Balances Tests", () => {
       await diamondFacet.connect(deployer).updateConfigVersion(newConfigVersion);
 
       // Set up standard roles
-      await executeRbac(base.accessControlFacet, [
+      await executeRbac(base.asset, [
         { role: ATS_ROLES._PAUSER_ROLE, members: [base.user1.address] },
         { role: ATS_ROLES._KYC_ROLE, members: [base.user1.address] },
         { role: ATS_ROLES._SSI_MANAGER_ROLE, members: [base.deployer.address] },

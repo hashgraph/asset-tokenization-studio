@@ -37,7 +37,7 @@ describe("ERC20Permit Tests", () => {
     signer_B = base.user1;
     signer_C = base.user2;
 
-    await executeRbac(base.accessControlFacet, [
+    await executeRbac(base.asset, [
       {
         role: ATS_ROLES._PAUSER_ROLE,
         members: [signer_A.address],

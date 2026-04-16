@@ -66,7 +66,7 @@ describe("ERC20 Tests", () => {
       signer_C = base.user2;
       signer_D = base.user3;
 
-      await executeRbac(base.accessControlFacet, [
+      await executeRbac(base.asset, [
         {
           role: ATS_ROLES._PAUSER_ROLE,
           members: [signer_B.address],
@@ -169,7 +169,7 @@ describe("ERC20 Tests", () => {
       signer_C = base.user2;
       signer_D = base.user3;
 
-      await executeRbac(base.accessControlFacet, [
+      await executeRbac(base.asset, [
         {
           role: ATS_ROLES._ISSUER_ROLE,
           members: [signer_B.address],

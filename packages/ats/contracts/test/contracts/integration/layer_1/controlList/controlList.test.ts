@@ -33,7 +33,7 @@ describe("Control List Tests", () => {
     pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target, signer_A);
     accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
 
-    await executeRbac(base.accessControlFacet, [{ role: ATS_ROLES._PAUSER_ROLE, members: [signer_B.address] }]);
+    await executeRbac(base.asset, [{ role: ATS_ROLES._PAUSER_ROLE, members: [signer_B.address] }]);
   }
 
   beforeEach(async () => {

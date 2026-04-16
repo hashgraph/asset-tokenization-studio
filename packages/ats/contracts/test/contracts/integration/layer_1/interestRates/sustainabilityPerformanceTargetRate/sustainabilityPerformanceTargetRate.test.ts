@@ -41,7 +41,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
     project1 = signer_A.address;
     project2 = signer_B.address;
 
-    await executeRbac(base.accessControlFacet, [
+    await executeRbac(base.asset, [
       {
         role: ATS_ROLES._PAUSER_ROLE,
         members: [signer_B.address],
@@ -114,15 +114,11 @@ describe("Sustainability Performance Target Rate Tests", () => {
     );
     await uninitializedDiamond.waitForDeployment();
 
-    // Get facets for the uninitialized diamond
-    const uninitializedAccessControl = await ethers.getContractAt(
-      "AccessControlFacet",
-      uninitializedDiamond.target,
-      signer_A,
-    );
+    // Get IAsset for the uninitialized diamond
+    const uninitializedAsset = await ethers.getContractAt("IAsset", uninitializedDiamond.target, signer_A);
 
     // Set up roles
-    await executeRbac(uninitializedAccessControl, [
+    await executeRbac(uninitializedAsset, [
       {
         role: ATS_ROLES._PROCEED_RECIPIENT_MANAGER_ROLE,
         members: [signer_A.address],

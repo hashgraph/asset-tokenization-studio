@@ -329,7 +329,7 @@ describe("ERC1410 Tests", () => {
     signer_E = base.user4;
 
     const init_rbacs = set_initRbacs();
-    await executeRbac(base.accessControlFacet, init_rbacs);
+    await executeRbac(base.asset, init_rbacs);
 
     await setFacets(diamond);
   }
@@ -344,7 +344,7 @@ describe("ERC1410 Tests", () => {
     signer_E = base.user4;
 
     const init_rbacs = set_initRbacs();
-    await executeRbac(base.accessControlFacet, init_rbacs);
+    await executeRbac(base.asset, init_rbacs);
 
     await setFacets(diamond);
   }

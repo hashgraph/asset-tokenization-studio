@@ -47,7 +47,7 @@ describe("ERC1644 Tests", () => {
       signer_D = base.user3;
       signer_E = base.user4;
 
-      await executeRbac(base.accessControlFacet, [
+      await executeRbac(base.asset, [
         {
           role: ATS_ROLES._PAUSER_ROLE,
           members: [signer_B.address],
@@ -235,7 +235,7 @@ describe("ERC1644 Tests", () => {
       signer_D = base.user3;
       signer_E = base.user4;
 
-      await executeRbac(base.accessControlFacet, [
+      await executeRbac(base.asset, [
         {
           role: ATS_ROLES._PAUSER_ROLE,
           members: [signer_B.address],

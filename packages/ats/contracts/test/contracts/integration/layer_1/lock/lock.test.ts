@@ -124,7 +124,7 @@ describe("Lock Tests", () => {
     signer_B = base.user1;
     signer_C = base.user2;
     signer_D = base.user3;
-    await executeRbac(base.accessControlFacet, set_initRbacs());
+    await executeRbac(base.asset, set_initRbacs());
 
     await setFacets({ diamond });
   }
@@ -136,7 +136,7 @@ describe("Lock Tests", () => {
     signer_B = base.user1;
     signer_C = base.user2;
     signer_D = base.user3;
-    await executeRbac(base.accessControlFacet, set_initRbacs());
+    await executeRbac(base.asset, set_initRbacs());
 
     await setFacets({ diamond });
   }

@@ -80,7 +80,7 @@ describe("Bond KpiLinked Rate Tests", () => {
     signer_B = base.user1;
     signer_C = base.user2;
 
-    await executeRbac(base.accessControlFacet, [
+    await executeRbac(base.asset, [
       {
         role: ATS_ROLES._KPI_MANAGER_ROLE,
         members: [signer_A.address],

@@ -25,7 +25,7 @@ describe("Kpi Linked Rate Tests", () => {
     signer_B = base.user2;
     signer_C = base.user3;
 
-    await executeRbac(base.accessControlFacet, [
+    await executeRbac(base.asset, [
       {
         role: ATS_ROLES._PAUSER_ROLE,
         members: [signer_B.address],

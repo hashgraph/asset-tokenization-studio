@@ -219,7 +219,7 @@ describe("Hold Tests", () => {
     signer_D = base.user3;
     signer_E = base.user4;
 
-    await executeRbac(base.accessControlFacet, set_initRbacs());
+    await executeRbac(base.asset, set_initRbacs());
 
     await setFacets({ diamond });
   }
@@ -233,7 +233,7 @@ describe("Hold Tests", () => {
     signer_D = base.user3;
     signer_E = base.user4;
 
-    await executeRbac(base.accessControlFacet, set_initRbacs());
+    await executeRbac(base.asset, set_initRbacs());
 
     await setFacets({ diamond });
   }
@@ -541,7 +541,7 @@ describe("Hold Tests", () => {
             },
           },
         });
-        await executeRbac(base.accessControlFacet, set_initRbacs());
+        await executeRbac(base.asset, set_initRbacs());
         diamond = base.diamond;
         await setFacets({ diamond });
         const operatorData = "0xab56";
@@ -1148,7 +1148,7 @@ describe("Hold Tests", () => {
         signer_D = base.user3;
         signer_E = base.user4;
 
-        await executeRbac(base.accessControlFacet, set_initRbacs());
+        await executeRbac(base.asset, set_initRbacs());
         await setFacets({ diamond });
       }
 
@@ -1350,7 +1350,7 @@ describe("Hold Tests", () => {
           },
         });
 
-        await executeRbac(base.accessControlFacet, set_initRbacs());
+        await executeRbac(base.asset, set_initRbacs());
         const message = {
           _partition: _DEFAULT_PARTITION,
           _from: signer_A.address,
@@ -1382,7 +1382,7 @@ describe("Hold Tests", () => {
           },
         },
       });
-      await executeRbac(base.accessControlFacet, set_initRbacs());
+      await executeRbac(base.asset, set_initRbacs());
       diamond = base.diamond;
       await setFacets({ diamond });
 
@@ -1411,7 +1411,7 @@ describe("Hold Tests", () => {
           },
         },
       });
-      await executeRbac(base.accessControlFacet, set_initRbacs());
+      await executeRbac(base.asset, set_initRbacs());
       diamond = base.diamond;
       await setFacets({ diamond });
 
