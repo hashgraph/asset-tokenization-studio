@@ -10,6 +10,7 @@ import {
   Pause,
   Lock,
   type IERC1410,
+  type IAsset,
   Kyc,
   SsiManagement,
   IHold,
@@ -66,6 +67,14 @@ let couponData = {
 
 describe("Coupon Tests", () => {
   let diamond: ResolverProxy;
+  let base: {
+    asset: IAsset;
+    diamond: ResolverProxy;
+    deployer: HardhatEthersSigner;
+    user1: HardhatEthersSigner;
+    user2: HardhatEthersSigner;
+    user3: HardhatEthersSigner;
+  };
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
@@ -89,7 +98,7 @@ describe("Coupon Tests", () => {
   let nominalValueFacet: NominalValueFacet;
 
   async function deploySecurityFixture(isMultiPartition = false) {
-    const base = await deployBondTokenFixture({
+    base = await deployBondTokenFixture({
       bondDataParams: {
         securityData: {
           isMultiPartition,
@@ -196,7 +205,10 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN an account without corporateActions role WHEN setCoupon THEN transaction fails with AccountHasNoRole", async () => {
-    await expect(couponFacet.connect(signer_C).setCoupon(couponData)).to.be.rejectedWith("AccountHasNoRole");
+    await expect(couponFacet.connect(signer_C).setCoupon(couponData)).to.be.revertedWithCustomError(
+      base.asset,
+      "AccountHasNoRole",
+    );
   });
 
   it("GIVEN a paused Token WHEN setCoupon THEN transaction fails with TokenIsPaused", async () => {
@@ -210,7 +222,10 @@ describe("Coupon Tests", () => {
       signer_C.address,
     );
 
-    await expect(couponFacet.connect(signer_C).setCoupon(couponData)).to.be.rejectedWith("TokenIsPaused");
+    await expect(couponFacet.connect(signer_C).setCoupon(couponData)).to.be.revertedWithCustomError(
+      base.asset,
+      "TokenIsPaused",
+    );
   });
 
   it("GIVEN an account with corporateActions role WHEN setCoupon with wrong dates THEN transaction fails", async () => {
@@ -551,7 +566,8 @@ describe("Coupon Tests", () => {
     const maturityDateBefore = (await bondReadFacet.getBondDetails()).maturityDate;
     const newMaturityDate = maturityDateBefore + 86400n;
 
-    await expect(bondFacet.connect(signer_C).updateMaturityDate(newMaturityDate)).to.be.rejectedWith(
+    await expect(bondFacet.connect(signer_C).updateMaturityDate(newMaturityDate)).to.be.revertedWithCustomError(
+      base.asset,
       "AccountHasNoRole",
     );
     const maturityDateAfter = (await bondReadFacet.getBondDetails()).maturityDate;
@@ -571,7 +587,10 @@ describe("Coupon Tests", () => {
     const maturityDateBefore = (await bondReadFacet.getBondDetails()).maturityDate;
     const newMaturityDate = maturityDateBefore + 86400n;
 
-    await expect(bondFacet.connect(signer_C).updateMaturityDate(newMaturityDate)).to.be.rejectedWith("TokenIsPaused");
+    await expect(bondFacet.connect(signer_C).updateMaturityDate(newMaturityDate)).to.be.revertedWithCustomError(
+      base.asset,
+      "TokenIsPaused",
+    );
     const maturityDateAfter = (await bondReadFacet.getBondDetails()).maturityDate;
     expect(maturityDateAfter).to.be.equal(maturityDateBefore);
   });
@@ -723,7 +742,10 @@ describe("Coupon Tests", () => {
 
     await couponFacet.connect(signer_C).setCoupon(couponData);
 
-    await expect(couponFacet.connect(signer_D).cancelCoupon(1)).to.be.rejectedWith("AccountHasNoRole");
+    await expect(couponFacet.connect(signer_D).cancelCoupon(1)).to.be.revertedWithCustomError(
+      base.asset,
+      "AccountHasNoRole",
+    );
   });
 
   it("GIVEN a paused Token WHEN cancelCoupon THEN transaction fails with TokenIsPaused", async () => {
@@ -733,7 +755,10 @@ describe("Coupon Tests", () => {
 
     await pauseFacet.connect(signer_B).pause();
 
-    await expect(couponFacet.connect(signer_C).cancelCoupon(1)).to.be.rejectedWith("TokenIsPaused");
+    await expect(couponFacet.connect(signer_C).cancelCoupon(1)).to.be.revertedWithCustomError(
+      base.asset,
+      "TokenIsPaused",
+    );
   });
 
   it("GIVEN no existing coupon WHEN cancelCoupon with invalid ID THEN transaction fails", async () => {

@@ -5,6 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
+  type IAsset,
   type EquityUSA,
   type Pause,
   type AccessControl,
@@ -26,6 +27,13 @@ const DECIMALS_INIT = 6;
 
 describe("Scheduled Tasks Tests", () => {
   let diamond: ResolverProxy;
+  let base: {
+    asset: IAsset;
+    diamond: ResolverProxy;
+    deployer: HardhatEthersSigner;
+    user2: HardhatEthersSigner;
+    user3: HardhatEthersSigner;
+  };
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
@@ -41,7 +49,7 @@ describe("Scheduled Tasks Tests", () => {
   let dividendFacet: DividendFacet;
 
   async function deploySecurityFixtureSinglePartition() {
-    const base = await deployEquityTokenFixture();
+    base = await deployEquityTokenFixture();
     diamond = base.diamond;
     signer_A = base.deployer;
     signer_B = base.user2;
@@ -93,12 +101,12 @@ describe("Scheduled Tasks Tests", () => {
     await pauseFacet.connect(signer_B).pause();
 
     // trigger scheduled snapshots
-    await expect(scheduledTasksFacet.connect(signer_C).triggerPendingScheduledCrossOrderedTasks()).to.be.rejectedWith(
-      "TokenIsPaused",
-    );
-    await expect(scheduledTasksFacet.connect(signer_C).triggerScheduledCrossOrderedTasks(1)).to.be.rejectedWith(
-      "TokenIsPaused",
-    );
+    await expect(
+      scheduledTasksFacet.connect(signer_C).triggerPendingScheduledCrossOrderedTasks(),
+    ).to.be.revertedWithCustomError(base.asset, "TokenIsPaused");
+    await expect(
+      scheduledTasksFacet.connect(signer_C).triggerScheduledCrossOrderedTasks(1),
+    ).to.be.revertedWithCustomError(base.asset, "TokenIsPaused");
   });
 
   it("GIVEN a token WHEN triggerTasks THEN transaction succeeds", async () => {

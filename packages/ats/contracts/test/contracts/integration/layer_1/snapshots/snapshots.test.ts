@@ -60,19 +60,19 @@ describe("Snapshots Tests", () => {
   let clearingTransferFacet: ClearingTransferFacet;
 
   async function deploySecurityFixtureMultiPartition() {
-    const base = await deployEquityTokenFixture({
+    const result = await deployEquityTokenFixture({
       equityDataParams: {
         securityData: {
           isMultiPartition: true,
         },
       },
     });
-    diamond = base.diamond;
-    signer_A = base.deployer;
-    signer_B = base.user2;
-    signer_C = base.user3;
+    diamond = result.diamond;
+    signer_A = result.deployer;
+    signer_B = result.user2;
+    signer_C = result.user3;
 
-    await executeRbac(base.asset, set_initRbacs());
+    await executeRbac(result.asset, set_initRbacs());
     await setFacets(diamond);
   }
 
@@ -139,7 +139,10 @@ describe("Snapshots Tests", () => {
 
   it("GIVEN an account without snapshot role WHEN takeSnapshot THEN transaction fails with AccountHasNoRole", async () => {
     // snapshot fails
-    await expect(snapshotFacet.connect(signer_C).takeSnapshot()).to.be.rejectedWith("AccountHasNoRole");
+    await expect(snapshotFacet.connect(signer_C).takeSnapshot()).to.be.revertedWithCustomError(
+      snapshotFacet,
+      "AccountHasNoRole",
+    );
   });
 
   it("GIVEN a paused Token WHEN takeSnapshot THEN transaction fails with TokenIsPaused", async () => {
@@ -153,30 +156,58 @@ describe("Snapshots Tests", () => {
       signer_C.address,
     );
 
-    await expect(snapshotFacet.connect(signer_C).takeSnapshot()).to.be.rejectedWith("TokenIsPaused");
+    await expect(snapshotFacet.connect(signer_C).takeSnapshot()).to.be.revertedWithCustomError(
+      snapshotFacet,
+      "TokenIsPaused",
+    );
   });
 
   it("GIVEN no snapshot WHEN reading snapshot values THEN transaction fails", async () => {
     // check snapshot
-    await expect(snapshotFacet.balanceOfAtSnapshot(1, signer_A.address)).to.be.rejectedWith("SnapshotIdDoesNotExists");
-    await expect(snapshotFacet.balanceOfAtSnapshot(0, signer_A.address)).to.be.rejectedWith("SnapshotIdNull");
-    await expect(snapshotFacet.totalSupplyAtSnapshot(1)).to.be.rejectedWith("SnapshotIdDoesNotExists");
-    await expect(snapshotFacet.totalSupplyAtSnapshot(0)).to.be.rejectedWith("SnapshotIdNull");
-    await expect(snapshotFacet.balanceOfAtSnapshotByPartition(_PARTITION_ID_1, 1, signer_A.address)).to.be.rejectedWith(
+    await expect(snapshotFacet.balanceOfAtSnapshot(1, signer_A.address)).to.be.revertedWithCustomError(
+      snapshotFacet,
       "SnapshotIdDoesNotExists",
     );
-    await expect(snapshotFacet.balanceOfAtSnapshotByPartition(_PARTITION_ID_1, 0, signer_A.address)).to.be.rejectedWith(
+    await expect(snapshotFacet.balanceOfAtSnapshot(0, signer_A.address)).to.be.revertedWithCustomError(
+      snapshotFacet,
       "SnapshotIdNull",
     );
-    await expect(snapshotFacet.partitionsOfAtSnapshot(1, signer_A.address)).to.be.rejectedWith(
+    await expect(snapshotFacet.totalSupplyAtSnapshot(1)).to.be.revertedWithCustomError(
+      snapshotFacet,
       "SnapshotIdDoesNotExists",
     );
-    await expect(snapshotFacet.partitionsOfAtSnapshot(0, signer_A.address)).to.be.rejectedWith("SnapshotIdNull");
+    await expect(snapshotFacet.totalSupplyAtSnapshot(0)).to.be.revertedWithCustomError(snapshotFacet, "SnapshotIdNull");
+    await expect(
+      snapshotFacet.balanceOfAtSnapshotByPartition(_PARTITION_ID_1, 1, signer_A.address),
+    ).to.be.revertedWithCustomError(snapshotFacet, "SnapshotIdDoesNotExists");
+    await expect(
+      snapshotFacet.balanceOfAtSnapshotByPartition(_PARTITION_ID_1, 0, signer_A.address),
+    ).to.be.revertedWithCustomError(snapshotFacet, "SnapshotIdNull");
+    await expect(snapshotFacet.partitionsOfAtSnapshot(1, signer_A.address)).to.be.revertedWithCustomError(
+      snapshotFacet,
+      "SnapshotIdDoesNotExists",
+    );
+    await expect(snapshotFacet.partitionsOfAtSnapshot(0, signer_A.address)).to.be.revertedWithCustomError(
+      snapshotFacet,
+      "SnapshotIdNull",
+    );
 
-    await expect(snapshotFacet.getTokenHoldersAtSnapshot(1, 0, 1)).to.be.rejectedWith("SnapshotIdDoesNotExists");
-    await expect(snapshotFacet.getTokenHoldersAtSnapshot(0, 0, 1)).to.be.rejectedWith("SnapshotIdNull");
-    await expect(snapshotFacet.getTotalTokenHoldersAtSnapshot(1)).to.be.rejectedWith("SnapshotIdDoesNotExists");
-    await expect(snapshotFacet.getTotalTokenHoldersAtSnapshot(0)).to.be.rejectedWith("SnapshotIdNull");
+    await expect(snapshotFacet.getTokenHoldersAtSnapshot(1, 0, 1)).to.be.revertedWithCustomError(
+      snapshotFacet,
+      "SnapshotIdDoesNotExists",
+    );
+    await expect(snapshotFacet.getTokenHoldersAtSnapshot(0, 0, 1)).to.be.revertedWithCustomError(
+      snapshotFacet,
+      "SnapshotIdNull",
+    );
+    await expect(snapshotFacet.getTotalTokenHoldersAtSnapshot(1)).to.be.revertedWithCustomError(
+      snapshotFacet,
+      "SnapshotIdDoesNotExists",
+    );
+    await expect(snapshotFacet.getTotalTokenHoldersAtSnapshot(0)).to.be.revertedWithCustomError(
+      snapshotFacet,
+      "SnapshotIdNull",
+    );
   });
 
   it("GIVEN an account with snapshot role WHEN takeSnapshot THEN transaction succeeds", async () => {
@@ -498,7 +529,7 @@ describe("Snapshots Tests", () => {
   });
 
   it("GIVEN snapshot exists WHEN querying cleared balances THEN returns correct values", async () => {
-    const base = await deployEquityTokenFixture({
+    const result = await deployEquityTokenFixture({
       equityDataParams: {
         securityData: {
           isMultiPartition: true,
@@ -506,9 +537,9 @@ describe("Snapshots Tests", () => {
         },
       },
     });
-    const diamond = base.diamond;
+    const diamond = result.diamond;
 
-    await executeRbac(base.asset, set_initRbacs());
+    await executeRbac(result.asset, set_initRbacs());
     await setFacets(diamond);
     await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_C.address);
     await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
@@ -608,16 +639,16 @@ describe("Snapshots Tests", () => {
   });
 
   it("GIVEN snapshot exists WHEN querying frozen balances THEN returns correct values", async () => {
-    const base = await deployEquityTokenFixture({
+    const result = await deployEquityTokenFixture({
       equityDataParams: {
         securityData: {
           isMultiPartition: false,
         },
       },
     });
-    const diamond = base.diamond;
+    const diamond = result.diamond;
 
-    await executeRbac(base.asset, set_initRbacs());
+    await executeRbac(result.asset, set_initRbacs());
     await setFacets(diamond);
 
     await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_C.address);

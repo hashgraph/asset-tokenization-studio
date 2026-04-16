@@ -29,6 +29,7 @@ let couponData = {
 };
 
 describe("Bond Fixed Rate Tests", () => {
+  let base: Awaited<ReturnType<typeof deployBondFixedRateTokenFixture>>;
   let diamond: ResolverProxy;
   let signer_A: HardhatEthersSigner;
 
@@ -36,7 +37,7 @@ describe("Bond Fixed Rate Tests", () => {
   let couponFixedRateFacet: CouponFacetTimeTravel;
 
   async function deploySecurityFixture() {
-    const base = await deployBondFixedRateTokenFixture();
+    base = await deployBondFixedRateTokenFixture();
 
     diamond = base.diamond;
     signer_A = base.deployer;
@@ -80,19 +81,28 @@ describe("Bond Fixed Rate Tests", () => {
   it("GIVEN a fixed rate bond WHEN setting a coupon with non pending status THEN transaction fails with InterestRateIsFixed", async () => {
     couponData.rateStatus = 1;
 
-    await expect(couponFixedRateFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsFixed");
+    await expect(couponFixedRateFacet.setCoupon(couponData)).to.be.revertedWithCustomError(
+      couponFixedRateFacet,
+      "InterestRateIsFixed",
+    );
   });
 
   it("GIVEN a fixed rate bond WHEN setting a coupon with rate non 0 THEN transaction fails with InterestRateIsFixed", async () => {
     couponData.rate = 1;
 
-    await expect(couponFixedRateFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsFixed");
+    await expect(couponFixedRateFacet.setCoupon(couponData)).to.be.revertedWithCustomError(
+      couponFixedRateFacet,
+      "InterestRateIsFixed",
+    );
   });
 
   it("GIVEN a fixed rate bond WHEN setting a coupon with rate decimals non 0 THEN transaction fails with InterestRateIsFixed", async () => {
     couponData.rateDecimals = 1;
 
-    await expect(couponFixedRateFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsFixed");
+    await expect(couponFixedRateFacet.setCoupon(couponData)).to.be.revertedWithCustomError(
+      couponFixedRateFacet,
+      "InterestRateIsFixed",
+    );
   });
 
   it("GIVEN a fixed rate bond WHEN setting a coupon with pending status THEN transaction success", async () => {

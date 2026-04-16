@@ -113,6 +113,7 @@ interface IAsset is
     IEquity,
     ISecurity,
     ICorporateActions,
+    IProtectedPartitions,
     INominalValue,
     IAmortization,
     ILoan,

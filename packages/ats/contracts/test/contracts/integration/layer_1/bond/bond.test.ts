@@ -36,6 +36,7 @@ const EMPTY_VC_ID = EMPTY_STRING;
 const DECIMALS = 6;
 
 describe("Bond Tests", () => {
+  let base: Awaited<ReturnType<typeof deployBondTokenFixture>>;
   let diamond: ResolverProxy;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
@@ -55,7 +56,7 @@ describe("Bond Tests", () => {
   let erc3643Facet: IERC3643;
 
   async function deploySecurityFixture(isMultiPartition = false) {
-    const base = await deployBondTokenFixture({
+    base = await deployBondTokenFixture({
       bondDataParams: {
         securityData: {
           isMultiPartition,
@@ -167,7 +168,7 @@ describe("Bond Tests", () => {
       };
       await expect(
         bondFacet._initialize_bondUSA(await getBondDetails(), regulationData, additionalSecurityData),
-      ).to.be.rejectedWith("AlreadyInitialized");
+      ).to.be.revertedWithCustomError(base.asset, "AlreadyInitialized");
     });
   });
 

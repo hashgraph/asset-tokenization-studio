@@ -24,6 +24,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture } from "@test";
 import { ADDRESS_ZERO, EQUITY_CONFIG_ID, BOND_CONFIG_ID, ATS_ROLES } from "@scripts";
 import { Rbac } from "@scripts/domain";
+import { decodeEvent } from "@scripts/infrastructure";
 import { getSecurityData, getRegulationData } from "@test";
 import { getEquityDetails } from "@test";
 import { getBondDetails } from "@test";
@@ -313,18 +314,8 @@ describe("TREX Factory Tests", () => {
 
       const deploymentReceipt = await deploymentResult.wait();
 
-      const trexSuiteDeployedEvent = deploymentReceipt!.logs
-        .map((log) => {
-          try {
-            return factoryAts.interface.parseLog({ topics: log.topics as string[], data: log.data });
-          } catch {
-            return null;
-          }
-        })
-        .find((parsed) => parsed?.name === "TREXSuiteDeployed");
-      expect(trexSuiteDeployedEvent).to.not.be.undefined;
-
-      const [trexAddr] = trexSuiteDeployedEvent?.args || [];
+      const decoded = await decodeEvent(factoryAts, "TREXSuiteDeployed", deploymentReceipt);
+      const trexAddr = decoded._token;
 
       await setFacets(trexAddr);
 
@@ -1182,18 +1173,8 @@ describe("TREX Factory Tests", () => {
 
       const deploymentReceipt = await deploymentResult.wait();
 
-      const trexSuiteDeployedEvent = deploymentReceipt!.logs
-        .map((log) => {
-          try {
-            return factoryAts.interface.parseLog({ topics: log.topics as string[], data: log.data });
-          } catch {
-            return null;
-          }
-        })
-        .find((parsed) => parsed?.name === "TREXSuiteDeployed");
-      expect(trexSuiteDeployedEvent).to.not.be.undefined;
-
-      const [trexAddr] = trexSuiteDeployedEvent?.args || [];
+      const decoded = await decodeEvent(factoryAts, "TREXSuiteDeployed", deploymentReceipt);
+      const trexAddr = decoded._token;
 
       await setFacets(trexAddr);
 
