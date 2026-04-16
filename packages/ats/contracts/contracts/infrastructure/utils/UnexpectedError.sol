@@ -9,7 +9,7 @@ pragma solidity >=0.8.0 <0.9.0;
  *      maintained for defensive programming.
  */
 
-import { UnexpectedError } from "../errors/CommonErrors.sol";
+import { ICommonErrors } from "../errors/ICommonErrors.sol";
 
 /**
  * @dev Reverts with UnexpectedError if the provided condition is true (indicating an impossible state).
@@ -19,5 +19,5 @@ import { UnexpectedError } from "../errors/CommonErrors.sol";
  * @param _errorId Unique identifier for the location in code where this is called
  */
 function _checkUnexpectedError(bool _isError, bytes4 _errorId) pure {
-    if (_isError) revert UnexpectedError(_errorId);
+    if (_isError) revert ICommonErrors.UnexpectedError(_errorId);
 }

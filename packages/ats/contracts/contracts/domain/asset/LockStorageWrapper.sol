@@ -12,7 +12,7 @@ import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { WrongExpirationTimestamp } from "../../infrastructure/errors/CommonErrors.sol";
+import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 
 struct LockDataStorage {
     mapping(address => uint256) totalLockedAmountByAccount;
@@ -22,6 +22,12 @@ struct LockDataStorage {
     mapping(address => mapping(bytes32 => uint256)) nextLockIdByAccountAndPartition;
 }
 
+/**
+ * @title LockStorageWrapper
+ * @notice Storage wrapper for lock management operations
+ * @dev Manages lock data storage including locks by account, partition, and lock ID
+ * @author Hashgraph
+ */
 library LockStorageWrapper {
     using Pagination for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.UintSet;
@@ -167,7 +173,8 @@ library LockStorageWrapper {
     }
 
     function requireValidExpirationTimestamp(uint256 expirationTimestamp) internal view {
-        if (expirationTimestamp < TimeTravelStorageWrapper.getBlockTimestamp()) revert WrongExpirationTimestamp();
+        if (expirationTimestamp < TimeTravelStorageWrapper.getBlockTimestamp())
+            revert ICommonErrors.WrongExpirationTimestamp();
     }
 
     function requireValidLockId(bytes32 partition, address tokenHolder, uint256 lockId) internal view {

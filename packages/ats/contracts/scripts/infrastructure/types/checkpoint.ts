@@ -206,6 +206,10 @@ export interface DeploymentCheckpoint {
       bondKpiLinkedRate?: ConfigurationResult;
       /** Bond Sustainability Performance Target Rate configuration */
       bondSustainabilityPerformanceTargetRate?: ConfigurationResult;
+      /** Loan configuration */
+      loan?: ConfigurationResult;
+      /** Loans Portfolio configuration */
+      loansPortfolio?: ConfigurationResult;
     };
 
     /** Factory deployment (step 6) */

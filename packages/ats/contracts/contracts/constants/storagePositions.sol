@@ -3,6 +3,15 @@ pragma solidity >=0.8.0 <0.9.0;
 
 // solhint-disable max-line-length
 
+/*
+ * Storage Positions Constants
+ *
+ * Defines EIP-1967 storage slot positions for all Diamond facets.
+ * These constants are used for unstructured storage to avoid slot collisions.
+ *
+ * Author: Hashgraph
+ */
+
 // Layer 0 Constants
 // keccak256('security.token.standard.cap.storage');
 bytes32 constant _CAP_STORAGE_POSITION = 0x591561cf73f8f1ca1532449c7ce18338a75e9e17f2894af1e41b36e3b013f951;
@@ -134,6 +143,15 @@ bytes32 constant _SUSTAINABILITY_PERFORMANCE_TARGET_RATE_STORAGE_POSITION = 0x93
 
 // keccak256('security.token.standard.nominalValue.storage');
 bytes32 constant _NOMINAL_VALUE_STORAGE_POSITION = 0xc0fde456b6db4817b54ba988cff47f70c0e04c5da2d340c51e72c7d679d44c40;
+
+// keccak256('security.token.standard.amortization.storage');
+bytes32 constant _AMORTIZATION_STORAGE_POSITION = 0x811809f3b5cf04ae28619650750f871e7fd7d91ca60e5d1c85e15eb170c74524;
+
+// keccak256('security.token.standard.loansPortfolio.storage');
+bytes32 constant _LOANS_PORTFOLIO_STORAGE_POSITION = 0x7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b;
+
+// keccak256('security.token.standard.loan.storage');
+bytes32 constant _LOAN_STORAGE_POSITION = 0x8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c;
 
 // Layer 3 Unique Constants
 // keccak256('security.token.standard.security.storage');

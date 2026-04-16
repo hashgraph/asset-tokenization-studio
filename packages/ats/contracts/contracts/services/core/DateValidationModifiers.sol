@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { CorporateActionsStorageWrapper } from "../../domain/core/CorporateActionsStorageWrapper.sol";
 import { KycStorageWrapper } from "../../domain/core/KycStorageWrapper.sol";
+import { DatesValidation } from "../../infrastructure/utils/DatesValidation.sol";
 
 /**
  * @title DateValidationModifiers
@@ -26,12 +26,12 @@ abstract contract DateValidationModifiers {
      * @param _secondDate Second date to compare
      */
     modifier onlyValidDates(uint256 _firstDate, uint256 _secondDate) {
-        CorporateActionsStorageWrapper.requireValidDates(_firstDate, _secondDate);
+        DatesValidation.checkDates(_firstDate, _secondDate);
         _;
     }
 
     modifier onlyThreeValidDates(uint256 _firstDate, uint256 _secondDate, uint256 _thirdDate) {
-        KycStorageWrapper.requireValidDates(_firstDate, _secondDate, _thirdDate);
+        DatesValidation.checkValidDates(_firstDate, _secondDate, _thirdDate);
         _;
     }
 
@@ -45,7 +45,7 @@ abstract contract DateValidationModifiers {
      * @param _timestamp The timestamp to validate
      */
     modifier onlyValidTimestamp(uint256 _timestamp) {
-        require(_timestamp > 0, "Invalid timestamp");
+        DatesValidation.checkTimestamp(_timestamp);
         _;
     }
 }

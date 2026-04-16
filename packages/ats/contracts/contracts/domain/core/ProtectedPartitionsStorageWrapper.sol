@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _PROTECTED_PARTITIONS_PARTICIPANT_ROLE } from "../../constants/roles.sol";
 import { _PROTECTED_PARTITIONS_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IProtectedPartitions } from "../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
-import { WrongSignature } from "../../infrastructure/errors/CommonErrors.sol";
+import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
 import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
 import { AccessControlStorageWrapper } from "./AccessControlStorageWrapper.sol";
@@ -80,7 +80,8 @@ library ProtectedPartitionsStorageWrapper {
         IProtectedPartitions.ProtectionData calldata _protectionData,
         string memory _name
     ) internal view {
-        if (!isTransferSignatureValid(_partition, _from, _to, _amount, _protectionData, _name)) revert WrongSignature();
+        if (!isTransferSignatureValid(_partition, _from, _to, _amount, _protectionData, _name))
+            revert ICommonErrors.WrongSignature();
     }
 
     function isTransferSignatureValid(
@@ -117,7 +118,8 @@ library ProtectedPartitionsStorageWrapper {
         IProtectedPartitions.ProtectionData calldata _protectionData,
         string memory _name
     ) internal view {
-        if (!isRedeemSignatureValid(_partition, _from, _amount, _protectionData, _name)) revert WrongSignature();
+        if (!isRedeemSignatureValid(_partition, _from, _amount, _protectionData, _name))
+            revert ICommonErrors.WrongSignature();
     }
 
     function isRedeemSignatureValid(
@@ -146,7 +148,8 @@ library ProtectedPartitionsStorageWrapper {
         bytes calldata _signature,
         string memory _name
     ) internal view {
-        if (!isCreateHoldSignatureValid(_partition, _from, _protectedHold, _signature, _name)) revert WrongSignature();
+        if (!isCreateHoldSignatureValid(_partition, _from, _protectedHold, _signature, _name))
+            revert ICommonErrors.WrongSignature();
     }
 
     function isCreateHoldSignatureValid(
@@ -175,7 +178,7 @@ library ProtectedPartitionsStorageWrapper {
         string memory _name
     ) internal view {
         if (!isClearingCreateHoldSignatureValid(_protectedClearingOperation, _hold, _signature, _name))
-            revert WrongSignature();
+            revert ICommonErrors.WrongSignature();
     }
 
     function isClearingCreateHoldSignatureValid(
@@ -204,7 +207,7 @@ library ProtectedPartitionsStorageWrapper {
         string memory _name
     ) internal view {
         if (!isClearingTransferSignatureValid(_protectedClearingOperation, _to, _amount, _signature, _name))
-            revert WrongSignature();
+            revert ICommonErrors.WrongSignature();
     }
 
     function isClearingTransferSignatureValid(
@@ -233,7 +236,7 @@ library ProtectedPartitionsStorageWrapper {
         string memory _name
     ) internal view {
         if (!isClearingRedeemSignatureValid(_protectedClearingOperation, _amount, _signature, _name))
-            revert WrongSignature();
+            revert ICommonErrors.WrongSignature();
     }
 
     function isClearingRedeemSignatureValid(

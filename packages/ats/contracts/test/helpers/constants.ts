@@ -420,7 +420,9 @@ export const TEST_STEPS_NEW_BLR = {
   BOND_FIXED_RATE_CONFIG: 6,
   BOND_KPI_LINKED_CONFIG: 7,
   BOND_SPT_CONFIG: 8,
-  FACTORY: 9,
+  LOAN_CONFIG: 9,
+  LOANS_PORTFOLIO_CONFIG: 10,
+  FACTORY: 11,
 } as const;
 
 /**
@@ -435,7 +437,9 @@ export const TEST_STEPS_EXISTING_BLR = {
   BOND_FIXED_RATE_CONFIG: 5,
   BOND_KPI_LINKED_CONFIG: 6,
   BOND_SPT_CONFIG: 7,
-  FACTORY: 8,
+  LOAN_CONFIG: 8,
+  LOANS_PORTFOLIO_CONFIG: 9,
+  FACTORY: 10,
 } as const;
 
 // ============================================================================

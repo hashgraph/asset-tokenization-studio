@@ -51,6 +51,8 @@ import {
   createBondFixedRateConfiguration,
   createBondKpiLinkedRateConfiguration,
   createBondSustainabilityPerformanceTargetRateConfiguration,
+  createLoanConfiguration,
+  createLoansPortfolioConfiguration,
   deployOrchestratorLibraries,
   hasOrchestratorLibraryAddresses,
 } from "@scripts/domain";
@@ -779,11 +781,106 @@ export async function deploySystemWithNewBlr(
       throw new Error(createTestFailureMessage("step", "bondSustainabilityPerformanceTargetRate"));
     }
 
-    // Step 8: Deploy Factory
+    let loanConfig: Awaited<ReturnType<typeof createLoanConfiguration>>;
+
+    if (checkpoint.steps.configurations?.loan && checkpoint.currentStep >= 9) {
+      info(`\n✓ Step 10/${totalSteps}: Loan configuration already created (resuming)`);
+      const loanConfigData = checkpoint.steps.configurations.loan;
+      info(`✅ Loan Config ID: ${loanConfigData.configId}`);
+      info(`✅ Loan Version: ${loanConfigData.version}`);
+      info(`✅ Loan Facets: ${loanConfigData.facetCount}`);
+
+      loanConfig = toConfigurationData(loanConfigData);
+    } else {
+      info(`\n📄 Step 10/${totalSteps}: Creating Loan configuration...`);
+
+      loanConfig = await createLoanConfiguration(
+        blrContract,
+        facetAddresses,
+        useTimeTravel,
+        partialBatchDeploy,
+        batchSize,
+        confirmations,
+      );
+
+      if (!loanConfig.success) {
+        throw new Error(`Loan config creation failed: ${loanConfig.error} - ${loanConfig.message}`);
+      }
+
+      info(`✅ Loan Config ID: ${loanConfig.data.configurationId}`);
+      info(`✅ Loan Version: ${loanConfig.data.version}`);
+      info(`✅ Loan Facets: ${loanConfig.data.facetKeys.length}`);
+
+      if (!checkpoint.steps.configurations) {
+        checkpoint.steps.configurations = {};
+      }
+      checkpoint.steps.configurations.loan = {
+        configId: loanConfig.data.configurationId,
+        version: loanConfig.data.version,
+        facetCount: loanConfig.data.facetKeys.length,
+        txHash: "",
+      };
+      checkpoint.currentStep = 9;
+      await checkpointManager.saveCheckpoint(checkpoint);
+    }
+
+    if (shouldFailAtStep("loan")) {
+      throw new Error(createTestFailureMessage("step", "loan"));
+    }
+
+    let loansPortfolioConfig: Awaited<ReturnType<typeof createLoansPortfolioConfiguration>>;
+
+    if (checkpoint.steps.configurations?.loansPortfolio && checkpoint.currentStep >= 10) {
+      info(`\n✓ Step 11/${totalSteps}: Loans Portfolio configuration already created (resuming)`);
+      const loansPortfolioConfigData = checkpoint.steps.configurations.loansPortfolio;
+      info(`✅ Loans Portfolio Config ID: ${loansPortfolioConfigData.configId}`);
+      info(`✅ Loans Portfolio Version: ${loansPortfolioConfigData.version}`);
+      info(`✅ Loans Portfolio Facets: ${loansPortfolioConfigData.facetCount}`);
+
+      loansPortfolioConfig = toConfigurationData(loansPortfolioConfigData);
+    } else {
+      info(`\n📄 Step 11/${totalSteps}: Creating Loans Portfolio configuration...`);
+
+      loansPortfolioConfig = await createLoansPortfolioConfiguration(
+        blrContract,
+        facetAddresses,
+        useTimeTravel,
+        partialBatchDeploy,
+        batchSize,
+        confirmations,
+      );
+
+      if (!loansPortfolioConfig.success) {
+        throw new Error(
+          `Loans Portfolio config creation failed: ${loansPortfolioConfig.error} - ${loansPortfolioConfig.message}`,
+        );
+      }
+
+      info(`✅ Loans Portfolio Config ID: ${loansPortfolioConfig.data.configurationId}`);
+      info(`✅ Loans Portfolio Version: ${loansPortfolioConfig.data.version}`);
+      info(`✅ Loans Portfolio Facets: ${loansPortfolioConfig.data.facetKeys.length}`);
+
+      if (!checkpoint.steps.configurations) {
+        checkpoint.steps.configurations = {};
+      }
+      checkpoint.steps.configurations.loansPortfolio = {
+        configId: loansPortfolioConfig.data.configurationId,
+        version: loansPortfolioConfig.data.version,
+        facetCount: loansPortfolioConfig.data.facetKeys.length,
+        txHash: "",
+      };
+      checkpoint.currentStep = 10;
+      await checkpointManager.saveCheckpoint(checkpoint);
+    }
+
+    if (shouldFailAtStep("loansPortfolio")) {
+      throw new Error(createTestFailureMessage("step", "loansPortfolio"));
+    }
+
     let factoryResult: Awaited<ReturnType<typeof deployFactory>>;
 
-    if (checkpoint.steps.factory && checkpoint.currentStep >= 9) {
-      info(`\n✓ Step 10/${totalSteps}: Factory already deployed (resuming)`);
+    if (checkpoint.steps.factory && checkpoint.currentStep >= 11) {
+      info(`\n✓ Step 12/${totalSteps}: Factory already deployed (resuming)`);
       // Reconstruct DeployFactoryResult from checkpoint (with placeholder proxyResult)
       const proxyAdminAddr = checkpoint.steps.proxyAdmin?.address || (proxyAdmin.target as string);
       factoryResult = {
@@ -805,7 +902,7 @@ export async function deploySystemWithNewBlr(
       info(`✅ Factory Implementation: ${checkpoint.steps.factory.implementation}`);
       info(`✅ Factory Proxy: ${checkpoint.steps.factory.proxy}`);
     } else {
-      info(`\n🏭 Step 10/${totalSteps}: Deploying Factory...`);
+      info(`\n🏭 Step 12/${totalSteps}: Deploying Factory...`);
       factoryResult = await deployFactory(signer, {
         existingProxyAdmin: proxyAdmin,
       });
@@ -826,7 +923,7 @@ export async function deploySystemWithNewBlr(
         txHash: "", // deployFactory doesn't return tx hash currently
         deployedAt: new Date().toISOString(),
       };
-      checkpoint.currentStep = 9;
+      checkpoint.currentStep = 11;
       await checkpointManager.saveCheckpoint(checkpoint);
     }
 
@@ -1010,6 +1107,18 @@ export async function deploySystemWithNewBlr(
             bondSustainabilityPerformanceTargetRateConfig.data.facetKeys.map((f) => f.key),
           );
           return output.facets.filter((facet) => bondSustainabilityPerformanceTargetRateKeys.has(facet.key));
+        },
+        getLoanFacets() {
+          // Use type guard to safely access .data property
+          if (!isSuccess(loanConfig)) return [];
+          const loanKeys = new Set(loanConfig.data.facetKeys.map((f) => f.key));
+          return output.facets.filter((facet) => loanKeys.has(facet.key));
+        },
+        getLoansPortfolioFacets() {
+          // Use type guard to safely access .data property
+          if (!isSuccess(loansPortfolioConfig)) return [];
+          const loansPortfolioKeys = new Set(loansPortfolioConfig.data.facetKeys.map((f) => f.key));
+          return output.facets.filter((facet) => loansPortfolioKeys.has(facet.key));
         },
       },
     };

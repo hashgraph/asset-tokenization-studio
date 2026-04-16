@@ -16,7 +16,7 @@ import {
 } from "../../constants/values.sol";
 import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
 import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
-import { ExpiredDeadline, WrongNounce, WrongSignatureLength } from "../errors/CommonErrors.sol";
+import { ICommonErrors } from "../errors/ICommonErrors.sol";
 
 function _getDomainHash(
     string memory _contractName,
@@ -200,8 +200,8 @@ function _checkNounceAndDeadline(
     uint256 _deadline,
     uint256 _blockTimestamp
 ) pure {
-    if (!_isDeadlineValid(_deadline, _blockTimestamp)) revert ExpiredDeadline(_deadline);
-    if (!_isNounceValid(_nounce, _currentNounce)) revert WrongNounce(_nounce, _account);
+    if (!_isDeadlineValid(_deadline, _blockTimestamp)) revert ICommonErrors.ExpiredDeadline(_deadline);
+    if (!_isNounceValid(_nounce, _currentNounce)) revert ICommonErrors.WrongNounce(_nounce, _account);
 }
 
 function _isDeadlineValid(uint256 _deadline, uint256 _blockTimestamp) pure returns (bool) {
@@ -218,7 +218,7 @@ function _recoverSigner(bytes32 _prefixedHash, bytes memory _signature) pure ret
 }
 
 function _splitSignature(bytes memory sig) pure returns (bytes32 r, bytes32 s, uint8 v) {
-    if (sig.length != 65) revert WrongSignatureLength();
+    if (sig.length != 65) revert ICommonErrors.WrongSignatureLength();
     // solhint-disable-next-line no-inline-assembly
     assembly {
         // first 32 bytes, after the length prefix which are 32 bytes long too

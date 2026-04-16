@@ -10,6 +10,7 @@ import {
   type AccessControl,
   type ScheduledCrossOrderedTasks,
   type TimeTravelFacet,
+  type CouponFacetTimeTravel,
 } from "@contract-types";
 import { ATS_ROLES, TIME_PERIODS_S, dateToUnixTimestamp } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -23,6 +24,7 @@ describe("Scheduled Coupon Listing Tests", () => {
   let account_C: string;
 
   let bondFacet: BondUSAKpiLinkedRateFacet;
+  let couponFacet: CouponFacetTimeTravel;
   let scheduledCouponListingFacet: ScheduledCouponListing;
   let scheduledTasksFacet: ScheduledCrossOrderedTasks;
   let accessControlFacet: AccessControl;
@@ -55,6 +57,7 @@ describe("Scheduled Coupon Listing Tests", () => {
 
     accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
     bondFacet = await ethers.getContractAt("BondUSAKpiLinkedRateFacetTimeTravel", diamond.target);
+    couponFacet = await ethers.getContractAt("CouponFacetTimeTravel", diamond.target);
     scheduledCouponListingFacet = await ethers.getContractAt("ScheduledCouponListingFacet", diamond.target);
     scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasks", diamond.target);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
@@ -108,9 +111,9 @@ describe("Scheduled Coupon Listing Tests", () => {
       rateDecimals: couponRateDecimals,
       rateStatus: 0,
     };
-    await bondFacet.connect(signer_C).setCoupon(couponData_2);
-    await bondFacet.connect(signer_C).setCoupon(couponData_3);
-    await bondFacet.connect(signer_C).setCoupon(couponData_1);
+    await couponFacet.connect(signer_C).setCoupon(couponData_2);
+    await couponFacet.connect(signer_C).setCoupon(couponData_3);
+    await couponFacet.connect(signer_C).setCoupon(couponData_1);
 
     const coupon_2_Id = "0x0000000000000000000000000000000000000000000000000000000000000001";
     const coupon_3_Id = "0x0000000000000000000000000000000000000000000000000000000000000002";

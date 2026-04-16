@@ -63,6 +63,22 @@ export interface BondDetailsDataParams {
   maturityDate: number;
 }
 
+export interface LoanDetailsDataParams {
+  currency: string;
+  nominalValue: ethers.BigNumberish;
+  nominalValueDecimals: number;
+  startingDate: number;
+  maturityDate: number;
+}
+
+export interface LoansPortfolioDetailsDataParams {
+  currency: string;
+  nominalValue: ethers.BigNumberish;
+  nominalValueDecimals: number;
+  startingDate: number;
+  maturityDate: number;
+}
+
 export enum DividendRight {
   NONE = 0,
   PREFERRED = 1,

@@ -50,6 +50,7 @@ import {
     ISustainabilityPerformanceTargetRate
 } from "../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 import { EvmAccessors } from "../infrastructure/utils/EvmAccessors.sol";
+import { DatesValidation } from "../infrastructure/utils/DatesValidation.sol";
 /* solhint-enable max-line-length */
 
 contract Factory is IFactory {
@@ -111,8 +112,7 @@ contract Factory is IFactory {
     }
 
     modifier checkBondDates(uint256 startingDate, uint256 maturityDate) {
-        CorporateActionsStorageWrapper.requireValidDates(startingDate, maturityDate);
-        ScheduledTasksStorageWrapper.requireValidTimestamp(maturityDate);
+        _checkBondDates(startingDate, maturityDate);
         _;
     }
 
@@ -302,6 +302,11 @@ contract Factory is IFactory {
             _data.impactData,
             _data.projects
         );
+    }
+
+    function _checkBondDates(uint256 startingDate, uint256 maturityDate) private {
+        DatesValidation.checkDates(startingDate, maturityDate);
+        ScheduledTasksStorageWrapper.requireValidTimestamp(maturityDate);
     }
 
     function _deploySecurity(

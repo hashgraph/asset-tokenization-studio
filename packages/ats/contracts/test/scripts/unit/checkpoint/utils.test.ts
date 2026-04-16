@@ -236,6 +236,10 @@ describe("Checkpoint Utilities", () => {
         expect(getStepName(TEST_STEPS_NEW_BLR.BOND_SPT_CONFIG, TEST_WORKFLOWS.NEW_BLR)).to.equal(
           "Bond SPT Rate Configuration",
         );
+        expect(getStepName(TEST_STEPS_NEW_BLR.LOAN_CONFIG, TEST_WORKFLOWS.NEW_BLR)).to.equal("Loan Configuration");
+        expect(getStepName(TEST_STEPS_NEW_BLR.LOANS_PORTFOLIO_CONFIG, TEST_WORKFLOWS.NEW_BLR)).to.equal(
+          "Loans Portfolio Configuration",
+        );
         expect(getStepName(TEST_STEPS_NEW_BLR.FACTORY, TEST_WORKFLOWS.NEW_BLR)).to.equal("Factory");
       });
 
@@ -272,6 +276,12 @@ describe("Checkpoint Utilities", () => {
         );
         expect(getStepName(TEST_STEPS_EXISTING_BLR.BOND_SPT_CONFIG, TEST_WORKFLOWS.EXISTING_BLR)).to.equal(
           "Bond SPT Rate Configuration",
+        );
+        expect(getStepName(TEST_STEPS_EXISTING_BLR.LOAN_CONFIG, TEST_WORKFLOWS.EXISTING_BLR)).to.equal(
+          "Loan Configuration",
+        );
+        expect(getStepName(TEST_STEPS_EXISTING_BLR.LOANS_PORTFOLIO_CONFIG, TEST_WORKFLOWS.EXISTING_BLR)).to.equal(
+          "Loans Portfolio Configuration",
         );
         expect(getStepName(TEST_STEPS_EXISTING_BLR.FACTORY, TEST_WORKFLOWS.EXISTING_BLR)).to.equal("Factory");
       });

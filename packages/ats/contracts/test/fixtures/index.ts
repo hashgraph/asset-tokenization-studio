@@ -31,6 +31,10 @@ export { deployBondTokenFixture, DEFAULT_BOND_PARAMS, getBondDetails } from "./t
 
 export { deployBondFixedRateTokenFixture, DEFAULT_BOND_FIXED_RATE_PARAMS } from "./tokens/bondFixedRate.fixture";
 
+export { deployLoanTokenFixture, DEFAULT_LOAN_PARAMS } from "./tokens/loan.fixture";
+
+export { deployLoansPortfolioTokenFixture, DEFAULT_LOANS_PORTFOLIO_PARAMS } from "./tokens/loansPortfolio.fixture";
+
 export {
   deployBondKpiLinkedRateTokenFixture,
   DEFAULT_BOND_KPI_LINKED_RATE_PARAMS,

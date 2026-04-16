@@ -1,0 +1,207 @@
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
+
+import { IAmortization } from "./IAmortization.sol";
+import { _AMORTIZATION_ROLE, _CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
+import { AMORTIZATION_CORPORATE_ACTION_TYPE } from "../../../constants/values.sol";
+import { AmortizationStorageWrapper } from "../../../domain/asset/amortization/AmortizationStorageWrapper.sol";
+import { IAmortizationStorageWrapper } from "../../../domain/asset/amortization/IAmortizationStorageWrapper.sol";
+import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateActionsStorageWrapper.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
+
+abstract contract Amortization is IAmortization, Modifiers {
+    function setAmortization(
+        IAmortization.Amortization calldata _amortization
+    )
+        external
+        override
+        onlyUnpaused
+        onlyWithoutMultiPartition
+        onlyRole(_CORPORATE_ACTION_ROLE)
+        onlyValidDates(_amortization.recordDate, _amortization.executionDate)
+        onlyValidTimestamp(_amortization.recordDate)
+        onlyValidDates(_amortization.recordDate, _amortization.executionDate)
+        returns (bool success_, uint256 amortizationID_)
+    {
+        (, amortizationID_) = AmortizationStorageWrapper.setAmortization(_amortization);
+        success_ = true;
+    }
+
+    function cancelAmortization(
+        uint256 _amortizationID
+    )
+        external
+        override
+        onlyUnpaused
+        onlyWithoutMultiPartition
+        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        onlyRole(_CORPORATE_ACTION_ROLE)
+        onlyNoActiveAmortizationHolds(_amortizationID)
+    {
+        AmortizationStorageWrapper.cancelAmortization(_amortizationID);
+    }
+
+    function releaseAmortizationHold(
+        uint256 _amortizationID,
+        address _tokenHolder
+    )
+        external
+        override
+        onlyUnpaused
+        onlyWithoutMultiPartition
+        onlyRole(_AMORTIZATION_ROLE)
+        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+    {
+        AmortizationStorageWrapper.releaseAmortizationHold(_amortizationID, _tokenHolder);
+    }
+
+    function setAmortizationHold(
+        uint256 _amortizationID,
+        address _tokenHolder,
+        uint256 _tokenAmount
+    )
+        external
+        override
+        onlyUnpaused
+        onlyWithoutMultiPartition
+        onlyRole(_AMORTIZATION_ROLE)
+        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        onlyPositiveTokenAmount(_tokenAmount, _amortizationID)
+        returns (uint256 holdId_)
+    {
+        return AmortizationStorageWrapper.setAmortizationHold(_amortizationID, _tokenHolder, _tokenAmount);
+    }
+
+    function getAmortization(
+        uint256 _amortizationID
+    )
+        external
+        view
+        override
+        onlyWithoutMultiPartition
+        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        returns (RegisteredAmortization memory registeredAmortization_, bool isDisabled_)
+    {
+        (registeredAmortization_, , isDisabled_) = AmortizationStorageWrapper.getAmortization(_amortizationID);
+    }
+
+    function getAmortizationFor(
+        uint256 _amortizationID,
+        address _account
+    )
+        external
+        view
+        override
+        onlyWithoutMultiPartition
+        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        returns (AmortizationFor memory amortizationFor_)
+    {
+        return AmortizationStorageWrapper.getAmortizationFor(_amortizationID, _account);
+    }
+
+    function getAmortizationsFor(
+        uint256 _amortizationID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    )
+        external
+        view
+        override
+        onlyWithoutMultiPartition
+        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        returns (AmortizationFor[] memory amortizationsFor_)
+    {
+        return AmortizationStorageWrapper.getAmortizationsFor(_amortizationID, _pageIndex, _pageLength);
+    }
+
+    function getAmortizationsCount()
+        external
+        view
+        override
+        onlyWithoutMultiPartition
+        returns (uint256 amortizationCount_)
+    {
+        return AmortizationStorageWrapper.getAmortizationsCount();
+    }
+
+    function getAmortizationHolders(
+        uint256 _amortizationID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    )
+        external
+        view
+        override
+        onlyWithoutMultiPartition
+        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        returns (address[] memory holders_)
+    {
+        return AmortizationStorageWrapper.getAmortizationHolders(_amortizationID, _pageIndex, _pageLength);
+    }
+
+    function getTotalAmortizationHolders(
+        uint256 _amortizationID
+    )
+        external
+        view
+        override
+        onlyWithoutMultiPartition
+        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        returns (uint256)
+    {
+        return AmortizationStorageWrapper.getTotalAmortizationHolders(_amortizationID);
+    }
+
+    function getAmortizationPaymentAmount(
+        uint256 _amortizationID,
+        address _tokenHolder
+    )
+        external
+        view
+        override
+        onlyWithoutMultiPartition
+        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        returns (uint256 tokenAmount_, uint8 decimals_)
+    {
+        return AmortizationStorageWrapper.getAmortizationPaymentAmount(_amortizationID, _tokenHolder);
+    }
+
+    function getActiveAmortizationHoldHolders(
+        uint256 _amortizationID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    )
+        external
+        view
+        override
+        onlyWithoutMultiPartition
+        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        returns (address[] memory holders_)
+    {
+        return AmortizationStorageWrapper.getAmortizationActiveHolders(_amortizationID, _pageIndex, _pageLength);
+    }
+
+    function getTotalActiveAmortizationHoldHolders(
+        uint256 _amortizationID
+    )
+        external
+        view
+        override
+        onlyWithoutMultiPartition
+        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        returns (uint256)
+    {
+        return AmortizationStorageWrapper.getTotalAmortizationActiveHolders(_amortizationID);
+    }
+
+    function getActiveAmortizationIds(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override onlyWithoutMultiPartition returns (uint256[] memory activeIds_) {
+        return AmortizationStorageWrapper.getActiveAmortizationIds(_pageIndex, _pageLength);
+    }
+
+    function getTotalActiveAmortizationIds() external view override onlyWithoutMultiPartition returns (uint256) {
+        return AmortizationStorageWrapper.getTotalActiveAmortizationIds();
+    }
+}

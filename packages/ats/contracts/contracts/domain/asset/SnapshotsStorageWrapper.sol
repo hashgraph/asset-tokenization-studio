@@ -327,8 +327,8 @@ library SnapshotsStorageWrapper {
         (uint256 start, uint256 end) = Pagination.getStartAndEnd(pageIndex, pageLength);
         uint256 length = Pagination.getSize(start, end, totalTokenHoldersAt(snapshotId));
         tk = new address[](length);
-        uint256 index = 1;
         for (uint256 i; i < length; ) {
+            uint256 index = start + i + 1;
             (bool snapshotted, address value) = addressValueAt(
                 snapshotId,
                 snapshotStorage().tokenHoldersSnapshots[index]
@@ -337,7 +337,6 @@ library SnapshotsStorageWrapper {
             tk[i] = snapshotted ? value : ERC1410StorageWrapper.getTokenHolder(index);
             unchecked {
                 ++i;
-                ++index;
             }
         }
     }
@@ -557,7 +556,24 @@ library SnapshotsStorageWrapper {
         return (ids.length == 0) ? 0 : ids[ids.length - 1];
     }
 
-    function snapshotStorage() internal pure returns (SnapshotStorage storage snapshotStorage_) {
+    function getSnapshotTakenBalance(
+        uint256 _date,
+        uint256 _snapshotId,
+        address _account
+    ) internal view returns (uint256 balance_, uint8 decimals_, bool snapshotTaken_) {
+        if (_date >= TimeTravelStorageWrapper.getBlockTimestamp()) return (balance_, decimals_, snapshotTaken_);
+        snapshotTaken_ = true;
+
+        balance_ = (_snapshotId != 0)
+            ? getTotalBalanceOfAtSnapshot(_snapshotId, _account)
+            : ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(_account, _date);
+
+        decimals_ = (_snapshotId != 0)
+            ? decimalsAtSnapshot(_snapshotId)
+            : ERC20StorageWrapper.decimalsAdjustedAt(_date);
+    }
+
+    function snapshotStorage() private pure returns (SnapshotStorage storage snapshotStorage_) {
         bytes32 position = _SNAPSHOT_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {

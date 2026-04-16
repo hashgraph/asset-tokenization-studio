@@ -52,7 +52,7 @@ const balanceOf_A_Original = [10 * _AMOUNT, 100 * _AMOUNT];
 const balanceOf_B_Original = [20 * _AMOUNT, 200 * _AMOUNT];
 const adjustFactor = 253;
 const adjustDecimals = 2;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 let holdIdentifier: any;
 enum ThirdPartyType {
   NULL,
@@ -71,7 +71,6 @@ describe("Hold Tests", () => {
   let signer_D: HardhatEthersSigner;
   let signer_E: HardhatEthersSigner;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let holdFacet: any;
   let pauseFacet: PauseFacet;
   let lock: LockFacet;
@@ -95,7 +94,6 @@ describe("Hold Tests", () => {
   let currentTimestamp = 0;
   let expirationTimestamp = 0;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let hold: any;
 
   const packedData = ethers.AbiCoder.defaultAbiCoder().encode(

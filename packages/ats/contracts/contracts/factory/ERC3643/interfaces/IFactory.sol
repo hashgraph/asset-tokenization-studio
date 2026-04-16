@@ -25,7 +25,8 @@ interface TRexIFactory {
         Equity,
         BondFixedRate,
         BondKpiLinkedRate,
-        BondSPTRate
+        BondSPTRate,
+        Loan
     }
 
     struct ResolverProxyConfiguration {

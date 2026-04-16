@@ -20,7 +20,8 @@ interface IFactory {
         Equity,
         BondFixedRate,
         BondKpiLinkedRate,
-        BondSPTRate
+        BondSPTRate,
+        Loan
     }
 
     struct ResolverProxyConfiguration {

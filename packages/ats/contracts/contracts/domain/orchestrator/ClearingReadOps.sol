@@ -7,7 +7,7 @@ import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol
 import { IClearingTransfer } from "../../facets/layer_1/clearing/IClearingTransfer.sol";
 import { IClearingRedeem } from "../../facets/layer_1/clearing/IClearingRedeem.sol";
 import { IClearingHoldCreation } from "../../facets/layer_1/clearing/IClearingHoldCreation.sol";
-import { WrongExpirationTimestamp } from "../../infrastructure/errors/CommonErrors.sol";
+import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 
 /// @title ClearingReadOps
 /// @notice Clearing read operations library - deployed once and called via DELEGATECALL
@@ -135,6 +135,6 @@ library ClearingReadOps {
 
     /// @notice Validate that a clearing expiration timestamp is in the future
     function checkClearingValidExpirationTimestamp(uint256 _expirationTimestamp, uint256 _blockTimestamp) public pure {
-        if (_expirationTimestamp < _blockTimestamp) revert WrongExpirationTimestamp();
+        if (_expirationTimestamp < _blockTimestamp) revert ICommonErrors.WrongExpirationTimestamp();
     }
 }
