@@ -4,6 +4,10 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ClearingStorageWrapper } from "../asset/ClearingStorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";
 import { TokenCoreOps } from "./TokenCoreOps.sol";
+import { ERC1410StorageWrapper } from "../asset/ERC1410StorageWrapper.sol";
+import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
+import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
@@ -346,9 +350,18 @@ library ClearingOps {
     // ============================================================================
 
     function transferClearingBalance(bytes32 _partition, address _to, uint256 _amount) internal {
-        if (TokenCoreOps.validPartitionForReceiver(_partition, _to)) {
-            TokenCoreOps.increaseBalanceByPartition(_to, _amount, _partition);
-            TokenCoreOps.emitTransferByPartition(
+        // Delegate to internal helper with direct StorageWrapper access
+        _transferClearingBalanceInternal(_partition, _to, _amount);
+    }
+
+    /// @dev Internal variant of transferClearingBalance with direct StorageWrapper access
+    /// @param _partition Partition to transfer
+    /// @param _to Destination address
+    /// @param _amount Amount to transfer
+    function _transferClearingBalanceInternal(bytes32 _partition, address _to, uint256 _amount) internal {
+        if (ERC1410StorageWrapper.validPartitionForReceiver(_partition, _to)) {
+            ERC1410StorageWrapper.increaseBalanceByPartition(_to, _amount, _partition);
+            emit IERC1410Types.TransferByPartition(
                 _partition,
                 EvmAccessors.getMsgSender(),
                 address(0),
@@ -357,10 +370,10 @@ library ClearingOps {
                 "",
                 ""
             );
-            TokenCoreOps.emitTransfer(address(0), _to, _amount);
+            emit IERC20.Transfer(address(0), _to, _amount);
         } else {
-            TokenCoreOps.addPartitionTo(_amount, _to, _partition);
-            TokenCoreOps.emitTransferByPartition(
+            ERC1410StorageWrapper.addPartitionTo(_amount, _to, _partition);
+            emit IERC1410Types.TransferByPartition(
                 _partition,
                 EvmAccessors.getMsgSender(),
                 address(0),
@@ -369,7 +382,7 @@ library ClearingOps {
                 "",
                 ""
             );
-            TokenCoreOps.emitTransfer(address(0), _to, _amount);
+            emit IERC20.Transfer(address(0), _to, _amount);
         }
     }
 
@@ -377,12 +390,20 @@ library ClearingOps {
         IClearingTypes.ClearingOperationIdentifier memory _id,
         address _destination
     ) internal {
-        // Trigger pending scheduled tasks and sync balance adjustments (ABAF factor)
-        TokenCoreOps.triggerAndSyncAll(_id.partition, _id.tokenHolder, _destination);
+        // Delegate to batched internal function to reduce delegatecall overhead
+        _beforeClearingOperationBatched(_id, _destination);
+    }
 
-        TokenCoreOps.updateAccountSnapshot(_id.tokenHolder, _id.partition);
-        TokenCoreOps.updateAccountSnapshot(_destination, _id.partition);
-        TokenCoreOps.updateAccountClearedBalancesSnapshot(_id.tokenHolder, _id.partition);
+    /// @dev Batched version of beforeClearingOperation to reduce delegatecall overhead
+    function _beforeClearingOperationBatched(
+        IClearingTypes.ClearingOperationIdentifier memory _id,
+        address _destination
+    ) internal {
+        // Direct calls — no delegatecall overhead
+        ERC1410StorageWrapper.triggerAndSyncAll(_id.partition, _id.tokenHolder, _destination);
+        SnapshotsStorageWrapper.updateAccountSnapshot(_id.tokenHolder, _id.partition);
+        SnapshotsStorageWrapper.updateAccountSnapshot(_destination, _id.partition);
+        SnapshotsStorageWrapper.updateAccountClearedBalancesSnapshot(_id.tokenHolder, _id.partition);
 
         // ABAF adjustments: update cleared amounts and LABAF if factors have changed
         uint256 abaf = AdjustBalancesStorageWrapper.getAbaf();
