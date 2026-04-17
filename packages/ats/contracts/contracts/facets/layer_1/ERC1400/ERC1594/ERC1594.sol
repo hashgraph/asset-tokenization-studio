@@ -52,8 +52,8 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
         onlyUnProtectedPartitionsOrWildCardRole
         onlyCanTransferFromByPartition(_from, _to, _DEFAULT_PARTITION, _value)
     {
-        TokenCoreOps.transferFrom(msg.sender, _from, _to, _value);
-        emit TransferFromWithData(msg.sender, _from, _to, _value, _data);
+        TokenCoreOps.transferFrom(EvmAccessors.getMsgSender(), _from, _to, _value);
+        emit TransferFromWithData(EvmAccessors.getMsgSender(), _from, _to, _value, _data);
     }
 
     function issue(
@@ -72,7 +72,7 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
         bytes32[] memory roles = new bytes32[](2);
         roles[0] = _ISSUER_ROLE;
         roles[1] = _AGENT_ROLE;
-        AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
+        AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         ERC1594StorageWrapper.issue(_tokenHolder, _value, _data);
     }
 
@@ -84,7 +84,7 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
         override
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanRedeemFromByPartition(msg.sender, _DEFAULT_PARTITION, _value)
+        onlyCanRedeemFromByPartition(EvmAccessors.getMsgSender(), _DEFAULT_PARTITION, _value)
     {
         ERC1594StorageWrapper.redeem(_value, _data);
     }
@@ -96,7 +96,7 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
     )
         external
         override
-        onlyUnrecoveredAddress(msg.sender)
+        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(_tokenHolder)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
@@ -118,7 +118,7 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
             return (false, Eip1066.PAUSED, IPause.TokenIsPaused.selector);
         }
         (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToTransferFromByPartition(
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             _to,
             _DEFAULT_PARTITION,
             _value,

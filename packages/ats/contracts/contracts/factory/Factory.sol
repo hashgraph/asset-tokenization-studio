@@ -304,11 +304,6 @@ contract Factory is IFactory {
         );
     }
 
-    function _checkBondDates(uint256 startingDate, uint256 maturityDate) private {
-        DatesValidation.checkDates(startingDate, maturityDate);
-        ScheduledTasksStorageWrapper.requireValidTimestamp(maturityDate);
-    }
-
     function _deploySecurity(
         SecurityData calldata _securityData,
         SecurityType _securityType
@@ -528,6 +523,11 @@ contract Factory is IFactory {
         address _bondAddress,
         BondKpiLinkedRateData calldata _bondKpiLinkedRateData
     ) private {
-        emit BondKpiLinkedRateDeployed(msg.sender, _bondAddress, _bondKpiLinkedRateData);
+        emit BondKpiLinkedRateDeployed(EvmAccessors.getMsgSender(), _bondAddress, _bondKpiLinkedRateData);
+    }
+
+    function _checkBondDates(uint256 startingDate, uint256 maturityDate) private view {
+        DatesValidation.checkDates(startingDate, maturityDate);
+        ScheduledTasksStorageWrapper.requireValidTimestamp(maturityDate);
     }
 }

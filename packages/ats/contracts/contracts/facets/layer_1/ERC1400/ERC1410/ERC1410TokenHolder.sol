@@ -95,8 +95,8 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Modifiers {
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyIdentifiedAddresses(msg.sender, _operator)
-        onlyCompliant(msg.sender, _operator, false)
+        onlyIdentifiedAddresses(EvmAccessors.getMsgSender(), _operator)
+        onlyCompliant(EvmAccessors.getMsgSender(), _operator, false)
     {
         ERC1410StorageWrapper.revokeOperatorByPartition(_partition, _operator);
     }

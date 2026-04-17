@@ -52,11 +52,18 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, Modifiers {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
+            AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         }
         for (uint256 i = 0; i < _fromList.length; i++) {
             TokenCoreOps.transfer(_fromList[i], _toList[i], _amounts[i]);
-            emit IERC1644.ControllerTransfer(msg.sender, _fromList[i], _toList[i], _amounts[i], "", "");
+            emit IERC1644.ControllerTransfer(
+                EvmAccessors.getMsgSender(),
+                _fromList[i],
+                _toList[i],
+                _amounts[i],
+                "",
+                ""
+            );
         }
     }
 
@@ -68,7 +75,7 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, Modifiers {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _ISSUER_ROLE;
             roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
+            AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         }
         for (uint256 i = 0; i < _toList.length; i++) {
             ERC1594StorageWrapper.checkIdentity(address(0), _toList[i]);
@@ -94,11 +101,11 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, Modifiers {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
+            AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         }
         for (uint256 i = 0; i < _userAddresses.length; i++) {
             TokenCoreOps.burn(_userAddresses[i], _amounts[i]);
-            emit IERC1644.ControllerRedemption(msg.sender, _userAddresses[i], _amounts[i], "", "");
+            emit IERC1644.ControllerRedemption(EvmAccessors.getMsgSender(), _userAddresses[i], _amounts[i], "", "");
         }
     }
 }

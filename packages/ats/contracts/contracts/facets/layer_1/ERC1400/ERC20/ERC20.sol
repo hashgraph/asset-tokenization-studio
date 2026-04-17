@@ -7,6 +7,7 @@ import { Modifiers } from "../../../../services/Modifiers.sol";
 import { ERC20StorageWrapper } from "../../../../domain/asset/ERC20StorageWrapper.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
+import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ERC20 is IERC20, TimestampProvider, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
@@ -21,13 +22,13 @@ abstract contract ERC20 is IERC20, TimestampProvider, Modifiers {
         external
         override
         onlyUnpaused
-        onlyUnrecoveredAddress(msg.sender)
+        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(spender)
         onlyWithoutMultiPartition
-        onlyCompliant(msg.sender, spender, false)
+        onlyCompliant(EvmAccessors.getMsgSender(), spender, false)
         returns (bool)
     {
-        return ERC20StorageWrapper.approve(msg.sender, spender, value);
+        return ERC20StorageWrapper.approve(EvmAccessors.getMsgSender(), spender, value);
     }
 
     function transfer(
@@ -39,10 +40,10 @@ abstract contract ERC20 is IERC20, TimestampProvider, Modifiers {
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanTransferFromByPartition(msg.sender, to, _DEFAULT_PARTITION, amount)
+        onlyCanTransferFromByPartition(EvmAccessors.getMsgSender(), to, _DEFAULT_PARTITION, amount)
         returns (bool)
     {
-        return TokenCoreOps.transfer(msg.sender, to, amount);
+        return TokenCoreOps.transfer(EvmAccessors.getMsgSender(), to, amount);
     }
 
     function transferFrom(
@@ -58,20 +59,32 @@ abstract contract ERC20 is IERC20, TimestampProvider, Modifiers {
         onlyCanTransferFromByPartition(from, to, _DEFAULT_PARTITION, amount)
         returns (bool)
     {
-        return TokenCoreOps.transferFrom(msg.sender, from, to, amount);
+        return TokenCoreOps.transferFrom(EvmAccessors.getMsgSender(), from, to, amount);
     }
 
     function increaseAllowance(
         address spender,
         uint256 addedValue
-    ) external onlyUnpaused onlyWithoutMultiPartition onlyCompliant(msg.sender, spender, false) returns (bool) {
+    )
+        external
+        onlyUnpaused
+        onlyWithoutMultiPartition
+        onlyCompliant(EvmAccessors.getMsgSender(), spender, false)
+        returns (bool)
+    {
         return ERC20StorageWrapper.increaseAllowance(spender, addedValue);
     }
 
     function decreaseAllowance(
         address spender,
         uint256 subtractedValue
-    ) external onlyUnpaused onlyWithoutMultiPartition onlyCompliant(msg.sender, spender, false) returns (bool) {
+    )
+        external
+        onlyUnpaused
+        onlyWithoutMultiPartition
+        onlyCompliant(EvmAccessors.getMsgSender(), spender, false)
+        returns (bool)
+    {
         return ERC20StorageWrapper.decreaseAllowance(spender, subtractedValue);
     }
 

@@ -111,7 +111,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
 
         HoldStorageWrapper.decreaseAllowedBalanceForHold(_partition, _from, _hold.amount, holdId_);
 
-        emit HeldFromByPartition(msg.sender, _from, _partition, holdId_, _hold, _operatorData);
+        emit HeldFromByPartition(EvmAccessors.getMsgSender(), _from, _partition, holdId_, _hold, _operatorData);
     }
 
     /**
@@ -210,7 +210,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
         uint256 amount;
         (success_, amount) = HoldStorageWrapper.reclaimHoldByPartition(_holdIdentifier);
         emit HoldByPartitionReclaimed(
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             _holdIdentifier.tokenHolder,
             _holdIdentifier.partition,
             _holdIdentifier.holdId,

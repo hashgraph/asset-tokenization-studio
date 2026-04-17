@@ -9,6 +9,7 @@ import { Modifiers } from "../../../services/Modifiers.sol";
 import { ERC1594StorageWrapper } from "../../../domain/asset/ERC1594StorageWrapper.sol";
 import { TokenCoreOps } from "../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ERC3643Operations is IERC3643Operations, TimestampProvider, Modifiers {
     function burn(
@@ -19,10 +20,10 @@ abstract contract ERC3643Operations is IERC3643Operations, TimestampProvider, Mo
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
+            AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         }
         TokenCoreOps.burn(_userAddress, _amount);
-        emit IERC1644.ControllerRedemption(msg.sender, _userAddress, _amount, "", "");
+        emit IERC1644.ControllerRedemption(EvmAccessors.getMsgSender(), _userAddress, _amount, "", "");
     }
 
     function mint(
@@ -40,7 +41,7 @@ abstract contract ERC3643Operations is IERC3643Operations, TimestampProvider, Mo
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _ISSUER_ROLE;
             roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
+            AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         }
         ERC1594StorageWrapper.issue(_to, _amount, "");
     }
@@ -54,10 +55,10 @@ abstract contract ERC3643Operations is IERC3643Operations, TimestampProvider, Mo
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
+            AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         }
         TokenCoreOps.transfer(_from, _to, _amount);
-        emit IERC1644.ControllerTransfer(msg.sender, _from, _to, _amount, "", "");
+        emit IERC1644.ControllerTransfer(EvmAccessors.getMsgSender(), _from, _to, _amount, "", "");
         return true;
     }
 }
