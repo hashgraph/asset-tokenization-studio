@@ -80,6 +80,7 @@ interface TRexIAccessControl {
     error AccountAssignedToRole(bytes32 role, address account);
     error AccountNotAssignedToRole(bytes32 role, address account);
     error RolesNotApplied(bytes32[] roles, bool[] actives, address account);
+    error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex);
 
     /**
      * @dev Grants a role
