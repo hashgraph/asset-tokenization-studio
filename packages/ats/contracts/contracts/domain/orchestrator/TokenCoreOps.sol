@@ -151,30 +151,6 @@ library TokenCoreOps {
         ERC1410StorageWrapper.triggerAndSyncAll(_partition, _from, _to);
     }
 
-    function emitTransferByPartition(
-        bytes32 _partition,
-        address _operator,
-        address _from,
-        address _to,
-        uint256 _amount,
-        bytes memory _data,
-        bytes memory _operatorData
-    ) public {
-        emit IERC1410Types.TransferByPartition(_partition, _operator, _from, _to, _amount, _data, _operatorData);
-    }
-
-    function emitTransfer(address _from, address _to, uint256 _amount) public {
-        emit IERC20.Transfer(_from, _to, _amount);
-    }
-
-    function validPartitionForReceiver(bytes32 _partition, address _receiver) public view returns (bool) {
-        return ERC1410StorageWrapper.validPartitionForReceiver(_partition, _receiver);
-    }
-
-    function getTokenName() public view returns (string memory) {
-        return ERC20StorageWrapper.getName();
-    }
-
     function checkIdentity(address _from, address _to) public view {
         ERC1594StorageWrapper.checkIdentity(_from, _to);
     }

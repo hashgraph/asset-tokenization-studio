@@ -78,6 +78,9 @@ import { ISsiManagement } from "./layer_1/ssi/ISsiManagement.sol";
 import { ITimeTravel } from "../test/testTimeTravel/ITimeTravel.sol";
 import { ITotalBalance } from "./layer_1/totalBalance/ITotalBalance.sol";
 import { ITransferAndLock } from "./layer_3/transferAndLock/ITransferAndLock.sol";
+import { ICoupon } from "./layer_2/coupon/ICoupon.sol";
+import { IDividend } from "./layer_2/dividend/IDividend.sol";
+import { IVoting } from "./layer_2/voting/IVoting.sol";
 
 /**
  * @title IAsset
@@ -99,6 +102,7 @@ interface IAsset is
     IPause,
     ISsiManagement,
     IKyc,
+    IKpis,
     ITimeTravel,
     IDiamond,
     IHold,
@@ -112,11 +116,37 @@ interface IAsset is
     ISecurity,
     ICorporateActions,
     IProtectedPartitions,
+    IProceedRecipients,
     INominalValue,
     IAmortization,
     ILoan,
     IAdjustBalances,
     IBondUSA,
     IEquityUSA,
-    ITransferAndLock
+    ITransferAndLock,
+    // Corporate Actions
+    ICoupon,
+    IDividend,
+    IVoting,
+    // Additional Layer 1
+    ICap,
+    INonces,
+    ITotalBalance,
+    IFixedRate,
+    ILock,
+    IFreeze,
+    ISnapshots,
+    // Clearing interfaces
+    IClearingActions,
+    IClearingTransfer,
+    IClearingRedeem,
+    IClearingHoldCreation,
+    IClearingRead,
+    // Additional ERC
+    IERC1594,
+    IERC1643,
+    IERC1644,
+    IERC20Permit,
+    // Control
+    IControlList
 {}

@@ -14,6 +14,8 @@ interface IExternalKycListManagement {
 
     error ExternalKycListsNotUpdated(address[] kycList, bool[] actives);
 
+    error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex);
+
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ExternalKycLists(address[] calldata _kycLists) external;
 

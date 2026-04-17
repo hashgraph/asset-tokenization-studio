@@ -14,31 +14,28 @@ import { _checkUnexpectedError } from "../../../infrastructure/utils/UnexpectedE
 
 /**
  * @title Bond
- * @dev Abstract contract for bond-specific operations
- *
- * Provides functionality for bond maturity redemption and maturity date updates.
- * Integrates with clearing, kyc, and control list modifiers.
- *
- * @notice Inherit from this contract to gain access to bond management functions
+ * @notice Abstract contract providing bond maturity redemption
+ *         and maturity date management capabilities.
+ * @dev Integrates with KYC verification, clearing controls, and
+ *      access list modifiers. Inheriting contracts gain bond-
+ *      specific redemption and maturity update functions. Relies
+ *      on ERC1410StorageWrapper for partition operations and
+ *      BondStorageWrapper for maturity date persistence.
  * @author Asset Tokenization Studio Team
  */
 abstract contract Bond is IBondManagement, TimestampProvider, Modifiers {
     /**
-     * @dev Redeems all tokens at maturity for a token holder
-     *
-     * Requirements:
-     * - Contract must not be paused
-     * - Caller must have MATURITY_REDEEMER_ROLE
-     * - Token holder must be on allowed list
-     * - Token holder must have valid KYC status
-     * - Maturity date must be valid
-     * - Token holder address must be valid
-     * - Token holder must not be recovered
-     * - Clearing must be disabled
-     *
-     * @param _tokenHolder The token holder address
-     *
-     * Emits Transfer events for each partition redeemed
+     * @notice Redeems all token partitions held by a token
+     *         holder at bond maturity.
+     * @dev Caller must hold _MATURITY_REDEEMER_ROLE. Contract
+     *      must be unpaused and clearing disabled. Token holder
+     *      must be on the allowed list with granted KYC status,
+     *      must not be recovered, and the maturity date must
+     *      have passed. Iterates all partitions and redeems
+     *      each balance. Reverts with an unexpected error if any
+     *      partition balance is zero. Emits Transfer events for
+     *      each partition redeemed via ERC1410StorageWrapper.
+     * @param _tokenHolder Address of the token holder to redeem
      */
     function fullRedeemAtMaturity(
         address _tokenHolder
@@ -46,6 +43,7 @@ abstract contract Bond is IBondManagement, TimestampProvider, Modifiers {
         external
         override
         onlyUnpaused
+        onlyClearingDisabled
         onlyRole(_MATURITY_REDEEMER_ROLE)
         onlyValidAddress(_tokenHolder)
         onlyUnrecoveredAddress(_tokenHolder)
@@ -70,24 +68,19 @@ abstract contract Bond is IBondManagement, TimestampProvider, Modifiers {
     }
 
     /**
-     * @dev Redeems tokens at maturity for a specific partition
-     *
-     * Requirements:
-     * - Contract must not be paused
-     * - Caller must have MATURITY_REDEEMER_ROLE
-     * - Token holder must be on allowed list
-     * - Token holder must have valid KYC status
-     * - Maturity date must be valid
-     * - Token holder address must be valid
-     * - Partition must be default with single partition
-     * - Token holder must not be recovered
-     * - Clearing must be disabled
-     *
-     * @param _tokenHolder The token holder address
-     * @param _partition The partition identifier
-     * @param _amount The amount to redeem
-     *
-     * Emits Transfer event on success
+     * @notice Redeems a specified amount of tokens from a
+     *         single partition at bond maturity.
+     * @dev Caller must hold _MATURITY_REDEEMER_ROLE. Contract
+     *      must be unpaused and clearing disabled. Token holder
+     *      must be on the allowed list with granted KYC status,
+     *      must not be recovered, and the maturity date must
+     *      have passed. The partition must be the default
+     *      partition when a single partition is configured.
+     *      Emits a Transfer event on successful redemption via
+     *      ERC1410StorageWrapper.
+     * @param _tokenHolder Address of the token holder to redeem
+     * @param _partition Partition identifier to redeem from
+     * @param _amount Amount of tokens to redeem
      */
     function redeemAtMaturityByPartition(
         address _tokenHolder,
@@ -97,6 +90,7 @@ abstract contract Bond is IBondManagement, TimestampProvider, Modifiers {
         external
         override
         onlyUnpaused
+        onlyClearingDisabled
         onlyRole(_MATURITY_REDEEMER_ROLE)
         onlyValidAddress(_tokenHolder)
         onlyDefaultPartitionWithSinglePartition(_partition)
@@ -109,17 +103,16 @@ abstract contract Bond is IBondManagement, TimestampProvider, Modifiers {
     }
 
     /**
-     * @dev Updates the bond maturity date
-     *
-     * Requirements:
-     * - Contract must not be paused
-     * - Caller must have BOND_MANAGER_ROLE
-     * - New maturity date must be valid
-     *
-     * @param _newMaturityDate The new maturity timestamp
-     * @return success_ Operation success status
-     *
-     * Emits MaturityDateUpdated event on success
+     * @notice Updates the bond maturity date to a new timestamp.
+     * @dev Caller must hold _BOND_MANAGER_ROLE. Contract must be
+     *      unpaused. The new maturity date must satisfy the
+     *      validity check enforced by the onlyValidMaturityDate
+     *      modifier. Emits MaturityDateUpdated with the contract
+     *      address, new maturity date, and previous maturity
+     *      date. State mutation: persists the new maturity date
+     *      via BondStorageWrapper.
+     * @param _newMaturityDate New maturity timestamp to set
+     * @return success_ Whether the operation succeeded
      */
     function updateMaturityDate(
         uint256 _newMaturityDate

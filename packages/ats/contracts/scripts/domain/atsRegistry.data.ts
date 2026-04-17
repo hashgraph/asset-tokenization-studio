@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-15T13:21:51.894Z
+ * Generated: 2026-04-17T12:28:28.401Z
  * Facets: 77
  * Infrastructure: 2
  *
@@ -339,6 +339,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountNotAssignedToRole(bytes32,address)",
         },
         selector: "0x3ad9a7ae",
+      },
+      {
+        name: "ContradictoryValuesInArray",
+        signature: {
+          full: "error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex)",
+          canonical: "ContradictoryValuesInArray(uint256,uint256)",
+        },
+        selector: "0xf50c17aa",
       },
       {
         name: "ContradictoryValuesInArray",
@@ -910,6 +918,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x67d08758",
       },
       {
+        name: "ClearingIsActivated",
+        signature: { full: "error ClearingIsActivated()", canonical: "ClearingIsActivated()" },
+        selector: "0x5b2e3086",
+      },
+      {
         name: "InsufficientBalance",
         signature: {
           full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
@@ -1101,6 +1114,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x67d08758",
       },
       {
+        name: "ClearingIsActivated",
+        signature: { full: "error ClearingIsActivated()", canonical: "ClearingIsActivated()" },
+        selector: "0x5b2e3086",
+      },
+      {
         name: "InsufficientBalance",
         signature: {
           full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
@@ -1290,6 +1308,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "BondMaturityDateWrong",
         signature: { full: "error BondMaturityDateWrong()", canonical: "BondMaturityDateWrong()" },
         selector: "0x67d08758",
+      },
+      {
+        name: "ClearingIsActivated",
+        signature: { full: "error ClearingIsActivated()", canonical: "ClearingIsActivated()" },
+        selector: "0x5b2e3086",
       },
       {
         name: "InsufficientBalance",
@@ -1769,6 +1792,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "BondMaturityDateWrong",
         signature: { full: "error BondMaturityDateWrong()", canonical: "BondMaturityDateWrong()" },
         selector: "0x67d08758",
+      },
+      {
+        name: "ClearingIsActivated",
+        signature: { full: "error ClearingIsActivated()", canonical: "ClearingIsActivated()" },
+        selector: "0x5b2e3086",
       },
       {
         name: "InsufficientBalance",
@@ -7807,6 +7835,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf50c17aa",
       },
       {
+        name: "ContradictoryValuesInArray",
+        signature: {
+          full: "error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex)",
+          canonical: "ContradictoryValuesInArray(uint256,uint256)",
+        },
+        selector: "0xf50c17aa",
+      },
+      {
         name: "ExternalControlListsNotUpdated",
         signature: {
           full: "error ExternalControlListsNotUpdated(address[] controlLista, bool[] actives)",
@@ -7972,6 +8008,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf50c17aa",
       },
       {
+        name: "ContradictoryValuesInArray",
+        signature: {
+          full: "error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex)",
+          canonical: "ContradictoryValuesInArray(uint256,uint256)",
+        },
+        selector: "0xf50c17aa",
+      },
+      {
         name: "ExternalKycListsNotUpdated",
         signature: {
           full: "error ExternalKycListsNotUpdated(address[] kycList, bool[] actives)",
@@ -8116,6 +8160,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
+      },
+      {
+        name: "ContradictoryValuesInArray",
+        signature: {
+          full: "error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex)",
+          canonical: "ContradictoryValuesInArray(uint256,uint256)",
+        },
+        selector: "0xf50c17aa",
       },
       {
         name: "ContradictoryValuesInArray",
