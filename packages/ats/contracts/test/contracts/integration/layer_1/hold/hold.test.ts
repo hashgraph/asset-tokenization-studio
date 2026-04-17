@@ -21,6 +21,7 @@ import {
   IERC1410,
   ControlListFacet,
   ERC20Facet,
+  ICore,
   TimeTravelFacet,
   KycFacet,
   SsiManagementFacet,
@@ -77,6 +78,7 @@ describe("Hold Tests", () => {
   let erc1410Facet: IERC1410;
   let controlListFacet: ControlListFacet;
   let erc20Facet: ERC20Facet;
+  let coreFacet: ICore;
   let timeTravelFacet: TimeTravelFacet;
   let kycFacet: KycFacet;
   let ssiManagementFacet: SsiManagementFacet;
@@ -185,6 +187,7 @@ describe("Hold Tests", () => {
     capFacet = await ethers.getContractAt("CapFacet", diamond.target, signer_A);
     accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
     erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.target, signer_A);
+    coreFacet = await ethers.getContractAt("ICore", diamond.target, signer_A);
     controlListFacet = await ethers.getContractAt("ControlListFacet", diamond.target, signer_E);
     erc3643Facet = await ethers.getContractAt("IERC3643", diamond.target, signer_A);
     erc1644Facet = await ethers.getContractAt("ERC1644Facet", diamond.target, signer_A);
@@ -1155,7 +1158,7 @@ describe("Hold Tests", () => {
       beforeEach(async () => {
         await loadFixture(protectedEquityTokenFixture);
 
-        const name = (await erc20Facet.getERC20Metadata()).info.name;
+        const name = (await coreFacet.getERC20Metadata()).info.name;
         const version = (await diamondCutFacet.getConfigInfo()).version_.toString();
         const chainId = await network.provider.send("eth_chainId");
 

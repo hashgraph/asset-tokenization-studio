@@ -13,20 +13,6 @@ interface IERC3643Management is IERC3643Types {
     function initialize_ERC3643(address _compliance, address _identityRegistry) external;
 
     /**
-     * @dev Sets the name of the token to `_name`.
-     *
-     * Emits an UpdatedTokenInformation event.
-     */
-    function setName(string calldata _name) external;
-
-    /**
-     * @dev Sets the symbol of the token to `_symbol`.
-     *
-     * Emits an UpdatedTokenInformation event.
-     */
-    function setSymbol(string calldata _symbol) external;
-
-    /**
      * @dev Sets the onchainID of the token to `_onchainID`.
      * @dev Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
      *

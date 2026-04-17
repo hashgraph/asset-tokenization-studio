@@ -9,7 +9,8 @@ import {
   type AccessControl,
   type ControlList,
   type ERC1644,
-  type ERC20,
+  type ICore,
+  ICore__factory,
 } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture } from "@test";
@@ -46,7 +47,7 @@ describe("Factory Tests", () => {
   let accessControlFacet: AccessControl;
   let controlListFacet: ControlList;
   let erc1644Facet: ERC1644;
-  let erc20Facet: ERC20;
+  let coreFacet: ICore;
 
   const listOfRoles = [
     ATS_ROLES._DEFAULT_ADMIN_ROLE,
@@ -84,7 +85,7 @@ describe("Factory Tests", () => {
 
     erc1644Facet = await ethers.getContractAt("ERC1644", equityAddress);
 
-    erc20Facet = await ethers.getContractAt("ERC20", equityAddress);
+    coreFacet = ICore__factory.connect(equityAddress, ethers.provider);
   }
 
   beforeEach(async () => {
@@ -241,7 +242,10 @@ describe("Factory Tests", () => {
           version: 1,
         };
 
-        await expect(factory.deployEquity(equityData, getRegulationData())).to.be.rejectedWith("WrongISIN");
+        await expect(factory.deployEquity(equityData, getRegulationData())).to.be.revertedWithCustomError(
+          factory,
+          "WrongISINChecksum",
+        );
       });
 
       it("GIVEN valid ISIN WHEN deploying bond THEN passes checkISIN validation", async () => {
@@ -729,7 +733,7 @@ describe("Factory Tests", () => {
       const controllable = await erc1644Facet.isControllable();
       expect(controllable).to.be.equal(equityData.security.isControllable);
 
-      const metadata = await erc20Facet.getERC20Metadata();
+      const metadata = await coreFacet.getERC20Metadata();
       expect(metadata.info.name).to.be.equal(equityData.security.erc20MetadataInfo.name);
       expect(metadata.info.symbol).to.be.equal(equityData.security.erc20MetadataInfo.symbol);
       expect(metadata.info.decimals).to.be.equal(equityData.security.erc20MetadataInfo.decimals);
@@ -764,7 +768,7 @@ describe("Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
-        bondDetails: await await getBondDetails(),
+        bondDetails: await getBondDetails(),
         proceedRecipients: [],
         proceedRecipientsData: [],
       };
@@ -912,7 +916,7 @@ describe("Factory Tests", () => {
       const controllable = await erc1644Facet.isControllable();
       expect(controllable).to.be.equal(bondData.security.isControllable);
 
-      const metadata = await erc20Facet.getERC20Metadata();
+      const metadata = await coreFacet.getERC20Metadata();
       expect(metadata.info.name).to.be.equal(bondData.security.erc20MetadataInfo.name);
       expect(metadata.info.symbol).to.be.equal(bondData.security.erc20MetadataInfo.symbol);
       expect(metadata.info.decimals).to.be.equal(bondData.security.erc20MetadataInfo.decimals);

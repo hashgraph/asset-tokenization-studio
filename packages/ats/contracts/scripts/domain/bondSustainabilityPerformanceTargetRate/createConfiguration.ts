@@ -36,6 +36,7 @@ import { BusinessLogicResolver } from "@contract-types";
 const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   // Core Functionality (10 - DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet)
   "AccessControlFacet",
+  "CoreFacet",
   "CapFacet",
   "ControlListFacet",
   "CorporateActionsFacet",

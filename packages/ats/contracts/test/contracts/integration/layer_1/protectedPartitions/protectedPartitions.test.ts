@@ -15,6 +15,7 @@ import {
   type KycFacet,
   type SsiManagementFacet,
   type IHold,
+  type ICore,
   ComplianceMock,
   DiamondFacet,
 } from "@contract-types";
@@ -207,6 +208,7 @@ describe("ProtectedPartitions Tests", () => {
   let erc1410Facet: IERC1410;
   let erc1594Facet: ERC1594Facet;
   let erc20Facet: ERC20Facet;
+  let coreFacet: ICore;
   let transferAndLockFacet: TransferAndLockFacet;
   let accessControlFacet: AccessControl;
   let kycFacet: KycFacet;
@@ -247,6 +249,7 @@ describe("ProtectedPartitions Tests", () => {
 
     const holdReadFacet = await ethers.getContractAt("HoldReadFacet", address, signer_A);
     const holdTokenHolderFacet = await ethers.getContractAt("HoldTokenHolderFacet", address, signer_A);
+    coreFacet = await ethers.getContractAt("ICore", address);
 
     const fragmentMapHold = new Map<string, any>();
     [
@@ -315,7 +318,7 @@ describe("ProtectedPartitions Tests", () => {
   async function setProtected() {
     await setFacets(diamond_ProtectedPartitions.target as string, complianceMockAddress);
 
-    domain.name = (await erc20Facet.getERC20Metadata()).info.name;
+    domain.name = (await coreFacet.getERC20Metadata()).info.name;
     domain.version = (await diamondCutFacet.getConfigInfo()).version_.toString();
     domain.chainId = await network.provider.send("eth_chainId");
     domain.verifyingContract = diamond_ProtectedPartitions.target as string;
@@ -578,7 +581,7 @@ describe("ProtectedPartitions Tests", () => {
 
     it("GIVEN an unprotected partitions equity WHEN retrieving the protected partitions Status, result is false", async () => {
       const partitionsProtectedStatus = await protectedPartitionsFacet.arePartitionsProtected();
-      await expect(partitionsProtectedStatus).to.be.false;
+      expect(partitionsProtectedStatus).to.be.false;
     });
 
     it("GIVEN an unprotected partitions equity AFTER protecting it THEN retrieving the protected partitions Status, result is true", async () => {

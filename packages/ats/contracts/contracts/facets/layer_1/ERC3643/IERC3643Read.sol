@@ -13,8 +13,6 @@ interface IERC3643Read is IERC3643Types {
 
     /**
      * @dev Returns the address of the identity registry contract.
-     * @dev Returns the version of the contract as a string.
-     *
      */
     function identityRegistry() external view returns (IIdentityRegistry);
 
@@ -32,10 +30,4 @@ interface IERC3643Read is IERC3643Types {
      * @notice Retrieves recovery status of a wallet
      */
     function isAddressRecovered(address _wallet) external view returns (bool);
-
-    /**
-     * @notice Retrieves the latest version of the contract.
-     * @dev The version is represented as a string.
-     */
-    function version() external view returns (string memory);
 }

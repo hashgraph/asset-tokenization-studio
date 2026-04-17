@@ -143,8 +143,8 @@ describe("Bond Tests", () => {
 
   describe("Initialization", () => {
     it("GIVEN a bond variable rate WHEN deployed THEN securityType is BOND_VARIABLE_RATE", async () => {
-      const erc20Facet = await ethers.getContractAt("ERC20", diamond.target);
-      const metadata = await erc20Facet.getERC20Metadata();
+      const coreContractFacet = await ethers.getContractAt("ICore", diamond.target);
+      const metadata = await coreContractFacet.getERC20Metadata();
       expect(metadata.securityType).to.be.equal(SecurityType.BOND_VARIABLE_RATE);
     });
 
@@ -165,9 +165,10 @@ describe("Bond Tests", () => {
         listOfCountries: "",
         info: "",
       };
+      // AlreadyInitialized is in ICommonErrors, accessible via any facet
       await expect(
         bondFacet._initialize_bondUSA(await getBondDetails(), regulationData, additionalSecurityData),
-      ).to.be.rejectedWith("AlreadyInitialized");
+      ).to.be.revertedWithCustomError(bondFacet, "AlreadyInitialized");
     });
   });
 

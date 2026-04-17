@@ -27,7 +27,7 @@ import { BusinessLogicResolver } from "@contract-types";
  * Bond Token Configuration
  *
  * Defines the set of facets for Bond tokens.
- * Includes all common facets plus BondUSAFacet (NOT EquityUSAFacet).
+ * Includes all common facets plus CoreFacet and BondUSAFacet (NOT EquityUSAFacet).
  *
  * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
  * so we only include DiamondFacet to avoid selector collisions.
@@ -38,6 +38,7 @@ import { BusinessLogicResolver } from "@contract-types";
 const BOND_FACETS = [
   // Core Functionality
   "AccessControlFacet",
+  "CoreFacet",
   "CapFacet",
   "ControlListFacet",
   "CorporateActionsFacet",

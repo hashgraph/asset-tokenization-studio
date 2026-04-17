@@ -659,6 +659,9 @@ bytes32 constant _LOAN_RESOLVER_KEY = 0x99001f821b750d64e6a82cf207800dc005acf93b
 // keccak256("security.token.standard.loansPortfolio.resolverKey");
 bytes32 constant _LOANS_PORTFOLIO_RESOLVER_KEY = 0x364410ebf7978001f91cfe2189e143fa8d75bb7365901fbc3d071ece7f86bd46;
 
+// keccak256("security.token.standard.core.resolverKey");
+bytes32 constant _CORE_RESOLVER_KEY = 0x6b7d10d5f354a1dd56d2152e6a9c56b614c4c2c9d08f5289a72824dfc13132eb;
+
 // Layer 3 Resolver Keys
 
 // keccak256("security.token.standard.transferAndLock.resolverKey")

@@ -12,6 +12,7 @@ import {
   KpisSustainabilityPerformanceTargetRateFacetTimeTravel,
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel,
   CouponFacetTimeTravel,
+  type ICore,
 } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES, TIME_PERIODS_S } from "@scripts";
 import { SecurityType } from "@scripts/domain";
@@ -45,6 +46,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
 
   let couponSPTRateFacet: CouponFacetTimeTravel;
   let sptRateFacet: SustainabilityPerformanceTargetRateFacetTimeTravel;
+  let coreFacet: ICore;
   let timeTravelFacet: TimeTravelFacet;
   let erc1594Facet: ERC1594SustainabilityPerformanceTargetRateFacetTimeTravel;
   let proceedRecipientsFacet: ProceedRecipientsSustainabilityPerformanceTargetRateFacetTimeTravel;
@@ -105,6 +107,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
       diamond.target,
       signer_A,
     );
+    coreFacet = await ethers.getContractAt("ICore", diamond.target, signer_A);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
     proceedRecipientsFacet = await ethers.getContractAt(
       "ProceedRecipientsSustainabilityPerformanceTargetRateFacetTimeTravel",
@@ -201,8 +204,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
   });
 
   it("GIVEN a bond SPT rate WHEN deployed THEN securityType is BOND_SPT_RATE", async () => {
-    const erc20Facet = await ethers.getContractAt("ERC20", diamond.target);
-    const metadata = await erc20Facet.getERC20Metadata();
+    const metadata = await coreFacet.getERC20Metadata();
     expect(metadata.securityType).to.be.equal(SecurityType.BOND_SPT_RATE);
   });
 

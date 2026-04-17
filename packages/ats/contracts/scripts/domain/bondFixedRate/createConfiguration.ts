@@ -33,6 +33,7 @@ import { BusinessLogicResolver } from "@contract-types";
 const BOND_FIXED_RATE_FACETS = [
   // Core Functionality
   "AccessControlFacet",
+  "CoreFacet",
   "CapFacet",
   "ControlListFacet",
   "CorporateActionsFacet",

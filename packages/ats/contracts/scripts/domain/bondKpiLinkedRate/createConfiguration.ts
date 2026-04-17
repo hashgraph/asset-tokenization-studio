@@ -36,6 +36,7 @@ import { BusinessLogicResolver } from "@contract-types";
 const BOND_KPI_LINKED_RATE_FACETS = [
   // Core Functionality (10 - DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet)
   "AccessControlFacet",
+  "CoreFacet",
   "CapFacet",
   "ControlListFacet",
   "CorporateActionsFacet",

@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-20T09:16:59.648Z
- * Facets: 77
+ * Generated: 2026-04-20T14:00:31.710Z
+ * Facets: 79
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -37,6 +37,7 @@ import {
   ClearingRedeemFacet__factory,
   ClearingTransferFacet__factory,
   ControlListFacet__factory,
+  CoreFacet__factory,
   CorporateActionsFacet__factory,
   CouponFacet__factory,
   CouponFixedRateFacet__factory,
@@ -72,6 +73,7 @@ import {
   KpisSustainabilityPerformanceTargetRateFacet__factory,
   KycFacet__factory,
   LoanFacet__factory,
+  LoansPortfolioFacet__factory,
   LockFacet__factory,
   NominalValueFacet__factory,
   NoncesFacet__factory,
@@ -147,6 +149,7 @@ import {
   KpisKpiLinkedRateFacetTimeTravel__factory,
   KpisSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   KycFacetTimeTravel__factory,
+  LoansPortfolioFacetTimeTravel__factory,
   LockFacetTimeTravel__factory,
   NoncesFacetTimeTravel__factory,
   PauseFacetTimeTravel__factory,
@@ -468,14 +471,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x99c50121",
       },
       {
-        name: "getActiveAmortizationHoldHolders",
-        signature: {
-          full: "function getActiveAmortizationHoldHolders(uint256 _amortizationID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
-          canonical: "getActiveAmortizationHoldHolders(uint256,uint256,uint256)",
-        },
-        selector: "0x3c819d06",
-      },
-      {
         name: "getActiveAmortizationIds",
         signature: {
           full: "function getActiveAmortizationIds(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] activeIds_)",
@@ -492,9 +487,17 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x52347466",
       },
       {
+        name: "getAmortizationActiveHolders",
+        signature: {
+          full: "function getAmortizationActiveHolders(uint256 _amortizationID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+          canonical: "getAmortizationActiveHolders(uint256,uint256,uint256)",
+        },
+        selector: "0x255e8d81",
+      },
+      {
         name: "getAmortizationFor",
         signature: {
-          full: "function getAmortizationFor(uint256 _amortizationID, address _account) view returns ((address account, uint256 recordDate, uint256 executionDate, uint256 holdId, bool holdActive, uint256 tokenHeldAmount, uint8 decimalsHeld, uint256 abafAtHold, uint256 tokenBalance, uint8 decimalsBalance, bool recordDateReached, uint256 abafAtSnapshot, uint256 nominalValue, uint8 nominalValueDecimals) amortizationFor_)",
+          full: "function getAmortizationFor(uint256 _amortizationID, address _account) view returns ((uint256 recordDate, uint256 executionDate, uint256 holdId, bool holdActive, uint256 tokenHeldAmount, uint8 decimalsHeld, uint256 abafAtHold, uint256 tokenBalance, uint8 decimalsBalance, bool recordDateReached, uint256 abafAtSnapshot, uint256 nominalValue, uint8 nominalValueDecimals) amortizationFor_)",
           canonical: "getAmortizationFor(uint256,address)",
         },
         selector: "0x57cc97ee",
@@ -508,14 +511,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x695453e3",
       },
       {
-        name: "getAmortizationPaymentAmount",
-        signature: {
-          full: "function getAmortizationPaymentAmount(uint256 _amortizationID, address _tokenHolder) view returns (uint256 tokenAmount_, uint8 decimals_)",
-          canonical: "getAmortizationPaymentAmount(uint256,address)",
-        },
-        selector: "0xbc4cd5c9",
-      },
-      {
         name: "getAmortizationsCount",
         signature: {
           full: "function getAmortizationsCount() view returns (uint256 amortizationCount_)",
@@ -526,18 +521,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getAmortizationsFor",
         signature: {
-          full: "function getAmortizationsFor(uint256 _amortizationID, uint256 _pageIndex, uint256 _pageLength) view returns ((address account, uint256 recordDate, uint256 executionDate, uint256 holdId, bool holdActive, uint256 tokenHeldAmount, uint8 decimalsHeld, uint256 abafAtHold, uint256 tokenBalance, uint8 decimalsBalance, bool recordDateReached, uint256 abafAtSnapshot, uint256 nominalValue, uint8 nominalValueDecimals)[] amortizationsFor_)",
+          full: "function getAmortizationsFor(uint256 _amortizationID, uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 recordDate, uint256 executionDate, uint256 holdId, bool holdActive, uint256 tokenHeldAmount, uint8 decimalsHeld, uint256 abafAtHold, uint256 tokenBalance, uint8 decimalsBalance, bool recordDateReached, uint256 abafAtSnapshot, uint256 nominalValue, uint8 nominalValueDecimals)[] amortizationsFor_, address[] holders_)",
           canonical: "getAmortizationsFor(uint256,uint256,uint256)",
         },
         selector: "0xed73a37e",
-      },
-      {
-        name: "getTotalActiveAmortizationHoldHolders",
-        signature: {
-          full: "function getTotalActiveAmortizationHoldHolders(uint256 _amortizationID) view returns (uint256)",
-          canonical: "getTotalActiveAmortizationHoldHolders(uint256)",
-        },
-        selector: "0xa18237e7",
       },
       {
         name: "getTotalActiveAmortizationIds",
@@ -548,12 +535,28 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x23099a13",
       },
       {
+        name: "getTotalAmortizationActiveHolders",
+        signature: {
+          full: "function getTotalAmortizationActiveHolders(uint256 _amortizationID) view returns (uint256)",
+          canonical: "getTotalAmortizationActiveHolders(uint256)",
+        },
+        selector: "0x5a88c5c5",
+      },
+      {
         name: "getTotalAmortizationHolders",
         signature: {
           full: "function getTotalAmortizationHolders(uint256 _amortizationID) view returns (uint256)",
           canonical: "getTotalAmortizationHolders(uint256)",
         },
         selector: "0x8bd49432",
+      },
+      {
+        name: "getTotalHoldByAmortizationId",
+        signature: {
+          full: "function getTotalHoldByAmortizationId(uint256 _amortizationID) view returns (uint256)",
+          canonical: "getTotalHoldByAmortizationId(uint256)",
+        },
+        selector: "0x6ee0f18a",
       },
       {
         name: "releaseAmortizationHold",
@@ -3491,6 +3494,103 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) => new ControlListFacetTimeTravel__factory(signer),
   },
 
+  CoreFacet: {
+    name: "CoreFacet",
+    description: "Facet shell exposing Core functionality via Diamond proxy pattern",
+    resolverKey: {
+      name: "_CORE_RESOLVER_KEY",
+      value: "0x6b7d10d5f354a1dd56d2152e6a9c56b614c4c2c9d08f5289a72824dfc13132eb",
+    },
+    inheritance: ["Core", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "decimals",
+        signature: { full: "function decimals() view returns (uint8)", canonical: "decimals()" },
+        selector: "0x313ce567",
+      },
+      {
+        name: "getERC20Metadata",
+        signature: {
+          full: "function getERC20Metadata() view returns (((string name, string symbol, string isin, uint8 decimals) info, uint8 securityType))",
+          canonical: "getERC20Metadata()",
+        },
+        selector: "0x8e649195",
+      },
+      {
+        name: "initializeCore",
+        signature: {
+          full: "function initializeCore(((string name, string symbol, string isin, uint8 decimals) info, uint8 securityType) erc20Metadata)",
+          canonical: "initializeCore(((string,string,string,uint8),uint8))",
+        },
+        selector: "0xb446569a",
+      },
+      {
+        name: "name",
+        signature: { full: "function name() view returns (string)", canonical: "name()" },
+        selector: "0x06fdde03",
+      },
+      {
+        name: "setName",
+        signature: { full: "function setName(string _name)", canonical: "setName(string)" },
+        selector: "0xc47f0027",
+      },
+      {
+        name: "setSymbol",
+        signature: { full: "function setSymbol(string _symbol)", canonical: "setSymbol(string)" },
+        selector: "0xb84c8246",
+      },
+      {
+        name: "symbol",
+        signature: { full: "function symbol() view returns (string)", canonical: "symbol()" },
+        selector: "0x95d89b41",
+      },
+      {
+        name: "version",
+        signature: { full: "function version() view returns (string)", canonical: "version()" },
+        selector: "0x54fd4d50",
+      },
+    ],
+    events: [
+      {
+        name: "UpdatedTokenInformation",
+        signature: {
+          full: "event UpdatedTokenInformation(string indexed newName, string indexed newSymbol, uint8 newDecimals, string newVersion, address indexed newOnchainID)",
+          canonical: "UpdatedTokenInformation(string,string,uint8,string,address)",
+        },
+        topic0: "0x6a1105ac8148a3c319adbc369f9072573e8a11d3a3d195e067e7c40767ec54d1",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRole",
+        signature: {
+          full: "error AccountHasNoRole(address account, bytes32 role)",
+          canonical: "AccountHasNoRole(address,bytes32)",
+        },
+        selector: "0xa1180aad",
+      },
+      {
+        name: "AlreadyInitialized",
+        signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
+        selector: "0x0dc149f0",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+    ],
+    factory: (signer) => new CoreFacet__factory(signer),
+  },
+
   CorporateActionsFacet: {
     name: "CorporateActionsFacet",
     resolverKey: {
@@ -6299,11 +6399,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x095ea7b3",
       },
       {
-        name: "decimals",
-        signature: { full: "function decimals() view returns (uint8)", canonical: "decimals()" },
-        selector: "0x313ce567",
-      },
-      {
         name: "decimalsAt",
         signature: {
           full: "function decimalsAt(uint256 _timestamp) view returns (uint8)",
@@ -6320,38 +6415,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa457c2d7",
       },
       {
-        name: "getERC20Metadata",
-        signature: {
-          full: "function getERC20Metadata() view returns (((string name, string symbol, string isin, uint8 decimals) info, uint8 securityType))",
-          canonical: "getERC20Metadata()",
-        },
-        selector: "0x8e649195",
-      },
-      {
         name: "increaseAllowance",
         signature: {
           full: "function increaseAllowance(address spender, uint256 addedValue) returns (bool)",
           canonical: "increaseAllowance(address,uint256)",
         },
         selector: "0x39509351",
-      },
-      {
-        name: "initialize_ERC20",
-        signature: {
-          full: "function initialize_ERC20(((string name, string symbol, string isin, uint8 decimals) info, uint8 securityType) erc20Metadata)",
-          canonical: "initialize_ERC20(((string,string,string,uint8),uint8))",
-        },
-        selector: "0xe04fb235",
-      },
-      {
-        name: "name",
-        signature: { full: "function name() view returns (string)", canonical: "name()" },
-        selector: "0x06fdde03",
-      },
-      {
-        name: "symbol",
-        signature: { full: "function symbol() view returns (string)", canonical: "symbol()" },
-        selector: "0x95d89b41",
       },
       {
         name: "transfer",
@@ -6404,11 +6473,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccessControlRequired(bytes32,address)",
         },
         selector: "0x10210dec",
-      },
-      {
-        name: "AlreadyInitialized",
-        signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
-        selector: "0x0dc149f0",
       },
       {
         name: "InsufficientAllowance",
@@ -7070,19 +7134,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xcbf3f861",
       },
       {
-        name: "setName",
-        signature: { full: "function setName(string _name)", canonical: "setName(string)" },
-        selector: "0xc47f0027",
-      },
-      {
         name: "setOnchainID",
         signature: { full: "function setOnchainID(address _onchainID)", canonical: "setOnchainID(address)" },
         selector: "0x3d1ddc5b",
-      },
-      {
-        name: "setSymbol",
-        signature: { full: "function setSymbol(string _symbol)", canonical: "setSymbol(string)" },
-        selector: "0xb84c8246",
       },
     ],
     events: [
@@ -7583,11 +7637,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "onchainID",
         signature: { full: "function onchainID() view returns (address)", canonical: "onchainID()" },
         selector: "0xaba63705",
-      },
-      {
-        name: "version",
-        signature: { full: "function version() view returns (string)", canonical: "version()" },
-        selector: "0x54fd4d50",
       },
     ],
     events: [
@@ -9680,7 +9729,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     description: "Facet for loan lifecycle operations",
     resolverKey: {
       name: "_LOAN_RESOLVER_KEY",
-      value: "0x0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e",
+      value: "0x99001f821b750d64e6a82cf207800dc005acf93b2880abe9f1cdbbfb5e996b86",
     },
     inheritance: ["Loan", "IStaticFunctionSelectors"],
     methods: [
@@ -9769,6 +9818,272 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     factory: (signer) => new LoanFacet__factory(signer),
+  },
+
+  LoansPortfolioFacet: {
+    name: "LoansPortfolioFacet",
+    resolverKey: {
+      name: "_LOANS_PORTFOLIO_RESOLVER_KEY",
+      value: "0x364410ebf7978001f91cfe2189e143fa8d75bb7365901fbc3d071ece7f86bd46",
+    },
+    inheritance: ["LoansPortfolio", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "addHoldingsAsset",
+        signature: {
+          full: "function addHoldingsAsset((address assetAddress, uint8 holdingsAssetType, string country) _holdingsAsset) returns (bool success_)",
+          canonical: "addHoldingsAsset((address,uint8,string))",
+        },
+        selector: "0xc8737c29",
+      },
+      {
+        name: "getDefaultedLoansRatio",
+        signature: {
+          full: "function getDefaultedLoansRatio() view returns (uint256 numerator_, uint256 denominator_)",
+          canonical: "getDefaultedLoansRatio()",
+        },
+        selector: "0x73de875c",
+      },
+      {
+        name: "getGeographicalExposure",
+        signature: {
+          full: "function getGeographicalExposure() view returns ((string country, uint256 count)[] geographicalExposure_)",
+          canonical: "getGeographicalExposure()",
+        },
+        selector: "0x200e1ac3",
+      },
+      {
+        name: "getHoldingsAssetOwnership",
+        signature: {
+          full: "function getHoldingsAssetOwnership(uint256 _pageIndex, uint256 _pageLength) view returns (address[] assets_, uint256[] balances_)",
+          canonical: "getHoldingsAssetOwnership(uint256,uint256)",
+        },
+        selector: "0x97eed8df",
+      },
+      {
+        name: "getHoldingsAssets",
+        signature: {
+          full: "function getHoldingsAssets(uint256 _pageIndex, uint256 _pageLength) view returns (address[] assets_)",
+          canonical: "getHoldingsAssets(uint256,uint256)",
+        },
+        selector: "0xc9f8f88b",
+      },
+      {
+        name: "getLoanHoldingsAssets",
+        signature: {
+          full: "function getLoanHoldingsAssets(uint256 _pageIndex, uint256 _pageLength) view returns (address[] assets_)",
+          canonical: "getLoanHoldingsAssets(uint256,uint256)",
+        },
+        selector: "0x6735d61e",
+      },
+      {
+        name: "getLoansPortfolioData",
+        signature: {
+          full: "function getLoansPortfolioData() view returns ((uint8 portfolioType, uint8 distributionPolicy) loansPortfolioData_)",
+          canonical: "getLoansPortfolioData()",
+        },
+        selector: "0xfcf9912d",
+      },
+      {
+        name: "getNonPerformingLoansRatio",
+        signature: {
+          full: "function getNonPerformingLoansRatio() view returns (uint256 numerator_, uint256 denominator_)",
+          canonical: "getNonPerformingLoansRatio()",
+        },
+        selector: "0xd2a20035",
+      },
+      {
+        name: "getNumberDefaultedLoans",
+        signature: {
+          full: "function getNumberDefaultedLoans() view returns (uint256 numberDefaultedLoans_)",
+          canonical: "getNumberDefaultedLoans()",
+        },
+        selector: "0x22c11e97",
+      },
+      {
+        name: "getNumberOfAssets",
+        signature: {
+          full: "function getNumberOfAssets() view returns (uint256 numberOfAssets_)",
+          canonical: "getNumberOfAssets()",
+        },
+        selector: "0xe269053a",
+      },
+      {
+        name: "getNumberOfCash",
+        signature: {
+          full: "function getNumberOfCash() view returns (uint256 numberOfCash_)",
+          canonical: "getNumberOfCash()",
+        },
+        selector: "0xa76562dd",
+      },
+      {
+        name: "getNumberOfLoans",
+        signature: {
+          full: "function getNumberOfLoans() view returns (uint256 numberOfLoans_)",
+          canonical: "getNumberOfLoans()",
+        },
+        selector: "0xf8b492f6",
+      },
+      {
+        name: "getNumberOfNonPerformingLoans",
+        signature: {
+          full: "function getNumberOfNonPerformingLoans() view returns (uint256 numberOfNonPerformingLoans_)",
+          canonical: "getNumberOfNonPerformingLoans()",
+        },
+        selector: "0x1a336a2a",
+      },
+      {
+        name: "getNumberOfPerformingLoans",
+        signature: {
+          full: "function getNumberOfPerformingLoans() view returns (uint256 numberOfPerformingLoans_)",
+          canonical: "getNumberOfPerformingLoans()",
+        },
+        selector: "0xcffd4f35",
+      },
+      {
+        name: "getPerformingLoansRatio",
+        signature: {
+          full: "function getPerformingLoansRatio() view returns (uint256 numerator_, uint256 denominator_)",
+          canonical: "getPerformingLoansRatio()",
+        },
+        selector: "0xbb644e3b",
+      },
+      {
+        name: "getSecuredLoansRatio",
+        signature: {
+          full: "function getSecuredLoansRatio() view returns (uint256 numerator_, uint256 denominator_)",
+          canonical: "getSecuredLoansRatio()",
+        },
+        selector: "0x03306b84",
+      },
+      {
+        name: "initializeLoansPortfolio",
+        signature: {
+          full: "function initializeLoansPortfolio((uint8 portfolioType, uint8 distributionPolicy) _loansPortfolioData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
+          canonical:
+            "initializeLoansPortfolio((uint8,uint8),(uint8,uint8,uint256,uint8,uint256,uint8,uint8,uint8),(bool,string,string))",
+        },
+        selector: "0x3f8b0a67",
+      },
+      {
+        name: "loansPortfolioWithdraw",
+        signature: {
+          full: "function loansPortfolioWithdraw(address _assetAddress, address _to, uint256 _amount) returns (bool success_)",
+          canonical: "loansPortfolioWithdraw(address,address,uint256)",
+        },
+        selector: "0x3790c60f",
+      },
+      {
+        name: "notifyLoanHoldingsAssetUpdate",
+        signature: {
+          full: "function notifyLoanHoldingsAssetUpdate(address _holdingsAssetAddress) returns (bool success_)",
+          canonical: "notifyLoanHoldingsAssetUpdate(address)",
+        },
+        selector: "0x6b8370d0",
+      },
+      {
+        name: "removeHoldingsAsset",
+        signature: {
+          full: "function removeHoldingsAsset((address assetAddress, uint8 holdingsAssetType, string country) _holdingsAsset) returns (bool success_)",
+          canonical: "removeHoldingsAsset((address,uint8,string))",
+        },
+        selector: "0xa5f7becc",
+      },
+    ],
+    events: [
+      {
+        name: "HoldingsAssetAdded",
+        signature: {
+          full: "event HoldingsAssetAdded((address assetAddress, uint8 holdingsAssetType, string country) holdingsAsset)",
+          canonical: "HoldingsAssetAdded((address,uint8,string))",
+        },
+        topic0: "0x86e9f9030819a7afbb259573c36d5e6cf6192559b52bf4cfaaea72bf37c697d3",
+      },
+      {
+        name: "HoldingsAssetRemoved",
+        signature: {
+          full: "event HoldingsAssetRemoved((address assetAddress, uint8 holdingsAssetType, string country) holdingsAsset)",
+          canonical: "HoldingsAssetRemoved((address,uint8,string))",
+        },
+        topic0: "0x5c6f1e5bd7484650e53aad97b992d92dbfe64362c802b5069d1a4e41573ce7b5",
+      },
+      {
+        name: "LoanHoldingsAssetUpdated",
+        signature: {
+          full: "event LoanHoldingsAssetUpdated(address loanHoldingsAsset)",
+          canonical: "LoanHoldingsAssetUpdated(address)",
+        },
+        topic0: "0xa75a9d5e89faf0645d0835c5b596fc8521dec3429395fde1f40c0d77dc8baf3f",
+      },
+      {
+        name: "LoansPortfolioWithdrawn",
+        signature: {
+          full: "event LoansPortfolioWithdrawn(address assetAddress, address to, uint256 amount)",
+          canonical: "LoansPortfolioWithdrawn(address,address,uint256)",
+        },
+        topic0: "0x478242a340ff39588a860534e9d38247a01d93823315fae6c50341621e898b26",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRole",
+        signature: {
+          full: "error AccountHasNoRole(address account, bytes32 role)",
+          canonical: "AccountHasNoRole(address,bytes32)",
+        },
+        selector: "0xa1180aad",
+      },
+      {
+        name: "AlreadyInitialized",
+        signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
+        selector: "0x0dc149f0",
+      },
+      {
+        name: "HoldingAssetNotFound",
+        signature: {
+          full: "error HoldingAssetNotFound(address assetAddress)",
+          canonical: "HoldingAssetNotFound(address)",
+        },
+        selector: "0x2a8dc4de",
+      },
+      {
+        name: "HoldingsAssetAlreadyExists",
+        signature: {
+          full: "error HoldingsAssetAlreadyExists(address assetAddress)",
+          canonical: "HoldingsAssetAlreadyExists(address)",
+        },
+        selector: "0x4e8e344f",
+      },
+      {
+        name: "HoldingsAssetTypeNotSupported",
+        signature: {
+          full: "error HoldingsAssetTypeNotSupported(uint8 holdingsAssetType)",
+          canonical: "HoldingsAssetTypeNotSupported(uint8)",
+        },
+        selector: "0xfc6c68ca",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+      {
+        name: "ZeroAddressNotAllowed",
+        signature: { full: "error ZeroAddressNotAllowed()", canonical: "ZeroAddressNotAllowed()" },
+        selector: "0x8579befe",
+      },
+      { name: "ZeroValue", signature: { full: "error ZeroValue()", canonical: "ZeroValue()" }, selector: "0x7c946ed7" },
+    ],
+    factory: (signer) => new LoansPortfolioFacet__factory(signer),
+    timeTravelFactory: (signer) => new LoansPortfolioFacetTimeTravel__factory(signer),
   },
 
   LockFacet: {
@@ -12510,7 +12825,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 77 as const;
+export const TOTAL_FACETS = 79 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -13158,82 +13473,22 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   ILoansPortfolioStorageWrapper: {
     name: "ILoansPortfolioStorageWrapper",
-    description: "Interface for loan and portfolio storage operations",
     methods: [],
-    events: [
-      {
-        name: "LoanAddedToPortfolio",
-        signature: {
-          full: "LoanAddedToPortfolio(bytes32,bytes32,address,uint256)",
-          canonical: "LoanAddedToPortfolio(bytes32,bytes32,address,uint256)",
-        },
-        topic0: "0xb96c2b19834ce7643960cd7a259bedf71cab990aea63f248cb3e6d73a8015eeb",
-      },
-      {
-        name: "LoanCancelled",
-        signature: { full: "LoanCancelled(bytes32,address)", canonical: "LoanCancelled(bytes32,address)" },
-        topic0: "0xa8ce39b3afa92b7bd2cb4e64e12f8705695d2e2ccf45f75d1cdb001785b099a3",
-      },
-      {
-        name: "LoanCreated",
-        signature: { full: "LoanCreated(bytes32,address,uint256)", canonical: "LoanCreated(bytes32,address,uint256)" },
-        topic0: "0x1a0dfea61a24fff93563d54e809e3f4d687fac3792d06b3a66863661af605fcf",
-      },
-      {
-        name: "LoanRemovedFromPortfolio",
-        signature: {
-          full: "LoanRemovedFromPortfolio(bytes32,bytes32,address)",
-          canonical: "LoanRemovedFromPortfolio(bytes32,bytes32,address)",
-        },
-        topic0: "0xfbebaa3d7fef69022db8e67164b650e9e188689ac6be7446c5aadf0f193c0c55",
-      },
-    ],
     errors: [
       {
-        name: "InvalidLoanState",
-        signature: { full: "InvalidLoanState(bytes32,uint8)", canonical: "InvalidLoanState(bytes32,uint8)" },
-        selector: "0x6ab86476",
+        name: "HoldingAssetNotFound",
+        signature: { full: "HoldingAssetNotFound(address)", canonical: "HoldingAssetNotFound(address)" },
+        selector: "0x2a8dc4de",
       },
       {
-        name: "InvalidStateTransition",
-        signature: {
-          full: "InvalidStateTransition(bytes32,uint8,uint8)",
-          canonical: "InvalidStateTransition(bytes32,uint8,uint8)",
-        },
-        selector: "0x00872967",
+        name: "HoldingsAssetAlreadyExists",
+        signature: { full: "HoldingsAssetAlreadyExists(address)", canonical: "HoldingsAssetAlreadyExists(address)" },
+        selector: "0x4e8e344f",
       },
       {
-        name: "LoanAlreadyInPortfolio",
-        signature: {
-          full: "LoanAlreadyInPortfolio(bytes32,bytes32)",
-          canonical: "LoanAlreadyInPortfolio(bytes32,bytes32)",
-        },
-        selector: "0x5b079c72",
-      },
-      {
-        name: "LoanCreationFailed",
-        signature: { full: "LoanCreationFailed()", canonical: "LoanCreationFailed()" },
-        selector: "0xf9b045f1",
-      },
-      {
-        name: "LoanHasActiveOperations",
-        signature: { full: "LoanHasActiveOperations(bytes32)", canonical: "LoanHasActiveOperations(bytes32)" },
-        selector: "0x9ba951b6",
-      },
-      {
-        name: "LoanNotActive",
-        signature: { full: "LoanNotActive(bytes32)", canonical: "LoanNotActive(bytes32)" },
-        selector: "0x13656369",
-      },
-      {
-        name: "LoanNotFound",
-        signature: { full: "LoanNotFound(bytes32)", canonical: "LoanNotFound(bytes32)" },
-        selector: "0xbc5f10ed",
-      },
-      {
-        name: "LoanNotInPortfolio",
-        signature: { full: "LoanNotInPortfolio(bytes32,bytes32)", canonical: "LoanNotInPortfolio(bytes32,bytes32)" },
-        selector: "0x391cd4a7",
+        name: "HoldingsAssetTypeNotSupported",
+        signature: { full: "HoldingsAssetTypeNotSupported(uint8)", canonical: "HoldingsAssetTypeNotSupported(uint8)" },
+        selector: "0xfc6c68ca",
       },
     ],
   },
@@ -13256,7 +13511,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   LoansPortfolioStorageWrapper: {
     name: "LoansPortfolioStorageWrapper",
-    description: "Library for loan and portfolio storage operations",
     methods: [],
   },
 
@@ -13371,7 +13625,6 @@ export const ROLES = {
   _KYC_MANAGER_ROLE: "0x8ebae577938c1afa7fb3dc7b06459c79c86ffd2ac9805b6da92ee4cbbf080449",
   _KYC_ROLE: "0x6fbd421e041603fa367357d79ffc3b2f9fd37a6fc4eec661aa5537a9ae75f93d",
   _LOAN_MANAGER_ROLE: "0xc085daff7cbf912b30437b0b95363f3920f33cbd53213a269a2fc5d44ee8289d",
-  _LOAN_ORIGINATOR_ROLE: "0x2c535291a6d0dde45c902f1589f13425a81654fd732c65147b4decf85c17e707",
   _LOANS_PORTFOLIO_MANAGER_ROLE: "0xa6b5c56eb64684d38c620773854f4720f1c51c63e6fa070641fff03465904e6c",
   _LOCKER_ROLE: "0xd8aa8c6f92fe8ac3f3c0f88216e25f7c08b3a6c374b4452a04d200c29786ce88",
   _MATURITY_REDEEMER_ROLE: "0xa0d696902e9ed231892dc96649f0c62b808a1cb9dd1269e78e0adc1cc4b8358c",
@@ -13390,4 +13643,4 @@ export const ROLES = {
 /**
  * Total number of unique roles in the registry.
  */
-export const TOTAL_ROLES = 35 as const;
+export const TOTAL_ROLES = 34 as const;

@@ -12,28 +12,48 @@ import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
+import { InitBitmap } from "../init/InitBits.sol";
 
+// Storage layout is tuned for slot packing:
+//   slot 0: decimals + securityType (both small, packed)
+//   slot 1: totalSupply
+//   slot 2: initBitmap (UDVT = uint256 = full slot)
+//   slot 3–5: name, symbol, isin (each string = own slot)
+//   slot 6–7: balances, allowed (each mapping = own slot)
+// Future appends go AFTER initBitmap and BEFORE strings to keep scalars together.
 struct ERC20Storage {
+    // Small scalars — packed into slot 0
+    uint8 decimals;
+    IFactory.SecurityType securityType;
+    // Large primitives — one slot each
+    uint256 totalSupply;
+    InitBitmap initBitmap;
+    // Strings — one slot each (break packing)
     string name;
     string symbol;
     string isin;
-    uint8 decimals;
-    bool initialized;
-    mapping(address => mapping(address => uint256)) allowed;
-    IFactory.SecurityType securityType;
-    uint256 totalSupply;
+    // Mappings — one slot each
     mapping(address => uint256) balances;
+    mapping(address => mapping(address => uint256)) allowed;
 }
 
+/// @title ERC20StorageWrapper
+/// @notice Provides safe access to ERC20 storage (decimals, totalSupply, name, symbol, isin, balances, allowances)
+/// @author Asset Tokenization Studio Team
 library ERC20StorageWrapper {
-    function initializeERC20(IERC20.ERC20Metadata calldata erc20Metadata) internal {
+    /**
+     * @notice Writes ERC20 metadata (name, symbol, isin, decimals, securityType).
+     * @param erc20Metadata The metadata struct containing name, symbol, isin, decimals, and securityType
+     * @dev Callers gate the write with onlyNotErc20Initialized(<mask>) and flip the
+     *      matching bits via markInitialized(<mask>) after the write.
+     */
+    function writeErc20Metadata(IERC20.ERC20Metadata calldata erc20Metadata) internal {
         ERC20Storage storage erc20Stor = erc20Storage();
         erc20Stor.name = erc20Metadata.info.name;
         erc20Stor.symbol = erc20Metadata.info.symbol;
         erc20Stor.isin = erc20Metadata.info.isin;
         erc20Stor.decimals = erc20Metadata.info.decimals;
         erc20Stor.securityType = erc20Metadata.securityType;
-        erc20Stor.initialized = true;
     }
 
     function increaseBalance(address to, uint256 value) internal {
@@ -215,6 +235,11 @@ library ERC20StorageWrapper {
         $.DEPRECATED_balances[tokenHolder] = 0;
     }
 
+    function markInitialized(uint256 bits) internal {
+        ERC20Storage storage s = erc20Storage();
+        s.initBitmap = s.initBitmap.markInitialized(bits);
+    }
+
     function totalSupply() internal view returns (uint256 totalSupply_) {
         totalSupply_ = ERC1410StorageWrapper.erc1410BasicStorage().DEPRECATED_totalSupply;
         return totalSupply_ == 0 ? erc20Storage().totalSupply : totalSupply_;
@@ -233,12 +258,12 @@ library ERC20StorageWrapper {
         return erc20Storage().name;
     }
 
-    function decimals() internal view returns (uint8) {
-        return erc20Storage().decimals;
+    function getSymbol() internal view returns (string memory) {
+        return erc20Storage().symbol;
     }
 
-    function isERC20Initialized() internal view returns (bool) {
-        return erc20Storage().initialized;
+    function decimals() internal view returns (uint8) {
+        return erc20Storage().decimals;
     }
 
     function getERC20Metadata() internal view returns (IERC20.ERC20Metadata memory erc20Metadata_) {
@@ -273,6 +298,22 @@ library ERC20StorageWrapper {
             );
     }
 
+    function isInitialized(uint256 bits) internal view returns (bool) {
+        return erc20Storage().initBitmap.isInitialized(bits);
+    }
+
+    function isAnyInitialized(uint256 bits) internal view returns (bool) {
+        return erc20Storage().initBitmap.isAnyInitialized(bits);
+    }
+
+    function requireNotInitialized(uint256 bits) internal view {
+        erc20Storage().initBitmap.requireNotInitialized(bits);
+    }
+
+    // TODO(least-privilege): downgrade to `private pure` once external callers
+    // (ERC3643StorageWrapper.setName/setSymbol/setOnchainID and MigrationFacetTest)
+    // route through named wrappers instead of reaching into ERC20Storage directly.
+    // Isolation rule says storage-slot accessors belong to the owning wrapper only.
     function erc20Storage() internal pure returns (ERC20Storage storage erc20Storage_) {
         bytes32 position = _ERC20_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly

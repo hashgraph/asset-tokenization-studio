@@ -48,6 +48,7 @@ import {
   ProceedRecipientsFacet__factory,
   TimeTravelFacet__factory,
   Loan__factory,
+  CoreFacet__factory,
 } from "@contract-types";
 import { decodeEvent } from "@scripts/infrastructure";
 import { DeepPartial, TIME_PERIODS_S } from "@scripts";
@@ -255,6 +256,7 @@ export async function deployLoanTokenFixture({
   const kycFacet = KycFacet__factory.connect(proxyAddress, deployer);
   const controlListFacet = ControlListFacet__factory.connect(proxyAddress, deployer);
   const erc20Facet = ERC20Facet__factory.connect(proxyAddress, deployer);
+  const coreFacet = CoreFacet__factory.connect(proxyAddress, deployer);
   const freezeFacet = FreezeFacet__factory.connect(proxyAddress, deployer);
   const capFacet = CapFacet__factory.connect(proxyAddress, deployer);
   const erc1644Facet = ERC1644Facet__factory.connect(proxyAddress, deployer);
@@ -279,7 +281,7 @@ export async function deployLoanTokenFixture({
   await controlListFacet.initializeControlList(securityData.isWhiteList);
   await erc1410ManagementFacet.initialize_ERC1410(securityData.isMultiPartition);
   await erc1644Facet.initialize_ERC1644(securityData.isControllable);
-  await erc20Facet.initialize_ERC20({
+  await coreFacet.initializeCore({
     info: {
       name: securityData.erc20MetadataInfo.name,
       symbol: securityData.erc20MetadataInfo.symbol,

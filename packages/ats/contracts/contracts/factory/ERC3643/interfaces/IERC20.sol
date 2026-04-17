@@ -31,10 +31,6 @@ interface TRexIERC20 {
     error SpenderWithZeroAddress();
     error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
 
-    // Initialization function
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC20(ERC20Metadata calldata erc1594Metadata) external;
-
     /**
      * @dev Moves `amount` tokens from the caller's account to `to`.
      *
@@ -111,29 +107,9 @@ interface TRexIERC20 {
     function allowance(address owner, address spender) external view returns (uint256);
 
     /**
-     * @notice Returns the name of the scurity token
-     */
-    function name() external view returns (string memory);
-
-    /**
-     * @notice Returns the symbol of the security token
-     */
-    function symbol() external view returns (string memory);
-
-    /**
-     * @notice Returns the decimals simulating non-triggered decimal adjustments up until current timestamp
-     */
-    function decimals() external view returns (uint8);
-
-    /**
      * @notice Returns the decimals simulating non-triggered decimal adjustments
      *
      * @param _timestamp The timestamp until which ABAFs are simulated
      */
     function decimalsAt(uint256 _timestamp) external view returns (uint8);
-
-    /**
-     * @notice Returns the metadata of the token in a struct
-     */
-    function getERC20Metadata() external view returns (ERC20Metadata memory);
 }

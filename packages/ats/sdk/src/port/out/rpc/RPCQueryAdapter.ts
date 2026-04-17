@@ -32,6 +32,7 @@ import {
   ClearingRedeemFacet__factory,
   ClearingTransferFacet__factory,
   ControlListFacet__factory,
+  CoreFacet__factory,
   DiamondFacet__factory,
   Dividend__factory,
   Equity__factory,
@@ -257,7 +258,7 @@ export class RPCQueryAdapter {
   async getSecurity(address: EvmAddress): Promise<Security> {
     LogService.logTrace(`Requesting security details for security: ${address.toString()}`);
 
-    const erc20Metadata = await this.connect(ERC20Facet__factory, address.toString()).getERC20Metadata();
+    const erc20Metadata = await this.connect(CoreFacet__factory, address.toString()).getERC20Metadata();
     const totalSupply = await this.connect(ERC1410ReadFacet__factory, address.toString()).totalSupply();
     const maxSupply = await this.connect(CapFacet__factory, address.toString()).getMaxSupply();
     const isWhiteList = await this.connect(ControlListFacet__factory, address.toString()).getControlListType();

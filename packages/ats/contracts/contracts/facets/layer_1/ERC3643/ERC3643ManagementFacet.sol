@@ -13,10 +13,8 @@ contract ERC3643ManagementFacet is ERC3643Management, IStaticFunctionSelectors {
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](9);
+        staticFunctionSelectors_ = new bytes4[](7);
         staticFunctionSelectors_[selectorIndex++] = this.initialize_ERC3643.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.setName.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.setSymbol.selector;
         staticFunctionSelectors_[selectorIndex++] = this.setOnchainID.selector;
         staticFunctionSelectors_[selectorIndex++] = this.setIdentityRegistry.selector;
         staticFunctionSelectors_[selectorIndex++] = this.setCompliance.selector;

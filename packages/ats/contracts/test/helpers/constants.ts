@@ -1204,3 +1204,39 @@ export const TEST_OPTIONS = {
    */
   CONFIRMATIONS_INSTANT: 0,
 } as const;
+
+// ============================================================================
+// ERC20 Metadata Test Values
+// ============================================================================
+
+/**
+ * Reusable ERC20 metadata values for tests that need to configure a token's
+ * name/symbol/decimals without inlining literals.
+ *
+ * Use INITIAL for the initial deployment metadata, UPDATED for a follow-up
+ * setName/setSymbol state change in the same test.
+ *
+ * `isin` is intentionally NOT included — it is dynamically generated per test
+ * via `isinGenerator()` from `@thomaschaplin/isin-generator`.
+ *
+ * @example
+ * const { name, symbol, decimals } = TEST_ERC20_METADATA.INITIAL;
+ * await deployEquityTokenFixture({
+ *   equityDataParams: {
+ *     securityData: { erc20MetadataInfo: { name, symbol, decimals, isin: isinGenerator() } },
+ *   },
+ * });
+ */
+export const TEST_ERC20_METADATA = {
+  /** Initial metadata for a freshly-deployed test token. */
+  INITIAL: {
+    name: "TEST_Core",
+    symbol: "TCO",
+    decimals: 6,
+  },
+  /** Post-update metadata for tests exercising setName/setSymbol. */
+  UPDATED: {
+    name: "UPDATED_Core",
+    symbol: "UCO",
+  },
+} as const;

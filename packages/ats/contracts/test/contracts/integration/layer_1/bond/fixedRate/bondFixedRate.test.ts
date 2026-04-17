@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { ResolverProxy, FixedRate, CouponFacetTimeTravel } from "@contract-types";
+import { ResolverProxy, FixedRate, CouponFacetTimeTravel, type ICore } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES, TIME_PERIODS_S } from "@scripts";
 import { SecurityType } from "@scripts/domain";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -34,6 +34,7 @@ describe("Bond Fixed Rate Tests", () => {
 
   let fixedRateFacet: FixedRate;
   let couponFixedRateFacet: CouponFacetTimeTravel;
+  let coreFacet: ICore;
 
   async function deploySecurityFixture() {
     const base = await deployBondFixedRateTokenFixture();
@@ -50,6 +51,7 @@ describe("Bond Fixed Rate Tests", () => {
 
     fixedRateFacet = await ethers.getContractAt("FixedRate", diamond.target, signer_A);
     couponFixedRateFacet = await ethers.getContractAt("CouponFixedRateFacetTimeTravel", diamond.target, signer_A);
+    coreFacet = await ethers.getContractAt("ICore", diamond.target, signer_A);
   }
 
   beforeEach(async () => {
@@ -72,8 +74,7 @@ describe("Bond Fixed Rate Tests", () => {
   });
 
   it("GIVEN a bond fixed rate WHEN deployed THEN securityType is BOND_FIXED_RATE", async () => {
-    const erc20Facet = await ethers.getContractAt("ERC20", diamond.target);
-    const metadata = await erc20Facet.getERC20Metadata();
+    const metadata = await coreFacet.getERC20Metadata();
     expect(metadata.securityType).to.be.equal(SecurityType.BOND_FIXED_RATE);
   });
 

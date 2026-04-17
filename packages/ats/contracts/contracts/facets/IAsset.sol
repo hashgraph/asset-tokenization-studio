@@ -27,6 +27,7 @@ import { ICompliance } from "./layer_1/ERC3643/ICompliance.sol";
 // Layer 1 — ERC3643
 import { IControlList } from "./layer_1/controlList/IControlList.sol";
 import { ICorporateActions } from "./layer_1/corporateAction/ICorporateActions.sol";
+import { ICore } from "./erc20/core/ICore.sol";
 import { IDiamond } from "../infrastructure/proxy/IDiamond.sol";
 
 // Layer 1 — External lists
@@ -103,6 +104,7 @@ interface IAsset is
     IKyc,
     ITimeTravel,
     IDiamond,
+    ICore,
     IHold,
     IERC20,
     IERC20Votes,

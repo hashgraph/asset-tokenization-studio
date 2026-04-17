@@ -68,6 +68,7 @@ import {
   ClearingRedeemFacet__factory,
   ClearingTransferFacet__factory,
   ControlListFacet__factory,
+  CoreFacet__factory,
   DiamondFacet__factory,
   Dividend__factory,
   Equity__factory,
@@ -2029,7 +2030,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Setting name to ${security.toString()}`);
 
     return this.executeTransaction(
-      ERC3643ManagementFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      CoreFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setName",
       [name],
       GAS.SET_NAME,
@@ -2040,7 +2041,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Setting symbol to ${security.toString()}`);
 
     return this.executeTransaction(
-      ERC3643ManagementFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      CoreFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setSymbol",
       [symbol],
       GAS.SET_SYMBOL,

@@ -9,6 +9,7 @@ import { ResolverProxy } from "../infrastructure/proxy/ResolverProxy.sol";
 import { IResolverProxy } from "../infrastructure/proxy/IResolverProxy.sol";
 import { _DEFAULT_ADMIN_ROLE } from "../constants/roles.sol";
 import { IControlList } from "../facets/layer_1/controlList/IControlList.sol";
+import { ICore } from "../facets/erc20/core/ICore.sol";
 import { IERC20 } from "../facets/layer_1/ERC1400/ERC20/IERC20.sol";
 import { IERC20Votes } from "../facets/layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
 import { IERC1644 } from "../facets/layer_1/ERC1400/ERC1644/IERC1644.sol";
@@ -326,13 +327,6 @@ contract Factory is IFactory {
         // configure controller flag (ERC1644Facet may not be present)
         _tryInitialize_ERC1644(securityAddress_, _securityData.isControllable);
 
-        // configure erc20 metadata (ERC20Facet may not be present)
-        IERC20.ERC20Metadata memory erc20Metadata = IERC20.ERC20Metadata({
-            info: _securityData.erc20MetadataInfo,
-            securityType: _securityType
-        });
-        _tryInitialize_ERC20(securityAddress_, erc20Metadata);
-
         // configure issue flag (ERC1594Facet may not be present)
         _tryInitialize_ERC1594(securityAddress_);
 
@@ -362,6 +356,13 @@ contract Factory is IFactory {
         // configure ERC20Votes (ERC20VotesFacet may not be present)
         _tryInitialize_ERC20Votes(securityAddress_, _securityData.erc20VotesActivated);
 
+        // configure Core (should be present)
+        IERC20.ERC20Metadata memory coreERC20Metadata = IERC20.ERC20Metadata({
+            info: _securityData.erc20MetadataInfo,
+            securityType: _securityType
+        });
+        _tryInitialize_Core(securityAddress_, coreERC20Metadata);
+
         // configure ERC3643 (should be present)
         IERC3643(securityAddress_).initialize_ERC3643(_securityData.compliance, _securityData.identityRegistry);
     }
@@ -376,14 +377,6 @@ contract Factory is IFactory {
 
     function _tryInitialize_ERC1644(address securityAddress_, bool isControllable) private {
         try IERC1644(securityAddress_).initialize_ERC1644(isControllable) {
-            // success
-        } catch {
-            // facet not present - skip initialization
-        }
-    }
-
-    function _tryInitialize_ERC20(address securityAddress_, IERC20.ERC20Metadata memory erc20Metadata) private {
-        try IERC20(securityAddress_).initialize_ERC20(erc20Metadata) {
             // success
         } catch {
             // facet not present - skip initialization
@@ -408,6 +401,14 @@ contract Factory is IFactory {
 
     function _tryInitialize_ERC20Votes(address securityAddress_, bool erc20VotesActivated) private {
         try IERC20Votes(securityAddress_).initialize_ERC20Votes(erc20VotesActivated) {
+            // success
+        } catch {
+            // facet not present - skip initialization
+        }
+    }
+
+    function _tryInitialize_Core(address securityAddress_, IERC20.ERC20Metadata memory erc20Metadata) private {
+        try ICore(securityAddress_).initializeCore(erc20Metadata) {
             // success
         } catch {
             // facet not present - skip initialization

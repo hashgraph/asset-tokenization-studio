@@ -14,11 +14,12 @@ import { _checkNotInitialized } from "../InitializationErrors.sol";
  */
 abstract contract ERC20Modifiers {
     /**
-     * @notice Modifier to ensure ERC20 has not been initialized
-     * @dev Reverts with AlreadyInitialized if ERC20 is already initialized
+     * @notice Modifier to ensure specified ERC20 init bits have not been set
+     * @param bits Bitmask of init bits to check
+     * @dev Reverts with AlreadyInitialized if any bits are already set
      */
-    modifier onlyNotERC20Initialized() {
-        _checkNotInitialized(ERC20StorageWrapper.isERC20Initialized());
+    modifier onlyNotErc20Initialized(uint256 bits) {
+        ERC20StorageWrapper.requireNotInitialized(bits);
         _;
     }
 
