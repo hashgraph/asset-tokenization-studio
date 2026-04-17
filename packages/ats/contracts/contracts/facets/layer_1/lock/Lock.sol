@@ -5,7 +5,6 @@ import { _LOCKER_ROLE, _CONTROLLER_ROLE } from "../../../constants/roles.sol";
 import { ILock } from "./ILock.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
-import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
@@ -17,7 +16,7 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
  * Provides functionality for locking tokens with expiration timestamps
  * and role-based access control. Inherits LockModifiers for expiration validation.
  */
-abstract contract Lock is ILock, TimestampProvider, Modifiers {
+abstract contract Lock is ILock, Modifiers {
     /**
      * @notice Lock tokens by partition
      * @dev Only callable by LOCKER_ROLE

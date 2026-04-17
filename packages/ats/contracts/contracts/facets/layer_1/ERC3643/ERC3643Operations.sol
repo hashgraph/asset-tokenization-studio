@@ -7,11 +7,11 @@ import { IERC1644 } from "../ERC1400/ERC1644/IERC1644.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ERC1594StorageWrapper } from "../../../domain/asset/ERC1594StorageWrapper.sol";
+import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { TokenCoreOps } from "../../../domain/orchestrator/TokenCoreOps.sol";
-import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
-abstract contract ERC3643Operations is IERC3643Operations, TimestampProvider, Modifiers {
+abstract contract ERC3643Operations is IERC3643Operations, Modifiers {
     function burn(
         address _userAddress,
         uint256 _amount
@@ -33,7 +33,7 @@ abstract contract ERC3643Operations is IERC3643Operations, TimestampProvider, Mo
         external
         onlyUnpaused
         onlyWithoutMultiPartition
-        onlyWithinMaxSupply(_amount, _getBlockTimestamp())
+        onlyWithinMaxSupply(_amount, TimeTravelStorageWrapper.getBlockTimestamp())
         onlyIdentifiedAddresses(address(0), _to)
         onlyCompliant(address(0), _to, false)
     {

@@ -6,13 +6,13 @@ import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWr
 import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
 import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
+import { TimeTravelStorageWrapper } from "../../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { IPause } from "../../../../facets/layer_1/pause/IPause.sol";
-import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 import { Eip1066 } from "../../../../constants/eip1066.sol";
 
-abstract contract ERC1410Read is IERC1410Read, TimestampProvider, Modifiers {
+abstract contract ERC1410Read is IERC1410Read, Modifiers {
     function balanceOf(address _tokenHolder) external view returns (uint256) {
-        return ERC1410StorageWrapper.balanceOfAdjustedAt(_tokenHolder, _getBlockTimestamp());
+        return ERC1410StorageWrapper.balanceOfAdjustedAt(_tokenHolder, TimeTravelStorageWrapper.getBlockTimestamp());
     }
 
     function balanceOfAt(address _tokenHolder, uint256 _timestamp) external view returns (uint256) {
@@ -20,15 +20,24 @@ abstract contract ERC1410Read is IERC1410Read, TimestampProvider, Modifiers {
     }
 
     function balanceOfByPartition(bytes32 _partition, address _tokenHolder) external view returns (uint256) {
-        return ERC1410StorageWrapper.balanceOfByPartitionAdjustedAt(_partition, _tokenHolder, _getBlockTimestamp());
+        return
+            ERC1410StorageWrapper.balanceOfByPartitionAdjustedAt(
+                _partition,
+                _tokenHolder,
+                TimeTravelStorageWrapper.getBlockTimestamp()
+            );
     }
 
     function totalSupply() external view returns (uint256) {
-        return ERC1410StorageWrapper.totalSupplyAdjustedAt(_getBlockTimestamp());
+        return ERC1410StorageWrapper.totalSupplyAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
     }
 
     function totalSupplyByPartition(bytes32 _partition) external view returns (uint256) {
-        return ERC1410StorageWrapper.totalSupplyByPartitionAdjustedAt(_partition, _getBlockTimestamp());
+        return
+            ERC1410StorageWrapper.totalSupplyByPartitionAdjustedAt(
+                _partition,
+                TimeTravelStorageWrapper.getBlockTimestamp()
+            );
     }
 
     function partitionsOf(address _tokenHolder) external view returns (bytes32[] memory) {

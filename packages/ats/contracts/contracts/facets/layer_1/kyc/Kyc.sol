@@ -5,11 +5,11 @@ import { _KYC_ROLE, _INTERNAL_KYC_MANAGER_ROLE } from "../../../constants/roles.
 import { IKyc } from "./IKyc.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { KycStorageWrapper } from "../../../domain/core/KycStorageWrapper.sol";
+import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";
-import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
-abstract contract Kyc is IKyc, TimestampProvider, Modifiers {
+abstract contract Kyc is IKyc, Modifiers {
     function initializeInternalKyc(bool _internalKycActivated) external {
         _checkNotInitialized(KycStorageWrapper.isKycInitialized());
         KycStorageWrapper.initializeInternalKyc(_internalKycActivated);
@@ -44,7 +44,7 @@ abstract contract Kyc is IKyc, TimestampProvider, Modifiers {
         onlyRole(_KYC_ROLE)
         notZeroAddress(_account)
         onlyValidKycStatus(KycStatus.NOT_GRANTED, _account)
-        onlyThreeValidDates(_validFrom, _validTo, _getBlockTimestamp())
+        onlyThreeValidDates(_validFrom, _validTo, TimeTravelStorageWrapper.getBlockTimestamp())
         onlyValidIssuer(_issuer)
         returns (bool success_)
     {
@@ -60,7 +60,7 @@ abstract contract Kyc is IKyc, TimestampProvider, Modifiers {
     }
 
     function getKycStatusFor(address _account) external view virtual override returns (KycStatus kycStatus_) {
-        kycStatus_ = KycStorageWrapper.getKycStatusFor(_account, _getBlockTimestamp());
+        kycStatus_ = KycStorageWrapper.getKycStatusFor(_account, TimeTravelStorageWrapper.getBlockTimestamp());
     }
 
     function getKycFor(address _account) external view virtual override returns (KycData memory kyc_) {

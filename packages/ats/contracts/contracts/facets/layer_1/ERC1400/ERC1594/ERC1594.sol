@@ -10,13 +10,13 @@ import { Modifiers } from "../../../../services/Modifiers.sol";
 import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
 import { IPause } from "../../../../facets/layer_1/pause/IPause.sol";
 import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
+import { TimeTravelStorageWrapper } from "../../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
-import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 import { Eip1066 } from "../../../../constants/eip1066.sol";
 import { ProtectedPartitionRoleValidator } from "../../../../infrastructure/utils/ProtectedPartitionRoleValidator.sol";
 import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
-abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPartitionRoleValidator {
+abstract contract ERC1594 is IERC1594, Modifiers, ProtectedPartitionRoleValidator {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1594() external override onlyNotERC1594Initialized {
         ERC1594StorageWrapper.initialize();
@@ -65,7 +65,7 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
         override
         onlyUnpaused
         onlyWithoutMultiPartition
-        onlyWithinMaxSupply(_value, _getBlockTimestamp())
+        onlyWithinMaxSupply(_value, TimeTravelStorageWrapper.getBlockTimestamp())
         onlyIdentifiedAddresses(address(0), _tokenHolder)
         onlyCompliant(address(0), _tokenHolder, false)
     {

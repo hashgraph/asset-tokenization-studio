@@ -7,7 +7,7 @@ import { Modifiers } from "../../../services/Modifiers.sol";
 import { ExternalListManagementStorageWrapper } from "../../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
-import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
+import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 /**
@@ -18,7 +18,7 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
  * Provides functionality for freezing addresses and partial token amounts
  * with role-based access control. Inherits ERC3643Modifiers for compliance checks.
  */
-abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
+abstract contract Freeze is IFreeze, Modifiers {
     /**
      * @notice Set address frozen status
      * @dev Only callable by FREEZE_MANAGER_ROLE or AGENT_ROLE
@@ -194,6 +194,10 @@ abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
      * @return Frozen token amount
      */
     function getFrozenTokens(address _userAddress) external view override returns (uint256) {
-        return ERC3643StorageWrapper.getFrozenAmountForAdjustedAt(_userAddress, _getBlockTimestamp());
+        return
+            ERC3643StorageWrapper.getFrozenAmountForAdjustedAt(
+                _userAddress,
+                TimeTravelStorageWrapper.getBlockTimestamp()
+            );
     }
 }

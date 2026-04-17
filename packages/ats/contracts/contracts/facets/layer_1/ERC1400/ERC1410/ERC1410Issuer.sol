@@ -5,12 +5,12 @@ import { _AGENT_ROLE, _ISSUER_ROLE } from "../../../../constants/roles.sol";
 import { IERC1410Issuer } from "./IERC1410Issuer.sol";
 import { IERC1410Types } from "./IERC1410Types.sol";
 import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
+import { TimeTravelStorageWrapper } from "../../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
-import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
-abstract contract ERC1410Issuer is IERC1410Issuer, TimestampProvider, Modifiers {
+abstract contract ERC1410Issuer is IERC1410Issuer, Modifiers {
     function issueByPartition(
         IERC1410Types.IssueData calldata _issueData
     )
@@ -18,8 +18,12 @@ abstract contract ERC1410Issuer is IERC1410Issuer, TimestampProvider, Modifiers 
         onlyUnpaused
         onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyDefaultPartitionWithSinglePartition(_issueData.partition)
-        onlyWithinMaxSupply(_issueData.value, _getBlockTimestamp())
-        onlyWithinMaxSupplyByPartition(_issueData.partition, _issueData.value, _getBlockTimestamp())
+        onlyWithinMaxSupply(_issueData.value, TimeTravelStorageWrapper.getBlockTimestamp())
+        onlyWithinMaxSupplyByPartition(
+            _issueData.partition,
+            _issueData.value,
+            TimeTravelStorageWrapper.getBlockTimestamp()
+        )
         onlyIdentifiedAddresses(address(0), _issueData.tokenHolder)
         onlyCompliant(address(0), _issueData.tokenHolder, false)
     {

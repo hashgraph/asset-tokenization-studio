@@ -5,11 +5,11 @@ import { IERC20 } from "./IERC20.sol";
 import { _DEFAULT_PARTITION } from "../../../../constants/values.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
 import { ERC20StorageWrapper } from "../../../../domain/asset/ERC20StorageWrapper.sol";
+import { TimeTravelStorageWrapper } from "../../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
-import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
-abstract contract ERC20 is IERC20, TimestampProvider, Modifiers {
+abstract contract ERC20 is IERC20, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20(ERC20Metadata calldata erc20Metadata) external override onlyNotERC20Initialized {
         ERC20StorageWrapper.initializeERC20(erc20Metadata);
@@ -89,7 +89,7 @@ abstract contract ERC20 is IERC20, TimestampProvider, Modifiers {
     }
 
     function allowance(address owner, address spender) external view override returns (uint256) {
-        return ERC20StorageWrapper.allowanceAdjustedAt(owner, spender, _getBlockTimestamp());
+        return ERC20StorageWrapper.allowanceAdjustedAt(owner, spender, TimeTravelStorageWrapper.getBlockTimestamp());
     }
 
     function name() external view returns (string memory) {
@@ -101,7 +101,7 @@ abstract contract ERC20 is IERC20, TimestampProvider, Modifiers {
     }
 
     function decimals() external view returns (uint8) {
-        return ERC20StorageWrapper.decimalsAdjustedAt(_getBlockTimestamp());
+        return ERC20StorageWrapper.decimalsAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
     }
 
     function decimalsAt(uint256 _timestamp) external view returns (uint8) {
@@ -109,6 +109,6 @@ abstract contract ERC20 is IERC20, TimestampProvider, Modifiers {
     }
 
     function getERC20Metadata() external view returns (ERC20Metadata memory) {
-        return ERC20StorageWrapper.getERC20MetadataAdjustedAt(_getBlockTimestamp());
+        return ERC20StorageWrapper.getERC20MetadataAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
     }
 }
