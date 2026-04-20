@@ -21,9 +21,6 @@ interface IControlList {
     error ListedAccount(address account);
     error UnlistedAccount(address account);
 
-    // Re-exported from IControlListStorageWrapper for TypeChain visibility
-    error AccountIsBlocked(address account);
-
     /**
      * @dev Initial configuration
      *

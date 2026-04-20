@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { ResolverProxy, KpiLinkedRateFacetTimeTravel } from "@contract-types";
+import { ResolverProxy, KpiLinkedRateFacetTimeTravel, IAsset } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES, TIME_PERIODS_S } from "@scripts";
 import { SecurityType } from "@scripts/domain";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -210,19 +210,28 @@ describe("Bond KpiLinked Rate Tests", () => {
     it("GIVEN a kpiLinked rate bond WHEN setting a coupon with non pending status THEN transaction fails with InterestRateIsKpiLinked", async () => {
       couponData.rateStatus = 1;
 
-      await expect(asset.connect(signer_A).setCoupon(couponData)).to.be.rejectedWith("InterestRateIsKpiLinked");
+      await expect(asset.connect(signer_A).setCoupon(couponData)).to.be.revertedWithCustomError(
+        asset,
+        "InterestRateIsKpiLinked",
+      );
     });
 
     it("GIVEN a kpiLinked rate bond WHEN setting a coupon with rate non 0 THEN transaction fails with InterestRateIsKpiLinked", async () => {
       couponData.rate = 1;
 
-      await expect(asset.connect(signer_A).setCoupon(couponData)).to.be.rejectedWith("InterestRateIsKpiLinked");
+      await expect(asset.connect(signer_A).setCoupon(couponData)).to.be.revertedWithCustomError(
+        asset,
+        "InterestRateIsKpiLinked",
+      );
     });
 
     it("GIVEN a kpiLinked rate bond WHEN setting a coupon with rate decimals non 0 THEN transaction fails with InterestRateIsKpiLinked", async () => {
       couponData.rateDecimals = 1;
 
-      await expect(asset.connect(signer_A).setCoupon(couponData)).to.be.rejectedWith("InterestRateIsKpiLinked");
+      await expect(asset.connect(signer_A).setCoupon(couponData)).to.be.revertedWithCustomError(
+        asset,
+        "InterestRateIsKpiLinked",
+      );
     });
 
     it("GIVEN a kpiLinked rate bond WHEN setting a coupon with pending status THEN transaction success", async () => {

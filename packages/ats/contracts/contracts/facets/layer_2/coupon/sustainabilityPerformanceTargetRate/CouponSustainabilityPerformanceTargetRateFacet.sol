@@ -5,7 +5,7 @@ import { CouponFacetBase } from "../CouponFacetBase.sol";
 import { ICouponTypes } from "../ICouponTypes.sol";
 // prettier-ignore
 // solhint-disable-next-line max-line-length
-import { ISustainabilityPerformanceTargetRate } from "../../interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+import { ISustainabilityPerformanceTargetRateErrors } from "../../interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRateErrors.sol";
 // prettier-ignore
 // solhint-disable-next-line max-line-length
 import { _COUPON_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
@@ -23,7 +23,7 @@ contract CouponSustainabilityPerformanceTargetRateFacet is CouponFacetBase {
             _newCoupon.rate != 0 ||
             _newCoupon.rateDecimals != 0
         ) {
-            revert ISustainabilityPerformanceTargetRate.InterestRateIsSustainabilityPerformanceTargetRate();
+            revert ISustainabilityPerformanceTargetRateErrors.InterestRateIsSustainabilityPerformanceTargetRate();
         }
         coupon_ = _newCoupon;
     }

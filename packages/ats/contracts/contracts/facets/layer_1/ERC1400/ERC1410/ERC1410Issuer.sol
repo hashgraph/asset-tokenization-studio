@@ -10,7 +10,24 @@ import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
+/**
+ * @title ERC1410Issuer
+ * @notice Facet for issuing tokens by partition (ERC-1410 standard)
+ * @dev Validates all pre-conditions before issuing tokens including:
+ *      - Caller has ISSUER_ROLE or AGENT_ROLE
+ *      - Token is not paused
+ *      - Addresses are not recovered
+ *      - Partition is valid
+ *      - Supply limits are respected
+ *      - Compliance rules are met
+ */
 abstract contract ERC1410Issuer is IERC1410Issuer, TimestampProvider, Modifiers {
+    /**
+     * @notice Issues tokens to a specific partition for a token holder
+     * @param _issueData The issue data containing partition, token holder, value, and data
+     * @dev Requires caller to have ISSUER_ROLE or AGENT_ROLE
+     * @dev Emits IssuedByPartition event on success
+     */
     function issueByPartition(
         IERC1410Types.IssueData calldata _issueData
     )

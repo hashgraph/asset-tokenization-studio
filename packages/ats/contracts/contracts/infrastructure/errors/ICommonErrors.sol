@@ -20,9 +20,6 @@ interface ICommonErrors {
     /// @notice Thrown when an expiration timestamp is in the past or otherwise invalid.
     error WrongExpirationTimestamp();
 
-    /// @notice Thrown when a function receives address(0) where a non-zero address is required.
-    error ZeroAddressNotAllowed();
-
     /// @notice Thrown when an EIP-712 / partition signature fails verification.
     error WrongSignature();
 
@@ -47,4 +44,10 @@ interface ICommonErrors {
     error InvalidDates();
 
     error InvalidTimestamp();
+
+    error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex);
+
+    error AccountIsBlocked(address account);
+
+    error ZeroAddressNotAllowed();
 }

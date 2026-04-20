@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-17T12:28:28.401Z
+ * Generated: 2026-04-20T17:09:00.754Z
  * Facets: 77
  * Infrastructure: 2
  *
@@ -339,14 +339,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountNotAssignedToRole(bytes32,address)",
         },
         selector: "0x3ad9a7ae",
-      },
-      {
-        name: "ContradictoryValuesInArray",
-        signature: {
-          full: "error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex)",
-          canonical: "ContradictoryValuesInArray(uint256,uint256)",
-        },
-        selector: "0xf50c17aa",
       },
       {
         name: "ContradictoryValuesInArray",
@@ -3490,11 +3482,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
-        name: "AccountIsBlocked",
-        signature: { full: "error AccountIsBlocked(address account)", canonical: "AccountIsBlocked(address)" },
-        selector: "0x796c1f0d",
-      },
-      {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
@@ -3620,9 +3607,22 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x10210dec",
       },
       {
+        name: "AccountIsBlocked",
+        signature: { full: "error AccountIsBlocked(address account)", canonical: "AccountIsBlocked(address)" },
+        selector: "0x796c1f0d",
+      },
+      {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
+      },
+      {
+        name: "ContradictoryValuesInArray",
+        signature: {
+          full: "error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex)",
+          canonical: "ContradictoryValuesInArray(uint256,uint256)",
+        },
+        selector: "0xf50c17aa",
       },
       {
         name: "CorporateActionAlreadyDisabled",
@@ -3876,6 +3876,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x69a80e75",
       },
       {
+        name: "InterestRateIsKpiLinked",
+        signature: { full: "error InterestRateIsKpiLinked()", canonical: "InterestRateIsKpiLinked()" },
+        selector: "0x68eba14f",
+      },
+      {
         name: "InvalidTimestamp",
         signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
         selector: "0xb7d09497",
@@ -3912,12 +3917,28 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1c94559c",
       },
       {
+        name: "WrongImpactDataValues",
+        signature: {
+          full: "error WrongImpactDataValues((uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData)",
+          canonical: "WrongImpactDataValues((uint256,uint256,uint256,uint8,uint256))",
+        },
+        selector: "0xa60b6cba",
+      },
+      {
         name: "WrongIndexForAction",
         signature: {
           full: "error WrongIndexForAction(uint256 index, bytes32 actionType)",
           canonical: "WrongIndexForAction(uint256,bytes32)",
         },
         selector: "0xd3924f4e",
+      },
+      {
+        name: "WrongInterestRateValues",
+        signature: {
+          full: "error WrongInterestRateValues((uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate)",
+          canonical: "WrongInterestRateValues((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8))",
+        },
+        selector: "0x570cf0d3",
       },
     ],
     factory: (signer) => new CouponFacet__factory(getLibLinks("clearingReadOps") as any, signer),
@@ -4088,6 +4109,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x849d4eb8",
       },
       {
+        name: "InterestRateIsKpiLinked",
+        signature: { full: "error InterestRateIsKpiLinked()", canonical: "InterestRateIsKpiLinked()" },
+        selector: "0x68eba14f",
+      },
+      {
         name: "InvalidTimestamp",
         signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
         selector: "0xb7d09497",
@@ -4124,12 +4150,28 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1c94559c",
       },
       {
+        name: "WrongImpactDataValues",
+        signature: {
+          full: "error WrongImpactDataValues((uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData)",
+          canonical: "WrongImpactDataValues((uint256,uint256,uint256,uint8,uint256))",
+        },
+        selector: "0xa60b6cba",
+      },
+      {
         name: "WrongIndexForAction",
         signature: {
           full: "error WrongIndexForAction(uint256 index, bytes32 actionType)",
           canonical: "WrongIndexForAction(uint256,bytes32)",
         },
         selector: "0xd3924f4e",
+      },
+      {
+        name: "WrongInterestRateValues",
+        signature: {
+          full: "error WrongInterestRateValues((uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate)",
+          canonical: "WrongInterestRateValues((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8))",
+        },
+        selector: "0x570cf0d3",
       },
     ],
     factory: (signer) => new CouponFixedRateFacet__factory(getLibLinks("clearingReadOps") as any, signer),
@@ -4139,6 +4181,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   CouponKpiLinkedRateFacet: {
     name: "CouponKpiLinkedRateFacet",
+    description: "Facet for coupon management in KPI-linked rate bonds",
     resolverKey: {
       name: "_COUPON_KPI_LINKED_RATE_RESOLVER_KEY",
       value: "0x45f4a1774eac5a47f3cbc755bf5332ca30d8a6bb0330d479c77590dd0d5aab18",
@@ -4337,12 +4380,28 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1c94559c",
       },
       {
+        name: "WrongImpactDataValues",
+        signature: {
+          full: "error WrongImpactDataValues((uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData)",
+          canonical: "WrongImpactDataValues((uint256,uint256,uint256,uint8,uint256))",
+        },
+        selector: "0xa60b6cba",
+      },
+      {
         name: "WrongIndexForAction",
         signature: {
           full: "error WrongIndexForAction(uint256 index, bytes32 actionType)",
           canonical: "WrongIndexForAction(uint256,bytes32)",
         },
         selector: "0xd3924f4e",
+      },
+      {
+        name: "WrongInterestRateValues",
+        signature: {
+          full: "error WrongInterestRateValues((uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate)",
+          canonical: "WrongInterestRateValues((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8))",
+        },
+        selector: "0x570cf0d3",
       },
     ],
     factory: (signer) => new CouponKpiLinkedRateFacet__factory(getLibLinks("clearingReadOps") as any, signer),
@@ -4509,6 +4568,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x69a80e75",
       },
       {
+        name: "InterestRateIsKpiLinked",
+        signature: { full: "error InterestRateIsKpiLinked()", canonical: "InterestRateIsKpiLinked()" },
+        selector: "0x68eba14f",
+      },
+      {
         name: "InterestRateIsSustainabilityPerformanceTargetRate",
         signature: {
           full: "error InterestRateIsSustainabilityPerformanceTargetRate()",
@@ -4553,12 +4617,28 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1c94559c",
       },
       {
+        name: "WrongImpactDataValues",
+        signature: {
+          full: "error WrongImpactDataValues((uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData)",
+          canonical: "WrongImpactDataValues((uint256,uint256,uint256,uint8,uint256))",
+        },
+        selector: "0xa60b6cba",
+      },
+      {
         name: "WrongIndexForAction",
         signature: {
           full: "error WrongIndexForAction(uint256 index, bytes32 actionType)",
           canonical: "WrongIndexForAction(uint256,bytes32)",
         },
         selector: "0xd3924f4e",
+      },
+      {
+        name: "WrongInterestRateValues",
+        signature: {
+          full: "error WrongInterestRateValues((uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate)",
+          canonical: "WrongInterestRateValues((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8))",
+        },
+        selector: "0x570cf0d3",
       },
     ],
     factory: (signer) =>
@@ -7835,14 +7915,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf50c17aa",
       },
       {
-        name: "ContradictoryValuesInArray",
-        signature: {
-          full: "error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex)",
-          canonical: "ContradictoryValuesInArray(uint256,uint256)",
-        },
-        selector: "0xf50c17aa",
-      },
-      {
         name: "ExternalControlListsNotUpdated",
         signature: {
           full: "error ExternalControlListsNotUpdated(address[] controlLista, bool[] actives)",
@@ -8008,14 +8080,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf50c17aa",
       },
       {
-        name: "ContradictoryValuesInArray",
-        signature: {
-          full: "error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex)",
-          canonical: "ContradictoryValuesInArray(uint256,uint256)",
-        },
-        selector: "0xf50c17aa",
-      },
-      {
         name: "ExternalKycListsNotUpdated",
         signature: {
           full: "error ExternalKycListsNotUpdated(address[] kycList, bool[] actives)",
@@ -8160,14 +8224,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
-      },
-      {
-        name: "ContradictoryValuesInArray",
-        signature: {
-          full: "error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex)",
-          canonical: "ContradictoryValuesInArray(uint256,uint256)",
-        },
-        selector: "0xf50c17aa",
       },
       {
         name: "ContradictoryValuesInArray",
@@ -10025,6 +10081,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe8232ac2",
       },
       {
+        name: "NotAllowedInMultiPartitionMode",
+        signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
+        selector: "0x76d08f88",
+      },
+      {
         name: "PartitionNotAllowedInSinglePartitionMode",
         signature: {
           full: "error PartitionNotAllowedInSinglePartitionMode(bytes32 partition)",
@@ -10790,6 +10851,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x0dc149f0",
       },
       {
+        name: "PartitionsAreProtected",
+        signature: { full: "error PartitionsAreProtected()", canonical: "PartitionsAreProtected()" },
+        selector: "0x1156c474",
+      },
+      {
         name: "PartitionsAreProtectedAndNoRole",
         signature: {
           full: "error PartitionsAreProtectedAndNoRole(address account, bytes32 role)",
@@ -11157,16 +11223,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "scheduledSnapshotCount()",
         },
         selector: "0xa19e91fe",
-      },
-    ],
-    events: [
-      {
-        name: "SnapshotTriggered",
-        signature: {
-          full: "event SnapshotTriggered(uint256 snapshotId, bytes metadata)",
-          canonical: "SnapshotTriggered(uint256,bytes)",
-        },
-        topic0: "0xf256aa4705d42c3984e319d2b0a2d1eb0a18a8a820922b71ba13e37c7699828c",
       },
     ],
     factory: (signer) => new ScheduledSnapshotsFacet__factory(signer),
@@ -11629,7 +11685,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       {
         name: "NotExistingProject",
-        signature: { full: "error NotExistingProject(address)", canonical: "NotExistingProject(address)" },
+        signature: { full: "error NotExistingProject(address project)", canonical: "NotExistingProject(address)" },
         selector: "0x2f850995",
       },
       {
@@ -13078,24 +13134,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
   ERC20VotesStorageWrapper: {
     name: "ERC20VotesStorageWrapper",
     methods: [],
-    events: [
-      {
-        name: "DelegateChanged",
-        signature: {
-          full: "DelegateChanged(address,address,address)",
-          canonical: "DelegateChanged(address,address,address)",
-        },
-        topic0: "0x3134e8a2e6d97e929a7e54011ea5485d7d196dd5f0ba4d4ef95803e8e3fc257f",
-      },
-      {
-        name: "DelegateVotesChanged",
-        signature: {
-          full: "DelegateVotesChanged(address,uint256,uint256)",
-          canonical: "DelegateVotesChanged(address,uint256,uint256)",
-        },
-        topic0: "0xdec2bacdd2f05b59de34da9b523dff8be42e5e38e818c82fdb0bae774387a724",
-      },
-    ],
   },
 
   ERC3643StorageWrapper: {

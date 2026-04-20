@@ -110,16 +110,6 @@ interface IAccessControl {
     error RolesNotApplied(bytes32[] roles, bool[] actives, address account);
 
     /**
-     * @notice Triggered when an array contains conflicting values
-     *         at different indices.
-     * @dev Indicates positions within the array where
-     *      contradictory entries were detected.
-     * @param lowerIndex The lower index of the contradiction
-     * @param upperIndex The upper index of the contradiction
-     */
-    error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex);
-
-    /**
      * @notice Grants a role to an account.
      * @dev The caller must be authorised to grant the specified
      *      role. Emits a RoleGranted event on success.

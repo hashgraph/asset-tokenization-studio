@@ -51,13 +51,13 @@ describe("Control List Tests", () => {
   });
 
   it("GIVEN a paused Token WHEN addToControlList THEN transaction fails with TokenIsPaused", async () => {
-    await grantRoleAndPauseToken(asset, asset, ATS_ROLES._CONTROL_LIST_ROLE, signer_A, signer_B, signer_C.address);
+    await grantRoleAndPauseToken(asset, ATS_ROLES._CONTROL_LIST_ROLE, signer_A, signer_B, signer_C.address);
 
     await expect(asset.connect(signer_C).addToControlList(signer_D.address)).to.be.rejectedWith("TokenIsPaused");
   });
 
   it("GIVEN a paused Token WHEN removeFromControlList THEN transaction fails with TokenIsPaused", async () => {
-    await grantRoleAndPauseToken(asset, asset, ATS_ROLES._CONTROL_LIST_ROLE, signer_A, signer_B, signer_C.address);
+    await grantRoleAndPauseToken(asset, ATS_ROLES._CONTROL_LIST_ROLE, signer_A, signer_B, signer_C.address);
 
     await expect(asset.connect(signer_C).removeFromControlList(signer_D.address)).to.be.rejectedWith("TokenIsPaused");
   });

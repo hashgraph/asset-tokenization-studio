@@ -32,6 +32,7 @@ interface IProtectedPartitions {
 
     error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
     error PartitionsAreUnProtected();
+    error PartitionsAreProtected();
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ProtectedPartitions(bool _arePartitionsProtected) external returns (bool success_);

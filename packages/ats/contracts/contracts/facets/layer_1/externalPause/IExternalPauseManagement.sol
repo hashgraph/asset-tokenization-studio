@@ -12,8 +12,6 @@ interface IExternalPauseManagement {
 
     error ExternalPausesNotUpdated(address[] pauses, bool[] actives);
 
-    error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex);
-
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ExternalPauses(address[] calldata _pauses) external;
 

@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+// solhint-disable max-line-length
 import {
-    ISustainabilityPerformanceTargetRate
-} from "../../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+    ISustainabilityPerformanceTargetRateErrors as ISPTRErrors
+} from "../../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRateErrors.sol";
+// solhint-enable max-line-length
 import { InterestRateStorageWrapper } from "./InterestRateStorageWrapper.sol";
 import { KpisStorageWrapper } from "./KpisStorageWrapper.sol";
 import { ProceedRecipientsStorageWrapper } from "./ProceedRecipientsStorageWrapper.sol";
@@ -29,8 +31,7 @@ library SustainabilityPerformanceTargetRateLib {
         uint256 couponID,
         ICouponTypes.Coupon memory coupon
     ) internal view returns (uint256, uint8) {
-        ISustainabilityPerformanceTargetRate.InterestRate memory interestRate = InterestRateStorageWrapper
-            .getSPTInterestRate();
+        ISPTRErrors.InterestRate memory interestRate = InterestRateStorageWrapper.getSPTInterestRate();
 
         if (coupon.fixingDate < interestRate.startPeriod) {
             return (interestRate.startRate, interestRate.rateDecimals);
@@ -44,8 +45,7 @@ library SustainabilityPerformanceTargetRateLib {
 
         for (uint256 index; index < projectCount; ) {
             address project = ProceedRecipientsStorageWrapper.getProceedRecipients(index, 1)[0];
-            ISustainabilityPerformanceTargetRate.ImpactData memory impactData = InterestRateStorageWrapper
-                .getSPTImpactDataFor(project);
+            ISPTRErrors.ImpactData memory impactData = InterestRateStorageWrapper.getSPTImpactDataFor(project);
 
             (uint256 kpiValue, bool kpiExists) = KpisStorageWrapper.getLatestKpiData(
                 previousFixingDate,
@@ -73,11 +73,11 @@ library SustainabilityPerformanceTargetRateLib {
     }
 
     function _calculateRateAdjustmentForProject(
-        ISustainabilityPerformanceTargetRate.ImpactData memory impactData,
+        ISPTRErrors.ImpactData memory impactData,
         uint256 kpiValue,
         bool kpiExists
     ) internal pure returns (uint256 penaltyRate_, uint256 bonusRate_) {
-        if (impactData.impactDataMode == ISustainabilityPerformanceTargetRate.ImpactDataMode.PENALTY) {
+        if (impactData.impactDataMode == ISPTRErrors.ImpactDataMode.PENALTY) {
             if (_shouldApplyPenalty(impactData, kpiValue, kpiExists)) penaltyRate_ = impactData.deltaRate;
             return (penaltyRate_, 0);
         }
@@ -88,27 +88,25 @@ library SustainabilityPerformanceTargetRateLib {
     }
 
     function _shouldApplyPenalty(
-        ISustainabilityPerformanceTargetRate.ImpactData memory impactData,
+        ISPTRErrors.ImpactData memory impactData,
         uint256 kpiValue,
         bool kpiExists
     ) internal pure returns (bool) {
         if (!kpiExists) return true;
 
-        if (impactData.baseLineMode == ISustainabilityPerformanceTargetRate.BaseLineMode.MINIMUM)
-            return kpiValue < impactData.baseLine;
+        if (impactData.baseLineMode == ISPTRErrors.BaseLineMode.MINIMUM) return kpiValue < impactData.baseLine;
 
         return kpiValue > impactData.baseLine;
     }
 
     function _shouldApplyBonus(
-        ISustainabilityPerformanceTargetRate.ImpactData memory impactData,
+        ISPTRErrors.ImpactData memory impactData,
         uint256 kpiValue,
         bool kpiExists
     ) internal pure returns (bool) {
         if (!kpiExists) return false;
 
-        if (impactData.baseLineMode == ISustainabilityPerformanceTargetRate.BaseLineMode.MINIMUM)
-            return kpiValue > impactData.baseLine;
+        if (impactData.baseLineMode == ISPTRErrors.BaseLineMode.MINIMUM) return kpiValue > impactData.baseLine;
 
         return kpiValue < impactData.baseLine;
     }
