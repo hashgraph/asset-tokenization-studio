@@ -45,7 +45,6 @@ describe("ERC20 Tests", () => {
 
   const name = "TEST_AccessControl";
   const symbol = "TAC";
-  const decimals = 6;
   const isin = isinGenerator();
   const EMPTY_VC_ID = EMPTY_STRING;
 

@@ -10,7 +10,6 @@ import {
     _DEFAULT_PARTITION
 } from "../../../constants/values.sol";
 import { IAmortization } from "../../../facets/layer_2/amortization/IAmortization.sol";
-import { IBondTypes } from "../../../facets/layer_2/bond/IBondTypes.sol";
 import { IAmortizationStorageWrapper } from "./IAmortizationStorageWrapper.sol";
 import { IHoldTypes } from "../../../facets/layer_1/hold/IHoldTypes.sol";
 import { IERC1410Types } from "../../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
@@ -25,7 +24,6 @@ import { HoldStorageWrapper } from "../HoldStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "../AdjustBalancesStorageWrapper.sol";
 import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
-import { BondStorageWrapper } from "../BondStorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 import { NominalValueStorageWrapper } from "../nominalValue/NominalValueStorageWrapper.sol";
 

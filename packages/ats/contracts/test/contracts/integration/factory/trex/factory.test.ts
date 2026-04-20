@@ -8,12 +8,10 @@ import {
   TREXFactoryAts,
   ITREXFactory,
   AccessControl,
-  ERC20,
   IFactory,
   CoreFacet,
   AccessControl__factory,
   CoreFacet__factory,
-  ERC20__factory,
   ModularCompliance__factory,
   IdentityRegistryStorage__factory,
   IERC3643__factory,
@@ -46,14 +44,12 @@ describe("TREX Factory Tests", () => {
   let trexDeployment: Awaited<ReturnType<typeof deployFullSuiteFixture>>;
 
   let accessControlFacet: AccessControl;
-  let erc20Facet: ERC20;
   let coreFacet: CoreFacet;
   let factory: IFactory;
 
   async function setFacets(diamond: string) {
     accessControlFacet = AccessControl__factory.connect(diamond.toString(), ethers.provider);
 
-    erc20Facet = ERC20__factory.connect(diamond.toString(), ethers.provider);
     coreFacet = CoreFacet__factory.connect(diamond.toString(), ethers.provider);
   }
   async function deployAtsFactoryFixture() {

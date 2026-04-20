@@ -9,7 +9,6 @@ import {
   type AccessControl,
   type ControlList,
   type ERC1644,
-  type ERC20,
   type CoreFacet,
 } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -47,7 +46,6 @@ describe("Factory Tests", () => {
   let accessControlFacet: AccessControl;
   let controlListFacet: ControlList;
   let erc1644Facet: ERC1644;
-  let erc20Facet: ERC20;
   let coreFacet: CoreFacet;
 
   const listOfRoles = [
@@ -85,8 +83,6 @@ describe("Factory Tests", () => {
     controlListFacet = await ethers.getContractAt("ControlList", equityAddress);
 
     erc1644Facet = await ethers.getContractAt("ERC1644", equityAddress);
-
-    erc20Facet = await ethers.getContractAt("ERC20", equityAddress);
 
     coreFacet = await ethers.getContractAt("CoreFacet", equityAddress);
   }

@@ -44,7 +44,6 @@ import { _validateISIN } from "./isinValidator.sol";
 import { IFixedRate } from "../facets/layer_2/interestRate/fixedRate/IFixedRate.sol";
 import { IKpiLinkedRate } from "../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
 import { InterestRateStorageWrapper } from "../domain/asset/InterestRateStorageWrapper.sol";
-import { CorporateActionsStorageWrapper } from "../domain/core/CorporateActionsStorageWrapper.sol";
 /* solhint-disable max-line-length */
 import {
     ISustainabilityPerformanceTargetRate

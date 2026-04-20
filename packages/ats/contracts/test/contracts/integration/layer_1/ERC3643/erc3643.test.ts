@@ -23,7 +23,6 @@ import {
   LockFacet,
   IHold,
   ProtectedPartitions,
-  DiamondFacet,
   FreezeFacet,
   ComplianceMock,
   IdentityRegistryMock,
@@ -48,8 +47,6 @@ import {
 
 const name = "TEST";
 const symbol = "TAC";
-const newName = "TEST_ERC3643";
-const newSymbol = "TAC_ERC3643";
 const decimals = 6;
 const version = "1";
 const isin = isinGenerator();
@@ -88,7 +85,6 @@ describe("ERC3643 Tests", () => {
   let clearingFacet: any;
   let holdFacet: IHold;
   let protectedPartitionsFacet: ProtectedPartitions;
-  let diamondFacet: DiamondFacet;
   let freezeFacet: FreezeFacet;
   let snapshotFacet: Snapshots;
 
@@ -226,7 +222,6 @@ describe("ERC3643 Tests", () => {
       clearingFacet = new Contract(diamond.target, uniqueFragments, signer_A);
       holdFacet = await ethers.getContractAt("IHold", diamond.target, signer_A);
       protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitions", diamond.target);
-      diamondFacet = await ethers.getContractAt("DiamondFacet", diamond.target);
       freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.target);
 
       accessControlFacet = accessControlFacet.connect(signer_A);
