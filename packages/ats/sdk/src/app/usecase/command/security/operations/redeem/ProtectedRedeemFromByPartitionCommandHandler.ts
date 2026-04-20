@@ -17,9 +17,7 @@ import ContractService from "@service/contract/ContractService";
 import { ProtectedRedeemFromByPartitionCommandError } from "./error/ProtectedRedeemFromByPartitionCommandError";
 
 @CommandHandler(ProtectedRedeemFromByPartitionCommand)
-export class ProtectedRedeemFromByPartitionCommandHandler
-  implements ICommandHandler<ProtectedRedeemFromByPartitionCommand>
-{
+export class ProtectedRedeemFromByPartitionCommandHandler implements ICommandHandler<ProtectedRedeemFromByPartitionCommand> {
   constructor(
     @lazyInject(SecurityService)
     private readonly securityService: SecurityService,

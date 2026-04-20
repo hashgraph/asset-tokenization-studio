@@ -18,9 +18,7 @@ import { ProtectedClearingTransferByPartitionCommandError } from "./error/Protec
 import { KycStatus } from "@domain/context/kyc/Kyc";
 
 @CommandHandler(ProtectedClearingTransferByPartitionCommand)
-export class ProtectedClearingTransferByPartitionCommandHandler
-  implements ICommandHandler<ProtectedClearingTransferByPartitionCommand>
-{
+export class ProtectedClearingTransferByPartitionCommandHandler implements ICommandHandler<ProtectedClearingTransferByPartitionCommand> {
   constructor(
     @lazyInject(SecurityService)
     private readonly securityService: SecurityService,

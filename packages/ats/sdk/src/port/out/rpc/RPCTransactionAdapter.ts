@@ -7,6 +7,7 @@
 import { CommandBus } from "@core/command/CommandBus";
 import {
   _PARTITION_ID_1,
+  CANCEL_AMORTIZATION_EVENT,
   CANCEL_COUPON_EVENT,
   CANCEL_DIVIDEND_EVENT,
   CANCEL_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
@@ -14,6 +15,9 @@ import {
   EVM_ZERO_ADDRESS,
   GAS,
   NOMINAL_VALUE_SET_EVENT,
+  RELEASE_AMORTIZATION_HOLD_EVENT,
+  SET_AMORTIZATION_EVENT,
+  SET_AMORTIZATION_HOLD_EVENT,
   SET_COUPON_EVENT,
   SET_DIVIDEND_EVENT,
   SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
@@ -101,6 +105,7 @@ import {
   TransferAndLockFacet__factory,
   TREXFactoryAts__factory,
   NominalValue__factory,
+  AmortizationFacet__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { ContractId } from "@hiero-ledger/sdk";
 import EventService from "@service/event/EventService";
@@ -2749,6 +2754,78 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       [nominalValue, nominalValueDecimals],
       GAS.SET_NOMINAL_VALUE,
       NOMINAL_VALUE_SET_EVENT,
+    );
+  }
+
+  async setAmortization(
+    security: EvmAddress,
+    recordDate: BigDecimal,
+    executionDate: BigDecimal,
+    tokensToRedeem: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Setting amortization: security=${security}, recordDate=${recordDate}, executionDate=${executionDate}, tokensToRedeem=${tokensToRedeem}`,
+    );
+
+    const amortizationStruct = {
+      recordDate: recordDate.toBigInt(),
+      executionDate: executionDate.toBigInt(),
+      tokensToRedeem: tokensToRedeem.toBigInt(),
+    };
+
+    return this.executeTransaction(
+      AmortizationFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "setAmortization",
+      [amortizationStruct],
+      GAS.SET_AMORTIZATION,
+      SET_AMORTIZATION_EVENT,
+    );
+  }
+
+  async cancelAmortization(security: EvmAddress, amortizationId: number): Promise<TransactionResponse> {
+    LogService.logTrace(`Cancelling amortization: ${amortizationId} for security: ${security}`);
+    return this.executeTransaction(
+      AmortizationFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "cancelAmortization",
+      [amortizationId],
+      GAS.CANCEL_AMORTIZATION,
+      CANCEL_AMORTIZATION_EVENT,
+    );
+  }
+
+  async setAmortizationHold(
+    security: EvmAddress,
+    amortizationId: number,
+    tokenHolder: EvmAddress,
+    tokenAmount: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Setting amortization hold: security=${security}, amortizationId=${amortizationId}, tokenHolder=${tokenHolder}, tokenAmount=${tokenAmount}`,
+    );
+
+    return this.executeTransaction(
+      AmortizationFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "setAmortizationHold",
+      [amortizationId, tokenHolder.toString(), tokenAmount.toBigInt()],
+      GAS.SET_AMORTIZATION_HOLD,
+      SET_AMORTIZATION_HOLD_EVENT,
+    );
+  }
+
+  async releaseAmortizationHold(
+    security: EvmAddress,
+    amortizationId: number,
+    tokenHolder: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Releasing amortization hold: security=${security}, amortizationId=${amortizationId}, tokenHolder=${tokenHolder}`,
+    );
+    return this.executeTransaction(
+      AmortizationFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "releaseAmortizationHold",
+      [amortizationId, tokenHolder.toString()],
+      GAS.RELEASE_AMORTIZATION_HOLD,
+      RELEASE_AMORTIZATION_HOLD_EVENT,
     );
   }
 }

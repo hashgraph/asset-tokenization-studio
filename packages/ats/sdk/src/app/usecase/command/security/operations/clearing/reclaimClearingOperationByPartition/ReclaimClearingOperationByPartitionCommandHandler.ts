@@ -16,9 +16,7 @@ import { ReclaimClearingOperationByPartitionCommandError } from "./error/Reclaim
 import { KycStatus } from "@domain/context/kyc/Kyc";
 
 @CommandHandler(ReclaimClearingOperationByPartitionCommand)
-export class ReclaimClearingOperationByPartitionCommandHandler
-  implements ICommandHandler<ReclaimClearingOperationByPartitionCommand>
-{
+export class ReclaimClearingOperationByPartitionCommandHandler implements ICommandHandler<ReclaimClearingOperationByPartitionCommand> {
   constructor(
     @lazyInject(AccountService)
     private readonly accountService: AccountService,

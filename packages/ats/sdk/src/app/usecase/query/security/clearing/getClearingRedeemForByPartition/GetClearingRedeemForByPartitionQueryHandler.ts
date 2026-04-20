@@ -16,9 +16,7 @@ import ContractService from "@service/contract/ContractService";
 import { GetClearingRedeemForByPartitionQueryError } from "./error/GetClearingRedeemForByPartitionQueryError";
 
 @QueryHandler(GetClearingRedeemForByPartitionQuery)
-export class GetClearingRedeemForByPartitionQueryHandler
-  implements IQueryHandler<GetClearingRedeemForByPartitionQuery>
-{
+export class GetClearingRedeemForByPartitionQueryHandler implements IQueryHandler<GetClearingRedeemForByPartitionQuery> {
   constructor(
     @lazyInject(SecurityService)
     private readonly securityService: SecurityService,

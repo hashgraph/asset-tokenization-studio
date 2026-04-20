@@ -41,7 +41,7 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
         with:
           egress-policy: audit
 
@@ -108,7 +108,7 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
         with:
           egress-policy: audit
 
@@ -121,6 +121,7 @@ jobs:
           node-version: 22.20.0
 
       - name: Restore dependencies from cache
+        id: deps-cache
         uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: |
@@ -129,9 +130,13 @@ jobs:
             */*/*/node_modules
             ~/.npm
           key: ${{ runner.os }}-deps-${{ hashFiles('package-lock.json') }}
-          fail-on-cache-miss: true
+
+      - name: Install dependencies
+        if: steps.deps-cache.outputs.cache-hit != 'true'
+        run: npm ci
 
       - name: Restore build artifacts from cache
+        id: build-cache
         uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: |
@@ -140,7 +145,10 @@ jobs:
             packages/ats/contracts/typechain-types
             packages/ats/contracts/cache
           key: ${{ runner.os }}-contracts-build-${{ hashFiles('packages/ats/contracts/contracts/**/*.sol', 'packages/ats/contracts/hardhat.config.ts', 'package-lock.json') }}
-          fail-on-cache-miss: true
+
+      - name: Build contracts
+        if: steps.build-cache.outputs.cache-hit != 'true'
+        run: npm run ats:contracts:build
 
       - name: Start Hardhat node
         working-directory: packages/ats/contracts
@@ -221,7 +229,7 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
         with:
           egress-policy: audit
 
@@ -246,6 +254,7 @@ jobs:
           fi
 
       - name: Restore dependencies from cache
+        id: deps-cache
         if: steps.docker-check.outputs.available == 'true'
         uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
@@ -255,9 +264,13 @@ jobs:
             */*/*/node_modules
             ~/.npm
           key: ${{ runner.os }}-deps-${{ hashFiles('package-lock.json') }}
-          fail-on-cache-miss: true
+
+      - name: Install dependencies
+        if: steps.docker-check.outputs.available == 'true' && steps.deps-cache.outputs.cache-hit != 'true'
+        run: npm ci
 
       - name: Restore build artifacts from cache
+        id: build-cache
         if: steps.docker-check.outputs.available == 'true'
         uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
@@ -267,7 +280,10 @@ jobs:
             packages/ats/contracts/typechain-types
             packages/ats/contracts/cache
           key: ${{ runner.os }}-contracts-build-${{ hashFiles('packages/ats/contracts/contracts/**/*.sol', 'packages/ats/contracts/hardhat.config.ts', 'package-lock.json') }}
-          fail-on-cache-miss: true
+
+      - name: Build contracts
+        if: steps.docker-check.outputs.available == 'true' && steps.build-cache.outputs.cache-hit != 'true'
+        run: npm run ats:contracts:build
 
       - name: Setup Hiero Solo Network
         id: solo

@@ -4,10 +4,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { ContractId } from "@hiero-ledger/sdk";
 import { ethers } from "ethers";
-import {
-  Factory__factory,
-  TREXFactoryAts__factory,
-} from "@hashgraph/asset-tokenization-contracts";
+import { Factory__factory, TREXFactoryAts__factory } from "@hashgraph/asset-tokenization-contracts";
 import { EVM_ZERO_ADDRESS, GAS } from "@core/Constants";
 import {
   FactoryBondFixedRateToken,

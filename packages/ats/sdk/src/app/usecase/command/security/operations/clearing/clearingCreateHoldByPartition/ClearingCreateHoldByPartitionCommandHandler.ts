@@ -17,9 +17,7 @@ import ContractService from "@service/contract/ContractService";
 import { ClearingCreateHoldByPartitionCommandError } from "./error/ClearingCreateHoldByPartitionCommandError";
 
 @CommandHandler(ClearingCreateHoldByPartitionCommand)
-export class ClearingCreateHoldByPartitionCommandHandler
-  implements ICommandHandler<ClearingCreateHoldByPartitionCommand>
-{
+export class ClearingCreateHoldByPartitionCommandHandler implements ICommandHandler<ClearingCreateHoldByPartitionCommand> {
   constructor(
     @lazyInject(SecurityService)
     private readonly securityService: SecurityService,

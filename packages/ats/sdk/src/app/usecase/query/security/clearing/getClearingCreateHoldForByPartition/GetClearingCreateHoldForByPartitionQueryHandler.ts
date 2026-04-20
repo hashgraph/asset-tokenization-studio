@@ -16,9 +16,7 @@ import ContractService from "@service/contract/ContractService";
 import { GetClearingCreateHoldForByPartitionQueryError } from "./error/GetClearingCreateHoldForByPartitionQueryError";
 
 @QueryHandler(GetClearingCreateHoldForByPartitionQuery)
-export class GetClearingCreateHoldForByPartitionQueryHandler
-  implements IQueryHandler<GetClearingCreateHoldForByPartitionQuery>
-{
+export class GetClearingCreateHoldForByPartitionQueryHandler implements IQueryHandler<GetClearingCreateHoldForByPartitionQuery> {
   constructor(
     @lazyInject(SecurityService)
     private readonly securityService: SecurityService,
