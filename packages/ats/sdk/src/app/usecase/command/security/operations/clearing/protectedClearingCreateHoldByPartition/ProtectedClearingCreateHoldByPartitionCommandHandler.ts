@@ -72,7 +72,7 @@ export class ProtectedClearingCreateHoldByPartitionCommandHandler implements ICo
 
       await this.validationService.checkBalance(securityId, sourceId, amountBd);
 
-      await this.validationService.checkValidNounce(securityId, sourceId, nonce);
+      await this.validationService.checkValidNonce(securityId, sourceId, nonce);
 
       const res = await handler.protectedClearingCreateHoldByPartition(
         securityEvmAddress,

@@ -2340,7 +2340,7 @@ describe("ERC3643 Tests", () => {
         await expect(
           erc1410Facet.protectedTransferFromByPartition(DEFAULT_PARTITION, signer_C.address, signer_B.address, amount, {
             deadline: MAX_UINT256,
-            nounce: 1,
+            nonce: 1,
             signature: "0x1234",
           }),
         ).to.be.revertedWithCustomError(erc3643Facet, "WalletRecovered");
@@ -2398,7 +2398,7 @@ describe("ERC3643 Tests", () => {
         await expect(
           erc1410Facet.protectedTransferFromByPartition(DEFAULT_PARTITION, signer_B.address, signer_C.address, amount, {
             deadline: MAX_UINT256,
-            nounce: 1,
+            nonce: 1,
             signature: "0x1234",
           }),
         ).to.be.revertedWithCustomError(erc3643Facet, "WalletRecovered");
@@ -2460,7 +2460,7 @@ describe("ERC3643 Tests", () => {
         await expect(
           erc1410Facet.protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_C.address, amount, {
             deadline: MAX_UINT256,
-            nounce: 1,
+            nonce: 1,
             signature: "0x1234",
           }),
         ).to.be.revertedWithCustomError(erc3643Facet, "WalletRecovered");

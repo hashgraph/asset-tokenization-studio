@@ -69,7 +69,7 @@ import GetAggregatedBalanceAdjustmentFactorRequest from "./account/GetAggregated
 import GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest from "./equity/GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest";
 import ProtectedTransferFromByPartitionRequest from "./security/operations/transfer/ProtectedTransferFromByPartitionRequest";
 import ProtectedRedeemFromByPartitionRequest from "./security/operations/redeem/ProtectedRedeemFromByPartitionRequest";
-import GetNounceRequest from "./security/operations/protectedPartitions/GetNounceRequest";
+import GetNonceRequest from "./security/operations/protectedPartitions/GetNonceRequest";
 import PartitionsProtectedRequest from "./security/operations/protectedPartitions/PartitionsProtectedRequest";
 import CreateHoldByPartitionRequest from "./security/operations/hold/CreateHoldByPartition";
 import CreateHoldFromByPartitionRequest from "./security/operations/hold/CreateHoldFromByPartition";
@@ -317,7 +317,7 @@ export {
   GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest,
   ProtectedTransferFromByPartitionRequest,
   ProtectedRedeemFromByPartitionRequest,
-  GetNounceRequest,
+  GetNonceRequest,
   PartitionsProtectedRequest,
   CreateHoldByPartitionRequest,
   CreateHoldFromByPartitionRequest,

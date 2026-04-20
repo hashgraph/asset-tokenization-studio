@@ -49,7 +49,7 @@ describe("TransferCommandHandler", () => {
     );
     const commandRaw = TransferCommandFixture.create();
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-    const { deadline, nounce, signature, sourceId, ...commandFiltered } = commandRaw;
+    const { deadline, nonce, signature, sourceId, ...commandFiltered } = commandRaw;
     command = commandFiltered;
   });
 

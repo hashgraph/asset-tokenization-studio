@@ -111,8 +111,8 @@ describe("ProtectedClearingRedeemByPartitionCommandHandler", () => {
           account.id.toString(),
           command.securityId,
         );
-        expect(validationServiceMock.checkValidNounce).toHaveBeenCalledTimes(1);
-        expect(validationServiceMock.checkValidNounce).toHaveBeenCalledWith(
+        expect(validationServiceMock.checkValidNonce).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkValidNonce).toHaveBeenCalledWith(
           command.securityId,
           command.sourceId,
           command.nonce,

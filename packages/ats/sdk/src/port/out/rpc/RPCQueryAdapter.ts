@@ -182,7 +182,7 @@ export class RPCQueryAdapter {
   }
 
   async getNonceFor(address: EvmAddress, target: EvmAddress): Promise<bigint> {
-    LogService.logTrace(`Getting Nounce`);
+    LogService.logTrace(`Getting Nonce`);
 
     return await this.connect(NoncesFacet__factory, address.toString()).nonces(target.toString());
   }

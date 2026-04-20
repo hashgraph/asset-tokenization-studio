@@ -43,7 +43,7 @@ describe("ControllerRedeemCommandHandler", () => {
     );
     const commandRaw = RedeemCommandFixture.create();
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-    const { deadline, nounce, signature, partitionId, ...commandFiltered } = commandRaw;
+    const { deadline, nonce, signature, partitionId, ...commandFiltered } = commandRaw;
     command = commandFiltered;
   });
 

@@ -2055,7 +2055,7 @@ describe("ERC1410 Tests", () => {
           .connect(signer_B)
           .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
             deadline: 1,
-            nounce: 0,
+            nonce: 0,
             signature: "0x1234",
           }),
       ).to.be.rejectedWith("PartitionsAreUnProtected");
@@ -2065,7 +2065,7 @@ describe("ERC1410 Tests", () => {
       await expect(
         erc1410Facet.connect(signer_B).protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, {
           deadline: 1,
-          nounce: 0,
+          nonce: 0,
           signature: "0x1234",
         }),
       ).to.be.rejectedWith("PartitionsAreUnProtected");
@@ -2135,7 +2135,7 @@ describe("ERC1410 Tests", () => {
               amount,
               {
                 deadline: MAX_UINT256,
-                nounce: 1,
+                nonce: 1,
                 signature: "0x1234",
               },
             ),
@@ -2154,7 +2154,7 @@ describe("ERC1410 Tests", () => {
               amount,
               {
                 deadline: MAX_UINT256,
-                nounce: 1,
+                nonce: 1,
                 signature: "0x1234",
               },
             ),
@@ -2167,7 +2167,7 @@ describe("ERC1410 Tests", () => {
               .connect(signer_C)
               .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
                 deadline: MAX_UINT256,
-                nounce: 1,
+                nonce: 1,
                 signature: "0x1234",
               }),
           ).to.be.rejectedWith("AccountHasNoRole");
@@ -2181,7 +2181,7 @@ describe("ERC1410 Tests", () => {
               .connect(signer_B)
               .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
                 deadline: MAX_UINT256,
-                nounce: 1,
+                nonce: 1,
                 signature: "0x1234",
               }),
           ).to.be.revertedWithCustomError(controlListFacet, "AccountIsBlocked");
@@ -2195,7 +2195,7 @@ describe("ERC1410 Tests", () => {
               .connect(signer_B)
               .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
                 deadline: MAX_UINT256,
-                nounce: 1,
+                nonce: 1,
                 signature: "0x1234",
               }),
           ).to.be.revertedWithCustomError(controlListFacet, "AccountIsBlocked");
@@ -2209,7 +2209,7 @@ describe("ERC1410 Tests", () => {
               .connect(signer_B)
               .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
                 deadline: MAX_UINT256,
-                nounce: 1,
+                nonce: 1,
                 signature: "0x1234",
               }),
           ).to.be.revertedWithCustomError(kycFacet, "InvalidKycStatus");
@@ -2219,7 +2219,7 @@ describe("ERC1410 Tests", () => {
               .connect(signer_B)
               .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_B.address, signer_A.address, amount, {
                 deadline: MAX_UINT256,
-                nounce: 1,
+                nonce: 1,
                 signature: "0x1234",
               }),
           ).to.be.revertedWithCustomError(kycFacet, "InvalidKycStatus");
@@ -2237,7 +2237,7 @@ describe("ERC1410 Tests", () => {
               .connect(signer_B)
               .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
                 deadline: 1,
-                nounce: 1,
+                nonce: 1,
                 signature: "0x1234",
               }),
           ).to.be.rejectedWith("ExpiredDeadline");
@@ -2255,7 +2255,7 @@ describe("ERC1410 Tests", () => {
               .connect(signer_B)
               .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
                 deadline: MAX_UINT256,
-                nounce: 1,
+                nonce: 1,
                 signature: "0x01",
               }),
           ).to.be.rejectedWith("WrongSignatureLength");
@@ -2273,14 +2273,14 @@ describe("ERC1410 Tests", () => {
               .connect(signer_B)
               .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
                 deadline: MAX_UINT256,
-                nounce: 1,
+                nonce: 1,
                 signature:
                   "0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344",
               }),
           ).to.be.rejectedWith("WrongSignature");
         });
 
-        it("GIVEN a wrong nounce WHEN performing a protected transfer THEN transaction fails with WrongNounce", async () => {
+        it("GIVEN a wrong nonce WHEN performing a protected transfer THEN transaction fails with WrongNonce", async () => {
           await erc1410Facet.issueByPartition({
             partition: DEFAULT_PARTITION,
             tokenHolder: signer_A.address,
@@ -2294,10 +2294,10 @@ describe("ERC1410 Tests", () => {
               .connect(signer_B)
               .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
                 deadline: deadline,
-                nounce: 0,
+                nonce: 0,
                 signature: "0x1234",
               }),
-          ).to.be.rejectedWith("WrongNounce");
+          ).to.be.rejectedWith("WrongNonce");
         });
       });
 
@@ -2309,7 +2309,7 @@ describe("ERC1410 Tests", () => {
           await expect(
             erc1410Facet.protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, {
               deadline: MAX_UINT256,
-              nounce: 1,
+              nonce: 1,
               signature: "0x1234",
             }),
           ).to.be.rejectedWith("TokenIsPaused");
@@ -2322,7 +2322,7 @@ describe("ERC1410 Tests", () => {
           await expect(
             erc1410Facet.protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, {
               deadline: MAX_UINT256,
-              nounce: 1,
+              nonce: 1,
               signature: "0x1234",
             }),
           ).to.be.revertedWithCustomError(clearingInterface, "ClearingIsActivated");
@@ -2332,7 +2332,7 @@ describe("ERC1410 Tests", () => {
           await expect(
             erc1410Facet.connect(signer_C).protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, {
               deadline: MAX_UINT256,
-              nounce: 1,
+              nonce: 1,
               signature: "0x1234",
             }),
           ).to.be.rejectedWith("AccountHasNoRole");
@@ -2344,7 +2344,7 @@ describe("ERC1410 Tests", () => {
           await expect(
             erc1410Facet.connect(signer_B).protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, {
               deadline: MAX_UINT256,
-              nounce: 1,
+              nonce: 1,
               signature: "0x1234",
             }),
           ).to.be.revertedWithCustomError(controlList, "AccountIsBlocked");
@@ -2356,7 +2356,7 @@ describe("ERC1410 Tests", () => {
           await expect(
             erc1410Facet.connect(signer_B).protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, {
               deadline: MAX_UINT256,
-              nounce: 1,
+              nonce: 1,
               signature: "0x1234",
             }),
           ).to.be.revertedWithCustomError(kycFacet, "InvalidKycStatus");
@@ -2372,7 +2372,7 @@ describe("ERC1410 Tests", () => {
           await expect(
             erc1410Facet.connect(signer_B).protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, {
               deadline: 1,
-              nounce: 0,
+              nonce: 0,
               signature: "0x1234",
             }),
           ).to.be.rejectedWith("ExpiredDeadline");
@@ -2387,7 +2387,7 @@ describe("ERC1410 Tests", () => {
           await expect(
             erc1410Facet.connect(signer_B).protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, {
               deadline: MAX_UINT256,
-              nounce: 1,
+              nonce: 1,
               signature: "0x01",
             }),
           ).to.be.rejectedWith("WrongSignatureLength");
@@ -2403,14 +2403,14 @@ describe("ERC1410 Tests", () => {
           await expect(
             erc1410Facet.connect(signer_B).protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, {
               deadline: MAX_UINT256,
-              nounce: 1,
+              nonce: 1,
               signature:
                 "0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344",
             }),
           ).to.be.rejectedWith("WrongSignature");
         });
 
-        it("GIVEN a wrong nounce WHEN performing a protected redeem THEN transaction fails with WrongNounce", async () => {
+        it("GIVEN a wrong nonce WHEN performing a protected redeem THEN transaction fails with WrongNonce", async () => {
           await erc1410Facet.issueByPartition({
             partition: DEFAULT_PARTITION,
             tokenHolder: signer_A.address,
@@ -2422,10 +2422,10 @@ describe("ERC1410 Tests", () => {
           await expect(
             erc1410Facet.connect(signer_B).protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, {
               deadline: deadline,
-              nounce: 0,
+              nonce: 0,
               signature: "0x1234",
             }),
-          ).to.be.rejectedWith("WrongNounce");
+          ).to.be.rejectedWith("WrongNonce");
         });
 
         it("GIVEN a correct signature WHEN performing a protected redeem THEN transaction succeeds", async () => {
@@ -2436,7 +2436,7 @@ describe("ERC1410 Tests", () => {
             _from: signer_A.address,
             _amount: amount,
             _deadline: deadline,
-            _nounce: 1,
+            _nonce: 1,
           };
           const domain = {
             name: (await erc20Facet.getERC20Metadata()).info.name,
@@ -2451,7 +2451,7 @@ describe("ERC1410 Tests", () => {
               { name: "_from", type: "address" },
               { name: "_amount", type: "uint256" },
               { name: "_deadline", type: "uint256" },
-              { name: "_nounce", type: "uint256" },
+              { name: "_nonce", type: "uint256" },
             ],
           };
 
@@ -2477,7 +2477,7 @@ describe("ERC1410 Tests", () => {
             .connect(signer_B)
             .protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, {
               deadline: deadline,
-              nounce: 1,
+              nonce: 1,
               signature: signature,
             });
         });

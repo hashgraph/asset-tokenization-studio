@@ -3,9 +3,9 @@
 import { QueryError } from "@query/error/QueryError";
 import BaseError from "@core/error/BaseError";
 
-export class GetNounceQueryError extends QueryError {
+export class GetNonceQueryError extends QueryError {
   constructor(error: Error) {
-    const msg = `An error occurred while querying nounce: ${error.message}`;
+    const msg = `An error occurred while querying nonce: ${error.message}`;
     super(msg, error instanceof BaseError ? error.errorCode : undefined);
   }
 }

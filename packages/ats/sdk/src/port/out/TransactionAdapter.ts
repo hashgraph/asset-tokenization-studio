@@ -324,7 +324,7 @@ interface ITransactionAdapter {
     targetId: EvmAddress,
     amount: BigDecimal,
     deadline: BigDecimal,
-    nounce: BigDecimal,
+    nonce: BigDecimal,
     signature: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
@@ -334,7 +334,7 @@ interface ITransactionAdapter {
     sourceId: EvmAddress,
     amount: BigDecimal,
     deadline: BigDecimal,
-    nounce: BigDecimal,
+    nonce: BigDecimal,
     signature: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
@@ -1274,7 +1274,7 @@ export default abstract class TransactionAdapter
     targetId: EvmAddress,
     amount: BigDecimal,
     deadline: BigDecimal,
-    nounce: BigDecimal,
+    nonce: BigDecimal,
     signature: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
@@ -1284,7 +1284,7 @@ export default abstract class TransactionAdapter
     sourceId: EvmAddress,
     amount: BigDecimal,
     deadline: BigDecimal,
-    nounce: BigDecimal,
+    nonce: BigDecimal,
     signature: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;

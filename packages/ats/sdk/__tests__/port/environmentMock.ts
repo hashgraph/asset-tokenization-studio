@@ -1617,7 +1617,7 @@ jest.mock("@port/out/rpc/RPCTransactionAdapter", () => {
     },
   );
 
-  singletonInstance.renounceRole = jest.fn(async () => {
+  singletonInstance.renonceRole = jest.fn(async () => {
     return {
       status: "success",
       id: transactionId,
@@ -1752,7 +1752,7 @@ jest.mock("@port/out/rpc/RPCTransactionAdapter", () => {
       targetId: EvmAddress,
       amount: BigDecimal,
       deadline: BigDecimal,
-      nounce: BigDecimal,
+      nonce: BigDecimal,
       signature: string,
     ) => {
       increaseBalance(targetId, amount);
@@ -1772,7 +1772,7 @@ jest.mock("@port/out/rpc/RPCTransactionAdapter", () => {
       sourceId: EvmAddress,
       amount: BigDecimal,
       deadline: BigDecimal,
-      nounce: BigDecimal,
+      nonce: BigDecimal,
       signature: string,
     ) => {
       decreaseBalance(sourceId, amount);

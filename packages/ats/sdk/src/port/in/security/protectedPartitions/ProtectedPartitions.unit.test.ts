@@ -2,7 +2,7 @@
 
 import { createMock } from "@golevelup/ts-jest";
 import { CommandBus } from "@core/command/CommandBus";
-import { GetNounceRequest, PartitionsProtectedRequest } from "../../request";
+import { GetNonceRequest, PartitionsProtectedRequest } from "../../request";
 import { TransactionIdFixture } from "@test/fixtures/shared/DataFixture";
 import LogService from "@service/log/LogService";
 import { QueryBus } from "@core/query/QueryBus";
@@ -11,20 +11,20 @@ import { ValidationError } from "@core/validation/ValidationError";
 import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
 import Security from "@port/in/security/Security";
 import {
-  GetNounceRequestFixture,
+  GetNonceRequestFixture,
   PartitionsProtectedRequestFixture,
 } from "@test/fixtures/protectedPartitions/ProtectedPartitionsFixture";
 import { PartitionsProtectedQuery } from "@query/security/protectedPartitions/arePartitionsProtected/PartitionsProtectedQuery";
 import { ProtectPartitionsCommand } from "@command/security/operations/protectPartitions/ProtectPartitionsCommand";
 import { UnprotectPartitionsCommand } from "@command/security/operations/unprotectPartitions/UnprotectPartitionsCommand";
-import { GetNounceQuery } from "@query/security/protectedPartitions/getNounce/GetNounceQuery";
+import { GetNonceQuery } from "@query/security/protectedPartitions/getNonce/GetNonceQuery";
 
 describe("Protected Partitions", () => {
   let commandBusMock: jest.Mocked<CommandBus>;
   let queryBusMock: jest.Mocked<QueryBus>;
   let mirrorNodeMock: jest.Mocked<MirrorNodeAdapter>;
 
-  let getNounceRequest: GetNounceRequest;
+  let getNonceRequest: GetNonceRequest;
 
   let handleValidationSpy: jest.SpyInstance;
 
@@ -182,8 +182,8 @@ describe("Protected Partitions", () => {
     });
   });
 
-  describe("getNounce", () => {
-    getNounceRequest = new GetNounceRequest(GetNounceRequestFixture.create());
+  describe("getNonce", () => {
+    getNonceRequest = new GetNonceRequest(GetNonceRequestFixture.create());
 
     const expectedResponse = {
       payload: 1,
@@ -191,12 +191,12 @@ describe("Protected Partitions", () => {
     it("should get nonce successfully", async () => {
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await Security.getNounce(getNounceRequest);
+      const result = await Security.getNonce(getNonceRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetNounceRequest", getNounceRequest);
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetNonceRequest", getNonceRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetNounceQuery(getNounceRequest.securityId, getNounceRequest.targetId),
+        new GetNonceQuery(getNonceRequest.securityId, getNonceRequest.targetId),
       );
       expect(result).toEqual(expectedResponse.payload);
     });
@@ -205,32 +205,32 @@ describe("Protected Partitions", () => {
       const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(Security.getNounce(getNounceRequest)).rejects.toThrow("Query execution failed");
+      await expect(Security.getNonce(getNonceRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetNounceRequest", getNounceRequest);
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetNonceRequest", getNonceRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetNounceQuery(getNounceRequest.securityId, getNounceRequest.targetId),
+        new GetNonceQuery(getNonceRequest.securityId, getNonceRequest.targetId),
       );
     });
 
     it("should throw error if securityId is invalid", async () => {
-      getNounceRequest = new GetNounceRequest({
-        ...GetNounceRequestFixture.create({
+      getNonceRequest = new GetNonceRequest({
+        ...GetNonceRequestFixture.create({
           securityId: "invalid",
         }),
       });
 
-      await expect(Security.getNounce(getNounceRequest)).rejects.toThrow(ValidationError);
+      await expect(Security.getNonce(getNonceRequest)).rejects.toThrow(ValidationError);
     });
     it("should throw error if targetId is invalid", async () => {
-      getNounceRequest = new GetNounceRequest({
-        ...GetNounceRequestFixture.create({
+      getNonceRequest = new GetNonceRequest({
+        ...GetNonceRequestFixture.create({
           targetId: "invalid",
         }),
       });
 
-      await expect(Security.getNounce(getNounceRequest)).rejects.toThrow(ValidationError);
+      await expect(Security.getNonce(getNonceRequest)).rejects.toThrow(ValidationError);
     });
   });
 });

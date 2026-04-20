@@ -30,7 +30,7 @@ struct ProtectedPartitionsDataStorage {
     // solhint-disable-next-line var-name-mixedcase
     string DEPRECATED_contractVersion;
     // solhint-disable-next-line var-name-mixedcase
-    mapping(address => uint256) DEPRECATED_nounces;
+    mapping(address => uint256) DEPRECATED_nonces;
 }
 
 library ProtectedPartitionsStorageWrapper {
@@ -101,7 +101,7 @@ library ProtectedPartitionsStorageWrapper {
                     _to,
                     _amount,
                     _protectionData.deadline,
-                    _protectionData.nounce
+                    _protectionData.nonce
                 ),
                 _protectionData.signature,
                 _name,
@@ -132,7 +132,7 @@ library ProtectedPartitionsStorageWrapper {
         return
             _verify(
                 _from,
-                _getMessageHashRedeem(_partition, _from, _amount, _protectionData.deadline, _protectionData.nounce),
+                _getMessageHashRedeem(_partition, _from, _amount, _protectionData.deadline, _protectionData.nonce),
                 _protectionData.signature,
                 _name,
                 Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),

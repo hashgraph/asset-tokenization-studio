@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-15T13:21:51.894Z
+ * Generated: 2026-04-20T09:16:59.648Z
  * Facets: 77
  * Infrastructure: 2
  *
@@ -3662,12 +3662,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xd3924f4e",
       },
       {
-        name: "WrongNounce",
+        name: "WrongNonce",
         signature: {
-          full: "error WrongNounce(uint256 nounce, address account)",
-          canonical: "WrongNounce(uint256,address)",
+          full: "error WrongNonce(uint256 nonce, address account)",
+          canonical: "WrongNonce(uint256,address)",
         },
-        selector: "0xd93f5efe",
+        selector: "0x2fb817aa",
       },
       {
         name: "WrongSignature",
@@ -5248,7 +5248,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "protectedRedeemFromByPartition",
         signature: {
-          full: "function protectedRedeemFromByPartition(bytes32 _partition, address _from, uint256 _amount, (uint256 deadline, uint256 nounce, bytes signature) _protectionData)",
+          full: "function protectedRedeemFromByPartition(bytes32 _partition, address _from, uint256 _amount, (uint256 deadline, uint256 nonce, bytes signature) _protectionData)",
           canonical: "protectedRedeemFromByPartition(bytes32,address,uint256,(uint256,uint256,bytes))",
         },
         selector: "0x7756e22e",
@@ -5256,7 +5256,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "protectedTransferFromByPartition",
         signature: {
-          full: "function protectedTransferFromByPartition(bytes32 _partition, address _from, address _to, uint256 _amount, (uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bytes32)",
+          full: "function protectedTransferFromByPartition(bytes32 _partition, address _from, address _to, uint256 _amount, (uint256 deadline, uint256 nonce, bytes signature) _protectionData) returns (bytes32)",
           canonical: "protectedTransferFromByPartition(bytes32,address,address,uint256,(uint256,uint256,bytes))",
         },
         selector: "0x99b5ef4a",
@@ -8693,12 +8693,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x7e90c2c9",
       },
       {
-        name: "WrongNounce",
+        name: "WrongNonce",
         signature: {
-          full: "error WrongNounce(uint256 nounce, address account)",
-          canonical: "WrongNounce(uint256,address)",
+          full: "error WrongNonce(uint256 nonce, address account)",
+          canonical: "WrongNonce(uint256,address)",
         },
-        selector: "0xd93f5efe",
+        selector: "0x2fb817aa",
       },
       {
         name: "WrongSignature",
@@ -10701,7 +10701,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "ProtectedRedeemFrom",
         signature: {
-          full: "event ProtectedRedeemFrom(bytes32 indexed partition, address indexed operator, address indexed from, uint256 value, uint256 deadline, uint256 nounce, bytes signature)",
+          full: "event ProtectedRedeemFrom(bytes32 indexed partition, address indexed operator, address indexed from, uint256 value, uint256 deadline, uint256 nonce, bytes signature)",
           canonical: "ProtectedRedeemFrom(bytes32,address,address,uint256,uint256,uint256,bytes)",
         },
         topic0: "0xac2a7d7fcbf24c034d113f94d7ccf1df23cb94932becc61aa96ab060df6f101b",
@@ -10709,7 +10709,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "ProtectedTransferFrom",
         signature: {
-          full: "event ProtectedTransferFrom(bytes32 indexed partition, address indexed operator, address indexed from, address to, uint256 value, uint256 deadline, uint256 nounce, bytes signature)",
+          full: "event ProtectedTransferFrom(bytes32 indexed partition, address indexed operator, address indexed from, address to, uint256 value, uint256 deadline, uint256 nonce, bytes signature)",
           canonical: "ProtectedTransferFrom(bytes32,address,address,address,uint256,uint256,uint256,bytes)",
         },
         topic0: "0x2abbd5300acea8488bc2d0777cfb860f38dee76badd52ff8b36d3dec0f5fdb6c",

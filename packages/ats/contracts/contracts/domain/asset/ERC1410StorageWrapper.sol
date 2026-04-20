@@ -24,7 +24,7 @@ import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
-import { _checkNounceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
+import { _checkNonceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
 
 /// @dev Represents a fungible set of tokens.
 struct Partition {
@@ -325,8 +325,8 @@ library ERC1410StorageWrapper {
         uint256 amount,
         IProtectedPartitions.ProtectionData calldata protectionData
     ) internal returns (bytes32) {
-        _checkNounceAndDeadline(
-            protectionData.nounce,
+        _checkNonceAndDeadline(
+            protectionData.nonce,
             from,
             NonceStorageWrapper.getNonceFor(from),
             protectionData.deadline,
@@ -342,7 +342,7 @@ library ERC1410StorageWrapper {
             ERC20StorageWrapper.getName()
         );
 
-        NonceStorageWrapper.setNonceFor(protectionData.nounce, from);
+        NonceStorageWrapper.setNonceFor(protectionData.nonce, from);
 
         return
             transferByPartition(
@@ -361,8 +361,8 @@ library ERC1410StorageWrapper {
         uint256 amount,
         IProtectedPartitions.ProtectionData calldata protectionData
     ) internal {
-        _checkNounceAndDeadline(
-            protectionData.nounce,
+        _checkNonceAndDeadline(
+            protectionData.nonce,
             from,
             NonceStorageWrapper.getNonceFor(from),
             protectionData.deadline,
@@ -376,7 +376,7 @@ library ERC1410StorageWrapper {
             protectionData,
             ERC20StorageWrapper.getName()
         );
-        NonceStorageWrapper.setNonceFor(protectionData.nounce, from);
+        NonceStorageWrapper.setNonceFor(protectionData.nonce, from);
 
         redeemByPartition(partition, from, EvmAccessors.getMsgSender(), amount, "", "");
     }

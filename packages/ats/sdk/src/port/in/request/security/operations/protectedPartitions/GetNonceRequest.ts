@@ -3,7 +3,7 @@
 import ValidatedRequest from "@core/validation/ValidatedArgs";
 import FormatValidation from "@port/in/request/FormatValidation";
 
-export default class GetNounceRequest extends ValidatedRequest<GetNounceRequest> {
+export default class GetNonceRequest extends ValidatedRequest<GetNonceRequest> {
   securityId: string;
   targetId: string;
 

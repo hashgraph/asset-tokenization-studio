@@ -18,7 +18,7 @@ export class ProtectedTransferFromByPartitionCommand extends Command<ProtectedTr
     public readonly targetId: string,
     public readonly amount: string,
     public readonly deadline: string,
-    public readonly nounce: number,
+    public readonly nonce: number,
     public readonly signature: string,
   ) {
     super();

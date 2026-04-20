@@ -977,14 +977,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     sourceId: EvmAddress,
     amount: BigDecimal,
     deadline: BigDecimal,
-    nounce: BigDecimal,
+    nonce: BigDecimal,
     signature: string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Protected Redeeming ${amount} securities from account ${sourceId.toString()}`);
 
     const protectionData: ProtectionData = {
       deadline: deadline.toBigInt(),
-      nounce: nounce.toBigInt(),
+      nonce: nonce.toBigInt(),
       signature: signature,
     };
 
@@ -1003,7 +1003,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     targetId: EvmAddress,
     amount: BigDecimal,
     deadline: BigDecimal,
-    nounce: BigDecimal,
+    nonce: BigDecimal,
     signature: string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
@@ -1012,7 +1012,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
 
     const protectionData: ProtectionData = {
       deadline: deadline.toBigInt(),
-      nounce: nounce.toBigInt(),
+      nonce: nonce.toBigInt(),
       signature: signature,
     };
 

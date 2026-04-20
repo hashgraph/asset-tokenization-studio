@@ -33,7 +33,7 @@ interface ICommonErrors {
     error WrongSignatureLength();
 
     /// @notice Thrown when an EIP-712 nonce does not match the expected next nonce for the account.
-    error WrongNounce(uint256 nounce, address account);
+    error WrongNonce(uint256 nonce, address account);
 
     /// @notice Thrown when a contract or facet initializer is invoked after it has already been initialized.
     error AlreadyInitialized();

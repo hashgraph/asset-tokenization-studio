@@ -17,7 +17,7 @@ export const COMMON_ERRORS_ABI = [
   "error WrongSignature()",
   "error ExpiredDeadline(uint256 deadline)",
   "error WrongSignatureLength()",
-  "error WrongNounce(uint256 nounce, address account)",
+  "error WrongNonce(uint256 nonce, address account)",
   "error AlreadyInitialized()",
 ] as const;
 

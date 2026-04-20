@@ -3,11 +3,11 @@
 import { Query } from "@core/query/Query";
 import { QueryResponse } from "@core/query/QueryResponse";
 
-export class GetNounceQueryResponse implements QueryResponse {
+export class GetNonceQueryResponse implements QueryResponse {
   constructor(public readonly payload: number) {}
 }
 
-export class GetNounceQuery extends Query<GetNounceQueryResponse> {
+export class GetNonceQuery extends Query<GetNonceQueryResponse> {
   constructor(
     public readonly securityId: string,
     public readonly targetId: string,

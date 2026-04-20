@@ -48,7 +48,7 @@ const transferType = {
     { name: "_to", type: "address" },
     { name: "_amount", type: "uint256" },
     { name: "_deadline", type: "uint256" },
-    { name: "_nounce", type: "uint256" },
+    { name: "_nonce", type: "uint256" },
   ],
 };
 
@@ -736,7 +736,7 @@ describe("ProtectedPartitions Tests", () => {
           _to: signer_B.address,
           _amount: amount,
           _deadline: deadline,
-          _nounce: 1,
+          _nonce: 1,
         };
 
         /*const domainSeparator =
@@ -761,7 +761,7 @@ describe("ProtectedPartitions Tests", () => {
           .connect(signer_B)
           .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
             deadline: deadline,
-            nounce: 1,
+            nonce: 1,
             signature: signature,
           });
       });
@@ -855,14 +855,14 @@ describe("ProtectedPartitions Tests", () => {
         ).to.be.revertedWithCustomError(holdFacet, "WrongSignature");
       });
 
-      it("GIVEN a wrong nounce WHEN performing a protected hold THEN transaction fails with WrongNounce", async () => {
+      it("GIVEN a wrong nonce WHEN performing a protected hold THEN transaction fails with WrongNonce", async () => {
         protectedHold.nonce = 0;
 
         await expect(
           holdFacet
             .connect(signer_B)
             .protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
-        ).to.be.revertedWithCustomError(holdFacet, "WrongNounce");
+        ).to.be.revertedWithCustomError(holdFacet, "WrongNonce");
       });
 
       it("GIVEN a correct signature WHEN performing a protected hold THEN transaction succeeds", async () => {
@@ -1014,7 +1014,7 @@ describe("ProtectedPartitions Tests", () => {
         ).to.be.revertedWithCustomError(holdFacet, "WrongSignature");
       });
 
-      it("GIVEN a wrong nounce WHEN performing a protected clearing THEN transaction fails with WrongNounce", async () => {
+      it("GIVEN a wrong nonce WHEN performing a protected clearing THEN transaction fails with WrongNonce", async () => {
         protectedClearingOperation.nonce = 0;
 
         //TRANSFER
@@ -1022,19 +1022,19 @@ describe("ProtectedPartitions Tests", () => {
           clearingFacet
             .connect(signer_B)
             .protectedClearingTransferByPartition(protectedClearingOperation, amount, signer_C.address, "0x1234"),
-        ).to.be.revertedWithCustomError(holdFacet, "WrongNounce");
+        ).to.be.revertedWithCustomError(holdFacet, "WrongNonce");
         // HOLD
         await expect(
           clearingFacet
             .connect(signer_B)
             .protectedClearingCreateHoldByPartition(protectedClearingOperation, hold, "0x1234"),
-        ).to.be.revertedWithCustomError(holdFacet, "WrongNounce");
+        ).to.be.revertedWithCustomError(holdFacet, "WrongNonce");
         //REDEEM
         await expect(
           clearingFacet
             .connect(signer_B)
             .protectedClearingRedeemByPartition(protectedClearingOperation, amount, "0x1234"),
-        ).to.be.revertedWithCustomError(holdFacet, "WrongNounce");
+        ).to.be.revertedWithCustomError(holdFacet, "WrongNonce");
       });
 
       it("GIVEN a correct signature WHEN performing a protected clearing THEN transaction succeeds", async () => {
@@ -1131,7 +1131,7 @@ describe("ProtectedPartitions Tests", () => {
           _to: signer_B.address,
           _amount: amount,
           _deadline: deadline,
-          _nounce: 1,
+          _nonce: 1,
         };
 
         const signature = await signer_A.signTypedData(domain, transferType, message);
@@ -1147,7 +1147,7 @@ describe("ProtectedPartitions Tests", () => {
           .connect(signer_B)
           .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
             deadline: deadline,
-            nounce: 1,
+            nonce: 1,
             signature: signature,
           });
         expect(await complianceMock.transferredHit()).to.equal(1);
