@@ -12,6 +12,7 @@ import {
   type ClearingActionsFacet,
   ClearingActionsFacet__factory,
   ControlListFacet,
+  CoreFacet,
   DiamondFacet,
   DividendFacet,
   Equity,
@@ -30,7 +31,7 @@ import {
   TimeTravelFacet,
 } from "@contract-types";
 import { ADDRESS_ZERO, ATS_ROLES, dateToUnixTimestamp, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
-import { deployEquityTokenFixture, executeRbac, getCoreFacet, MAX_UINT256 } from "@test";
+import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 type ClearingFacetCombined = any;
 
@@ -164,6 +165,7 @@ describe("Clearing Tests", () => {
   let erc1410Facet: IERC1410;
   let controlListFacet: ControlListFacet;
   let erc20Facet: ERC20Facet;
+  let coreFacet: CoreFacet;
   let timeTravelFacet: TimeTravelFacet;
   let kycFacet: Kyc;
   let ssiManagementFacet: SsiManagement;
@@ -213,6 +215,7 @@ describe("Clearing Tests", () => {
     erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target, signer_B);
     controlListFacet = await ethers.getContractAt("ControlListFacet", diamond.target, signer_E);
     erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.target, signer_A);
+    coreFacet = await ethers.getContractAt("CoreFacet", diamond.target, signer_A);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
     kycFacet = await ethers.getContractAt("Kyc", diamond.target, signer_B);
     ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.target, signer_A);
@@ -4348,7 +4351,7 @@ describe("Clearing Tests", () => {
         };
 
         // Prepare EIP-712 domain
-        const name = (await (await getCoreFacet(diamond.target)).getERC20Metadata()).info.name;
+        const name = (await coreFacet.getERC20Metadata()).info.name;
         const version = (await diamondCutFacet.getConfigInfo()).version_.toString();
         const chainId = await network.provider.send("eth_chainId");
 
@@ -4438,7 +4441,7 @@ describe("Clearing Tests", () => {
         };
 
         // Prepare EIP-712 domain
-        const name = (await (await getCoreFacet(diamond.target)).getERC20Metadata()).info.name;
+        const name = (await coreFacet.getERC20Metadata()).info.name;
         const version = (await diamondCutFacet.getConfigInfo()).version_.toString();
         const chainId = await network.provider.send("eth_chainId");
 
@@ -4534,7 +4537,7 @@ describe("Clearing Tests", () => {
         };
 
         // Prepare EIP-712 domain
-        const name = (await (await getCoreFacet(diamond.target)).getERC20Metadata()).info.name;
+        const name = (await coreFacet.getERC20Metadata()).info.name;
         const version = (await diamondCutFacet.getConfigInfo()).version_.toString();
         const chainId = await network.provider.send("eth_chainId");
 

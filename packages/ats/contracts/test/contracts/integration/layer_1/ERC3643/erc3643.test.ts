@@ -7,6 +7,7 @@ import { isinGenerator } from "@thomaschaplin/isin-generator";
 import {
   type ResolverProxy,
   type ERC20,
+  type CoreFacet,
   type PauseFacet,
   type KycFacet,
   type ControlListFacet,
@@ -32,7 +33,7 @@ import {
 } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { Contract } from "ethers";
-import { deployEquityTokenFixture, getCoreFacet } from "@test";
+import { deployEquityTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
 import {
   EMPTY_STRING,
@@ -105,6 +106,7 @@ describe("ERC3643 Tests", () => {
     let erc3643Transferor: IERC3643;
     let erc1410SnapshotFacet: IERC1410;
     let erc20Facet: ERC20;
+    let coreFacet: CoreFacet;
     async function deploySecurityFixtureSinglePartition() {
       complianceMock = await (await ethers.getContractFactory("ComplianceMock", signer_A)).deploy(true, false);
       await complianceMock.waitForDeployment();
@@ -170,6 +172,7 @@ describe("ERC3643 Tests", () => {
       accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
 
       erc20Facet = await ethers.getContractAt("ERC20", diamond.target);
+      coreFacet = await ethers.getContractAt("CoreFacet", diamond.target);
 
       erc3643Facet = await ethers.getContractAt("IERC3643", diamond.target);
 
@@ -2125,7 +2128,7 @@ describe("ERC3643 Tests", () => {
         const freeBefore = await erc1410Facet.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address);
 
         // Apply ABAF with factor 2 - this internally uses _getTotalBalanceForByPartitionAdjusted to calculate total balance
-        const decimals = await (await getCoreFacet(diamond.target)).decimals();
+        const decimals = await coreFacet.decimals();
         await adjustBalancesFacet.connect(signer_A).adjustBalances(2, decimals);
 
         // Take another snapshot after ABAF to trigger _getTotalBalanceForByPartitionAdjusted again

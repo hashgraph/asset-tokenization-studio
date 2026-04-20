@@ -12,6 +12,7 @@ import {
   type ERC1594Facet,
   type TransferAndLockFacet,
   type ERC20Facet,
+  type CoreFacet,
   type KycFacet,
   type SsiManagementFacet,
   type IHold,
@@ -21,7 +22,7 @@ import {
 import { DEFAULT_PARTITION, ZERO, EMPTY_STRING, ADDRESS_ZERO, ATS_ROLES } from "@scripts";
 import { Contract } from "ethers";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployEquityTokenFixture, getCoreFacet, MAX_UINT256 } from "@test";
+import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
 
 const amount = 1;
@@ -207,6 +208,7 @@ describe("ProtectedPartitions Tests", () => {
   let erc1410Facet: IERC1410;
   let erc1594Facet: ERC1594Facet;
   let erc20Facet: ERC20Facet;
+  let coreFacet: CoreFacet;
   let transferAndLockFacet: TransferAndLockFacet;
   let accessControlFacet: AccessControl;
   let kycFacet: KycFacet;
@@ -269,6 +271,7 @@ describe("ProtectedPartitions Tests", () => {
     erc1410Facet = await ethers.getContractAt("IERC1410", address);
     erc1594Facet = await ethers.getContractAt("ERC1594Facet", address);
     erc20Facet = await ethers.getContractAt("ERC20Facet", address);
+    coreFacet = await ethers.getContractAt("CoreFacet", address);
     transferAndLockFacet = await ethers.getContractAt("TransferAndLockFacet", address);
     accessControlFacet = await ethers.getContractAt("AccessControl", address);
     kycFacet = await ethers.getContractAt("KycFacet", address);
@@ -315,7 +318,7 @@ describe("ProtectedPartitions Tests", () => {
   async function setProtected() {
     await setFacets(diamond_ProtectedPartitions.target as string, complianceMockAddress);
 
-    domain.name = (await (await getCoreFacet(diamond_ProtectedPartitions.target)).getERC20Metadata()).info.name;
+    domain.name = (await coreFacet.getERC20Metadata()).info.name;
     domain.version = (await diamondCutFacet.getConfigInfo()).version_.toString();
     domain.chainId = await network.provider.send("eth_chainId");
     domain.verifyingContract = diamond_ProtectedPartitions.target as string;

@@ -14,6 +14,7 @@ import {
   ERC1594Facet,
   ERC1644Facet,
   ERC20Facet,
+  CoreFacet,
   IClearing,
   type PauseFacet,
   ProtectedPartitionsFacet,
@@ -21,7 +22,7 @@ import {
   SnapshotsFacet,
   TimeTravelFacet,
 } from "@contract-types";
-import { deployEquityTokenFixture, executeRbac, getCoreFacet, grantRoleAndPauseToken, MAX_UINT256 } from "@test";
+import { deployEquityTokenFixture, executeRbac, grantRoleAndPauseToken, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import {
   ADDRESS_ZERO,
@@ -104,6 +105,7 @@ describe("ERC1410 Tests", () => {
   let controlList: any;
   let capFacet: Cap;
   let erc20Facet: ERC20Facet;
+  let coreFacet: CoreFacet;
   let erc1594Facet: ERC1594Facet;
   let erc1644Facet: ERC1644Facet;
   let adjustBalancesFacet: AdjustBalancesFacet;
@@ -187,7 +189,6 @@ describe("ERC1410 Tests", () => {
    * Retrieves and returns various balance and supply values adjusted for partitions.
    */
   async function getBalanceAdjustedValues(): Promise<BalanceAdjustedValues> {
-    const coreFacet = await getCoreFacet(diamond.target);
     const [maxSupply, totalSupply, balanceOf_A, balanceOf_B, decimals, metadata] = await Promise.all([
       getMaxSupplyValues(),
       getTotalSupplyValues(),
@@ -359,6 +360,7 @@ describe("ERC1410 Tests", () => {
     pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target);
     capFacet = await ethers.getContractAt("CapFacet", diamond.target);
     erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.target);
+    coreFacet = await ethers.getContractAt("CoreFacet", diamond.target);
     erc1594Facet = await ethers.getContractAt("ERC1594Facet", diamond.target);
     erc1644Facet = await ethers.getContractAt("ERC1644Facet", diamond.target);
     equityFacet = await ethers.getContractAt("Equity", diamond.target);
@@ -2440,7 +2442,7 @@ describe("ERC1410 Tests", () => {
             _nonce: 1,
           };
           const domain = {
-            name: (await (await getCoreFacet(diamond.target)).getERC20Metadata()).info.name,
+            name: (await coreFacet.getERC20Metadata()).info.name,
             version: (await diamondCutFacet.getConfigInfo()).version_.toString(),
             chainId: await network.provider.send("eth_chainId"),
             verifyingContract: diamond.target.toString(),
