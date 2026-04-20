@@ -9,8 +9,8 @@ import {
 } from "@hashgraph/smart-contracts/contracts/system-contracts/hedera-token-service/HederaTokenService.sol";
 import { Pause } from "./core/Pause.sol";
 import { AccessControl } from "./core/AccessControl.sol";
-import { IERC20 } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_1/ERC1400/ERC20/IERC20.sol";
-import { IERC20 as OZ_IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { ICore } from "@hashgraph/asset-tokenization-contracts/contracts/facets/core/ICore.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { ISnapshots } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_1/snapshot/ISnapshots.sol";
 import { IBond } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/bond/IBond.sol";
@@ -24,12 +24,12 @@ import { _PERCENTAGE_DECIMALS_SIZE } from "./constants/values.sol";
 import { _LIFECYCLE_CASH_FLOW_STORAGE_POSITION } from "./constants/storagePositions.sol";
 
 abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaTokenService, Pause, AccessControl {
-    using SafeERC20 for OZ_IERC20;
+    using SafeERC20 for IERC20;
 
     struct LifeCycleCashFlowStorage {
         address asset;
         ILifeCycleCashFlow.AssetType assetType;
-        OZ_IERC20 paymentToken;
+        IERC20 paymentToken;
         mapping(uint256 => mapping(address => bool)) paidAddressesByDistribution;
         mapping(uint256 => mapping(address => bool)) paidAddressesBySnapshot;
     }
@@ -249,7 +249,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      * @param amount The amount of USDC tokens to be transferred
      */
     function _transferPaymentToken(address _to, uint256 _amount) internal {
-        OZ_IERC20 paymentToken = _lifeCycleCashFlowStorage().paymentToken;
+        IERC20 paymentToken = _lifeCycleCashFlowStorage().paymentToken;
         if (paymentToken.balanceOf(address(this)) < _amount) {
             revert ILifeCycleCashFlow.NotEnoughBalance(_amount);
         }
@@ -265,7 +265,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      * @param newPaymentToken The new payment token
      */
     function _updatePaymentToken(address _newPaymentToken) internal {
-        _setPaymentToken(OZ_IERC20(_newPaymentToken));
+        _setPaymentToken(IERC20(_newPaymentToken));
         _associateToken(_newPaymentToken);
     }
 
@@ -292,7 +292,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      *
      * @param token The payment token to be set
      */
-    function _setPaymentToken(OZ_IERC20 token) internal {
+    function _setPaymentToken(IERC20 token) internal {
         _lifeCycleCashFlowStorage().paymentToken = token;
     }
 
@@ -368,7 +368,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      *
      * @return The payment token
      */
-    function _getPaymentToken() internal view returns (OZ_IERC20) {
+    function _getPaymentToken() internal view returns (IERC20) {
         return _lifeCycleCashFlowStorage().paymentToken;
     }
 
@@ -378,7 +378,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      * @return The payment token decimals
      */
     function _getPaymentTokenDecimals() internal view returns (uint8) {
-        return IERC20(address(_getPaymentToken())).decimals();
+        return ICore(address(_getPaymentToken())).decimals();
     }
 
     /*
@@ -464,7 +464,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         failedAddresses_ = new address[](_holders.length);
         succeededAddresses_ = new address[](_holders.length);
         paidAmount_ = new uint256[](_holders.length);
-        OZ_IERC20 paymentToken = _lifeCycleCashFlowStorage().paymentToken;
+        IERC20 paymentToken = _lifeCycleCashFlowStorage().paymentToken;
         uint8 paymentTokenDecimals = _getPaymentTokenDecimals();
 
         uint256 failedIndex;
@@ -593,7 +593,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         failedAddresses_ = new address[](_holders.length);
         succeededAddresses_ = new address[](_holders.length);
         paidAmount_ = new uint256[](_holders.length);
-        OZ_IERC20 paymentToken = _lifeCycleCashFlowStorage().paymentToken;
+        IERC20 paymentToken = _lifeCycleCashFlowStorage().paymentToken;
         uint8 paymentTokenDecimals = _getPaymentTokenDecimals();
 
         uint256 failedIndex;
@@ -636,7 +636,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         uint256 _distributionID,
         address _holder,
         uint256 _amount,
-        OZ_IERC20 _paymentToken
+        IERC20 _paymentToken
     ) private returns (bool) {
         if (_paymentToken.balanceOf(address(this)) < _amount) {
             return false;
@@ -669,7 +669,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         uint256 _snapshotID,
         address _holder,
         uint256 _amount,
-        OZ_IERC20 _paymentToken
+        IERC20 _paymentToken
     ) private returns (bool) {
         if (_paymentToken.balanceOf(address(this)) < _amount) {
             return false;
@@ -697,7 +697,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      *
      * @return True if the payment succeeded, false otherwise
      */
-    function _payHolderCashOut(address _holder, uint256 _amount, OZ_IERC20 _paymentToken) private returns (bool) {
+    function _payHolderCashOut(address _holder, uint256 _amount, IERC20 _paymentToken) private returns (bool) {
         if (_paymentToken.balanceOf(address(this)) < _amount) {
             return false;
         }

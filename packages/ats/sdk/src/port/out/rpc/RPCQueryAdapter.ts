@@ -40,7 +40,7 @@ import {
   ERC1594Facet__factory,
   ERC1643Facet__factory,
   ERC1644Facet__factory,
-  ERC20Facet__factory,
+  CoreFacet__factory,
   ExternalControlListManagementFacet__factory,
   ExternalKycListManagementFacet__factory,
   ExternalPauseManagementFacet__factory,
@@ -257,7 +257,7 @@ export class RPCQueryAdapter {
   async getSecurity(address: EvmAddress): Promise<Security> {
     LogService.logTrace(`Requesting security details for security: ${address.toString()}`);
 
-    const erc20Metadata = await this.connect(ERC20Facet__factory, address.toString()).getERC20Metadata();
+    const erc20Metadata = await this.connect(CoreFacet__factory, address.toString()).getERC20Metadata();
     const totalSupply = await this.connect(ERC1410ReadFacet__factory, address.toString()).totalSupply();
     const maxSupply = await this.connect(CapFacet__factory, address.toString()).getMaxSupply();
     const isWhiteList = await this.connect(ControlListFacet__factory, address.toString()).getControlListType();
@@ -1689,7 +1689,6 @@ export class RPCQueryAdapter {
     );
 
     return new AmortizationFor(
-      af.account,
       Number(af.recordDate),
       Number(af.executionDate),
       Number(af.holdId),
@@ -1720,10 +1719,9 @@ export class RPCQueryAdapter {
       end,
     );
 
-    return result.map(
+    return result.amortizationsFor_.map(
       (af) =>
         new AmortizationFor(
-          af.account,
           Number(af.recordDate),
           Number(af.executionDate),
           Number(af.holdId),
@@ -1783,12 +1781,12 @@ export class RPCQueryAdapter {
       `Getting amortization payment amount: amortizationId=${amortizationId}, tokenHolder=${tokenHolder.toString()}`,
     );
 
-    const { tokenAmount_, decimals_ } = await this.connect(
+    const af = await this.connect(
       AmortizationFacet__factory,
       address.toString(),
-    ).getAmortizationPaymentAmount(amortizationId, tokenHolder.toString());
+    ).getAmortizationFor(amortizationId, tokenHolder.toString());
 
-    return new AmortizationPaymentAmount(new BigDecimal(tokenAmount_.toString()), Number(decimals_));
+    return new AmortizationPaymentAmount(new BigDecimal(af.tokenHeldAmount.toString()), Number(af.decimalsHeld));
   }
 
   async getActiveAmortizationHoldHolders(
@@ -1799,7 +1797,7 @@ export class RPCQueryAdapter {
   ): Promise<string[]> {
     LogService.logTrace(`Getting active amortization hold holders for amortizationId: ${amortizationId}`);
 
-    return await this.connect(AmortizationFacet__factory, address.toString()).getActiveAmortizationHoldHolders(
+    return await this.connect(AmortizationFacet__factory, address.toString()).getAmortizationActiveHolders(
       amortizationId,
       start,
       end,
@@ -1812,7 +1810,7 @@ export class RPCQueryAdapter {
     const total = await this.connect(
       AmortizationFacet__factory,
       address.toString(),
-    ).getTotalActiveAmortizationHoldHolders(amortizationId);
+    ).getTotalAmortizationActiveHolders(amortizationId);
 
     return Number(total);
   }
