@@ -4,9 +4,9 @@ pragma solidity >=0.8.0 <0.9.0;
 import { TimeTravelStorageWrapper } from "./TimeTravelStorageWrapper.sol";
 
 /// @title TimeTravelProvider
-/// @notice Test-only mixin that overrides TimestampProvider to use TimeTravelStorageWrapper storage slots.
-/// @dev Concrete TimeTravel variant facets inherit both the production facet and this contract.
-///      C3 linearization ensures these overrides win over TimestampProvider's defaults.
+/// @notice Test-only mixin providing timestamp/block-number overrides via TimeTravelStorageWrapper storage slots.
+/// @dev TimeTravel variant facets inherit this alongside the production facet. In production the slots are 0
+///      and native block values are returned; TimeTravelFacet writes to them during tests (chainId 1337).
 abstract contract TimeTravelProvider {
     function _getBlockTimestamp() internal view virtual returns (uint256) {
         return TimeTravelStorageWrapper.getBlockTimestamp();

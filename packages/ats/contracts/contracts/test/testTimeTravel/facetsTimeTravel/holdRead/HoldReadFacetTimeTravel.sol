@@ -4,12 +4,4 @@ pragma solidity >=0.8.0 <0.9.0;
 import { HoldReadFacet } from "../../../../facets/layer_1/hold/HoldReadFacet.sol";
 import { TimeTravelProvider } from "../../timeTravel/TimeTravelProvider.sol";
 
-contract HoldReadFacetTimeTravel is HoldReadFacet, TimeTravelProvider {
-    function _getBlockTimestamp() internal view override(TimeTravelProvider) returns (uint256) {
-        return TimeTravelProvider._getBlockTimestamp();
-    }
-
-    function _getBlockNumber() internal view override(TimeTravelProvider) returns (uint256) {
-        return TimeTravelProvider._getBlockNumber();
-    }
-}
+contract HoldReadFacetTimeTravel is HoldReadFacet, TimeTravelProvider {}

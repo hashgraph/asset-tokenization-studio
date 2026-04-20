@@ -6,12 +6,4 @@ import {
 } from "../../../../facets/layer_3/bondUSA/kpiLinkedRate/BondUSAReadKpiLinkedRateFacet.sol";
 import { TimeTravelProvider } from "../../timeTravel/TimeTravelProvider.sol";
 
-contract BondUSAReadKpiLinkedRateFacetTimeTravel is BondUSAReadKpiLinkedRateFacet, TimeTravelProvider {
-    function _getBlockTimestamp() internal view override(TimeTravelProvider) returns (uint256) {
-        return TimeTravelProvider._getBlockTimestamp();
-    }
-
-    function _getBlockNumber() internal view override(TimeTravelProvider) returns (uint256) {
-        return TimeTravelProvider._getBlockNumber();
-    }
-}
+contract BondUSAReadKpiLinkedRateFacetTimeTravel is BondUSAReadKpiLinkedRateFacet, TimeTravelProvider {}
