@@ -3,12 +3,10 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { IAsset } from "@contract-types";
-import { type ResolverProxy, TimeTravelFacet as TimeTravel, type MigrationFacetTest } from "@contract-types";
-import { grantRoleAndPauseToken } from "@test";
+import { type ResolverProxy, type IAsset, type MigrationFacetTest } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ATS_ROLES, dateToUnixTimestamp, EQUITY_CONFIG_ID } from "@scripts";
-import { deployEquityTokenFixture, MAX_UINT256, executeRbac } from "@test";
+import { deployEquityTokenFixture, MAX_UINT256, executeRbac, grantRoleAndPauseToken } from "@test";
 
 const amount = 1;
 const balanceOf_B_Original = [20 * amount, 200 * amount];
@@ -23,23 +21,22 @@ describe("Adjust Balances Tests", () => {
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
 
-  let timeTravelFacet: TimeTravel;
-  let base: { asset: IAsset };
+  let asset: IAsset;
 
   async function deploySecurityFixtureMultiPartition() {
-    const result = await deployEquityTokenFixture({
+    const base = await deployEquityTokenFixture({
       equityDataParams: {
         securityData: {
           isMultiPartition: true,
         },
       },
     });
-    diamond = result.diamond;
-    signer_A = result.deployer;
-    signer_B = result.user1;
-    signer_C = result.user2;
-    base = { asset: result.asset };
-    await executeRbac(base.asset, [
+    diamond = base.diamond;
+    signer_A = base.deployer;
+    signer_B = base.user1;
+    signer_C = base.user2;
+    asset = await ethers.getContractAt("IAsset", diamond.target);
+    await executeRbac(asset, [
       {
         role: ATS_ROLES._PAUSER_ROLE,
         members: [signer_B.address],
@@ -53,7 +50,6 @@ describe("Adjust Balances Tests", () => {
         members: [signer_A.address],
       },
     ]);
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
   }
 
   beforeEach(async () => {
@@ -61,47 +57,43 @@ describe("Adjust Balances Tests", () => {
   });
 
   it("GIVEN an account without adjustBalances role WHEN adjustBalances THEN transaction fails with AccountHasNoRole", async () => {
-    await expect(
-      base.asset.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals),
-    ).to.be.revertedWithCustomError(base.asset, "AccountHasNoRole");
+    // adjustBalances fails
+    await expect(asset.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals)).to.be.revertedWithCustomError(
+      asset,
+      "AccountHasNoRole",
+    );
   });
 
   it("GIVEN a paused Token WHEN adjustBalances THEN transaction fails with TokenIsPaused", async () => {
     // Granting Role to account C and Pause
-    await grantRoleAndPauseToken(
-      base.asset,
-      base.asset,
-      ATS_ROLES._ADJUSTMENT_BALANCE_ROLE,
-      signer_A,
-      signer_B,
-      signer_C.address,
-    );
+    await grantRoleAndPauseToken(asset, ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_A, signer_B, signer_C.address);
 
     // adjustBalances fails
-    await expect(
-      base.asset.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals),
-    ).to.be.revertedWithCustomError(base.asset, "TokenIsPaused");
+    await expect(asset.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals)).to.be.revertedWithCustomError(
+      asset,
+      "TokenIsPaused",
+    );
   });
 
   it("GIVEN a Token WHEN adjustBalances with factor set at 0 THEN transaction fails with FactorIsZero", async () => {
-    await base.asset.connect(signer_A).grantRole(ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_C.address);
 
     // adjustBalances fails
-    await expect(base.asset.connect(signer_C).adjustBalances(0, adjustDecimals)).to.be.revertedWithCustomError(
-      base.asset,
+    await expect(asset.connect(signer_C).adjustBalances(0, adjustDecimals)).to.be.revertedWithCustomError(
+      asset,
       "FactorIsZero",
     );
   });
 
   it("GIVEN an account with adjustBalance role WHEN adjustBalances THEN scheduled tasks get executed succeeds", async () => {
-    await base.asset.connect(signer_A).grantRole(ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_A.address);
-    await base.asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
-    await base.asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
 
-    await base.asset.connect(signer_A).addIssuer(signer_A.address);
-    await base.asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, 0, MAX_UINT256, signer_A.address);
+    await asset.connect(signer_A).addIssuer(signer_A.address);
+    await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, 0, MAX_UINT256, signer_A.address);
 
-    await base.asset.connect(signer_A).issueByPartition({
+    await asset.connect(signer_A).issueByPartition({
       partition: _PARTITION_ID_2,
       tokenHolder: signer_B.address,
       value: balanceOf_B_Original[0],
@@ -120,7 +112,7 @@ describe("Adjust Balances Tests", () => {
       amountDecimals: dividendAmountDecimalsPerEquity,
     };
 
-    await base.asset.connect(signer_A).setDividend(dividendData_1);
+    await asset.connect(signer_A).setDividend(dividendData_1);
 
     const balanceAdjustmentExecutionDateInSeconds_1 = dateToUnixTimestamp(`2030-01-01T00:00:07Z`);
 
@@ -130,17 +122,17 @@ describe("Adjust Balances Tests", () => {
       decimals: adjustDecimals,
     };
 
-    await base.asset.connect(signer_A).setScheduledBalanceAdjustment(balanceAdjustmentData_1);
+    await asset.connect(signer_A).setScheduledBalanceAdjustment(balanceAdjustmentData_1);
 
-    const tasks_count_Before = await base.asset.scheduledCrossOrderedTaskCount();
+    const tasks_count_Before = await asset.scheduledCrossOrderedTaskCount();
 
     //-------------------------
-    await timeTravelFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_1 + 1);
+    await asset.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_1 + 1);
 
     // balance adjustment
-    await base.asset.connect(signer_A).adjustBalances(1, 0);
+    await asset.connect(signer_A).adjustBalances(1, 0);
 
-    const tasks_count_After = await base.asset.scheduledCrossOrderedTaskCount();
+    const tasks_count_After = await asset.scheduledCrossOrderedTaskCount();
 
     expect(tasks_count_Before).to.be.equal(2);
     expect(tasks_count_After).to.be.equal(0);
@@ -182,8 +174,8 @@ describe("Adjust Balances Tests", () => {
       const latestBLRVersion = Number(await blr.getLatestVersion());
 
       // Get current facet IDs from the diamond to build the new configuration version
-      const diamondFacet = await ethers.getContractAt("DiamondFacet", baseDiamond.target);
-      const existingFacetIds = await diamondFacet.getFacetIds();
+      asset = await ethers.getContractAt("IAsset", baseDiamond.target);
+      const existingFacetIds = await asset.getFacetIds();
 
       // All facets use latestBLRVersion (mirrors the scripts' createBatchConfiguration approach)
       const allFacetIds = [...existingFacetIds, migrationResolverKey];
@@ -199,10 +191,10 @@ describe("Adjust Balances Tests", () => {
 
       // Dynamically get the new config version and upgrade the diamond
       const newConfigVersion = Number(await blr.getLatestVersionByConfiguration(EQUITY_CONFIG_ID));
-      await diamondFacet.connect(deployer).updateConfigVersion(newConfigVersion);
+      await asset.connect(deployer).updateConfigVersion(newConfigVersion);
 
       // Set up standard roles
-      await executeRbac(base.asset, [
+      await executeRbac(asset, [
         { role: ATS_ROLES._PAUSER_ROLE, members: [base.user1.address] },
         { role: ATS_ROLES._KYC_ROLE, members: [base.user1.address] },
         { role: ATS_ROLES._SSI_MANAGER_ROLE, members: [base.deployer.address] },
@@ -210,6 +202,7 @@ describe("Adjust Balances Tests", () => {
 
       return {
         ...base,
+        asset,
         migrationFacet: (await ethers.getContractAt("MigrationFacetTest", baseDiamond.target)) as MigrationFacetTest,
       };
     }
@@ -221,15 +214,15 @@ describe("Adjust Balances Tests", () => {
       signer_B = result.user1;
       signer_C = result.user2;
       migrationFacet = result.migrationFacet;
-      base.asset = result.asset;
+      asset = result.asset;
     });
 
     it("GIVEN non-migrated totalSupply and balance WHEN adjustBalances is called THEN totalSupply migrates and balance migrates on next interaction", async () => {
-      await base.asset.connect(signer_A).grantRole(ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_A.address);
-      await base.asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
 
-      await base.asset.connect(signer_A).addIssuer(signer_A.address);
-      await base.asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, 0, MAX_UINT256, signer_A.address);
+      await asset.connect(signer_A).addIssuer(signer_A.address);
+      await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, 0, MAX_UINT256, signer_A.address);
 
       const legacyTotalSupply = 1000 * amount;
       const legacyBalance_B = 200 * amount;
@@ -246,7 +239,7 @@ describe("Adjust Balances Tests", () => {
       expect(await migrationFacet.getNewBalance(signer_B.address)).to.equal(0n);
 
       // Call adjustBalances - triggers _adjustTotalSupply which calls _migrateTotalSupplyIfNeeded
-      await base.asset.connect(signer_A).adjustBalances(1, 0);
+      await asset.connect(signer_A).adjustBalances(1, 0);
 
       // Verify totalSupply has been migrated from legacy to new storage
       expect(await migrationFacet.getLegacyTotalSupply()).to.equal(0n);
@@ -257,7 +250,7 @@ describe("Adjust Balances Tests", () => {
 
       // Trigger lazy balance migration by issuing tokens to signer_B
       // issueByPartition calls _increaseBalance which calls _migrateBalanceIfNeeded
-      await base.asset.connect(signer_A).issueByPartition({
+      await asset.connect(signer_A).issueByPartition({
         partition: _PARTITION_ID_2,
         tokenHolder: signer_B.address,
         value: newIssuanceAmount,

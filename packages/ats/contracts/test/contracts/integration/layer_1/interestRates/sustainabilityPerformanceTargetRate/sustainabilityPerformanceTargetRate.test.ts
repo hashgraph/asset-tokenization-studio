@@ -3,12 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import {
-  type ResolverProxy,
-  PauseFacet,
-  SustainabilityPerformanceTargetRateFacet,
-  ProceedRecipientsFacet,
-} from "@contract-types";
+import { type ResolverProxy, type IAsset, SustainabilityPerformanceTargetRateFacet } from "@contract-types";
 import { ATS_ROLES, BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import {
@@ -27,8 +22,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
   let project2: string;
 
   let sustainabilityPerformanceTargetRateFacet: SustainabilityPerformanceTargetRateFacet;
-  let pauseFacet: PauseFacet;
-  let proceedRecipientsFacet: ProceedRecipientsFacet;
+  let asset: IAsset;
 
   async function deploySecurityFixtureMultiPartition() {
     const base = await deployBondSustainabilityPerformanceTargetRateTokenFixture();
@@ -41,7 +35,8 @@ describe("Sustainability Performance Target Rate Tests", () => {
     project1 = signer_A.address;
     project2 = signer_B.address;
 
-    await executeRbac(base.asset, [
+    asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
+    await executeRbac(asset, [
       {
         role: ATS_ROLES._PAUSER_ROLE,
         members: [signer_B.address],
@@ -61,11 +56,9 @@ describe("Sustainability Performance Target Rate Tests", () => {
       diamond.target,
       signer_A,
     );
-    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target, signer_A);
-    proceedRecipientsFacet = await ethers.getContractAt("ProceedRecipientsFacet", diamond.target, signer_A);
 
-    await proceedRecipientsFacet.connect(signer_A).addProceedRecipient(project1, "0x");
-    await proceedRecipientsFacet.connect(signer_A).addProceedRecipient(project2, "0x");
+    await asset.connect(signer_A).addProceedRecipient(project1, "0x");
+    await asset.connect(signer_A).addProceedRecipient(project2, "0x");
   }
 
   beforeEach(async () => {
@@ -91,7 +84,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
         ],
         [project1],
       ),
-    ).to.be.revertedWithCustomError(sustainabilityPerformanceTargetRateFacet, "AlreadyInitialized");
+    ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
   });
 
   it("GIVEN mismatched array lengths WHEN initializing THEN transaction fails with ProvidedListsLengthMismatch", async () => {
@@ -114,25 +107,19 @@ describe("Sustainability Performance Target Rate Tests", () => {
     );
     await uninitializedDiamond.waitForDeployment();
 
-    // Get IAsset for the uninitialized diamond
-    const uninitializedAsset = await ethers.getContractAt("IAsset", uninitializedDiamond.target, signer_A);
+    // Get facets for the uninitialized diamond
+    const newasset = await ethers.getContractAt("IAsset", uninitializedDiamond.target, signer_A);
 
     // Set up roles
-    await executeRbac(uninitializedAsset, [
+    await executeRbac(newasset, [
       {
         role: ATS_ROLES._PROCEED_RECIPIENT_MANAGER_ROLE,
         members: [signer_A.address],
       },
     ]);
 
-    const uninitializedProceedFacet = await ethers.getContractAt(
-      "ProceedRecipientsFacet",
-      uninitializedDiamond.target,
-      signer_A,
-    );
-
     // Add proceed recipients
-    await uninitializedProceedFacet.connect(signer_A).addProceedRecipient(project1, "0x");
+    await newasset.connect(signer_A).addProceedRecipient(project1, "0x");
 
     const uninitializedFacet = await ethers.getContractAt(
       "SustainabilityPerformanceTargetRateFacet",
@@ -171,7 +158,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
   describe("Paused", () => {
     beforeEach(async () => {
       // Pausing the token
-      await pauseFacet.connect(signer_B).pause();
+      await asset.connect(signer_B).pause();
     });
 
     it("GIVEN a paused Token WHEN setInterestRate THEN transaction fails with TokenIsPaused", async () => {
@@ -182,7 +169,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
           startRate: 60,
           rateDecimals: 2,
         }),
-      ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
     });
 
     it("GIVEN a paused Token WHEN setImpactData THEN transaction fails with TokenIsPaused", async () => {
@@ -198,7 +185,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
           ],
           [project1],
         ),
-      ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
     });
   });
 
@@ -211,7 +198,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
           startRate: 60,
           rateDecimals: 2,
         }),
-      ).to.be.revertedWithCustomError(sustainabilityPerformanceTargetRateFacet, "AccountHasNoRole");
+      ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
     it("GIVEN an account without interest rate manager role WHEN setImpactData THEN transaction fails with AccountHasNoRole", async () => {
@@ -227,7 +214,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
           ],
           [project1],
         ),
-      ).to.be.revertedWithCustomError(sustainabilityPerformanceTargetRateFacet, "AccountHasNoRole");
+      ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
   });
 

@@ -5,6 +5,7 @@ import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { ExternalListManagementStorageWrapper } from "./ExternalListManagementStorageWrapper.sol";
 import { _CONTROL_LIST_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 import { IControlList } from "../../facets/layer_1/controlList/IControlList.sol";
 
 struct ControlListStorage {
@@ -49,7 +50,7 @@ library ControlListStorageWrapper {
     // solhint-disable-next-line ordering
     function checkControlList(address _account) internal view {
         if (!isAbleToAccess(_account)) {
-            revert IControlList.AccountIsBlocked(_account);
+            revert ICommonErrors.AccountIsBlocked(_account);
         }
     }
 

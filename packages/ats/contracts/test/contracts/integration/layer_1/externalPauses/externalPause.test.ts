@@ -6,15 +6,14 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT } from "@scripts";
 import { deployEquityTokenFixture } from "@test";
-import { ResolverProxy, ExternalPauseManagementFacet, MockedExternalPause, AccessControl } from "@contract-types";
+import { ResolverProxy, type IAsset, MockedExternalPause } from "@contract-types";
 
 describe("ExternalPause Tests", () => {
   let diamond: ResolverProxy;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
 
-  let externalPauseManagement: ExternalPauseManagementFacet;
-  let accessControlFacet: AccessControl;
+  let asset: IAsset;
   let externalPauseMock1: MockedExternalPause;
   let externalPauseMock2: MockedExternalPause;
   let externalPauseMock3: MockedExternalPause;
@@ -40,8 +39,7 @@ describe("ExternalPause Tests", () => {
     signer_A = base.deployer;
     signer_B = base.user1;
 
-    externalPauseManagement = await ethers.getContractAt("ExternalPauseManagementFacet", diamond.target, signer_A);
-    accessControlFacet = base.accessControlFacet;
+    asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
 
     await base.accessControlFacet.grantRole(ATS_ROLES._PAUSE_MANAGER_ROLE, signer_A.address);
 
@@ -64,11 +62,11 @@ describe("ExternalPause Tests", () => {
       gasLimit: GAS_LIMIT.default,
     });
 
-    await externalPauseManagement.addExternalPause(externalPauseMock1.target as string, {
+    await asset.addExternalPause(externalPauseMock1.target as string, {
       gasLimit: GAS_LIMIT.default,
     });
 
-    await externalPauseManagement.addExternalPause(externalPauseMock2.target as string, {
+    await asset.addExternalPause(externalPauseMock2.target as string, {
       gasLimit: GAS_LIMIT.default,
     });
   }
@@ -80,61 +78,61 @@ describe("ExternalPause Tests", () => {
   describe("Add Tests", () => {
     it("GIVEN an unlisted external pause WHEN added THEN it is listed and event is emitted", async () => {
       const newPause = externalPauseMock3.target as string;
-      expect(await externalPauseManagement.isExternalPause(newPause)).to.be.false;
-      const initialCount = await externalPauseManagement.getExternalPausesCount();
+      expect(await asset.isExternalPause(newPause)).to.be.false;
+      const initialCount = await asset.getExternalPausesCount();
       await expect(
-        externalPauseManagement.addExternalPause(newPause, {
+        asset.addExternalPause(newPause, {
           gasLimit: GAS_LIMIT.default,
         }),
       )
-        .to.emit(externalPauseManagement, "AddedToExternalPauses")
+        .to.emit(asset, "AddedToExternalPauses")
         .withArgs(signer_A.address, newPause);
-      expect(await externalPauseManagement.isExternalPause(newPause)).to.be.true;
-      expect(await externalPauseManagement.getExternalPausesCount()).to.equal(initialCount + 1n);
+      expect(await asset.isExternalPause(newPause)).to.be.true;
+      expect(await asset.getExternalPausesCount()).to.equal(initialCount + 1n);
     });
 
     it("GIVEN a listed external pause WHEN adding it again THEN it reverts with ListedPause", async () => {
-      expect(await externalPauseManagement.isExternalPause(externalPauseMock1.target as string)).to.be.true;
+      expect(await asset.isExternalPause(externalPauseMock1.target as string)).to.be.true;
       await expect(
-        externalPauseManagement.addExternalPause(externalPauseMock1.target as string, {
+        asset.addExternalPause(externalPauseMock1.target as string, {
           gasLimit: GAS_LIMIT.default,
         }),
-      ).to.be.revertedWithCustomError(externalPauseManagement, "ListedPause");
+      ).to.be.revertedWithCustomError(asset, "ListedPause");
     });
 
     it("GIVEN an invalid address WHEN adding it THEN it reverts with ZeroAddressNotAllowed", async () => {
       await expect(
-        externalPauseManagement.addExternalPause(ADDRESS_ZERO, {
+        asset.addExternalPause(ADDRESS_ZERO, {
           gasLimit: GAS_LIMIT.default,
         }),
-      ).to.be.revertedWithCustomError(externalPauseManagement, "ZeroAddressNotAllowed");
+      ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
     });
   });
 
   describe("Remove Tests", () => {
     it("GIVEN a listed external pause WHEN removed THEN it is unlisted and event is emitted", async () => {
       const pauseToRemove = externalPauseMock1.target as string;
-      expect(await externalPauseManagement.isExternalPause(pauseToRemove)).to.be.true;
-      const initialCount = await externalPauseManagement.getExternalPausesCount();
+      expect(await asset.isExternalPause(pauseToRemove)).to.be.true;
+      const initialCount = await asset.getExternalPausesCount();
       await expect(
-        externalPauseManagement.removeExternalPause(pauseToRemove, {
+        asset.removeExternalPause(pauseToRemove, {
           gasLimit: GAS_LIMIT.default,
         }),
       )
-        .to.emit(externalPauseManagement, "RemovedFromExternalPauses")
+        .to.emit(asset, "RemovedFromExternalPauses")
         .withArgs(signer_A.address, pauseToRemove);
-      expect(await externalPauseManagement.isExternalPause(pauseToRemove)).to.be.false;
-      expect(await externalPauseManagement.getExternalPausesCount()).to.equal(initialCount - 1n);
+      expect(await asset.isExternalPause(pauseToRemove)).to.be.false;
+      expect(await asset.getExternalPausesCount()).to.equal(initialCount - 1n);
     });
 
     it("GIVEN an unlisted external pause WHEN removing THEN it reverts with UnlistedPause", async () => {
       const randomAddress = ethers.Wallet.createRandom().address;
-      expect(await externalPauseManagement.isExternalPause(randomAddress)).to.be.false;
+      expect(await asset.isExternalPause(randomAddress)).to.be.false;
       await expect(
-        externalPauseManagement.removeExternalPause(randomAddress, {
+        asset.removeExternalPause(randomAddress, {
           gasLimit: GAS_LIMIT.default,
         }),
-      ).to.be.revertedWithCustomError(externalPauseManagement, "UnlistedPause");
+      ).to.be.revertedWithCustomError(asset, "UnlistedPause");
     });
   });
 
@@ -144,137 +142,137 @@ describe("ExternalPause Tests", () => {
       const actives = [true];
 
       await expect(
-        externalPauseManagement.updateExternalPauses(pausesToUpdate, actives, {
+        asset.updateExternalPauses(pausesToUpdate, actives, {
           gasLimit: GAS_LIMIT.high,
         }),
-      ).to.be.revertedWithCustomError(externalPauseManagement, "ZeroAddressNotAllowed");
+      ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
     });
 
     it("GIVEN multiple external pauses WHEN updated THEN their statuses are updated and event is emitted", async () => {
       // Initial state: mock1=true, mock2=true. Verify.
-      expect(await externalPauseManagement.isExternalPause(externalPauseMock1.target as string)).to.be.true;
-      expect(await externalPauseManagement.isExternalPause(externalPauseMock2.target as string)).to.be.true;
-      expect(await externalPauseManagement.isExternalPause(externalPauseMock3.target as string)).to.be.false;
-      const initialCount = await externalPauseManagement.getExternalPausesCount();
+      expect(await asset.isExternalPause(externalPauseMock1.target as string)).to.be.true;
+      expect(await asset.isExternalPause(externalPauseMock2.target as string)).to.be.true;
+      expect(await asset.isExternalPause(externalPauseMock3.target as string)).to.be.false;
+      const initialCount = await asset.getExternalPausesCount();
       expect(initialCount).to.equal(4); // 2 from init + 2 added in fixture
 
       const pausesToUpdate = [externalPauseMock2.target as string, externalPauseMock3.target as string];
       const activesToUpdate = [false, true]; // Corresponds to removing mock2, adding mock3
 
       await expect(
-        externalPauseManagement.updateExternalPauses(pausesToUpdate, activesToUpdate, {
+        asset.updateExternalPauses(pausesToUpdate, activesToUpdate, {
           gasLimit: GAS_LIMIT.high,
         }),
       )
-        .to.emit(externalPauseManagement, "ExternalPausesUpdated")
+        .to.emit(asset, "ExternalPausesUpdated")
         .withArgs(signer_A.address, pausesToUpdate, activesToUpdate);
 
       // Verify final state
-      expect(await externalPauseManagement.isExternalPause(externalPauseMock1.target as string)).to.be.true; // mock1 untouched
-      expect(await externalPauseManagement.isExternalPause(externalPauseMock2.target as string)).to.be.false; // mock2 removed
-      expect(await externalPauseManagement.isExternalPause(externalPauseMock3.target as string)).to.be.true; // mock3 added
-      expect(await externalPauseManagement.getExternalPausesCount()).to.equal(initialCount - 1n + 1n); // 4 - 1 + 1 = 4
+      expect(await asset.isExternalPause(externalPauseMock1.target as string)).to.be.true; // mock1 untouched
+      expect(await asset.isExternalPause(externalPauseMock2.target as string)).to.be.false; // mock2 removed
+      expect(await asset.isExternalPause(externalPauseMock3.target as string)).to.be.true; // mock3 added
+      expect(await asset.getExternalPausesCount()).to.equal(initialCount - 1n + 1n); // 4 - 1 + 1 = 4
     });
 
     it("GIVEN duplicate addresses with conflicting actives (true then false) WHEN updated THEN it reverts with ContradictoryValuesInArray", async () => {
       const duplicatePause = externalPauseMock3.target as string;
-      expect(await externalPauseManagement.isExternalPause(duplicatePause)).to.be.false;
+      expect(await asset.isExternalPause(duplicatePause)).to.be.false;
 
       const pauses = [duplicatePause, duplicatePause];
       const actives = [true, false];
 
       await expect(
-        externalPauseManagement.updateExternalPauses(pauses, actives, {
+        asset.updateExternalPauses(pauses, actives, {
           gasLimit: GAS_LIMIT.high,
         }),
-      ).to.be.revertedWithCustomError(externalPauseManagement, "ContradictoryValuesInArray");
+      ).to.be.revertedWithCustomError(asset, "ContradictoryValuesInArray");
     });
 
     it("GIVEN duplicate addresses with conflicting actives (false then true) WHEN updated THEN it reverts with ContradictoryValuesInArray", async () => {
       const duplicatePause = externalPauseMock1.target as string;
-      expect(await externalPauseManagement.isExternalPause(duplicatePause)).to.be.true;
+      expect(await asset.isExternalPause(duplicatePause)).to.be.true;
 
       const pauses = [duplicatePause, duplicatePause];
       const actives = [false, true];
 
       await expect(
-        externalPauseManagement.updateExternalPauses(pauses, actives, {
+        asset.updateExternalPauses(pauses, actives, {
           gasLimit: GAS_LIMIT.high,
         }),
-      ).to.be.revertedWithCustomError(externalPauseManagement, "ContradictoryValuesInArray");
+      ).to.be.revertedWithCustomError(asset, "ContradictoryValuesInArray");
     });
 
     it("GIVEN empty arrays WHEN updating THEN it succeeds and emits event", async () => {
-      const initialCount = await externalPauseManagement.getExternalPausesCount();
+      const initialCount = await asset.getExternalPausesCount();
       const pauses: string[] = [];
       const actives: boolean[] = [];
       await expect(
-        externalPauseManagement.updateExternalPauses(pauses, actives, {
+        asset.updateExternalPauses(pauses, actives, {
           gasLimit: GAS_LIMIT.high,
         }),
       )
-        .to.emit(externalPauseManagement, "ExternalPausesUpdated")
+        .to.emit(asset, "ExternalPausesUpdated")
         .withArgs(signer_A.address, pauses, actives);
-      expect(await externalPauseManagement.getExternalPausesCount()).to.equal(initialCount);
+      expect(await asset.getExternalPausesCount()).to.equal(initialCount);
     });
   });
 
   describe("View/Getter Functions", () => {
     it("GIVEN listed and unlisted addresses WHEN isExternalPause is called THEN it returns the correct status", async () => {
-      expect(await externalPauseManagement.isExternalPause(externalPauseMock1.target as string)).to.be.true;
-      expect(await externalPauseManagement.isExternalPause(externalPauseMock2.target as string)).to.be.true;
+      expect(await asset.isExternalPause(externalPauseMock1.target as string)).to.be.true;
+      expect(await asset.isExternalPause(externalPauseMock2.target as string)).to.be.true;
       const randomAddress = ethers.Wallet.createRandom().address;
-      expect(await externalPauseManagement.isExternalPause(randomAddress)).to.be.false;
-      await externalPauseManagement.addExternalPause(externalPauseMock3.target as string);
-      expect(await externalPauseManagement.isExternalPause(externalPauseMock3.target as string)).to.be.true;
+      expect(await asset.isExternalPause(randomAddress)).to.be.false;
+      await asset.addExternalPause(externalPauseMock3.target as string);
+      expect(await asset.isExternalPause(externalPauseMock3.target as string)).to.be.true;
     });
 
     it("GIVEN external pauses WHEN getExternalPausesCount is called THEN it returns the current count", async () => {
-      const initialCount = await externalPauseManagement.getExternalPausesCount();
+      const initialCount = await asset.getExternalPausesCount();
       expect(initialCount).to.equal(4); // 2 from init + 2 from beforeEach
-      await externalPauseManagement.addExternalPause(externalPauseMock3.target as string);
-      expect(await externalPauseManagement.getExternalPausesCount()).to.equal(initialCount + 1n); // 5
-      await externalPauseManagement.removeExternalPause(externalPauseMock1.target as string);
-      expect(await externalPauseManagement.getExternalPausesCount()).to.equal(initialCount); // 4
-      await externalPauseManagement.removeExternalPause(externalPauseMock2.target as string);
-      await externalPauseManagement.removeExternalPause(externalPauseMock3.target as string);
-      expect(await externalPauseManagement.getExternalPausesCount()).to.equal(2); // 2 from init remain
+      await asset.addExternalPause(externalPauseMock3.target as string);
+      expect(await asset.getExternalPausesCount()).to.equal(initialCount + 1n); // 5
+      await asset.removeExternalPause(externalPauseMock1.target as string);
+      expect(await asset.getExternalPausesCount()).to.equal(initialCount); // 4
+      await asset.removeExternalPause(externalPauseMock2.target as string);
+      await asset.removeExternalPause(externalPauseMock3.target as string);
+      expect(await asset.getExternalPausesCount()).to.equal(2); // 2 from init remain
     });
 
     it("GIVEN external pauses WHEN getExternalPausesMembers is called THEN it returns paginated members", async () => {
-      expect(await externalPauseManagement.getExternalPausesCount()).to.equal(4); // 2 from init + 2 from beforeEach
+      expect(await asset.getExternalPausesCount()).to.equal(4); // 2 from init + 2 from beforeEach
 
       // Test pagination - get first member
-      let membersPage = await externalPauseManagement.getExternalPausesMembers(0, 1);
+      let membersPage = await asset.getExternalPausesMembers(0, 1);
       expect(membersPage).to.have.lengthOf(1);
       const firstMember = membersPage[0];
 
       // Test pagination - get second member (should be different from first)
-      membersPage = await externalPauseManagement.getExternalPausesMembers(1, 1);
+      membersPage = await asset.getExternalPausesMembers(1, 1);
       expect(membersPage).to.have.lengthOf(1);
       expect(membersPage[0]).to.not.equal(firstMember);
 
       // Get all 4 members
-      let allMembers = await externalPauseManagement.getExternalPausesMembers(0, 4);
+      let allMembers = await asset.getExternalPausesMembers(0, 4);
       expect(allMembers).to.have.lengthOf(4);
       expect(allMembers).to.contain(externalPauseMock1.target as string);
       expect(allMembers).to.contain(externalPauseMock2.target as string);
-      await externalPauseManagement.addExternalPause(externalPauseMock3.target as string);
-      allMembers = await externalPauseManagement.getExternalPausesMembers(0, 5);
+      await asset.addExternalPause(externalPauseMock3.target as string);
+      allMembers = await asset.getExternalPausesMembers(0, 5);
       expect(allMembers).to.have.lengthOf(5);
       expect(allMembers).to.contain(externalPauseMock1.target as string);
       expect(allMembers).to.contain(externalPauseMock2.target as string);
       expect(allMembers).to.contain(externalPauseMock3.target as string);
 
-      membersPage = await externalPauseManagement.getExternalPausesMembers(1, 3);
+      membersPage = await asset.getExternalPausesMembers(1, 3);
       expect(membersPage).to.have.lengthOf(2);
 
-      membersPage = await externalPauseManagement.getExternalPausesMembers(5, 1);
+      membersPage = await asset.getExternalPausesMembers(5, 1);
       expect(membersPage).to.have.lengthOf(0);
-      await externalPauseManagement.removeExternalPause(externalPauseMock1.target as string);
-      await externalPauseManagement.removeExternalPause(externalPauseMock2.target as string);
-      await externalPauseManagement.removeExternalPause(externalPauseMock3.target as string);
-      allMembers = await externalPauseManagement.getExternalPausesMembers(0, 5);
+      await asset.removeExternalPause(externalPauseMock1.target as string);
+      await asset.removeExternalPause(externalPauseMock2.target as string);
+      await asset.removeExternalPause(externalPauseMock3.target as string);
+      allMembers = await asset.getExternalPausesMembers(0, 5);
       expect(allMembers).to.have.lengthOf(2); // 2 from init remain
     });
   });
@@ -284,43 +282,43 @@ describe("ExternalPause Tests", () => {
       await externalPauseMock1.setPaused(true, {
         gasLimit: GAS_LIMIT.default,
       });
-      // Use externalPauseManagement instance for error checking as Common interface loading failed
+      // Use asset instance for error checking as Common interface loading failed
       await expect(
-        externalPauseManagement.addExternalPause(externalPauseMock3.target as string, {
+        asset.addExternalPause(externalPauseMock3.target as string, {
           gasLimit: GAS_LIMIT.default,
         }),
-      ).to.be.revertedWithCustomError(externalPauseManagement, "TokenIsPaused"); // Assumes TokenIsPaused is inherited/available
+      ).to.be.revertedWithCustomError(asset, "TokenIsPaused"); // Assumes TokenIsPaused is inherited/available
       await expect(
-        externalPauseManagement.removeExternalPause(externalPauseMock2.target as string, {
+        asset.removeExternalPause(externalPauseMock2.target as string, {
           gasLimit: GAS_LIMIT.default,
         }),
-      ).to.be.revertedWithCustomError(externalPauseManagement, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
       const pauses = [externalPauseMock2.target as string];
       const actives = [false];
       await expect(
-        externalPauseManagement.updateExternalPauses(pauses, actives, {
+        asset.updateExternalPauses(pauses, actives, {
           gasLimit: GAS_LIMIT.high,
         }),
-      ).to.be.revertedWithCustomError(externalPauseManagement, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
     });
 
     it("GIVEN all external pauses are unpaused WHEN calling a function with onlyUnpaused THEN it succeeds", async () => {
       expect(await externalPauseMock1.isPaused()).to.be.false;
       expect(await externalPauseMock2.isPaused()).to.be.false;
       await expect(
-        externalPauseManagement.addExternalPause(externalPauseMock3.target as string, {
+        asset.addExternalPause(externalPauseMock3.target as string, {
           gasLimit: GAS_LIMIT.default,
         }),
       ).to.not.be.reverted;
       await expect(
-        externalPauseManagement.removeExternalPause(externalPauseMock1.target as string, {
+        asset.removeExternalPause(externalPauseMock1.target as string, {
           gasLimit: GAS_LIMIT.default,
         }),
       ).to.not.be.reverted;
       const pauses = [externalPauseMock2.target as string];
       const actives = [false];
       await expect(
-        externalPauseManagement.updateExternalPauses(pauses, actives, {
+        asset.updateExternalPauses(pauses, actives, {
           gasLimit: GAS_LIMIT.high,
         }),
       ).to.not.be.reverted;
@@ -331,79 +329,76 @@ describe("ExternalPause Tests", () => {
     it("GIVEN an account without ATS_ROLES._PAUSE_MANAGER_ROLE WHEN adding an external pause THEN it reverts with AccessControl", async () => {
       const newPause = externalPauseMock3.target as string;
       await expect(
-        externalPauseManagement.connect(signer_B).addExternalPause(newPause, { gasLimit: GAS_LIMIT.default }),
-      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
+        asset.connect(signer_B).addExternalPause(newPause, { gasLimit: GAS_LIMIT.default }),
+      ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
     it("GIVEN an account with ATS_ROLES._PAUSE_MANAGER_ROLE WHEN adding an external pause THEN it succeeds", async () => {
       const newPause = externalPauseMock3.target as string;
-      expect(await externalPauseManagement.isExternalPause(newPause)).to.be.false;
+      expect(await asset.isExternalPause(newPause)).to.be.false;
       await expect(
-        externalPauseManagement.addExternalPause(newPause, {
+        asset.addExternalPause(newPause, {
           gasLimit: GAS_LIMIT.default,
         }),
       )
-        .to.emit(externalPauseManagement, "AddedToExternalPauses")
+        .to.emit(asset, "AddedToExternalPauses")
         .withArgs(signer_A.address, newPause);
-      expect(await externalPauseManagement.isExternalPause(newPause)).to.be.true;
+      expect(await asset.isExternalPause(newPause)).to.be.true;
     });
 
     it("GIVEN an account without ATS_ROLES._PAUSE_MANAGER_ROLE WHEN removing an external pause THEN it reverts with AccessControl", async () => {
-      expect(await externalPauseManagement.isExternalPause(externalPauseMock1.target as string)).to.be.true;
+      expect(await asset.isExternalPause(externalPauseMock1.target as string)).to.be.true;
       // --- FIX: Check for custom error ---
       await expect(
-        externalPauseManagement.connect(signer_B).removeExternalPause(externalPauseMock1.target as string, {
+        asset.connect(signer_B).removeExternalPause(externalPauseMock1.target as string, {
           gasLimit: GAS_LIMIT.default,
         }),
-      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
+      ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
     it("GIVEN an account with ATS_ROLES._PAUSE_MANAGER_ROLE WHEN removing an external pause THEN it succeeds", async () => {
-      expect(await externalPauseManagement.isExternalPause(externalPauseMock1.target as string)).to.be.true;
+      expect(await asset.isExternalPause(externalPauseMock1.target as string)).to.be.true;
       await expect(
-        externalPauseManagement.removeExternalPause(externalPauseMock1.target as string, {
+        asset.removeExternalPause(externalPauseMock1.target as string, {
           gasLimit: GAS_LIMIT.default,
         }),
       )
-        .to.emit(externalPauseManagement, "RemovedFromExternalPauses")
+        .to.emit(asset, "RemovedFromExternalPauses")
         .withArgs(signer_A.address, externalPauseMock1.target as string);
-      expect(await externalPauseManagement.isExternalPause(externalPauseMock1.target as string)).to.be.false;
+      expect(await asset.isExternalPause(externalPauseMock1.target as string)).to.be.false;
     });
 
     it("GIVEN an account without ATS_ROLES._PAUSE_MANAGER_ROLE WHEN updating external pauses THEN it reverts with AccessControl", async () => {
       const pauses = [externalPauseMock1.target as string];
       const actives = [false];
-      expect(await externalPauseManagement.isExternalPause(externalPauseMock1.target as string)).to.be.true;
+      expect(await asset.isExternalPause(externalPauseMock1.target as string)).to.be.true;
       await expect(
-        externalPauseManagement.connect(signer_B).updateExternalPauses(pauses, actives, {
+        asset.connect(signer_B).updateExternalPauses(pauses, actives, {
           gasLimit: GAS_LIMIT.high,
         }),
-      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
+      ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
     it("GIVEN an account with ATS_ROLES._PAUSE_MANAGER_ROLE WHEN updating external pauses THEN it succeeds", async () => {
-      expect(await externalPauseManagement.isExternalPause(externalPauseMock1.target as string)).to.be.true;
-      expect(await externalPauseManagement.isExternalPause(externalPauseMock2.target as string)).to.be.true;
+      expect(await asset.isExternalPause(externalPauseMock1.target as string)).to.be.true;
+      expect(await asset.isExternalPause(externalPauseMock2.target as string)).to.be.true;
       const pauses = [externalPauseMock1.target as string, externalPauseMock2.target as string];
       const actives = [false, true]; // Remove mock1, keep mock2
       await expect(
-        externalPauseManagement.updateExternalPauses(pauses, actives, {
+        asset.updateExternalPauses(pauses, actives, {
           gasLimit: GAS_LIMIT.high,
         }),
       )
-        .to.emit(externalPauseManagement, "ExternalPausesUpdated")
+        .to.emit(asset, "ExternalPausesUpdated")
         .withArgs(signer_A.address, pauses, actives);
-      expect(await externalPauseManagement.isExternalPause(externalPauseMock1.target as string)).to.be.false;
-      expect(await externalPauseManagement.isExternalPause(externalPauseMock2.target as string)).to.be.true;
+      expect(await asset.isExternalPause(externalPauseMock1.target as string)).to.be.false;
+      expect(await asset.isExternalPause(externalPauseMock2.target as string)).to.be.true;
     });
   });
 
   describe("Initialize Tests", () => {
     it("GIVEN already initialized WHEN initialize_ExternalPauses is called again THEN it reverts with AlreadyInitialized", async () => {
-      await expect(externalPauseManagement.initialize_ExternalPauses([])).to.be.revertedWithCustomError(
-        externalPauseManagement,
-        "AlreadyInitialized",
-      );
+      await expect(asset.initialize_ExternalPauses([])).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
     });
   });
 });

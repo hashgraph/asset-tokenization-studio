@@ -28,6 +28,7 @@ import { ICompliance } from "./layer_1/ERC3643/ICompliance.sol";
 import { IControlList } from "./layer_1/controlList/IControlList.sol";
 import { ICorporateActions } from "./layer_1/corporateAction/ICorporateActions.sol";
 import { IDiamond } from "../infrastructure/proxy/IDiamond.sol";
+import { ICommonErrors } from "../infrastructure/errors/ICommonErrors.sol";
 
 // Layer 1 — External lists
 import { IERC1410 } from "./layer_1/ERC1400/ERC1410/IERC1410.sol";
@@ -49,6 +50,10 @@ import { IExternalKycListManagement } from "./layer_1/externalKycList/IExternalK
 import { IExternalPause } from "./layer_1/externalPause/IExternalPause.sol";
 import { IExternalPauseManagement } from "./layer_1/externalPause/IExternalPauseManagement.sol";
 import { IFixedRate } from "./layer_2/interestRate/fixedRate/IFixedRate.sol";
+import { IKpiLinkedRateErrors } from "./layer_2/interestRate/kpiLinkedRate/IKpiLinkedRateErrors.sol";
+import {
+    ISustainabilityPerformanceTargetRateErrors
+} from "./layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRateErrors.sol";
 
 // Layer 2
 import { IFreeze } from "./layer_1/freeze/IFreeze.sol";
@@ -82,7 +87,6 @@ import { ITotalBalance } from "./layer_1/totalBalance/ITotalBalance.sol";
 import { ITransferAndLock } from "./layer_3/transferAndLock/ITransferAndLock.sol";
 import { ICoupon } from "./layer_2/coupon/ICoupon.sol";
 import { IDividend } from "./layer_2/dividend/IDividend.sol";
-import { IVoting } from "./layer_2/voting/IVoting.sol";
 
 /**
  * @title IAsset
@@ -97,13 +101,18 @@ import { IVoting } from "./layer_2/voting/IVoting.sol";
  *
  * Note: IKpiLinkedRate and ISustainabilityPerformanceTargetRate are intentionally
  * excluded due to an irreconcilable function selector conflict on getInterestRate().
+ * However, IKpiLinkedRateErrors and ISustainabilityPerformanceTargetRateErrors are included
+ * to expose the error selectors through IAsset.
  */
 // solhint-disable no-empty-blocks
 interface IAsset is
     IAccessControl,
     IPause,
+    IExternalPauseManagement,
     ISsiManagement,
     IKyc,
+    IExternalKycList,
+    IExternalKycListManagement,
     IKpis,
     ITimeTravel,
     IDiamond,
@@ -113,6 +122,7 @@ interface IAsset is
     IERC1410,
     IERC3643,
     IScheduledCrossOrderedTasks,
+    IScheduledSnapshots,
     IBond,
     IEquity,
     ISecurity,
@@ -131,12 +141,14 @@ interface IAsset is
     // Corporate Actions
     ICoupon,
     IDividend,
-    IVoting,
     // Additional Layer 1
     ICap,
     INonces,
     ITotalBalance,
     IFixedRate,
+    // Scheduled Tasks
+    IScheduledCouponListing,
+    IScheduledBalanceAdjustments,
     ILock,
     IFreeze,
     ISnapshots,
@@ -152,5 +164,7 @@ interface IAsset is
     IERC1644,
     IERC20Permit,
     // Control
-    IControlList
+    IControlList,
+    IExternalControlList,
+    IExternalControlListManagement
 {}

@@ -130,7 +130,7 @@ describe("Bond Tests", () => {
       };
       await expect(
         asset.connect(signer_A)._initialize_bondUSA(await getBondDetails(), regulationData, additionalSecurityData),
-      ).to.be.rejectedWith("AlreadyInitialized");
+      ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
     });
   });
 
@@ -194,8 +194,6 @@ describe("Bond Tests", () => {
         );
       });
       it("GIVEN clearing is activated WHEN redeeming at maturity THEN transaction fails with ClearingIsActivated", async () => {
-        await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-        await asset.changeSystemTimestamp(maturityDate + 1);
         await asset.connect(signer_A).activateClearing();
 
         await expect(
@@ -209,14 +207,7 @@ describe("Bond Tests", () => {
       });
 
       it("GIVEN the token is paused WHEN redeeming at maturity THEN transaction fails with TokenIsPaused", async () => {
-        await grantRoleAndPauseToken(
-          asset,
-          asset,
-          ATS_ROLES._CORPORATE_ACTION_ROLE,
-          signer_A,
-          signer_B,
-          signer_C.address,
-        );
+        await grantRoleAndPauseToken(asset, ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
 
         await expect(
           asset.connect(signer_C).redeemAtMaturityByPartition(signer_C.address, DEFAULT_PARTITION, amount),
