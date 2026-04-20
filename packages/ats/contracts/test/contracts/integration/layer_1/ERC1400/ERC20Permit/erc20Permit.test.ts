@@ -14,7 +14,7 @@ import {
   DiamondFacet,
 } from "@contract-types";
 import { ADDRESS_ZERO, ATS_ROLES } from "@scripts";
-import { deployEquityTokenFixture, executeRbac, getDltTimestamp } from "@test";
+import { deployEquityTokenFixture, executeRbac, getCoreFacet, getDltTimestamp } from "@test";
 
 describe("ERC20Permit Tests", () => {
   let diamond: ResolverProxy;
@@ -58,7 +58,7 @@ describe("ERC20Permit Tests", () => {
     describe("Domain Separator", () => {
       it("GIVEN a deployed contract WHEN DOMAIN_SEPARATOR is called THEN the correct domain separator is returned", async () => {
         const domainSeparator = await erc20PermitFacet.DOMAIN_SEPARATOR();
-        const CONTRACT_NAME = (await erc20Facet.getERC20Metadata()).info.name;
+        const CONTRACT_NAME = (await (await getCoreFacet(diamond.target)).getERC20Metadata()).info.name;
         const CONTRACT_VERSION = (await diamondCutFacet.getConfigInfo()).version_.toString();
         const domain = {
           name: CONTRACT_NAME,
@@ -182,7 +182,7 @@ describe("ERC20Permit Tests", () => {
       it("GIVEN a signature from a different owner WHEN permit is called THEN the transaction reverts with ERC2612InvalidSigner", async () => {
         const nonce = await noncesFacet.nonces(signer_A.address);
         const expiry = (await getDltTimestamp()) + 3600; // 1 hour in the future
-        const CONTRACT_NAME = (await erc20Facet.getERC20Metadata()).info.name;
+        const CONTRACT_NAME = (await (await getCoreFacet(diamond.target)).getERC20Metadata()).info.name;
         const CONTRACT_VERSION = (await diamondCutFacet.getConfigInfo()).version_.toString();
 
         const domain = {
@@ -221,7 +221,7 @@ describe("ERC20Permit Tests", () => {
       it("GIVEN a valid signature WHEN permit is called THEN the approval succeeds and emits Approval event", async () => {
         const nonce = await noncesFacet.nonces(signer_A.address);
         const expiry = (await getDltTimestamp()) + 3600; // 1 hour in the future
-        const CONTRACT_NAME = (await erc20Facet.getERC20Metadata()).info.name;
+        const CONTRACT_NAME = (await (await getCoreFacet(diamond.target)).getERC20Metadata()).info.name;
         const CONTRACT_VERSION = (await diamondCutFacet.getConfigInfo()).version_.toString();
 
         const domain = {

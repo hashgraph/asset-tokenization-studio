@@ -10,7 +10,9 @@ import {
   AccessControl,
   ERC20,
   IFactory,
+  CoreFacet,
   AccessControl__factory,
+  CoreFacet__factory,
   ERC20__factory,
   ModularCompliance__factory,
   IdentityRegistryStorage__factory,
@@ -45,12 +47,14 @@ describe("TREX Factory Tests", () => {
 
   let accessControlFacet: AccessControl;
   let erc20Facet: ERC20;
+  let coreFacet: CoreFacet;
   let factory: IFactory;
 
   async function setFacets(diamond: string) {
     accessControlFacet = AccessControl__factory.connect(diamond.toString(), ethers.provider);
 
     erc20Facet = ERC20__factory.connect(diamond.toString(), ethers.provider);
+    coreFacet = CoreFacet__factory.connect(diamond.toString(), ethers.provider);
   }
   async function deployAtsFactoryFixture() {
     const base = await deployAtsInfrastructureFixture();
@@ -328,9 +332,9 @@ describe("TREX Factory Tests", () => {
 
       await setFacets(trexAddr);
 
-      expect(await erc20Facet.name()).to.equal(equityData.security.erc20MetadataInfo.name);
-      expect(await erc20Facet.symbol()).to.equal(equityData.security.erc20MetadataInfo.symbol);
-      expect(await erc20Facet.decimals()).to.equal(equityData.security.erc20MetadataInfo.decimals);
+      expect(await coreFacet.name()).to.equal(equityData.security.erc20MetadataInfo.name);
+      expect(await coreFacet.symbol()).to.equal(equityData.security.erc20MetadataInfo.symbol);
+      expect(await coreFacet.decimals()).to.equal(equityData.security.erc20MetadataInfo.decimals);
       expect(await accessControlFacet.hasRole(ATS_ROLES._TREX_OWNER_ROLE, deployer.address)).to.be.true;
       expect(await accessControlFacet.hasRole(ATS_ROLES._DEFAULT_ADMIN_ROLE, deployer.address)).to.be.true;
     });
@@ -1197,9 +1201,9 @@ describe("TREX Factory Tests", () => {
 
       await setFacets(trexAddr);
 
-      expect(await erc20Facet.name()).to.equal(bondData.security.erc20MetadataInfo.name);
-      expect(await erc20Facet.symbol()).to.equal(bondData.security.erc20MetadataInfo.symbol);
-      expect(await erc20Facet.decimals()).to.equal(bondData.security.erc20MetadataInfo.decimals);
+      expect(await coreFacet.name()).to.equal(bondData.security.erc20MetadataInfo.name);
+      expect(await coreFacet.symbol()).to.equal(bondData.security.erc20MetadataInfo.symbol);
+      expect(await coreFacet.decimals()).to.equal(bondData.security.erc20MetadataInfo.decimals);
       expect(await accessControlFacet.hasRole(ATS_ROLES._TREX_OWNER_ROLE, deployer.address)).to.be.true;
       expect(await accessControlFacet.hasRole(ATS_ROLES._DEFAULT_ADMIN_ROLE, deployer.address)).to.be.true;
     });

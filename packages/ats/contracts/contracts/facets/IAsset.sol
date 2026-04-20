@@ -29,6 +29,9 @@ import { IControlList } from "./layer_1/controlList/IControlList.sol";
 import { ICorporateActions } from "./layer_1/corporateAction/ICorporateActions.sol";
 import { IDiamond } from "../infrastructure/proxy/IDiamond.sol";
 
+// Core
+import { ICore } from "./core/ICore.sol";
+
 // Layer 1 — External lists
 import { IERC1410 } from "./layer_1/ERC1400/ERC1410/IERC1410.sol";
 import { IERC1594 } from "./layer_1/ERC1400/ERC1594/IERC1594.sol";
@@ -97,6 +100,7 @@ import { ITransferAndLock } from "./layer_3/transferAndLock/ITransferAndLock.sol
  */
 // solhint-disable no-empty-blocks
 interface IAsset is
+    ICore,
     IAccessControl,
     IPause,
     ISsiManagement,

@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers, network } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployEquityTokenFixture } from "@test";
+import { deployEquityTokenFixture, getCoreFacet } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
 import {
   EMPTY_STRING,
@@ -1155,7 +1155,7 @@ describe("Hold Tests", () => {
       beforeEach(async () => {
         await loadFixture(protectedEquityTokenFixture);
 
-        const name = (await erc20Facet.getERC20Metadata()).info.name;
+        const name = (await (await getCoreFacet(diamond.target)).getERC20Metadata()).info.name;
         const version = (await diamondCutFacet.getConfigInfo()).version_.toString();
         const chainId = await network.provider.send("eth_chainId");
 

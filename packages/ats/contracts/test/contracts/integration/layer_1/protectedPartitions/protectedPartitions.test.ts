@@ -21,7 +21,7 @@ import {
 import { DEFAULT_PARTITION, ZERO, EMPTY_STRING, ADDRESS_ZERO, ATS_ROLES } from "@scripts";
 import { Contract } from "ethers";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
+import { deployEquityTokenFixture, getCoreFacet, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
 
 const amount = 1;
@@ -315,7 +315,7 @@ describe("ProtectedPartitions Tests", () => {
   async function setProtected() {
     await setFacets(diamond_ProtectedPartitions.target as string, complianceMockAddress);
 
-    domain.name = (await erc20Facet.getERC20Metadata()).info.name;
+    domain.name = (await (await getCoreFacet(diamond_ProtectedPartitions.target)).getERC20Metadata()).info.name;
     domain.version = (await diamondCutFacet.getConfigInfo()).version_.toString();
     domain.chainId = await network.provider.send("eth_chainId");
     domain.verifyingContract = diamond_ProtectedPartitions.target as string;

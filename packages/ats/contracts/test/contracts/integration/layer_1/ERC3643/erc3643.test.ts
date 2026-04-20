@@ -32,7 +32,7 @@ import {
 } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { Contract } from "ethers";
-import { deployEquityTokenFixture } from "@test";
+import { deployEquityTokenFixture, getCoreFacet } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
 import {
   EMPTY_STRING,
@@ -240,23 +240,7 @@ describe("ERC3643 Tests", () => {
       await loadFixture(deploySecurityFixtureSinglePartition);
     });
 
-    it("GIVEN a paused token WHEN attempting to update name or symbol THEN transactions revert with TokenIsPaused error", async () => {
-      await pauseFacet.connect(signer_B).pause();
-
-      await expect(erc3643Facet.setName(newName)).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
-      await expect(erc3643Facet.setName(newSymbol)).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
-    });
-
-    it("GIVEN an initialized token WHEN retrieving the version THEN returns the right version", async () => {
-      const json = await erc3643Facet.version();
-      const parsed = JSON.parse(json);
-
-      const [configResolver, configId, configVersion] = await diamondFacet.getConfigInfo();
-
-      expect(parsed["Resolver"].toLowerCase()).to.equal(configResolver.toLowerCase());
-      expect(parsed["Config ID"].toLowerCase()).to.equal(configId.toLowerCase());
-      expect(parsed["Version"]).to.equal(configVersion.toString());
-    });
+    // Note: `setName` / `setSymbol` pause and `version` tests moved to Core facet (see core.test.ts).
 
     describe("initialize", () => {
       it("GIVEN an already initialized token WHEN attempting to initialize again THEN transaction fails with AlreadyInitialized", async () => {
@@ -385,33 +369,7 @@ describe("ERC3643 Tests", () => {
       });
     });
 
-    describe("setName", () => {
-      it("GIVEN an initialized token WHEN updating the name THEN setName emits UpdatedTokenInformation with updated name and current metadata", async () => {
-        const retrieved_name = await erc20Facet.name();
-        expect(retrieved_name).to.equal(name);
-
-        //Update name
-        expect(await erc3643Facet.setName(newName))
-          .to.emit(erc3643Facet, "UpdatedTokenInformation")
-          .withArgs(newName, symbol, decimals, version, ADDRESS_ZERO);
-
-        const retrieved_newName = await erc20Facet.name();
-        expect(retrieved_newName).to.equal(newName);
-      });
-
-      it("GIVEN an initialized token WHEN updating the symbol THEN setSymbol emits UpdatedTokenInformation with updated symbol and current metadata", async () => {
-        const retrieved_symbol = await erc20Facet.symbol();
-        expect(retrieved_symbol).to.equal(symbol);
-
-        //Update symbol
-        expect(await erc3643Facet.setSymbol(newSymbol))
-          .to.emit(erc3643Facet, "UpdatedTokenInformation")
-          .withArgs(name, newSymbol, decimals, version, ADDRESS_ZERO);
-
-        const retrieved_newSymbol = await erc20Facet.symbol();
-        expect(retrieved_newSymbol).to.equal(newSymbol);
-      });
-    });
+    // Note: `setName` / `setSymbol` happy-path tests moved to Core facet (see core.test.ts).
 
     describe("Freeze", () => {
       describe("snapshot", () => {
@@ -1878,20 +1836,7 @@ describe("ERC3643 Tests", () => {
     });
 
     describe("AccessControl", () => {
-      it("GIVEN an account without TREX_OWNER role WHEN setName THEN transaction fails with AccountHasNoRole", async () => {
-        // set name fails
-        await expect(erc3643Facet.connect(signer_C).setName(newName)).to.be.revertedWithCustomError(
-          accessControlFacet,
-          "AccountHasNoRole",
-        );
-      });
-      it("GIVEN an account without TREX_OWNER role WHEN setSymbol THEN transaction fails with AccountHasNoRole", async () => {
-        // set symbol fails
-        await expect(erc3643Facet.connect(signer_C).setSymbol(newSymbol)).to.be.revertedWithCustomError(
-          accessControlFacet,
-          "AccountHasNoRole",
-        );
-      });
+      // Note: `setName` / `setSymbol` access-control tests moved to Core facet (see core.test.ts).
       it("GIVEN an account without TREX_OWNER role WHEN setOnchainID THEN transaction fails with AccountHasNoRole", async () => {
         // set onchainID fails
         await expect(erc3643Facet.connect(signer_C).setOnchainID(onchainId)).to.be.revertedWithCustomError(
@@ -2004,9 +1949,7 @@ describe("ERC3643 Tests", () => {
         );
       });
 
-      it("GIVEN a paused token WHEN attempting to update name or symbol THEN transactions revert with TokenIsPaused error", async () => {
-        await expect(erc3643Facet.setName(newName)).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
-        await expect(erc3643Facet.setSymbol(newSymbol)).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
+      it("GIVEN a paused token WHEN attempting to update onchainID, identity registry or compliance THEN transactions revert with TokenIsPaused error", async () => {
         await expect(erc3643Facet.setOnchainID(onchainId)).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
         await expect(
           erc3643Facet.setIdentityRegistry(identityRegistryMock.target as string),
@@ -2016,6 +1959,7 @@ describe("ERC3643 Tests", () => {
           "TokenIsPaused",
         );
       });
+      // Note: `setName` / `setSymbol` paused behaviour moved to Core facet (see core.test.ts).
     });
     describe("Adjust balances", () => {
       const _AMOUNT = 1000;
@@ -2181,7 +2125,7 @@ describe("ERC3643 Tests", () => {
         const freeBefore = await erc1410Facet.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address);
 
         // Apply ABAF with factor 2 - this internally uses _getTotalBalanceForByPartitionAdjusted to calculate total balance
-        const decimals = await erc20Facet.decimals();
+        const decimals = await (await getCoreFacet(diamond.target)).decimals();
         await adjustBalancesFacet.connect(signer_A).adjustBalances(2, decimals);
 
         // Take another snapshot after ABAF to trigger _getTotalBalanceForByPartitionAdjusted again

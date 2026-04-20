@@ -13,7 +13,7 @@ contract ERC20Facet is ERC20, IStaticFunctionSelectors {
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](12);
+        staticFunctionSelectors_ = new bytes4[](8);
         staticFunctionSelectors_[selectorIndex++] = this.initialize_ERC20.selector;
         staticFunctionSelectors_[selectorIndex++] = this.approve.selector;
         staticFunctionSelectors_[selectorIndex++] = this.transfer.selector;
@@ -21,10 +21,6 @@ contract ERC20Facet is ERC20, IStaticFunctionSelectors {
         staticFunctionSelectors_[selectorIndex++] = this.increaseAllowance.selector;
         staticFunctionSelectors_[selectorIndex++] = this.decreaseAllowance.selector;
         staticFunctionSelectors_[selectorIndex++] = this.allowance.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getERC20Metadata.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.name.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.symbol.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.decimals.selector;
         staticFunctionSelectors_[selectorIndex++] = this.decimalsAt.selector;
     }
 

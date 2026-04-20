@@ -19,7 +19,6 @@ import {
   AccessControlFacet,
 } from "@contract-types";
 import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO } from "@scripts";
-import { assertObject } from "../../../../../common";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
 import { SecurityType } from "@scripts/domain";
@@ -108,28 +107,7 @@ describe("ERC20 Tests", () => {
       ).to.be.revertedWithCustomError(erc20Facet, "AlreadyInitialized");
     });
 
-    it("GIVEN a initialized ERC20 WHEN getERC20Metadata THEN obtain configured metadata", async () => {
-      // initialize fails
-      const erc20Metadata = await erc20Facet.getERC20Metadata();
-      assertObject(erc20Metadata.info, {
-        name: name,
-        symbol: symbol,
-        isin: isin,
-        decimals: decimals,
-      });
-      expect(erc20Metadata.securityType).to.be.equal(SecurityType.EQUITY);
-    });
-
-    it("GIVEN a initialized ERC20 WHEN name, symbol, decimals THEN obtain configured metadata", async () => {
-      // initialize fails
-      const retrieved_name = await erc20Facet.name();
-      const retrieved_symbol = await erc20Facet.symbol();
-      const retrieved_decimals = await erc20Facet.decimals();
-
-      expect(retrieved_name).to.equal(name);
-      expect(retrieved_symbol).to.equal(symbol);
-      expect(retrieved_decimals).to.equal(decimals);
-    });
+    // Note: `getERC20Metadata`, `name`, `symbol`, `decimals` moved to Core facet; see core.test.ts.
 
     it("GIVEN a initialized ERC20 WHEN running any state changing method THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
       await expect(erc20Facet.connect(signer_A).approve(signer_D.address, amount)).to.be.revertedWithCustomError(

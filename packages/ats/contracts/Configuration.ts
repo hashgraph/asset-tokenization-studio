@@ -77,6 +77,7 @@ export const CONTRACT_NAMES = [
   "CapFacet",
   "ControlListFacet",
   "PauseFacet",
+  "CoreFacet",
   "ERC20Facet",
   "ERC20PermitFacet",
   "ERC1410ScheduledTasksFacet",

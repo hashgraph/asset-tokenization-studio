@@ -21,7 +21,7 @@ import {
   SnapshotsFacet,
   TimeTravelFacet,
 } from "@contract-types";
-import { deployEquityTokenFixture, executeRbac, grantRoleAndPauseToken, MAX_UINT256 } from "@test";
+import { deployEquityTokenFixture, executeRbac, getCoreFacet, grantRoleAndPauseToken, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import {
   ADDRESS_ZERO,
@@ -187,13 +187,14 @@ describe("ERC1410 Tests", () => {
    * Retrieves and returns various balance and supply values adjusted for partitions.
    */
   async function getBalanceAdjustedValues(): Promise<BalanceAdjustedValues> {
+    const coreFacet = await getCoreFacet(diamond.target);
     const [maxSupply, totalSupply, balanceOf_A, balanceOf_B, decimals, metadata] = await Promise.all([
       getMaxSupplyValues(),
       getTotalSupplyValues(),
       getBalanceValues(signer_A.address),
       getBalanceValues(signer_B.address),
-      erc20Facet.decimals(),
-      erc20Facet.getERC20Metadata(),
+      coreFacet.decimals(),
+      coreFacet.getERC20Metadata(),
     ]);
 
     return {
@@ -2439,7 +2440,7 @@ describe("ERC1410 Tests", () => {
             _nonce: 1,
           };
           const domain = {
-            name: (await erc20Facet.getERC20Metadata()).info.name,
+            name: (await (await getCoreFacet(diamond.target)).getERC20Metadata()).info.name,
             version: (await diamondCutFacet.getConfigInfo()).version_.toString(),
             chainId: await network.provider.send("eth_chainId"),
             verifyingContract: diamond.target.toString(),

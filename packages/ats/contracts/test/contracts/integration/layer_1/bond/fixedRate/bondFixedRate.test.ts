@@ -72,8 +72,8 @@ describe("Bond Fixed Rate Tests", () => {
   });
 
   it("GIVEN a bond fixed rate WHEN deployed THEN securityType is BOND_FIXED_RATE", async () => {
-    const erc20Facet = await ethers.getContractAt("ERC20", diamond.target);
-    const metadata = await erc20Facet.getERC20Metadata();
+    const coreFacet = await ethers.getContractAt("CoreFacet", diamond.target);
+    const metadata = await coreFacet.getERC20Metadata();
     expect(metadata.securityType).to.be.equal(SecurityType.BOND_FIXED_RATE);
   });
 
