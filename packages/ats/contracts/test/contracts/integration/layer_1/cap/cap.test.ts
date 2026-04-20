@@ -3,19 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import {
-  type ResolverProxy,
-  type CapFacet,
-  type IERC1410,
-  type IAsset,
-  AccessControl,
-  Pause,
-  Kyc,
-  SsiManagement,
-  Equity,
-  Snapshots,
-  TimeTravelFacet,
-} from "@contract-types";
+import { type ResolverProxy, type IAsset } from "@contract-types";
 import { ZERO, EMPTY_STRING, dateToUnixTimestamp, ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
@@ -37,29 +25,14 @@ interface Adjustment {
 
 describe("Cap Tests", () => {
   let diamond: ResolverProxy;
-  let base: {
-    asset: IAsset;
-    diamond: ResolverProxy;
-    deployer: HardhatEthersSigner;
-    user2: HardhatEthersSigner;
-    user3: HardhatEthersSigner;
-  };
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
 
-  let capFacet: CapFacet;
-  let accessControlFacet: AccessControl;
-  let pauseFacet: Pause;
-  let erc1410Facet: IERC1410;
-  let kycFacet: Kyc;
-  let ssiManagementFacet: SsiManagement;
-  let equityFacet: Equity;
-  let snapshotFacet: Snapshots;
-  let timeTravelFacet: TimeTravelFacet;
+  let asset: IAsset;
 
   async function deploySecurityFixtureMultiPartition() {
-    base = await deployEquityTokenFixture({
+    const base = await deployEquityTokenFixture({
       equityDataParams: {
         securityData: {
           isMultiPartition: true,
@@ -72,7 +45,9 @@ describe("Cap Tests", () => {
     signer_B = base.user2;
     signer_C = base.user3;
 
-    await executeRbac(base.asset, [
+    asset = await ethers.getContractAt("IAsset", diamond.target);
+
+    await executeRbac(asset, [
       {
         role: ATS_ROLES._PAUSER_ROLE,
         members: [signer_B.address],
@@ -91,17 +66,8 @@ describe("Cap Tests", () => {
       },
     ]);
 
-    capFacet = await ethers.getContractAt("CapFacet", diamond.target, signer_A);
-    pauseFacet = await ethers.getContractAt("Pause", diamond.target, signer_A);
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target, signer_A);
-    kycFacet = await ethers.getContractAt("Kyc", diamond.target, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.target, signer_A);
-    equityFacet = await ethers.getContractAt("Equity", diamond.target, signer_A);
-    snapshotFacet = await ethers.getContractAt("Snapshots", diamond.target, signer_A);
-    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
-    await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
-    await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+    await asset.connect(signer_A).addIssuer(signer_A.address);
+    await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
   }
 
   beforeEach(async () => {
@@ -118,23 +84,23 @@ describe("Cap Tests", () => {
           },
         },
       }),
-    ).to.be.revertedWithCustomError(capFacet, "NewMaxSupplyCannotBeZero");
+    ).to.be.revertedWithCustomError(asset, "NewMaxSupplyCannotBeZero");
   });
 
   it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-    await expect(capFacet.initialize_Cap(5, [])).to.be.revertedWithCustomError(capFacet, "AlreadyInitialized");
+    await expect(asset.initialize_Cap(5, [])).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
   });
 
   describe("Paused", () => {
     beforeEach(async () => {
       // Pausing the token
-      await pauseFacet.connect(signer_B).pause();
+      await asset.connect(signer_B).pause();
     });
 
     it("GIVEN a paused Token WHEN setMaxSupply THEN transaction fails with TokenIsPaused", async () => {
       // transfer with data fails
-      await expect(capFacet.connect(signer_C).setMaxSupply(maxSupply)).to.be.revertedWithCustomError(
-        pauseFacet,
+      await expect(asset.connect(signer_C).setMaxSupply(maxSupply)).to.be.revertedWithCustomError(
+        asset,
         "TokenIsPaused",
       );
     });
@@ -142,16 +108,16 @@ describe("Cap Tests", () => {
     it("GIVEN a paused Token WHEN setMaxSupplyByPartition THEN transaction fails with TokenIsPaused", async () => {
       // transfer from with data fails
       await expect(
-        capFacet.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupplyByPartition),
-      ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
+        asset.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupplyByPartition),
+      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
     });
   });
 
   describe("AccessControl", () => {
     it("GIVEN an account without cap role WHEN setMaxSupply THEN transaction fails with AccountHasNoRole", async () => {
       // add to list fails
-      await expect(capFacet.connect(signer_C).setMaxSupply(maxSupply)).to.be.revertedWithCustomError(
-        accessControlFacet,
+      await expect(asset.connect(signer_C).setMaxSupply(maxSupply)).to.be.revertedWithCustomError(
+        asset,
         "AccountHasNoRole",
       );
     });
@@ -159,26 +125,26 @@ describe("Cap Tests", () => {
     it("GIVEN an account without cap role WHEN setMaxSupplyByPartition THEN transaction fails with AccountHasNoRole", async () => {
       // add to list fails
       await expect(
-        capFacet.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply),
-      ).to.be.revertedWithCustomError(capFacet, "AccountHasNoRole");
+        asset.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply),
+      ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
   });
 
   describe("New Max Supply Too low or 0", () => {
     it("GIVEN a token WHEN setMaxSupply to 0 THEN transaction fails with NewMaxSupplyCannotBeZero", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_C.address);
 
       // add to list fails
-      await expect(capFacet.connect(signer_C).setMaxSupply(0)).to.be.revertedWithCustomError(
-        capFacet,
+      await expect(asset.connect(signer_C).setMaxSupply(0)).to.be.revertedWithCustomError(
+        asset,
         "NewMaxSupplyCannotBeZero",
       );
     });
     it("GIVEN a token WHEN setMaxSupply a value that is less than the current total supply THEN transaction fails with NewMaxSupplyTooLow", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_C.address);
 
-      await erc1410Facet.connect(signer_C).issueByPartition({
+      await asset.connect(signer_C).issueByPartition({
         partition: _PARTITION_ID_1,
         tokenHolder: signer_A.address,
         value: maxSupply * 2,
@@ -186,17 +152,17 @@ describe("Cap Tests", () => {
       });
 
       // add to list fails
-      await expect(capFacet.connect(signer_C).setMaxSupply(maxSupply)).to.be.revertedWithCustomError(
-        capFacet,
+      await expect(asset.connect(signer_C).setMaxSupply(maxSupply)).to.be.revertedWithCustomError(
+        asset,
         "NewMaxSupplyTooLow",
       );
     });
 
     it("GIVEN a token WHEN setMaxSupplyByPartition a value that is less than the current total supply THEN transaction fails with NewMaxSupplyForPartitionTooLow", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_C.address);
 
-      await erc1410Facet.connect(signer_C).issueByPartition({
+      await asset.connect(signer_C).issueByPartition({
         partition: _PARTITION_ID_1,
         tokenHolder: signer_A.address,
         value: maxSupply * 2,
@@ -205,44 +171,44 @@ describe("Cap Tests", () => {
 
       // add to list fails
       await expect(
-        capFacet.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply),
-      ).to.be.revertedWithCustomError(capFacet, "NewMaxSupplyForPartitionTooLow");
+        asset.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply),
+      ).to.be.revertedWithCustomError(asset, "NewMaxSupplyForPartitionTooLow");
     });
   });
 
   describe("New Max Supply By Partition Too High", () => {
     it("GIVEN a token WHEN setMaxSupplyByPartition a value that is less than the current total supply THEN transaction fails with NewMaxSupplyByPartitionTooHigh", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_C.address);
 
       // add to list fails
       await expect(
-        capFacet.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply * 100),
-      ).to.be.revertedWithCustomError(capFacet, "NewMaxSupplyByPartitionTooHigh");
+        asset.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply * 100),
+      ).to.be.revertedWithCustomError(asset, "NewMaxSupplyByPartitionTooHigh");
     });
   });
 
   describe("New Max Supply OK", () => {
     it("GIVEN a token WHEN setMaxSupply THEN transaction succeeds", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_C.address);
 
-      await expect(capFacet.connect(signer_C).setMaxSupply(maxSupply * 4))
-        .to.emit(capFacet, "MaxSupplySet")
+      await expect(asset.connect(signer_C).setMaxSupply(maxSupply * 4))
+        .to.emit(asset, "MaxSupplySet")
         .withArgs(signer_C.address, maxSupply * 4, maxSupply * 2);
 
-      const currentMaxSupply = await capFacet.getMaxSupply();
+      const currentMaxSupply = await asset.getMaxSupply();
 
       expect(currentMaxSupply).to.equal(maxSupply * 4);
     });
 
     it("GIVEN a token WHEN setMaxSupplyByPartition THEN transaction succeeds", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_C.address);
 
-      await expect(capFacet.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply * 2))
-        .to.emit(capFacet, "MaxSupplyByPartitionSet")
+      await expect(asset.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply * 2))
+        .to.emit(asset, "MaxSupplyByPartitionSet")
         .withArgs(signer_C.address, _PARTITION_ID_1, maxSupply * 2, 0);
 
-      const currentMaxSupply = await capFacet.getMaxSupplyByPartition(_PARTITION_ID_1);
+      const currentMaxSupply = await asset.getMaxSupplyByPartition(_PARTITION_ID_1);
 
       expect(currentMaxSupply).to.equal(maxSupply * 2);
     });
@@ -255,7 +221,7 @@ describe("Cap Tests", () => {
 
     const setupScheduledBalanceAdjustments = async (adjustments: Adjustment[]) => {
       for (const adjustment of adjustments) {
-        await equityFacet.connect(signer_C).setScheduledBalanceAdjustment(adjustment);
+        await asset.connect(signer_C).setScheduledBalanceAdjustment(adjustment);
       }
     };
 
@@ -277,14 +243,12 @@ describe("Cap Tests", () => {
 
       // Execute adjustments and verify
       for (let i = 0; i < adjustments.length; i++) {
-        await timeTravelFacet.changeSystemTimestamp(
-          dateToUnixTimestamp(`2030-01-01T00:00:00Z`) + ((i + 1) * TIME) / 1000 + 1,
-        );
-        await snapshotFacet.connect(signer_A).takeSnapshot();
+        await asset.changeSystemTimestamp(dateToUnixTimestamp(`2030-01-01T00:00:00Z`) + ((i + 1) * TIME) / 1000 + 1);
+        await asset.connect(signer_A).takeSnapshot();
       }
 
-      const currentMaxSupply = await capFacet.getMaxSupply();
-      const currentMaxSupplyByPartition_1 = await capFacet.getMaxSupplyByPartition(_PARTITION_ID_1);
+      const currentMaxSupply = await asset.getMaxSupply();
+      const currentMaxSupplyByPartition_1 = await asset.getMaxSupplyByPartition(_PARTITION_ID_1);
 
       const adjustmentFactor = expectedFactors.reduce((acc, val) => acc * val, 1);
       expect(currentMaxSupply).to.equal(maxSupply * adjustmentFactor);
@@ -292,16 +256,16 @@ describe("Cap Tests", () => {
     };
 
     async function setPreBalanceAdjustment() {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_C.address);
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_A.address);
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
 
-      await capFacet.connect(signer_C).setMaxSupply(maxSupply);
-      await capFacet.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupplyByPartition);
+      await asset.connect(signer_C).setMaxSupply(maxSupply);
+      await asset.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupplyByPartition);
 
-      await kycFacet.grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-      await erc1410Facet.connect(signer_C).issueByPartition({
+      await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+      await asset.connect(signer_C).issueByPartition({
         partition: _PARTITION_ID_1,
         tokenHolder: signer_C.address,
         value: issueAmount,
@@ -316,7 +280,7 @@ describe("Cap Tests", () => {
         [5, 6, 7],
         [2, 0, 1],
       );
-      const currentMaxSupplyByPartition_2 = await capFacet.getMaxSupplyByPartition(_PARTITION_ID_2);
+      const currentMaxSupplyByPartition_2 = await asset.getMaxSupplyByPartition(_PARTITION_ID_2);
       expect(currentMaxSupplyByPartition_2).to.equal(0);
       await testBalanceAdjustments(adjustments, [5, 6, 7]);
     });
@@ -328,12 +292,9 @@ describe("Cap Tests", () => {
       await setupScheduledBalanceAdjustments(adjustments);
 
       // Execute adjustments and verify reversion case
-      await timeTravelFacet.changeSystemTimestamp(adjustments[0].executionDate + 1);
+      await asset.changeSystemTimestamp(adjustments[0].executionDate + 1);
 
-      await expect(capFacet.setMaxSupply(maxSupplyByPartition)).to.be.revertedWithCustomError(
-        capFacet,
-        "NewMaxSupplyTooLow",
-      );
+      await expect(asset.setMaxSupply(maxSupplyByPartition)).to.be.revertedWithCustomError(asset, "NewMaxSupplyTooLow");
     });
 
     it("GIVEN a token WHEN max supply and partition max supply are set THEN balance adjustments occur and resetting partition max supply fails with NewMaxSupplyForPartitionTooLow", async () => {
@@ -344,40 +305,41 @@ describe("Cap Tests", () => {
       await setupScheduledBalanceAdjustments(adjustments);
       //-------------------------
       // wait for first balance adjustment
-      await timeTravelFacet.changeSystemTimestamp(adjustments[0].executionDate + 1);
+      await asset.changeSystemTimestamp(adjustments[0].executionDate + 1);
 
       // Attempt to change the max supply by partition with the same value as before
-      await expect(
-        capFacet.setMaxSupplyByPartition(_PARTITION_ID_1, maxSupplyByPartition),
-      ).to.be.revertedWithCustomError(capFacet, "NewMaxSupplyForPartitionTooLow");
+      await expect(asset.setMaxSupplyByPartition(_PARTITION_ID_1, maxSupplyByPartition)).to.be.revertedWithCustomError(
+        asset,
+        "NewMaxSupplyForPartitionTooLow",
+      );
     });
 
     it("GIVEN a token with max supply equal to MAX_UINT THEN balance adjustment occurs but max supply remains unchanged", async () => {
       const adjustmentFactor = 2n;
 
       // Before
-      await capFacet.setMaxSupply(MAX_UINT256 / adjustmentFactor);
-      await capFacet.setMaxSupplyByPartition(_PARTITION_ID_1, MAX_UINT256 / adjustmentFactor);
+      await asset.setMaxSupply(MAX_UINT256 / adjustmentFactor);
+      await asset.setMaxSupplyByPartition(_PARTITION_ID_1, MAX_UINT256 / adjustmentFactor);
 
       // First adjustment
       const currentTime = dateToUnixTimestamp(`2030-01-01T00:00:00Z`);
       const adjustments = createAdjustmentData(currentTime, [TIME / 1000], [Number(adjustmentFactor + 1n)], [0]);
       await setupScheduledBalanceAdjustments(adjustments);
 
-      await timeTravelFacet.changeSystemTimestamp(adjustments[0].executionDate + 1);
+      await asset.changeSystemTimestamp(adjustments[0].executionDate + 1);
 
-      const maxSupplyAfter = await capFacet.getMaxSupply();
-      const maxSupplyByPartitionAfter = await capFacet.getMaxSupplyByPartition(_PARTITION_ID_1);
+      const maxSupplyAfter = await asset.getMaxSupply();
+      const maxSupplyByPartitionAfter = await asset.getMaxSupplyByPartition(_PARTITION_ID_1);
 
       // Second adjustment
       const currentTime_2 = parseInt(adjustments[0].executionDate + 2);
       const adjustments_2 = createAdjustmentData(currentTime_2, [TIME / 1000], [5], [1]);
       await setupScheduledBalanceAdjustments(adjustments_2);
 
-      await timeTravelFacet.changeSystemTimestamp(adjustments_2[0].executionDate + 1);
+      await asset.changeSystemTimestamp(adjustments_2[0].executionDate + 1);
 
-      const maxSupplyAfter_2 = await capFacet.getMaxSupply();
-      const maxSupplyByPartitionAfter_2 = await capFacet.getMaxSupplyByPartition(_PARTITION_ID_1);
+      const maxSupplyAfter_2 = await asset.getMaxSupply();
+      const maxSupplyByPartitionAfter_2 = await asset.getMaxSupplyByPartition(_PARTITION_ID_1);
 
       expect(maxSupplyAfter).to.equal(MAX_UINT256);
       expect(maxSupplyByPartitionAfter).to.equal(MAX_UINT256);

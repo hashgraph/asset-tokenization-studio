@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { IKpiLinkedRateErrors } from "../interestRate/kpiLinkedRate/IKpiLinkedRateErrors.sol";
+
 /// @title ICouponTypes
 /// @notice Single source of truth for all Coupon domain types (structs, enums)
-interface ICouponTypes {
+/// @dev Inherits KpiLinkedRate structs and errors from IKpiLinkedRateErrors
+interface ICouponTypes is IKpiLinkedRateErrors {
     /// @notice Status of the coupon rate calculation process
     enum RateCalculationStatus {
         PENDING,

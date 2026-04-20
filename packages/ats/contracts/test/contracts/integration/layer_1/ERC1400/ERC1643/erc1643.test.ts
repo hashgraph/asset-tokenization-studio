@@ -48,19 +48,22 @@ describe("ERC1643 Tests", () => {
 
   it("GIVEN an account without documenter role WHEN setDocument THEN transaction fails with AccountHasNoRole", async () => {
     // add document fails
-    await expect(asset.connect(signer_C).setDocument(documentName_1, documentURI_1, documentHASH_1)).to.be.rejectedWith(
-      "AccountHasNoRole",
-    );
+    await expect(
+      asset.connect(signer_C).setDocument(documentName_1, documentURI_1, documentHASH_1),
+    ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
   });
 
   it("GIVEN an account without documenter role WHEN removeDocument THEN transaction fails with AccountHasNoRole", async () => {
     // add document fails
-    await expect(asset.connect(signer_C).removeDocument(documentName_1)).to.be.rejectedWith("AccountHasNoRole");
+    await expect(asset.connect(signer_C).removeDocument(documentName_1)).to.be.revertedWithCustomError(
+      asset,
+      "AccountHasNoRole",
+    );
   });
 
   it("GIVEN a paused Token WHEN setDocument THEN transaction fails with TokenIsPaused", async () => {
     // Granting Role to account C and Pause
-    await grantRoleAndPauseToken(asset, asset, ATS_ROLES._DOCUMENTER_ROLE, signer_A, signer_B, signer_C.address);
+    await grantRoleAndPauseToken(asset, ATS_ROLES._DOCUMENTER_ROLE, signer_A, signer_B, signer_C.address);
 
     // add document fails
     await expect(
@@ -70,7 +73,7 @@ describe("ERC1643 Tests", () => {
 
   it("GIVEN a paused Token WHEN removeDocument THEN transaction fails with TokenIsPaused", async () => {
     // Granting Role to account C and Pause
-    await grantRoleAndPauseToken(asset, asset, ATS_ROLES._DOCUMENTER_ROLE, signer_A, signer_B, signer_C.address);
+    await grantRoleAndPauseToken(asset, ATS_ROLES._DOCUMENTER_ROLE, signer_A, signer_B, signer_C.address);
 
     // remove document
     await expect(asset.connect(signer_C).removeDocument(documentName_1)).to.be.revertedWithCustomError(
@@ -91,13 +94,14 @@ describe("ERC1643 Tests", () => {
           documentURI_1,
           documentHASH_1,
         ),
-    ).to.be.rejectedWith("EmptyName");
+    ).to.be.revertedWithCustomError(asset, "EmptyName");
   });
 
   it("GIVEN a document with no URI WHEN setDocument THEN transaction fails with EmptyURI", async () => {
     await asset.connect(signer_A).grantRole(ATS_ROLES._DOCUMENTER_ROLE, signer_C.address);
     // add document fails
-    await expect(asset.connect(signer_C).setDocument(documentName_1, "", documentHASH_1)).to.be.rejectedWith(
+    await expect(asset.connect(signer_C).setDocument(documentName_1, "", documentHASH_1)).to.be.revertedWithCustomError(
+      asset,
       "EmptyURI",
     );
   });
@@ -114,14 +118,17 @@ describe("ERC1643 Tests", () => {
           documentURI_1,
           "0x0000000000000000000000000000000000000000000000000000000000000000",
         ),
-    ).to.be.rejectedWith("EmptyHASH");
+    ).to.be.revertedWithCustomError(asset, "EmptyHASH");
   });
 
   it("GIVEN a document that does not exist WHEN removeDocument THEN transaction fails with DocumentDoesNotExist", async () => {
     await asset.connect(signer_A).grantRole(ATS_ROLES._DOCUMENTER_ROLE, signer_C.address);
 
     // add document fails
-    await expect(asset.connect(signer_C).removeDocument(documentName_1)).to.be.rejectedWith("DocumentDoesNotExist");
+    await expect(asset.connect(signer_C).removeDocument(documentName_1)).to.be.revertedWithCustomError(
+      asset,
+      "DocumentDoesNotExist",
+    );
   });
 
   it("GIVEN an account with documenter role WHEN setDocument and removeDocument THEN transaction succeeds", async () => {

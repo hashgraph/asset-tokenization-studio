@@ -3,14 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import {
-  ProceedRecipientsKpiLinkedRateFacetTimeTravel,
-  ResolverProxy,
-  AccessControl,
-  ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel,
-  TimeTravelFacet,
-  CouponFacetTimeTravel,
-} from "@contract-types";
+import { type IAsset, ResolverProxy } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployBondKpiLinkedRateTokenFixture } from "@test";
@@ -23,11 +16,7 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
   let signer_A: HardhatEthersSigner;
 
   let diamond: ResolverProxy;
-  let proceedRecipientsFacet: ProceedRecipientsKpiLinkedRateFacetTimeTravel;
-  let accessControlFacet: AccessControl;
-  let couponKpiLinkedRateFacet: CouponFacetTimeTravel;
-  let scheduledTasksFacet: ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel;
-  let timeTravelFacet: TimeTravelFacet;
+  let asset: IAsset;
 
   const couponData = {
     startDate: referenceDate.toString(),
@@ -46,26 +35,10 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
     diamond = base.diamond;
     signer_A = base.deployer;
 
-    proceedRecipientsFacet = await ethers.getContractAt(
-      "ProceedRecipientsKpiLinkedRateFacetTimeTravel",
-      diamond.target,
-      signer_A,
-    );
-    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
-    couponKpiLinkedRateFacet = await ethers.getContractAt(
-      "CouponKpiLinkedRateFacetTimeTravel",
-      diamond.target,
-      signer_A,
-    );
-    scheduledTasksFacet = await ethers.getContractAt(
-      "ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel",
-      diamond.target,
-      signer_A,
-    );
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
+    asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
 
-    await accessControlFacet.grantRole(ATS_ROLES._PROCEED_RECIPIENT_MANAGER_ROLE, signer_A.address);
-    await accessControlFacet.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
+    await asset.grantRole(ATS_ROLES._PROCEED_RECIPIENT_MANAGER_ROLE, signer_A.address);
+    await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
   }
 
   beforeEach(async () => {
@@ -74,14 +47,14 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
 
   describe("Add Tests", () => {
     it("GIVEN a unlisted proceed recipient WHEN authorized user adds it THEN it is listed and pending tasks triggered", async () => {
-      await couponKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
-      const tasks_count_Before = await scheduledTasksFacet.scheduledCrossOrderedTaskCount();
+      await asset.connect(signer_A).setCoupon(couponData);
+      const tasks_count_Before = await asset.scheduledCrossOrderedTaskCount();
 
-      await timeTravelFacet.changeSystemTimestamp(couponData.fixingDate + 1);
+      await asset.changeSystemTimestamp(couponData.fixingDate + 1);
 
-      await proceedRecipientsFacet.addProceedRecipient(PROCEED_RECIPIENT_1, PROCEED_RECIPIENT_1_DATA);
+      await asset.addProceedRecipient(PROCEED_RECIPIENT_1, PROCEED_RECIPIENT_1_DATA);
 
-      const tasks_count_After = await scheduledTasksFacet.scheduledCrossOrderedTaskCount();
+      const tasks_count_After = await asset.scheduledCrossOrderedTaskCount();
 
       expect(tasks_count_Before).to.equal(2);
       expect(tasks_count_After).to.equal(0);
@@ -90,16 +63,16 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
 
   describe("Remove Tests", () => {
     it("GIVEN a unlisted proceed recipient WHEN authorized user adds it THEN it is listed and pending tasks triggered", async () => {
-      await proceedRecipientsFacet.addProceedRecipient(PROCEED_RECIPIENT_1, PROCEED_RECIPIENT_1_DATA);
+      await asset.addProceedRecipient(PROCEED_RECIPIENT_1, PROCEED_RECIPIENT_1_DATA);
 
-      await couponKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
-      const tasks_count_Before = await scheduledTasksFacet.scheduledCrossOrderedTaskCount();
+      await asset.connect(signer_A).setCoupon(couponData);
+      const tasks_count_Before = await asset.scheduledCrossOrderedTaskCount();
 
-      await timeTravelFacet.changeSystemTimestamp(couponData.fixingDate + 1);
+      await asset.changeSystemTimestamp(couponData.fixingDate + 1);
 
-      await proceedRecipientsFacet.removeProceedRecipient(PROCEED_RECIPIENT_1);
+      await asset.removeProceedRecipient(PROCEED_RECIPIENT_1);
 
-      const tasks_count_After = await scheduledTasksFacet.scheduledCrossOrderedTaskCount();
+      const tasks_count_After = await asset.scheduledCrossOrderedTaskCount();
 
       expect(tasks_count_Before).to.equal(2);
       expect(tasks_count_After).to.equal(0);

@@ -3,19 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import {
-  type ResolverProxy,
-  type IAsset,
-  type EquityUSA,
-  type Pause,
-  type AccessControl,
-  TimeTravelFacet,
-  ScheduledCrossOrderedTasks,
-  type IERC1410,
-  Kyc,
-  SsiManagement,
-  DividendFacet,
-} from "@contract-types";
+import { type ResolverProxy, type IAsset } from "@contract-types";
 import { ZERO, EMPTY_STRING, dateToUnixTimestamp, ATS_ROLES, ATS_TASK } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
@@ -27,35 +15,22 @@ const DECIMALS_INIT = 6;
 
 describe("Scheduled Tasks Tests", () => {
   let diamond: ResolverProxy;
-  let base: {
-    asset: IAsset;
-    diamond: ResolverProxy;
-    deployer: HardhatEthersSigner;
-    user2: HardhatEthersSigner;
-    user3: HardhatEthersSigner;
-  };
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
 
-  let equityFacet: EquityUSA;
-  let scheduledTasksFacet: ScheduledCrossOrderedTasks;
-  let accessControlFacet: AccessControl;
-  let pauseFacet: Pause;
-  let erc1410Facet: IERC1410;
-  let timeTravelFacet: TimeTravelFacet;
-  let kycFacet: Kyc;
-  let ssiManagementFacet: SsiManagement;
-  let dividendFacet: DividendFacet;
+  let asset: IAsset;
 
   async function deploySecurityFixtureSinglePartition() {
-    base = await deployEquityTokenFixture();
+    const base = await deployEquityTokenFixture();
     diamond = base.diamond;
     signer_A = base.deployer;
     signer_B = base.user2;
     signer_C = base.user3;
 
-    await executeRbac(base.asset, [
+    asset = await ethers.getContractAt("IAsset", diamond.target);
+
+    await executeRbac(asset, [
       {
         role: ATS_ROLES._PAUSER_ROLE,
         members: [signer_B.address],
@@ -73,23 +48,9 @@ describe("Scheduled Tasks Tests", () => {
         members: [signer_A.address],
       },
     ]);
-    await setFacets(diamond);
-  }
 
-  async function setFacets(diamond: ResolverProxy) {
-    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
-    equityFacet = await ethers.getContractAt("EquityUSA", diamond.target, signer_A);
-    dividendFacet = await ethers.getContractAt("DividendFacet", diamond.target, signer_A);
-    scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasks", diamond.target, signer_A);
-
-    pauseFacet = await ethers.getContractAt("Pause", diamond.target, signer_A);
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target, signer_A);
-
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
-    kycFacet = await ethers.getContractAt("Kyc", diamond.target, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.target, signer_A);
-    await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
-    await kycFacet.grantKyc(signer_A.address, EMPTY_STRING, ZERO, MAX_UINT256, signer_A.address);
+    await asset.connect(signer_A).addIssuer(signer_A.address);
+    await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_STRING, ZERO, MAX_UINT256, signer_A.address);
   }
 
   beforeEach(async () => {
@@ -98,22 +59,24 @@ describe("Scheduled Tasks Tests", () => {
 
   it("GIVEN a paused Token WHEN triggerTasks THEN transaction fails with TokenIsPaused", async () => {
     // Pausing the token
-    await pauseFacet.connect(signer_B).pause();
+    await asset.connect(signer_B).pause();
 
     // trigger scheduled snapshots
-    await expect(
-      scheduledTasksFacet.connect(signer_C).triggerPendingScheduledCrossOrderedTasks(),
-    ).to.be.revertedWithCustomError(base.asset, "TokenIsPaused");
-    await expect(
-      scheduledTasksFacet.connect(signer_C).triggerScheduledCrossOrderedTasks(1),
-    ).to.be.revertedWithCustomError(base.asset, "TokenIsPaused");
+    await expect(asset.connect(signer_C).triggerPendingScheduledCrossOrderedTasks()).to.be.revertedWithCustomError(
+      asset,
+      "TokenIsPaused",
+    );
+    await expect(asset.connect(signer_C).triggerScheduledCrossOrderedTasks(1)).to.be.revertedWithCustomError(
+      asset,
+      "TokenIsPaused",
+    );
   });
 
   it("GIVEN a token WHEN triggerTasks THEN transaction succeeds", async () => {
     // Granting Role to account C
-    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
-    await erc1410Facet.connect(signer_B).issueByPartition({
+    await asset.connect(signer_B).issueByPartition({
       partition: _PARTITION_ID_1,
       tokenHolder: signer_A.address,
       value: INITIAL_AMOUNT,
@@ -138,8 +101,8 @@ describe("Scheduled Tasks Tests", () => {
       amount: dividendsAmountPerEquity,
       amountDecimals: dividendsAmountDecimalsPerEquity,
     };
-    await dividendFacet.connect(signer_C).setDividend(dividendData_2);
-    await dividendFacet.connect(signer_C).setDividend(dividendData_1);
+    await asset.connect(signer_C).setDividend(dividendData_2);
+    await asset.connect(signer_C).setDividend(dividendData_1);
 
     const balanceAdjustmentExecutionDateInSeconds_1 = dateToUnixTimestamp("2030-01-01T00:00:16Z");
     const balanceAdjustmentExecutionDateInSeconds_2 = dateToUnixTimestamp("2030-01-01T00:00:31Z");
@@ -159,13 +122,13 @@ describe("Scheduled Tasks Tests", () => {
       decimals: balanceAdjustmentsDecimals_2,
     };
 
-    await equityFacet.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData_2);
-    await equityFacet.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData_1);
+    await asset.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData_2);
+    await asset.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData_1);
 
     // check schedled tasks
 
-    let scheduledTasksCount = await scheduledTasksFacet.scheduledCrossOrderedTaskCount();
-    let scheduledTasks = await scheduledTasksFacet.getScheduledCrossOrderedTasks(0, 100);
+    let scheduledTasksCount = await asset.scheduledCrossOrderedTaskCount();
+    let scheduledTasks = await asset.getScheduledCrossOrderedTasks(0, 100);
 
     expect(scheduledTasksCount).to.equal(4);
     expect(scheduledTasks.length).to.equal(scheduledTasksCount);
@@ -179,22 +142,22 @@ describe("Scheduled Tasks Tests", () => {
     expect(scheduledTasks[3].data).to.equal(ATS_TASK.SNAPSHOT);
 
     // AFTER FIRST SCHEDULED TASKS ------------------------------------------------------------------
-    await timeTravelFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_1 + 1);
+    await asset.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_1 + 1);
 
     // Checking dividends For before triggering from the queue
-    const BalanceOf_A_Dividend_1 = await dividendFacet.getDividendFor(2, signer_A.address);
-    let BalanceOf_A_Dividend_2 = await dividendFacet.getDividendFor(1, signer_A.address);
+    const BalanceOf_A_Dividend_1 = await asset.getDividendFor(2, signer_A.address);
+    let BalanceOf_A_Dividend_2 = await asset.getDividendFor(1, signer_A.address);
 
     expect(BalanceOf_A_Dividend_1.tokenBalance).to.equal(INITIAL_AMOUNT);
     expect(BalanceOf_A_Dividend_2.tokenBalance).to.equal(0);
     expect(BalanceOf_A_Dividend_1.decimals).to.equal(DECIMALS_INIT);
 
     // triggering from the queue
-    await scheduledTasksFacet.connect(signer_A).triggerPendingScheduledCrossOrderedTasks();
+    await asset.connect(signer_A).triggerPendingScheduledCrossOrderedTasks();
 
-    scheduledTasksCount = await scheduledTasksFacet.scheduledCrossOrderedTaskCount();
+    scheduledTasksCount = await asset.scheduledCrossOrderedTaskCount();
 
-    scheduledTasks = await scheduledTasksFacet.getScheduledCrossOrderedTasks(0, 100);
+    scheduledTasks = await asset.getScheduledCrossOrderedTasks(0, 100);
 
     expect(scheduledTasksCount).to.equal(2);
     expect(scheduledTasks.length).to.equal(scheduledTasksCount);
@@ -204,19 +167,19 @@ describe("Scheduled Tasks Tests", () => {
     expect(scheduledTasks[1].data).to.equal(ATS_TASK.SNAPSHOT);
 
     // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-    await timeTravelFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_2 + 1);
+    await asset.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_2 + 1);
     // Checking dividends For before triggering from the queue
-    BalanceOf_A_Dividend_2 = await dividendFacet.getDividendFor(1, signer_A.address);
+    BalanceOf_A_Dividend_2 = await asset.getDividendFor(1, signer_A.address);
 
     expect(BalanceOf_A_Dividend_2.tokenBalance).to.equal(INITIAL_AMOUNT * balanceAdjustmentsFactor_1);
     expect(BalanceOf_A_Dividend_2.decimals).to.equal(DECIMALS_INIT + balanceAdjustmentsDecimals_1);
 
     // triggering from the queue
-    await scheduledTasksFacet.connect(signer_A).triggerScheduledCrossOrderedTasks(100);
+    await asset.connect(signer_A).triggerScheduledCrossOrderedTasks(100);
 
-    scheduledTasksCount = await scheduledTasksFacet.scheduledCrossOrderedTaskCount();
+    scheduledTasksCount = await asset.scheduledCrossOrderedTaskCount();
 
-    scheduledTasks = await scheduledTasksFacet.getScheduledCrossOrderedTasks(0, 100);
+    scheduledTasks = await asset.getScheduledCrossOrderedTasks(0, 100);
 
     expect(scheduledTasksCount).to.equal(0);
     expect(scheduledTasks.length).to.equal(scheduledTasksCount);

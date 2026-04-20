@@ -1,21 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { type Pause, type AccessControl } from "@contract-types";
+import { type IAsset } from "@contract-types";
 import { Signer } from "ethers";
 import { ethers } from "hardhat";
 
 export async function grantRoleAndPauseToken(
-  accessControlFacet: AccessControl,
-  pauseFacet: Pause,
+  asset: IAsset,
   role: string,
   signerAccessControl: Signer,
   signerPause: Signer,
   accountToAssignRole: string,
 ) {
   // Granting Role to account
-  await accessControlFacet.connect(signerAccessControl).grantRole(role, accountToAssignRole);
+  await asset.connect(signerAccessControl).grantRole(role, accountToAssignRole);
   // Pausing the token
-  await pauseFacet.connect(signerPause).pause();
+  await asset.connect(signerPause).pause();
 }
 
 export async function getDltTimestamp(): Promise<number> {
