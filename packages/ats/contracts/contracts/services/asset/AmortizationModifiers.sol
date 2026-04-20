@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IAmortizationStorageWrapper } from "../../domain/asset/amortization/IAmortizationStorageWrapper.sol";
+import { AmortizationStorageWrapper } from "../../domain/asset/amortization/AmortizationStorageWrapper.sol";
 
 abstract contract AmortizationModifiers {
     modifier onlyNoActiveAmortizationHolds(uint256 _amortizationID) {
