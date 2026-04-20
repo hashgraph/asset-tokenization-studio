@@ -3,15 +3,20 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ITotalBalance } from "./ITotalBalance.sol";
 import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
-import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
+import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
-abstract contract TotalBalance is ITotalBalance, TimestampProvider {
+abstract contract TotalBalance is ITotalBalance {
     function getTotalBalanceFor(address _account) external view returns (uint256) {
-        return ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(_account, _getBlockTimestamp());
+        return
+            ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(_account, TimeTravelStorageWrapper.getBlockTimestamp());
     }
 
     function getTotalBalanceForByPartition(bytes32 _partition, address _account) external view returns (uint256) {
         return
-            ERC3643StorageWrapper.getTotalBalanceForByPartitionAdjustedAt(_partition, _account, _getBlockTimestamp());
+            ERC3643StorageWrapper.getTotalBalanceForByPartitionAdjustedAt(
+                _partition,
+                _account,
+                TimeTravelStorageWrapper.getBlockTimestamp()
+            );
     }
 }

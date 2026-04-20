@@ -6,6 +6,7 @@ import { _INTEREST_RATE_MANAGER_ROLE } from "../../../../constants/roles.sol";
 import { InterestRateStorageWrapper } from "../../../../domain/asset/InterestRateStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../../../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
+import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
 contract KpiLinkedRate is IKpiLinkedRate, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
@@ -23,7 +24,7 @@ contract KpiLinkedRate is IKpiLinkedRate, Modifiers {
     ) external onlyUnpaused onlyRole(_INTEREST_RATE_MANAGER_ROLE) onlyValidInterestRate(_newInterestRate) {
         ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();
         InterestRateStorageWrapper.setInterestRate(_newInterestRate);
-        emit InterestRateUpdated(msg.sender, _newInterestRate);
+        emit InterestRateUpdated(EvmAccessors.getMsgSender(), _newInterestRate);
     }
 
     function setImpactData(
@@ -31,7 +32,7 @@ contract KpiLinkedRate is IKpiLinkedRate, Modifiers {
     ) external onlyUnpaused onlyRole(_INTEREST_RATE_MANAGER_ROLE) onlyValidImpactData(_newImpactData) {
         ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();
         InterestRateStorageWrapper.setImpactData(_newImpactData);
-        emit ImpactDataUpdated(msg.sender, _newImpactData);
+        emit ImpactDataUpdated(EvmAccessors.getMsgSender(), _newImpactData);
     }
 
     function getInterestRate() external view returns (InterestRate memory interestRate_) {

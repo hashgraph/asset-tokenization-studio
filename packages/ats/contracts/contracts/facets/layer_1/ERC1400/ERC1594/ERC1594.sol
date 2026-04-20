@@ -10,13 +10,13 @@ import { Modifiers } from "../../../../services/Modifiers.sol";
 import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
 import { IPause } from "../../../../facets/layer_1/pause/IPause.sol";
 import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
+import { TimeTravelStorageWrapper } from "../../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
-import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 import { Eip1066 } from "../../../../constants/eip1066.sol";
 import { ProtectedPartitionRoleValidator } from "../../../../infrastructure/utils/ProtectedPartitionRoleValidator.sol";
 import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
-abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPartitionRoleValidator {
+abstract contract ERC1594 is IERC1594, Modifiers, ProtectedPartitionRoleValidator {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1594() external override onlyNotERC1594Initialized {
         ERC1594StorageWrapper.initialize();
@@ -52,8 +52,8 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
         onlyUnProtectedPartitionsOrWildCardRole
         onlyCanTransferFromByPartition(_from, _to, _DEFAULT_PARTITION, _value)
     {
-        TokenCoreOps.transferFrom(msg.sender, _from, _to, _value);
-        emit TransferFromWithData(msg.sender, _from, _to, _value, _data);
+        TokenCoreOps.transferFrom(EvmAccessors.getMsgSender(), _from, _to, _value);
+        emit TransferFromWithData(EvmAccessors.getMsgSender(), _from, _to, _value, _data);
     }
 
     function issue(
@@ -65,14 +65,14 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
         override
         onlyUnpaused
         onlyWithoutMultiPartition
-        onlyWithinMaxSupply(_value, _getBlockTimestamp())
+        onlyWithinMaxSupply(_value, TimeTravelStorageWrapper.getBlockTimestamp())
         onlyIdentifiedAddresses(address(0), _tokenHolder)
         onlyCompliant(address(0), _tokenHolder, false)
     {
         bytes32[] memory roles = new bytes32[](2);
         roles[0] = _ISSUER_ROLE;
         roles[1] = _AGENT_ROLE;
-        AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
+        AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         ERC1594StorageWrapper.issue(_tokenHolder, _value, _data);
     }
 
@@ -84,7 +84,7 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
         override
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanRedeemFromByPartition(msg.sender, _DEFAULT_PARTITION, _value)
+        onlyCanRedeemFromByPartition(EvmAccessors.getMsgSender(), _DEFAULT_PARTITION, _value)
     {
         ERC1594StorageWrapper.redeem(_value, _data);
     }
@@ -96,7 +96,7 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
     )
         external
         override
-        onlyUnrecoveredAddress(msg.sender)
+        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(_tokenHolder)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
@@ -118,7 +118,7 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
             return (false, Eip1066.PAUSED, IPause.TokenIsPaused.selector);
         }
         (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToTransferFromByPartition(
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             _to,
             _DEFAULT_PARTITION,
             _value,

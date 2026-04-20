@@ -8,7 +8,6 @@ import { EvmAccessors } from "./EvmAccessors.sol";
 /// @dev Facets should inherit from this to use _msgSender(), _txOrigin(), _getChainId()
 ///      instead of msg.sender, tx.origin, block.chainid directly.
 ///      This allows test-time overrides via EvmAccessors library (similar to TimeTravelStorageWrapper).
-/// @dev Similar pattern to TimestampProvider for block.timestamp/block.number.
 abstract contract ContextProvider {
     /// @notice Returns the effective sender address with test override support.
     /// @return The sender address (msg.sender or test override)

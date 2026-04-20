@@ -6,6 +6,7 @@ import { _PROCEED_RECIPIENT_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProceedRecipientsStorageWrapper } from "../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
 import { AddressValidation } from "../../../infrastructure/utils/AddressValidation.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
@@ -41,7 +42,7 @@ abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
         onlyIfProceedRecipient(_proceedRecipient)
     {
         ProceedRecipientsStorageWrapper.setProceedRecipientData(_proceedRecipient, _data);
-        emit ProceedRecipientDataUpdated(msg.sender, _proceedRecipient, _data);
+        emit ProceedRecipientDataUpdated(EvmAccessors.getMsgSender(), _proceedRecipient, _data);
     }
 
     function isProceedRecipient(address _proceedRecipient) external view override returns (bool) {
@@ -67,12 +68,12 @@ abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
         AddressValidation.checkZeroAddress(_proceedRecipient);
         ProceedRecipientsStorageWrapper.requireNotProceedRecipient(_proceedRecipient);
         ProceedRecipientsStorageWrapper.addProceedRecipient(_proceedRecipient, _data);
-        emit ProceedRecipientAdded(msg.sender, _proceedRecipient, _data);
+        emit ProceedRecipientAdded(EvmAccessors.getMsgSender(), _proceedRecipient, _data);
     }
 
     function _removeProceedRecipientInternal(address _proceedRecipient) internal {
         ProceedRecipientsStorageWrapper.requireProceedRecipient(_proceedRecipient);
         ProceedRecipientsStorageWrapper.removeProceedRecipient(_proceedRecipient);
-        emit ProceedRecipientRemoved(msg.sender, _proceedRecipient);
+        emit ProceedRecipientRemoved(EvmAccessors.getMsgSender(), _proceedRecipient);
     }
 }

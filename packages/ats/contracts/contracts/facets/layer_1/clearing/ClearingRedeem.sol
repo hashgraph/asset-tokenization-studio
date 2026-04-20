@@ -4,14 +4,14 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IClearingRedeem } from "./IClearingRedeem.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
+import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { ClearingOps } from "../../../domain/orchestrator/ClearingOps.sol";
 import { ClearingProtectedOps } from "../../../domain/orchestrator/ClearingProtectedOps.sol";
 import { ClearingReadOps } from "../../../domain/orchestrator/ClearingReadOps.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
-import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
-abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider, Modifiers {
+abstract contract ClearingRedeem is IClearingRedeem, Modifiers {
     function clearingRedeemByPartition(
         ClearingOperation calldata _clearingOperation,
         uint256 _amount
@@ -130,7 +130,7 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider, Modifier
                 _partition,
                 _tokenHolder,
                 _clearingId,
-                _getBlockTimestamp()
+                TimeTravelStorageWrapper.getBlockTimestamp()
             );
     }
 }

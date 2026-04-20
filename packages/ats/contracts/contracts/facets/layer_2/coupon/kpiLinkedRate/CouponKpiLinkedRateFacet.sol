@@ -13,7 +13,7 @@ contract CouponKpiLinkedRateFacet is CouponFacetBase {
 
     function _prepareCoupon(
         ICouponTypes.Coupon calldata _newCoupon
-    ) internal view override returns (ICouponTypes.Coupon memory coupon_) {
+    ) internal pure override returns (ICouponTypes.Coupon memory coupon_) {
         if (
             _newCoupon.rateStatus != ICouponTypes.RateCalculationStatus.PENDING ||
             _newCoupon.rate != 0 ||

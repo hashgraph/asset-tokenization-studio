@@ -49,7 +49,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
         if (!success_) {
             revert UnlistedKycList(_kycLists);
         }
-        emit RemovedFromExternalKycLists(msg.sender, _kycLists);
+        emit RemovedFromExternalKycLists(EvmAccessors.getMsgSender(), _kycLists);
     }
 
     function isExternalKycList(address _kycList) external view override returns (bool) {

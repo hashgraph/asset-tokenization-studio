@@ -5,6 +5,7 @@ import { IBusinessLogicResolver } from "./IBusinessLogicResolver.sol";
 import { DiamondCutManager } from "./DiamondCutManager.sol";
 import { _DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     error Unimplemented();
@@ -16,7 +17,7 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
         onlyUninitialized(_businessLogicResolverStorage().initialized)
         returns (bool success_)
     {
-        AccessControlStorageWrapper.grantRole(_DEFAULT_ADMIN_ROLE, msg.sender);
+        AccessControlStorageWrapper.grantRole(_DEFAULT_ADMIN_ROLE, EvmAccessors.getMsgSender());
 
         _businessLogicResolverStorage().initialized = true;
         success_ = true;
