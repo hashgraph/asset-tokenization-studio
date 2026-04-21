@@ -62,6 +62,30 @@ import { ITimeTravel } from "../test/testTimeTravel/ITimeTravel.sol";
 import { ITransferAndLock } from "./layer_3/transferAndLock/ITransferAndLock.sol";
 import { ICoupon } from "./layer_2/coupon/ICoupon.sol";
 import { IDividend } from "./layer_2/dividend/IDividend.sol";
+import { IKpis } from "./layer_2/kpi/kpiLatest/IKpis.sol";
+import { IScheduledSnapshots } from "./layer_2/scheduledTask/scheduledSnapshot/IScheduledSnapshots.sol";
+import { IProtectedPartitions } from "./layer_1/protectedPartition/IProtectedPartitions.sol";
+import { IProceedRecipients } from "./layer_2/proceedRecipient/IProceedRecipients.sol";
+import { ICap } from "./layer_1/cap/ICap.sol";
+import { INonces } from "./layer_1/nonce/INonces.sol";
+import { ITotalBalance } from "./layer_1/totalBalance/ITotalBalance.sol";
+import { IScheduledCouponListing } from "./layer_2/scheduledTask/scheduledCouponListing/IScheduledCouponListing.sol";
+import {
+    IScheduledBalanceAdjustments
+} from "./layer_2/scheduledTask/scheduledBalanceAdjustment/IScheduledBalanceAdjustments.sol";
+import { ILock } from "./layer_1/lock/ILock.sol";
+import { IFreeze } from "./layer_1/freeze/IFreeze.sol";
+import { ISnapshots } from "./layer_1/snapshot/ISnapshots.sol";
+import { IClearingActions } from "./layer_1/clearing/IClearingActions.sol";
+import { IClearingTransfer } from "./layer_1/clearing/IClearingTransfer.sol";
+import { IClearingRedeem } from "./layer_1/clearing/IClearingRedeem.sol";
+import { IClearingHoldCreation } from "./layer_1/clearing/IClearingHoldCreation.sol";
+import { IClearingRead } from "./layer_1/clearing/IClearingRead.sol";
+import { IERC1594 } from "./layer_1/ERC1400/ERC1594/IERC1594.sol";
+import { IERC1643 } from "./layer_1/ERC1400/ERC1643/IERC1643.sol";
+import { IERC1644 } from "./layer_1/ERC1400/ERC1644/IERC1644.sol";
+import { IERC20Permit } from "./layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
+import { IControlList } from "./layer_1/controlList/IControlList.sol";
 
 /**
  * @title IAsset
