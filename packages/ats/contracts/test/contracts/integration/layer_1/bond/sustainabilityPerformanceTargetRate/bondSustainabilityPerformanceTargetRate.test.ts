@@ -163,8 +163,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
   });
 
   it("GIVEN a bond SPT rate WHEN deployed THEN securityType is BOND_SPT_RATE", async () => {
-    const coreFacet = await ethers.getContractAt("CoreFacet", diamond.target);
-    const metadata = await coreFacet.getERC20Metadata();
+    const metadata = await asset.getERC20Metadata();
     expect(metadata.securityType).to.be.equal(SecurityType.BOND_SPT_RATE);
   });
 

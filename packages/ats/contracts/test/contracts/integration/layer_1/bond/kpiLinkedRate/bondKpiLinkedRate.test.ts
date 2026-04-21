@@ -202,8 +202,7 @@ describe("Bond KpiLinked Rate Tests", () => {
   });
 
   it("GIVEN a bond kpi linked rate WHEN deployed THEN securityType is BOND_KPI_LINKED_RATE", async () => {
-    const coreFacet = await ethers.getContractAt("CoreFacet", diamond.target);
-    const metadata = await coreFacet.getERC20Metadata();
+    const metadata = await asset.getERC20Metadata();
     expect(metadata.securityType).to.be.equal(SecurityType.BOND_KPI_LINKED_RATE);
   });
 
