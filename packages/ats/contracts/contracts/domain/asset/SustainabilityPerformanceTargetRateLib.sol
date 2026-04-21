@@ -3,8 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 // solhint-disable max-line-length
 import {
-    ISustainabilityPerformanceTargetRateErrors as ISPTRErrors
-} from "../../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRateErrors.sol";
+    ISustainabilityPerformanceTargetRateTypes as ISPTRErrors
+} from "../../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRateTypes.sol";
 // solhint-enable max-line-length
 import { InterestRateStorageWrapper } from "./InterestRateStorageWrapper.sol";
 import { KpisStorageWrapper } from "./KpisStorageWrapper.sol";

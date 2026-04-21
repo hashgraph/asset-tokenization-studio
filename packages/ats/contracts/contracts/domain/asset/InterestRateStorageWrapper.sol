@@ -10,8 +10,8 @@ import {
     ISustainabilityPerformanceTargetRate
 } from "../../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 import {
-    ISustainabilityPerformanceTargetRateErrors
-} from "../../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRateErrors.sol";
+    ISustainabilityPerformanceTargetRateTypes
+} from "../../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRateTypes.sol";
 /* solhint-enable max-line-length */
 
 struct FixedRateDataStorage {
@@ -42,7 +42,7 @@ struct SustainabilityPerformanceTargetRateDataStorage {
     uint256 startPeriod;
     uint256 startRate;
     uint8 rateDecimals;
-    mapping(address project => ISustainabilityPerformanceTargetRateErrors.ImpactData impactData) impactDataByProject;
+    mapping(address project => ISustainabilityPerformanceTargetRateTypes.ImpactData impactData) impactDataByProject;
     bool initialized;
 }
 
@@ -76,8 +76,8 @@ library InterestRateStorageWrapper {
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_SustainabilityPerformanceTargetRate(
-        ISustainabilityPerformanceTargetRateErrors.InterestRate calldata _interestRate,
-        ISustainabilityPerformanceTargetRateErrors.ImpactData[] calldata _impactData,
+        ISustainabilityPerformanceTargetRateTypes.InterestRate calldata _interestRate,
+        ISustainabilityPerformanceTargetRateTypes.ImpactData[] calldata _impactData,
         address[] calldata _projects,
         function(address) view returns (bool) _isProceedRecipient
     ) internal {
@@ -86,7 +86,7 @@ library InterestRateStorageWrapper {
         for (uint256 index; index < length; ) {
             address project = _projects[index];
             if (!_isProceedRecipient(project))
-                revert ISustainabilityPerformanceTargetRateErrors.NotExistingProject(project);
+                revert ISustainabilityPerformanceTargetRateTypes.NotExistingProject(project);
             setSPTImpactData(_impactData[index], project);
             unchecked {
                 ++index;
@@ -97,7 +97,7 @@ library InterestRateStorageWrapper {
     }
 
     function setSPTInterestRate(
-        ISustainabilityPerformanceTargetRateErrors.InterestRate calldata _newInterestRate
+        ISustainabilityPerformanceTargetRateTypes.InterestRate calldata _newInterestRate
     ) internal {
         SustainabilityPerformanceTargetRateDataStorage
             storage sptStorage = sustainabilityPerformanceTargetRateStorage();
@@ -108,10 +108,10 @@ library InterestRateStorageWrapper {
     }
 
     function setSPTImpactData(
-        ISustainabilityPerformanceTargetRateErrors.ImpactData calldata _newImpactData,
+        ISustainabilityPerformanceTargetRateTypes.ImpactData calldata _newImpactData,
         address _project
     ) internal {
-        ISustainabilityPerformanceTargetRateErrors.ImpactData
+        ISustainabilityPerformanceTargetRateTypes.ImpactData
             storage impactData = sustainabilityPerformanceTargetRateStorage().impactDataByProject[_project];
         impactData.baseLine = _newImpactData.baseLine;
         impactData.baseLineMode = _newImpactData.baseLineMode;
@@ -122,11 +122,11 @@ library InterestRateStorageWrapper {
     function getSPTInterestRate()
         internal
         view
-        returns (ISustainabilityPerformanceTargetRateErrors.InterestRate memory interestRate_)
+        returns (ISustainabilityPerformanceTargetRateTypes.InterestRate memory interestRate_)
     {
         SustainabilityPerformanceTargetRateDataStorage
             storage sptStorage = sustainabilityPerformanceTargetRateStorage();
-        interestRate_ = ISustainabilityPerformanceTargetRateErrors.InterestRate({
+        interestRate_ = ISustainabilityPerformanceTargetRateTypes.InterestRate({
             baseRate: sptStorage.baseRate,
             startPeriod: sptStorage.startPeriod,
             startRate: sptStorage.startRate,
@@ -136,7 +136,7 @@ library InterestRateStorageWrapper {
 
     function getSPTImpactDataFor(
         address _project
-    ) internal view returns (ISustainabilityPerformanceTargetRateErrors.ImpactData memory impactData_) {
+    ) internal view returns (ISustainabilityPerformanceTargetRateTypes.ImpactData memory impactData_) {
         return sustainabilityPerformanceTargetRateStorage().impactDataByProject[_project];
     }
 
@@ -201,7 +201,7 @@ library InterestRateStorageWrapper {
 
     function requireEqualLength(uint256 len1, uint256 len2) internal pure {
         if (len1 != len2) {
-            revert ISustainabilityPerformanceTargetRateErrors.ProvidedListsLengthMismatch(len1, len2);
+            revert ISustainabilityPerformanceTargetRateTypes.ProvidedListsLengthMismatch(len1, len2);
         }
     }
 

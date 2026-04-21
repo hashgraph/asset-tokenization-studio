@@ -52,8 +52,8 @@ import { IExternalPauseManagement } from "./layer_1/externalPause/IExternalPause
 import { IFixedRate } from "./layer_2/interestRate/fixedRate/IFixedRate.sol";
 import { IKpiLinkedRateErrors } from "./layer_2/interestRate/kpiLinkedRate/IKpiLinkedRateErrors.sol";
 import {
-    ISustainabilityPerformanceTargetRateErrors
-} from "./layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRateErrors.sol";
+    ISustainabilityPerformanceTargetRateTypes
+} from "./layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRateTypes.sol";
 
 // Layer 2
 import { IFreeze } from "./layer_1/freeze/IFreeze.sol";

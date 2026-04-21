@@ -31,9 +31,6 @@ struct ERC20VotesStorage {
 library ERC20VotesStorageWrapper {
     using Checkpoints for Checkpoints.Checkpoint[];
 
-    // NOTE: DelegateChanged and DelegateVotesChanged events are defined in IERC20Votes.sol
-    // to avoid duplicate definitions across the codebase
-
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20Votes(bool activated) internal {
         setActivate(activated);

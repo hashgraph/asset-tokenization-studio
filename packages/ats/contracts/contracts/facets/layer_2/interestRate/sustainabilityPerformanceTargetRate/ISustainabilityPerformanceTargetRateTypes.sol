@@ -7,7 +7,7 @@ pragma solidity >=0.8.0 <0.9.0;
  * @dev Separated from ISustainabilityPerformanceTargetRate to expose errors through IAsset
  *      without including ISustainabilityPerformanceTargetRate's function selectors
  */
-interface ISustainabilityPerformanceTargetRateErrors {
+interface ISustainabilityPerformanceTargetRateTypes {
     enum BaseLineMode {
         MINIMUM,
         MAXIMUM

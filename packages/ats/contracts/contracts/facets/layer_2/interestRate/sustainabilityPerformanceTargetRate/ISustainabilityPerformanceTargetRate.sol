@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ISustainabilityPerformanceTargetRateErrors } from "./ISustainabilityPerformanceTargetRateErrors.sol";
+import { ISustainabilityPerformanceTargetRateTypes } from "./ISustainabilityPerformanceTargetRateTypes.sol";
 
-interface ISustainabilityPerformanceTargetRate is ISustainabilityPerformanceTargetRateErrors {
+interface ISustainabilityPerformanceTargetRate is ISustainabilityPerformanceTargetRateTypes {
     // Structs, enums and errors are inherited from ISustainabilityPerformanceTargetRateErrors
 
     event InterestRateUpdated(address indexed operator, InterestRate newInterestRate);
