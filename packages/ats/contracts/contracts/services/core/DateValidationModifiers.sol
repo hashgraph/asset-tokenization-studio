@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { KycStorageWrapper } from "../../domain/core/KycStorageWrapper.sol";
 import { DatesValidation } from "../../infrastructure/utils/DatesValidation.sol";
 
 /**

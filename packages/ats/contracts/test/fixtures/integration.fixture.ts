@@ -20,6 +20,8 @@ import {
   deployOrchestratorLibraries,
   getFacetLibraryLinks,
   LIBRARY_DEPENDENT_FACETS,
+  hasOrchestratorLibraryAddresses,
+  getOrchestratorLibraryAddresses,
   type OrchestratorLibraryAddresses,
 } from "@scripts/domain";
 import type { Signer } from "ethers";
@@ -36,7 +38,11 @@ let _cachedLibraryAddresses: OrchestratorLibraryAddresses | null = null;
  */
 async function getOrDeployLibraries(signer: Signer): Promise<OrchestratorLibraryAddresses> {
   if (!_cachedLibraryAddresses) {
-    _cachedLibraryAddresses = await deployOrchestratorLibraries(signer);
+    if (hasOrchestratorLibraryAddresses()) {
+      _cachedLibraryAddresses = getOrchestratorLibraryAddresses();
+    } else {
+      _cachedLibraryAddresses = await deployOrchestratorLibraries(signer);
+    }
   }
   return _cachedLibraryAddresses;
 }

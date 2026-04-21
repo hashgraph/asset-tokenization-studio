@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-21T06:41:36.583Z
- * Facets: 78
+ * Generated: 2026-04-21T11:03:37.213Z
+ * Facets: 79
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -37,6 +37,7 @@ import {
   ClearingRedeemFacet__factory,
   ClearingTransferFacet__factory,
   ControlListFacet__factory,
+  CoreFacet__factory,
   CorporateActionsFacet__factory,
   CouponFacet__factory,
   CouponFixedRateFacet__factory,
@@ -3508,6 +3509,104 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) => new ControlListFacetTimeTravel__factory(signer),
   },
 
+  CoreFacet: {
+    name: "CoreFacet",
+    description:
+      "Diamond facet for the Core domain. Registers the 8 selectors that define the base identity of the token (ERC20 metadata readers, ERC3643 name/symbol setters and version).",
+    resolverKey: {
+      name: "_CORE_RESOLVER_KEY",
+      value: "0x6b7d10d5f354a1dd56d2152e6a9c56b614c4c2c9d08f5289a72824dfc13132eb",
+    },
+    inheritance: ["Core", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "decimals",
+        signature: { full: "function decimals() view returns (uint8)", canonical: "decimals()" },
+        selector: "0x313ce567",
+      },
+      {
+        name: "getERC20Metadata",
+        signature: {
+          full: "function getERC20Metadata() view returns (((string name, string symbol, string isin, uint8 decimals) info, uint8 securityType))",
+          canonical: "getERC20Metadata()",
+        },
+        selector: "0x8e649195",
+      },
+      {
+        name: "initializeCore",
+        signature: {
+          full: "function initializeCore(((string name, string symbol, string isin, uint8 decimals) info, uint8 securityType) metadata)",
+          canonical: "initializeCore(((string,string,string,uint8),uint8))",
+        },
+        selector: "0xb446569a",
+      },
+      {
+        name: "name",
+        signature: { full: "function name() view returns (string)", canonical: "name()" },
+        selector: "0x06fdde03",
+      },
+      {
+        name: "setName",
+        signature: { full: "function setName(string _name)", canonical: "setName(string)" },
+        selector: "0xc47f0027",
+      },
+      {
+        name: "setSymbol",
+        signature: { full: "function setSymbol(string _symbol)", canonical: "setSymbol(string)" },
+        selector: "0xb84c8246",
+      },
+      {
+        name: "symbol",
+        signature: { full: "function symbol() view returns (string)", canonical: "symbol()" },
+        selector: "0x95d89b41",
+      },
+      {
+        name: "version",
+        signature: { full: "function version() view returns (string)", canonical: "version()" },
+        selector: "0x54fd4d50",
+      },
+    ],
+    events: [
+      {
+        name: "UpdatedTokenInformation",
+        signature: {
+          full: "event UpdatedTokenInformation(string indexed newName, string indexed newSymbol, uint8 newDecimals, string newVersion, address indexed newOnchainID)",
+          canonical: "UpdatedTokenInformation(string,string,uint8,string,address)",
+        },
+        topic0: "0x6a1105ac8148a3c319adbc369f9072573e8a11d3a3d195e067e7c40767ec54d1",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRole",
+        signature: {
+          full: "error AccountHasNoRole(address account, bytes32 role)",
+          canonical: "AccountHasNoRole(address,bytes32)",
+        },
+        selector: "0xa1180aad",
+      },
+      {
+        name: "AlreadyInitialized",
+        signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
+        selector: "0x0dc149f0",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+    ],
+    factory: (signer) => new CoreFacet__factory(signer),
+  },
+
   CorporateActionsFacet: {
     name: "CorporateActionsFacet",
     resolverKey: {
@@ -6409,11 +6508,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x095ea7b3",
       },
       {
-        name: "decimals",
-        signature: { full: "function decimals() view returns (uint8)", canonical: "decimals()" },
-        selector: "0x313ce567",
-      },
-      {
         name: "decimalsAt",
         signature: {
           full: "function decimalsAt(uint256 _timestamp) view returns (uint8)",
@@ -6430,14 +6524,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa457c2d7",
       },
       {
-        name: "getERC20Metadata",
-        signature: {
-          full: "function getERC20Metadata() view returns (((string name, string symbol, string isin, uint8 decimals) info, uint8 securityType))",
-          canonical: "getERC20Metadata()",
-        },
-        selector: "0x8e649195",
-      },
-      {
         name: "increaseAllowance",
         signature: {
           full: "function increaseAllowance(address spender, uint256 addedValue) returns (bool)",
@@ -6452,16 +6538,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "initialize_ERC20(((string,string,string,uint8),uint8))",
         },
         selector: "0xe04fb235",
-      },
-      {
-        name: "name",
-        signature: { full: "function name() view returns (string)", canonical: "name()" },
-        selector: "0x06fdde03",
-      },
-      {
-        name: "symbol",
-        signature: { full: "function symbol() view returns (string)", canonical: "symbol()" },
-        selector: "0x95d89b41",
       },
       {
         name: "transfer",
@@ -7180,19 +7256,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xcbf3f861",
       },
       {
-        name: "setName",
-        signature: { full: "function setName(string _name)", canonical: "setName(string)" },
-        selector: "0xc47f0027",
-      },
-      {
         name: "setOnchainID",
         signature: { full: "function setOnchainID(address _onchainID)", canonical: "setOnchainID(address)" },
         selector: "0x3d1ddc5b",
-      },
-      {
-        name: "setSymbol",
-        signature: { full: "function setSymbol(string _symbol)", canonical: "setSymbol(string)" },
-        selector: "0xb84c8246",
       },
     ],
     events: [
@@ -7693,11 +7759,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "onchainID",
         signature: { full: "function onchainID() view returns (address)", canonical: "onchainID()" },
         selector: "0xaba63705",
-      },
-      {
-        name: "version",
-        signature: { full: "function version() view returns (string)", canonical: "version()" },
-        selector: "0x54fd4d50",
       },
     ],
     events: [
@@ -12886,7 +12947,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 78 as const;
+export const TOTAL_FACETS = 79 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

@@ -20,7 +20,11 @@ import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployContract, registerFacets, registerAdditionalFacets } from "@scripts/infrastructure";
 import { atsRegistry, isLibraryDependentFacet, getFacetRequiredLibraries, getLibLinks } from "@scripts/domain";
-import { deployOrchestratorLibraries, setOrchestratorLibraryAddresses } from "@scripts/domain";
+import {
+  deployOrchestratorLibraries,
+  setOrchestratorLibraryAddresses,
+  hasOrchestratorLibraryAddresses,
+} from "@scripts/domain";
 import { TEST_SIZES, BLR_VERSIONS, deployBlrFixture, silenceScriptLogging } from "@test";
 
 describe("registerAdditionalFacets - Integration Tests", () => {
@@ -293,7 +297,7 @@ describe("registerAdditionalFacets - Integration Tests", () => {
 
       // Deploy orchestrator libraries if any facet needs them
       const needsLibraries = facetNames.some((name) => isLibraryDependentFacet(name));
-      if (needsLibraries) {
+      if (needsLibraries && !hasOrchestratorLibraryAddresses()) {
         const libAddresses = await deployOrchestratorLibraries(deployer);
         setOrchestratorLibraryAddresses(libAddresses);
       }

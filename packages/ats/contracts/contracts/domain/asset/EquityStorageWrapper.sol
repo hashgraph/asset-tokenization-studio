@@ -4,8 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _EQUITY_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import {
     BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
-    SNAPSHOT_RESULT_ID,
-    SNAPSHOT_TASK_TYPE,
     BALANCE_ADJUSTMENT_TASK_TYPE,
     KPI_EQUITY_BALANCE_ADJ
 } from "../../constants/values.sol";
@@ -14,7 +12,6 @@ import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageW
 import { NominalValueStorageWrapper } from "./nominalValue/NominalValueStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
-import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";

@@ -12,20 +12,18 @@ contract ERC20Facet is ERC20, IStaticFunctionSelectors {
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](12);
-        staticFunctionSelectors_[selectorIndex++] = this.initialize_ERC20.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.approve.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.transfer.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.transferFrom.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.increaseAllowance.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.decreaseAllowance.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.allowance.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getERC20Metadata.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.name.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.symbol.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.decimals.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.decimalsAt.selector;
+        uint256 selectorIndex = 8;
+        staticFunctionSelectors_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this.decimalsAt.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.allowance.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.decreaseAllowance.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.increaseAllowance.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.transferFrom.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.transfer.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.approve.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.initialize_ERC20.selector;
+        }
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {

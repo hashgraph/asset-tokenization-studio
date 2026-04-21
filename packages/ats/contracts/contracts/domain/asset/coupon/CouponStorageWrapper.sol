@@ -13,7 +13,6 @@ import { ERC1410StorageWrapper } from "../ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../core/ERC3643StorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
-import { IBondTypes } from "../../../facets/layer_2/bond/IBondTypes.sol";
 import { ICoupon } from "../../../facets/layer_2/coupon/ICoupon.sol";
 import { ICouponTypes } from "../../../facets/layer_2/coupon/ICouponTypes.sol";
 import { InterestRateStorageWrapper } from "../InterestRateStorageWrapper.sol";

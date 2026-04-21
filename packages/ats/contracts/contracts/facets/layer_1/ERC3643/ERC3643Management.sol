@@ -17,14 +17,6 @@ abstract contract ERC3643Management is IERC3643Management, Modifiers {
         ERC3643StorageWrapper.initialize_ERC3643(_compliance, _identityRegistry);
     }
 
-    function setName(string calldata _name) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
-        ERC3643StorageWrapper.setName(_name);
-    }
-
-    function setSymbol(string calldata _symbol) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
-        ERC3643StorageWrapper.setSymbol(_symbol);
-    }
-
     function setOnchainID(address _onchainID) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
         ERC3643StorageWrapper.setOnchainID(_onchainID);
     }
