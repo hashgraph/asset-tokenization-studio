@@ -19,8 +19,6 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
  * and role-based access control. Inherits LockModifiers for expiration validation.
  */
 abstract contract Lock is ILock, Modifiers {
-    // State changing functions (external - must come first)
-
     function lock(
         uint256 _amount,
         address _tokenHolder,

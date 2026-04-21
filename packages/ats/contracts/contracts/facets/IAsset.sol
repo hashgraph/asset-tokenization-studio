@@ -87,7 +87,6 @@ import { ITotalBalance } from "./layer_1/totalBalance/ITotalBalance.sol";
 import { ITransferAndLock } from "./layer_3/transferAndLock/ITransferAndLock.sol";
 import { ICoupon } from "./layer_2/coupon/ICoupon.sol";
 import { IDividend } from "./layer_2/dividend/IDividend.sol";
-import { IVoting } from "./layer_2/voting/IVoting.sol";
 
 /**
  * @title IAsset
@@ -142,7 +141,6 @@ interface IAsset is
     // Corporate Actions
     ICoupon,
     IDividend,
-    IVoting,
     // Additional Layer 1
     ICap,
     INonces,
