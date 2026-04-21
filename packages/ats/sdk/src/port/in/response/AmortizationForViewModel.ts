@@ -3,7 +3,6 @@
 import { QueryResponse } from "@core/query/QueryResponse";
 
 export default interface AmortizationForViewModel extends QueryResponse {
-  account: string;
   recordDate: Date;
   executionDate: Date;
   holdId: number;
