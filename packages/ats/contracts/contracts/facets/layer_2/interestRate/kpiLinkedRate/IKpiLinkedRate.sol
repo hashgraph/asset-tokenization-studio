@@ -1,30 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-interface IKpiLinkedRate {
-    struct InterestRate {
-        uint256 maxRate;
-        uint256 baseRate;
-        uint256 minRate;
-        uint256 startPeriod;
-        uint256 startRate;
-        uint256 missedPenalty;
-        uint256 reportPeriod;
-        uint8 rateDecimals;
-    }
-    struct ImpactData {
-        uint256 maxDeviationCap;
-        uint256 baseLine;
-        uint256 maxDeviationFloor;
-        uint8 impactDataDecimals;
-        uint256 adjustmentPrecision;
-    }
+import { IKpiLinkedRateErrors } from "./IKpiLinkedRateErrors.sol";
 
+interface IKpiLinkedRate is IKpiLinkedRateErrors {
     event InterestRateUpdated(address indexed operator, InterestRate newInterestRate);
     event ImpactDataUpdated(address indexed operator, ImpactData newImpactData);
 
-    error WrongInterestRateValues(InterestRate interestRate);
-    error WrongImpactDataValues(ImpactData impactData);
     error InterestRateIsKpiLinked();
 
     // solhint-disable-next-line func-name-mixedcase

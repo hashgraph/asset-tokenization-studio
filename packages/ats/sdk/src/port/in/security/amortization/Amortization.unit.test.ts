@@ -439,7 +439,6 @@ describe("Amortization", () => {
 
       expect(result).toEqual(
         expect.objectContaining({
-          account: amortizationFor.account,
           holdId: amortizationFor.holdId,
           holdActive: amortizationFor.holdActive,
           decimalsHeld: amortizationFor.decimalsHeld,

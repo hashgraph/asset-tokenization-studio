@@ -22,6 +22,7 @@ import {
   PauseFacet__factory,
   KycFacet__factory,
   ControlListFacet__factory,
+  IAsset__factory,
 } from "@contract-types";
 import { DividendRight, EquityDetailsDataParams, FactoryRegulationDataParams } from "@scripts/domain";
 import { getRegulationData, getSecurityData } from "./common.fixture";
@@ -69,7 +70,6 @@ export function getEquityDetails(params?: DeepPartial<EquityDetailsDataParams>) 
  * @param tokenParams - Optional custom token parameters (merged with defaults)
  * @returns Infrastructure + deployed equity token + connected facets
  */
-//1893456035
 export async function deployEquityTokenFixture({
   equityDataParams,
   regulationTypeParams,
@@ -101,6 +101,7 @@ export async function deployEquityTokenFixture({
   const pauseFacet = PauseFacet__factory.connect(diamond.target as string, deployer);
   const kycFacet = KycFacet__factory.connect(diamond.target as string, deployer);
   const controlListFacet = ControlListFacet__factory.connect(diamond.target as string, deployer);
+  const asset = IAsset__factory.connect(diamond.target as string, deployer);
 
   await accessControlFacet.grantRole(ATS_ROLES._NOMINAL_VALUE_ROLE, deployer.address);
 
@@ -116,5 +117,6 @@ export async function deployEquityTokenFixture({
     pauseFacet,
     kycFacet,
     controlListFacet,
+    asset,
   };
 }

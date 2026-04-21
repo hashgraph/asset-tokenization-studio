@@ -7,8 +7,26 @@ import { IERC5805 } from "./IERC5805.sol";
 import { Checkpoints } from "../../../../infrastructure/utils/Checkpoints.sol";
 
 interface IERC20Votes is IERC5805 {
+    /// @notice Emitted when an account changes their delegate
+    /// @param delegator The account that changed their delegation
+    /// @param fromDelegate The previous delegate address
+    /// @param toDelegate The new delegate address
+    event DelegateChanged(address indexed delegator, address indexed fromDelegate, address indexed toDelegate);
+
+    /// @notice Emitted when delegate votes change due to balance changes
+    /// @param delegate The delegate whose votes changed
+    /// @param previousBalance The previous vote balance
+    /// @param newBalance The new vote balance
+    event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance);
+
+    /// @notice Raised when attempting to change ABAF for a block that is forbidden
+    /// @param blockNumber The block number that is forbidden
     error AbafChangeForBlockForbidden(uint256 blockNumber);
+    /// @notice Raised when the clock mode is broken
     error BrokenClockMode();
+    /// @notice Raised when querying past votes or supply with a future timepoint
+    /// @param timepoint The requested future timepoint
+    /// @param currentClock The current clock value
     error FutureLookup(uint256 timepoint, uint256 currentClock);
 
     // solhint-disable-next-line func-name-mixedcase

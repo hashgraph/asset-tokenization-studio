@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type INominalValue, type NominalValueMigrationFacetTest } from "@contract-types";
+import { type ResolverProxy, type IAsset, type NominalValueMigrationFacetTest } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { BOND_CONFIG_ID, EQUITY_CONFIG_ID } from "@scripts";
 import { deployBondTokenFixture, deployEquityTokenFixture } from "@test";
@@ -27,8 +27,8 @@ async function addMigrationFacetToDiamond(base: Awaited<ReturnType<typeof deploy
 
   const latestBLRVersion = Number(await blr.getLatestVersion());
 
-  const diamondFacet = await ethers.getContractAt("DiamondFacet", baseDiamond.target);
-  const existingFacetIds = await diamondFacet.getFacetIds();
+  const asset = await ethers.getContractAt("IAsset", baseDiamond.target);
+  const existingFacetIds = await asset.getFacetIds();
 
   const allFacetIds = [...existingFacetIds, migrationResolverKey];
   const facetConfigs = allFacetIds.map((id: string) => ({ id, version: latestBLRVersion }));
@@ -41,7 +41,7 @@ async function addMigrationFacetToDiamond(base: Awaited<ReturnType<typeof deploy
   }
 
   const newConfigVersion = Number(await blr.getLatestVersionByConfiguration(configId));
-  await diamondFacet.connect(deployer).updateConfigVersion(newConfigVersion);
+  await asset.connect(deployer).updateConfigVersion(newConfigVersion);
 
   return base;
 }
@@ -51,7 +51,7 @@ describe("NominalValue Migration Tests", () => {
     let diamond: ResolverProxy;
     let signer_A: HardhatEthersSigner;
 
-    let nominalValueFacet: INominalValue;
+    let asset: IAsset;
     let migrationFacet: NominalValueMigrationFacetTest;
 
     async function deployBondWithMigrationFacet() {
@@ -61,7 +61,7 @@ describe("NominalValue Migration Tests", () => {
       diamond = base.diamond;
       signer_A = base.deployer;
 
-      nominalValueFacet = await ethers.getContractAt("INominalValue", diamond.target, signer_A);
+      asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
       migrationFacet = await ethers.getContractAt("NominalValueMigrationFacetTest", diamond.target, signer_A);
     }
 
@@ -70,8 +70,8 @@ describe("NominalValue Migration Tests", () => {
     });
 
     it("GIVEN a bond with initialized nominalValue WHEN getNominalValue THEN returns correct value", async () => {
-      const nominalValue = await nominalValueFacet.getNominalValue();
-      const nominalValueDecimals = await nominalValueFacet.getNominalValueDecimals();
+      const nominalValue = await asset.getNominalValue();
+      const nominalValueDecimals = await asset.getNominalValueDecimals();
 
       // Default bond params: nominalValue=100, nominalValueDecimals=2
       expect(nominalValue).to.equal(100);
@@ -100,7 +100,7 @@ describe("NominalValue Migration Tests", () => {
       expect(aggregatedBefore).to.equal(100 + 500); // new storage (100) + legacy bond (500)
 
       // Call setNominalValue to trigger migration
-      await nominalValueFacet.connect(signer_A).setNominalValue(200, 4);
+      await asset.connect(signer_A).setNominalValue(200, 4);
 
       // Verify legacy data is cleared
       [legacyValue, legacyDecimals] = await migrationFacet.getLegacyBondNominalValue();
@@ -108,15 +108,15 @@ describe("NominalValue Migration Tests", () => {
       expect(legacyDecimals).to.equal(0);
 
       // Verify new value is set correctly (not aggregated with legacy)
-      expect(await nominalValueFacet.getNominalValue()).to.equal(200);
-      expect(await nominalValueFacet.getNominalValueDecimals()).to.equal(4);
+      expect(await asset.getNominalValue()).to.equal(200);
+      expect(await asset.getNominalValueDecimals()).to.equal(4);
     });
 
     it("GIVEN no legacy bond nominalValue WHEN setNominalValue is called THEN only new value is updated", async () => {
-      await nominalValueFacet.connect(signer_A).setNominalValue(300, 5);
+      await asset.connect(signer_A).setNominalValue(300, 5);
 
-      expect(await nominalValueFacet.getNominalValue()).to.equal(300);
-      expect(await nominalValueFacet.getNominalValueDecimals()).to.equal(5);
+      expect(await asset.getNominalValue()).to.equal(300);
+      expect(await asset.getNominalValueDecimals()).to.equal(5);
 
       const [legacyValue, legacyDecimals] = await migrationFacet.getLegacyBondNominalValue();
       expect(legacyValue).to.equal(0);
@@ -128,7 +128,7 @@ describe("NominalValue Migration Tests", () => {
     let diamond: ResolverProxy;
     let signer_A: HardhatEthersSigner;
 
-    let nominalValueFacet: INominalValue;
+    let asset: IAsset;
     let migrationFacet: NominalValueMigrationFacetTest;
 
     async function deployEquityWithMigrationFacet() {
@@ -138,7 +138,7 @@ describe("NominalValue Migration Tests", () => {
       diamond = base.diamond;
       signer_A = base.deployer;
 
-      nominalValueFacet = await ethers.getContractAt("INominalValue", diamond.target, signer_A);
+      asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
       migrationFacet = await ethers.getContractAt("NominalValueMigrationFacetTest", diamond.target, signer_A);
     }
 
@@ -147,8 +147,8 @@ describe("NominalValue Migration Tests", () => {
     });
 
     it("GIVEN an equity with initialized nominalValue WHEN getNominalValue THEN returns correct value", async () => {
-      const nominalValue = await nominalValueFacet.getNominalValue();
-      const nominalValueDecimals = await nominalValueFacet.getNominalValueDecimals();
+      const nominalValue = await asset.getNominalValue();
+      const nominalValueDecimals = await asset.getNominalValueDecimals();
 
       // Default equity params: nominalValue=100, nominalValueDecimals=2
       expect(nominalValue).to.equal(100);
@@ -177,7 +177,7 @@ describe("NominalValue Migration Tests", () => {
       expect(aggregatedBefore).to.equal(100 + 750);
 
       // Trigger migration via setNominalValue
-      await nominalValueFacet.connect(signer_A).setNominalValue(400, 3);
+      await asset.connect(signer_A).setNominalValue(400, 3);
 
       // Verify legacy cleared
       [legacyValue, legacyDecimals] = await migrationFacet.getLegacyEquityNominalValue();
@@ -185,8 +185,8 @@ describe("NominalValue Migration Tests", () => {
       expect(legacyDecimals).to.equal(0);
 
       // Verify new value
-      expect(await nominalValueFacet.getNominalValue()).to.equal(400);
-      expect(await nominalValueFacet.getNominalValueDecimals()).to.equal(3);
+      expect(await asset.getNominalValue()).to.equal(400);
+      expect(await asset.getNominalValueDecimals()).to.equal(3);
     });
   });
 
@@ -194,7 +194,7 @@ describe("NominalValue Migration Tests", () => {
     let diamond: ResolverProxy;
     let signer_A: HardhatEthersSigner;
 
-    let nominalValueFacet: INominalValue;
+    let asset: IAsset;
     let migrationFacet: NominalValueMigrationFacetTest;
 
     async function deployBondWithMigrationFacet() {
@@ -204,7 +204,7 @@ describe("NominalValue Migration Tests", () => {
       diamond = base.diamond;
       signer_A = base.deployer;
 
-      nominalValueFacet = await ethers.getContractAt("INominalValue", diamond.target, signer_A);
+      asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
       migrationFacet = await ethers.getContractAt("NominalValueMigrationFacetTest", diamond.target, signer_A);
     }
 
@@ -221,7 +221,7 @@ describe("NominalValue Migration Tests", () => {
       expect(await migrationFacet.getAggregatedNominalValue()).to.equal(400);
 
       // Trigger migration
-      await nominalValueFacet.connect(signer_A).setNominalValue(500, 4);
+      await asset.connect(signer_A).setNominalValue(500, 4);
 
       // Both legacy storages should be cleared
       const [bondValue, bondDecimals] = await migrationFacet.getLegacyBondNominalValue();
@@ -233,8 +233,8 @@ describe("NominalValue Migration Tests", () => {
       expect(equityDecimals).to.equal(0);
 
       // Only new storage value
-      expect(await nominalValueFacet.getNominalValue()).to.equal(500);
-      expect(await nominalValueFacet.getNominalValueDecimals()).to.equal(4);
+      expect(await asset.getNominalValue()).to.equal(500);
+      expect(await asset.getNominalValueDecimals()).to.equal(4);
     });
 
     it("GIVEN legacy values WHEN setNominalValue is called twice THEN second call has no migration side effects", async () => {
@@ -242,13 +242,13 @@ describe("NominalValue Migration Tests", () => {
       await migrationFacet.setLegacyBondNominalValue(100, 2);
 
       // First set - migrates
-      await nominalValueFacet.connect(signer_A).setNominalValue(300, 3);
-      expect(await nominalValueFacet.getNominalValue()).to.equal(300);
+      await asset.connect(signer_A).setNominalValue(300, 3);
+      expect(await asset.getNominalValue()).to.equal(300);
 
       // Second set - no legacy to migrate
-      await nominalValueFacet.connect(signer_A).setNominalValue(400, 4);
-      expect(await nominalValueFacet.getNominalValue()).to.equal(400);
-      expect(await nominalValueFacet.getNominalValueDecimals()).to.equal(4);
+      await asset.connect(signer_A).setNominalValue(400, 4);
+      expect(await asset.getNominalValue()).to.equal(400);
+      expect(await asset.getNominalValueDecimals()).to.equal(4);
     });
   });
 
@@ -256,7 +256,7 @@ describe("NominalValue Migration Tests", () => {
     let diamond: ResolverProxy;
     let signer_A: HardhatEthersSigner;
 
-    let nominalValueFacet: INominalValue;
+    let asset: IAsset;
     let migrationFacet: NominalValueMigrationFacetTest;
 
     async function deployBondWithMigrationFacet() {
@@ -266,7 +266,7 @@ describe("NominalValue Migration Tests", () => {
       diamond = base.diamond;
       signer_A = base.deployer;
 
-      nominalValueFacet = await ethers.getContractAt("INominalValue", diamond.target, signer_A);
+      asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
       migrationFacet = await ethers.getContractAt("NominalValueMigrationFacetTest", diamond.target, signer_A);
     }
 
@@ -275,10 +275,7 @@ describe("NominalValue Migration Tests", () => {
     });
 
     it("GIVEN an already initialized nominalValue WHEN initialize_NominalValue is called THEN reverts with AlreadyInitialized", async () => {
-      await expect(nominalValueFacet.initialize_NominalValue(200, 4)).to.be.revertedWithCustomError(
-        { interface: (await ethers.getContractFactory("NominalValueFacet")).interface } as any,
-        "AlreadyInitialized",
-      );
+      await expect(asset.initialize_NominalValue(200, 4)).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
     });
 
     it("GIVEN an uninitialized nominalValue WHEN setNominalValue is called THEN it initializes and sets value", async () => {
@@ -286,10 +283,10 @@ describe("NominalValue Migration Tests", () => {
       await migrationFacet.resetNominalValueInitialized();
 
       // setNominalValue should trigger _initialize_NominalValue internally
-      await nominalValueFacet.connect(signer_A).setNominalValue(600, 5);
+      await asset.connect(signer_A).setNominalValue(600, 5);
 
-      expect(await nominalValueFacet.getNominalValue()).to.equal(600);
-      expect(await nominalValueFacet.getNominalValueDecimals()).to.equal(5);
+      expect(await asset.getNominalValue()).to.equal(600);
+      expect(await asset.getNominalValueDecimals()).to.equal(5);
     });
   });
 
@@ -327,7 +324,7 @@ describe("NominalValue Migration Tests", () => {
     let signer_A: HardhatEthersSigner;
     let signer_B: HardhatEthersSigner;
 
-    let nominalValueFacet: INominalValue;
+    let asset: IAsset;
 
     async function deployBondFixture() {
       const base = await deployBondTokenFixture({ useLoadFixture: false });
@@ -336,7 +333,7 @@ describe("NominalValue Migration Tests", () => {
       signer_A = base.deployer;
       signer_B = base.user1;
 
-      nominalValueFacet = await ethers.getContractAt("INominalValue", diamond.target, signer_A);
+      asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
     }
 
     beforeEach(async () => {
@@ -344,14 +341,14 @@ describe("NominalValue Migration Tests", () => {
     });
 
     it("GIVEN a user with _NOMINAL_VALUE_ROLE WHEN setNominalValue THEN succeeds", async () => {
-      await nominalValueFacet.connect(signer_A).setNominalValue(500, 4);
+      await asset.connect(signer_A).setNominalValue(500, 4);
 
-      expect(await nominalValueFacet.getNominalValue()).to.equal(500);
-      expect(await nominalValueFacet.getNominalValueDecimals()).to.equal(4);
+      expect(await asset.getNominalValue()).to.equal(500);
+      expect(await asset.getNominalValueDecimals()).to.equal(4);
     });
 
     it("GIVEN a user without _NOMINAL_VALUE_ROLE WHEN setNominalValue THEN reverts with AccountHasNoRole", async () => {
-      await expect(nominalValueFacet.connect(signer_B).setNominalValue(500, 4)).to.be.rejectedWith("AccountHasNoRole");
+      await expect(asset.connect(signer_B).setNominalValue(500, 4)).to.be.rejectedWith("AccountHasNoRole");
     });
   });
 });

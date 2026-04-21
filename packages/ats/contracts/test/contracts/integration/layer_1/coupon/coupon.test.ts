@@ -3,24 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import {
-  ResolverProxy,
-  BondUSAFacet,
-  AccessControl,
-  Pause,
-  Lock,
-  type IERC1410,
-  Kyc,
-  SsiManagement,
-  IHold,
-  ClearingActionsFacet,
-  FreezeFacet,
-  ClearingTransferFacet,
-  BondUSAReadFacet,
-  TimeTravelFacet as TimeTravel,
-  CouponFacetTimeTravel,
-  NominalValueFacet,
-} from "@contract-types";
+import { ResolverProxy, type IAsset } from "@contract-types";
 import {
   DEFAULT_PARTITION,
   ATS_ROLES,
@@ -71,22 +54,7 @@ describe("Coupon Tests", () => {
   let signer_C: HardhatEthersSigner;
   let signer_D: HardhatEthersSigner;
 
-  let bondFacet: BondUSAFacet;
-  let bondReadFacet: BondUSAReadFacet;
-  let couponFacet: CouponFacetTimeTravel;
-  let accessControlFacet: AccessControl;
-  let pauseFacet: Pause;
-  let lockFacet: Lock;
-  let holdFacet: IHold;
-  let erc1410Facet: IERC1410;
-  let timeTravelFacet: TimeTravel;
-  let kycFacet: Kyc;
-  let ssiManagementFacet: SsiManagement;
-
-  let clearingActionsFacet: ClearingActionsFacet;
-  let freezeFacet: FreezeFacet;
-  let clearingTransferFacet: ClearingTransferFacet;
-  let nominalValueFacet: NominalValueFacet;
+  let asset: IAsset;
 
   async function deploySecurityFixture(isMultiPartition = false) {
     const base = await deployBondTokenFixture({
@@ -106,7 +74,8 @@ describe("Coupon Tests", () => {
     signer_C = base.user2;
     signer_D = base.user3;
 
-    await executeRbac(base.accessControlFacet, [
+    asset = await ethers.getContractAt("IAsset", diamond.target);
+    await executeRbac(asset, [
       {
         role: ATS_ROLES._FREEZE_MANAGER_ROLE,
         members: [signer_A.address],
@@ -145,28 +114,9 @@ describe("Coupon Tests", () => {
       },
     ]);
 
-    bondFacet = await ethers.getContractAt("BondUSAFacetTimeTravel", diamond.target, signer_A);
-    bondReadFacet = await ethers.getContractAt("BondUSAReadFacetTimeTravel", diamond.target, signer_A);
-    couponFacet = await ethers.getContractAt("CouponFacetTimeTravel", diamond.target, signer_A);
+    await asset.connect(signer_A).addIssuer(signer_A.address);
 
-    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target, signer_A);
-    pauseFacet = await ethers.getContractAt("Pause", diamond.target, signer_A);
-    lockFacet = await ethers.getContractAt("Lock", diamond.target, signer_A);
-    holdFacet = await ethers.getContractAt("IHold", diamond.target, signer_A);
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target, signer_A);
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
-    kycFacet = await ethers.getContractAt("Kyc", diamond.target, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.target, signer_A);
-    nominalValueFacet = await ethers.getContractAt("NominalValueFacet", diamond.target, signer_A);
-
-    await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
-
-    clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.target, signer_A);
-
-    freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.target, signer_A);
-    clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.target, signer_A);
-
-    await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+    await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
   }
 
   before(async () => {
@@ -196,25 +146,21 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN an account without corporateActions role WHEN setCoupon THEN transaction fails with AccountHasNoRole", async () => {
-    await expect(couponFacet.connect(signer_C).setCoupon(couponData)).to.be.rejectedWith("AccountHasNoRole");
+    await expect(asset.connect(signer_C).setCoupon(couponData)).to.be.revertedWithCustomError(
+      asset,
+      "AccountHasNoRole",
+    );
   });
 
   it("GIVEN a paused Token WHEN setCoupon THEN transaction fails with TokenIsPaused", async () => {
     // Granting Role to account C and Pause
-    await grantRoleAndPauseToken(
-      accessControlFacet,
-      pauseFacet,
-      ATS_ROLES._CORPORATE_ACTION_ROLE,
-      signer_A,
-      signer_B,
-      signer_C.address,
-    );
+    await grantRoleAndPauseToken(asset, ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
 
-    await expect(couponFacet.connect(signer_C).setCoupon(couponData)).to.be.rejectedWith("TokenIsPaused");
+    await expect(asset.connect(signer_C).setCoupon(couponData)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
   });
 
   it("GIVEN an account with corporateActions role WHEN setCoupon with wrong dates THEN transaction fails", async () => {
-    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
     const wrongcouponData_1 = {
       recordDate: couponExecutionDateInSeconds.toString(),
       executionDate: couponRecordDateInSeconds.toString(),
@@ -226,8 +172,8 @@ describe("Coupon Tests", () => {
       rateStatus: couponRateStatus,
     };
 
-    await expect(couponFacet.connect(signer_C).setCoupon(wrongcouponData_1)).to.be.revertedWithCustomError(
-      bondFacet,
+    await expect(asset.connect(signer_C).setCoupon(wrongcouponData_1)).to.be.revertedWithCustomError(
+      asset,
       "WrongDates",
     );
 
@@ -242,14 +188,14 @@ describe("Coupon Tests", () => {
       rateStatus: couponRateStatus,
     };
 
-    await expect(couponFacet.connect(signer_C).setCoupon(wrongcouponData_2)).to.be.revertedWithCustomError(
-      bondFacet,
+    await expect(asset.connect(signer_C).setCoupon(wrongcouponData_2)).to.be.revertedWithCustomError(
+      asset,
       "WrongTimestamp",
     );
   });
 
   it("GIVEN an account with corporateActions role WHEN setCoupon with period THEN period is stored correctly", async () => {
-    await accessControlFacet.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
     const customPeriod = 3 * 24 * 60 * 60; // 3 days in seconds
     const customStartDate = couponEndDateInSeconds - customPeriod;
@@ -264,8 +210,8 @@ describe("Coupon Tests", () => {
       rateStatus: couponRateStatus,
     };
 
-    await expect(couponFacet.connect(signer_C).setCoupon(customCouponData))
-      .to.emit(couponFacet, "CouponSet")
+    await expect(asset.connect(signer_C).setCoupon(customCouponData))
+      .to.emit(asset, "CouponSet")
       .withArgs("0x0000000000000000000000000000000000000000000000000000000000000001", 1, signer_C.address, [
         couponRecordDateInSeconds,
         couponExecutionDateInSeconds,
@@ -277,18 +223,17 @@ describe("Coupon Tests", () => {
         couponRateStatus,
       ]);
 
-    const registeredCoupon = await couponFacet.getCoupon(1);
+    const registeredCoupon = await asset.getCoupon(1);
     expect(registeredCoupon.registeredCoupon_.coupon.endDate).to.equal(couponEndDateInSeconds);
     expect(registeredCoupon.registeredCoupon_.coupon.startDate).to.equal(customStartDate);
 
-    const couponFor = await couponFacet.getCouponFor(1, signer_A.address);
+    const couponFor = await asset.getCouponFor(1, signer_A.address);
     expect(couponFor.coupon.endDate).to.equal(couponEndDateInSeconds);
     expect(couponFor.coupon.startDate).to.equal(customStartDate);
   });
 
   it("GIVEN an account with corporateActions role WHEN setCoupon with period 0 THEN transaction succeeds", async () => {
-    accessControlFacet = accessControlFacet.connect(signer_A);
-    await accessControlFacet.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
     const minValidPeriodCouponData = {
       recordDate: couponRecordDateInSeconds.toString(),
       executionDate: couponExecutionDateInSeconds.toString(),
@@ -300,8 +245,8 @@ describe("Coupon Tests", () => {
       rateStatus: couponRateStatus,
     };
 
-    await expect(couponFacet.connect(signer_C).setCoupon(minValidPeriodCouponData))
-      .to.emit(couponFacet, "CouponSet")
+    await expect(asset.connect(signer_C).setCoupon(minValidPeriodCouponData))
+      .to.emit(asset, "CouponSet")
       .withArgs("0x0000000000000000000000000000000000000000000000000000000000000001", 1, signer_C.address, [
         couponRecordDateInSeconds,
         couponExecutionDateInSeconds,
@@ -315,10 +260,10 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN an account with corporateActions role WHEN setCoupon THEN transaction succeeds", async () => {
-    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
-    await expect(couponFacet.connect(signer_C).setCoupon(couponData))
-      .to.emit(couponFacet, "CouponSet")
+    await expect(asset.connect(signer_C).setCoupon(couponData))
+      .to.emit(asset, "CouponSet")
       .withArgs("0x0000000000000000000000000000000000000000000000000000000000000001", 1, signer_C.address, [
         couponRecordDateInSeconds,
         couponExecutionDateInSeconds,
@@ -330,17 +275,17 @@ describe("Coupon Tests", () => {
         couponRateStatus,
       ]);
 
-    const listCount = await couponFacet.getCouponCount();
-    const [coupon, isDisabled] = await couponFacet.getCoupon(1);
+    const listCount = await asset.getCouponCount();
+    const [coupon, isDisabled] = await asset.getCoupon(1);
 
-    const couponFor = await couponFacet.getCouponFor(1, signer_A.address);
-    const couponAmountFor = await couponFacet.getCouponAmountFor(1, signer_A.address);
-    const couponTotalHolders = await couponFacet.getTotalCouponHolders(1);
-    const couponHolders = await couponFacet.getCouponHolders(1, 0, couponTotalHolders);
+    const couponFor = await asset.getCouponFor(1, signer_A.address);
+    const couponAmountFor = await asset.getCouponAmountFor(1, signer_A.address);
+    const couponTotalHolders = await asset.getTotalCouponHolders(1);
+    const couponHolders = await asset.getCouponHolders(1, 0, couponTotalHolders);
 
-    const [couponsFor, accounts] = await couponFacet.getCouponsFor(1, 0, 10);
+    const [couponsFor, accounts] = await asset.getCouponsFor(1, 0, 10);
 
-    const couponsOrderedListTotal = await couponFacet.getCouponsOrderedListTotal();
+    const couponsOrderedListTotal = await asset.getCouponsOrderedListTotal();
 
     expect(listCount).to.equal(1);
     expect(isDisabled).to.be.false;
@@ -385,25 +330,25 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN an account with corporateActions role WHEN setCoupon and lock THEN transaction succeeds", async () => {
-    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._LOCKER_ROLE, signer_C.address);
-    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._LOCKER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
 
     // issue and lock
     const TotalAmount = numberOfUnits;
     const LockedAmount = TotalAmount - 5;
 
-    await erc1410Facet.connect(signer_C).issueByPartition({
+    await asset.connect(signer_C).issueByPartition({
       partition: DEFAULT_PARTITION,
       tokenHolder: signer_A.address,
       value: TotalAmount,
       data: "0x",
     });
 
-    await lockFacet.connect(signer_C).lock(LockedAmount, signer_A.address, MAX_UINT256);
+    await asset.connect(signer_C).lock(LockedAmount, signer_A.address, MAX_UINT256);
 
-    await expect(couponFacet.connect(signer_C).setCoupon(couponData))
-      .to.emit(couponFacet, "CouponSet")
+    await expect(asset.connect(signer_C).setCoupon(couponData))
+      .to.emit(asset, "CouponSet")
       .withArgs("0x0000000000000000000000000000000000000000000000000000000000000001", 1, signer_C.address, [
         couponRecordDateInSeconds,
         couponExecutionDateInSeconds,
@@ -415,18 +360,18 @@ describe("Coupon Tests", () => {
         couponRateStatus,
       ]);
 
-    await timeTravelFacet.changeSystemTimestamp(couponRecordDateInSeconds + 1);
-    await accessControlFacet.connect(signer_A).revokeRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+    await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+    await asset.connect(signer_A).revokeRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
 
-    const couponFor = await couponFacet.getCouponFor(1, signer_A.address);
-    const couponAmountFor = await couponFacet.getCouponAmountFor(1, signer_A.address);
-    const couponTotalHolders = await couponFacet.getTotalCouponHolders(1);
-    const couponHolders = await couponFacet.getCouponHolders(1, 0, couponTotalHolders);
-    const nominalValue = await nominalValueFacet.getNominalValue();
-    const nominalValueDecimals = await nominalValueFacet.getNominalValueDecimals();
+    const couponFor = await asset.getCouponFor(1, signer_A.address);
+    const couponAmountFor = await asset.getCouponAmountFor(1, signer_A.address);
+    const couponTotalHolders = await asset.getTotalCouponHolders(1);
+    const couponHolders = await asset.getCouponHolders(1, 0, couponTotalHolders);
+    const nominalValue = await asset.getNominalValue();
+    const nominalValueDecimals = await asset.getNominalValueDecimals();
     const period = couponFor.coupon.endDate - couponFor.coupon.startDate;
 
-    const [couponsForList, accountsList] = await couponFacet.getCouponsFor(1, 0, 10);
+    const [couponsForList, accountsList] = await asset.getCouponsFor(1, 0, 10);
     expect(couponsForList.length).to.equal(1);
     expect(accountsList.length).to.equal(1);
     expect(accountsList[0]).to.equal(signer_A.address);
@@ -451,13 +396,13 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN an account with corporateActions role WHEN setCoupon and hold THEN transaction succeeds", async () => {
-    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
 
     const TotalAmount = numberOfUnits;
     const HeldAmount = TotalAmount - 5;
 
-    await erc1410Facet.connect(signer_C).issueByPartition({
+    await asset.connect(signer_C).issueByPartition({
       partition: DEFAULT_PARTITION,
       tokenHolder: signer_A.address,
       value: TotalAmount,
@@ -472,10 +417,10 @@ describe("Coupon Tests", () => {
       data: "0x",
     };
 
-    await holdFacet.createHoldByPartition(DEFAULT_PARTITION, hold);
+    await asset.createHoldByPartition(DEFAULT_PARTITION, hold);
 
-    await expect(couponFacet.connect(signer_C).setCoupon(couponData))
-      .to.emit(couponFacet, "CouponSet")
+    await expect(asset.connect(signer_C).setCoupon(couponData))
+      .to.emit(asset, "CouponSet")
       .withArgs("0x0000000000000000000000000000000000000000000000000000000000000001", 1, signer_C.address, [
         couponRecordDateInSeconds,
         couponExecutionDateInSeconds,
@@ -487,18 +432,18 @@ describe("Coupon Tests", () => {
         couponRateStatus,
       ]);
 
-    await timeTravelFacet.changeSystemTimestamp(couponRecordDateInSeconds + 1);
-    await accessControlFacet.connect(signer_A).revokeRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+    await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+    await asset.connect(signer_A).revokeRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
 
-    const couponFor = await couponFacet.getCouponFor(1, signer_A.address);
-    const couponAmountFor = await couponFacet.getCouponAmountFor(1, signer_A.address);
-    const couponTotalHolders = await couponFacet.getTotalCouponHolders(1);
-    const couponHolders = await couponFacet.getCouponHolders(1, 0, couponTotalHolders);
-    const nominalValue = await nominalValueFacet.getNominalValue();
-    const nominalValueDecimals = await nominalValueFacet.getNominalValueDecimals();
+    const couponFor = await asset.getCouponFor(1, signer_A.address);
+    const couponAmountFor = await asset.getCouponAmountFor(1, signer_A.address);
+    const couponTotalHolders = await asset.getTotalCouponHolders(1);
+    const couponHolders = await asset.getCouponHolders(1, 0, couponTotalHolders);
+    const nominalValue = await asset.getNominalValue();
+    const nominalValueDecimals = await asset.getNominalValueDecimals();
     const period = couponFor.coupon.endDate - couponFor.coupon.startDate;
 
-    const [couponsForList, accountsList] = await couponFacet.getCouponsFor(1, 0, 10);
+    const [couponsForList, accountsList] = await asset.getCouponsFor(1, 0, 10);
     expect(couponsForList.length).to.equal(1);
     expect(accountsList.length).to.equal(1);
     expect(accountsList[0]).to.equal(signer_A.address);
@@ -523,63 +468,61 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN an account with bondManager role WHEN setMaturityDate THEN transaction succeeds", async () => {
-    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._BOND_MANAGER_ROLE, signer_C.address);
-    const maturityDateBefore = (await bondReadFacet.getBondDetails()).maturityDate;
+    await asset.connect(signer_A).grantRole(ATS_ROLES._BOND_MANAGER_ROLE, signer_C.address);
+    const maturityDateBefore = (await asset.getBondDetails()).maturityDate;
     const newMaturityDate = maturityDateBefore + 86400n;
 
-    await expect(bondFacet.connect(signer_C).updateMaturityDate(newMaturityDate))
-      .to.emit(bondFacet, "MaturityDateUpdated")
-      .withArgs(bondFacet.target, newMaturityDate, maturityDateBefore);
-    const maturityDateAfter = (await bondReadFacet.getBondDetails()).maturityDate;
+    await expect(asset.connect(signer_C).updateMaturityDate(newMaturityDate))
+      .to.emit(asset, "MaturityDateUpdated")
+      .withArgs(asset.target, newMaturityDate, maturityDateBefore);
+    const maturityDateAfter = (await asset.getBondDetails()).maturityDate;
     expect(maturityDateAfter).not.to.be.equal(maturityDateBefore);
     expect(maturityDateAfter).to.be.equal(newMaturityDate);
   });
 
   it("GIVEN an account with bondManager role WHEN setMaturityDate to earlier date THEN transaction fails", async () => {
-    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._BOND_MANAGER_ROLE, signer_C.address);
-    const maturityDateBefore = (await bondReadFacet.getBondDetails()).maturityDate;
+    await asset.connect(signer_A).grantRole(ATS_ROLES._BOND_MANAGER_ROLE, signer_C.address);
+    const maturityDateBefore = (await asset.getBondDetails()).maturityDate;
     const dayBeforeCurrentMaturity = maturityDateBefore - 86400n;
 
-    await expect(
-      bondFacet.connect(signer_C).updateMaturityDate(dayBeforeCurrentMaturity),
-    ).to.be.revertedWithCustomError(bondFacet, "BondMaturityDateWrong");
-    const maturityDateAfter = (await bondReadFacet.getBondDetails()).maturityDate;
+    await expect(asset.connect(signer_C).updateMaturityDate(dayBeforeCurrentMaturity)).to.be.revertedWithCustomError(
+      asset,
+      "BondMaturityDateWrong",
+    );
+    const maturityDateAfter = (await asset.getBondDetails()).maturityDate;
     expect(maturityDateAfter).to.be.equal(maturityDateBefore);
   });
 
   it("GIVEN an account without bondManager role WHEN setMaturityDate THEN transaction fails with AccountHasNoRole", async () => {
-    const maturityDateBefore = (await bondReadFacet.getBondDetails()).maturityDate;
+    const maturityDateBefore = (await asset.getBondDetails()).maturityDate;
     const newMaturityDate = maturityDateBefore + 86400n;
 
-    await expect(bondFacet.connect(signer_C).updateMaturityDate(newMaturityDate)).to.be.rejectedWith(
+    await expect(asset.connect(signer_C).updateMaturityDate(newMaturityDate)).to.be.revertedWithCustomError(
+      asset,
       "AccountHasNoRole",
     );
-    const maturityDateAfter = (await bondReadFacet.getBondDetails()).maturityDate;
+    const maturityDateAfter = (await asset.getBondDetails()).maturityDate;
     expect(maturityDateAfter).to.be.equal(maturityDateBefore);
   });
 
   it("GIVEN a paused Token WHEN setMaturityDate THEN transaction fails with TokenIsPaused", async () => {
-    await grantRoleAndPauseToken(
-      accessControlFacet,
-      pauseFacet,
-      ATS_ROLES._BOND_MANAGER_ROLE,
-      signer_A,
-      signer_B,
-      signer_C.address,
-    );
+    await grantRoleAndPauseToken(asset, ATS_ROLES._BOND_MANAGER_ROLE, signer_A, signer_B, signer_C.address);
 
-    const maturityDateBefore = (await bondReadFacet.getBondDetails()).maturityDate;
+    const maturityDateBefore = (await asset.getBondDetails()).maturityDate;
     const newMaturityDate = maturityDateBefore + 86400n;
 
-    await expect(bondFacet.connect(signer_C).updateMaturityDate(newMaturityDate)).to.be.rejectedWith("TokenIsPaused");
-    const maturityDateAfter = (await bondReadFacet.getBondDetails()).maturityDate;
+    await expect(asset.connect(signer_C).updateMaturityDate(newMaturityDate)).to.be.revertedWithCustomError(
+      asset,
+      "TokenIsPaused",
+    );
+    const maturityDateAfter = (await asset.getBondDetails()).maturityDate;
     expect(maturityDateAfter).to.be.equal(maturityDateBefore);
   });
 
   it("Given a coupon and account with normal, cleared, held, locked and frozen balance WHEN  getCouponFor THEN sum of balances is correct", async () => {
-    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._LOCKER_ROLE, signer_C.address);
-    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._LOCKER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
 
     const totalAmount = numberOfUnits;
     const lockedAmount = totalAmount / 5;
@@ -587,7 +530,7 @@ describe("Coupon Tests", () => {
     const frozenAmount = totalAmount / 5;
     const clearedAmount = totalAmount / 5;
 
-    await erc1410Facet.connect(signer_C).issueByPartition({
+    await asset.connect(signer_C).issueByPartition({
       partition: DEFAULT_PARTITION,
       tokenHolder: signer_A.address,
       value: totalAmount,
@@ -602,10 +545,10 @@ describe("Coupon Tests", () => {
       data: "0x",
     };
 
-    await holdFacet.createHoldByPartition(DEFAULT_PARTITION, hold);
-    await lockFacet.connect(signer_C).lock(lockedAmount, signer_A.address, MAX_UINT256);
-    await freezeFacet.freezePartialTokens(signer_A.address, frozenAmount);
-    await clearingActionsFacet.activateClearing();
+    await asset.createHoldByPartition(DEFAULT_PARTITION, hold);
+    await asset.connect(signer_C).lock(lockedAmount, signer_A.address, MAX_UINT256);
+    await asset.freezePartialTokens(signer_A.address, frozenAmount);
+    await asset.activateClearing();
 
     const clearingOperation = {
       partition: DEFAULT_PARTITION,
@@ -613,10 +556,10 @@ describe("Coupon Tests", () => {
       data: EMPTY_HEX_BYTES,
     };
 
-    await clearingTransferFacet.clearingTransferByPartition(clearingOperation, clearedAmount, signer_D.address);
+    await asset.clearingTransferByPartition(clearingOperation, clearedAmount, signer_D.address);
 
-    await expect(couponFacet.connect(signer_C).setCoupon(couponData))
-      .to.emit(couponFacet, "CouponSet")
+    await expect(asset.connect(signer_C).setCoupon(couponData))
+      .to.emit(asset, "CouponSet")
       .withArgs("0x0000000000000000000000000000000000000000000000000000000000000001", 1, signer_C.address, [
         couponRecordDateInSeconds,
         couponExecutionDateInSeconds,
@@ -628,23 +571,23 @@ describe("Coupon Tests", () => {
         couponRateStatus,
       ]);
 
-    const before = await couponFacet.getCouponFor(1, signer_A.address);
-    const couponAmountForBefore = await couponFacet.getCouponAmountFor(1, signer_A.address);
+    const before = await asset.getCouponFor(1, signer_A.address);
+    const couponAmountForBefore = await asset.getCouponAmountFor(1, signer_A.address);
     expect(before.recordDateReached).to.equal(false);
     expect(before.tokenBalance).to.equal(0);
     expect(couponAmountForBefore.recordDateReached).to.equal(before.recordDateReached);
     expect(couponAmountForBefore.numerator).to.equal(0);
     expect(couponAmountForBefore.denominator).to.equal(0);
 
-    await timeTravelFacet.changeSystemTimestamp(couponRecordDateInSeconds + 1);
-    await accessControlFacet.revokeRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+    await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+    await asset.revokeRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
 
-    const couponFor = await couponFacet.getCouponFor(1, signer_A.address);
-    const couponAmountForAfter = await couponFacet.getCouponAmountFor(1, signer_A.address);
-    const bondDetails = await bondReadFacet.getBondDetails();
+    const couponFor = await asset.getCouponFor(1, signer_A.address);
+    const couponAmountForAfter = await asset.getCouponAmountFor(1, signer_A.address);
+    const bondDetails = await asset.getBondDetails();
     const period = couponFor.coupon.endDate - couponFor.coupon.startDate;
 
-    const [couponsForList, accountsList] = await couponFacet.getCouponsFor(1, 0, 10);
+    const [couponsForList, accountsList] = await asset.getCouponsFor(1, 0, 10);
     expect(couponsForList.length).to.equal(1);
     expect(accountsList.length).to.equal(1);
     expect(accountsList[0]).to.equal(signer_A.address);
@@ -680,78 +623,72 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN an account with corporateActions role WHEN cancelling a coupon THEN transaction succeeds", async () => {
-    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
 
-    await couponFacet.connect(signer_C).setCoupon(couponData);
+    await asset.connect(signer_C).setCoupon(couponData);
 
-    await expect(couponFacet.connect(signer_C).cancelCoupon(1))
-      .to.emit(couponFacet, "CouponCancelled")
+    await expect(asset.connect(signer_C).cancelCoupon(1))
+      .to.emit(asset, "CouponCancelled")
       .withArgs(1, signer_C.address);
-    const isDisabled = (await couponFacet.getCoupon(1)).isDisabled_;
+    const isDisabled = (await asset.getCoupon(1)).isDisabled_;
     expect(isDisabled).to.equal(true);
-    const couponFor = await couponFacet.getCouponFor(1, signer_A.address);
+    const couponFor = await asset.getCouponFor(1, signer_A.address);
     expect(couponFor.isDisabled).to.equal(true);
   });
 
   it("GIVEN a coupon after execution date WHEN cancelCoupon THEN transaction fails with CorporateActionAlreadyExecuted", async () => {
-    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
 
-    await couponFacet.connect(signer_C).setCoupon(couponData);
+    await asset.connect(signer_C).setCoupon(couponData);
 
-    await timeTravelFacet.changeSystemTimestamp(couponExecutionDateInSeconds + 1);
+    await asset.changeSystemTimestamp(couponExecutionDateInSeconds + 1);
 
-    await expect(couponFacet.connect(signer_C).cancelCoupon(1)).to.be.revertedWithCustomError(
-      couponFacet,
-      "CouponAlreadyExecuted",
-    );
+    await expect(asset.connect(signer_C).cancelCoupon(1)).to.be.revertedWithCustomError(asset, "CouponAlreadyExecuted");
   });
 
   it("GIVEN a coupon after record date but before execution date WHEN cancelCoupon THEN transaction succeeds", async () => {
-    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
 
-    await couponFacet.connect(signer_C).setCoupon(couponData);
+    await asset.connect(signer_C).setCoupon(couponData);
 
-    await timeTravelFacet.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+    await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
 
-    await expect(couponFacet.connect(signer_C).cancelCoupon(1))
-      .to.emit(couponFacet, "CouponCancelled")
+    await expect(asset.connect(signer_C).cancelCoupon(1))
+      .to.emit(asset, "CouponCancelled")
       .withArgs(1, signer_C.address);
   });
 
   it("GIVEN an account without corporateActions role WHEN cancelCoupon THEN transaction fails with AccountHasNoRole", async () => {
-    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
 
-    await couponFacet.connect(signer_C).setCoupon(couponData);
+    await asset.connect(signer_C).setCoupon(couponData);
 
-    await expect(couponFacet.connect(signer_D).cancelCoupon(1)).to.be.rejectedWith("AccountHasNoRole");
+    await expect(asset.connect(signer_D).cancelCoupon(1)).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
   });
 
   it("GIVEN a paused Token WHEN cancelCoupon THEN transaction fails with TokenIsPaused", async () => {
-    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
 
-    await couponFacet.connect(signer_C).setCoupon(couponData);
+    await asset.connect(signer_C).setCoupon(couponData);
 
-    await pauseFacet.connect(signer_B).pause();
+    await asset.connect(signer_B).pause();
 
-    await expect(couponFacet.connect(signer_C).cancelCoupon(1)).to.be.rejectedWith("TokenIsPaused");
+    await expect(asset.connect(signer_C).cancelCoupon(1)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
   });
 
   it("GIVEN no existing coupon WHEN cancelCoupon with invalid ID THEN transaction fails", async () => {
-    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
 
-    await expect(couponFacet.connect(signer_C).cancelCoupon(999)).to.be.revertedWithCustomError(
-      couponFacet,
-      "WrongIndexForAction",
-    );
+    await expect(asset.connect(signer_C).cancelCoupon(999)).to.be.revertedWithCustomError(asset, "WrongIndexForAction");
   });
 
   it("GIVEN a coupon with snapshot WHEN getCouponHolders is called THEN returns token holders from snapshot", async () => {
     const TotalAmount = 1000;
-    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
-    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
-    await kycFacet.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+    await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
 
-    await erc1410Facet.connect(signer_A).issueByPartition({
+    await asset.connect(signer_A).issueByPartition({
       partition: DEFAULT_PARTITION,
       tokenHolder: signer_A.address,
       value: TotalAmount,
@@ -772,21 +709,21 @@ describe("Coupon Tests", () => {
       rateStatus: couponRateStatus,
     };
 
-    await couponFacet.connect(signer_A).setCoupon(couponData);
+    await asset.connect(signer_A).setCoupon(couponData);
 
-    await timeTravelFacet.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+    await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
 
     // Trigger scheduled tasks by performing an action
-    await erc1410Facet.connect(signer_A).issueByPartition({
+    await asset.connect(signer_A).issueByPartition({
       partition: DEFAULT_PARTITION,
       tokenHolder: signer_B.address,
       value: 500,
       data: "0x",
     });
 
-    const coupon = (await couponFacet.getCoupon(1)).registeredCoupon_;
-    const couponTotalHolders = await couponFacet.getTotalCouponHolders(1);
-    const couponHolders = await couponFacet.getCouponHolders(1, 0, couponTotalHolders);
+    const coupon = (await asset.getCoupon(1)).registeredCoupon_;
+    const couponTotalHolders = await asset.getTotalCouponHolders(1);
+    const couponHolders = await asset.getCouponHolders(1, 0, couponTotalHolders);
 
     expect(coupon.snapshotId).to.be.greaterThan(0); // Snapshot should have been taken
     expect(couponTotalHolders).to.equal(1);
@@ -795,10 +732,10 @@ describe("Coupon Tests", () => {
 
   it("GIVEN a coupon without snapshot WHEN getCouponFor is called after record date THEN uses current balance", async () => {
     const TotalAmount = 1000;
-    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
-    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
 
-    await erc1410Facet.connect(signer_A).issueByPartition({
+    await asset.connect(signer_A).issueByPartition({
       partition: DEFAULT_PARTITION,
       tokenHolder: signer_A.address,
       value: TotalAmount,
@@ -819,14 +756,14 @@ describe("Coupon Tests", () => {
       rateStatus: couponRateStatus,
     };
 
-    await couponFacet.connect(signer_A).setCoupon(couponData);
+    await asset.connect(signer_A).setCoupon(couponData);
 
     // Time travel past record date but DON'T trigger snapshot
-    await timeTravelFacet.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+    await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
 
     // Query couponFor without triggering snapshot - should use current balance path
-    const couponFor = await couponFacet.getCouponFor(1, signer_A.address);
-    const coupon = (await couponFacet.getCoupon(1)).registeredCoupon_;
+    const couponFor = await asset.getCouponFor(1, signer_A.address);
+    const coupon = (await asset.getCoupon(1)).registeredCoupon_;
 
     expect(coupon.snapshotId).to.equal(0); // No snapshot taken
     expect(couponFor.recordDateReached).to.be.true;
@@ -835,7 +772,7 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN a coupon WHEN getCoupon is called THEN decodes coupon data", async () => {
-    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
     couponRecordDateInSeconds = (await getDltTimestamp()) + 1000;
     couponExecutionDateInSeconds = (await getDltTimestamp()) + 2000;
 
@@ -850,9 +787,9 @@ describe("Coupon Tests", () => {
       rateStatus: couponRateStatus,
     };
 
-    await couponFacet.connect(signer_A).setCoupon(couponData);
+    await asset.connect(signer_A).setCoupon(couponData);
 
-    const coupon = (await couponFacet.getCoupon(1)).registeredCoupon_;
+    const coupon = (await asset.getCoupon(1)).registeredCoupon_;
 
     expect(coupon.coupon.recordDate).to.equal(couponRecordDateInSeconds);
     expect(coupon.coupon.executionDate).to.equal(couponExecutionDateInSeconds);
@@ -865,32 +802,20 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN a non-coupon corporate action WHEN call with invalid index view methods THEN transaction fails with WrongActionType", async () => {
-    await expect(couponFacet.getCoupon(999)).to.be.revertedWithCustomError(couponFacet, "WrongIndexForAction");
-    await expect(couponFacet.getCouponFor(999, signer_A.address)).to.be.revertedWithCustomError(
-      couponFacet,
+    await expect(asset.getCoupon(999)).to.be.revertedWithCustomError(asset, "WrongIndexForAction");
+    await expect(asset.getCouponFor(999, signer_A.address)).to.be.revertedWithCustomError(asset, "WrongIndexForAction");
+    await expect(asset.getCouponAmountFor(999, signer_A.address)).to.be.revertedWithCustomError(
+      asset,
       "WrongIndexForAction",
     );
-    await expect(couponFacet.getCouponAmountFor(999, signer_A.address)).to.be.revertedWithCustomError(
-      couponFacet,
-      "WrongIndexForAction",
-    );
-    await expect(couponFacet.getTotalCouponHolders(999)).to.be.revertedWithCustomError(
-      couponFacet,
-      "WrongIndexForAction",
-    );
-    await expect(couponFacet.getCouponHolders(999, 0, 10)).to.be.revertedWithCustomError(
-      couponFacet,
-      "WrongIndexForAction",
-    );
+    await expect(asset.getTotalCouponHolders(999)).to.be.revertedWithCustomError(asset, "WrongIndexForAction");
+    await expect(asset.getCouponHolders(999, 0, 10)).to.be.revertedWithCustomError(asset, "WrongIndexForAction");
 
-    await expect(couponFacet.getCouponsFor(999, 0, 10)).to.be.revertedWithCustomError(
-      couponFacet,
-      "WrongIndexForAction",
-    );
+    await expect(asset.getCouponsFor(999, 0, 10)).to.be.revertedWithCustomError(asset, "WrongIndexForAction");
   });
 
   it("GIVEN invalid startDate > endDate WHEN setCoupon THEN transaction fails with WrongDates", async () => {
-    await accessControlFacet.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
     const currentTimestamp = await getDltTimestamp();
     const invalidCoupon = {
@@ -904,14 +829,11 @@ describe("Coupon Tests", () => {
       rateStatus: couponRateStatus,
     };
 
-    await expect(couponFacet.connect(signer_C).setCoupon(invalidCoupon)).to.be.revertedWithCustomError(
-      bondFacet,
-      "WrongDates",
-    );
+    await expect(asset.connect(signer_C).setCoupon(invalidCoupon)).to.be.revertedWithCustomError(asset, "WrongDates");
   });
 
   it("GIVEN invalid fixingDate > executionDate WHEN setCoupon THEN transaction fails with WrongDates", async () => {
-    await accessControlFacet.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
     const currentTimestamp = await getDltTimestamp();
     const invalidCoupon = {
       recordDate: currentTimestamp + TIME_PERIODS_S.DAY,
@@ -924,14 +846,11 @@ describe("Coupon Tests", () => {
       rateStatus: couponRateStatus,
     };
 
-    await expect(couponFacet.connect(signer_C).setCoupon(invalidCoupon)).to.be.revertedWithCustomError(
-      bondFacet,
-      "WrongDates",
-    );
+    await expect(asset.connect(signer_C).setCoupon(invalidCoupon)).to.be.revertedWithCustomError(asset, "WrongDates");
   });
 
   it("GIVEN fixingDate in the past WHEN setCoupon THEN transaction fails with WrongTimestamp", async () => {
-    await accessControlFacet.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
     const currentTimestamp = await getDltTimestamp();
     const invalidCoupon = {
       recordDate: currentTimestamp + TIME_PERIODS_S.DAY,
@@ -944,8 +863,8 @@ describe("Coupon Tests", () => {
       rateStatus: couponRateStatus,
     };
 
-    await expect(couponFacet.connect(signer_C).setCoupon(invalidCoupon)).to.be.revertedWithCustomError(
-      bondFacet,
+    await expect(asset.connect(signer_C).setCoupon(invalidCoupon)).to.be.revertedWithCustomError(
+      asset,
       "WrongTimestamp",
     );
   });
@@ -1108,15 +1027,15 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN empty ordered list WHEN getCouponFromOrderedListAt with _pos >= getCouponsOrderedListTotalAdjustedAt THEN returns 0", async () => {
-    const couponIdAtPos0 = await couponFacet.getCouponFromOrderedListAt(0);
+    const couponIdAtPos0 = await asset.getCouponFromOrderedListAt(0);
     expect(couponIdAtPos0).to.equal(0);
 
     // Test position 1 - should return 0 because list is empty
-    const couponIdAtPos1 = await couponFacet.getCouponFromOrderedListAt(1);
+    const couponIdAtPos1 = await asset.getCouponFromOrderedListAt(1);
     expect(couponIdAtPos1).to.equal(0);
 
     // Test position 100 - should return 0 because list is empty
-    const couponIdAtPos100 = await couponFacet.getCouponFromOrderedListAt(100);
+    const couponIdAtPos100 = await asset.getCouponFromOrderedListAt(100);
     expect(couponIdAtPos100).to.equal(0);
   });
 });
