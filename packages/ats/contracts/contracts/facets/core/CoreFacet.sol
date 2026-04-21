@@ -17,16 +17,18 @@ contract CoreFacet is Core, IStaticFunctionSelectors {
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](8);
-        staticFunctionSelectors_[selectorIndex++] = this.initializeCore.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.decimals.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.name.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.symbol.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getERC20Metadata.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.setName.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.setSymbol.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.version.selector;
+        uint256 selectorIndex = staticFunctionSelectors_.length;
+        unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this.version.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.setSymbol.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.setName.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getERC20Metadata.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.symbol.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.name.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.decimals.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.initializeCore.selector;
+        }
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
