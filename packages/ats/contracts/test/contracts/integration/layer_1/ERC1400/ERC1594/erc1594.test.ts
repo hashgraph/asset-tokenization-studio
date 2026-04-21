@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type IAsset, type ResolverProxy } from "@contract-types";
-import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
+import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ATS_ROLES, DEFAULT_PARTITION, EIP1066_CODES, EMPTY_STRING, ZERO } from "@scripts";
 import { getSelector } from "@scripts/infrastructure";
@@ -674,6 +674,7 @@ describe("ERC1594 Tests", () => {
     describe("Protected Partitions with Wild Card Role", () => {
       beforeEach(async () => {
         // Deploy a new token with protected partitions
+        const infrastructure = await loadFixture(deployAtsInfrastructureFixture);
         const base = await deployEquityTokenFixture({
           equityDataParams: {
             securityData: {
@@ -682,7 +683,7 @@ describe("ERC1594 Tests", () => {
               arePartitionsProtected: true,
             },
           },
-          useLoadFixture: false,
+          infrastructure,
         });
 
         diamond = base.diamond;

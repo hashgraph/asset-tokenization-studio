@@ -6,7 +6,13 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type ResolverProxy, type IAsset, type MigrationFacetTest } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ATS_ROLES, dateToUnixTimestamp, EQUITY_CONFIG_ID } from "@scripts";
-import { deployEquityTokenFixture, MAX_UINT256, executeRbac, grantRoleAndPauseToken } from "@test";
+import {
+  deployAtsInfrastructureFixture,
+  deployEquityTokenFixture,
+  MAX_UINT256,
+  executeRbac,
+  grantRoleAndPauseToken,
+} from "@test";
 
 const amount = 1;
 const balanceOf_B_Original = [20 * amount, 200 * amount];
@@ -142,13 +148,14 @@ describe("Adjust Balances Tests", () => {
     let migrationFacet: MigrationFacetTest;
 
     async function deploySecurityFixtureMultiPartitionWithMigration() {
+      const infrastructure = await loadFixture(deployAtsInfrastructureFixture);
       const base = await deployEquityTokenFixture({
         equityDataParams: {
           securityData: {
             isMultiPartition: true,
           },
         },
-        useLoadFixture: false,
+        infrastructure,
       });
 
       const { blr, deployer, diamond: baseDiamond } = base;

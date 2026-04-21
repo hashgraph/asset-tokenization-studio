@@ -45,12 +45,15 @@ export async function deployBondFixedRateTokenFixture({
   bondDataParams,
   regulationTypeParams,
   fixedRateParams,
+  infrastructure: providedInfrastructure,
 }: {
   bondDataParams?: DeepPartial<DeployBondFromFactoryParams>;
   regulationTypeParams?: DeepPartial<FactoryRegulationDataParams>;
   fixedRateParams?: DeepPartial<FixedRateParams>;
+  infrastructure?: Awaited<ReturnType<typeof deployAtsInfrastructureFixture>>;
 } = {}) {
-  const infrastructure = await deployAtsInfrastructureFixture();
+  // Reuse already-loaded infrastructure when provided to avoid redeploying it for sibling tokens.
+  const infrastructure = providedInfrastructure ?? (await deployAtsInfrastructureFixture());
   const { factory, blr, deployer } = infrastructure;
 
   const securityData = getSecurityData(blr, {

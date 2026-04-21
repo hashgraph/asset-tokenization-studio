@@ -58,14 +58,18 @@ export async function deployBondTokenFixture({
   bondDataParams,
   regulationTypeParams,
   useLoadFixture = true,
+  infrastructure: providedInfrastructure,
 }: {
   bondDataParams?: DeepPartial<DeployBondFromFactoryParams>;
   regulationTypeParams?: DeepPartial<FactoryRegulationDataParams>;
   useLoadFixture?: boolean;
+  infrastructure?: Awaited<ReturnType<typeof deployAtsInfrastructureFixture>>;
 } = {}) {
-  const infrastructure = useLoadFixture
-    ? await loadFixture(deployAtsInfrastructureFixture)
-    : await deployAtsInfrastructureFixture();
+  // Reuse already-loaded infrastructure when provided to avoid nested loadFixture
+  // calls that would revert the chain and wipe previously-deployed sibling tokens.
+  const infrastructure =
+    providedInfrastructure ??
+    (useLoadFixture ? await loadFixture(deployAtsInfrastructureFixture) : await deployAtsInfrastructureFixture());
   const { factory, blr, deployer } = infrastructure;
 
   const securityData = getSecurityData(blr, {

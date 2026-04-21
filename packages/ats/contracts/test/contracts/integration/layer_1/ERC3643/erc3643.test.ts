@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { isinGenerator } from "@thomaschaplin/isin-generator";
 import { IAsset, type ResolverProxy, ComplianceMock, IdentityRegistryMock } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployEquityTokenFixture } from "@test";
+import { deployAtsInfrastructureFixture, deployEquityTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
 import {
   EMPTY_STRING,
@@ -54,6 +54,8 @@ describe("ERC3643 Tests", () => {
 
   describe("single partition", () => {
     async function deploySecurityFixtureSinglePartition() {
+      const infrastructure = await loadFixture(deployAtsInfrastructureFixture);
+
       complianceMock = await (await ethers.getContractFactory("ComplianceMock", signer_A)).deploy(true, false);
       await complianceMock.waitForDeployment();
 
@@ -71,7 +73,7 @@ describe("ERC3643 Tests", () => {
             erc20MetadataInfo: { name, symbol, decimals, isin },
           },
         },
-        useLoadFixture: false, // Avoid nested loadFixture to prevent mock state pollution
+        infrastructure,
       });
       diamond = base.diamond;
       signer_A = base.deployer;

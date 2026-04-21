@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type ResolverProxy, type IAsset, ComplianceMock } from "@contract-types";
 import { DEFAULT_PARTITION, ZERO, EMPTY_STRING, ADDRESS_ZERO, ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
+import { deployAtsInfrastructureFixture, deployEquityTokenFixture, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
 
 const amount = 1;
@@ -288,7 +288,8 @@ describe("ProtectedPartitions Tests", () => {
   }
 
   async function deploySecurityFixtureUnprotectedPartitions() {
-    const base = await deployEquityTokenFixture({ useLoadFixture: false });
+    const infrastructure = await loadFixture(deployAtsInfrastructureFixture);
+    const base = await deployEquityTokenFixture({ infrastructure });
     diamond_UnprotectedPartitions = base.diamond;
     signer_A = base.deployer;
     signer_B = base.user2;
@@ -300,6 +301,11 @@ describe("ProtectedPartitions Tests", () => {
   }
 
   async function deploySecurityFixtureProtectedPartitions() {
+    // Pre-load infra so the ComplianceMock deployed below persists through the
+    // equity fixture (passing `infrastructure` keeps it from calling loadFixture
+    // a second time, which would revert the chain and erase the mock).
+    const infrastructure = await loadFixture(deployAtsInfrastructureFixture);
+
     const ComplianceMockFactory = await ethers.getContractFactory("ComplianceMock", signer_A);
     const complianceMockInstance = await ComplianceMockFactory.deploy(true, false);
     await complianceMockInstance.waitForDeployment();
@@ -312,7 +318,7 @@ describe("ProtectedPartitions Tests", () => {
           compliance: complianceMockAddress,
         },
       },
-      useLoadFixture: false, // CRITICAL: avoid nested loadFixture that would erase ComplianceMock
+      infrastructure,
     });
 
     diamond_ProtectedPartitions = base.diamond;

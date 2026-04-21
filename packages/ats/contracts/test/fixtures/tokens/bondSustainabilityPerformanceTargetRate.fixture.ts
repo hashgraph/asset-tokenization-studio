@@ -64,14 +64,17 @@ export async function deployBondSustainabilityPerformanceTargetRateTokenFixture(
   interestRateParams,
   impactDataParams,
   projects,
+  infrastructure: providedInfrastructure,
 }: {
   bondDataParams?: DeepPartial<DeployBondFromFactoryParams>;
   regulationTypeParams?: DeepPartial<FactoryRegulationDataParams>;
   interestRateParams?: DeepPartial<InterestRateParamsSPT>;
   impactDataParams?: DeepPartial<ImpactDataParamsSPT>[];
   projects?: string[];
+  infrastructure?: Awaited<ReturnType<typeof deployAtsInfrastructureFixture>>;
 } = {}) {
-  const infrastructure = await deployAtsInfrastructureFixture();
+  // Reuse already-loaded infrastructure when provided to avoid redeploying it for sibling tokens.
+  const infrastructure = providedInfrastructure ?? (await deployAtsInfrastructureFixture());
   const { factory, blr, deployer } = infrastructure;
 
   const securityData = getSecurityData(blr, {

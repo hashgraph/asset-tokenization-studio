@@ -89,15 +89,18 @@ export async function deployLoansPortfolioTokenFixture({
   loanPortfolioParams,
   regulationTypeParams,
   useLoadFixture = true,
+  infrastructure: providedInfrastructure,
 }: {
   loanPortfolioParams?: DeepPartial<LoansPortfolioDefaultParamsType>;
   regulationTypeParams?: DeepPartial<FactoryRegulationDataParams>;
   useLoadFixture?: boolean;
+  infrastructure?: Awaited<ReturnType<typeof deployAtsInfrastructureFixture>>;
 } = {}) {
-  // Load base infrastructure (BLR + all facets deployed)
-  const infrastructure = useLoadFixture
-    ? await loadFixture(deployAtsInfrastructureFixture)
-    : await deployAtsInfrastructureFixture();
+  // Reuse already-loaded infrastructure when provided to avoid nested loadFixture
+  // calls that would revert the chain and wipe previously-deployed sibling tokens.
+  const infrastructure =
+    providedInfrastructure ??
+    (useLoadFixture ? await loadFixture(deployAtsInfrastructureFixture) : await deployAtsInfrastructureFixture());
   const { factory, blr, deployer } = infrastructure;
   const securityData = getSecurityData(blr, {
     resolverProxyConfiguration: {

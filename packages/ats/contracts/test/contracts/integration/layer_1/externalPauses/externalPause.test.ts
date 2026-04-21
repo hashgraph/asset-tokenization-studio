@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT } from "@scripts";
-import { deployEquityTokenFixture } from "@test";
+import { deployAtsInfrastructureFixture, deployEquityTokenFixture } from "@test";
 import { ResolverProxy, type IAsset, MockedExternalPause } from "@contract-types";
 
 describe("ExternalPause Tests", () => {
@@ -19,6 +19,8 @@ describe("ExternalPause Tests", () => {
   let externalPauseMock3: MockedExternalPause;
 
   async function deployExternalPauseSecurityFixture() {
+    const infrastructure = await loadFixture(deployAtsInfrastructureFixture);
+
     const [tempSigner] = await ethers.getSigners();
     const initMock1 = await (await ethers.getContractFactory("MockedExternalPause", tempSigner)).deploy();
     await initMock1.waitForDeployment();
@@ -27,7 +29,7 @@ describe("ExternalPause Tests", () => {
     await initMock2.waitForDeployment();
 
     const base = await deployEquityTokenFixture({
-      useLoadFixture: false,
+      infrastructure,
       equityDataParams: {
         securityData: {
           isMultiPartition: true,

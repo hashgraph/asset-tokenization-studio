@@ -55,7 +55,7 @@ describe("NominalValue Migration Tests", () => {
     let migrationFacet: NominalValueMigrationFacetTest;
 
     async function deployBondWithMigrationFacet() {
-      const base = await deployBondTokenFixture({ useLoadFixture: false });
+      const base = await deployBondTokenFixture();
       await addMigrationFacetToDiamond(base, BOND_CONFIG_ID);
 
       diamond = base.diamond;
@@ -132,7 +132,7 @@ describe("NominalValue Migration Tests", () => {
     let migrationFacet: NominalValueMigrationFacetTest;
 
     async function deployEquityWithMigrationFacet() {
-      const base = await deployEquityTokenFixture({ useLoadFixture: false });
+      const base = await deployEquityTokenFixture();
       await addMigrationFacetToDiamond(base, EQUITY_CONFIG_ID);
 
       diamond = base.diamond;
@@ -198,7 +198,7 @@ describe("NominalValue Migration Tests", () => {
     let migrationFacet: NominalValueMigrationFacetTest;
 
     async function deployBondWithMigrationFacet() {
-      const base = await deployBondTokenFixture({ useLoadFixture: false });
+      const base = await deployBondTokenFixture();
       await addMigrationFacetToDiamond(base, BOND_CONFIG_ID);
 
       diamond = base.diamond;
@@ -260,7 +260,7 @@ describe("NominalValue Migration Tests", () => {
     let migrationFacet: NominalValueMigrationFacetTest;
 
     async function deployBondWithMigrationFacet() {
-      const base = await deployBondTokenFixture({ useLoadFixture: false });
+      const base = await deployBondTokenFixture();
       await addMigrationFacetToDiamond(base, BOND_CONFIG_ID);
 
       diamond = base.diamond;
@@ -327,7 +327,7 @@ describe("NominalValue Migration Tests", () => {
     let asset: IAsset;
 
     async function deployBondFixture() {
-      const base = await deployBondTokenFixture({ useLoadFixture: false });
+      const base = await deployBondTokenFixture();
 
       diamond = base.diamond;
       signer_A = base.deployer;

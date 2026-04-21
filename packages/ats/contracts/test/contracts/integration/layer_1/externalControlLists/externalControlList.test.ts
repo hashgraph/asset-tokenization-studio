@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { MockedWhitelist, MockedBlacklist, ResolverProxy, IAsset } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployEquityTokenFixture } from "@test";
+import { deployAtsInfrastructureFixture, deployEquityTokenFixture } from "@test";
 import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, GAS_LIMIT } from "@scripts";
 
 describe("ExternalControlList Management Tests", () => {
@@ -21,6 +21,8 @@ describe("ExternalControlList Management Tests", () => {
   let externalWhitelistMock2: MockedWhitelist;
 
   async function deployExternalControlListTokenSecurity() {
+    const infrastructure = await loadFixture(deployAtsInfrastructureFixture);
+
     const [deployer] = await ethers.getSigners();
     initMock1 = await (await ethers.getContractFactory("MockedWhitelist", deployer)).deploy();
     await initMock1.waitForDeployment();
@@ -28,7 +30,7 @@ describe("ExternalControlList Management Tests", () => {
     await initMock2.waitForDeployment();
 
     const base = await deployEquityTokenFixture({
-      useLoadFixture: false,
+      infrastructure,
       equityDataParams: {
         securityData: {
           isMultiPartition: true,

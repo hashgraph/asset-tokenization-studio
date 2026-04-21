@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT } from "@scripts";
-import { deployEquityTokenFixture } from "@test";
+import { deployAtsInfrastructureFixture, deployEquityTokenFixture } from "@test";
 
 import { ResolverProxy, MockedExternalKycList, IAsset } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -22,6 +22,8 @@ describe("ExternalKycList Management Tests", () => {
   let externalKycListMock3: MockedExternalKycList;
 
   async function deployExternalKycSecurityFixture() {
+    const infrastructure = await loadFixture(deployAtsInfrastructureFixture);
+
     const [deployer] = await ethers.getSigners();
     initMock1 = await (await ethers.getContractFactory("MockedExternalKycList", deployer)).deploy();
     await initMock1.waitForDeployment();
@@ -29,7 +31,7 @@ describe("ExternalKycList Management Tests", () => {
     await initMock2.waitForDeployment();
 
     const base = await deployEquityTokenFixture({
-      useLoadFixture: false,
+      infrastructure,
       equityDataParams: {
         securityData: {
           isMultiPartition: true,
