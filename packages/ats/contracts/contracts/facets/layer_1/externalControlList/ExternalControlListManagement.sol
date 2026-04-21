@@ -50,7 +50,7 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
         if (!success_) {
             revert ListedControlList(_controlList);
         }
-        emit AddedToExternalControlLists(msg.sender, _controlList);
+        emit AddedToExternalControlLists(EvmAccessors.getMsgSender(), _controlList);
     }
 
     function removeExternalControlList(
@@ -63,7 +63,7 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
         if (!success_) {
             revert UnlistedControlList(_controlList);
         }
-        emit RemovedFromExternalControlLists(msg.sender, _controlList);
+        emit RemovedFromExternalControlLists(EvmAccessors.getMsgSender(), _controlList);
     }
 
     function isExternalControlList(address _controlList) external view override returns (bool) {

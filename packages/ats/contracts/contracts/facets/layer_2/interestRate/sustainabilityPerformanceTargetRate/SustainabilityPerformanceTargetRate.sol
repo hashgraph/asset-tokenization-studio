@@ -6,6 +6,7 @@ import { _INTEREST_RATE_MANAGER_ROLE } from "../../../../constants/roles.sol";
 import { InterestRateStorageWrapper } from "../../../../domain/asset/InterestRateStorageWrapper.sol";
 import { ProceedRecipientsStorageWrapper } from "../../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
+import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
 contract SustainabilityPerformanceTargetRate is ISustainabilityPerformanceTargetRate, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
@@ -31,7 +32,7 @@ contract SustainabilityPerformanceTargetRate is ISustainabilityPerformanceTarget
         InterestRate calldata _newInterestRate
     ) external onlyUnpaused onlyRole(_INTEREST_RATE_MANAGER_ROLE) {
         InterestRateStorageWrapper.setSPTInterestRate(_newInterestRate);
-        emit InterestRateUpdated(msg.sender, _newInterestRate);
+        emit InterestRateUpdated(EvmAccessors.getMsgSender(), _newInterestRate);
     }
 
     function setImpactData(
@@ -49,7 +50,7 @@ contract SustainabilityPerformanceTargetRate is ISustainabilityPerformanceTarget
             }
             InterestRateStorageWrapper.setSPTImpactData(_newImpactData[index], _projects[index]);
         }
-        emit ImpactDataUpdated(msg.sender, _newImpactData, _projects);
+        emit ImpactDataUpdated(EvmAccessors.getMsgSender(), _newImpactData, _projects);
     }
 
     function getInterestRate() external view returns (InterestRate memory interestRate_) {

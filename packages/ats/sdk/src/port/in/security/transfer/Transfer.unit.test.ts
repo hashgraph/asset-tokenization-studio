@@ -396,7 +396,7 @@ describe("Transfer", () => {
           protectedTransferFromByPartitionRequest.targetId,
           protectedTransferFromByPartitionRequest.amount,
           protectedTransferFromByPartitionRequest.deadline,
-          protectedTransferFromByPartitionRequest.nounce,
+          protectedTransferFromByPartitionRequest.nonce,
           protectedTransferFromByPartitionRequest.signature,
         ),
       );
@@ -424,7 +424,7 @@ describe("Transfer", () => {
           protectedTransferFromByPartitionRequest.targetId,
           protectedTransferFromByPartitionRequest.amount,
           protectedTransferFromByPartitionRequest.deadline,
-          protectedTransferFromByPartitionRequest.nounce,
+          protectedTransferFromByPartitionRequest.nonce,
           protectedTransferFromByPartitionRequest.signature,
         ),
       );

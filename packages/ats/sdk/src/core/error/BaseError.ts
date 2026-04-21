@@ -49,7 +49,7 @@ export enum ErrorCode {
   InsufficientFunds = "20005",
   InsufficientHoldBalance = "20019",
   MaxSupplyReached = "20002",
-  NounceAlreadyUsed = "20016",
+  NonceAlreadyUsed = "20016",
   OperationNotAllowed = "20004",
   PartitionsProtected = "20017",
   PartitionsUnprotected = "20018",

@@ -33,8 +33,8 @@ import { GetMaxSupplyQuery } from "@query/security/cap/getMaxSupply/GetMaxSupply
 import { MaxSupplyReached } from "@domain/context/security/error/operations/MaxSupplyReached";
 import CheckNums from "@core/checks/numbers/CheckNums";
 import { DecimalsOverRange } from "@domain/context/security/error/operations/DecimalsOverRange";
-import { GetNounceQuery } from "@query/security/protectedPartitions/getNounce/GetNounceQuery";
-import { NounceAlreadyUsed } from "@domain/context/security/error/operations/NounceAlreadyUsed";
+import { GetNonceQuery } from "@query/security/protectedPartitions/getNonce/GetNonceQuery";
+import { NonceAlreadyUsed } from "@domain/context/security/error/operations/NonceAlreadyUsed";
 import { IsInControlListQuery } from "@query/account/controlList/IsInControlListQuery";
 import { AccountAlreadyInControlList } from "@domain/context/security/error/operations/AccountAlreadyInControlList";
 import { AccountNotInControlList } from "@domain/context/security/error/operations/AccountNotInControlList";
@@ -509,31 +509,27 @@ describe("ValidationService", () => {
     });
   });
 
-  describe("checkValidNounce", () => {
+  describe("checkValidNonce", () => {
     const nonce = 5;
-    it("should return void when nounce is valid", async () => {
+    it("should return void when nonce is valid", async () => {
       queryBusMock.execute.mockResolvedValueOnce({ payload: 4 });
 
-      await expect(service.checkValidNounce(securityId.value, targetId.value, nonce)).resolves.toBeUndefined();
+      await expect(service.checkValidNonce(securityId.value, targetId.value, nonce)).resolves.toBeUndefined();
 
-      expect(queryBusMock.execute).toHaveBeenCalledWith(new GetNounceQuery(securityId.value, targetId.value));
+      expect(queryBusMock.execute).toHaveBeenCalledWith(new GetNonceQuery(securityId.value, targetId.value));
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
     });
 
-    it("should throw NounceAlreadyUsed when nounce is equal to nextNounce", async () => {
+    it("should throw NonceAlreadyUsed when nonce is equal to nextNonce", async () => {
       queryBusMock.execute.mockResolvedValueOnce({ payload: 5 });
 
-      await expect(service.checkValidNounce(securityId.value, targetId.value, nonce)).rejects.toThrow(
-        NounceAlreadyUsed,
-      );
+      await expect(service.checkValidNonce(securityId.value, targetId.value, nonce)).rejects.toThrow(NonceAlreadyUsed);
     });
 
-    it("should throw NounceAlreadyUsed when nounce is less than nextNounce", async () => {
+    it("should throw NonceAlreadyUsed when nonce is less than nextNonce", async () => {
       queryBusMock.execute.mockResolvedValueOnce({ payload: 6 });
 
-      await expect(service.checkValidNounce(securityId.value, targetId.value, nonce)).rejects.toThrow(
-        NounceAlreadyUsed,
-      );
+      await expect(service.checkValidNonce(securityId.value, targetId.value, nonce)).rejects.toThrow(NonceAlreadyUsed);
     });
   });
 

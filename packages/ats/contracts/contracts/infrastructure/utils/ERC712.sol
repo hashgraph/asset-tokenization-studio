@@ -42,11 +42,11 @@ function _getMessageHashTransfer(
     address _to,
     uint256 _amount,
     uint256 _deadline,
-    uint256 _nounce
+    uint256 _nonce
 ) pure returns (bytes32) {
     return
         keccak256(
-            abi.encode(_PROTECTED_TRANSFER_FROM_PARTITION_TYPEHASH, _partition, _from, _to, _amount, _deadline, _nounce)
+            abi.encode(_PROTECTED_TRANSFER_FROM_PARTITION_TYPEHASH, _partition, _from, _to, _amount, _deadline, _nonce)
         );
 }
 
@@ -55,12 +55,10 @@ function _getMessageHashRedeem(
     address _from,
     uint256 _amount,
     uint256 _deadline,
-    uint256 _nounce
+    uint256 _nonce
 ) pure returns (bytes32) {
     return
-        keccak256(
-            abi.encode(_PROTECTED_REDEEM_FROM_PARTITION_TYPEHASH, _partition, _from, _amount, _deadline, _nounce)
-        );
+        keccak256(abi.encode(_PROTECTED_REDEEM_FROM_PARTITION_TYPEHASH, _partition, _from, _amount, _deadline, _nonce));
 }
 
 function _getMessageHashCreateHold(
@@ -193,23 +191,23 @@ function _getMessageHashClearingRedeem(
         );
 }
 
-function _checkNounceAndDeadline(
-    uint256 _nounce,
+function _checkNonceAndDeadline(
+    uint256 _nonce,
     address _account,
-    uint256 _currentNounce,
+    uint256 _currentNonce,
     uint256 _deadline,
     uint256 _blockTimestamp
 ) pure {
     if (!_isDeadlineValid(_deadline, _blockTimestamp)) revert ICommonErrors.ExpiredDeadline(_deadline);
-    if (!_isNounceValid(_nounce, _currentNounce)) revert ICommonErrors.WrongNounce(_nounce, _account);
+    if (!_isNonceValid(_nonce, _currentNonce)) revert ICommonErrors.WrongNonce(_nonce, _account);
 }
 
 function _isDeadlineValid(uint256 _deadline, uint256 _blockTimestamp) pure returns (bool) {
     return _deadline >= _blockTimestamp;
 }
 
-function _isNounceValid(uint256 _nounce, uint256 _currentNounce) pure returns (bool) {
-    return _currentNounce < _nounce;
+function _isNonceValid(uint256 _nonce, uint256 _currentNonce) pure returns (bool) {
+    return _currentNonce < _nonce;
 }
 
 function _recoverSigner(bytes32 _prefixedHash, bytes memory _signature) pure returns (address) {

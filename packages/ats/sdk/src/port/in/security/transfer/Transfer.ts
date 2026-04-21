@@ -84,7 +84,7 @@ export class SecurityInPortTransfer extends BaseSecurityInPort implements ISecur
   async protectedTransferFromByPartition(
     request: ProtectedTransferFromByPartitionRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, partitionId, sourceId, targetId, amount, deadline, nounce, signature } = request;
+    const { securityId, partitionId, sourceId, targetId, amount, deadline, nonce, signature } = request;
     ValidatedRequest.handleValidation("ProtectedTransferFromByPartitionRequest", request);
 
     return await this.commandBus.execute(
@@ -95,7 +95,7 @@ export class SecurityInPortTransfer extends BaseSecurityInPort implements ISecur
         targetId,
         amount,
         deadline,
-        nounce,
+        nonce,
         signature,
       ),
     );

@@ -10,7 +10,7 @@ export default class ProtectedRedeemFromByPartitionRequest extends ValidatedRequ
   sourceId: string;
   amount: string;
   deadline: string;
-  nounce: number;
+  nonce: number;
   signature: string;
 
   constructor({
@@ -19,7 +19,7 @@ export default class ProtectedRedeemFromByPartitionRequest extends ValidatedRequ
     sourceId,
     amount,
     deadline,
-    nounce,
+    nonce,
     signature,
   }: {
     securityId: string;
@@ -27,7 +27,7 @@ export default class ProtectedRedeemFromByPartitionRequest extends ValidatedRequ
     sourceId: string;
     amount: string;
     deadline: string;
-    nounce: number;
+    nonce: number;
     signature: string;
   }) {
     super({
@@ -45,7 +45,7 @@ export default class ProtectedRedeemFromByPartitionRequest extends ValidatedRequ
     this.amount = amount;
     this.partitionId = partitionId;
     this.deadline = deadline;
-    this.nounce = nounce;
+    this.nonce = nonce;
     this.signature = signature;
   }
 }

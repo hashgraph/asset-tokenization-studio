@@ -147,11 +147,11 @@ bytes32 constant _NOMINAL_VALUE_STORAGE_POSITION = 0xc0fde456b6db4817b54ba988cff
 // keccak256('security.token.standard.amortization.storage');
 bytes32 constant _AMORTIZATION_STORAGE_POSITION = 0x811809f3b5cf04ae28619650750f871e7fd7d91ca60e5d1c85e15eb170c74524;
 
-// keccak256('security.token.standard.loansPortfolio.storage');
-bytes32 constant _LOANS_PORTFOLIO_STORAGE_POSITION = 0x7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b;
-
 // keccak256('security.token.standard.loan.storage');
 bytes32 constant _LOAN_STORAGE_POSITION = 0x8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c;
+
+// keccak256('security.token.standard.loansPortfolio.storage');
+bytes32 constant _LOANS_PORTFOLIO_STORAGE_POSITION = 0xce43d022d4ff90dcc241a663e3a14313e42aad8fd58de13c348659eb5fd12925;
 
 // Layer 3 Unique Constants
 // keccak256('security.token.standard.security.storage');

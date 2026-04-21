@@ -5,18 +5,24 @@ import { IHoldTypes } from "./IHoldTypes.sol";
 import { IHoldRead } from "./IHoldRead.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 import { HoldStorageWrapper } from "../../../domain/asset/HoldStorageWrapper.sol";
-import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
+import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
-abstract contract HoldRead is IHoldRead, TimestampProvider {
+abstract contract HoldRead is IHoldRead {
     function getHeldAmountFor(address _tokenHolder) external view override returns (uint256 amount_) {
-        return HoldStorageWrapper.getHeldAmountForAdjustedAt(_tokenHolder, _getBlockTimestamp());
+        return
+            HoldStorageWrapper.getHeldAmountForAdjustedAt(_tokenHolder, TimeTravelStorageWrapper.getBlockTimestamp());
     }
 
     function getHeldAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
     ) external view override returns (uint256 amount_) {
-        return HoldStorageWrapper.getHeldAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _getBlockTimestamp());
+        return
+            HoldStorageWrapper.getHeldAmountForByPartitionAdjustedAt(
+                _partition,
+                _tokenHolder,
+                TimeTravelStorageWrapper.getBlockTimestamp()
+            );
     }
 
     function getHoldCountForByPartition(
@@ -51,7 +57,11 @@ abstract contract HoldRead is IHoldRead, TimestampProvider {
             ThirdPartyType thirdPartyType_
         )
     {
-        return HoldStorageWrapper.getHoldForByPartitionAdjustedAt(_holdIdentifier, _getBlockTimestamp());
+        return
+            HoldStorageWrapper.getHoldForByPartitionAdjustedAt(
+                _holdIdentifier,
+                TimeTravelStorageWrapper.getBlockTimestamp()
+            );
     }
 
     function getHoldThirdParty(

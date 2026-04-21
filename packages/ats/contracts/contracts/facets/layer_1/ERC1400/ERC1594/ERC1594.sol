@@ -11,7 +11,7 @@ import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper
 import { IPause } from "../../../../facets/layer_1/pause/IPause.sol";
 import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
-import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
+import { TimeTravelStorageWrapper } from "../../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { Eip1066 } from "../../../../constants/eip1066.sol";
 import { ProtectedPartitionRoleValidator } from "../../../../infrastructure/utils/ProtectedPartitionRoleValidator.sol";
 import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
@@ -22,7 +22,7 @@ import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol"
  * @dev Provides core functionality for issuing, redeeming, and transferring security tokens
  *      with support for data attachments. Validates compliance, identity, and supply limits.
  */
-abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPartitionRoleValidator {
+abstract contract ERC1594 is IERC1594, Modifiers, ProtectedPartitionRoleValidator {
     /**
      * @notice Initializes the ERC1594 facet for the calling contract
      * @dev Can only be called once per contract. Sets up the issuance state.
@@ -102,7 +102,7 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, Modifiers, ProtectedPa
         override
         onlyUnpaused
         onlyWithoutMultiPartition
-        onlyWithinMaxSupply(_value, _getBlockTimestamp())
+        onlyWithinMaxSupply(_value, TimeTravelStorageWrapper.getBlockTimestamp())
         onlyIdentifiedAddresses(address(0), _tokenHolder)
         onlyCompliant(address(0), _tokenHolder, false)
     {

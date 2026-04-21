@@ -152,14 +152,14 @@ export class SecurityMetadataOperations {
     sourceId: EvmAddress,
     amount: BigDecimal,
     deadline: BigDecimal,
-    nounce: BigDecimal,
+    nonce: BigDecimal,
     signature: string,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Protected Redeeming ${amount} securities from account ${sourceId.toString()}`);
     const protectionData: ProtectionData = {
       deadline: deadline.toBigInt(),
-      nounce: nounce.toBigInt(),
+      nonce: nonce.toBigInt(),
       signature: signature,
     };
     return this.executor.executeContractCall(
@@ -178,7 +178,7 @@ export class SecurityMetadataOperations {
     targetId: EvmAddress,
     amount: BigDecimal,
     deadline: BigDecimal,
-    nounce: BigDecimal,
+    nonce: BigDecimal,
     signature: string,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
@@ -187,7 +187,7 @@ export class SecurityMetadataOperations {
     );
     const protectionData: ProtectionData = {
       deadline: deadline.toBigInt(),
-      nounce: nounce.toBigInt(),
+      nonce: nonce.toBigInt(),
       signature: signature,
     };
     return this.executor.executeContractCall(

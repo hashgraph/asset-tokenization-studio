@@ -7,17 +7,8 @@ import {
 } from "../../../../facets/layer_3/bondUSA/sustainabilityPerformanceTargetRate/BondUSASustainabilityPerformanceTargetRateFacet.sol";
 /* solhint-enable max-line-length */
 import { TimeTravelProvider } from "../../timeTravel/TimeTravelProvider.sol";
-import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 
 contract BondUSASustainabilityPerformanceTargetRateFacetTimeTravel is
     BondUSASustainabilityPerformanceTargetRateFacet,
     TimeTravelProvider
-{
-    function _getBlockTimestamp() internal view override(TimestampProvider, TimeTravelProvider) returns (uint256) {
-        return TimeTravelProvider._getBlockTimestamp();
-    }
-
-    function _getBlockNumber() internal view override(TimestampProvider, TimeTravelProvider) returns (uint256) {
-        return TimeTravelProvider._getBlockNumber();
-    }
-}
+{}

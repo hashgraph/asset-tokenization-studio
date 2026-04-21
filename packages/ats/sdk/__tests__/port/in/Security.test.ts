@@ -1006,7 +1006,7 @@ describe("🧪 Security tests", () => {
             targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
             amount: protectedTransferAmount,
             deadline: "9999999999",
-            nounce: 1,
+            nonce: 1,
             signature: "vvvv",
           }),
         )
@@ -1022,7 +1022,7 @@ describe("🧪 Security tests", () => {
             sourceId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
             amount: protectedRedeemAmount,
             deadline: "9999999999",
-            nounce: 2,
+            nonce: 2,
             signature: "vvvv",
           }),
         )

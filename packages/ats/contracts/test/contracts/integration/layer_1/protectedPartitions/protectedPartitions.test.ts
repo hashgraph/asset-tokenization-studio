@@ -749,14 +749,14 @@ describe("ProtectedPartitions Tests", () => {
         ).to.be.revertedWithCustomError(asset, "WrongSignature");
       });
 
-      it("GIVEN a wrong nounce WHEN performing a protected hold THEN transaction fails with WrongNounce", async () => {
+      it("GIVEN a wrong nonce WHEN performing a protected hold THEN transaction fails with WrongNonce", async () => {
         protectedHold.nonce = 0;
 
         await expect(
           asset
             .connect(signer_B)
             .protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
-        ).to.be.revertedWithCustomError(asset, "WrongNounce");
+        ).to.be.revertedWithCustomError(asset, "WrongNonce");
       });
 
       it("GIVEN a correct signature WHEN performing a protected hold THEN transaction succeeds", async () => {
@@ -896,7 +896,7 @@ describe("ProtectedPartitions Tests", () => {
         ).to.be.revertedWithCustomError(asset, "WrongSignature");
       });
 
-      it("GIVEN a wrong nounce WHEN performing a protected clearing THEN transaction fails with WrongNounce", async () => {
+      it("GIVEN a wrong nonce WHEN performing a protected clearing THEN transaction fails with WrongNonce", async () => {
         protectedClearingOperation.nonce = 0;
 
         //TRANSFER
@@ -904,15 +904,15 @@ describe("ProtectedPartitions Tests", () => {
           asset
             .connect(signer_B)
             .protectedClearingTransferByPartition(protectedClearingOperation, amount, signer_C.address, "0x1234"),
-        ).to.be.revertedWithCustomError(asset, "WrongNounce");
+        ).to.be.revertedWithCustomError(asset, "WrongNonce");
         // HOLD
         await expect(
           asset.connect(signer_B).protectedClearingCreateHoldByPartition(protectedClearingOperation, hold, "0x1234"),
-        ).to.be.revertedWithCustomError(asset, "WrongNounce");
+        ).to.be.revertedWithCustomError(asset, "WrongNonce");
         //REDEEM
         await expect(
           asset.connect(signer_B).protectedClearingRedeemByPartition(protectedClearingOperation, amount, "0x1234"),
-        ).to.be.revertedWithCustomError(asset, "WrongNounce");
+        ).to.be.revertedWithCustomError(asset, "WrongNonce");
       });
 
       it("GIVEN a correct signature WHEN performing a protected clearing THEN transaction succeeds", async () => {

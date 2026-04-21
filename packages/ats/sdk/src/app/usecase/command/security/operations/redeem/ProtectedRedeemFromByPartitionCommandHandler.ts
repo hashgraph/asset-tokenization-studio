@@ -17,9 +17,7 @@ import ContractService from "@service/contract/ContractService";
 import { ProtectedRedeemFromByPartitionCommandError } from "./error/ProtectedRedeemFromByPartitionCommandError";
 
 @CommandHandler(ProtectedRedeemFromByPartitionCommand)
-export class ProtectedRedeemFromByPartitionCommandHandler
-  implements ICommandHandler<ProtectedRedeemFromByPartitionCommand>
-{
+export class ProtectedRedeemFromByPartitionCommandHandler implements ICommandHandler<ProtectedRedeemFromByPartitionCommand> {
   constructor(
     @lazyInject(SecurityService)
     private readonly securityService: SecurityService,
@@ -37,7 +35,7 @@ export class ProtectedRedeemFromByPartitionCommandHandler
     command: ProtectedRedeemFromByPartitionCommand,
   ): Promise<ProtectedRedeemFromByPartitionCommandResponse> {
     try {
-      const { securityId, partitionId, sourceId, amount, deadline, nounce, signature } = command;
+      const { securityId, partitionId, sourceId, amount, deadline, nonce, signature } = command;
 
       const handler = this.transactionService.getHandler();
       const security = await this.securityService.get(securityId);
@@ -51,7 +49,7 @@ export class ProtectedRedeemFromByPartitionCommandHandler
 
       await this.validationService.checkDecimals(security, amount);
 
-      await this.validationService.checkValidNounce(securityId, sourceId, nounce);
+      await this.validationService.checkValidNonce(securityId, sourceId, nonce);
 
       const res = await handler.protectedRedeemFromByPartition(
         securityEvmAddress,
@@ -59,7 +57,7 @@ export class ProtectedRedeemFromByPartitionCommandHandler
         sourceEvmAddress,
         amountBd,
         BigDecimal.fromString(deadline.substring(0, 10)),
-        BigDecimal.fromString(nounce.toString()),
+        BigDecimal.fromString(nonce.toString()),
         signature,
         command.securityId,
       );

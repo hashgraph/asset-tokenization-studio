@@ -18,9 +18,7 @@ import { ProtectedClearingTransferByPartitionCommandError } from "./error/Protec
 import { KycStatus } from "@domain/context/kyc/Kyc";
 
 @CommandHandler(ProtectedClearingTransferByPartitionCommand)
-export class ProtectedClearingTransferByPartitionCommandHandler
-  implements ICommandHandler<ProtectedClearingTransferByPartitionCommand>
-{
+export class ProtectedClearingTransferByPartitionCommandHandler implements ICommandHandler<ProtectedClearingTransferByPartitionCommand> {
   constructor(
     @lazyInject(SecurityService)
     private readonly securityService: SecurityService,
@@ -70,7 +68,7 @@ export class ProtectedClearingTransferByPartitionCommandHandler
 
       await this.validationService.checkBalance(securityId, sourceId, amountBd);
 
-      await this.validationService.checkValidNounce(securityId, sourceId, nonce);
+      await this.validationService.checkValidNonce(securityId, sourceId, nonce);
 
       const res = await handler.protectedClearingTransferByPartition(
         securityEvmAddress,

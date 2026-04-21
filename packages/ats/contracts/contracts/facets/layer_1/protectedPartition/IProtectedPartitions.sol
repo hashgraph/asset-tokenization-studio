@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 interface IProtectedPartitions {
     struct ProtectionData {
         uint256 deadline;
-        uint256 nounce;
+        uint256 nonce;
         bytes signature;
     }
 
@@ -17,7 +17,7 @@ interface IProtectedPartitions {
         address to,
         uint256 value,
         uint256 deadline,
-        uint256 nounce,
+        uint256 nonce,
         bytes signature
     );
     event ProtectedRedeemFrom(
@@ -26,7 +26,7 @@ interface IProtectedPartitions {
         address indexed from,
         uint256 value,
         uint256 deadline,
-        uint256 nounce,
+        uint256 nonce,
         bytes signature
     );
 

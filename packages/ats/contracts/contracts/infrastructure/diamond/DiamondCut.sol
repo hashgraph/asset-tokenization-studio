@@ -7,10 +7,11 @@ import { IBusinessLogicResolver } from "./IBusinessLogicResolver.sol";
 import { _DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
 import { ResolverProxyStorageWrapper, ResolverProxyStorage } from "../../domain/core/ResolverProxyStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
     modifier onlyRole(bytes32 _role) {
-        AccessControlStorageWrapper.checkRole(_role, msg.sender);
+        AccessControlStorageWrapper.checkRole(_role, EvmAccessors.getMsgSender());
         _;
     }
     function updateConfigVersion(uint256 _newVersion) external override onlyRole(_DEFAULT_ADMIN_ROLE) {

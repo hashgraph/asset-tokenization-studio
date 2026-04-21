@@ -7,10 +7,11 @@ import { IERC1644 } from "../ERC1400/ERC1644/IERC1644.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ERC1594StorageWrapper } from "../../../domain/asset/ERC1594StorageWrapper.sol";
+import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { TokenCoreOps } from "../../../domain/orchestrator/TokenCoreOps.sol";
-import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
-abstract contract ERC3643Operations is IERC3643Operations, TimestampProvider, Modifiers {
+abstract contract ERC3643Operations is IERC3643Operations, Modifiers {
     function burn(
         address _userAddress,
         uint256 _amount
@@ -19,10 +20,10 @@ abstract contract ERC3643Operations is IERC3643Operations, TimestampProvider, Mo
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
+            AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         }
         TokenCoreOps.burn(_userAddress, _amount);
-        emit IERC1644.ControllerRedemption(msg.sender, _userAddress, _amount, "", "");
+        emit IERC1644.ControllerRedemption(EvmAccessors.getMsgSender(), _userAddress, _amount, "", "");
     }
 
     function mint(
@@ -32,7 +33,7 @@ abstract contract ERC3643Operations is IERC3643Operations, TimestampProvider, Mo
         external
         onlyUnpaused
         onlyWithoutMultiPartition
-        onlyWithinMaxSupply(_amount, _getBlockTimestamp())
+        onlyWithinMaxSupply(_amount, TimeTravelStorageWrapper.getBlockTimestamp())
         onlyIdentifiedAddresses(address(0), _to)
         onlyCompliant(address(0), _to, false)
     {
@@ -40,7 +41,7 @@ abstract contract ERC3643Operations is IERC3643Operations, TimestampProvider, Mo
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _ISSUER_ROLE;
             roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
+            AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         }
         ERC1594StorageWrapper.issue(_to, _amount, "");
     }
@@ -54,10 +55,10 @@ abstract contract ERC3643Operations is IERC3643Operations, TimestampProvider, Mo
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
+            AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         }
         TokenCoreOps.transfer(_from, _to, _amount);
-        emit IERC1644.ControllerTransfer(msg.sender, _from, _to, _amount, "", "");
+        emit IERC1644.ControllerTransfer(EvmAccessors.getMsgSender(), _from, _to, _amount, "", "");
         return true;
     }
 }

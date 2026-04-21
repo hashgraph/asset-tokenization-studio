@@ -49,7 +49,7 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers
         if (!success_) {
             revert UnlistedPause(_pause);
         }
-        emit RemovedFromExternalPauses(msg.sender, _pause);
+        emit RemovedFromExternalPauses(EvmAccessors.getMsgSender(), _pause);
     }
 
     function isExternalPause(address _pause) external view override returns (bool) {

@@ -5,6 +5,7 @@ import { IFixedRate } from "./IFixedRate.sol";
 import { _INTEREST_RATE_MANAGER_ROLE } from "../../../../constants/roles.sol";
 import { InterestRateStorageWrapper } from "../../../../domain/asset/InterestRateStorageWrapper.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
+import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
 contract FixedRate is IFixedRate, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
@@ -18,7 +19,7 @@ contract FixedRate is IFixedRate, Modifiers {
         uint8 _newRateDecimals
     ) external override onlyUnpaused onlyRole(_INTEREST_RATE_MANAGER_ROLE) {
         InterestRateStorageWrapper.setRate(_newRate, _newRateDecimals);
-        emit RateUpdated(msg.sender, _newRate, _newRateDecimals);
+        emit RateUpdated(EvmAccessors.getMsgSender(), _newRate, _newRateDecimals);
     }
 
     function getRate() external view override returns (uint256 rate_, uint8 decimals_) {

@@ -17,13 +17,13 @@ abstract contract AmortizationFacetBase is Amortization, IStaticFunctionSelector
         staticFunctionSelectors_[selectorIndex++] = this.getAmortizationsCount.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getAmortizationHolders.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getTotalAmortizationHolders.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getAmortizationPaymentAmount.selector;
         staticFunctionSelectors_[selectorIndex++] = this.setAmortizationHold.selector;
         staticFunctionSelectors_[selectorIndex++] = this.releaseAmortizationHold.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getActiveAmortizationHoldHolders.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getTotalActiveAmortizationHoldHolders.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getAmortizationActiveHolders.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getTotalAmortizationActiveHolders.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getActiveAmortizationIds.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getTotalActiveAmortizationIds.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getTotalHoldByAmortizationId.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {

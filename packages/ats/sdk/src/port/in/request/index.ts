@@ -69,7 +69,7 @@ import GetAggregatedBalanceAdjustmentFactorRequest from "./account/GetAggregated
 import GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest from "./equity/GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest";
 import ProtectedTransferFromByPartitionRequest from "./security/operations/transfer/ProtectedTransferFromByPartitionRequest";
 import ProtectedRedeemFromByPartitionRequest from "./security/operations/redeem/ProtectedRedeemFromByPartitionRequest";
-import GetNounceRequest from "./security/operations/protectedPartitions/GetNounceRequest";
+import GetNonceRequest from "./security/operations/protectedPartitions/GetNonceRequest";
 import PartitionsProtectedRequest from "./security/operations/protectedPartitions/PartitionsProtectedRequest";
 import CreateHoldByPartitionRequest from "./security/operations/hold/CreateHoldByPartition";
 import CreateHoldFromByPartitionRequest from "./security/operations/hold/CreateHoldFromByPartition";
@@ -157,6 +157,21 @@ import SetSymbolRequest from "./security/operations/tokeMetadata/SetSymbolReques
 import SetNominalValueRequest from "./security/operations/nominalValue/SetNominalValueRequest";
 import GetNominalValueRequest from "./security/operations/nominalValue/GetNominalValueRequest";
 import GetNominalValueDecimalsRequest from "./security/operations/nominalValue/GetNominalValueDecimalsRequest";
+import SetAmortizationRequest from "./security/amortization/SetAmortizationRequest";
+import CancelAmortizationRequest from "./security/amortization/CancelAmortizationRequest";
+import SetAmortizationHoldRequest from "./security/amortization/SetAmortizationHoldRequest";
+import ReleaseAmortizationHoldRequest from "./security/amortization/ReleaseAmortizationHoldRequest";
+import GetAmortizationRequest from "./security/amortization/GetAmortizationRequest";
+import GetAmortizationForRequest from "./security/amortization/GetAmortizationForRequest";
+import GetAmortizationsForRequest from "./security/amortization/GetAmortizationsForRequest";
+import GetAmortizationsCountRequest from "./security/amortization/GetAmortizationsCountRequest";
+import GetAmortizationHoldersRequest from "./security/amortization/GetAmortizationHoldersRequest";
+import GetTotalAmortizationHoldersRequest from "./security/amortization/GetTotalAmortizationHoldersRequest";
+import GetAmortizationPaymentAmountRequest from "./security/amortization/GetAmortizationPaymentAmountRequest";
+import GetActiveAmortizationHoldHoldersRequest from "./security/amortization/GetActiveAmortizationHoldHoldersRequest";
+import GetTotalActiveAmortizationHoldHoldersRequest from "./security/amortization/GetTotalActiveAmortizationHoldHoldersRequest";
+import GetActiveAmortizationIdsRequest from "./security/amortization/GetActiveAmortizationIdsRequest";
+import GetTotalActiveAmortizationIdsRequest from "./security/amortization/GetTotalActiveAmortizationIdsRequest";
 import SetOnchainIDRequest from "./security/operations/tokeMetadata/SetOnchainIDRequest";
 import SetComplianceRequest from "./security/compliance/SetComplianceRequest";
 import ComplianceRequest from "./security/compliance/ComplianceRequest";
@@ -302,7 +317,7 @@ export {
   GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest,
   ProtectedTransferFromByPartitionRequest,
   ProtectedRedeemFromByPartitionRequest,
-  GetNounceRequest,
+  GetNonceRequest,
   PartitionsProtectedRequest,
   CreateHoldByPartitionRequest,
   CreateHoldFromByPartitionRequest,
@@ -455,4 +470,19 @@ export {
   SetNominalValueRequest,
   GetNominalValueRequest,
   GetNominalValueDecimalsRequest,
+  SetAmortizationRequest,
+  CancelAmortizationRequest,
+  SetAmortizationHoldRequest,
+  ReleaseAmortizationHoldRequest,
+  GetAmortizationRequest,
+  GetAmortizationForRequest,
+  GetAmortizationsForRequest,
+  GetAmortizationsCountRequest,
+  GetAmortizationHoldersRequest,
+  GetTotalAmortizationHoldersRequest,
+  GetAmortizationPaymentAmountRequest,
+  GetActiveAmortizationHoldHoldersRequest,
+  GetTotalActiveAmortizationHoldHoldersRequest,
+  GetActiveAmortizationIdsRequest,
+  GetTotalActiveAmortizationIdsRequest,
 };

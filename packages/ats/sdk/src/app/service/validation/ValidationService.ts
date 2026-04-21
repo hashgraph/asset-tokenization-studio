@@ -25,8 +25,8 @@ import { CanTransferByPartitionQuery } from "@query/security/canTransferByPartit
 import { Security } from "@domain/context/security/Security";
 import CheckNums from "@core/checks/numbers/CheckNums";
 import { getProtectedPartitionRole } from "@domain/context/security/SecurityRole";
-import { GetNounceQuery } from "@query/security/protectedPartitions/getNounce/GetNounceQuery";
-import { NounceAlreadyUsed } from "@domain/context/security/error/operations/NounceAlreadyUsed";
+import { GetNonceQuery } from "@query/security/protectedPartitions/getNonce/GetNonceQuery";
+import { NonceAlreadyUsed } from "@domain/context/security/error/operations/NonceAlreadyUsed";
 import { IsInControlListQuery } from "@query/account/controlList/IsInControlListQuery";
 import { AccountNotInControlList } from "@domain/context/security/error/operations/AccountNotInControlList";
 import { AccountAlreadyInControlList } from "@domain/context/security/error/operations/AccountAlreadyInControlList";
@@ -249,12 +249,12 @@ export default class ValidationService extends Service {
     await this.checkRole(protectedPartitionRole, accountId, securityId);
   }
 
-  async checkValidNounce(securityId: string, targetId: string, nounce: number): Promise<void> {
+  async checkValidNonce(securityId: string, targetId: string, nonce: number): Promise<void> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
-    const nextNounce = (await this.queryBus.execute(new GetNounceQuery(securityId, targetId))).payload;
+    const nextNonce = (await this.queryBus.execute(new GetNonceQuery(securityId, targetId))).payload;
 
-    if (nounce <= nextNounce) {
-      throw new NounceAlreadyUsed(nounce);
+    if (nonce <= nextNonce) {
+      throw new NonceAlreadyUsed(nonce);
     }
   }
 

@@ -88,14 +88,14 @@ uint8 constant _ASCII_7 = 55;
 uint8 constant _ASCII_0 = 48;
 
 // solhint-disable-next-line max-line-length
-//keccak256('protectedTransferFromByPartition(bytes32 _partition,address _from,address _to,uint256 _amount,uint256 _deadline,uint256 _nounce)');
+//keccak256('protectedTransferFromByPartition(bytes32 _partition,address _from,address _to,uint256 _amount,uint256 _deadline,uint256 _nonce)');
 // solhint-disable-next-line max-line-length
-bytes32 constant _PROTECTED_TRANSFER_FROM_PARTITION_TYPEHASH = 0x2d745a289deb1f3b76a62c3c841fc26cbf0bc208da63068e1eec99f929bbdc9e;
+bytes32 constant _PROTECTED_TRANSFER_FROM_PARTITION_TYPEHASH = 0x16deec2d76392b2642d942266ed8c94deb86eeb6635eddeb0c875b884306328a;
 
 // solhint-disable-next-line max-line-length
-//keccak256('protectedRedeemFromByPartition(bytes32 _partition,address _from,uint256 _amount,uint256 _deadline,uint256 _nounce)');
+//keccak256('protectedRedeemFromByPartition(bytes32 _partition,address _from,uint256 _amount,uint256 _deadline,uint256 _nonce)');
 // solhint-disable-next-line max-line-length
-bytes32 constant _PROTECTED_REDEEM_FROM_PARTITION_TYPEHASH = 0x5075effccf2d386f2a3f230b6a45274e523d872e1b1b33a0cf97bef34dfa14e7;
+bytes32 constant _PROTECTED_REDEEM_FROM_PARTITION_TYPEHASH = 0xbc3531b1719123937a7188397ff70a66a55675a651e932b581bdcbd9e2f780dc;
 
 // solhint-disable-next-line max-line-length
 //keccak256('protectedCreateHoldByPartition(bytes32 _partition,address _from,ProtectedHold _protectedHold)Hold(uint256 amount,uint256 expirationTimestamp,address escrow,address to,bytes data)ProtectedHold(Hold hold,uint256 deadline,uint256 nonce)');

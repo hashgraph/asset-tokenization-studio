@@ -235,7 +235,6 @@ library AmortizationStorageWrapper {
 
         ) = getAmortization(_amortizationID);
 
-        amortizationFor_.account = _account;
         amortizationFor_.recordDate = registeredAmortization.amortization.recordDate;
         amortizationFor_.executionDate = registeredAmortization.amortization.executionDate;
 
@@ -281,12 +280,12 @@ library AmortizationStorageWrapper {
         uint256 _amortizationID,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (IAmortization.AmortizationFor[] memory amortizationsFor_) {
-        address[] memory holders = getAmortizationHolders(_amortizationID, _pageIndex, _pageLength);
-        uint256 length = holders.length;
+    ) internal view returns (IAmortization.AmortizationFor[] memory amortizationsFor_, address[] memory holders_) {
+        holders_ = getAmortizationHolders(_amortizationID, _pageIndex, _pageLength);
+        uint256 length = holders_.length;
         amortizationsFor_ = new IAmortization.AmortizationFor[](length);
         for (uint256 i; i < length; ) {
-            amortizationsFor_[i] = getAmortizationFor(_amortizationID, holders[i]);
+            amortizationsFor_[i] = getAmortizationFor(_amortizationID, holders_[i]);
             unchecked {
                 ++i;
             }
@@ -335,15 +334,6 @@ library AmortizationStorageWrapper {
         return ERC1410StorageWrapper.getTotalTokenHolders();
     }
 
-    function getAmortizationPaymentAmount(
-        uint256 _amortizationID,
-        address _tokenHolder
-    ) internal view returns (uint256 tokenAmount_, uint8 decimals_) {
-        IAmortization.AmortizationFor memory amortizationFor = getAmortizationFor(_amortizationID, _tokenHolder);
-        tokenAmount_ = amortizationFor.tokenHeldAmount;
-        decimals_ = amortizationFor.decimalsHeld;
-    }
-
     function getAmortizationActiveHolders(
         uint256 _amortizationID,
         uint256 _pageIndex,
@@ -361,25 +351,19 @@ library AmortizationStorageWrapper {
     }
 
     function getTotalAmortizationActiveHolders(uint256 _amortizationID) internal view returns (uint256) {
-        return
-            _amortizationStorage()
-                .activeHoldHolders[
-                    CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
-                        AMORTIZATION_CORPORATE_ACTION_TYPE,
-                        _amortizationID - 1
-                    )
-                ]
-                .length();
+        bytes32 corporateActionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
+            AMORTIZATION_CORPORATE_ACTION_TYPE,
+            _amortizationID - 1
+        );
+        return _amortizationStorage().activeHoldHolders[corporateActionId].length();
     }
 
     function getTotalHoldByAmortizationId(uint256 _amortizationID) internal view returns (uint256) {
-        return
-            _amortizationStorage().totalHoldByAmortizationId[
-                CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
-                    AMORTIZATION_CORPORATE_ACTION_TYPE,
-                    _amortizationID - 1
-                )
-            ];
+        bytes32 corporateActionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
+            AMORTIZATION_CORPORATE_ACTION_TYPE,
+            _amortizationID - 1
+        );
+        return _amortizationStorage().totalHoldByAmortizationId[corporateActionId];
     }
 
     function getActiveAmortizationIds(

@@ -4,10 +4,10 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IERC1643 } from "./IERC1643.sol";
 import { _DOCUMENTER_ROLE } from "../../../../constants/roles.sol";
 import { _ERC1643_STORAGE_POSITION } from "../../../../constants/storagePositions.sol";
+import { TimeTravelStorageWrapper } from "../../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
-import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 
-abstract contract ERC1643 is IERC1643, TimestampProvider, Modifiers {
+abstract contract ERC1643 is IERC1643, Modifiers {
     function setDocument(
         bytes32 _name,
         string calldata _uri,
@@ -27,7 +27,7 @@ abstract contract ERC1643 is IERC1643, TimestampProvider, Modifiers {
             erc1643Storage.docNames.push(_name);
             erc1643Storage.docIndexes[_name] = erc1643Storage.docNames.length;
         }
-        erc1643Storage.documents[_name] = Document(_documentHash, _getBlockTimestamp(), _uri);
+        erc1643Storage.documents[_name] = Document(_documentHash, TimeTravelStorageWrapper.getBlockTimestamp(), _uri);
         emit DocumentUpdated(_name, _uri, _documentHash);
     }
 

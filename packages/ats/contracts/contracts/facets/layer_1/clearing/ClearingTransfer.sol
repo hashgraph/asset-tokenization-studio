@@ -5,14 +5,14 @@ import { IClearingTransfer } from "./IClearingTransfer.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
+import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { ClearingOps } from "../../../domain/orchestrator/ClearingOps.sol";
 import { ClearingProtectedOps } from "../../../domain/orchestrator/ClearingProtectedOps.sol";
 import { ClearingReadOps } from "../../../domain/orchestrator/ClearingReadOps.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
-import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
-abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider, Modifiers {
+abstract contract ClearingTransfer is IClearingTransfer, Modifiers {
     function clearingTransferByPartition(
         ClearingOperation calldata _clearingOperation,
         uint256 _amount,
@@ -130,7 +130,7 @@ abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider, Modi
                 _partition,
                 _tokenHolder,
                 _clearingId,
-                _getBlockTimestamp()
+                TimeTravelStorageWrapper.getBlockTimestamp()
             );
     }
 

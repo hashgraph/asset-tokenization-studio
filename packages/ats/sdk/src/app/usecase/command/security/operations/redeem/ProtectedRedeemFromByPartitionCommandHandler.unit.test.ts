@@ -104,7 +104,7 @@ describe("ProtectedRedeemFromByPartitionCommandHandler", () => {
           evmAddress,
           BigDecimal.fromString(command.amount, security.decimals),
           BigDecimal.fromString(command.deadline.substring(0, 10)),
-          BigDecimal.fromString(command.nounce.toString()),
+          BigDecimal.fromString(command.nonce.toString()),
           command.signature,
           command.securityId,
         );

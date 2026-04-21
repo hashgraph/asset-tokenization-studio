@@ -324,7 +324,7 @@ interface ITransactionAdapter {
     targetId: EvmAddress,
     amount: BigDecimal,
     deadline: BigDecimal,
-    nounce: BigDecimal,
+    nonce: BigDecimal,
     signature: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
@@ -334,7 +334,7 @@ interface ITransactionAdapter {
     sourceId: EvmAddress,
     amount: BigDecimal,
     deadline: BigDecimal,
-    nounce: BigDecimal,
+    nonce: BigDecimal,
     signature: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
@@ -886,6 +886,37 @@ interface INominalValueTransactionAdapter {
   ): Promise<TransactionResponse>;
 }
 
+export interface IAmortizationTransactionAdapter {
+  setAmortization(
+    security: EvmAddress,
+    recordDate: BigDecimal,
+    executionDate: BigDecimal,
+    tokensToRedeem: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
+
+  cancelAmortization(
+    security: EvmAddress,
+    amortizationId: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
+
+  setAmortizationHold(
+    security: EvmAddress,
+    amortizationId: number,
+    tokenHolder: EvmAddress,
+    tokenAmount: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
+
+  releaseAmortizationHold(
+    security: EvmAddress,
+    amortizationId: number,
+    tokenHolder: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
+}
+
 export default abstract class TransactionAdapter
   implements
     WalletAdapter,
@@ -911,7 +942,8 @@ export default abstract class TransactionAdapter
     IAgent,
     IProceedRecipients,
     IFixedRate,
-    INominalValueTransactionAdapter
+    INominalValueTransactionAdapter,
+    IAmortizationTransactionAdapter
 {
   abstract setImpactData(
     security: EvmAddress,
@@ -1242,7 +1274,7 @@ export default abstract class TransactionAdapter
     targetId: EvmAddress,
     amount: BigDecimal,
     deadline: BigDecimal,
-    nounce: BigDecimal,
+    nonce: BigDecimal,
     signature: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
@@ -1252,7 +1284,7 @@ export default abstract class TransactionAdapter
     sourceId: EvmAddress,
     amount: BigDecimal,
     deadline: BigDecimal,
-    nounce: BigDecimal,
+    nonce: BigDecimal,
     signature: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
@@ -1819,6 +1851,35 @@ export default abstract class TransactionAdapter
   abstract cancelScheduledBalanceAdjustment(
     security: EvmAddress,
     balanceAdjustmentId: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
+
+  abstract setAmortization(
+    security: EvmAddress,
+    recordDate: BigDecimal,
+    executionDate: BigDecimal,
+    tokensToRedeem: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
+
+  abstract cancelAmortization(
+    security: EvmAddress,
+    amortizationId: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
+
+  abstract setAmortizationHold(
+    security: EvmAddress,
+    amortizationId: number,
+    tokenHolder: EvmAddress,
+    tokenAmount: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
+
+  abstract releaseAmortizationHold(
+    security: EvmAddress,
+    amortizationId: number,
+    tokenHolder: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
 }

@@ -8,7 +8,7 @@ import { KPI_BOND_REDEEM_BALANCE } from "../../../constants/values.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { BondStorageWrapper } from "../../../domain/asset/BondStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
-import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
+import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 import { _checkUnexpectedError } from "../../../infrastructure/utils/UnexpectedError.sol";
 
@@ -23,7 +23,7 @@ import { _checkUnexpectedError } from "../../../infrastructure/utils/UnexpectedE
  *      BondStorageWrapper for maturity date persistence.
  * @author Asset Tokenization Studio Team
  */
-abstract contract Bond is IBondManagement, TimestampProvider, Modifiers {
+abstract contract Bond is IBondManagement, Modifiers {
     /**
      * @notice Redeems all token partitions held by a token
      *         holder at bond maturity.
@@ -49,7 +49,7 @@ abstract contract Bond is IBondManagement, TimestampProvider, Modifiers {
         onlyUnrecoveredAddress(_tokenHolder)
         onlyListedAllowed(_tokenHolder)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
-        onlyValidMaturityDate(_getBlockTimestamp())
+        onlyValidMaturityDate(TimeTravelStorageWrapper.getBlockTimestamp())
     {
         bytes32[] memory partitions = ERC1410StorageWrapper.partitionsOf(_tokenHolder);
         for (uint256 i = 0; i < partitions.length; i++) {
@@ -97,7 +97,7 @@ abstract contract Bond is IBondManagement, TimestampProvider, Modifiers {
         onlyUnrecoveredAddress(_tokenHolder)
         onlyListedAllowed(_tokenHolder)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
-        onlyValidMaturityDate(_getBlockTimestamp())
+        onlyValidMaturityDate(TimeTravelStorageWrapper.getBlockTimestamp())
     {
         ERC1410StorageWrapper.redeemByPartition(_partition, _tokenHolder, EvmAccessors.getMsgSender(), _amount, "", "");
     }

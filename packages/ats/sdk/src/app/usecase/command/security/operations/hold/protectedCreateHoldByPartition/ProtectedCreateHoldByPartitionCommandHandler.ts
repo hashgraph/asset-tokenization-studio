@@ -17,9 +17,7 @@ import ContractService from "@service/contract/ContractService";
 import { ProtectedCreateHoldByPartitionCommandError } from "./error/ProtectedCreateHoldByPartitionCommandError";
 
 @CommandHandler(ProtectedCreateHoldByPartitionCommand)
-export class ProtectedCreateHoldByPartitionCommandHandler
-  implements ICommandHandler<ProtectedCreateHoldByPartitionCommand>
-{
+export class ProtectedCreateHoldByPartitionCommandHandler implements ICommandHandler<ProtectedCreateHoldByPartitionCommand> {
   constructor(
     @lazyInject(SecurityService)
     private readonly securityService: SecurityService,
@@ -74,7 +72,7 @@ export class ProtectedCreateHoldByPartitionCommandHandler
 
       await this.validationService.checkBalance(securityId, sourceId, amountBd);
 
-      await this.validationService.checkValidNounce(securityId, sourceId, nonce);
+      await this.validationService.checkValidNonce(securityId, sourceId, nonce);
 
       const res = await handler.protectedCreateHoldByPartition(
         securityEvmAddress,

@@ -5,14 +5,14 @@ import { _CONTROLLER_ROLE, _ISSUER_ROLE, _AGENT_ROLE } from "../../../constants/
 import { IERC3643Batch } from "./IERC3643Batch.sol";
 import { IERC1644 } from "../ERC1400/ERC1644/IERC1644.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
+import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../../domain/core/CapStorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../../domain/asset/ERC1594StorageWrapper.sol";
 import { TokenCoreOps } from "../../../domain/orchestrator/TokenCoreOps.sol";
-import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
-abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, Modifiers {
+abstract contract ERC3643Batch is IERC3643Batch, Modifiers {
     function batchTransfer(
         address[] calldata _toList,
         uint256[] calldata _amounts
@@ -52,11 +52,18 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, Modifiers {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
+            AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         }
         for (uint256 i = 0; i < _fromList.length; i++) {
             TokenCoreOps.transfer(_fromList[i], _toList[i], _amounts[i]);
-            emit IERC1644.ControllerTransfer(msg.sender, _fromList[i], _toList[i], _amounts[i], "", "");
+            emit IERC1644.ControllerTransfer(
+                EvmAccessors.getMsgSender(),
+                _fromList[i],
+                _toList[i],
+                _amounts[i],
+                "",
+                ""
+            );
         }
     }
 
@@ -68,12 +75,12 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, Modifiers {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _ISSUER_ROLE;
             roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
+            AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         }
         for (uint256 i = 0; i < _toList.length; i++) {
             ERC1594StorageWrapper.checkIdentity(address(0), _toList[i]);
             ERC1594StorageWrapper.checkCompliance(address(0), _toList[i], false);
-            CapStorageWrapper.requireWithinMaxSupply(_amounts[i], _getBlockTimestamp());
+            CapStorageWrapper.requireWithinMaxSupply(_amounts[i], TimeTravelStorageWrapper.getBlockTimestamp());
         }
         for (uint256 i = 0; i < _toList.length; i++) {
             ERC1594StorageWrapper.issue(_toList[i], _amounts[i], "");
@@ -94,11 +101,11 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, Modifiers {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
+            AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         }
         for (uint256 i = 0; i < _userAddresses.length; i++) {
             TokenCoreOps.burn(_userAddresses[i], _amounts[i]);
-            emit IERC1644.ControllerRedemption(msg.sender, _userAddresses[i], _amounts[i], "", "");
+            emit IERC1644.ControllerRedemption(EvmAccessors.getMsgSender(), _userAddresses[i], _amounts[i], "", "");
         }
     }
 }

@@ -18,9 +18,7 @@ import { ClearingRedeemFromByPartitionCommandError } from "./error/ClearingRedee
 import { KycStatus } from "@domain/context/kyc/Kyc";
 
 @CommandHandler(ClearingRedeemFromByPartitionCommand)
-export class ClearingRedeemFromByPartitionCommandHandler
-  implements ICommandHandler<ClearingRedeemFromByPartitionCommand>
-{
+export class ClearingRedeemFromByPartitionCommandHandler implements ICommandHandler<ClearingRedeemFromByPartitionCommand> {
   constructor(
     @lazyInject(SecurityService)
     private readonly securityService: SecurityService,

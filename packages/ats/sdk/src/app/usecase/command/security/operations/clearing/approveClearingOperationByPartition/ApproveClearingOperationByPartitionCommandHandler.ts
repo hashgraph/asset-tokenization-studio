@@ -18,9 +18,7 @@ import { ApproveClearingOperationByPartitionCommandError } from "./error/Approve
 import { KycStatus } from "@domain/context/kyc/Kyc";
 
 @CommandHandler(ApproveClearingOperationByPartitionCommand)
-export class ApproveClearingOperationByPartitionCommandHandler
-  implements ICommandHandler<ApproveClearingOperationByPartitionCommand>
-{
+export class ApproveClearingOperationByPartitionCommandHandler implements ICommandHandler<ApproveClearingOperationByPartitionCommand> {
   constructor(
     @lazyInject(AccountService)
     private readonly accountService: AccountService,

@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { _WILD_CARD_ROLE } from "../../constants/roles.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title ProtectedPartitionRoleValidator
@@ -34,10 +35,10 @@ abstract contract ProtectedPartitionRoleValidator {
         if (
             !AccessControlStorageWrapper.hasRole(
                 ProtectedPartitionsStorageWrapper.protectedPartitionsRole(partition),
-                msg.sender
+                EvmAccessors.getMsgSender()
             )
         ) {
-            revert ProtectedPartitionRoleRequired(partition, msg.sender);
+            revert ProtectedPartitionRoleRequired(partition, EvmAccessors.getMsgSender());
         }
         _;
     }
@@ -56,8 +57,8 @@ abstract contract ProtectedPartitionRoleValidator {
         roles[0] = ProtectedPartitionsStorageWrapper.protectedPartitionsRole(partition);
         roles[1] = _WILD_CARD_ROLE;
 
-        if (!AccessControlStorageWrapper.hasAnyRole(roles, msg.sender)) {
-            revert ProtectedPartitionRoleRequired(partition, msg.sender);
+        if (!AccessControlStorageWrapper.hasAnyRole(roles, EvmAccessors.getMsgSender())) {
+            revert ProtectedPartitionRoleRequired(partition, EvmAccessors.getMsgSender());
         }
         _;
     }
@@ -74,13 +75,13 @@ abstract contract ProtectedPartitionRoleValidator {
      */
     modifier onlySelfOrPartitionRole(address from, bytes32 partition) {
         if (
-            msg.sender != from &&
+            EvmAccessors.getMsgSender() != from &&
             !AccessControlStorageWrapper.hasRole(
                 ProtectedPartitionsStorageWrapper.protectedPartitionsRole(partition),
-                msg.sender
+                EvmAccessors.getMsgSender()
             )
         ) {
-            revert ProtectedPartitionRoleRequired(partition, msg.sender);
+            revert ProtectedPartitionRoleRequired(partition, EvmAccessors.getMsgSender());
         }
         _;
     }
@@ -94,7 +95,7 @@ abstract contract ProtectedPartitionRoleValidator {
     function _hasPartitionRole(bytes32 partition) internal view returns (bool hasRole_) {
         hasRole_ = AccessControlStorageWrapper.hasRole(
             ProtectedPartitionsStorageWrapper.protectedPartitionsRole(partition),
-            msg.sender
+            EvmAccessors.getMsgSender()
         );
     }
 
@@ -108,6 +109,6 @@ abstract contract ProtectedPartitionRoleValidator {
         bytes32[] memory roles = new bytes32[](2);
         roles[0] = ProtectedPartitionsStorageWrapper.protectedPartitionsRole(partition);
         roles[1] = _WILD_CARD_ROLE;
-        hasRole_ = AccessControlStorageWrapper.hasAnyRole(roles, msg.sender);
+        hasRole_ = AccessControlStorageWrapper.hasAnyRole(roles, EvmAccessors.getMsgSender());
     }
 }

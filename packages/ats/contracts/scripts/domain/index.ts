@@ -69,3 +69,4 @@ export * from "./loan/createConfiguration";
 
 // Loans Portfolio configuration
 export * from "./loanPortfolio/createConfiguration";
+export * from "./loanPortfolio/types";
