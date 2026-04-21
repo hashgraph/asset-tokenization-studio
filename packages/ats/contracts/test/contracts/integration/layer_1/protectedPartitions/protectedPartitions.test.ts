@@ -33,7 +33,7 @@ const transferType = {
     { name: "_to", type: "address" },
     { name: "_amount", type: "uint256" },
     { name: "_deadline", type: "uint256" },
-    { name: "_nounce", type: "uint256" },
+    { name: "_nonce", type: "uint256" },
   ],
 };
 
@@ -630,7 +630,7 @@ describe("ProtectedPartitions Tests", () => {
           _to: signer_B.address,
           _amount: amount,
           _deadline: deadline,
-          _nounce: 1,
+          _nonce: 1,
         };
 
         /*const domainSeparator =
@@ -655,7 +655,7 @@ describe("ProtectedPartitions Tests", () => {
           .connect(signer_B)
           .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
             deadline: deadline,
-            nounce: 1,
+            nonce: 1,
             signature: signature,
           });
       });
@@ -1009,7 +1009,7 @@ describe("ProtectedPartitions Tests", () => {
           _to: signer_B.address,
           _amount: amount,
           _deadline: deadline,
-          _nounce: 1,
+          _nonce: 1,
         };
 
         const signature = await signer_A.signTypedData(domain, transferType, message);
@@ -1025,7 +1025,7 @@ describe("ProtectedPartitions Tests", () => {
           .connect(signer_B)
           .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
             deadline: deadline,
-            nounce: 1,
+            nonce: 1,
             signature: signature,
           });
         expect(await complianceMock.transferredHit()).to.equal(1);
