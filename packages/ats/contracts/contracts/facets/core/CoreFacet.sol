@@ -17,8 +17,8 @@ contract CoreFacet is Core, IStaticFunctionSelectors {
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        staticFunctionSelectors_ = new bytes4[](8);
-        uint256 selectorIndex = staticFunctionSelectors_.length;
+        uint256 selectorIndex = 8;
+        staticFunctionSelectors_ = new bytes4[](selectorIndex);
         unchecked {
             staticFunctionSelectors_[--selectorIndex] = this.version.selector;
             staticFunctionSelectors_[--selectorIndex] = this.setSymbol.selector;
