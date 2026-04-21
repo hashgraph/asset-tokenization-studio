@@ -10,7 +10,7 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  * @notice Abstract contract providing control list modifiers
  * @dev Provides modifiers for control list validation using _check* pattern
  *      from ControlListStorageWrapper
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract ControlListModifiers {
     /**

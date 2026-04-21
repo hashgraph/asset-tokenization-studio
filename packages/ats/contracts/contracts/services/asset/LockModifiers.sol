@@ -5,7 +5,7 @@ import { LockStorageWrapper } from "../../domain/asset/LockStorageWrapper.sol";
 
 /**
  * @title LockModifiers
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  * @notice Abstract contract providing lock-related modifiers
  *
  * This contract wraps LockStorageWrapper library functions into modifiers

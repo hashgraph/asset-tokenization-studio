@@ -8,7 +8,7 @@ import { KpisStorageWrapper } from "../../domain/asset/KpisStorageWrapper.sol";
  * @notice Abstract contract providing kpis-related modifiers
  * @dev Provides modifiers for kpis validation using _check* pattern
  *      from KpisStorageWrapper
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract KpisModifiers {
     /**

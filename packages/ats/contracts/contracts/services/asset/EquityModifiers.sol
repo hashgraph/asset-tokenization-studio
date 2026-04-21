@@ -9,7 +9,7 @@ import { _checkNotInitialized } from "../InitializationErrors.sol";
  * @notice Abstract contract providing equity-related modifiers
  * @dev Provides modifiers for equity state validation using _check* pattern
  *      from EquityStorageWrapper
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract EquityModifiers {
     /**

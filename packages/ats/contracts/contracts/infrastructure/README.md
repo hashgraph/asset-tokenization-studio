@@ -234,7 +234,7 @@ struct ResolverProxyStorage {
 The proxy stores this configuration at a fixed storage location to prevent collisions:
 
 ```solidity
-function _resolverProxyStorage() internal pure returns (ResolverProxyStorageWrapper.ResolverProxyStorage storage) {
+function _resolverProxyStorage() private pure returns (ResolverProxyStorageWrapper.ResolverProxyStorage storage) {
   // Uses fixed position to prevent collision with facet storage
 }
 ```

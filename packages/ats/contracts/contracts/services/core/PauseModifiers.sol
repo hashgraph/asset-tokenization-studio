@@ -9,7 +9,7 @@ import { _checkNotInitialized } from "../InitializationErrors.sol";
  * @notice Abstract contract providing pause-related modifiers
  * @dev Provides modifiers for pause state validation using _check* pattern
  *      from PauseStorageWrapper
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract PauseModifiers {
     modifier onlyUnpaused() {

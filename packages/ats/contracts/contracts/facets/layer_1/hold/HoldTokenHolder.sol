@@ -10,7 +10,7 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title HoldTokenHolder
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  * @notice Abstract contract for hold token holder operations
  *
  * Provides functionality for creating and managing holds on tokens

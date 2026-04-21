@@ -9,7 +9,7 @@ import { _checkNotInitialized } from "../InitializationErrors.sol";
  * @notice Abstract contract providing external list management modifiers
  * @dev Provides modifiers for external control list and KYC list initialization validation
  *      using _check* pattern from ExternalListManagementStorageWrapper
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract ExternalListModifiers {
     modifier onlyNotExternalControlListInitialized() {

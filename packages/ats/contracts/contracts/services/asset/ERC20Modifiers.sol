@@ -10,7 +10,7 @@ import { _checkNotInitialized } from "../InitializationErrors.sol";
  * @notice Abstract contract providing ERC20 and ERC20Votes-related modifiers
  * @dev Provides modifiers for ERC20 state validation using _check* pattern
  *      from ERC20StorageWrapper and ERC20VotesStorageWrapper
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract ERC20Modifiers {
     /**

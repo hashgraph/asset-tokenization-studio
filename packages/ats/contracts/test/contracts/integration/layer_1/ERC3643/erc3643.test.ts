@@ -146,7 +146,7 @@ describe("ERC3643 Tests", () => {
 
       expect(parsed["Resolver"].toLowerCase()).to.equal(configResolver.toLowerCase());
       expect(parsed["Config ID"].toLowerCase()).to.equal(configId.toLowerCase());
-      expect(parsed["Version"]).to.equal(configVersion.toString());
+      expect(parsed["Version"]).to.equal(ethers.toBeHex(configVersion, 32));
     });
 
     describe("initialize", () => {

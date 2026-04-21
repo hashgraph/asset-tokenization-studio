@@ -13,7 +13,7 @@ import { _checkNotInitialized } from "../InitializationErrors.sol";
  * keeping ProceedRecipientsStorageWrapper as a library.
  *
  * @notice Inherit from this contract to gain access to proceed recipient modifiers
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract ProceedRecipientModifiers {
     /// @notice Modifier to ensure proceed recipients have not been initialized

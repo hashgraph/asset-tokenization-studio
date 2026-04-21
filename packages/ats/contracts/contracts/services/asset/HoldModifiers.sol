@@ -13,7 +13,7 @@ import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
  * keeping HoldStorageWrapper as a library.
  *
  * @notice Inherit from this contract to gain access to Hold validation modifiers
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract HoldModifiers {
     /**

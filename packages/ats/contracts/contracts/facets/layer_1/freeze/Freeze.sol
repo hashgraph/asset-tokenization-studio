@@ -12,7 +12,7 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title Freeze
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  * @notice Abstract contract for freezing addresses and partial tokens
  *
  * Provides functionality for freezing addresses and partial token amounts

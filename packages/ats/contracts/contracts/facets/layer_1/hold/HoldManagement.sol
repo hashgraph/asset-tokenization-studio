@@ -19,7 +19,7 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
  * It integrates clearing, lock, ERC3643, and partition validation modifiers.
  *
  * @notice Inherit from this contract to gain access to hold management functions
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract HoldManagement is IHoldManagement, Modifiers {
     /**

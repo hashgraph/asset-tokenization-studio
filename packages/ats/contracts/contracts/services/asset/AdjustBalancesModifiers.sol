@@ -8,7 +8,7 @@ import { AdjustBalancesStorageWrapper } from "../../domain/asset/AdjustBalancesS
  * @notice Abstract contract providing adjust balances-related modifiers
  * @dev Provides modifiers for adjust balances validation using _check* pattern
  *      from AdjustBalancesStorageWrapper
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract AdjustBalancesModifiers {
     /**

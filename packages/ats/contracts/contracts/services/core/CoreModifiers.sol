@@ -17,7 +17,7 @@ pragma solidity >=0.8.0 <0.9.0;
  * - PartitionModifiers: Partition protection validation
  * - PauseModifiers: Pause state validation (onlyUnpaused, onlyPaused)
  *
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 
 import { AccessControlModifiers } from "./AccessControlModifiers.sol";

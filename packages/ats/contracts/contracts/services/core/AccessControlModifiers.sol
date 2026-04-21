@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { AccessControlStorageWrapper, RoleDataStorage } from "../../domain/core/AccessControlStorageWrapper.sol";
+import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
 import { _FREEZE_MANAGER_ROLE, _AGENT_ROLE } from "../../constants/roles.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
@@ -14,11 +14,9 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  * consistent role validation across the codebase.
  *
  * @notice Modifiers are MANDATORY unless compilation fails or bytecode exceeds limits
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract AccessControlModifiers {
-    using AccessControlStorageWrapper for RoleDataStorage;
-
     /**
      * @dev Emitted when a role check fails
      */

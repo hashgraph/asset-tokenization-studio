@@ -8,7 +8,7 @@ pragma solidity >=0.8.0 <0.9.0;
  * @dev Defines the standard for managing role assignments with
  *      paginated retrieval of role members and account roles.
  *      Supports bulk role application via applyRoles.
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 interface IAccessControl {
     /**

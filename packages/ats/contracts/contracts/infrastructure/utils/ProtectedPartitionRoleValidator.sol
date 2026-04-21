@@ -15,7 +15,7 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  * inherited by facets that need to enforce partition-based access control.
  *
  * @notice This is a helper contract for explicit role validation in facets
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract ProtectedPartitionRoleValidator {
     /**

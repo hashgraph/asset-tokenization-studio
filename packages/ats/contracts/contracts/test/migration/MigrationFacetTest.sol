@@ -6,129 +6,116 @@ import { ERC1410StorageWrapper, ERC1410BasicStorage } from "../../domain/asset/E
 import { ERC20StorageWrapper } from "../../domain/asset/ERC20StorageWrapper.sol";
 
 /**
- * @dev Test facet for ERC20 storage migration testing.
- * Exposes storage accessors to set up legacy storage state and verify migration behavior.
- * This is an abstract contract to avoid implementing interface requirements not relevant for testing.
- * This facet is for testing purposes only and should not be deployed to production.
+ * @title Migration Facet Test Contract
+ * @notice Provides testing utilities for ERC20 storage migration functionality
+ * @dev Abstract contract exposing storage accessors to simulate legacy states and verify migration behaviour
+ * @author Hashgraph
  */
 contract MigrationFacetTest is IStaticFunctionSelectors {
     // Legacy Storage Setters (for test setup)
 
     /**
-     * @dev Sets the legacy totalSupply in ERC1410BasicStorage (for testing).
-     * @param _value The totalSupply value to set in legacy storage
+     * @notice Sets the legacy total supply value for testing purposes
+     * @dev Mutates the deprecated storage directly to simulate pre-migration state
+     * @param _value The total supply amount to set in legacy storage
      */
     function setLegacyTotalSupply(uint256 _value) external {
-        ERC1410StorageWrapper.erc1410BasicStorage().DEPRECATED_totalSupply = _value;
+        ERC1410StorageWrapper.setLegacyTotalSupply(_value);
     }
 
     /**
-     * @dev Sets the legacy balance for a specific token holder in ERC1410BasicStorage (for testing).
-     * @param _tokenHolder The address of the token holder
-     * @param _value The balance value to set in legacy storage
+     * @notice Sets the legacy balance for a specific account for testing purposes
+     * @dev Mutates the deprecated storage directly to simulate pre-migration state
+     * @param _tokenHolder The address whose legacy balance is being set
+     * @param _value The balance amount to set in legacy storage
      */
     function setLegacyBalance(address _tokenHolder, uint256 _value) external {
-        ERC1410StorageWrapper.erc1410BasicStorage().DEPRECATED_balances[_tokenHolder] = _value;
+        ERC1410StorageWrapper.setLegacyBalance(_tokenHolder, _value);
     }
 
     // Migration Functions (for test verification)
 
     /**
-     * @dev Migrates the totalSupply from legacy to new storage (manually trigger for testing).
+     * @notice Manually triggers migration of total supply from legacy to new storage
+     * @dev Callable only for testing to verify migration logic independently
      */
     function migrateTotalSupply() external {
         ERC20StorageWrapper.migrateTotalSupplyIfNeeded();
     }
 
     /**
-     * @dev Migrates the balance for a specific token holder from legacy to new storage (manually trigger for testing).
-     * @param _tokenHolder The address of the token holder
+     * @notice Manually triggers migration of a specific account's balance from legacy to new storage
+     * @dev Callable only for testing to verify migration logic independently
+     * @param _tokenHolder The address whose balance should be migrated
      */
     function migrateBalance(address _tokenHolder) external {
         ERC20StorageWrapper.migrateBalanceIfNeeded(_tokenHolder);
     }
 
     /**
-     * @dev Migrates all balances for all token holders from legacy to new storage.
+     * @notice Triggers migration of all account balances from legacy to new storage
+     * @dev Performs full data migration across all registered token holders
      */
     function migrateAll() external {
-        ERC1410BasicStorage storage $ = ERC1410StorageWrapper.erc1410BasicStorage();
-
-        // Migrate total supply
-        if ($.DEPRECATED_totalSupply != 0) {
-            ERC20StorageWrapper.migrateTotalSupplyIfNeeded();
-        }
-
-        // Migrate all balances
-        uint256 totalTokenHolders = $.totalTokenHolders;
-        for (uint256 i = 1; i <= totalTokenHolders; i++) {
-            address holder = $.tokenHolders[i];
-            ERC20StorageWrapper.migrateBalanceIfNeeded(holder);
-        }
+        ERC1410StorageWrapper.migrateAll();
     }
 
     // Legacy Storage Getters (for test verification)
 
     /**
-     * @dev Gets the legacy totalSupply from ERC1410BasicStorage.
-     * @return legacyTotalSupply_ The totalSupply in legacy storage
+     * @notice Retrieves the current legacy total supply value
+     * @dev Reads directly from the deprecated storage slot for verification
+     * @return legacyTotalSupply_ The total supply stored in legacy storage
      */
     function getLegacyTotalSupply() external view returns (uint256 legacyTotalSupply_) {
-        legacyTotalSupply_ = ERC1410StorageWrapper.erc1410BasicStorage().DEPRECATED_totalSupply;
+        legacyTotalSupply_ = ERC1410StorageWrapper.getDeprecatedTotalSupply();
     }
 
     /**
-     * @dev Gets the legacy balance for a specific token holder from ERC1410BasicStorage.
-     * @param _tokenHolder The address of the token holder
-     * @return legacyBalance_ The balance in legacy storage
+     * @notice Retrieves the current legacy balance for a specific account
+     * @dev Reads directly from the deprecated storage mapping for verification
+     * @param _tokenHolder The address whose legacy balance is retrieved
+     * @return legacyBalance_ The balance stored in legacy storage
      */
     function getLegacyBalance(address _tokenHolder) external view returns (uint256 legacyBalance_) {
-        legacyBalance_ = ERC1410StorageWrapper.erc1410BasicStorage().DEPRECATED_balances[_tokenHolder];
+        legacyBalance_ = ERC1410StorageWrapper.getDeprecatedBalanceOf(_tokenHolder);
     }
 
     // New Storage Getters (for test verification)
 
     /**
-     * @dev Gets the new totalSupply from ERC20Storage.
-     * @return newTotalSupply_ The totalSupply in new storage
+     * @notice Retrieves the current new total supply value
+     * @dev Reads from the updated storage structure post-migration
+     * @return newTotalSupply_ The total supply stored in new storage
      */
     function getNewTotalSupply() external view returns (uint256 newTotalSupply_) {
-        newTotalSupply_ = ERC20StorageWrapper.erc20Storage().totalSupply;
+        newTotalSupply_ = ERC20StorageWrapper.getNewTotalSuppl();
     }
 
     /**
-     * @dev Gets the new balance for a specific token holder from ERC20Storage.
-     * @param _tokenHolder The address of the token holder
-     * @return newBalance_ The balance in new storage
+     * @notice Retrieves the current new balance for a specific account
+     * @dev Reads from the updated storage mapping post-migration
+     * @param _tokenHolder The address whose new balance is retrieved
+     * @return newBalance_ The balance stored in new storage
      */
     function getNewBalance(address _tokenHolder) external view returns (uint256 newBalance_) {
-        newBalance_ = ERC20StorageWrapper.erc20Storage().balances[_tokenHolder];
+        newBalance_ = ERC20StorageWrapper.getNewBalanceOf(_tokenHolder);
     }
 
     /**
-     * @dev Checks if the totalSupply has been migrated (legacy is 0 and new is non-zero).
-     * @return isMigrated_ True if migrated, false otherwise
+     * @notice Verifies whether the total supply has been successfully migrated
+     * @dev Checks that legacy storage is zeroed and new storage contains the expected value
+     * @return isMigrated_ True if migration is complete, false otherwise
      */
     function isMigrated() external view returns (bool isMigrated_) {
-        ERC1410BasicStorage storage $ = ERC1410StorageWrapper.erc1410BasicStorage();
-
-        // Check totalSupply migration
-        if ($.DEPRECATED_totalSupply != 0) {
-            return false;
-        }
-
-        // Check if any balances are still in legacy storage
-        uint256 totalTokenHolders = $.totalTokenHolders;
-        for (uint256 i = 1; i <= totalTokenHolders; i++) {
-            address holder = $.tokenHolders[i];
-            if ($.DEPRECATED_balances[holder] != 0) {
-                return false;
-            }
-        }
-
-        return true;
+        isMigrated_ = ERC1410StorageWrapper.isMigrated();
     }
 
+    /**
+     * @notice Returns function selectors supported by this facet for proxy resolution
+     * @dev Implements IStaticFunctionSelectors to enable deterministic proxy routing
+     * @return staticFunctionSelectors_ Array of function selectors managed by this facet
+     */
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         staticFunctionSelectors_ = new bytes4[](10);
         uint256 selectorIndex;
@@ -144,10 +131,20 @@ contract MigrationFacetTest is IStaticFunctionSelectors {
         staticFunctionSelectors_[selectorIndex++] = this.isMigrated.selector;
     }
 
+    /**
+     * @notice Returns interface IDs supported by this facet
+     * @dev Currently returns empty array as no additional interfaces are implemented
+     * @return staticInterfaceIds_ Empty array of interface IDs
+     */
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](0);
     }
 
+    /**
+     * @notice Returns resolver key used for identifying this facet in proxy deployments
+     * @dev Uses keccak256 hash of contract name for deterministic identification
+     * @return staticResolverKey_ Unique identifier for this facet
+     */
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = keccak256("MigrationFacetTest");
     }

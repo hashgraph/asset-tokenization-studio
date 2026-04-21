@@ -12,7 +12,7 @@ import { AddressValidation } from "../../infrastructure/utils/AddressValidation.
  * consistent addresses format across the codebase.
  *
  * @notice Modifiers are MANDATORY unless compilation fails or bytecode exceeds limits
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract AddressModifiers {
     /**

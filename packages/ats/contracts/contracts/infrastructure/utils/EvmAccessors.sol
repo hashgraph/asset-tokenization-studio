@@ -6,7 +6,7 @@ pragma solidity >=0.8.0 <0.9.0;
 /// @dev Similar pattern to TimeTravelStorageWrapper but for msg.sender, tx.origin, and chainId.
 ///      In production (non-Hardhat), the override slots are always 0 and native values are returned.
 ///      Test facets can write to these slots during tests.
-/// @author ATS Team
+/// @author Hashgraph
 library EvmAccessors {
     // keccak256('security.token.standard.test.evm.sender')
     bytes32 private constant _SENDER_OVERRIDE_SLOT = 0x6dffada92f87e08031a64f3c82fa9d9b647a47b516130bdc52f646d498adc7f0;

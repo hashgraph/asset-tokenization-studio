@@ -12,7 +12,7 @@ import { BondStorageWrapper } from "../../domain/asset/BondStorageWrapper.sol";
  * keeping BondStorageWrapper as a library.
  *
  * @notice Inherit from this contract to gain access to maturity modifiers
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract MaturityModifiers {
     /**

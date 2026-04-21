@@ -12,7 +12,7 @@ import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.
  * keeping ERC1410StorageWrapper as a library.
  *
  * @notice Inherit from this contract to gain access to partition validation modifiers
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract PartitionValidationModifiers {
     /**
