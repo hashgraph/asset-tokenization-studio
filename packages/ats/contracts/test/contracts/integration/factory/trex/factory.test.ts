@@ -24,6 +24,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture } from "@test";
 import { ADDRESS_ZERO, EQUITY_CONFIG_ID, BOND_CONFIG_ID, ATS_ROLES } from "@scripts";
 import { Rbac } from "@scripts/domain";
+import { decodeEvent } from "@scripts/infrastructure";
 import { getSecurityData, getRegulationData } from "@test";
 import { getEquityDetails } from "@test";
 import { getBondDetails } from "@test";
@@ -142,7 +143,7 @@ describe("TREX Factory Tests", () => {
         factoryAts
           .connect(deployer)
           .deployTREXSuiteAtsEquity("salt-equity", tokenDetails, claimDetails, equityData, factoryRegulationData),
-      ).to.revertedWith("token already deployed");
+      ).to.be.revertedWith("token already deployed");
     });
 
     it("GIVEN an invalid claim pattern THEN transaction reverts with claim pattern not valid", async () => {
@@ -163,7 +164,7 @@ describe("TREX Factory Tests", () => {
         factoryAts
           .connect(deployer)
           .deployTREXSuiteAtsEquity("salt-equity", tokenDetails, claimDetails, equityData, factoryRegulationData),
-      ).to.revertedWith("claim pattern not valid");
+      ).to.be.revertedWith("claim pattern not valid");
     });
 
     it("GIVEN max claim issuers exceeded THEN transaction reverts with max 5 claim issuers at deployment", async () => {
@@ -185,7 +186,7 @@ describe("TREX Factory Tests", () => {
         factoryAts
           .connect(deployer)
           .deployTREXSuiteAtsEquity("salt-equity", tokenDetails, claimDetails, equityData, factoryRegulationData),
-      ).to.revertedWith("max 5 claim issuers at deployment");
+      ).to.be.revertedWith("max 5 claim issuers at deployment");
     });
 
     it("GIVEN max claim topics exceeded THEN transaction reverts with max 5 claim topics at deployment", async () => {
@@ -206,7 +207,7 @@ describe("TREX Factory Tests", () => {
         factoryAts
           .connect(deployer)
           .deployTREXSuiteAtsEquity("salt-equity", tokenDetails, claimDetails, equityData, factoryRegulationData),
-      ).to.revertedWith("max 5 claim topics at deployment");
+      ).to.be.revertedWith("max 5 claim topics at deployment");
     });
 
     it("GIVEN max ir agents exceeded THEN transaction reverts with max 5 agents at deployment", async () => {
@@ -227,7 +228,7 @@ describe("TREX Factory Tests", () => {
         factoryAts
           .connect(deployer)
           .deployTREXSuiteAtsEquity("salt-equity", tokenDetails, claimDetails, equityData, factoryRegulationData),
-      ).to.revertedWith("max 5 agents at deployment");
+      ).to.be.revertedWith("max 5 agents at deployment");
     });
 
     it("GIVEN max token agents exceeded THEN transaction reverts with max 5 agents at deployment", async () => {
@@ -248,7 +249,7 @@ describe("TREX Factory Tests", () => {
         factoryAts
           .connect(deployer)
           .deployTREXSuiteAtsEquity("salt-equity", tokenDetails, claimDetails, equityData, factoryRegulationData),
-      ).to.revertedWith("max 5 agents at deployment");
+      ).to.be.revertedWith("max 5 agents at deployment");
     });
 
     it("GIVEN max token agents exceeded THEN transaction reverts with max 5 agents at deployment", async () => {
@@ -269,7 +270,7 @@ describe("TREX Factory Tests", () => {
         factoryAts
           .connect(deployer)
           .deployTREXSuiteAtsEquity("salt-equity", tokenDetails, claimDetails, equityData, factoryRegulationData),
-      ).to.revertedWith("max 5 agents at deployment");
+      ).to.be.revertedWith("max 5 agents at deployment");
     });
 
     it("GIVEN max modules actions exceeded THEN transaction reverts with max 30 module actions at deployment", async () => {
@@ -313,18 +314,8 @@ describe("TREX Factory Tests", () => {
 
       const deploymentReceipt = await deploymentResult.wait();
 
-      const trexSuiteDeployedEvent = deploymentReceipt!.logs
-        .map((log) => {
-          try {
-            return factoryAts.interface.parseLog({ topics: log.topics as string[], data: log.data });
-          } catch {
-            return null;
-          }
-        })
-        .find((parsed) => parsed?.name === "TREXSuiteDeployed");
-      expect(trexSuiteDeployedEvent).to.not.be.undefined;
-
-      const [trexAddr] = trexSuiteDeployedEvent?.args || [];
+      const decoded = await decodeEvent(factoryAts, "TREXSuiteDeployed", deploymentReceipt);
+      const trexAddr = decoded._token;
 
       await setFacets(trexAddr);
 
@@ -917,7 +908,7 @@ describe("TREX Factory Tests", () => {
         factoryAts
           .connect(deployer)
           .deployTREXSuiteAtsBond("salt-bond", tokenDetails, claimDetails, bondData, factoryRegulationData),
-      ).to.revertedWith("token already deployed");
+      ).to.be.revertedWith("token already deployed");
     });
 
     it("GIVEN an invalid claim pattern THEN transaction reverts with claim pattern not valid", async () => {
@@ -940,7 +931,7 @@ describe("TREX Factory Tests", () => {
         factoryAts
           .connect(deployer)
           .deployTREXSuiteAtsBond("salt-bond", tokenDetails, claimDetails, bondData, factoryRegulationData),
-      ).to.revertedWith("claim pattern not valid");
+      ).to.be.revertedWith("claim pattern not valid");
     });
 
     it("GIVEN max claim issuers exceeded THEN transaction reverts with max 5 claim issuers at deployment", async () => {
@@ -964,7 +955,7 @@ describe("TREX Factory Tests", () => {
         factoryAts
           .connect(deployer)
           .deployTREXSuiteAtsBond("salt-bond", tokenDetails, claimDetails, bondData, factoryRegulationData),
-      ).to.revertedWith("max 5 claim issuers at deployment");
+      ).to.be.revertedWith("max 5 claim issuers at deployment");
     });
 
     it("GIVEN max claim topics exceeded THEN transaction reverts with max 5 claim topics at deployment", async () => {
@@ -987,7 +978,7 @@ describe("TREX Factory Tests", () => {
         factoryAts
           .connect(deployer)
           .deployTREXSuiteAtsBond("salt-bond", tokenDetails, claimDetails, bondData, factoryRegulationData),
-      ).to.revertedWith("max 5 claim topics at deployment");
+      ).to.be.revertedWith("max 5 claim topics at deployment");
     });
 
     it("GIVEN max ir agents exceeded THEN transaction reverts with max 5 agents at deployment", async () => {
@@ -1010,7 +1001,7 @@ describe("TREX Factory Tests", () => {
         factoryAts
           .connect(deployer)
           .deployTREXSuiteAtsBond("salt-bond", tokenDetails, claimDetails, bondData, factoryRegulationData),
-      ).to.revertedWith("max 5 agents at deployment");
+      ).to.be.revertedWith("max 5 agents at deployment");
     });
 
     it("GIVEN max token agents exceeded THEN transaction reverts with max 5 agents at deployment", async () => {
@@ -1033,7 +1024,7 @@ describe("TREX Factory Tests", () => {
         factoryAts
           .connect(deployer)
           .deployTREXSuiteAtsBond("salt-bond", tokenDetails, claimDetails, bondData, factoryRegulationData),
-      ).to.revertedWith("max 5 agents at deployment");
+      ).to.be.revertedWith("max 5 agents at deployment");
     });
 
     it("GIVEN max modules actions exceeded THEN transaction reverts with max 30 module actions at deployment", async () => {
@@ -1182,18 +1173,8 @@ describe("TREX Factory Tests", () => {
 
       const deploymentReceipt = await deploymentResult.wait();
 
-      const trexSuiteDeployedEvent = deploymentReceipt!.logs
-        .map((log) => {
-          try {
-            return factoryAts.interface.parseLog({ topics: log.topics as string[], data: log.data });
-          } catch {
-            return null;
-          }
-        })
-        .find((parsed) => parsed?.name === "TREXSuiteDeployed");
-      expect(trexSuiteDeployedEvent).to.not.be.undefined;
-
-      const [trexAddr] = trexSuiteDeployedEvent?.args || [];
+      const decoded = await decodeEvent(factoryAts, "TREXSuiteDeployed", deploymentReceipt);
+      const trexAddr = decoded._token;
 
       await setFacets(trexAddr);
 

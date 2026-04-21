@@ -4,11 +4,14 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _FIXED_RATE_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { _KPI_LINKED_RATE_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { _SUSTAINABILITY_PERFORMANCE_TARGET_RATE_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { IKpiLinkedRate } from "../../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
+import { IKpiLinkedRateErrors } from "../../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRateErrors.sol";
 /* solhint-disable max-line-length */
 import {
     ISustainabilityPerformanceTargetRate
 } from "../../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+import {
+    ISustainabilityPerformanceTargetRateTypes
+} from "../../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRateTypes.sol";
 /* solhint-enable max-line-length */
 
 struct FixedRateDataStorage {
@@ -39,7 +42,7 @@ struct SustainabilityPerformanceTargetRateDataStorage {
     uint256 startPeriod;
     uint256 startRate;
     uint8 rateDecimals;
-    mapping(address project => ISustainabilityPerformanceTargetRate.ImpactData impactData) impactDataByProject;
+    mapping(address project => ISustainabilityPerformanceTargetRateTypes.ImpactData impactData) impactDataByProject;
     bool initialized;
 }
 
@@ -50,7 +53,7 @@ library InterestRateStorageWrapper {
         frs.decimals = _newRateDecimals;
     }
 
-    function setInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) internal {
+    function setInterestRate(IKpiLinkedRateErrors.InterestRate calldata _newInterestRate) internal {
         KpiLinkedRateDataStorage storage kpiRateStorage = kpiLinkedRateStorage();
         kpiRateStorage.maxRate = _newInterestRate.maxRate;
         kpiRateStorage.baseRate = _newInterestRate.baseRate;
@@ -62,7 +65,7 @@ library InterestRateStorageWrapper {
         kpiRateStorage.rateDecimals = _newInterestRate.rateDecimals;
     }
 
-    function setImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) internal {
+    function setImpactData(IKpiLinkedRateErrors.ImpactData calldata _newImpactData) internal {
         KpiLinkedRateDataStorage storage kpiRateStorage = kpiLinkedRateStorage();
         kpiRateStorage.maxDeviationCap = _newImpactData.maxDeviationCap;
         kpiRateStorage.baseLine = _newImpactData.baseLine;
@@ -73,8 +76,8 @@ library InterestRateStorageWrapper {
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_SustainabilityPerformanceTargetRate(
-        ISustainabilityPerformanceTargetRate.InterestRate calldata _interestRate,
-        ISustainabilityPerformanceTargetRate.ImpactData[] calldata _impactData,
+        ISustainabilityPerformanceTargetRateTypes.InterestRate calldata _interestRate,
+        ISustainabilityPerformanceTargetRateTypes.ImpactData[] calldata _impactData,
         address[] calldata _projects,
         function(address) view returns (bool) _isProceedRecipient
     ) internal {
@@ -82,7 +85,8 @@ library InterestRateStorageWrapper {
         uint256 length = _impactData.length;
         for (uint256 index; index < length; ) {
             address project = _projects[index];
-            if (!_isProceedRecipient(project)) revert ISustainabilityPerformanceTargetRate.NotExistingProject(project);
+            if (!_isProceedRecipient(project))
+                revert ISustainabilityPerformanceTargetRateTypes.NotExistingProject(project);
             setSPTImpactData(_impactData[index], project);
             unchecked {
                 ++index;
@@ -92,7 +96,9 @@ library InterestRateStorageWrapper {
         sustainabilityPerformanceTargetRateStorage().initialized = true;
     }
 
-    function setSPTInterestRate(ISustainabilityPerformanceTargetRate.InterestRate calldata _newInterestRate) internal {
+    function setSPTInterestRate(
+        ISustainabilityPerformanceTargetRateTypes.InterestRate calldata _newInterestRate
+    ) internal {
         SustainabilityPerformanceTargetRateDataStorage
             storage sptStorage = sustainabilityPerformanceTargetRateStorage();
         sptStorage.baseRate = _newInterestRate.baseRate;
@@ -102,10 +108,10 @@ library InterestRateStorageWrapper {
     }
 
     function setSPTImpactData(
-        ISustainabilityPerformanceTargetRate.ImpactData calldata _newImpactData,
+        ISustainabilityPerformanceTargetRateTypes.ImpactData calldata _newImpactData,
         address _project
     ) internal {
-        ISustainabilityPerformanceTargetRate.ImpactData
+        ISustainabilityPerformanceTargetRateTypes.ImpactData
             storage impactData = sustainabilityPerformanceTargetRateStorage().impactDataByProject[_project];
         impactData.baseLine = _newImpactData.baseLine;
         impactData.baseLineMode = _newImpactData.baseLineMode;
@@ -116,11 +122,11 @@ library InterestRateStorageWrapper {
     function getSPTInterestRate()
         internal
         view
-        returns (ISustainabilityPerformanceTargetRate.InterestRate memory interestRate_)
+        returns (ISustainabilityPerformanceTargetRateTypes.InterestRate memory interestRate_)
     {
         SustainabilityPerformanceTargetRateDataStorage
             storage sptStorage = sustainabilityPerformanceTargetRateStorage();
-        interestRate_ = ISustainabilityPerformanceTargetRate.InterestRate({
+        interestRate_ = ISustainabilityPerformanceTargetRateTypes.InterestRate({
             baseRate: sptStorage.baseRate,
             startPeriod: sptStorage.startPeriod,
             startRate: sptStorage.startRate,
@@ -130,7 +136,7 @@ library InterestRateStorageWrapper {
 
     function getSPTImpactDataFor(
         address _project
-    ) internal view returns (ISustainabilityPerformanceTargetRate.ImpactData memory impactData_) {
+    ) internal view returns (ISustainabilityPerformanceTargetRateTypes.ImpactData memory impactData_) {
         return sustainabilityPerformanceTargetRateStorage().impactDataByProject[_project];
     }
 
@@ -151,9 +157,9 @@ library InterestRateStorageWrapper {
         decimals_ = fixedRateStorage().decimals;
     }
 
-    function getInterestRate() internal view returns (IKpiLinkedRate.InterestRate memory interestRate_) {
+    function getInterestRate() internal view returns (IKpiLinkedRateErrors.InterestRate memory interestRate_) {
         KpiLinkedRateDataStorage storage kpiRateStorage = kpiLinkedRateStorage();
-        interestRate_ = IKpiLinkedRate.InterestRate({
+        interestRate_ = IKpiLinkedRateErrors.InterestRate({
             maxRate: kpiRateStorage.maxRate,
             baseRate: kpiRateStorage.baseRate,
             minRate: kpiRateStorage.minRate,
@@ -165,9 +171,9 @@ library InterestRateStorageWrapper {
         });
     }
 
-    function getImpactData() internal view returns (IKpiLinkedRate.ImpactData memory impactData_) {
+    function getImpactData() internal view returns (IKpiLinkedRateErrors.ImpactData memory impactData_) {
         KpiLinkedRateDataStorage storage kpiRateStorage = kpiLinkedRateStorage();
-        impactData_ = IKpiLinkedRate.ImpactData({
+        impactData_ = IKpiLinkedRateErrors.ImpactData({
             maxDeviationCap: kpiRateStorage.maxDeviationCap,
             baseLine: kpiRateStorage.baseLine,
             maxDeviationFloor: kpiRateStorage.maxDeviationFloor,
@@ -176,26 +182,26 @@ library InterestRateStorageWrapper {
         });
     }
 
-    function requireValidInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) internal pure {
+    function requireValidInterestRate(IKpiLinkedRateErrors.InterestRate calldata _newInterestRate) internal pure {
         if (
             _newInterestRate.minRate > _newInterestRate.baseRate || _newInterestRate.baseRate > _newInterestRate.maxRate
         ) {
-            revert IKpiLinkedRate.WrongInterestRateValues(_newInterestRate);
+            revert IKpiLinkedRateErrors.WrongInterestRateValues(_newInterestRate);
         }
     }
 
-    function requireValidImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) internal pure {
+    function requireValidImpactData(IKpiLinkedRateErrors.ImpactData calldata _newImpactData) internal pure {
         if (
             _newImpactData.maxDeviationFloor > _newImpactData.baseLine ||
             _newImpactData.baseLine > _newImpactData.maxDeviationCap
         ) {
-            revert IKpiLinkedRate.WrongImpactDataValues(_newImpactData);
+            revert IKpiLinkedRateErrors.WrongImpactDataValues(_newImpactData);
         }
     }
 
     function requireEqualLength(uint256 len1, uint256 len2) internal pure {
         if (len1 != len2) {
-            revert ISustainabilityPerformanceTargetRate.ProvidedListsLengthMismatch(len1, len2);
+            revert ISustainabilityPerformanceTargetRateTypes.ProvidedListsLengthMismatch(len1, len2);
         }
     }
 

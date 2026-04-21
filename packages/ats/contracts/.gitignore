@@ -71,3 +71,5 @@ deployments/**/.checkpoints/
 
 # Engram AI agent memory
 .engram/
+
+gasReporterOutput.json

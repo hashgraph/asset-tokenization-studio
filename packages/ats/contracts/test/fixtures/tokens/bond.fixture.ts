@@ -7,6 +7,7 @@ import {
   PauseFacet__factory,
   KycFacet__factory,
   ControlListFacet__factory,
+  IAsset__factory,
 } from "@contract-types";
 import { DeployBondFromFactoryParams, deployBondFromFactory } from "@scripts/domain";
 import { BondDetailsDataParams, FactoryRegulationDataParams } from "@scripts/domain";
@@ -97,6 +98,7 @@ export async function deployBondTokenFixture({
   const pauseFacet = PauseFacet__factory.connect(diamond.target as string, deployer);
   const kycFacet = KycFacet__factory.connect(diamond.target as string, deployer);
   const controlListFacet = ControlListFacet__factory.connect(diamond.target as string, deployer);
+  const asset = IAsset__factory.connect(diamond.target as string, deployer);
 
   await accessControlFacet.grantRole(ATS_ROLES._NOMINAL_VALUE_ROLE, deployer.address);
 
@@ -112,5 +114,6 @@ export async function deployBondTokenFixture({
     pauseFacet,
     kycFacet,
     controlListFacet,
+    asset,
   };
 }

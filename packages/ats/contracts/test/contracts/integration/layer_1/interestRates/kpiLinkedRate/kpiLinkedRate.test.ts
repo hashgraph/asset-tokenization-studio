@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, Pause, KpiLinkedRate } from "@contract-types";
+import { type ResolverProxy, type IAsset, KpiLinkedRate } from "@contract-types";
 import { ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { DEFAULT_BOND_KPI_LINKED_RATE_PARAMS, deployBondKpiLinkedRateTokenFixture } from "@test";
@@ -16,7 +16,7 @@ describe("Kpi Linked Rate Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let kpiLinkedRateFacet: KpiLinkedRate;
-  let pauseFacet: Pause;
+  let asset: IAsset;
 
   async function deploySecurityFixtureMultiPartition() {
     const base = await deployBondKpiLinkedRateTokenFixture();
@@ -25,7 +25,8 @@ describe("Kpi Linked Rate Tests", () => {
     signer_B = base.user2;
     signer_C = base.user3;
 
-    await executeRbac(base.accessControlFacet, [
+    asset = await ethers.getContractAt("IAsset", diamond.target);
+    await executeRbac(asset, [
       {
         role: ATS_ROLES._PAUSER_ROLE,
         members: [signer_B.address],
@@ -37,7 +38,6 @@ describe("Kpi Linked Rate Tests", () => {
     ]);
 
     kpiLinkedRateFacet = await ethers.getContractAt("KpiLinkedRate", diamond.target, signer_A);
-    pauseFacet = await ethers.getContractAt("Pause", diamond.target, signer_A);
   }
 
   beforeEach(async () => {
@@ -65,13 +65,13 @@ describe("Kpi Linked Rate Tests", () => {
           adjustmentPrecision: 3,
         },
       ),
-    ).to.be.revertedWithCustomError(kpiLinkedRateFacet, "AlreadyInitialized");
+    ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
   });
 
   describe("Paused", () => {
     beforeEach(async () => {
       // Pausing the token
-      await pauseFacet.connect(signer_B).pause();
+      await asset.connect(signer_B).pause();
     });
 
     it("GIVEN a paused Token WHEN setInterestRate THEN transaction fails with TokenIsPaused", async () => {
@@ -87,7 +87,7 @@ describe("Kpi Linked Rate Tests", () => {
           reportPeriod: 5000,
           rateDecimals: 1,
         }),
-      ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
     });
 
     it("GIVEN a paused Token WHEN setImpactData THEN transaction fails with TokenIsPaused", async () => {
@@ -100,7 +100,7 @@ describe("Kpi Linked Rate Tests", () => {
           impactDataDecimals: 1,
           adjustmentPrecision: 3,
         }),
-      ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
     });
   });
 
@@ -118,7 +118,7 @@ describe("Kpi Linked Rate Tests", () => {
           reportPeriod: 5000,
           rateDecimals: 1,
         }),
-      ).to.be.revertedWithCustomError(kpiLinkedRateFacet, "AccountHasNoRole");
+      ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
     it("GIVEN an account without interest rate manager role WHEN setImpactData THEN transaction fails with AccountHasNoRole", async () => {
@@ -131,7 +131,7 @@ describe("Kpi Linked Rate Tests", () => {
           impactDataDecimals: 1,
           adjustmentPrecision: 3,
         }),
-      ).to.be.revertedWithCustomError(kpiLinkedRateFacet, "AccountHasNoRole");
+      ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
   });
 
@@ -149,7 +149,7 @@ describe("Kpi Linked Rate Tests", () => {
           reportPeriod: 5000,
           rateDecimals: 1,
         }),
-      ).to.be.revertedWithCustomError(kpiLinkedRateFacet, "WrongInterestRateValues");
+      ).to.be.revertedWithCustomError(asset, "WrongInterestRateValues");
     });
 
     it("GIVEN Base Rate larger than Max Rate WHEN setInterestRate THEN transaction fails with WrongInterestRateValues", async () => {
@@ -165,7 +165,7 @@ describe("Kpi Linked Rate Tests", () => {
           reportPeriod: 5000,
           rateDecimals: 1,
         }),
-      ).to.be.revertedWithCustomError(kpiLinkedRateFacet, "WrongInterestRateValues");
+      ).to.be.revertedWithCustomError(asset, "WrongInterestRateValues");
     });
 
     it("GIVEN correct interest rate WHEN setInterestRate THEN transaction succeeds", async () => {
@@ -217,7 +217,7 @@ describe("Kpi Linked Rate Tests", () => {
           impactDataDecimals: 1,
           adjustmentPrecision: 8,
         }),
-      ).to.be.revertedWithCustomError(kpiLinkedRateFacet, "WrongImpactDataValues");
+      ).to.be.revertedWithCustomError(asset, "WrongImpactDataValues");
     });
 
     it("GIVEN Base Line larger than Max Deviation Cap WHEN setImpactData THEN transaction fails with WrongImpactDataValues", async () => {
@@ -230,7 +230,7 @@ describe("Kpi Linked Rate Tests", () => {
           impactDataDecimals: 1,
           adjustmentPrecision: 8,
         }),
-      ).to.be.revertedWithCustomError(kpiLinkedRateFacet, "WrongImpactDataValues");
+      ).to.be.revertedWithCustomError(asset, "WrongImpactDataValues");
     });
 
     it("GIVEN correct impact data WHEN setImpactData THEN transaction succeeds", async () => {

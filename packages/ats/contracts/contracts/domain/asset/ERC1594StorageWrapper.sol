@@ -129,7 +129,7 @@ library ERC1594StorageWrapper {
             return (
                 false,
                 Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-                IControlList.AccountIsBlocked.selector,
+                ICommonErrors.AccountIsBlocked.selector,
                 EMPTY_BYTES
             );
         }
@@ -293,7 +293,7 @@ library ERC1594StorageWrapper {
         }
 
         if (!ControlListStorageWrapper.isAbleToAccess(account)) {
-            return (false, Eip1066.DISALLOWED_OR_STOP, IControlList.AccountIsBlocked.selector, details);
+            return (false, Eip1066.DISALLOWED_OR_STOP, ICommonErrors.AccountIsBlocked.selector, details);
         }
 
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);

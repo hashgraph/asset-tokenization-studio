@@ -1,37 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-interface ISustainabilityPerformanceTargetRate {
-    enum BaseLineMode {
-        MINIMUM,
-        MAXIMUM
-    }
+import { ISustainabilityPerformanceTargetRateTypes } from "./ISustainabilityPerformanceTargetRateTypes.sol";
 
-    enum ImpactDataMode {
-        PENALTY,
-        BONUS
-    }
-
-    struct InterestRate {
-        uint256 baseRate;
-        uint256 startPeriod;
-        uint256 startRate;
-        uint8 rateDecimals;
-    }
-
-    struct ImpactData {
-        uint256 baseLine;
-        BaseLineMode baseLineMode;
-        uint256 deltaRate;
-        ImpactDataMode impactDataMode;
-    }
+interface ISustainabilityPerformanceTargetRate is ISustainabilityPerformanceTargetRateTypes {
+    // Structs, enums and errors are inherited from ISustainabilityPerformanceTargetRateErrors
 
     event InterestRateUpdated(address indexed operator, InterestRate newInterestRate);
     event ImpactDataUpdated(address indexed operator, ImpactData[] newImpactData, address[] projects);
-
-    error NotExistingProject(address);
-    error ProvidedListsLengthMismatch(uint256 impactDataLength, uint256 projectsLength);
-    error InterestRateIsSustainabilityPerformanceTargetRate();
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_SustainabilityPerformanceTargetRate(

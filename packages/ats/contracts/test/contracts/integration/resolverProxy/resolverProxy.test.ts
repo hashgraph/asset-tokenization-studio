@@ -91,7 +91,6 @@ describe("ResolverProxy Tests", () => {
   }
 
   beforeEach(async () => {
-    //await loadFixture(deployContracts)
     await loadFixture(deployContracts);
   });
 

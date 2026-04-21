@@ -28,6 +28,7 @@ import {
   BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
 } from "@scripts";
 import { Rbac, SecurityType } from "@scripts/domain";
+import { decodeEvent } from "@scripts/infrastructure";
 import { getBondDetails } from "@test";
 
 describe("Factory Tests", () => {
@@ -241,7 +242,10 @@ describe("Factory Tests", () => {
           version: 1,
         };
 
-        await expect(factory.deployEquity(equityData, getRegulationData())).to.be.rejectedWith("WrongISIN");
+        await expect(factory.deployEquity(equityData, getRegulationData())).to.be.revertedWithCustomError(
+          factory,
+          "WrongISINChecksum",
+        );
       });
 
       it("GIVEN valid ISIN WHEN deploying bond THEN passes checkISIN validation", async () => {
@@ -530,24 +534,13 @@ describe("Factory Tests", () => {
       const result = await tx;
       const receipt = await result.wait();
 
-      const deployedProxyEvent = receipt!.logs
-        .map((log) => {
-          try {
-            return factory.interface.parseLog({
-              topics: log.topics as string[],
-              data: log.data,
-            });
-          } catch {
-            return null;
-          }
-        })
-        .find((parsed) => parsed?.name === "ProxyDeployed");
+      const decoded = await decodeEvent(factory, "ProxyDeployed", receipt);
 
-      const proxyAddress = deployedProxyEvent!.args!.proxyAddress;
-      const resolver = deployedProxyEvent!.args!.resolver;
-      const configKey = deployedProxyEvent!.args!.configKey;
-      const version = deployedProxyEvent!.args!.version;
-      const rbac = deployedProxyEvent!.args!.rbac;
+      const proxyAddress = decoded.proxyAddress;
+      const resolver = decoded.resolver;
+      const configKey = decoded.configKey;
+      const version = decoded.version;
+      const rbac = decoded.rbac;
 
       expect(proxyAddress).not.to.equal(ADDRESS_ZERO);
       expect(proxyAddress).to.equal(expectedProxyAddress);
@@ -702,16 +695,8 @@ describe("Factory Tests", () => {
 
       const result = await tx;
       const receipt = await result.wait();
-      const deployedEquityEvent = receipt!.logs
-        .map((log) => {
-          try {
-            return factory.interface.parseLog({ topics: log.topics as string[], data: log.data });
-          } catch {
-            return null;
-          }
-        })
-        .find((parsed) => parsed?.name === "EquityDeployed");
-      const equityAddress = deployedEquityEvent!.args!.equityAddress;
+      const decoded = await decodeEvent(factory, "EquityDeployed", receipt);
+      const equityAddress = decoded.equityAddress;
 
       await readFacets(equityAddress);
 
@@ -885,16 +870,8 @@ describe("Factory Tests", () => {
 
       const result = await tx;
       const receipt = await result.wait();
-      const deployedBondEvent = receipt!.logs
-        .map((log) => {
-          try {
-            return factory.interface.parseLog({ topics: log.topics as string[], data: log.data });
-          } catch {
-            return null;
-          }
-        })
-        .find((parsed) => parsed?.name === "BondDeployed");
-      const bondAddress = deployedBondEvent!.args!.bondAddress;
+      const decoded = await decodeEvent(factory, "BondDeployed", receipt);
+      const bondAddress = decoded.bondAddress;
 
       await readFacets(bondAddress);
 
@@ -1144,16 +1121,8 @@ describe("Factory Tests", () => {
 
       const result = await tx;
       const receipt = await result.wait();
-      const deployedBondEvent = receipt!.logs
-        .map((log) => {
-          try {
-            return factory.interface.parseLog({ topics: log.topics as string[], data: log.data });
-          } catch {
-            return null;
-          }
-        })
-        .find((parsed) => parsed?.name === "BondFixedRateDeployed");
-      const bondAddress = deployedBondEvent!.args!.bondAddress;
+      const decoded = await decodeEvent(factory, "BondFixedRateDeployed", receipt);
+      const bondAddress = decoded.bondAddress;
 
       // Verify fixed rate was set
       const fixedRateFacet = await ethers.getContractAt("FixedRate", bondAddress);
@@ -1315,16 +1284,8 @@ describe("Factory Tests", () => {
 
       const result = await tx;
       const receipt = await result.wait();
-      const deployedBondEvent = receipt!.logs
-        .map((log) => {
-          try {
-            return factory.interface.parseLog({ topics: log.topics as string[], data: log.data });
-          } catch {
-            return null;
-          }
-        })
-        .find((parsed) => parsed?.name === "BondKpiLinkedRateDeployed");
-      const bondAddress = deployedBondEvent!.args!.bondAddress;
+      const decoded = await decodeEvent(factory, "BondKpiLinkedRateDeployed", receipt);
+      const bondAddress = decoded.bondAddress;
 
       // Verify KPI linked rate was set
       const kpiLinkedRateFacet = await ethers.getContractAt("KpiLinkedRate", bondAddress);
@@ -1709,16 +1670,8 @@ describe("Factory Tests", () => {
 
       const result = await tx;
       const receipt = await result.wait();
-      const deployedBondEvent = receipt!.logs
-        .map((log) => {
-          try {
-            return factory.interface.parseLog({ topics: log.topics as string[], data: log.data });
-          } catch {
-            return null;
-          }
-        })
-        .find((parsed) => parsed?.name === "BondSustainabilityPerformanceTargetRateDeployed");
-      const bondAddress = deployedBondEvent!.args!.bondAddress;
+      const decoded = await decodeEvent(factory, "BondSustainabilityPerformanceTargetRateDeployed", receipt);
+      const bondAddress = decoded.bondAddress;
 
       // Verify sustainability rate was set
       const sustainabilityRateFacet = await ethers.getContractAt("SustainabilityPerformanceTargetRate", bondAddress);

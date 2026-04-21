@@ -675,5 +675,3 @@ bytes32 constant _TRANSFER_AND_LOCK_KPI_LINKED_RATE_RESOLVER_KEY = 0x3e5f7a9b1c2
 
 // keccak256("security.token.standard.transferandlock.SustainabilityPerformanceTarget.rate.resolverKey");
 bytes32 constant _TRANSFER_AND_LOCK_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x9d1e3f5a7b9c0d2e4f6a8b0c1d3e5f7a9b0c2d4e6f8a9b1c3d5e7f9a0b2c4d6e;
-
-

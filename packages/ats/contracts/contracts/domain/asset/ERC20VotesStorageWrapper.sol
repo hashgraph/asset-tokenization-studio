@@ -31,10 +31,6 @@ struct ERC20VotesStorage {
 library ERC20VotesStorageWrapper {
     using Checkpoints for Checkpoints.Checkpoint[];
 
-    event DelegateChanged(address indexed delegator, address indexed fromDelegate, address indexed toDelegate);
-
-    event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance);
-
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20Votes(bool activated) internal {
         setActivate(activated);
@@ -98,7 +94,7 @@ library ERC20VotesStorageWrapper {
 
         erc20VotesStorage_().delegates[delegator] = delegatee;
 
-        emit DelegateChanged(delegator, currentDelegate, delegatee);
+        emit IERC20Votes.DelegateChanged(delegator, currentDelegate, delegatee);
 
         moveVotingPower(
             currentDelegate,
@@ -125,7 +121,7 @@ library ERC20VotesStorageWrapper {
             isAdd,
             amount
         );
-        emit DelegateVotesChanged(account, oldWeight, newWeight);
+        emit IERC20Votes.DelegateVotesChanged(account, oldWeight, newWeight);
     }
 
     function writeCheckpoint(
