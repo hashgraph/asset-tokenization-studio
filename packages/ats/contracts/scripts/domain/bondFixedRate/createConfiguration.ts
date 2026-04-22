@@ -57,7 +57,7 @@ const BOND_FIXED_RATE_FACETS = [
   "ERC1410ReadFacet",
   "ERC1410TokenHolderFacet",
   "ERC1594Facet",
-  "ERC1643Facet",
+  "DocumentationFacet",
   "ERC1644Facet",
   "ERC20PermitFacet",
   "NoncesFacet",

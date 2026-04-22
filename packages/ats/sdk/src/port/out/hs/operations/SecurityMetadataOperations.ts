@@ -4,7 +4,7 @@ import { ContractId } from "@hiero-ledger/sdk";
 import { ethers } from "ethers";
 import {
   ERC3643ManagementFacet__factory,
-  ERC1643Facet__factory,
+  IAsset__factory,
   DiamondFacet__factory,
   FreezeFacet__factory,
   ERC1410ManagementFacet__factory,
@@ -54,7 +54,7 @@ export class SecurityMetadataOperations {
     LogService.logTrace(`Setting document: ${name}, with ${uri}, and hash ${hash} for security ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC1643Facet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "setDocument",
       [name, uri, hash],
       GAS.SET_DOCUMENT,
@@ -69,7 +69,7 @@ export class SecurityMetadataOperations {
     LogService.logTrace(`Removing document: ${name} for security ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC1643Facet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "removeDocument",
       [name],
       GAS.REMOVE_DOCUMENT,

@@ -213,7 +213,7 @@ describe("Checkpoint Resumability - Integration Tests", () => {
             ["ERC20Facet", createDeployedContract("0x5555555555555555555555555555555555555555", "0x222...")],
             ["ERC1410Facet", createDeployedContract("0x6666666666666666666666666666666666666666", "0x333...")],
             ["ERC1594Facet", createDeployedContract("0x7777777777777777777777777777777777777777", "0x444...")],
-            ["ERC1643Facet", createDeployedContract("0x8888888888888888888888888888888888888888", "0x555...")],
+            ["DocumentationFacet", createDeployedContract("0x8888888888888888888888888888888888888888", "0x555...")],
           ]),
         },
       });
@@ -1145,7 +1145,7 @@ describe("Checkpoint Resumability - Integration Tests", () => {
             ["ERC20Facet", createDeployedContract("0xaaaa222222222222222222222222222222222222", "0x222...")],
             ["ERC1410Facet", createDeployedContract("0xaaaa333333333333333333333333333333333333", "0x333...")],
             ["ERC1594Facet", createDeployedContract("0xaaaa444444444444444444444444444444444444", "0x444...")],
-            ["ERC1643Facet", createDeployedContract("0xaaaa555555555555555555555555555555555555", "0x555...")],
+            ["DocumentationFacet", createDeployedContract("0xaaaa555555555555555555555555555555555555", "0x555...")],
           ]),
         },
       });
@@ -1154,7 +1154,7 @@ describe("Checkpoint Resumability - Integration Tests", () => {
       simulateFailureAtStep(
         partialCheckpoint,
         2,
-        "[TEST] Intentional failure after deploying facet #5 (ERC1643Facet) for checkpoint testing",
+        "[TEST] Intentional failure after deploying facet #5 (DocumentationFacet) for checkpoint testing",
         TEST_WORKFLOWS.NEW_BLR,
       );
       await manager.saveCheckpoint(partialCheckpoint);
@@ -1171,13 +1171,13 @@ describe("Checkpoint Resumability - Integration Tests", () => {
       expect(facetNames).to.include("ERC20Facet");
       expect(facetNames).to.include("ERC1410Facet");
       expect(facetNames).to.include("ERC1594Facet");
-      expect(facetNames).to.include("ERC1643Facet");
+      expect(facetNames).to.include("DocumentationFacet");
 
       // Verify addresses match original
       expect(loadedCheckpoint?.steps.facets?.get("AccessControlFacet")?.address).to.equal(
         "0xaaaa111111111111111111111111111111111111",
       );
-      expect(loadedCheckpoint?.steps.facets?.get("ERC1643Facet")?.address).to.equal(
+      expect(loadedCheckpoint?.steps.facets?.get("DocumentationFacet")?.address).to.equal(
         "0xaaaa555555555555555555555555555555555555",
       );
     });

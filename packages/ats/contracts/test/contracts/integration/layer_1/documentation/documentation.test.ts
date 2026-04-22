@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { grantRoleAndPauseToken } from "../../../../../common";
+import { grantRoleAndPauseToken } from "../../../../common";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac } from "@test";
 import { ATS_ROLES } from "@scripts";
@@ -17,7 +17,7 @@ const documentHASH_1 = "0x000000000000000000000000000000000000000000000000000000
 const documentURI_2 = "https://whatever2.com";
 const documentHASH_2 = "0x000000000000000000000000000000000000000000000000000000000002cc32";
 
-describe("ERC1643 Tests", () => {
+describe("Documentation Tests", () => {
   let diamond: ResolverProxy;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
