@@ -9,7 +9,7 @@ import { _CONTROLLER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 /**
  * @title ControllerFacet
  * @notice Diamond facet exposing ERC-1644 forced-transfer operations and ERC-3643 agent management.
- * @dev Registers nine selectors: initialize_ERC1644, isControllable, controllerTransfer,
+ * @dev Registers nine selectors: initialize_Controller, isControllable, controllerTransfer,
  *      controllerRedeem, finalizeControllable, forcedTransfer, addAgent, removeAgent, and isAgent.
  *      Inherits all business logic from the Controller abstract contract.
  */

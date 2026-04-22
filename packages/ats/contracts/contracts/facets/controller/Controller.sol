@@ -15,7 +15,7 @@ import { Modifiers } from "../../services/Modifiers.sol";
  * @title Controller
  * @notice Abstract implementation of ERC-1644 forced-transfer operations and ERC-3643 agent management.
  * @dev Consolidates `controllerTransfer`, `controllerRedeem`, `forcedTransfer`, `finalizeControllable`,
- *      `addAgent`, `removeAgent`, `isControllable`, `isAgent`, and the `initialize_ERC1644` initializer
+ *      `addAgent`, `removeAgent`, `isControllable`, `isAgent`, and the `initialize_Controller` initializer
  *      in a single abstract contract. Forced-transfer functions are restricted to single-partition mode
  *      and require the caller to hold either `_CONTROLLER_ROLE` or `_AGENT_ROLE`. Agent management
  *      functions require the role-admin of `_AGENT_ROLE`.

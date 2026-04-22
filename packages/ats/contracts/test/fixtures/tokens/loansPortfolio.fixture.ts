@@ -155,7 +155,7 @@ export async function deployLoansPortfolioTokenFixture({
 
   await controlListFacet.initializeControlList(securityData.isWhiteList);
   await erc1410ManagementFacet.initialize_ERC1410(securityData.isMultiPartition);
-  await controllerFacet.initialize_ERC1644(securityData.isControllable);
+  await controllerFacet.initialize_Controller(securityData.isControllable);
   await erc20Facet.initialize_ERC20({
     info: {
       name: securityData.erc20MetadataInfo.name,
