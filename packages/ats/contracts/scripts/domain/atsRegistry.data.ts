@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-22T11:27:47.595Z
+ * Generated: 2026-04-22T12:28:04.684Z
  * Facets: 81
  * Infrastructure: 2
  *
@@ -13462,7 +13462,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   DocumentationStorageWrapper: {
     name: "DocumentationStorageWrapper",
-    description: "Library providing diamond storage access and validation checks for the documentation domain.",
+    description: "Library providing diamond storage access and all read/write operations for the documentation domain.",
     methods: [],
   },
 
