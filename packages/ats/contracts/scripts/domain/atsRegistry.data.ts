@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-22T14:34:22.048Z
- * Facets: 86
+ * Generated: 2026-04-22T19:03:02.746Z
+ * Facets: 85
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -3669,9 +3669,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9fc1d0e7",
       },
       {
-        name: "initialize_ERC1644",
-        signature: { full: "function initialize_ERC1644(bool _controllable)", canonical: "initialize_ERC1644(bool)" },
-        selector: "0xaa4ea38e",
+        name: "initialize_Controller",
+        signature: {
+          full: "function initialize_Controller(bool _controllable)",
+          canonical: "initialize_Controller(bool)",
+        },
+        selector: "0x3829cbf1",
       },
       {
         name: "isAgent",
@@ -9878,9 +9881,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9fc1d0e7",
       },
       {
-        name: "initialize_ERC1644",
-        signature: { full: "function initialize_ERC1644(bool _isControllable)", canonical: "initialize_ERC1644(bool)" },
-        selector: "0xaa4ea38e",
+        name: "initialize_Controller",
+        signature: {
+          full: "function initialize_Controller(bool _isControllable)",
+          canonical: "initialize_Controller(bool)",
+        },
+        selector: "0x3829cbf1",
       },
       {
         name: "isAgent",

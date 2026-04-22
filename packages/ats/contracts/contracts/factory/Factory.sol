@@ -323,7 +323,7 @@ contract Factory is IFactory {
         _tryInitialize_ERC1410(securityAddress_, _securityData.isMultiPartition);
 
         // configure controller flag (ControllerFacet may not be present)
-        _tryInitialize_ERC1644(securityAddress_, _securityData.isControllable);
+        _tryInitialize_Controller(securityAddress_, _securityData.isControllable);
 
         // configure erc20 metadata (ERC20Facet may not be present)
         IERC20.ERC20Metadata memory erc20Metadata = IERC20.ERC20Metadata({
@@ -373,8 +373,8 @@ contract Factory is IFactory {
         }
     }
 
-    function _tryInitialize_ERC1644(address securityAddress_, bool isControllable) private {
-        try IControllerFacet(securityAddress_).initialize_ERC1644(isControllable) {
+    function _tryInitialize_Controller(address securityAddress_, bool isControllable) private {
+        try IControllerFacet(securityAddress_).initialize_Controller(isControllable) {
             // success
         } catch {
             // facet not present - skip initialization
