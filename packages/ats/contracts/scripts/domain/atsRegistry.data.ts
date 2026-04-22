@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-22T07:39:34.735Z
- * Facets: 80
+ * Generated: 2026-04-22T09:27:45.767Z
+ * Facets: 81
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -792,6 +792,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   BalanceTrackerFacet: {
     name: "BalanceTrackerFacet",
+    description:
+      "Diamond facet that exposes token balance and total supply queries through the `IBalanceTracker` interface, registered under `_BALANCE_TRACKER_RESOLVER_KEY`.",
     resolverKey: {
       name: "_BALANCE_TRACKER_RESOLVER_KEY",
       value: "0xe5224fce279d87fd0876a56f9f00d1596cef92571a27c651c09f9b0462efb974",
@@ -3546,6 +3548,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   CoreAdjustedFacet: {
     name: "CoreAdjustedFacet",
+    description:
+      "Diamond facet for the CoreAdjusted domain. Registers the single selector that exposes time-adjusted ERC-20 decimal reads (`decimalsAt`) to the Diamond proxy.",
     resolverKey: {
       name: "_CORE_ADJUSTED_RESOLVER_KEY",
       value: "0xb4135b83cc3bbd6b3d1da5b0abcc33c9cb857bf5a314bab3cdff8241e72306d0",
@@ -12973,7 +12977,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 80 as const;
+export const TOTAL_FACETS = 81 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
