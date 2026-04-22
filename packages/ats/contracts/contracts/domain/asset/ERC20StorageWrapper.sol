@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _ERC20_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { _DEFAULT_PARTITION, KPI_ERC20_APPROVE_OWNER } from "../../constants/values.sol";
 import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
+import { IAllowanceTypes } from "../../facets/allowance/IAllowanceTypes.sol";
 // IERC20StorageWrapper is now merged into IERC20
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { IFactory } from "../../factory/IFactory.sol";
@@ -106,17 +107,17 @@ library ERC20StorageWrapper {
         _checkUnexpectedError(owner == address(0), KPI_ERC20_APPROVE_OWNER);
 
         if (spender == address(0)) {
-            revert IERC20.SpenderWithZeroAddress();
+            revert IAllowanceTypes.SpenderWithZeroAddress();
         }
 
         erc20Storage().allowed[owner][spender] = value;
-        emit IERC20.Approval(owner, spender, value);
+        emit IAllowanceTypes.Approval(owner, spender, value);
         return true;
     }
 
     function increaseAllowance(address spender, uint256 addedValue) internal returns (bool) {
         if (spender == address(0)) {
-            revert IERC20.SpenderWithZeroAddress();
+            revert IAllowanceTypes.SpenderWithZeroAddress();
         }
 
         increaseAllowedBalance(EvmAccessors.getMsgSender(), spender, addedValue);
@@ -126,10 +127,10 @@ library ERC20StorageWrapper {
 
     function decreaseAllowance(address spender, uint256 subtractedValue) internal returns (bool) {
         if (spender == address(0)) {
-            revert IERC20.SpenderWithZeroAddress();
+            revert IAllowanceTypes.SpenderWithZeroAddress();
         }
         decreaseAllowedBalance(EvmAccessors.getMsgSender(), spender, subtractedValue);
-        emit IERC20.Approval(
+        emit IAllowanceTypes.Approval(
             EvmAccessors.getMsgSender(),
             spender,
             erc20Storage().allowed[EvmAccessors.getMsgSender()][spender]
@@ -185,7 +186,7 @@ library ERC20StorageWrapper {
         ERC20Storage storage erc20Stor = erc20Storage();
 
         if (value > erc20Stor.allowed[from][spender]) {
-            revert IERC20.InsufficientAllowance(spender, from);
+            revert IAllowanceTypes.InsufficientAllowance(spender, from);
         }
 
         erc20Stor.allowed[from][spender] -= value;
@@ -198,7 +199,7 @@ library ERC20StorageWrapper {
 
         erc20Stor.allowed[from][spender] += value;
 
-        emit IERC20.Approval(from, spender, erc20Storage().allowed[from][spender]);
+        emit IAllowanceTypes.Approval(from, spender, erc20Storage().allowed[from][spender]);
     }
 
     function migrateTotalSupplyIfNeeded() internal {

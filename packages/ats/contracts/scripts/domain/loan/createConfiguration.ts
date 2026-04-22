@@ -54,6 +54,9 @@ const LOAN_FACETS = [
   // Core
   "CoreFacet",
 
+  // Allowance
+  "AllowanceFacet",
+
   // ERC Standards
   "ERC20Facet",
   "ERC20PermitFacet",

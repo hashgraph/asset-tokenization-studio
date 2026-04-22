@@ -37,6 +37,7 @@ import { atsRegistry } from "../atsRegistry";
 const EQUITY_FACETS = [
   // Core Functionality (10 - DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet)
   "AccessControlFacet",
+  "AllowanceFacet",
   "CapFacet",
   "ControlListFacet",
   "CorporateActionsFacet",

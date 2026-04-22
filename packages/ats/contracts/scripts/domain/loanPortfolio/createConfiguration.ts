@@ -43,6 +43,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "LoansPortfolioFacet",
   // Core Functionality
   "AccessControlFacet",
+  "AllowanceFacet",
   "CapFacet",
   "ControlListFacet",
   "CorporateActionsFacet",
