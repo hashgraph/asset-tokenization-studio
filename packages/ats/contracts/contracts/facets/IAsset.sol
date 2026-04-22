@@ -60,6 +60,7 @@ import { IVoting } from "./layer_2/voting/IVoting.sol";
 import { ISecurity } from "./layer_2/security/ISecurity.sol";
 import { ISsiManagement } from "./layer_1/ssi/ISsiManagement.sol";
 import { ITimeTravel } from "../test/testTimeTravel/ITimeTravel.sol";
+import { IBalanceTracker } from "./balanceTracker/IBalanceTracker.sol";
 import { ITransferAndLock } from "./layer_3/transferAndLock/ITransferAndLock.sol";
 import { ICoupon } from "./layer_2/coupon/ICoupon.sol";
 import { IDividend } from "./layer_2/dividend/IDividend.sol";
@@ -144,6 +145,7 @@ interface IAsset is
     ICoupon,
     IDividend,
     // Additional Layer 1
+    IBalanceTracker,
     ICap,
     INonces,
     ITotalBalance,

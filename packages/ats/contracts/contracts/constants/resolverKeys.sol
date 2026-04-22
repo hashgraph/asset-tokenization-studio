@@ -510,6 +510,9 @@ bytes32 constant _TOTAL_BALANCE_KPI_LINKED_RATE_RESOLVER_KEY = 0xc162f5370d292bd
 // keccak256("security.token.standard.totalBalance.SustainabilityPerformanceTarget.rate.resolverKey");
 bytes32 constant _TOTAL_BALANCE_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x70b68464eff2e356899f071ddcf4cc232d6aa181ec8f142f2251291b3cd73f3e;
 
+// keccak256("security.token.standard.balanceTracker.resolverKey");
+bytes32 constant _BALANCE_TRACKER_RESOLVER_KEY = 0xe5224fce279d87fd0876a56f9f00d1596cef92571a27c651c09f9b0462efb974;
+
 // Layer 2 Resolver Keys
 
 // keccak256('security.token.standard.equity.resolverKey');
