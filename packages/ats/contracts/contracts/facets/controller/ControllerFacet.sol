@@ -32,7 +32,7 @@ contract ControllerFacet is Controller, IStaticFunctionSelectors {
             staticFunctionSelectors_[--selectorIndex] = this.controllerRedeem.selector;
             staticFunctionSelectors_[--selectorIndex] = this.controllerTransfer.selector;
             staticFunctionSelectors_[--selectorIndex] = this.isControllable.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.initialize_ERC1644.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.initialize_Controller.selector;
         }
     }
 
