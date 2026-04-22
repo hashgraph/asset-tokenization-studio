@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-22T10:08:24.451Z
+ * Generated: 2026-04-22T10:19:56.174Z
  * Facets: 81
  * Infrastructure: 2
  *
@@ -23,7 +23,6 @@ import {
   AdjustBalancesFacet__factory,
   AllowanceFacet__factory,
   AmortizationFacet__factory,
-  BalanceTrackerFacet__factory,
   BondUSAFacet__factory,
   BondUSAFixedRateFacet__factory,
   BondUSAKpiLinkedRateFacet__factory,
@@ -909,41 +908,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     factory: (signer) => new AmortizationFacet__factory(getLibLinks("clearingReadOps") as any, signer),
-  },
-
-  BalanceTrackerFacet: {
-    name: "BalanceTrackerFacet",
-    description:
-      "Diamond facet that exposes token balance and total supply queries through the `IBalanceTracker` interface, registered under `_BALANCE_TRACKER_RESOLVER_KEY`.",
-    resolverKey: {
-      name: "_BALANCE_TRACKER_RESOLVER_KEY",
-      value: "0xe5224fce279d87fd0876a56f9f00d1596cef92571a27c651c09f9b0462efb974",
-    },
-    inheritance: ["BalanceTracker", "IStaticFunctionSelectors"],
-    methods: [
-      {
-        name: "balanceOf",
-        signature: {
-          full: "function balanceOf(address _tokenHolder) view returns (uint256)",
-          canonical: "balanceOf(address)",
-        },
-        selector: "0x70a08231",
-      },
-      {
-        name: "getTotalBalanceFor",
-        signature: {
-          full: "function getTotalBalanceFor(address _account) view returns (uint256)",
-          canonical: "getTotalBalanceFor(address)",
-        },
-        selector: "0xa8f9868e",
-      },
-      {
-        name: "totalSupply",
-        signature: { full: "function totalSupply() view returns (uint256)", canonical: "totalSupply()" },
-        selector: "0x18160ddd",
-      },
-    ],
-    factory: (signer) => new BalanceTrackerFacet__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   BondUSAFacet: {
@@ -5817,6 +5781,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["ERC1410Read", "IStaticFunctionSelectors"],
     methods: [
       {
+        name: "balanceOf",
+        signature: {
+          full: "function balanceOf(address _tokenHolder) view returns (uint256)",
+          canonical: "balanceOf(address)",
+        },
+        selector: "0x70a08231",
+      },
+      {
         name: "balanceOfAt",
         signature: {
           full: "function balanceOfAt(address _tokenHolder, uint256 _timestamp) view returns (uint256)",
@@ -5876,6 +5848,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "partitionsOf(address)",
         },
         selector: "0x740ab8f4",
+      },
+      {
+        name: "totalSupply",
+        signature: { full: "function totalSupply() view returns (uint256)", canonical: "totalSupply()" },
+        selector: "0x18160ddd",
       },
       {
         name: "totalSupplyByPartition",
@@ -12233,6 +12210,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["TotalBalance", "IStaticFunctionSelectors"],
     methods: [
+      {
+        name: "getTotalBalanceFor",
+        signature: {
+          full: "function getTotalBalanceFor(address _account) view returns (uint256)",
+          canonical: "getTotalBalanceFor(address)",
+        },
+        selector: "0xa8f9868e",
+      },
       {
         name: "getTotalBalanceForByPartition",
         signature: {
