@@ -52,6 +52,9 @@ const BOND_FACETS = [
   // Core
   "CoreFacet",
 
+  // Allowance
+  "AllowanceFacet",
+
   // CoreAdjusted
   "CoreAdjustedFacet",
 

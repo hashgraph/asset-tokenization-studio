@@ -47,6 +47,9 @@ const BOND_FIXED_RATE_FACETS = [
   // Core
   "CoreFacet",
 
+  // Allowance
+  "AllowanceFacet",
+
   // CoreAdjusted
   "CoreAdjustedFacet",
 

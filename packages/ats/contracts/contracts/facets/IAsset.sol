@@ -22,6 +22,9 @@ import { ICommonErrors } from "../infrastructure/errors/ICommonErrors.sol";
 import { ICore } from "./core/ICore.sol";
 import { ICoreAdjusted } from "./coreAdjusted/ICoreAdjusted.sol";
 
+// Allowance
+import { IAllowance } from "./allowance/IAllowance.sol";
+
 // Layer 1 — External lists
 import { IERC1410 } from "./layer_1/ERC1400/ERC1410/IERC1410.sol";
 import { IERC20 } from "./layer_1/ERC1400/ERC20/IERC20.sol";
@@ -109,6 +112,7 @@ import { IControlList } from "./layer_1/controlList/IControlList.sol";
 interface IAsset is
     ICore,
     ICoreAdjusted,
+    IAllowance,
     IAccessControl,
     IPause,
     IExternalPauseManagement,
