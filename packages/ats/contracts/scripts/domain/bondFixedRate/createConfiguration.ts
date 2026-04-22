@@ -40,6 +40,7 @@ const BOND_FIXED_RATE_FACETS = [
   "FreezeFacet",
   "KycFacet",
   "PauseFacet",
+  "BalanceTrackerFacet",
   "SnapshotsFacet",
   "TotalBalanceFacet",
 
