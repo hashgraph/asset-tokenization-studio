@@ -9,7 +9,7 @@ pragma solidity >=0.8.0 <0.9.0;
  *      where modifiers delegate to storage wrapper check functions rather than
  *      implementing validation inline.
  *
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 import { InterestRateStorageWrapper } from "../../domain/asset/InterestRateStorageWrapper.sol";
 import { _checkNotInitialized } from "../InitializationErrors.sol";

@@ -211,7 +211,7 @@ describe("Loan Tests", () => {
             },
           },
         }),
-      ).to.be.revertedWithCustomError(asset, "InvalidTimestamp");
+      ).to.be.revertedWithCustomError(asset, "WrongTimestamp");
     });
 
     it("GIVEN startingDate after maturityDate WHEN deploying loan THEN transaction fails with WrongDates", async () => {

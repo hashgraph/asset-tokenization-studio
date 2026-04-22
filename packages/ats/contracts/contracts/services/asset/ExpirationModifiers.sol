@@ -13,7 +13,7 @@ import { ClearingStorageWrapper } from "../../domain/asset/ClearingStorageWrappe
  * functions into modifiers for convenient use in facets.
  *
  * @notice Inherit from this contract to gain access to expiration modifiers
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract ExpirationModifiers {
     /**

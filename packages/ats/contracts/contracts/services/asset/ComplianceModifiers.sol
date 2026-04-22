@@ -11,7 +11,7 @@ import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.
  * functions into modifiers for convenient use in facets.
  *
  * @notice Inherit from this contract to gain access to compliance modifiers
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract ComplianceModifiers {
     /**

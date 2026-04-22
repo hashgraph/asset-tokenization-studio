@@ -39,11 +39,11 @@ describe("Time Travel Tests", () => {
     expect(await timeTravelFacet.blockTimestamp()).to.be.equal(newTimestamp);
   });
 
-  it("GIVEN incorrect system timestamp change THEN revert with InvalidTimestamp", async () => {
+  it("GIVEN incorrect system timestamp change THEN revert with WrongTimestamp", async () => {
     const newTimestamp = 0;
     await expect(timeTravelFacet.changeSystemTimestamp(newTimestamp)).to.revertedWithCustomError(
       timeTravelFacet,
-      "InvalidTimestamp",
+      "WrongTimestamp",
     );
   });
 

@@ -12,7 +12,7 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title Lock
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  * @notice Abstract contract for locking tokens by partition
  *
  * Provides functionality for locking tokens with expiration timestamps

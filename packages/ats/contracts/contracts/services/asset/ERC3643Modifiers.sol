@@ -16,7 +16,7 @@ import { _checkNotInitialized } from "../InitializationErrors.sol";
  * keeping ERC3643StorageWrapper as a library.
  *
  * @notice Inherit from this contract to gain access to ERC3643 modifiers
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract ERC3643Modifiers {
     /**

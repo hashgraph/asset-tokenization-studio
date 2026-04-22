@@ -10,7 +10,7 @@ import { _checkNotInitialized } from "../InitializationErrors.sol";
  * @notice Abstract contract providing clearing-related modifiers
  * @dev Provides modifiers for clearing state validation using _check* pattern
  *      from ClearingStorageWrapper
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract ClearingModifiers {
     /**

@@ -12,7 +12,6 @@ import { IAccessControl } from "./layer_1/accessControl/IAccessControl.sol";
 import { IAdjustBalances } from "./layer_2/adjustBalance/IAdjustBalances.sol";
 import { IAmortization } from "./layer_2/amortization/IAmortization.sol";
 import { IBond } from "./layer_2/bond/IBond.sol";
-import { IBondRead } from "./layer_2/bond/IBondRead.sol";
 import { IBondUSA } from "./layer_3/bondUSA/IBondUSA.sol";
 
 // Layer 1 — ERC1400
@@ -22,13 +21,11 @@ import { IClearingHoldCreation } from "./layer_1/clearing/IClearingHoldCreation.
 import { IClearingRead } from "./layer_1/clearing/IClearingRead.sol";
 import { IClearingRedeem } from "./layer_1/clearing/IClearingRedeem.sol";
 import { IClearingTransfer } from "./layer_1/clearing/IClearingTransfer.sol";
-import { ICompliance } from "./layer_1/ERC3643/ICompliance.sol";
 
 // Layer 1 — ERC3643
 import { IControlList } from "./layer_1/controlList/IControlList.sol";
 import { ICorporateActions } from "./layer_1/corporateAction/ICorporateActions.sol";
 import { IDiamond } from "../infrastructure/proxy/IDiamond.sol";
-import { ICommonErrors } from "../infrastructure/errors/ICommonErrors.sol";
 
 // Layer 1 — External lists
 import { IERC1410 } from "./layer_1/ERC1400/ERC1410/IERC1410.sol";
@@ -47,18 +44,12 @@ import { IExternalControlList } from "./layer_1/externalControlList/IExternalCon
 import { IExternalControlListManagement } from "./layer_1/externalControlList/IExternalControlListManagement.sol";
 import { IExternalKycList } from "./layer_1/externalKycList/IExternalKycList.sol";
 import { IExternalKycListManagement } from "./layer_1/externalKycList/IExternalKycListManagement.sol";
-import { IExternalPause } from "./layer_1/externalPause/IExternalPause.sol";
 import { IExternalPauseManagement } from "./layer_1/externalPause/IExternalPauseManagement.sol";
 import { IFixedRate } from "./layer_2/interestRate/fixedRate/IFixedRate.sol";
-import { IKpiLinkedRateErrors } from "./layer_2/interestRate/kpiLinkedRate/IKpiLinkedRateErrors.sol";
-import {
-    ISustainabilityPerformanceTargetRateTypes
-} from "./layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRateTypes.sol";
 
 // Layer 2
 import { IFreeze } from "./layer_1/freeze/IFreeze.sol";
 import { IHold } from "./layer_1/hold/IHold.sol";
-import { IIdentityRegistry } from "./layer_1/ERC3643/IIdentityRegistry.sol";
 import { IKpis } from "./layer_2/kpi/kpiLatest/IKpis.sol";
 import { IKyc } from "./layer_1/kyc/IKyc.sol";
 // IKpiLinkedRate and ISustainabilityPerformanceTargetRate are excluded: both define
@@ -72,7 +63,6 @@ import { INonces } from "./layer_1/nonce/INonces.sol";
 import { IPause } from "./layer_1/pause/IPause.sol";
 import { IProceedRecipients } from "./layer_2/proceedRecipient/IProceedRecipients.sol";
 import { IProtectedPartitions } from "./layer_1/protectedPartition/IProtectedPartitions.sol";
-import { IRevocationList } from "./layer_1/kyc/IRevocationList.sol";
 import { IScheduledCouponListing } from "./layer_2/scheduledTask/scheduledCouponListing/IScheduledCouponListing.sol";
 import { IScheduledSnapshots } from "./layer_2/scheduledTask/scheduledSnapshot/IScheduledSnapshots.sol";
 import { ILoansPortfolio } from "./layer_2/loansPortfolio/ILoansPortfolio.sol";

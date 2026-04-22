@@ -5,13 +5,11 @@ import { IResolverProxy } from "./IResolverProxy.sol";
 import { IBusinessLogicResolver } from "../diamond/IBusinessLogicResolver.sol";
 import { IDiamondLoupe } from "./IDiamondLoupe.sol";
 import { ResolverProxyStorageWrapper, ResolverProxyStorage } from "../../domain/core/ResolverProxyStorageWrapper.sol";
-import { AccessControlStorageWrapper, RoleDataStorage } from "../../domain/core/AccessControlStorageWrapper.sol";
+import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
 
 // Remember to add the loupe functions from DiamondLoupeFacet.sol.sol to the resolverProxy.
 // The loupe functions are required by the EIP2535 ResolverProxys standard
 abstract contract ResolverProxyUnstructured {
-    using AccessControlStorageWrapper for RoleDataStorage;
-
     function _initialize(
         IBusinessLogicResolver _resolver,
         bytes32 _resolverProxyConfigurationId,

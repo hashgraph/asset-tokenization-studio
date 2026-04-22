@@ -12,7 +12,7 @@ import { CorporateActionsStorageWrapper } from "../../domain/core/CorporateActio
  * keeping CorporateActionsStorageWrapper as a library.
  *
  * @notice Inherit from this contract to gain access to action validation modifiers
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract ActionValidationModifiers {
     /**

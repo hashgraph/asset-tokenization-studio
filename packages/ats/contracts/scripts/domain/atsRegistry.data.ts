@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-21T06:41:36.583Z
+ * Generated: 2026-04-22T13:39:10.919Z
  * Facets: 78
  * Infrastructure: 2
  *
@@ -735,11 +735,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbf84f4ec",
       },
       {
-        name: "InvalidTimestamp",
-        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
-        selector: "0xb7d09497",
-      },
-      {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
         selector: "0x76d08f88",
@@ -782,6 +777,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "WrongIndexForAction(uint256,bytes32)",
         },
         selector: "0xd3924f4e",
+      },
+      {
+        name: "WrongTimestamp",
+        signature: { full: "error WrongTimestamp(uint256 timeStamp)", canonical: "WrongTimestamp(uint256)" },
+        selector: "0xdcf61246",
       },
     ],
     factory: (signer) => new AmortizationFacet__factory(getLibLinks("clearingReadOps") as any, signer),
@@ -3710,6 +3710,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5763538a",
       },
       {
+        name: "WrongTimestamp",
+        signature: { full: "error WrongTimestamp(uint256 timeStamp)", canonical: "WrongTimestamp(uint256)" },
+        selector: "0xdcf61246",
+      },
+      {
         name: "ZeroAddressNotAllowed",
         signature: { full: "error ZeroAddressNotAllowed()", canonical: "ZeroAddressNotAllowed()" },
         selector: "0x8579befe",
@@ -3883,11 +3888,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x68eba14f",
       },
       {
-        name: "InvalidTimestamp",
-        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
-        selector: "0xb7d09497",
-      },
-      {
         name: "SnapshotIdDoesNotExists",
         signature: {
           full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
@@ -3941,6 +3941,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "WrongInterestRateValues((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8))",
         },
         selector: "0x570cf0d3",
+      },
+      {
+        name: "WrongTimestamp",
+        signature: { full: "error WrongTimestamp(uint256 timeStamp)", canonical: "WrongTimestamp(uint256)" },
+        selector: "0xdcf61246",
       },
     ],
     factory: (signer) => new CouponFacet__factory(getLibLinks("clearingReadOps") as any, signer),
@@ -4116,11 +4121,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x68eba14f",
       },
       {
-        name: "InvalidTimestamp",
-        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
-        selector: "0xb7d09497",
-      },
-      {
         name: "SnapshotIdDoesNotExists",
         signature: {
           full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
@@ -4174,6 +4174,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "WrongInterestRateValues((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8))",
         },
         selector: "0x570cf0d3",
+      },
+      {
+        name: "WrongTimestamp",
+        signature: { full: "error WrongTimestamp(uint256 timeStamp)", canonical: "WrongTimestamp(uint256)" },
+        selector: "0xdcf61246",
       },
     ],
     factory: (signer) => new CouponFixedRateFacet__factory(getLibLinks("clearingReadOps") as any, signer),
@@ -4346,11 +4351,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x68eba14f",
       },
       {
-        name: "InvalidTimestamp",
-        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
-        selector: "0xb7d09497",
-      },
-      {
         name: "SnapshotIdDoesNotExists",
         signature: {
           full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
@@ -4404,6 +4404,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "WrongInterestRateValues((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8))",
         },
         selector: "0x570cf0d3",
+      },
+      {
+        name: "WrongTimestamp",
+        signature: { full: "error WrongTimestamp(uint256 timeStamp)", canonical: "WrongTimestamp(uint256)" },
+        selector: "0xdcf61246",
       },
     ],
     factory: (signer) => new CouponKpiLinkedRateFacet__factory(getLibLinks("clearingReadOps") as any, signer),
@@ -4583,11 +4588,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x4f56f79f",
       },
       {
-        name: "InvalidTimestamp",
-        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
-        selector: "0xb7d09497",
-      },
-      {
         name: "SnapshotIdDoesNotExists",
         signature: {
           full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
@@ -4641,6 +4641,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "WrongInterestRateValues((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8))",
         },
         selector: "0x570cf0d3",
+      },
+      {
+        name: "WrongTimestamp",
+        signature: { full: "error WrongTimestamp(uint256 timeStamp)", canonical: "WrongTimestamp(uint256)" },
+        selector: "0xdcf61246",
       },
     ],
     factory: (signer) =>
@@ -4938,11 +4943,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x409bf2d2",
       },
       {
-        name: "InvalidTimestamp",
-        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
-        selector: "0xb7d09497",
-      },
-      {
         name: "SnapshotIdDoesNotExists",
         signature: {
           full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
@@ -4980,6 +4980,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "WrongIndexForAction(uint256,bytes32)",
         },
         selector: "0xd3924f4e",
+      },
+      {
+        name: "WrongTimestamp",
+        signature: { full: "error WrongTimestamp(uint256 timeStamp)", canonical: "WrongTimestamp(uint256)" },
+        selector: "0xdcf61246",
       },
     ],
     factory: (signer) => new DividendFacet__factory(getLibLinks("clearingReadOps") as any, signer),
@@ -5127,11 +5132,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x936e9b6d",
       },
       {
-        name: "InvalidTimestamp",
-        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
-        selector: "0xb7d09497",
-      },
-      {
         name: "TokenIsPaused",
         signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
         selector: "0x649815a5",
@@ -5148,6 +5148,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "WrongIndexForAction(uint256,bytes32)",
         },
         selector: "0xd3924f4e",
+      },
+      {
+        name: "WrongTimestamp",
+        signature: { full: "error WrongTimestamp(uint256 timeStamp)", canonical: "WrongTimestamp(uint256)" },
+        selector: "0xdcf61246",
       },
     ],
     factory: (signer) => new EquityUSAFacet__factory(signer),
@@ -6678,6 +6683,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ERC20VotesFacet: {
     name: "ERC20VotesFacet",
+    description: "Diamond facet exposing ERC-5805 voting power functionality via the proxy router.",
     resolverKey: {
       name: "_ERC20VOTES_RESOLVER_KEY",
       value: "0x5cbfbaa435e19a43530a00ac685c9b5252862a94af2053667ded44642a0d9f4c",
@@ -7797,6 +7803,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ExternalControlListManagementFacet: {
     name: "ExternalControlListManagementFacet",
+    description: "Exposes external control list management functions as a diamond proxy facet.",
     resolverKey: {
       name: "_EXTERNAL_CONTROL_LIST_RESOLVER_KEY",
       value: "0x490196911bc65200514fb4568861a36670854901dffa91bc27577664fdace575",
@@ -7954,6 +7961,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ExternalKycListManagementFacet: {
     name: "ExternalKycListManagementFacet",
+    description: "Diamond facet exposing external KYC list management via the proxy router.",
     resolverKey: {
       name: "_EXTERNAL_KYC_LIST_RESOLVER_KEY",
       value: "0x32f05e55195d945105aff8ac4b041d4680824578bd72c6a34e4aa906a59237f1",
@@ -9855,11 +9863,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x0dc149f0",
       },
       {
-        name: "InvalidTimestamp",
-        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
-        selector: "0xb7d09497",
-      },
-      {
         name: "TokenIsPaused",
         signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
         selector: "0x649815a5",
@@ -9871,6 +9874,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "WrongDates(uint256,uint256)",
         },
         selector: "0x1c94559c",
+      },
+      {
+        name: "WrongTimestamp",
+        signature: { full: "error WrongTimestamp(uint256 timeStamp)", canonical: "WrongTimestamp(uint256)" },
+        selector: "0xdcf61246",
       },
       {
         name: "ZeroAddressNotAllowed",
@@ -12068,14 +12076,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x769a518c",
       },
       {
-        name: "InvalidTimestamp",
-        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
-        selector: "0xb7d09497",
-      },
-      {
         name: "WrongChainId",
         signature: { full: "error WrongChainId()", canonical: "WrongChainId()" },
         selector: "0x5f87bc00",
+      },
+      {
+        name: "WrongTimestamp",
+        signature: { full: "error WrongTimestamp(uint256 timeStamp)", canonical: "WrongTimestamp(uint256)" },
+        selector: "0xdcf61246",
       },
     ],
     factory: (signer) => new TimeTravelFacet__factory(signer),
@@ -12829,11 +12837,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
-        name: "InvalidTimestamp",
-        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
-        selector: "0xb7d09497",
-      },
-      {
         name: "SnapshotIdDoesNotExists",
         signature: {
           full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
@@ -12876,6 +12879,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "WrongIndexForAction(uint256,bytes32)",
         },
         selector: "0xd3924f4e",
+      },
+      {
+        name: "WrongTimestamp",
+        signature: { full: "error WrongTimestamp(uint256 timeStamp)", canonical: "WrongTimestamp(uint256)" },
+        selector: "0xdcf61246",
       },
     ],
     factory: (signer) => new VotingFacet__factory(getLibLinks("clearingReadOps") as any, signer),
@@ -13236,6 +13244,8 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
 
   Factory: {
     name: "Factory",
+    description:
+      "Deploys and initialises ERC-2535 diamond proxy instances for equity and bond security tokens, including all standard and optional facet configurations.",
     inheritance: ["IFactory"],
     methods: [
       {
@@ -13300,6 +13310,13 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
         selector: "0x7b5208d0",
       },
     ],
+    events: [
+      {
+        name: "emission",
+        signature: { full: "emission(BondKpiLinkedRateData)", canonical: "emission(BondKpiLinkedRateData)" },
+        topic0: "0xf0a78894437c1988a770463e4c97f87a2594e3ad0a9a19f02d79ebf848982074",
+      },
+    ],
   },
 };
 
@@ -13323,13 +13340,28 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   AdjustBalancesStorageWrapper: {
     name: "AdjustBalancesStorageWrapper",
+    description: "Stores and manages balance adjustment factors and related per-account tracking data.",
     methods: [],
   },
 
   AmortizationStorageWrapper: {
     name: "AmortizationStorageWrapper",
-    description: "Storage wrapper for amortization management operations",
+    description: "Provides storage and operational logic for token amortisation corporate actions.",
     methods: [],
+    events: [
+      {
+        name: "upon",
+        signature: { full: "upon(IAmortization.Amortization)", canonical: "upon(IAmortization.Amortization)" },
+        topic0: "0xa639c46cb2637ebea39aa6ca456c0b350d56ed091cb91f92ad811b871b403a40",
+      },
+    ],
+    errors: [
+      {
+        name: "context",
+        signature: { full: "context(uint256,uint256)", canonical: "context(uint256,uint256)" },
+        selector: "0x1c8253ff",
+      },
+    ],
   },
 
   BondStorageWrapper: {
@@ -13344,23 +13376,40 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   ClearingStorageWrapper: {
     name: "ClearingStorageWrapper",
+    description:
+      "Internal library providing pure storage operations for the clearing subsystem, including registration, mutation, removal, and validation of pending clearing operations across transfer, redeem, and hold-creation types.",
     methods: [],
+    errors: [
+      {
+        name: "from",
+        signature: {
+          full: "from(uint256,address,address,address,bytes32)",
+          canonical: "from(uint256,address,address,address,bytes32)",
+        },
+        selector: "0x881bebd8",
+      },
+    ],
   },
 
   ControlListStorageWrapper: {
     name: "ControlListStorageWrapper",
-    description: "Call these library functions to manage control list",
+    description:
+      "Internal library for managing a whitelist or blacklist of addresses using Diamond Storage, providing membership checks, list mutations, and access guards.",
     methods: [],
   },
 
   CorporateActionsStorageWrapper: {
     name: "CorporateActionsStorageWrapper",
-    description: "Storage wrapper for corporate action management operations",
+    description:
+      "Internal library for registering, mutating, and querying corporate actions using the Diamond Storage Pattern.",
     methods: [],
+    errors: [{ name: "signal", signature: { full: "signal(0)", canonical: "signal(0)" }, selector: "0x92c44951" }],
   },
 
   CouponStorageWrapper: {
     name: "CouponStorageWrapper",
+    description:
+      "Internal library for registering, mutating, and querying bond coupon data using the Diamond Storage Pattern.",
     methods: [],
   },
 
@@ -13371,21 +13420,49 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   EquityStorageWrapper: {
     name: "EquityStorageWrapper",
+    description:
+      "Internal library for managing equity token storage operations, including rights initialisation, scheduled balance adjustment lifecycle, legacy nominal value migration, and balance snapshot resolution.",
     methods: [],
   },
 
   ERC1410StorageWrapper: {
     name: "ERC1410StorageWrapper",
+    description:
+      "Internal library providing storage operations for ERC1410 partition-based token management, including issuance, redemption, transfer, operator authorisation, and token holder registry maintenance.",
     methods: [],
+    events: [
+      {
+        name: "for",
+        signature: { full: "for(no-op)", canonical: "for(no-op)" },
+        topic0: "0x9cb5a076666ccf860f6d1e45dd56257883480ecf3d99c7381f99f9ba33c1f5b8",
+      },
+      {
+        name: "is",
+        signature: { full: "is(0)", canonical: "is(0)" },
+        topic0: "0x34a2274aec11b305299d2d5f11c4fda6be2850062acd3fe4d5559bb1354719fd",
+      },
+    ],
   },
 
   ERC1594StorageWrapper: {
     name: "ERC1594StorageWrapper",
+    description:
+      "Internal library providing storage operations and transfer eligibility checks for ERC1594 security token issuance, redemption, and transfer validation.",
     methods: [],
+    events: [
+      {
+        name: "is",
+        signature: { full: "is(0)", canonical: "is(0)" },
+        topic0: "0x34a2274aec11b305299d2d5f11c4fda6be2850062acd3fe4d5559bb1354719fd",
+      },
+    ],
+    errors: [{ name: "selector", signature: { full: "selector()", canonical: "selector()" }, selector: "0xea3d508a" }],
   },
 
   ERC1644StorageWrapper: {
     name: "ERC1644StorageWrapper",
+    description:
+      "Internal library providing storage operations for ERC1644 controller token functionality, governing whether privileged controller transfers and redemptions are permitted.",
     methods: [],
   },
 
@@ -13396,27 +13473,79 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   ERC20StorageWrapper: {
     name: "ERC20StorageWrapper",
+    description:
+      "Internal library providing storage operations for ERC20 token metadata, balances, allowances, and token lifecycle functions (mint, burn, transfer).",
     methods: [],
+    events: [
+      {
+        name: "emission",
+        signature: { full: "emission(string)", canonical: "emission(string)" },
+        topic0: "0x149aa11601f5d52d9f971e1c924d60da01907402f7e048deec1c8aab142df9b8",
+      },
+      {
+        name: "for",
+        signature: { full: "for(0)", canonical: "for(0)" },
+        topic0: "0xcf6e0c340f0ff606ef692d530b5d61fe082abcd4c4e10304d111898fb6ce6fe9",
+      },
+      {
+        name: "from",
+        signature: { full: "from(0)", canonical: "from(0)" },
+        topic0: "0x527385d58a1af6e9edaee09bcb8f1e0e015701442c821b1afbd7e84ba173162d",
+      },
+      {
+        name: "is",
+        signature: { full: "is(0)", canonical: "is(0)" },
+        topic0: "0x34a2274aec11b305299d2d5f11c4fda6be2850062acd3fe4d5559bb1354719fd",
+      },
+      {
+        name: "to",
+        signature: { full: "to(0)", canonical: "to(0)" },
+        topic0: "0xe0cd3c66f9de0cb8cec44076d642ea7289ba435a8f0cbb470d67d4e4082a8920",
+      },
+    ],
+    errors: [{ name: "rather", signature: { full: "rather(0)", canonical: "rather(0)" }, selector: "0x3a429bf0" }],
   },
 
   ERC20VotesStorageWrapper: {
     name: "ERC20VotesStorageWrapper",
+    description: "Manages voting power tracking and delegation logic for ERC20 tokens",
     methods: [],
   },
 
   ERC3643StorageWrapper: {
     name: "ERC3643StorageWrapper",
+    description:
+      "Internal library providing storage operations for the ERC3643 security token standard, including compliance and identity registry management, agent role administration, token freezing, address recovery, and multi-partition frozen balance tracking.",
     methods: [],
+    events: [
+      {
+        name: "includes",
+        signature: { full: "includes(string)", canonical: "includes(string)" },
+        topic0: "0xa61a22a2432ed4812b959fcb604b78961b2817695358185d23a485618217ed10",
+      },
+      {
+        name: "is",
+        signature: { full: "is(bytes32,address,uint256)", canonical: "is(bytes32,address,uint256)" },
+        topic0: "0x66e340169e2711e3754ee344aa33d21776e0b8f26b19b265dd92715868d82376",
+      },
+      {
+        name: "reflects",
+        signature: { full: "reflects(address)", canonical: "reflects(address)" },
+        topic0: "0x9622c5fd0d56b684ac060c7c6b466fdc4be2e6b8581e7b9e00436bbea3dda3b7",
+      },
+    ],
   },
 
   ExternalListManagementStorageWrapper: {
     name: "ExternalListManagementStorageWrapper",
+    description: "Provides utility functions for managing external lists in storage",
     methods: [],
   },
 
   HoldStorageWrapper: {
     name: "HoldStorageWrapper",
-    description: "Storage wrapper for hold management operations",
+    description:
+      "Internal library providing storage operations for the token hold mechanism, including hold creation, execution, release, reclaim, ABAF adjustment, and multi-partition held balance tracking.",
     methods: [],
   },
 
@@ -13538,22 +13667,27 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   InterestRateStorageWrapper: {
     name: "InterestRateStorageWrapper",
+    description:
+      "Internal library providing storage operations for three distinct interest rate mechanisms: fixed rate, KPI-linked rate, and Sustainability Performance Target (SPT) rate.",
     methods: [],
   },
 
   KpisStorageWrapper: {
     name: "KpisStorageWrapper",
+    description:
+      "Internal library for managing KPI data checkpoint storage, including sorted insertion of time-series KPI values per project and coupling with the coupon ordered list for minimum date enforcement.",
     methods: [],
   },
 
   KycStorageWrapper: {
     name: "KycStorageWrapper",
-    description: "Storage wrapper for KYC (Know Your Customer) management operations",
     methods: [],
   },
 
   LoansPortfolioStorageWrapper: {
     name: "LoansPortfolioStorageWrapper",
+    description:
+      "Internal library providing storage operations for a loans portfolio instrument, including asset registration, multi-dimensional loan classification, geographical exposure tracking, and portfolio-level token withdrawals.",
     methods: [],
   },
 
@@ -13565,55 +13699,67 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   LockStorageWrapper: {
     name: "LockStorageWrapper",
-    description: "Storage wrapper for lock management operations",
+    description:
+      "Internal library providing storage operations for the token lock mechanism, including lock creation, release, ABAF adjustment, and locked balance queries.",
     methods: [],
   },
 
   NominalValueStorageWrapper: {
     name: "NominalValueStorageWrapper",
+    description:
+      "Manages read and write access to the dedicated NominalValue storage slot, including aggregation with legacy bond and equity storage fields during the migration period.",
     methods: [],
   },
 
   NonceStorageWrapper: {
     name: "NonceStorageWrapper",
+    description: "Library for managing account nonces using Diamond Storage Pattern",
     methods: [],
   },
 
   PauseStorageWrapper: {
     name: "PauseStorageWrapper",
-    description: "Use PauseModifiers for modifiers, or call functions directly",
+    description: "Library managing pause-related storage and logic using Diamond Storage Pattern",
     methods: [],
+    errors: [{ name: "if", signature: { full: "if()", canonical: "if()" }, selector: "0x71ae8604" }],
   },
 
   ProceedRecipientsStorageWrapper: {
     name: "ProceedRecipientsStorageWrapper",
+    description: "Provides structured access and management of proceed recipients within persistent storage",
     methods: [],
   },
 
   ProtectedPartitionsStorageWrapper: {
     name: "ProtectedPartitionsStorageWrapper",
+    description: "A library providing structured access to protected partitions storage and associated logic.",
     methods: [],
+    events: [
+      {
+        name: "based",
+        signature: { full: "based(bool)", canonical: "based(bool)" },
+        topic0: "0x820349ebe90f6b97db4a3b7a31131393735e76f5792578c0bb5849824d7ef06e",
+      },
+    ],
   },
 
   ResolverProxyStorageWrapper: {
     name: "ResolverProxyStorageWrapper",
+    description: "Provides access functions to the ResolverProxy storage",
     methods: [],
   },
 
   ScheduledTasksStorageWrapper: {
     name: "ScheduledTasksStorageWrapper",
+    description:
+      "Manages scheduling, retrieval, and execution of time-based corporate action tasks across four independent queues: snapshots, coupon listings, balance adjustments, and cross-ordered tasks.",
     methods: [],
-    errors: [
-      {
-        name: "WrongTimestamp",
-        signature: { full: "WrongTimestamp(uint256)", canonical: "WrongTimestamp(uint256)" },
-        selector: "0xdcf61246",
-      },
-    ],
   },
 
   SecurityStorageWrapper: {
     name: "SecurityStorageWrapper",
+    description:
+      "Provides secure access and management of security regulation data within a decentralised storage slot",
     methods: [],
   },
 
@@ -13624,6 +13770,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   SsiManagementStorageWrapper: {
     name: "SsiManagementStorageWrapper",
+    description: "Provides access and management functions for SSI-related storage",
     methods: [],
   },
 

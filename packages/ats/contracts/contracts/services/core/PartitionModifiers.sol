@@ -9,7 +9,7 @@ import { _checkNotInitialized } from "../InitializationErrors.sol";
  * @notice Abstract contract providing partition-related modifiers
  * @dev Provides modifiers for partition validation using _check* pattern
  *      from ProtectedPartitionsStorageWrapper
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract PartitionModifiers {
     /// @notice Modifier to ensure protected partitions have not been initialized

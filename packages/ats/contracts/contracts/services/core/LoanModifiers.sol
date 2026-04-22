@@ -10,7 +10,7 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  * @notice Abstract contract providing loan-related modifiers
  * @dev Provides modifiers for loan management role validation using _checkRole pattern
  *      from AccessControlStorageWrapper
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract LoanModifiers {
     /**

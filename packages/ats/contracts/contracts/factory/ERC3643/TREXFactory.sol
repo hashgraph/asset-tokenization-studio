@@ -11,7 +11,7 @@ import { TREXBondDeploymentLib } from "./libraries/TREXBondDeploymentLib.sol";
 import { TREXEquityDeploymentLib } from "./libraries/TREXEquityDeploymentLib.sol";
 
 /**
- * @author Tokeny Solutions
+ * @author Hashgraph
  * @notice Adapted from the T-REX official repository to deploy an ERC-3643-compatible ATS security token
  * @dev Uses tree-like structure with libraries as leaves instead of resolver proxy pattern for simplicity
  */

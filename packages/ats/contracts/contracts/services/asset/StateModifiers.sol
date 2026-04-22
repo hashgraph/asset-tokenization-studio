@@ -12,7 +12,7 @@ import { _checkNotInitialized } from "../InitializationErrors.sol";
  * for convenient use in facets.
  *
  * @notice Inherit from this contract to gain access to state modifiers
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract StateModifiers {
     /**

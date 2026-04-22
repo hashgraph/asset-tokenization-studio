@@ -9,7 +9,7 @@ import { _checkNotInitialized } from "../InitializationErrors.sol";
  * @notice Abstract contract providing bond-related modifiers
  * @dev Provides modifiers for bond state validation using _check* pattern
  *      from BondStorageWrapper
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract BondModifiers {
     /**

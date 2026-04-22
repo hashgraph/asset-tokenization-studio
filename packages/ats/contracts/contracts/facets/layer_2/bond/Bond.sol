@@ -21,7 +21,7 @@ import { _checkUnexpectedError } from "../../../infrastructure/utils/UnexpectedE
  *      specific redemption and maturity update functions. Relies
  *      on ERC1410StorageWrapper for partition operations and
  *      BondStorageWrapper for maturity date persistence.
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract Bond is IBondManagement, Modifiers {
     /**

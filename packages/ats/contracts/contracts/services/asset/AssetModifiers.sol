@@ -46,7 +46,7 @@ import { LoansPortfolioModifiers } from "./LoansPortfolioModifiers.sol";
  * - ProceedRecipientModifiers: Proceed recipients validation
  * - StateModifiers: State validation
  *
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract AssetModifiers is
     ActionValidationModifiers,

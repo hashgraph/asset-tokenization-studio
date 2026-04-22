@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { KycStorageWrapper } from "../../domain/core/KycStorageWrapper.sol";
 import { DatesValidation } from "../../infrastructure/utils/DatesValidation.sol";
 
 /**
@@ -12,7 +11,7 @@ import { DatesValidation } from "../../infrastructure/utils/DatesValidation.sol"
  * for convenient use in facets.
  *
  * @notice Inherit from this contract to gain access to date validation modifiers
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract DateValidationModifiers {
     /**

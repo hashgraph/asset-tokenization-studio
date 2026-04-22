@@ -14,7 +14,7 @@ import { SsiManagementStorageWrapper } from "../../domain/core/SsiManagementStor
  * keeping KycStorageWrapper as a library (required for ERC1594StorageWrapper compatibility).
  *
  * @notice Inherit from this contract to gain access to KYC validation modifiers
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract KycModifiers {
     /**

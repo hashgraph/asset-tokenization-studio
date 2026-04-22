@@ -12,7 +12,7 @@ pragma solidity >=0.8.0 <0.9.0;
  * - CoreModifiers: Pause, AccessControl, ControlList, Kyc, Partition, State
  * - AssetModifiers: Clearing, Lock, ERC3643, Compliance, etc.
  *
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 import { AssetModifiers } from "./asset/AssetModifiers.sol";
 import { CoreModifiers } from "./core/CoreModifiers.sol";

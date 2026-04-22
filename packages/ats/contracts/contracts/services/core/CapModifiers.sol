@@ -9,7 +9,7 @@ import { _checkNotInitialized } from "../InitializationErrors.sol";
  * @notice Abstract contract providing cap-related modifiers
  * @dev Provides modifiers for cap validation using _check* pattern
  *      from CapStorageWrapper
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract CapModifiers {
     /// @notice Modifier to ensure cap has not been initialized

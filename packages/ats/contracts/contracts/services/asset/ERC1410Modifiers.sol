@@ -11,7 +11,7 @@ import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.
  * for convenient use in facets.
  *
  * @notice Inherit from this contract to gain access to ERC1410 validation modifiers
- * @author Asset Tokenization Studio Team
+ * @author Hashgraph
  */
 abstract contract ERC1410Modifiers {
     /**
