@@ -12,6 +12,14 @@ import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.s
 import { Eip1066 } from "../../constants/eip1066.sol";
 import { ICompliance } from "../layer_1/ERC3643/ICompliance.sol";
 
+/**
+ * @title Compliance
+ * @notice Abstract implementation of transfer-eligibility checks and compliance contract management.
+ * @dev Consolidates `canTransfer`, `canTransferFrom`, `setCompliance`, and `compliance` in a single
+ *      abstract contract. Both transfer-check functions are restricted to single-partition mode and
+ *      delegate the actual validation to `ERC1594StorageWrapper.isAbleToTransferFromByPartition`.
+ *      When the token is paused they short-circuit with the EIP-1066 PAUSED status code.
+ */
 abstract contract Compliance is IComplianceFacet, Modifiers {
     /**
      * @notice Sets the compliance contract address
