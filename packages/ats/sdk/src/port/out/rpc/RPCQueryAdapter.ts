@@ -39,7 +39,6 @@ import {
   ERC1410ReadFacet__factory,
   ERC20Votes__factory,
   ERC1594Facet__factory,
-  ERC1643Facet__factory,
   ERC1644Facet__factory,
   IAsset__factory,
   ExternalControlListManagementFacet__factory,
@@ -680,13 +679,13 @@ export class RPCQueryAdapter {
   async getDocument(address: EvmAddress, name: string): Promise<[string, string, bigint]> {
     LogService.logTrace(`Getting document: ${name}`);
 
-    return await this.connect(ERC1643Facet__factory, address.toString()).getDocument(name);
+    return await this.connect(IAsset__factory, address.toString()).getDocument(name);
   }
 
   async getAllDocuments(address: EvmAddress): Promise<string[]> {
     LogService.logTrace(`Getting all documents`);
 
-    return await this.connect(ERC1643Facet__factory, address.toString()).getAllDocuments();
+    return await this.connect(IAsset__factory, address.toString()).getAllDocuments();
   }
 
   async isOperatorForPartition(

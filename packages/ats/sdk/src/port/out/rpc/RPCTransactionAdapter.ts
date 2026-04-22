@@ -75,7 +75,6 @@ import {
   ERC1410IssuerFacet__factory,
   ERC1410ManagementFacet__factory,
   ERC1410TokenHolderFacet__factory,
-  ERC1643Facet__factory,
   ERC3643BatchFacet__factory,
   ERC3643ManagementFacet__factory,
   ERC3643OperationsFacet__factory,
@@ -713,7 +712,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Setting document: ${name}, with ${uri}, and hash ${hash} for security ${security.toString()}`);
 
     return this.executeTransaction(
-      ERC1643Facet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      IAsset__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setDocument",
       [name, uri, hash],
       GAS.SET_DOCUMENT,
@@ -724,7 +723,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Removing document: ${name} for security ${security.toString()}`);
 
     return this.executeTransaction(
-      ERC1643Facet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      IAsset__factory.connect(security.toString(), this.getSignerOrProvider()),
       "removeDocument",
       [name],
       GAS.REMOVE_DOCUMENT,

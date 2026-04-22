@@ -61,8 +61,8 @@ bytes32 constant _HOLD_STORAGE_POSITION = 0x80346b80475a6f26abb9f460d81c6dbe6a8d
 // keccak256('security.token.standard.erc1594.storage');
 bytes32 constant _ERC1594_STORAGE_POSITION = 0x919465d7e15b775c94035d2b592c0808b79e37ecb2e0ceb66bd8c481f998ee9f;
 
-// keccak256('security.token.standard.erc1643.storage');
-bytes32 constant _ERC1643_STORAGE_POSITION = 0xf570af0a020d64f3ea72a78716790700daaeb1b83730feca87e92c517de986ef;
+// keccak256('security.token.standard.documentation.storage');
+bytes32 constant _DOCUMENTATION_STORAGE_POSITION = 0x1fc4fd526525f9824b2c5281c13f150dcad8151e0be556d609cf96360a80fe2a;
 
 // keccak256('security.token.standard.erc1410.operator.storage');
 bytes32 constant _ERC1410_OPERATOR_STORAGE_POSITION = 0x319c8795293307b302697a4daf045524536834965f40eb730e6ca085ae32ae00;

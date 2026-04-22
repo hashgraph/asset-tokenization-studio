@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-22T10:19:56.174Z
- * Facets: 82
+ * Generated: 2026-04-22T12:40:23.053Z
+ * Facets: 84
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -49,12 +49,12 @@ import {
   CouponSustainabilityPerformanceTargetRateFacet__factory,
   DiamondFacet__factory,
   DividendFacet__factory,
+  DocumentationFacet__factory,
   ERC1410IssuerFacet__factory,
   ERC1410ManagementFacet__factory,
   ERC1410ReadFacet__factory,
   ERC1410TokenHolderFacet__factory,
   ERC1594Facet__factory,
-  ERC1643Facet__factory,
   ERC1644Facet__factory,
   ERC20Facet__factory,
   ERC20PermitFacet__factory,
@@ -133,7 +133,6 @@ import {
   ERC1410ReadFacetTimeTravel__factory,
   ERC1410TokenHolderFacetTimeTravel__factory,
   ERC1594FacetTimeTravel__factory,
-  ERC1643FacetTimeTravel__factory,
   ERC1644FacetTimeTravel__factory,
   ERC20FacetTimeTravel__factory,
   ERC20PermitFacetTimeTravel__factory,
@@ -3550,6 +3549,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ComplianceFacet: {
     name: "ComplianceFacet",
+    description: "Diamond facet exposing transfer-eligibility checks and compliance contract management.",
     resolverKey: {
       name: "_COMPLIANCE_RESOLVER_KEY",
       value: "0x26dd018c79db76fffcf69d611558031ed11d7660991c2466b284afe6cfdfe5b5",
@@ -5342,6 +5342,95 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) => new DividendFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
+  DocumentationFacet: {
+    name: "DocumentationFacet",
+    description:
+      "Diamond facet that exposes on-chain document management through the `IDocumentation` interface, registered under `_DOCUMENTATION_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_DOCUMENTATION_RESOLVER_KEY",
+      value: "0x57129a8daf2f0c8049f790465a8c176b7e9fdd5f8cbe1f7f9c6c3a70351ea521",
+    },
+    inheritance: ["Documentation", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "getAllDocuments",
+        signature: { full: "function getAllDocuments() view returns (bytes32[])", canonical: "getAllDocuments()" },
+        selector: "0x9fa5f50b",
+      },
+      {
+        name: "getDocument",
+        signature: {
+          full: "function getDocument(bytes32 _name) view returns (string, bytes32, uint256)",
+          canonical: "getDocument(bytes32)",
+        },
+        selector: "0xb10d6b41",
+      },
+      {
+        name: "removeDocument",
+        signature: { full: "function removeDocument(bytes32 _name)", canonical: "removeDocument(bytes32)" },
+        selector: "0xc3501848",
+      },
+      {
+        name: "setDocument",
+        signature: {
+          full: "function setDocument(bytes32 _name, string _uri, bytes32 _documentHash)",
+          canonical: "setDocument(bytes32,string,bytes32)",
+        },
+        selector: "0x010648ca",
+      },
+    ],
+    events: [
+      {
+        name: "DocumentRemoved",
+        signature: {
+          full: "event DocumentRemoved(bytes32 indexed name, string uri, bytes32 documentHash)",
+          canonical: "DocumentRemoved(bytes32,string,bytes32)",
+        },
+        topic0: "0x3d9bba27d3e360d8c80645beed7e991454a8271bf6f269a24f7782be0f0d0654",
+      },
+      {
+        name: "DocumentUpdated",
+        signature: {
+          full: "event DocumentUpdated(bytes32 indexed name, string uri, bytes32 documentHash)",
+          canonical: "DocumentUpdated(bytes32,string,bytes32)",
+        },
+        topic0: "0xb4c22d60cd550a815744f04e3ff5278bf19684565ee00e2b084041b6024bd6f6",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRole",
+        signature: {
+          full: "error AccountHasNoRole(address account, bytes32 role)",
+          canonical: "AccountHasNoRole(address,bytes32)",
+        },
+        selector: "0xa1180aad",
+      },
+      {
+        name: "DocumentDoesNotExist",
+        signature: { full: "error DocumentDoesNotExist(bytes32 name)", canonical: "DocumentDoesNotExist(bytes32)" },
+        selector: "0xc2e54650",
+      },
+      { name: "EmptyHASH", signature: { full: "error EmptyHASH()", canonical: "EmptyHASH()" }, selector: "0x402e72be" },
+      { name: "EmptyName", signature: { full: "error EmptyName()", canonical: "EmptyName()" }, selector: "0x2ef13105" },
+      { name: "EmptyURI", signature: { full: "error EmptyURI()", canonical: "EmptyURI()" }, selector: "0xd07b00d6" },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+    ],
+    factory: (signer) => new DocumentationFacet__factory(signer),
+  },
+
   EquityUSAFacet: {
     name: "EquityUSAFacet",
     resolverKey: {
@@ -5894,14 +5983,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["ERC1410Read", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "balanceOf",
-        signature: {
-          full: "function balanceOf(address _tokenHolder) view returns (uint256)",
-          canonical: "balanceOf(address)",
-        },
-        selector: "0x70a08231",
-      },
-      {
         name: "balanceOfAt",
         signature: {
           full: "function balanceOfAt(address _tokenHolder, uint256 _timestamp) view returns (uint256)",
@@ -5961,11 +6042,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "partitionsOf(address)",
         },
         selector: "0x740ab8f4",
-      },
-      {
-        name: "totalSupply",
-        signature: { full: "function totalSupply() view returns (uint256)", canonical: "totalSupply()" },
-        selector: "0x18160ddd",
       },
       {
         name: "totalSupplyByPartition",
@@ -6518,94 +6594,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     factory: (signer) => new ERC1594Facet__factory(getLibLinks("tokenCoreOps") as any, signer),
     timeTravelFactory: (signer) => new ERC1594FacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
-  },
-
-  ERC1643Facet: {
-    name: "ERC1643Facet",
-    resolverKey: {
-      name: "_ERC1643_RESOLVER_KEY",
-      value: "0x24543637956a3076689f171d3932b10f22d40f3785d53acebb340f37bed01625",
-    },
-    inheritance: ["ERC1643", "IStaticFunctionSelectors"],
-    methods: [
-      {
-        name: "getAllDocuments",
-        signature: { full: "function getAllDocuments() view returns (bytes32[])", canonical: "getAllDocuments()" },
-        selector: "0x9fa5f50b",
-      },
-      {
-        name: "getDocument",
-        signature: {
-          full: "function getDocument(bytes32 _name) view returns (string, bytes32, uint256)",
-          canonical: "getDocument(bytes32)",
-        },
-        selector: "0xb10d6b41",
-      },
-      {
-        name: "removeDocument",
-        signature: { full: "function removeDocument(bytes32 _name)", canonical: "removeDocument(bytes32)" },
-        selector: "0xc3501848",
-      },
-      {
-        name: "setDocument",
-        signature: {
-          full: "function setDocument(bytes32 _name, string _uri, bytes32 _documentHash)",
-          canonical: "setDocument(bytes32,string,bytes32)",
-        },
-        selector: "0x010648ca",
-      },
-    ],
-    events: [
-      {
-        name: "DocumentRemoved",
-        signature: {
-          full: "event DocumentRemoved(bytes32 indexed name, string uri, bytes32 documentHash)",
-          canonical: "DocumentRemoved(bytes32,string,bytes32)",
-        },
-        topic0: "0x3d9bba27d3e360d8c80645beed7e991454a8271bf6f269a24f7782be0f0d0654",
-      },
-      {
-        name: "DocumentUpdated",
-        signature: {
-          full: "event DocumentUpdated(bytes32 indexed name, string uri, bytes32 documentHash)",
-          canonical: "DocumentUpdated(bytes32,string,bytes32)",
-        },
-        topic0: "0xb4c22d60cd550a815744f04e3ff5278bf19684565ee00e2b084041b6024bd6f6",
-      },
-    ],
-    errors: [
-      {
-        name: "AccessControlRequired",
-        signature: {
-          full: "error AccessControlRequired(bytes32 role, address sender)",
-          canonical: "AccessControlRequired(bytes32,address)",
-        },
-        selector: "0x10210dec",
-      },
-      {
-        name: "AccountHasNoRole",
-        signature: {
-          full: "error AccountHasNoRole(address account, bytes32 role)",
-          canonical: "AccountHasNoRole(address,bytes32)",
-        },
-        selector: "0xa1180aad",
-      },
-      {
-        name: "DocumentDoesNotExist",
-        signature: { full: "error DocumentDoesNotExist(bytes32 name)", canonical: "DocumentDoesNotExist(bytes32)" },
-        selector: "0xc2e54650",
-      },
-      { name: "EmptyHASH", signature: { full: "error EmptyHASH()", canonical: "EmptyHASH()" }, selector: "0x402e72be" },
-      { name: "EmptyName", signature: { full: "error EmptyName()", canonical: "EmptyName()" }, selector: "0x2ef13105" },
-      { name: "EmptyURI", signature: { full: "error EmptyURI()", canonical: "EmptyURI()" }, selector: "0xd07b00d6" },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
-    ],
-    factory: (signer) => new ERC1643Facet__factory(signer),
-    timeTravelFactory: (signer) => new ERC1643FacetTimeTravel__factory(signer),
   },
 
   ERC1644Facet: {
@@ -12330,14 +12318,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["TotalBalance", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "getTotalBalanceFor",
-        signature: {
-          full: "function getTotalBalanceFor(address _account) view returns (uint256)",
-          canonical: "getTotalBalanceFor(address)",
-        },
-        selector: "0xa8f9868e",
-      },
-      {
         name: "getTotalBalanceForByPartition",
         signature: {
           full: "function getTotalBalanceForByPartition(bytes32 _partition, address _account) view returns (uint256)",
@@ -13126,7 +13106,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 81 as const;
+export const TOTAL_FACETS = 84 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -13609,6 +13589,12 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [],
   },
 
+  DocumentationStorageWrapper: {
+    name: "DocumentationStorageWrapper",
+    description: "Library providing diamond storage access and all read/write operations for the documentation domain.",
+    methods: [],
+  },
+
   EquityStorageWrapper: {
     name: "EquityStorageWrapper",
     methods: [],
@@ -13881,7 +13867,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 40 as const;
+export const TOTAL_STORAGE_WRAPPERS = 41 as const;
 
 /**
  * All role identifiers extracted from contracts.
