@@ -16,6 +16,7 @@ const config = {
     "@infrastructure(.*)$": "<rootDir>/src/infrastructure/$1",
     "@config(.*)$": "<rootDir>/src/config/$1",
     "@shared(.*)$": "<rootDir>/src/shared/$1",
+    "@utils(.*)$": "<rootDir>/src/utils/$1",
     "@test(.*)$": "<rootDir>/test/$1",
   },
   rootDir: ".",
