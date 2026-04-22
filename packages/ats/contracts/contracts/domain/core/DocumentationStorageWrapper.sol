@@ -60,7 +60,7 @@ library DocumentationStorageWrapper {
      * @param _uri          Off-chain URI of the document.
      */
     function setDocumentEntry(bytes32 _name, bytes32 _documentHash, uint256 _timestamp, string calldata _uri) internal {
-        DocumentationDataStorage storage docStorage = _documentationStorage();
+        DocumentationDataStorage storage docStorage = documentationStorage();
         if (docStorage.documents[_name].lastModified == uint256(0)) {
             docStorage.docNames.push(_name);
             docStorage.docIndexes[_name] = docStorage.docNames.length;
@@ -79,7 +79,7 @@ library DocumentationStorageWrapper {
      * @return docHash_ Content hash that was associated with the document.
      */
     function removeDocumentEntry(bytes32 _name) internal returns (string memory uri_, bytes32 docHash_) {
-        DocumentationDataStorage storage docStorage = _documentationStorage();
+        DocumentationDataStorage storage docStorage = documentationStorage();
         uri_ = docStorage.documents[_name].uri;
         docHash_ = docStorage.documents[_name].docHash;
         uint256 index = docStorage.docIndexes[_name] - 1;
@@ -105,7 +105,7 @@ library DocumentationStorageWrapper {
     function getDocumentData(
         bytes32 _name
     ) internal view returns (string memory uri_, bytes32 docHash_, uint256 lastModified_) {
-        DocumentationDataStorage storage docStorage = _documentationStorage();
+        DocumentationDataStorage storage docStorage = documentationStorage();
         uri_ = docStorage.documents[_name].uri;
         docHash_ = docStorage.documents[_name].docHash;
         lastModified_ = docStorage.documents[_name].lastModified;
@@ -118,7 +118,7 @@ library DocumentationStorageWrapper {
      * @return Array of `bytes32` document names.
      */
     function getDocumentNames() internal view returns (bytes32[] memory) {
-        return _documentationStorage().docNames;
+        return documentationStorage().docNames;
     }
 
     // -------------------------------------------------------------------------
@@ -132,7 +132,7 @@ library DocumentationStorageWrapper {
      * @param _name The `bytes32` document name whose existence is asserted.
      */
     function _checkDocumentExists(bytes32 _name) internal view {
-        if (_documentationStorage().documents[_name].lastModified == uint256(0)) {
+        if (documentationStorage().documents[_name].lastModified == uint256(0)) {
             revert IDocumentation.DocumentDoesNotExist(_name);
         }
     }
@@ -171,7 +171,7 @@ library DocumentationStorageWrapper {
      *      library's typed API rather than direct slot manipulation by callers.
      * @return docStorage_ Reference to the `DocumentationStorage` struct.
      */
-    function _documentationStorage() private pure returns (DocumentationDataStorage storage docStorage_) {
+    function documentationStorage() private pure returns (DocumentationDataStorage storage docStorage_) {
         bytes32 position = _DOCUMENTATION_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
