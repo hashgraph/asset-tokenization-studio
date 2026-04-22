@@ -48,6 +48,7 @@ import {
   Factory__factory,
   FixedRate__factory,
   FreezeFacet__factory,
+  HoldFacet__factory,
   HoldReadFacet__factory,
   KycFacet__factory,
   LockFacet__factory,
@@ -863,7 +864,7 @@ export class RPCQueryAdapter {
   async getHeldAmountFor(address: EvmAddress, targetId: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting Held Amount For ${targetId}`);
 
-    const heldAmountFor = await this.connect(HoldReadFacet__factory, address.toString()).getHeldAmountFor(
+    const heldAmountFor = await this.connect(HoldFacet__factory, address.toString()).getHeldAmountFor(
       targetId.toString(),
     );
 

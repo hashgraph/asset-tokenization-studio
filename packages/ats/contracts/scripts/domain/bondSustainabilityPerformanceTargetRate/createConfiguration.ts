@@ -74,6 +74,7 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "ClearingReadFacet",
   "ClearingRedeemFacet",
   "ClearingTransferFacet",
+  "HoldFacet",
   "HoldManagementFacet",
   "HoldReadFacet",
   "HoldTokenHolderFacet",
