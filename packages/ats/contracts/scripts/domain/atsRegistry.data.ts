@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-21T11:03:37.213Z
- * Facets: 79
+ * Generated: 2026-04-21T14:30:58.494Z
+ * Facets: 80
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -37,6 +37,7 @@ import {
   ClearingRedeemFacet__factory,
   ClearingTransferFacet__factory,
   ControlListFacet__factory,
+  CoreAdjustedFacet__factory,
   CoreFacet__factory,
   CorporateActionsFacet__factory,
   CouponFacet__factory,
@@ -3509,6 +3510,26 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) => new ControlListFacetTimeTravel__factory(signer),
   },
 
+  CoreAdjustedFacet: {
+    name: "CoreAdjustedFacet",
+    resolverKey: {
+      name: "_CORE_ADJUSTED_RESOLVER_KEY",
+      value: "0xb4135b83cc3bbd6b3d1da5b0abcc33c9cb857bf5a314bab3cdff8241e72306d0",
+    },
+    inheritance: ["CoreAdjusted", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "decimalsAt",
+        signature: {
+          full: "function decimalsAt(uint256 _timestamp) view returns (uint8)",
+          canonical: "decimalsAt(uint256)",
+        },
+        selector: "0x771918ca",
+      },
+    ],
+    factory: (signer) => new CoreAdjustedFacet__factory(signer),
+  },
+
   CoreFacet: {
     name: "CoreFacet",
     description:
@@ -6506,14 +6527,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "approve(address,uint256)",
         },
         selector: "0x095ea7b3",
-      },
-      {
-        name: "decimalsAt",
-        signature: {
-          full: "function decimalsAt(uint256 _timestamp) view returns (uint8)",
-          canonical: "decimalsAt(uint256)",
-        },
-        selector: "0x771918ca",
       },
       {
         name: "decreaseAllowance",
@@ -12947,7 +12960,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 79 as const;
+export const TOTAL_FACETS = 80 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

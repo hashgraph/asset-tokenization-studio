@@ -42,6 +42,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "DiamondFacet", // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
   "CoreFacet",
   "ERC20Facet",
+  "CoreAdjustedFacet",
   "FreezeFacet",
   "KycFacet",
   "PauseFacet",
