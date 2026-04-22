@@ -64,7 +64,7 @@ import GetTotalDividendHoldersRequest from "@port/in/request/dividend/GetTotalDi
 import GetVotingHoldersRequest from "@port/in/request/equity/GetVotingHoldersRequest";
 import GetTotalVotingHoldersRequest from "@port/in/request/equity/GetTotalVotingHoldersRequest";
 import { CreateTrexSuiteEquityCommand } from "@command/equity/createTrexSuite/CreateTrexSuiteEquityCommand";
-import { CreateTrexSuiteEquityRequest } from "src";
+import CreateTrexSuiteEquityRequest from "@port/in/request/equity/CreateTrexSuiteEquityRequest";
 
 export const CreateEquityRequestFixture = createFixture<CreateEquityRequest>((request) => {
   request.name.faker((faker) => faker.company.name());

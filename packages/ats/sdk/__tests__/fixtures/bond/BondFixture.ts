@@ -49,13 +49,11 @@ import { GetCouponHoldersQuery } from "@query/bond/coupons/getCouponHolders/GetC
 import { GetTotalCouponHoldersQuery } from "@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery";
 import { GetBondDetailsQuery } from "@query/bond/get/getBondDetails/GetBondDetailsQuery";
 import { GetPrincipalForQuery } from "@query/bond/get/getPrincipalFor/GetPrincipalForQuery";
-import {
-  CreateTrexSuiteBondRequest,
-  GetProceedRecipientDataRequest,
-  GetProceedRecipientsCountRequest,
-  GetProceedRecipientsRequest,
-  IsProceedRecipientRequest,
-} from "src";
+import CreateTrexSuiteBondRequest from "@port/in/request/bond/CreateTrexSuiteBondRequest";
+import GetProceedRecipientDataRequest from "@port/in/request/bond/GetProceedRecipientDataRequest";
+import GetProceedRecipientsCountRequest from "@port/in/request/bond/GetProceedRecipientsCountRequest";
+import GetProceedRecipientsRequest from "@port/in/request/bond/GetProceedRecipientsRequest";
+import IsProceedRecipientRequest from "@port/in/request/bond/IsProceedRecipientRequest";
 import { createFixture } from "../config";
 import { ContractIdPropFixture, HederaIdPropsFixture, PartitionIdFixture } from "../shared/DataFixture";
 import { SecurityPropsFixture } from "../shared/SecurityFixture";
