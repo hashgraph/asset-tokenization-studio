@@ -139,7 +139,7 @@ export class RPCQueryAdapter {
   async balanceOf(address: EvmAddress, target: EvmAddress): Promise<bigint> {
     LogService.logTrace(`Getting balance of ${address.toString()} security for the account ${target.toString()}`);
 
-    return await this.connect(ERC1410ReadFacet__factory, address.toString()).balanceOf(target.toString());
+    return await this.connect(IAsset__factory, address.toString()).balanceOf(target.toString());
   }
 
   async balanceOfByPartition(address: EvmAddress, target: EvmAddress, partitionId: string): Promise<bigint> {
@@ -205,7 +205,7 @@ export class RPCQueryAdapter {
   async totalSupply(address: EvmAddress): Promise<bigint> {
     LogService.logTrace(`Getting total supply of ${address.toString()} security`);
 
-    return await this.connect(ERC1410ReadFacet__factory, address.toString()).totalSupply();
+    return await this.connect(IAsset__factory, address.toString()).totalSupply();
   }
 
   async totalSupplyAtSnapshot(address: EvmAddress, snapshotId: number): Promise<bigint> {
@@ -258,7 +258,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Requesting security details for security: ${address.toString()}`);
 
     const erc20Metadata = await this.connect(IAsset__factory, address.toString()).getERC20Metadata();
-    const totalSupply = await this.connect(ERC1410ReadFacet__factory, address.toString()).totalSupply();
+    const totalSupply = await this.connect(IAsset__factory, address.toString()).totalSupply();
     const maxSupply = await this.connect(CapFacet__factory, address.toString()).getMaxSupply();
     const isWhiteList = await this.connect(ControlListFacet__factory, address.toString()).getControlListType();
     const erc20VotesActivated = await this.connect(ERC20Votes__factory, address.toString()).isActivated();
