@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-22T13:07:54.863Z
+ * Generated: 2026-04-22T14:34:22.048Z
  * Facets: 86
  * Infrastructure: 2
  *
@@ -149,6 +149,7 @@ import {
   ExternalPauseManagementFacetTimeTravel__factory,
   FixedRateFacetTimeTravel__factory,
   FreezeFacetTimeTravel__factory,
+  HoldFacetTimeTravel__factory,
   HoldManagementFacetTimeTravel__factory,
   HoldReadFacetTimeTravel__factory,
   HoldTokenHolderFacetTimeTravel__factory,
@@ -8874,6 +8875,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     factory: (signer) => new HoldFacet__factory(signer),
+    timeTravelFactory: (signer) => new HoldFacetTimeTravel__factory(signer),
   },
 
   HoldManagementFacet: {
@@ -9628,6 +9630,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   IHoldFacet: {
     name: "IHoldFacet",
+    description: "Interface for the high-level, partition-agnostic hold read accessors.",
     methods: [
       {
         name: "getHeldAmountFor",
@@ -13359,7 +13362,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 84 as const;
+export const TOTAL_FACETS = 86 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
