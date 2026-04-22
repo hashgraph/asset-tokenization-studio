@@ -44,8 +44,4 @@ abstract contract ERC20 is IERC20, Modifiers {
     {
         return TokenCoreOps.transferFrom(EvmAccessors.getMsgSender(), from, to, amount);
     }
-
-    function decimalsAt(uint256 _timestamp) external view returns (uint8) {
-        return ERC20StorageWrapper.decimalsAdjustedAt(_timestamp);
-    }
 }
