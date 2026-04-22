@@ -106,6 +106,7 @@ import {
   TREXFactoryAts__factory,
   NominalValue__factory,
   AmortizationFacet__factory,
+  IAsset__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { ContractId } from "@hiero-ledger/sdk";
 import EventService from "@service/event/EventService";
@@ -2029,7 +2030,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Setting name to ${security.toString()}`);
 
     return this.executeTransaction(
-      ERC3643ManagementFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      IAsset__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setName",
       [name],
       GAS.SET_NAME,
@@ -2040,7 +2041,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Setting symbol to ${security.toString()}`);
 
     return this.executeTransaction(
-      ERC3643ManagementFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      IAsset__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setSymbol",
       [symbol],
       GAS.SET_SYMBOL,

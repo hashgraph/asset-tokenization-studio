@@ -40,6 +40,7 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "ControlListFacet",
   "CorporateActionsFacet",
   "DiamondFacet", // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
+  "CoreFacet",
   "ERC20Facet",
   "FreezeFacet",
   "KycFacet",

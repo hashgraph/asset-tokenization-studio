@@ -52,6 +52,9 @@ const LOAN_FACETS = [
   "FreezeFacet",
   "PauseFacet",
 
+  // Core
+  "CoreFacet",
+
   // ERC Standards
   "ERC20Facet",
   "ERC20PermitFacet",

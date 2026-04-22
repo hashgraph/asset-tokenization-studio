@@ -28,8 +28,4 @@ abstract contract ERC3643Read is IERC3643Read {
     function isAddressRecovered(address _wallet) external view returns (bool) {
         return ERC3643StorageWrapper.isRecovered(_wallet);
     }
-
-    function version() external view returns (string memory) {
-        return ERC3643StorageWrapper.version();
-    }
 }

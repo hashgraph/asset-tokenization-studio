@@ -13,7 +13,9 @@
     "serve": "docusaurus serve --port 3010",
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "clean": "npm run clean:node",
+    "clean:node": "npx --yes rimraf node_modules"
   },
   "dependencies": {
     "@docusaurus/core": "3.9.2",

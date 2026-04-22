@@ -49,6 +49,9 @@ const BOND_FACETS = [
   "BalanceTrackerFacet",
   "TotalBalanceFacet",
 
+  // Core
+  "CoreFacet",
+
   // ERC Standards
   "ERC20Facet",
   "ERC1410IssuerFacet",

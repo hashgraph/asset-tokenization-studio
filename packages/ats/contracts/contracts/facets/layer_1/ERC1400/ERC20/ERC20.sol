@@ -92,23 +92,7 @@ abstract contract ERC20 is IERC20, Modifiers {
         return ERC20StorageWrapper.allowanceAdjustedAt(owner, spender, TimeTravelStorageWrapper.getBlockTimestamp());
     }
 
-    function name() external view returns (string memory) {
-        return ERC20StorageWrapper.getERC20Metadata().info.name;
-    }
-
-    function symbol() external view returns (string memory) {
-        return ERC20StorageWrapper.getERC20Metadata().info.symbol;
-    }
-
-    function decimals() external view returns (uint8) {
-        return ERC20StorageWrapper.decimalsAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
-    }
-
     function decimalsAt(uint256 _timestamp) external view returns (uint8) {
         return ERC20StorageWrapper.decimalsAdjustedAt(_timestamp);
-    }
-
-    function getERC20Metadata() external view returns (ERC20Metadata memory) {
-        return ERC20StorageWrapper.getERC20MetadataAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
     }
 }

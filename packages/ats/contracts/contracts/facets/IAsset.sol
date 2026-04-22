@@ -3,40 +3,27 @@ pragma solidity >=0.8.0 <0.9.0;
 
 // Layer 1 — Core
 import {
-    IScheduledBalanceAdjustments
-} from "./layer_2/scheduledTask/scheduledBalanceAdjustment/IScheduledBalanceAdjustments.sol";
-import {
     IScheduledCrossOrderedTasks
 } from "./layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
 import { IAccessControl } from "./layer_1/accessControl/IAccessControl.sol";
 import { IAdjustBalances } from "./layer_2/adjustBalance/IAdjustBalances.sol";
 import { IAmortization } from "./layer_2/amortization/IAmortization.sol";
 import { IBond } from "./layer_2/bond/IBond.sol";
-import { IBondRead } from "./layer_2/bond/IBondRead.sol";
 import { IBondUSA } from "./layer_3/bondUSA/IBondUSA.sol";
 
 // Layer 1 — ERC1400
-import { ICap } from "./layer_1/cap/ICap.sol";
-import { IClearingActions } from "./layer_1/clearing/IClearingActions.sol";
-import { IClearingHoldCreation } from "./layer_1/clearing/IClearingHoldCreation.sol";
-import { IClearingRead } from "./layer_1/clearing/IClearingRead.sol";
-import { IClearingRedeem } from "./layer_1/clearing/IClearingRedeem.sol";
-import { IClearingTransfer } from "./layer_1/clearing/IClearingTransfer.sol";
-import { ICompliance } from "./layer_1/ERC3643/ICompliance.sol";
 
 // Layer 1 — ERC3643
-import { IControlList } from "./layer_1/controlList/IControlList.sol";
 import { ICorporateActions } from "./layer_1/corporateAction/ICorporateActions.sol";
 import { IDiamond } from "../infrastructure/proxy/IDiamond.sol";
 import { ICommonErrors } from "../infrastructure/errors/ICommonErrors.sol";
 
+// Core
+import { ICore } from "./core/ICore.sol";
+
 // Layer 1 — External lists
 import { IERC1410 } from "./layer_1/ERC1400/ERC1410/IERC1410.sol";
-import { IERC1594 } from "./layer_1/ERC1400/ERC1594/IERC1594.sol";
-import { IERC1643 } from "./layer_1/ERC1400/ERC1643/IERC1643.sol";
-import { IERC1644 } from "./layer_1/ERC1400/ERC1644/IERC1644.sol";
 import { IERC20 } from "./layer_1/ERC1400/ERC20/IERC20.sol";
-import { IERC20Permit } from "./layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
 
 // Layer 1 — Remaining facets
 import { IERC20Votes } from "./layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
@@ -56,38 +43,50 @@ import {
 } from "./layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRateTypes.sol";
 
 // Layer 2
-import { IFreeze } from "./layer_1/freeze/IFreeze.sol";
 import { IHold } from "./layer_1/hold/IHold.sol";
-import { IIdentityRegistry } from "./layer_1/ERC3643/IIdentityRegistry.sol";
-import { IKpis } from "./layer_2/kpi/kpiLatest/IKpis.sol";
 import { IKyc } from "./layer_1/kyc/IKyc.sol";
 // IKpiLinkedRate and ISustainabilityPerformanceTargetRate are excluded: both define
 // getInterestRate() with incompatible return types (different InterestRate structs),
 // which cannot be reconciled in a single Solidity interface. Use those typed instances
 // directly when testing KPI-linked or SPTR interest rate facets.
 import { ILoan } from "./layer_2/loan/ILoan.sol";
-import { ILock } from "./layer_1/lock/ILock.sol";
 import { INominalValue } from "./layer_2/nominalValue/INominalValue.sol";
-import { INonces } from "./layer_1/nonce/INonces.sol";
 import { IPause } from "./layer_1/pause/IPause.sol";
-import { IProceedRecipients } from "./layer_2/proceedRecipient/IProceedRecipients.sol";
-import { IProtectedPartitions } from "./layer_1/protectedPartition/IProtectedPartitions.sol";
-import { IRevocationList } from "./layer_1/kyc/IRevocationList.sol";
-import { IScheduledCouponListing } from "./layer_2/scheduledTask/scheduledCouponListing/IScheduledCouponListing.sol";
-import { IScheduledSnapshots } from "./layer_2/scheduledTask/scheduledSnapshot/IScheduledSnapshots.sol";
 import { ILoansPortfolio } from "./layer_2/loansPortfolio/ILoansPortfolio.sol";
 import { IVoting } from "./layer_2/voting/IVoting.sol";
 
 // Layer 3
 import { ISecurity } from "./layer_2/security/ISecurity.sol";
-import { ISnapshots } from "./layer_1/snapshot/ISnapshots.sol";
 import { ISsiManagement } from "./layer_1/ssi/ISsiManagement.sol";
 import { ITimeTravel } from "../test/testTimeTravel/ITimeTravel.sol";
 import { IBalanceTracker } from "./balanceTracker/IBalanceTracker.sol";
-import { ITotalBalance } from "./layer_1/totalBalance/ITotalBalance.sol";
 import { ITransferAndLock } from "./layer_3/transferAndLock/ITransferAndLock.sol";
 import { ICoupon } from "./layer_2/coupon/ICoupon.sol";
 import { IDividend } from "./layer_2/dividend/IDividend.sol";
+import { IKpis } from "./layer_2/kpi/kpiLatest/IKpis.sol";
+import { IScheduledSnapshots } from "./layer_2/scheduledTask/scheduledSnapshot/IScheduledSnapshots.sol";
+import { IProtectedPartitions } from "./layer_1/protectedPartition/IProtectedPartitions.sol";
+import { IProceedRecipients } from "./layer_2/proceedRecipient/IProceedRecipients.sol";
+import { ICap } from "./layer_1/cap/ICap.sol";
+import { INonces } from "./layer_1/nonce/INonces.sol";
+import { ITotalBalance } from "./layer_1/totalBalance/ITotalBalance.sol";
+import { IScheduledCouponListing } from "./layer_2/scheduledTask/scheduledCouponListing/IScheduledCouponListing.sol";
+import {
+    IScheduledBalanceAdjustments
+} from "./layer_2/scheduledTask/scheduledBalanceAdjustment/IScheduledBalanceAdjustments.sol";
+import { ILock } from "./layer_1/lock/ILock.sol";
+import { IFreeze } from "./layer_1/freeze/IFreeze.sol";
+import { ISnapshots } from "./layer_1/snapshot/ISnapshots.sol";
+import { IClearingActions } from "./layer_1/clearing/IClearingActions.sol";
+import { IClearingTransfer } from "./layer_1/clearing/IClearingTransfer.sol";
+import { IClearingRedeem } from "./layer_1/clearing/IClearingRedeem.sol";
+import { IClearingHoldCreation } from "./layer_1/clearing/IClearingHoldCreation.sol";
+import { IClearingRead } from "./layer_1/clearing/IClearingRead.sol";
+import { IERC1594 } from "./layer_1/ERC1400/ERC1594/IERC1594.sol";
+import { IERC1643 } from "./layer_1/ERC1400/ERC1643/IERC1643.sol";
+import { IERC1644 } from "./layer_1/ERC1400/ERC1644/IERC1644.sol";
+import { IERC20Permit } from "./layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
+import { IControlList } from "./layer_1/controlList/IControlList.sol";
 
 /**
  * @title IAsset
@@ -107,6 +106,7 @@ import { IDividend } from "./layer_2/dividend/IDividend.sol";
  */
 // solhint-disable no-empty-blocks
 interface IAsset is
+    ICore,
     IAccessControl,
     IPause,
     IExternalPauseManagement,
