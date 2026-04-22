@@ -86,40 +86,4 @@ interface IERC1594 {
      * @return bool `true` signifies the minting is allowed. While `false` denotes the end of minting
      */
     function isIssuable() external view returns (bool);
-
-    /**
-     * @notice Transfers of securities may fail for a number of reasons. So this function will used to understand the
-     * cause of failure by getting the byte value. Which will be the ESC that follows the EIP 1066. ESC can be mapped
-     * with a reson string to understand the failure cause, table of Ethereum status code will always reside off-chain
-     * @param _to address The address which you want to transfer to
-     * @param _value uint256 the amount of tokens to be transferred
-     * @param _data The `bytes calldata _data` allows arbitrary data to be submitted alongside the transfer.
-     * @return bool It signifies whether the transaction will be executed or not.
-     * @return byte Ethereum status code (ESC)
-     * @return bytes32 Application specific reason code
-     */
-    function canTransfer(
-        address _to,
-        uint256 _value,
-        bytes calldata _data
-    ) external view returns (bool, bytes1, bytes32);
-
-    /**
-     * @notice Transfers of securities may fail for a number of reasons. So this function will used to understand the
-     * cause of failure by getting the byte value. Which will be the ESC that follows the EIP 1066. ESC can be mapped
-     * with a reson string to understand the failure cause, table of Ethereum status code will always reside off-chain
-     * @param _from address The address which you want to send tokens from
-     * @param _to address The address which you want to transfer to
-     * @param _value uint256 the amount of tokens to be transferred
-     * @param _data The `bytes calldata _data` allows arbitrary data to be submitted alongside the transfer.
-     * @return bool It signifies whether the transaction will be executed or not.
-     * @return byte Ethereum status code (ESC)
-     * @return bytes32 Application specific reason code
-     */
-    function canTransferFrom(
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes calldata _data
-    ) external view returns (bool, bytes1, bytes32);
 }

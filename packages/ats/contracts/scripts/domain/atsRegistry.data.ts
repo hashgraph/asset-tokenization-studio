@@ -38,6 +38,7 @@ import {
   ClearingReadFacet__factory,
   ClearingRedeemFacet__factory,
   ClearingTransferFacet__factory,
+  ComplianceFacet__factory,
   ControlListFacet__factory,
   CoreAdjustedFacet__factory,
   CoreFacet__factory,
@@ -71,6 +72,7 @@ import {
   HoldManagementFacet__factory,
   HoldReadFacet__factory,
   HoldTokenHolderFacet__factory,
+  IComplianceFacet__factory,
   KpiLinkedRateFacet__factory,
   KpisKpiLinkedRateFacet__factory,
   KpisSustainabilityPerformanceTargetRateFacet__factory,
@@ -117,6 +119,7 @@ import {
   ClearingReadFacetTimeTravel__factory,
   ClearingRedeemFacetTimeTravel__factory,
   ClearingTransferFacetTimeTravel__factory,
+  ComplianceFacetTimeTravel__factory,
   ControlListFacetTimeTravel__factory,
   CorporateActionsFacetTimeTravel__factory,
   CouponFacetTimeTravel__factory,
@@ -3545,6 +3548,80 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       ),
   },
 
+  ComplianceFacet: {
+    name: "ComplianceFacet",
+    resolverKey: {
+      name: "_COMPLIANCE_RESOLVER_KEY",
+      value: "0x26dd018c79db76fffcf69d611558031ed11d7660991c2466b284afe6cfdfe5b5",
+    },
+    inheritance: ["Compliance", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "canTransfer",
+        signature: {
+          full: "function canTransfer(address _to, uint256 _value, bytes _data) view returns (bool, bytes1, bytes32)",
+          canonical: "canTransfer(address,uint256,bytes)",
+        },
+        selector: "0x1badb25c",
+      },
+      {
+        name: "canTransferFrom",
+        signature: {
+          full: "function canTransferFrom(address _from, address _to, uint256 _value, bytes _data) view returns (bool, bytes1, bytes32)",
+          canonical: "canTransferFrom(address,address,uint256,bytes)",
+        },
+        selector: "0x122eb575",
+      },
+      {
+        name: "compliance",
+        signature: { full: "function compliance() view returns (address)", canonical: "compliance()" },
+        selector: "0x6290865d",
+      },
+      {
+        name: "setCompliance",
+        signature: { full: "function setCompliance(address _compliance)", canonical: "setCompliance(address)" },
+        selector: "0xf8981789",
+      },
+    ],
+    events: [
+      {
+        name: "ComplianceAdded",
+        signature: { full: "event ComplianceAdded(address indexed compliance)", canonical: "ComplianceAdded(address)" },
+        topic0: "0x7f3a888862559648ec01d97deb7b5012bff86dc91e654a1de397170db40e35b6",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRole",
+        signature: {
+          full: "error AccountHasNoRole(address account, bytes32 role)",
+          canonical: "AccountHasNoRole(address,bytes32)",
+        },
+        selector: "0xa1180aad",
+      },
+      {
+        name: "NotAllowedInMultiPartitionMode",
+        signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
+        selector: "0x76d08f88",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+    ],
+    factory: (signer) => new ComplianceFacet__factory(signer),
+    timeTravelFactory: (signer) => new ComplianceFacetTimeTravel__factory(signer),
+  },
+
   ControlListFacet: {
     name: "ControlListFacet",
     resolverKey: {
@@ -6203,22 +6280,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["ERC1594", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "canTransfer",
-        signature: {
-          full: "function canTransfer(address _to, uint256 _value, bytes _data) view returns (bool, bytes1, bytes32)",
-          canonical: "canTransfer(address,uint256,bytes)",
-        },
-        selector: "0x1badb25c",
-      },
-      {
-        name: "canTransferFrom",
-        signature: {
-          full: "function canTransferFrom(address _from, address _to, uint256 _value, bytes _data) view returns (bool, bytes1, bytes32)",
-          canonical: "canTransferFrom(address,address,uint256,bytes)",
-        },
-        selector: "0x122eb575",
-      },
-      {
         name: "initialize_ERC1594",
         signature: { full: "function initialize_ERC1594()", canonical: "initialize_ERC1594()" },
         selector: "0x9be12cea",
@@ -7339,11 +7400,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x97a6278e",
       },
       {
-        name: "setCompliance",
-        signature: { full: "function setCompliance(address _compliance)", canonical: "setCompliance(address)" },
-        selector: "0xf8981789",
-      },
-      {
         name: "setIdentityRegistry",
         signature: {
           full: "function setIdentityRegistry(address _identityRegistry)",
@@ -7828,11 +7884,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["ERC3643Read", "IStaticFunctionSelectors"],
     methods: [
-      {
-        name: "compliance",
-        signature: { full: "function compliance() view returns (address)", canonical: "compliance()" },
-        selector: "0x6290865d",
-      },
       {
         name: "identityRegistry",
         signature: { full: "function identityRegistry() view returns (address)", canonical: "identityRegistry()" },
@@ -9430,6 +9481,38 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     factory: (signer) => new HoldTokenHolderFacet__factory(signer),
     timeTravelFactory: (signer) => new HoldTokenHolderFacetTimeTravel__factory(signer),
+  },
+
+  IComplianceFacet: {
+    name: "IComplianceFacet",
+    methods: [
+      {
+        name: "canTransfer",
+        signature: {
+          full: "function canTransfer(address _to, uint256 _value, bytes _data) view returns (bool, bytes1, bytes32)",
+          canonical: "canTransfer(address,uint256,bytes)",
+        },
+        selector: "0x1badb25c",
+      },
+      {
+        name: "canTransferFrom",
+        signature: {
+          full: "function canTransferFrom(address _from, address _to, uint256 _value, bytes _data) view returns (bool, bytes1, bytes32)",
+          canonical: "canTransferFrom(address,address,uint256,bytes)",
+        },
+        selector: "0x122eb575",
+      },
+      {
+        name: "compliance",
+        signature: { full: "function compliance() view returns (address)", canonical: "compliance()" },
+        selector: "0x6290865d",
+      },
+      {
+        name: "setCompliance",
+        signature: { full: "function setCompliance(address _compliance)", canonical: "setCompliance(address)" },
+        selector: "0xf8981789",
+      },
+    ],
   },
 
   KpiLinkedRateFacet: {

@@ -31,6 +31,7 @@ import {
   ClearingReadFacet__factory,
   ClearingRedeemFacet__factory,
   ClearingTransferFacet__factory,
+  ComplianceFacet__factory,
   ControlListFacet__factory,
   DiamondFacet__factory,
   Dividend__factory,
@@ -643,7 +644,7 @@ export class RPCQueryAdapter {
   ): Promise<[boolean, string, string]> {
     LogService.logTrace(`Checking can transfer`);
 
-    return await this.connect(ERC1594Facet__factory, address.toString()).canTransfer(
+    return await this.connect(ComplianceFacet__factory, address.toString()).canTransfer(
       targetId.toString(),
       amount.toBigInt(),
       data,
@@ -1320,7 +1321,7 @@ export class RPCQueryAdapter {
   async compliance(address: EvmAddress): Promise<string> {
     LogService.logTrace(`Getting Compliance for security ${address.toString()}`);
 
-    return await this.connect(ERC3643ReadFacet__factory, address.toString()).compliance();
+    return await this.connect(ComplianceFacet__factory, address.toString()).compliance();
   }
 
   async getFrozenPartialTokens(address: EvmAddress, targetId: EvmAddress): Promise<number> {

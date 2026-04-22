@@ -86,6 +86,7 @@ import { IClearingTransfer } from "./layer_1/clearing/IClearingTransfer.sol";
 import { IClearingRedeem } from "./layer_1/clearing/IClearingRedeem.sol";
 import { IClearingHoldCreation } from "./layer_1/clearing/IClearingHoldCreation.sol";
 import { IClearingRead } from "./layer_1/clearing/IClearingRead.sol";
+import { IComplianceFacet } from "./compliance/IComplianceFacet.sol";
 import { IERC1594 } from "./layer_1/ERC1400/ERC1594/IERC1594.sol";
 import { IERC1643 } from "./layer_1/ERC1400/ERC1643/IERC1643.sol";
 import { IERC1644 } from "./layer_1/ERC1400/ERC1644/IERC1644.sol";
@@ -167,6 +168,7 @@ interface IAsset is
     IClearingHoldCreation,
     IClearingRead,
     // Additional ERC
+    IComplianceFacet,
     IERC1594,
     IERC1643,
     IERC1644,

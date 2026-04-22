@@ -11,6 +11,7 @@ import {
   IFactory,
   CoreFacet,
   AccessControl__factory,
+  ComplianceFacet__factory,
   CoreFacet__factory,
   ModularCompliance__factory,
   IdentityRegistryStorage__factory,
@@ -1109,7 +1110,7 @@ describe("TREX Factory Tests", () => {
         .deployTREXSuiteAtsBond("salt-bond-first-module", tokenDetails, claimDetails, bondData, factoryRegulationData);
 
       const firstToken = await factoryAts.getToken("salt-bond-first-module");
-      const firstTokenContract = IERC3643__factory.connect(firstToken.toString(), ethers.provider);
+      const firstTokenContract = ComplianceFacet__factory.connect(firstToken.toString(), ethers.provider);
       const compliance = await firstTokenContract.compliance();
 
       // Transfer compliance ownership to factory so it can be reused
@@ -1146,7 +1147,7 @@ describe("TREX Factory Tests", () => {
       expect(secondToken).to.not.equal(ADDRESS_ZERO);
 
       // Verify both tokens use same compliance
-      const secondTokenContract = IERC3643__factory.connect(secondToken.toString(), ethers.provider);
+      const secondTokenContract = ComplianceFacet__factory.connect(secondToken.toString(), ethers.provider);
       const secondCompliance = await secondTokenContract.compliance();
       expect(secondCompliance).to.equal(compliance);
     });

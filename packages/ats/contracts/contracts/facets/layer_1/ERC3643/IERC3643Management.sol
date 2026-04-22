@@ -33,16 +33,6 @@ interface IERC3643Management is IERC3643Types {
     function setIdentityRegistry(address _identityRegistry) external;
 
     /**
-     * @dev Sets the compliance contract address.
-     * @dev Burns `_amount` tokens from the address `_userAddress`.
-     *
-     * Reduces total supply.
-     *
-     * Emits a ComplianceAdded event.
-     */
-    function setCompliance(address _compliance) external;
-
-    /**
      * @notice Gives an account the agent role
      * @notice Granting an agent role allows the account to perform multiple ERC-1400 actions
      * @dev Can only be called by the role admin

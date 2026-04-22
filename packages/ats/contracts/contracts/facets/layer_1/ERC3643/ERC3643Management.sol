@@ -25,10 +25,6 @@ abstract contract ERC3643Management is IERC3643Management, Modifiers {
         ERC3643StorageWrapper.setIdentityRegistry(_identityRegistry);
     }
 
-    function setCompliance(address _compliance) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
-        ERC3643StorageWrapper.setCompliance(_compliance);
-    }
-
     function addAgent(
         address _agent
     ) external onlyUnpaused onlyRole(AccessControlStorageWrapper.getRoleAdmin(_AGENT_ROLE)) {

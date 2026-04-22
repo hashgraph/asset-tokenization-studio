@@ -767,22 +767,6 @@ describe("ERC3643 Tests", () => {
     });
 
     describe("Compliance", () => {
-      it("GIVEN an initialized token WHEN updating the compliance THEN setCompliance emits ComplianceAdded with updated compliance", async () => {
-        const retrieved_compliance = await asset.compliance();
-        expect(retrieved_compliance).to.equal(complianceMock.target as string);
-        const newComplianceMock = await (
-          await ethers.getContractFactory("ComplianceMock", signer_A)
-        ).deploy(true, false);
-        await newComplianceMock.waitForDeployment();
-
-        expect(await asset.setCompliance(newComplianceMock.target as string))
-          .to.emit(asset, "ComplianceAdded")
-          .withArgs(newComplianceMock);
-
-        const retrieved_newCompliance = await asset.compliance();
-        expect(retrieved_newCompliance).to.equal(newComplianceMock.target as string);
-      });
-
       it("GIVEN ComplianceMock flag set to true THEN canTransfer returns true", async () => {
         expect(
           await complianceMock.canTransfer(
@@ -1783,12 +1767,6 @@ describe("ERC3643 Tests", () => {
           asset.connect(signer_C).setIdentityRegistry(identityRegistryMock.target as string),
         ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
       });
-      it("GIVEN an account without TREX_OWNER role WHEN setCompliance THEN transaction fails with AccountHasNoRole", async () => {
-        await expect(
-          asset.connect(signer_C).setCompliance(complianceMock.target as string),
-        ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
-      });
-
       it("GIVEN an account without FREEZE MANAGER role WHEN freezePartialTokens THEN transaction fails with AccountHasNoRole", async () => {
         await expect(asset.connect(signer_C).freezePartialTokens(signer_A.address, 10)).to.be.revertedWithCustomError(
           asset,
@@ -1882,10 +1860,6 @@ describe("ERC3643 Tests", () => {
         await expect(asset.setSymbol(newSymbol)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
         await expect(asset.setOnchainID(onchainId)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
         await expect(asset.setIdentityRegistry(identityRegistryMock.target as string)).to.be.revertedWithCustomError(
-          asset,
-          "TokenIsPaused",
-        );
-        await expect(asset.setCompliance(complianceMock.target as string)).to.be.revertedWithCustomError(
           asset,
           "TokenIsPaused",
         );
