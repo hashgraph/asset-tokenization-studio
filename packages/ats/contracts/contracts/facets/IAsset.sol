@@ -20,6 +20,7 @@ import { ICommonErrors } from "../infrastructure/errors/ICommonErrors.sol";
 
 // Core
 import { ICore } from "./core/ICore.sol";
+import { ICoreAdjusted } from "./coreAdjusted/ICoreAdjusted.sol";
 
 // Layer 1 — External lists
 import { IERC1410 } from "./layer_1/ERC1400/ERC1410/IERC1410.sol";
@@ -107,6 +108,7 @@ import { IControlList } from "./layer_1/controlList/IControlList.sol";
 // solhint-disable no-empty-blocks
 interface IAsset is
     ICore,
+    ICoreAdjusted,
     IAccessControl,
     IPause,
     IExternalPauseManagement,

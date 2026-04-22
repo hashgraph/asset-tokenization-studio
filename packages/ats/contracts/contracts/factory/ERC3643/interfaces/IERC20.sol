@@ -109,11 +109,4 @@ interface TRexIERC20 {
      * This value changes when {approve} or {transferFrom} are called.
      */
     function allowance(address owner, address spender) external view returns (uint256);
-
-    /**
-     * @notice Returns the decimals simulating non-triggered decimal adjustments
-     *
-     * @param _timestamp The timestamp until which ABAFs are simulated
-     */
-    function decimalsAt(uint256 _timestamp) external view returns (uint8);
 }

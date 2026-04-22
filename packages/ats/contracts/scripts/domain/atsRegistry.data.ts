@@ -38,6 +38,7 @@ import {
   ClearingRedeemFacet__factory,
   ClearingTransferFacet__factory,
   ControlListFacet__factory,
+  CoreAdjustedFacet__factory,
   CoreFacet__factory,
   CorporateActionsFacet__factory,
   CouponFacet__factory,
@@ -3543,6 +3544,26 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) => new ControlListFacetTimeTravel__factory(signer),
   },
 
+  CoreAdjustedFacet: {
+    name: "CoreAdjustedFacet",
+    resolverKey: {
+      name: "_CORE_ADJUSTED_RESOLVER_KEY",
+      value: "0xb4135b83cc3bbd6b3d1da5b0abcc33c9cb857bf5a314bab3cdff8241e72306d0",
+    },
+    inheritance: ["CoreAdjusted", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "decimalsAt",
+        signature: {
+          full: "function decimalsAt(uint256 _timestamp) view returns (uint8)",
+          canonical: "decimalsAt(uint256)",
+        },
+        selector: "0x771918ca",
+      },
+    ],
+    factory: (signer) => new CoreAdjustedFacet__factory(signer),
+  },
+
   CoreFacet: {
     name: "CoreFacet",
     description:
@@ -6527,14 +6548,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "approve(address,uint256)",
         },
         selector: "0x095ea7b3",
-      },
-      {
-        name: "decimalsAt",
-        signature: {
-          full: "function decimalsAt(uint256 _timestamp) view returns (uint8)",
-          canonical: "decimalsAt(uint256)",
-        },
-        selector: "0x771918ca",
       },
       {
         name: "decreaseAllowance",

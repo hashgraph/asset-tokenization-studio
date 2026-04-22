@@ -91,8 +91,4 @@ abstract contract ERC20 is IERC20, Modifiers {
     function allowance(address owner, address spender) external view override returns (uint256) {
         return ERC20StorageWrapper.allowanceAdjustedAt(owner, spender, TimeTravelStorageWrapper.getBlockTimestamp());
     }
-
-    function decimalsAt(uint256 _timestamp) external view returns (uint8) {
-        return ERC20StorageWrapper.decimalsAdjustedAt(_timestamp);
-    }
 }

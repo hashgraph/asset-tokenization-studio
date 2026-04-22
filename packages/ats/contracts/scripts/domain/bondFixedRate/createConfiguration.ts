@@ -47,6 +47,9 @@ const BOND_FIXED_RATE_FACETS = [
   // Core
   "CoreFacet",
 
+  // CoreAdjusted
+  "CoreAdjustedFacet",
+
   // ERC Standards
   "ERC20Facet",
   "ERC1410IssuerFacet",
