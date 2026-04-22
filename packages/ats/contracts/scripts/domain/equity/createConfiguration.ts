@@ -45,6 +45,7 @@ const EQUITY_FACETS = [
   "FreezeFacet",
   "KycFacet",
   "PauseFacet",
+  "BalanceTrackerFacet",
   "SnapshotsFacet",
   "TotalBalanceFacet",
 

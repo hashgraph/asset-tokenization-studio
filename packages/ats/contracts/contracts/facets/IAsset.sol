@@ -83,6 +83,7 @@ import { ISecurity } from "./layer_2/security/ISecurity.sol";
 import { ISnapshots } from "./layer_1/snapshot/ISnapshots.sol";
 import { ISsiManagement } from "./layer_1/ssi/ISsiManagement.sol";
 import { ITimeTravel } from "../test/testTimeTravel/ITimeTravel.sol";
+import { IBalanceTracker } from "./balanceTracker/IBalanceTracker.sol";
 import { ITotalBalance } from "./layer_1/totalBalance/ITotalBalance.sol";
 import { ITransferAndLock } from "./layer_3/transferAndLock/ITransferAndLock.sol";
 import { ICoupon } from "./layer_2/coupon/ICoupon.sol";
@@ -142,6 +143,7 @@ interface IAsset is
     ICoupon,
     IDividend,
     // Additional Layer 1
+    IBalanceTracker,
     ICap,
     INonces,
     ITotalBalance,

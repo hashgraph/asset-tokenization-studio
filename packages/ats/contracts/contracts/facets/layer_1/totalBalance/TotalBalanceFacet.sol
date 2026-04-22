@@ -13,8 +13,7 @@ contract TotalBalanceFacet is TotalBalance, IStaticFunctionSelectors {
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](2);
-        staticFunctionSelectors_[selectorIndex++] = this.getTotalBalanceFor.selector;
+        staticFunctionSelectors_ = new bytes4[](1);
         staticFunctionSelectors_[selectorIndex++] = this.getTotalBalanceForByPartition.selector;
     }
 

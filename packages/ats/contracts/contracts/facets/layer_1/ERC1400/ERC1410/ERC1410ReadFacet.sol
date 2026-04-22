@@ -13,11 +13,9 @@ contract ERC1410ReadFacet is ERC1410Read, IStaticFunctionSelectors {
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](11);
-        staticFunctionSelectors_[selectorIndex++] = this.balanceOf.selector;
+        staticFunctionSelectors_ = new bytes4[](9);
         staticFunctionSelectors_[selectorIndex++] = this.balanceOfAt.selector;
         staticFunctionSelectors_[selectorIndex++] = this.balanceOfByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.totalSupply.selector;
         staticFunctionSelectors_[selectorIndex++] = this.totalSupplyByPartition.selector;
         staticFunctionSelectors_[selectorIndex++] = this.partitionsOf.selector;
         staticFunctionSelectors_[selectorIndex++] = this.isMultiPartition.selector;
