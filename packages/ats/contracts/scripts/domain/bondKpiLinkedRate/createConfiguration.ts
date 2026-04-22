@@ -66,6 +66,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "ERC3643ManagementFacet",
   "ERC3643OperationsFacet",
   "ERC3643ReadFacet",
+  "ComplianceFacet",
 
   // Clearing & Settlement
   "ClearingActionsFacet",

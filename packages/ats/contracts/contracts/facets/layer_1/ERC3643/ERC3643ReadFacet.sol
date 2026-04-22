@@ -12,11 +12,10 @@ contract ERC3643ReadFacet is ERC3643Read, IStaticFunctionSelectors {
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 5;
+        uint256 selectorIndex = 4;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);
         unchecked {
             staticFunctionSelectors_[--selectorIndex] = this.isAddressRecovered.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.compliance.selector;
             staticFunctionSelectors_[--selectorIndex] = this.onchainID.selector;
             staticFunctionSelectors_[--selectorIndex] = this.identityRegistry.selector;
             staticFunctionSelectors_[--selectorIndex] = this.isAgent.selector;
