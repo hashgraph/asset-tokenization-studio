@@ -5,7 +5,6 @@ import { IERC20 } from "./IERC20.sol";
 import { _DEFAULT_PARTITION } from "../../../../constants/values.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
 import { ERC20StorageWrapper } from "../../../../domain/asset/ERC20StorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
@@ -13,22 +12,6 @@ abstract contract ERC20 is IERC20, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20(ERC20Metadata calldata erc20Metadata) external override onlyNotERC20Initialized {
         ERC20StorageWrapper.initializeERC20(erc20Metadata);
-    }
-
-    function approve(
-        address spender,
-        uint256 value
-    )
-        external
-        override
-        onlyUnpaused
-        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
-        onlyUnrecoveredAddress(spender)
-        onlyWithoutMultiPartition
-        onlyCompliant(EvmAccessors.getMsgSender(), spender, false)
-        returns (bool)
-    {
-        return ERC20StorageWrapper.approve(EvmAccessors.getMsgSender(), spender, value);
     }
 
     function transfer(
@@ -60,35 +43,5 @@ abstract contract ERC20 is IERC20, Modifiers {
         returns (bool)
     {
         return TokenCoreOps.transferFrom(EvmAccessors.getMsgSender(), from, to, amount);
-    }
-
-    function increaseAllowance(
-        address spender,
-        uint256 addedValue
-    )
-        external
-        onlyUnpaused
-        onlyWithoutMultiPartition
-        onlyCompliant(EvmAccessors.getMsgSender(), spender, false)
-        returns (bool)
-    {
-        return ERC20StorageWrapper.increaseAllowance(spender, addedValue);
-    }
-
-    function decreaseAllowance(
-        address spender,
-        uint256 subtractedValue
-    )
-        external
-        onlyUnpaused
-        onlyWithoutMultiPartition
-        onlyCompliant(EvmAccessors.getMsgSender(), spender, false)
-        returns (bool)
-    {
-        return ERC20StorageWrapper.decreaseAllowance(spender, subtractedValue);
-    }
-
-    function allowance(address owner, address spender) external view override returns (uint256) {
-        return ERC20StorageWrapper.allowanceAdjustedAt(owner, spender, TimeTravelStorageWrapper.getBlockTimestamp());
     }
 }

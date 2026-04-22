@@ -52,6 +52,9 @@ const BOND_FACETS = [
   // Core
   "CoreFacet",
 
+  // Allowance
+  "AllowanceFacet",
+
   // CoreAdjusted
   "CoreAdjustedFacet",
 
@@ -71,6 +74,7 @@ const BOND_FACETS = [
   "ERC3643ManagementFacet",
   "ERC3643OperationsFacet",
   "ERC3643ReadFacet",
+  "ComplianceFacet",
 
   // Clearing & Settlement
   "ClearingActionsFacet",

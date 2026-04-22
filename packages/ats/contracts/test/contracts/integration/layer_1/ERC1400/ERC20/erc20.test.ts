@@ -3,305 +3,228 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ADDRESS_ZERO, ATS_ROLES } from "@scripts";
-import { deployEquityTokenFixture, executeRbac, getDltTimestamp } from "@test";
+import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO } from "@scripts";
+import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
+import { SecurityType } from "@scripts/domain";
 
-describe("ERC20Permit Tests", () => {
+const amount = 1000;
+const EMPTY_VC_ID = EMPTY_STRING;
+
+describe("ERC20 Facet Tests", () => {
   let diamond: ResolverProxy;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
 
-  beforeEach(async () => {
-    const base = await deployEquityTokenFixture();
-    diamond = base.diamond;
-    signer_A = base.deployer;
-    signer_B = base.user1;
-    signer_C = base.user2;
-
-    asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
-    await executeRbac(asset, [
-      {
-        role: ATS_ROLES._PAUSER_ROLE,
-        members: [signer_A.address],
-      },
-    ]);
-  });
-
-  describe("Single Partition", () => {
-    describe("Domain Separator", () => {
-      it("GIVEN a deployed contract WHEN DOMAIN_SEPARATOR is called THEN the correct domain separator is returned", async () => {
-        const domainSeparator = await asset.DOMAIN_SEPARATOR();
-        const CONTRACT_NAME = (await asset.getERC20Metadata()).info.name;
-        const CONTRACT_VERSION = (await asset.getConfigInfo()).version_.toString();
-        const domain = {
-          name: CONTRACT_NAME,
-          version: CONTRACT_VERSION,
-          chainId: await ethers.provider.getNetwork().then((n) => n.chainId),
-          verifyingContract: diamond.target as string,
-        };
-        const domainHash = ethers.TypedDataEncoder.hashDomain(domain);
-        expect(domainSeparator).to.equal(domainHash);
-      });
-    });
-
-    describe("permit", () => {
-      it("GIVEN a paused token WHEN permit is called THEN the transaction fails with TokenIsPaused", async () => {
-        await asset.pause();
-
-        const expiry = (await getDltTimestamp()) + 3600;
-
-        await expect(
-          asset.permit(
-            signer_B.address,
-            signer_A.address,
-            1,
-            expiry,
-            27,
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-          ),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
-      });
-
-      it("GIVEN an owner address of zero WHEN permit is called THEN the transaction fails with ZeroAddressNotAllowed", async () => {
-        const expiry = (await getDltTimestamp()) + 3600;
-
-        await expect(
-          asset.permit(
-            ADDRESS_ZERO,
-            signer_A.address,
-            1,
-            expiry,
-            27,
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-          ),
-        ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
-      });
-
-      it("GIVEN a spender address of zero WHEN permit is called THEN the transaction fails with ZeroAddressNotAllowed", async () => {
-        const expiry = (await getDltTimestamp()) + 3600;
-
-        await expect(
-          asset.permit(
-            signer_A.address,
-            ADDRESS_ZERO,
-            1,
-            expiry,
-            27,
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-          ),
-        ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
-      });
-
-      it("GIVEN a blocked owner account WHEN permit is called THEN the transaction fails with AccountIsBlocked", async () => {
-        // Blacklisting accounts
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_A.address);
-        await asset.connect(signer_A).addToControlList(signer_C.address);
-
-        const expiry = (await getDltTimestamp()) + 3600;
-
-        await expect(
-          asset.permit(
-            signer_C.address,
-            signer_B.address,
-            1,
-            expiry,
-            27,
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-          ),
-        ).to.be.revertedWithCustomError(asset, "AccountIsBlocked");
-      });
-
-      it("GIVEN a blocked spender account WHEN permit is called THEN the transaction fails with AccountIsBlocked", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_A.address);
-        await asset.connect(signer_A).addToControlList(signer_C.address);
-
-        const expiry = (await getDltTimestamp()) + 3600;
-
-        await expect(
-          asset.permit(
-            signer_B.address,
-            signer_C.address,
-            1,
-            expiry,
-            27,
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-          ),
-        ).to.be.revertedWithCustomError(asset, "AccountIsBlocked");
-      });
-
-      it("GIVEN an expired signature WHEN permit is called THEN the transaction reverts with ERC2612ExpiredSignature", async () => {
-        const expiry = (await getDltTimestamp()) - 3600; // 1 hour ago
-
-        await expect(
-          asset.permit(
-            signer_B.address,
-            signer_C.address,
-            1,
-            expiry,
-            27,
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-          ),
-        )
-          .to.be.revertedWithCustomError(asset, "ERC2612ExpiredSignature")
-          .withArgs(expiry);
-      });
-
-      it("GIVEN a signature from a different owner WHEN permit is called THEN the transaction reverts with ERC2612InvalidSigner", async () => {
-        const nonce = await asset.nonces(signer_A.address);
-        const expiry = (await getDltTimestamp()) + 3600; // 1 hour in the future
-        const CONTRACT_NAME = (await asset.getERC20Metadata()).info.name;
-        const CONTRACT_VERSION = (await asset.getConfigInfo()).version_.toString();
-
-        const domain = {
-          name: CONTRACT_NAME,
-          version: CONTRACT_VERSION,
-          chainId: await ethers.provider.getNetwork().then((n) => n.chainId),
-          verifyingContract: diamond.target as string,
-        };
-
-        const types = {
-          Permit: [
-            { name: "owner", type: "address" },
-            { name: "spender", type: "address" },
-            { name: "value", type: "uint256" },
-            { name: "nonce", type: "uint256" },
-            { name: "deadline", type: "uint256" },
-          ],
-        };
-
-        const value = {
-          owner: signer_A.address,
-          spender: signer_B.address,
-          value: 1,
-          nonce: nonce,
-          deadline: expiry,
-        };
-
-        const signature = await signer_A.signTypedData(domain, types, value);
-        const sig = ethers.Signature.from(signature);
-
-        await expect(
-          asset.permit(signer_B.address, signer_A.address, 1, expiry, sig.v, sig.r, sig.s),
-        ).to.be.revertedWithCustomError(asset, "ERC2612InvalidSigner");
-      });
-
-      it("GIVEN a valid signature WHEN permit is called THEN the approval succeeds and emits Approval event", async () => {
-        const nonce = await asset.nonces(signer_A.address);
-        const expiry = (await getDltTimestamp()) + 3600; // 1 hour in the future
-        const CONTRACT_NAME = (await asset.getERC20Metadata()).info.name;
-        const CONTRACT_VERSION = (await asset.getConfigInfo()).version_.toString();
-
-        const domain = {
-          name: CONTRACT_NAME,
-          version: CONTRACT_VERSION,
-          chainId: await ethers.provider.getNetwork().then((n) => n.chainId),
-          verifyingContract: diamond.target as string,
-        };
-
-        const types = {
-          Permit: [
-            { name: "owner", type: "address" },
-            { name: "spender", type: "address" },
-            { name: "value", type: "uint256" },
-            { name: "nonce", type: "uint256" },
-            { name: "deadline", type: "uint256" },
-          ],
-        };
-
-        const value = {
-          owner: signer_A.address,
-          spender: signer_B.address,
-          value: 1,
-          nonce: nonce,
-          deadline: expiry,
-        };
-
-        const signature = await signer_A.signTypedData(domain, types, value);
-        const sig = ethers.Signature.from(signature);
-
-        await expect(asset.permit(signer_A.address, signer_B.address, 1, expiry, sig.v, sig.r, sig.s))
-          .to.emit(asset, "Approval")
-          .withArgs(signer_A.address, signer_B.address, 1);
-      });
-    });
-  });
-  describe("Multi Partition", () => {
-    it("GIVEN a new diamond contract with multi-partition enabled WHEN permit is called THEN the transaction fails with NotAllowedInMultiPartitionMode", async () => {
+  describe("Multi partition", () => {
+    async function deployMultiPartitionFixture() {
       const base = await deployEquityTokenFixture({
         equityDataParams: {
           securityData: { isMultiPartition: true },
         },
       });
+      diamond = base.diamond;
+      signer_A = base.deployer;
+      signer_C = base.user2;
+      signer_D = base.user3;
 
-      const expiry = (await getDltTimestamp()) + 3600;
+      asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
+    }
 
+    beforeEach(async () => {
+      await loadFixture(deployMultiPartitionFixture);
+    });
+
+    it("GIVEN an initialized ERC20 WHEN initialize_ERC20 again THEN reverts with AlreadyInitialized", async () => {
       await expect(
-        (asset.attach(base.diamond.target) as IAsset).permit(
-          signer_B.address,
-          signer_C.address,
-          1,
-          expiry,
-          27,
-          "0x0000000000000000000000000000000000000000000000000000000000000000",
-          "0x0000000000000000000000000000000000000000000000000000000000000000",
-        ),
-      ).to.be.revertedWithCustomError(asset, "NotAllowedInMultiPartitionMode");
+        asset.initialize_ERC20({
+          info: { name: "TEST", symbol: "TST", isin: "ES1234567890", decimals: 6 },
+          securityType: SecurityType.BOND_VARIABLE_RATE,
+        }),
+      ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+    });
+
+    it("GIVEN a multi-partition token WHEN transfer or transferFrom THEN reverts with NotAllowedInMultiPartitionMode", async () => {
+      await expect(asset.transfer(signer_D.address, amount)).to.be.revertedWithCustomError(
+        asset,
+        "NotAllowedInMultiPartitionMode",
+      );
+
+      await expect(asset.transferFrom(signer_C.address, signer_D.address, amount)).to.be.revertedWithCustomError(
+        asset,
+        "NotAllowedInMultiPartitionMode",
+      );
     });
   });
 
-  describe("onlyUnrecoveredAddress modifier for permit", () => {
-    it("GIVEN a recovered owner address WHEN calling permit THEN transaction fails with WalletRecovered", async () => {
-      // Grant _AGENT_ROLE to recover address
-      await asset.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+  describe("Single partition", () => {
+    let assetSignerC: IAsset;
+    let assetSignerD: IAsset;
 
-      // Recover signer_B (owner) address
-      await asset.recoveryAddress(signer_B.address, signer_C.address, ADDRESS_ZERO);
+    async function deploySinglePartitionFixture() {
+      const base = await deployEquityTokenFixture();
+      diamond = base.diamond;
+      signer_A = base.deployer;
+      signer_B = base.user1;
+      signer_C = base.user2;
+      signer_D = base.user3;
 
-      const expiry = (await getDltTimestamp()) + 3600;
+      asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
+      assetSignerC = await ethers.getContractAt("IAsset", diamond.target, signer_C);
+      assetSignerD = await ethers.getContractAt("IAsset", diamond.target, signer_D);
 
-      await expect(
-        asset.permit(
-          signer_B.address,
-          signer_A.address,
-          1,
-          expiry,
-          27,
-          "0x0000000000000000000000000000000000000000000000000000000000000000",
-          "0x0000000000000000000000000000000000000000000000000000000000000000",
-        ),
-      ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+      await executeRbac(asset, [
+        { role: ATS_ROLES._ISSUER_ROLE, members: [signer_B.address] },
+        { role: ATS_ROLES._KYC_ROLE, members: [signer_B.address] },
+        { role: ATS_ROLES._SSI_MANAGER_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES._PAUSER_ROLE, members: [signer_B.address] },
+        { role: ATS_ROLES._CLEARING_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES._CONTROL_LIST_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES._PROTECTED_PARTITIONS_ROLE, members: [signer_A.address] },
+      ]);
+
+      await asset.addIssuer(signer_D.address);
+      await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_D.address);
+      await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_D.address);
+      await asset.connect(signer_B).issue(signer_C.address, amount, "0x");
+    }
+
+    beforeEach(async () => {
+      await loadFixture(deploySinglePartitionFixture);
     });
 
-    it("GIVEN a recovered spender address WHEN calling permit THEN transaction fails with WalletRecovered", async () => {
-      // Grant _AGENT_ROLE to recover address
-      await asset.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+    describe("transfer", () => {
+      it("GIVEN a non-kyc sender or receiver WHEN transfer THEN reverts with InvalidKycStatus", async () => {
+        await asset.connect(signer_B).revokeKyc(signer_D.address);
+        await expect(assetSignerC.transfer(signer_D.address, amount / 2)).to.be.revertedWithCustomError(
+          asset,
+          "InvalidKycStatus",
+        );
 
-      // Recover signer_C (spender) address
-      await asset.recoveryAddress(signer_C.address, signer_B.address, ADDRESS_ZERO);
+        await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_D.address);
+        await asset.connect(signer_B).revokeKyc(signer_C.address);
+        await expect(assetSignerC.transfer(signer_D.address, amount / 2)).to.be.revertedWithCustomError(
+          asset,
+          "InvalidKycStatus",
+        );
+      });
 
-      const expiry = (await getDltTimestamp()) + 3600;
+      it("GIVEN an account with balance WHEN transfer to a whitelisted account THEN emits Transfer and balances update", async () => {
+        await expect(assetSignerC.transfer(signer_D.address, amount / 2))
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_C.address, signer_D.address, amount / 2);
 
-      await expect(
-        asset.permit(
-          signer_A.address,
-          signer_C.address,
-          1,
-          expiry,
-          27,
-          "0x0000000000000000000000000000000000000000000000000000000000000000",
-          "0x0000000000000000000000000000000000000000000000000000000000000000",
-        ),
-      ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+        expect(await asset.balanceOf(signer_C.address)).to.equal(amount / 2);
+        expect(await asset.balanceOf(signer_D.address)).to.equal(amount / 2);
+        expect(await asset.totalSupply()).to.equal(amount);
+        expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_C.address)).to.equal(amount / 2);
+        expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_D.address)).to.equal(amount / 2);
+        expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.equal(amount);
+      });
+    });
+
+    describe("transferFrom", () => {
+      beforeEach(async () => {
+        await assetSignerC.approve(signer_D.address, amount);
+      });
+
+      it("GIVEN a non-kyc sender or receiver WHEN transferFrom THEN reverts with InvalidKycStatus", async () => {
+        await asset.connect(signer_B).revokeKyc(signer_C.address);
+        await expect(
+          assetSignerD.transferFrom(signer_C.address, signer_D.address, amount / 2),
+        ).to.be.revertedWithCustomError(asset, "InvalidKycStatus");
+
+        await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_D.address);
+        await asset.connect(signer_B).revokeKyc(signer_D.address);
+        await expect(
+          assetSignerD.transferFrom(signer_C.address, signer_D.address, amount / 2),
+        ).to.be.revertedWithCustomError(asset, "InvalidKycStatus");
+      });
+
+      it("GIVEN an allowance WHEN transferFrom to a whitelisted account THEN emits Transfer and balances update", async () => {
+        await expect(assetSignerD.transferFrom(signer_C.address, signer_D.address, amount / 2))
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_C.address, signer_D.address, amount / 2);
+
+        expect(await asset.balanceOf(signer_C.address)).to.equal(amount / 2);
+        expect(await asset.balanceOf(signer_D.address)).to.equal(amount / 2);
+        expect(await asset.totalSupply()).to.equal(amount);
+        expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_C.address)).to.equal(amount / 2);
+        expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_D.address)).to.equal(amount / 2);
+        expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.equal(amount);
+      });
+    });
+
+    describe("Protected Partitions Role Tests", () => {
+      it("GIVEN protected partitions activated WHEN transfer without role THEN reverts with PartitionsAreProtectedAndNoRole", async () => {
+        await asset.protectPartitions();
+        await expect(assetSignerC.transfer(signer_D.address, amount / 2)).to.be.revertedWithCustomError(
+          asset,
+          "PartitionsAreProtectedAndNoRole",
+        );
+      });
+
+      it("GIVEN protected partitions activated WHEN transferFrom without role THEN reverts with PartitionsAreProtectedAndNoRole", async () => {
+        await asset.protectPartitions();
+        await assetSignerC.approve(signer_D.address, amount);
+        await expect(
+          assetSignerD.transferFrom(signer_C.address, signer_D.address, amount / 2),
+        ).to.be.revertedWithCustomError(asset, "PartitionsAreProtectedAndNoRole");
+      });
+    });
+
+    describe("decimalsAt", () => {
+      it("GIVEN an ERC20 token WHEN decimalsAt THEN returns the configured decimals", async () => {
+        const currentTimestamp = Math.floor(Date.now() / 1000);
+        expect(await asset.decimalsAt(currentTimestamp)).to.equal(6);
+      });
+    });
+
+    it("GIVEN a paused ERC20 WHEN transfer or transferFrom THEN reverts with TokenIsPaused", async () => {
+      await asset.connect(signer_B).pause();
+
+      await expect(assetSignerC.transfer(signer_D.address, amount)).to.be.revertedWithCustomError(
+        asset,
+        "TokenIsPaused",
+      );
+
+      await expect(assetSignerD.transferFrom(signer_C.address, signer_D.address, amount)).to.be.revertedWithCustomError(
+        asset,
+        "TokenIsPaused",
+      );
+    });
+
+    it("GIVEN an ERC20 with clearing active WHEN transfer or transferFrom THEN reverts with ClearingIsActivated", async () => {
+      await asset.activateClearing();
+
+      await expect(assetSignerC.transfer(signer_D.address, amount)).to.be.revertedWithCustomError(
+        asset,
+        "ClearingIsActivated",
+      );
+
+      await expect(assetSignerD.transferFrom(signer_C.address, signer_D.address, amount)).to.be.revertedWithCustomError(
+        asset,
+        "ClearingIsActivated",
+      );
+    });
+
+    it("GIVEN a blacklisted account WHEN transfer or transferFrom THEN reverts with AccountIsBlocked", async () => {
+      await asset.addToControlList(signer_C.address);
+
+      await expect(assetSignerC.transfer(signer_D.address, amount)).to.be.revertedWithCustomError(
+        asset,
+        "AccountIsBlocked",
+      );
+
+      await expect(assetSignerD.transferFrom(signer_C.address, signer_D.address, amount)).to.be.revertedWithCustomError(
+        asset,
+        "AccountIsBlocked",
+      );
     });
   });
 });

@@ -7,12 +7,9 @@ import { IERC1594 } from "./IERC1594.sol";
 
 import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
-import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
-import { IPause } from "../../../../facets/layer_1/pause/IPause.sol";
 import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimeTravelStorageWrapper } from "../../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { Eip1066 } from "../../../../constants/eip1066.sol";
 import { ProtectedPartitionRoleValidator } from "../../../../infrastructure/utils/ProtectedPartitionRoleValidator.sol";
 import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
@@ -164,67 +161,5 @@ abstract contract ERC1594 is IERC1594, Modifiers, ProtectedPartitionRoleValidato
      */
     function isIssuable() external view override returns (bool) {
         return ERC1594StorageWrapper.isIssuable();
-    }
-
-    /**
-     * @notice Checks if a transfer can be executed
-     * @param _to The recipient address
-     * @param _value The amount of tokens to transfer
-     * @param _data Additional data for the transfer check
-     * @return status True if the transfer can be executed
-     * @return code EIP1066 status code indicating the result
-     * @return reason Additional reason data for the result
-     * @dev Performs a static check without executing the transfer
-     *      Considers pause state and transfer restrictions
-     */
-    function canTransfer(
-        address _to,
-        uint256 _value,
-        bytes memory _data
-    ) external view override onlyWithoutMultiPartition returns (bool, bytes1, bytes32) {
-        if (PauseStorageWrapper.isPaused()) {
-            return (false, Eip1066.PAUSED, IPause.TokenIsPaused.selector);
-        }
-        (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToTransferFromByPartition(
-            msg.sender,
-            _to,
-            _DEFAULT_PARTITION,
-            _value,
-            _data,
-            ""
-        );
-        return (status, statusCode, reason);
-    }
-
-    /**
-     * @notice Checks if a transferFrom can be executed
-     * @param _from The sender address
-     * @param _to The recipient address
-     * @param _value The amount of tokens to transfer
-     * @param _data Additional data for the transfer check
-     * @return status True if the transfer can be executed
-     * @return code EIP1066 status code indicating the result
-     * @return reason Additional reason data for the result
-     * @dev Performs a static check without executing the transfer
-     *      Considers pause state, allowances, and transfer restrictions
-     */
-    function canTransferFrom(
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes memory _data
-    ) external view onlyWithoutMultiPartition returns (bool, bytes1, bytes32) {
-        if (PauseStorageWrapper.isPaused()) {
-            return (false, Eip1066.PAUSED, IPause.TokenIsPaused.selector);
-        }
-        (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToTransferFromByPartition(
-            _from,
-            _to,
-            _DEFAULT_PARTITION,
-            _value,
-            _data,
-            ""
-        );
-        return (status, statusCode, reason);
     }
 }

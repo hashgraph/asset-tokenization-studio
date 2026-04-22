@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BaseContract, TransactionReceipt } from "ethers";
-import { TypedContractEvent } from "typechain-types/common";
+import { TypedContractEvent } from "@common-types";
 
 export type GetEventArguments<T extends BaseContract, TName extends keyof T["filters"]> =
   T["filters"][TName] extends TypedContractEvent<any, any, infer TOutputObject> ? TOutputObject : never;

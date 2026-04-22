@@ -22,6 +22,9 @@ import { ICommonErrors } from "../infrastructure/errors/ICommonErrors.sol";
 import { ICore } from "./core/ICore.sol";
 import { ICoreAdjusted } from "./coreAdjusted/ICoreAdjusted.sol";
 
+// Allowance
+import { IAllowance } from "./allowance/IAllowance.sol";
+
 // Layer 1 — External lists
 import { IERC1410 } from "./layer_1/ERC1400/ERC1410/IERC1410.sol";
 import { IERC20 } from "./layer_1/ERC1400/ERC20/IERC20.sol";
@@ -83,6 +86,7 @@ import { IClearingTransfer } from "./layer_1/clearing/IClearingTransfer.sol";
 import { IClearingRedeem } from "./layer_1/clearing/IClearingRedeem.sol";
 import { IClearingHoldCreation } from "./layer_1/clearing/IClearingHoldCreation.sol";
 import { IClearingRead } from "./layer_1/clearing/IClearingRead.sol";
+import { IComplianceFacet } from "./compliance/IComplianceFacet.sol";
 import { IERC1594 } from "./layer_1/ERC1400/ERC1594/IERC1594.sol";
 import { IDocumentation } from "./documentation/IDocumentation.sol";
 import { IERC1644 } from "./layer_1/ERC1400/ERC1644/IERC1644.sol";
@@ -109,6 +113,7 @@ import { IControlList } from "./layer_1/controlList/IControlList.sol";
 interface IAsset is
     ICore,
     ICoreAdjusted,
+    IAllowance,
     IAccessControl,
     IPause,
     IExternalPauseManagement,
@@ -163,6 +168,7 @@ interface IAsset is
     IClearingHoldCreation,
     IClearingRead,
     // Additional ERC
+    IComplianceFacet,
     IERC1594,
     IDocumentation,
     IERC1644,

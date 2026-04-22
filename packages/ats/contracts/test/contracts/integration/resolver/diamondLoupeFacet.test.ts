@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { DiamondFacet } from "@contract-types";
-import { deployEquityTokenFixture } from "test/fixtures";
+import { deployEquityTokenFixture } from "@test/fixtures";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 describe("DiamondLoupeFacet", () => {

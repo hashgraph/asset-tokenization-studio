@@ -108,20 +108,6 @@ describe("ERC1594 Tests", () => {
           asset.connect(signer_C).redeemFrom(signer_D.address, 2 * BALANCE_OF_C_ORIGINAL, DATA),
         ).to.be.revertedWithCustomError(asset, "NotAllowedInMultiPartitionMode");
       });
-
-      it("GIVEN an initialized token WHEN canTransfer THEN fails with NotAllowedInMultiPartitionMode", async () => {
-        // transfer with data fails
-        await expect(
-          asset.connect(signer_C).canTransfer(signer_D.address, 2 * BALANCE_OF_C_ORIGINAL, DATA),
-        ).to.revertedWithCustomError(asset, "NotAllowedInMultiPartitionMode");
-      });
-
-      it("GIVEN an initialized token WHEN canTransferFrom THEN fails with NotAllowedInMultiPartitionMode", async () => {
-        // transfer with data fails
-        await expect(
-          asset.connect(signer_C).canTransferFrom(signer_B.address, signer_D.address, 2 * BALANCE_OF_C_ORIGINAL, DATA),
-        ).to.revertedWithCustomError(asset, "NotAllowedInMultiPartitionMode");
-      });
     });
   });
 
@@ -322,17 +308,6 @@ describe("ERC1594 Tests", () => {
       });
 
       it("GIVEN a paused Token WHEN transfer THEN transaction fails with TokenIsPaused", async () => {
-        expect(await asset.connect(signer_C).canTransfer(signer_D.address, AMOUNT, DATA)).to.be.deep.equal([
-          false,
-          EIP1066_CODES.PAUSED,
-          getSelector(asset, "TokenIsPaused"),
-        ]);
-
-        expect(
-          await asset.connect(signer_C).canTransferFrom(signer_E.address, signer_D.address, AMOUNT, DATA),
-        ).to.be.deep.equal([false, EIP1066_CODES.PAUSED, getSelector(asset, "TokenIsPaused")]);
-      });
-      it("GIVEN a paused Token WHEN transfer THEN transaction fails with TokenIsPaused", async () => {
         // transfer with data fails
         await expect(
           asset.connect(signer_C).transferWithData(signer_D.address, AMOUNT, DATA),
@@ -387,77 +362,7 @@ describe("ERC1594 Tests", () => {
       });
     });
 
-    it(
-      "GIVEN blocked accounts (sender, to, from) " +
-        "WHEN canTransfer or canTransferFrom " +
-        "THEN transaction returns _OPERATOR_signer_B.addressLOCKED_ERROR_ID, " +
-        "_FROM_signer_B.addressLOCKED_ERROR_ID or _TO_signer_B.addressLOCKED_ERROR_ID",
-      async () => {
-        await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
-        await asset.issue(signer_C.address, AMOUNT, DATA);
-        await asset.connect(signer_C).increaseAllowance(signer_A.address, AMOUNT);
-        await asset.connect(signer_E).increaseAllowance(signer_C.address, AMOUNT);
-        // Blacklisting accounts
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_A.address);
-        await asset.connect(signer_A).addToControlList(signer_C.address);
-
-        expect(await asset.connect(signer_C).canTransfer(signer_D.address, AMOUNT, DATA)).to.be.deep.equal([
-          false,
-          EIP1066_CODES.DISALLOWED_OR_STOP,
-          getSelector(asset, "AccountIsBlocked"),
-        ]);
-        await asset.issue(signer_D.address, AMOUNT, DATA);
-        expect(await asset.connect(signer_D).canTransfer(signer_C.address, AMOUNT, DATA)).to.be.deep.equal([
-          false,
-          EIP1066_CODES.DISALLOWED_OR_STOP,
-          getSelector(asset, "AccountIsBlocked"),
-        ]);
-
-        await asset.issue(signer_E.address, AMOUNT, DATA);
-        expect(
-          await asset.connect(signer_C).canTransferFrom(signer_E.address, signer_D.address, AMOUNT, DATA),
-        ).to.be.deep.equal([false, EIP1066_CODES.DISALLOWED_OR_STOP, getSelector(asset, "AccountIsBlocked")]);
-
-        expect(
-          await asset.connect(signer_A).canTransferFrom(signer_C.address, signer_D.address, AMOUNT, DATA),
-        ).to.be.deep.equal([false, EIP1066_CODES.DISALLOWED_OR_STOP, getSelector(asset, "AccountIsBlocked")]);
-        await asset.connect(signer_E).increaseAllowance(signer_A.address, AMOUNT);
-        expect(
-          await asset.connect(signer_A).canTransferFrom(signer_E.address, signer_C.address, AMOUNT, DATA),
-        ).to.be.deep.equal([false, EIP1066_CODES.DISALLOWED_OR_STOP, getSelector(asset, "AccountIsBlocked")]);
-      },
-    );
     describe("Kyc", () => {
-      it(
-        "GIVEN non kyc accounts (to, from) " +
-          "WHEN canTransfer or canTransferFrom " +
-          "THEN transaction returns _FROM_signer_K.addressYC_ERROR_ID or _TO_signer_K.addressYC_ERROR_ID",
-        async () => {
-          await asset.issue(signer_E.address, AMOUNT, DATA);
-          await asset.connect(signer_E).increaseAllowance(signer_B.address, AMOUNT);
-          await asset.connect(signer_B).revokeKyc(signer_E.address);
-          // non kyc'd sender
-          expect(await asset.connect(signer_E).canTransfer(signer_D.address, AMOUNT, DATA)).to.be.deep.equal([
-            false,
-            EIP1066_CODES.DISALLOWED_OR_STOP,
-            getSelector(asset, "InvalidKycStatus"),
-          ]);
-          expect(
-            await asset.connect(signer_B).canTransferFrom(signer_E.address, signer_A.address, AMOUNT, DATA),
-          ).to.be.deep.equal([false, EIP1066_CODES.DISALLOWED_OR_STOP, getSelector(asset, "InvalidKycStatus")]);
-          // non kyc'd receiver
-          await asset.issue(signer_D.address, AMOUNT, DATA);
-          expect(await asset.connect(signer_D).canTransfer(signer_E.address, AMOUNT, DATA)).to.be.deep.equal([
-            false,
-            EIP1066_CODES.DISALLOWED_OR_STOP,
-            getSelector(asset, "InvalidKycStatus"),
-          ]);
-          await asset.connect(signer_D).increaseAllowance(signer_A.address, AMOUNT);
-          expect(
-            await asset.connect(signer_A).canTransferFrom(signer_D.address, signer_E.address, AMOUNT, DATA),
-          ).to.be.deep.equal([false, EIP1066_CODES.DISALLOWED_OR_STOP, getSelector(asset, "InvalidKycStatus")]);
-        },
-      );
       it(
         "GIVEN non kyc accounts (to, from) " +
           "WHEN transfer or transferFrom " +
@@ -498,47 +403,6 @@ describe("ERC1594 Tests", () => {
         await asset.connect(signer_B).revokeKyc(signer_E.address);
         await expect(asset.issue(signer_E.address, AMOUNT, DATA)).to.revertedWithCustomError(asset, "InvalidKycStatus");
       });
-    });
-
-    it("GIVEN a zero address in to WHEN canTransfer and canTransferFrom THEN responds _TO_signer_N.addressULL_ERROR_ID", async () => {
-      await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
-      await asset.issue(signer_A.address, AMOUNT, DATA);
-      expect(await asset.canTransfer(ethers.ZeroAddress, AMOUNT, DATA)).to.be.deep.equal([
-        false,
-        EIP1066_CODES.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-        getSelector(asset, "ZeroAddressNotAllowed"),
-      ]);
-      await asset.issue(signer_D.address, AMOUNT, DATA);
-      await asset.connect(signer_D).increaseAllowance(signer_A.address, AMOUNT);
-      expect(await asset.canTransferFrom(signer_D.address, ethers.ZeroAddress, AMOUNT, DATA)).to.be.deep.equal([
-        false,
-        EIP1066_CODES.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-        getSelector(asset, "ZeroAddressNotAllowed"),
-      ]);
-    });
-
-    it("GIVEN a non allowed WHEN canTransferFrom THEN responds _ALLOWANCE_REACHED_ERROR_ID", async () => {
-      expect(await asset.canTransferFrom(signer_B.address, signer_D.address, AMOUNT, DATA)).to.be.deep.equal([
-        false,
-        EIP1066_CODES.DISALLOWED_OR_STOP,
-        getSelector(asset, "InvalidKycStatus"),
-      ]);
-    });
-
-    it("GIVEN a non funds account WHEN canTransfer & canTransferFrom THEN responds NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID", async () => {
-      expect(await asset.canTransfer(signer_D.address, AMOUNT, DATA)).to.be.deep.equal([
-        false,
-        EIP1066_CODES.DISALLOWED_OR_STOP,
-        getSelector(asset, "InvalidKycStatus"),
-      ]);
-
-      await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
-      await asset.connect(signer_C).approve(signer_A.address, AMOUNT);
-      expect(await asset.canTransferFrom(signer_C.address, signer_D.address, AMOUNT, DATA)).to.be.deep.equal([
-        false,
-        EIP1066_CODES.INSUFFICIENT_FUNDS,
-        getSelector(asset, "InvalidPartition"),
-      ]);
     });
 
     it("GIVEN an account with issuer role WHEN issue THEN transaction succeeds", async () => {

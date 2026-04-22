@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC3643Types } from "./IERC3643Types.sol";
-import { ICompliance } from "./ICompliance.sol";
 import { IIdentityRegistry } from "./IIdentityRegistry.sol";
 
 interface IERC3643Read is IERC3643Types {
@@ -22,11 +21,6 @@ interface IERC3643Read is IERC3643Types {
      * @dev Returns the onchainID address associated with the token.
      */
     function onchainID() external view returns (address);
-
-    /**
-     * @dev Returns the address of the compliance contract.
-     */
-    function compliance() external view returns (ICompliance);
 
     /**
      * @notice Retrieves recovery status of a wallet

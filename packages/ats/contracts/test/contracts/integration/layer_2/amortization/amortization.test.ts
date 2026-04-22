@@ -7,7 +7,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { type IAsset } from "@contract-types";
 import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES } from "@scripts";
 import { deployLoanTokenFixture, getDltTimestamp } from "@test";
-import { DEFAULT_SECURITY_PARAMS } from "test/fixtures/tokens/common.fixture";
+import { DEFAULT_SECURITY_PARAMS } from "@test/fixtures/tokens/common.fixture";
 
 const TOTAL_UNITS = 1_000;
 const TOKENS_TO_REDEEM = 500;

@@ -43,6 +43,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "LoansPortfolioFacet",
   // Core Functionality
   "AccessControlFacet",
+  "AllowanceFacet",
   "CapFacet",
   "ControlListFacet",
   "CorporateActionsFacet",
@@ -73,6 +74,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "ERC3643ManagementFacet",
   "ERC3643OperationsFacet",
   "ERC3643ReadFacet",
+  "ComplianceFacet",
 
   // Nominal Value
   "NominalValueFacet",

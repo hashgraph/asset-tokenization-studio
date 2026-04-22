@@ -67,6 +67,7 @@ import {
   ClearingHoldCreationFacet__factory,
   ClearingRedeemFacet__factory,
   ClearingTransferFacet__factory,
+  ComplianceFacet__factory,
   ControlListFacet__factory,
   DiamondFacet__factory,
   Dividend__factory,
@@ -2073,7 +2074,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Setting Compliance to ${security.toString()}`);
 
     return this.executeTransaction(
-      ERC3643ManagementFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      ComplianceFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setCompliance",
       [compliance.toString()],
       GAS.SET_COMPLIANCE,

@@ -14,6 +14,7 @@ import { IIdentityRegistry } from "../../facets/layer_1/ERC3643/IIdentityRegistr
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
+import { IAllowanceTypes } from "../../facets/allowance/IAllowanceTypes.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
@@ -412,7 +413,7 @@ library ERC1594StorageWrapper {
             return (
                 false,
                 Eip1066.INSUFFICIENT_FUNDS,
-                IERC20.InsufficientAllowance.selector,
+                IAllowanceTypes.InsufficientAllowance.selector,
                 abi.encode(sender, from, currentAllowance, value, _DEFAULT_PARTITION)
             );
         }

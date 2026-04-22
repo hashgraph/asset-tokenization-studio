@@ -55,6 +55,9 @@ const LOAN_FACETS = [
   // Core
   "CoreFacet",
 
+  // Allowance
+  "AllowanceFacet",
+
   // ERC Standards
   "ERC20Facet",
   "CoreAdjustedFacet",
@@ -71,6 +74,7 @@ const LOAN_FACETS = [
   "ERC3643OperationsFacet",
   "ERC3643ReadFacet",
   "ERC3643BatchFacet",
+  "ComplianceFacet",
 
   // Hold
   "HoldReadFacet",
