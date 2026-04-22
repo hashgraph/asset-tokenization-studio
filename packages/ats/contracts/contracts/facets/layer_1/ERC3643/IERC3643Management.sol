@@ -33,19 +33,6 @@ interface IERC3643Management is IERC3643Types {
     function setIdentityRegistry(address _identityRegistry) external;
 
     /**
-     * @notice Gives an account the agent role
-     * @notice Granting an agent role allows the account to perform multiple ERC-1400 actions
-     * @dev Can only be called by the role admin
-     */
-    function addAgent(address _agent) external;
-
-    /**
-     * @notice Revokes an account the agent role
-     * @dev Can only be called by the role admin
-     */
-    function removeAgent(address _agent) external;
-
-    /**
      * @notice Transfers the status of a lost wallet to a new wallet
      * @dev Can only be called by the agent
      */

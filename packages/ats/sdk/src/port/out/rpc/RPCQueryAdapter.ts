@@ -1487,7 +1487,7 @@ export class RPCQueryAdapter {
 
     return {
       actionType: result.actionType_,
-      actionTypeId: Number(result.actionIdByType_),
+      actionTypeId: Number(result.actionTypeIndex_),
       data: result.data_,
       isDisabled: result.isDisabled_,
     };
@@ -1506,7 +1506,7 @@ export class RPCQueryAdapter {
 
     return {
       actionTypes: result.actionTypes_,
-      actionTypeIds: result.actionIdByType_.map((id) => Number(id)),
+      actionTypeIds: result.actionTypeIndex_.map((id) => Number(id)),
       datas: result.datas_,
       isDisabled: result.isDisabled_,
     };
@@ -1529,7 +1529,7 @@ export class RPCQueryAdapter {
 
     return {
       actionTypes: result.actionTypes_,
-      actionTypeIds: result.actionIdByType_.map((id) => Number(id)),
+      actionTypeIds: result.actionTypeIndex_.map((id) => Number(id)),
       datas: result.datas_,
       isDisabled: result.isDisabled_,
     };
