@@ -33,12 +33,14 @@ contract DocumentationFacet is Documentation, IStaticFunctionSelectors {
      *         `setDocument`, `removeDocument`, and `getAllDocuments`.
      */
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](4);
-        staticFunctionSelectors_[selectorIndex++] = this.getDocument.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.setDocument.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.removeDocument.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getAllDocuments.selector;
+        uint256 selectorIndex = 4;
+        staticFunctionSelectors_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this.getAllDocuments.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.removeDocument.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.setDocument.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getDocument.selector;
+        }
     }
 
     /**
@@ -48,7 +50,6 @@ contract DocumentationFacet is Documentation, IStaticFunctionSelectors {
      */
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IDocumentation).interfaceId;
+        staticInterfaceIds_[0] = type(IDocumentation).interfaceId;
     }
 }

@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IDocumentation } from "./IDocumentation.sol";
 import { _DOCUMENTER_ROLE } from "../../constants/roles.sol";
-import { _DOCUMENTATION_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { DocumentationStorageWrapper } from "../../domain/core/DocumentationStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 
@@ -12,10 +12,11 @@ import { Modifiers } from "../../services/Modifiers.sol";
  * @notice Abstract implementation of `IDocumentation` providing full document
  *         lifecycle management — creation, update, removal, and retrieval — for
  *         security tokens built on the ATS Diamond architecture.
- * @dev Inherits `Modifiers` to enforce `onlyUnpaused` and `onlyRole` guards on
- *      all write operations. Storage is accessed via an isolated diamond storage
- *      slot (`_DOCUMENTATION_STORAGE_POSITION`) to prevent layout collisions with
- *      other facets. The `lastModified` timestamp is resolved through
+ * @dev Inherits `Modifiers` to enforce `onlyUnpaused`, `onlyRole`, and documentation
+ *      validation guards on all write operations. Storage is accessed via
+ *      `DocumentationStorageWrapper` using an isolated diamond storage slot
+ *      (`_DOCUMENTATION_STORAGE_POSITION`) to prevent layout collisions with other
+ *      facets. The `lastModified` timestamp is resolved through
  *      `TimeTravelStorageWrapper.getBlockTimestamp()`, enabling deterministic
  *      behaviour in test environments without altering production semantics.
  *      Designed to be inherited exclusively by `DocumentationFacet`.
@@ -38,17 +39,16 @@ abstract contract Documentation is IDocumentation, Modifiers {
         bytes32 _name,
         string calldata _uri,
         bytes32 _documentHash
-    ) external override onlyUnpaused onlyRole(_DOCUMENTER_ROLE) {
-        if (_name == bytes32(0)) {
-            revert EmptyName();
-        }
-        if (bytes(_uri).length == 0) {
-            revert EmptyURI();
-        }
-        if (_documentHash == bytes32(0)) {
-            revert EmptyHASH();
-        }
-        DocumentationStorage storage docStorage = _documentationStorage();
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_DOCUMENTER_ROLE)
+        notEmptyName(_name)
+        notEmptyURI(_uri)
+        notEmptyHash(_documentHash)
+    {
+        IDocumentation.DocumentationStorage storage docStorage = DocumentationStorageWrapper.documentationStorage();
         if (docStorage.documents[_name].lastModified == uint256(0)) {
             docStorage.docNames.push(_name);
             docStorage.docIndexes[_name] = docStorage.docNames.length;
@@ -60,19 +60,15 @@ abstract contract Documentation is IDocumentation, Modifiers {
     /**
      * @notice Removes an existing document from the token.
      * @dev Restricted to accounts holding `_DOCUMENTER_ROLE` on an unpaused token.
-     *      Applies a swap-and-pop strategy: the last element of `docNames` is moved
-     *      into the vacated position and `docIndexes` is updated accordingly, keeping
-     *      the operation O(1). The `documents` mapping entry is deleted after the
-     *      event is emitted to avoid reading zeroed storage in the event data.
+     *      Uses a swap-and-pop strategy to remove the entry from `docNames` in O(1),
+     *      updating `docIndexes` accordingly. Emits {DocumentRemoved}.
      *      Reverts with {DocumentDoesNotExist} if `_name` is not registered.
-     *      Emits {DocumentRemoved}.
      * @param _name Unique `bytes32` identifier of the document to remove.
      */
-    function removeDocument(bytes32 _name) external override onlyUnpaused onlyRole(_DOCUMENTER_ROLE) {
-        DocumentationStorage storage docStorage = _documentationStorage();
-        if (docStorage.documents[_name].lastModified == uint256(0)) {
-            revert DocumentDoesNotExist(_name);
-        }
+    function removeDocument(
+        bytes32 _name
+    ) external override onlyUnpaused onlyRole(_DOCUMENTER_ROLE) documentExists(_name) {
+        IDocumentation.DocumentationStorage storage docStorage = DocumentationStorageWrapper.documentationStorage();
         uint256 index = docStorage.docIndexes[_name] - 1;
         if (index != docStorage.docNames.length - 1) {
             docStorage.docNames[index] = docStorage.docNames[docStorage.docNames.length - 1];
@@ -91,7 +87,7 @@ abstract contract Documentation is IDocumentation, Modifiers {
      * @return      Unix timestamp of the last write to this document entry.
      */
     function getDocument(bytes32 _name) external view override returns (string memory, bytes32, uint256) {
-        DocumentationStorage storage docStorage = _documentationStorage();
+        IDocumentation.DocumentationStorage storage docStorage = DocumentationStorageWrapper.documentationStorage();
         return (
             docStorage.documents[_name].uri,
             docStorage.documents[_name].docHash,
@@ -106,20 +102,6 @@ abstract contract Documentation is IDocumentation, Modifiers {
      * @return Array of `bytes32` document names.
      */
     function getAllDocuments() external view override returns (bytes32[] memory) {
-        return _documentationStorage().docNames;
-    }
-
-    /**
-     * @notice Resolves the diamond storage slot for the documentation domain.
-     * @dev Uses inline assembly to assign the slot directly from
-     *      `_DOCUMENTATION_STORAGE_POSITION`, ensuring no overlap with other facets.
-     * @return docStorage Reference to the `DocumentationStorage` struct in diamond storage.
-     */
-    function _documentationStorage() internal pure returns (DocumentationStorage storage docStorage) {
-        bytes32 position = _DOCUMENTATION_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            docStorage.slot := position
-        }
+        return DocumentationStorageWrapper.documentationStorage().docNames;
     }
 }

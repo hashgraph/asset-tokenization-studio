@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-22T10:37:07.990Z
+ * Generated: 2026-04-22T11:27:47.595Z
  * Facets: 81
  * Infrastructure: 2
  *
@@ -13460,6 +13460,12 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [],
   },
 
+  DocumentationStorageWrapper: {
+    name: "DocumentationStorageWrapper",
+    description: "Library providing diamond storage access and validation checks for the documentation domain.",
+    methods: [],
+  },
+
   EquityStorageWrapper: {
     name: "EquityStorageWrapper",
     methods: [],
@@ -13732,7 +13738,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 40 as const;
+export const TOTAL_STORAGE_WRAPPERS = 41 as const;
 
 /**
  * All role identifiers extracted from contracts.
