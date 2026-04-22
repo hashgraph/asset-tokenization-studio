@@ -44,6 +44,7 @@ const EQUITY_FACETS = [
   "DiamondFacet", // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
   "CoreFacet",
   "ERC20Facet",
+  "CoreAdjustedFacet",
   "FreezeFacet",
   "KycFacet",
   "PauseFacet",

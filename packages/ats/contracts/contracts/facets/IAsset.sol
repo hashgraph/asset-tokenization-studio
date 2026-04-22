@@ -20,6 +20,7 @@ import { ICommonErrors } from "../infrastructure/errors/ICommonErrors.sol";
 
 // Core
 import { ICore } from "./core/ICore.sol";
+import { ICoreAdjusted } from "./coreAdjusted/ICoreAdjusted.sol";
 
 // Allowance
 import { IAllowance } from "./allowance/IAllowance.sol";
@@ -109,6 +110,7 @@ import { IControlList } from "./layer_1/controlList/IControlList.sol";
 // solhint-disable no-empty-blocks
 interface IAsset is
     ICore,
+    ICoreAdjusted,
     IAllowance,
     IAccessControl,
     IPause,

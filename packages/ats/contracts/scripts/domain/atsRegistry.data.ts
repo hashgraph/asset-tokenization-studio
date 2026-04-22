@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-22T07:35:10.009Z
+ * Generated: 2026-04-21T14:30:58.494Z
  * Facets: 80
  * Infrastructure: 2
  *
@@ -21,7 +21,6 @@ import { FacetDefinition, ContractDefinition, StorageWrapperDefinition } from "@
 import {
   AccessControlFacet__factory,
   AdjustBalancesFacet__factory,
-  AllowanceFacet__factory,
   AmortizationFacet__factory,
   BondUSAFacet__factory,
   BondUSAFixedRateFacet__factory,
@@ -38,6 +37,7 @@ import {
   ClearingRedeemFacet__factory,
   ClearingTransferFacet__factory,
   ControlListFacet__factory,
+  CoreAdjustedFacet__factory,
   CoreFacet__factory,
   CorporateActionsFacet__factory,
   CouponFacet__factory,
@@ -453,126 +453,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     factory: (signer) => new AdjustBalancesFacet__factory(signer),
     timeTravelFactory: (signer) => new AdjustBalancesFacetTimeTravel__factory(signer),
-  },
-
-  AllowanceFacet: {
-    name: "AllowanceFacet",
-    description:
-      "Diamond facet for the Allowance domain. Registers the 4 selectors that define the ERC-20 allowance surface (`approve`, `increaseAllowance`, `decreaseAllowance` and `allowance`).",
-    resolverKey: {
-      name: "_ALLOWANCE_RESOLVER_KEY",
-      value: "0x9c4229f3034838823867ed0b4bf1bcab29d3ecebdbfe117d13932557c830f228",
-    },
-    inheritance: ["Allowance", "IStaticFunctionSelectors"],
-    methods: [
-      {
-        name: "allowance",
-        signature: {
-          full: "function allowance(address owner, address spender) view returns (uint256)",
-          canonical: "allowance(address,address)",
-        },
-        selector: "0xdd62ed3e",
-      },
-      {
-        name: "approve",
-        signature: {
-          full: "function approve(address spender, uint256 value) returns (bool)",
-          canonical: "approve(address,uint256)",
-        },
-        selector: "0x095ea7b3",
-      },
-      {
-        name: "decreaseAllowance",
-        signature: {
-          full: "function decreaseAllowance(address spender, uint256 subtractedValue) returns (bool)",
-          canonical: "decreaseAllowance(address,uint256)",
-        },
-        selector: "0xa457c2d7",
-      },
-      {
-        name: "increaseAllowance",
-        signature: {
-          full: "function increaseAllowance(address spender, uint256 addedValue) returns (bool)",
-          canonical: "increaseAllowance(address,uint256)",
-        },
-        selector: "0x39509351",
-      },
-    ],
-    events: [
-      {
-        name: "Approval",
-        signature: {
-          full: "event Approval(address indexed owner, address indexed spender, uint256 value)",
-          canonical: "Approval(address,address,uint256)",
-        },
-        topic0: "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
-      },
-      {
-        name: "Transfer",
-        signature: {
-          full: "event Transfer(address indexed from, address indexed to, uint256 value)",
-          canonical: "Transfer(address,address,uint256)",
-        },
-        topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
-      },
-      {
-        name: "TransferByPartition",
-        signature: {
-          full: "event TransferByPartition(bytes32 indexed _fromPartition, address _operator, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)",
-          canonical: "TransferByPartition(bytes32,address,address,address,uint256,bytes,bytes)",
-        },
-        topic0: "0xff4e9a26af4eb73b8bacfaa4abd4fea03d9448e7b912dc5ff4019048875aa2d4",
-      },
-    ],
-    errors: [
-      {
-        name: "AccessControlRequired",
-        signature: {
-          full: "error AccessControlRequired(bytes32 role, address sender)",
-          canonical: "AccessControlRequired(bytes32,address)",
-        },
-        selector: "0x10210dec",
-      },
-      {
-        name: "InsufficientAllowance",
-        signature: {
-          full: "error InsufficientAllowance(address spender, address from)",
-          canonical: "InsufficientAllowance(address,address)",
-        },
-        selector: "0xf180d8f9",
-      },
-      {
-        name: "NotAllowedInMultiPartitionMode",
-        signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
-        selector: "0x76d08f88",
-      },
-      {
-        name: "SpenderWithZeroAddress",
-        signature: { full: "error SpenderWithZeroAddress()", canonical: "SpenderWithZeroAddress()" },
-        selector: "0x80e32d8f",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
-      {
-        name: "UnexpectedError",
-        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
-        selector: "0xc9622656",
-      },
-      {
-        name: "WalletRecovered",
-        signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
-        selector: "0xf9f9bcf9",
-      },
-      {
-        name: "ZeroOwnerAddress",
-        signature: { full: "error ZeroOwnerAddress()", canonical: "ZeroOwnerAddress()" },
-        selector: "0x42cad957",
-      },
-    ],
-    factory: (signer) => new AllowanceFacet__factory(signer),
   },
 
   AmortizationFacet: {
@@ -3630,6 +3510,26 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) => new ControlListFacetTimeTravel__factory(signer),
   },
 
+  CoreAdjustedFacet: {
+    name: "CoreAdjustedFacet",
+    resolverKey: {
+      name: "_CORE_ADJUSTED_RESOLVER_KEY",
+      value: "0xb4135b83cc3bbd6b3d1da5b0abcc33c9cb857bf5a314bab3cdff8241e72306d0",
+    },
+    inheritance: ["CoreAdjusted", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "decimalsAt",
+        signature: {
+          full: "function decimalsAt(uint256 _timestamp) view returns (uint8)",
+          canonical: "decimalsAt(uint256)",
+        },
+        selector: "0x771918ca",
+      },
+    ],
+    factory: (signer) => new CoreAdjustedFacet__factory(signer),
+  },
+
   CoreFacet: {
     name: "CoreFacet",
     description:
@@ -6613,12 +6513,36 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["ERC20", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "decimalsAt",
+        name: "allowance",
         signature: {
-          full: "function decimalsAt(uint256 _timestamp) view returns (uint8)",
-          canonical: "decimalsAt(uint256)",
+          full: "function allowance(address owner, address spender) view returns (uint256)",
+          canonical: "allowance(address,address)",
         },
-        selector: "0x771918ca",
+        selector: "0xdd62ed3e",
+      },
+      {
+        name: "approve",
+        signature: {
+          full: "function approve(address spender, uint256 value) returns (bool)",
+          canonical: "approve(address,uint256)",
+        },
+        selector: "0x095ea7b3",
+      },
+      {
+        name: "decreaseAllowance",
+        signature: {
+          full: "function decreaseAllowance(address spender, uint256 subtractedValue) returns (bool)",
+          canonical: "decreaseAllowance(address,uint256)",
+        },
+        selector: "0xa457c2d7",
+      },
+      {
+        name: "increaseAllowance",
+        signature: {
+          full: "function increaseAllowance(address spender, uint256 addedValue) returns (bool)",
+          canonical: "increaseAllowance(address,uint256)",
+        },
+        selector: "0x39509351",
       },
       {
         name: "initialize_ERC20",
@@ -6647,12 +6571,28 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
+        name: "Approval",
+        signature: {
+          full: "event Approval(address indexed owner, address indexed spender, uint256 value)",
+          canonical: "Approval(address,address,uint256)",
+        },
+        topic0: "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
+      },
+      {
         name: "Transfer",
         signature: {
           full: "event Transfer(address indexed from, address indexed to, uint256 value)",
           canonical: "Transfer(address,address,uint256)",
         },
         topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+      },
+      {
+        name: "TransferByPartition",
+        signature: {
+          full: "event TransferByPartition(bytes32 indexed _fromPartition, address _operator, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)",
+          canonical: "TransferByPartition(bytes32,address,address,address,uint256,bytes,bytes)",
+        },
+        topic0: "0xff4e9a26af4eb73b8bacfaa4abd4fea03d9448e7b912dc5ff4019048875aa2d4",
       },
     ],
     errors: [
@@ -6668,6 +6608,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
+      },
+      {
+        name: "InsufficientAllowance",
+        signature: {
+          full: "error InsufficientAllowance(address spender, address from)",
+          canonical: "InsufficientAllowance(address,address)",
+        },
+        selector: "0xf180d8f9",
       },
       {
         name: "InsufficientBalance",
@@ -6691,9 +6639,29 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x55347310",
       },
       {
+        name: "SpenderWithZeroAddress",
+        signature: { full: "error SpenderWithZeroAddress()", canonical: "SpenderWithZeroAddress()" },
+        selector: "0x80e32d8f",
+      },
+      {
         name: "TokenIsPaused",
         signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
         selector: "0x649815a5",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
+      },
+      {
+        name: "WalletRecovered",
+        signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
+        selector: "0xf9f9bcf9",
+      },
+      {
+        name: "ZeroOwnerAddress",
+        signature: { full: "error ZeroOwnerAddress()", canonical: "ZeroOwnerAddress()" },
+        selector: "0x42cad957",
       },
     ],
     factory: (signer) => new ERC20Facet__factory(getLibLinks("tokenCoreOps") as any, signer),

@@ -2,8 +2,8 @@
 
 import { AmountType, PayoutSubtype, Recurrency } from "@domain/model/distribution"
 import { IsEnum, IsNotEmpty, IsOptional, ValidateIf } from "class-validator"
-import { IsFutureDateString } from "src/utils/IsFutureDateString"
-import { IsPositiveNumberString } from "src/utils/IsPositiveNumberString"
+import { IsFutureDateString } from "@utils/IsFutureDateString"
+import { IsPositiveNumberString } from "@utils/IsPositiveNumberString"
 import { ApiProperty } from "@nestjs/swagger"
 
 export class CreatePayoutRequest {

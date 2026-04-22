@@ -23,6 +23,7 @@
       "@infrastructure/*": ["./src/infrastructure/*"],
       "@config/*": ["./src/config/*"],
       "@shared/*": ["./src/shared/*"],
+      "@utils/*": ["./src/utils/*"],
       "@test/*": ["./test/*"]
     },
     "esModuleInterop": true
