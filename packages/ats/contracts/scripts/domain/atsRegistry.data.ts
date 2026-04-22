@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-21T17:28:01.014Z
+ * Generated: 2026-04-22T13:39:10.919Z
  * Facets: 78
  * Infrastructure: 2
  *
@@ -735,11 +735,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbf84f4ec",
       },
       {
-        name: "InvalidTimestamp",
-        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
-        selector: "0xb7d09497",
-      },
-      {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
         selector: "0x76d08f88",
@@ -782,6 +777,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "WrongIndexForAction(uint256,bytes32)",
         },
         selector: "0xd3924f4e",
+      },
+      {
+        name: "WrongTimestamp",
+        signature: { full: "error WrongTimestamp(uint256 timeStamp)", canonical: "WrongTimestamp(uint256)" },
+        selector: "0xdcf61246",
       },
     ],
     factory: (signer) => new AmortizationFacet__factory(getLibLinks("clearingReadOps") as any, signer),
@@ -3710,6 +3710,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5763538a",
       },
       {
+        name: "WrongTimestamp",
+        signature: { full: "error WrongTimestamp(uint256 timeStamp)", canonical: "WrongTimestamp(uint256)" },
+        selector: "0xdcf61246",
+      },
+      {
         name: "ZeroAddressNotAllowed",
         signature: { full: "error ZeroAddressNotAllowed()", canonical: "ZeroAddressNotAllowed()" },
         selector: "0x8579befe",
@@ -3883,11 +3888,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x68eba14f",
       },
       {
-        name: "InvalidTimestamp",
-        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
-        selector: "0xb7d09497",
-      },
-      {
         name: "SnapshotIdDoesNotExists",
         signature: {
           full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
@@ -3941,6 +3941,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "WrongInterestRateValues((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8))",
         },
         selector: "0x570cf0d3",
+      },
+      {
+        name: "WrongTimestamp",
+        signature: { full: "error WrongTimestamp(uint256 timeStamp)", canonical: "WrongTimestamp(uint256)" },
+        selector: "0xdcf61246",
       },
     ],
     factory: (signer) => new CouponFacet__factory(getLibLinks("clearingReadOps") as any, signer),
@@ -4116,11 +4121,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x68eba14f",
       },
       {
-        name: "InvalidTimestamp",
-        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
-        selector: "0xb7d09497",
-      },
-      {
         name: "SnapshotIdDoesNotExists",
         signature: {
           full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
@@ -4174,6 +4174,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "WrongInterestRateValues((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8))",
         },
         selector: "0x570cf0d3",
+      },
+      {
+        name: "WrongTimestamp",
+        signature: { full: "error WrongTimestamp(uint256 timeStamp)", canonical: "WrongTimestamp(uint256)" },
+        selector: "0xdcf61246",
       },
     ],
     factory: (signer) => new CouponFixedRateFacet__factory(getLibLinks("clearingReadOps") as any, signer),
@@ -4346,11 +4351,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x68eba14f",
       },
       {
-        name: "InvalidTimestamp",
-        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
-        selector: "0xb7d09497",
-      },
-      {
         name: "SnapshotIdDoesNotExists",
         signature: {
           full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
@@ -4404,6 +4404,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "WrongInterestRateValues((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8))",
         },
         selector: "0x570cf0d3",
+      },
+      {
+        name: "WrongTimestamp",
+        signature: { full: "error WrongTimestamp(uint256 timeStamp)", canonical: "WrongTimestamp(uint256)" },
+        selector: "0xdcf61246",
       },
     ],
     factory: (signer) => new CouponKpiLinkedRateFacet__factory(getLibLinks("clearingReadOps") as any, signer),
@@ -4583,11 +4588,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x4f56f79f",
       },
       {
-        name: "InvalidTimestamp",
-        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
-        selector: "0xb7d09497",
-      },
-      {
         name: "SnapshotIdDoesNotExists",
         signature: {
           full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
@@ -4641,6 +4641,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "WrongInterestRateValues((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8))",
         },
         selector: "0x570cf0d3",
+      },
+      {
+        name: "WrongTimestamp",
+        signature: { full: "error WrongTimestamp(uint256 timeStamp)", canonical: "WrongTimestamp(uint256)" },
+        selector: "0xdcf61246",
       },
     ],
     factory: (signer) =>
@@ -4938,11 +4943,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x409bf2d2",
       },
       {
-        name: "InvalidTimestamp",
-        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
-        selector: "0xb7d09497",
-      },
-      {
         name: "SnapshotIdDoesNotExists",
         signature: {
           full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
@@ -4980,6 +4980,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "WrongIndexForAction(uint256,bytes32)",
         },
         selector: "0xd3924f4e",
+      },
+      {
+        name: "WrongTimestamp",
+        signature: { full: "error WrongTimestamp(uint256 timeStamp)", canonical: "WrongTimestamp(uint256)" },
+        selector: "0xdcf61246",
       },
     ],
     factory: (signer) => new DividendFacet__factory(getLibLinks("clearingReadOps") as any, signer),
@@ -5127,11 +5132,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x936e9b6d",
       },
       {
-        name: "InvalidTimestamp",
-        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
-        selector: "0xb7d09497",
-      },
-      {
         name: "TokenIsPaused",
         signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
         selector: "0x649815a5",
@@ -5148,6 +5148,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "WrongIndexForAction(uint256,bytes32)",
         },
         selector: "0xd3924f4e",
+      },
+      {
+        name: "WrongTimestamp",
+        signature: { full: "error WrongTimestamp(uint256 timeStamp)", canonical: "WrongTimestamp(uint256)" },
+        selector: "0xdcf61246",
       },
     ],
     factory: (signer) => new EquityUSAFacet__factory(signer),
@@ -6678,6 +6683,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ERC20VotesFacet: {
     name: "ERC20VotesFacet",
+    description: "Diamond facet exposing ERC-5805 voting power functionality via the proxy router.",
     resolverKey: {
       name: "_ERC20VOTES_RESOLVER_KEY",
       value: "0x5cbfbaa435e19a43530a00ac685c9b5252862a94af2053667ded44642a0d9f4c",
@@ -7797,6 +7803,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ExternalControlListManagementFacet: {
     name: "ExternalControlListManagementFacet",
+    description: "Exposes external control list management functions as a diamond proxy facet.",
     resolverKey: {
       name: "_EXTERNAL_CONTROL_LIST_RESOLVER_KEY",
       value: "0x490196911bc65200514fb4568861a36670854901dffa91bc27577664fdace575",
@@ -7954,6 +7961,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ExternalKycListManagementFacet: {
     name: "ExternalKycListManagementFacet",
+    description: "Diamond facet exposing external KYC list management via the proxy router.",
     resolverKey: {
       name: "_EXTERNAL_KYC_LIST_RESOLVER_KEY",
       value: "0x32f05e55195d945105aff8ac4b041d4680824578bd72c6a34e4aa906a59237f1",
@@ -9855,11 +9863,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x0dc149f0",
       },
       {
-        name: "InvalidTimestamp",
-        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
-        selector: "0xb7d09497",
-      },
-      {
         name: "TokenIsPaused",
         signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
         selector: "0x649815a5",
@@ -9871,6 +9874,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "WrongDates(uint256,uint256)",
         },
         selector: "0x1c94559c",
+      },
+      {
+        name: "WrongTimestamp",
+        signature: { full: "error WrongTimestamp(uint256 timeStamp)", canonical: "WrongTimestamp(uint256)" },
+        selector: "0xdcf61246",
       },
       {
         name: "ZeroAddressNotAllowed",
@@ -12068,14 +12076,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x769a518c",
       },
       {
-        name: "InvalidTimestamp",
-        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
-        selector: "0xb7d09497",
-      },
-      {
         name: "WrongChainId",
         signature: { full: "error WrongChainId()", canonical: "WrongChainId()" },
         selector: "0x5f87bc00",
+      },
+      {
+        name: "WrongTimestamp",
+        signature: { full: "error WrongTimestamp(uint256 timeStamp)", canonical: "WrongTimestamp(uint256)" },
+        selector: "0xdcf61246",
       },
     ],
     factory: (signer) => new TimeTravelFacet__factory(signer),
@@ -12829,11 +12837,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
-        name: "InvalidTimestamp",
-        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
-        selector: "0xb7d09497",
-      },
-      {
         name: "SnapshotIdDoesNotExists",
         signature: {
           full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
@@ -12876,6 +12879,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "WrongIndexForAction(uint256,bytes32)",
         },
         selector: "0xd3924f4e",
+      },
+      {
+        name: "WrongTimestamp",
+        signature: { full: "error WrongTimestamp(uint256 timeStamp)", canonical: "WrongTimestamp(uint256)" },
+        selector: "0xdcf61246",
       },
     ],
     factory: (signer) => new VotingFacet__factory(getLibLinks("clearingReadOps") as any, signer),
@@ -13500,6 +13508,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   ERC20VotesStorageWrapper: {
     name: "ERC20VotesStorageWrapper",
+    description: "Manages voting power tracking and delegation logic for ERC20 tokens",
     methods: [],
   },
 
@@ -13529,6 +13538,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   ExternalListManagementStorageWrapper: {
     name: "ExternalListManagementStorageWrapper",
+    description: "Provides utility functions for managing external lists in storage",
     methods: [],
   },
 
@@ -13716,16 +13726,26 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   ProceedRecipientsStorageWrapper: {
     name: "ProceedRecipientsStorageWrapper",
+    description: "Provides structured access and management of proceed recipients within persistent storage",
     methods: [],
   },
 
   ProtectedPartitionsStorageWrapper: {
     name: "ProtectedPartitionsStorageWrapper",
+    description: "A library providing structured access to protected partitions storage and associated logic.",
     methods: [],
+    events: [
+      {
+        name: "based",
+        signature: { full: "based(bool)", canonical: "based(bool)" },
+        topic0: "0x820349ebe90f6b97db4a3b7a31131393735e76f5792578c0bb5849824d7ef06e",
+      },
+    ],
   },
 
   ResolverProxyStorageWrapper: {
     name: "ResolverProxyStorageWrapper",
+    description: "Provides access functions to the ResolverProxy storage",
     methods: [],
   },
 
@@ -13734,13 +13754,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     description:
       "Manages scheduling, retrieval, and execution of time-based corporate action tasks across four independent queues: snapshots, coupon listings, balance adjustments, and cross-ordered tasks.",
     methods: [],
-    errors: [
-      {
-        name: "WrongTimestamp",
-        signature: { full: "WrongTimestamp(uint256)", canonical: "WrongTimestamp(uint256)" },
-        selector: "0xdcf61246",
-      },
-    ],
   },
 
   SecurityStorageWrapper: {

@@ -33,6 +33,7 @@ import { InterestRateStorageWrapper } from "./InterestRateStorageWrapper.sol";
 import { SustainabilityPerformanceTargetRateLib } from "./SustainabilityPerformanceTargetRateLib.sol";
 import { ICouponTypes } from "../../facets/layer_2/coupon/ICouponTypes.sol";
 import { KpiLinkedRateLib } from "./KpiLinkedRateLib.sol";
+import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 
 /**
  * @title Scheduled Tasks Storage Wrapper
@@ -48,16 +49,6 @@ import { KpiLinkedRateLib } from "./KpiLinkedRateLib.sol";
  * @author Hashgraph
  */
 library ScheduledTasksStorageWrapper {
-    /**
-     * @notice Raised when a provided timestamp does not satisfy the future-only
-     *         constraint enforced by `requireValidTimestamp`.
-     * @dev Thrown if `_timestamp` is less than or equal to the current block
-     *      timestamp. Callers scheduling tasks must ensure timestamps are strictly
-     *      in the future relative to the simulated or real block time.
-     * @param timeStamp The invalid timestamp that triggered the revert.
-     */
-    error WrongTimestamp(uint256 timeStamp);
-
     // =========================================================================
     // Internal — Task Execution
     // =========================================================================
@@ -117,6 +108,7 @@ library ScheduledTasksStorageWrapper {
      * @param _actionId             Corporate action identifier linked to this snapshot.
      */
     function addScheduledSnapshot(uint256 _newScheduledTimestamp, bytes32 _actionId) internal {
+        requireValidTimestamp(_newScheduledTimestamp);
         ScheduledTasksLib.addScheduledTask(scheduledSnapshotStorage(), _newScheduledTimestamp, abi.encode(_actionId));
     }
 
@@ -139,6 +131,7 @@ library ScheduledTasksStorageWrapper {
      * @param _actionId             Corporate action identifier linked to this coupon.
      */
     function addScheduledCouponListing(uint256 _newScheduledTimestamp, bytes32 _actionId) internal {
+        requireValidTimestamp(_newScheduledTimestamp);
         ScheduledTasksLib.addScheduledTask(
             scheduledCouponListingStorage(),
             _newScheduledTimestamp,
@@ -166,6 +159,7 @@ library ScheduledTasksStorageWrapper {
      * @param _actionId             Corporate action identifier for the balance adjustment.
      */
     function addScheduledBalanceAdjustment(uint256 _newScheduledTimestamp, bytes32 _actionId) internal {
+        requireValidTimestamp(_newScheduledTimestamp);
         ScheduledTasksLib.addScheduledTask(
             scheduledBalanceAdjustmentStorage(),
             _newScheduledTimestamp,
@@ -195,6 +189,7 @@ library ScheduledTasksStorageWrapper {
      *                              or `COUPON_LISTING_TASK_TYPE`.
      */
     function addScheduledCrossOrderedTask(uint256 _newScheduledTimestamp, bytes32 _taskType) internal {
+        requireValidTimestamp(_newScheduledTimestamp);
         ScheduledTasksLib.addScheduledTask(
             scheduledCrossOrderedTaskStorage(),
             _newScheduledTimestamp,
@@ -235,7 +230,7 @@ library ScheduledTasksStorageWrapper {
      * @param _timestamp The Unix timestamp to validate.
      */
     function requireValidTimestamp(uint256 _timestamp) internal view {
-        if (_timestamp <= TimeTravelStorageWrapper.getBlockTimestamp()) revert WrongTimestamp(_timestamp);
+        if (_timestamp <= TimeTravelStorageWrapper.getBlockTimestamp()) revert ICommonErrors.WrongTimestamp(_timestamp);
     }
 
     // =========================================================================
@@ -435,68 +430,6 @@ library ScheduledTasksStorageWrapper {
         return ScheduledTasksLib.getScheduledTasks(scheduledCrossOrderedTaskStorage(), _pageIndex, _pageLength);
     }
 
-    // =========================================================================
-    // Internal — Storage Slot Accessors (public queues)
-    // =========================================================================
-
-    /**
-     * @notice Returns a storage pointer to the coupon listing task queue.
-     * @dev Resolves the slot via inline assembly using
-     *      `_SCHEDULED_COUPON_LISTING_STORAGE_POSITION`. Follows the diamond storage
-     *      pattern to prevent layout collisions with other facets.
-     * @return scheduledCouponListing_ Storage reference to the coupon listing queue.
-     */
-    function scheduledCouponListingStorage()
-        internal
-        pure
-        returns (ScheduledTasksDataStorage storage scheduledCouponListing_)
-    {
-        bytes32 position = _SCHEDULED_COUPON_LISTING_STORAGE_POSITION;
-        assembly {
-            scheduledCouponListing_.slot := position
-        }
-    }
-
-    /**
-     * @notice Returns a storage pointer to the balance adjustment task queue.
-     * @dev Resolves the slot via inline assembly using
-     *      `_SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION`. Follows the diamond
-     *      storage pattern to prevent layout collisions with other facets.
-     * @return scheduledBalanceAdjustments_ Storage reference to the balance adjustment queue.
-     */
-    function scheduledBalanceAdjustmentStorage()
-        internal
-        pure
-        returns (ScheduledTasksDataStorage storage scheduledBalanceAdjustments_)
-    {
-        bytes32 position = _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION;
-        assembly {
-            scheduledBalanceAdjustments_.slot := position
-        }
-    }
-
-    /**
-     * @notice Returns a storage pointer to the cross-ordered task queue.
-     * @dev Resolves the slot via inline assembly using
-     *      `_SCHEDULED_CROSS_ORDERED_TASKS_STORAGE_POSITION`. Follows the diamond
-     *      storage pattern to prevent layout collisions with other facets.
-     * @return scheduledCrossOrderedTasks_ Storage reference to the cross-ordered task queue.
-     */
-    function scheduledCrossOrderedTaskStorage()
-        internal
-        pure
-        returns (ScheduledTasksDataStorage storage scheduledCrossOrderedTasks_)
-    {
-        bytes32 position = _SCHEDULED_CROSS_ORDERED_TASKS_STORAGE_POSITION;
-        assembly {
-            scheduledCrossOrderedTasks_.slot := position
-        }
-    }
-
-    // ============================================================================
-    // Private Callback Functions
-    // ============================================================================
-
     /**
      * @notice Routes a matured task to its corresponding handler based on queue type.
      * @dev Evaluated in priority order: `"snapshot"` → `"coupon"` → `"balance"` →
@@ -538,11 +471,13 @@ library ScheduledTasksStorageWrapper {
      *      `ISnapshots.SnapshotTriggered` with the new snapshot ID and the encoded
      *      action ID. The result is persisted via `CorporateActionsStorageWrapper`
      *      under `SNAPSHOT_RESULT_ID`.
-     * @param _scheduledTask  The matured `ScheduledTask` containing the encoded action ID.
+     * @param _pos                  The index of the task in the queue; unused by this handler.
+     * @param _scheduledTasksLength The total number of tasks in the queue; unused by this handler.
+     * @param _scheduledTask        The matured `ScheduledTask` containing the encoded action ID.
      */
     function onScheduledSnapshotTriggered(
-        uint256 /*_pos*/,
-        uint256 /*_scheduledTasksLength*/,
+        uint256 _pos, // solhint-disable-line no-unused-vars
+        uint256 _scheduledTasksLength, // solhint-disable-line no-unused-vars
         ScheduledTask memory _scheduledTask
     ) private {
         bytes32 actionId = abi.decode(_scheduledTask.data, (bytes32));
@@ -565,11 +500,13 @@ library ScheduledTasksStorageWrapper {
      *      conditionally updates the coupon rate if a Sustainability Performance Target
      *      or KPI-linked rate is initialised (see `_updateCouponRatesIfNeeded`). The
      *      resulting ordered list position is persisted under `COUPON_LISTING_RESULT_ID`.
-     * @param _scheduledTask  The matured `ScheduledTask` containing the encoded action ID.
+     * @param _pos                  The index of the task in the queue; unused by this handler.
+     * @param _scheduledTasksLength The total number of tasks in the queue; unused by this handler.
+     * @param _scheduledTask        The matured `ScheduledTask` containing the encoded action ID.
      */
     function onScheduledCouponListingTriggered(
-        uint256 /*_pos*/,
-        uint256 /*_scheduledTasksLength*/,
+        uint256 _pos, // solhint-disable-line no-unused-vars
+        uint256 _scheduledTasksLength, // solhint-disable-line no-unused-vars
         ScheduledTask memory _scheduledTask
     ) private {
         bytes32 actionId = _getActionIdFromScheduledTask(_scheduledTask);
@@ -594,11 +531,13 @@ library ScheduledTasksStorageWrapper {
      *      corporate action data into `IEquity.ScheduledBalanceAdjustment` and
      *      delegates the mutation to `AdjustBalancesStorageWrapper.adjustBalances`.
      *      This operation is a global state mutation affecting all holder balances.
-     * @param _scheduledTask  The matured `ScheduledTask` containing the encoded action ID.
+     * @param _pos                  The index of the task in the queue; unused by this handler.
+     * @param _scheduledTasksLength The total number of tasks in the queue; unused by this handler.
+     * @param _scheduledTask        The matured `ScheduledTask` containing the encoded action ID.
      */
     function onScheduledBalanceAdjustmentTriggered(
-        uint256 /*_pos*/,
-        uint256 /*_scheduledTasksLength*/,
+        uint256 _pos, // solhint-disable-line no-unused-vars
+        uint256 _scheduledTasksLength, // solhint-disable-line no-unused-vars
         ScheduledTask memory _scheduledTask
     ) private {
         (, , bytes memory balanceAdjustmentData, bool isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(
@@ -619,11 +558,13 @@ library ScheduledTasksStorageWrapper {
      *      `triggerScheduledSnapshots`, `triggerScheduledBalanceAdjustments`, or
      *      `triggerScheduledCouponListing`, each with a limit of `1`. An unrecognised
      *      task type results in a silent no-op.
-     * @param _scheduledTask  The matured `ScheduledTask` containing the encoded task type.
+     * @param _pos                  The index of the task in the queue; unused by this handler.
+     * @param _scheduledTasksLength The total number of tasks in the queue; unused by this handler.
+     * @param _scheduledTask        The matured `ScheduledTask` containing the encoded task type.
      */
     function onScheduledCrossOrderedTaskTriggered(
-        uint256 /*_pos*/,
-        uint256 /*_scheduledTasksLength*/,
+        uint256 _pos, // solhint-disable-line no-unused-vars
+        uint256 _scheduledTasksLength, // solhint-disable-line no-unused-vars
         ScheduledTask memory _scheduledTask
     ) private {
         bytes32 taskType = _getActionIdFromScheduledTask(_scheduledTask);
@@ -686,6 +627,64 @@ library ScheduledTasksStorageWrapper {
         ScheduledTask memory _scheduledTask
     ) private pure returns (bytes32 actionId_) {
         return abi.decode(_scheduledTask.data, (bytes32));
+    }
+
+    // =========================================================================
+    // Internal — Storage Slot Accessors (public queues)
+    // =========================================================================
+
+    /**
+     * @notice Returns a storage pointer to the coupon listing task queue.
+     * @dev Resolves the slot via inline assembly using
+     *      `_SCHEDULED_COUPON_LISTING_STORAGE_POSITION`. Follows the diamond storage
+     *      pattern to prevent layout collisions with other facets.
+     * @return scheduledCouponListing_ Storage reference to the coupon listing queue.
+     */
+    function scheduledCouponListingStorage()
+        private
+        pure
+        returns (ScheduledTasksDataStorage storage scheduledCouponListing_)
+    {
+        bytes32 position = _SCHEDULED_COUPON_LISTING_STORAGE_POSITION;
+        assembly {
+            scheduledCouponListing_.slot := position
+        }
+    }
+
+    /**
+     * @notice Returns a storage pointer to the balance adjustment task queue.
+     * @dev Resolves the slot via inline assembly using
+     *      `_SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION`. Follows the diamond
+     *      storage pattern to prevent layout collisions with other facets.
+     * @return scheduledBalanceAdjustments_ Storage reference to the balance adjustment queue.
+     */
+    function scheduledBalanceAdjustmentStorage()
+        private
+        pure
+        returns (ScheduledTasksDataStorage storage scheduledBalanceAdjustments_)
+    {
+        bytes32 position = _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION;
+        assembly {
+            scheduledBalanceAdjustments_.slot := position
+        }
+    }
+
+    /**
+     * @notice Returns a storage pointer to the cross-ordered task queue.
+     * @dev Resolves the slot via inline assembly using
+     *      `_SCHEDULED_CROSS_ORDERED_TASKS_STORAGE_POSITION`. Follows the diamond
+     *      storage pattern to prevent layout collisions with other facets.
+     * @return scheduledCrossOrderedTasks_ Storage reference to the cross-ordered task queue.
+     */
+    function scheduledCrossOrderedTaskStorage()
+        private
+        pure
+        returns (ScheduledTasksDataStorage storage scheduledCrossOrderedTasks_)
+    {
+        bytes32 position = _SCHEDULED_CROSS_ORDERED_TASKS_STORAGE_POSITION;
+        assembly {
+            scheduledCrossOrderedTasks_.slot := position
+        }
     }
 
     /**

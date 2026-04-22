@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ProceedRecipientsStorageWrapper } from "../../domain/asset/ProceedRecipientsStorageWrapper.sol";
+import { ExternalListManagementStorageWrapper } from "../../domain/asset/ProceedRecipientsStorageWrapper.sol";
 import { _checkNotInitialized } from "../InitializationErrors.sol";
 
 /**
@@ -19,7 +20,7 @@ abstract contract ProceedRecipientModifiers {
     /// @notice Modifier to ensure proceed recipients have not been initialized
     /// @dev Calls _checkNotProceedRecipientsInitialized from ProceedRecipientsStorageWrapper
     modifier onlyNotProceedRecipientsInitialized() {
-        _checkNotInitialized(ProceedRecipientsStorageWrapper.isProceedRecipientsInitialized());
+        _checkNotInitialized(ExternalListManagementStorageWrapper.isProceedRecipientsInitialized());
         _;
     }
 
