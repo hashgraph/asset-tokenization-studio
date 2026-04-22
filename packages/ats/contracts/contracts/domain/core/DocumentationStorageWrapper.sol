@@ -5,6 +5,32 @@ import { _DOCUMENTATION_STORAGE_POSITION } from "../../constants/storagePosition
 import { IDocumentation } from "../../facets/documentation/IDocumentation.sol";
 
 /**
+ * @notice Represents a single off-chain document referenced by the contract.
+ * @param docHash      Keccak-256 hash of the document contents for integrity verification.
+ * @param lastModified Unix timestamp of the most recent write operation on this entry.
+ * @param uri          Off-chain location from which the document can be retrieved.
+ */
+struct Document {
+    bytes32 docHash;
+    uint256 lastModified;
+    string uri;
+}
+
+/**
+ * @notice Diamond storage layout for the documentation domain.
+ * @param documents  Mapping from document name to its `Document` record.
+ * @param docIndexes Mapping from document name to its one-based position in `docNames`,
+ *                   used for O(1) existence checks and swap-and-pop removal.
+ * @param docNames   Ordered array of all registered document names; maintains the
+ *                   enumerable set of active documents.
+ */
+struct DocumentationDataStorage {
+    mapping(bytes32 => Document) documents;
+    mapping(bytes32 => uint256) docIndexes;
+    bytes32[] docNames;
+}
+
+/**
  * @title DocumentationStorageWrapper
  * @notice Library providing diamond storage access and all read/write operations for
  *         the documentation domain.
@@ -18,7 +44,7 @@ import { IDocumentation } from "../../facets/documentation/IDocumentation.sol";
  */
 library DocumentationStorageWrapper {
     // -------------------------------------------------------------------------
-    // Write operations (internal)
+    // Write operations
     // -------------------------------------------------------------------------
 
     /**
@@ -34,12 +60,12 @@ library DocumentationStorageWrapper {
      * @param _uri          Off-chain URI of the document.
      */
     function setDocumentEntry(bytes32 _name, bytes32 _documentHash, uint256 _timestamp, string calldata _uri) internal {
-        IDocumentation.DocumentationStorage storage docStorage = _storage();
+        DocumentationDataStorage storage docStorage = _documentationStorage();
         if (docStorage.documents[_name].lastModified == uint256(0)) {
             docStorage.docNames.push(_name);
             docStorage.docIndexes[_name] = docStorage.docNames.length;
         }
-        docStorage.documents[_name] = IDocumentation.Document(_documentHash, _timestamp, _uri);
+        docStorage.documents[_name] = Document(_documentHash, _timestamp, _uri);
     }
 
     /**
@@ -53,7 +79,7 @@ library DocumentationStorageWrapper {
      * @return docHash_ Content hash that was associated with the document.
      */
     function removeDocumentEntry(bytes32 _name) internal returns (string memory uri_, bytes32 docHash_) {
-        IDocumentation.DocumentationStorage storage docStorage = _storage();
+        DocumentationDataStorage storage docStorage = _documentationStorage();
         uri_ = docStorage.documents[_name].uri;
         docHash_ = docStorage.documents[_name].docHash;
         uint256 index = docStorage.docIndexes[_name] - 1;
@@ -66,20 +92,8 @@ library DocumentationStorageWrapper {
     }
 
     // -------------------------------------------------------------------------
-    // Read operations (internal view)
+    // Read operations
     // -------------------------------------------------------------------------
-
-    /**
-     * @notice Reverts when `_name` has not been registered.
-     * @dev Uses `lastModified == 0` as the absence sentinel, consistent with the
-     *      storage default for unmapped entries.
-     * @param _name The `bytes32` document name whose existence is asserted.
-     */
-    function _checkDocumentExists(bytes32 _name) internal view {
-        if (_storage().documents[_name].lastModified == uint256(0)) {
-            revert IDocumentation.DocumentDoesNotExist(_name);
-        }
-    }
 
     /**
      * @notice Returns the URI, content hash, and last-modified timestamp of a document.
@@ -91,7 +105,7 @@ library DocumentationStorageWrapper {
     function getDocumentData(
         bytes32 _name
     ) internal view returns (string memory uri_, bytes32 docHash_, uint256 lastModified_) {
-        IDocumentation.DocumentationStorage storage docStorage = _storage();
+        DocumentationDataStorage storage docStorage = _documentationStorage();
         uri_ = docStorage.documents[_name].uri;
         docHash_ = docStorage.documents[_name].docHash;
         lastModified_ = docStorage.documents[_name].lastModified;
@@ -104,12 +118,24 @@ library DocumentationStorageWrapper {
      * @return Array of `bytes32` document names.
      */
     function getDocumentNames() internal view returns (bytes32[] memory) {
-        return _storage().docNames;
+        return _documentationStorage().docNames;
     }
 
     // -------------------------------------------------------------------------
-    // Validation helpers (internal pure)
+    // Validation checks (called by DocumentationModifiers)
     // -------------------------------------------------------------------------
+
+    /**
+     * @notice Reverts when `_name` has not been registered.
+     * @dev Uses `lastModified == 0` as the absence sentinel, consistent with the
+     *      storage default for unmapped entries.
+     * @param _name The `bytes32` document name whose existence is asserted.
+     */
+    function _checkDocumentExists(bytes32 _name) internal view {
+        if (_documentationStorage().documents[_name].lastModified == uint256(0)) {
+            revert IDocumentation.DocumentDoesNotExist(_name);
+        }
+    }
 
     /**
      * @notice Reverts when `_name` is the zero value.
@@ -145,7 +171,7 @@ library DocumentationStorageWrapper {
      *      library's typed API rather than direct slot manipulation by callers.
      * @return docStorage_ Reference to the `DocumentationStorage` struct.
      */
-    function _storage() private pure returns (IDocumentation.DocumentationStorage storage docStorage_) {
+    function _documentationStorage() private pure returns (DocumentationDataStorage storage docStorage_) {
         bytes32 position = _DOCUMENTATION_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {

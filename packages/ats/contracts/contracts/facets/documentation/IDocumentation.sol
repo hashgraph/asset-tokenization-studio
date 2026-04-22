@@ -14,32 +14,6 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface IDocumentation {
     /**
-     * @notice Represents a single off-chain document referenced by the contract.
-     * @param docHash   Keccak-256 hash of the document contents for integrity verification.
-     * @param lastModified Unix timestamp of the most recent write operation on this entry.
-     * @param uri       Off-chain location from which the document can be retrieved.
-     */
-    struct Document {
-        bytes32 docHash;
-        uint256 lastModified;
-        string uri;
-    }
-
-    /**
-     * @notice Diamond storage layout for the documentation domain.
-     * @param documents  Mapping from document name to its `Document` record.
-     * @param docIndexes Mapping from document name to its one-based position in `docNames`,
-     *                   used for O(1) existence checks and swap-and-pop removal.
-     * @param docNames   Ordered array of all registered document names; maintains the
-     *                   enumerable set of active documents.
-     */
-    struct DocumentationStorage {
-        mapping(bytes32 => Document) documents;
-        mapping(bytes32 => uint256) docIndexes;
-        bytes32[] docNames;
-    }
-
-    /**
      * @notice Emitted when a document is permanently removed from the contract.
      * @param name         Unique identifier of the document that was removed.
      * @param uri          Off-chain URI that was associated with the document.
