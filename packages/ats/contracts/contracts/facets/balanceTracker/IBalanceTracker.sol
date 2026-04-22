@@ -1,6 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/**
+ * @title IBalanceTracker
+ * @notice Interface for querying token balances and total supply across all partitions,
+ *         with support for time-adjusted values that simulate pending balance adjustments.
+ * @dev All read operations resolve the current block timestamp via `TimeTravelStorageWrapper`,
+ *      enabling deterministic results in test environments without altering production behaviour.
+ */
 interface IBalanceTracker {
     /**
      * @notice Returns the total token balance of a token holder across all partitions,
