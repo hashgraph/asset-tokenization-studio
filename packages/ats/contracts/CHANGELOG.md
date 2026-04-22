@@ -1,5 +1,20 @@
 # @hashgraph/asset-tokenization-contracts
 
+## 7.0.0
+
+### Major Changes
+
+- 7c56922: refactor split voting functions in a new facet
+- 7c56922: Architectural migration: library-based Diamond pattern (BBND-1458 / BBND-1459 / BBND-1460). Converts every storage wrapper from an abstract contract to a library, consolidates modifiers into `CoreModifiers` and `AssetModifiers` aggregators under `services/`, introduces `EvmAccessors` for `msg.sender` abstraction (replacing the old `TimestampProvider` / direct `msg.sender` usage), and reorganizes the contracts tree into `domain/` (core + asset), `facets/` (layer_1 / layer_2 / layer_3) and `infrastructure/` (diamond, proxy, utils). Existing storage slots and public facet entry points are preserved, so downstream ABIs for already-deployed tokens remain compatible — the major bump signals the internal rewrite and the removal of the top-level `addCorporateAction` / `cancelCorporateAction` external functions (replaced by per-action commands).
+- 7c56922: split equity facet from equity facet
+- 7c56922: split coupon from bondFacet
+
+### Minor Changes
+
+- 7c56922: Factory generic method to deploy resolver proxies implemented
+- 0dfb7ba: Add LoansPortfolioFacet for LoanPortfolio asset type. Manages a portfolio of loan and cash holdings with classification by collateral, performance status, and country. Includes LoansPortfolioStorageWrapper, full Diamond integration (resolver keys, roles, storage positions), TimeTravel test variant, and a complete integration test suite.
+- 7c56922: BLR now checks that business logics keys corresponds to the key returned by the corresponding introspection method of the business logic address when registering new facets. This double check reduces the chances of an admin setting by mistake the wrong address for a facet.
+
 ## 6.0.0
 
 ### Major Changes

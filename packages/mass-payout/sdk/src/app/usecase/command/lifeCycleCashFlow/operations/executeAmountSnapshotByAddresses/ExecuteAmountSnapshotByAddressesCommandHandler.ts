@@ -14,9 +14,7 @@ import {
 import { ExecuteAmountSnapshotByAddressesCommandError } from "./error/ExecuteAmountSnapshotByAddressesCommandError";
 
 @CommandHandler(ExecuteAmountSnapshotByAddressesCommand)
-export class ExecuteAmountSnapshotByAddressesCommandHandler
-  implements ICommandHandler<ExecuteAmountSnapshotByAddressesCommand>
-{
+export class ExecuteAmountSnapshotByAddressesCommandHandler implements ICommandHandler<ExecuteAmountSnapshotByAddressesCommand> {
   constructor(
     private readonly transactionService: TransactionService,
     private readonly contractService: ContractService,
