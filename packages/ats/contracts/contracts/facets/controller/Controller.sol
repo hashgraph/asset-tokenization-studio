@@ -26,8 +26,8 @@ abstract contract Controller is IControllerFacet, Modifiers {
      * @param _controllable True to enable the controller feature, false to disable it from the start.
      */
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1644(bool _controllable) external override onlyNotControllerInitialized {
-        ERC1644StorageWrapper.initialize_ERC1644(_controllable);
+    function initialize_Controller(bool _controllable) external override onlyNotControllerInitialized {
+        ERC1644StorageWrapper.initialize_Controller(_controllable);
     }
 
     /**

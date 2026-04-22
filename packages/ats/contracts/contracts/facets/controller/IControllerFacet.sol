@@ -54,7 +54,7 @@ interface IControllerFacet is IERC3643Types {
      * @param _isControllable true is controllable, false is not controllable
      */
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1644(bool _isControllable) external;
+    function initialize_Controller(bool _isControllable) external;
 
     /**
      * @notice This function allows an authorised address to transfer tokens between any two token holders.
