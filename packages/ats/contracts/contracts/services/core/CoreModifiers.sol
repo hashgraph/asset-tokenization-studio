@@ -25,6 +25,7 @@ import { AddressModifiers } from "./AddressModifiers.sol";
 import { CapModifiers } from "./CapModifiers.sol";
 import { ControlListModifiers } from "./ControlListModifiers.sol";
 import { DateValidationModifiers } from "./DateValidationModifiers.sol";
+import { DocumentationModifiers } from "./DocumentationModifiers.sol";
 import { ExternalListModifiers } from "./ExternalListModifiers.sol";
 import { KycModifiers } from "./KycModifiers.sol";
 import { LoanModifiers } from "./LoanModifiers.sol";
@@ -38,6 +39,7 @@ abstract contract CoreModifiers is
     CapModifiers,
     ControlListModifiers,
     DateValidationModifiers,
+    DocumentationModifiers,
     ExternalListModifiers,
     KycModifiers,
     LoanModifiers,

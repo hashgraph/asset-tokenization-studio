@@ -89,7 +89,7 @@ import { IClearingRead } from "./layer_1/clearing/IClearingRead.sol";
 import { IComplianceFacet } from "./compliance/IComplianceFacet.sol";
 import { IHoldFacet } from "./hold/IHoldFacet.sol";
 import { IERC1594 } from "./layer_1/ERC1400/ERC1594/IERC1594.sol";
-import { IERC1643 } from "./layer_1/ERC1400/ERC1643/IERC1643.sol";
+import { IDocumentation } from "./documentation/IDocumentation.sol";
 import { IERC1644 } from "./layer_1/ERC1400/ERC1644/IERC1644.sol";
 import { IERC20Permit } from "./layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
 import { IControlList } from "./layer_1/controlList/IControlList.sol";
@@ -172,7 +172,7 @@ interface IAsset is
     IComplianceFacet,
     IHoldFacet,
     IERC1594,
-    IERC1643,
+    IDocumentation,
     IERC1644,
     IERC20Permit,
     // Control

@@ -192,7 +192,7 @@ import {
 
 export class SDKService {
   static initData?: InitializationData = undefined;
-  static testnetNetwork = "testnet";
+  static testnetNetwork = process.env.REACT_APP_NETWORK ?? "testnet";
   static testnetMirrorNode = {
     baseUrl: process.env.REACT_APP_MIRROR_NODE ?? "",
     apiKey: "",

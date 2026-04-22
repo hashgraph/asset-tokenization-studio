@@ -13,6 +13,7 @@ import { _BALANCE_TRACKER_RESOLVER_KEY } from "../../constants/resolverKeys.sol"
  * @dev Inherits balance logic from `BalanceTracker` and satisfies the `IStaticFunctionSelectors`
  *      contract required by the Diamond proxy for selector registration. Exposes three selectors:
  *      `balanceOf`, `totalSupply`, and `getTotalBalanceFor`.
+ * @author Hashgraph
  */
 contract BalanceTrackerFacet is BalanceTracker, IStaticFunctionSelectors {
     /**
@@ -29,11 +30,13 @@ contract BalanceTrackerFacet is BalanceTracker, IStaticFunctionSelectors {
      *         `totalSupply`, and `getTotalBalanceFor`.
      */
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](3);
-        staticFunctionSelectors_[selectorIndex++] = this.balanceOf.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.totalSupply.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getTotalBalanceFor.selector;
+        uint256 selectorIndex = 3;
+        staticFunctionSelectors_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this.getTotalBalanceFor.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.totalSupply.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.balanceOf.selector;
+        }
     }
 
     /**
