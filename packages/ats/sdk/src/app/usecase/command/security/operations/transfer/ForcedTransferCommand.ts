@@ -2,7 +2,6 @@
 
 import { Command } from "@core/command/Command";
 import { CommandResponse } from "@core/command/CommandResponse";
-import { HederaId } from "@domain/context/shared/HederaId";
 
 export class ForcedTransferCommandResponse implements CommandResponse {
   constructor(

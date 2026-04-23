@@ -22,56 +22,14 @@ import { AmortizationPaymentAmount } from "@domain/context/amortization/Amortiza
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import { HederaId } from "@domain/context/shared/HederaId";
 import {
-  AccessControlFacet__factory,
-  BondRead__factory,
-  Coupon__factory,
-  CapFacet__factory,
-  ClearingActionsFacet__factory,
-  ClearingHoldCreationFacet__factory,
-  ClearingReadFacet__factory,
-  ClearingRedeemFacet__factory,
-  ClearingTransferFacet__factory,
-  ComplianceFacet__factory,
-  ControlListFacet__factory,
-  DiamondFacet__factory,
-  Dividend__factory,
-  Equity__factory,
-  ERC1410ReadFacet__factory,
-  ERC20Votes__factory,
-  ERC1594Facet__factory,
-  ERC1644Facet__factory,
   IAsset__factory,
-  ExternalControlListManagementFacet__factory,
-  ExternalKycListManagementFacet__factory,
-  ExternalPauseManagementFacet__factory,
   Factory__factory,
-  FixedRate__factory,
-  FreezeFacet__factory,
-  HoldFacet__factory,
-  HoldReadFacet__factory,
-  KycFacet__factory,
-  LockFacet__factory,
   MockedBlacklist__factory,
   MockedExternalKycList__factory,
   MockedExternalPause__factory,
   MockedWhitelist__factory,
-  PauseFacet__factory,
-  ProtectedPartitionsFacet__factory,
-  ScheduledSnapshotsFacet__factory,
-  Security__factory,
-  SnapshotsFacet__factory,
-  SsiManagementFacet__factory,
-  ERC3643ReadFacet__factory,
   TREXFactoryAts__factory,
-  ProceedRecipientsFacet__factory,
-  CorporateActionsFacet__factory,
-  NoncesFacet__factory,
-  Kpis__factory,
   KpiLinkedRate__factory,
-  ScheduledCouponListingFacet__factory,
-  NominalValue__factory,
-  VotingFacet__factory,
-  AmortizationFacet__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { ScheduledSnapshot } from "@domain/context/security/ScheduledSnapshot";
 import { VotingRights } from "@domain/context/equity/VotingRights";
@@ -148,7 +106,7 @@ export class RPCQueryAdapter {
       `Getting balance of ${address.toString()} security for partition ${partitionId} for the account ${target.toString()}`,
     );
 
-    return await this.connect(ERC1410ReadFacet__factory, address.toString()).balanceOfByPartition(
+    return await this.connect(IAsset__factory, address.toString()).balanceOfByPartition(
       partitionId,
       target.toString(),
     );
@@ -159,7 +117,7 @@ export class RPCQueryAdapter {
       `Getting balance of ${address.toString()} security at snapshot ${snapshotId.toString()} for the account ${target.toString()}`,
     );
 
-    return await this.connect(SnapshotsFacet__factory, address.toString()).balanceOfAtSnapshot(
+    return await this.connect(IAsset__factory, address.toString()).balanceOfAtSnapshot(
       snapshotId,
       target.toString(),
     );
@@ -175,7 +133,7 @@ export class RPCQueryAdapter {
       `Getting balance of ${address.toString()} security for partition ${partitionId} at snapshot ${snapshotId.toString()} for the account ${target.toString()}`,
     );
 
-    return await this.connect(SnapshotsFacet__factory, address.toString()).balanceOfAtSnapshotByPartition(
+    return await this.connect(IAsset__factory, address.toString()).balanceOfAtSnapshotByPartition(
       partitionId,
       snapshotId,
       target.toString(),
@@ -185,19 +143,19 @@ export class RPCQueryAdapter {
   async getNonceFor(address: EvmAddress, target: EvmAddress): Promise<bigint> {
     LogService.logTrace(`Getting Nonce`);
 
-    return await this.connect(NoncesFacet__factory, address.toString()).nonces(target.toString());
+    return await this.connect(IAsset__factory, address.toString()).nonces(target.toString());
   }
 
   async partitionsOf(address: EvmAddress, targetId: EvmAddress): Promise<string[]> {
     LogService.logTrace(`Getting partitions for account ${targetId.toString()}`);
 
-    return await this.connect(ERC1410ReadFacet__factory, address.toString()).partitionsOf(targetId.toString());
+    return await this.connect(IAsset__factory, address.toString()).partitionsOf(targetId.toString());
   }
 
   async partitionsOfAtSnapshot(address: EvmAddress, targetId: EvmAddress, snapshotId: number): Promise<string[]> {
     LogService.logTrace(`Getting partitions for account ${targetId.toString()} at snapshot ${snapshotId.toString()}`);
 
-    return await this.connect(SnapshotsFacet__factory, address.toString()).partitionsOfAtSnapshot(
+    return await this.connect(IAsset__factory, address.toString()).partitionsOfAtSnapshot(
       snapshotId,
       targetId.toString(),
     );
@@ -212,13 +170,13 @@ export class RPCQueryAdapter {
   async totalSupplyAtSnapshot(address: EvmAddress, snapshotId: number): Promise<bigint> {
     LogService.logTrace(`Getting total supply of ${address.toString()} security at snapshot ${snapshotId.toString()}`);
 
-    return await this.connect(SnapshotsFacet__factory, address.toString()).totalSupplyAtSnapshot(snapshotId);
+    return await this.connect(IAsset__factory, address.toString()).totalSupplyAtSnapshot(snapshotId);
   }
 
   async getRolesFor(address: EvmAddress, target: EvmAddress, start: number, end: number): Promise<string[]> {
     LogService.logTrace(`Getting roles for ${target.toString()} from ${start} to ${end}`);
 
-    return await this.connect(AccessControlFacet__factory, address.toString()).getRolesFor(
+    return await this.connect(IAsset__factory, address.toString()).getRolesFor(
       target.toString(),
       start,
       end,
@@ -228,13 +186,13 @@ export class RPCQueryAdapter {
   async getRoleMembers(address: EvmAddress, role: string, start: number, end: number): Promise<string[]> {
     LogService.logTrace(`Getting roles members for role ${role} from ${start} to ${end}`);
 
-    return await this.connect(AccessControlFacet__factory, address.toString()).getRoleMembers(role, start, end);
+    return await this.connect(IAsset__factory, address.toString()).getRoleMembers(role, start, end);
   }
 
   async getRoleCountFor(address: EvmAddress, target: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting role count for ${target.toString()}`);
 
-    const roleCount = await this.connect(AccessControlFacet__factory, address.toString()).getRoleCountFor(
+    const roleCount = await this.connect(IAsset__factory, address.toString()).getRoleCountFor(
       target.toString(),
     );
 
@@ -244,7 +202,7 @@ export class RPCQueryAdapter {
   async getRoleMemberCount(address: EvmAddress, role: string): Promise<number> {
     LogService.logTrace(`Getting role member count for ${role}`);
 
-    const membersCount = await this.connect(AccessControlFacet__factory, address.toString()).getRoleMemberCount(role);
+    const membersCount = await this.connect(IAsset__factory, address.toString()).getRoleMemberCount(role);
 
     return Number(membersCount);
   }
@@ -252,7 +210,7 @@ export class RPCQueryAdapter {
   async hasRole(address: EvmAddress, target: EvmAddress, role: string): Promise<boolean> {
     LogService.logTrace(`Getting if the account ${target.toString()} has the role ${address.toString()}`);
 
-    return await this.connect(AccessControlFacet__factory, address.toString()).hasRole(role, target.toString());
+    return await this.connect(IAsset__factory, address.toString()).hasRole(role, target.toString());
   }
 
   async getSecurity(address: EvmAddress): Promise<Security> {
@@ -260,20 +218,20 @@ export class RPCQueryAdapter {
 
     const erc20Metadata = await this.connect(IAsset__factory, address.toString()).getERC20Metadata();
     const totalSupply = await this.connect(IAsset__factory, address.toString()).totalSupply();
-    const maxSupply = await this.connect(CapFacet__factory, address.toString()).getMaxSupply();
-    const isWhiteList = await this.connect(ControlListFacet__factory, address.toString()).getControlListType();
-    const erc20VotesActivated = await this.connect(ERC20Votes__factory, address.toString()).isActivated();
-    const isControllable = await this.connect(ERC1644Facet__factory, address.toString()).isControllable();
+    const maxSupply = await this.connect(IAsset__factory, address.toString()).getMaxSupply();
+    const isWhiteList = await this.connect(IAsset__factory, address.toString()).getControlListType();
+    const erc20VotesActivated = await this.connect(IAsset__factory, address.toString()).isActivated();
+    const isControllable = await this.connect(IAsset__factory, address.toString()).isControllable();
     const arePartitionsProtected = await this.connect(
-      ProtectedPartitionsFacet__factory,
+      IAsset__factory,
       address.toString(),
     ).arePartitionsProtected();
-    const clearingActive = await this.connect(ClearingActionsFacet__factory, address.toString()).isClearingActivated();
-    const internalKycActivated = await this.connect(KycFacet__factory, address.toString()).isInternalKycActivated();
-    const isMultiPartition = await this.connect(ERC1410ReadFacet__factory, address.toString()).isMultiPartition();
-    const isIssuable = await this.connect(ERC1594Facet__factory, address.toString()).isIssuable();
-    const isPaused = await this.connect(PauseFacet__factory, address.toString()).isPaused();
-    const regulationInfo = await this.connect(Security__factory, address.toString()).getSecurityRegulationData();
+    const clearingActive = await this.connect(IAsset__factory, address.toString()).isClearingActivated();
+    const internalKycActivated = await this.connect(IAsset__factory, address.toString()).isInternalKycActivated();
+    const isMultiPartition = await this.connect(IAsset__factory, address.toString()).isMultiPartition();
+    const isIssuable = await this.connect(IAsset__factory, address.toString()).isIssuable();
+    const isPaused = await this.connect(IAsset__factory, address.toString()).isPaused();
+    const regulationInfo = await this.connect(IAsset__factory, address.toString()).getSecurityRegulationData();
     const diamondAddress = await this.mirrorNode.getHederaIdfromContractAddress(address.toString());
     const regulation: Regulation = {
       type: CastRegulationType.fromBigint(regulationInfo.regulationData.regulationType),
@@ -321,7 +279,7 @@ export class RPCQueryAdapter {
   async getEquityDetails(address: EvmAddress): Promise<EquityDetails> {
     LogService.logTrace(`Requesting equity details for equity: ${address.toString()}`);
 
-    const res = await this.connect(Equity__factory, address.toString()).getEquityDetails();
+    const res = await this.connect(IAsset__factory, address.toString()).getEquityDetails();
 
     return new EquityDetails(
       res.votingRight,
@@ -341,7 +299,7 @@ export class RPCQueryAdapter {
   async getBondDetails(address: EvmAddress): Promise<BondDetails> {
     LogService.logTrace(`Requesting bond details for bond: ${address.toString()}`);
 
-    const res = await this.connect(BondRead__factory, address.toString()).getBondDetails();
+    const res = await this.connect(IAsset__factory, address.toString()).getBondDetails();
 
     return new BondDetails(
       res.currency,
@@ -355,13 +313,13 @@ export class RPCQueryAdapter {
   async getControlListMembers(address: EvmAddress, start: number, end: number): Promise<string[]> {
     LogService.logTrace(`Getting control list members from ${start} to ${end}`);
 
-    return await this.connect(ControlListFacet__factory, address.toString()).getControlListMembers(start, end);
+    return await this.connect(IAsset__factory, address.toString()).getControlListMembers(start, end);
   }
 
   async getControlListCount(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting control list count`);
 
-    const controlListCount = await this.connect(ControlListFacet__factory, address.toString()).getControlListCount();
+    const controlListCount = await this.connect(IAsset__factory, address.toString()).getControlListCount();
 
     return Number(controlListCount);
   }
@@ -369,19 +327,19 @@ export class RPCQueryAdapter {
   async getControlListType(address: EvmAddress): Promise<boolean> {
     LogService.logTrace(`Getting control list type`);
 
-    return await this.connect(ControlListFacet__factory, address.toString()).getControlListType();
+    return await this.connect(IAsset__factory, address.toString()).getControlListType();
   }
 
   async isAccountInControlList(address: EvmAddress, target: EvmAddress): Promise<boolean> {
     LogService.logTrace(`Getting if account ${target.toString()} is in control list`);
 
-    return await this.connect(ControlListFacet__factory, address.toString()).isInControlList(target.toString());
+    return await this.connect(IAsset__factory, address.toString()).isInControlList(target.toString());
   }
 
   async getDividendFor(address: EvmAddress, target: EvmAddress, dividend: number): Promise<DividendFor> {
     LogService.logTrace(`Getting dividends for`);
 
-    const dividendFor = await this.connect(Dividend__factory, address.toString()).getDividendFor(
+    const dividendFor = await this.connect(IAsset__factory, address.toString()).getDividendFor(
       dividend,
       target.toString(),
     );
@@ -396,7 +354,7 @@ export class RPCQueryAdapter {
   async getDividendAmountFor(address: EvmAddress, target: EvmAddress, dividend: number): Promise<DividendAmountFor> {
     LogService.logTrace(`Getting dividends amount for`);
 
-    const dividendAmountFor = await this.connect(Dividend__factory, address.toString()).getDividendAmountFor(
+    const dividendAmountFor = await this.connect(IAsset__factory, address.toString()).getDividendAmountFor(
       dividend,
       target.toString(),
     );
@@ -411,7 +369,7 @@ export class RPCQueryAdapter {
   async getDividend(address: EvmAddress, dividend: number): Promise<Dividend> {
     LogService.logTrace(`Getting dividends`);
 
-    const { registeredDividend_, isDisabled_ } = await this.connect(Dividend__factory, address.toString()).getDividend(
+    const { registeredDividend_, isDisabled_ } = await this.connect(IAsset__factory, address.toString()).getDividend(
       dividend,
     );
 
@@ -428,7 +386,7 @@ export class RPCQueryAdapter {
   async getDividendsCount(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting dividends count`);
 
-    const dividendsCount = await this.connect(Dividend__factory, address.toString()).getDividendsCount();
+    const dividendsCount = await this.connect(IAsset__factory, address.toString()).getDividendsCount();
 
     return Number(dividendsCount);
   }
@@ -436,7 +394,7 @@ export class RPCQueryAdapter {
   async getVotingFor(address: EvmAddress, target: EvmAddress, voting: number): Promise<VotingFor> {
     LogService.logTrace(`Getting voting for`);
 
-    const votingFor = await this.connect(VotingFacet__factory, address.toString()).getVotingFor(
+    const votingFor = await this.connect(IAsset__factory, address.toString()).getVotingFor(
       voting,
       target.toString(),
     );
@@ -447,7 +405,7 @@ export class RPCQueryAdapter {
   async getVoting(address: EvmAddress, voting: number): Promise<VotingRights> {
     LogService.logTrace(`Getting voting`);
 
-    const { registeredVoting_, isDisabled_ } = await this.connect(VotingFacet__factory, address.toString()).getVoting(
+    const { registeredVoting_, isDisabled_ } = await this.connect(IAsset__factory, address.toString()).getVoting(
       voting,
     );
 
@@ -462,7 +420,7 @@ export class RPCQueryAdapter {
   async getVotingsCount(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting votings count`);
 
-    const votingsCount = await this.connect(VotingFacet__factory, address.toString()).getVotingCount();
+    const votingsCount = await this.connect(IAsset__factory, address.toString()).getVotingCount();
 
     return Number(votingsCount);
   }
@@ -470,7 +428,7 @@ export class RPCQueryAdapter {
   async getCouponFor(address: EvmAddress, target: EvmAddress, coupon: number): Promise<CouponFor> {
     LogService.logTrace(`Getting Coupon for`);
 
-    const couponFor = await this.connect(Coupon__factory, address.toString()).getCouponFor(coupon, target.toString());
+    const couponFor = await this.connect(IAsset__factory, address.toString()).getCouponFor(coupon, target.toString());
 
     const couponDomain = new Coupon(
       Number(couponFor.coupon.recordDate),
@@ -508,7 +466,7 @@ export class RPCQueryAdapter {
   ): Promise<{ coupons: CouponFor[]; accounts: string[] }> {
     LogService.logTrace(`Getting Coupons for`);
 
-    const result = await this.connect(Coupon__factory, address.toString()).getCouponsFor(
+    const result = await this.connect(IAsset__factory, address.toString()).getCouponsFor(
       couponId,
       pageIndex,
       pageLength,
@@ -549,7 +507,7 @@ export class RPCQueryAdapter {
   async getCouponAmountFor(address: EvmAddress, target: EvmAddress, coupon: number): Promise<CouponAmountFor> {
     LogService.logTrace(`Getting Coupon Amount for`);
 
-    const couponAmountFor = await this.connect(Coupon__factory, address.toString()).getCouponAmountFor(
+    const couponAmountFor = await this.connect(IAsset__factory, address.toString()).getCouponAmountFor(
       coupon,
       target.toString(),
     );
@@ -564,7 +522,7 @@ export class RPCQueryAdapter {
   async getPrincipalFor(address: EvmAddress, target: EvmAddress): Promise<PrincipalFor> {
     LogService.logTrace(`Getting Principal for`);
 
-    const principalFor = await this.connect(BondRead__factory, address.toString()).getPrincipalFor(target.toString());
+    const principalFor = await this.connect(IAsset__factory, address.toString()).getPrincipalFor(target.toString());
 
     return new PrincipalFor(principalFor.numerator.toString(), principalFor.denominator.toString());
   }
@@ -572,7 +530,7 @@ export class RPCQueryAdapter {
   async getCoupon(address: EvmAddress, coupon: number): Promise<Coupon> {
     LogService.logTrace(`Getting Coupon`);
 
-    const { registeredCoupon_, isDisabled_ } = await this.connect(Coupon__factory, address.toString()).getCoupon(
+    const { registeredCoupon_, isDisabled_ } = await this.connect(IAsset__factory, address.toString()).getCoupon(
       coupon,
     );
 
@@ -593,7 +551,7 @@ export class RPCQueryAdapter {
   async getCouponCount(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting Coupon count`);
 
-    const couponCount = await this.connect(Coupon__factory, address.toString()).getCouponCount();
+    const couponCount = await this.connect(IAsset__factory, address.toString()).getCouponCount();
 
     return Number(couponCount);
   }
@@ -601,13 +559,13 @@ export class RPCQueryAdapter {
   async isPaused(address: EvmAddress): Promise<boolean> {
     LogService.logTrace(`Checking if the security: ${address.toString()} is paused`);
 
-    return await this.connect(PauseFacet__factory, address.toString()).isPaused();
+    return await this.connect(IAsset__factory, address.toString()).isPaused();
   }
 
   async arePartitionsProtected(address: EvmAddress): Promise<boolean> {
     LogService.logTrace(`Checking if the security: ${address.toString()} partitions are protected`);
 
-    return await this.connect(ProtectedPartitionsFacet__factory, address.toString()).arePartitionsProtected();
+    return await this.connect(IAsset__factory, address.toString()).arePartitionsProtected();
   }
 
   async canTransferByPartition(
@@ -622,7 +580,7 @@ export class RPCQueryAdapter {
   ): Promise<[boolean, string, string]> {
     LogService.logTrace(`Checking can transfer by partition`);
 
-    return await this.connect(ERC1410ReadFacet__factory, address.toString()).canTransferByPartition(
+    return await this.connect(IAsset__factory, address.toString()).canTransferByPartition(
       sourceId.toString(),
       targetId.toString(),
       partitionId,
@@ -644,7 +602,7 @@ export class RPCQueryAdapter {
   ): Promise<[boolean, string, string]> {
     LogService.logTrace(`Checking can transfer`);
 
-    return await this.connect(ComplianceFacet__factory, address.toString()).canTransfer(
+    return await this.connect(IAsset__factory, address.toString()).canTransfer(
       targetId.toString(),
       amount.toBigInt(),
       data,
@@ -665,7 +623,7 @@ export class RPCQueryAdapter {
   ): Promise<[boolean, string, string]> {
     LogService.logTrace(`Checking can redeem`);
 
-    return await this.connect(ERC1410ReadFacet__factory, address.toString()).canRedeemByPartition(
+    return await this.connect(IAsset__factory, address.toString()).canRedeemByPartition(
       sourceId.toString(),
       partitionId,
       amount.toBigInt(),
@@ -699,7 +657,7 @@ export class RPCQueryAdapter {
       `Checking if the account: ${operator.toString()} is operator for ${target.toString()} and partition ${partitionId}`,
     );
 
-    return await this.connect(ERC1410ReadFacet__factory, address.toString()).isOperatorForPartition(
+    return await this.connect(IAsset__factory, address.toString()).isOperatorForPartition(
       partitionId,
       operator.toString(),
       target.toString(),
@@ -709,7 +667,7 @@ export class RPCQueryAdapter {
   async isOperator(address: EvmAddress, operator: EvmAddress, target: EvmAddress): Promise<boolean> {
     LogService.logTrace(`Checking if the account: ${operator.toString()} is operator for ${target.toString()}`);
 
-    return await this.connect(ERC1410ReadFacet__factory, address.toString()).isOperator(
+    return await this.connect(IAsset__factory, address.toString()).isOperator(
       operator.toString(),
       target.toString(),
     );
@@ -718,7 +676,7 @@ export class RPCQueryAdapter {
   async getScheduledSnapshots(address: EvmAddress, start: number, end: number): Promise<ScheduledSnapshot[]> {
     LogService.logTrace(`Getting scheduled snapshots from ${start} to ${end}`);
 
-    const snapshots = await this.connect(ScheduledSnapshotsFacet__factory, address.toString()).getScheduledSnapshots(
+    const snapshots = await this.connect(IAsset__factory, address.toString()).getScheduledSnapshots(
       start,
       end,
     );
@@ -732,7 +690,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting scheduled snapshots count`);
 
     const scheduledSnapshotsCount = await this.connect(
-      ScheduledSnapshotsFacet__factory,
+      IAsset__factory,
       address.toString(),
     ).scheduledSnapshotCount();
 
@@ -742,19 +700,19 @@ export class RPCQueryAdapter {
   async getMaxSupply(address: EvmAddress): Promise<bigint> {
     LogService.logTrace(`Getting max supply for ${address.toString()} security`);
 
-    return await this.connect(CapFacet__factory, address.toString()).getMaxSupply();
+    return await this.connect(IAsset__factory, address.toString()).getMaxSupply();
   }
 
   async getMaxSupplyByPartition(address: EvmAddress, partitionId: string): Promise<bigint> {
     LogService.logTrace(`Getting max supply by partition for ${address.toString()} security`);
 
-    return await this.connect(CapFacet__factory, address.toString()).getMaxSupplyByPartition(partitionId);
+    return await this.connect(IAsset__factory, address.toString()).getMaxSupplyByPartition(partitionId);
   }
 
   async getTotalSupplyByPartition(address: EvmAddress, partitionId: string): Promise<bigint> {
     LogService.logTrace(`Getting max supply by partition for ${address.toString()} security`);
 
-    return await this.connect(ERC1410ReadFacet__factory, address.toString()).totalSupplyByPartition(partitionId);
+    return await this.connect(IAsset__factory, address.toString()).totalSupplyByPartition(partitionId);
   }
 
   async getRegulationDetails(type: number, subType: number, factoryAddress: EvmAddress): Promise<Regulation> {
@@ -782,7 +740,7 @@ export class RPCQueryAdapter {
       `Getting locked balance of ${address.toString()} security for the account ${target.toString()}`,
     );
 
-    return await this.connect(LockFacet__factory, address.toString()).getLockedAmountForByPartition(
+    return await this.connect(IAsset__factory, address.toString()).getLockedAmountForByPartition(
       _PARTITION_ID_1,
       target.toString(),
     );
@@ -791,7 +749,7 @@ export class RPCQueryAdapter {
   async getLockCount(address: EvmAddress, target: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting lock count of ${address.toString()} security for the account ${target.toString()}`);
 
-    const count = await this.connect(LockFacet__factory, address.toString()).getLockCountForByPartition(
+    const count = await this.connect(IAsset__factory, address.toString()).getLockCountForByPartition(
       _PARTITION_ID_1,
       target.toString(),
     );
@@ -804,7 +762,7 @@ export class RPCQueryAdapter {
       `Getting locks id of ${address.toString()} security for the account ${target.toString()} from ${start.toString()} to ${end.toString()}`,
     );
 
-    return await this.connect(LockFacet__factory, address.toString()).getLocksIdForByPartition(
+    return await this.connect(IAsset__factory, address.toString()).getLocksIdForByPartition(
       _PARTITION_ID_1,
       target.toString(),
       start,
@@ -816,7 +774,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(
       `Getting lock ${lockId.toString()} of ${address.toString()} security for the account ${target.toString()}`,
     );
-    return await this.connect(LockFacet__factory, address.toString()).getLockForByPartition(
+    return await this.connect(IAsset__factory, address.toString()).getLockForByPartition(
       _PARTITION_ID_1,
       target.toString(),
       lockId,
@@ -825,7 +783,7 @@ export class RPCQueryAdapter {
 
   async getConfigInfo(address: EvmAddress): Promise<[string, string, number]> {
     LogService.logTrace(`Getting config info for ${address.toString()}`);
-    const configInfo = await this.connect(DiamondFacet__factory, address.toString()).getConfigInfo();
+    const configInfo = await this.connect(IAsset__factory, address.toString()).getConfigInfo();
 
     return [configInfo.resolver_.toString(), configInfo.configurationId_, Number(configInfo.version_)];
   }
@@ -837,7 +795,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting scheduled balance adjustment`);
 
     const scheduledBalanceAdjustmentInfo = await this.connect(
-      Equity__factory,
+      IAsset__factory,
       address.toString(),
     ).getScheduledBalanceAdjustment(balanceAdjustmentId);
 
@@ -853,7 +811,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting scheduled balance adjustment count`);
 
     const scheduledBalanceAdjustmentCount = await this.connect(
-      Equity__factory,
+      IAsset__factory,
       address.toString(),
     ).getScheduledBalanceAdjustmentCount();
 
@@ -863,6 +821,7 @@ export class RPCQueryAdapter {
   async getHeldAmountFor(address: EvmAddress, targetId: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting Held Amount For ${targetId}`);
 
+    const heldAmountFor = await this.connect(IAsset__factory, address.toString()).getHeldAmountFor(
     const heldAmountFor = await this.connect(HoldFacet__factory, address.toString()).getHeldAmountFor(
       targetId.toString(),
     );
@@ -874,7 +833,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting Held Amount For ${targetId} by partition ${partitionId}`);
 
     const heldAmountForByPartition = await this.connect(
-      HoldReadFacet__factory,
+      IAsset__factory,
       address.toString(),
     ).getHeldAmountForByPartition(partitionId, targetId.toString());
 
@@ -885,7 +844,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting Hold Count For ${address} by partition ${partitionId}`);
 
     const holdCountForByPartition = await this.connect(
-      HoldReadFacet__factory,
+      IAsset__factory,
       address.toString(),
     ).getHoldCountForByPartition(partitionId, targetId.toString());
 
@@ -902,7 +861,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting Holds Id For ${target} by partition ${partitionId} from ${start} to ${end}`);
 
     const holdsIdForByPartition = await this.connect(
-      HoldReadFacet__factory,
+      IAsset__factory,
       address.toString(),
     ).getHoldsIdForByPartition(partitionId, target.toString(), start, end);
 
@@ -917,7 +876,7 @@ export class RPCQueryAdapter {
   ): Promise<HoldDetails> {
     LogService.logTrace(`Getting hold details for ${targetId} id ${holdId} by partition ${partitionId}`);
 
-    const hold = await this.connect(HoldReadFacet__factory, address.toString()).getHoldForByPartition({
+    const hold = await this.connect(IAsset__factory, address.toString()).getHoldForByPartition({
       partition: partitionId,
       tokenHolder: targetId.toString(),
       holdId,
@@ -937,13 +896,13 @@ export class RPCQueryAdapter {
   async getRevocationRegistryAddress(address: EvmAddress): Promise<string> {
     LogService.logTrace(`Getting Revocation Registry Address of ${address.toString()}`);
 
-    return await this.connect(SsiManagementFacet__factory, address.toString()).getRevocationRegistryAddress();
+    return await this.connect(IAsset__factory, address.toString()).getRevocationRegistryAddress();
   }
 
   async getIssuerListCount(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting Issuer List Count of ${address.toString()}`);
 
-    const count = await this.connect(SsiManagementFacet__factory, address.toString()).getIssuerListCount();
+    const count = await this.connect(IAsset__factory, address.toString()).getIssuerListCount();
 
     return Number(count);
   }
@@ -951,19 +910,19 @@ export class RPCQueryAdapter {
   async getIssuerListMembers(address: EvmAddress, start: number, end: number): Promise<string[]> {
     LogService.logTrace(`Getting Issuer List Count of ${address.toString()} from ${start} to ${end}`);
 
-    return await this.connect(SsiManagementFacet__factory, address.toString()).getIssuerListMembers(start, end);
+    return await this.connect(IAsset__factory, address.toString()).getIssuerListMembers(start, end);
   }
 
   async isIssuer(address: EvmAddress, issuer: EvmAddress): Promise<boolean> {
     LogService.logTrace(`Getting if ${issuer.toString()} is an Issuer`);
 
-    return await this.connect(SsiManagementFacet__factory, address.toString()).isIssuer(issuer.toString());
+    return await this.connect(IAsset__factory, address.toString()).isIssuer(issuer.toString());
   }
 
   async getKycFor(address: EvmAddress, targetId: EvmAddress): Promise<Kyc> {
     LogService.logTrace(`Getting KYC details for ${targetId}}`);
 
-    const kycData = await this.connect(KycFacet__factory, address.toString()).getKycFor(targetId.toString());
+    const kycData = await this.connect(IAsset__factory, address.toString()).getKycFor(targetId.toString());
 
     return new Kyc(
       kycData.validFrom.toString(),
@@ -977,7 +936,7 @@ export class RPCQueryAdapter {
   async getKycStatusFor(address: EvmAddress, targetId: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting KYC status for ${targetId}}`);
 
-    const kycData = await this.connect(KycFacet__factory, address.toString()).getKycStatusFor(targetId.toString());
+    const kycData = await this.connect(IAsset__factory, address.toString()).getKycStatusFor(targetId.toString());
 
     return Number(kycData);
   }
@@ -990,7 +949,7 @@ export class RPCQueryAdapter {
   ): Promise<KycAccountData[]> {
     LogService.logTrace(`Getting accounts data with KYC status ${kycStatus}`);
 
-    const [accounts, kycAccountsData] = await this.connect(KycFacet__factory, address.toString()).getKycAccountsData(
+    const [accounts, kycAccountsData] = await this.connect(IAsset__factory, address.toString()).getKycAccountsData(
       kycStatus,
       start,
       end,
@@ -1011,7 +970,7 @@ export class RPCQueryAdapter {
 
   async getKycAccountsCount(address: EvmAddress, kycStatus: number): Promise<number> {
     LogService.logTrace(`Getting count of accounts with KYC status ${kycStatus}}`);
-    const kycAccountsCount = await this.connect(KycFacet__factory, address.toString()).getKycAccountsCount(kycStatus);
+    const kycAccountsCount = await this.connect(IAsset__factory, address.toString()).getKycAccountsCount(kycStatus);
 
     return Number(kycAccountsCount);
   }
@@ -1019,7 +978,7 @@ export class RPCQueryAdapter {
   async getClearedAmountFor(address: EvmAddress, targetId: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting Cleared Amount For ${targetId}`);
 
-    const clearedAmountFor = await this.connect(ClearingReadFacet__factory, address.toString()).getClearedAmountFor(
+    const clearedAmountFor = await this.connect(IAsset__factory, address.toString()).getClearedAmountFor(
       targetId.toString(),
     );
 
@@ -1034,7 +993,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting Cleared Amount For ${targetId} by partition ${partitionId}`);
 
     const clearedAmountForByPartition = await this.connect(
-      ClearingReadFacet__factory,
+      IAsset__factory,
       address.toString(),
     ).getClearedAmountForByPartition(partitionId, targetId.toString());
 
@@ -1050,7 +1009,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting Clearing Count For ${address} by partition ${partitionId}`);
 
     const clearingCountForByPartition = await this.connect(
-      ClearingReadFacet__factory,
+      IAsset__factory,
       address.toString(),
     ).getClearingCountForByPartition(
       partitionId,
@@ -1072,7 +1031,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting Clearings Id For ${target} by partition ${partitionId} from ${start} to ${end}`);
 
     const clearingsIdForByPartition = await this.connect(
-      ClearingReadFacet__factory,
+      IAsset__factory,
       address.toString(),
     ).getClearingsIdForByPartition(
       partitionId,
@@ -1096,7 +1055,7 @@ export class RPCQueryAdapter {
     );
 
     const clearing = await this.connect(
-      ClearingHoldCreationFacet__factory,
+      IAsset__factory,
       address.toString(),
     ).getClearingCreateHoldForByPartition(partitionId, targetId.toString(), clearingId);
 
@@ -1121,7 +1080,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting Clearing Redeem details for ${targetId} id ${clearingId} by partition ${partitionId}`);
 
     const clearing = await this.connect(
-      ClearingRedeemFacet__factory,
+      IAsset__factory,
       address.toString(),
     ).getClearingRedeemForByPartition(partitionId, targetId.toString(), clearingId);
 
@@ -1144,7 +1103,7 @@ export class RPCQueryAdapter {
     );
 
     const clearing = await this.connect(
-      ClearingTransferFacet__factory,
+      IAsset__factory,
       address.toString(),
     ).getClearingTransferForByPartition(partitionId, targetId.toString(), clearingId);
 
@@ -1160,7 +1119,7 @@ export class RPCQueryAdapter {
   async isClearingActivated(address: EvmAddress): Promise<boolean> {
     LogService.logTrace(`Getting if clearing is activated to security ${address.toString()}`);
 
-    return await this.connect(ClearingActionsFacet__factory, address.toString()).isClearingActivated();
+    return await this.connect(IAsset__factory, address.toString()).isClearingActivated();
   }
 
   async isExternalPause(address: EvmAddress, externalPauseAddress: EvmAddress): Promise<boolean> {
@@ -1168,7 +1127,7 @@ export class RPCQueryAdapter {
       `Checking if the address ${externalPauseAddress.toString()} is a external pause for the security: ${address.toString()}`,
     );
 
-    return await this.connect(ExternalPauseManagementFacet__factory, address.toString()).isExternalPause(
+    return await this.connect(IAsset__factory, address.toString()).isExternalPause(
       externalPauseAddress.toString(),
     );
   }
@@ -1177,7 +1136,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting External Pauses Count for ${address.toString()}`);
 
     const getExternalPausesCount = await this.connect(
-      ExternalPauseManagementFacet__factory,
+      IAsset__factory,
       address.toString(),
     ).getExternalPausesCount();
 
@@ -1187,7 +1146,7 @@ export class RPCQueryAdapter {
   async getExternalPausesMembers(address: EvmAddress, start: number, end: number): Promise<string[]> {
     LogService.logTrace(`Getting External Pauses Members For security ${address.toString()} from ${start} to ${end}`);
 
-    return await this.connect(ExternalPauseManagementFacet__factory, address.toString()).getExternalPausesMembers(
+    return await this.connect(IAsset__factory, address.toString()).getExternalPausesMembers(
       start,
       end,
     );
@@ -1204,7 +1163,7 @@ export class RPCQueryAdapter {
       `Checking if the address ${externalControlListAddress.toString()} is a external control list for the security: ${address.toString()}`,
     );
 
-    return await this.connect(ExternalControlListManagementFacet__factory, address.toString()).isExternalControlList(
+    return await this.connect(IAsset__factory, address.toString()).isExternalControlList(
       externalControlListAddress.toString(),
     );
   }
@@ -1213,7 +1172,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting External Control Lists Count for ${address.toString()}`);
 
     const getExternalPausesCount = await this.connect(
-      ExternalControlListManagementFacet__factory,
+      IAsset__factory,
       address.toString(),
     ).getExternalControlListsCount();
 
@@ -1226,7 +1185,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ExternalControlListManagementFacet__factory,
+      IAsset__factory,
       address.toString(),
     ).getExternalControlListsMembers(start, end);
   }
@@ -1252,7 +1211,7 @@ export class RPCQueryAdapter {
       `Checking if the address ${externalKycListAddress.toString()} is a external kyc list for the security: ${address.toString()}`,
     );
 
-    return await this.connect(ExternalKycListManagementFacet__factory, address.toString()).isExternalKycList(
+    return await this.connect(IAsset__factory, address.toString()).isExternalKycList(
       externalKycListAddress.toString(),
     );
   }
@@ -1261,7 +1220,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting External Kyc Lists Count for ${address.toString()}`);
 
     const getExternalKycListsCount = await this.connect(
-      ExternalKycListManagementFacet__factory,
+      IAsset__factory,
       address.toString(),
     ).getExternalKycListsCount();
 
@@ -1273,7 +1232,7 @@ export class RPCQueryAdapter {
       `Getting External Kyc Lists Members For security ${address.toString()} from ${start} to ${end}`,
     );
 
-    return await this.connect(ExternalKycListManagementFacet__factory, address.toString()).getExternalKycListsMembers(
+    return await this.connect(IAsset__factory, address.toString()).getExternalKycListsMembers(
       start,
       end,
     );
@@ -1284,7 +1243,7 @@ export class RPCQueryAdapter {
       `Checking if the address ${targetId.toString()} has the status '${kycStatus}' for the contract: ${address.toString()}`,
     );
 
-    return await this.connect(ExternalKycListManagementFacet__factory, address.toString()).isExternallyGranted(
+    return await this.connect(IAsset__factory, address.toString()).isExternallyGranted(
       targetId.toString(),
       kycStatus,
     );
@@ -1293,7 +1252,7 @@ export class RPCQueryAdapter {
   async isInternalKycActivated(address: EvmAddress): Promise<boolean> {
     LogService.logTrace(`Checking if the internal kyc is activated for the security: ${address.toString()}`);
 
-    return await this.connect(KycFacet__factory, address.toString()).isInternalKycActivated();
+    return await this.connect(IAsset__factory, address.toString()).isInternalKycActivated();
   }
 
   async getKycStatusMock(address: EvmAddress, targetId: EvmAddress): Promise<number> {
@@ -1309,19 +1268,19 @@ export class RPCQueryAdapter {
   async onchainID(address: EvmAddress): Promise<string> {
     LogService.logTrace(`Getting OnchainID for security ${address.toString()}`);
 
-    return await this.connect(ERC3643ReadFacet__factory, address.toString()).onchainID();
+    return await this.connect(IAsset__factory, address.toString()).onchainID();
   }
 
   async identityRegistry(address: EvmAddress): Promise<string> {
     LogService.logTrace(`Getting IdentityRegistry for security ${address.toString()}`);
 
-    return await this.connect(ERC3643ReadFacet__factory, address.toString()).identityRegistry();
+    return await this.connect(IAsset__factory, address.toString()).identityRegistry();
   }
 
   async compliance(address: EvmAddress): Promise<string> {
     LogService.logTrace(`Getting Compliance for security ${address.toString()}`);
 
-    return await this.connect(ComplianceFacet__factory, address.toString()).compliance();
+    return await this.connect(IAsset__factory, address.toString()).compliance();
   }
 
   async getFrozenPartialTokens(address: EvmAddress, targetId: EvmAddress): Promise<number> {
@@ -1329,7 +1288,7 @@ export class RPCQueryAdapter {
       `Getting frozen partial tokens for account ${targetId}} for the mock contract ${address.toString()}`,
     );
 
-    const frozenTokens = await this.connect(FreezeFacet__factory, address.toString()).getFrozenTokens(
+    const frozenTokens = await this.connect(IAsset__factory, address.toString()).getFrozenTokens(
       targetId.toString(),
     );
 
@@ -1339,7 +1298,7 @@ export class RPCQueryAdapter {
   async isAddressRecovered(address: EvmAddress, targetId: EvmAddress): Promise<boolean> {
     LogService.logTrace(`Getting recovery status of ${targetId}`);
 
-    const isAddressRecovered = await this.connect(ERC3643ReadFacet__factory, address.toString()).isAddressRecovered(
+    const isAddressRecovered = await this.connect(IAsset__factory, address.toString()).isAddressRecovered(
       targetId.toString(),
     );
 
@@ -1353,7 +1312,7 @@ export class RPCQueryAdapter {
     end: number,
   ): Promise<string[]> {
     LogService.logTrace(`Getting token holders at snapshot ${snapshotId} for security ${address.toString()}`);
-    return await this.connect(SnapshotsFacet__factory, address.toString()).getTokenHoldersAtSnapshot(
+    return await this.connect(IAsset__factory, address.toString()).getTokenHoldersAtSnapshot(
       snapshotId,
       start,
       end,
@@ -1363,7 +1322,7 @@ export class RPCQueryAdapter {
   async getTotalTokenHoldersAtSnapshot(address: EvmAddress, snapshotId: number): Promise<number> {
     LogService.logTrace(`Getting total token holders at snapshot ${snapshotId} for security ${address.toString()}`);
 
-    const total = await this.connect(SnapshotsFacet__factory, address.toString()).getTotalTokenHoldersAtSnapshot(
+    const total = await this.connect(IAsset__factory, address.toString()).getTotalTokenHoldersAtSnapshot(
       snapshotId,
     );
 
@@ -1380,7 +1339,7 @@ export class RPCQueryAdapter {
       `Getting balances at snapshot ${snapshotId} for security ${address.toString()}, page ${pageIndex}, length ${pageLength}`,
     );
 
-    return await this.connect(SnapshotsFacet__factory, address.toString()).balancesOfAtSnapshot(
+    return await this.connect(IAsset__factory, address.toString()).balancesOfAtSnapshot(
       snapshotId,
       pageIndex,
       pageLength,
@@ -1389,13 +1348,13 @@ export class RPCQueryAdapter {
 
   async getCouponHolders(address: EvmAddress, couponId: number, start: number, end: number): Promise<string[]> {
     LogService.logTrace(`Getting coupon holders for coupon ${couponId} for security ${address.toString()}`);
-    return await this.connect(Coupon__factory, address.toString()).getCouponHolders(couponId, start, end);
+    return await this.connect(IAsset__factory, address.toString()).getCouponHolders(couponId, start, end);
   }
 
   async getTotalCouponHolders(address: EvmAddress, couponId: number): Promise<number> {
     LogService.logTrace(`Getting total coupon holders for coupon ${couponId} for security ${address.toString()}`);
 
-    const total = await this.connect(Coupon__factory, address.toString()).getTotalCouponHolders(couponId);
+    const total = await this.connect(IAsset__factory, address.toString()).getTotalCouponHolders(couponId);
 
     return Number(total);
   }
@@ -1403,7 +1362,7 @@ export class RPCQueryAdapter {
   async getCouponFromOrderedListAt(address: EvmAddress, pos: number): Promise<number> {
     LogService.logTrace(`Getting coupon from ordered list at position ${pos} for security ${address.toString()}`);
 
-    const couponId = await this.connect(Coupon__factory, address.toString()).getCouponFromOrderedListAt(pos);
+    const couponId = await this.connect(IAsset__factory, address.toString()).getCouponFromOrderedListAt(pos);
 
     return Number(couponId);
   }
@@ -1415,7 +1374,7 @@ export class RPCQueryAdapter {
 
     // If pagination parameters are provided, use paginated call
     if (pageIndex !== undefined && pageLength !== undefined) {
-      const couponIds = await this.connect(Coupon__factory, address.toString()).getCouponsOrderedList(
+      const couponIds = await this.connect(IAsset__factory, address.toString()).getCouponsOrderedList(
         pageIndex,
         pageLength,
       );
@@ -1423,53 +1382,53 @@ export class RPCQueryAdapter {
     }
 
     // Otherwise get all coupons (simulate by getting first page with large length)
-    const couponIds = await this.connect(Coupon__factory, address.toString()).getCouponsOrderedList(0, 1000);
+    const couponIds = await this.connect(IAsset__factory, address.toString()).getCouponsOrderedList(0, 1000);
     return couponIds.map((id: bigint) => Number(id));
   }
 
   async getCouponsOrderedListTotal(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting coupons ordered list total for security ${address.toString()}`);
 
-    const total = await this.connect(Coupon__factory, address.toString()).getCouponsOrderedListTotal();
+    const total = await this.connect(IAsset__factory, address.toString()).getCouponsOrderedListTotal();
 
     return Number(total);
   }
 
   async getDividendHolders(address: EvmAddress, dividendId: number, start: number, end: number): Promise<string[]> {
     LogService.logTrace(`Getting dividend holders for dividend ${dividendId} for security ${address.toString()}`);
-    return await this.connect(Dividend__factory, address.toString()).getDividendHolders(dividendId, start, end);
+    return await this.connect(IAsset__factory, address.toString()).getDividendHolders(dividendId, start, end);
   }
 
   async getTotalDividendHolders(address: EvmAddress, dividendId: number): Promise<number> {
     LogService.logTrace(`Getting total dividend holders for dividend ${dividendId} for security ${address.toString()}`);
 
-    const total = await this.connect(Dividend__factory, address.toString()).getTotalDividendHolders(dividendId);
+    const total = await this.connect(IAsset__factory, address.toString()).getTotalDividendHolders(dividendId);
 
     return Number(total);
   }
 
   async getVotingHolders(address: EvmAddress, voteId: number, start: number, end: number): Promise<string[]> {
     LogService.logTrace(`Getting voting holders for vote ${voteId} for security ${address.toString()}`);
-    return await this.connect(VotingFacet__factory, address.toString()).getVotingHolders(voteId, start, end);
+    return await this.connect(IAsset__factory, address.toString()).getVotingHolders(voteId, start, end);
   }
 
   async getTotalVotingHolders(address: EvmAddress, voteId: number): Promise<number> {
     LogService.logTrace(`Getting total voting holders for vote ${voteId} for security ${address.toString()}`);
 
-    const total = await this.connect(VotingFacet__factory, address.toString()).getTotalVotingHolders(voteId);
+    const total = await this.connect(IAsset__factory, address.toString()).getTotalVotingHolders(voteId);
 
     return Number(total);
   }
 
   async getSecurityHolders(address: EvmAddress, start: number, end: number): Promise<string[]> {
     LogService.logTrace(`Getting security holders for security ${address.toString()}`);
-    return await this.connect(Security__factory, address.toString()).getSecurityHolders(start, end);
+    return await this.connect(IAsset__factory, address.toString()).getSecurityHolders(start, end);
   }
 
   async getTotalSecurityHolders(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting total security holders for security ${address.toString()}`);
 
-    const total = await this.connect(Security__factory, address.toString()).getTotalSecurityHolders();
+    const total = await this.connect(IAsset__factory, address.toString()).getTotalSecurityHolders();
 
     return Number(total);
   }
@@ -1484,7 +1443,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(
       `Checking if the address ${proceedRecipient.toString()} is a proceed recipient for the security: ${address.toString()}`,
     );
-    return await this.connect(ProceedRecipientsFacet__factory, address.toString()).isProceedRecipient(
+    return await this.connect(IAsset__factory, address.toString()).isProceedRecipient(
       proceedRecipient.toString(),
     );
   }
@@ -1493,21 +1452,21 @@ export class RPCQueryAdapter {
     LogService.logTrace(
       `Getting proceed recipient data for the address ${proceedRecipient.toString()} for the security: ${address.toString()}`,
     );
-    return await this.connect(ProceedRecipientsFacet__factory, address.toString()).getProceedRecipientData(
+    return await this.connect(IAsset__factory, address.toString()).getProceedRecipientData(
       proceedRecipient.toString(),
     );
   }
 
   async getProceedRecipientsCount(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting proceedRecipients count for the security: ${address.toString()}`);
-    return Number(await this.connect(ProceedRecipientsFacet__factory, address.toString()).getProceedRecipientsCount());
+    return Number(await this.connect(IAsset__factory, address.toString()).getProceedRecipientsCount());
   }
 
   async getProceedRecipients(address: EvmAddress, page: number, pageLength: number): Promise<string[]> {
     LogService.logTrace(
       `Getting proceedRecipients from ${page} to ${pageLength} for the security: ${address.toString()}`,
     );
-    return await this.connect(ProceedRecipientsFacet__factory, address.toString()).getProceedRecipients(
+    return await this.connect(IAsset__factory, address.toString()).getProceedRecipients(
       page,
       pageLength,
     );
@@ -1515,7 +1474,7 @@ export class RPCQueryAdapter {
 
   async actionContentHashExists(address: EvmAddress, contentHash: string): Promise<boolean> {
     LogService.logTrace(`Getting actionContentHashExists for ${contentHash} for the security: ${address.toString()}`);
-    return await this.connect(CorporateActionsFacet__factory, address.toString()).actionContentHashExists(contentHash);
+    return await this.connect(IAsset__factory, address.toString()).actionContentHashExists(contentHash);
   }
 
   async getCorporateAction(
@@ -1523,13 +1482,13 @@ export class RPCQueryAdapter {
     corporateActionId: string,
   ): Promise<{ actionType: string; actionTypeId: number; data: string; isDisabled: boolean }> {
     LogService.logTrace(`Getting corporate action ${corporateActionId} for security: ${address.toString()}`);
-    const result = await this.connect(CorporateActionsFacet__factory, address.toString()).getCorporateAction(
+    const result = await this.connect(IAsset__factory, address.toString()).getCorporateAction(
       corporateActionId,
     );
 
     return {
       actionType: result.actionType_,
-      actionTypeId: Number(result.actionTypeId_),
+      actionTypeId: Number(result.actionIdByType_),
       data: result.data_,
       isDisabled: result.isDisabled_,
     };
@@ -1541,14 +1500,14 @@ export class RPCQueryAdapter {
     end: number,
   ): Promise<{ actionTypes: string[]; actionTypeIds: number[]; datas: string[]; isDisabled: boolean[] }> {
     LogService.logTrace(`Getting corporate actions from ${start} to ${end} for security: ${address.toString()}`);
-    const result = await this.connect(CorporateActionsFacet__factory, address.toString()).getCorporateActions(
+    const result = await this.connect(IAsset__factory, address.toString()).getCorporateActions(
       start,
       end,
     );
 
     return {
       actionTypes: result.actionTypes_,
-      actionTypeIds: result.actionTypeIds_.map((id) => Number(id)),
+      actionTypeIds: result.actionIdByType_.map((id) => Number(id)),
       datas: result.datas_,
       isDisabled: result.isDisabled_,
     };
@@ -1563,7 +1522,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(
       `Getting corporate actions of type ${actionType} from ${start} to ${end} for security: ${address.toString()}`,
     );
-    const result = await this.connect(CorporateActionsFacet__factory, address.toString()).getCorporateActionsByType(
+    const result = await this.connect(IAsset__factory, address.toString()).getCorporateActionsByType(
       actionType,
       start,
       end,
@@ -1571,14 +1530,14 @@ export class RPCQueryAdapter {
 
     return {
       actionTypes: result.actionTypes_,
-      actionTypeIds: result.actionTypeIds_.map((id) => Number(id)),
+      actionTypeIds: result.actionIdByType_.map((id) => Number(id)),
       datas: result.datas_,
       isDisabled: result.isDisabled_,
     };
   }
 
   async getRate(address: EvmAddress): Promise<[bigint, number]> {
-    const result = await this.connect(FixedRate__factory, address.toString()).getRate();
+    const result = await this.connect(IAsset__factory, address.toString()).getRate();
     return [result.rate_, Number(result.decimals_)];
   }
 
@@ -1606,13 +1565,13 @@ export class RPCQueryAdapter {
     kpi: EvmAddress,
   ): Promise<{ value: bigint; exists: boolean }> {
     LogService.logTrace(`Getting latest KPI data for the security: ${address.toString()}`);
-    const result = await this.connect(Kpis__factory, address.toString()).getLatestKpiData(from, to, kpi.toString());
+    const result = await this.connect(IAsset__factory, address.toString()).getLatestKpiData(from, to, kpi.toString());
     return { value: result[0], exists: result[1] };
   }
 
   async getMinDate(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting min date for the security: ${address.toString()}`);
-    const result = await this.connect(Kpis__factory, address.toString()).getMinDate();
+    const result = await this.connect(IAsset__factory, address.toString()).getMinDate();
     return Number(result);
   }
 
@@ -1630,13 +1589,13 @@ export class RPCQueryAdapter {
 
   async isCheckPointDate(address: EvmAddress, date: number, project: EvmAddress): Promise<boolean> {
     LogService.logTrace(`Checking if date ${date.toString()} is a checkpoint date for project ${project.toString()}`);
-    return await this.connect(Kpis__factory, address.toString()).isCheckPointDate(date, project.toString());
+    return await this.connect(IAsset__factory, address.toString()).isCheckPointDate(date, project.toString());
   }
 
   async scheduledCouponListingCount(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting scheduled coupon listing count for security: ${address.toString()}`);
     const result = await this.connect(
-      ScheduledCouponListingFacet__factory,
+      IAsset__factory,
       address.toString(),
     ).scheduledCouponListingCount();
     return Number(result);
@@ -1644,7 +1603,7 @@ export class RPCQueryAdapter {
 
   async getScheduledCouponListing(address: EvmAddress, pageIndex: number, pageLength: number): Promise<any> {
     LogService.logTrace(`Getting scheduled coupon listing for security: ${address.toString()}`);
-    return await this.connect(ScheduledCouponListingFacet__factory, address.toString()).getScheduledCouponListing(
+    return await this.connect(IAsset__factory, address.toString()).getScheduledCouponListing(
       pageIndex,
       pageLength,
     );
@@ -1652,13 +1611,13 @@ export class RPCQueryAdapter {
 
   async getNominalValue(address: EvmAddress): Promise<BigDecimal> {
     LogService.logTrace(`Getting nominal value for security: ${address.toString()}`);
-    const result = await this.connect(NominalValue__factory, address.toString()).getNominalValue();
+    const result = await this.connect(IAsset__factory, address.toString()).getNominalValue();
     return new BigDecimal(result.toString());
   }
 
   async getNominalValueDecimals(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting nominal value decimals for security: ${address.toString()}`);
-    const result = await this.connect(NominalValue__factory, address.toString()).getNominalValueDecimals();
+    const result = await this.connect(IAsset__factory, address.toString()).getNominalValueDecimals();
     return Number(result);
   }
 
@@ -1666,7 +1625,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting amortization: ${amortizationId}`);
 
     const { registeredAmortization_, isDisabled_ } = await this.connect(
-      AmortizationFacet__factory,
+      IAsset__factory,
       address.toString(),
     ).getAmortization(amortizationId);
 
@@ -1684,7 +1643,7 @@ export class RPCQueryAdapter {
   async getAmortizationFor(address: EvmAddress, target: EvmAddress, amortizationId: number): Promise<AmortizationFor> {
     LogService.logTrace(`Getting amortization for: ${target.toString()}, amortizationId: ${amortizationId}`);
 
-    const af = await this.connect(AmortizationFacet__factory, address.toString()).getAmortizationFor(
+    const af = await this.connect(IAsset__factory, address.toString()).getAmortizationFor(
       amortizationId,
       target.toString(),
     );
@@ -1714,7 +1673,7 @@ export class RPCQueryAdapter {
   ): Promise<AmortizationFor[]> {
     LogService.logTrace(`Getting amortizations for: amortizationId=${amortizationId}`);
 
-    const result = await this.connect(AmortizationFacet__factory, address.toString()).getAmortizationsFor(
+    const result = await this.connect(IAsset__factory, address.toString()).getAmortizationsFor(
       amortizationId,
       start,
       end,
@@ -1743,7 +1702,7 @@ export class RPCQueryAdapter {
   async getAmortizationsCount(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting amortizations count`);
 
-    const count = await this.connect(AmortizationFacet__factory, address.toString()).getAmortizationsCount();
+    const count = await this.connect(IAsset__factory, address.toString()).getAmortizationsCount();
 
     return Number(count);
   }
@@ -1756,7 +1715,7 @@ export class RPCQueryAdapter {
   ): Promise<string[]> {
     LogService.logTrace(`Getting amortization holders for amortizationId: ${amortizationId}`);
 
-    return await this.connect(AmortizationFacet__factory, address.toString()).getAmortizationHolders(
+    return await this.connect(IAsset__factory, address.toString()).getAmortizationHolders(
       amortizationId,
       start,
       end,
@@ -1766,7 +1725,7 @@ export class RPCQueryAdapter {
   async getTotalAmortizationHolders(address: EvmAddress, amortizationId: number): Promise<number> {
     LogService.logTrace(`Getting total amortization holders for amortizationId: ${amortizationId}`);
 
-    const total = await this.connect(AmortizationFacet__factory, address.toString()).getTotalAmortizationHolders(
+    const total = await this.connect(IAsset__factory, address.toString()).getTotalAmortizationHolders(
       amortizationId,
     );
 
@@ -1783,7 +1742,7 @@ export class RPCQueryAdapter {
     );
 
     const af = await this.connect(
-      AmortizationFacet__factory,
+      IAsset__factory,
       address.toString(),
     ).getAmortizationFor(amortizationId, tokenHolder.toString());
 
@@ -1798,7 +1757,7 @@ export class RPCQueryAdapter {
   ): Promise<string[]> {
     LogService.logTrace(`Getting active amortization hold holders for amortizationId: ${amortizationId}`);
 
-    return await this.connect(AmortizationFacet__factory, address.toString()).getAmortizationActiveHolders(
+    return await this.connect(IAsset__factory, address.toString()).getAmortizationActiveHolders(
       amortizationId,
       start,
       end,
@@ -1809,7 +1768,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting total active amortization hold holders for amortizationId: ${amortizationId}`);
 
     const total = await this.connect(
-      AmortizationFacet__factory,
+      IAsset__factory,
       address.toString(),
     ).getTotalAmortizationActiveHolders(amortizationId);
 
@@ -1819,7 +1778,7 @@ export class RPCQueryAdapter {
   async getActiveAmortizationIds(address: EvmAddress, start: number, end: number): Promise<number[]> {
     LogService.logTrace(`Getting active amortization IDs`);
 
-    const ids = await this.connect(AmortizationFacet__factory, address.toString()).getActiveAmortizationIds(start, end);
+    const ids = await this.connect(IAsset__factory, address.toString()).getActiveAmortizationIds(start, end);
 
     return ids.map(Number);
   }
@@ -1827,7 +1786,7 @@ export class RPCQueryAdapter {
   async getTotalActiveAmortizationIds(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting total active amortization IDs`);
 
-    const total = await this.connect(AmortizationFacet__factory, address.toString()).getTotalActiveAmortizationIds();
+    const total = await this.connect(IAsset__factory, address.toString()).getTotalActiveAmortizationIds();
 
     return Number(total);
   }

@@ -1,13 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ContractId } from "@hiero-ledger/sdk";
-import { ethers } from "ethers";
-import {
-  ERC1410IssuerFacet__factory,
-  ERC3643OperationsFacet__factory,
-  ERC3643BatchFacet__factory,
-  Bond__factory,
-} from "@hashgraph/asset-tokenization-contracts";
+import { IAsset__factory } from "@hashgraph/asset-tokenization-contracts";
 import { _PARTITION_ID_1, GAS } from "@core/Constants";
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import EvmAddress from "@domain/context/contract/EvmAddress";
@@ -34,7 +28,7 @@ export class IssuanceOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC1410IssuerFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "issueByPartition",
       [issueData],
       GAS.ISSUE,
@@ -50,7 +44,7 @@ export class IssuanceOperations {
     LogService.logTrace(`Minting ${amount} ${security} to account: ${target.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC3643OperationsFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "mint",
       [target.toString(), amount.toHexString()],
       GAS.MINT,
@@ -66,7 +60,7 @@ export class IssuanceOperations {
     LogService.logTrace(`Batch minting ${amountList.length} tokens to ${toList.map((item) => item.toString())}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC3643BatchFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "batchMint",
       [toList.map((addr) => addr.toString()), amountList.map((amount) => amount.toBigInt())],
       GAS.BATCH_MINT,
@@ -83,7 +77,7 @@ export class IssuanceOperations {
     LogService.logTrace(`Redeeming at maturity by partition to address ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      new ethers.Interface(Bond__factory.abi as ethers.InterfaceAbi),
+      IAsset__factory.createInterface(),
       "redeemAtMaturityByPartition",
       [sourceId.toString(), partitionId, amount.toBigInt()],
       GAS.REDEEM_AT_MATURITY_BY_PARTITION_GAS,
@@ -98,7 +92,7 @@ export class IssuanceOperations {
     LogService.logTrace(`Redeeming at maturity by partition to address ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      new ethers.Interface(Bond__factory.abi as ethers.InterfaceAbi),
+      IAsset__factory.createInterface(),
       "fullRedeemAtMaturity",
       [sourceId.toString()],
       GAS.FULL_REDEEM_AT_MATURITY_GAS,

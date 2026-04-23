@@ -1,13 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ContractId } from "@hiero-ledger/sdk";
-import {
-  ERC1410TokenHolderFacet__factory,
-  ERC1410ManagementFacet__factory,
-  ERC3643OperationsFacet__factory,
-  ERC3643BatchFacet__factory,
-  TransferAndLockFacet__factory,
-} from "@hashgraph/asset-tokenization-contracts";
+import { IAsset__factory } from "@hashgraph/asset-tokenization-contracts";
 import { _PARTITION_ID_1, GAS } from "@core/Constants";
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import EvmAddress from "@domain/context/contract/EvmAddress";
@@ -32,7 +26,7 @@ export class TransferOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC1410TokenHolderFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "transferByPartition",
       [_PARTITION_ID_1, basicTransferInfo, "0x"],
       GAS.TRANSFER,
@@ -51,7 +45,7 @@ export class TransferOperations {
     );
     return this.executor.executeContractCall(
       securityId.toString(),
-      TransferAndLockFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "transferAndLockByPartition",
       [_PARTITION_ID_1, targetId.toString(), amount.toHexString(), "0x", expirationDate.toHexString()],
       GAS.TRANSFER_AND_LOCK,
@@ -66,7 +60,7 @@ export class TransferOperations {
     LogService.logTrace(`Redeeming ${amount} securities from account ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC1410TokenHolderFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "redeemByPartition",
       [_PARTITION_ID_1, amount.toHexString(), "0x"],
       GAS.REDEEM,
@@ -82,7 +76,7 @@ export class TransferOperations {
     LogService.logTrace(`Burning ${amount} securities from account ${source.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC3643OperationsFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "burn",
       [source.toString(), amount.toHexString()],
       GAS.BURN,
@@ -101,7 +95,7 @@ export class TransferOperations {
     );
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC1410ManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "controllerTransferByPartition",
       [_PARTITION_ID_1, sourceId.toString(), targetId.toString(), amount.toHexString(), "0x", "0x"],
       GAS.CONTROLLER_TRANSFER,
@@ -120,7 +114,7 @@ export class TransferOperations {
     );
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC3643OperationsFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "forcedTransfer",
       [source.toString(), target.toString(), amount.toHexString()],
       GAS.FORCED_TRANSFER,
@@ -136,7 +130,7 @@ export class TransferOperations {
     LogService.logTrace(`Force redeem ${amount} tokens from account ${sourceId.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC1410ManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "controllerRedeemByPartition",
       [_PARTITION_ID_1, sourceId.toString(), amount.toHexString(), "0x", "0x"],
       GAS.CONTROLLER_REDEEM,
@@ -164,7 +158,7 @@ export class TransferOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC1410ManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "operatorTransferByPartition",
       [operatorTransferData],
       GAS.TRANSFER_OPERATOR,
@@ -182,7 +176,7 @@ export class TransferOperations {
     );
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC3643BatchFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "batchTransfer",
       [toList.map((addr) => addr.toString()), amountList.map((amount) => amount.toBigInt())],
       GAS.BATCH_TRANSFER,
@@ -201,7 +195,7 @@ export class TransferOperations {
     );
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC3643BatchFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "batchForcedTransfer",
       [
         fromList.map((addr) => addr.toString()),
@@ -221,7 +215,7 @@ export class TransferOperations {
     LogService.logTrace(`Batch burning ${amountList.length} tokens from ${targetList.map((item) => item.toString())}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC3643BatchFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "batchBurn",
       [targetList.map((addr) => addr.toString()), amountList.map((amount) => amount.toBigInt())],
       GAS.BATCH_BURN,
