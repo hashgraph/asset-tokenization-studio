@@ -152,6 +152,14 @@ describe("ERC1594 Tests", () => {
     beforeEach(async () => {
       await loadFixture(deploySecurityFixtureSinglePartition);
     });
+    describe("Cap", () => {
+      it("GIVEN a max supply WHEN issue more than the max supply THEN transaction fails with MaxSupplyReached", async () => {
+        // add to list fails
+        await expect(
+          asset.connect(signer_A).issue(signer_E.address, MAX_SUPPLY + 1, DATA),
+        ).to.be.revertedWithCustomError(asset, "MaxSupplyReached");
+      });
+    });
 
     describe("ControlList", () => {
       it("GIVEN blocked accounts (sender, to, from) WHEN transfer THEN transaction fails with AccountIsBlocked", async () => {
@@ -192,6 +200,37 @@ describe("ERC1594 Tests", () => {
         await expect(
           asset.connect(signer_C).transferFromWithData(signer_E.address, signer_D.address, AMOUNT, DATA),
         ).to.be.revertedWithCustomError(asset, "AccountIsBlocked");
+      });
+
+      it("GIVEN blocked accounts (to) USING WHITELIST WHEN issue THEN transaction fails with AccountIsBlocked", async () => {
+        // First deploy a new token using white list
+        const newTokenFixture = await deployEquityTokenFixture({
+          equityDataParams: {
+            securityData: {
+              internalKycActivated: true,
+              isWhiteList: true,
+            },
+          },
+        });
+
+        // accounts are blacklisted by default (white list)
+        const newAccessControl = asset.attach(newTokenFixture.diamond.target).connect(signer_A) as IAsset;
+        await newAccessControl.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+        await newAccessControl.grantRole(ATS_ROLES._KYC_ROLE, signer_B.address);
+        await newAccessControl.grantRole(ATS_ROLES._SSI_MANAGER_ROLE, signer_A.address);
+
+        const newSsiManagement = asset.attach(newTokenFixture.diamond.target).connect(signer_A) as IAsset;
+        await newSsiManagement.addIssuer(signer_E.address);
+
+        const newKycFacet = asset.attach(newTokenFixture.diamond.target).connect(signer_B) as IAsset;
+        await newKycFacet.grantKyc(signer_E.address, EMPTY_STRING, ZERO, MAX_UINT256, signer_E.address);
+
+        // issue fails
+        const newErc1594 = asset.attach(newTokenFixture.diamond.target).connect(signer_A) as IAsset;
+        await expect(newErc1594.issue(signer_E.address, AMOUNT, DATA)).to.be.revertedWithCustomError(
+          asset,
+          "AccountIsBlocked",
+        );
       });
 
       it("GIVEN blocked accounts (sender, from) WHEN redeem THEN transaction fails with AccountIsBlocked", async () => {
@@ -271,6 +310,14 @@ describe("ERC1594 Tests", () => {
         ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
       });
 
+      it("GIVEN a paused Token WHEN issue THEN transaction fails with TokenIsPaused", async () => {
+        // issue fails
+        await expect(asset.connect(signer_C).issue(signer_E.address, AMOUNT, DATA)).to.be.revertedWithCustomError(
+          asset,
+          "TokenIsPaused",
+        );
+      });
+
       it("GIVEN a paused Token WHEN redeem THEN transaction fails with TokenIsPaused", async () => {
         // transfer with data fails
         await expect(asset.connect(signer_C).redeem(AMOUNT, DATA)).to.be.revertedWithCustomError(
@@ -282,6 +329,26 @@ describe("ERC1594 Tests", () => {
         await expect(asset.connect(signer_C).redeemFrom(signer_E.address, AMOUNT, DATA)).to.be.revertedWithCustomError(
           asset,
           "TokenIsPaused",
+        );
+      });
+    });
+
+    describe("AccessControl", () => {
+      it("GIVEN an account without issuer role WHEN issue THEN transaction fails with AccountHasNoRole", async () => {
+        // add to list fails
+        await expect(asset.connect(signer_B).issue(signer_E.address, AMOUNT, DATA)).to.be.revertedWithCustomError(
+          asset,
+          "AccountHasNoRoles",
+        );
+      });
+    });
+
+    describe("AccessControl", () => {
+      it("GIVEN an account without issuer role WHEN issue THEN transaction fails with AccountHasNoRole", async () => {
+        // add to list fails
+        await expect(asset.connect(signer_B).issue(signer_E.address, AMOUNT, DATA)).to.be.revertedWithCustomError(
+          asset,
+          "AccountHasNoRoles",
         );
       });
     });
