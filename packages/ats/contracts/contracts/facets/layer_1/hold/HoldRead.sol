@@ -8,11 +8,6 @@ import { HoldStorageWrapper } from "../../../domain/asset/HoldStorageWrapper.sol
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 abstract contract HoldRead is IHoldRead {
-    function getHeldAmountFor(address _tokenHolder) external view override returns (uint256 amount_) {
-        return
-            HoldStorageWrapper.getHeldAmountForAdjustedAt(_tokenHolder, TimeTravelStorageWrapper.getBlockTimestamp());
-    }
-
     function getHeldAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
@@ -62,11 +57,5 @@ abstract contract HoldRead is IHoldRead {
                 _holdIdentifier,
                 TimeTravelStorageWrapper.getBlockTimestamp()
             );
-    }
-
-    function getHoldThirdParty(
-        IHoldTypes.HoldIdentifier calldata _holdIdentifier
-    ) external view override returns (address) {
-        return HoldStorageWrapper.getHoldThirdParty(_holdIdentifier);
     }
 }

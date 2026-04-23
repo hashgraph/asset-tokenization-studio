@@ -81,6 +81,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "NominalValueFacet",
 
   // Hold
+  "HoldFacet",
   "HoldReadFacet",
   "HoldManagementFacet",
   "HoldTokenHolderFacet",

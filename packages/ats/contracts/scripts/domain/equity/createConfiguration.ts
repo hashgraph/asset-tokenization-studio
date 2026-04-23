@@ -76,6 +76,7 @@ const EQUITY_FACETS = [
   "ClearingReadFacet",
   "ClearingRedeemFacet",
   "ClearingTransferFacet",
+  "HoldFacet",
   "HoldManagementFacet",
   "HoldReadFacet",
   "HoldTokenHolderFacet",
