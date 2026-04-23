@@ -822,7 +822,6 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting Held Amount For ${targetId}`);
 
     const heldAmountFor = await this.connect(IAsset__factory, address.toString()).getHeldAmountFor(
-    const heldAmountFor = await this.connect(HoldFacet__factory, address.toString()).getHeldAmountFor(
       targetId.toString(),
     );
 
