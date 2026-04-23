@@ -14,6 +14,14 @@ const _AMOUNT = 1000;
 const _DATA = "0x1234";
 const EMPTY_VC_ID = EMPTY_STRING;
 
+interface Hold {
+  amount: bigint | number;
+  expirationTimestamp: bigint | number;
+  escrow: string;
+  to: string;
+  data: string;
+}
+
 describe("Hold Tests", () => {
   let diamond: ResolverProxy;
   let signer_A: HardhatEthersSigner;
@@ -24,7 +32,7 @@ describe("Hold Tests", () => {
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let expirationTimestamp = 0;
-  let hold: any;
+  let hold: Hold;
 
   function baseRbacs() {
     return [
