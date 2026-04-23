@@ -46,8 +46,11 @@ import {
     ISustainabilityPerformanceTargetRateTypes
 } from "./layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRateTypes.sol";
 
+// Hold
+import { IHoldFacet } from "./hold/IHoldFacet.sol";
+import { IHoldByPartition } from "./holdByPartition/IHoldByPartition.sol";
+
 // Layer 2
-import { IHold } from "./layer_1/hold/IHold.sol";
 import { IKyc } from "./layer_1/kyc/IKyc.sol";
 // IKpiLinkedRate and ISustainabilityPerformanceTargetRate are excluded: both define
 // getInterestRate() with incompatible return types (different InterestRate structs),
@@ -99,8 +102,7 @@ import { IControlList } from "./layer_1/controlList/IControlList.sol";
  * Intended for use in tests and external tooling to interact with all Diamond
  * methods through a single typed object, rather than multiple per-facet instances.
  *
- * Note: IHold already transitively includes IAccessControl, IClearing, IERC1410,
- * IHoldFacet, IHoldManagement, and IHoldByPartition. IERC3643 already includes its
+ * Note: IERC3643 already includes its
  * sub-interfaces. IERC20Votes includes IERC5805 and IVotes. Solidity C3 linearization
  * handles the resulting diamond inheritance without conflicts.
  *
@@ -124,7 +126,8 @@ interface IAsset is
     IKpis,
     ITimeTravel,
     IDiamond,
-    IHold,
+    IHoldFacet,
+    IHoldByPartition,
     IERC20,
     IERC20Votes,
     IERC1410,
