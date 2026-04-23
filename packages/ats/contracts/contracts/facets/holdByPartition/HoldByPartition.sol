@@ -13,7 +13,7 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
  * @title HoldByPartition
  * @notice Abstract contract implementing all hold operations scoped to a specific partition.
  * @dev Combines the write operations from the former HoldTokenHolder (create, execute, release,
- *      reclaim) with the partition-scoped read operations from the former HoldRead
+ *      reclaim) with the partition-scoped read operations from the former HoldReadFacet
  *      (getHeldAmountForByPartition, getHoldCountForByPartition, getHoldsIdForByPartition,
  *      getHoldForByPartition). All write methods delegate to HoldStorageWrapper via HoldOps.
  * @author Asset Tokenization Studio Team

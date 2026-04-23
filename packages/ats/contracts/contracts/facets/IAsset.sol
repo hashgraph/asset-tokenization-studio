@@ -87,7 +87,6 @@ import { IClearingRedeem } from "./layer_1/clearing/IClearingRedeem.sol";
 import { IClearingHoldCreation } from "./layer_1/clearing/IClearingHoldCreation.sol";
 import { IClearingRead } from "./layer_1/clearing/IClearingRead.sol";
 import { IComplianceFacet } from "./compliance/IComplianceFacet.sol";
-import { IHoldFacet } from "./hold/IHoldFacet.sol";
 import { IERC1594 } from "./layer_1/ERC1400/ERC1594/IERC1594.sol";
 import { IDocumentation } from "./documentation/IDocumentation.sol";
 import { IERC1644 } from "./layer_1/ERC1400/ERC1644/IERC1644.sol";
@@ -101,7 +100,7 @@ import { IControlList } from "./layer_1/controlList/IControlList.sol";
  * methods through a single typed object, rather than multiple per-facet instances.
  *
  * Note: IHold already transitively includes IAccessControl, IClearing, IERC1410,
- * IHoldRead, IHoldManagement, and IHoldByPartition. IERC3643 already includes its
+ * IHoldFacet, IHoldManagement, and IHoldByPartition. IERC3643 already includes its
  * sub-interfaces. IERC20Votes includes IERC5805 and IVotes. Solidity C3 linearization
  * handles the resulting diamond inheritance without conflicts.
  *
@@ -170,7 +169,6 @@ interface IAsset is
     IClearingRead,
     // Additional ERC
     IComplianceFacet,
-    IHoldFacet,
     IERC1594,
     IDocumentation,
     IERC1644,

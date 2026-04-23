@@ -76,7 +76,6 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "ClearingTransferFacet",
   "HoldFacet",
   "HoldManagementFacet",
-  "HoldReadFacet",
   "HoldByPartitionFacet",
 
   // External Management

@@ -9,9 +9,9 @@ import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";
  * @notice Interface for hold operations scoped to a specific partition: creation, execution,
  *         release, reclamation, and partition-scoped read queries.
  * @dev Aggregates the holder-facing write operations (previously in IHoldTokenHolder) and
- *      the partition-scoped read operations (previously in IHoldRead) into a single interface.
- *      The two methods that remain in IHoldRead — getHeldAmountFor and getHoldThirdParty —
- *      are global (not partition-scoped) and are intentionally excluded here.
+ *      the partition-scoped read operations into a single interface.
+ *      The two global methods — getHeldAmountFor and getHoldThirdParty —
+ *      are intentionally excluded here and live in IHoldFacet.
  * @author Asset Tokenization Studio Team
  */
 interface IHoldByPartition is IHoldTypes {

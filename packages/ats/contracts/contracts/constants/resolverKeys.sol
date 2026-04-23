@@ -234,18 +234,6 @@ bytes32 constant _HOLD_MANAGEMENT_KPI_LINKED_RATE_RESOLVER_KEY = 0x33bc2345a65f0
 // keccak256("security.token.standard.hold.management.SustainabilityPerformanceTarget.rate.resolverKey")
 bytes32 constant _HOLD_MANAGEMENT_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x0d5970e1c2888cfd8951593b20cf1050f0fd9758475a44e0cbab08aaf7a3a058;
 
-// keccak256("security.token.standard.holdRead.resolverKey")
-bytes32 constant _HOLD_READ_RESOLVER_KEY = 0xd8a2714462c01975a075ccd4be2588934afd8074afef746fac089b757b803851;
-
-// keccak256("security.token.standard.holdRead.fixed.rate.resolverKey")
-bytes32 constant _HOLD_READ_FIXED_RATE_RESOLVER_KEY = 0xcf1b5b7fa2ca417ea3b952a93a6157f237fce01f4944d27160e5101f05335e52;
-
-// keccak256("security.token.standard.holdRead.kpilinked.rate.resolverKey")
-bytes32 constant _HOLD_READ_KPI_LINKED_RATE_RESOLVER_KEY = 0x6b896f9725e5d4f4b5f8cff875e71b5f3284000a933f6ab32c01cdd5f71306d6;
-
-// keccak256("security.token.standard.holdRead.SustainabilityPerformanceTarget.rate.resolverKey")
-bytes32 constant _HOLD_READ_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x8e7113391652a4d3d8feb1d90990cd06ee33dc67a640b4400f8bfb9fae4f91b2;
-
 // keccak256("security.token.standard.ssi.management.resolverKey")
 bytes32 constant _SSI_MANAGEMENT_RESOLVER_KEY = 0x46df6aaf3742e0cbad136a74fb679b686e087dcc3a3d92d1c4ce2f3ef1b508a0;
 

@@ -81,7 +81,6 @@ const LOANS_PORTFOLIO_FACETS = [
 
   // Hold
   "HoldFacet",
-  "HoldReadFacet",
   "HoldManagementFacet",
   "HoldByPartitionFacet",
 

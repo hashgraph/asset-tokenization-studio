@@ -78,7 +78,6 @@ const LOAN_FACETS = [
 
   // Hold
   "HoldFacet",
-  "HoldReadFacet",
   "HoldManagementFacet",
   "HoldByPartitionFacet",
 

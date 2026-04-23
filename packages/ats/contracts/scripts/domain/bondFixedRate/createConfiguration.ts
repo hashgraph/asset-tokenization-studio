@@ -79,7 +79,6 @@ const BOND_FIXED_RATE_FACETS = [
   "ClearingTransferFacet",
   "HoldFacet",
   "HoldManagementFacet",
-  "HoldReadFacet",
   "HoldByPartitionFacet",
 
   // External Management
