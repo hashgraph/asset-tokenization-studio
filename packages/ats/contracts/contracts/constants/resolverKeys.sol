@@ -366,6 +366,9 @@ bytes32 constant _ERC3643_BATCH_KPI_LINKED_RATE_RESOLVER_KEY = 0xdf3ace3e8d3a434
 // keccak256("security.token.standard.erc3643.batch.SustainabilityPerformanceTarget.rate.resolverKey");
 bytes32 constant _ERC3643_BATCH_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x500c4c5bff9db733228f1df9b6e818bf8fab883422d3fbe971c036b513e983d9;
 
+// keccak256("security.token.standard.batchburn.resolverKey");
+bytes32 constant _BATCH_BURN_RESOLVER_KEY = 0x43fc8244bf524f6f323a3774e3e8b4da44f7ddc31b86d4c1019aebeda7450850;
+
 // keccak256("security.token.standard.freeze.resolverKey");
 bytes32 constant _FREEZE_RESOLVER_KEY = 0x49f765e7155d979a148049c2a0ebed5e028b11799061897a255f99314f0bd3f1;
 

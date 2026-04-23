@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-23T07:30:26.359Z
- * Facets: 84
+ * Generated: 2026-04-23T09:34:51.385Z
+ * Facets: 85
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -24,6 +24,7 @@ import {
   AllowanceFacet__factory,
   AmortizationFacet__factory,
   BalanceTrackerFacet__factory,
+  BatchBurnFacet__factory,
   BondUSAFacet__factory,
   BondUSAFixedRateFacet__factory,
   BondUSAKpiLinkedRateFacet__factory,
@@ -946,6 +947,76 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     factory: (signer) => new BalanceTrackerFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+  },
+
+  BatchBurnFacet: {
+    name: "BatchBurnFacet",
+    description:
+      "Diamond facet that exposes the batch burn capability through the `IBatchBurn` interface, registered under `_BATCH_BURN_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_BATCH_BURN_RESOLVER_KEY",
+      value: "0x43fc8244bf524f6f323a3774e3e8b4da44f7ddc31b86d4c1019aebeda7450850",
+    },
+    inheritance: ["BatchBurn", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "batchBurn",
+        signature: {
+          full: "function batchBurn(address[] _userAddresses, uint256[] _amounts)",
+          canonical: "batchBurn(address[],uint256[])",
+        },
+        selector: "0x4a6cc677",
+      },
+    ],
+    events: [
+      {
+        name: "ControllerRedemption",
+        signature: {
+          full: "event ControllerRedemption(address _controller, address indexed _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)",
+          canonical: "ControllerRedemption(address,address,uint256,bytes,bytes)",
+        },
+        topic0: "0x876b7cb47aa150b3a5516188b19ed308752ad4d0ae9a702543353b78163f7589",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRoles",
+        signature: {
+          full: "error AccountHasNoRoles(address account, bytes32[] roles)",
+          canonical: "AccountHasNoRoles(address,bytes32[])",
+        },
+        selector: "0x90e55392",
+      },
+      {
+        name: "InputAmountsArrayLengthMismatch",
+        signature: { full: "error InputAmountsArrayLengthMismatch()", canonical: "InputAmountsArrayLengthMismatch()" },
+        selector: "0x64f13710",
+      },
+      {
+        name: "NotAllowedInMultiPartitionMode",
+        signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
+        selector: "0x76d08f88",
+      },
+      {
+        name: "TokenIsNotControllable",
+        signature: { full: "error TokenIsNotControllable()", canonical: "TokenIsNotControllable()" },
+        selector: "0xf4b7b072",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+    ],
+    factory: (signer) => new BatchBurnFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   BondUSAFacet: {
@@ -7081,14 +7152,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["ERC3643Batch", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "batchBurn",
-        signature: {
-          full: "function batchBurn(address[] _userAddresses, uint256[] _amounts)",
-          canonical: "batchBurn(address[],uint256[])",
-        },
-        selector: "0x4a6cc677",
-      },
-      {
         name: "batchForcedTransfer",
         signature: {
           full: "function batchForcedTransfer(address[] _fromList, address[] _toList, uint256[] _amounts)",
@@ -7128,14 +7191,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "ComplianceAdded",
         signature: { full: "event ComplianceAdded(address indexed compliance)", canonical: "ComplianceAdded(address)" },
         topic0: "0x7f3a888862559648ec01d97deb7b5012bff86dc91e654a1de397170db40e35b6",
-      },
-      {
-        name: "ControllerRedemption",
-        signature: {
-          full: "event ControllerRedemption(address _controller, address indexed _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)",
-          canonical: "ControllerRedemption(address,address,uint256,bytes,bytes)",
-        },
-        topic0: "0x876b7cb47aa150b3a5516188b19ed308752ad4d0ae9a702543353b78163f7589",
       },
       {
         name: "ControllerTransfer",
@@ -13106,7 +13161,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 84 as const;
+export const TOTAL_FACETS = 85 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
