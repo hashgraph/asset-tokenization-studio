@@ -77,6 +77,7 @@ const BOND_FIXED_RATE_FACETS = [
   "ClearingReadFacet",
   "ClearingRedeemFacet",
   "ClearingTransferFacet",
+  "HoldFacet",
   "HoldManagementFacet",
   "HoldReadFacet",
   "HoldByPartitionFacet",
