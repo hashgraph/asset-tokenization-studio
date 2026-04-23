@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ContractId } from "@hiero-ledger/sdk";
-import { ethers } from "ethers";
 import {
-  ExternalPauseManagementFacet__factory,
+  IAsset__factory,
   MockedExternalPause__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { GAS } from "@core/Constants";
@@ -19,7 +18,7 @@ export class PauseOperations {
     LogService.logTrace(`Pausing security: ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      new ethers.Interface(["function pause()"]),
+      IAsset__factory.createInterface(),
       "pause",
       [],
       GAS.PAUSE,
@@ -30,7 +29,7 @@ export class PauseOperations {
     LogService.logTrace(`Unpausing security: ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      new ethers.Interface(["function unpause()"]),
+      IAsset__factory.createInterface(),
       "unpause",
       [],
       GAS.PAUSE,
@@ -46,7 +45,7 @@ export class PauseOperations {
     LogService.logTrace(`Updating External Pauses for security ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ExternalPauseManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "updateExternalPauses",
       [externalPausesAddresses.map((address) => address.toString()), actives],
       GAS.UPDATE_EXTERNAL_PAUSES,
@@ -61,7 +60,7 @@ export class PauseOperations {
     LogService.logTrace(`Adding External Pause for security ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ExternalPauseManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "addExternalPause",
       [externalPauseAddress.toString()],
       GAS.ADD_EXTERNAL_PAUSE,
@@ -76,7 +75,7 @@ export class PauseOperations {
     LogService.logTrace(`Removing External Pause for security ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ExternalPauseManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "removeExternalPause",
       [externalPauseAddress.toString()],
       GAS.REMOVE_EXTERNAL_PAUSE,

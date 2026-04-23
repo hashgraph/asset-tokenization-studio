@@ -1039,7 +1039,7 @@ describe("Bond", () => {
     });
 
     it("should throw error if securityId is invalid", async () => {
-      let addProceedRecipientRequest = new AddProceedRecipientRequest({
+      const addProceedRecipientRequest = new AddProceedRecipientRequest({
         ...AddProceedRecipientRequestFixture.create(),
         securityId: "invalid",
       });
@@ -1048,7 +1048,7 @@ describe("Bond", () => {
     });
 
     it("should throw error if data is invalid", async () => {
-      let addProceedRecipientRequest = new AddProceedRecipientRequest({
+      const addProceedRecipientRequest = new AddProceedRecipientRequest({
         ...AddProceedRecipientRequestFixture.create(),
         data: "invalid",
       });
@@ -1057,7 +1057,7 @@ describe("Bond", () => {
     });
 
     it("should throw error if proceedRecipientId is invalid", async () => {
-      let addProceedRecipientRequest = new AddProceedRecipientRequest({
+      const addProceedRecipientRequest = new AddProceedRecipientRequest({
         ...AddProceedRecipientRequestFixture.create(),
         proceedRecipientId: "invalid",
       });
@@ -1113,7 +1113,7 @@ describe("Bond", () => {
     });
 
     it("should throw error if securityId is invalid", async () => {
-      let removeProceedRecipientRequest = new RemoveProceedRecipientRequest({
+      const removeProceedRecipientRequest = new RemoveProceedRecipientRequest({
         ...RemoveProceedRecipientRequestFixture.create(),
         securityId: "invalid",
       });
@@ -1122,7 +1122,7 @@ describe("Bond", () => {
     });
 
     it("should throw error if proceedRecipientId is invalid", async () => {
-      let removeProceedRecipientRequest = new RemoveProceedRecipientRequest({
+      const removeProceedRecipientRequest = new RemoveProceedRecipientRequest({
         ...RemoveProceedRecipientRequestFixture.create(),
         proceedRecipientId: "invalid",
       });
@@ -1186,7 +1186,7 @@ describe("Bond", () => {
     });
 
     it("should throw error if securityId is invalid", async () => {
-      let updateProceedRecipientDataRequest = new UpdateProceedRecipientDataRequest({
+      const updateProceedRecipientDataRequest = new UpdateProceedRecipientDataRequest({
         ...UpdateProceedRecipientDataRequestFixture.create(),
         securityId: "invalid",
       });
@@ -1197,7 +1197,7 @@ describe("Bond", () => {
     });
 
     it("should throw error if data is invalid", async () => {
-      let updateProceedRecipientDataRequest = new UpdateProceedRecipientDataRequest({
+      const updateProceedRecipientDataRequest = new UpdateProceedRecipientDataRequest({
         ...UpdateProceedRecipientDataRequestFixture.create(),
         data: "invalid",
       });
@@ -1208,7 +1208,7 @@ describe("Bond", () => {
     });
 
     it("should throw error if proceedRecipientId is invalid", async () => {
-      let updateProceedRecipientDataRequest = new UpdateProceedRecipientDataRequest({
+      const updateProceedRecipientDataRequest = new UpdateProceedRecipientDataRequest({
         ...UpdateProceedRecipientDataRequestFixture.create(),
         proceedRecipientId: "invalid",
       });
@@ -1256,7 +1256,7 @@ describe("Bond", () => {
     });
 
     it("should throw error if securityId is invalid", async () => {
-      let isProceedRecipientRequest = new IsProceedRecipientRequest({
+      const isProceedRecipientRequest = new IsProceedRecipientRequest({
         ...AddProceedRecipientRequestFixture.create(),
         securityId: "invalid",
       });
@@ -1265,7 +1265,7 @@ describe("Bond", () => {
     });
 
     it("should throw error if proceedRecipientId is invalid", async () => {
-      let isProceedRecipientRequest = new IsProceedRecipientRequest({
+      const isProceedRecipientRequest = new IsProceedRecipientRequest({
         ...AddProceedRecipientRequestFixture.create(),
         proceedRecipientId: "invalid",
       });
@@ -1321,7 +1321,7 @@ describe("Bond", () => {
     });
 
     it("should throw error if securityId is invalid", async () => {
-      let getProceedRecipientsCountRequest = new GetProceedRecipientsCountRequest({
+      const getProceedRecipientsCountRequest = new GetProceedRecipientsCountRequest({
         ...AddProceedRecipientRequestFixture.create(),
         securityId: "invalid",
       });
@@ -1385,7 +1385,7 @@ describe("Bond", () => {
     });
 
     it("should throw error if securityId is invalid", async () => {
-      let isProceedRecipientRequest = new GetProceedRecipientDataRequest({
+      const isProceedRecipientRequest = new GetProceedRecipientDataRequest({
         ...AddProceedRecipientRequestFixture.create(),
         securityId: "invalid",
       });
@@ -1394,7 +1394,7 @@ describe("Bond", () => {
     });
 
     it("should throw error if proceedRecipientId is invalid", async () => {
-      let isProceedRecipientRequest = new GetProceedRecipientDataRequest({
+      const isProceedRecipientRequest = new GetProceedRecipientDataRequest({
         ...AddProceedRecipientRequestFixture.create(),
         proceedRecipientId: "invalid",
       });
@@ -1450,7 +1450,7 @@ describe("Bond", () => {
     });
 
     it("should throw error if securityId is invalid", async () => {
-      let getProceedRecipientsRequest = new GetProceedRecipientsRequest({
+      const getProceedRecipientsRequest = new GetProceedRecipientsRequest({
         ...GetProceedRecipientsRequestFixture.create(),
         securityId: "invalid",
       });
@@ -1459,7 +1459,7 @@ describe("Bond", () => {
     });
 
     it("should throw error if page size is invalid", async () => {
-      let getProceedRecipientsRequest = new GetProceedRecipientsRequest({
+      const getProceedRecipientsRequest = new GetProceedRecipientsRequest({
         ...GetProceedRecipientsRequestFixture.create(),
         pageSize: -1,
       });
