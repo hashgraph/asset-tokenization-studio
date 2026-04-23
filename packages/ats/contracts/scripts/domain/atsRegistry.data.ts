@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-23T07:41:45.359Z
+ * Generated: 2026-04-23T11:39:12.068Z
  * Facets: 84
  * Infrastructure: 2
  *
@@ -3882,7 +3882,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCorporateAction",
         signature: {
-          full: "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionTypeId_, bytes data_, bool isDisabled_)",
+          full: "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionIdByType_, bytes data_, bool isDisabled_)",
           canonical: "getCorporateAction(bytes32)",
         },
         selector: "0x911181da",
@@ -3922,7 +3922,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCorporateActions",
         signature: {
-          full: "function getCorporateActions(uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] actionTypes_, uint256[] actionTypeIds_, bytes[] datas_, bool[] isDisabled_)",
+          full: "function getCorporateActions(uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] actionTypes_, uint256[] actionIdByType_, bytes[] datas_, bool[] isDisabled_)",
           canonical: "getCorporateActions(uint256,uint256)",
         },
         selector: "0xe248a917",

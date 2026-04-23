@@ -1,16 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ContractId } from "@hiero-ledger/sdk";
-import { ethers } from "ethers";
-import {
-  ERC3643ManagementFacet__factory,
-  IAsset__factory,
-  DiamondFacet__factory,
-  FreezeFacet__factory,
-  ERC1410ManagementFacet__factory,
-  CapFacet__factory,
-  NominalValue__factory,
-} from "@hashgraph/asset-tokenization-contracts";
+import { IAsset__factory } from "@hashgraph/asset-tokenization-contracts";
 import { EVM_ZERO_ADDRESS, GAS } from "@core/Constants";
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import EvmAddress from "@domain/context/contract/EvmAddress";
@@ -26,7 +17,7 @@ export class SecurityMetadataOperations {
     LogService.logTrace(`Setting name to ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC3643ManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "setName",
       [name],
       GAS.SET_NAME,
@@ -37,7 +28,7 @@ export class SecurityMetadataOperations {
     LogService.logTrace(`Setting symbol to ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC3643ManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "setSymbol",
       [symbol],
       GAS.SET_SYMBOL,
@@ -84,7 +75,7 @@ export class SecurityMetadataOperations {
     LogService.logTrace(`Updating config version`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      DiamondFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "updateConfigVersion",
       [configVersion],
       GAS.UPDATE_CONFIG_VERSION,
@@ -100,7 +91,7 @@ export class SecurityMetadataOperations {
     LogService.logTrace(`Updating config`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      DiamondFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "updateConfig",
       [configId, configVersion],
       GAS.UPDATE_CONFIG,
@@ -117,7 +108,7 @@ export class SecurityMetadataOperations {
     LogService.logTrace(`Updating Resolver`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      DiamondFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "updateResolver",
       [resolver.toString(), configId, configVersion],
       GAS.UPDATE_RESOLVER,
@@ -128,7 +119,7 @@ export class SecurityMetadataOperations {
     LogService.logTrace(`Protecting Partitions for security: ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      new ethers.Interface(["function protectPartitions()"]),
+      IAsset__factory.createInterface(),
       "protectPartitions",
       [],
       GAS.PROTECT_PARTITION,
@@ -139,7 +130,7 @@ export class SecurityMetadataOperations {
     LogService.logTrace(`Unprotecting Partitions for security: ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      new ethers.Interface(["function unprotectPartitions()"]),
+      IAsset__factory.createInterface(),
       "unprotectPartitions",
       [],
       GAS.UNPROTECT_PARTITION,
@@ -164,7 +155,7 @@ export class SecurityMetadataOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC1410ManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "protectedRedeemFromByPartition",
       [partitionId, sourceId.toString(), amount.toBigInt(), protectionData],
       GAS.PROTECTED_REDEEM,
@@ -192,7 +183,7 @@ export class SecurityMetadataOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC1410ManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "protectedTransferFromByPartition",
       [partitionId, sourceId.toString(), targetId.toString(), amount.toBigInt(), protectionData],
       GAS.PROTECTED_TRANSFER,
@@ -208,7 +199,7 @@ export class SecurityMetadataOperations {
     LogService.logTrace(`Freezing ${amount} tokens ${security.toString()} to account ${targetId.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      FreezeFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "freezePartialTokens",
       [targetId.toString(), amount.toBigInt()],
       GAS.FREEZE_PARTIAL_TOKENS,
@@ -224,7 +215,7 @@ export class SecurityMetadataOperations {
     LogService.logTrace(`Unfreezing ${amount} tokens ${security.toString()} to account ${targetId.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      FreezeFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "unfreezePartialTokens",
       [targetId.toString(), amount.toBigInt()],
       GAS.UNFREEZE_PARTIAL_TOKENS,
@@ -240,7 +231,7 @@ export class SecurityMetadataOperations {
     LogService.logTrace(`Freezing address ${target.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      FreezeFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "setAddressFrozen",
       [target.toString(), status],
       GAS.SET_ADDRESS_FROZEN,
@@ -256,7 +247,7 @@ export class SecurityMetadataOperations {
     LogService.logTrace(`Batch setting freeze status for ${targetList.length} addresses`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      FreezeFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "batchSetAddressFrozen",
       [targetList.map((addr) => addr.toString()), freezeList],
       GAS.BATCH_SET_ADDRESS_FROZEN,
@@ -272,7 +263,7 @@ export class SecurityMetadataOperations {
     LogService.logTrace(`Batch freezing partial tokens for ${targetList.length} addresses`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      FreezeFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "batchFreezePartialTokens",
       [targetList.map((addr) => addr.toString()), amountList.map((amount) => amount.toBigInt())],
       GAS.BATCH_FREEZE_PARTIAL_TOKENS,
@@ -288,7 +279,7 @@ export class SecurityMetadataOperations {
     LogService.logTrace(`Batch unfreezing partial tokens for ${targetList.length} addresses`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      FreezeFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "batchUnfreezePartialTokens",
       [targetList.map((addr) => addr.toString()), amountList.map((amount) => amount.toBigInt())],
       GAS.BATCH_UNFREEZE_PARTIAL_TOKENS,
@@ -304,7 +295,7 @@ export class SecurityMetadataOperations {
     LogService.logTrace(`Recovering address ${lostWalletId.toString()} to ${newWalletId.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC3643ManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "recoveryAddress",
       [lostWalletId.toString(), newWalletId.toString(), EVM_ZERO_ADDRESS],
       GAS.RECOVERY_ADDRESS,
@@ -319,7 +310,7 @@ export class SecurityMetadataOperations {
     LogService.logTrace(`Granting agent role to ${agentId.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC3643ManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "addAgent",
       [agentId.toString()],
       GAS.ADD_AGENT,
@@ -334,7 +325,7 @@ export class SecurityMetadataOperations {
     LogService.logTrace(`Revoking agent role from ${agentId.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      ERC3643ManagementFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "removeAgent",
       [agentId.toString()],
       GAS.REMOVE_AGENT,
@@ -349,7 +340,7 @@ export class SecurityMetadataOperations {
     LogService.logTrace(`Setting max supply ${maxSupply} for security ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      CapFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "setMaxSupply",
       [maxSupply.toHexString()],
       GAS.SET_MAX_SUPPLY,
@@ -365,7 +356,7 @@ export class SecurityMetadataOperations {
     LogService.logTrace(`Setting nominal value for security: ${security.toString()}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      NominalValue__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "setNominalValue",
       [nominalValue, nominalValueDecimals],
       GAS.SET_NOMINAL_VALUE,

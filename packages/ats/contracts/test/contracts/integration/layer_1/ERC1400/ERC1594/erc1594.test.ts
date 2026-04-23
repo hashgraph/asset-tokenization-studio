@@ -7,7 +7,6 @@ import { type IAsset, type ResolverProxy } from "@contract-types";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ATS_ROLES, DEFAULT_PARTITION, EIP1066_CODES, EMPTY_STRING, ZERO } from "@scripts";
-import { getSelector } from "@scripts/infrastructure";
 
 const AMOUNT = 1000;
 const BALANCE_OF_C_ORIGINAL = 2 * AMOUNT;

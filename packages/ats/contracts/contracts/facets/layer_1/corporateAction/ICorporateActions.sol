@@ -33,12 +33,12 @@ interface ICorporateActions is ICommonErrors {
      *
      * @param _corporateActionId The corporate action unique Id
      * @return actionType_ the corproate action type
-     * @return actionTypeIndex_ the corproate action type index
+     * @return actionIdByType_ the corporate action id by action type
      * @return data_ the corproate action related data (body and anything else)
      */
     function getCorporateAction(
         bytes32 _corporateActionId
-    ) external view returns (bytes32 actionType_, uint256 actionTypeIndex_, bytes memory data_, bool isDisabled_);
+    ) external view returns (bytes32 actionType_, uint256 actionIdByType_, bytes memory data_, bool isDisabled_);
 
     /**
      * @dev Returns the number of corporate actions the token currently has
@@ -65,7 +65,7 @@ interface ICorporateActions is ICommonErrors {
      * @param _pageIndex members to skip : _pageIndex * _pageLength
      * @param _pageLength number of members to return
      * @return actionTypes_ The array of corporate action types
-     * @return actionTypeIndex_ The array of corporate action type index
+     * @return actionIdByType_ The array of corporate action id by action type
      * @return datas_ The array of corporate action related data (body and anything else)
      * @return isDisabled_ The array of corporate action disabled status
      */
@@ -77,7 +77,7 @@ interface ICorporateActions is ICommonErrors {
         view
         returns (
             bytes32[] memory actionTypes_,
-            uint256[] memory actionTypeIndex_,
+            uint256[] memory actionIdByType_,
             bytes[] memory datas_,
             bool[] memory isDisabled_
         );
@@ -111,7 +111,7 @@ interface ICorporateActions is ICommonErrors {
      * @param _pageIndex members to skip : _pageIndex * _pageLength
      * @param _pageLength number of members to return
      * @return actionTypes_ The array of corporate action types
-     * @return actionTypeIndex_ The array of corporate action type index
+     * @return actionIdByType_ The array of corporate action id by action type
      * @return datas_ The array of corporate action related data (body and anything else)
      * @return isDisabled_ The array of corporate action disabled status
      */
@@ -124,7 +124,7 @@ interface ICorporateActions is ICommonErrors {
         view
         returns (
             bytes32[] memory actionTypes_,
-            uint256[] memory actionTypeIndex_,
+            uint256[] memory actionIdByType_,
             bytes[] memory datas_,
             bool[] memory isDisabled_
         );
