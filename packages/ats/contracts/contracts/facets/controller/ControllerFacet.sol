@@ -9,7 +9,7 @@ import { _CONTROLLER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 /**
  * @title ControllerFacet
  * @notice Diamond facet exposing ERC-1644 forced-transfer operations and ERC-3643 agent management.
- * @dev Registers nine selectors: initialize_Controller, isControllable, controllerTransfer,
+ * @dev Registers nine selectors: initializeController, isControllable, controllerTransfer,
  *      controllerRedeem, finalizeControllable, forcedTransfer, addAgent, removeAgent, and isAgent.
  *      Inherits all business logic from the Controller abstract contract.
  */
@@ -32,7 +32,7 @@ contract ControllerFacet is Controller, IStaticFunctionSelectors {
             staticFunctionSelectors_[--selectorIndex] = this.controllerRedeem.selector;
             staticFunctionSelectors_[--selectorIndex] = this.controllerTransfer.selector;
             staticFunctionSelectors_[--selectorIndex] = this.isControllable.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.initialize_Controller.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.initializeController.selector;
         }
     }
 

@@ -12,7 +12,7 @@ struct ERC1644Storage {
 
 library ERC1644StorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_Controller(bool _controllable) internal {
+    function initializeController(bool _controllable) internal {
         erc1644Storage().isControllable = _controllable;
         erc1644Storage().initialized = true;
     }
