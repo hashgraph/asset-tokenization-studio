@@ -72,7 +72,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
     it("should generate TimeTravel variant names correctly", () => {
       expect(getTimeTravelVariant("AccessControlFacet")).to.equal("AccessControlFacetTimeTravel");
       expect(getTimeTravelVariant("KycFacet")).to.equal("KycFacetTimeTravel");
-      expect(getTimeTravelVariant("ERC20Facet")).to.equal("ERC20FacetTimeTravel");
+      expect(getTimeTravelVariant("TransferFacet")).to.equal("TransferFacetTimeTravel");
     });
 
     it("should detect TimeTravel variant availability from registry", () => {
@@ -139,7 +139,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
       expect(FACET_REGISTRY).to.have.property("AccessControlFacet");
       expect(FACET_REGISTRY).to.have.property("KycFacet");
       expect(FACET_REGISTRY).to.have.property("PauseFacet");
-      expect(FACET_REGISTRY).to.have.property("ERC20Facet");
+      expect(FACET_REGISTRY).to.have.property("TransferFacet");
       expect(FACET_REGISTRY).to.have.property("ControlListFacet");
     });
 

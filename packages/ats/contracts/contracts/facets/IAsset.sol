@@ -27,7 +27,7 @@ import { IAllowance } from "./allowance/IAllowance.sol";
 
 // Layer 1 — External lists
 import { IERC1410 } from "./layer_1/ERC1400/ERC1410/IERC1410.sol";
-import { IERC20 } from "./layer_1/ERC1400/ERC20/IERC20.sol";
+import { ITransferFacet } from "./transfer/ITransferFacet.sol";
 
 // Layer 1 — Remaining facets
 import { IERC20Votes } from "./layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
@@ -125,7 +125,7 @@ interface IAsset is
     ITimeTravel,
     IDiamond,
     IHold,
-    IERC20,
+    ITransferFacet,
     IERC20Votes,
     IERC1410,
     IERC3643,

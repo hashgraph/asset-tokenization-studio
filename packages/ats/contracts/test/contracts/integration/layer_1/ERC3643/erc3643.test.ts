@@ -695,7 +695,7 @@ describe("ERC3643 Tests", () => {
 
         const erc3643NoCompliance = await ethers.getContractAt("IERC3643", newTokenFixture.diamond.target);
         const kycNoCompliance = await ethers.getContractAt("Kyc", newTokenFixture.diamond.target, signer_B);
-        const erc20NoCompliance = await ethers.getContractAt("ERC20", newTokenFixture.diamond.target, signer_E);
+        const erc20NoCompliance = await ethers.getContractAt("Transfer", newTokenFixture.diamond.target, signer_E);
         const ssiNoCompliance = await ethers.getContractAt("SsiManagement", newTokenFixture.diamond.target);
 
         // Grant ATS_ROLES._SSI_MANAGER_ROLE to signer_A.address first, then add signer_E.address as an issuer
@@ -750,7 +750,7 @@ describe("ERC3643 Tests", () => {
 
         const erc3643NoCompliance = await ethers.getContractAt("IERC3643", newTokenFixture.diamond.target);
         const kycNoCompliance = await ethers.getContractAt("Kyc", newTokenFixture.diamond.target, signer_B);
-        const erc20NoCompliance = await ethers.getContractAt("ERC20", newTokenFixture.diamond.target, signer_E);
+        const erc20NoCompliance = await ethers.getContractAt("Transfer", newTokenFixture.diamond.target, signer_E);
         const ssiNoCompliance = await ethers.getContractAt("SsiManagement", newTokenFixture.diamond.target);
 
         // Grant ATS_ROLES._SSI_MANAGER_ROLE to signer_A.address first, then add signer_E.address as an issuer

@@ -19,34 +19,6 @@ interface IERC1594 {
     function initialize_ERC1594() external;
 
     /**
-     * @notice Transfer restrictions can take many forms and typically involve on-chain rules or whitelists.
-     * However for many types of approved transfers, maintaining an on-chain list of approved transfers can be
-     * cumbersome and expensive. An alternative is the co-signing approach, where in addition to the token holder
-     * approving a token transfer, and authorised entity provides signed data which further validates the transfer.
-     * @param _to address The address which you want to transfer to
-     * @param _value uint256 the amount of tokens to be transferred
-     * @param _data The `bytes calldata _data` allows arbitrary data to be submitted alongside the transfer.
-     * for the token contract to interpret or record. This could be signed data authorising the transfer
-     * (e.g. a dynamic whitelist) but is flexible enough to accomadate other use-cases.
-     */
-    function transferWithData(address _to, uint256 _value, bytes calldata _data) external;
-
-    /**
-     * @notice Transfer restrictions can take many forms and typically involve on-chain rules or whitelists.
-     * However for many types of approved transfers, maintaining an on-chain list of approved transfers can be
-     * cumbersome and expensive. An alternative is the co-signing approach, where in addition to the token holder
-     * approving a token transfer, and authorised entity provides signed data which further validates the transfer.
-     * @dev `msg.sender` MUST have a sufficient `allowance` set and this `allowance` must be debited by the `_value`.
-     * @param _from address The address which you want to send tokens from
-     * @param _to address The address which you want to transfer to
-     * @param _value uint256 the amount of tokens to be transferred
-     * @param _data The `bytes calldata _data` allows arbitrary data to be submitted alongside the transfer.
-     * for the token contract to interpret or record. This could be signed data authorising the transfer
-     * (e.g. a dynamic whitelist) but is flexible enough to accomadate other use-cases.
-     */
-    function transferFromWithData(address _from, address _to, uint256 _value, bytes calldata _data) external;
-
-    /**
      * @notice This function must be called to increase the total supply (Corresponds to mint function of ERC20).
      * @dev It only be called by the token issuer or the operator defined by the issuer. ERC1594 doesn't have
      * have the any logic related to operator but its superset ERC1400 have the operator logic and this function

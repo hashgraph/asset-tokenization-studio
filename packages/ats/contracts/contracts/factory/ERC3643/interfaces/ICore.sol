@@ -1,7 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity >=0.8.0 <0.9.0;
+// AUTO-GENERATED — DO NOT EDIT.
+// Source: contracts/facets/core/ICore.sol
+// Regenerated on every `npx hardhat compile` by the
+// `erc3643-clone-interfaces` task in `tasks/compile.ts`.
+// Edits to this file will be silently overwritten.
+pragma solidity ^0.8.17;
 
-import { IFactory } from "../../factory/IFactory.sol";
+import { TRexIFactory as IFactory } from "./IFactory.sol";
 
 /**
  * @title ICore
@@ -10,7 +15,7 @@ import { IFactory } from "../../factory/IFactory.sol";
  *         Also owns the `ERC20MetadataInfo` and `ERC20Metadata` structs, since the only
  *         initializer for this data (`initializeCore`) lives in CoreFacet.
  */
-interface ICore {
+interface TRexICore {
     /**
      * @notice Basic ERC-20 token identity fields.
      */

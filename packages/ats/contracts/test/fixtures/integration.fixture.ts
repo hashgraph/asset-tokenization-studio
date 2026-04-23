@@ -119,48 +119,48 @@ export async function registerCommonFacetsFixture() {
 }
 
 /**
- * BLR + ERC20Facet registered for testing SelectorAlreadyRegistered error.
+ * BLR + TransferFacet registered for testing SelectorAlreadyRegistered error.
  *
  * Provides a fixture for testing duplicate selector detection:
  * - BLR with proxy
  * - AccessControlFacet, KycFacet, PauseFacet (common facets)
- * - ERC20Facet (has transfer.selector = 0xa9059cbb)
+ * - TransferFacet (has transfer.selector = 0xa9059cbb)
  *
  * Use this fixture together with DuplicateSelectorFacetTest to verify that
  * the SelectorAlreadyRegistered error is thrown when two facets share the same selector.
  */
-export async function registerERC20FacetFixture() {
+export async function registerTransferFacetFixture() {
   const base = await registerCommonFacetsFixture();
   const { deployer, blr, facetAddresses } = base;
 
-  // Deploy orchestrator libraries first (required for ERC20Facet)
+  // Deploy orchestrator libraries first (required for TransferFacet)
   await getOrDeployLibraries(deployer);
 
-  // Deploy ERC20Facet with library linking - only TokenCoreOps needed
-  const erc20LibraryLinks = getFacetLibraryLinks("ERC20Facet");
-  const erc20Factory = await ethers.getContractFactory("ERC20Facet", {
+  // Deploy TransferFacet with library linking - only TokenCoreOps needed
+  const transferLibraryLinks = getFacetLibraryLinks("TransferFacet");
+  const transferFactory = await ethers.getContractFactory("TransferFacet", {
     signer: deployer,
-    libraries: erc20LibraryLinks,
+    libraries: transferLibraryLinks,
   });
-  const erc20Result = await deployContract(erc20Factory as any, {
+  const transferResult = await deployContract(transferFactory as any, {
     confirmations: 0,
     verifyDeployment: false,
   });
-  const erc20FacetAddress = erc20Result.address!;
+  const transferFacetAddress = transferResult.address!;
 
-  // Get resolver key for ERC20Facet
-  const erc20FacetDef = atsRegistry.getFacetDefinition("ERC20Facet");
-  if (!erc20FacetDef?.resolverKey?.value) {
-    throw new Error("No resolver key found for ERC20Facet");
+  // Get resolver key for TransferFacet
+  const transferFacetDef = atsRegistry.getFacetDefinition("TransferFacet");
+  if (!transferFacetDef?.resolverKey?.value) {
+    throw new Error("No resolver key found for TransferFacet");
   }
 
-  // Register ERC20Facet in BLR
+  // Register TransferFacet in BLR
   await registerFacets(blr, {
     facets: [
       {
-        name: "ERC20Facet",
-        address: erc20FacetAddress,
-        resolverKey: erc20FacetDef.resolverKey.value,
+        name: "TransferFacet",
+        address: transferFacetAddress,
+        resolverKey: transferFacetDef.resolverKey.value,
       },
     ],
   });
@@ -169,10 +169,10 @@ export async function registerERC20FacetFixture() {
     ...base,
     facetAddresses: {
       ...facetAddresses,
-      ERC20Facet: erc20FacetAddress,
+      TransferFacet: transferFacetAddress,
     },
-    erc20FacetAddress,
-    erc20ResolverKey: erc20FacetDef.resolverKey.value,
+    transferFacetAddress,
+    transferResolverKey: transferFacetDef.resolverKey.value,
   };
 }
 

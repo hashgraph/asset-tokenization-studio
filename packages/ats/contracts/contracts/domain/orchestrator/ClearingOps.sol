@@ -7,7 +7,7 @@ import { TokenCoreOps } from "./TokenCoreOps.sol";
 import { ERC1410StorageWrapper } from "../asset/ERC1410StorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
-import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
+import { ITransferFacet } from "../../facets/transfer/ITransferFacet.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
@@ -370,7 +370,7 @@ library ClearingOps {
                 "",
                 ""
             );
-            emit IERC20.Transfer(address(0), _to, _amount);
+            emit ITransferFacet.Transfer(address(0), _to, _amount);
         } else {
             ERC1410StorageWrapper.addPartitionTo(_amount, _to, _partition);
             emit IERC1410Types.TransferByPartition(
@@ -382,7 +382,7 @@ library ClearingOps {
                 "",
                 ""
             );
-            emit IERC20.Transfer(address(0), _to, _amount);
+            emit ITransferFacet.Transfer(address(0), _to, _amount);
         }
     }
 

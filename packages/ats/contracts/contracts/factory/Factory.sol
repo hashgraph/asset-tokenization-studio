@@ -9,7 +9,7 @@ import { ResolverProxy } from "../infrastructure/proxy/ResolverProxy.sol";
 import { IResolverProxy } from "../infrastructure/proxy/IResolverProxy.sol";
 import { _DEFAULT_ADMIN_ROLE } from "../constants/roles.sol";
 import { IControlList } from "../facets/layer_1/controlList/IControlList.sol";
-import { IERC20 } from "../facets/layer_1/ERC1400/ERC20/IERC20.sol";
+import { ICore } from "../facets/core/ICore.sol";
 import { IERC20Votes } from "../facets/layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
 import { IERC1644 } from "../facets/layer_1/ERC1400/ERC1644/IERC1644.sol";
 import { IERC1410 } from "../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
@@ -325,12 +325,12 @@ contract Factory is IFactory {
         // configure controller flag (ERC1644Facet may not be present)
         _tryInitialize_ERC1644(securityAddress_, _securityData.isControllable);
 
-        // configure erc20 metadata (ERC20Facet may not be present)
-        IERC20.ERC20Metadata memory erc20Metadata = IERC20.ERC20Metadata({
+        // configure erc20 metadata (CoreFacet may not be present)
+        ICore.ERC20Metadata memory erc20Metadata = ICore.ERC20Metadata({
             info: _securityData.erc20MetadataInfo,
             securityType: _securityType
         });
-        _tryInitialize_ERC20(securityAddress_, erc20Metadata);
+        ICore(securityAddress_).initializeCore(erc20Metadata);
 
         // configure issue flag (ERC1594Facet may not be present)
         _tryInitialize_ERC1594(securityAddress_);
@@ -375,14 +375,6 @@ contract Factory is IFactory {
 
     function _tryInitialize_ERC1644(address securityAddress_, bool isControllable) private {
         try IERC1644(securityAddress_).initialize_ERC1644(isControllable) {
-            // success
-        } catch {
-            // facet not present - skip initialization
-        }
-    }
-
-    function _tryInitialize_ERC20(address securityAddress_, IERC20.ERC20Metadata memory erc20Metadata) private {
-        try IERC20(securityAddress_).initialize_ERC20(erc20Metadata) {
             // success
         } catch {
             // facet not present - skip initialization

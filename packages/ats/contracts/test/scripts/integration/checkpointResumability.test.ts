@@ -88,7 +88,7 @@ describe("Checkpoint Resumability - Integration Tests", () => {
           },
           facets: new Map([
             ["AccessControlFacet", createDeployedContract("0x4444444444444444444444444444444444444444", "0x111...")],
-            ["ERC20Facet", createDeployedContract("0x5555555555555555555555555555555555555555", "0x222...")],
+            ["TransferFacet", createDeployedContract("0x5555555555555555555555555555555555555555", "0x222...")],
             ["PauseFacet", createDeployedContract("0x6666666666666666666666666666666666666666", "0x333...")],
           ]),
           facetsRegistered: true,
@@ -210,7 +210,7 @@ describe("Checkpoint Resumability - Integration Tests", () => {
           },
           facets: new Map([
             ["AccessControlFacet", createDeployedContract("0x3333333333333333333333333333333333333333", "0x111...")],
-            ["ERC20Facet", createDeployedContract("0x5555555555555555555555555555555555555555", "0x222...")],
+            ["TransferFacet", createDeployedContract("0x5555555555555555555555555555555555555555", "0x222...")],
             ["ERC1410Facet", createDeployedContract("0x6666666666666666666666666666666666666666", "0x333...")],
             ["ERC1594Facet", createDeployedContract("0x7777777777777777777777777777777777777777", "0x444...")],
             ["DocumentationFacet", createDeployedContract("0x8888888888888888888888888888888888888888", "0x555...")],
@@ -241,7 +241,7 @@ describe("Checkpoint Resumability - Integration Tests", () => {
 
       // Verify all partial facets are preserved
       expect(loadedCheckpoint?.steps.facets?.has("AccessControlFacet")).to.be.true;
-      expect(loadedCheckpoint?.steps.facets?.has("ERC20Facet")).to.be.true;
+      expect(loadedCheckpoint?.steps.facets?.has("TransferFacet")).to.be.true;
       expect(loadedCheckpoint?.steps.facets?.has("ERC1410Facet")).to.be.true;
     });
 
@@ -270,7 +270,7 @@ describe("Checkpoint Resumability - Integration Tests", () => {
       });
 
       // Add facets one by one (simulating incremental saves)
-      const facetNames = ["AccessControlFacet", "ERC20Facet", "PauseFacet"];
+      const facetNames = ["AccessControlFacet", "TransferFacet", "PauseFacet"];
       for (let i = 0; i < facetNames.length; i++) {
         const facetName = facetNames[i];
         addFacetToCheckpoint(
@@ -286,7 +286,7 @@ describe("Checkpoint Resumability - Integration Tests", () => {
       const loaded = await manager.loadCheckpoint(checkpoint.checkpointId);
       expect(loaded?.steps.facets?.size).to.equal(3);
       expect(loaded?.steps.facets?.has("AccessControlFacet")).to.be.true;
-      expect(loaded?.steps.facets?.has("ERC20Facet")).to.be.true;
+      expect(loaded?.steps.facets?.has("TransferFacet")).to.be.true;
       expect(loaded?.steps.facets?.has("PauseFacet")).to.be.true;
     });
   });
@@ -327,7 +327,7 @@ describe("Checkpoint Resumability - Integration Tests", () => {
           },
           facets: new Map([
             ["AccessControlFacet", createDeployedContract("0x3333333333333333333333333333333333333333", "0x111...")],
-            ["ERC20Facet", createDeployedContract("0x5555555555555555555555555555555555555555", "0x222...")],
+            ["TransferFacet", createDeployedContract("0x5555555555555555555555555555555555555555", "0x222...")],
           ]),
           facetsRegistered: true,
         },
@@ -962,7 +962,10 @@ describe("Checkpoint Resumability - Integration Tests", () => {
               "AccessControlFacetTimeTravel",
               createDeployedContract("0x4444444444444444444444444444444444444444", "0xghi789"),
             ],
-            ["ERC20FacetTimeTravel", createDeployedContract("0x5555555555555555555555555555555555555555", "0xjkl012")],
+            [
+              "TransferFacetTimeTravel",
+              createDeployedContract("0x5555555555555555555555555555555555555555", "0xjkl012"),
+            ],
             [
               "SnapshotsFacetTimeTravel",
               createDeployedContract("0x6666666666666666666666666666666666666666", "0xmno345"),
@@ -979,7 +982,7 @@ describe("Checkpoint Resumability - Integration Tests", () => {
       expect(loadedCheckpoint).to.exist;
       expect(loadedCheckpoint?.steps.facets).to.exist;
       expect(loadedCheckpoint?.steps.facets?.has("AccessControlFacetTimeTravel")).to.be.true;
-      expect(loadedCheckpoint?.steps.facets?.has("ERC20FacetTimeTravel")).to.be.true;
+      expect(loadedCheckpoint?.steps.facets?.has("TransferFacetTimeTravel")).to.be.true;
       expect(loadedCheckpoint?.steps.facets?.has("SnapshotsFacetTimeTravel")).to.be.true;
 
       // Verify facet names include "TimeTravel" suffix
@@ -1019,7 +1022,10 @@ describe("Checkpoint Resumability - Integration Tests", () => {
               createDeployedContract("0x5555555555555555555555555555555555555555", "0x222..."),
             ],
             ["KycFacet", createDeployedContract("0x6666666666666666666666666666666666666666", "0x333...")],
-            ["ERC20FacetTimeTravel", createDeployedContract("0x7777777777777777777777777777777777777777", "0x444...")],
+            [
+              "TransferFacetTimeTravel",
+              createDeployedContract("0x7777777777777777777777777777777777777777", "0x444..."),
+            ],
           ]),
         },
       });
@@ -1037,7 +1043,7 @@ describe("Checkpoint Resumability - Integration Tests", () => {
 
       // TimeTravel facets
       expect(loaded?.steps.facets?.has("AccessControlFacetTimeTravel")).to.be.true;
-      expect(loaded?.steps.facets?.has("ERC20FacetTimeTravel")).to.be.true;
+      expect(loaded?.steps.facets?.has("TransferFacetTimeTravel")).to.be.true;
 
       // Verify distinction in naming
       const facetNames = Array.from(loaded!.steps.facets!.keys());
@@ -1142,7 +1148,7 @@ describe("Checkpoint Resumability - Integration Tests", () => {
           // 5 facets were deployed before the test failure
           facets: new Map([
             ["AccessControlFacet", createDeployedContract("0xaaaa111111111111111111111111111111111111", "0x111...")],
-            ["ERC20Facet", createDeployedContract("0xaaaa222222222222222222222222222222222222", "0x222...")],
+            ["TransferFacet", createDeployedContract("0xaaaa222222222222222222222222222222222222", "0x222...")],
             ["ERC1410Facet", createDeployedContract("0xaaaa333333333333333333333333333333333333", "0x333...")],
             ["ERC1594Facet", createDeployedContract("0xaaaa444444444444444444444444444444444444", "0x444...")],
             ["DocumentationFacet", createDeployedContract("0xaaaa555555555555555555555555555555555555", "0x555...")],
@@ -1168,7 +1174,7 @@ describe("Checkpoint Resumability - Integration Tests", () => {
       // Verify all partial facet addresses are preserved
       const facetNames = Array.from(loadedCheckpoint!.steps.facets!.keys());
       expect(facetNames).to.include("AccessControlFacet");
-      expect(facetNames).to.include("ERC20Facet");
+      expect(facetNames).to.include("TransferFacet");
       expect(facetNames).to.include("ERC1410Facet");
       expect(facetNames).to.include("ERC1594Facet");
       expect(facetNames).to.include("DocumentationFacet");

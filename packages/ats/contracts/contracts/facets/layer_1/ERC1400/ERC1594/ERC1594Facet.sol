@@ -12,15 +12,13 @@ contract ERC1594Facet is ERC1594, IStaticFunctionSelectors {
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 7;
+        uint256 selectorIndex = 5;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);
         unchecked {
             staticFunctionSelectors_[--selectorIndex] = this.redeemFrom.selector;
             staticFunctionSelectors_[--selectorIndex] = this.redeem.selector;
             staticFunctionSelectors_[--selectorIndex] = this.issue.selector;
             staticFunctionSelectors_[--selectorIndex] = this.isIssuable.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.transferFromWithData.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.transferWithData.selector;
             staticFunctionSelectors_[--selectorIndex] = this.initialize_ERC1594.selector;
         }
     }
