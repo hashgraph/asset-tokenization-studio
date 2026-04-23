@@ -19,19 +19,7 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
  * @author Asset Tokenization Studio Team
  */
 abstract contract HoldByPartition is IHoldByPartition, Modifiers {
-    // ─────────────────────────────────────────────────────────────
-    // Write operations
-    // ─────────────────────────────────────────────────────────────
-
-    /**
-     * @notice Creates a hold on the tokens of a token holder on a specific partition.
-     * @dev Validates partition, expiration timestamp, address recovery status, and partition
-     *      protection. Emits {HeldByPartition}.
-     * @param _partition The partition on which the hold is created.
-     * @param _hold Hold data structure containing escrow, destination, amount, and expiration.
-     * @return success_ True if the hold was created successfully.
-     * @return holdId_ The identifier of the created hold.
-     */
+    /// @inheritdoc IHoldByPartition
     function createHoldByPartition(
         bytes32 _partition,
         IHoldTypes.Hold calldata _hold
@@ -59,17 +47,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
         emit HeldByPartition(EvmAccessors.getMsgSender(), EvmAccessors.getMsgSender(), _partition, holdId_, _hold, "");
     }
 
-    /**
-     * @notice Creates a hold on the tokens of a token holder, by a third party, on a specific partition.
-     * @dev Validates partition, expiration timestamp, all involved addresses, and partition
-     *      protection. Decreases the third party's allowed balance for the hold. Emits {HeldFromByPartition}.
-     * @param _partition The partition on which the hold is created.
-     * @param _from The address from which the tokens will be held.
-     * @param _hold Hold data structure.
-     * @param _operatorData Additional data attached by the third party.
-     * @return success_ True if the hold was created successfully.
-     * @return holdId_ The identifier of the created hold.
-     */
+    /// @inheritdoc IHoldByPartition
     function createHoldFromByPartition(
         bytes32 _partition,
         address _from,
@@ -104,15 +82,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
         emit HeldFromByPartition(EvmAccessors.getMsgSender(), _from, _partition, holdId_, _hold, _operatorData);
     }
 
-    /**
-     * @notice Transfers the held tokens to the specified address.
-     * @dev Validates partition, hold ID, address identification, and compliance. Emits {HoldByPartitionExecuted}.
-     * @param _holdIdentifier The identifier of the hold to be executed.
-     * @param _to The address to which the held tokens will be transferred.
-     * @param _amount The amount of tokens to execute from the hold.
-     * @return success_ True if the hold was executed successfully.
-     * @return partition_ The partition from which the tokens were transferred.
-     */
+    /// @inheritdoc IHoldByPartition
     function executeHoldByPartition(
         IHoldTypes.HoldIdentifier calldata _holdIdentifier,
         address _to,
@@ -138,13 +108,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
         );
     }
 
-    /**
-     * @notice Releases the held tokens back to the token holder.
-     * @dev Callable only before the hold has expired. Emits {HoldByPartitionReleased}.
-     * @param _holdIdentifier The identifier of the hold to be released.
-     * @param _amount The amount of tokens to release from the hold.
-     * @return success_ True if the hold was released successfully.
-     */
+    /// @inheritdoc IHoldByPartition
     function releaseHoldByPartition(
         IHoldTypes.HoldIdentifier calldata _holdIdentifier,
         uint256 _amount
@@ -165,12 +129,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
         );
     }
 
-    /**
-     * @notice Reclaims the held tokens back to the token holder.
-     * @dev Callable only after the hold has expired. Emits {HoldByPartitionReclaimed}.
-     * @param _holdIdentifier The identifier of the hold to be reclaimed.
-     * @return success_ True if the hold was reclaimed successfully.
-     */
+    /// @inheritdoc IHoldByPartition
     function reclaimHoldByPartition(
         IHoldTypes.HoldIdentifier calldata _holdIdentifier
     )
@@ -192,16 +151,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
         );
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // Read operations (partition-scoped)
-    // ─────────────────────────────────────────────────────────────
-
-    /**
-     * @notice Returns the total amount of tokens held for a token holder on a specific partition.
-     * @param _partition The partition to query.
-     * @param _tokenHolder The address of the token holder.
-     * @return amount_ The total held amount on the given partition.
-     */
+    /// @inheritdoc IHoldByPartition
     function getHeldAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
@@ -214,12 +164,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
             );
     }
 
-    /**
-     * @notice Returns the number of active holds for a token holder on a specific partition.
-     * @param _partition The partition to query.
-     * @param _tokenHolder The address of the token holder.
-     * @return holdCount_ The number of holds on the given partition.
-     */
+    /// @inheritdoc IHoldByPartition
     function getHoldCountForByPartition(
         bytes32 _partition,
         address _tokenHolder
@@ -227,14 +172,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
         return HoldStorageWrapper.getHoldCountForByPartition(_partition, _tokenHolder);
     }
 
-    /**
-     * @notice Returns a paginated list of hold IDs for a token holder on a specific partition.
-     * @param _partition The partition to query.
-     * @param _tokenHolder The address of the token holder.
-     * @param _pageIndex The zero-based index of the page to retrieve.
-     * @param _pageLength The maximum number of hold IDs to return.
-     * @return holdsId_ The array of hold IDs for the given page.
-     */
+    /// @inheritdoc IHoldByPartition
     function getHoldsIdForByPartition(
         bytes32 _partition,
         address _tokenHolder,
@@ -244,17 +182,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
         return HoldStorageWrapper.getHoldsIdForByPartition(_partition, _tokenHolder, _pageIndex, _pageLength);
     }
 
-    /**
-     * @notice Returns the details of a specific hold identified by its hold identifier.
-     * @param _holdIdentifier The identifier of the hold.
-     * @return amount_ The amount of tokens held.
-     * @return expirationTimestamp_ The expiration timestamp of the hold.
-     * @return escrow_ The escrow address associated with the hold.
-     * @return destination_ The destination address for execution.
-     * @return data_ Additional data attached to the hold.
-     * @return operatorData_ Additional data attached by the operator.
-     * @return thirdPartyType_ The type of third party associated with the hold.
-     */
+    /// @inheritdoc IHoldByPartition
     function getHoldForByPartition(
         IHoldTypes.HoldIdentifier calldata _holdIdentifier
     )

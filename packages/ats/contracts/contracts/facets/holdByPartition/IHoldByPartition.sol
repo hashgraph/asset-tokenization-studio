@@ -15,10 +15,6 @@ import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";
  * @author Asset Tokenization Studio Team
  */
 interface IHoldByPartition is IHoldTypes {
-    // ─────────────────────────────────────────────────────────────
-    // Write operations
-    // ─────────────────────────────────────────────────────────────
-
     /**
      * @notice Creates a hold on the tokens of a token holder on a specific partition.
      * @param _partition The partition on which the hold is created.
@@ -82,10 +78,6 @@ interface IHoldByPartition is IHoldTypes {
     function reclaimHoldByPartition(
         IHoldTypes.HoldIdentifier calldata _holdIdentifier
     ) external returns (bool success_);
-
-    // ─────────────────────────────────────────────────────────────
-    // Read operations (partition-scoped)
-    // ─────────────────────────────────────────────────────────────
 
     /**
      * @notice Returns the total amount of tokens held for a token holder on a specific partition.

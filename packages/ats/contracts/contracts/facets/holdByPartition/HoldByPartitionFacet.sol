@@ -19,18 +19,12 @@ import { _HOLD_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.so
  * @author Asset Tokenization Studio Team
  */
 contract HoldByPartitionFacet is HoldByPartition, IStaticFunctionSelectors {
-    /**
-     * @notice Returns the resolver key used to register this facet in the Diamond proxy.
-     * @return staticResolverKey_ The `_HOLD_BY_PARTITION_RESOLVER_KEY` constant.
-     */
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _HOLD_BY_PARTITION_RESOLVER_KEY;
     }
 
-    /**
-     * @notice Returns the function selectors exposed by this facet for Diamond registration.
-     * @return staticFunctionSelectors_ Array containing the nine selectors of this facet.
-     */
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex = 9;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);
@@ -47,10 +41,7 @@ contract HoldByPartitionFacet is HoldByPartition, IStaticFunctionSelectors {
         }
     }
 
-    /**
-     * @notice Returns the interface IDs supported by this facet for ERC-165 introspection.
-     * @return staticInterfaceIds_ Array containing the `IHoldByPartition` interface ID.
-     */
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         staticInterfaceIds_[0] = type(IHoldByPartition).interfaceId;
