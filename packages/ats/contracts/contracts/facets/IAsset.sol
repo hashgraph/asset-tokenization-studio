@@ -46,11 +46,9 @@ import {
     ISustainabilityPerformanceTargetRateTypes
 } from "./layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRateTypes.sol";
 
-// Hold
-import { IHoldFacet } from "./hold/IHoldFacet.sol";
-import { IHoldByPartition } from "./holdByPartition/IHoldByPartition.sol";
-
 // Layer 2
+import { IHold } from "./layer_1/hold/IHold.sol";
+import { IHoldByPartition } from "./holdByPartition/IHoldByPartition.sol";
 import { IKyc } from "./layer_1/kyc/IKyc.sol";
 // IKpiLinkedRate and ISustainabilityPerformanceTargetRate are excluded: both define
 // getInterestRate() with incompatible return types (different InterestRate structs),
@@ -90,7 +88,9 @@ import { IClearingRedeem } from "./layer_1/clearing/IClearingRedeem.sol";
 import { IClearingHoldCreation } from "./layer_1/clearing/IClearingHoldCreation.sol";
 import { IClearingRead } from "./layer_1/clearing/IClearingRead.sol";
 import { IComplianceFacet } from "./compliance/IComplianceFacet.sol";
+import { IHoldFacet } from "./hold/IHoldFacet.sol";
 import { IERC1594 } from "./layer_1/ERC1400/ERC1594/IERC1594.sol";
+
 import { IDocumentation } from "./documentation/IDocumentation.sol";
 import { IERC1644 } from "./layer_1/ERC1400/ERC1644/IERC1644.sol";
 import { IERC20Permit } from "./layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
@@ -102,7 +102,8 @@ import { IControlList } from "./layer_1/controlList/IControlList.sol";
  * Intended for use in tests and external tooling to interact with all Diamond
  * methods through a single typed object, rather than multiple per-facet instances.
  *
- * Note: IERC3643 already includes its
+ * Note: IHold already transitively includes IAccessControl, IClearing, IERC1410,
+ * IHoldRead, IHoldManagement, and IHoldTokenHolder. IERC3643 already includes its
  * sub-interfaces. IERC20Votes includes IERC5805 and IVotes. Solidity C3 linearization
  * handles the resulting diamond inheritance without conflicts.
  *
@@ -126,8 +127,7 @@ interface IAsset is
     IKpis,
     ITimeTravel,
     IDiamond,
-    IHoldFacet,
-    IHoldByPartition,
+    IHold,
     IERC20,
     IERC20Votes,
     IERC1410,
@@ -172,6 +172,8 @@ interface IAsset is
     IClearingRead,
     // Additional ERC
     IComplianceFacet,
+    IHoldFacet,
+    IHoldByPartition,
     IERC1594,
     IDocumentation,
     IERC1644,
