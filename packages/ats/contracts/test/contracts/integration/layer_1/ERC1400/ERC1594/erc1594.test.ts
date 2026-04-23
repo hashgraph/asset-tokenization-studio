@@ -7,7 +7,6 @@ import { type IAsset, type ResolverProxy } from "@contract-types";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ATS_ROLES, DEFAULT_PARTITION, EIP1066_CODES, EMPTY_STRING, ZERO } from "@scripts";
-import { getSelector } from "@scripts/infrastructure";
 
 const AMOUNT = 1000;
 const BALANCE_OF_C_ORIGINAL = 2 * AMOUNT;
@@ -86,14 +85,6 @@ describe("ERC1594 Tests", () => {
         ).to.be.revertedWithCustomError(asset, "NotAllowedInMultiPartitionMode");
       });
 
-      it("GIVEN an initialized token WHEN issue THEN fails with NotAllowedInMultiPartitionMode", async () => {
-        // transfer with data fails
-        expect(await asset.connect(signer_A).isIssuable()).to.be.true;
-        await expect(
-          asset.connect(signer_A).issue(signer_D.address, 2 * BALANCE_OF_C_ORIGINAL, DATA),
-        ).to.be.revertedWithCustomError(asset, "NotAllowedInMultiPartitionMode");
-      });
-
       it("GIVEN an initialized token WHEN redeem THEN fails with NotAllowedInMultiPartitionMode", async () => {
         // transfer with data fails
         await expect(asset.connect(signer_C).redeem(2 * BALANCE_OF_C_ORIGINAL, DATA)).to.be.revertedWithCustomError(
@@ -161,14 +152,6 @@ describe("ERC1594 Tests", () => {
     beforeEach(async () => {
       await loadFixture(deploySecurityFixtureSinglePartition);
     });
-    describe("Cap", () => {
-      it("GIVEN a max supply WHEN issue more than the max supply THEN transaction fails with MaxSupplyReached", async () => {
-        // add to list fails
-        await expect(
-          asset.connect(signer_A).issue(signer_E.address, MAX_SUPPLY + 1, DATA),
-        ).to.be.revertedWithCustomError(asset, "MaxSupplyReached");
-      });
-    });
 
     describe("ControlList", () => {
       it("GIVEN blocked accounts (sender, to, from) WHEN transfer THEN transaction fails with AccountIsBlocked", async () => {
@@ -209,37 +192,6 @@ describe("ERC1594 Tests", () => {
         await expect(
           asset.connect(signer_C).transferFromWithData(signer_E.address, signer_D.address, AMOUNT, DATA),
         ).to.be.revertedWithCustomError(asset, "AccountIsBlocked");
-      });
-
-      it("GIVEN blocked accounts (to) USING WHITELIST WHEN issue THEN transaction fails with AccountIsBlocked", async () => {
-        // First deploy a new token using white list
-        const newTokenFixture = await deployEquityTokenFixture({
-          equityDataParams: {
-            securityData: {
-              internalKycActivated: true,
-              isWhiteList: true,
-            },
-          },
-        });
-
-        // accounts are blacklisted by default (white list)
-        const newAccessControl = asset.attach(newTokenFixture.diamond.target).connect(signer_A) as IAsset;
-        await newAccessControl.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
-        await newAccessControl.grantRole(ATS_ROLES._KYC_ROLE, signer_B.address);
-        await newAccessControl.grantRole(ATS_ROLES._SSI_MANAGER_ROLE, signer_A.address);
-
-        const newSsiManagement = asset.attach(newTokenFixture.diamond.target).connect(signer_A) as IAsset;
-        await newSsiManagement.addIssuer(signer_E.address);
-
-        const newKycFacet = asset.attach(newTokenFixture.diamond.target).connect(signer_B) as IAsset;
-        await newKycFacet.grantKyc(signer_E.address, EMPTY_STRING, ZERO, MAX_UINT256, signer_E.address);
-
-        // issue fails
-        const newErc1594 = asset.attach(newTokenFixture.diamond.target).connect(signer_A) as IAsset;
-        await expect(newErc1594.issue(signer_E.address, AMOUNT, DATA)).to.be.revertedWithCustomError(
-          asset,
-          "AccountIsBlocked",
-        );
       });
 
       it("GIVEN blocked accounts (sender, from) WHEN redeem THEN transaction fails with AccountIsBlocked", async () => {
@@ -319,14 +271,6 @@ describe("ERC1594 Tests", () => {
         ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
       });
 
-      it("GIVEN a paused Token WHEN issue THEN transaction fails with TokenIsPaused", async () => {
-        // issue fails
-        await expect(asset.connect(signer_C).issue(signer_E.address, AMOUNT, DATA)).to.be.revertedWithCustomError(
-          asset,
-          "TokenIsPaused",
-        );
-      });
-
       it("GIVEN a paused Token WHEN redeem THEN transaction fails with TokenIsPaused", async () => {
         // transfer with data fails
         await expect(asset.connect(signer_C).redeem(AMOUNT, DATA)).to.be.revertedWithCustomError(
@@ -338,26 +282,6 @@ describe("ERC1594 Tests", () => {
         await expect(asset.connect(signer_C).redeemFrom(signer_E.address, AMOUNT, DATA)).to.be.revertedWithCustomError(
           asset,
           "TokenIsPaused",
-        );
-      });
-    });
-
-    describe("AccessControl", () => {
-      it("GIVEN an account without issuer role WHEN issue THEN transaction fails with AccountHasNoRole", async () => {
-        // add to list fails
-        await expect(asset.connect(signer_B).issue(signer_E.address, AMOUNT, DATA)).to.be.revertedWithCustomError(
-          asset,
-          "AccountHasNoRoles",
-        );
-      });
-    });
-
-    describe("AccessControl", () => {
-      it("GIVEN an account without issuer role WHEN issue THEN transaction fails with AccountHasNoRole", async () => {
-        // add to list fails
-        await expect(asset.connect(signer_B).issue(signer_E.address, AMOUNT, DATA)).to.be.revertedWithCustomError(
-          asset,
-          "AccountHasNoRoles",
         );
       });
     });
@@ -399,21 +323,6 @@ describe("ERC1594 Tests", () => {
           );
         },
       );
-      it("GIVEN non kyc account " + "WHEN issue " + "THEN transaction reverts with InvalidKycStatus", async () => {
-        await asset.connect(signer_B).revokeKyc(signer_E.address);
-        await expect(asset.issue(signer_E.address, AMOUNT, DATA)).to.revertedWithCustomError(asset, "InvalidKycStatus");
-      });
-    });
-
-    it("GIVEN an account with issuer role WHEN issue THEN transaction succeeds", async () => {
-      // issue succeeds
-      expect(await asset.issue(signer_E.address, AMOUNT / 2, DATA))
-        .to.emit(asset, "Issued")
-        .withArgs(signer_C.address, signer_E.address, AMOUNT / 2);
-      expect(await asset.totalSupply()).to.be.equal(AMOUNT / 2);
-      expect(await asset.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
-      expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.be.equal(AMOUNT / 2);
-      expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.be.equal(AMOUNT / 2);
     });
 
     it("GIVEN an account with balance WHEN transferWithData THEN transaction success", async () => {

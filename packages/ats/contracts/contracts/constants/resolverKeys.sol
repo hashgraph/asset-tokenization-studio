@@ -57,6 +57,9 @@ bytes32 constant _CAP_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0xa3
 // keccak256("security.token.standard.compliance.resolverKey");
 bytes32 constant _COMPLIANCE_RESOLVER_KEY = 0x26dd018c79db76fffcf69d611558031ed11d7660991c2466b284afe6cfdfe5b5;
 
+// keccak256("security.token.standard.mint.resolverKey");
+bytes32 constant _MINT_RESOLVER_KEY = 0x936fea8488bdd2feb75c9f50636e7ca7a0d630c49209e3af07c00abb000da03f;
+
 // keccak256("security.token.standard.core.resolverKey");
 bytes32 constant _CORE_RESOLVER_KEY = 0x6b7d10d5f354a1dd56d2152e6a9c56b614c4c2c9d08f5289a72824dfc13132eb;
 

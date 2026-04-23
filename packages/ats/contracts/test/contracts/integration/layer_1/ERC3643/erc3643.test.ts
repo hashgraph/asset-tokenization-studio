@@ -159,51 +159,6 @@ describe("ERC3643 Tests", () => {
       });
     });
 
-    describe("mint", () => {
-      it("GIVEN an account with issuer role WHEN mint THEN transaction succeeds", async () => {
-        // issue succeeds
-        expect(await asset.mint(signer_E.address, AMOUNT / 2))
-          .to.emit(asset, "Issued")
-          .withArgs(signer_C.address, signer_E.address, AMOUNT / 2);
-        expect(await asset.totalSupply()).to.be.equal(AMOUNT / 2);
-        expect(await asset.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
-        expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.be.equal(AMOUNT / 2);
-        expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.be.equal(AMOUNT / 2);
-      });
-      it("GIVEN a paused token WHEN attempting to mint TokenIsPaused error", async () => {
-        await asset.addIssuer(signer_A.address);
-        await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-
-        await asset.connect(signer_B).pause();
-
-        await expect(asset.mint(signer_A.address, AMOUNT)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
-      });
-      it("GIVEN a max supply WHEN mint more than the max supply THEN transaction fails with MaxSupplyReached", async () => {
-        await expect(asset.connect(signer_A).mint(signer_E.address, MAX_SUPPLY + 1)).to.be.revertedWithCustomError(
-          asset,
-          "MaxSupplyReached",
-        );
-      });
-      it("GIVEN blocked account USING WHITELIST WHEN mint THEN transaction fails with AccountIsBlocked", async () => {
-        // Blacklisting accounts
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_A.address);
-        await asset.connect(signer_A).addToControlList(signer_C.address);
-
-        await asset.addIssuer(signer_C.address);
-        await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_C.address);
-
-        // mint fails
-        await expect(asset.connect(signer_C).mint(signer_C.address, AMOUNT)).to.be.revertedWithCustomError(
-          asset,
-          "AccountIsBlocked",
-        );
-      });
-      it("GIVEN non kyc account WHEN mint THEN transaction reverts with InvalidKycStatus", async () => {
-        await asset.connect(signer_B).revokeKyc(signer_E.address);
-        await expect(asset.mint(signer_E.address, AMOUNT)).to.revertedWithCustomError(asset, "InvalidKycStatus");
-      });
-    });
-
     describe("burn", () => {
       it("GIVEN an initialized token WHEN burning THEN transaction success", async () => {
         //happy path
@@ -705,7 +660,7 @@ describe("ERC3643 Tests", () => {
         await kycNoCompliance.grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
         await kycNoCompliance.grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
 
-        await erc3643NoCompliance.mint(signer_E.address, AMOUNT);
+        await newasset.mint(signer_E.address, AMOUNT);
 
         await expect(erc20NoCompliance.transfer(signer_D.address, AMOUNT / 2)).to.not.be.reverted;
       });
@@ -760,7 +715,7 @@ describe("ERC3643 Tests", () => {
         await kycNoCompliance.grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
         await kycNoCompliance.grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
 
-        await erc3643NoCompliance.mint(signer_E.address, AMOUNT);
+        await newasset.mint(signer_E.address, AMOUNT);
 
         await expect(erc20NoCompliance.transfer(signer_D.address, AMOUNT / 2)).to.not.be.reverted;
       });

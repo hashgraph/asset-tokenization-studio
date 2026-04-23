@@ -78,6 +78,7 @@ import {
   ERC3643BatchFacet__factory,
   ERC3643ManagementFacet__factory,
   ERC3643OperationsFacet__factory,
+  MintFacet__factory,
   ExternalControlListManagementFacet__factory,
   ExternalKycListManagementFacet__factory,
   ExternalPauseManagementFacet__factory,
@@ -499,7 +500,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Minting ${amount} ${security} to account: ${target.toString()}`);
 
     return this.executeTransaction(
-      ERC3643OperationsFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      MintFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "mint",
       [target.toString(), amount.toBigInt()],
       GAS.MINT,

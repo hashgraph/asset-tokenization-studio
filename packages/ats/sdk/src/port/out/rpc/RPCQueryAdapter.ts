@@ -40,6 +40,7 @@ import {
   ERC20Votes__factory,
   ERC1594Facet__factory,
   ERC1644Facet__factory,
+  MintFacet__factory,
   IAsset__factory,
   ExternalControlListManagementFacet__factory,
   ExternalKycListManagementFacet__factory,
@@ -270,7 +271,7 @@ export class RPCQueryAdapter {
     const clearingActive = await this.connect(ClearingActionsFacet__factory, address.toString()).isClearingActivated();
     const internalKycActivated = await this.connect(KycFacet__factory, address.toString()).isInternalKycActivated();
     const isMultiPartition = await this.connect(ERC1410ReadFacet__factory, address.toString()).isMultiPartition();
-    const isIssuable = await this.connect(ERC1594Facet__factory, address.toString()).isIssuable();
+    const isIssuable = await this.connect(MintFacet__factory, address.toString()).isIssuable();
     const isPaused = await this.connect(PauseFacet__factory, address.toString()).isPaused();
     const regulationInfo = await this.connect(Security__factory, address.toString()).getSecurityRegulationData();
     const diamondAddress = await this.mirrorNode.getHederaIdfromContractAddress(address.toString());

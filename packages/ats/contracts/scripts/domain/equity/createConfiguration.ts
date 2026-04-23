@@ -68,6 +68,7 @@ const EQUITY_FACETS = [
   "ERC3643OperationsFacet",
   "ERC3643ReadFacet",
   "ComplianceFacet",
+  "MintFacet",
 
   // Clearing & Settlement (8)
   "ClearingActionsFacet",
