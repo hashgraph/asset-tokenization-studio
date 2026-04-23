@@ -3,11 +3,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { ContractId } from "@hiero-ledger/sdk";
-import { ethers } from "ethers";
 import { Factory__factory, TREXFactoryAts__factory } from "@hashgraph/asset-tokenization-contracts";
 import { EVM_ZERO_ADDRESS, GAS } from "@core/Constants";
 import {
-  FactoryBondFixedRateToken,
   FactoryBondToken,
   FactoryEquityToken,
   FactoryRegulationData,
@@ -523,7 +521,7 @@ export class FactoryOperations {
     try {
       return this.executor.executeContractCall(
         factoryId!.toString(),
-        new ethers.Interface(TREXFactoryAts__factory.abi as ethers.InterfaceAbi),
+        TREXFactoryAts__factory.createInterface(),
         "deployTREXSuiteAtsBond",
         [
           salt,
@@ -639,7 +637,7 @@ export class FactoryOperations {
       LogService.logTrace(`Deploying equity: ${{ security: securityTokenToCreate }}`);
       return this.executor.executeContractCall(
         factoryId!.toString(),
-        new ethers.Interface(TREXFactoryAts__factory.abi as ethers.InterfaceAbi),
+        TREXFactoryAts__factory.createInterface(),
         "deployTREXSuiteAtsEquity",
         [
           salt,
