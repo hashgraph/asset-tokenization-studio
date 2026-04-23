@@ -6,13 +6,6 @@ import { IHoldTypes } from "./IHoldTypes.sol";
 
 interface IHoldRead is IHoldTypes {
     /**
-     * @notice Gets the total amount of tokens held for a specific token holder
-     * @param _tokenHolder The address of the token holder
-     * @return amount_ The total amount of tokens held for the token holder
-     */
-    function getHeldAmountFor(address _tokenHolder) external view returns (uint256 amount_);
-
-    /**
      * @notice Gets the total amount of tokens held for a specific token holder on a specific partition
      * @param _partition The partition on which to check the held amount
      * @param _tokenHolder The address of the token holder
@@ -73,8 +66,4 @@ interface IHoldRead is IHoldTypes {
             bytes memory operatorData_,
             ThirdPartyType thirdPartyType_
         );
-
-    function getHoldThirdParty(
-        IHoldTypes.HoldIdentifier calldata _holdIdentifier
-    ) external view returns (address thirdParty_);
 }
