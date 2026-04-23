@@ -85,7 +85,6 @@ import {
   FixedRate__factory,
   FreezeFacet__factory,
   HoldManagementFacet__factory,
-  HoldTokenHolderFacet__factory,
   IEquity,
   VotingFacet__factory,
   KpiLinkedRate__factory,
@@ -1046,7 +1045,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return this.executeTransaction(
-      HoldTokenHolderFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      IAsset__factory.connect(security.toString(), this.getSignerOrProvider()),
       "createHoldByPartition",
       [partitionId, hold],
       GAS.CREATE_HOLD,
@@ -1075,7 +1074,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return this.executeTransaction(
-      HoldTokenHolderFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      IAsset__factory.connect(security.toString(), this.getSignerOrProvider()),
       "createHoldFromByPartition",
       [partitionId, sourceId.toString(), hold, "0x"],
       GAS.CREATE_HOLD_FROM,
@@ -1165,7 +1164,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return this.executeTransaction(
-      HoldTokenHolderFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      IAsset__factory.connect(security.toString(), this.getSignerOrProvider()),
       "releaseHoldByPartition",
       [holdIdentifier, amount.toBigInt()],
       GAS.RELEASE_HOLD,
@@ -1187,7 +1186,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return this.executeTransaction(
-      HoldTokenHolderFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      IAsset__factory.connect(security.toString(), this.getSignerOrProvider()),
       "reclaimHoldByPartition",
       [holdIdentifier],
       GAS.RECLAIM_HOLD,
@@ -1213,7 +1212,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return this.executeTransaction(
-      HoldTokenHolderFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      IAsset__factory.connect(security.toString(), this.getSignerOrProvider()),
       "executeHoldByPartition",
       [holdIdentifier, targetId.toString(), amount.toBigInt()],
       GAS.EXECUTE_HOLD_BY_PARTITION,

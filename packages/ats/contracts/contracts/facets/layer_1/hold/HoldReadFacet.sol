@@ -12,14 +12,12 @@ contract HoldReadFacet is HoldRead, IStaticFunctionSelectors {
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](6);
-        staticFunctionSelectors_[selectorIndex++] = this.getHeldAmountFor.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getHeldAmountForByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getHoldCountForByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getHoldsIdForByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getHoldForByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getHoldThirdParty.selector;
+        uint256 selectorIndex = 2;
+        staticFunctionSelectors_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this.getHoldThirdParty.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getHeldAmountFor.selector;
+        }
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {

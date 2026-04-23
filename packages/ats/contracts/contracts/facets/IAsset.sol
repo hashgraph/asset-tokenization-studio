@@ -100,7 +100,7 @@ import { IControlList } from "./layer_1/controlList/IControlList.sol";
  * methods through a single typed object, rather than multiple per-facet instances.
  *
  * Note: IHold already transitively includes IAccessControl, IClearing, IERC1410,
- * IHoldRead, IHoldManagement, and IHoldTokenHolder. IERC3643 already includes its
+ * IHoldRead, IHoldManagement, and IHoldByPartition. IERC3643 already includes its
  * sub-interfaces. IERC20Votes includes IERC5805 and IVotes. Solidity C3 linearization
  * handles the resulting diamond inheritance without conflicts.
  *

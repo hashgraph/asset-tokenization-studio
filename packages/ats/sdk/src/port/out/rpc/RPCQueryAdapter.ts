@@ -873,7 +873,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting Held Amount For ${targetId} by partition ${partitionId}`);
 
     const heldAmountForByPartition = await this.connect(
-      HoldReadFacet__factory,
+      IAsset__factory,
       address.toString(),
     ).getHeldAmountForByPartition(partitionId, targetId.toString());
 
@@ -884,7 +884,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting Hold Count For ${address} by partition ${partitionId}`);
 
     const holdCountForByPartition = await this.connect(
-      HoldReadFacet__factory,
+      IAsset__factory,
       address.toString(),
     ).getHoldCountForByPartition(partitionId, targetId.toString());
 
@@ -901,7 +901,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting Holds Id For ${target} by partition ${partitionId} from ${start} to ${end}`);
 
     const holdsIdForByPartition = await this.connect(
-      HoldReadFacet__factory,
+      IAsset__factory,
       address.toString(),
     ).getHoldsIdForByPartition(partitionId, target.toString(), start, end);
 
@@ -916,7 +916,7 @@ export class RPCQueryAdapter {
   ): Promise<HoldDetails> {
     LogService.logTrace(`Getting hold details for ${targetId} id ${holdId} by partition ${partitionId}`);
 
-    const hold = await this.connect(HoldReadFacet__factory, address.toString()).getHoldForByPartition({
+    const hold = await this.connect(IAsset__factory, address.toString()).getHoldForByPartition({
       partition: partitionId,
       tokenHolder: targetId.toString(),
       holdId,
