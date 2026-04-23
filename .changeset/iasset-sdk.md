@@ -1,6 +1,6 @@
 ---
-"@hashgraph/asset-tokenization-contracts": minor
+"@hashgraph/asset-tokenization-contracts": major
 "@hashgraph/asset-tokenization-sdk": minor
 ---
 
-Use IAsset in SDK for every SC calls and change actionTypeId\_ and actionTypeIndex\_ by actionIdByType\_ in CoporporateActions
+Use IAsset in SDK for every SC call and change actionTypeId* and actionTypeIndex* to actionIdByType\_ in CorporateActions
