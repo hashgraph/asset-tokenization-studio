@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ContractId } from "@hiero-ledger/sdk";
-import { AmortizationFacet__factory } from "@hashgraph/asset-tokenization-contracts";
+import { IAsset__factory } from "@hashgraph/asset-tokenization-contracts";
 import { GAS } from "@core/Constants";
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import EvmAddress from "@domain/context/contract/EvmAddress";
@@ -29,7 +29,7 @@ export class AmortizationOperations {
     };
     return this.executor.executeContractCall(
       securityId.toString(),
-      AmortizationFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "setAmortization",
       [amortization],
       GAS.SET_AMORTIZATION,
@@ -44,7 +44,7 @@ export class AmortizationOperations {
     LogService.logTrace(`Cancelling amortization: ${amortizationId} for security: ${security}`);
     return this.executor.executeContractCall(
       securityId.toString(),
-      AmortizationFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "cancelAmortization",
       [amortizationId],
       GAS.CANCEL_AMORTIZATION,
@@ -63,7 +63,7 @@ export class AmortizationOperations {
     );
     return this.executor.executeContractCall(
       securityId.toString(),
-      AmortizationFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "setAmortizationHold",
       [amortizationId, tokenHolder.toString(), tokenAmount.toHexString()],
       GAS.SET_AMORTIZATION_HOLD,
@@ -81,7 +81,7 @@ export class AmortizationOperations {
     );
     return this.executor.executeContractCall(
       securityId.toString(),
-      AmortizationFacet__factory.createInterface(),
+      IAsset__factory.createInterface(),
       "releaseAmortizationHold",
       [amortizationId, tokenHolder.toString()],
       GAS.RELEASE_AMORTIZATION_HOLD,

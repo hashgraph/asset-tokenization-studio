@@ -82,6 +82,7 @@ const BOND_FACETS = [
   "ClearingReadFacet",
   "ClearingRedeemFacet",
   "ClearingTransferFacet",
+  "HoldFacet",
   "HoldManagementFacet",
   "HoldReadFacet",
   "HoldTokenHolderFacet",

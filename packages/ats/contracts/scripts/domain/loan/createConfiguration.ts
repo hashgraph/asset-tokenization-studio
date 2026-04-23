@@ -77,6 +77,7 @@ const LOAN_FACETS = [
   "ComplianceFacet",
 
   // Hold
+  "HoldFacet",
   "HoldReadFacet",
   "HoldManagementFacet",
   "HoldTokenHolderFacet",
