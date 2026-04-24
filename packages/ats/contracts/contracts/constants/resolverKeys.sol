@@ -366,6 +366,9 @@ bytes32 constant _BATCH_BURN_RESOLVER_KEY = 0x43fc8244bf524f6f323a3774e3e8b4da44
 // keccak256("security.token.standard.batchmint.resolverKey");
 bytes32 constant _BATCH_MINT_RESOLVER_KEY = 0x374297c978f655a089db25efe1b31a49abab9c474f8f1a4a54224df3f09e2b39;
 
+// keccak256("security.token.standard.batchtransfer.resolverKey");
+bytes32 constant _BATCH_TRANSFER_RESOLVER_KEY = 0x2c2bcad4399109e963ba5d1f9b9731b938099d1d3352ee7455c5e5076de49c82;
+
 // keccak256("security.token.standard.freeze.resolverKey");
 bytes32 constant _FREEZE_RESOLVER_KEY = 0x49f765e7155d979a148049c2a0ebed5e028b11799061897a255f99314f0bd3f1;
 

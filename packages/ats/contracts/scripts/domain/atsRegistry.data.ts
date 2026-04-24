@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-24T10:53:36.196Z
- * Facets: 89
+ * Generated: 2026-04-24T12:22:49.686Z
+ * Facets: 90
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -26,6 +26,7 @@ import {
   BalanceTrackerFacet__factory,
   BatchBurnFacet__factory,
   BatchMintFacet__factory,
+  BatchTransferFacet__factory,
   BondUSAFacet__factory,
   BondUSAFixedRateFacet__factory,
   BondUSAKpiLinkedRateFacet__factory,
@@ -1162,6 +1163,66 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "ZeroValue", signature: { full: "error ZeroValue()", canonical: "ZeroValue()" }, selector: "0x7c946ed7" },
     ],
     factory: (signer) => new BatchMintFacet__factory(signer),
+  },
+
+  BatchTransferFacet: {
+    name: "BatchTransferFacet",
+    description:
+      "Diamond facet that exposes the batch transfer capability through the `IBatchTransfer` interface, registered under `_BATCH_TRANSFER_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_BATCH_TRANSFER_RESOLVER_KEY",
+      value: "0x2c2bcad4399109e963ba5d1f9b9731b938099d1d3352ee7455c5e5076de49c82",
+    },
+    inheritance: ["BatchTransfer", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "batchTransfer",
+        signature: {
+          full: "function batchTransfer(address[] _toList, uint256[] _amounts)",
+          canonical: "batchTransfer(address[],uint256[])",
+        },
+        selector: "0x88d695b2",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "ClearingIsActivated",
+        signature: { full: "error ClearingIsActivated()", canonical: "ClearingIsActivated()" },
+        selector: "0x5b2e3086",
+      },
+      {
+        name: "InputAmountsArrayLengthMismatch",
+        signature: { full: "error InputAmountsArrayLengthMismatch()", canonical: "InputAmountsArrayLengthMismatch()" },
+        selector: "0x64f13710",
+      },
+      {
+        name: "NotAllowedInMultiPartitionMode",
+        signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
+        selector: "0x76d08f88",
+      },
+      {
+        name: "PartitionsAreProtectedAndNoRole",
+        signature: {
+          full: "error PartitionsAreProtectedAndNoRole(address account, bytes32 role)",
+          canonical: "PartitionsAreProtectedAndNoRole(address,bytes32)",
+        },
+        selector: "0x55347310",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+    ],
+    factory: (signer) => new BatchTransferFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   BondUSAFacet: {
@@ -7390,14 +7451,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x42a47abc",
       },
-      {
-        name: "batchTransfer",
-        signature: {
-          full: "function batchTransfer(address[] _toList, uint256[] _amounts)",
-          canonical: "batchTransfer(address[],uint256[])",
-        },
-        selector: "0x88d695b2",
-      },
     ],
     events: [
       {
@@ -7476,11 +7529,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x505389ae",
       },
       {
-        name: "ClearingIsActivated",
-        signature: { full: "error ClearingIsActivated()", canonical: "ClearingIsActivated()" },
-        selector: "0x5b2e3086",
-      },
-      {
         name: "ComplianceCallFailed",
         signature: { full: "error ComplianceCallFailed()", canonical: "ComplianceCallFailed()" },
         selector: "0x67fba102",
@@ -7517,14 +7565,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
         selector: "0x76d08f88",
-      },
-      {
-        name: "PartitionsAreProtectedAndNoRole",
-        signature: {
-          full: "error PartitionsAreProtectedAndNoRole(address account, bytes32 role)",
-          canonical: "PartitionsAreProtectedAndNoRole(address,bytes32)",
-        },
-        selector: "0x55347310",
       },
       {
         name: "TokenIsNotControllable",
@@ -13467,7 +13507,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 89 as const;
+export const TOTAL_FACETS = 90 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

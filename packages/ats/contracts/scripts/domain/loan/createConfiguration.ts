@@ -76,6 +76,7 @@ const LOAN_FACETS = [
   "ERC3643BatchFacet",
   "BatchBurnFacet",
   "BatchMintFacet",
+  "BatchTransferFacet",
   "ComplianceFacet",
   "MintFacet",
 
