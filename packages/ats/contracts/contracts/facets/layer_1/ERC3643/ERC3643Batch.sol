@@ -11,28 +11,6 @@ import { TokenCoreOps } from "../../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ERC3643Batch is IERC3643Batch, Modifiers {
-    function batchTransfer(
-        address[] calldata _toList,
-        uint256[] calldata _amounts
-    )
-        external
-        onlyUnpaused
-        onlyValidInputAmountsArrayLength(_toList, _amounts)
-        onlyWithoutMultiPartition
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
-        onlyIdentifiedAddresses(EvmAccessors.getMsgSender(), address(0))
-        onlyCompliant(EvmAccessors.getMsgSender(), address(0), false)
-    {
-        for (uint256 i = 0; i < _toList.length; i++) {
-            ERC1594StorageWrapper.checkIdentity(address(0), _toList[i]);
-            ERC1594StorageWrapper.checkCompliance(address(0), _toList[i], false);
-        }
-        for (uint256 i = 0; i < _toList.length; i++) {
-            TokenCoreOps.transfer(EvmAccessors.getMsgSender(), _toList[i], _amounts[i]);
-        }
-    }
-
     function batchForcedTransfer(
         address[] calldata _fromList,
         address[] calldata _toList,

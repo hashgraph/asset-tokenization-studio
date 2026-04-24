@@ -97,6 +97,7 @@ import { IERC20Permit } from "./layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
 import { IControlList } from "./layer_1/controlList/IControlList.sol";
 import { IBatchBurn } from "./batchBurn/IBatchBurn.sol";
 import { IBatchMint } from "./batchMint/IBatchMint.sol";
+import { IBatchTransfer } from "./batchTransfer/IBatchTransfer.sol";
 
 /**
  * @title IAsset
@@ -185,5 +186,6 @@ interface IAsset is
     IExternalControlList,
     IExternalControlListManagement,
     IBatchBurn,
-    IBatchMint
+    IBatchMint,
+    IBatchTransfer
 {}
