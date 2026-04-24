@@ -395,8 +395,8 @@ async function deployFacetsPhase(ctx: UpgradePhaseContext): Promise<void> {
   info(`   Found ${allFacets.length} facets in registry`);
 
   if (!useTimeTravel) {
-    allFacets = allFacets.filter((f) => f.name !== "TimeTravelFacet");
-    info("   TimeTravelFacet removed from deployment list");
+    allFacets = allFacets.filter((f) => f.name !== "EvmAccessorsFacet");
+    info("   EvmAccessorsFacet removed from deployment list");
   }
 
   // Initialize facets Map if not exists

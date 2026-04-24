@@ -4,7 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IAllowance } from "./IAllowance.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC20StorageWrapper } from "../../domain/asset/ERC20StorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
@@ -82,6 +81,6 @@ abstract contract Allowance is IAllowance, Modifiers {
      *      storage.
      */
     function allowance(address owner, address spender) external view override returns (uint256) {
-        return ERC20StorageWrapper.allowanceAdjustedAt(owner, spender, TimeTravelStorageWrapper.getBlockTimestamp());
+        return ERC20StorageWrapper.allowanceAdjustedAt(owner, spender, EvmAccessors.getBlockTimestamp());
     }
 }

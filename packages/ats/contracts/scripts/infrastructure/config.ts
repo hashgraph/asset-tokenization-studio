@@ -283,3 +283,26 @@ export function getDeployedAddress(
 export function isDeployed(contractName: string, network: string): boolean {
   return getDeployedAddress(contractName, network) !== undefined;
 }
+
+/**
+ * Check if test mode is enabled for EVM accessor generation.
+ *
+ * In test mode (ATS_TEST_MODE=true): generates accessors with slot fallback, override readers, writers.
+ * In prod mode (default): generates accessors with getters only, inline native opcodes.
+ *
+ * Routes through Configuration.ts (single source of truth for env vars).
+ *
+ * @returns true if test mode is enabled, false otherwise (default)
+ *
+ * @example
+ * ```typescript
+ * if (isTestMode()) {
+ *   console.log('Generating test-mode accessors with fallback readers/writers')
+ * } else {
+ *   console.log('Generating prod-mode accessors (getters only)')
+ * }
+ * ```
+ */
+export function isTestMode(): boolean {
+  return Configuration.isTestMode;
+}

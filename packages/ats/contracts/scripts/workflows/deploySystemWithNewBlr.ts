@@ -317,7 +317,7 @@ export async function deploySystemWithNewBlr(
     // Determine expected facet count for complete deployment check
     let expectedFacets = atsRegistry.getAllFacets();
     if (!useTimeTravel) {
-      expectedFacets = expectedFacets.filter((f) => f.name !== "TimeTravelFacet");
+      expectedFacets = expectedFacets.filter((f) => f.name !== "EvmAccessorsFacet");
     }
     const expectedFacetCount = expectedFacets.length;
 
@@ -343,8 +343,8 @@ export async function deploySystemWithNewBlr(
       info(`   Found ${allFacets.length} facets in registry`);
 
       if (!useTimeTravel) {
-        allFacets = allFacets.filter((f) => f.name !== "TimeTravelFacet");
-        info("   TimeTravelFacet removed from deployment list");
+        allFacets = allFacets.filter((f) => f.name !== "EvmAccessorsFacet");
+        info("   EvmAccessorsFacet removed from deployment list");
       }
 
       // Initialize facets Map if not exists

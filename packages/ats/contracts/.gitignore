@@ -73,3 +73,6 @@ deployments/**/.checkpoints/
 .engram/
 
 gasReporterOutput.json
+
+# Generated accessor library (do not commit — emitted by scripts/tools/accessor-generator)
+contracts/infrastructure/utils/EvmAccessors.sol

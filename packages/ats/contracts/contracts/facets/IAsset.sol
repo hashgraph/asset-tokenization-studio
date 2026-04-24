@@ -16,7 +16,6 @@ import { IBondUSA } from "./layer_3/bondUSA/IBondUSA.sol";
 // Layer 1 — ERC3643
 import { ICorporateActions } from "./layer_1/corporateAction/ICorporateActions.sol";
 import { IDiamond } from "../infrastructure/proxy/IDiamond.sol";
-import { ICommonErrors } from "../infrastructure/errors/ICommonErrors.sol";
 
 // Core
 import { ICore } from "./core/ICore.sol";
@@ -38,13 +37,8 @@ import { IExternalControlList } from "./layer_1/externalControlList/IExternalCon
 import { IExternalControlListManagement } from "./layer_1/externalControlList/IExternalControlListManagement.sol";
 import { IExternalKycList } from "./layer_1/externalKycList/IExternalKycList.sol";
 import { IExternalKycListManagement } from "./layer_1/externalKycList/IExternalKycListManagement.sol";
-import { IExternalPause } from "./layer_1/externalPause/IExternalPause.sol";
 import { IExternalPauseManagement } from "./layer_1/externalPause/IExternalPauseManagement.sol";
 import { IFixedRate } from "./layer_2/interestRate/fixedRate/IFixedRate.sol";
-import { IKpiLinkedRateErrors } from "./layer_2/interestRate/kpiLinkedRate/IKpiLinkedRateErrors.sol";
-import {
-    ISustainabilityPerformanceTargetRateTypes
-} from "./layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRateTypes.sol";
 
 // Layer 2
 import { IHold } from "./layer_1/hold/IHold.sol";
@@ -63,7 +57,7 @@ import { IVoting } from "./layer_2/voting/IVoting.sol";
 // Layer 3
 import { ISecurity } from "./layer_2/security/ISecurity.sol";
 import { ISsiManagement } from "./layer_1/ssi/ISsiManagement.sol";
-import { ITimeTravel } from "../test/testTimeTravel/ITimeTravel.sol";
+import { IEvmAccessorsFacet } from "../test/testAccessors/IEvmAccessorsFacet.sol";
 import { IBalanceTracker } from "./balanceTracker/IBalanceTracker.sol";
 import { ITransferAndLock } from "./layer_3/transferAndLock/ITransferAndLock.sol";
 import { ICoupon } from "./layer_2/coupon/ICoupon.sol";
@@ -126,7 +120,7 @@ interface IAsset is
     IExternalKycList,
     IExternalKycListManagement,
     IKpis,
-    ITimeTravel,
+    IEvmAccessorsFacet,
     IDiamond,
     IHold,
     IERC20,

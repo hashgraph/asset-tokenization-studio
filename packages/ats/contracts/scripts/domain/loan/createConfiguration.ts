@@ -31,7 +31,7 @@ import { atsRegistry } from "../atsRegistry";
  * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
  * so we only include DiamondFacet to avoid selector collisions.
  *
- * Note: Loan does NOT include TimeTravel variants (per spec). TimeTravelFacet
+ * Note: Loan does NOT include TimeTravel variants (per spec). EvmAccessorsFacet
  * is injected automatically by the deploy script in test environments.
  */
 const LOAN_FACETS = [
@@ -167,9 +167,11 @@ export async function createLoanConfiguration(
   confirmations: number = 0,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
   // Build facet data with resolver keys from registry
-  const baseFacets = useTimeTravel ? [...LOAN_FACETS, "TimeTravelFacet"] : LOAN_FACETS;
+  const baseFacets = useTimeTravel ? [...LOAN_FACETS, "EvmAccessorsFacet"] : LOAN_FACETS;
   const facetNames = useTimeTravel
-    ? baseFacets.map((name) => (name === "TimeTravelFacet" || name.endsWith("TimeTravel") ? name : `${name}TimeTravel`))
+    ? baseFacets.map((name) =>
+        name === "EvmAccessorsFacet" || name.endsWith("TimeTravel") ? name : `${name}TimeTravel`,
+      )
     : baseFacets;
 
   const facets = facetNames.map((name) => {

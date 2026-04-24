@@ -1,16 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { TASK_COMPILE } from "hardhat/builtin-tasks/task-names";
-import { task } from "hardhat/config";
+import { TASK_COMPILE, TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS } from "hardhat/builtin-tasks/task-names";
+import { task, subtask } from "hardhat/config";
 import fs from "fs";
 import { sync as globSync } from "glob";
 import { Artifact } from "hardhat/types";
 import path from "path";
+import { isTestMode } from "../scripts/infrastructure/config";
 
 task(
   TASK_COMPILE,
   "Replace 'interface' with 'interfaces' in TypeChain generated files to avoid compilation errors",
   async function (taskArguments, hre, runSuper) {
+    // Generate EvmAccessors.sol before compilation based on ATS_TEST_MODE
+    await hre.run("generate-evm-accessors");
+
     await runSuper(taskArguments);
 
     await hre.run("erc3643-clone-interfaces");
@@ -23,6 +27,22 @@ task(
     await hre.run("generate-registry", { silent: true });
   },
 );
+
+/**
+ * Filter out test-only directories when in prod mode.
+ * In prod compile (!isTestMode()), exclude test-only facet directories
+ * that call non-existent writers, so compilation doesn't fail.
+ */
+subtask(TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS).setAction(async (_, __, runSuper) => {
+  const paths = await runSuper();
+  if (!isTestMode()) {
+    return paths.filter(
+      (p) =>
+        !p.includes("/test/testTimeTravel/") && !p.includes("/test/testAccessors/") && !p.includes("/test/testBond/"),
+    );
+  }
+  return paths;
+});
 
 function patchTypeChainFiles(pattern: string) {
   const files = globSync(pattern, { nodir: true });
@@ -215,4 +235,30 @@ task("erc3643-clone-interfaces", async (_, hre) => {
     console.error("Failed to format ERC3643 interface files");
     throw error;
   }
+});
+
+/**
+ * Generate EvmAccessors.sol based on isTestMode() configuration.
+ * Prod mode (default): getters only, inline native opcodes
+ * Test mode (isTestMode()=true): getters with slot fallback, override readers, writers
+ */
+task("generate-evm-accessors", async () => {
+  const { generate } = await import("../scripts/tools/accessor-generator/generator");
+  const testMode = isTestMode();
+  const mode = testMode ? "test" : "prod";
+
+  // Output path: contracts/infrastructure/utils/EvmAccessors.sol
+  const outputPath = path.join(__dirname, "../contracts/infrastructure/utils/EvmAccessors.sol");
+
+  // Ensure output directory exists
+  const outputDir = path.dirname(outputPath);
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
+  // Generate and write
+  const source = generate(mode, "scripts/tools/accessor-generator/");
+  fs.writeFileSync(outputPath, source, "utf8");
+
+  console.log(`✅ Generated EvmAccessors.sol (${mode} mode)`);
 });

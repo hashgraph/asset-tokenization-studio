@@ -36,7 +36,7 @@ import { BusinessLogicResolver } from "@contract-types";
  * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
  * so we only include DiamondFacet to avoid selector collisions.
  *
- * Note: Loan Portfolio does NOT include TimeTravel variants (per spec). TimeTravelFacet
+ * Note: Loan Portfolio does NOT include TimeTravel variants (per spec). EvmAccessorsFacet
  * is injected automatically by the deploy script in test environments.
  */
 const LOANS_PORTFOLIO_FACETS = [
@@ -119,7 +119,7 @@ export async function createLoansPortfolioConfiguration(
   confirmations: number = 0,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
   const facetNames = useTimeTravel
-    ? [...LOANS_PORTFOLIO_FACETS.map((name) => `${name}TimeTravel`), "TimeTravelFacet"]
+    ? [...LOANS_PORTFOLIO_FACETS.map((name) => `${name}TimeTravel`), "EvmAccessorsFacet"]
     : [...LOANS_PORTFOLIO_FACETS];
 
   // Build facet data with resolver keys from registry

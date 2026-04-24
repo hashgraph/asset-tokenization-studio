@@ -206,6 +206,23 @@ export default class Configuration {
     );
   }
 
+  /**
+   * Determines whether test mode is enabled for EVM accessor generation.
+   *
+   * In test mode (ATS_TEST_MODE=true): generates accessors with slot fallback, override readers, writers.
+   * In prod mode (default): generates accessors with getters only, inline native opcodes.
+   *
+   * @returns {boolean} True if test mode is enabled, false otherwise (default).
+   */
+  public static get isTestMode(): boolean {
+    return (
+      Configuration._getEnvironmentVariable({
+        name: "ATS_TEST_MODE",
+        defaultValue: "false",
+      }).toLowerCase() === "true"
+    );
+  }
+
   public static get privateKeys(): Record<Network, string[]> {
     return NETWORKS.reduce(
       (result, network) => {

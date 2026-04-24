@@ -381,14 +381,14 @@ export async function generateRegistryPipeline(
   }
 
   // Collect warnings
-  const missingResolverKeys = facetsWithoutResolverKeys.filter((f) => f.name !== "TimeTravelFacet");
+  const missingResolverKeys = facetsWithoutResolverKeys.filter((f) => f.name !== "EvmAccessorsFacet");
   if (missingResolverKeys.length > 0) {
     const warningMsg = `${missingResolverKeys.length} facets missing resolver keys: ${missingResolverKeys.map((f) => f.name).join(", ")}`;
     warnings.push(warningMsg);
     warn(warningMsg);
   }
 
-  const withoutTimeTravel = facetMetadata.filter((f) => !f.hasTimeTravel && f.name !== "TimeTravelFacet");
+  const withoutTimeTravel = facetMetadata.filter((f) => !f.hasTimeTravel && f.name !== "EvmAccessorsFacet");
   if (fullConfig.includeTimeTravel && withoutTimeTravel.length > 0 && withoutTimeTravel.length < 10) {
     const warningMsg = `${withoutTimeTravel.length} facets don't have TimeTravel variants: ${withoutTimeTravel.map((f) => f.name).join(", ")}`;
     warnings.push(warningMsg);

@@ -190,8 +190,14 @@ function generateHeader(
 ): string {
   const mockLine = mockCount > 0 ? `\n * Mocks: ${mockCount}` : "";
 
-  // Sort facet names alphabetically for deterministic output
-  const sortedFacetNames = [...facets].map((f) => f.name).sort();
+  // Sort facet names alphabetically for deterministic output.
+  // Only deployable facets get a factory reference in the generated registry,
+  // so non-deployable ones (abstract/interface) must NOT be imported — the
+  // imports would otherwise be emitted but never used and fail lint.
+  const sortedFacetNames = [...facets]
+    .filter((f) => f.isDeployable)
+    .map((f) => f.name)
+    .sort();
 
   // Generate TypeChain factory imports (Prettier will format)
   const factoryImports: string[] = [];
@@ -199,12 +205,7 @@ function generateHeader(
     factoryImports.push(`${name}__factory`);
   }
 
-  // Include TimeTravel variant factory imports for facets that have them
-  const facetsWithTimeTravel = facets.filter((f) => f.hasTimeTravel && f.name !== "TimeTravelFacet");
-  const sortedTimeTravelNames = [...facetsWithTimeTravel].map((f) => `${f.name}TimeTravel`).sort();
-  for (const name of sortedTimeTravelNames) {
-    factoryImports.push(`${name}__factory`);
-  }
+  // V4: No TimeTravel variants under the EVM Accessor Generator pattern
 
   // Include mock contract factory imports (only deployable mocks)
   if (mocks && mocks.length > 0) {
@@ -298,36 +299,25 @@ function generateFacetEntry(facet: ContractMetadata): string {
 
   // Add TypeChain factory reference (only for deployable contracts)
   // Abstract contracts (isDeployable: false) don't have constructors in their factories
+  // V4: No TimeTravel variants under the EVM Accessor Generator pattern
   let factoryLine: string;
-  let timeTravelFactoryLine: string;
 
   if (!facet.isDeployable) {
     // Abstract contracts - no factory constructor, only static methods
     factoryLine = "";
-    timeTravelFactoryLine = "";
   } else {
     // Deployable contracts - generate factory code
     const libDeps = getCachedLibDeps(facet.name, facet.sourceFile);
     if (libDeps.length > 0) {
       const libArgs = libDeps.map((l) => `"${l}"`).join(", ");
       factoryLine = `\n        factory: (signer) => new ${facet.name}__factory(getLibLinks(${libArgs}) as any, signer),`;
-
-      timeTravelFactoryLine =
-        facet.hasTimeTravel && facet.name !== "TimeTravelFacet"
-          ? `\n        timeTravelFactory: (signer) => new ${facet.name}TimeTravel__factory(getLibLinks(${libArgs}) as any, signer),`
-          : "";
     } else {
       factoryLine = `\n        factory: (signer) => new ${facet.name}__factory(signer),`;
-
-      timeTravelFactoryLine =
-        facet.hasTimeTravel && facet.name !== "TimeTravelFacet"
-          ? `\n        timeTravelFactory: (signer) => new ${facet.name}TimeTravel__factory(signer),`
-          : "";
     }
   }
 
   return `    ${facet.name}: {
-        name: '${facet.name}',${descriptionLine}${resolverKeyLine}${rolesLine}${inheritanceLine}${methodsLine}${eventsLine}${errorsLine}${factoryLine}${timeTravelFactoryLine}
+        name: '${facet.name}',${descriptionLine}${resolverKeyLine}${rolesLine}${inheritanceLine}${methodsLine}${eventsLine}${errorsLine}${factoryLine}
     }`;
 }
 
@@ -583,13 +573,11 @@ export function generateSummary(
 } {
   const byCategory: Record<string, number> = {};
   const byLayer: Record<number, number> = {};
-  let withTimeTravel = 0;
   let withRoles = 0;
 
   for (const facet of facets) {
     byCategory[facet.category] = (byCategory[facet.category] || 0) + 1;
     byLayer[facet.layer] = (byLayer[facet.layer] || 0) + 1;
-    if (facet.hasTimeTravel) withTimeTravel++;
     if (facet.roles.length > 0) withRoles++;
   }
 
@@ -598,7 +586,7 @@ export function generateSummary(
     totalInfrastructure: infrastructure.length,
     byCategory,
     byLayer,
-    withTimeTravel,
+    withTimeTravel: 0,
     withRoles,
   };
 }

@@ -1,27 +1,24 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
-import { DatesValidation } from "../../../infrastructure/utils/DatesValidation.sol";
-import { BondStorageWrapper } from "../../../domain/asset/BondStorageWrapper.sol";
-import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { ITimeTravel } from "../ITimeTravel.sol";
-import { TimeTravelProvider } from "./TimeTravelProvider.sol";
-import { TimeTravelStorageWrapper } from "./TimeTravelStorageWrapper.sol";
-import { _TIME_TRAVEL_RESOLVER_KEY } from "../constants/resolverKeys.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DatesValidation } from "../../infrastructure/utils/DatesValidation.sol";
+import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { IEvmAccessorsFacet } from "./IEvmAccessorsFacet.sol";
+import { _EVM_ACCESSORS_RESOLVER_KEY } from "../constants/resolverKeys.sol";
 
-contract TimeTravelFacet is IStaticFunctionSelectors, ITimeTravel, TimeTravelProvider {
+contract EvmAccessorsFacet is IStaticFunctionSelectors, IEvmAccessorsFacet {
     function changeSystemTimestamp(uint256 newTimestamp) external override {
         DatesValidation.checkTimestamp(newTimestamp);
 
-        uint256 oldTimestamp = TimeTravelStorageWrapper.getTimestampOverride();
-        TimeTravelStorageWrapper.setTimestampOverride(newTimestamp);
+        uint256 oldTimestamp = EvmAccessors.getBlockTimestampOverride();
+        EvmAccessors.setBlockTimestampOverride(newTimestamp);
 
         emit SystemTimestampChanged(oldTimestamp, newTimestamp);
     }
 
     function resetSystemTimestamp() external override {
-        TimeTravelStorageWrapper.setTimestampOverride(0);
+        EvmAccessors.setBlockTimestampOverride(0);
         emit SystemTimestampReset();
     }
 
@@ -30,24 +27,35 @@ contract TimeTravelFacet is IStaticFunctionSelectors, ITimeTravel, TimeTravelPro
             revert InvalidBlocknumber(_newSystemBlocknumber);
         }
 
-        uint256 oldBlocknumber = TimeTravelStorageWrapper.getBlockNumberOverride();
-        TimeTravelStorageWrapper.setBlockNumberOverride(_newSystemBlocknumber);
+        uint256 oldBlocknumber = EvmAccessors.getBlockNumberOverride();
+        EvmAccessors.setBlockNumberOverride(_newSystemBlocknumber);
 
         emit SystemBlocknumberChanged(oldBlocknumber, _newSystemBlocknumber);
     }
 
     function resetSystemBlocknumber() external override {
-        TimeTravelStorageWrapper.setBlockNumberOverride(0);
+        EvmAccessors.setBlockNumberOverride(0);
         emit SystemBlocknumberReset();
     }
 
-    // solhint-disable-next-line func-name-mixedcase
-    function testOnlyAddDeprecatedCoupon(uint256 _couponID) external {
-        BondStorageWrapper.DEPRECATED_pushCouponOrderedListId(_couponID);
+    function changeSystemChainId(uint256 _newChainId) external override {
+        if (_newChainId == 0) {
+            revert InvalidChainId(_newChainId);
+        }
+
+        uint256 oldChainId = EvmAccessors.getChainIdOverride();
+        EvmAccessors.setChainIdOverride(_newChainId);
+
+        emit SystemChainIdChanged(oldChainId, _newChainId);
+    }
+
+    function resetSystemChainId() external override {
+        EvmAccessors.setChainIdOverride(0);
+        emit SystemChainIdReset();
     }
 
     function blockTimestamp() external view override returns (uint256) {
-        return TimeTravelStorageWrapper.getBlockTimestamp();
+        return EvmAccessors.getBlockTimestamp();
     }
 
     /*
@@ -58,8 +66,10 @@ contract TimeTravelFacet is IStaticFunctionSelectors, ITimeTravel, TimeTravelPro
         if (EvmAccessors.getChainId() != chainId) revert WrongChainId();
     }
 
+    // msg.sender / tx.origin writers intentionally omitted: prefer Hardhat impersonation or signer.connect().
+
     function getStaticResolverKey() external pure virtual override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _TIME_TRAVEL_RESOLVER_KEY;
+        staticResolverKey_ = _EVM_ACCESSORS_RESOLVER_KEY;
     }
 
     function getStaticFunctionSelectors()
@@ -70,19 +80,20 @@ contract TimeTravelFacet is IStaticFunctionSelectors, ITimeTravel, TimeTravelPro
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](7);
+        staticFunctionSelectors_ = new bytes4[](8);
         staticFunctionSelectors_[selectorIndex++] = this.changeSystemTimestamp.selector;
         staticFunctionSelectors_[selectorIndex++] = this.resetSystemTimestamp.selector;
         staticFunctionSelectors_[selectorIndex++] = this.blockTimestamp.selector;
         staticFunctionSelectors_[selectorIndex++] = this.checkBlockChainid.selector;
         staticFunctionSelectors_[selectorIndex++] = this.changeSystemBlocknumber.selector;
         staticFunctionSelectors_[selectorIndex++] = this.resetSystemBlocknumber.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.testOnlyAddDeprecatedCoupon.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.changeSystemChainId.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.resetSystemChainId.selector;
     }
 
     function getStaticInterfaceIds() external pure virtual override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ITimeTravel).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IEvmAccessorsFacet).interfaceId;
     }
 }

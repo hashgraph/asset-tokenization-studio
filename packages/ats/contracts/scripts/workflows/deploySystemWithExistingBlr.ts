@@ -437,7 +437,7 @@ export async function deploySystemWithExistingBlr(
         info(`   Found ${allFacets.length} facets in registry`);
 
         if (!useTimeTravel) {
-          allFacets = allFacets.filter((f) => f.name !== "TimeTravelFacet");
+          allFacets = allFacets.filter((f) => f.name !== "EvmAccessorsFacet");
         }
 
         // Initialize facets Map if not exists

@@ -168,9 +168,9 @@ export async function createBondConfiguration(
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
   // Build facet list based on time travel mode
   // When useTimeTravel=true, ALL facets get TimeTravel suffix (universal mapping)
-  // plus TimeTravelFacet controller. No filtering needed — simplifies deployment logic.
+  // plus EvmAccessorsFacet controller. No filtering needed — simplifies deployment logic.
   const facetNames = useTimeTravel
-    ? [...BOND_FACETS.map((name) => `${name}TimeTravel`), "TimeTravelFacet"]
+    ? [...BOND_FACETS.map((name) => `${name}TimeTravel`), "EvmAccessorsFacet"]
     : [...BOND_FACETS];
 
   // Build facet data with resolver keys from registry

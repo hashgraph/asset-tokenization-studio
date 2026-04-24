@@ -31,69 +31,51 @@ export function getTimeTravelVariant(contractName: string): string {
 /**
  * Check if a contract has a TimeTravel variant available.
  *
- * CONVENTION-BASED: Uses naming convention to determine if a contract
- * has a TimeTravel variant. Contracts ending with 'Facet' are assumed
- * to have TimeTravel variants, while infrastructure contracts don't.
+ * V4 DESIGN (EVM Accessor Generator): No facet variants.
+ * All facets use compile-time accessor generation that produces identical
+ * bytecode for prod and test modes — no TimeTravel variant contracts exist.
  *
- * Invariant: 'TimeTravelFacet' never has a TimeTravel variant.
- *
- * @param contractName - Base contract name
- * @returns true if contract name ends with 'Facet' (except 'TimeTravelFacet'), false otherwise
+ * @param contractName - Base contract name (ignored; always false)
+ * @returns false — no facet has a TimeTravel variant under v4 design
  *
  * @example
  * ```typescript
- * hasTimeTravelVariant('AccessControlFacet') // true - ends with 'Facet'
- * hasTimeTravelVariant('ProxyAdmin') // false - infrastructure
- * hasTimeTravelVariant('TimeTravelFacet') // false - invariant
- * hasTimeTravelVariant('BusinessLogicResolver') // false - doesn't end with 'Facet'
+ * hasTimeTravelVariant('AccessControlFacet') // false - v4: no variants
+ * hasTimeTravelVariant('ProxyAdmin') // false - no variants
+ * hasTimeTravelVariant('EvmAccessorsFacet') // false - no variants
  * ```
+ *
+ * @deprecated v4 eliminates the TimeTravel variant pattern entirely.
+ * Kept for API compatibility; always returns false.
  */
-export function hasTimeTravelVariant(contractName: string): boolean {
-  // Invariant: 'TimeTravelFacet' never has a TimeTravel variant
-  if (contractName === "TimeTravelFacet") {
-    return false;
-  }
-
-  // Convention: Contracts ending with 'Facet' have TimeTravel variants
-  // Infrastructure contracts (ProxyAdmin, TransparentUpgradeableProxy, etc.)
-  // don't follow this naming pattern
-  return contractName.endsWith("Facet");
+export function hasTimeTravelVariant(_contractName: string): boolean {
+  return false;
 }
 
 /**
  * Resolve contract name based on deployment options.
  *
- * Returns the appropriate contract name variant (standard or TimeTravel)
- * based on whether TimeTravel mode is enabled and the contract supports it.
+ * V4 DESIGN: Always returns the base contract name.
+ * No TimeTravel variants exist under the EVM Accessor Generator pattern.
+ * The `useTimeTravel` flag is ignored for API compatibility.
  *
  * @param contractName - Base contract name
- * @param useTimeTravel - Whether to use TimeTravel variant
- * @returns Resolved contract name (TimeTravel variant if applicable, otherwise base name)
+ * @param useTimeTravel - Ignored; kept for API compatibility (v4: no variants)
+ * @returns Base contract name (always)
  *
  * @example
  * ```typescript
- * // Testing mode
- * const name = resolveContractName('AccessControlFacet', true)
- * // Returns: 'AccessControlFacetTimeTravel'
- *
- * // Production mode
- * const name = resolveContractName('AccessControlFacet', false)
+ * // All calls return the same base name
+ * resolveContractName('AccessControlFacet', true)
  * // Returns: 'AccessControlFacet'
  *
- * // Contract without TimeTravel support
- * const name = resolveContractName('ProxyAdmin', true)
- * // Returns: 'ProxyAdmin' (no TimeTravel variant exists)
+ * resolveContractName('AccessControlFacet', false)
+ * // Returns: 'AccessControlFacet'
  * ```
+ *
+ * @deprecated v4 eliminates variants; useTimeTravel flag has no effect.
  */
-export function resolveContractName(contractName: string, useTimeTravel: boolean = false): string {
-  if (!useTimeTravel) {
-    return contractName;
-  }
-
-  if (hasTimeTravelVariant(contractName)) {
-    return getTimeTravelVariant(contractName);
-  }
-
+export function resolveContractName(contractName: string, _useTimeTravel: boolean = false): string {
   return contractName;
 }
 

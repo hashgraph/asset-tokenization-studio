@@ -65,6 +65,7 @@
     "lint:sol:fix": "solhint --config solhint.config.js 'contracts/**/*.sol' --fix",
     "lint:js": "eslint . --cache",
     "lint:js:fix": "eslint . --fix",
+    "generate:accessors": "npx tsx scripts/tools/accessor-generator/index.ts",
     "generate:registry": "npx tsx scripts/tools/registry-generator/index.ts",
     "generate:registry:cached": "npx tsx scripts/tools/registry-generator/index.ts --use-cache",
     "deploy:newBlr": "npm run build && npx tsx scripts/cli/deploySystemWithNewBlr.ts",

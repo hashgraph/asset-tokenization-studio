@@ -558,7 +558,7 @@ export function extractFacetResolverKeyImport(source: string): string | undefine
     return keyName;
   }
 
-  // Second try: Check for inline constant definition (e.g., TimeTravelFacet)
+  // Second try: Check for inline constant definition (e.g., EvmAccessorsFacet)
   const inlineKeys = extractResolverKeys(source);
   if (inlineKeys.length > 0) {
     return inlineKeys[0].name;
