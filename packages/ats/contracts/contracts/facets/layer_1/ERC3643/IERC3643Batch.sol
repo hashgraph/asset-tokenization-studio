@@ -17,9 +17,4 @@ interface IERC3643Batch is IERC3643Types {
         address[] calldata _toList,
         uint256[] calldata _amounts
     ) external;
-
-    /**
-     * @notice Batch mint tokens to multiple addresses
-     */
-    function batchMint(address[] calldata _toList, uint256[] calldata _amounts) external;
 }

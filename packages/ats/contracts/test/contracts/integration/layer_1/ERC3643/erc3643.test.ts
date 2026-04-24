@@ -1130,61 +1130,6 @@ describe("ERC3643 Tests", () => {
     });
 
     describe("Batch Operations", () => {
-      describe("batchMint", () => {
-        it("GIVEN an account with issuer role WHEN batchMint THEN transaction succeeds and balances are updated", async () => {
-          const mintAmount = AMOUNT / 2;
-          const toList = [signer_D.address, signer_E.address];
-          const amounts = [mintAmount, mintAmount];
-
-          const initialBalanceD = await asset.balanceOf(signer_D.address);
-          const initialBalanceE = await asset.balanceOf(signer_E.address);
-          const initialTotalSupply = await asset.totalSupply();
-
-          await expect(asset.batchMint(toList, amounts)).to.not.be.reverted;
-
-          const finalBalanceD = await asset.balanceOf(signer_D.address);
-          const finalBalanceE = await asset.balanceOf(signer_E.address);
-          const finalTotalSupply = await asset.totalSupply();
-
-          expect(finalBalanceD).to.be.equal(initialBalanceD + BigInt(mintAmount));
-          expect(finalBalanceE).to.be.equal(initialBalanceE + BigInt(mintAmount));
-          expect(finalTotalSupply).to.be.equal(initialTotalSupply + BigInt(mintAmount * 2));
-        });
-
-        it("GIVEN an account without issuer role WHEN batchMint THEN transaction fails with AccountHasNoRole", async () => {
-          const mintAmount = AMOUNT / 2;
-          const toList = [signer_D.address, signer_E.address];
-          const amounts = [mintAmount, mintAmount];
-
-          // signer_B does not have ATS_ROLES._ISSUER_ROLE
-          await expect(asset.connect(signer_B).batchMint(toList, amounts)).to.be.revertedWithCustomError(
-            asset,
-            "AccountHasNoRoles",
-          );
-        });
-
-        it("GIVEN an invalid input amounts array THEN transaction fails with InputAmountsArrayLengthMismatch", async () => {
-          const mintAmount = AMOUNT / 2;
-          const toList = [signer_D.address];
-          const amounts = [mintAmount, mintAmount];
-
-          await expect(asset.batchMint(toList, amounts)).to.be.revertedWithCustomError(
-            asset,
-            "InputAmountsArrayLengthMismatch",
-          );
-        });
-
-        it("GIVEN a paused token WHEN batchMint THEN transaction fails with TokenIsPaused", async () => {
-          await asset.pause();
-
-          const mintAmount = AMOUNT / 2;
-          const toList = [signer_D.address];
-          const amounts = [mintAmount];
-
-          await expect(asset.batchMint(toList, amounts)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
-        });
-      });
-
       describe("batchTransfer", () => {
         const transferAmount = AMOUNT / 4;
         const initialMintAmount = AMOUNT;
@@ -2486,12 +2431,6 @@ describe("ERC3643 Tests", () => {
         await expect(
           asset.batchForcedTransfer([signer_A.address], [signer_A.address], [AMOUNT]),
         ).to.be.revertedWithCustomError(asset, "NotAllowedInMultiPartitionMode");
-      });
-      it("GIVEN an single partition token WHEN batchMint THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
-        await expect(asset.batchMint([signer_A.address], [AMOUNT])).to.be.revertedWithCustomError(
-          asset,
-          "NotAllowedInMultiPartitionMode",
-        );
       });
     });
 

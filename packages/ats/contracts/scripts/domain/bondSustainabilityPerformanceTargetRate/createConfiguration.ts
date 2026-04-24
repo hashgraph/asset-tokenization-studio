@@ -64,6 +64,7 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "ERC20VotesFacet",
   "ERC3643BatchFacet",
   "BatchBurnFacet",
+  "BatchMintFacet",
   "ERC3643ManagementFacet",
   "ERC3643OperationsFacet",
   "ERC3643ReadFacet",
