@@ -74,13 +74,13 @@ const LOAN_FACETS = [
   "ERC3643OperationsFacet",
   "ERC3643ReadFacet",
   "ERC3643BatchFacet",
+  "BatchBurnFacet",
   "ComplianceFacet",
 
   // Hold
   "HoldFacet",
-  "HoldReadFacet",
   "HoldManagementFacet",
-  "HoldTokenHolderFacet",
+  "HoldByPartitionFacet",
 
   // Clearing & Settlement
   "ClearingTransferFacet",

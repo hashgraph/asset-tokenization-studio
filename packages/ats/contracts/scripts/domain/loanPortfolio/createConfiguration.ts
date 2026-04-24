@@ -71,6 +71,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "NoncesFacet",
   "ERC20VotesFacet",
   "ERC3643BatchFacet",
+  "BatchBurnFacet",
   "ERC3643ManagementFacet",
   "ERC3643OperationsFacet",
   "ERC3643ReadFacet",
@@ -81,9 +82,8 @@ const LOANS_PORTFOLIO_FACETS = [
 
   // Hold
   "HoldFacet",
-  "HoldReadFacet",
   "HoldManagementFacet",
-  "HoldTokenHolderFacet",
+  "HoldByPartitionFacet",
 
   // Clearing & Settlement
   "ClearingTransferFacet",

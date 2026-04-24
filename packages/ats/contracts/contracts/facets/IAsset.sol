@@ -48,6 +48,7 @@ import {
 
 // Layer 2
 import { IHold } from "./layer_1/hold/IHold.sol";
+import { IHoldByPartition } from "./holdByPartition/IHoldByPartition.sol";
 import { IKyc } from "./layer_1/kyc/IKyc.sol";
 // IKpiLinkedRate and ISustainabilityPerformanceTargetRate are excluded: both define
 // getInterestRate() with incompatible return types (different InterestRate structs),
@@ -89,10 +90,12 @@ import { IClearingRead } from "./layer_1/clearing/IClearingRead.sol";
 import { IComplianceFacet } from "./compliance/IComplianceFacet.sol";
 import { IHoldFacet } from "./hold/IHoldFacet.sol";
 import { IERC1594 } from "./layer_1/ERC1400/ERC1594/IERC1594.sol";
+
 import { IDocumentation } from "./documentation/IDocumentation.sol";
 import { IControllerFacet } from "./controller/IControllerFacet.sol";
 import { IERC20Permit } from "./layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
 import { IControlList } from "./layer_1/controlList/IControlList.sol";
+import { IBatchBurn } from "./batchBurn/IBatchBurn.sol";
 
 /**
  * @title IAsset
@@ -171,6 +174,7 @@ interface IAsset is
     // Additional ERC
     IComplianceFacet,
     IHoldFacet,
+    IHoldByPartition,
     IERC1594,
     IDocumentation,
     IControllerFacet,
@@ -178,5 +182,6 @@ interface IAsset is
     // Control
     IControlList,
     IExternalControlList,
-    IExternalControlListManagement
+    IExternalControlListManagement,
+    IBatchBurn
 {}

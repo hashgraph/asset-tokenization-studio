@@ -86,32 +86,4 @@ abstract contract ERC3643Batch is IERC3643Batch, Modifiers {
             ERC1594StorageWrapper.issue(_toList[i], _amounts[i], "");
         }
     }
-
-    function batchBurn(
-        address[] calldata _userAddresses,
-        uint256[] calldata _amounts
-    )
-        external
-        onlyUnpaused
-        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
-        onlyWithoutMultiPartition
-        onlyControllable
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _CONTROLLER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
-        }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
-            TokenCoreOps.burn(_userAddresses[i], _amounts[i]);
-            emit IControllerFacet.ControllerRedemption(
-                EvmAccessors.getMsgSender(),
-                _userAddresses[i],
-                _amounts[i],
-                "",
-                ""
-            );
-        }
-    }
 }

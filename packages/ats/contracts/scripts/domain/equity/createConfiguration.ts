@@ -64,6 +64,7 @@ const EQUITY_FACETS = [
   "NoncesFacet",
   "ERC20VotesFacet",
   "ERC3643BatchFacet",
+  "BatchBurnFacet",
   "ERC3643ManagementFacet",
   "ERC3643OperationsFacet",
   "ERC3643ReadFacet",
@@ -77,8 +78,7 @@ const EQUITY_FACETS = [
   "ClearingTransferFacet",
   "HoldFacet",
   "HoldManagementFacet",
-  "HoldReadFacet",
-  "HoldTokenHolderFacet",
+  "HoldByPartitionFacet",
 
   // External Management (3)
   "ExternalControlListManagementFacet",
