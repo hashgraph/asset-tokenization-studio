@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ITransferFacet } from "../../facets/transfer/ITransferFacet.sol";
+import {ITransfer} from "../../facets/transfer/ITransfer.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import {
     _ERC1410_BASIC_STORAGE_POSITION,
@@ -79,7 +79,7 @@ library ERC1410StorageWrapper {
         uint256 fromBalance = balanceOfByPartition(partition, from);
 
         if (fromBalance < value) {
-            revert ITransferFacet.InsufficientBalance(from, fromBalance, value, partition);
+            revert ITransfer.InsufficientBalance(from, fromBalance, value, partition);
         }
 
         ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();

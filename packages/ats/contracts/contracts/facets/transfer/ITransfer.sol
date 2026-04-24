@@ -7,7 +7,7 @@ pragma solidity >=0.8.0 <0.9.0;
  *         ERC-1594 data-bearing style. Also owns the `Transfer` event and the
  *         `InsufficientBalance` error that were previously declared in `IERC20`.
  */
-interface ITransferFacet {
+interface ITransfer {
     /**
      * @notice Emitted whenever tokens move between accounts, are minted, or are burned.
      * @param from  Source account (zero address on mint).

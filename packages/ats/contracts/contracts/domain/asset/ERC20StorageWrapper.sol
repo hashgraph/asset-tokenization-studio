@@ -4,9 +4,8 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _ERC20_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { _DEFAULT_PARTITION, KPI_ERC20_APPROVE_OWNER } from "../../constants/values.sol";
 import { ICore } from "../../facets/core/ICore.sol";
-import { ITransferFacet } from "../../facets/transfer/ITransferFacet.sol";
+import {ITransfer} from "../../facets/transfer/ITransfer.sol";
 import { IAllowanceTypes } from "../../facets/allowance/IAllowanceTypes.sol";
-// IERC20StorageWrapper is now merged into ITransferFacet
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { IFactory } from "../../factory/IFactory.sol";
 import { ERC1410BasicStorage, ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
@@ -83,7 +82,7 @@ library ERC20StorageWrapper {
         if (newBalance != oldBalance) {
             erc20Storage().balances[account] = newBalance;
             unchecked {
-                emit ITransferFacet.Transfer(address(0), address(0), newBalance - oldBalance);
+                emit ITransfer.Transfer(address(0), address(0), newBalance - oldBalance);
             }
         }
         AdjustBalancesStorageWrapper.updateLabafByTokenHolder(abaf, account);
@@ -149,7 +148,7 @@ library ERC20StorageWrapper {
             spender,
             ""
         );
-        emit ITransferFacet.Transfer(from, to, value);
+        emit ITransfer.Transfer(from, to, value);
         return true;
     }
 
@@ -162,18 +161,18 @@ library ERC20StorageWrapper {
             address(0),
             ""
         );
-        emit ITransferFacet.Transfer(from, to, value);
+        emit ITransfer.Transfer(from, to, value);
         return true;
     }
 
     function mint(address to, uint256 value) internal {
         ERC1410StorageWrapper.issueByPartition(IERC1410Types.IssueData(_DEFAULT_PARTITION, to, value, ""));
-        emit ITransferFacet.Transfer(address(0), to, value);
+        emit ITransfer.Transfer(address(0), to, value);
     }
 
     function burn(address from, uint256 value) internal {
         ERC1410StorageWrapper.redeemByPartition(_DEFAULT_PARTITION, from, address(0), value, "", "");
-        emit ITransferFacet.Transfer(from, address(0), value);
+        emit ITransfer.Transfer(from, address(0), value);
     }
 
     function burnFrom(address account, uint256 value) internal {

@@ -13,7 +13,7 @@ import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { IIdentityRegistry } from "../../facets/layer_1/ERC3643/IIdentityRegistry.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
-import { ITransferFacet } from "../../facets/transfer/ITransferFacet.sol";
+import {ITransfer} from "../../facets/transfer/ITransfer.sol";
 import { IAllowanceTypes } from "../../facets/allowance/IAllowanceTypes.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
@@ -452,7 +452,7 @@ library ERC1594StorageWrapper {
             return (
                 false,
                 Eip1066.INSUFFICIENT_FUNDS,
-                ITransferFacet.InsufficientBalance.selector,
+                ITransfer.InsufficientBalance.selector,
                 abi.encode(from, currentPartitionBalance, value, partition)
             );
         }

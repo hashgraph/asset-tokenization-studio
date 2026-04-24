@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ITransferFacet } from "./ITransferFacet.sol";
+import {ITransfer} from "./ITransfer.sol";
 import { Transfer } from "./Transfer.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { _TRANSFER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
@@ -33,6 +33,6 @@ contract TransferFacet is Transfer, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(ITransferFacet).interfaceId;
+        staticInterfaceIds_[0] = type(ITransfer).interfaceId;
     }
 }

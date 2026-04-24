@@ -1506,7 +1506,7 @@ export class RPCQueryAdapter {
 
     return {
       actionTypes: result.actionTypes_,
-      actionTypeIds: result.actionIdByType_.map((id) => Number(id)),
+      actionTypeIds: result.actionIdByType_.map((id: bigint) => Number(id)),
       datas: result.datas_,
       isDisabled: result.isDisabled_,
     };
@@ -1529,7 +1529,7 @@ export class RPCQueryAdapter {
 
     return {
       actionTypes: result.actionTypes_,
-      actionTypeIds: result.actionIdByType_.map((id) => Number(id)),
+      actionTypeIds: result.actionIdByType_.map((id: bigint) => Number(id)),
       datas: result.datas_,
       isDisabled: result.isDisabled_,
     };

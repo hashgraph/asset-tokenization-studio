@@ -13,7 +13,7 @@ import { IAmortization } from "../../../facets/layer_2/amortization/IAmortizatio
 import { IAmortizationStorageWrapper } from "./IAmortizationStorageWrapper.sol";
 import { IHoldTypes } from "../../../facets/layer_1/hold/IHoldTypes.sol";
 import { IERC1410Types } from "../../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
-import { ITransferFacet } from "../../../facets/transfer/ITransferFacet.sol";
+import {ITransfer} from "../../../facets/transfer/ITransfer.sol";
 import { ThirdPartyType } from "../types/ThirdPartyType.sol";
 import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
@@ -442,7 +442,7 @@ library AmortizationStorageWrapper {
             "",
             ""
         );
-        emit ITransferFacet.Transfer(address(0), _tokenHolder, _amount);
+        emit ITransfer.Transfer(address(0), _tokenHolder, _amount);
 
         return true;
     }

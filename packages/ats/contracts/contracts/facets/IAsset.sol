@@ -27,7 +27,7 @@ import { IAllowance } from "./allowance/IAllowance.sol";
 
 // Layer 1 — External lists
 import { IERC1410 } from "./layer_1/ERC1400/ERC1410/IERC1410.sol";
-import { ITransferFacet } from "./transfer/ITransferFacet.sol";
+import {ITransfer} from "./transfer/ITransfer.sol";
 
 // Layer 1 — Remaining facets
 import { IERC20Votes } from "./layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
@@ -48,6 +48,7 @@ import {
 
 // Layer 2
 import { IHold } from "./layer_1/hold/IHold.sol";
+import { IHoldByPartition } from "./holdByPartition/IHoldByPartition.sol";
 import { IKyc } from "./layer_1/kyc/IKyc.sol";
 // IKpiLinkedRate and ISustainabilityPerformanceTargetRate are excluded: both define
 // getInterestRate() with incompatible return types (different InterestRate structs),
@@ -89,10 +90,12 @@ import { IClearingRead } from "./layer_1/clearing/IClearingRead.sol";
 import { IComplianceFacet } from "./compliance/IComplianceFacet.sol";
 import { IHoldFacet } from "./hold/IHoldFacet.sol";
 import { IERC1594 } from "./layer_1/ERC1400/ERC1594/IERC1594.sol";
+
 import { IDocumentation } from "./documentation/IDocumentation.sol";
-import { IERC1644 } from "./layer_1/ERC1400/ERC1644/IERC1644.sol";
+import { IController } from "./controller/IController.sol";
 import { IERC20Permit } from "./layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
 import { IControlList } from "./layer_1/controlList/IControlList.sol";
+import { IBatchBurn } from "./batchBurn/IBatchBurn.sol";
 
 /**
  * @title IAsset
@@ -126,7 +129,7 @@ interface IAsset is
     ITimeTravel,
     IDiamond,
     IHold,
-    ITransferFacet,
+    ITransfer,
     IERC20Votes,
     IERC1410,
     IERC3643,
@@ -171,12 +174,14 @@ interface IAsset is
     // Additional ERC
     IComplianceFacet,
     IHoldFacet,
+    IHoldByPartition,
     IERC1594,
     IDocumentation,
-    IERC1644,
+    IController,
     IERC20Permit,
     // Control
     IControlList,
     IExternalControlList,
-    IExternalControlListManagement
+    IExternalControlListManagement,
+    IBatchBurn
 {}

@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _CONTROLLER_ROLE, _ISSUER_ROLE, _AGENT_ROLE } from "../../../constants/roles.sol";
 import { IERC3643Batch } from "./IERC3643Batch.sol";
-import { IERC1644 } from "../ERC1400/ERC1644/IERC1644.sol";
+import { IController } from "../../controller/IController.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
@@ -56,7 +56,7 @@ abstract contract ERC3643Batch is IERC3643Batch, Modifiers {
         }
         for (uint256 i = 0; i < _fromList.length; i++) {
             TokenCoreOps.transfer(_fromList[i], _toList[i], _amounts[i]);
-            emit IERC1644.ControllerTransfer(
+            emit IController.ControllerTransfer(
                 EvmAccessors.getMsgSender(),
                 _fromList[i],
                 _toList[i],
@@ -84,28 +84,6 @@ abstract contract ERC3643Batch is IERC3643Batch, Modifiers {
         }
         for (uint256 i = 0; i < _toList.length; i++) {
             ERC1594StorageWrapper.issue(_toList[i], _amounts[i], "");
-        }
-    }
-
-    function batchBurn(
-        address[] calldata _userAddresses,
-        uint256[] calldata _amounts
-    )
-        external
-        onlyUnpaused
-        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
-        onlyWithoutMultiPartition
-        onlyControllable
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _CONTROLLER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
-        }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
-            TokenCoreOps.burn(_userAddresses[i], _amounts[i]);
-            emit IERC1644.ControllerRedemption(EvmAccessors.getMsgSender(), _userAddresses[i], _amounts[i], "", "");
         }
     }
 }

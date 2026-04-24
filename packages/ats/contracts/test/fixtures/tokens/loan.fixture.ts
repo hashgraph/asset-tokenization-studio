@@ -12,7 +12,6 @@
  * @see https://hardhat.org/hardhat-network-helpers/docs/reference#loadfixture
  */
 
-import { isinGenerator } from "@thomaschaplin/isin-generator";
 import { ethers } from "hardhat";
 import { ZeroAddress, ethers as ethersTypes } from "ethers";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -34,7 +33,7 @@ import {
   CoreFacet__factory,
   ERC3643ManagementFacet__factory,
   ERC20VotesFacet__factory,
-  ERC1644Facet__factory,
+  ControllerFacet__factory,
   ERC1594Facet__factory,
   ERC1410ManagementFacet__factory,
   FreezeFacet__factory,
@@ -260,7 +259,7 @@ export async function deployLoanTokenFixture({
   const coreFacet = CoreFacet__factory.connect(proxyAddress, deployer);
   const freezeFacet = FreezeFacet__factory.connect(proxyAddress, deployer);
   const capFacet = CapFacet__factory.connect(proxyAddress, deployer);
-  const erc1644Facet = ERC1644Facet__factory.connect(proxyAddress, deployer);
+  const controllerFacet = ControllerFacet__factory.connect(proxyAddress, deployer);
   const erc1594Facet = ERC1594Facet__factory.connect(proxyAddress, deployer);
   const erc1410ManagementFacet = ERC1410ManagementFacet__factory.connect(proxyAddress, deployer);
   const erc3643ManagementFacet = ERC3643ManagementFacet__factory.connect(proxyAddress, deployer);
@@ -281,7 +280,7 @@ export async function deployLoanTokenFixture({
 
   await controlListFacet.initializeControlList(securityData.isWhiteList);
   await erc1410ManagementFacet.initialize_ERC1410(securityData.isMultiPartition);
-  await erc1644Facet.initialize_ERC1644(securityData.isControllable);
+  await controllerFacet.initializeController(securityData.isControllable);
   await coreFacet.initializeCore({
     info: {
       name: securityData.erc20MetadataInfo.name,
@@ -333,7 +332,7 @@ export async function deployLoanTokenFixture({
     coreFacet,
     freezeFacet,
     capFacet,
-    erc1644Facet,
+    controllerFacet,
     erc1594Facet,
     erc1410ManagementFacet,
     erc3643ManagementFacet,

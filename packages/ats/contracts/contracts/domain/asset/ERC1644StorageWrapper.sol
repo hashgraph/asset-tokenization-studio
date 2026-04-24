@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _ERC1644_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { IERC1644 } from "../../facets/layer_1/ERC1400/ERC1644/IERC1644.sol";
+import { IController } from "../../facets/controller/IController.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 struct ERC1644Storage {
@@ -12,18 +12,18 @@ struct ERC1644Storage {
 
 library ERC1644StorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1644(bool _controllable) internal {
+    function initializeController(bool _controllable) internal {
         erc1644Storage().isControllable = _controllable;
         erc1644Storage().initialized = true;
     }
 
     function finalizeControllable() internal {
         erc1644Storage().isControllable = false;
-        emit IERC1644.FinalizedControllerFeature(EvmAccessors.getMsgSender());
+        emit IController.FinalizedControllerFeature(EvmAccessors.getMsgSender());
     }
 
     function requireControllable() internal view {
-        if (!isControllable()) revert IERC1644.TokenIsNotControllable();
+        if (!isControllable()) revert IController.TokenIsNotControllable();
     }
 
     function isControllable() internal view returns (bool) {
