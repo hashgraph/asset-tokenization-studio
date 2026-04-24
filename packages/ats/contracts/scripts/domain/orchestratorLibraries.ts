@@ -110,13 +110,14 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   ERC1410ReadFacet: ["tokenCoreOps"],
   ERC1410IssuerFacet: ["tokenCoreOps"],
   ERC1594Facet: ["tokenCoreOps"],
-  ERC1644Facet: ["tokenCoreOps"],
+  ControllerFacet: ["tokenCoreOps"],
   ERC3643BatchFacet: ["tokenCoreOps"],
+  BatchBurnFacet: ["tokenCoreOps"],
   ERC3643OperationsFacet: ["tokenCoreOps"],
   // HoldOps dependencies - hold/lock operations
   HoldManagementFacet: ["holdOps"],
-  HoldReadFacet: ["holdOps"],
-  HoldTokenHolderFacet: ["holdOps"],
+  HoldFacet: ["holdOps"],
+  HoldByPartitionFacet: ["holdOps"],
   // ClearingOps dependencies - clearing transfer operations
   ClearingActionsFacet: ["clearingOps"],
   ClearingTransferFacet: ["clearingOps", "clearingProtectedOps"],

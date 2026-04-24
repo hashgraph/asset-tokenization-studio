@@ -21,10 +21,11 @@ contract ERC3643OperationsFacet is ERC3643Operations, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](2);
-        staticFunctionSelectors_[selectorIndex++] = this.burn.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.forcedTransfer.selector;
+        uint256 selectorIndex = 1;
+        staticFunctionSelectors_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this.burn.selector;
+        }
     }
 
     /// @inheritdoc IStaticFunctionSelectors

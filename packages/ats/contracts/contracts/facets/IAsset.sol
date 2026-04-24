@@ -42,6 +42,7 @@ import { IFixedRate } from "./layer_2/interestRate/fixedRate/IFixedRate.sol";
 
 // Layer 2
 import { IHold } from "./layer_1/hold/IHold.sol";
+import { IHoldByPartition } from "./holdByPartition/IHoldByPartition.sol";
 import { IKyc } from "./layer_1/kyc/IKyc.sol";
 // IKpiLinkedRate and ISustainabilityPerformanceTargetRate are excluded: both define
 // getInterestRate() with incompatible return types (different InterestRate structs),
@@ -82,11 +83,15 @@ import { IClearingHoldCreation } from "./layer_1/clearing/IClearingHoldCreation.
 import { IClearingRead } from "./layer_1/clearing/IClearingRead.sol";
 import { IComplianceFacet } from "./compliance/IComplianceFacet.sol";
 import { IMintFacet } from "./mint/IMintFacet.sol";
+import { IHoldFacet } from "./hold/IHoldFacet.sol";
 import { IERC1594 } from "./layer_1/ERC1400/ERC1594/IERC1594.sol";
+
 import { IDocumentation } from "./documentation/IDocumentation.sol";
-import { IERC1644 } from "./layer_1/ERC1400/ERC1644/IERC1644.sol";
+import { IController } from "./controller/IController.sol";
 import { IERC20Permit } from "./layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
 import { IControlList } from "./layer_1/controlList/IControlList.sol";
+import { IBatchBurn } from "./batchBurn/IBatchBurn.sol";
+import { IBatchMint } from "./batchMint/IBatchMint.sol";
 
 // solhint-disable no-empty-blocks
 /**
@@ -165,13 +170,17 @@ interface IAsset is
     IClearingRead,
     // Additional ERC
     IComplianceFacet,
+    IHoldFacet,
+    IHoldByPartition,
     IMintFacet,
     IERC1594,
     IDocumentation,
-    IERC1644,
+    IController,
     IERC20Permit,
     // Control
     IControlList,
     IExternalControlList,
-    IExternalControlListManagement
+    IExternalControlListManagement,
+    IBatchBurn,
+    IBatchMint
 {}

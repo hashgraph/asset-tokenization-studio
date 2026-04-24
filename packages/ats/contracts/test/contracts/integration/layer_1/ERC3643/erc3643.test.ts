@@ -181,42 +181,6 @@ describe("ERC3643 Tests", () => {
       });
     });
 
-    describe("ForcedTransfer", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CONTROLLER_ROLE, signer_A.address);
-      });
-      it("GIVEN an account with balance WHEN forcedTransfer THEN transaction success", async () => {
-        //Happy path
-        await asset.mint(signer_E.address, AMOUNT);
-
-        //Grant ATS_ROLES._CONTROLLER_ROLE role to account E
-        await asset.grantRole(ATS_ROLES._CONTROLLER_ROLE, signer_E.address);
-
-        expect(await asset.forcedTransfer(signer_E.address, signer_D.address, AMOUNT / 2))
-          .to.emit(asset, "Transferred")
-          .withArgs(signer_E.address, signer_D.address, AMOUNT / 2);
-
-        expect(await asset.totalSupply()).to.be.equal(AMOUNT);
-        expect(await asset.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
-        expect(await asset.balanceOf(signer_D.address)).to.be.equal(AMOUNT / 2);
-        expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.be.equal(AMOUNT / 2);
-        expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_D.address)).to.be.equal(AMOUNT / 2);
-        expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.be.equal(AMOUNT);
-      });
-      it("GIVEN a paused token WHEN attempting to forcedTransfer TokenIsPaused error", async () => {
-        await asset.connect(signer_B).pause();
-
-        await expect(
-          asset.forcedTransfer(signer_A.address, signer_B.address, AMOUNT - 1),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
-      });
-      it("GIVEN an account without ATS_ROLES._CONTROLLER_ROLE WHEN forcedTransfer is called THEN transaction fails with AccountHasNoRole", async () => {
-        await expect(
-          asset.connect(signer_B).forcedTransfer(signer_D.address, signer_E.address, AMOUNT),
-        ).to.be.revertedWithCustomError(asset, "AccountHasNoRoles");
-      });
-    });
-
     describe("setName", () => {
       it("GIVEN an initialized token WHEN updating the name THEN setName emits UpdatedTokenInformation with updated name and current metadata", async () => {
         const retrieved_name = await asset.name();
@@ -1121,61 +1085,6 @@ describe("ERC3643 Tests", () => {
     });
 
     describe("Batch Operations", () => {
-      describe("batchMint", () => {
-        it("GIVEN an account with issuer role WHEN batchMint THEN transaction succeeds and balances are updated", async () => {
-          const mintAmount = AMOUNT / 2;
-          const toList = [signer_D.address, signer_E.address];
-          const amounts = [mintAmount, mintAmount];
-
-          const initialBalanceD = await asset.balanceOf(signer_D.address);
-          const initialBalanceE = await asset.balanceOf(signer_E.address);
-          const initialTotalSupply = await asset.totalSupply();
-
-          await expect(asset.batchMint(toList, amounts)).to.not.be.reverted;
-
-          const finalBalanceD = await asset.balanceOf(signer_D.address);
-          const finalBalanceE = await asset.balanceOf(signer_E.address);
-          const finalTotalSupply = await asset.totalSupply();
-
-          expect(finalBalanceD).to.be.equal(initialBalanceD + BigInt(mintAmount));
-          expect(finalBalanceE).to.be.equal(initialBalanceE + BigInt(mintAmount));
-          expect(finalTotalSupply).to.be.equal(initialTotalSupply + BigInt(mintAmount * 2));
-        });
-
-        it("GIVEN an account without issuer role WHEN batchMint THEN transaction fails with AccountHasNoRole", async () => {
-          const mintAmount = AMOUNT / 2;
-          const toList = [signer_D.address, signer_E.address];
-          const amounts = [mintAmount, mintAmount];
-
-          // signer_B does not have ATS_ROLES._ISSUER_ROLE
-          await expect(asset.connect(signer_B).batchMint(toList, amounts)).to.be.revertedWithCustomError(
-            asset,
-            "AccountHasNoRoles",
-          );
-        });
-
-        it("GIVEN an invalid input amounts array THEN transaction fails with InputAmountsArrayLengthMismatch", async () => {
-          const mintAmount = AMOUNT / 2;
-          const toList = [signer_D.address];
-          const amounts = [mintAmount, mintAmount];
-
-          await expect(asset.batchMint(toList, amounts)).to.be.revertedWithCustomError(
-            asset,
-            "InputAmountsArrayLengthMismatch",
-          );
-        });
-
-        it("GIVEN a paused token WHEN batchMint THEN transaction fails with TokenIsPaused", async () => {
-          await asset.pause();
-
-          const mintAmount = AMOUNT / 2;
-          const toList = [signer_D.address];
-          const amounts = [mintAmount];
-
-          await expect(asset.batchMint(toList, amounts)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
-        });
-      });
-
       describe("batchTransfer", () => {
         const transferAmount = AMOUNT / 4;
         const initialMintAmount = AMOUNT;
@@ -1365,60 +1274,6 @@ describe("ERC3643 Tests", () => {
         });
       });
 
-      describe("batchBurn", () => {
-        const burnAmount = AMOUNT / 2;
-
-        beforeEach(async () => {
-          await asset.mint(signer_D.address, burnAmount);
-          await asset.mint(signer_E.address, burnAmount);
-
-          // The burner (signer_A) needs approval from the token holders
-          await asset.connect(signer_D).approve(signer_A.address, burnAmount);
-          await asset.connect(signer_E).approve(signer_A.address, burnAmount);
-        });
-
-        it("GIVEN approved operator WHEN batchBurn THEN transaction succeeds", async () => {
-          const userAddresses = [signer_D.address, signer_E.address];
-          const amounts = [burnAmount, burnAmount];
-
-          const initialTotalSupply = await asset.totalSupply();
-          const initialBalanceD = await asset.balanceOf(signer_D.address);
-          const initialBalanceE = await asset.balanceOf(signer_E.address);
-
-          await expect(asset.connect(signer_A).batchBurn(userAddresses, amounts)).to.not.be.reverted;
-
-          const finalTotalSupply = await asset.totalSupply();
-          const finalBalanceD = await asset.balanceOf(signer_D.address);
-          const finalBalanceE = await asset.balanceOf(signer_E.address);
-
-          expect(finalBalanceD).to.equal(initialBalanceD - BigInt(burnAmount));
-          expect(finalBalanceE).to.equal(initialBalanceE - BigInt(burnAmount));
-          expect(finalTotalSupply).to.equal(initialTotalSupply - BigInt(burnAmount * 2));
-        });
-
-        it("GIVEN an invalid input amounts array THEN transaction fails with InputAmountsArrayLengthMismatch", async () => {
-          const userAddresses = [signer_D.address];
-          const amounts = [burnAmount, burnAmount];
-
-          await expect(asset.connect(signer_A).batchBurn(userAddresses, amounts)).to.be.revertedWithCustomError(
-            asset,
-            "InputAmountsArrayLengthMismatch",
-          );
-        });
-
-        it("GIVEN a paused token WHEN batchBurn THEN transaction fails with TokenIsPaused", async () => {
-          await asset.pause();
-
-          const userAddresses = [signer_D.address];
-          const amounts = [burnAmount];
-
-          await expect(asset.connect(signer_A).batchBurn(userAddresses, amounts)).to.be.revertedWithCustomError(
-            asset,
-            "TokenIsPaused",
-          );
-        });
-      });
-
       describe("batchSetAddressFrozen", () => {
         const mintAmount = AMOUNT;
         const transferAmount = AMOUNT / 2;
@@ -1599,104 +1454,6 @@ describe("ERC3643 Tests", () => {
       });
     });
 
-    describe("Agent", () => {
-      it("GIVEN an initialized token WHEN adding agent THEN addAgent emits AgentAdded with agent address", async () => {
-        expect(await asset.addAgent(signer_B.address))
-          .to.emit(asset, "AgentAdded")
-          .withArgs(signer_B.address);
-
-        const hasRole = await asset.hasRole(ATS_ROLES._AGENT_ROLE, signer_B.address);
-        const isAgent = await asset.isAgent(signer_B.address);
-        expect(isAgent).to.equal(true);
-        expect(hasRole).to.equal(true);
-      });
-
-      it("GIVEN an agent WHEN removing agent THEN removeAgent emits AgentRemoved and revokes role", async () => {
-        await asset.addAgent(signer_B.address);
-
-        expect(await asset.removeAgent(signer_B.address))
-          .to.emit(asset, "AgentRemoved")
-          .withArgs(signer_B.address);
-
-        const hasRole = await asset.hasRole(ATS_ROLES._AGENT_ROLE, signer_B.address);
-        const isAgent = await asset.isAgent(signer_B.address);
-        expect(isAgent).to.equal(false);
-        expect(hasRole).to.equal(false);
-      });
-
-      it("GIVEN a non-agent address WHEN removing agent THEN reverts with AccountNotAssignedToRole", async () => {
-        await expect(asset.removeAgent(signer_C.address))
-          .to.be.revertedWithCustomError(asset, "AccountNotAssignedToRole")
-          .withArgs(ATS_ROLES._AGENT_ROLE, signer_C.address);
-      });
-
-      it("GIVEN an already-agent address WHEN adding agent again THEN reverts with AccountAssignedToRole", async () => {
-        await asset.addAgent(signer_B.address);
-
-        await expect(asset.addAgent(signer_B.address))
-          .to.be.revertedWithCustomError(asset, "AccountAssignedToRole")
-          .withArgs(ATS_ROLES._AGENT_ROLE, signer_B.address);
-      });
-
-      it("GIVEN a user with the agent role WHEN performing actions using ERC-1400 methods succeeds", async () => {
-        await asset.grantRole(ATS_ROLES._AGENT_ROLE, signer_B.address);
-        const amount = 1000;
-        await expect(
-          asset.connect(signer_B).issueByPartition({
-            partition: DEFAULT_PARTITION,
-            tokenHolder: signer_E.address,
-            value: 4 * amount,
-            data: EMPTY_HEX_BYTES,
-          }),
-        ).to.emit(asset, "IssuedByPartition");
-
-        await expect(asset.connect(signer_B).controllerRedeem(signer_E.address, amount, "0x", "0x")).to.emit(
-          asset,
-          "ControllerRedemption",
-        );
-        await expect(
-          asset.connect(signer_B).controllerRedeemByPartition(DEFAULT_PARTITION, signer_E.address, amount, "0x", "0x"),
-        ).to.emit(asset, "RedeemedByPartition");
-        await expect(
-          asset.connect(signer_B).controllerTransfer(signer_E.address, signer_D.address, amount, "0x", "0x"),
-        ).to.emit(asset, "TransferByPartition");
-        await expect(
-          asset
-            .connect(signer_B)
-            .controllerTransferByPartition(DEFAULT_PARTITION, signer_E.address, signer_D.address, amount, "0x", "0x"),
-        ).to.emit(asset, "TransferByPartition");
-      });
-
-      it("GIVEN a user with the agent role WHEN performing actions using ERC-3643 methods succeeds", async () => {
-        await asset.grantRole(ATS_ROLES._AGENT_ROLE, signer_B.address);
-        const amount = 1000;
-        await asset.issueByPartition({
-          partition: DEFAULT_PARTITION,
-          tokenHolder: signer_E.address,
-          value: amount,
-          data: "0x",
-        });
-        await expect(asset.connect(signer_B).freezePartialTokens(signer_E.address, amount))
-          .to.emit(asset, "TokensFrozen")
-          .withArgs(signer_E.address, amount, DEFAULT_PARTITION);
-        await expect(asset.connect(signer_B).unfreezePartialTokens(signer_E.address, amount))
-          .to.emit(asset, "TokensUnfrozen")
-          .withArgs(signer_E.address, amount, DEFAULT_PARTITION);
-        await expect(asset.connect(signer_B).forcedTransfer(signer_E.address, signer_D.address, amount))
-          .to.emit(asset, "TransferByPartition")
-          .withArgs(DEFAULT_PARTITION, ADDRESS_ZERO, signer_E.address, signer_D.address, amount, "0x", "0x");
-        await expect(asset.connect(signer_B).mint(signer_E.address, amount))
-          .to.emit(asset, "Issued")
-          .withArgs(signer_B.address, signer_E.address, amount, "0x");
-        await expect(asset.connect(signer_B).burn(signer_E.address, amount))
-          .to.emit(asset, "Transfer")
-          .withArgs(signer_E.address, ADDRESS_ZERO, amount);
-        await expect(asset.connect(signer_B).setAddressFrozen(signer_E.address, true))
-          .to.emit(asset, "AddressFrozen")
-          .withArgs(signer_E.address, true, signer_B.address);
-      });
-    });
-
     describe("AccessControl", () => {
       it("GIVEN an account without TREX_OWNER role WHEN setName THEN transaction fails with AccountHasNoRole", async () => {
         // set name fails
@@ -1743,16 +1500,6 @@ describe("ERC3643 Tests", () => {
         );
       });
 
-      it("GIVEN an account without admin role WHEN addAgent or removeAgent THEN transaction fails with AccountHasNoRole", async () => {
-        await expect(asset.connect(signer_C).addAgent(signer_A.address)).to.be.revertedWithCustomError(
-          asset,
-          "AccountHasNoRole",
-        );
-        await expect(asset.connect(signer_C).removeAgent(signer_A.address)).to.be.revertedWithCustomError(
-          asset,
-          "AccountHasNoRole",
-        );
-      });
       it("GIVEN an account without AGENT_ROLE role WHEN recoveryAddress THEN transaction fails with AccountHasNoRole", async () => {
         await expect(
           asset.connect(signer_C).recoveryAddress(signer_A.address, signer_B.address, signer_C.address),
@@ -1803,11 +1550,6 @@ describe("ERC3643 Tests", () => {
           asset,
           "TokenIsPaused",
         );
-      });
-
-      it("GIVEN a paused token WHEN attempting to addAgent or removeAgent THEN transactions revert with TokenIsPaused error", async () => {
-        await expect(asset.addAgent(signer_A.address)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
-        await expect(asset.removeAgent(signer_A.address)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
       });
 
       it("GIVEN a paused token WHEN attempting to update name or symbol THEN transactions revert with TokenIsPaused error", async () => {
@@ -2645,18 +2387,6 @@ describe("ERC3643 Tests", () => {
           asset.batchForcedTransfer([signer_A.address], [signer_A.address], [AMOUNT]),
         ).to.be.revertedWithCustomError(asset, "NotAllowedInMultiPartitionMode");
       });
-      it("GIVEN an single partition token WHEN batchMint THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
-        await expect(asset.batchMint([signer_A.address], [AMOUNT])).to.be.revertedWithCustomError(
-          asset,
-          "NotAllowedInMultiPartitionMode",
-        );
-      });
-      it("GIVEN an single partition token WHEN batchBurn THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
-        await expect(asset.batchBurn([signer_A.address], [AMOUNT])).to.be.revertedWithCustomError(
-          asset,
-          "NotAllowedInMultiPartitionMode",
-        );
-      });
     });
 
     describe("Freeze", () => {
@@ -2747,15 +2477,6 @@ describe("ERC3643 Tests", () => {
       await loadFixture(deployERC3643TokenIsControllableFixture);
     });
 
-    it("GIVEN token is not controllable WHEN batchBurn THEN transaction fails with TokenIsNotControllable", async () => {
-      const userAddresses = [signer_D.address];
-      const amounts = [AMOUNT];
-
-      await expect(asset.connect(signer_A).batchBurn(userAddresses, amounts)).to.be.revertedWithCustomError(
-        asset,
-        "TokenIsNotControllable",
-      );
-    });
     it("GIVEN token is not controllable WHEN batchForcedTransfer THEN transaction fails with TokenIsNotControllable", async () => {
       const fromList = [signer_F.address];
       const toList = [signer_E.address];

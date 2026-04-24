@@ -8,7 +8,7 @@ import {
   IFactory,
   type AccessControl,
   type ControlList,
-  type ERC1644,
+  type ControllerFacet,
   type CoreFacet,
 } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -46,7 +46,7 @@ describe("Factory Tests", () => {
   let businessLogicResolver: BusinessLogicResolver;
   let accessControlFacet: AccessControl;
   let controlListFacet: ControlList;
-  let erc1644Facet: ERC1644;
+  let controllerFacet: ControllerFacet;
   let coreFacet: CoreFacet;
 
   const listOfRoles = [
@@ -83,7 +83,7 @@ describe("Factory Tests", () => {
 
     controlListFacet = await ethers.getContractAt("ControlList", equityAddress);
 
-    erc1644Facet = await ethers.getContractAt("ERC1644", equityAddress);
+    controllerFacet = await ethers.getContractAt("ControllerFacet", equityAddress);
 
     coreFacet = await ethers.getContractAt("CoreFacet", equityAddress);
   }
@@ -711,7 +711,7 @@ describe("Factory Tests", () => {
       const whiteList = await controlListFacet.getControlListType();
       expect(whiteList).to.be.equal(equityData.security.isWhiteList);
 
-      const controllable = await erc1644Facet.isControllable();
+      const controllable = await controllerFacet.isControllable();
       expect(controllable).to.be.equal(equityData.security.isControllable);
 
       const metadata = await coreFacet.getERC20Metadata();
@@ -886,7 +886,7 @@ describe("Factory Tests", () => {
       const whiteList = await controlListFacet.getControlListType();
       expect(whiteList).to.be.equal(bondData.security.isWhiteList);
 
-      const controllable = await erc1644Facet.isControllable();
+      const controllable = await controllerFacet.isControllable();
       expect(controllable).to.be.equal(bondData.security.isControllable);
 
       const metadata = await coreFacet.getERC20Metadata();

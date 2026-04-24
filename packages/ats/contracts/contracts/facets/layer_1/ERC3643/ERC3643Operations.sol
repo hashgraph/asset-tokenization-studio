@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _CONTROLLER_ROLE, _AGENT_ROLE } from "../../../constants/roles.sol";
 import { IERC3643Operations } from "./IERC3643Operations.sol";
-import { IERC1644 } from "../ERC1400/ERC1644/IERC1644.sol";
+import { IController } from "../../controller/IController.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../../domain/orchestrator/TokenCoreOps.sol";
@@ -31,23 +31,6 @@ abstract contract ERC3643Operations is IERC3643Operations, Modifiers {
             AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         }
         TokenCoreOps.burn(_userAddress, _amount);
-        emit IERC1644.ControllerRedemption(EvmAccessors.getMsgSender(), _userAddress, _amount, "", "");
-    }
-
-    /// @inheritdoc IERC3643Operations
-    function forcedTransfer(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) external onlyUnpaused onlyWithoutMultiPartition onlyControllable returns (bool success_) {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _CONTROLLER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
-        }
-        TokenCoreOps.transfer(_from, _to, _amount);
-        emit IERC1644.ControllerTransfer(EvmAccessors.getMsgSender(), _from, _to, _amount, "", "");
-        success_ = true;
+        emit IController.ControllerRedemption(EvmAccessors.getMsgSender(), _userAddress, _amount, "", "");
     }
 }

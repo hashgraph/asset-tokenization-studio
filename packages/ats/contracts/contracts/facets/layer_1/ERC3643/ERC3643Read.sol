@@ -1,17 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _AGENT_ROLE } from "../../../constants/roles.sol";
 import { IERC3643Read } from "./IERC3643Read.sol";
 import { IIdentityRegistry } from "./IIdentityRegistry.sol";
-import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
 
 abstract contract ERC3643Read is IERC3643Read {
-    function isAgent(address _agent) external view returns (bool) {
-        return AccessControlStorageWrapper.hasRole(_AGENT_ROLE, _agent);
-    }
-
     function identityRegistry() external view override returns (IIdentityRegistry) {
         return ERC3643StorageWrapper.getIdentityRegistry();
     }

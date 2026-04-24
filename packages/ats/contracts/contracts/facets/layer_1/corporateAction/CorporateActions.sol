@@ -12,9 +12,9 @@ abstract contract CorporateActions is ICorporateActions, Modifiers {
         external
         view
         override
-        returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_, bool isDisabled_)
+        returns (bytes32 actionType_, uint256 actionIdByType_, bytes memory data_, bool isDisabled_)
     {
-        (actionType_, actionTypeId_, data_, isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(
+        (actionType_, actionIdByType_, data_, isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(
             _corporateActionId
         );
     }
@@ -28,12 +28,12 @@ abstract contract CorporateActions is ICorporateActions, Modifiers {
         override
         returns (
             bytes32[] memory actionTypes_,
-            uint256[] memory actionTypeIds_,
+            uint256[] memory actionIdByType_,
             bytes[] memory datas_,
             bool[] memory isDisabled_
         )
     {
-        (actionTypes_, actionTypeIds_, datas_, isDisabled_) = CorporateActionsStorageWrapper.getCorporateActions(
+        (actionTypes_, actionIdByType_, datas_, isDisabled_) = CorporateActionsStorageWrapper.getCorporateActions(
             _pageIndex,
             _pageLength
         );
