@@ -293,7 +293,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         steps: {
           facets: new Map([
             ["AccessControlFacet", createDeployedContract("0x3333333333333333333333333333333333333333", "0x111...")],
-            ["ERC20Facet", createDeployedContract("0x4444444444444444444444444444444444444444", "0x222...")],
+            ["TransferFacet", createDeployedContract("0x4444444444444444444444444444444444444444", "0x222...")],
           ]),
         },
         options: {
@@ -331,7 +331,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         steps: {
           facets: new Map([
             ["AccessControlFacet", createDeployedContract("0x3333333333333333333333333333333333333333", "0x111...")],
-            ["ERC20Facet", createDeployedContract("0x4444444444444444444444444444444444444444", "0x222...")],
+            ["TransferFacet", createDeployedContract("0x4444444444444444444444444444444444444444", "0x222...")],
             ["PauseFacet", createDeployedContract("0x5555555555555555555555555555555555555555", "0x333...")],
           ]),
         },
@@ -369,7 +369,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         steps: {
           facets: new Map([
             ["AccessControlFacet", createDeployedContract("0x3333333333333333333333333333333333333333", "0x111...")],
-            ["ERC20Facet", createDeployedContract("0x4444444444444444444444444444444444444444", "0x222...")],
+            ["TransferFacet", createDeployedContract("0x4444444444444444444444444444444444444444", "0x222...")],
           ]),
           facetsRegistered: true,
         },

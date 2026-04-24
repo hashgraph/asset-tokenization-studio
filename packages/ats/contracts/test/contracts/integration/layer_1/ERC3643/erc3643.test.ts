@@ -159,51 +159,6 @@ describe("ERC3643 Tests", () => {
       });
     });
 
-    describe("mint", () => {
-      it("GIVEN an account with issuer role WHEN mint THEN transaction succeeds", async () => {
-        // issue succeeds
-        expect(await asset.mint(signer_E.address, AMOUNT / 2))
-          .to.emit(asset, "Issued")
-          .withArgs(signer_C.address, signer_E.address, AMOUNT / 2);
-        expect(await asset.totalSupply()).to.be.equal(AMOUNT / 2);
-        expect(await asset.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
-        expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.be.equal(AMOUNT / 2);
-        expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.be.equal(AMOUNT / 2);
-      });
-      it("GIVEN a paused token WHEN attempting to mint TokenIsPaused error", async () => {
-        await asset.addIssuer(signer_A.address);
-        await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-
-        await asset.connect(signer_B).pause();
-
-        await expect(asset.mint(signer_A.address, AMOUNT)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
-      });
-      it("GIVEN a max supply WHEN mint more than the max supply THEN transaction fails with MaxSupplyReached", async () => {
-        await expect(asset.connect(signer_A).mint(signer_E.address, MAX_SUPPLY + 1)).to.be.revertedWithCustomError(
-          asset,
-          "MaxSupplyReached",
-        );
-      });
-      it("GIVEN blocked account USING WHITELIST WHEN mint THEN transaction fails with AccountIsBlocked", async () => {
-        // Blacklisting accounts
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_A.address);
-        await asset.connect(signer_A).addToControlList(signer_C.address);
-
-        await asset.addIssuer(signer_C.address);
-        await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_C.address);
-
-        // mint fails
-        await expect(asset.connect(signer_C).mint(signer_C.address, AMOUNT)).to.be.revertedWithCustomError(
-          asset,
-          "AccountIsBlocked",
-        );
-      });
-      it("GIVEN non kyc account WHEN mint THEN transaction reverts with InvalidKycStatus", async () => {
-        await asset.connect(signer_B).revokeKyc(signer_E.address);
-        await expect(asset.mint(signer_E.address, AMOUNT)).to.revertedWithCustomError(asset, "InvalidKycStatus");
-      });
-    });
-
     describe("burn", () => {
       it("GIVEN an initialized token WHEN burning THEN transaction success", async () => {
         //happy path
@@ -659,7 +614,7 @@ describe("ERC3643 Tests", () => {
 
         const erc3643NoCompliance = await ethers.getContractAt("IERC3643", newTokenFixture.diamond.target);
         const kycNoCompliance = await ethers.getContractAt("Kyc", newTokenFixture.diamond.target, signer_B);
-        const erc20NoCompliance = await ethers.getContractAt("ERC20", newTokenFixture.diamond.target, signer_E);
+        const erc20NoCompliance = await ethers.getContractAt("Transfer", newTokenFixture.diamond.target, signer_E);
         const ssiNoCompliance = await ethers.getContractAt("SsiManagement", newTokenFixture.diamond.target);
 
         // Grant ATS_ROLES._SSI_MANAGER_ROLE to signer_A.address first, then add signer_E.address as an issuer
@@ -669,7 +624,7 @@ describe("ERC3643 Tests", () => {
         await kycNoCompliance.grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
         await kycNoCompliance.grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
 
-        await erc3643NoCompliance.mint(signer_E.address, AMOUNT);
+        await newasset.mint(signer_E.address, AMOUNT);
 
         await expect(erc20NoCompliance.transfer(signer_D.address, AMOUNT / 2)).to.not.be.reverted;
       });
@@ -714,7 +669,7 @@ describe("ERC3643 Tests", () => {
 
         const erc3643NoCompliance = await ethers.getContractAt("IERC3643", newTokenFixture.diamond.target);
         const kycNoCompliance = await ethers.getContractAt("Kyc", newTokenFixture.diamond.target, signer_B);
-        const erc20NoCompliance = await ethers.getContractAt("ERC20", newTokenFixture.diamond.target, signer_E);
+        const erc20NoCompliance = await ethers.getContractAt("Transfer", newTokenFixture.diamond.target, signer_E);
         const ssiNoCompliance = await ethers.getContractAt("SsiManagement", newTokenFixture.diamond.target);
 
         // Grant ATS_ROLES._SSI_MANAGER_ROLE to signer_A.address first, then add signer_E.address as an issuer
@@ -724,7 +679,7 @@ describe("ERC3643 Tests", () => {
         await kycNoCompliance.grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
         await kycNoCompliance.grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
 
-        await erc3643NoCompliance.mint(signer_E.address, AMOUNT);
+        await newasset.mint(signer_E.address, AMOUNT);
 
         await expect(erc20NoCompliance.transfer(signer_D.address, AMOUNT / 2)).to.not.be.reverted;
       });
@@ -1130,173 +1085,6 @@ describe("ERC3643 Tests", () => {
     });
 
     describe("Batch Operations", () => {
-      describe("batchMint", () => {
-        it("GIVEN an account with issuer role WHEN batchMint THEN transaction succeeds and balances are updated", async () => {
-          const mintAmount = AMOUNT / 2;
-          const toList = [signer_D.address, signer_E.address];
-          const amounts = [mintAmount, mintAmount];
-
-          const initialBalanceD = await asset.balanceOf(signer_D.address);
-          const initialBalanceE = await asset.balanceOf(signer_E.address);
-          const initialTotalSupply = await asset.totalSupply();
-
-          await expect(asset.batchMint(toList, amounts)).to.not.be.reverted;
-
-          const finalBalanceD = await asset.balanceOf(signer_D.address);
-          const finalBalanceE = await asset.balanceOf(signer_E.address);
-          const finalTotalSupply = await asset.totalSupply();
-
-          expect(finalBalanceD).to.be.equal(initialBalanceD + BigInt(mintAmount));
-          expect(finalBalanceE).to.be.equal(initialBalanceE + BigInt(mintAmount));
-          expect(finalTotalSupply).to.be.equal(initialTotalSupply + BigInt(mintAmount * 2));
-        });
-
-        it("GIVEN an account without issuer role WHEN batchMint THEN transaction fails with AccountHasNoRole", async () => {
-          const mintAmount = AMOUNT / 2;
-          const toList = [signer_D.address, signer_E.address];
-          const amounts = [mintAmount, mintAmount];
-
-          // signer_B does not have ATS_ROLES._ISSUER_ROLE
-          await expect(asset.connect(signer_B).batchMint(toList, amounts)).to.be.revertedWithCustomError(
-            asset,
-            "AccountHasNoRoles",
-          );
-        });
-
-        it("GIVEN an invalid input amounts array THEN transaction fails with InputAmountsArrayLengthMismatch", async () => {
-          const mintAmount = AMOUNT / 2;
-          const toList = [signer_D.address];
-          const amounts = [mintAmount, mintAmount];
-
-          await expect(asset.batchMint(toList, amounts)).to.be.revertedWithCustomError(
-            asset,
-            "InputAmountsArrayLengthMismatch",
-          );
-        });
-
-        it("GIVEN a paused token WHEN batchMint THEN transaction fails with TokenIsPaused", async () => {
-          await asset.pause();
-
-          const mintAmount = AMOUNT / 2;
-          const toList = [signer_D.address];
-          const amounts = [mintAmount];
-
-          await expect(asset.batchMint(toList, amounts)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
-        });
-      });
-
-      describe("batchTransfer", () => {
-        const transferAmount = AMOUNT / 4;
-        const initialMintAmount = AMOUNT;
-
-        beforeEach(async () => {
-          // Mint initial tokens to the sender (signer_E)
-          await asset.mint(signer_E.address, initialMintAmount);
-        });
-
-        it("GIVEN a valid sender WHEN batchTransfer THEN transaction succeeds and balances are updated", async () => {
-          const toList = [signer_F.address, signer_D.address];
-          const amounts = [transferAmount, transferAmount];
-
-          const initialBalanceSender = await asset.balanceOf(signer_E.address);
-          const initialBalanceF = await asset.balanceOf(signer_F.address);
-          const initialBalanceD = await asset.balanceOf(signer_D.address);
-
-          await expect(asset.connect(signer_E).batchTransfer(toList, amounts)).to.not.be.reverted;
-
-          const finalBalanceSender = await asset.balanceOf(signer_E.address);
-          const finalBalanceF = await asset.balanceOf(signer_F.address);
-          const finalBalanceD = await asset.balanceOf(signer_D.address);
-
-          expect(finalBalanceSender).to.equal(initialBalanceSender - BigInt(transferAmount * 2));
-          expect(finalBalanceF).to.equal(initialBalanceF + BigInt(transferAmount));
-          expect(finalBalanceD).to.equal(initialBalanceD + BigInt(transferAmount));
-        });
-
-        it("GIVEN insufficient balance WHEN batchTransfer THEN transaction fails", async () => {
-          const toList = [signer_F.address, signer_D.address];
-          // Total amount > balance
-          const amounts = [initialMintAmount, transferAmount];
-
-          await expect(asset.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
-            asset,
-            "InvalidPartition",
-          );
-        });
-
-        it("GIVEN an invalid input amounts array THEN transaction fails with InputAmountsArrayLengthMismatch", async () => {
-          const mintAmount = AMOUNT / 2;
-          const toList = [signer_D.address];
-          const amounts = [mintAmount, mintAmount];
-
-          await expect(asset.batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
-            asset,
-            "InputAmountsArrayLengthMismatch",
-          );
-        });
-
-        it("GIVEN a paused token WHEN batchTransfer THEN transaction fails with TokenIsPaused", async () => {
-          await asset.pause();
-
-          const toList = [signer_F.address];
-          const amounts = [transferAmount];
-
-          await expect(asset.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
-            asset,
-            "TokenIsPaused",
-          );
-        });
-
-        it("GIVEN clearing is activated WHEN batchTransfer THEN transaction fails with ClearingIsActivated", async () => {
-          await asset.connect(signer_B).activateClearing();
-
-          const toList = [signer_F.address];
-          const amounts = [transferAmount];
-
-          await expect(asset.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
-            asset,
-            "ClearingIsActivated",
-          );
-        });
-
-        it("GIVEN protected partitions without wildcard role WHEN batchTransfer THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
-          await asset.grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
-          await asset.protectPartitions();
-
-          const toList = [signer_F.address];
-          const amounts = [transferAmount];
-
-          await expect(asset.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
-            asset,
-            "PartitionsAreProtectedAndNoRole",
-          );
-        });
-
-        it("GIVEN non-verified sender WHEN batchTransfer THEN transaction fails with AddressNotVerified", async () => {
-          await identityRegistryMock.setFlags(false, false);
-
-          const toList = [signer_F.address];
-          const amounts = [transferAmount];
-
-          await expect(asset.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
-            asset,
-            "AddressNotVerified",
-          );
-        });
-
-        it("GIVEN compliance returns false WHEN batchTransfer THEN transaction fails with ComplianceNotAllowed", async () => {
-          await complianceMock.setFlags(false, false);
-
-          const toList = [signer_F.address];
-          const amounts = [transferAmount];
-
-          await expect(asset.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
-            asset,
-            "ComplianceNotAllowed",
-          );
-        });
-      });
-
       describe("batchForcedTransfer", () => {
         const transferAmount = AMOUNT / 2;
 
@@ -2476,22 +2264,10 @@ describe("ERC3643 Tests", () => {
     });
 
     describe("Batch operations", () => {
-      it("GIVEN an single partition token WHEN batchTransfer THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
-        await expect(asset.batchTransfer([signer_A.address], [AMOUNT])).to.be.revertedWithCustomError(
-          asset,
-          "NotAllowedInMultiPartitionMode",
-        );
-      });
       it("GIVEN an single partition token WHEN batchForcedTransfer THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
         await expect(
           asset.batchForcedTransfer([signer_A.address], [signer_A.address], [AMOUNT]),
         ).to.be.revertedWithCustomError(asset, "NotAllowedInMultiPartitionMode");
-      });
-      it("GIVEN an single partition token WHEN batchMint THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
-        await expect(asset.batchMint([signer_A.address], [AMOUNT])).to.be.revertedWithCustomError(
-          asset,
-          "NotAllowedInMultiPartitionMode",
-        );
       });
     });
 

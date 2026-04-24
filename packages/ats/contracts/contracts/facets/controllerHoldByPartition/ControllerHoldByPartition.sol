@@ -9,6 +9,11 @@ import { HoldStorageWrapper } from "../../domain/asset/HoldStorageWrapper.sol";
 import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
+/**
+ * @title ControllerHoldByPartition
+ * @notice Implementation of the ControllerHoldByPartition domain. Delegates into the existing
+ *         storage wrappers so semantics match `HoldManagement` exactly.
+ */
 abstract contract ControllerHoldByPartition is IControllerHoldByPartition, Modifiers {
     /// @inheritdoc IControllerHoldByPartition
     function controllerCreateHoldByPartition(

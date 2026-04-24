@@ -42,7 +42,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "CorporateActionsFacet",
   "DiamondFacet", // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
   "CoreFacet",
-  "ERC20Facet",
+  "TransferFacet",
   "CoreAdjustedFacet",
   "FreezeFacet",
   "KycFacet",
@@ -64,10 +64,13 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "ERC20VotesFacet",
   "ERC3643BatchFacet",
   "BatchBurnFacet",
+  "BatchMintFacet",
+  "BatchTransferFacet",
   "ERC3643ManagementFacet",
   "ERC3643OperationsFacet",
   "ERC3643ReadFacet",
   "ComplianceFacet",
+  "MintFacet",
 
   // Clearing & Settlement
   "ClearingActionsFacet",

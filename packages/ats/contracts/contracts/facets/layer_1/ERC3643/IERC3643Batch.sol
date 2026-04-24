@@ -5,11 +5,6 @@ import { IERC3643Types } from "./IERC3643Types.sol";
 
 interface IERC3643Batch is IERC3643Types {
     /**
-     * @notice Batch transfer tokens to multiple addresses
-     */
-    function batchTransfer(address[] calldata _toList, uint256[] calldata _amounts) external;
-
-    /**
      * @notice Batch forced transfer tokens from multiple addresses to multiple addresses
      */
     function batchForcedTransfer(
@@ -17,9 +12,4 @@ interface IERC3643Batch is IERC3643Types {
         address[] calldata _toList,
         uint256[] calldata _amounts
     ) external;
-
-    /**
-     * @notice Batch mint tokens to multiple addresses
-     */
-    function batchMint(address[] calldata _toList, uint256[] calldata _amounts) external;
 }
