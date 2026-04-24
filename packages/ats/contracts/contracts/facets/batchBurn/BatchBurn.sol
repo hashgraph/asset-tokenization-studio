@@ -20,15 +20,7 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  * @author Asset Tokenization Studio Team
  */
 abstract contract BatchBurn is IBatchBurn, Modifiers {
-    /**
-     * @notice Burns tokens from multiple addresses in a single transaction.
-     * @dev Requires `_CONTROLLER_ROLE` or `_AGENT_ROLE`. Reverts if the token is paused,
-     *      if multi-partition is active, or if the input arrays have mismatched lengths.
-     *      Emits `IERC1644.ControllerRedemption` for each address. Calls `TokenCoreOps.burn`
-     *      for each entry after performing role validation.
-     * @param _userAddresses Addresses from which tokens will be burnt.
-     * @param _amounts Corresponding token amounts to burn. Must be the same length as `_userAddresses`.
-     */
+    /// @inheritdoc IBatchBurn
     function batchBurn(
         address[] calldata _userAddresses,
         uint256[] calldata _amounts
@@ -45,9 +37,13 @@ abstract contract BatchBurn is IBatchBurn, Modifiers {
             roles[1] = _AGENT_ROLE;
             AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
+        uint256 length = _userAddresses.length;
+        for (uint256 i; i < length; ) {
             TokenCoreOps.burn(_userAddresses[i], _amounts[i]);
             emit IERC1644.ControllerRedemption(EvmAccessors.getMsgSender(), _userAddresses[i], _amounts[i], "", "");
+            unchecked {
+                ++i;
+            }
         }
     }
 }
