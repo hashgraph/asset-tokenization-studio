@@ -217,11 +217,6 @@ describe("Hold Tests", () => {
         ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
       });
 
-      it("GIVEN a paused Token WHEN controllerCreateHoldByPartition THEN transaction fails with TokenIsPaused", async () => {
-        await expect(
-          asset.controllerCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
-      });
     });
 
     describe("Clearing active", () => {
@@ -242,13 +237,6 @@ describe("Hold Tests", () => {
         ).to.be.revertedWithCustomError(asset, "Unauthorized");
       });
 
-      it("GIVEN an account without CONTROLLER role WHEN controllerCreateHoldByPartition THEN transaction fails with AccountHasNoRole", async () => {
-        await expect(
-          asset
-            .connect(signer_B)
-            .controllerCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
-      });
     });
 
     describe("Create with wrong input arguments", () => {
@@ -290,29 +278,6 @@ describe("Hold Tests", () => {
         ).to.be.revertedWithCustomError(asset, "PartitionsAreProtectedAndNoRole");
       });
 
-      it("Given a invalid _from address when controllerCreateHoldByPartition THEN transaction fails with ZeroAddressNotAllowed", async () => {
-        const hold_wrong = {
-          amount: _AMOUNT,
-          expirationTimestamp: expirationTimestamp,
-          escrow: ADDRESS_ZERO,
-          to: ADDRESS_ZERO,
-          data: _DATA,
-        };
-        await expect(
-          asset
-            .connect(signer_C)
-            .controllerCreateHoldByPartition(_DEFAULT_PARTITION, ADDRESS_ZERO, hold_wrong, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
-      });
-      it("Given noControllable token when controllerCreateHoldByPartition THEN transaction fails with TokenIsNotControllable", async () => {
-        await asset.connect(signer_A).finalizeControllable();
-
-        await expect(
-          asset
-            .connect(signer_C)
-            .controllerCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(asset, "TokenIsNotControllable");
-      });
       it("GIVEN a Token WHEN creating hold with amount bigger than balance THEN transaction fails with InsufficientBalance", async () => {
         const AmountLargerThanBalance = 1000 * _AMOUNT;
 
@@ -331,14 +296,6 @@ describe("Hold Tests", () => {
             .connect(signer_B)
             .operatorCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold_wrong, EMPTY_HEX_BYTES),
         ).to.be.revertedWithCustomError(asset, "InsufficientBalance");
-
-        await asset.connect(signer_A).revokeOperator(signer_B.address);
-
-        await expect(
-          asset
-            .connect(signer_C)
-            .controllerCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold_wrong, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(asset, "InsufficientBalance");
       });
 
       it("GIVEN a Token WHEN createHoldByPartition passing empty escrow THEN transaction fails with ZeroAddressNotAllowed", async () => {
@@ -356,14 +313,6 @@ describe("Hold Tests", () => {
           asset
             .connect(signer_B)
             .operatorCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold_wrong, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
-
-        await asset.connect(signer_A).revokeOperator(signer_B.address);
-
-        await expect(
-          asset
-            .connect(signer_C)
-            .controllerCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold_wrong, EMPTY_HEX_BYTES),
         ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
       });
 
@@ -386,14 +335,6 @@ describe("Hold Tests", () => {
             .connect(signer_B)
             .operatorCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold_wrong, EMPTY_HEX_BYTES),
         ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
-
-        await asset.connect(signer_A).revokeOperator(signer_B.address);
-
-        await expect(
-          asset
-            .connect(signer_C)
-            .controllerCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold_wrong, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
       });
 
       it("GIVEN a wrong partition WHEN creating hold THEN transaction fails with PartitionNotAllowedInSinglePartitionMode", async () => {
@@ -403,14 +344,6 @@ describe("Hold Tests", () => {
           asset
             .connect(signer_B)
             .operatorCreateHoldByPartition(_WRONG_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode");
-
-        await asset.connect(signer_A).revokeOperator(signer_B.address);
-
-        await expect(
-          asset
-            .connect(signer_C)
-            .controllerCreateHoldByPartition(_WRONG_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
         ).to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode");
       });
     });
@@ -457,19 +390,6 @@ describe("Hold Tests", () => {
         await checkCreatedHold(ThirdPartyType.OPERATOR, ADDRESS_ZERO, operatorData);
       });
 
-      it("GIVEN a Token WHEN controllerCreateHoldByPartition hold THEN transaction succeeds", async () => {
-        const operatorData = "0xab56222233";
-
-        await expect(
-          asset
-            .connect(signer_C)
-            .controllerCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, operatorData),
-        )
-          .to.emit(asset, "ControllerHeldByPartition")
-          .withArgs(signer_C.address, signer_A.address, _DEFAULT_PARTITION, 1, Object.values(hold), operatorData);
-
-        await checkCreatedHold(ThirdPartyType.CONTROLLER, ADDRESS_ZERO, operatorData);
-      });
     });
 
     describe("Protected Create Hold By Partition", () => {
@@ -737,21 +657,13 @@ describe("Hold Tests", () => {
       await loadFixture(deploySecurityFixtureMultiPartition);
     });
 
-    it("GIVEN a Token WHEN operatorCreateHoldByPartition/controllerCreateHoldByPartition for wrong partition THEN transaction fails with InvalidPartition", async () => {
+    it("GIVEN a Token WHEN operatorCreateHoldByPartition for wrong partition THEN transaction fails with InvalidPartition", async () => {
       await asset.connect(signer_A).authorizeOperator(signer_B.address);
 
       await expect(
         asset
           .connect(signer_B)
           .operatorCreateHoldByPartition(_WRONG_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
-      ).to.be.revertedWithCustomError(asset, "InvalidPartition");
-
-      await asset.connect(signer_A).revokeOperator(signer_B.address);
-
-      await expect(
-        asset
-          .connect(signer_C)
-          .controllerCreateHoldByPartition(_WRONG_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
       ).to.be.revertedWithCustomError(asset, "InvalidPartition");
     });
   });
