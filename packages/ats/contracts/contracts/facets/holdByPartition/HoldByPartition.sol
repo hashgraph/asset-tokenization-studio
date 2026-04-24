@@ -1,41 +1,25 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { HoldStorageWrapper } from "../../../domain/asset/HoldStorageWrapper.sol";
-import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
-import { IHoldTypes } from "./IHoldTypes.sol";
-import { IHoldTokenHolder } from "./IHoldTokenHolder.sol";
-import { Modifiers } from "../../../services/Modifiers.sol";
-import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+import { HoldStorageWrapper } from "../../domain/asset/HoldStorageWrapper.sol";
+import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";
+import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
+import { IHoldByPartition } from "./IHoldByPartition.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 /**
- * @title HoldTokenHolder
+ * @title HoldByPartition
+ * @notice Abstract contract implementing all hold operations scoped to a specific partition.
+ * @dev Combines the write operations from the former HoldTokenHolder (create, execute, release,
+ *      reclaim) with the partition-scoped read operations from the former HoldReadFacet
+ *      (getHeldAmountForByPartition, getHoldCountForByPartition, getHoldsIdForByPartition,
+ *      getHoldForByPartition). All write methods delegate to HoldStorageWrapper via HoldOps.
  * @author Asset Tokenization Studio Team
- * @notice Abstract contract for hold token holder operations
- *
- * Provides functionality for creating and managing holds on tokens
- * with partition support. Inherits modifiers from multiple concerns:
- * - ClearingModifiers: clearing-related validations
- * - ERC3643Modifiers: ERC3643 compliance checks
- * - LockModifiers: lock expiration validation
- * - PartitionModifiers: partition protection checks
  */
-abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
-    /**
-     * @notice Create a hold by partition
-     * @dev Validates partition, expiration timestamp, and address recovery status
-     *
-     * Requirements:
-     * - Partition must be valid and single
-     * - Expiration timestamp must be in the future
-     * - Addresses must not be recovered
-     * - Partitions must not be protected or caller must have wildcard role
-     *
-     * @param _partition The partition identifier
-     * @param _hold Hold data structure with escrow, to, amount, expirationTimestamp
-     * @return success_ Boolean indicating success
-     * @return holdId_ The created hold identifier
-     */
+abstract contract HoldByPartition is IHoldByPartition, Modifiers {
+    /// @inheritdoc IHoldByPartition
     function createHoldByPartition(
         bytes32 _partition,
         IHoldTypes.Hold calldata _hold
@@ -63,23 +47,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
         emit HeldByPartition(EvmAccessors.getMsgSender(), EvmAccessors.getMsgSender(), _partition, holdId_, _hold, "");
     }
 
-    /**
-     * @notice Create a hold from address by partition
-     * @dev Validates partition, expiration timestamp, and all addresses
-     *
-     * Requirements:
-     * - Partition must be valid and single
-     * - Expiration timestamp must be in the future
-     * - All addresses (sender, to, from) must not be recovered
-     * - Partitions must not be protected or caller must have wildcard role
-     *
-     * @param _partition The partition identifier
-     * @param _from The address to hold from
-     * @param _hold Hold data structure
-     * @param _operatorData Additional operator data
-     * @return success_ Boolean indicating success
-     * @return holdId_ The created hold identifier
-     */
+    /// @inheritdoc IHoldByPartition
     function createHoldFromByPartition(
         bytes32 _partition,
         address _from,
@@ -114,21 +82,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
         emit HeldFromByPartition(EvmAccessors.getMsgSender(), _from, _partition, holdId_, _hold, _operatorData);
     }
 
-    /**
-     * @notice Execute hold by partition
-     * @dev Transfers held amount to specified address
-     *
-     * Requirements:
-     * - Partition must be valid and single
-     * - Hold ID must be valid
-     * - Addresses must be identified and compliant
-     *
-     * @param _holdIdentifier Hold identifier structure
-     * @param _to The address to transfer to
-     * @param _amount The amount to transfer
-     * @return success_ Boolean indicating success
-     * @return partition_ The partition identifier
-     */
+    /// @inheritdoc IHoldByPartition
     function executeHoldByPartition(
         IHoldTypes.HoldIdentifier calldata _holdIdentifier,
         address _to,
@@ -154,18 +108,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
         );
     }
 
-    /**
-     * @notice Release hold by partition
-     * @dev Releases held tokens back to holder
-     *
-     * Requirements:
-     * - Partition must be valid and single
-     * - Hold ID must be valid
-     *
-     * @param _holdIdentifier Hold identifier structure
-     * @param _amount The amount to release
-     * @return success_ Boolean indicating success
-     */
+    /// @inheritdoc IHoldByPartition
     function releaseHoldByPartition(
         IHoldTypes.HoldIdentifier calldata _holdIdentifier,
         uint256 _amount
@@ -186,17 +129,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
         );
     }
 
-    /**
-     * @notice Reclaim hold by partition
-     * @dev Reclaims held tokens to original holder
-     *
-     * Requirements:
-     * - Partition must be valid and single
-     * - Hold ID must be valid
-     *
-     * @param _holdIdentifier Hold identifier structure
-     * @return success_ Boolean indicating success
-     */
+    /// @inheritdoc IHoldByPartition
     function reclaimHoldByPartition(
         IHoldTypes.HoldIdentifier calldata _holdIdentifier
     )
@@ -216,5 +149,60 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
             _holdIdentifier.holdId,
             amount
         );
+    }
+
+    /// @inheritdoc IHoldByPartition
+    function getHeldAmountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view override returns (uint256 amount_) {
+        return
+            HoldStorageWrapper.getHeldAmountForByPartitionAdjustedAt(
+                _partition,
+                _tokenHolder,
+                TimeTravelStorageWrapper.getBlockTimestamp()
+            );
+    }
+
+    /// @inheritdoc IHoldByPartition
+    function getHoldCountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view override returns (uint256 holdCount_) {
+        return HoldStorageWrapper.getHoldCountForByPartition(_partition, _tokenHolder);
+    }
+
+    /// @inheritdoc IHoldByPartition
+    function getHoldsIdForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override returns (uint256[] memory holdsId_) {
+        return HoldStorageWrapper.getHoldsIdForByPartition(_partition, _tokenHolder, _pageIndex, _pageLength);
+    }
+
+    /// @inheritdoc IHoldByPartition
+    function getHoldForByPartition(
+        IHoldTypes.HoldIdentifier calldata _holdIdentifier
+    )
+        external
+        view
+        override
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address escrow_,
+            address destination_,
+            bytes memory data_,
+            bytes memory operatorData_,
+            ThirdPartyType thirdPartyType_
+        )
+    {
+        return
+            HoldStorageWrapper.getHoldForByPartitionAdjustedAt(
+                _holdIdentifier,
+                TimeTravelStorageWrapper.getBlockTimestamp()
+            );
     }
 }

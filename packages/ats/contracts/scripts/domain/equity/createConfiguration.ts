@@ -78,8 +78,7 @@ const EQUITY_FACETS = [
   "ClearingTransferFacet",
   "HoldFacet",
   "HoldManagementFacet",
-  "HoldReadFacet",
-  "HoldTokenHolderFacet",
+  "HoldByPartitionFacet",
 
   // External Management (3)
   "ExternalControlListManagementFacet",
