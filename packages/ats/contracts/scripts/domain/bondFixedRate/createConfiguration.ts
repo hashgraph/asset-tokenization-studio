@@ -66,6 +66,7 @@ const BOND_FIXED_RATE_FACETS = [
   "NoncesFacet",
   "ERC20VotesFacet",
   "ERC3643BatchFacet",
+  "BatchBurnFacet",
   "BatchMintFacet",
   "ERC3643ManagementFacet",
   "ERC3643OperationsFacet",
@@ -80,8 +81,7 @@ const BOND_FIXED_RATE_FACETS = [
   "ClearingTransferFacet",
   "HoldFacet",
   "HoldManagementFacet",
-  "HoldReadFacet",
-  "HoldTokenHolderFacet",
+  "HoldByPartitionFacet",
 
   // External Management
   "ExternalControlListManagementFacet",

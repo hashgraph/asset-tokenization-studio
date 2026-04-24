@@ -71,6 +71,7 @@ const BOND_FACETS = [
   "NoncesFacet",
   "ERC20VotesFacet",
   "ERC3643BatchFacet",
+  "BatchBurnFacet",
   "BatchMintFacet",
   "ERC3643ManagementFacet",
   "ERC3643OperationsFacet",
@@ -85,8 +86,7 @@ const BOND_FACETS = [
   "ClearingTransferFacet",
   "HoldFacet",
   "HoldManagementFacet",
-  "HoldReadFacet",
-  "HoldTokenHolderFacet",
+  "HoldByPartitionFacet",
 
   // External Management
   "ExternalControlListManagementFacet",
