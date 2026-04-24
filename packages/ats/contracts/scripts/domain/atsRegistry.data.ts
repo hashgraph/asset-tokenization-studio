@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-24T09:59:07.959Z
- * Facets: 88
+ * Generated: 2026-04-24T12:22:49.686Z
+ * Facets: 90
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -77,6 +77,7 @@ import {
   HoldManagementFacet__factory,
   IComplianceFacet__factory,
   IHoldFacet__factory,
+  IMintFacet__factory,
   KpiLinkedRateFacet__factory,
   KpisKpiLinkedRateFacet__factory,
   KpisSustainabilityPerformanceTargetRateFacet__factory,
@@ -84,6 +85,7 @@ import {
   LoanFacet__factory,
   LoansPortfolioFacet__factory,
   LockFacet__factory,
+  MintFacet__factory,
   NominalValueFacet__factory,
   NoncesFacet__factory,
   PauseFacet__factory,
@@ -6870,6 +6872,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ERC1594Facet: {
     name: "ERC1594Facet",
+    description: "Diamond facet exposing the ERC-1594 issuance and redemption surface.",
     resolverKey: {
       name: "_ERC1594_RESOLVER_KEY",
       value: "0xcb70773e8163595d8bd906e277adeb3935976ad802ee8c29face3dfb0263291f",
@@ -6880,19 +6883,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "initialize_ERC1594",
         signature: { full: "function initialize_ERC1594()", canonical: "initialize_ERC1594()" },
         selector: "0x9be12cea",
-      },
-      {
-        name: "isIssuable",
-        signature: { full: "function isIssuable() view returns (bool)", canonical: "isIssuable()" },
-        selector: "0x2f1cae85",
-      },
-      {
-        name: "issue",
-        signature: {
-          full: "function issue(address _tokenHolder, uint256 _value, bytes _data)",
-          canonical: "issue(address,uint256,bytes)",
-        },
-        selector: "0xbb3acde9",
       },
       {
         name: "redeem",
@@ -6940,14 +6930,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "Issued(address,address,uint256,bytes)",
         },
         topic0: "0x0e9905d62635f049c2f4e11678ebf9dc3d1f8c4a653e290759b772e47ba00d00",
-      },
-      {
-        name: "IssuedByPartition",
-        signature: {
-          full: "event IssuedByPartition(bytes32 indexed partition, address indexed operator, address indexed to, uint256 value, bytes data)",
-          canonical: "IssuedByPartition(bytes32,address,address,uint256,bytes)",
-        },
-        topic0: "0x5af1c8f424b104b6ba4e3c0885f2ed9fef04a9b1ea39cd9ed362432105c0791a",
       },
       {
         name: "Redeemed",
@@ -7016,14 +6998,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x10210dec",
       },
       {
-        name: "AccountHasNoRoles",
-        signature: {
-          full: "error AccountHasNoRoles(address account, bytes32[] roles)",
-          canonical: "AccountHasNoRoles(address,bytes32[])",
-        },
-        selector: "0x90e55392",
-      },
-      {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
@@ -7051,11 +7025,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "InvalidPartition(address,bytes32)",
         },
         selector: "0xbf84f4ec",
-      },
-      {
-        name: "MaxSupplyReached",
-        signature: { full: "error MaxSupplyReached(uint256 maxSupply)", canonical: "MaxSupplyReached(uint256)" },
-        selector: "0xf9f84915",
       },
       {
         name: "NotAllowedInMultiPartitionMode",
@@ -7092,11 +7061,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf128004d",
       },
       {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
-      {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
         selector: "0xc9622656",
@@ -7106,12 +7070,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
         selector: "0xf9f9bcf9",
       },
-      {
-        name: "ZeroPartition",
-        signature: { full: "error ZeroPartition()", canonical: "ZeroPartition()" },
-        selector: "0x4a6f30c3",
-      },
-      { name: "ZeroValue", signature: { full: "error ZeroValue()", canonical: "ZeroValue()" }, selector: "0x7c946ed7" },
     ],
     factory: (signer) => new ERC1594Facet__factory(getLibLinks("tokenCoreOps") as any, signer),
     timeTravelFactory: (signer) => new ERC1594FacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
@@ -7860,6 +7818,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ERC3643OperationsFacet: {
     name: "ERC3643OperationsFacet",
+    description: "Diamond facet exposing the ERC-3643 controller operations (burn and forced transfer).",
     resolverKey: {
       name: "_ERC3643_OPERATIONS_RESOLVER_KEY",
       value: "0xe30b6b8e9e62fb8f017c940c7ffac12709f7ef6ae90beac5570fab25c7384e9c",
@@ -7870,11 +7829,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "burn",
         signature: { full: "function burn(address _userAddress, uint256 _amount)", canonical: "burn(address,uint256)" },
         selector: "0x9dc29fac",
-      },
-      {
-        name: "mint",
-        signature: { full: "function mint(address _to, uint256 _amount)", canonical: "mint(address,uint256)" },
-        selector: "0x40c10f19",
       },
     ],
     events: [
@@ -7902,14 +7856,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x876b7cb47aa150b3a5516188b19ed308752ad4d0ae9a702543353b78163f7589",
       },
       {
-        name: "DelegateVotesChanged",
-        signature: {
-          full: "event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance)",
-          canonical: "DelegateVotesChanged(address,uint256,uint256)",
-        },
-        topic0: "0xdec2bacdd2f05b59de34da9b523dff8be42e5e38e818c82fdb0bae774387a724",
-      },
-      {
         name: "IdentityRegistryAdded",
         signature: {
           full: "event IdentityRegistryAdded(address indexed identityRegistry)",
@@ -7918,44 +7864,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xd2be862d755bca7e0d39772b2cab3a5578da9c285f69199f4c063c2294a7f36c",
       },
       {
-        name: "Issued",
-        signature: {
-          full: "event Issued(address indexed _operator, address indexed _to, uint256 _value, bytes _data)",
-          canonical: "Issued(address,address,uint256,bytes)",
-        },
-        topic0: "0x0e9905d62635f049c2f4e11678ebf9dc3d1f8c4a653e290759b772e47ba00d00",
-      },
-      {
-        name: "IssuedByPartition",
-        signature: {
-          full: "event IssuedByPartition(bytes32 indexed partition, address indexed operator, address indexed to, uint256 value, bytes data)",
-          canonical: "IssuedByPartition(bytes32,address,address,uint256,bytes)",
-        },
-        topic0: "0x5af1c8f424b104b6ba4e3c0885f2ed9fef04a9b1ea39cd9ed362432105c0791a",
-      },
-      {
         name: "RecoverySuccess",
         signature: {
           full: "event RecoverySuccess(address _lostWallet, address _newWallet, address _investorOnchainID)",
           canonical: "RecoverySuccess(address,address,address)",
         },
         topic0: "0xf0c9129a94f30f1caaceb63e44b9811d0a3edf1d6c23757f346093af5553fed0",
-      },
-      {
-        name: "Transfer",
-        signature: {
-          full: "event Transfer(address indexed from, address indexed to, uint256 value)",
-          canonical: "Transfer(address,address,uint256)",
-        },
-        topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
-      },
-      {
-        name: "TransferByPartition",
-        signature: {
-          full: "event TransferByPartition(bytes32 indexed _fromPartition, address _operator, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)",
-          canonical: "TransferByPartition(bytes32,address,address,address,uint256,bytes,bytes)",
-        },
-        topic0: "0xff4e9a26af4eb73b8bacfaa4abd4fea03d9448e7b912dc5ff4019048875aa2d4",
       },
       {
         name: "UpdatedTokenInformation",
@@ -7967,14 +7881,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      {
-        name: "AbafChangeForBlockForbidden",
-        signature: {
-          full: "error AbafChangeForBlockForbidden(uint256 blockNumber)",
-          canonical: "AbafChangeForBlockForbidden(uint256)",
-        },
-        selector: "0x5a2afdff",
-      },
       {
         name: "AccessControlRequired",
         signature: {
@@ -8035,35 +7941,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xefafde54",
       },
       {
-        name: "InvalidPartition",
-        signature: {
-          full: "error InvalidPartition(address account, bytes32 partition)",
-          canonical: "InvalidPartition(address,bytes32)",
-        },
-        selector: "0xbf84f4ec",
-      },
-      {
-        name: "MaxSupplyReached",
-        signature: { full: "error MaxSupplyReached(uint256 maxSupply)", canonical: "MaxSupplyReached(uint256)" },
-        selector: "0xf9f84915",
-      },
-      {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
         selector: "0x76d08f88",
-      },
-      {
-        name: "SnapshotIdDoesNotExists",
-        signature: {
-          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
-          canonical: "SnapshotIdDoesNotExists(uint256)",
-        },
-        selector: "0x8e81eb83",
-      },
-      {
-        name: "SnapshotIdNull",
-        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
-        selector: "0xf128004d",
       },
       {
         name: "TokenIsNotControllable",
@@ -8076,21 +7956,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x649815a5",
       },
       {
-        name: "UnexpectedError",
-        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
-        selector: "0xc9622656",
-      },
-      {
         name: "WalletRecovered",
         signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
         selector: "0xf9f9bcf9",
       },
-      {
-        name: "ZeroPartition",
-        signature: { full: "error ZeroPartition()", canonical: "ZeroPartition()" },
-        selector: "0x4a6f30c3",
-      },
-      { name: "ZeroValue", signature: { full: "error ZeroValue()", canonical: "ZeroValue()" }, selector: "0x7c946ed7" },
     ],
     factory: (signer) => new ERC3643OperationsFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
     timeTravelFactory: (signer) =>
@@ -9864,6 +9733,31 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
   },
 
+  IMintFacet: {
+    name: "IMintFacet",
+    description: "Interface aggregating the token issuance entry points of the ATS Diamond.",
+    methods: [
+      {
+        name: "isIssuable",
+        signature: { full: "function isIssuable() view returns (bool issuable_)", canonical: "isIssuable()" },
+        selector: "0x2f1cae85",
+      },
+      {
+        name: "issue",
+        signature: {
+          full: "function issue(address _tokenHolder, uint256 _value, bytes _data)",
+          canonical: "issue(address,uint256,bytes)",
+        },
+        selector: "0xbb3acde9",
+      },
+      {
+        name: "mint",
+        signature: { full: "function mint(address _to, uint256 _amount)", canonical: "mint(address,uint256)" },
+        selector: "0x40c10f19",
+      },
+    ],
+  },
+
   KpiLinkedRateFacet: {
     name: "KpiLinkedRateFacet",
     resolverKey: {
@@ -10986,6 +10880,152 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     factory: (signer) => new LockFacet__factory(signer),
     timeTravelFactory: (signer) => new LockFacetTimeTravel__factory(signer),
+  },
+
+  MintFacet: {
+    name: "MintFacet",
+    description: "Diamond facet exposing the consolidated token issuance entry points.",
+    resolverKey: {
+      name: "_MINT_RESOLVER_KEY",
+      value: "0x936fea8488bdd2feb75c9f50636e7ca7a0d630c49209e3af07c00abb000da03f",
+    },
+    inheritance: ["Mint", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "isIssuable",
+        signature: { full: "function isIssuable() view returns (bool)", canonical: "isIssuable()" },
+        selector: "0x2f1cae85",
+      },
+      {
+        name: "issue",
+        signature: {
+          full: "function issue(address _tokenHolder, uint256 _value, bytes _data)",
+          canonical: "issue(address,uint256,bytes)",
+        },
+        selector: "0xbb3acde9",
+      },
+      {
+        name: "mint",
+        signature: { full: "function mint(address _to, uint256 _amount)", canonical: "mint(address,uint256)" },
+        selector: "0x40c10f19",
+      },
+    ],
+    events: [
+      {
+        name: "DelegateVotesChanged",
+        signature: {
+          full: "event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance)",
+          canonical: "DelegateVotesChanged(address,uint256,uint256)",
+        },
+        topic0: "0xdec2bacdd2f05b59de34da9b523dff8be42e5e38e818c82fdb0bae774387a724",
+      },
+      {
+        name: "Issued",
+        signature: {
+          full: "event Issued(address indexed _operator, address indexed _to, uint256 _value, bytes _data)",
+          canonical: "Issued(address,address,uint256,bytes)",
+        },
+        topic0: "0x0e9905d62635f049c2f4e11678ebf9dc3d1f8c4a653e290759b772e47ba00d00",
+      },
+      {
+        name: "IssuedByPartition",
+        signature: {
+          full: "event IssuedByPartition(bytes32 indexed partition, address indexed operator, address indexed to, uint256 value, bytes data)",
+          canonical: "IssuedByPartition(bytes32,address,address,uint256,bytes)",
+        },
+        topic0: "0x5af1c8f424b104b6ba4e3c0885f2ed9fef04a9b1ea39cd9ed362432105c0791a",
+      },
+      {
+        name: "Transfer",
+        signature: {
+          full: "event Transfer(address indexed from, address indexed to, uint256 value)",
+          canonical: "Transfer(address,address,uint256)",
+        },
+        topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+      },
+      {
+        name: "TransferByPartition",
+        signature: {
+          full: "event TransferByPartition(bytes32 indexed _fromPartition, address _operator, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)",
+          canonical: "TransferByPartition(bytes32,address,address,address,uint256,bytes,bytes)",
+        },
+        topic0: "0xff4e9a26af4eb73b8bacfaa4abd4fea03d9448e7b912dc5ff4019048875aa2d4",
+      },
+    ],
+    errors: [
+      {
+        name: "AbafChangeForBlockForbidden",
+        signature: {
+          full: "error AbafChangeForBlockForbidden(uint256 blockNumber)",
+          canonical: "AbafChangeForBlockForbidden(uint256)",
+        },
+        selector: "0x5a2afdff",
+      },
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRoles",
+        signature: {
+          full: "error AccountHasNoRoles(address account, bytes32[] roles)",
+          canonical: "AccountHasNoRoles(address,bytes32[])",
+        },
+        selector: "0x90e55392",
+      },
+      {
+        name: "InvalidPartition",
+        signature: {
+          full: "error InvalidPartition(address account, bytes32 partition)",
+          canonical: "InvalidPartition(address,bytes32)",
+        },
+        selector: "0xbf84f4ec",
+      },
+      {
+        name: "MaxSupplyReached",
+        signature: { full: "error MaxSupplyReached(uint256 maxSupply)", canonical: "MaxSupplyReached(uint256)" },
+        selector: "0xf9f84915",
+      },
+      {
+        name: "NotAllowedInMultiPartitionMode",
+        signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
+        selector: "0x76d08f88",
+      },
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
+      },
+      {
+        name: "ZeroPartition",
+        signature: { full: "error ZeroPartition()", canonical: "ZeroPartition()" },
+        selector: "0x4a6f30c3",
+      },
+      { name: "ZeroValue", signature: { full: "error ZeroValue()", canonical: "ZeroValue()" }, selector: "0x7c946ed7" },
+    ],
+    factory: (signer) => new MintFacet__factory(signer),
   },
 
   NominalValueFacet: {
@@ -13467,7 +13507,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 88 as const;
+export const TOTAL_FACETS = 90 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
