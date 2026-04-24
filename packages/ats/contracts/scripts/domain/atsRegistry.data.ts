@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-24T09:08:09.127Z
- * Facets: 87
+ * Generated: 2026-04-24T13:15:55.159Z
+ * Facets: 86
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -74,7 +74,6 @@ import {
   HoldManagementFacet__factory,
   IComplianceFacet__factory,
   IHoldFacet__factory,
-  ITransferFacet__factory,
   KpiLinkedRateFacet__factory,
   KpisKpiLinkedRateFacet__factory,
   KpisSustainabilityPerformanceTargetRateFacet__factory,
@@ -9671,66 +9670,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
   },
 
-  ITransferFacet: {
-    name: "ITransferFacet",
-    description:
-      "Interface grouping all standard token transfer operations: ERC-20 style and ERC-1594 data-bearing style. Also owns the `Transfer` event and the `InsufficientBalance` error that were previously declared in `IERC20`.",
-    methods: [
-      {
-        name: "transfer",
-        signature: {
-          full: "function transfer(address to, uint256 amount) returns (bool)",
-          canonical: "transfer(address,uint256)",
-        },
-        selector: "0xa9059cbb",
-      },
-      {
-        name: "transferFrom",
-        signature: {
-          full: "function transferFrom(address from, address to, uint256 amount) returns (bool)",
-          canonical: "transferFrom(address,address,uint256)",
-        },
-        selector: "0x23b872dd",
-      },
-      {
-        name: "transferFromWithData",
-        signature: {
-          full: "function transferFromWithData(address _from, address _to, uint256 _value, bytes _data)",
-          canonical: "transferFromWithData(address,address,uint256,bytes)",
-        },
-        selector: "0xee532f31",
-      },
-      {
-        name: "transferWithData",
-        signature: {
-          full: "function transferWithData(address _to, uint256 _value, bytes _data)",
-          canonical: "transferWithData(address,uint256,bytes)",
-        },
-        selector: "0x2535f762",
-      },
-    ],
-    events: [
-      {
-        name: "Transfer",
-        signature: {
-          full: "event Transfer(address indexed from, address indexed to, uint256 value)",
-          canonical: "Transfer(address,address,uint256)",
-        },
-        topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
-      },
-    ],
-    errors: [
-      {
-        name: "InsufficientBalance",
-        signature: {
-          full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
-          canonical: "InsufficientBalance(address,uint256,uint256,bytes32)",
-        },
-        selector: "0x5d6824c4",
-      },
-    ],
-  },
-
   KpiLinkedRateFacet: {
     name: "KpiLinkedRateFacet",
     resolverKey: {
@@ -13447,7 +13386,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 87 as const;
+export const TOTAL_FACETS = 86 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

@@ -8,6 +8,11 @@ import { Modifiers } from "../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
+/**
+ * @title Transfer
+ * @notice Implementation of the Transfer domain. Delegates into the existing storage wrappers so
+ *         semantics match `ERC20` / `ERC1594` exactly.
+ */
 abstract contract Transfer is ITransfer, Modifiers {
     /// @inheritdoc ITransfer
     function transfer(

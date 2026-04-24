@@ -15,34 +15,42 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
  *         transition period.
  */
 abstract contract Core is ICore, Modifiers {
+    /// @inheritdoc ICore
     function initializeCore(ICore.ERC20Metadata calldata metadata) external override onlyNotERC20Initialized {
         ERC20StorageWrapper.initializeERC20(metadata);
     }
 
+    /// @inheritdoc ICore
     function setName(string calldata _name) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
         ERC3643StorageWrapper.setName(_name);
     }
 
+    /// @inheritdoc ICore
     function setSymbol(string calldata _symbol) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
         ERC3643StorageWrapper.setSymbol(_symbol);
     }
 
+    /// @inheritdoc ICore
     function decimals() external view override returns (uint8) {
         return ERC20StorageWrapper.decimalsAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
     }
 
+    /// @inheritdoc ICore
     function name() external view override returns (string memory) {
         return ERC20StorageWrapper.getERC20Metadata().info.name;
     }
 
+    /// @inheritdoc ICore
     function symbol() external view override returns (string memory) {
         return ERC20StorageWrapper.getERC20Metadata().info.symbol;
     }
 
+    /// @inheritdoc ICore
     function getERC20Metadata() external view override returns (ICore.ERC20Metadata memory) {
         return ERC20StorageWrapper.getERC20MetadataAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
     }
 
+    /// @inheritdoc ICore
     function version() external view override returns (string memory) {
         return ERC3643StorageWrapper.version();
     }
