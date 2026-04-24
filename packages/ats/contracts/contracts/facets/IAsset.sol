@@ -96,6 +96,7 @@ import { IERC1644 } from "./layer_1/ERC1400/ERC1644/IERC1644.sol";
 import { IERC20Permit } from "./layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
 import { IControlList } from "./layer_1/controlList/IControlList.sol";
 import { IBatchBurn } from "./batchBurn/IBatchBurn.sol";
+import { IBatchMint } from "./batchMint/IBatchMint.sol";
 
 /**
  * @title IAsset
@@ -183,5 +184,6 @@ interface IAsset is
     IControlList,
     IExternalControlList,
     IExternalControlListManagement,
-    IBatchBurn
+    IBatchBurn,
+    IBatchMint
 {}
