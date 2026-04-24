@@ -95,4 +95,23 @@ abstract contract AccessControlModifiers {
         AccessControlStorageWrapper.checkAnyRole(roles, _account);
         _;
     }
+
+    /**
+     * @dev Modifier that verifies the transaction sender holds at least one of the two given
+     * roles. Generic variant of `onlyAnyRole` for the common "role A or role B" check, so that
+     * call sites do not need to allocate and populate the roles array inline.
+     *
+     * Requirements:
+     * - the resolved sender must have either `_roleA` or `_roleB`.
+     *
+     * @param _roleA The first role identifier.
+     * @param _roleB The second role identifier.
+     */
+    modifier onlyRolesPair(bytes32 _roleA, bytes32 _roleB) virtual {
+        bytes32[] memory roles = new bytes32[](2);
+        roles[0] = _roleA;
+        roles[1] = _roleB;
+        AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
+        _;
+    }
 }

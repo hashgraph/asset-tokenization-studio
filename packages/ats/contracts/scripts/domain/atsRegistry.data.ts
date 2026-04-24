@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-23T09:49:46.888Z
+ * Generated: 2026-04-23T14:36:41.079Z
  * Facets: 86
  * Infrastructure: 2
  *
@@ -10532,7 +10532,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     methods: [
       {
         name: "isIssuable",
-        signature: { full: "function isIssuable() view returns (bool issuable_)", canonical: "isIssuable()" },
+        signature: { full: "function isIssuable() view returns (bool)", canonical: "isIssuable()" },
         selector: "0x2f1cae85",
       },
       {
