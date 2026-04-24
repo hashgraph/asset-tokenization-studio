@@ -19,7 +19,7 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  *      followed by an issuance pass (calling `ERC1594StorageWrapper.issue` for each).
  *      Inherits modifier guards from `Modifiers` and is intended to be used only through
  *      the `BatchMintFacet` Diamond facet.
- * @author Hashgraph Asset Tokenization
+ * @author Asset Tokenization Studio Team
  */
 abstract contract BatchMint is IBatchMint, Modifiers {
     /// @inheritdoc IBatchMint
@@ -33,13 +33,20 @@ abstract contract BatchMint is IBatchMint, Modifiers {
             roles[1] = _AGENT_ROLE;
             AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         }
-        for (uint256 i = 0; i < _toList.length; i++) {
+        uint256 length = _toList.length;
+        for (uint256 i; i < length; ) {
             ERC1594StorageWrapper.checkIdentity(address(0), _toList[i]);
             ERC1594StorageWrapper.checkCompliance(address(0), _toList[i], false);
             CapStorageWrapper.requireWithinMaxSupply(_amounts[i], TimeTravelStorageWrapper.getBlockTimestamp());
+            unchecked {
+                ++i;
+            }
         }
-        for (uint256 i = 0; i < _toList.length; i++) {
+        for (uint256 i; i < length; ) {
             ERC1594StorageWrapper.issue(_toList[i], _amounts[i], "");
+            unchecked {
+                ++i;
+            }
         }
     }
 }
