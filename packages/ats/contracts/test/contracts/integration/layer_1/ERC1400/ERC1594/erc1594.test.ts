@@ -69,30 +69,6 @@ describe("ERC1594 Tests", () => {
     });
 
     describe("NotAllowedInMultiPartitionMode", () => {
-<<<<<<< HEAD
-      it("GIVEN an initialized token WHEN issue THEN fails with NotAllowedInMultiPartitionMode", async () => {
-        // transfer with data fails
-        expect(await asset.connect(signer_A).isIssuable()).to.be.true;
-        await expect(
-          asset.connect(signer_A).issue(signer_D.address, 2 * BALANCE_OF_C_ORIGINAL, DATA),
-=======
-      it("GIVEN an initialized token WHEN transferWithData THEN fails with NotAllowedInMultiPartitionMode", async () => {
-        // transfer with data fails
-        await expect(
-          asset.connect(signer_C).transferWithData(signer_D.address, 2 * BALANCE_OF_C_ORIGINAL, DATA),
-        ).to.be.revertedWithCustomError(asset, "NotAllowedInMultiPartitionMode");
-      });
-
-      it("GIVEN an initialized token WHEN transferFromWithData THEN fails with NotAllowedInMultiPartitionMode", async () => {
-        // transfer with data fails
-        await expect(
-          asset
-            .connect(signer_C)
-            .transferFromWithData(signer_B.address, signer_D.address, 2 * BALANCE_OF_C_ORIGINAL, DATA),
->>>>>>> origin/development
-        ).to.be.revertedWithCustomError(asset, "NotAllowedInMultiPartitionMode");
-      });
-
       it("GIVEN an initialized token WHEN redeem THEN fails with NotAllowedInMultiPartitionMode", async () => {
         // transfer with data fails
         await expect(asset.connect(signer_C).redeem(2 * BALANCE_OF_C_ORIGINAL, DATA)).to.be.revertedWithCustomError(

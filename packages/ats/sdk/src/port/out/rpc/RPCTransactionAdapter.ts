@@ -461,7 +461,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
 
     return this.executeTransaction(
       IAsset__factory.connect(security.toString(), this.getSignerOrProvider()),
-      MintFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "mint",
       [target.toString(), amount.toBigInt()],
       GAS.MINT,
