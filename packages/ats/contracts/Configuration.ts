@@ -75,6 +75,7 @@ export const CONTRACT_NAMES = [
   "BusinessLogicResolver",
   "AccessControlFacet",
   "AllowanceFacet",
+  "MintFacet",
   "CapFacet",
   "ControlListFacet",
   "PauseFacet",

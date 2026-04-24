@@ -77,6 +77,7 @@ const LOAN_FACETS = [
   "BatchBurnFacet",
   "BatchMintFacet",
   "ComplianceFacet",
+  "MintFacet",
 
   // Hold
   "HoldFacet",

@@ -72,6 +72,7 @@ const BOND_FIXED_RATE_FACETS = [
   "ERC3643OperationsFacet",
   "ERC3643ReadFacet",
   "ComplianceFacet",
+  "MintFacet",
 
   // Clearing & Settlement
   "ClearingActionsFacet",
