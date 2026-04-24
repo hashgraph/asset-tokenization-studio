@@ -103,22 +103,4 @@ abstract contract AccessControlModifiers {
         AccessControlStorageWrapper.checkAnyRole(roles, _account);
         _;
     }
-
-    /**
-     * @notice Restricts execution to callers holding at least one of the two roles provided, as a
-     *         generic variant of `onlyAnyRole` that avoids allocating the roles array at the call
-     *         site.
-     * @dev Resolves the caller via `EvmAccessors.getMsgSender()` for consistency with the other
-     *      access-control modifiers in this file, and reverts through
-     *      `AccessControlStorageWrapper.checkAnyRole` when neither role is held by the caller.
-     * @param _roleA The first role identifier accepted by the check.
-     * @param _roleB The second role identifier accepted by the check.
-     */
-    modifier onlyRolesPair(bytes32 _roleA, bytes32 _roleB) virtual {
-        bytes32[] memory roles = new bytes32[](2);
-        roles[0] = _roleA;
-        roles[1] = _roleB;
-        AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
-        _;
-    }
 }
