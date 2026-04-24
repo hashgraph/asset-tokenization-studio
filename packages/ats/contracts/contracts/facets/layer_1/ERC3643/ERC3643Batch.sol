@@ -35,38 +35,6 @@ abstract contract ERC3643Batch is IERC3643Batch, Modifiers {
         }
     }
 
-    function batchForcedTransfer(
-        address[] calldata _fromList,
-        address[] calldata _toList,
-        uint256[] calldata _amounts
-    )
-        external
-        override
-        onlyUnpaused
-        onlyValidInputAmountsArrayLength(_fromList, _amounts)
-        onlyValidInputAmountsArrayLength(_toList, _amounts)
-        onlyWithoutMultiPartition
-        onlyControllable
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _CONTROLLER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
-        }
-        for (uint256 i = 0; i < _fromList.length; i++) {
-            TokenCoreOps.transfer(_fromList[i], _toList[i], _amounts[i]);
-            emit IERC1644.ControllerTransfer(
-                EvmAccessors.getMsgSender(),
-                _fromList[i],
-                _toList[i],
-                _amounts[i],
-                "",
-                ""
-            );
-        }
-    }
-
     function batchMint(
         address[] calldata _toList,
         uint256[] calldata _amounts

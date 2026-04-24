@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-22T14:34:22.048Z
- * Facets: 86
+ * Generated: 2026-04-23T15:05:41.803Z
+ * Facets: 88
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -24,6 +24,7 @@ import {
   AllowanceFacet__factory,
   AmortizationFacet__factory,
   BalanceTrackerFacet__factory,
+  BatchControllerFacet__factory,
   BondUSAFacet__factory,
   BondUSAFixedRateFacet__factory,
   BondUSAKpiLinkedRateFacet__factory,
@@ -73,6 +74,7 @@ import {
   HoldManagementFacet__factory,
   HoldReadFacet__factory,
   HoldTokenHolderFacet__factory,
+  IBatchControllerFacet__factory,
   IComplianceFacet__factory,
   IHoldFacet__factory,
   KpiLinkedRateFacet__factory,
@@ -107,6 +109,7 @@ import {
   VotingFacet__factory,
   AccessControlFacetTimeTravel__factory,
   AdjustBalancesFacetTimeTravel__factory,
+  BatchControllerFacetTimeTravel__factory,
   BondUSAFacetTimeTravel__factory,
   BondUSAFixedRateFacetTimeTravel__factory,
   BondUSAKpiLinkedRateFacetTimeTravel__factory,
@@ -949,6 +952,77 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     factory: (signer) => new BalanceTrackerFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+  },
+
+  BatchControllerFacet: {
+    name: "BatchControllerFacet",
+    description: "Diamond facet exposing controller-only batch transfer operations.",
+    resolverKey: {
+      name: "_BATCH_CONTROLLER_RESOLVER_KEY",
+      value: "0xffe1275def1a3a46bc6ba76bcbfd30f67a8fe0acbb897a549fc767cd63b810b5",
+    },
+    inheritance: ["BatchController", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "batchForcedTransfer",
+        signature: {
+          full: "function batchForcedTransfer(address[] _fromList, address[] _toList, uint256[] _amounts)",
+          canonical: "batchForcedTransfer(address[],address[],uint256[])",
+        },
+        selector: "0x42a47abc",
+      },
+    ],
+    events: [
+      {
+        name: "ControllerTransfer",
+        signature: {
+          full: "event ControllerTransfer(address _controller, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)",
+          canonical: "ControllerTransfer(address,address,address,uint256,bytes,bytes)",
+        },
+        topic0: "0x6bf62b4b9c7b768275122bf70d429efc398a056d669b1efdf6c3976346246d7d",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRoles",
+        signature: {
+          full: "error AccountHasNoRoles(address account, bytes32[] roles)",
+          canonical: "AccountHasNoRoles(address,bytes32[])",
+        },
+        selector: "0x90e55392",
+      },
+      {
+        name: "InputAmountsArrayLengthMismatch",
+        signature: { full: "error InputAmountsArrayLengthMismatch()", canonical: "InputAmountsArrayLengthMismatch()" },
+        selector: "0x64f13710",
+      },
+      {
+        name: "NotAllowedInMultiPartitionMode",
+        signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
+        selector: "0x76d08f88",
+      },
+      {
+        name: "TokenIsNotControllable",
+        signature: { full: "error TokenIsNotControllable()", canonical: "TokenIsNotControllable()" },
+        selector: "0xf4b7b072",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+    ],
+    factory: (signer) => new BatchControllerFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new BatchControllerFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   BondUSAFacet: {
@@ -7092,14 +7166,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x4a6cc677",
       },
       {
-        name: "batchForcedTransfer",
-        signature: {
-          full: "function batchForcedTransfer(address[] _fromList, address[] _toList, uint256[] _amounts)",
-          canonical: "batchForcedTransfer(address[],address[],uint256[])",
-        },
-        selector: "0x42a47abc",
-      },
-      {
         name: "batchMint",
         signature: {
           full: "function batchMint(address[] _toList, uint256[] _amounts)",
@@ -7139,14 +7205,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "ControllerRedemption(address,address,uint256,bytes,bytes)",
         },
         topic0: "0x876b7cb47aa150b3a5516188b19ed308752ad4d0ae9a702543353b78163f7589",
-      },
-      {
-        name: "ControllerTransfer",
-        signature: {
-          full: "event ControllerTransfer(address _controller, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)",
-          canonical: "ControllerTransfer(address,address,address,uint256,bytes,bytes)",
-        },
-        topic0: "0x6bf62b4b9c7b768275122bf70d429efc398a056d669b1efdf6c3976346246d7d",
       },
       {
         name: "DelegateVotesChanged",
@@ -9594,6 +9652,21 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     factory: (signer) => new HoldTokenHolderFacet__factory(signer),
     timeTravelFactory: (signer) => new HoldTokenHolderFacetTimeTravel__factory(signer),
+  },
+
+  IBatchControllerFacet: {
+    name: "IBatchControllerFacet",
+    description: "Interface for controller-only batch transfer operations.",
+    methods: [
+      {
+        name: "batchForcedTransfer",
+        signature: {
+          full: "function batchForcedTransfer(address[] _fromList, address[] _toList, uint256[] _amounts)",
+          canonical: "batchForcedTransfer(address[],address[],uint256[])",
+        },
+        selector: "0x42a47abc",
+      },
+    ],
   },
 
   IComplianceFacet: {
@@ -13362,7 +13435,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 86 as const;
+export const TOTAL_FACETS = 88 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

@@ -88,6 +88,7 @@ import { IClearingHoldCreation } from "./layer_1/clearing/IClearingHoldCreation.
 import { IClearingRead } from "./layer_1/clearing/IClearingRead.sol";
 import { IComplianceFacet } from "./compliance/IComplianceFacet.sol";
 import { IHoldFacet } from "./hold/IHoldFacet.sol";
+import { IBatchControllerFacet } from "./batchController/IBatchControllerFacet.sol";
 import { IERC1594 } from "./layer_1/ERC1400/ERC1594/IERC1594.sol";
 import { IDocumentation } from "./documentation/IDocumentation.sol";
 import { IERC1644 } from "./layer_1/ERC1400/ERC1644/IERC1644.sol";
@@ -171,6 +172,7 @@ interface IAsset is
     // Additional ERC
     IComplianceFacet,
     IHoldFacet,
+    IBatchControllerFacet,
     IERC1594,
     IDocumentation,
     IERC1644,

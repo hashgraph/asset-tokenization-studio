@@ -112,6 +112,7 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   ERC1594Facet: ["tokenCoreOps"],
   ERC1644Facet: ["tokenCoreOps"],
   ERC3643BatchFacet: ["tokenCoreOps"],
+  BatchControllerFacet: ["tokenCoreOps"],
   ERC3643OperationsFacet: ["tokenCoreOps"],
   // HoldOps dependencies - hold/lock operations
   HoldManagementFacet: ["holdOps"],
