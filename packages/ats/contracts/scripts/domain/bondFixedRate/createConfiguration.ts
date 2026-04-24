@@ -67,10 +67,13 @@ const BOND_FIXED_RATE_FACETS = [
   "ERC20VotesFacet",
   "ERC3643BatchFacet",
   "BatchBurnFacet",
+  "BatchMintFacet",
+  "BatchTransferFacet",
   "ERC3643ManagementFacet",
   "ERC3643OperationsFacet",
   "ERC3643ReadFacet",
   "ComplianceFacet",
+  "MintFacet",
 
   // Clearing & Settlement
   "ClearingActionsFacet",

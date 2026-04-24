@@ -75,7 +75,10 @@ const LOAN_FACETS = [
   "ERC3643ReadFacet",
   "ERC3643BatchFacet",
   "BatchBurnFacet",
+  "BatchMintFacet",
+  "BatchTransferFacet",
   "ComplianceFacet",
+  "MintFacet",
 
   // Hold
   "HoldFacet",

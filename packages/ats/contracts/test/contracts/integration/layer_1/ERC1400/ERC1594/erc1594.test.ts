@@ -69,11 +69,27 @@ describe("ERC1594 Tests", () => {
     });
 
     describe("NotAllowedInMultiPartitionMode", () => {
+<<<<<<< HEAD
       it("GIVEN an initialized token WHEN issue THEN fails with NotAllowedInMultiPartitionMode", async () => {
         // transfer with data fails
         expect(await asset.connect(signer_A).isIssuable()).to.be.true;
         await expect(
           asset.connect(signer_A).issue(signer_D.address, 2 * BALANCE_OF_C_ORIGINAL, DATA),
+=======
+      it("GIVEN an initialized token WHEN transferWithData THEN fails with NotAllowedInMultiPartitionMode", async () => {
+        // transfer with data fails
+        await expect(
+          asset.connect(signer_C).transferWithData(signer_D.address, 2 * BALANCE_OF_C_ORIGINAL, DATA),
+        ).to.be.revertedWithCustomError(asset, "NotAllowedInMultiPartitionMode");
+      });
+
+      it("GIVEN an initialized token WHEN transferFromWithData THEN fails with NotAllowedInMultiPartitionMode", async () => {
+        // transfer with data fails
+        await expect(
+          asset
+            .connect(signer_C)
+            .transferFromWithData(signer_B.address, signer_D.address, 2 * BALANCE_OF_C_ORIGINAL, DATA),
+>>>>>>> origin/development
         ).to.be.revertedWithCustomError(asset, "NotAllowedInMultiPartitionMode");
       });
 
@@ -297,21 +313,6 @@ describe("ERC1594 Tests", () => {
           );
         },
       );
-      it("GIVEN non kyc account " + "WHEN issue " + "THEN transaction reverts with InvalidKycStatus", async () => {
-        await asset.connect(signer_B).revokeKyc(signer_E.address);
-        await expect(asset.issue(signer_E.address, AMOUNT, DATA)).to.revertedWithCustomError(asset, "InvalidKycStatus");
-      });
-    });
-
-    it("GIVEN an account with issuer role WHEN issue THEN transaction succeeds", async () => {
-      // issue succeeds
-      expect(await asset.issue(signer_E.address, AMOUNT / 2, DATA))
-        .to.emit(asset, "Issued")
-        .withArgs(signer_C.address, signer_E.address, AMOUNT / 2);
-      expect(await asset.totalSupply()).to.be.equal(AMOUNT / 2);
-      expect(await asset.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
-      expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.be.equal(AMOUNT / 2);
-      expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.be.equal(AMOUNT / 2);
     });
 
     it("GIVEN an account with balance WHEN redeem THEN transaction succeeds", async () => {

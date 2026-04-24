@@ -60,7 +60,7 @@ abstract contract Transfer is ITransfer, Modifiers {
         onlyCanTransferFromByPartition(EvmAccessors.getMsgSender(), _to, _DEFAULT_PARTITION, _value)
     {
         TokenCoreOps.transfer(EvmAccessors.getMsgSender(), _to, _value);
-        emit IERC1594.TransferWithData(EvmAccessors.getMsgSender(), _to, _value, _data);
+        emit TransferWithData(EvmAccessors.getMsgSender(), _to, _value, _data);
     }
 
     /// @inheritdoc ITransfer
@@ -80,6 +80,6 @@ abstract contract Transfer is ITransfer, Modifiers {
         onlyCanTransferFromByPartition(_from, _to, _DEFAULT_PARTITION, _value)
     {
         TokenCoreOps.transferFrom(msg.sender, _from, _to, _value);
-        emit IERC1594.TransferFromWithData(msg.sender, _from, _to, _value, _data);
+        emit TransferFromWithData(msg.sender, _from, _to, _value, _data);
     }
 }

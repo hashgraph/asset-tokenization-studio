@@ -9,6 +9,31 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface ITransfer {
     /**
+     * @notice Emitted when tokens are transferred with an attached data payload.
+     * @param sender Account that executed the transfer (typically `msg.sender`).
+     * @param to Recipient of the transferred tokens.
+     * @param amount Amount of tokens transferred, denominated in base units.
+     * @param data Arbitrary payload supplied by the caller for off-chain interpretation.
+     */
+    event TransferWithData(address indexed sender, address indexed to, uint256 amount, bytes data);
+
+    /**
+     * @notice Emitted when tokens are transferred via an allowance with an attached data payload.
+     * @param sender Account that executed the transfer (typically `msg.sender`).
+     * @param from Address from which tokens were debited.
+     * @param to Recipient of the transferred tokens.
+     * @param amount Amount of tokens transferred, denominated in base units.
+     * @param data Arbitrary payload supplied by the caller for off-chain interpretation.
+     */
+    event TransferFromWithData(
+        address indexed sender,
+        address indexed from,
+        address indexed to,
+        uint256 amount,
+        bytes data
+    );
+
+    /**
      * @notice Emitted whenever tokens move between accounts, are minted, or are burned.
      * @param from  Source account (zero address on mint).
      * @param to    Destination account (zero address on burn).
