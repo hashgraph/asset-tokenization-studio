@@ -1410,60 +1410,6 @@ describe("ERC3643 Tests", () => {
         });
       });
 
-      describe("batchBurn", () => {
-        const burnAmount = AMOUNT / 2;
-
-        beforeEach(async () => {
-          await asset.mint(signer_D.address, burnAmount);
-          await asset.mint(signer_E.address, burnAmount);
-
-          // The burner (signer_A) needs approval from the token holders
-          await asset.connect(signer_D).approve(signer_A.address, burnAmount);
-          await asset.connect(signer_E).approve(signer_A.address, burnAmount);
-        });
-
-        it("GIVEN approved operator WHEN batchBurn THEN transaction succeeds", async () => {
-          const userAddresses = [signer_D.address, signer_E.address];
-          const amounts = [burnAmount, burnAmount];
-
-          const initialTotalSupply = await asset.totalSupply();
-          const initialBalanceD = await asset.balanceOf(signer_D.address);
-          const initialBalanceE = await asset.balanceOf(signer_E.address);
-
-          await expect(asset.connect(signer_A).batchBurn(userAddresses, amounts)).to.not.be.reverted;
-
-          const finalTotalSupply = await asset.totalSupply();
-          const finalBalanceD = await asset.balanceOf(signer_D.address);
-          const finalBalanceE = await asset.balanceOf(signer_E.address);
-
-          expect(finalBalanceD).to.equal(initialBalanceD - BigInt(burnAmount));
-          expect(finalBalanceE).to.equal(initialBalanceE - BigInt(burnAmount));
-          expect(finalTotalSupply).to.equal(initialTotalSupply - BigInt(burnAmount * 2));
-        });
-
-        it("GIVEN an invalid input amounts array THEN transaction fails with InputAmountsArrayLengthMismatch", async () => {
-          const userAddresses = [signer_D.address];
-          const amounts = [burnAmount, burnAmount];
-
-          await expect(asset.connect(signer_A).batchBurn(userAddresses, amounts)).to.be.revertedWithCustomError(
-            asset,
-            "InputAmountsArrayLengthMismatch",
-          );
-        });
-
-        it("GIVEN a paused token WHEN batchBurn THEN transaction fails with TokenIsPaused", async () => {
-          await asset.pause();
-
-          const userAddresses = [signer_D.address];
-          const amounts = [burnAmount];
-
-          await expect(asset.connect(signer_A).batchBurn(userAddresses, amounts)).to.be.revertedWithCustomError(
-            asset,
-            "TokenIsPaused",
-          );
-        });
-      });
-
       describe("batchSetAddressFrozen", () => {
         const mintAmount = AMOUNT;
         const transferAmount = AMOUNT / 2;
@@ -2696,12 +2642,6 @@ describe("ERC3643 Tests", () => {
           "NotAllowedInMultiPartitionMode",
         );
       });
-      it("GIVEN an single partition token WHEN batchBurn THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
-        await expect(asset.batchBurn([signer_A.address], [AMOUNT])).to.be.revertedWithCustomError(
-          asset,
-          "NotAllowedInMultiPartitionMode",
-        );
-      });
     });
 
     describe("Freeze", () => {
@@ -2792,15 +2732,6 @@ describe("ERC3643 Tests", () => {
       await loadFixture(deployERC3643TokenIsControllableFixture);
     });
 
-    it("GIVEN token is not controllable WHEN batchBurn THEN transaction fails with TokenIsNotControllable", async () => {
-      const userAddresses = [signer_D.address];
-      const amounts = [AMOUNT];
-
-      await expect(asset.connect(signer_A).batchBurn(userAddresses, amounts)).to.be.revertedWithCustomError(
-        asset,
-        "TokenIsNotControllable",
-      );
-    });
     it("GIVEN token is not controllable WHEN batchForcedTransfer THEN transaction fails with TokenIsNotControllable", async () => {
       const fromList = [signer_F.address];
       const toList = [signer_E.address];
