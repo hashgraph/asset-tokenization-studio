@@ -25,14 +25,4 @@ interface IERC3643Operations is IERC3643Types {
      * Emits a Issued event.
      */
     function mint(address _to, uint256 _amount) external;
-
-    /**
-     * @dev Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
-     * @dev This function should only be callable by an authorized entities.
-     *
-     * Returns `true` if the transfer was successful.
-     *
-     * Emits a ControllerTransfer event.
-     */
-    function forcedTransfer(address _from, address _to, uint256 _amount) external returns (bool);
 }

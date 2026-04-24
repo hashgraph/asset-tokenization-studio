@@ -58,7 +58,7 @@ abstract contract ERC3643Modifiers {
      * Requirements:
      * - ERC1644 must not be initialized
      */
-    modifier onlyNotERC1644Initialized() {
+    modifier onlyNotControllerInitialized() {
         _checkNotInitialized(ERC1644StorageWrapper.isERC1644Initialized());
         _;
     }

@@ -189,7 +189,7 @@ export function detectCategory(contract: ContractFile, layer: number): string {
     name.includes("ERC1410") ||
     name.includes("ERC1594") ||
     name.includes("Documentation") ||
-    name.includes("ERC1644") ||
+    name.includes("Controller") ||
     name.includes("AccessControl") ||
     name.includes("Pause") ||
     name.includes("Diamond") ||

@@ -6,11 +6,6 @@ import { IIdentityRegistry } from "./IIdentityRegistry.sol";
 
 interface IERC3643Read is IERC3643Types {
     /**
-     * @dev Checks if an account has the agent role
-     */
-    function isAgent(address _agent) external view returns (bool);
-
-    /**
      * @dev Returns the address of the identity registry contract.
      * @dev Returns the version of the contract as a string.
      *

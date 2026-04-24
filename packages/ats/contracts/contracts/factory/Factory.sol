@@ -11,7 +11,7 @@ import { _DEFAULT_ADMIN_ROLE } from "../constants/roles.sol";
 import { IControlList } from "../facets/layer_1/controlList/IControlList.sol";
 import { IERC20 } from "../facets/layer_1/ERC1400/ERC20/IERC20.sol";
 import { IERC20Votes } from "../facets/layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
-import { IERC1644 } from "../facets/layer_1/ERC1400/ERC1644/IERC1644.sol";
+import { IController } from "../facets/controller/IController.sol";
 import { IERC1410 } from "../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
 import { ICap } from "../facets/layer_1/cap/ICap.sol";
 import { IERC1594 } from "../facets/layer_1/ERC1400/ERC1594/IERC1594.sol";
@@ -322,8 +322,8 @@ contract Factory is IFactory {
         // configure multi partition flag (ERC1410ManagementFacet may not be present)
         _tryInitialize_ERC1410(securityAddress_, _securityData.isMultiPartition);
 
-        // configure controller flag (ERC1644Facet may not be present)
-        _tryInitialize_ERC1644(securityAddress_, _securityData.isControllable);
+        // configure controller flag (ControllerFacet may not be present)
+        _tryInitializeController(securityAddress_, _securityData.isControllable);
 
         // configure erc20 metadata (ERC20Facet may not be present)
         IERC20.ERC20Metadata memory erc20Metadata = IERC20.ERC20Metadata({
@@ -373,8 +373,8 @@ contract Factory is IFactory {
         }
     }
 
-    function _tryInitialize_ERC1644(address securityAddress_, bool isControllable) private {
-        try IERC1644(securityAddress_).initialize_ERC1644(isControllable) {
+    function _tryInitializeController(address securityAddress_, bool isControllable) private {
+        try IController(securityAddress_).initializeController(isControllable) {
             // success
         } catch {
             // facet not present - skip initialization
