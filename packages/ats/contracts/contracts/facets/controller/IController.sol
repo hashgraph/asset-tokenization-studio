@@ -4,12 +4,12 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IERC3643Types } from "../layer_1/ERC3643/IERC3643Types.sol";
 
 /**
- * @title IControllerFacet
+ * @title IController
  * @notice Interface for the ControllerFacet, grouping all controller and agent management operations.
  * @dev Combines ERC-1644 forced-transfer / controllability lifecycle with ERC-3643 agent role
  *      management. Inherits `AgentAdded` and `AgentRemoved` events from `IERC3643Types`.
  */
-interface IControllerFacet is IERC3643Types {
+interface IController is IERC3643Types {
     /// @notice Emitted when the controller feature is permanently disabled for a token.
     event FinalizedControllerFeature(address operator);
 
@@ -53,7 +53,6 @@ interface IControllerFacet is IERC3643Types {
      * @dev Initial configuration
      * @param _isControllable true is controllable, false is not controllable
      */
-    // solhint-disable-next-line func-name-mixedcase
     function initializeController(bool _isControllable) external;
 
     /**

@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _CONTROLLER_ROLE, _ISSUER_ROLE, _AGENT_ROLE } from "../../../constants/roles.sol";
 import { IERC3643Batch } from "./IERC3643Batch.sol";
-import { IControllerFacet } from "../../controller/IControllerFacet.sol";
+import { IController } from "../../controller/IController.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
@@ -56,7 +56,7 @@ abstract contract ERC3643Batch is IERC3643Batch, Modifiers {
         }
         for (uint256 i = 0; i < _fromList.length; i++) {
             TokenCoreOps.transfer(_fromList[i], _toList[i], _amounts[i]);
-            emit IControllerFacet.ControllerTransfer(
+            emit IController.ControllerTransfer(
                 EvmAccessors.getMsgSender(),
                 _fromList[i],
                 _toList[i],

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IControllerFacet } from "./IControllerFacet.sol";
+import { IController } from "./IController.sol";
 import { Controller } from "./Controller.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { _CONTROLLER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
@@ -39,6 +39,6 @@ contract ControllerFacet is Controller, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(IControllerFacet).interfaceId;
+        staticInterfaceIds_[0] = type(IController).interfaceId;
     }
 }

@@ -11,7 +11,7 @@ import { _DEFAULT_ADMIN_ROLE } from "../constants/roles.sol";
 import { IControlList } from "../facets/layer_1/controlList/IControlList.sol";
 import { IERC20 } from "../facets/layer_1/ERC1400/ERC20/IERC20.sol";
 import { IERC20Votes } from "../facets/layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
-import { IControllerFacet } from "../facets/controller/IControllerFacet.sol";
+import { IController } from "../facets/controller/IController.sol";
 import { IERC1410 } from "../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
 import { ICap } from "../facets/layer_1/cap/ICap.sol";
 import { IERC1594 } from "../facets/layer_1/ERC1400/ERC1594/IERC1594.sol";
@@ -374,7 +374,7 @@ contract Factory is IFactory {
     }
 
     function _tryInitializeController(address securityAddress_, bool isControllable) private {
-        try IControllerFacet(securityAddress_).initializeController(isControllable) {
+        try IController(securityAddress_).initializeController(isControllable) {
             // success
         } catch {
             // facet not present - skip initialization

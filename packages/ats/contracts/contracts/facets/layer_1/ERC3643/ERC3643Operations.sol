@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _CONTROLLER_ROLE, _ISSUER_ROLE, _AGENT_ROLE } from "../../../constants/roles.sol";
 import { IERC3643Operations } from "./IERC3643Operations.sol";
-import { IControllerFacet } from "../../controller/IControllerFacet.sol";
+import { IController } from "../../controller/IController.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ERC1594StorageWrapper } from "../../../domain/asset/ERC1594StorageWrapper.sol";
@@ -23,7 +23,7 @@ abstract contract ERC3643Operations is IERC3643Operations, Modifiers {
             AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         }
         TokenCoreOps.burn(_userAddress, _amount);
-        emit IControllerFacet.ControllerRedemption(EvmAccessors.getMsgSender(), _userAddress, _amount, "", "");
+        emit IController.ControllerRedemption(EvmAccessors.getMsgSender(), _userAddress, _amount, "", "");
     }
 
     function mint(

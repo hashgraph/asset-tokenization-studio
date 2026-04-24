@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _CONTROLLER_ROLE, _AGENT_ROLE } from "../../constants/roles.sol";
 import { IBatchBurn } from "./IBatchBurn.sol";
-import { IERC1644 } from "../layer_1/ERC1400/ERC1644/IERC1644.sol";
+import { IController } from "../controller/IController.sol";
 import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
@@ -40,7 +40,7 @@ abstract contract BatchBurn is IBatchBurn, Modifiers {
         uint256 length = _userAddresses.length;
         for (uint256 i; i < length; ) {
             TokenCoreOps.burn(_userAddresses[i], _amounts[i]);
-            emit IERC1644.ControllerRedemption(EvmAccessors.getMsgSender(), _userAddresses[i], _amounts[i], "", "");
+            emit IController.ControllerRedemption(EvmAccessors.getMsgSender(), _userAddresses[i], _amounts[i], "", "");
             unchecked {
                 ++i;
             }

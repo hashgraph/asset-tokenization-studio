@@ -92,7 +92,7 @@ import { IHoldFacet } from "./hold/IHoldFacet.sol";
 import { IERC1594 } from "./layer_1/ERC1400/ERC1594/IERC1594.sol";
 
 import { IDocumentation } from "./documentation/IDocumentation.sol";
-import { IControllerFacet } from "./controller/IControllerFacet.sol";
+import { IController } from "./controller/IController.sol";
 import { IERC20Permit } from "./layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
 import { IControlList } from "./layer_1/controlList/IControlList.sol";
 import { IBatchBurn } from "./batchBurn/IBatchBurn.sol";
@@ -177,7 +177,7 @@ interface IAsset is
     IHoldByPartition,
     IERC1594,
     IDocumentation,
-    IControllerFacet,
+    IController,
     IERC20Permit,
     // Control
     IControlList,
