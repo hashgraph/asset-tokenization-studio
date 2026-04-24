@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-24T07:02:53.271Z
+ * Generated: 2026-04-24T08:22:50.897Z
  * Facets: 86
  * Infrastructure: 2
  *
@@ -41,6 +41,7 @@ import {
   ClearingTransferFacet__factory,
   ComplianceFacet__factory,
   ControlListFacet__factory,
+  ControllerFacet__factory,
   CoreAdjustedFacet__factory,
   CoreFacet__factory,
   CorporateActionsFacet__factory,
@@ -56,7 +57,6 @@ import {
   ERC1410ReadFacet__factory,
   ERC1410TokenHolderFacet__factory,
   ERC1594Facet__factory,
-  ERC1644Facet__factory,
   ERC20Facet__factory,
   ERC20PermitFacet__factory,
   ERC20VotesFacet__factory,
@@ -123,6 +123,7 @@ import {
   ClearingTransferFacetTimeTravel__factory,
   ComplianceFacetTimeTravel__factory,
   ControlListFacetTimeTravel__factory,
+  ControllerFacetTimeTravel__factory,
   CorporateActionsFacetTimeTravel__factory,
   CouponFacetTimeTravel__factory,
   CouponFixedRateFacetTimeTravel__factory,
@@ -135,7 +136,6 @@ import {
   ERC1410ReadFacetTimeTravel__factory,
   ERC1410TokenHolderFacetTimeTravel__factory,
   ERC1594FacetTimeTravel__factory,
-  ERC1644FacetTimeTravel__factory,
   ERC20FacetTimeTravel__factory,
   ERC20PermitFacetTimeTravel__factory,
   ERC20VotesFacetTimeTravel__factory,
@@ -3693,6 +3693,252 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) => new ComplianceFacetTimeTravel__factory(signer),
   },
 
+  ControllerFacet: {
+    name: "ControllerFacet",
+    description: "Diamond facet exposing ERC-1644 forced-transfer operations and ERC-3643 agent management.",
+    resolverKey: {
+      name: "_CONTROLLER_RESOLVER_KEY",
+      value: "0xbcebebda5c664322324b3088c913c7048d0b921b434e745816b26392167cfef6",
+    },
+    inheritance: ["Controller", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "addAgent",
+        signature: { full: "function addAgent(address _agent)", canonical: "addAgent(address)" },
+        selector: "0x84e79842",
+      },
+      {
+        name: "controllerRedeem",
+        signature: {
+          full: "function controllerRedeem(address _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)",
+          canonical: "controllerRedeem(address,uint256,bytes,bytes)",
+        },
+        selector: "0x2bc6acc3",
+      },
+      {
+        name: "controllerTransfer",
+        signature: {
+          full: "function controllerTransfer(address _from, address _to, uint256 _value, bytes _data, bytes _operatorData)",
+          canonical: "controllerTransfer(address,address,uint256,bytes,bytes)",
+        },
+        selector: "0xf282527a",
+      },
+      {
+        name: "finalizeControllable",
+        signature: { full: "function finalizeControllable()", canonical: "finalizeControllable()" },
+        selector: "0xa213934f",
+      },
+      {
+        name: "forcedTransfer",
+        signature: {
+          full: "function forcedTransfer(address _from, address _to, uint256 _amount) returns (bool)",
+          canonical: "forcedTransfer(address,address,uint256)",
+        },
+        selector: "0x9fc1d0e7",
+      },
+      {
+        name: "initializeController",
+        signature: {
+          full: "function initializeController(bool _controllable)",
+          canonical: "initializeController(bool)",
+        },
+        selector: "0xcfb008c8",
+      },
+      {
+        name: "isAgent",
+        signature: { full: "function isAgent(address _agent) view returns (bool)", canonical: "isAgent(address)" },
+        selector: "0x1ffbb064",
+      },
+      {
+        name: "isControllable",
+        signature: { full: "function isControllable() view returns (bool)", canonical: "isControllable()" },
+        selector: "0x4c783bf5",
+      },
+      {
+        name: "removeAgent",
+        signature: { full: "function removeAgent(address _agent)", canonical: "removeAgent(address)" },
+        selector: "0x97a6278e",
+      },
+    ],
+    events: [
+      {
+        name: "AgentAdded",
+        signature: { full: "event AgentAdded(address indexed _agent)", canonical: "AgentAdded(address)" },
+        topic0: "0xf68e73cec97f2d70aa641fb26e87a4383686e2efacb648f2165aeb02ac562ec5",
+      },
+      {
+        name: "AgentRemoved",
+        signature: { full: "event AgentRemoved(address indexed _agent)", canonical: "AgentRemoved(address)" },
+        topic0: "0xed9c8ad8d5a0a66898ea49d2956929c93ae2e8bd50281b2ed897c5d1a6737e0b",
+      },
+      {
+        name: "ComplianceAdded",
+        signature: { full: "event ComplianceAdded(address indexed compliance)", canonical: "ComplianceAdded(address)" },
+        topic0: "0x7f3a888862559648ec01d97deb7b5012bff86dc91e654a1de397170db40e35b6",
+      },
+      {
+        name: "ControllerRedemption",
+        signature: {
+          full: "event ControllerRedemption(address _controller, address indexed _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)",
+          canonical: "ControllerRedemption(address,address,uint256,bytes,bytes)",
+        },
+        topic0: "0x876b7cb47aa150b3a5516188b19ed308752ad4d0ae9a702543353b78163f7589",
+      },
+      {
+        name: "ControllerTransfer",
+        signature: {
+          full: "event ControllerTransfer(address _controller, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)",
+          canonical: "ControllerTransfer(address,address,address,uint256,bytes,bytes)",
+        },
+        topic0: "0x6bf62b4b9c7b768275122bf70d429efc398a056d669b1efdf6c3976346246d7d",
+      },
+      {
+        name: "FinalizedControllerFeature",
+        signature: {
+          full: "event FinalizedControllerFeature(address operator)",
+          canonical: "FinalizedControllerFeature(address)",
+        },
+        topic0: "0x08a9c42b6917e90aff41cebfd6d2815b241dc3555d2482d792eeada3fe7df6fd",
+      },
+      {
+        name: "IdentityRegistryAdded",
+        signature: {
+          full: "event IdentityRegistryAdded(address indexed identityRegistry)",
+          canonical: "IdentityRegistryAdded(address)",
+        },
+        topic0: "0xd2be862d755bca7e0d39772b2cab3a5578da9c285f69199f4c063c2294a7f36c",
+      },
+      {
+        name: "RecoverySuccess",
+        signature: {
+          full: "event RecoverySuccess(address _lostWallet, address _newWallet, address _investorOnchainID)",
+          canonical: "RecoverySuccess(address,address,address)",
+        },
+        topic0: "0xf0c9129a94f30f1caaceb63e44b9811d0a3edf1d6c23757f346093af5553fed0",
+      },
+      {
+        name: "UpdatedTokenInformation",
+        signature: {
+          full: "event UpdatedTokenInformation(string indexed newName, string indexed newSymbol, uint8 newDecimals, string newVersion, address indexed newOnchainID)",
+          canonical: "UpdatedTokenInformation(string,string,uint8,string,address)",
+        },
+        topic0: "0x6a1105ac8148a3c319adbc369f9072573e8a11d3a3d195e067e7c40767ec54d1",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountAssignedToRole",
+        signature: {
+          full: "error AccountAssignedToRole(bytes32 role, address account)",
+          canonical: "AccountAssignedToRole(bytes32,address)",
+        },
+        selector: "0xa6006e94",
+      },
+      {
+        name: "AccountHasNoRole",
+        signature: {
+          full: "error AccountHasNoRole(address account, bytes32 role)",
+          canonical: "AccountHasNoRole(address,bytes32)",
+        },
+        selector: "0xa1180aad",
+      },
+      {
+        name: "AccountHasNoRoles",
+        signature: {
+          full: "error AccountHasNoRoles(address account, bytes32[] roles)",
+          canonical: "AccountHasNoRoles(address,bytes32[])",
+        },
+        selector: "0x90e55392",
+      },
+      {
+        name: "AccountNotAssignedToRole",
+        signature: {
+          full: "error AccountNotAssignedToRole(bytes32 role, address account)",
+          canonical: "AccountNotAssignedToRole(bytes32,address)",
+        },
+        selector: "0x3ad9a7ae",
+      },
+      {
+        name: "AddressNotVerified",
+        signature: { full: "error AddressNotVerified()", canonical: "AddressNotVerified()" },
+        selector: "0x209d2853",
+      },
+      {
+        name: "AlreadyInitialized",
+        signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
+        selector: "0x0dc149f0",
+      },
+      {
+        name: "CannotRecoverWallet",
+        signature: { full: "error CannotRecoverWallet()", canonical: "CannotRecoverWallet()" },
+        selector: "0x505389ae",
+      },
+      {
+        name: "ComplianceCallFailed",
+        signature: { full: "error ComplianceCallFailed()", canonical: "ComplianceCallFailed()" },
+        selector: "0x67fba102",
+      },
+      {
+        name: "ComplianceNotAllowed",
+        signature: { full: "error ComplianceNotAllowed()", canonical: "ComplianceNotAllowed()" },
+        selector: "0x66eb1b54",
+      },
+      {
+        name: "IdentityRegistryCallFailed",
+        signature: { full: "error IdentityRegistryCallFailed()", canonical: "IdentityRegistryCallFailed()" },
+        selector: "0xad87849e",
+      },
+      {
+        name: "InputAmountsArrayLengthMismatch",
+        signature: { full: "error InputAmountsArrayLengthMismatch()", canonical: "InputAmountsArrayLengthMismatch()" },
+        selector: "0x64f13710",
+      },
+      {
+        name: "InputBoolArrayLengthMismatch",
+        signature: { full: "error InputBoolArrayLengthMismatch()", canonical: "InputBoolArrayLengthMismatch()" },
+        selector: "0x07ac0eb9",
+      },
+      {
+        name: "InsufficientFrozenBalance",
+        signature: {
+          full: "error InsufficientFrozenBalance(address user, uint256 requestedUnfreeze, uint256 availableFrozen, bytes32 partition)",
+          canonical: "InsufficientFrozenBalance(address,uint256,uint256,bytes32)",
+        },
+        selector: "0xefafde54",
+      },
+      {
+        name: "NotAllowedInMultiPartitionMode",
+        signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
+        selector: "0x76d08f88",
+      },
+      {
+        name: "TokenIsNotControllable",
+        signature: { full: "error TokenIsNotControllable()", canonical: "TokenIsNotControllable()" },
+        selector: "0xf4b7b072",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+      {
+        name: "WalletRecovered",
+        signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
+        selector: "0xf9f9bcf9",
+      },
+    ],
+    factory: (signer) => new ControllerFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) => new ControllerFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
+  },
+
   ControlListFacet: {
     name: "ControlListFacet",
     resolverKey: {
@@ -6667,122 +6913,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) => new ERC1594FacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
-  ERC1644Facet: {
-    name: "ERC1644Facet",
-    resolverKey: {
-      name: "_ERC1644_RESOLVER_KEY",
-      value: "0xf1da2ed271d62ba0b6597874c96fb6ed7d929e5ec679f4ad8c2c516c72f6736d",
-    },
-    inheritance: ["ERC1644", "IStaticFunctionSelectors"],
-    methods: [
-      {
-        name: "controllerRedeem",
-        signature: {
-          full: "function controllerRedeem(address _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)",
-          canonical: "controllerRedeem(address,uint256,bytes,bytes)",
-        },
-        selector: "0x2bc6acc3",
-      },
-      {
-        name: "controllerTransfer",
-        signature: {
-          full: "function controllerTransfer(address _from, address _to, uint256 _value, bytes _data, bytes _operatorData)",
-          canonical: "controllerTransfer(address,address,uint256,bytes,bytes)",
-        },
-        selector: "0xf282527a",
-      },
-      {
-        name: "finalizeControllable",
-        signature: { full: "function finalizeControllable()", canonical: "finalizeControllable()" },
-        selector: "0xa213934f",
-      },
-      {
-        name: "initialize_ERC1644",
-        signature: { full: "function initialize_ERC1644(bool _controllable)", canonical: "initialize_ERC1644(bool)" },
-        selector: "0xaa4ea38e",
-      },
-      {
-        name: "isControllable",
-        signature: { full: "function isControllable() view returns (bool)", canonical: "isControllable()" },
-        selector: "0x4c783bf5",
-      },
-    ],
-    events: [
-      {
-        name: "ControllerRedemption",
-        signature: {
-          full: "event ControllerRedemption(address _controller, address indexed _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)",
-          canonical: "ControllerRedemption(address,address,uint256,bytes,bytes)",
-        },
-        topic0: "0x876b7cb47aa150b3a5516188b19ed308752ad4d0ae9a702543353b78163f7589",
-      },
-      {
-        name: "ControllerTransfer",
-        signature: {
-          full: "event ControllerTransfer(address _controller, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)",
-          canonical: "ControllerTransfer(address,address,address,uint256,bytes,bytes)",
-        },
-        topic0: "0x6bf62b4b9c7b768275122bf70d429efc398a056d669b1efdf6c3976346246d7d",
-      },
-      {
-        name: "FinalizedControllerFeature",
-        signature: {
-          full: "event FinalizedControllerFeature(address operator)",
-          canonical: "FinalizedControllerFeature(address)",
-        },
-        topic0: "0x08a9c42b6917e90aff41cebfd6d2815b241dc3555d2482d792eeada3fe7df6fd",
-      },
-    ],
-    errors: [
-      {
-        name: "AccessControlRequired",
-        signature: {
-          full: "error AccessControlRequired(bytes32 role, address sender)",
-          canonical: "AccessControlRequired(bytes32,address)",
-        },
-        selector: "0x10210dec",
-      },
-      {
-        name: "AccountHasNoRole",
-        signature: {
-          full: "error AccountHasNoRole(address account, bytes32 role)",
-          canonical: "AccountHasNoRole(address,bytes32)",
-        },
-        selector: "0xa1180aad",
-      },
-      {
-        name: "AccountHasNoRoles",
-        signature: {
-          full: "error AccountHasNoRoles(address account, bytes32[] roles)",
-          canonical: "AccountHasNoRoles(address,bytes32[])",
-        },
-        selector: "0x90e55392",
-      },
-      {
-        name: "AlreadyInitialized",
-        signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
-        selector: "0x0dc149f0",
-      },
-      {
-        name: "NotAllowedInMultiPartitionMode",
-        signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
-        selector: "0x76d08f88",
-      },
-      {
-        name: "TokenIsNotControllable",
-        signature: { full: "error TokenIsNotControllable()", canonical: "TokenIsNotControllable()" },
-        selector: "0xf4b7b072",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
-    ],
-    factory: (signer) => new ERC1644Facet__factory(getLibLinks("tokenCoreOps") as any, signer),
-    timeTravelFactory: (signer) => new ERC1644FacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
-  },
-
   ERC20Facet: {
     name: "ERC20Facet",
     resolverKey: {
@@ -7417,11 +7547,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["ERC3643Management", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "addAgent",
-        signature: { full: "function addAgent(address _agent)", canonical: "addAgent(address)" },
-        selector: "0x84e79842",
-      },
-      {
         name: "initialize_ERC3643",
         signature: {
           full: "function initialize_ERC3643(address _compliance, address _identityRegistry)",
@@ -7436,11 +7561,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "recoveryAddress(address,address,address)",
         },
         selector: "0x9285948a",
-      },
-      {
-        name: "removeAgent",
-        signature: { full: "function removeAgent(address _agent)", canonical: "removeAgent(address)" },
-        selector: "0x97a6278e",
       },
       {
         name: "setIdentityRegistry",
@@ -7539,28 +7659,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x10210dec",
       },
       {
-        name: "AccountAssignedToRole",
-        signature: {
-          full: "error AccountAssignedToRole(bytes32 role, address account)",
-          canonical: "AccountAssignedToRole(bytes32,address)",
-        },
-        selector: "0xa6006e94",
-      },
-      {
         name: "AccountHasNoRole",
         signature: {
           full: "error AccountHasNoRole(address account, bytes32 role)",
           canonical: "AccountHasNoRole(address,bytes32)",
         },
         selector: "0xa1180aad",
-      },
-      {
-        name: "AccountNotAssignedToRole",
-        signature: {
-          full: "error AccountNotAssignedToRole(bytes32 role, address account)",
-          canonical: "AccountNotAssignedToRole(bytes32,address)",
-        },
-        selector: "0x3ad9a7ae",
       },
       {
         name: "AddressNotVerified",
@@ -7678,14 +7782,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9dc29fac",
       },
       {
-        name: "forcedTransfer",
-        signature: {
-          full: "function forcedTransfer(address _from, address _to, uint256 _amount) returns (bool)",
-          canonical: "forcedTransfer(address,address,uint256)",
-        },
-        selector: "0x9fc1d0e7",
-      },
-      {
         name: "mint",
         signature: { full: "function mint(address _to, uint256 _amount)", canonical: "mint(address,uint256)" },
         selector: "0x40c10f19",
@@ -7714,14 +7810,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "ControllerRedemption(address,address,uint256,bytes,bytes)",
         },
         topic0: "0x876b7cb47aa150b3a5516188b19ed308752ad4d0ae9a702543353b78163f7589",
-      },
-      {
-        name: "ControllerTransfer",
-        signature: {
-          full: "event ControllerTransfer(address _controller, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)",
-          canonical: "ControllerTransfer(address,address,address,uint256,bytes,bytes)",
-        },
-        topic0: "0x6bf62b4b9c7b768275122bf70d429efc398a056d669b1efdf6c3976346246d7d",
       },
       {
         name: "DelegateVotesChanged",
@@ -7939,11 +8027,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "isAddressRecovered(address)",
         },
         selector: "0x1b997ec2",
-      },
-      {
-        name: "isAgent",
-        signature: { full: "function isAgent(address _agent) view returns (bool)", canonical: "isAgent(address)" },
-        selector: "0x1ffbb064",
       },
       {
         name: "onchainID",

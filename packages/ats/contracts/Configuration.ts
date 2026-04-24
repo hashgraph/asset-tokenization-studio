@@ -89,7 +89,7 @@ export const CONTRACT_NAMES = [
   "ERC1410TokenHolderFacet",
   "ERC1594Facet",
   "DocumentationFacet",
-  "ERC1644Facet",
+  "ControllerFacet",
   "DiamondFacet",
   "EquityUSAFacet",
   "BondUSAFacet",
