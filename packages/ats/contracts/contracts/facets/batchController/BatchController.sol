@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _CONTROLLER_ROLE, _AGENT_ROLE } from "../../constants/roles.sol";
-import { IBatchControllerFacet } from "./IBatchControllerFacet.sol";
-import { IERC1644 } from "../layer_1/ERC1400/ERC1644/IERC1644.sol";
-import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
+import { _CONTROLLER_ROLE, _AGENT_ROLE, _buildRoles } from "../../constants/roles.sol";
+import { IBatchController } from "./IBatchController.sol";
+import { IController } from "../controller/IController.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
@@ -17,8 +16,8 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  *      in single-partition mode. Emits one `ControllerTransfer` event per transferred element so
  *      downstream indexers observe the same event stream as the single-shot path.
  */
-abstract contract BatchController is IBatchControllerFacet, Modifiers {
-    /// @inheritdoc IBatchControllerFacet
+abstract contract BatchController is IBatchController, Modifiers {
+    /// @inheritdoc IBatchController
     function batchForcedTransfer(
         address[] calldata _fromList,
         address[] calldata _toList,
@@ -31,23 +30,16 @@ abstract contract BatchController is IBatchControllerFacet, Modifiers {
         onlyValidInputAmountsArrayLength(_toList, _amounts)
         onlyWithoutMultiPartition
         onlyControllable
+        onlyAnyRole(_buildRoles(_CONTROLLER_ROLE, _AGENT_ROLE))
     {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _CONTROLLER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
-        }
-        for (uint256 i = 0; i < _fromList.length; i++) {
+        address operator = EvmAccessors.getMsgSender();
+        uint256 length = _fromList.length;
+        for (uint256 i; i < length; ) {
             TokenCoreOps.transfer(_fromList[i], _toList[i], _amounts[i]);
-            emit IERC1644.ControllerTransfer(
-                EvmAccessors.getMsgSender(),
-                _fromList[i],
-                _toList[i],
-                _amounts[i],
-                "",
-                ""
-            );
+            emit IController.ControllerTransfer(operator, _fromList[i], _toList[i], _amounts[i], "", "");
+            unchecked {
+                ++i;
+            }
         }
     }
 }

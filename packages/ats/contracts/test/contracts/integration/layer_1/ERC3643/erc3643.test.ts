@@ -1242,83 +1242,6 @@ describe("ERC3643 Tests", () => {
         });
       });
 
-      describe("batchForcedTransfer", () => {
-        const transferAmount = AMOUNT / 2;
-
-        beforeEach(async () => {
-          await asset.mint(signer_F.address, transferAmount);
-          await asset.mint(signer_D.address, transferAmount);
-          await asset.grantRole(ATS_ROLES._CONTROLLER_ROLE, signer_A.address);
-        });
-
-        it("GIVEN controller role WHEN batchForcedTransfer THEN transaction succeeds", async () => {
-          const fromList = [signer_F.address, signer_D.address];
-          const toList = [signer_E.address, signer_E.address];
-          const amounts = [transferAmount, transferAmount];
-
-          const initialBalanceF = await asset.balanceOf(signer_F.address);
-          const initialBalanceD = await asset.balanceOf(signer_D.address);
-          const initialBalanceE = await asset.balanceOf(signer_E.address);
-
-          await expect(asset.connect(signer_A).batchForcedTransfer(fromList, toList, amounts)).to.not.be.reverted;
-
-          const finalBalanceF = await asset.balanceOf(signer_F.address);
-          const finalBalanceD = await asset.balanceOf(signer_D.address);
-          const finalBalanceE = await asset.balanceOf(signer_E.address);
-
-          expect(finalBalanceF).to.equal(initialBalanceF - BigInt(transferAmount));
-          expect(finalBalanceD).to.equal(initialBalanceD - BigInt(transferAmount));
-          expect(finalBalanceE).to.equal(initialBalanceE + BigInt(transferAmount * 2));
-        });
-
-        it("GIVEN account without controller role WHEN batchForcedTransfer THEN transaction fails with AccountHasNoRole", async () => {
-          const fromList = [signer_F.address];
-          const toList = [signer_E.address];
-          const amounts = [transferAmount];
-
-          // signer_B does not have ATS_ROLES._CONTROLLER_ROLE
-          await expect(
-            asset.connect(signer_B).batchForcedTransfer(fromList, toList, amounts),
-          ).to.be.revertedWithCustomError(asset, "AccountHasNoRoles");
-        });
-
-        it("GIVEN an invalid input amounts array THEN transaction fails with InputAmountsArrayLengthMismatch", async () => {
-          const mintAmount = AMOUNT / 2;
-          const toList = [signer_D.address];
-          const fromList = [signer_F.address, signer_D.address];
-          const amounts = [mintAmount, mintAmount];
-
-          await expect(asset.batchForcedTransfer(fromList, toList, amounts)).to.be.revertedWithCustomError(
-            asset,
-            "InputAmountsArrayLengthMismatch",
-          );
-        });
-
-        it("GIVEN toList and amounts with different lengths WHEN batchForcedTransfer THEN transaction fails with InputAmountsArrayLengthMismatch", async () => {
-          const mintAmount = AMOUNT / 2;
-          const fromList = [signer_A.address, signer_F.address];
-          const toList = [signer_D.address, signer_E.address];
-          const amounts = [mintAmount];
-
-          await expect(asset.batchForcedTransfer(fromList, toList, amounts)).to.be.revertedWithCustomError(
-            asset,
-            "InputAmountsArrayLengthMismatch",
-          );
-        });
-
-        it("GIVEN a paused token WHEN batchForcedTransfer THEN transaction fails with TokenIsPaused", async () => {
-          await asset.pause();
-
-          const fromList = [signer_F.address];
-          const toList = [signer_E.address];
-          const amounts = [transferAmount];
-
-          await expect(
-            asset.connect(signer_A).batchForcedTransfer(fromList, toList, amounts),
-          ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
-        });
-      });
-
       describe("batchSetAddressFrozen", () => {
         const mintAmount = AMOUNT;
         const transferAmount = AMOUNT / 2;
@@ -2427,11 +2350,6 @@ describe("ERC3643 Tests", () => {
           "NotAllowedInMultiPartitionMode",
         );
       });
-      it("GIVEN an single partition token WHEN batchForcedTransfer THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
-        await expect(
-          asset.batchForcedTransfer([signer_A.address], [signer_A.address], [AMOUNT]),
-        ).to.be.revertedWithCustomError(asset, "NotAllowedInMultiPartitionMode");
-      });
     });
 
     describe("Freeze", () => {
@@ -2522,15 +2440,6 @@ describe("ERC3643 Tests", () => {
       await loadFixture(deployERC3643TokenIsControllableFixture);
     });
 
-    it("GIVEN token is not controllable WHEN batchForcedTransfer THEN transaction fails with TokenIsNotControllable", async () => {
-      const fromList = [signer_F.address];
-      const toList = [signer_E.address];
-      const amounts = [AMOUNT];
-
-      await expect(
-        asset.connect(signer_A).batchForcedTransfer(fromList, toList, amounts),
-      ).to.be.revertedWithCustomError(asset, "TokenIsNotControllable");
-    });
     it("GIVEN token is controllable WHEN burning THEN transaction fails with TokenIsNotControllable", async () => {
       await expect(asset.burn(signer_E.address, AMOUNT)).to.be.revertedWithCustomError(asset, "TokenIsNotControllable");
     });

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBatchControllerFacet } from "./IBatchControllerFacet.sol";
+import { IBatchController } from "./IBatchController.sol";
 import { BatchController } from "./BatchController.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { _BATCH_CONTROLLER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
@@ -29,7 +29,10 @@ contract BatchControllerFacet is BatchController, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(IBatchControllerFacet).interfaceId;
+        uint256 selectorIndex = 1;
+        staticInterfaceIds_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticInterfaceIds_[--selectorIndex] = type(IBatchController).interfaceId;
+        }
     }
 }
