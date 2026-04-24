@@ -16,7 +16,6 @@ import { IBondUSA } from "./layer_3/bondUSA/IBondUSA.sol";
 // Layer 1 — ERC3643
 import { ICorporateActions } from "./layer_1/corporateAction/ICorporateActions.sol";
 import { IDiamond } from "../infrastructure/proxy/IDiamond.sol";
-import { ICommonErrors } from "../infrastructure/errors/ICommonErrors.sol";
 
 // Core
 import { ICore } from "./core/ICore.sol";
@@ -38,13 +37,8 @@ import { IExternalControlList } from "./layer_1/externalControlList/IExternalCon
 import { IExternalControlListManagement } from "./layer_1/externalControlList/IExternalControlListManagement.sol";
 import { IExternalKycList } from "./layer_1/externalKycList/IExternalKycList.sol";
 import { IExternalKycListManagement } from "./layer_1/externalKycList/IExternalKycListManagement.sol";
-import { IExternalPause } from "./layer_1/externalPause/IExternalPause.sol";
 import { IExternalPauseManagement } from "./layer_1/externalPause/IExternalPauseManagement.sol";
 import { IFixedRate } from "./layer_2/interestRate/fixedRate/IFixedRate.sol";
-import { IKpiLinkedRateErrors } from "./layer_2/interestRate/kpiLinkedRate/IKpiLinkedRateErrors.sol";
-import {
-    ISustainabilityPerformanceTargetRateTypes
-} from "./layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRateTypes.sol";
 
 // Layer 2
 import { IHold } from "./layer_1/hold/IHold.sol";
@@ -88,6 +82,7 @@ import { IClearingRedeem } from "./layer_1/clearing/IClearingRedeem.sol";
 import { IClearingHoldCreation } from "./layer_1/clearing/IClearingHoldCreation.sol";
 import { IClearingRead } from "./layer_1/clearing/IClearingRead.sol";
 import { IComplianceFacet } from "./compliance/IComplianceFacet.sol";
+import { IMintFacet } from "./mint/IMintFacet.sol";
 import { IHoldFacet } from "./hold/IHoldFacet.sol";
 import { IERC1594 } from "./layer_1/ERC1400/ERC1594/IERC1594.sol";
 
@@ -99,23 +94,24 @@ import { IBatchBurn } from "./batchBurn/IBatchBurn.sol";
 import { IBatchMint } from "./batchMint/IBatchMint.sol";
 import { IBatchTransfer } from "./batchTransfer/IBatchTransfer.sol";
 
+// solhint-disable no-empty-blocks
 /**
  * @title IAsset
- * @dev Unified interface combining all facet interfaces of the ATS Diamond.
- * Intended for use in tests and external tooling to interact with all Diamond
- * methods through a single typed object, rather than multiple per-facet instances.
+ * @author Asset Tokenization Studio Team
+ * @notice Aggregated interface exposing every facet selector of the ATS Diamond through a single
+ *         typed handle.
+ * @dev Intended for use in tests and external tooling to interact with all Diamond methods
+ *      through a single typed object, rather than multiple per-facet instances.
  *
- * Note: IHold already transitively includes IAccessControl, IClearing, IERC1410,
- * IHoldRead, IHoldManagement, and IHoldTokenHolder. IERC3643 already includes its
- * sub-interfaces. IERC20Votes includes IERC5805 and IVotes. Solidity C3 linearization
- * handles the resulting diamond inheritance without conflicts.
+ *      Note: IHold already transitively includes IAccessControl, IClearing, IERC1410,
+ *      IHoldRead, IHoldManagement, and IHoldTokenHolder. IERC3643 already includes its
+ *      sub-interfaces. IERC20Votes includes IERC5805 and IVotes. Solidity C3 linearisation
+ *      handles the resulting diamond inheritance without conflicts.
  *
- * Note: IKpiLinkedRate and ISustainabilityPerformanceTargetRate are intentionally
- * excluded due to an irreconcilable function selector conflict on getInterestRate().
- * However, IKpiLinkedRateErrors and ISustainabilityPerformanceTargetRateErrors are included
- * to expose the error selectors through IAsset.
+ *      Note: IKpiLinkedRate and ISustainabilityPerformanceTargetRate are intentionally excluded
+ *      due to an irreconcilable function selector conflict on getInterestRate(). Consumers that
+ *      need the KPI-linked or SPTR surface must use those typed interfaces directly.
  */
-// solhint-disable no-empty-blocks
 interface IAsset is
     ICore,
     ICoreAdjusted,
@@ -177,6 +173,7 @@ interface IAsset is
     IComplianceFacet,
     IHoldFacet,
     IHoldByPartition,
+    IMintFacet,
     IERC1594,
     IDocumentation,
     IController,

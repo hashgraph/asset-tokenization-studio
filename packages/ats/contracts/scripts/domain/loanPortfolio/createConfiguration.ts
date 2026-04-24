@@ -78,6 +78,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "ERC3643OperationsFacet",
   "ERC3643ReadFacet",
   "ComplianceFacet",
+  "MintFacet",
 
   // Nominal Value
   "NominalValueFacet",
