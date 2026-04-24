@@ -135,10 +135,7 @@ asset-tokenization-studio.iml
 
 # AI files
 .kiro/
-.claude/*
-!.claude/skills/
-.claude/skills/*
-!.claude/skills/solidity-natspec/
+.claude/
 .opencode/
 CLAUDE.md
 AGENTS.md
