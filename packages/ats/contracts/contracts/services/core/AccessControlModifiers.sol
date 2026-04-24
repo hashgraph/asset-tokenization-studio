@@ -37,6 +37,14 @@ abstract contract AccessControlModifiers {
         _;
     }
 
+    modifier onlyAdminRole() virtual {
+        AccessControlStorageWrapper.checkRole(
+            AccessControlStorageWrapper.getRoleAdmin(_AGENT_ROLE),
+            EvmAccessors.getMsgSender()
+        );
+        _;
+    }
+
     /**
      * @dev Modifier that validates msg.sender has any of the specified roles
      *

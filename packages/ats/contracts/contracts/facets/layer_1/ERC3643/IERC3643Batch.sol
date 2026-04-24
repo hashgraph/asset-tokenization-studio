@@ -8,14 +8,4 @@ interface IERC3643Batch is IERC3643Types {
      * @notice Batch transfer tokens to multiple addresses
      */
     function batchTransfer(address[] calldata _toList, uint256[] calldata _amounts) external;
-
-    /**
-     * @notice Batch mint tokens to multiple addresses
-     */
-    function batchMint(address[] calldata _toList, uint256[] calldata _amounts) external;
-
-    /**
-     * @notice Batch burn tokens from multiple addresses
-     */
-    function batchBurn(address[] calldata _userAddresses, uint256[] calldata _amounts) external;
 }

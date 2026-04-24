@@ -8,7 +8,7 @@ import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
  * @notice Interface for the high-level, partition-agnostic hold read accessors.
  * @dev Defines the read surface of the `HoldFacet` diamond facet: the aggregate held balance for an
  *      account and the third party registered on a specific hold. Partition-scoped accessors remain on
- *      `IHoldRead`. Implementations are expected to honour `TimeTravelStorageWrapper` for adjusted
+ *      `IHoldByPartition`. Implementations are expected to honour `TimeTravelStorageWrapper` for adjusted
  *      balance reads so results stay consistent under time-travel tests.
  */
 interface IHoldFacet is IHoldTypes {
