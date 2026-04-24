@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _AGENT_ROLE, _ISSUER_ROLE, _buildRoles } from "../../constants/roles.sol";
-import { IMintFacet } from "./IMintFacet.sol";
+import {IMint} from "./IMint.sol";
 import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
@@ -15,8 +15,8 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
  *      entry points enforce the same access-control matrix (issuer or agent), supply ceiling and
  *      compliance checks, and differ only in the calldata payload they accept.
  */
-abstract contract Mint is IMintFacet, Modifiers {
-    /// @inheritdoc IMintFacet
+abstract contract Mint is IMint, Modifiers {
+    /// @inheritdoc IMint
     function issue(
         address _tokenHolder,
         uint256 _value,
@@ -34,7 +34,7 @@ abstract contract Mint is IMintFacet, Modifiers {
         ERC1594StorageWrapper.issue(_tokenHolder, _value, _data);
     }
 
-    /// @inheritdoc IMintFacet
+    /// @inheritdoc IMint
     function mint(
         address _to,
         uint256 _amount
@@ -51,7 +51,7 @@ abstract contract Mint is IMintFacet, Modifiers {
         ERC1594StorageWrapper.issue(_to, _amount, "");
     }
 
-    /// @inheritdoc IMintFacet
+    /// @inheritdoc IMint
     function isIssuable() external view override returns (bool) {
         return ERC1594StorageWrapper.isIssuable();
     }

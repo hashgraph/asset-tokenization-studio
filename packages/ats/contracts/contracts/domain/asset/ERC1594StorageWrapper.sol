@@ -13,7 +13,8 @@ import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { IIdentityRegistry } from "../../facets/layer_1/ERC3643/IIdentityRegistry.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
-import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
+import {ITransfer} from "../../facets/transfer/ITransfer.sol";
+import {IMint} from "../../facets/mint/IMint.sol";
 import { IAllowanceTypes } from "../../facets/allowance/IAllowanceTypes.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
@@ -45,7 +46,7 @@ library ERC1594StorageWrapper {
 
     function issue(address tokenHolder, uint256 value, bytes memory data) internal {
         ERC20StorageWrapper.mint(tokenHolder, value);
-        emit IERC1594.Issued(EvmAccessors.getMsgSender(), tokenHolder, value, data);
+        emit IMint.Issued(EvmAccessors.getMsgSender(), tokenHolder, value, data);
     }
 
     function redeem(uint256 value, bytes memory data) internal {
@@ -452,7 +453,7 @@ library ERC1594StorageWrapper {
             return (
                 false,
                 Eip1066.INSUFFICIENT_FUNDS,
-                IERC20.InsufficientBalance.selector,
+                ITransfer.InsufficientBalance.selector,
                 abi.encode(from, currentPartitionBalance, value, partition)
             );
         }

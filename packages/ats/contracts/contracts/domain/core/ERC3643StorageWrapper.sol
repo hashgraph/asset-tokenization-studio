@@ -22,7 +22,7 @@ import { LockStorageWrapper } from "../asset/LockStorageWrapper.sol";
 import { HoldStorageWrapper } from "../asset/HoldStorageWrapper.sol";
 import { ClearingStorageWrapper } from "../asset/ClearingStorageWrapper.sol";
 import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
-import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
+import {ITransfer} from "../../facets/transfer/ITransfer.sol";
 
 library ERC3643StorageWrapper {
     using LowLevelCall for address;
@@ -149,7 +149,7 @@ library ERC3643StorageWrapper {
         st.frozenTokensByPartition[_account][_partition] -= _amount;
 
         transferFrozenBalance(_partition, _account, _amount);
-        emit IERC20.Transfer(address(0), _account, _amount);
+        emit ITransfer.Transfer(address(0), _account, _amount);
     }
 
     function transferFrozenBalance(bytes32 _partition, address _to, uint256 _amount) internal {

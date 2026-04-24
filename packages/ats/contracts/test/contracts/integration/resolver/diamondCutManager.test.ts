@@ -23,7 +23,7 @@ import {
   LOAN_CONFIG_ID,
   LOANS_PORTFOLIO_CONFIG_ID,
 } from "@scripts";
-import { deployAtsInfrastructureFixture, registerERC20FacetFixture } from "@test";
+import { deployAtsInfrastructureFixture, registerTransferFacetFixture } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ethers } from "hardhat";
 import { deployContract, registerFacets } from "@scripts/infrastructure";
@@ -773,11 +773,11 @@ describe("DiamondCutManager", () => {
   });
 
   it("GIVEN a resolver WHEN adding configuration with overlapping selectors from different facets THEN fails with SelectorAlreadyRegistered", async () => {
-    // Use the lightweight fixture that includes ERC20Facet
-    const fixture = await loadFixture(registerERC20FacetFixture);
-    const { deployer, blr, erc20ResolverKey } = fixture;
+    // Use the lightweight fixture that includes TransferFacet
+    const fixture = await loadFixture(registerTransferFacetFixture);
+    const { deployer, blr, transferResolverKey } = fixture;
 
-    // Deploy DuplicateSelectorFacetTest which has the same transfer.selector (0xa9059cbb) as ERC20Facet
+    // Deploy DuplicateSelectorFacetTest which has the same transfer.selector (0xa9059cbb) as TransferFacet
     const duplicateFactory = await ethers.getContractFactory("DuplicateSelectorFacetTest", deployer);
     const duplicateResult = await deployContract(duplicateFactory, {
       confirmations: 0,
@@ -802,11 +802,11 @@ describe("DiamondCutManager", () => {
     // Connect DiamondCutManager to the BLR
     const testDiamondCutManager = DiamondCutManager__factory.connect(await blr.getAddress(), deployer);
 
-    // Try to create configuration with both ERC20Facet and DuplicateSelectorFacetTest
+    // Try to create configuration with both TransferFacet and DuplicateSelectorFacetTest
     // Both have the same transfer.selector (0xa9059cbb)
     const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000020";
     const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [
-      { id: erc20ResolverKey, version: 1 },
+      { id: transferResolverKey, version: 1 },
       { id: duplicateResolverKey, version: 1 },
     ];
 

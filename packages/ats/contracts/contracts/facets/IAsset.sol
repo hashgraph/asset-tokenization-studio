@@ -26,7 +26,7 @@ import { IAllowance } from "./allowance/IAllowance.sol";
 
 // Layer 1 — External lists
 import { IERC1410 } from "./layer_1/ERC1400/ERC1410/IERC1410.sol";
-import { IERC20 } from "./layer_1/ERC1400/ERC20/IERC20.sol";
+import {ITransfer} from "./transfer/ITransfer.sol";
 
 // Layer 1 — Remaining facets
 import { IERC20Votes } from "./layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
@@ -82,7 +82,7 @@ import { IClearingRedeem } from "./layer_1/clearing/IClearingRedeem.sol";
 import { IClearingHoldCreation } from "./layer_1/clearing/IClearingHoldCreation.sol";
 import { IClearingRead } from "./layer_1/clearing/IClearingRead.sol";
 import { IComplianceFacet } from "./compliance/IComplianceFacet.sol";
-import { IMintFacet } from "./mint/IMintFacet.sol";
+import { IMint } from "./mint/IMint.sol";
 import { IHoldFacet } from "./hold/IHoldFacet.sol";
 import { IERC1594 } from "./layer_1/ERC1400/ERC1594/IERC1594.sol";
 
@@ -127,7 +127,7 @@ interface IAsset is
     ITimeTravel,
     IDiamond,
     IHold,
-    IERC20,
+    ITransfer,
     IERC20Votes,
     IERC1410,
     IERC3643,
@@ -173,7 +173,7 @@ interface IAsset is
     IComplianceFacet,
     IHoldFacet,
     IHoldByPartition,
-    IMintFacet,
+    IMint,
     IERC1594,
     IDocumentation,
     IController,

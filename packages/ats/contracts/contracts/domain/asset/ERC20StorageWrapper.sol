@@ -3,9 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _ERC20_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { _DEFAULT_PARTITION, KPI_ERC20_APPROVE_OWNER } from "../../constants/values.sol";
-import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
+import { ICore } from "../../facets/core/ICore.sol";
+import {ITransfer} from "../../facets/transfer/ITransfer.sol";
 import { IAllowanceTypes } from "../../facets/allowance/IAllowanceTypes.sol";
-// IERC20StorageWrapper is now merged into IERC20
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { IFactory } from "../../factory/IFactory.sol";
 import { ERC1410BasicStorage, ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
@@ -27,7 +27,7 @@ struct ERC20Storage {
 }
 
 library ERC20StorageWrapper {
-    function initializeERC20(IERC20.ERC20Metadata calldata erc20Metadata) internal {
+    function initializeERC20(ICore.ERC20Metadata calldata erc20Metadata) internal {
         ERC20Storage storage erc20Stor = erc20Storage();
         erc20Stor.name = erc20Metadata.info.name;
         erc20Stor.symbol = erc20Metadata.info.symbol;
@@ -82,7 +82,7 @@ library ERC20StorageWrapper {
         if (newBalance != oldBalance) {
             erc20Storage().balances[account] = newBalance;
             unchecked {
-                emit IERC20.Transfer(address(0), address(0), newBalance - oldBalance);
+                emit ITransfer.Transfer(address(0), address(0), newBalance - oldBalance);
             }
         }
         AdjustBalancesStorageWrapper.updateLabafByTokenHolder(abaf, account);
@@ -148,7 +148,7 @@ library ERC20StorageWrapper {
             spender,
             ""
         );
-        emit IERC20.Transfer(from, to, value);
+        emit ITransfer.Transfer(from, to, value);
         return true;
     }
 
@@ -161,18 +161,18 @@ library ERC20StorageWrapper {
             address(0),
             ""
         );
-        emit IERC20.Transfer(from, to, value);
+        emit ITransfer.Transfer(from, to, value);
         return true;
     }
 
     function mint(address to, uint256 value) internal {
         ERC1410StorageWrapper.issueByPartition(IERC1410Types.IssueData(_DEFAULT_PARTITION, to, value, ""));
-        emit IERC20.Transfer(address(0), to, value);
+        emit ITransfer.Transfer(address(0), to, value);
     }
 
     function burn(address from, uint256 value) internal {
         ERC1410StorageWrapper.redeemByPartition(_DEFAULT_PARTITION, from, address(0), value, "", "");
-        emit IERC20.Transfer(from, address(0), value);
+        emit ITransfer.Transfer(from, address(0), value);
     }
 
     function burnFrom(address account, uint256 value) internal {
@@ -242,20 +242,20 @@ library ERC20StorageWrapper {
         return erc20Storage().initialized;
     }
 
-    function getERC20Metadata() internal view returns (IERC20.ERC20Metadata memory erc20Metadata_) {
+    function getERC20Metadata() internal view returns (ICore.ERC20Metadata memory erc20Metadata_) {
         ERC20Storage storage erc20Stor = erc20Storage();
-        IERC20.ERC20MetadataInfo memory erc20Info = IERC20.ERC20MetadataInfo({
+        ICore.ERC20MetadataInfo memory erc20Info = ICore.ERC20MetadataInfo({
             name: erc20Stor.name,
             symbol: erc20Stor.symbol,
             isin: erc20Stor.isin,
             decimals: erc20Stor.decimals
         });
-        erc20Metadata_ = IERC20.ERC20Metadata({ info: erc20Info, securityType: erc20Stor.securityType });
+        erc20Metadata_ = ICore.ERC20Metadata({ info: erc20Info, securityType: erc20Stor.securityType });
     }
 
     function getERC20MetadataAdjustedAt(
         uint256 timestamp
-    ) internal view returns (IERC20.ERC20Metadata memory erc20Metadata_) {
+    ) internal view returns (ICore.ERC20Metadata memory erc20Metadata_) {
         (, uint8 pendingDecimals) = ScheduledTasksStorageWrapper.getPendingScheduledBalanceAdjustmentsAt(timestamp);
         erc20Metadata_ = getERC20Metadata();
         erc20Metadata_.info.decimals += pendingDecimals;

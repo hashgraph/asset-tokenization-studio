@@ -8,7 +8,7 @@ pragma solidity ^0.8.17;
 
 import { TRexIResolverProxy as IResolverProxy } from "./IResolverProxy.sol";
 import { TRexIBusinessLogicResolver as IBusinessLogicResolver } from "./IBusinessLogicResolver.sol";
-import { TRexIERC20 as IERC20 } from "./IERC20.sol";
+import { TRexICore as ICore } from "./ICore.sol";
 import { TRexIBondRead as IBondRead } from "./IBondRead.sol";
 import { TRexIEquity as IEquity } from "./IEquity.sol";
 import { FactoryRegulationData, RegulationData, RegulationType, RegulationSubType } from "./regulation.sol";
@@ -43,7 +43,7 @@ interface TRexIFactory {
         bool isControllable;
         bool isWhiteList;
         uint256 maxSupply;
-        IERC20.ERC20MetadataInfo erc20MetadataInfo;
+        ICore.ERC20MetadataInfo erc20MetadataInfo;
         bool clearingActive;
         bool internalKycActivated;
         address[] externalPauses;

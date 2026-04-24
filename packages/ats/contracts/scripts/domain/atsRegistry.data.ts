@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-24T12:22:49.686Z
- * Facets: 90
+ * Generated: 2026-04-24T13:45:56.342Z
+ * Facets: 89
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -59,7 +59,6 @@ import {
   ERC1410ReadFacet__factory,
   ERC1410TokenHolderFacet__factory,
   ERC1594Facet__factory,
-  ERC20Facet__factory,
   ERC20PermitFacet__factory,
   ERC20VotesFacet__factory,
   ERC3643BatchFacet__factory,
@@ -77,7 +76,6 @@ import {
   HoldManagementFacet__factory,
   IComplianceFacet__factory,
   IHoldFacet__factory,
-  IMintFacet__factory,
   KpiLinkedRateFacet__factory,
   KpisKpiLinkedRateFacet__factory,
   KpisSustainabilityPerformanceTargetRateFacet__factory,
@@ -108,6 +106,7 @@ import {
   TransferAndLockFixedRateFacet__factory,
   TransferAndLockKpiLinkedRateFacet__factory,
   TransferAndLockSustainabilityPerformanceTargetRateFacet__factory,
+  TransferFacet__factory,
   VotingFacet__factory,
   AccessControlFacetTimeTravel__factory,
   AdjustBalancesFacetTimeTravel__factory,
@@ -140,7 +139,6 @@ import {
   ERC1410ReadFacetTimeTravel__factory,
   ERC1410TokenHolderFacetTimeTravel__factory,
   ERC1594FacetTimeTravel__factory,
-  ERC20FacetTimeTravel__factory,
   ERC20PermitFacetTimeTravel__factory,
   ERC20VotesFacetTimeTravel__factory,
   ERC3643BatchFacetTimeTravel__factory,
@@ -181,6 +179,7 @@ import {
   TransferAndLockFixedRateFacetTimeTravel__factory,
   TransferAndLockKpiLinkedRateFacetTimeTravel__factory,
   TransferAndLockSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
+  TransferFacetTimeTravel__factory,
   VotingFacetTimeTravel__factory,
 } from "@contract-types";
 import { getLibLinks } from "./orchestratorLibraries";
@@ -6897,22 +6896,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x9675193c",
       },
-      {
-        name: "transferFromWithData",
-        signature: {
-          full: "function transferFromWithData(address _from, address _to, uint256 _value, bytes _data)",
-          canonical: "transferFromWithData(address,address,uint256,bytes)",
-        },
-        selector: "0xee532f31",
-      },
-      {
-        name: "transferWithData",
-        signature: {
-          full: "function transferWithData(address _to, uint256 _value, bytes _data)",
-          canonical: "transferWithData(address,uint256,bytes)",
-        },
-        selector: "0x2535f762",
-      },
     ],
     events: [
       {
@@ -6922,14 +6905,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "DelegateVotesChanged(address,uint256,uint256)",
         },
         topic0: "0xdec2bacdd2f05b59de34da9b523dff8be42e5e38e818c82fdb0bae774387a724",
-      },
-      {
-        name: "Issued",
-        signature: {
-          full: "event Issued(address indexed _operator, address indexed _to, uint256 _value, bytes _data)",
-          canonical: "Issued(address,address,uint256,bytes)",
-        },
-        topic0: "0x0e9905d62635f049c2f4e11678ebf9dc3d1f8c4a653e290759b772e47ba00d00",
       },
       {
         name: "Redeemed",
@@ -6962,22 +6937,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "TransferByPartition(bytes32,address,address,address,uint256,bytes,bytes)",
         },
         topic0: "0xff4e9a26af4eb73b8bacfaa4abd4fea03d9448e7b912dc5ff4019048875aa2d4",
-      },
-      {
-        name: "TransferFromWithData",
-        signature: {
-          full: "event TransferFromWithData(address indexed sender, address indexed from, address indexed to, uint256 amount, bytes data)",
-          canonical: "TransferFromWithData(address,address,address,uint256,bytes)",
-        },
-        topic0: "0x7d32874c3a67d8bea4a75c3d32f8fda3b1d5c767d4d42b96710a820b22e31957",
-      },
-      {
-        name: "TransferWithData",
-        signature: {
-          full: "event TransferWithData(address indexed sender, address indexed to, uint256 amount, bytes data)",
-          canonical: "TransferWithData(address,address,uint256,bytes)",
-        },
-        topic0: "0xe68ca1ec8e8e022357047aae1f96036cbb808c6dc2bbbfbd3bde507ab21098c4",
       },
     ],
     errors: [
@@ -7071,96 +7030,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf9f9bcf9",
       },
     ],
-    factory: (signer) => new ERC1594Facet__factory(getLibLinks("tokenCoreOps") as any, signer),
-    timeTravelFactory: (signer) => new ERC1594FacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
-  },
-
-  ERC20Facet: {
-    name: "ERC20Facet",
-    resolverKey: {
-      name: "_ERC20_RESOLVER_KEY",
-      value: "0x064c883089ba1a596d9146c7aaa73c19ef8825f374c67a9538787c3d12e68dc5",
-    },
-    inheritance: ["ERC20", "IStaticFunctionSelectors"],
-    methods: [
-      {
-        name: "initialize_ERC20",
-        signature: {
-          full: "function initialize_ERC20(((string name, string symbol, string isin, uint8 decimals) info, uint8 securityType) erc20Metadata)",
-          canonical: "initialize_ERC20(((string,string,string,uint8),uint8))",
-        },
-        selector: "0xe04fb235",
-      },
-      {
-        name: "transfer",
-        signature: {
-          full: "function transfer(address to, uint256 amount) returns (bool)",
-          canonical: "transfer(address,uint256)",
-        },
-        selector: "0xa9059cbb",
-      },
-      {
-        name: "transferFrom",
-        signature: {
-          full: "function transferFrom(address from, address to, uint256 amount) returns (bool)",
-          canonical: "transferFrom(address,address,uint256)",
-        },
-        selector: "0x23b872dd",
-      },
-    ],
-    events: [
-      {
-        name: "Transfer",
-        signature: {
-          full: "event Transfer(address indexed from, address indexed to, uint256 value)",
-          canonical: "Transfer(address,address,uint256)",
-        },
-        topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
-      },
-    ],
-    errors: [
-      {
-        name: "AccessControlRequired",
-        signature: {
-          full: "error AccessControlRequired(bytes32 role, address sender)",
-          canonical: "AccessControlRequired(bytes32,address)",
-        },
-        selector: "0x10210dec",
-      },
-      {
-        name: "AlreadyInitialized",
-        signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
-        selector: "0x0dc149f0",
-      },
-      {
-        name: "InsufficientBalance",
-        signature: {
-          full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
-          canonical: "InsufficientBalance(address,uint256,uint256,bytes32)",
-        },
-        selector: "0x5d6824c4",
-      },
-      {
-        name: "NotAllowedInMultiPartitionMode",
-        signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
-        selector: "0x76d08f88",
-      },
-      {
-        name: "PartitionsAreProtectedAndNoRole",
-        signature: {
-          full: "error PartitionsAreProtectedAndNoRole(address account, bytes32 role)",
-          canonical: "PartitionsAreProtectedAndNoRole(address,bytes32)",
-        },
-        selector: "0x55347310",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
-    ],
-    factory: (signer) => new ERC20Facet__factory(getLibLinks("tokenCoreOps") as any, signer),
-    timeTravelFactory: (signer) => new ERC20FacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
+    factory: (signer) => new ERC1594Facet__factory(signer),
+    timeTravelFactory: (signer) => new ERC1594FacetTimeTravel__factory(signer),
   },
 
   ERC20PermitFacet: {
@@ -9729,31 +9600,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "WrongHoldId",
         signature: { full: "error WrongHoldId()", canonical: "WrongHoldId()" },
         selector: "0x7e90c2c9",
-      },
-    ],
-  },
-
-  IMintFacet: {
-    name: "IMintFacet",
-    description: "Interface aggregating the token issuance entry points of the ATS Diamond.",
-    methods: [
-      {
-        name: "isIssuable",
-        signature: { full: "function isIssuable() view returns (bool issuable_)", canonical: "isIssuable()" },
-        selector: "0x2f1cae85",
-      },
-      {
-        name: "issue",
-        signature: {
-          full: "function issue(address _tokenHolder, uint256 _value, bytes _data)",
-          canonical: "issue(address,uint256,bytes)",
-        },
-        selector: "0xbb3acde9",
-      },
-      {
-        name: "mint",
-        signature: { full: "function mint(address _to, uint256 _amount)", canonical: "mint(address,uint256)" },
-        selector: "0x40c10f19",
       },
     ],
   },
@@ -13349,6 +13195,119 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       new TransferAndLockSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
   },
 
+  TransferFacet: {
+    name: "TransferFacet",
+    description: "Diamond facet exposing ERC-20 and ERC-1594 token transfer operations.",
+    resolverKey: {
+      name: "_TRANSFER_RESOLVER_KEY",
+      value: "0x9818f50e5682a829cabb91bab6ca3ae07cb96402fa6bd2b3f861c80ae89588e6",
+    },
+    inheritance: ["Transfer", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "transfer",
+        signature: {
+          full: "function transfer(address to, uint256 amount) returns (bool)",
+          canonical: "transfer(address,uint256)",
+        },
+        selector: "0xa9059cbb",
+      },
+      {
+        name: "transferFrom",
+        signature: {
+          full: "function transferFrom(address from, address to, uint256 amount) returns (bool)",
+          canonical: "transferFrom(address,address,uint256)",
+        },
+        selector: "0x23b872dd",
+      },
+      {
+        name: "transferFromWithData",
+        signature: {
+          full: "function transferFromWithData(address _from, address _to, uint256 _value, bytes _data)",
+          canonical: "transferFromWithData(address,address,uint256,bytes)",
+        },
+        selector: "0xee532f31",
+      },
+      {
+        name: "transferWithData",
+        signature: {
+          full: "function transferWithData(address _to, uint256 _value, bytes _data)",
+          canonical: "transferWithData(address,uint256,bytes)",
+        },
+        selector: "0x2535f762",
+      },
+    ],
+    events: [
+      {
+        name: "Transfer",
+        signature: {
+          full: "event Transfer(address indexed from, address indexed to, uint256 value)",
+          canonical: "Transfer(address,address,uint256)",
+        },
+        topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+      },
+      {
+        name: "TransferFromWithData",
+        signature: {
+          full: "event TransferFromWithData(address indexed sender, address indexed from, address indexed to, uint256 amount, bytes data)",
+          canonical: "TransferFromWithData(address,address,address,uint256,bytes)",
+        },
+        topic0: "0x7d32874c3a67d8bea4a75c3d32f8fda3b1d5c767d4d42b96710a820b22e31957",
+      },
+      {
+        name: "TransferWithData",
+        signature: {
+          full: "event TransferWithData(address indexed sender, address indexed to, uint256 amount, bytes data)",
+          canonical: "TransferWithData(address,address,uint256,bytes)",
+        },
+        topic0: "0xe68ca1ec8e8e022357047aae1f96036cbb808c6dc2bbbfbd3bde507ab21098c4",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "InsufficientBalance",
+        signature: {
+          full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
+          canonical: "InsufficientBalance(address,uint256,uint256,bytes32)",
+        },
+        selector: "0x5d6824c4",
+      },
+      {
+        name: "NotAllowedInMultiPartitionMode",
+        signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
+        selector: "0x76d08f88",
+      },
+      {
+        name: "PartitionsAreProtectedAndNoRole",
+        signature: {
+          full: "error PartitionsAreProtectedAndNoRole(address account, bytes32 role)",
+          canonical: "PartitionsAreProtectedAndNoRole(address,bytes32)",
+        },
+        selector: "0x55347310",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+      {
+        name: "WalletRecovered",
+        signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
+        selector: "0xf9f9bcf9",
+      },
+    ],
+    factory: (signer) => new TransferFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) => new TransferFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
+  },
+
   VotingFacet: {
     name: "VotingFacet",
     resolverKey: {
@@ -13507,7 +13466,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 90 as const;
+export const TOTAL_FACETS = 89 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

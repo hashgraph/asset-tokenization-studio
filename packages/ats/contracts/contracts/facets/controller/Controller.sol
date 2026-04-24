@@ -11,6 +11,11 @@ import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 
+/**
+ * @title Controller
+ * @notice Implementation of the Controller domain. Delegates into the existing storage wrappers so
+ *         semantics match `ERC1644` / `ERC3643Management` exactly.
+ */
 abstract contract Controller is IController, Modifiers {
     /// @inheritdoc IController
     function initializeController(bool _controllable) external override onlyNotControllerInitialized {

@@ -49,7 +49,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "CorporateActionsFacet",
   "DiamondFacet",
   "CoreFacet",
-  "ERC20Facet",
+  "TransferFacet",
   "CoreAdjustedFacet",
   "FreezeFacet",
   "KycFacet",

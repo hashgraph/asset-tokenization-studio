@@ -10,8 +10,8 @@ import { _ERC1594_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
  * @title ERC1594Facet
  * @author Asset Tokenization Studio Team
  * @notice Diamond facet exposing the ERC-1594 issuance and redemption surface.
- * @dev Registers five selectors: `initialize_ERC1594`, `transferWithData`, `transferFromWithData`,
- *      `redeem` and `redeemFrom`. Business logic lives in the `ERC1594` abstract contract.
+ * @dev Registers three selectors: `initialize_ERC1594`, `redeem` and `redeemFrom`. Business logic
+ *      lives in the `ERC1594` abstract contract.
  */
 contract ERC1594Facet is ERC1594, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
@@ -21,13 +21,11 @@ contract ERC1594Facet is ERC1594, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 5;
+        uint256 selectorIndex = 3;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);
         unchecked {
             staticFunctionSelectors_[--selectorIndex] = this.redeemFrom.selector;
             staticFunctionSelectors_[--selectorIndex] = this.redeem.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.transferFromWithData.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.transferWithData.selector;
             staticFunctionSelectors_[--selectorIndex] = this.initialize_ERC1594.selector;
         }
     }
