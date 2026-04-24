@@ -14,7 +14,7 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  *         in a single, atomic transaction.
  * @dev Caller must hold `CONTROLLER_ROLE` or `AGENT_ROLE`. The token must be unpaused and
  *      configured for a single partition. Delegates burn execution to `TokenCoreOps` and
- *      emits `IERC1644.ControllerRedemption` for each address processed.
+ *      emits `IController.ControllerRedemption` for each address processed.
  *      Intended to be inherited by `BatchBurnFacet`.
  * @author Asset Tokenization Studio Team
  */

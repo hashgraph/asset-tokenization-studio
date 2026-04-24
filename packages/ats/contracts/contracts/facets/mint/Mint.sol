@@ -17,6 +17,13 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
  */
 abstract contract Mint is IMint, Modifiers {
     /// @inheritdoc IMint
+    /// @dev Reverts via `onlyNotERC1594Initialized` if the facet is already initialised.
+    // solhint-disable-next-line func-name-mixedcase
+    function initialize_ERC1594() external override onlyNotERC1594Initialized {
+        ERC1594StorageWrapper.initialize();
+    }
+    
+    /// @inheritdoc IMint
     function issue(
         address _tokenHolder,
         uint256 _value,

@@ -1,14 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-/**
- * @title IERC1594
- * @author Asset Tokenization Studio Team
- * @notice Interface defining the ERC-1594 issuance and redemption surface for security tokens.
- * @dev Re-exports the canonical ERC-1594 events plus the transfer and redeem variants that carry
- *      an arbitrary `data` payload used by off-chain authorisation flows.
- */
-interface IERC1594 {
+interface IBurn {
     /**
      * @notice Emitted when tokens are redeemed from a holder's balance.
      * @param _operator Account that executed the redemption.
@@ -19,12 +12,11 @@ interface IERC1594 {
     event Redeemed(address indexed _operator, address indexed _from, uint256 _value, bytes _data);
 
     /**
-     * @notice Initialises the ERC-1594 facet on the calling contract.
-     * @dev Can only be invoked once per contract; subsequent calls revert via the
-     *      `onlyNotERC1594Initialized` modifier on the implementation.
+     * @dev Burns `_amount` tokens from the address `_userAddress`.
+     * Only callable by authorized entities (CONTROLLER_ROLE or AGENT_ROLE).
+     * Emits a ControllerRedemption event.
      */
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1594() external;
+    function burn(address _userAddress, uint256 _amount) external;
 
     /**
      * @notice This function redeem an amount of the token of a msg.sender. For doing so msg.sender may incentivize

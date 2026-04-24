@@ -332,9 +332,9 @@ describe("registerAdditionalFacets - Integration Tests", () => {
       const erc1410Factory = await ethers.getContractFactory("ERC1410ReadFacet", deployer);
       const erc1410 = await deployContract(erc1410Factory, {});
 
-      // ERC1594Facet
-      const erc1594Factory = await ethers.getContractFactory("ERC1594Facet", deployer);
-      const erc1594 = await deployContract(erc1594Factory as any, {});
+      // MintFacet
+      const mintFactory = await ethers.getContractFactory("MintFacet", deployer);
+      const mint = await deployContract(mintFactory as any, {});
 
       const newFacetsWithKeys = [
         {
@@ -343,9 +343,9 @@ describe("registerAdditionalFacets - Integration Tests", () => {
           resolverKey: atsRegistry.getFacetDefinition("ERC1410ReadFacet")!.resolverKey!.value,
         },
         {
-          name: "ERC1594Facet",
-          address: erc1594.address!,
-          resolverKey: atsRegistry.getFacetDefinition("ERC1594Facet")!.resolverKey!.value,
+          name: "MintFacet",
+          address: mint.address!,
+          resolverKey: atsRegistry.getFacetDefinition("MintFacet")!.resolverKey!.value,
         },
       ];
       const result = await registerAdditionalFacets(deployer, {
