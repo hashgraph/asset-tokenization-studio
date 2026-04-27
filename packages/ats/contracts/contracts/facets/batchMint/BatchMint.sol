@@ -7,6 +7,10 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
 import { Modifiers } from "../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../domain/core/CapStorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
+import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
+import { ITransfer } from "../transfer/ITransfer.sol";
+import { IMint } from "../mint/IMint.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title BatchMint
@@ -40,8 +44,11 @@ abstract contract BatchMint is IBatchMint, Modifiers {
                 ++i;
             }
         }
+        address sender = EvmAccessors.getMsgSender();
         for (uint256 i; i < length; ) {
-            ERC1594StorageWrapper.issue(_toList[i], _amounts[i], "");
+            TokenCoreOps.issue(_toList[i], _amounts[i]);
+            emit ITransfer.Transfer(address(0), _toList[i], _amounts[i]);
+            emit IMint.Issued(sender, _toList[i], _amounts[i], "");
             unchecked {
                 ++i;
             }

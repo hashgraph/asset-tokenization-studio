@@ -43,19 +43,16 @@ library ERC1594StorageWrapper {
         ds.initialized = true;
     }
 
-    function issue(address tokenHolder, uint256 value, bytes memory data) internal {
+    function issue(address tokenHolder, uint256 value) internal {
         ERC20StorageWrapper.mint(tokenHolder, value);
-        emit IMint.Issued(EvmAccessors.getMsgSender(), tokenHolder, value, data);
     }
 
-    function redeem(uint256 value, bytes memory data) internal {
+    function redeem(uint256 value) internal {
         ERC20StorageWrapper.burn(EvmAccessors.getMsgSender(), value);
-        emit IBurn.Redeemed(address(0), EvmAccessors.getMsgSender(), value, data);
     }
 
-    function redeemFrom(address tokenHolder, uint256 value, bytes memory data) internal {
+    function redeemFrom(address tokenHolder, uint256 value) internal {
         ERC20StorageWrapper.burnFrom(tokenHolder, value);
-        emit IBurn.Redeemed(EvmAccessors.getMsgSender(), tokenHolder, value, data);
     }
 
     function isIssuable() internal view returns (bool) {

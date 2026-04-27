@@ -332,8 +332,16 @@ describe("registerAdditionalFacets - Integration Tests", () => {
       const erc1410Factory = await ethers.getContractFactory("ERC1410ReadFacet", deployer);
       const erc1410 = await deployContract(erc1410Factory, {});
 
-      // MintFacet
-      const mintFactory = await ethers.getContractFactory("MintFacet", deployer);
+      // MintFacet — requires TokenCoreOps library link
+      if (!hasOrchestratorLibraryAddresses()) {
+        const libAddresses = await deployOrchestratorLibraries(deployer);
+        setOrchestratorLibraryAddresses(libAddresses);
+      }
+      const mintLibLinks = getLibLinks(...getFacetRequiredLibraries("MintFacet"));
+      const mintFactory = await ethers.getContractFactory("MintFacet", {
+        signer: deployer,
+        libraries: mintLibLinks,
+      });
       const mint = await deployContract(mintFactory as any, {});
 
       const newFacetsWithKeys = [
