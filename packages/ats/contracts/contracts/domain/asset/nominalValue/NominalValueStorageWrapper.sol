@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import "../BondStorageWrapper.sol";
 import "../EquityStorageWrapper.sol";
-import { _NOMINAL_VALUE_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
+import "../../../constants/storagePositions.sol";
 import { Bond } from "../../../facets/layer_2/bond/Bond.sol";
 
 /// @notice Storage wrapper for NominalValue feature.
