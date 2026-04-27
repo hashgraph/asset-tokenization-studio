@@ -198,8 +198,8 @@ function _checkNonceAndDeadline(
     uint256 _deadline,
     uint256 _blockTimestamp
 ) pure {
-    if (!isDeadlineValid(_deadline, _blockTimestamp)) revert ICommonErrors.ExpiredDeadline(_deadline);
-    if (!isNonceValid(_nonce, _currentNonce)) revert ICommonErrors.WrongNonce(_nonce, _account);
+    if (!_isDeadlineValid(_deadline, _blockTimestamp)) revert ICommonErrors.ExpiredDeadline(_deadline);
+    if (!_isNonceValid(_nonce, _currentNonce)) revert ICommonErrors.WrongNonce(_nonce, _account);
 }
 
 function _isDeadlineValid(uint256 _deadline, uint256 _blockTimestamp) pure returns (bool) {
@@ -211,7 +211,7 @@ function _isNonceValid(uint256 _nonce, uint256 _currentNonce) pure returns (bool
 }
 
 function _recoverSigner(bytes32 _prefixedHash, bytes memory _signature) pure returns (address) {
-    (bytes32 r, bytes32 s, uint8 v) = splitSignature(_signature);
+    (bytes32 r, bytes32 s, uint8 v) = _splitSignature(_signature);
     return ecrecover(_prefixedHash, v, r, s);
 }
 
@@ -238,7 +238,7 @@ function _verify(
     uint256 _chainid,
     address _contractAddress
 ) pure returns (bool) {
-    bytes32 domainHash = getDomainHash(_contractName, _contractVersion, _chainid, _contractAddress);
+    bytes32 domainHash = _getDomainHash(_contractName, _contractVersion, _chainid, _contractAddress);
     bytes32 prefixedHash = keccak256(abi.encodePacked(_SALT, domainHash, _functionHash));
-    return (recoverSigner(prefixedHash, _signature) == _signer);
+    return (_recoverSigner(prefixedHash, _signature) == _signer);
 }

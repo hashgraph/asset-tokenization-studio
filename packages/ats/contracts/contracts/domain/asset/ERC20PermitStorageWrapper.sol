@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IERC20Permit } from "../../facets/layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import { ERC20PERMIT_TYPEHASH } from "../../constants/values.sol";
-import { getDomainHash } from "../../infrastructure/utils/ERC712.sol";
+import { _getDomainHash } from "../../infrastructure/utils/ERC712.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
@@ -56,7 +56,7 @@ library ERC20PermitStorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
     function DOMAIN_SEPARATOR() internal view returns (bytes32) {
         return
-            getDomainHash(
+            _getDomainHash(
                 ERC20StorageWrapper.getName(),
                 Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
                 EvmAccessors.getChainId(),

@@ -10,13 +10,13 @@ import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
 import { AccessControlStorageWrapper } from "./AccessControlStorageWrapper.sol";
 import { ResolverProxyStorageWrapper } from "./ResolverProxyStorageWrapper.sol";
 import {
-    getMessageHashTransfer,
-    getMessageHashRedeem,
-    getMessageHashCreateHold,
-    getMessageHashClearingTransfer,
-    getMessageHashClearingCreateHold,
-    getMessageHashClearingRedeem,
-    verify
+    _getMessageHashTransfer,
+    _getMessageHashRedeem,
+    _getMessageHashCreateHold,
+    _getMessageHashClearingTransfer,
+    _getMessageHashClearingCreateHold,
+    _getMessageHashClearingRedeem,
+    _verify
 } from "../../infrastructure/utils/ERC712.sol";
 import { WILD_CARD_ROLE } from "../../constants/roles.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
@@ -93,9 +93,9 @@ library ProtectedPartitionsStorageWrapper {
         string memory _name
     ) internal view returns (bool) {
         return
-            verify(
+            _verify(
                 _from,
-                getMessageHashTransfer(
+                _getMessageHashTransfer(
                     _partition,
                     _from,
                     _to,
@@ -130,9 +130,9 @@ library ProtectedPartitionsStorageWrapper {
         string memory _name
     ) internal view returns (bool) {
         return
-            verify(
+            _verify(
                 _from,
-                getMessageHashRedeem(_partition, _from, _amount, _protectionData.deadline, _protectionData.nonce),
+                _getMessageHashRedeem(_partition, _from, _amount, _protectionData.deadline, _protectionData.nonce),
                 _protectionData.signature,
                 _name,
                 Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
@@ -160,9 +160,9 @@ library ProtectedPartitionsStorageWrapper {
         string memory _name
     ) internal view returns (bool) {
         return
-            verify(
+            _verify(
                 _from,
-                getMessageHashCreateHold(_partition, _from, _protectedHold),
+                _getMessageHashCreateHold(_partition, _from, _protectedHold),
                 _signature,
                 _name,
                 Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
@@ -188,9 +188,9 @@ library ProtectedPartitionsStorageWrapper {
         string memory _name
     ) internal view returns (bool) {
         return
-            verify(
+            _verify(
                 _protectedClearingOperation.from,
-                getMessageHashClearingCreateHold(_protectedClearingOperation, _hold),
+                _getMessageHashClearingCreateHold(_protectedClearingOperation, _hold),
                 _signature,
                 _name,
                 Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
@@ -218,9 +218,9 @@ library ProtectedPartitionsStorageWrapper {
         string memory _name
     ) internal view returns (bool) {
         return
-            verify(
+            _verify(
                 _protectedClearingOperation.from,
-                getMessageHashClearingTransfer(_protectedClearingOperation, _to, _amount),
+                _getMessageHashClearingTransfer(_protectedClearingOperation, _to, _amount),
                 _signature,
                 _name,
                 Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
@@ -246,9 +246,9 @@ library ProtectedPartitionsStorageWrapper {
         string memory _name
     ) internal view returns (bool) {
         return
-            verify(
+            _verify(
                 _protectedClearingOperation.from,
-                getMessageHashClearingRedeem(_protectedClearingOperation, _amount),
+                _getMessageHashClearingRedeem(_protectedClearingOperation, _amount),
                 _signature,
                 _name,
                 Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),

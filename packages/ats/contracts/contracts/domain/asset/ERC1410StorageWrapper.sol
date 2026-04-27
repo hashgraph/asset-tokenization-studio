@@ -24,7 +24,7 @@ import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
-import { checkNonceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
+import { _checkNonceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
 
 /// @dev Represents a fungible set of tokens.
 struct Partition {
@@ -325,7 +325,7 @@ library ERC1410StorageWrapper {
         uint256 amount,
         IProtectedPartitions.ProtectionData calldata protectionData
     ) internal returns (bytes32) {
-        checkNonceAndDeadline(
+        _checkNonceAndDeadline(
             protectionData.nonce,
             from,
             NonceStorageWrapper.getNonceFor(from),
@@ -361,7 +361,7 @@ library ERC1410StorageWrapper {
         uint256 amount,
         IProtectedPartitions.ProtectionData calldata protectionData
     ) internal {
-        checkNonceAndDeadline(
+        _checkNonceAndDeadline(
             protectionData.nonce,
             from,
             NonceStorageWrapper.getNonceFor(from),

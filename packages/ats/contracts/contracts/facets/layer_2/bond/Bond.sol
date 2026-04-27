@@ -10,7 +10,7 @@ import { BondStorageWrapper } from "../../../domain/asset/BondStorageWrapper.sol
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
-import { checkUnexpectedError } from "../../../infrastructure/utils/UnexpectedError.sol";
+import { _checkUnexpectedError } from "../../../infrastructure/utils/UnexpectedError.sol";
 
 /**
  * @title Bond
@@ -55,7 +55,7 @@ abstract contract Bond is IBondManagement, Modifiers {
         for (uint256 i = 0; i < partitions.length; i++) {
             bytes32 partition = partitions[i];
             uint256 balance = ERC1410StorageWrapper.balanceOfByPartition(partition, _tokenHolder);
-            checkUnexpectedError(balance == 0, KPI_BOND_REDEEM_BALANCE);
+            _checkUnexpectedError(balance == 0, KPI_BOND_REDEEM_BALANCE);
             ERC1410StorageWrapper.redeemByPartition(
                 partition,
                 _tokenHolder,

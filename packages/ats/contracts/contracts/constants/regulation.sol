@@ -95,12 +95,12 @@ function _buildRegulationData(
     regulationData_ = RegulationData({
         regulationType: _regulationType,
         regulationSubType: _regulationSubType,
-        dealSize: buildDealSize(_regulationType, _regulationSubType),
-        accreditedInvestors: buildAccreditedInvestors(_regulationType, _regulationSubType),
-        maxNonAccreditedInvestors: buildMaxNonAccreditedInvestors(_regulationType, _regulationSubType),
-        manualInvestorVerification: buildManualInvestorVerification(_regulationType, _regulationSubType),
-        internationalInvestors: buildInternationalInvestors(_regulationType, _regulationSubType),
-        resaleHoldPeriod: buildResaleHoldPeriod(_regulationType, _regulationSubType)
+        dealSize: _buildDealSize(_regulationType, _regulationSubType),
+        accreditedInvestors: _buildAccreditedInvestors(_regulationType, _regulationSubType),
+        maxNonAccreditedInvestors: _buildMaxNonAccreditedInvestors(_regulationType, _regulationSubType),
+        manualInvestorVerification: _buildManualInvestorVerification(_regulationType, _regulationSubType),
+        internationalInvestors: _buildInternationalInvestors(_regulationType, _regulationSubType),
+        resaleHoldPeriod: _buildResaleHoldPeriod(_regulationType, _regulationSubType)
     });
 }
 
@@ -183,7 +183,7 @@ function _buildResaleHoldPeriod(
 }
 
 function _checkRegulationTypeAndSubType(RegulationType _regulationType, RegulationSubType _regulationSubType) pure {
-    if (isValidTypeAndSubType(_regulationType, _regulationSubType)) {
+    if (_isValidTypeAndSubType(_regulationType, _regulationSubType)) {
         return;
     }
     revert RegulationTypeAndSubTypeForbidden(_regulationType, _regulationSubType);
@@ -194,8 +194,8 @@ function _isValidTypeAndSubType(
     RegulationSubType _regulationSubType
 ) pure returns (bool isValid_) {
     isValid_ =
-        isValidTypeAndSubTypeForRegS(_regulationType, _regulationSubType) ||
-        isValidTypeAndSubTypeForRegD(_regulationType, _regulationSubType);
+        _isValidTypeAndSubTypeForRegS(_regulationType, _regulationSubType) ||
+        _isValidTypeAndSubTypeForRegD(_regulationType, _regulationSubType);
 }
 
 function _isValidTypeAndSubTypeForRegS(
