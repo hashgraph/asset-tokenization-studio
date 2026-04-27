@@ -126,7 +126,7 @@ bytes32 constant LOAN_MANAGER_ROLE = 0xc085daff7cbf912b30437b0b95363f3920f33cbd5
 // keccak256('security.token.standard.role.loansPortfolioManager');
 bytes32 constant LOANS_PORTFOLIO_MANAGER_ROLE = 0xa6b5c56eb64684d38c620773854f4720f1c51c63e6fa070641fff03465904e6c;
 
-function buildRoles(bytes32 role1, bytes32 role2) pure returns (bytes32[] memory roles_) {
+function _buildRoles(bytes32 role1, bytes32 role2) pure returns (bytes32[] memory roles_) {
     roles_ = new bytes32[](2);
     roles_[0] = role1;
     roles_[1] = role2;

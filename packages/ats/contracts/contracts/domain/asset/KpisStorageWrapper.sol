@@ -8,7 +8,7 @@ import { Checkpoints } from "../../infrastructure/utils/Checkpoints.sol";
 import { CouponStorageWrapper } from "./coupon/CouponStorageWrapper.sol";
 import { ICouponTypes } from "../../facets/layer_2/coupon/ICouponTypes.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
+import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 
 struct KpisDataStorage {
     mapping(address => Checkpoints.Checkpoint[]) checkpointsByProject;
@@ -59,7 +59,7 @@ library KpisStorageWrapper {
         (ICouponTypes.RegisteredCoupon memory registeredCoupon, , ) = CouponStorageWrapper.getCoupon(couponID);
         uint256 lastFixingDate = registeredCoupon.coupon.fixingDate;
 
-        checkUnexpectedError(lastFixingDate < kpisDataStorage().minDate, KPI_KPIS_ADD_COUPON_DATE);
+        _checkUnexpectedError(lastFixingDate < kpisDataStorage().minDate, KPI_KPIS_ADD_COUPON_DATE);
 
         setMinDate(lastFixingDate);
     }
@@ -118,7 +118,7 @@ library KpisStorageWrapper {
         );
         uint256 lastFixingDate = registeredCoupon.coupon.fixingDate;
 
-        checkUnexpectedError(lastFixingDate < minDate_, KPI_KPIS_SET_MINDATE);
+        _checkUnexpectedError(lastFixingDate < minDate_, KPI_KPIS_SET_MINDATE);
 
         minDate_ = lastFixingDate;
     }
