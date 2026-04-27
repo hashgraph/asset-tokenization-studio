@@ -36,10 +36,10 @@ describe("Hold Tests", () => {
 
   function baseRbacs() {
     return [
-      { role: ATS_ROLES._ISSUER_ROLE, members: [signer_B.address] },
-      { role: ATS_ROLES._KYC_ROLE, members: [signer_B.address] },
-      { role: ATS_ROLES._SSI_MANAGER_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES._CONTROLLER_ROLE, members: [signer_C.address] },
+      { role: ATS_ROLES.ISSUER_ROLE, members: [signer_B.address] },
+      { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
+      { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.CONTROLLER_ROLE, members: [signer_C.address] },
     ];
   }
 
@@ -103,7 +103,7 @@ describe("Hold Tests", () => {
 
         const heldAmount = await asset.getHeldAmountFor(signer_A.address);
 
-        expect(heldAmount).to.equal(hold.amount * 2);
+        expect(heldAmount).to.equal(Number(hold.amount) * 2);
       });
 
       it("GIVEN a released hold WHEN getHeldAmountFor THEN the released amount is no longer held", async () => {
@@ -210,7 +210,7 @@ describe("Hold Tests", () => {
 
         const heldAmount = await asset.getHeldAmountFor(signer_A.address);
 
-        expect(heldAmount).to.equal(hold.amount * 2);
+        expect(heldAmount).to.equal(Number(hold.amount) * 2);
       });
     });
 

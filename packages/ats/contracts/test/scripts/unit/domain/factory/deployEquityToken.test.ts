@@ -49,7 +49,7 @@ describe("Equity Token Deployment", () => {
       const callArgs = mockFactory.deployEquity.getCall(0).args[0];
       const rbacs = callArgs.security.rbacs;
 
-      expect(rbacs[0].role).to.equal(ATS_ROLES._DEFAULT_ADMIN_ROLE);
+      expect(rbacs[0].role).to.equal(ATS_ROLES.DEFAULT_ADMIN_ROLE);
       expect(rbacs[0].members).to.include(adminAccount);
     });
 
@@ -57,8 +57,8 @@ describe("Equity Token Deployment", () => {
       const diamondAddress = TEST_ADDRESSES.VALID_3;
       const mockFactory = createMockFactory(TEST_FACTORY_EVENTS.EQUITY_DEPLOYED, diamondAddress);
       const additionalRbacs = [
-        { role: ATS_ROLES._PAUSER_ROLE, members: [TEST_ADDRESSES.VALID_4] },
-        { role: ATS_ROLES._CONTROLLER_ROLE, members: [TEST_ADDRESSES.VALID_5] },
+        { role: ATS_ROLES.PAUSER_ROLE, members: [TEST_ADDRESSES.VALID_4] },
+        { role: ATS_ROLES.CONTROLLER_ROLE, members: [TEST_ADDRESSES.VALID_5] },
       ];
       const securityData = createMockSecurityDataWithRbacs(additionalRbacs);
       const params = createDeployEquityParams(mockFactory, { securityData });
@@ -71,9 +71,9 @@ describe("Equity Token Deployment", () => {
 
       // Admin role should be first, then additional roles
       expect(rbacs).to.have.length(3);
-      expect(rbacs[0].role).to.equal(ATS_ROLES._DEFAULT_ADMIN_ROLE);
-      expect(rbacs[1].role).to.equal(ATS_ROLES._PAUSER_ROLE);
-      expect(rbacs[2].role).to.equal(ATS_ROLES._CONTROLLER_ROLE);
+      expect(rbacs[0].role).to.equal(ATS_ROLES.DEFAULT_ADMIN_ROLE);
+      expect(rbacs[1].role).to.equal(ATS_ROLES.PAUSER_ROLE);
+      expect(rbacs[2].role).to.equal(ATS_ROLES.CONTROLLER_ROLE);
     });
 
     it("should place admin role first in array", async () => {
@@ -89,7 +89,7 @@ describe("Equity Token Deployment", () => {
       const callArgs = mockFactory.deployEquity.getCall(0).args[0];
       const rbacs = callArgs.security.rbacs;
 
-      expect(rbacs[0].role).to.equal(ATS_ROLES._DEFAULT_ADMIN_ROLE);
+      expect(rbacs[0].role).to.equal(ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
   });
 

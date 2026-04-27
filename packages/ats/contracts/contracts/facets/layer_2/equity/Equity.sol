@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
+import { CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
 import { BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE } from "../../../constants/values.sol";
 import { IEquity } from "./IEquity.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
@@ -15,7 +15,7 @@ abstract contract Equity is IEquity, Modifiers {
         external
         override
         onlyUnpaused
-        onlyRole(_CORPORATE_ACTION_ROLE)
+        onlyRole(CORPORATE_ACTION_ROLE)
         onlyValidTimestamp(_newBalanceAdjustment.executionDate)
         onlyValidFactor(_newBalanceAdjustment.factor)
         returns (uint256 balanceAdjustmentID_)
@@ -36,7 +36,7 @@ abstract contract Equity is IEquity, Modifiers {
 
     function cancelScheduledBalanceAdjustment(
         uint256 _balanceAdjustmentId
-    ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (bool success_) {
+    ) external override onlyUnpaused onlyRole(CORPORATE_ACTION_ROLE) returns (bool success_) {
         (success_) = EquityStorageWrapper.cancelScheduledBalanceAdjustment(_balanceAdjustmentId);
         if (success_) {
             emit IEquity.ScheduledBalanceAdjustmentCancelled(_balanceAdjustmentId, EvmAccessors.getMsgSender());

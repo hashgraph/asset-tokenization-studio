@@ -7,7 +7,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IFactory } from "./IFactory.sol";
 import { ResolverProxy } from "../infrastructure/proxy/ResolverProxy.sol";
 import { IResolverProxy } from "../infrastructure/proxy/IResolverProxy.sol";
-import { _DEFAULT_ADMIN_ROLE } from "../constants/roles.sol";
+import { DEFAULT_ADMIN_ROLE } from "../constants/roles.sol";
 import { IControlList } from "../facets/layer_1/controlList/IControlList.sol";
 import { ICore } from "../facets/core/ICore.sol";
 import { IERC20Votes } from "../facets/layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
@@ -70,7 +70,7 @@ contract Factory is IFactory {
 
         // Looking for admin role within initialization rbacas in order to add the factory
         for (uint256 rbacsIndex = 0; rbacsIndex < rbacs.length; rbacsIndex++) {
-            if (rbacs[rbacsIndex].role == _DEFAULT_ADMIN_ROLE) {
+            if (rbacs[rbacsIndex].role == DEFAULT_ADMIN_ROLE) {
                 if (rbacs[rbacsIndex].members.length > 0) {
                     for (
                         uint256 adminMemberIndex = 0;

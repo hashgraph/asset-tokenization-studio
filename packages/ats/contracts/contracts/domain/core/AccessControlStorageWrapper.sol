@@ -8,16 +8,6 @@ import { _ACCESS_CONTROL_STORAGE_POSITION } from "../../constants/storagePositio
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { IAccessControl } from "../../facets/layer_1/accessControl/IAccessControl.sol";
 
-/**
- * @title AccessControlStorageWrapper
- * @dev Library providing access control storage operations with Diamond Storage Pattern
- *
- * This library uses ERC-2535 Diamond Storage Pattern to store role data in a specific storage slot.
- * It provides storage operations, read functions, and guard checks for role-based access control.
- *
- * @notice Use with `using AccessControlStorageWrapper for RoleDataStorage;` or call functions directly
- * @author Asset Tokenization Studio Team
- */
 struct RoleData {
     bytes32 roleAdmin;
     EnumerableSet.AddressSet roleMembers;
@@ -28,6 +18,16 @@ struct RoleDataStorage {
     mapping(address => EnumerableSet.Bytes32Set) memberRoles;
 }
 
+/**
+ * @title AccessControlStorageWrapper
+ * @dev Library providing access control storage operations with Diamond Storage Pattern
+ *
+ * This library uses ERC-2535 Diamond Storage Pattern to store role data in a specific storage slot.
+ * It provides storage operations, read functions, and guard checks for role-based access control.
+ *
+ * @notice Use with `using AccessControlStorageWrapper for RoleDataStorage;` or call functions directly
+ * @author Asset Tokenization Studio Team
+ */
 library AccessControlStorageWrapper {
     using Pagination for EnumerableSet.AddressSet;
     using Pagination for EnumerableSet.Bytes32Set;
@@ -53,7 +53,7 @@ library AccessControlStorageWrapper {
         ArrayValidation.checkUniqueValues(_roles, _actives);
     }
 
-    function has(
+    function _has(
         RoleDataStorage storage _rolesStorageData,
         bytes32 _role,
         address _account
@@ -87,7 +87,7 @@ library AccessControlStorageWrapper {
         for (uint256 index; index < length; ) {
             checkRole(getRoleAdmin(_roles[index]), sender);
             if (_actives[index]) {
-                if (!has(roleDataStorage, _roles[index], _account)) {
+                if (!_has(roleDataStorage, _roles[index], _account)) {
                     roleDataStorage.roles[_roles[index]].roleMembers.add(_account);
                     roleDataStorage.memberRoles[_account].add(_roles[index]);
                 }
@@ -96,7 +96,7 @@ library AccessControlStorageWrapper {
                 }
                 continue;
             }
-            if (has(roleDataStorage, _roles[index], _account)) {
+            if (_has(roleDataStorage, _roles[index], _account)) {
                 roleDataStorage.roles[_roles[index]].roleMembers.remove(_account);
                 roleDataStorage.memberRoles[_account].remove(_roles[index]);
             }
@@ -120,13 +120,13 @@ library AccessControlStorageWrapper {
     }
 
     function hasRole(bytes32 _role, address _account) internal view returns (bool) {
-        return has(rolesStorage(), _role, _account);
+        return _has(rolesStorage(), _role, _account);
     }
 
     function hasAnyRole(bytes32[] memory _roles, address _account) internal view returns (bool) {
         RoleDataStorage storage roleDataStorage = rolesStorage();
         for (uint256 i; i < _roles.length; ) {
-            if (has(roleDataStorage, _roles[i], _account)) {
+            if (_has(roleDataStorage, _roles[i], _account)) {
                 return true;
             }
             unchecked {

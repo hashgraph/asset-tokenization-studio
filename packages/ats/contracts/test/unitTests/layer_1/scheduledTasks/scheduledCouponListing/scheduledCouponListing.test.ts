@@ -59,7 +59,7 @@ describe("Scheduled Coupon Listing Tests", () => {
     scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasks", diamond.target);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
 
-    await accessControlFacet.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, account_C);
+    await accessControlFacet.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, account_C);
   }
 
   beforeEach(async () => {

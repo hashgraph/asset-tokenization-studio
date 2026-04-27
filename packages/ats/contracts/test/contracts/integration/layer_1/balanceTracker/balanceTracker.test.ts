@@ -67,31 +67,31 @@ describe("Balance Tracker Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target);
     await executeRbac(asset, [
       {
-        role: ATS_ROLES._ISSUER_ROLE,
+        role: ATS_ROLES.ISSUER_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._LOCKER_ROLE,
+        role: ATS_ROLES.LOCKER_ROLE,
         members: [signer_C.address],
       },
       {
-        role: ATS_ROLES._FREEZE_MANAGER_ROLE,
+        role: ATS_ROLES.FREEZE_MANAGER_ROLE,
         members: [signer_D.address],
       },
       {
-        role: ATS_ROLES._KYC_ROLE,
+        role: ATS_ROLES.KYC_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._SSI_MANAGER_ROLE,
+        role: ATS_ROLES.SSI_MANAGER_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._CLEARING_ROLE,
+        role: ATS_ROLES.CLEARING_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._CLEARING_VALIDATOR_ROLE,
+        role: ATS_ROLES.CLEARING_VALIDATOR_ROLE,
         members: [signer_A.address],
       },
     ]);

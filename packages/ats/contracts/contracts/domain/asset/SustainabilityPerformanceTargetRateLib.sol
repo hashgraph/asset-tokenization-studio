@@ -14,6 +14,7 @@ import { ICouponTypes } from "../../facets/layer_2/coupon/ICouponTypes.sol";
 
 /**
  * @title SustainabilityPerformanceTargetRateLib
+ * @notice Library that computes the interest rate for bonds with Sustainability Performance Targets (SPT).
  * @dev Library for calculating Sustainability Performance Target (SPT) interest rates.
  * This library implements the rate calculation logic for bonds with sustainability performance targets.
  *
@@ -25,6 +26,7 @@ import { ICouponTypes } from "../../facets/layer_2/coupon/ICouponTypes.sol";
  * Rate calculation formula:
  * 1. If fixing date is before start period: use start rate
  * 2. Otherwise: base rate + total bonuses - total penalties
+ * @author Asset Tokenization Studio Team
  */
 library SustainabilityPerformanceTargetRateLib {
     function calculateSustainabilityPerformanceTargetInterestRate(
@@ -53,7 +55,7 @@ library SustainabilityPerformanceTargetRateLib {
                 project
             );
 
-            (uint256 penaltyRate, uint256 bonusRate) = _calculateRateAdjustmentForProject(
+            (uint256 penaltyRate, uint256 bonusRate) = calculateRateAdjustmentForProject(
                 impactData,
                 kpiValue,
                 kpiExists
@@ -67,27 +69,27 @@ library SustainabilityPerformanceTargetRateLib {
         }
 
         return (
-            _applyRateAdjustments(interestRate.baseRate, totalPenaltyRate, totalBonusRate),
+            applyRateAdjustments(interestRate.baseRate, totalPenaltyRate, totalBonusRate),
             interestRate.rateDecimals
         );
     }
 
-    function _calculateRateAdjustmentForProject(
+    function calculateRateAdjustmentForProject(
         ISPTRErrors.ImpactData memory impactData,
         uint256 kpiValue,
         bool kpiExists
     ) internal pure returns (uint256 penaltyRate_, uint256 bonusRate_) {
         if (impactData.impactDataMode == ISPTRErrors.ImpactDataMode.PENALTY) {
-            if (_shouldApplyPenalty(impactData, kpiValue, kpiExists)) penaltyRate_ = impactData.deltaRate;
+            if (shouldApplyPenalty(impactData, kpiValue, kpiExists)) penaltyRate_ = impactData.deltaRate;
             return (penaltyRate_, 0);
         }
 
-        if (_shouldApplyBonus(impactData, kpiValue, kpiExists)) bonusRate_ = impactData.deltaRate;
+        if (shouldApplyBonus(impactData, kpiValue, kpiExists)) bonusRate_ = impactData.deltaRate;
 
         return (0, bonusRate_);
     }
 
-    function _shouldApplyPenalty(
+    function shouldApplyPenalty(
         ISPTRErrors.ImpactData memory impactData,
         uint256 kpiValue,
         bool kpiExists
@@ -99,7 +101,7 @@ library SustainabilityPerformanceTargetRateLib {
         return kpiValue > impactData.baseLine;
     }
 
-    function _shouldApplyBonus(
+    function shouldApplyBonus(
         ISPTRErrors.ImpactData memory impactData,
         uint256 kpiValue,
         bool kpiExists
@@ -111,7 +113,7 @@ library SustainabilityPerformanceTargetRateLib {
         return kpiValue < impactData.baseLine;
     }
 
-    function _applyRateAdjustments(
+    function applyRateAdjustments(
         uint256 baseRate,
         uint256 totalPenaltyRate,
         uint256 totalBonusRate

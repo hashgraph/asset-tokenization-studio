@@ -42,7 +42,7 @@ describe("Hold Tests", () => {
 
   const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
     ["bytes32", "bytes32"],
-    [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, DEFAULT_PARTITION],
+    [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, DEFAULT_PARTITION],
   );
   const packedDataWithoutPrefix = packedData.slice(2);
   const ProtectedPartitionRole_1 = ethers.keccak256("0x" + packedDataWithoutPrefix);
@@ -50,43 +50,43 @@ describe("Hold Tests", () => {
   function set_initRbacs() {
     return [
       {
-        role: ATS_ROLES._ISSUER_ROLE,
+        role: ATS_ROLES.ISSUER_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: ATS_ROLES.PAUSER_ROLE,
         members: [signer_D.address],
       },
       {
-        role: ATS_ROLES._KYC_ROLE,
+        role: ATS_ROLES.KYC_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._SSI_MANAGER_ROLE,
+        role: ATS_ROLES.SSI_MANAGER_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._CLEARING_ROLE,
+        role: ATS_ROLES.CLEARING_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._CORPORATE_ACTION_ROLE,
+        role: ATS_ROLES.CORPORATE_ACTION_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._CONTROL_LIST_ROLE,
+        role: ATS_ROLES.CONTROL_LIST_ROLE,
         members: [signer_E.address],
       },
       {
-        role: ATS_ROLES._CONTROLLER_ROLE,
+        role: ATS_ROLES.CONTROLLER_ROLE,
         members: [signer_C.address],
       },
       {
-        role: ATS_ROLES._PROTECTED_PARTITIONS_ROLE,
+        role: ATS_ROLES.PROTECTED_PARTITIONS_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._AGENT_ROLE,
+        role: ATS_ROLES.AGENT_ROLE,
         members: [signer_A.address],
       },
       { role: ProtectedPartitionRole_1, members: [signer_B.address] },
@@ -216,7 +216,6 @@ describe("Hold Tests", () => {
           asset.operatorCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
         ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
       });
-
     });
 
     describe("Clearing active", () => {
@@ -236,7 +235,6 @@ describe("Hold Tests", () => {
             .operatorCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
         ).to.be.revertedWithCustomError(asset, "Unauthorized");
       });
-
     });
 
     describe("Create with wrong input arguments", () => {
@@ -389,7 +387,6 @@ describe("Hold Tests", () => {
 
         await checkCreatedHold(ThirdPartyType.OPERATOR, ADDRESS_ZERO, operatorData);
       });
-
     });
 
     describe("Protected Create Hold By Partition", () => {

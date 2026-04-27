@@ -57,37 +57,37 @@ describe("BatchTransfer Tests", () => {
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: ATS_ROLES.PAUSER_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._KYC_ROLE,
+        role: ATS_ROLES.KYC_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._SSI_MANAGER_ROLE,
+        role: ATS_ROLES.SSI_MANAGER_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._AGENT_ROLE,
+        role: ATS_ROLES.AGENT_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._CLEARING_ROLE,
+        role: ATS_ROLES.CLEARING_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._PROTECTED_PARTITIONS_ROLE,
+        role: ATS_ROLES.PROTECTED_PARTITIONS_ROLE,
         members: [signer_A.address],
       },
     ]);
 
-    await asset.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+    await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
     await asset.addIssuer(signer_E.address);
     await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
     await asset.connect(signer_B).grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
     await asset.connect(signer_B).grantKyc(signer_F.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
-    await asset.grantRole(ATS_ROLES._PAUSER_ROLE, signer_A.address);
+    await asset.grantRole(ATS_ROLES.PAUSER_ROLE, signer_A.address);
   }
 
   describe("single partition", () => {

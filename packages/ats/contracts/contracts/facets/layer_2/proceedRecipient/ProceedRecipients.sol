@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IProceedRecipients } from "./IProceedRecipients.sol";
-import { _PROCEED_RECIPIENT_MANAGER_ROLE } from "../../../constants/roles.sol";
+import { PROCEED_RECIPIENT_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProceedRecipientsStorageWrapper } from "../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
 import { AddressValidation } from "../../../infrastructure/utils/AddressValidation.sol";
@@ -20,13 +20,13 @@ abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
     function addProceedRecipient(
         address _proceedRecipient,
         bytes calldata _data
-    ) external virtual override onlyUnpaused onlyRole(_PROCEED_RECIPIENT_MANAGER_ROLE) {
+    ) external virtual override onlyUnpaused onlyRole(PROCEED_RECIPIENT_MANAGER_ROLE) {
         _addProceedRecipientInternal(_proceedRecipient, _data);
     }
 
     function removeProceedRecipient(
         address _proceedRecipient
-    ) external virtual override onlyUnpaused onlyRole(_PROCEED_RECIPIENT_MANAGER_ROLE) {
+    ) external virtual override onlyUnpaused onlyRole(PROCEED_RECIPIENT_MANAGER_ROLE) {
         _removeProceedRecipientInternal(_proceedRecipient);
     }
 
@@ -37,7 +37,7 @@ abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
         external
         override
         onlyUnpaused
-        onlyRole(_PROCEED_RECIPIENT_MANAGER_ROLE)
+        onlyRole(PROCEED_RECIPIENT_MANAGER_ROLE)
         notZeroAddress(_proceedRecipient)
         onlyIfProceedRecipient(_proceedRecipient)
     {

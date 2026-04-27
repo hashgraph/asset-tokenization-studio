@@ -92,16 +92,16 @@ describe("Transfer Facet Tests", () => {
       assetSignerD = await ethers.getContractAt("IAsset", diamond.target, signer_D);
 
       await executeRbac(asset, [
-        { role: ATS_ROLES._ISSUER_ROLE, members: [signer_B.address, signer_C.address] },
-        { role: ATS_ROLES._KYC_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES._SSI_MANAGER_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES._PAUSER_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES._CLEARING_ROLE, members: [signer_A.address, signer_B.address] },
-        { role: ATS_ROLES._CONTROL_LIST_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES._PROTECTED_PARTITIONS_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.ISSUER_ROLE, members: [signer_B.address, signer_C.address] },
+        { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
+        { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.PAUSER_ROLE, members: [signer_B.address] },
+        { role: ATS_ROLES.CLEARING_ROLE, members: [signer_A.address, signer_B.address] },
+        { role: ATS_ROLES.CONTROL_LIST_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.PROTECTED_PARTITIONS_ROLE, members: [signer_A.address] },
       ]);
 
-      await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
       await asset.connect(signer_A).addIssuer(signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
@@ -399,11 +399,11 @@ describe("Transfer Facet Tests", () => {
 
         asset = await ethers.getContractAt("IAsset", diamond.target);
         await executeRbac(asset, [
-          { role: ATS_ROLES._ISSUER_ROLE, members: [signer_C.address] },
-          { role: ATS_ROLES._KYC_ROLE, members: [signer_B.address] },
-          { role: ATS_ROLES._SSI_MANAGER_ROLE, members: [signer_A.address] },
-          { role: ATS_ROLES._PROTECTED_PARTITIONS_ROLE, members: [signer_A.address] },
-          { role: ATS_ROLES._WILD_CARD_ROLE, members: [signer_E.address] },
+          { role: ATS_ROLES.ISSUER_ROLE, members: [signer_C.address] },
+          { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
+          { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
+          { role: ATS_ROLES.PROTECTED_PARTITIONS_ROLE, members: [signer_A.address] },
+          { role: ATS_ROLES.WILD_CARD_ROLE, members: [signer_E.address] },
         ]);
 
         await asset.connect(signer_A).addIssuer(signer_E.address);
@@ -451,7 +451,7 @@ describe("Transfer Facet Tests", () => {
 
     describe("Recovered Addresses", () => {
       beforeEach(async () => {
-        await asset.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
         await asset.connect(signer_C).issue(signer_E.address, amount, DATA);
         await asset.connect(signer_C).issue(signer_C.address, amount, DATA);
       });

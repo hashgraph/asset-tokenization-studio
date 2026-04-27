@@ -49,19 +49,19 @@ describe("Cap Tests", () => {
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: ATS_ROLES.PAUSER_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._KYC_ROLE,
+        role: ATS_ROLES.KYC_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._SSI_MANAGER_ROLE,
+        role: ATS_ROLES.SSI_MANAGER_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._CAP_ROLE,
+        role: ATS_ROLES.CAP_ROLE,
         members: [signer_A.address],
       },
     ]);
@@ -132,7 +132,7 @@ describe("Cap Tests", () => {
 
   describe("New Max Supply Too low or 0", () => {
     it("GIVEN a token WHEN setMaxSupply to 0 THEN transaction fails with NewMaxSupplyCannotBeZero", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
 
       // add to list fails
       await expect(asset.connect(signer_C).setMaxSupply(0)).to.be.revertedWithCustomError(
@@ -141,8 +141,8 @@ describe("Cap Tests", () => {
       );
     });
     it("GIVEN a token WHEN setMaxSupply a value that is less than the current total supply THEN transaction fails with NewMaxSupplyTooLow", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
 
       await asset.connect(signer_C).issueByPartition({
         partition: _PARTITION_ID_1,
@@ -159,8 +159,8 @@ describe("Cap Tests", () => {
     });
 
     it("GIVEN a token WHEN setMaxSupplyByPartition a value that is less than the current total supply THEN transaction fails with NewMaxSupplyForPartitionTooLow", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
 
       await asset.connect(signer_C).issueByPartition({
         partition: _PARTITION_ID_1,
@@ -178,8 +178,8 @@ describe("Cap Tests", () => {
 
   describe("New Max Supply By Partition Too High", () => {
     it("GIVEN a token WHEN setMaxSupplyByPartition a value that is less than the current total supply THEN transaction fails with NewMaxSupplyByPartitionTooHigh", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
 
       // add to list fails
       await expect(
@@ -190,7 +190,7 @@ describe("Cap Tests", () => {
 
   describe("New Max Supply OK", () => {
     it("GIVEN a token WHEN setMaxSupply THEN transaction succeeds", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
 
       await expect(asset.connect(signer_C).setMaxSupply(maxSupply * 4))
         .to.emit(asset, "MaxSupplySet")
@@ -202,7 +202,7 @@ describe("Cap Tests", () => {
     });
 
     it("GIVEN a token WHEN setMaxSupplyByPartition THEN transaction succeeds", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
 
       await expect(asset.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply * 2))
         .to.emit(asset, "MaxSupplyByPartitionSet")
@@ -256,10 +256,10 @@ describe("Cap Tests", () => {
     };
 
     async function setPreBalanceAdjustment() {
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_C.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_A.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
 
       await asset.connect(signer_C).setMaxSupply(maxSupply);
       await asset.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupplyByPartition);

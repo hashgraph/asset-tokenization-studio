@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _ERC3643_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { _AGENT_ROLE } from "../../constants/roles.sol";
+import { AGENT_ROLE } from "../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
 import { IAccessControl } from "../../facets/layer_1/accessControl/IAccessControl.sol";
@@ -24,6 +24,16 @@ import { ClearingStorageWrapper } from "../asset/ClearingStorageWrapper.sol";
 import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
 import { ITransfer } from "../../facets/transfer/ITransfer.sol";
 
+/**
+ * @title ERC3643StorageWrapper
+ * @notice Library that encapsulates storage management and core operations for an
+ *         ERC3643-compliant token, including freeze/unfreeze, agent management,
+ *         compliance, identity registry, and wallet recovery.
+ * @dev All state mutations are performed via the diamond storage pattern,
+ *      using a dedicated struct stored at a fixed EIP-1967 slot.
+ *      This library is intended to be consumed by an upstream facet or orchestrator.
+ * @author Asset Tokenization Studio Team
+ */
 library ERC3643StorageWrapper {
     using LowLevelCall for address;
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -59,14 +69,14 @@ library ERC3643StorageWrapper {
     }
 
     function addAgent(address _agent) internal {
-        if (!AccessControlStorageWrapper.grantRole(_AGENT_ROLE, _agent)) {
-            revert IAccessControl.AccountAssignedToRole(_AGENT_ROLE, _agent);
+        if (!AccessControlStorageWrapper.grantRole(AGENT_ROLE, _agent)) {
+            revert IAccessControl.AccountAssignedToRole(AGENT_ROLE, _agent);
         }
     }
 
     function removeAgent(address _agent) internal {
-        if (!AccessControlStorageWrapper.revokeRole(_AGENT_ROLE, _agent)) {
-            revert IAccessControl.AccountNotAssignedToRole(_AGENT_ROLE, _agent);
+        if (!AccessControlStorageWrapper.revokeRole(AGENT_ROLE, _agent)) {
+            revert IAccessControl.AccountNotAssignedToRole(AGENT_ROLE, _agent);
         }
     }
 

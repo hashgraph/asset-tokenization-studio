@@ -56,7 +56,7 @@ interface IDocumentation {
     /**
      * @notice Attaches a new document to the contract or updates the URI and hash of an
      *         existing one.
-     * @dev Requires the caller to hold `_DOCUMENTER_ROLE` and the token to be unpaused.
+     * @dev Requires the caller to hold `DOCUMENTER_ROLE` and the token to be unpaused.
      *      If `_name` is not yet registered, it is appended to the `docNames` array and
      *      its index is recorded in `docIndexes`. Emits {DocumentUpdated}.
      * @param _name         Unique `bytes32` identifier for the document. Must not be zero.
@@ -67,7 +67,7 @@ interface IDocumentation {
 
     /**
      * @notice Removes an existing document from the contract.
-     * @dev Requires the caller to hold `_DOCUMENTER_ROLE` and the token to be unpaused.
+     * @dev Requires the caller to hold `DOCUMENTER_ROLE` and the token to be unpaused.
      *      Uses a swap-and-pop strategy to remove the entry from `docNames` in O(1),
      *      updating `docIndexes` accordingly. Emits {DocumentRemoved}.
      *      Reverts with {DocumentDoesNotExist} if `_name` is not registered.

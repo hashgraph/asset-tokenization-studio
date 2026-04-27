@@ -28,7 +28,7 @@ describe("Scheduled BalanceAdjustments Tests", () => {
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: ATS_ROLES.PAUSER_ROLE,
         members: [signer_B.address],
       },
     ]);
@@ -43,7 +43,7 @@ describe("Scheduled BalanceAdjustments Tests", () => {
   });
 
   it("GIVEN a token WHEN triggerBalanceAdjustments THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
     // set balanceAdjustment
     const balanceAdjustmentExecutionDateInSeconds_1 = dateToUnixTimestamp("2030-01-01T00:00:06Z");

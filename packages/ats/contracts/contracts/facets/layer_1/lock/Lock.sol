@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _LOCKER_ROLE, _CONTROLLER_ROLE } from "../../../constants/roles.sol";
+import { LOCKER_ROLE, CONTROLLER_ROLE } from "../../../constants/roles.sol";
 import { ILock } from "./ILock.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
@@ -27,7 +27,7 @@ abstract contract Lock is ILock, Modifiers {
         external
         override
         onlyUnpaused
-        onlyRole(_LOCKER_ROLE)
+        onlyRole(LOCKER_ROLE)
         onlyWithoutMultiPartition
         onlyUnrecoveredAddress(_tokenHolder)
         onlyValidExpirationTimestamp(_expirationTimestamp)
@@ -103,7 +103,7 @@ abstract contract Lock is ILock, Modifiers {
         external
         override
         onlyUnpaused
-        onlyRole(_LOCKER_ROLE)
+        onlyRole(LOCKER_ROLE)
         onlyValidExpirationTimestamp(_expirationTimestamp)
         onlyUnrecoveredAddress(_tokenHolder)
         onlyDefaultPartitionWithSinglePartition(_partition)
@@ -182,8 +182,8 @@ abstract contract Lock is ILock, Modifiers {
         address _tokenHolder
     ) external onlyUnpaused onlyDefaultPartitionWithSinglePartition(_partition) returns (bool success_) {
         bytes32[] memory roles = new bytes32[](2);
-        roles[0] = _LOCKER_ROLE;
-        roles[1] = _CONTROLLER_ROLE;
+        roles[0] = LOCKER_ROLE;
+        roles[1] = CONTROLLER_ROLE;
         AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         success_ = LockStorageWrapper.releaseByPartition(
             _partition,

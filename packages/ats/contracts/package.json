@@ -7,28 +7,13 @@
   "types": "./build/typechain-types/index.d.ts",
   "typesVersions": {
     "*": {
-      "scripts": [
-        "./build/scripts/index.d.ts"
-      ],
-      "typechain-types": [
-        "./build/typechain-types/index.d.ts"
-      ],
-      "test": [
-        "./build/test/index.d.ts"
-      ],
-      "test/fixtures": [
-        "./build/test/fixtures/index.d.ts"
-      ]
+      "scripts": ["./build/scripts/index.d.ts"],
+      "typechain-types": ["./build/typechain-types/index.d.ts"],
+      "test": ["./build/test/index.d.ts"],
+      "test/fixtures": ["./build/test/fixtures/index.d.ts"]
     }
   },
-  "files": [
-    "artifacts/",
-    "contracts/",
-    "typechain-types/",
-    "build/",
-    "!artifacts/build-info/",
-    "!build/**/*.map"
-  ],
+  "files": ["artifacts/", "contracts/", "typechain-types/", "build/", "!artifacts/build-info/", "!build/**/*.map"],
   "exports": {
     ".": {
       "types": "./build/typechain-types/index.d.ts",
@@ -64,12 +49,7 @@
     },
     "./package.json": "./package.json"
   },
-  "keywords": [
-    "hedera",
-    "smart-contracts",
-    "tokenization",
-    "hardhat"
-  ],
+  "keywords": ["hedera", "smart-contracts", "tokenization", "hardhat"],
   "author": "",
   "license": "Apache-2.0",
   "scripts": {
@@ -209,11 +189,10 @@
     "hardhat-gas-reporter": "^1.0.8",
     "sinon": "^21.0.1",
     "solidity-coverage": "^0.8.14",
-    "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.16",
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.8.2"
   },
   "overrides": {
     "ws": "^8.15.0"

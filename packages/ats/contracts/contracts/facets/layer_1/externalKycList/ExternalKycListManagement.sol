@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalKycListManagement } from "./IExternalKycListManagement.sol";
-import { _KYC_MANAGER_ROLE } from "../../../constants/roles.sol";
+import { KYC_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { _KYC_MANAGEMENT_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { ExternalListManagementStorageWrapper } from "../../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
@@ -19,7 +19,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
     function updateExternalKycLists(
         address[] calldata _kycLists,
         bool[] calldata _actives
-    ) external override onlyUnpaused onlyRole(_KYC_MANAGER_ROLE) returns (bool success_) {
+    ) external override onlyUnpaused onlyRole(KYC_MANAGER_ROLE) returns (bool success_) {
         ArrayValidation.checkUniqueValues(_kycLists, _actives);
         success_ = ExternalListManagementStorageWrapper.updateExternalLists(
             _KYC_MANAGEMENT_STORAGE_POSITION,
@@ -34,7 +34,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
 
     function addExternalKycList(
         address _kycLists
-    ) external override onlyUnpaused onlyRole(_KYC_MANAGER_ROLE) onlyValidAddress(_kycLists) returns (bool success_) {
+    ) external override onlyUnpaused onlyRole(KYC_MANAGER_ROLE) onlyValidAddress(_kycLists) returns (bool success_) {
         success_ = ExternalListManagementStorageWrapper.addExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists);
         if (!success_) {
             revert ListedKycList(_kycLists);
@@ -44,7 +44,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
 
     function removeExternalKycList(
         address _kycLists
-    ) external override onlyUnpaused onlyRole(_KYC_MANAGER_ROLE) returns (bool success_) {
+    ) external override onlyUnpaused onlyRole(KYC_MANAGER_ROLE) returns (bool success_) {
         success_ = ExternalListManagementStorageWrapper.removeExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists);
         if (!success_) {
             revert UnlistedKycList(_kycLists);

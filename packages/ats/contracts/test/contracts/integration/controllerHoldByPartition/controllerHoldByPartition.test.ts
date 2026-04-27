@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
-import { EMPTY_STRING, ATS_ROLES, ZERO, EMPTY_HEX_BYTES, ADDRESS_ZERO } from "@scripts";
+import { EMPTY_STRING, ZERO, EMPTY_HEX_BYTES, ADDRESS_ZERO } from "@scripts";
 import { ResolverProxy, IAsset } from "@contract-types";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -43,39 +43,39 @@ describe("ControllerHoldByPartition Tests", () => {
   function set_initRbacs() {
     return [
       {
-        role: ATS_ROLES._ISSUER_ROLE,
+        role: "ISSUER_ROLE",
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: "PAUSER_ROLE",
         members: [signer_D.address],
       },
       {
-        role: ATS_ROLES._KYC_ROLE,
+        role: "KYC_ROLE",
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._SSI_MANAGER_ROLE,
+        role: "SSI_MANAGER_ROLE",
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._CLEARING_ROLE,
+        role: "CLEARING_ROLE",
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._CORPORATE_ACTION_ROLE,
+        role: "CORPORATE_ACTION_ROLE",
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._CONTROL_LIST_ROLE,
+        role: "CONTROL_LIST_ROLE",
         members: [signer_E.address],
       },
       {
-        role: ATS_ROLES._CONTROLLER_ROLE,
+        role: "CONTROLLER_ROLE",
         members: [signer_C.address],
       },
       {
-        role: ATS_ROLES._AGENT_ROLE,
+        role: "AGENT_ROLE",
         members: [signer_A.address],
       },
     ];

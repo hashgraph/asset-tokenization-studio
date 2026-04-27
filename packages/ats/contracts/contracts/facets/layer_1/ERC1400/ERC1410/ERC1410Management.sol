@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _CONTROLLER_ROLE, _AGENT_ROLE } from "../../../../constants/roles.sol";
+import { CONTROLLER_ROLE, AGENT_ROLE } from "../../../../constants/roles.sol";
 import { IERC1410Types } from "./IERC1410Types.sol";
 import { IERC1410Management } from "./IERC1410Management.sol";
 import { IProtectedPartitions } from "../../../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
@@ -34,8 +34,8 @@ abstract contract ERC1410Management is IERC1410Management, Modifiers {
         returns (bytes32)
     {
         bytes32[] memory roles = new bytes32[](2);
-        roles[0] = _CONTROLLER_ROLE;
-        roles[1] = _AGENT_ROLE;
+        roles[0] = CONTROLLER_ROLE;
+        roles[1] = AGENT_ROLE;
         AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         return
             TokenCoreOps.transferByPartition(
@@ -56,8 +56,8 @@ abstract contract ERC1410Management is IERC1410Management, Modifiers {
         bytes calldata _operatorData
     ) external override onlyUnpaused onlyDefaultPartitionWithSinglePartition(_partition) onlyControllable {
         bytes32[] memory roles = new bytes32[](2);
-        roles[0] = _CONTROLLER_ROLE;
-        roles[1] = _AGENT_ROLE;
+        roles[0] = CONTROLLER_ROLE;
+        roles[1] = AGENT_ROLE;
         AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         TokenCoreOps.redeemByPartition(
             _partition,

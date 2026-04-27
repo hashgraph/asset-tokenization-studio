@@ -190,8 +190,14 @@ function generateHeader(
 ): string {
   const mockLine = mockCount > 0 ? `\n * Mocks: ${mockCount}` : "";
 
-  // Sort facet names alphabetically for deterministic output
-  const sortedFacetNames = [...facets].map((f) => f.name).sort();
+  // Sort facet names alphabetically for deterministic output. Only deployable
+  // facets are imported; abstract contracts and interfaces have no factory
+  // reference in the generated body, so importing their __factory would leave
+  // an unused symbol that fails the no-unused-imports lint rule.
+  const sortedFacetNames = facets
+    .filter((f) => f.isDeployable)
+    .map((f) => f.name)
+    .sort();
 
   // Generate TypeChain factory imports (Prettier will format)
   const factoryImports: string[] = [];

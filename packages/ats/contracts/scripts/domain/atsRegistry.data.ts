@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-24T13:45:56.342Z
- * Facets: 89
+ * Generated: 2026-04-27T15:59:08.366Z
+ * Facets: 90
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -25,6 +25,7 @@ import {
   AmortizationFacet__factory,
   BalanceTrackerFacet__factory,
   BatchBurnFacet__factory,
+  BatchControllerFacet__factory,
   BatchMintFacet__factory,
   BatchTransferFacet__factory,
   BondUSAFacet__factory,
@@ -62,7 +63,6 @@ import {
   ERC1594Facet__factory,
   ERC20PermitFacet__factory,
   ERC20VotesFacet__factory,
-  ERC3643BatchFacet__factory,
   ERC3643ManagementFacet__factory,
   ERC3643OperationsFacet__factory,
   ERC3643ReadFacet__factory,
@@ -75,8 +75,6 @@ import {
   HoldByPartitionFacet__factory,
   HoldFacet__factory,
   HoldManagementFacet__factory,
-  IComplianceFacet__factory,
-  IHoldFacet__factory,
   KpiLinkedRateFacet__factory,
   KpisKpiLinkedRateFacet__factory,
   KpisSustainabilityPerformanceTargetRateFacet__factory,
@@ -111,6 +109,7 @@ import {
   VotingFacet__factory,
   AccessControlFacetTimeTravel__factory,
   AdjustBalancesFacetTimeTravel__factory,
+  BatchControllerFacetTimeTravel__factory,
   BondUSAFacetTimeTravel__factory,
   BondUSAFixedRateFacetTimeTravel__factory,
   BondUSAKpiLinkedRateFacetTimeTravel__factory,
@@ -143,7 +142,6 @@ import {
   ERC1594FacetTimeTravel__factory,
   ERC20PermitFacetTimeTravel__factory,
   ERC20VotesFacetTimeTravel__factory,
-  ERC3643BatchFacetTimeTravel__factory,
   ERC3643ManagementFacetTimeTravel__factory,
   ERC3643OperationsFacetTimeTravel__factory,
   ERC3643ReadFacetTimeTravel__factory,
@@ -1022,6 +1020,77 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     factory: (signer) => new BatchBurnFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+  },
+
+  BatchControllerFacet: {
+    name: "BatchControllerFacet",
+    description: "Diamond facet exposing controller-only batch transfer operations.",
+    resolverKey: {
+      name: "_BATCH_CONTROLLER_RESOLVER_KEY",
+      value: "0xffe1275def1a3a46bc6ba76bcbfd30f67a8fe0acbb897a549fc767cd63b810b5",
+    },
+    inheritance: ["BatchController", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "batchForcedTransfer",
+        signature: {
+          full: "function batchForcedTransfer(address[] _fromList, address[] _toList, uint256[] _amounts)",
+          canonical: "batchForcedTransfer(address[],address[],uint256[])",
+        },
+        selector: "0x42a47abc",
+      },
+    ],
+    events: [
+      {
+        name: "ControllerTransfer",
+        signature: {
+          full: "event ControllerTransfer(address _controller, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)",
+          canonical: "ControllerTransfer(address,address,address,uint256,bytes,bytes)",
+        },
+        topic0: "0x6bf62b4b9c7b768275122bf70d429efc398a056d669b1efdf6c3976346246d7d",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRoles",
+        signature: {
+          full: "error AccountHasNoRoles(address account, bytes32[] roles)",
+          canonical: "AccountHasNoRoles(address,bytes32[])",
+        },
+        selector: "0x90e55392",
+      },
+      {
+        name: "InputAmountsArrayLengthMismatch",
+        signature: { full: "error InputAmountsArrayLengthMismatch()", canonical: "InputAmountsArrayLengthMismatch()" },
+        selector: "0x64f13710",
+      },
+      {
+        name: "NotAllowedInMultiPartitionMode",
+        signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
+        selector: "0x76d08f88",
+      },
+      {
+        name: "TokenIsNotControllable",
+        signature: { full: "error TokenIsNotControllable()", canonical: "TokenIsNotControllable()" },
+        selector: "0xf4b7b072",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+    ],
+    factory: (signer) => new BatchControllerFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new BatchControllerFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   BatchMintFacet: {
@@ -4148,6 +4217,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ControllerHoldByPartitionFacet: {
     name: "ControllerHoldByPartitionFacet",
+    description:
+      "Provides the diamond facet interface for partition-based hold control operations within the controller system.",
     resolverKey: {
       name: "_CONTROLLER_HOLD_BY_PARTITION_RESOLVER_KEY",
       value: "0x9e49506d2dfd484ed2aa6f2fd6f90a9efd8ae79466f93fa70571a95ddda4659c",
@@ -7524,157 +7595,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     factory: (signer) => new ERC20VotesFacet__factory(getLibLinks("clearingReadOps") as any, signer),
     timeTravelFactory: (signer) =>
       new ERC20VotesFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
-  },
-
-  ERC3643BatchFacet: {
-    name: "ERC3643BatchFacet",
-    resolverKey: {
-      name: "_ERC3643_BATCH_RESOLVER_KEY",
-      value: "0x00332311d9f0c311b31b87399043a90feb10341fcbb4d7f4ed6e3c0072a3c392",
-    },
-    inheritance: ["ERC3643Batch", "IStaticFunctionSelectors"],
-    methods: [
-      {
-        name: "batchForcedTransfer",
-        signature: {
-          full: "function batchForcedTransfer(address[] _fromList, address[] _toList, uint256[] _amounts)",
-          canonical: "batchForcedTransfer(address[],address[],uint256[])",
-        },
-        selector: "0x42a47abc",
-      },
-    ],
-    events: [
-      {
-        name: "AgentAdded",
-        signature: { full: "event AgentAdded(address indexed _agent)", canonical: "AgentAdded(address)" },
-        topic0: "0xf68e73cec97f2d70aa641fb26e87a4383686e2efacb648f2165aeb02ac562ec5",
-      },
-      {
-        name: "AgentRemoved",
-        signature: { full: "event AgentRemoved(address indexed _agent)", canonical: "AgentRemoved(address)" },
-        topic0: "0xed9c8ad8d5a0a66898ea49d2956929c93ae2e8bd50281b2ed897c5d1a6737e0b",
-      },
-      {
-        name: "ComplianceAdded",
-        signature: { full: "event ComplianceAdded(address indexed compliance)", canonical: "ComplianceAdded(address)" },
-        topic0: "0x7f3a888862559648ec01d97deb7b5012bff86dc91e654a1de397170db40e35b6",
-      },
-      {
-        name: "ControllerTransfer",
-        signature: {
-          full: "event ControllerTransfer(address _controller, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)",
-          canonical: "ControllerTransfer(address,address,address,uint256,bytes,bytes)",
-        },
-        topic0: "0x6bf62b4b9c7b768275122bf70d429efc398a056d669b1efdf6c3976346246d7d",
-      },
-      {
-        name: "IdentityRegistryAdded",
-        signature: {
-          full: "event IdentityRegistryAdded(address indexed identityRegistry)",
-          canonical: "IdentityRegistryAdded(address)",
-        },
-        topic0: "0xd2be862d755bca7e0d39772b2cab3a5578da9c285f69199f4c063c2294a7f36c",
-      },
-      {
-        name: "RecoverySuccess",
-        signature: {
-          full: "event RecoverySuccess(address _lostWallet, address _newWallet, address _investorOnchainID)",
-          canonical: "RecoverySuccess(address,address,address)",
-        },
-        topic0: "0xf0c9129a94f30f1caaceb63e44b9811d0a3edf1d6c23757f346093af5553fed0",
-      },
-      {
-        name: "UpdatedTokenInformation",
-        signature: {
-          full: "event UpdatedTokenInformation(string indexed newName, string indexed newSymbol, uint8 newDecimals, string newVersion, address indexed newOnchainID)",
-          canonical: "UpdatedTokenInformation(string,string,uint8,string,address)",
-        },
-        topic0: "0x6a1105ac8148a3c319adbc369f9072573e8a11d3a3d195e067e7c40767ec54d1",
-      },
-    ],
-    errors: [
-      {
-        name: "AccessControlRequired",
-        signature: {
-          full: "error AccessControlRequired(bytes32 role, address sender)",
-          canonical: "AccessControlRequired(bytes32,address)",
-        },
-        selector: "0x10210dec",
-      },
-      {
-        name: "AccountHasNoRoles",
-        signature: {
-          full: "error AccountHasNoRoles(address account, bytes32[] roles)",
-          canonical: "AccountHasNoRoles(address,bytes32[])",
-        },
-        selector: "0x90e55392",
-      },
-      {
-        name: "AddressNotVerified",
-        signature: { full: "error AddressNotVerified()", canonical: "AddressNotVerified()" },
-        selector: "0x209d2853",
-      },
-      {
-        name: "CannotRecoverWallet",
-        signature: { full: "error CannotRecoverWallet()", canonical: "CannotRecoverWallet()" },
-        selector: "0x505389ae",
-      },
-      {
-        name: "ComplianceCallFailed",
-        signature: { full: "error ComplianceCallFailed()", canonical: "ComplianceCallFailed()" },
-        selector: "0x67fba102",
-      },
-      {
-        name: "ComplianceNotAllowed",
-        signature: { full: "error ComplianceNotAllowed()", canonical: "ComplianceNotAllowed()" },
-        selector: "0x66eb1b54",
-      },
-      {
-        name: "IdentityRegistryCallFailed",
-        signature: { full: "error IdentityRegistryCallFailed()", canonical: "IdentityRegistryCallFailed()" },
-        selector: "0xad87849e",
-      },
-      {
-        name: "InputAmountsArrayLengthMismatch",
-        signature: { full: "error InputAmountsArrayLengthMismatch()", canonical: "InputAmountsArrayLengthMismatch()" },
-        selector: "0x64f13710",
-      },
-      {
-        name: "InputBoolArrayLengthMismatch",
-        signature: { full: "error InputBoolArrayLengthMismatch()", canonical: "InputBoolArrayLengthMismatch()" },
-        selector: "0x07ac0eb9",
-      },
-      {
-        name: "InsufficientFrozenBalance",
-        signature: {
-          full: "error InsufficientFrozenBalance(address user, uint256 requestedUnfreeze, uint256 availableFrozen, bytes32 partition)",
-          canonical: "InsufficientFrozenBalance(address,uint256,uint256,bytes32)",
-        },
-        selector: "0xefafde54",
-      },
-      {
-        name: "NotAllowedInMultiPartitionMode",
-        signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
-        selector: "0x76d08f88",
-      },
-      {
-        name: "TokenIsNotControllable",
-        signature: { full: "error TokenIsNotControllable()", canonical: "TokenIsNotControllable()" },
-        selector: "0xf4b7b072",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
-      {
-        name: "WalletRecovered",
-        signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
-        selector: "0xf9f9bcf9",
-      },
-    ],
-    factory: (signer) => new ERC3643BatchFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
-    timeTravelFactory: (signer) => new ERC3643BatchFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   ERC3643ManagementFacet: {
@@ -13673,7 +13593,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 89 as const;
+export const TOTAL_FACETS = 90 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -14153,6 +14073,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   DividendStorageWrapper: {
     name: "DividendStorageWrapper",
+    description: "Provides internal functions to manage lifecycle and queries for dividend corporate actions.",
     methods: [],
   },
 
@@ -14174,7 +14095,18 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   ERC1594StorageWrapper: {
     name: "ERC1594StorageWrapper",
+    description:
+      "Library providing the core issuance, redemption, and compliance checking logic for the ERC1594 token standard. Handles storage management, balance mutations via ERC20/ERC1410 wrappers, and multi-layered access controls (KYC, identity, compliance, control lists, allowances, partitions).",
     methods: [],
+    errors: [
+      { name: "data", signature: { full: "data(empty)", canonical: "data(empty)" }, selector: "0x78ba4e81" },
+      {
+        name: "payload",
+        signature: { full: "payload(address,bytes)", canonical: "payload(address,bytes)" },
+        selector: "0x6434449d",
+      },
+      { name: "selectors", signature: { full: "selectors()", canonical: "selectors()" }, selector: "0x6e25b978" },
+    ],
   },
 
   ERC1644StorageWrapper: {
@@ -14199,6 +14131,8 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   ERC3643StorageWrapper: {
     name: "ERC3643StorageWrapper",
+    description:
+      "Library that encapsulates storage management and core operations for an ERC3643-compliant token, including freeze/unfreeze, agent management, compliance, identity registry, and wallet recovery.",
     methods: [],
   },
 
@@ -14331,6 +14265,8 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   InterestRateStorageWrapper: {
     name: "InterestRateStorageWrapper",
+    description:
+      "Library providing setters, getters, validation, and storage access for three interest rate models using deterministic storage slots.",
     methods: [],
   },
 
@@ -14347,6 +14283,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   LoansPortfolioStorageWrapper: {
     name: "LoansPortfolioStorageWrapper",
+    description: "Library providing storage management and query functions for a loans portfolio.",
     methods: [],
   },
 
@@ -14364,6 +14301,8 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   NominalValueStorageWrapper: {
     name: "NominalValueStorageWrapper",
+    description:
+      "Storage wrapper for nominal value data, aggregating legacy bond and equity storage for backward compatibility during migration.",
     methods: [],
   },
 
@@ -14385,6 +14324,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   ProtectedPartitionsStorageWrapper: {
     name: "ProtectedPartitionsStorageWrapper",
+    description: "Library providing storage access and logic for protected partitions.",
     methods: [],
   },
 
@@ -14395,6 +14335,8 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   ScheduledTasksStorageWrapper: {
     name: "ScheduledTasksStorageWrapper",
+    description:
+      "Storage and execution layer for managing time‑based scheduled tasks (snapshots, coupon listings, balance adjustments, cross‑ordered tasks).",
     methods: [],
     errors: [
       {
@@ -14412,6 +14354,8 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   SnapshotsStorageWrapper: {
     name: "SnapshotsStorageWrapper",
+    description:
+      "Provides internal functions to manage snapshot histories for balances, partitions, locked, held, frozen, and cleared state, as well as total supply and token holder data.",
     methods: [],
   },
 
@@ -14427,6 +14371,8 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   VotingStorageWrapper: {
     name: "VotingStorageWrapper",
+    description:
+      "Library providing internal functions to manage voting rights corporate actions, including creation, cancellation, retrieval, and snapshot balance lookup.",
     methods: [],
   },
 };
@@ -14440,40 +14386,40 @@ export const TOTAL_STORAGE_WRAPPERS = 41 as const;
  * All role identifiers extracted from contracts.
  */
 export const ROLES = {
-  _ADJUSTMENT_BALANCE_ROLE: "0x6d0d63b623e69df3a6ea8aebd01f360a0250a880cbc44f7f10c49726a80a78a9",
-  _AGENT_ROLE: "0xc4aed0454da9bde6defa5baf93bb49d4690626fc243d138104e12d1def783ea6",
-  _AMORTIZATION_ROLE: "0x29b3565c49b924f0c461060cea1eabe7d7136c83f454f891574239e9f8ee9431",
-  _BOND_MANAGER_ROLE: "0x8e99f55d84328dd46dd7790df91f368b44ea448d246199c88b97896b3f83f65d",
-  _CAP_ROLE: "0xb60cac52541732a1020ce6841bc7449e99ed73090af03b50911c75d631476571",
-  _CLEARING_ROLE: "0x2292383e7bb988fb281e5195ab88da11e62fec74cf43e8685cff613d6b906450",
-  _CLEARING_VALIDATOR_ROLE: "0x7b688898673e16c47810f5da9ce1262a3d7d022dfe27c8ff9305371cd435c619",
-  _CONTROL_LIST_MANAGER_ROLE: "0x0e625647b832ec7d4146c12550c31c065b71e0a698095568fd8320dd2aa72e75",
-  _CONTROL_LIST_ROLE: "0xca537e1c88c9f52dc5692c96c482841c3bea25aafc5f3bfe96f645b5f800cac3",
-  _CONTROLLER_ROLE: "0xa72964c08512ad29f46841ce735cff038789243c2b506a89163cc99f76d06c0f",
-  _CORPORATE_ACTION_ROLE: "0x8a139eeb747b9809192ae3de1b88acfd2568c15241a5c4f85db0443a536d77d6",
-  _DEFAULT_ADMIN_ROLE: "0x0000000000000000000000000000000000000000000000000000000000000000",
-  _DOCUMENTER_ROLE: "0x83ace103a76d3729b4ba1350ad27522bbcda9a1a589d1e5091f443e76abccf41",
-  _FREEZE_MANAGER_ROLE: "0xd0e5294c1fc630933e135c5b668c5d577576754d33964d700bbbcdbfd7e1361b",
-  _INTEREST_RATE_MANAGER_ROLE: "0xa174f099c94c902831d8b8a07810700505da86a76ea0bcb7629884ef26cf682e",
-  _INTERNAL_KYC_MANAGER_ROLE: "0x3916c5c9e68488134c2ee70660332559707c133d0a295a25971da4085441522e",
-  _ISSUER_ROLE: "0x4be32e8849414d19186807008dabd451c1d87dae5f8e22f32f5ce94d486da842",
-  _KPI_MANAGER_ROLE: "0x441e549cc2c88d01fa80bd9e7b40412d3106214149223501aa25d4fa23bf306d",
-  _KYC_MANAGER_ROLE: "0x8ebae577938c1afa7fb3dc7b06459c79c86ffd2ac9805b6da92ee4cbbf080449",
-  _KYC_ROLE: "0x6fbd421e041603fa367357d79ffc3b2f9fd37a6fc4eec661aa5537a9ae75f93d",
-  _LOAN_MANAGER_ROLE: "0xc085daff7cbf912b30437b0b95363f3920f33cbd53213a269a2fc5d44ee8289d",
-  _LOANS_PORTFOLIO_MANAGER_ROLE: "0xa6b5c56eb64684d38c620773854f4720f1c51c63e6fa070641fff03465904e6c",
-  _LOCKER_ROLE: "0xd8aa8c6f92fe8ac3f3c0f88216e25f7c08b3a6c374b4452a04d200c29786ce88",
-  _MATURITY_REDEEMER_ROLE: "0xa0d696902e9ed231892dc96649f0c62b808a1cb9dd1269e78e0adc1cc4b8358c",
-  _NOMINAL_VALUE_ROLE: "0x127c185a9f04723376575bc896cc0d3cf15a32dd0db17f01168dcac5d2de6102",
-  _PAUSE_MANAGER_ROLE: "0xbc36fbd776e95c4811506a63b650c876b4159cb152d827a5f717968b67c69b84",
-  _PAUSER_ROLE: "0x6f65556918c1422809d0d567462eafeb371be30159d74b38ac958dc58864faeb",
-  _PROCEED_RECIPIENT_MANAGER_ROLE: "0xebc53fe99fea28c7aa9476a714959af5b931f34a8a8734365ec63113198d512f",
-  _PROTECTED_PARTITIONS_PARTICIPANT_ROLE: "0xdaba153046c65d49da6a7597abc24374aa681e3eee7004426ca6185b3927a3f5",
-  _PROTECTED_PARTITIONS_ROLE: "0x8e359333991af626d1f6087d9bc57221ef1207a053860aaa78b7609c2c8f96b6",
-  _SNAPSHOT_ROLE: "0x3fbb44760c0954eea3f6cb9f1f210568f5ae959dcbbef66e72f749dbaa7cc2da",
-  _SSI_MANAGER_ROLE: "0x0995a089e16ba792fdf9ec5a4235cba5445a9fb250d6e96224c586678b81ebd0",
-  _TREX_OWNER_ROLE: "0x03ce2fdc316501dd97f5219e6ad908a3238f1e90f910aa17b627f801a6aafab7",
-  _WILD_CARD_ROLE: "0x96658f163b67573bbf1e3f9e9330b199b3ac2f6ec0139ea95f622e20a5df2f46",
+  ADJUSTMENT_BALANCE_ROLE: "0x6d0d63b623e69df3a6ea8aebd01f360a0250a880cbc44f7f10c49726a80a78a9",
+  AGENT_ROLE: "0xc4aed0454da9bde6defa5baf93bb49d4690626fc243d138104e12d1def783ea6",
+  AMORTIZATION_ROLE: "0x29b3565c49b924f0c461060cea1eabe7d7136c83f454f891574239e9f8ee9431",
+  BOND_MANAGER_ROLE: "0x8e99f55d84328dd46dd7790df91f368b44ea448d246199c88b97896b3f83f65d",
+  CAP_ROLE: "0xb60cac52541732a1020ce6841bc7449e99ed73090af03b50911c75d631476571",
+  CLEARING_ROLE: "0x2292383e7bb988fb281e5195ab88da11e62fec74cf43e8685cff613d6b906450",
+  CLEARING_VALIDATOR_ROLE: "0x7b688898673e16c47810f5da9ce1262a3d7d022dfe27c8ff9305371cd435c619",
+  CONTROL_LIST_MANAGER_ROLE: "0x0e625647b832ec7d4146c12550c31c065b71e0a698095568fd8320dd2aa72e75",
+  CONTROL_LIST_ROLE: "0xca537e1c88c9f52dc5692c96c482841c3bea25aafc5f3bfe96f645b5f800cac3",
+  CONTROLLER_ROLE: "0xa72964c08512ad29f46841ce735cff038789243c2b506a89163cc99f76d06c0f",
+  CORPORATE_ACTION_ROLE: "0x8a139eeb747b9809192ae3de1b88acfd2568c15241a5c4f85db0443a536d77d6",
+  DEFAULT_ADMIN_ROLE: "0x0000000000000000000000000000000000000000000000000000000000000000",
+  DOCUMENTER_ROLE: "0x83ace103a76d3729b4ba1350ad27522bbcda9a1a589d1e5091f443e76abccf41",
+  FREEZE_MANAGER_ROLE: "0xd0e5294c1fc630933e135c5b668c5d577576754d33964d700bbbcdbfd7e1361b",
+  INTEREST_RATE_MANAGER_ROLE: "0xa174f099c94c902831d8b8a07810700505da86a76ea0bcb7629884ef26cf682e",
+  INTERNAL_KYC_MANAGER_ROLE: "0x3916c5c9e68488134c2ee70660332559707c133d0a295a25971da4085441522e",
+  ISSUER_ROLE: "0x4be32e8849414d19186807008dabd451c1d87dae5f8e22f32f5ce94d486da842",
+  KPI_MANAGER_ROLE: "0x441e549cc2c88d01fa80bd9e7b40412d3106214149223501aa25d4fa23bf306d",
+  KYC_MANAGER_ROLE: "0x8ebae577938c1afa7fb3dc7b06459c79c86ffd2ac9805b6da92ee4cbbf080449",
+  KYC_ROLE: "0x6fbd421e041603fa367357d79ffc3b2f9fd37a6fc4eec661aa5537a9ae75f93d",
+  LOAN_MANAGER_ROLE: "0xc085daff7cbf912b30437b0b95363f3920f33cbd53213a269a2fc5d44ee8289d",
+  LOANS_PORTFOLIO_MANAGER_ROLE: "0xa6b5c56eb64684d38c620773854f4720f1c51c63e6fa070641fff03465904e6c",
+  LOCKER_ROLE: "0xd8aa8c6f92fe8ac3f3c0f88216e25f7c08b3a6c374b4452a04d200c29786ce88",
+  MATURITY_REDEEMER_ROLE: "0xa0d696902e9ed231892dc96649f0c62b808a1cb9dd1269e78e0adc1cc4b8358c",
+  NOMINAL_VALUE_ROLE: "0x127c185a9f04723376575bc896cc0d3cf15a32dd0db17f01168dcac5d2de6102",
+  PAUSE_MANAGER_ROLE: "0xbc36fbd776e95c4811506a63b650c876b4159cb152d827a5f717968b67c69b84",
+  PAUSER_ROLE: "0x6f65556918c1422809d0d567462eafeb371be30159d74b38ac958dc58864faeb",
+  PROCEED_RECIPIENT_MANAGER_ROLE: "0xebc53fe99fea28c7aa9476a714959af5b931f34a8a8734365ec63113198d512f",
+  PROTECTED_PARTITIONS_PARTICIPANT_ROLE: "0xdaba153046c65d49da6a7597abc24374aa681e3eee7004426ca6185b3927a3f5",
+  PROTECTED_PARTITIONS_ROLE: "0x8e359333991af626d1f6087d9bc57221ef1207a053860aaa78b7609c2c8f96b6",
+  SNAPSHOT_ROLE: "0x3fbb44760c0954eea3f6cb9f1f210568f5ae959dcbbef66e72f749dbaa7cc2da",
+  SSI_MANAGER_ROLE: "0x0995a089e16ba792fdf9ec5a4235cba5445a9fb250d6e96224c586678b81ebd0",
+  TREX_OWNER_ROLE: "0x03ce2fdc316501dd97f5219e6ad908a3238f1e90f910aa17b627f801a6aafab7",
+  WILD_CARD_ROLE: "0x96658f163b67573bbf1e3f9e9330b199b3ac2f6ec0139ea95f622e20a5df2f46",
 } as const;
 
 /**

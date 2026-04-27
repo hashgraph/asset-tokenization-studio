@@ -49,7 +49,7 @@ describe("Bond Token Deployment", () => {
       const callArgs = mockFactory.deployBond.getCall(0).args[0];
       const rbacs = callArgs.security.rbacs;
 
-      expect(rbacs[0].role).to.equal(ATS_ROLES._DEFAULT_ADMIN_ROLE);
+      expect(rbacs[0].role).to.equal(ATS_ROLES.DEFAULT_ADMIN_ROLE);
       expect(rbacs[0].members).to.include(adminAccount);
     });
 
@@ -57,8 +57,8 @@ describe("Bond Token Deployment", () => {
       const diamondAddress = TEST_ADDRESSES.VALID_3;
       const mockFactory = createMockFactory(TEST_FACTORY_EVENTS.BOND_DEPLOYED, diamondAddress);
       const additionalRbacs = [
-        { role: ATS_ROLES._PAUSER_ROLE, members: [TEST_ADDRESSES.VALID_4] },
-        { role: ATS_ROLES._CORPORATE_ACTION_ROLE, members: [TEST_ADDRESSES.VALID_5] },
+        { role: ATS_ROLES.PAUSER_ROLE, members: [TEST_ADDRESSES.VALID_4] },
+        { role: ATS_ROLES.CORPORATE_ACTION_ROLE, members: [TEST_ADDRESSES.VALID_5] },
       ];
       const securityData = createMockSecurityDataWithRbacs(additionalRbacs);
       const params = createDeployBondParams(mockFactory, { securityData });
@@ -70,9 +70,9 @@ describe("Bond Token Deployment", () => {
       const rbacs = callArgs.security.rbacs;
 
       expect(rbacs).to.have.length(3);
-      expect(rbacs[0].role).to.equal(ATS_ROLES._DEFAULT_ADMIN_ROLE);
-      expect(rbacs[1].role).to.equal(ATS_ROLES._PAUSER_ROLE);
-      expect(rbacs[2].role).to.equal(ATS_ROLES._CORPORATE_ACTION_ROLE);
+      expect(rbacs[0].role).to.equal(ATS_ROLES.DEFAULT_ADMIN_ROLE);
+      expect(rbacs[1].role).to.equal(ATS_ROLES.PAUSER_ROLE);
+      expect(rbacs[2].role).to.equal(ATS_ROLES.CORPORATE_ACTION_ROLE);
     });
 
     it("should place admin role first in array", async () => {
@@ -88,7 +88,7 @@ describe("Bond Token Deployment", () => {
       const callArgs = mockFactory.deployBond.getCall(0).args[0];
       const rbacs = callArgs.security.rbacs;
 
-      expect(rbacs[0].role).to.equal(ATS_ROLES._DEFAULT_ADMIN_ROLE);
+      expect(rbacs[0].role).to.equal(ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
   });
 

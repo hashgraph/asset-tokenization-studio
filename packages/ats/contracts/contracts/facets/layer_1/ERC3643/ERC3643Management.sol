@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 // solhint-disable max-line-length
 
-import { _AGENT_ROLE, _TREX_OWNER_ROLE } from "../../../constants/roles.sol";
+import { AGENT_ROLE, TREX_OWNER_ROLE } from "../../../constants/roles.sol";
 import { IERC3643Management } from "./IERC3643Management.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
@@ -15,11 +15,11 @@ abstract contract ERC3643Management is IERC3643Management, Modifiers {
         ERC3643StorageWrapper.initialize_ERC3643(_compliance, _identityRegistry);
     }
 
-    function setOnchainID(address _onchainID) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
+    function setOnchainID(address _onchainID) external override onlyUnpaused onlyRole(TREX_OWNER_ROLE) {
         ERC3643StorageWrapper.setOnchainID(_onchainID);
     }
 
-    function setIdentityRegistry(address _identityRegistry) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
+    function setIdentityRegistry(address _identityRegistry) external override onlyUnpaused onlyRole(TREX_OWNER_ROLE) {
         ERC3643StorageWrapper.setIdentityRegistry(_identityRegistry);
     }
 
@@ -30,7 +30,7 @@ abstract contract ERC3643Management is IERC3643Management, Modifiers {
     )
         external
         override
-        onlyRole(_AGENT_ROLE)
+        onlyRole(AGENT_ROLE)
         onlyUnrecoveredAddress(_lostWallet)
         onlyEmptyWallet(_lostWallet)
         onlyWithoutMultiPartition

@@ -86,7 +86,7 @@ export async function deployBondKpiLinkedRateFromFactory(
   // Build RBAC array with admin
   const rbacs: Rbac[] = [
     {
-      role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+      role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
       members: [adminAccount],
     },
     ...securityDataParams.rbacs,

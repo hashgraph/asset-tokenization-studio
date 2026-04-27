@@ -38,23 +38,23 @@ describe("Controller Tests", () => {
       asset = await ethers.getContractAt("IAsset", diamond.target);
       await executeRbac(asset, [
         {
-          role: ATS_ROLES._PAUSER_ROLE,
+          role: ATS_ROLES.PAUSER_ROLE,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES._ISSUER_ROLE,
+          role: ATS_ROLES.ISSUER_ROLE,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES._CONTROLLER_ROLE,
+          role: ATS_ROLES.CONTROLLER_ROLE,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES._KYC_ROLE,
+          role: ATS_ROLES.KYC_ROLE,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES._SSI_MANAGER_ROLE,
+          role: ATS_ROLES.SSI_MANAGER_ROLE,
           members: [signer_A.address],
         },
       ]);
@@ -70,7 +70,7 @@ describe("Controller Tests", () => {
 
     describe("Paused", () => {
       beforeEach(async () => {
-        await grantRoleAndPauseToken(asset, ATS_ROLES._CONTROLLER_ROLE, signer_A, signer_B, signer_C.address);
+        await grantRoleAndPauseToken(asset, ATS_ROLES.CONTROLLER_ROLE, signer_A, signer_B, signer_C.address);
       });
 
       it("GIVEN a paused Token WHEN controllerTransfer THEN transaction fails with TokenIsPaused", async () => {
@@ -122,7 +122,7 @@ describe("Controller Tests", () => {
         );
       });
 
-      it("GIVEN an account without ATS_ROLES._CONTROLLER_ROLE WHEN forcedTransfer is called THEN transaction fails with AccountHasNoRole", async () => {
+      it("GIVEN an account without ATS_ROLES.CONTROLLER_ROLE WHEN forcedTransfer is called THEN transaction fails with AccountHasNoRole", async () => {
         await expect(
           asset.connect(signer_C).forcedTransfer(signer_D.address, signer_E.address, amount),
         ).to.be.revertedWithCustomError(asset, "AccountHasNoRoles");
@@ -170,8 +170,8 @@ describe("Controller Tests", () => {
 
     describe("finalizeControllable", () => {
       beforeEach(async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CONTROLLER_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROLLER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
         await expect(asset.connect(signer_A).finalizeControllable())
           .to.emit(asset, "FinalizedControllerFeature")
           .withArgs(signer_A.address);
@@ -202,7 +202,7 @@ describe("Controller Tests", () => {
 
     describe("ForcedTransfer", () => {
       beforeEach(async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CONTROLLER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROLLER_ROLE, signer_A.address);
         await asset.connect(signer_A).addIssuer(signer_A.address);
         await asset.connect(signer_B).grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
         await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -210,7 +210,7 @@ describe("Controller Tests", () => {
 
       it("GIVEN an account with balance WHEN forcedTransfer THEN transaction success", async () => {
         await asset.connect(signer_B).mint(signer_E.address, amount * 2);
-        await asset.grantRole(ATS_ROLES._CONTROLLER_ROLE, signer_E.address);
+        await asset.grantRole(ATS_ROLES.CONTROLLER_ROLE, signer_E.address);
 
         expect(await asset.forcedTransfer(signer_E.address, signer_D.address, amount))
           .to.emit(asset, "Transferred")
@@ -245,7 +245,7 @@ describe("Controller Tests", () => {
           .to.emit(asset, "AgentAdded")
           .withArgs(signer_B.address);
 
-        const hasRole = await asset.hasRole(ATS_ROLES._AGENT_ROLE, signer_B.address);
+        const hasRole = await asset.hasRole(ATS_ROLES.AGENT_ROLE, signer_B.address);
         const isAgent = await asset.isAgent(signer_B.address);
         expect(isAgent).to.equal(true);
         expect(hasRole).to.equal(true);
@@ -258,7 +258,7 @@ describe("Controller Tests", () => {
           .to.emit(asset, "AgentRemoved")
           .withArgs(signer_B.address);
 
-        const hasRole = await asset.hasRole(ATS_ROLES._AGENT_ROLE, signer_B.address);
+        const hasRole = await asset.hasRole(ATS_ROLES.AGENT_ROLE, signer_B.address);
         const isAgent = await asset.isAgent(signer_B.address);
         expect(isAgent).to.equal(false);
         expect(hasRole).to.equal(false);
@@ -267,7 +267,7 @@ describe("Controller Tests", () => {
       it("GIVEN a non-agent address WHEN removing agent THEN reverts with AccountNotAssignedToRole", async () => {
         await expect(asset.removeAgent(signer_C.address))
           .to.be.revertedWithCustomError(asset, "AccountNotAssignedToRole")
-          .withArgs(ATS_ROLES._AGENT_ROLE, signer_C.address);
+          .withArgs(ATS_ROLES.AGENT_ROLE, signer_C.address);
       });
 
       it("GIVEN an already-agent address WHEN adding agent again THEN reverts with AccountAssignedToRole", async () => {
@@ -275,11 +275,11 @@ describe("Controller Tests", () => {
 
         await expect(asset.addAgent(signer_B.address))
           .to.be.revertedWithCustomError(asset, "AccountAssignedToRole")
-          .withArgs(ATS_ROLES._AGENT_ROLE, signer_B.address);
+          .withArgs(ATS_ROLES.AGENT_ROLE, signer_B.address);
       });
 
       it("GIVEN a user with the agent role WHEN performing actions using ERC-1400 methods succeeds", async () => {
-        await asset.grantRole(ATS_ROLES._AGENT_ROLE, signer_B.address);
+        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_B.address);
         const issueAmount = 1000;
         await expect(
           asset.connect(signer_B).issueByPartition({
@@ -317,7 +317,7 @@ describe("Controller Tests", () => {
       });
 
       it("GIVEN a user with the agent role WHEN performing actions using ERC-3643 methods succeeds", async () => {
-        await asset.grantRole(ATS_ROLES._AGENT_ROLE, signer_B.address);
+        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_B.address);
         const issueAmount = 1000;
         await asset.connect(signer_B).issueByPartition({
           partition: DEFAULT_PARTITION,
@@ -364,7 +364,7 @@ describe("Controller Tests", () => {
       asset = await ethers.getContractAt("IAsset", diamond.target);
       await executeRbac(asset, [
         {
-          role: ATS_ROLES._PAUSER_ROLE,
+          role: ATS_ROLES.PAUSER_ROLE,
           members: [signer_B.address],
         },
       ]);
@@ -376,9 +376,9 @@ describe("Controller Tests", () => {
 
     describe("NotAllowedInMultiPartitionMode", () => {
       beforeEach(async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CONTROLLER_ROLE, signer_C.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROLLER_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
       });
 
       it("GIVEN an account with controller role WHEN controllerTransfer THEN NotAllowedInMultiPartitionMode", async () => {

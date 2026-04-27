@@ -55,28 +55,28 @@ describe("BatchBurn Tests", () => {
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: ATS_ROLES.PAUSER_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._KYC_ROLE,
+        role: ATS_ROLES.KYC_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._SSI_MANAGER_ROLE,
+        role: ATS_ROLES.SSI_MANAGER_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._AGENT_ROLE,
+        role: ATS_ROLES.AGENT_ROLE,
         members: [signer_A.address],
       },
     ]);
 
-    await asset.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+    await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
     await asset.addIssuer(signer_E.address);
     await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
     await asset.connect(signer_B).grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
-    await asset.grantRole(ATS_ROLES._PAUSER_ROLE, signer_A.address);
+    await asset.grantRole(ATS_ROLES.PAUSER_ROLE, signer_A.address);
   }
 
   beforeEach(async () => {
@@ -176,10 +176,10 @@ describe("BatchBurn Tests", () => {
       asset = await ethers.getContractAt("IAsset", base.diamond.target);
 
       await executeRbac(asset, [
-        { role: ATS_ROLES._CONTROLLER_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES._ISSUER_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES._KYC_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES._SSI_MANAGER_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.CONTROLLER_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.ISSUER_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.KYC_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
       ]);
 
       await asset.addIssuer(signer_A.address);

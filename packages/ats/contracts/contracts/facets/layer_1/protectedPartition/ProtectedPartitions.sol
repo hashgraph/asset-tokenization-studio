@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IProtectedPartitions } from "./IProtectedPartitions.sol";
-import { _PROTECTED_PARTITIONS_ROLE } from "../../../constants/roles.sol";
+import { PROTECTED_PARTITIONS_ROLE } from "../../../constants/roles.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 
@@ -18,7 +18,7 @@ abstract contract ProtectedPartitions is IProtectedPartitions, Modifiers {
         external
         override
         onlyUnpaused
-        onlyRole(_PROTECTED_PARTITIONS_ROLE)
+        onlyRole(PROTECTED_PARTITIONS_ROLE)
         returns (bool success_)
     {
         ProtectedPartitionsStorageWrapper.setProtectedPartitions(true);
@@ -29,7 +29,7 @@ abstract contract ProtectedPartitions is IProtectedPartitions, Modifiers {
         external
         override
         onlyUnpaused
-        onlyRole(_PROTECTED_PARTITIONS_ROLE)
+        onlyRole(PROTECTED_PARTITIONS_ROLE)
         returns (bool success_)
     {
         ProtectedPartitionsStorageWrapper.setProtectedPartitions(false);

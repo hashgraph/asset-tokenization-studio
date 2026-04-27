@@ -33,19 +33,19 @@ describe("Kpi Latest Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
     await executeRbac(asset, [
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: ATS_ROLES.PAUSER_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._INTEREST_RATE_MANAGER_ROLE,
+        role: ATS_ROLES.INTEREST_RATE_MANAGER_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._PROCEED_RECIPIENT_MANAGER_ROLE,
+        role: ATS_ROLES.PROCEED_RECIPIENT_MANAGER_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._KPI_MANAGER_ROLE,
+        role: ATS_ROLES.KPI_MANAGER_ROLE,
         members: [signer_A.address],
       },
     ]);

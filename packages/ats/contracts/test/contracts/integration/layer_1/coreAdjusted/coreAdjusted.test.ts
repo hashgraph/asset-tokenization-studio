@@ -32,8 +32,8 @@ describe("CoreAdjusted Facet Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
     await executeRbac(asset, [
-      { role: ATS_ROLES._CORPORATE_ACTION_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.CORPORATE_ACTION_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.ADJUSTMENT_BALANCE_ROLE, members: [signer_A.address] },
     ]);
   }
 

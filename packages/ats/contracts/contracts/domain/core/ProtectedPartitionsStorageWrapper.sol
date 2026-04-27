@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _PROTECTED_PARTITIONS_PARTICIPANT_ROLE } from "../../constants/roles.sol";
+import { PROTECTED_PARTITIONS_PARTICIPANT_ROLE } from "../../constants/roles.sol";
 import { _PROTECTED_PARTITIONS_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IProtectedPartitions } from "../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
@@ -18,10 +18,18 @@ import {
     _getMessageHashClearingRedeem,
     _verify
 } from "../../infrastructure/utils/ERC712.sol";
-import { _WILD_CARD_ROLE } from "../../constants/roles.sol";
+import { WILD_CARD_ROLE } from "../../constants/roles.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
+/**
+ * @notice Storage layout for the protected partitions module.
+ * @param initialized Whether the protected partitions feature has been initialised.
+ * @param arePartitionsProtected Whether token partitions are currently protected.
+ * @param DEPRECATED_contractName Deprecated field, formerly held the contract name.
+ * @param DEPRECATED_contractVersion Deprecated field, formerly held the contract version.
+ * @param DEPRECATED_nonces Deprecated mapping of address to nonce.
+ */
 struct ProtectedPartitionsDataStorage {
     bool initialized;
     bool arePartitionsProtected;
@@ -33,6 +41,15 @@ struct ProtectedPartitionsDataStorage {
     mapping(address => uint256) DEPRECATED_nonces;
 }
 
+/**
+ * @title ProtectedPartitionsStorageWrapper
+ * @notice Library providing storage access and logic for protected partitions.
+ * @dev Provides functions to initialise, set, query, and validate protected partition state,
+ *      as well as EIP-712 signature verification for transfers, redeems, holds, and clearing
+ *      operations. All storage is accessed via a fixed slot defined in
+ *      `_PROTECTED_PARTITIONS_STORAGE_POSITION`.
+ * @author Asset Tokenization Studio Team
+ */
 library ProtectedPartitionsStorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ProtectedPartitions(bool _protectPartitions) internal returns (bool success_) {
@@ -66,9 +83,9 @@ library ProtectedPartitionsStorageWrapper {
     function requireUnProtectedPartitionsOrWildCardRole() internal view {
         if (
             ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
-            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, EvmAccessors.getMsgSender())
+            !AccessControlStorageWrapper.hasRole(WILD_CARD_ROLE, EvmAccessors.getMsgSender())
         ) {
-            revert IProtectedPartitions.PartitionsAreProtectedAndNoRole(EvmAccessors.getMsgSender(), _WILD_CARD_ROLE);
+            revert IProtectedPartitions.PartitionsAreProtectedAndNoRole(EvmAccessors.getMsgSender(), WILD_CARD_ROLE);
         }
     }
 
@@ -258,11 +275,11 @@ library ProtectedPartitionsStorageWrapper {
     }
 
     function protectedPartitionsRole(bytes32 _partition) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(_PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _partition));
+        return keccak256(abi.encodePacked(PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _partition));
     }
 
     function calculateRoleForPartition(bytes32 partition) internal pure returns (bytes32 role) {
-        role = keccak256(abi.encode(_PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partition));
+        role = keccak256(abi.encode(PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partition));
     }
 
     function protectedPartitionsStorage()

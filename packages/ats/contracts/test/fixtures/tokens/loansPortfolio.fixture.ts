@@ -120,7 +120,7 @@ export async function deployLoansPortfolioTokenFixture({
 
   await createLoansPortfolioConfiguration(blr, facetAddresses, true);
 
-  const rbacs = [{ role: ATS_ROLES._DEFAULT_ADMIN_ROLE, members: [deployer.address] }];
+  const rbacs = [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [deployer.address] }];
 
   const blrProxyAddress = infrastructure.deployment.infrastructure.blr.proxy;
 

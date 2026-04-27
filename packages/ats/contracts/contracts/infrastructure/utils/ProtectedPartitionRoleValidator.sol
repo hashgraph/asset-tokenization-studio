@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../domain/core/ProtectedPartitionsStorageWrapper.sol";
-import { _WILD_CARD_ROLE } from "../../constants/roles.sol";
+import { WILD_CARD_ROLE } from "../../constants/roles.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
@@ -47,7 +47,7 @@ abstract contract ProtectedPartitionRoleValidator {
      * @dev Modifier that validates msg.sender has wildcard role OR partition role
      *
      * This is the more permissive variant that allows either:
-     * - The wildcard role (_WILD_CARD_ROLE) for universal access
+     * - The wildcard role (WILD_CARD_ROLE) for universal access
      * - OR the specific partition role for partition-specific access
      *
      * @param partition The partition to check role for
@@ -55,7 +55,7 @@ abstract contract ProtectedPartitionRoleValidator {
     modifier onlyWildCardOrPartitionRole(bytes32 partition) {
         bytes32[] memory roles = new bytes32[](2);
         roles[0] = ProtectedPartitionsStorageWrapper.protectedPartitionsRole(partition);
-        roles[1] = _WILD_CARD_ROLE;
+        roles[1] = WILD_CARD_ROLE;
 
         if (!AccessControlStorageWrapper.hasAnyRole(roles, EvmAccessors.getMsgSender())) {
             revert ProtectedPartitionRoleRequired(partition, EvmAccessors.getMsgSender());
@@ -108,7 +108,7 @@ abstract contract ProtectedPartitionRoleValidator {
     function _hasWildCardOrPartitionRole(bytes32 partition) internal view returns (bool hasRole_) {
         bytes32[] memory roles = new bytes32[](2);
         roles[0] = ProtectedPartitionsStorageWrapper.protectedPartitionsRole(partition);
-        roles[1] = _WILD_CARD_ROLE;
+        roles[1] = WILD_CARD_ROLE;
         hasRole_ = AccessControlStorageWrapper.hasAnyRole(roles, EvmAccessors.getMsgSender());
     }
 }

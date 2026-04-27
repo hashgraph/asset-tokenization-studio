@@ -17,6 +17,16 @@ import { ScheduledTasksStorageWrapper } from "../ScheduledTasksStorageWrapper.so
 import { SnapshotsStorageWrapper } from "../SnapshotsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
+/**
+ * @title VotingStorageWrapper
+ * @notice Library providing internal functions to manage voting rights corporate actions,
+ *         including creation, cancellation, retrieval, and snapshot balance lookup.
+ * @dev All functions are internal and designed to be called by facet contracts. Relies on
+ *      CorporateActionsStorageWrapper, ScheduledTasksStorageWrapper, SnapshotsStorageWrapper,
+ *      and TimeTravelStorageWrapper for storage and scheduling. Emits events from the IVoting
+ *      interface. Reverts with IVoting errors on invalid operations.
+ * @author Asset Tokenization Studio Team
+ */
 library VotingStorageWrapper {
     function setVoting(
         IVotingTypes.Voting calldata newVoting
@@ -101,7 +111,7 @@ library VotingStorageWrapper {
             votingFor_.tokenBalance,
             votingFor_.decimals,
             votingFor_.recordDateReached
-        ) = getSnapshotBalanceForIfDateReached(
+        ) = _getSnapshotBalanceForIfDateReached(
             registeredVoting.voting.recordDate,
             registeredVoting.snapshotId,
             account
@@ -138,7 +148,7 @@ library VotingStorageWrapper {
         return ERC1410StorageWrapper.getTotalTokenHolders();
     }
 
-    function getSnapshotBalanceForIfDateReached(
+    function _getSnapshotBalanceForIfDateReached(
         uint256 date,
         uint256 snapshotId,
         address account

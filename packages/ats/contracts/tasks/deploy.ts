@@ -79,7 +79,6 @@ task(
       erc3643ManagementFacet,
       erc3643OperationsFacet,
       erc3643ReadFacet,
-      erc3643BatchFacet,
       freezeFacet,
       erc20PermitFacet,
     } = await deployAtsFullInfrastructure(
@@ -142,7 +141,6 @@ task(
       "ERC3643 Management Facet": erc3643ManagementFacet.address,
       "ERC3643 Operations Facet": erc3643OperationsFacet.address,
       "ERC3643 Read Facet": erc3643ReadFacet.address,
-      "ERC3643 Batch Facet": erc3643BatchFacet.address,
       "Freeze Facet": freezeFacet.address,
       "ERC20Permit Facet": erc20PermitFacet.address,
     };

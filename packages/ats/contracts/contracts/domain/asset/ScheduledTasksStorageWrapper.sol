@@ -34,6 +34,15 @@ import { SustainabilityPerformanceTargetRateLib } from "./SustainabilityPerforma
 import { ICouponTypes } from "../../facets/layer_2/coupon/ICouponTypes.sol";
 import { KpiLinkedRateLib } from "./KpiLinkedRateLib.sol";
 
+/**
+ * @title ScheduledTasksStorageWrapper
+ * @notice Storage and execution layer for managing time‑based scheduled tasks
+ *         (snapshots, coupon listings, balance adjustments, cross‑ordered tasks).
+ * @dev Provides internal helpers to add, trigger, query and dispatch scheduled
+ *      tasks by type. Relies on `ScheduledTasksLib` for core queue logic and on
+ *      dedicated storage wrappers for per‑type state.
+ * @author Asset Tokenization Studio Team
+ */
 library ScheduledTasksStorageWrapper {
     error WrongTimestamp(uint256 timeStamp);
 
@@ -301,26 +310,26 @@ library ScheduledTasksStorageWrapper {
         ScheduledTask memory currentScheduledTask
     ) private {
         if (callbackType == bytes32("snapshot")) {
-            onScheduledSnapshotTriggered(pos, scheduledTasksLength, currentScheduledTask);
+            _onScheduledSnapshotTriggered(pos, scheduledTasksLength, currentScheduledTask);
             return;
         }
 
         if (callbackType == bytes32("coupon")) {
-            onScheduledCouponListingTriggered(pos, scheduledTasksLength, currentScheduledTask);
+            _onScheduledCouponListingTriggered(pos, scheduledTasksLength, currentScheduledTask);
             return;
         }
 
         if (callbackType == bytes32("balance")) {
-            onScheduledBalanceAdjustmentTriggered(pos, scheduledTasksLength, currentScheduledTask);
+            _onScheduledBalanceAdjustmentTriggered(pos, scheduledTasksLength, currentScheduledTask);
             return;
         }
 
         if (callbackType == bytes32("crossOrdered")) {
-            onScheduledCrossOrderedTaskTriggered(pos, scheduledTasksLength, currentScheduledTask);
+            _onScheduledCrossOrderedTaskTriggered(pos, scheduledTasksLength, currentScheduledTask);
         }
     }
 
-    function onScheduledSnapshotTriggered(
+    function _onScheduledSnapshotTriggered(
         uint256 /*_pos*/,
         uint256 /*_scheduledTasksLength*/,
         ScheduledTask memory _scheduledTask
@@ -339,7 +348,7 @@ library ScheduledTasksStorageWrapper {
         );
     }
 
-    function onScheduledCouponListingTriggered(
+    function _onScheduledCouponListingTriggered(
         uint256 /*_pos*/,
         uint256 /*_scheduledTasksLength*/,
         ScheduledTask memory _scheduledTask
@@ -363,7 +372,7 @@ library ScheduledTasksStorageWrapper {
         );
     }
 
-    function onScheduledBalanceAdjustmentTriggered(
+    function _onScheduledBalanceAdjustmentTriggered(
         uint256 /*_pos*/,
         uint256 /*_scheduledTasksLength*/,
         ScheduledTask memory _scheduledTask
@@ -382,7 +391,7 @@ library ScheduledTasksStorageWrapper {
         AdjustBalancesStorageWrapper.adjustBalances(balanceAdjustment.factor, balanceAdjustment.decimals);
     }
 
-    function onScheduledCrossOrderedTaskTriggered(
+    function _onScheduledCrossOrderedTaskTriggered(
         uint256 /*_pos*/,
         uint256 /*_scheduledTasksLength*/,
         ScheduledTask memory _scheduledTask

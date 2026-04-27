@@ -4,14 +4,17 @@ pragma solidity >=0.8.0 <0.9.0;
 import "../EquityStorageWrapper.sol";
 import { _NOMINAL_VALUE_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { BondStorageWrapper } from "../BondStorageWrapper.sol";
-import { Bond } from "../../../facets/layer_2/bond/Bond.sol";
 
-/// @notice Storage wrapper for NominalValue feature.
-/// @dev Reads nominal value from the dedicated NominalValue slot, and aggregates
-/// with legacy bond/equity storage fields for backward compatibility during migration.
-/// MIGRATION: Once all legacy tokens have been migrated, remove the legacy reads
-/// and simplify _getNominalValue / _getNominalValueDecimals to return only the
-/// dedicated storage values.
+/**
+ * @title NominalValueStorageWrapper - Nominal Value Storage Wrapper
+ * @notice Storage wrapper for nominal value data, aggregating legacy bond and
+ *         equity storage for backward compatibility during migration.
+ * @dev Reads nominal value from the dedicated storage slot and aggregates it
+ *      with legacy bond and equity storage fields. Once all legacy tokens have
+ *      been migrated, the legacy reads should be removed and the getters
+ *      simplified to return only the dedicated storage values.
+ * @author Asset Tokenization Studio Team
+ */
 library NominalValueStorageWrapper {
     struct NominalValueDataStorage {
         uint256 nominalValue;
@@ -40,49 +43,49 @@ library NominalValueStorageWrapper {
 
     // --- Dedicated accessors ---
 
-    function _initializeNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) internal {
+    function initializeNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) internal {
         _nominalValueStorage().initialized = true;
-        _setNominalValue(_nominalValue, _nominalValueDecimals);
+        setNominalValue(_nominalValue, _nominalValueDecimals);
     }
 
-    function _setNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) internal {
-        _migrateBondNominalValue();
-        _migrateEquityNominalValue();
+    function setNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) internal {
+        migrateBondNominalValue();
+        migrateEquityNominalValue();
 
         NominalValueDataStorage storage nvData_ = _nominalValueStorage();
         nvData_.nominalValue = _nominalValue;
         nvData_.nominalValueDecimals = _nominalValueDecimals;
     }
 
-    function _migrateBondNominalValue() internal {
+    function migrateBondNominalValue() internal {
         if (
             BondStorageWrapper.getDeprecatedNominalValue() > 0 ||
             BondStorageWrapper.getDeprecatedNominalValueDecimals() > 0
         ) BondStorageWrapper.clearNominalValue();
     }
 
-    function _migrateEquityNominalValue() internal {
+    function migrateEquityNominalValue() internal {
         if (
             EquityStorageWrapper.getDeprecatedNominalValue() > 0 ||
             EquityStorageWrapper.getDeprecatedNominalValueDecimals() > 0
         ) EquityStorageWrapper.clearNominalValue();
     }
 
-    function _getNominalValue() internal view returns (uint256) {
+    function getNominalValue() internal view returns (uint256) {
         return
             _nominalValueStorage().nominalValue +
             BondStorageWrapper.getDeprecatedNominalValue() +
             EquityStorageWrapper.getDeprecatedNominalValue();
     }
 
-    function _getNominalValueDecimals() internal view returns (uint8) {
+    function getNominalValueDecimals() internal view returns (uint8) {
         return
             _nominalValueStorage().nominalValueDecimals +
             BondStorageWrapper.getDeprecatedNominalValueDecimals() +
             EquityStorageWrapper.getDeprecatedNominalValueDecimals();
     }
 
-    function _isNominalValueInitialized() internal view returns (bool) {
+    function isNominalValueInitialized() internal view returns (bool) {
         return _nominalValueStorage().initialized;
     }
 

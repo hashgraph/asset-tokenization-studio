@@ -11,6 +11,7 @@ import { _BOND_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 /// @title Bond Storage Wrapper
 /// @notice Library for managing Bond token storage operations.
 /// @dev Provides structured access to BondDataStorage with migration support for NominalValue.
+/// @author Asset Tokenization Studio Team
 library BondStorageWrapper {
     struct BondDataStorage {
         bytes3 currency;
@@ -83,8 +84,8 @@ library BondStorageWrapper {
         BondDataStorage storage bs = _bondStorage();
         bondDetails_ = IBondTypes.BondDetailsData({
             currency: bs.currency,
-            nominalValue: NominalValueStorageWrapper._getNominalValue(),
-            nominalValueDecimals: NominalValueStorageWrapper._getNominalValueDecimals(),
+            nominalValue: NominalValueStorageWrapper.getNominalValue(),
+            nominalValueDecimals: NominalValueStorageWrapper.getNominalValueDecimals(),
             startingDate: bs.startingDate,
             maturityDate: bs.maturityDate
         });
