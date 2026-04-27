@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { Pause } from "../../facets/layer_1/pause/Pause.sol";
 import { AccessControl } from "../../facets/layer_1/accessControl/AccessControl.sol";
 import { DiamondCutManagerWrapper } from "./DiamondCutManagerWrapper.sol";
@@ -16,7 +16,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
     function createConfiguration(
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations
-    ) external override validateConfigurationId(_configurationId) onlyRole(_DEFAULT_ADMIN_ROLE) onlyUnpaused {
+    ) external override validateConfigurationId(_configurationId) onlyRole(DEFAULT_ADMIN_ROLE) onlyUnpaused {
         emit DiamondConfigurationCreated(
             _configurationId,
             _facetConfigurations,
@@ -28,7 +28,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations,
         bool _isLastBatch
-    ) external override validateConfigurationId(_configurationId) onlyRole(_DEFAULT_ADMIN_ROLE) onlyUnpaused {
+    ) external override validateConfigurationId(_configurationId) onlyRole(DEFAULT_ADMIN_ROLE) onlyUnpaused {
         emit DiamondBatchConfigurationCreated(
             _configurationId,
             _facetConfigurations,
@@ -39,7 +39,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
 
     function cancelBatchConfiguration(
         bytes32 _configurationId
-    ) external override validateConfigurationId(_configurationId) onlyRole(_DEFAULT_ADMIN_ROLE) onlyUnpaused {
+    ) external override validateConfigurationId(_configurationId) onlyRole(DEFAULT_ADMIN_ROLE) onlyUnpaused {
         _cancelBatchConfiguration(_configurationId);
         emit DiamondBatchConfigurationCanceled(_configurationId);
     }

@@ -67,7 +67,7 @@ describe("DiamondCutManager", () => {
 
     // Use TypeChain factories instead of ethers.getContractAt for proper ABI resolution
     accessControl = AccessControlFacet__factory.connect(businessLogicResolver.target.toString(), signer_A);
-    await accessControl.grantRole(ATS_ROLES._PAUSER_ROLE, signer_B.address);
+    await accessControl.grantRole(ATS_ROLES.PAUSER_ROLE, signer_B.address);
 
     pause = Pause__factory.connect(businessLogicResolver.target.toString(), signer_A);
 
@@ -468,7 +468,7 @@ describe("DiamondCutManager", () => {
       batchBusinessLogicResolver.target.toString(),
       signer_A,
     );
-    await batchAccessControl.grantRole(ATS_ROLES._PAUSER_ROLE, signer_B.address);
+    await batchAccessControl.grantRole(ATS_ROLES.PAUSER_ROLE, signer_B.address);
 
     const batchDiamondCutManager = DiamondCutManager__factory.connect(
       batchBusinessLogicResolver.target.toString(),

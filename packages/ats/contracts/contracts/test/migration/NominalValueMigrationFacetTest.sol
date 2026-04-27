@@ -10,7 +10,7 @@ import { NominalValueStorageWrapper } from "../../domain/asset/nominalValue/Nomi
 
 /**
  * @dev Test facet for NominalValue storage migration testing.
- * Exposes storage accessors to set up legacy storage state and verify migration behavior.
+ * Exposes storage accessors to set up legacy storage state and _verify migration behavior.
  * This facet is for testing purposes only and should not be deployed to production.
  */
 contract NominalValueMigrationFacetTest is Modifiers, IStaticFunctionSelectors {
@@ -56,11 +56,11 @@ contract NominalValueMigrationFacetTest is Modifiers, IStaticFunctionSelectors {
     // ========================================
 
     function getAggregatedNominalValue() external view returns (uint256) {
-        return NominalValueStorageWrapper._getNominalValue();
+        return NominalValueStorageWrapper.getNominalValue();
     }
 
     function getAggregatedNominalValueDecimals() external view returns (uint8) {
-        return NominalValueStorageWrapper._getNominalValueDecimals();
+        return NominalValueStorageWrapper.getNominalValueDecimals();
     }
 
     // ========================================

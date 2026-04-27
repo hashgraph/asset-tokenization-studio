@@ -38,7 +38,7 @@ describe("Security Tests", () => {
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES._ISSUER_ROLE,
+        role: ATS_ROLES.ISSUER_ROLE,
         members: [signer_A.address],
       },
     ]);

@@ -129,8 +129,8 @@ library EquityStorageWrapper {
             putRight: _equityStorage().putRight,
             dividendRight: _equityStorage().dividendRight,
             currency: _equityStorage().currency,
-            nominalValue: NominalValueStorageWrapper._getNominalValue(),
-            nominalValueDecimals: NominalValueStorageWrapper._getNominalValueDecimals()
+            nominalValue: NominalValueStorageWrapper.getNominalValue(),
+            nominalValueDecimals: NominalValueStorageWrapper.getNominalValueDecimals()
         });
     }
 

@@ -62,7 +62,7 @@ describe("TREX Factory Tests", () => {
 
     init_rbacs = [
       {
-        role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+        role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
         members: [deployer.address],
       },
     ];
@@ -323,8 +323,8 @@ describe("TREX Factory Tests", () => {
       expect(await coreFacet.name()).to.equal(equityData.security.erc20MetadataInfo.name);
       expect(await coreFacet.symbol()).to.equal(equityData.security.erc20MetadataInfo.symbol);
       expect(await coreFacet.decimals()).to.equal(equityData.security.erc20MetadataInfo.decimals);
-      expect(await accessControlFacet.hasRole(ATS_ROLES._TREX_OWNER_ROLE, deployer.address)).to.be.true;
-      expect(await accessControlFacet.hasRole(ATS_ROLES._DEFAULT_ADMIN_ROLE, deployer.address)).to.be.true;
+      expect(await accessControlFacet.hasRole(ATS_ROLES.TREX_OWNER_ROLE, deployer.address)).to.be.true;
+      expect(await accessControlFacet.hasRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, deployer.address)).to.be.true;
     });
 
     it("GIVEN correct data WHEN fetching deployed suite by salt THEN suite details are returned", async () => {
@@ -352,11 +352,11 @@ describe("TREX Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: [
             {
-              role: ATS_ROLES._TREX_OWNER_ROLE,
+              role: ATS_ROLES.TREX_OWNER_ROLE,
               members: [deployer.address],
             },
             {
-              role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+              role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
               members: [deployer.address],
             },
           ],
@@ -452,7 +452,7 @@ describe("TREX Factory Tests", () => {
       const [, , , , , otherUser] = await ethers.getSigners();
       const rbacWithDifferentOwner = [
         {
-          role: ATS_ROLES._TREX_OWNER_ROLE,
+          role: ATS_ROLES.TREX_OWNER_ROLE,
           members: [otherUser.address],
         },
       ];
@@ -1182,8 +1182,8 @@ describe("TREX Factory Tests", () => {
       expect(await coreFacet.name()).to.equal(bondData.security.erc20MetadataInfo.name);
       expect(await coreFacet.symbol()).to.equal(bondData.security.erc20MetadataInfo.symbol);
       expect(await coreFacet.decimals()).to.equal(bondData.security.erc20MetadataInfo.decimals);
-      expect(await accessControlFacet.hasRole(ATS_ROLES._TREX_OWNER_ROLE, deployer.address)).to.be.true;
-      expect(await accessControlFacet.hasRole(ATS_ROLES._DEFAULT_ADMIN_ROLE, deployer.address)).to.be.true;
+      expect(await accessControlFacet.hasRole(ATS_ROLES.TREX_OWNER_ROLE, deployer.address)).to.be.true;
+      expect(await accessControlFacet.hasRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, deployer.address)).to.be.true;
     });
 
     it("GIVEN correct data WHEN fetching deployed suite by salt THEN suite details are returned", async () => {
@@ -1213,11 +1213,11 @@ describe("TREX Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: [
             {
-              role: ATS_ROLES._TREX_OWNER_ROLE,
+              role: ATS_ROLES.TREX_OWNER_ROLE,
               members: [deployer.address],
             },
             {
-              role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+              role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
               members: [deployer.address],
             },
           ],
@@ -1305,7 +1305,7 @@ describe("TREX Factory Tests", () => {
       const [, , , , , otherUser] = await ethers.getSigners();
       const rbacWithDifferentOwner = [
         {
-          role: ATS_ROLES._TREX_OWNER_ROLE,
+          role: ATS_ROLES.TREX_OWNER_ROLE,
           members: [otherUser.address],
         },
       ];

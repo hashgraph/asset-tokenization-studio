@@ -53,39 +53,39 @@ describe("Bond Tests", () => {
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES._FREEZE_MANAGER_ROLE,
+        role: ATS_ROLES.FREEZE_MANAGER_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: ATS_ROLES.PAUSER_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._KYC_ROLE,
+        role: ATS_ROLES.KYC_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._MATURITY_REDEEMER_ROLE,
+        role: ATS_ROLES.MATURITY_REDEEMER_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._SSI_MANAGER_ROLE,
+        role: ATS_ROLES.SSI_MANAGER_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._CONTROL_LIST_ROLE,
+        role: ATS_ROLES.CONTROL_LIST_ROLE,
         members: [signer_D.address],
       },
       {
-        role: ATS_ROLES._CLEARING_ROLE,
+        role: ATS_ROLES.CLEARING_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._PROTECTED_PARTITIONS_ROLE,
+        role: ATS_ROLES.PROTECTED_PARTITIONS_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._AGENT_ROLE,
+        role: ATS_ROLES.AGENT_ROLE,
         members: [signer_A.address],
       },
     ]);
@@ -136,7 +136,7 @@ describe("Bond Tests", () => {
 
   describe("Single Partition", () => {
     it("GIVEN token holder WHEN getting principal For THEN succeeds", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
 
       await asset.connect(signer_C).issueByPartition({
         partition: DEFAULT_PARTITION,
@@ -207,7 +207,7 @@ describe("Bond Tests", () => {
       });
 
       it("GIVEN the token is paused WHEN redeeming at maturity THEN transaction fails with TokenIsPaused", async () => {
-        await grantRoleAndPauseToken(asset, ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
+        await grantRoleAndPauseToken(asset, ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
 
         await expect(
           asset.connect(signer_C).redeemAtMaturityByPartition(signer_C.address, DEFAULT_PARTITION, amount),
@@ -255,7 +255,7 @@ describe("Bond Tests", () => {
       });
 
       it("GIVEN all conditions are met WHEN redeeming at maturity THEN transaction succeeds and emits RedeemedByPartition", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
 
         await asset.connect(signer_C).issueByPartition({
           partition: DEFAULT_PARTITION,
@@ -272,7 +272,7 @@ describe("Bond Tests", () => {
       });
 
       it("GIVEN all conditions are met WHEN redeeming all at maturity THEN transaction succeeds and emits RedeemedByPartition", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
 
         await asset.connect(signer_C).issueByPartition({
           partition: DEFAULT_PARTITION,
@@ -293,7 +293,7 @@ describe("Bond Tests", () => {
       it("GIVEN token holder WHEN getting principal For THEN succeeds", async () => {
         await deploySecurityFixture(true);
 
-        await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
 
         await asset.connect(signer_C).issueByPartition({
           partition: DEFAULT_PARTITION,
@@ -318,7 +318,7 @@ describe("Bond Tests", () => {
 
       it("GIVEN a new diamond contract with multi-partition WHEN redeemAtMaturityByPartition is called THEN transaction success", async () => {
         await deploySecurityFixture(true);
-        await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
         await asset.connect(signer_C).issueByPartition({
           partition: _PARTITION_ID,
           tokenHolder: signer_A.address,
@@ -335,7 +335,7 @@ describe("Bond Tests", () => {
 
       it("GIVEN a new diamond contract with multi-partition WHEN redeemAtMaturityByPartition is called THEN transaction success", async () => {
         await deploySecurityFixture(true);
-        await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
         await asset.connect(signer_C).issueByPartition({
           partition: _PARTITION_ID,
           tokenHolder: signer_A.address,

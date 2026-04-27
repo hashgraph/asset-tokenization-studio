@@ -83,8 +83,8 @@ library BondStorageWrapper {
         BondDataStorage storage bs = _bondStorage();
         bondDetails_ = IBondTypes.BondDetailsData({
             currency: bs.currency,
-            nominalValue: NominalValueStorageWrapper._getNominalValue(),
-            nominalValueDecimals: NominalValueStorageWrapper._getNominalValueDecimals(),
+            nominalValue: NominalValueStorageWrapper.getNominalValue(),
+            nominalValueDecimals: NominalValueStorageWrapper.getNominalValueDecimals(),
             startingDate: bs.startingDate,
             maturityDate: bs.maturityDate
         });

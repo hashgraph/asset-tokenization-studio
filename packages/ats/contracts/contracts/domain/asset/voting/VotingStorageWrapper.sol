@@ -101,7 +101,7 @@ library VotingStorageWrapper {
             votingFor_.tokenBalance,
             votingFor_.decimals,
             votingFor_.recordDateReached
-        ) = getSnapshotBalanceForIfDateReached(
+        ) = _getSnapshotBalanceForIfDateReached(
             registeredVoting.voting.recordDate,
             registeredVoting.snapshotId,
             account
@@ -138,7 +138,7 @@ library VotingStorageWrapper {
         return ERC1410StorageWrapper.getTotalTokenHolders();
     }
 
-    function getSnapshotBalanceForIfDateReached(
+    function _getSnapshotBalanceForIfDateReached(
         uint256 date,
         uint256 snapshotId,
         address account

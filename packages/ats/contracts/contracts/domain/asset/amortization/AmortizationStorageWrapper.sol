@@ -257,8 +257,8 @@ library AmortizationStorageWrapper {
             ? SnapshotsStorageWrapper.abafAtSnapshot(registeredAmortization.snapshotId)
             : amortizationFor_.abafAtSnapshot = AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp);
 
-        amortizationFor_.nominalValue = NominalValueStorageWrapper._getNominalValue();
-        amortizationFor_.nominalValueDecimals = NominalValueStorageWrapper._getNominalValueDecimals();
+        amortizationFor_.nominalValue = NominalValueStorageWrapper.getNominalValue();
+        amortizationFor_.nominalValueDecimals = NominalValueStorageWrapper.getNominalValueDecimals();
 
         if (holdInfo.holdId == 0) return amortizationFor_;
 

@@ -72,11 +72,11 @@ describe("Allowance Facet Tests", () => {
       assetSignerD = await ethers.getContractAt("IAsset", diamond.target, signer_D);
 
       await executeRbac(asset, [
-        { role: ATS_ROLES._ISSUER_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES._KYC_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES._SSI_MANAGER_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES._PAUSER_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES._CONTROL_LIST_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.ISSUER_ROLE, members: [signer_B.address] },
+        { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
+        { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.PAUSER_ROLE, members: [signer_B.address] },
+        { role: ATS_ROLES.CONTROL_LIST_ROLE, members: [signer_A.address] },
       ]);
 
       await asset.addIssuer(signer_D.address);
@@ -205,7 +205,7 @@ describe("Allowance Facet Tests", () => {
       });
 
       it("GIVEN a recovered sender WHEN approve THEN reverts with WalletRecovered", async () => {
-        await asset.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
         await asset.recoveryAddress(signer_C.address, signer_A.address, ADDRESS_ZERO);
 
         expect(await asset.isAddressRecovered(signer_C.address)).to.be.true;
@@ -217,7 +217,7 @@ describe("Allowance Facet Tests", () => {
       });
 
       it("GIVEN a recovered spender WHEN approve THEN reverts with WalletRecovered", async () => {
-        await asset.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
         await asset.recoveryAddress(signer_D.address, signer_A.address, ADDRESS_ZERO);
 
         expect(await asset.isAddressRecovered(signer_D.address)).to.be.true;

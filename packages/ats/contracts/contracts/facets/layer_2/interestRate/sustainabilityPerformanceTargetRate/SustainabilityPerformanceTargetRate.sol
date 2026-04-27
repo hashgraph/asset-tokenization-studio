@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ISustainabilityPerformanceTargetRate } from "./ISustainabilityPerformanceTargetRate.sol";
-import { _INTEREST_RATE_MANAGER_ROLE } from "../../../../constants/roles.sol";
+import { INTEREST_RATE_MANAGER_ROLE } from "../../../../constants/roles.sol";
 import { InterestRateStorageWrapper } from "../../../../domain/asset/InterestRateStorageWrapper.sol";
 import { ProceedRecipientsStorageWrapper } from "../../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
@@ -30,7 +30,7 @@ contract SustainabilityPerformanceTargetRate is ISustainabilityPerformanceTarget
 
     function setInterestRate(
         InterestRate calldata _newInterestRate
-    ) external onlyUnpaused onlyRole(_INTEREST_RATE_MANAGER_ROLE) {
+    ) external onlyUnpaused onlyRole(INTEREST_RATE_MANAGER_ROLE) {
         InterestRateStorageWrapper.setSPTInterestRate(_newInterestRate);
         emit InterestRateUpdated(EvmAccessors.getMsgSender(), _newInterestRate);
     }
@@ -41,7 +41,7 @@ contract SustainabilityPerformanceTargetRate is ISustainabilityPerformanceTarget
     )
         external
         onlyUnpaused
-        onlyRole(_INTEREST_RATE_MANAGER_ROLE)
+        onlyRole(INTEREST_RATE_MANAGER_ROLE)
         onlyValidEqualLength(_newImpactData.length, _projects.length)
     {
         for (uint256 index = 0; index < _newImpactData.length; index++) {

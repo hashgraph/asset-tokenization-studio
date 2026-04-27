@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ICap } from "./ICap.sol";
-import { _CAP_ROLE } from "../../../constants/roles.sol";
+import { CAP_ROLE } from "../../../constants/roles.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../../domain/core/CapStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
@@ -27,7 +27,7 @@ abstract contract Cap is ICap, Modifiers {
         external
         override
         onlyUnpaused
-        onlyRole(_CAP_ROLE)
+        onlyRole(CAP_ROLE)
         onlyValidNewMaxSupply(maxSupply, TimeTravelStorageWrapper.getBlockTimestamp())
         returns (bool success_)
     {
@@ -42,7 +42,7 @@ abstract contract Cap is ICap, Modifiers {
         external
         override
         onlyUnpaused
-        onlyRole(_CAP_ROLE)
+        onlyRole(CAP_ROLE)
         onlyValidNewMaxSupplyByPartition(_partition, _maxSupply, TimeTravelStorageWrapper.getBlockTimestamp())
         returns (bool success_)
     {

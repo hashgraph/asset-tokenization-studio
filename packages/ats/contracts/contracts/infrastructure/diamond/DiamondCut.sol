@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IDiamondCut } from "../proxy/IDiamondCut.sol";
 import { ResolverProxyUnstructured } from "../proxy/ResolverProxyUnstructured.sol";
 import { IBusinessLogicResolver } from "./IBusinessLogicResolver.sol";
-import { _DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
 import { ResolverProxyStorageWrapper, ResolverProxyStorage } from "../../domain/core/ResolverProxyStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
@@ -14,7 +14,7 @@ abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
         AccessControlStorageWrapper.checkRole(_role, EvmAccessors.getMsgSender());
         _;
     }
-    function updateConfigVersion(uint256 _newVersion) external override onlyRole(_DEFAULT_ADMIN_ROLE) {
+    function updateConfigVersion(uint256 _newVersion) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         ResolverProxyStorage storage ds = ResolverProxyStorageWrapper.resolverProxyStorage();
         ds.resolver.checkResolverProxyConfigurationRegistered(ds.resolverProxyConfigurationId, _newVersion);
         _updateVersion(ds, _newVersion);
@@ -23,7 +23,7 @@ abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
     function updateConfig(
         bytes32 _newConfigurationId,
         uint256 _newVersion
-    ) external override onlyRole(_DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         ResolverProxyStorage storage ds = ResolverProxyStorageWrapper.resolverProxyStorage();
         ds.resolver.checkResolverProxyConfigurationRegistered(_newConfigurationId, _newVersion);
         _updateConfigId(ds, _newConfigurationId);
@@ -34,7 +34,7 @@ abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
         IBusinessLogicResolver _newResolver,
         bytes32 _newConfigurationId,
         uint256 _newVersion
-    ) external override onlyRole(_DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         _newResolver.checkResolverProxyConfigurationRegistered(_newConfigurationId, _newVersion);
         ResolverProxyStorage storage ds = ResolverProxyStorageWrapper.resolverProxyStorage();
         _updateResolver(ds, _newResolver);

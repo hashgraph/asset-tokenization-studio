@@ -59,18 +59,18 @@ describe("AmortizationFacet", () => {
 
   describe("setAmortization", () => {
     beforeEach(async () => {
-      await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, user2.address);
     });
 
     it("GIVEN account without CORPORATE_ACTION_ROLE WHEN setAmortization THEN reverts with AccountHasNoRole", async () => {
       const data = await makeAmortizationData();
       await expect(asset.connect(user3).setAmortization(data))
         .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
-        .withArgs(user3.address, ATS_ROLES._CORPORATE_ACTION_ROLE);
+        .withArgs(user3.address, ATS_ROLES.CORPORATE_ACTION_ROLE);
     });
 
     it("GIVEN paused token WHEN setAmortization THEN reverts with TokenIsPaused", async () => {
-      await asset.grantRole(ATS_ROLES._PAUSER_ROLE, user1.address);
+      await asset.grantRole(ATS_ROLES.PAUSER_ROLE, user1.address);
       await asset.connect(user1).pause();
 
       const data = await makeAmortizationData();
@@ -161,7 +161,7 @@ describe("AmortizationFacet", () => {
     let amortizationData: Awaited<ReturnType<typeof makeAmortizationData>>;
 
     beforeEach(async () => {
-      await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, user2.address);
       amortizationData = await makeAmortizationData();
       await asset.connect(user2).setAmortization(amortizationData);
     });
@@ -169,11 +169,11 @@ describe("AmortizationFacet", () => {
     it("GIVEN account without CORPORATE_ACTION_ROLE WHEN cancelAmortization THEN reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(user3).cancelAmortization(1))
         .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
-        .withArgs(user3.address, ATS_ROLES._CORPORATE_ACTION_ROLE);
+        .withArgs(user3.address, ATS_ROLES.CORPORATE_ACTION_ROLE);
     });
 
     it("GIVEN paused token WHEN cancelAmortization THEN reverts with TokenIsPaused", async () => {
-      await asset.grantRole(ATS_ROLES._PAUSER_ROLE, user1.address);
+      await asset.grantRole(ATS_ROLES.PAUSER_ROLE, user1.address);
 
       await asset.connect(user1).pause();
 
@@ -205,8 +205,8 @@ describe("AmortizationFacet", () => {
     });
 
     it("GIVEN amortization with one active hold WHEN cancelAmortization THEN reverts with AmortizationHasActiveHolds", async () => {
-      await asset.grantRole(ATS_ROLES._AMORTIZATION_ROLE, user2.address);
-      await asset.grantRole(ATS_ROLES._ISSUER_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.AMORTIZATION_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, user2.address);
 
       await asset.connect(user2).issueByPartition({
         partition: DEFAULT_PARTITION,
@@ -222,8 +222,8 @@ describe("AmortizationFacet", () => {
     });
 
     it("GIVEN amortization with hold released WHEN cancelAmortization THEN emits AmortizationCancelled", async () => {
-      await asset.grantRole(ATS_ROLES._AMORTIZATION_ROLE, user2.address);
-      await asset.grantRole(ATS_ROLES._ISSUER_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.AMORTIZATION_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, user2.address);
 
       await asset.connect(user2).issueByPartition({
         partition: DEFAULT_PARTITION,
@@ -256,7 +256,7 @@ describe("AmortizationFacet", () => {
     });
 
     it("GIVEN 2 amortizations with one cancelled WHEN getAmortizationsCount THEN returns 2", async () => {
-      await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, user2.address);
 
       const data1 = await makeAmortizationData(400, 1200);
       await asset.connect(user2).setAmortization(data1);
@@ -294,8 +294,8 @@ describe("AmortizationFacet", () => {
 
   describe("getAmortizationHolders", () => {
     beforeEach(async () => {
-      await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, user2.address);
-      await asset.grantRole(ATS_ROLES._ISSUER_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, user2.address);
     });
     it("GIVEN invalid amortization ID WHEN getAmortizationHolders THEN reverts with WrongIndexForAction", async () => {
       await expect(asset.getAmortizationHolders(999, 0, 10)).to.be.revertedWithCustomError(
@@ -394,8 +394,8 @@ describe("AmortizationFacet", () => {
 
   describe("Post-recordDate — with snapshot", () => {
     beforeEach(async () => {
-      await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, user2.address);
-      await asset.grantRole(ATS_ROLES._ISSUER_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, user2.address);
     });
 
     it("GIVEN 2 holders and snapshot triggered WHEN querying THEN getTotalAmortizationHolders=2, getAmortizationHolders contains both addresses, getAmortizationFor for each holder has correct tokenBalance", async () => {
@@ -536,8 +536,8 @@ describe("AmortizationFacet", () => {
 
   describe("Post-recordDate — without snapshot (snapshotId == 0)", () => {
     it("GIVEN recordDate passed but no snapshot triggered WHEN getAmortizationFor, getAmortizationHolders and getTotalAmortizationHolders THEN uses live balances and holders", async () => {
-      await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, user2.address);
-      await asset.grantRole(ATS_ROLES._ISSUER_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, user2.address);
 
       const data = await makeAmortizationData();
 
@@ -578,9 +578,9 @@ describe("AmortizationFacet", () => {
 
   describe("setAmortizationHold", () => {
     beforeEach(async () => {
-      await asset.grantRole(ATS_ROLES._AMORTIZATION_ROLE, user2.address);
-      await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, user2.address);
-      await asset.grantRole(ATS_ROLES._ISSUER_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.AMORTIZATION_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, user2.address);
     });
 
     it("GIVEN valid amortizationID and tokenHolder with balance WHEN setAmortizationHold THEN creates hold, emits AmortizationHoldSet", async () => {
@@ -677,11 +677,11 @@ describe("AmortizationFacet", () => {
 
       await expect(asset.connect(user3).setAmortizationHold(1, deployer.address, BigInt(TOKENS_TO_REDEEM)))
         .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
-        .withArgs(user3.address, ATS_ROLES._AMORTIZATION_ROLE);
+        .withArgs(user3.address, ATS_ROLES.AMORTIZATION_ROLE);
     });
 
     it("GIVEN paused token WHEN setAmortizationHold THEN reverts with TokenIsPaused", async () => {
-      await asset.grantRole(ATS_ROLES._PAUSER_ROLE, user1.address);
+      await asset.grantRole(ATS_ROLES.PAUSER_ROLE, user1.address);
 
       const data = await makeAmortizationData();
 
@@ -796,9 +796,9 @@ describe("AmortizationFacet", () => {
     const holdAmount = BigInt(TOKENS_TO_REDEEM);
 
     beforeEach(async () => {
-      await asset.grantRole(ATS_ROLES._AMORTIZATION_ROLE, user2.address);
-      await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, user2.address);
-      await asset.grantRole(ATS_ROLES._ISSUER_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.AMORTIZATION_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, user2.address);
 
       amortizationData = await makeAmortizationData();
 
@@ -818,11 +818,11 @@ describe("AmortizationFacet", () => {
     it("GIVEN account without AMORTIZATION_ROLE WHEN releaseAmortizationHold THEN reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(user3).releaseAmortizationHold(1, deployer.address))
         .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
-        .withArgs(user3.address, ATS_ROLES._AMORTIZATION_ROLE);
+        .withArgs(user3.address, ATS_ROLES.AMORTIZATION_ROLE);
     });
 
     it("GIVEN paused token WHEN releaseAmortizationHold THEN reverts with TokenIsPaused", async () => {
-      await asset.grantRole(ATS_ROLES._PAUSER_ROLE, user1.address);
+      await asset.grantRole(ATS_ROLES.PAUSER_ROLE, user1.address);
       await asset.connect(user1).pause();
 
       await expect(asset.connect(user2).releaseAmortizationHold(1, deployer.address)).to.be.revertedWithCustomError(
@@ -865,10 +865,10 @@ describe("AmortizationFacet", () => {
 
   describe("Post-adjustBalance — hold + snapshot + balance adjustment", () => {
     it("GIVEN hold created after snapshot WHEN adjustBalances(2, 0) called THEN tokenHeldAmount doubles, abafAtHold updates, abafAtSnapshot preserved", async () => {
-      await asset.grantRole(ATS_ROLES._AMORTIZATION_ROLE, user2.address);
-      await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, user2.address);
-      await asset.grantRole(ATS_ROLES._ISSUER_ROLE, user2.address);
-      await asset.grantRole(ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.AMORTIZATION_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.ADJUSTMENT_BALANCE_ROLE, user2.address);
 
       const data = await makeAmortizationData();
 
@@ -915,9 +915,9 @@ describe("AmortizationFacet", () => {
 
   describe("getAmortizationActiveHolders", () => {
     beforeEach(async () => {
-      await asset.grantRole(ATS_ROLES._AMORTIZATION_ROLE, user2.address);
-      await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, user2.address);
-      await asset.grantRole(ATS_ROLES._ISSUER_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.AMORTIZATION_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, user2.address);
     });
 
     it("GIVEN invalid amortization ID WHEN getAmortizationActiveHolders THEN reverts with WrongIndexForAction", async () => {
@@ -1064,9 +1064,9 @@ describe("AmortizationFacet", () => {
 
   describe("getTotalAmortizationActiveHolders", () => {
     beforeEach(async () => {
-      await asset.grantRole(ATS_ROLES._AMORTIZATION_ROLE, user2.address);
-      await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, user2.address);
-      await asset.grantRole(ATS_ROLES._ISSUER_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.AMORTIZATION_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, user2.address);
     });
 
     it("GIVEN invalid amortization ID WHEN getTotalAmortizationActiveHolders THEN reverts with WrongIndexForAction", async () => {
@@ -1149,9 +1149,9 @@ describe("AmortizationFacet", () => {
 
   describe("getTotalHoldByAmortizationId", () => {
     beforeEach(async () => {
-      await asset.grantRole(ATS_ROLES._AMORTIZATION_ROLE, user2.address);
-      await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, user2.address);
-      await asset.grantRole(ATS_ROLES._ISSUER_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.AMORTIZATION_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, user2.address);
     });
 
     it("GIVEN invalid amortization ID WHEN getTotalHoldByAmortizationId THEN reverts with WrongIndexForAction", async () => {
@@ -1249,7 +1249,7 @@ describe("AmortizationFacet", () => {
 
   describe("getActiveAmortizationIds", () => {
     beforeEach(async () => {
-      await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, user2.address);
     });
 
     it("GIVEN no amortizations WHEN getActiveAmortizationIds THEN returns empty array", async () => {
@@ -1312,7 +1312,7 @@ describe("AmortizationFacet", () => {
 
   describe("getTotalActiveAmortizationIds", () => {
     beforeEach(async () => {
-      await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, user2.address);
     });
 
     it("GIVEN no amortizations WHEN getTotalActiveAmortizationIds THEN returns 0", async () => {
@@ -1360,8 +1360,8 @@ describe("AmortizationFacet", () => {
       const fixture = await loadFixture(deployMultiPartitionLoanFixture);
       mpAsset = fixture.mpAsset;
 
-      await mpAsset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, deployer.address);
-      await mpAsset.grantRole(ATS_ROLES._AMORTIZATION_ROLE, deployer.address);
+      await mpAsset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, deployer.address);
+      await mpAsset.grantRole(ATS_ROLES.AMORTIZATION_ROLE, deployer.address);
     });
 
     const amortizationData = {

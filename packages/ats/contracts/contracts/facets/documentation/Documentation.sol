@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IDocumentation } from "./IDocumentation.sol";
-import { _DOCUMENTER_ROLE } from "../../constants/roles.sol";
+import { DOCUMENTER_ROLE } from "../../constants/roles.sol";
 import { DocumentationStorageWrapper } from "../../domain/core/DocumentationStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
@@ -26,7 +26,7 @@ abstract contract Documentation is IDocumentation, Modifiers {
     /**
      * @notice Attaches a new document to the token or updates the URI and hash of an
      *         existing one.
-     * @dev Restricted to accounts holding `_DOCUMENTER_ROLE` on an unpaused token.
+     * @dev Restricted to accounts holding `DOCUMENTER_ROLE` on an unpaused token.
      *      If `_name` has no prior entry, it is appended to the enumerable set.
      *      On update, only the `Document` record is overwritten. Emits {DocumentUpdated}.
      * @param _name         Unique `bytes32` identifier for the document. Must not be zero.
@@ -41,7 +41,7 @@ abstract contract Documentation is IDocumentation, Modifiers {
         external
         override
         onlyUnpaused
-        onlyRole(_DOCUMENTER_ROLE)
+        onlyRole(DOCUMENTER_ROLE)
         notEmptyName(_name)
         notEmptyURI(_uri)
         notEmptyHash(_documentHash)
@@ -57,7 +57,7 @@ abstract contract Documentation is IDocumentation, Modifiers {
 
     /**
      * @notice Removes an existing document from the token.
-     * @dev Restricted to accounts holding `_DOCUMENTER_ROLE` on an unpaused token.
+     * @dev Restricted to accounts holding `DOCUMENTER_ROLE` on an unpaused token.
      *      Uses a swap-and-pop strategy to remove the entry from `docNames` in O(1).
      *      Reverts with {DocumentDoesNotExist} if `_name` is not registered.
      *      Emits {DocumentRemoved}.
@@ -65,7 +65,7 @@ abstract contract Documentation is IDocumentation, Modifiers {
      */
     function removeDocument(
         bytes32 _name
-    ) external override onlyUnpaused onlyRole(_DOCUMENTER_ROLE) documentExists(_name) {
+    ) external override onlyUnpaused onlyRole(DOCUMENTER_ROLE) documentExists(_name) {
         (string memory uri, bytes32 docHash) = DocumentationStorageWrapper.removeDocumentEntry(_name);
         emit DocumentRemoved(_name, uri, docHash);
     }

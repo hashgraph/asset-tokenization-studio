@@ -30,8 +30,8 @@ describe("Pause Tests", () => {
     await externalPauseMock.waitForDeployment();
 
     // Add external pause to the token
-    await asset.connect(base.deployer).grantRole(ATS_ROLES._PAUSER_ROLE, base.deployer.address);
-    await asset.connect(base.deployer).grantRole(ATS_ROLES._PAUSE_MANAGER_ROLE, base.deployer.address);
+    await asset.connect(base.deployer).grantRole(ATS_ROLES.PAUSER_ROLE, base.deployer.address);
+    await asset.connect(base.deployer).grantRole(ATS_ROLES.PAUSE_MANAGER_ROLE, base.deployer.address);
     await asset.connect(base.deployer).addExternalPause(externalPauseMock.target, {
       gasLimit: GAS_LIMIT.high,
     });
@@ -57,7 +57,7 @@ describe("Pause Tests", () => {
     // Granting Role and Pause
     await grantRoleAndPauseToken(
       asset,
-      ATS_ROLES._PAUSER_ROLE,
+      ATS_ROLES.PAUSER_ROLE,
       deployer,
       unknownSigner,
       await unknownSigner.getAddress(),
@@ -68,7 +68,7 @@ describe("Pause Tests", () => {
   });
 
   it("GIVEN an unpause Token WHEN unpause THEN transaction fails with TokenIsUnpaused", async () => {
-    await asset.connect(deployer).grantRole(ATS_ROLES._PAUSER_ROLE, await unknownSigner.getAddress());
+    await asset.connect(deployer).grantRole(ATS_ROLES.PAUSER_ROLE, await unknownSigner.getAddress());
 
     // unpause fails
     await expect(asset.connect(unknownSigner).unpause()).to.be.revertedWithCustomError(asset, "TokenIsUnpaused");
@@ -76,7 +76,7 @@ describe("Pause Tests", () => {
 
   it("GIVEN an account with pause role WHEN pause and unpause THEN transaction succeeds", async () => {
     // Granting Role
-    await asset.connect(deployer).grantRole(ATS_ROLES._PAUSER_ROLE, await unknownSigner.getAddress());
+    await asset.connect(deployer).grantRole(ATS_ROLES.PAUSER_ROLE, await unknownSigner.getAddress());
 
     // PAUSE
     await expect(asset.connect(unknownSigner).pause())

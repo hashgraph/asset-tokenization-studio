@@ -87,46 +87,46 @@ describe("ERC3643 Tests", () => {
 
       await executeRbac(asset, [
         {
-          role: ATS_ROLES._PAUSER_ROLE,
+          role: ATS_ROLES.PAUSER_ROLE,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES._ISSUER_ROLE,
+          role: ATS_ROLES.ISSUER_ROLE,
           members: [signer_C.address],
         },
         {
-          role: ATS_ROLES._KYC_ROLE,
+          role: ATS_ROLES.KYC_ROLE,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES._SSI_MANAGER_ROLE,
+          role: ATS_ROLES.SSI_MANAGER_ROLE,
           members: [signer_A.address],
         },
         {
-          role: ATS_ROLES._CLEARING_ROLE,
+          role: ATS_ROLES.CLEARING_ROLE,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES._CLEARING_VALIDATOR_ROLE,
+          role: ATS_ROLES.CLEARING_VALIDATOR_ROLE,
           members: [signer_A.address],
         },
         {
-          role: ATS_ROLES._AGENT_ROLE,
+          role: ATS_ROLES.AGENT_ROLE,
           members: [signer_A.address],
         },
         {
-          role: ATS_ROLES._TREX_OWNER_ROLE,
+          role: ATS_ROLES.TREX_OWNER_ROLE,
           members: [signer_A.address],
         },
       ]);
 
-      await asset.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
       await asset.addIssuer(signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_F.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
-      await asset.grantRole(ATS_ROLES._FREEZE_MANAGER_ROLE, signer_A.address);
-      await asset.grantRole(ATS_ROLES._PAUSER_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.FREEZE_MANAGER_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.PAUSER_ROLE, signer_A.address);
     }
 
     beforeEach(async () => {
@@ -214,7 +214,7 @@ describe("ERC3643 Tests", () => {
         it("GIVEN an account with snapshot role WHEN takeSnapshot and Freeze THEN transaction succeeds", async () => {
           const AMOUNT = 10;
 
-          await asset.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_A.address);
+          await asset.connect(signer_A).grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_A.address);
 
           await asset.connect(signer_A).issueByPartition({
             partition: DEFAULT_PARTITION,
@@ -266,7 +266,7 @@ describe("ERC3643 Tests", () => {
         });
 
         it("GIVEN frozen tokens WHEN querying historical snapshot THEN balance and frozen amounts are tracked separately", async () => {
-          await asset.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_A.address);
+          await asset.connect(signer_A).grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_A.address);
 
           await asset.issueByPartition({
             partition: DEFAULT_PARTITION,
@@ -333,11 +333,11 @@ describe("ERC3643 Tests", () => {
 
         await executeRbac(newasset, [
           {
-            role: ATS_ROLES._FREEZE_MANAGER_ROLE,
+            role: ATS_ROLES.FREEZE_MANAGER_ROLE,
             members: [signer_A.address],
           },
           {
-            role: ATS_ROLES._CONTROL_LIST_ROLE,
+            role: ATS_ROLES.CONTROL_LIST_ROLE,
             members: [signer_A.address],
           },
         ]);
@@ -606,20 +606,19 @@ describe("ERC3643 Tests", () => {
 
         await executeRbac(newasset, [
           {
-            role: ATS_ROLES._ISSUER_ROLE,
+            role: ATS_ROLES.ISSUER_ROLE,
             members: [signer_A.address],
           },
-          { role: ATS_ROLES._KYC_ROLE, members: [signer_B.address] },
+          { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
         ]);
 
-        const erc3643NoCompliance = await ethers.getContractAt("IERC3643", newTokenFixture.diamond.target);
         const kycNoCompliance = await ethers.getContractAt("Kyc", newTokenFixture.diamond.target, signer_B);
         const erc20NoCompliance = await ethers.getContractAt("Transfer", newTokenFixture.diamond.target, signer_E);
         const ssiNoCompliance = await ethers.getContractAt("SsiManagement", newTokenFixture.diamond.target);
 
-        // Grant ATS_ROLES._SSI_MANAGER_ROLE to signer_A.address first, then add signer_E.address as an issuer
+        // Grant ATS_ROLES.SSI_MANAGER_ROLE to signer_A.address first, then add signer_E.address as an issuer
         const accessControlNoCompliance = await ethers.getContractAt("AccessControl", newTokenFixture.diamond.target);
-        await accessControlNoCompliance.grantRole(ATS_ROLES._SSI_MANAGER_ROLE, signer_A.address);
+        await accessControlNoCompliance.grantRole(ATS_ROLES.SSI_MANAGER_ROLE, signer_A.address);
         await ssiNoCompliance.addIssuer(signer_E.address);
         await kycNoCompliance.grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
         await kycNoCompliance.grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
@@ -660,21 +659,20 @@ describe("ERC3643 Tests", () => {
 
         await executeRbac(newasset, [
           {
-            role: ATS_ROLES._ISSUER_ROLE,
+            role: ATS_ROLES.ISSUER_ROLE,
             members: [signer_A.address],
           },
-          { role: ATS_ROLES._KYC_ROLE, members: [signer_B.address] },
+          { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
         ]);
         // Deploy token without compliance contract (zero address)
 
-        const erc3643NoCompliance = await ethers.getContractAt("IERC3643", newTokenFixture.diamond.target);
         const kycNoCompliance = await ethers.getContractAt("Kyc", newTokenFixture.diamond.target, signer_B);
         const erc20NoCompliance = await ethers.getContractAt("Transfer", newTokenFixture.diamond.target, signer_E);
         const ssiNoCompliance = await ethers.getContractAt("SsiManagement", newTokenFixture.diamond.target);
 
-        // Grant ATS_ROLES._SSI_MANAGER_ROLE to signer_A.address first, then add signer_E.address as an issuer
+        // Grant ATS_ROLES.SSI_MANAGER_ROLE to signer_A.address first, then add signer_E.address as an issuer
         const accessControlNoCompliance = await ethers.getContractAt("AccessControl", newTokenFixture.diamond.target);
-        await accessControlNoCompliance.grantRole(ATS_ROLES._SSI_MANAGER_ROLE, signer_A.address);
+        await accessControlNoCompliance.grantRole(ATS_ROLES.SSI_MANAGER_ROLE, signer_A.address);
         await ssiNoCompliance.addIssuer(signer_E.address);
         await kycNoCompliance.grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
         await kycNoCompliance.grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
@@ -1085,6 +1083,83 @@ describe("ERC3643 Tests", () => {
     });
 
     describe("Batch Operations", () => {
+      describe("batchForcedTransfer", () => {
+        const transferAmount = AMOUNT / 2;
+
+        beforeEach(async () => {
+          await asset.mint(signer_F.address, transferAmount);
+          await asset.mint(signer_D.address, transferAmount);
+          await asset.grantRole(ATS_ROLES.CONTROLLER_ROLE, signer_A.address);
+        });
+
+        it("GIVEN controller role WHEN batchForcedTransfer THEN transaction succeeds", async () => {
+          const fromList = [signer_F.address, signer_D.address];
+          const toList = [signer_E.address, signer_E.address];
+          const amounts = [transferAmount, transferAmount];
+
+          const initialBalanceF = await asset.balanceOf(signer_F.address);
+          const initialBalanceD = await asset.balanceOf(signer_D.address);
+          const initialBalanceE = await asset.balanceOf(signer_E.address);
+
+          await expect(asset.connect(signer_A).batchForcedTransfer(fromList, toList, amounts)).to.not.be.reverted;
+
+          const finalBalanceF = await asset.balanceOf(signer_F.address);
+          const finalBalanceD = await asset.balanceOf(signer_D.address);
+          const finalBalanceE = await asset.balanceOf(signer_E.address);
+
+          expect(finalBalanceF).to.equal(initialBalanceF - BigInt(transferAmount));
+          expect(finalBalanceD).to.equal(initialBalanceD - BigInt(transferAmount));
+          expect(finalBalanceE).to.equal(initialBalanceE + BigInt(transferAmount * 2));
+        });
+
+        it("GIVEN account without controller role WHEN batchForcedTransfer THEN transaction fails with AccountHasNoRole", async () => {
+          const fromList = [signer_F.address];
+          const toList = [signer_E.address];
+          const amounts = [transferAmount];
+
+          // signer_B does not have ATS_ROLES.CONTROLLER_ROLE
+          await expect(
+            asset.connect(signer_B).batchForcedTransfer(fromList, toList, amounts),
+          ).to.be.revertedWithCustomError(asset, "AccountHasNoRoles");
+        });
+
+        it("GIVEN an invalid input amounts array THEN transaction fails with InputAmountsArrayLengthMismatch", async () => {
+          const mintAmount = AMOUNT / 2;
+          const toList = [signer_D.address];
+          const fromList = [signer_F.address, signer_D.address];
+          const amounts = [mintAmount, mintAmount];
+
+          await expect(asset.batchForcedTransfer(fromList, toList, amounts)).to.be.revertedWithCustomError(
+            asset,
+            "InputAmountsArrayLengthMismatch",
+          );
+        });
+
+        it("GIVEN toList and amounts with different lengths WHEN batchForcedTransfer THEN transaction fails with InputAmountsArrayLengthMismatch", async () => {
+          const mintAmount = AMOUNT / 2;
+          const fromList = [signer_A.address, signer_F.address];
+          const toList = [signer_D.address, signer_E.address];
+          const amounts = [mintAmount];
+
+          await expect(asset.batchForcedTransfer(fromList, toList, amounts)).to.be.revertedWithCustomError(
+            asset,
+            "InputAmountsArrayLengthMismatch",
+          );
+        });
+
+        it("GIVEN a paused token WHEN batchForcedTransfer THEN transaction fails with TokenIsPaused", async () => {
+          await asset.pause();
+
+          const fromList = [signer_F.address];
+          const toList = [signer_E.address];
+          const amounts = [transferAmount];
+
+          await expect(
+            asset.connect(signer_A).batchForcedTransfer(fromList, toList, amounts),
+          ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        });
+      });
+
       describe("batchSetAddressFrozen", () => {
         const mintAmount = AMOUNT;
         const transferAmount = AMOUNT / 2;
@@ -1158,7 +1233,7 @@ describe("ERC3643 Tests", () => {
           expect(await asset.balanceOf(signer_E.address)).to.equal(mintAmount - transferAmount);
         });
 
-        it("GIVEN an account without ATS_ROLES._FREEZE_MANAGER_ROLE WHEN batchSetAddressFrozen THEN transaction fails", async () => {
+        it("GIVEN an account without ATS_ROLES.FREEZE_MANAGER_ROLE WHEN batchSetAddressFrozen THEN transaction fails", async () => {
           const userAddresses = [signer_D.address, signer_E.address];
           const freezeFlags = [true, true];
 
@@ -1185,7 +1260,7 @@ describe("ERC3643 Tests", () => {
           await asset.mint(signer_E.address, freezeAmount);
         });
 
-        it("GIVEN ATS_ROLES._FREEZE_MANAGER_ROLE WHEN batchFreezePartialTokens THEN tokens are frozen successfully", async () => {
+        it("GIVEN ATS_ROLES.FREEZE_MANAGER_ROLE WHEN batchFreezePartialTokens THEN tokens are frozen successfully", async () => {
           const userAddresses = [signer_D.address, signer_E.address];
           const amounts = [freezeAmount, freezeAmount];
 
@@ -1382,11 +1457,11 @@ describe("ERC3643 Tests", () => {
       const adjustDecimals = 2;
 
       async function setPreBalanceAdjustment() {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ADJUSTMENT_BALANCE_ROLE, signer_C.address);
 
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CONTROLLER_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROLLER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_B.address);
 
         await asset.setMaxSupply(maxSupply_Original);
         await asset.setMaxSupplyByPartition(DEFAULT_PARTITION, maxSupply_Partition_1_Original);
@@ -1451,7 +1526,7 @@ describe("ERC3643 Tests", () => {
 
       it("GIVEN frozen tokens WHEN ABAF changes and freezing again THEN frozen amount adjustment is applied", async () => {
         // Grant necessary role for adjustBalances and connect to signer_A
-        await asset.grantRole(ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ADJUSTMENT_BALANCE_ROLE, signer_A.address);
         const assetA = asset.connect(signer_A);
 
         const amount = 1000;
@@ -1509,8 +1584,8 @@ describe("ERC3643 Tests", () => {
       });
 
       it("GIVEN frozen tokens by partition WHEN checking total balance THEN frozen tokens are included", async () => {
-        await asset.grantRole(ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_A.address);
-        await asset.grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ADJUSTMENT_BALANCE_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_A.address);
 
         const amount = 1000;
         const frozenAmount = 300;
@@ -1567,7 +1642,7 @@ describe("ERC3643 Tests", () => {
 
     describe("Recovery", () => {
       it("GIVEN lost wallet with pending locks, holds or clearings THEN recovery fails with CannotRecoverWallet", async () => {
-        await asset.grantRole(ATS_ROLES._LOCKER_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.LOCKER_ROLE, signer_A.address);
         const amount = 1000;
         await asset.issueByPartition({
           partition: DEFAULT_PARTITION,
@@ -1616,7 +1691,7 @@ describe("ERC3643 Tests", () => {
 
       it("GIVEN lost wallet WHEN calling recoveryAddress THEN normal balance and freeze balance and status is successfully transferred", async () => {
         const amount = 1000;
-        await asset.grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.CONTROL_LIST_ROLE, signer_A.address);
         await asset.issueByPartition({
           partition: DEFAULT_PARTITION,
           tokenHolder: signer_E.address,
@@ -1655,8 +1730,8 @@ describe("ERC3643 Tests", () => {
         await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
         await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
         await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
-        await asset.grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
-        await asset.grantRole(ATS_ROLES._LOCKER_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.PROTECTED_PARTITIONS_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.LOCKER_ROLE, signer_A.address);
         await asset.connect(signer_C).authorizeOperator(signer_A.address);
         await asset.connect(signer_C).authorizeOperator(signer_B.address);
         await asset.connect(signer_A).authorizeOperator(signer_C.address);
@@ -1682,7 +1757,7 @@ describe("ERC3643 Tests", () => {
         ).to.be.revertedWithCustomError(asset, "WalletRecovered");
         const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
           ["bytes32", "bytes32"],
-          [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, DEFAULT_PARTITION],
+          [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, DEFAULT_PARTITION],
         );
         const packedDataWithoutPrefix = packedData.slice(2);
 
@@ -2145,17 +2220,17 @@ describe("ERC3643 Tests", () => {
 
       await executeRbac(asset, [
         {
-          role: ATS_ROLES._PAUSER_ROLE,
+          role: ATS_ROLES.PAUSER_ROLE,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES._CLEARING_ROLE,
+          role: ATS_ROLES.CLEARING_ROLE,
           members: [signer_B.address],
         },
       ]);
 
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CONTROLLER_ROLE, signer_A.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROLLER_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
     });
 
     it("GIVEN an account with issuer role WHEN mint THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
@@ -2180,42 +2255,42 @@ describe("ERC3643 Tests", () => {
     });
 
     it("GIVEN an single partition token WHEN recoveryAddress THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
-      await asset.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
       await expect(
         asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO),
       ).to.be.revertedWithCustomError(asset, "NotAllowedInMultiPartitionMode");
     });
 
     describe("Freeze", () => {
-      it("GIVEN an account with ATS_ROLES._FREEZE_MANAGER_ROLE WHEN freezePartialTokens THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
+      it("GIVEN an account with ATS_ROLES.FREEZE_MANAGER_ROLE WHEN freezePartialTokens THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
         await expect(asset.freezePartialTokens(signer_A.address, AMOUNT)).to.be.revertedWithCustomError(
           asset,
           "NotAllowedInMultiPartitionMode",
         );
       });
 
-      it("GIVEN an account with ATS_ROLES._FREEZE_MANAGER_ROLE WHEN unfreezePartialTokens THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
+      it("GIVEN an account with ATS_ROLES.FREEZE_MANAGER_ROLE WHEN unfreezePartialTokens THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
         await expect(asset.unfreezePartialTokens(signer_A.address, AMOUNT)).to.be.revertedWithCustomError(
           asset,
           "NotAllowedInMultiPartitionMode",
         );
       });
 
-      it("GIVEN an account with ATS_ROLES._FREEZE_MANAGER_ROLE WHEN unfreezePartialTokens THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
+      it("GIVEN an account with ATS_ROLES.FREEZE_MANAGER_ROLE WHEN unfreezePartialTokens THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
         await expect(asset.unfreezePartialTokens(signer_A.address, AMOUNT)).to.be.revertedWithCustomError(
           asset,
           "NotAllowedInMultiPartitionMode",
         );
       });
 
-      it("GIVEN an account with ATS_ROLES._FREEZE_MANAGER_ROLE WHEN batchFreezePartialTokens THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
+      it("GIVEN an account with ATS_ROLES.FREEZE_MANAGER_ROLE WHEN batchFreezePartialTokens THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
         await expect(asset.batchFreezePartialTokens([signer_A.address], [AMOUNT])).to.be.revertedWithCustomError(
           asset,
           "NotAllowedInMultiPartitionMode",
         );
       });
 
-      it("GIVEN an account with ATS_ROLES._FREEZE_MANAGER_ROLE WHEN batchFreezePartialTokens THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
+      it("GIVEN an account with ATS_ROLES.FREEZE_MANAGER_ROLE WHEN batchFreezePartialTokens THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
         await expect(asset.batchUnfreezePartialTokens([signer_A.address], [AMOUNT])).to.be.revertedWithCustomError(
           asset,
           "NotAllowedInMultiPartitionMode",
@@ -2246,19 +2321,19 @@ describe("ERC3643 Tests", () => {
 
       await executeRbac(asset, [
         {
-          role: ATS_ROLES._CONTROLLER_ROLE,
+          role: ATS_ROLES.CONTROLLER_ROLE,
           members: [signer_A.address],
         },
         {
-          role: ATS_ROLES._ISSUER_ROLE,
+          role: ATS_ROLES.ISSUER_ROLE,
           members: [signer_A.address],
         },
         {
-          role: ATS_ROLES._KYC_ROLE,
+          role: ATS_ROLES.KYC_ROLE,
           members: [signer_A.address],
         },
         {
-          role: ATS_ROLES._SSI_MANAGER_ROLE,
+          role: ATS_ROLES.SSI_MANAGER_ROLE,
           members: [signer_A.address],
         },
       ]);

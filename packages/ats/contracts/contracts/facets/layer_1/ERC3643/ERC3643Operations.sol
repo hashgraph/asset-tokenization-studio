@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _CONTROLLER_ROLE, _AGENT_ROLE } from "../../../constants/roles.sol";
+import { CONTROLLER_ROLE, AGENT_ROLE } from "../../../constants/roles.sol";
 import { IERC3643Operations } from "./IERC3643Operations.sol";
 import { IController } from "../../controller/IController.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
@@ -26,8 +26,8 @@ abstract contract ERC3643Operations is IERC3643Operations, Modifiers {
     ) external onlyUnpaused onlyWithoutMultiPartition onlyControllable {
         {
             bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _CONTROLLER_ROLE;
-            roles[1] = _AGENT_ROLE;
+            roles[0] = CONTROLLER_ROLE;
+            roles[1] = AGENT_ROLE;
             AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         }
         TokenCoreOps.burn(_userAddress, _amount);

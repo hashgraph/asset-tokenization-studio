@@ -34,8 +34,8 @@ describe("Proceed Recipients Tests", () => {
 
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
 
-    await asset.grantRole(ATS_ROLES._PROCEED_RECIPIENT_MANAGER_ROLE, signer_A.address);
-    await asset.grantRole(ATS_ROLES._PAUSER_ROLE, signer_A.address);
+    await asset.grantRole(ATS_ROLES.PROCEED_RECIPIENT_MANAGER_ROLE, signer_A.address);
+    await asset.grantRole(ATS_ROLES.PAUSER_ROLE, signer_A.address);
   }
 
   beforeEach(async () => {

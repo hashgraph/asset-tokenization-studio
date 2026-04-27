@@ -6,7 +6,7 @@ import "@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol";
 import { TRexIAccessControl } from "../../interfaces/IRexIAccessControl.sol";
 import "@onchain-id/solidity/contracts/factory/IIdFactory.sol";
 import { TREXFactoryAts } from "../../TREXFactory.sol";
-import { _TREX_OWNER_ROLE, _DEFAULT_ADMIN_ROLE } from "../../interfaces/roles.sol";
+import { TREX_OWNER_ROLE, DEFAULT_ADMIN_ROLE } from "../../interfaces/roles.sol";
 
 // solhint-disable custom-errors
 library TREXBaseDeploymentLib {
@@ -107,8 +107,8 @@ library TREXBaseDeploymentLib {
         }
         _tokenDeployed[_salt] = address(_token);
         // Equivalent to transfer ownership of the token to the new owner
-        TRexIAccessControl(address(_token)).renounceRole(_TREX_OWNER_ROLE);
-        TRexIAccessControl(address(_token)).renounceRole(_DEFAULT_ADMIN_ROLE);
+        TRexIAccessControl(address(_token)).renounceRole(TREX_OWNER_ROLE);
+        TRexIAccessControl(address(_token)).renounceRole(DEFAULT_ADMIN_ROLE);
         (Ownable(_identityRegistry)).transferOwnership(_tokenDetails.owner);
         (Ownable(address(tir))).transferOwnership(_tokenDetails.owner);
         (Ownable(address(ctr))).transferOwnership(_tokenDetails.owner);

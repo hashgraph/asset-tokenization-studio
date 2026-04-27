@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _KYC_ROLE, _INTERNAL_KYC_MANAGER_ROLE } from "../../../constants/roles.sol";
+import { KYC_ROLE, INTERNAL_KYC_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { IKyc } from "./IKyc.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { KycStorageWrapper } from "../../../domain/core/KycStorageWrapper.sol";
@@ -15,17 +15,12 @@ abstract contract Kyc is IKyc, Modifiers {
         KycStorageWrapper.initializeInternalKyc(_internalKycActivated);
     }
 
-    function activateInternalKyc() external onlyUnpaused onlyRole(_INTERNAL_KYC_MANAGER_ROLE) returns (bool success_) {
+    function activateInternalKyc() external onlyUnpaused onlyRole(INTERNAL_KYC_MANAGER_ROLE) returns (bool success_) {
         success_ = KycStorageWrapper.setInternalKyc(true);
         emit InternalKycStatusUpdated(EvmAccessors.getMsgSender(), true);
     }
 
-    function deactivateInternalKyc()
-        external
-        onlyUnpaused
-        onlyRole(_INTERNAL_KYC_MANAGER_ROLE)
-        returns (bool success_)
-    {
+    function deactivateInternalKyc() external onlyUnpaused onlyRole(INTERNAL_KYC_MANAGER_ROLE) returns (bool success_) {
         success_ = KycStorageWrapper.setInternalKyc(false);
         emit InternalKycStatusUpdated(EvmAccessors.getMsgSender(), false);
     }
@@ -41,7 +36,7 @@ abstract contract Kyc is IKyc, Modifiers {
         virtual
         override
         onlyUnpaused
-        onlyRole(_KYC_ROLE)
+        onlyRole(KYC_ROLE)
         notZeroAddress(_account)
         onlyValidKycStatus(KycStatus.NOT_GRANTED, _account)
         onlyThreeValidDates(_validFrom, _validTo, TimeTravelStorageWrapper.getBlockTimestamp())
@@ -54,7 +49,7 @@ abstract contract Kyc is IKyc, Modifiers {
 
     function revokeKyc(
         address _account
-    ) external virtual override onlyUnpaused onlyRole(_KYC_ROLE) notZeroAddress(_account) returns (bool success_) {
+    ) external virtual override onlyUnpaused onlyRole(KYC_ROLE) notZeroAddress(_account) returns (bool success_) {
         success_ = KycStorageWrapper.revokeKyc(_account);
         emit KycRevoked(_account, EvmAccessors.getMsgSender());
     }

@@ -61,19 +61,19 @@ describe("ERC20Votes Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
     await executeRbac(asset, [
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: ATS_ROLES.PAUSER_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._ADJUSTMENT_BALANCE_ROLE,
+        role: ATS_ROLES.ADJUSTMENT_BALANCE_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._CORPORATE_ACTION_ROLE,
+        role: ATS_ROLES.CORPORATE_ACTION_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._ISSUER_ROLE,
+        role: ATS_ROLES.ISSUER_ROLE,
         members: [signer_A.address],
       },
     ]);

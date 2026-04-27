@@ -46,9 +46,9 @@ describe("ExternalControlList Management Tests", () => {
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
-    await base.accessControlFacet.grantRole(ATS_ROLES._CONTROL_LIST_MANAGER_ROLE, signer_A.address);
-    await base.accessControlFacet.grantRole(ATS_ROLES._PAUSER_ROLE, signer_A.address);
-    await base.accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+    await base.accessControlFacet.grantRole(ATS_ROLES.CONTROL_LIST_MANAGER_ROLE, signer_A.address);
+    await base.accessControlFacet.grantRole(ATS_ROLES.PAUSER_ROLE, signer_A.address);
+    await base.accessControlFacet.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
 
     externalWhitelistMock1 = await (await ethers.getContractFactory("MockedWhitelist", signer_A)).deploy();
     await externalWhitelistMock1.waitForDeployment();

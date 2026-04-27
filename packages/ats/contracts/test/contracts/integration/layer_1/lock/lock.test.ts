@@ -42,27 +42,27 @@ describe("Lock Tests", () => {
 
   function set_initRbacs(): Rbac[] {
     const rbacIssuer: Rbac = {
-      role: ATS_ROLES._ISSUER_ROLE,
+      role: ATS_ROLES.ISSUER_ROLE,
       members: [signer_B.address],
     };
     const rbacLocker: Rbac = {
-      role: ATS_ROLES._LOCKER_ROLE,
+      role: ATS_ROLES.LOCKER_ROLE,
       members: [signer_C.address],
     };
     const rbacPausable: Rbac = {
-      role: ATS_ROLES._PAUSER_ROLE,
+      role: ATS_ROLES.PAUSER_ROLE,
       members: [signer_D.address],
     };
     const rbacKYC: Rbac = {
-      role: ATS_ROLES._KYC_ROLE,
+      role: ATS_ROLES.KYC_ROLE,
       members: [signer_B.address],
     };
     const rbacSSI: Rbac = {
-      role: ATS_ROLES._SSI_MANAGER_ROLE,
+      role: ATS_ROLES.SSI_MANAGER_ROLE,
       members: [signer_A.address],
     };
     const rbacCorporateAction: Rbac = {
-      role: ATS_ROLES._CORPORATE_ACTION_ROLE,
+      role: ATS_ROLES.CORPORATE_ACTION_ROLE,
       members: [signer_B.address],
     };
     return [rbacIssuer, rbacLocker, rbacPausable, rbacKYC, rbacSSI, rbacCorporateAction];
@@ -317,11 +317,11 @@ describe("Lock Tests", () => {
     describe("Adjust Balances", () => {
       async function setPreBalanceAdjustment() {
         // Granting Role to account C
-        await asset.connect(signer_A).grantRole(ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_C.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CONTROLLER_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES._LOCKER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ADJUSTMENT_BALANCE_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROLLER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.LOCKER_ROLE, signer_A.address);
 
         await asset.connect(signer_A).setMaxSupply(maxSupply_Original);
         await asset.connect(signer_A).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply_Partition_1_Original);
@@ -541,9 +541,9 @@ describe("Lock Tests", () => {
         const AMOUNT = 10;
         const EXPIRATION_TIMESTAMP = dateToUnixTimestamp(`2030-01-01T00:00:35Z`);
 
-        await asset.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES._LOCKER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.LOCKER_ROLE, signer_A.address);
 
         await asset.connect(signer_A).issueByPartition({
           partition: _DEFAULT_PARTITION,

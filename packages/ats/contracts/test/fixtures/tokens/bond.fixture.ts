@@ -104,7 +104,7 @@ export async function deployBondTokenFixture({
   const controlListFacet = ControlListFacet__factory.connect(diamond.target as string, deployer);
   const asset = IAsset__factory.connect(diamond.target as string, deployer);
 
-  await accessControlFacet.grantRole(ATS_ROLES._NOMINAL_VALUE_ROLE, deployer.address);
+  await accessControlFacet.grantRole(ATS_ROLES.NOMINAL_VALUE_ROLE, deployer.address);
 
   return {
     ...infrastructure,

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _CONTROLLER_ROLE } from "../../../constants/roles.sol";
+import { CONTROLLER_ROLE } from "../../../constants/roles.sol";
 import { IHoldTypes } from "./IHoldTypes.sol";
 import { IHoldManagement } from "./IHoldManagement.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
@@ -107,7 +107,7 @@ abstract contract HoldManagement is IHoldManagement, Modifiers {
         external
         override
         onlyUnpaused
-        onlyRole(_CONTROLLER_ROLE)
+        onlyRole(CONTROLLER_ROLE)
         notZeroAddress(_from)
         notZeroAddress(_hold.escrow)
         onlyValidExpirationTimestamp(_hold.expirationTimestamp)

@@ -13,12 +13,12 @@ import { _checkNotInitialized } from "../InitializationErrors.sol";
  */
 abstract contract PauseModifiers {
     modifier onlyUnpaused() {
-        PauseStorageWrapper._checkUnpaused();
+        PauseStorageWrapper.checkUnpaused();
         _;
     }
 
     modifier onlyPaused() {
-        PauseStorageWrapper._checkPaused();
+        PauseStorageWrapper.checkPaused();
         _;
     }
 
