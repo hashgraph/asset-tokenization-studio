@@ -12,8 +12,18 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { ProtectedPartitionRoleValidator } from "../../infrastructure/utils/ProtectedPartitionRoleValidator.sol";
 import { ITransfer } from "../transfer/ITransfer.sol";
 
+/**
+ * @title Burn
+ * @author Asset Tokenization Studio Team
+ * @notice Abstract implementation of the ERC-1594 redemption and ERC-3643 burn surfaces.
+ *         Exposes three entry points: `burn` (controller/agent-initiated), `redeem`
+ *         (self-redemption by the caller) and `redeemFrom` (operator-initiated on behalf
+ *         of a token holder). All operations are restricted to single-partition mode.
+ */
 abstract contract Burn is IBurn, Modifiers, ProtectedPartitionRoleValidator {
     /// @inheritdoc IBurn
+    /// @dev Captures the operator via `EvmAccessors.getMsgSender()` instead of `msg.sender`
+    ///      to support meta-transaction contexts when emitting `ControllerRedemption`.
     function burn(
         address _userAddress,
         uint256 _amount

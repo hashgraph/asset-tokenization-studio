@@ -9,9 +9,11 @@ import { _BURN_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 /**
  * @title BurnFacet
  * @author Asset Tokenization Studio Team
- * @notice Diamond facet exposing the ERC-1594 redemption and ERC-3643 burn surfaces.
- * @dev Registers three selectors: `burn`, `redeem` and `redeemFrom`. Business logic
- *      lives in the `Burn` abstract contract.
+ * @notice Diamond facet exposing the ERC-1594 redemption and ERC-3643 burn surfaces,
+ *         registered under `_BURN_RESOLVER_KEY`.
+ * @dev Inherits burn logic from `Burn` and satisfies the `IStaticFunctionSelectors`
+ *      contract required by the Diamond proxy for selector registration. Exposes three
+ *      selectors: `burn`, `redeem` and `redeemFrom`.
  */
 contract BurnFacet is Burn, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
