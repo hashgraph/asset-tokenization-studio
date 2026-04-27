@@ -103,7 +103,7 @@ describe("Hold Tests", () => {
 
         const heldAmount = await asset.getHeldAmountFor(signer_A.address);
 
-        expect(heldAmount).to.equal(hold.amount * 2);
+        expect(heldAmount).to.equal(Number(hold.amount) * 2);
       });
 
       it("GIVEN a released hold WHEN getHeldAmountFor THEN the released amount is no longer held", async () => {
@@ -210,7 +210,7 @@ describe("Hold Tests", () => {
 
         const heldAmount = await asset.getHeldAmountFor(signer_A.address);
 
-        expect(heldAmount).to.equal(hold.amount * 2);
+        expect(heldAmount).to.equal(Number(hold.amount) * 2);
       });
     });
 

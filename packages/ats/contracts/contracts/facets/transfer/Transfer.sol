@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {ITransfer} from "./ITransfer.sol";
+import { ITransfer } from "./ITransfer.sol";
 import { IERC1594 } from "../layer_1/ERC1400/ERC1594/IERC1594.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { Modifiers } from "../../services/Modifiers.sol";

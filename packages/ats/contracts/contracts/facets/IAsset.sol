@@ -26,7 +26,7 @@ import { IAllowance } from "./allowance/IAllowance.sol";
 
 // Layer 1 — External lists
 import { IERC1410 } from "./layer_1/ERC1400/ERC1410/IERC1410.sol";
-import {ITransfer} from "./transfer/ITransfer.sol";
+import { ITransfer } from "./transfer/ITransfer.sol";
 
 // Layer 1 — Remaining facets
 import { IERC20Votes } from "./layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
@@ -84,6 +84,7 @@ import { IClearingRead } from "./layer_1/clearing/IClearingRead.sol";
 import { IComplianceFacet } from "./compliance/IComplianceFacet.sol";
 import { IMint } from "./mint/IMint.sol";
 import { IHoldFacet } from "./hold/IHoldFacet.sol";
+import { IBatchController } from "./batchController/IBatchController.sol";
 import { IERC1594 } from "./layer_1/ERC1400/ERC1594/IERC1594.sol";
 
 import { IDocumentation } from "./documentation/IDocumentation.sol";
@@ -172,6 +173,7 @@ interface IAsset is
     // Additional ERC
     IComplianceFacet,
     IHoldFacet,
+    IBatchController,
     IHoldByPartition,
     IMint,
     IERC1594,

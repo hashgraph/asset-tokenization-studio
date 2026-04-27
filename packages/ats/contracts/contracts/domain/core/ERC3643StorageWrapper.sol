@@ -22,7 +22,7 @@ import { LockStorageWrapper } from "../asset/LockStorageWrapper.sol";
 import { HoldStorageWrapper } from "../asset/HoldStorageWrapper.sol";
 import { ClearingStorageWrapper } from "../asset/ClearingStorageWrapper.sol";
 import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
-import {ITransfer} from "../../facets/transfer/ITransfer.sol";
+import { ITransfer } from "../../facets/transfer/ITransfer.sol";
 
 library ERC3643StorageWrapper {
     using LowLevelCall for address;

@@ -5,7 +5,7 @@ import { _LOCK_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { ILock } from "../../facets/layer_1/lock/ILock.sol";
-import {ITransfer} from "../../facets/transfer/ITransfer.sol";
+import { ITransfer } from "../../facets/transfer/ITransfer.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";

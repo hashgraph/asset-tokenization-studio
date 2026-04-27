@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _ERC20_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { _DEFAULT_PARTITION, KPI_ERC20_APPROVE_OWNER } from "../../constants/values.sol";
 import { ICore } from "../../facets/core/ICore.sol";
-import {ITransfer} from "../../facets/transfer/ITransfer.sol";
+import { ITransfer } from "../../facets/transfer/ITransfer.sol";
 import { IAllowanceTypes } from "../../facets/allowance/IAllowanceTypes.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { IFactory } from "../../factory/IFactory.sol";

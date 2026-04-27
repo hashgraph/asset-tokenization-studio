@@ -8,7 +8,7 @@ import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableS
 import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
-import {ITransfer} from "../../facets/transfer/ITransfer.sol";
+import { ITransfer } from "../../facets/transfer/ITransfer.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { ThirdPartyType } from "./types/ThirdPartyType.sol";
