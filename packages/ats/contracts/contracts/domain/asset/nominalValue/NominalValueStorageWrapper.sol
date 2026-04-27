@@ -3,7 +3,6 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "../EquityStorageWrapper.sol";
 import { _NOMINAL_VALUE_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
-import { BondStorageWrapper } from "../BondStorageWrapper.sol";
 import { Bond } from "../../../facets/layer_2/bond/Bond.sol";
 
 /// @notice Storage wrapper for NominalValue feature.
