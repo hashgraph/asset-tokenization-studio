@@ -11,7 +11,7 @@ import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
-import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
+import { checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 
 //TODO: Remove revert reasons.
 
@@ -194,7 +194,7 @@ library ERC20VotesStorageWrapper {
     function calculateFactorBetween(uint256 fromBlock, uint256 toBlock) internal view returns (uint256) {
         (, uint256 abafAtBlockFrom) = erc20VotesStorage_().abafCheckpoints.checkpointsLookup(fromBlock);
         (, uint256 abafAtBlockTo) = erc20VotesStorage_().abafCheckpoints.checkpointsLookup(toBlock);
-        _checkUnexpectedError(abafAtBlockFrom > abafAtBlockTo, KPI_VOTES_CALC_FACTOR);
+        checkUnexpectedError(abafAtBlockFrom > abafAtBlockTo, KPI_VOTES_CALC_FACTOR);
 
         if (abafAtBlockFrom == 0) return 1;
 

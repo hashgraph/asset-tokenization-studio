@@ -301,26 +301,26 @@ library ScheduledTasksStorageWrapper {
         ScheduledTask memory currentScheduledTask
     ) private {
         if (callbackType == bytes32("snapshot")) {
-            onScheduledSnapshotTriggered(pos, scheduledTasksLength, currentScheduledTask);
+            _onScheduledSnapshotTriggered(pos, scheduledTasksLength, currentScheduledTask);
             return;
         }
 
         if (callbackType == bytes32("coupon")) {
-            onScheduledCouponListingTriggered(pos, scheduledTasksLength, currentScheduledTask);
+            _onScheduledCouponListingTriggered(pos, scheduledTasksLength, currentScheduledTask);
             return;
         }
 
         if (callbackType == bytes32("balance")) {
-            onScheduledBalanceAdjustmentTriggered(pos, scheduledTasksLength, currentScheduledTask);
+            _onScheduledBalanceAdjustmentTriggered(pos, scheduledTasksLength, currentScheduledTask);
             return;
         }
 
         if (callbackType == bytes32("crossOrdered")) {
-            onScheduledCrossOrderedTaskTriggered(pos, scheduledTasksLength, currentScheduledTask);
+            _onScheduledCrossOrderedTaskTriggered(pos, scheduledTasksLength, currentScheduledTask);
         }
     }
 
-    function onScheduledSnapshotTriggered(
+    function _onScheduledSnapshotTriggered(
         uint256 /*_pos*/,
         uint256 /*_scheduledTasksLength*/,
         ScheduledTask memory _scheduledTask
@@ -339,7 +339,7 @@ library ScheduledTasksStorageWrapper {
         );
     }
 
-    function onScheduledCouponListingTriggered(
+    function _onScheduledCouponListingTriggered(
         uint256 /*_pos*/,
         uint256 /*_scheduledTasksLength*/,
         ScheduledTask memory _scheduledTask
@@ -363,7 +363,7 @@ library ScheduledTasksStorageWrapper {
         );
     }
 
-    function onScheduledBalanceAdjustmentTriggered(
+    function _onScheduledBalanceAdjustmentTriggered(
         uint256 /*_pos*/,
         uint256 /*_scheduledTasksLength*/,
         ScheduledTask memory _scheduledTask
@@ -382,7 +382,7 @@ library ScheduledTasksStorageWrapper {
         AdjustBalancesStorageWrapper.adjustBalances(balanceAdjustment.factor, balanceAdjustment.decimals);
     }
 
-    function onScheduledCrossOrderedTaskTriggered(
+    function _onScheduledCrossOrderedTaskTriggered(
         uint256 /*_pos*/,
         uint256 /*_scheduledTasksLength*/,
         ScheduledTask memory _scheduledTask

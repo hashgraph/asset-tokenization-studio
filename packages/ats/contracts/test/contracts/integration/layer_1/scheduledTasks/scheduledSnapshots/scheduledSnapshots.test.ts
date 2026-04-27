@@ -28,7 +28,7 @@ describe("Scheduled Snapshots Tests", () => {
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: ATS_ROLES.PAUSER_ROLE,
         members: [signer_B.address],
       },
     ]);
@@ -39,7 +39,7 @@ describe("Scheduled Snapshots Tests", () => {
   });
 
   it("GIVEN a token WHEN triggerSnapshots THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
     // set dividend
     const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp("2030-01-01T00:00:06Z");
@@ -131,7 +131,7 @@ describe("Scheduled Snapshots Tests", () => {
   });
 
   it("GIVEN a disabled corporate action WHEN triggerSnapshots is called THEN snapshot is not executed", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
     const dividendsRecordDateInSeconds = dateToUnixTimestamp("2030-01-01T00:00:06Z");
     const dividendsExecutionDateInSeconds = dateToUnixTimestamp("2030-01-01T00:01:00Z");

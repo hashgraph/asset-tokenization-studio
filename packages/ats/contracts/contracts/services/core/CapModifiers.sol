@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { CapStorageWrapper } from "../../domain/core/CapStorageWrapper.sol";
-import { _checkNotInitialized } from "../InitializationErrors.sol";
+import { checkNotInitialized } from "../InitializationErrors.sol";
 
 /**
  * @title CapModifiers
@@ -15,7 +15,7 @@ abstract contract CapModifiers {
     /// @notice Modifier to ensure cap has not been initialized
     /// @dev Calls _checkNotCapInitialized from CapStorageWrapper
     modifier onlyNotCapInitialized() {
-        _checkNotInitialized(CapStorageWrapper.isCapInitialized());
+        checkNotInitialized(CapStorageWrapper.isCapInitialized());
         _;
     }
 

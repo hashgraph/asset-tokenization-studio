@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _TREX_OWNER_ROLE } from "../../constants/roles.sol";
+import { TREX_OWNER_ROLE } from "../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { IComplianceFacet } from "./IComplianceFacet.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
@@ -25,7 +25,7 @@ abstract contract Compliance is IComplianceFacet, Modifiers {
      * @notice Sets the compliance contract address
      * @param _compliance The address of the new compliance contract
      */
-    function setCompliance(address _compliance) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
+    function setCompliance(address _compliance) external override onlyUnpaused onlyRole(TREX_OWNER_ROLE) {
         ERC3643StorageWrapper.setCompliance(_compliance);
     }
 

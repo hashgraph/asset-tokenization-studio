@@ -5,7 +5,7 @@ import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.s
 import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC1644StorageWrapper } from "../../domain/asset/ERC1644StorageWrapper.sol";
-import { _checkNotInitialized } from "../InitializationErrors.sol";
+import { checkNotInitialized } from "../InitializationErrors.sol";
 
 /**
  * @title ERC3643Modifiers
@@ -26,7 +26,7 @@ abstract contract ERC3643Modifiers {
      * - ERC3643 must not be initialized
      */
     modifier onlyNotERC3643Initialized() {
-        _checkNotInitialized(ERC3643StorageWrapper.isERC3643Initialized());
+        checkNotInitialized(ERC3643StorageWrapper.isERC3643Initialized());
         _;
     }
 
@@ -37,7 +37,7 @@ abstract contract ERC3643Modifiers {
      * - ERC1594 must not be initialized
      */
     modifier onlyNotERC1594Initialized() {
-        _checkNotInitialized(ERC1594StorageWrapper.isERC1594Initialized());
+        checkNotInitialized(ERC1594StorageWrapper.isERC1594Initialized());
         _;
     }
 
@@ -48,7 +48,7 @@ abstract contract ERC3643Modifiers {
      * - ERC1410 must not be initialized
      */
     modifier onlyNotERC1410Initialized() {
-        _checkNotInitialized(ERC1410StorageWrapper.isERC1410Initialized());
+        checkNotInitialized(ERC1410StorageWrapper.isERC1410Initialized());
         _;
     }
 
@@ -59,7 +59,7 @@ abstract contract ERC3643Modifiers {
      * - ERC1644 must not be initialized
      */
     modifier onlyNotControllerInitialized() {
-        _checkNotInitialized(ERC1644StorageWrapper.isERC1644Initialized());
+        checkNotInitialized(ERC1644StorageWrapper.isERC1644Initialized());
         _;
     }
 

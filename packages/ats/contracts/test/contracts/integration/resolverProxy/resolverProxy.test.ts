@@ -143,7 +143,7 @@ describe("ResolverProxy Tests", () => {
     const diamondLoupe = await ethers.getContractAt("DiamondFacet", resolverProxy.target);
 
     const GRANT_ROLE_SIGNATURE = "0x2f2ff15d";
-    await expect(accessControl.grantRole(ATS_ROLES._DEFAULT_ADMIN_ROLE, signer_A.address))
+    await expect(accessControl.grantRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, signer_A.address))
       .to.be.revertedWithCustomError(resolverProxy, "FunctionNotFound")
       .withArgs(GRANT_ROLE_SIGNATURE);
     await expect(await diamondLoupe.supportsInterface(GRANT_ROLE_SIGNATURE)).to.be.false;
@@ -238,7 +238,7 @@ describe("ResolverProxy Tests", () => {
 
     const rbac = [
       {
-        role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+        role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
         members: [signer_A.address],
       },
     ];
@@ -271,7 +271,7 @@ describe("ResolverProxy Tests", () => {
 
     const rbac = [
       {
-        role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+        role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
         members: [signer_A.address],
       },
     ];
@@ -340,7 +340,7 @@ describe("ResolverProxy Tests", () => {
 
     const rbac = [
       {
-        role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+        role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
         members: [signer_A.address],
       },
     ];
@@ -374,7 +374,7 @@ describe("ResolverProxy Tests", () => {
 
     const rbac = [
       {
-        role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+        role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
         members: [signer_A.address],
       },
     ];
@@ -450,7 +450,7 @@ describe("ResolverProxy Tests", () => {
 
     const rbac = [
       {
-        role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+        role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
         members: [signer_A.address],
       },
     ];
@@ -486,7 +486,7 @@ describe("ResolverProxy Tests", () => {
 
     const rbac = [
       {
-        role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+        role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
         members: [signer_A.address],
       },
     ];

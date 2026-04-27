@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalPauseManagement } from "./IExternalPauseManagement.sol";
-import { _PAUSE_MANAGER_ROLE } from "../../../constants/roles.sol";
+import { PAUSE_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { _PAUSE_MANAGEMENT_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
 import { ExternalListManagementStorageWrapper } from "../../../domain/core/ExternalListManagementStorageWrapper.sol";
@@ -19,7 +19,7 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers
     function updateExternalPauses(
         address[] calldata _pauses,
         bool[] calldata _actives
-    ) external override onlyUnpaused onlyRole(_PAUSE_MANAGER_ROLE) returns (bool success_) {
+    ) external override onlyUnpaused onlyRole(PAUSE_MANAGER_ROLE) returns (bool success_) {
         ArrayValidation.checkUniqueValues(_pauses, _actives);
         success_ = ExternalListManagementStorageWrapper.updateExternalLists(
             _PAUSE_MANAGEMENT_STORAGE_POSITION,
@@ -34,7 +34,7 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers
 
     function addExternalPause(
         address _pause
-    ) external override onlyUnpaused onlyRole(_PAUSE_MANAGER_ROLE) onlyValidAddress(_pause) returns (bool success_) {
+    ) external override onlyUnpaused onlyRole(PAUSE_MANAGER_ROLE) onlyValidAddress(_pause) returns (bool success_) {
         success_ = ExternalListManagementStorageWrapper.addExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
         if (!success_) {
             revert ListedPause(_pause);
@@ -44,7 +44,7 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers
 
     function removeExternalPause(
         address _pause
-    ) external override onlyUnpaused onlyRole(_PAUSE_MANAGER_ROLE) returns (bool success_) {
+    ) external override onlyUnpaused onlyRole(PAUSE_MANAGER_ROLE) returns (bool success_) {
         success_ = ExternalListManagementStorageWrapper.removeExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
         if (!success_) {
             revert UnlistedPause(_pause);

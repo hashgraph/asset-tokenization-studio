@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _CONTROLLER_ROLE, _AGENT_ROLE, _buildRoles } from "../../constants/roles.sol";
+import { CONTROLLER_ROLE, AGENT_ROLE, buildRoles } from "../../constants/roles.sol";
 import { IBatchBurn } from "./IBatchBurn.sol";
 import { IController } from "../controller/IController.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
@@ -12,7 +12,7 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  * @title BatchBurn
  * @notice Abstract implementation of `IBatchBurn` that burns tokens from multiple addresses
  *         in a single, atomic transaction.
- * @dev Caller must hold `_CONTROLLER_ROLE` or `_AGENT_ROLE`. The token must be unpaused and
+ * @dev Caller must hold `CONTROLLER_ROLE` or `AGENT_ROLE`. The token must be unpaused and
  *      configured for a single partition. Delegates burn execution to `TokenCoreOps` and
  *      emits `IERC1644.ControllerRedemption` for each address processed.
  *      Intended to be inherited by `BatchBurnFacet`.
@@ -29,7 +29,7 @@ abstract contract BatchBurn is IBatchBurn, Modifiers {
         onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
         onlyWithoutMultiPartition
         onlyControllable
-        onlyAnyRole(_buildRoles(_CONTROLLER_ROLE, _AGENT_ROLE))
+        onlyAnyRole(buildRoles(CONTROLLER_ROLE, AGENT_ROLE))
     {
         uint256 length = _userAddresses.length;
         for (uint256 i; i < length; ) {

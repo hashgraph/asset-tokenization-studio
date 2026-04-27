@@ -157,7 +157,7 @@ library CouponStorageWrapper {
                     TimeTravelStorageWrapper.getBlockTimestamp()
                 );
             couponFor_.decimals = ERC20StorageWrapper.decimalsAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
-            couponFor_.nominalValue = NominalValueStorageWrapper._getNominalValue();
+            couponFor_.nominalValue = NominalValueStorageWrapper.getNominalValue();
         }
 
         couponFor_.couponAmount = _calculateCouponAmount(
@@ -285,8 +285,8 @@ library CouponStorageWrapper {
         if (!recordDateReached) return couponAmountFor_;
 
         uint256 period = coupon.endDate - coupon.startDate;
-        uint256 nominalValue = NominalValueStorageWrapper._getNominalValue();
-        uint8 nominalValueDecimals = NominalValueStorageWrapper._getNominalValueDecimals();
+        uint256 nominalValue = NominalValueStorageWrapper.getNominalValue();
+        uint8 nominalValueDecimals = NominalValueStorageWrapper.getNominalValueDecimals();
 
         couponAmountFor_.recordDateReached = true;
         couponAmountFor_.numerator = tokenBalance * nominalValue * coupon.rate * period;

@@ -13,7 +13,7 @@ import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { ThirdPartyType } from "./types/ThirdPartyType.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
-import { _checkNonceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
+import { checkNonceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
@@ -74,7 +74,7 @@ library HoldStorageWrapper {
         IHoldTypes.ProtectedHold memory _protectedHold,
         bytes calldata _signature
     ) internal returns (bool success_, uint256 holdId_) {
-        _checkNonceAndDeadline(
+        checkNonceAndDeadline(
             _protectedHold.nonce,
             _from,
             NonceStorageWrapper.getNonceFor(_from),

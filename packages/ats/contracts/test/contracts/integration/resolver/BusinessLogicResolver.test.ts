@@ -45,7 +45,7 @@ describe("BusinessLogicResolver", () => {
 
     await businessLogicResolver.initialize_BusinessLogicResolver();
     accessControl = await ethers.getContractAt("AccessControl", businessLogicResolver.target, signer_A);
-    await accessControl.grantRole(ATS_ROLES._PAUSER_ROLE, signer_B.address);
+    await accessControl.grantRole(ATS_ROLES.PAUSER_ROLE, signer_B.address);
 
     pause = await ethers.getContractAt("Pause", businessLogicResolver.target);
     freezeFacet = await new FreezeFacet__factory(signer_A).deploy();

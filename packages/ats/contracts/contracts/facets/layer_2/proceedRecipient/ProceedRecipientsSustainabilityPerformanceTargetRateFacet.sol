@@ -7,21 +7,21 @@ import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticF
 import {
     _PROCEED_RECIPIENTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY
 } from "../../../constants/resolverKeys.sol";
-import { _PROCEED_RECIPIENT_MANAGER_ROLE } from "../../../constants/roles.sol";
+import { PROCEED_RECIPIENT_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";
 
 contract ProceedRecipientsSustainabilityPerformanceTargetRateFacet is ProceedRecipients, IStaticFunctionSelectors {
     function addProceedRecipient(
         address _proceedRecipient,
         bytes calldata _data
-    ) external override onlyUnpaused onlyRole(_PROCEED_RECIPIENT_MANAGER_ROLE) {
+    ) external override onlyUnpaused onlyRole(PROCEED_RECIPIENT_MANAGER_ROLE) {
         ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();
         _addProceedRecipientInternal(_proceedRecipient, _data);
     }
 
     function removeProceedRecipient(
         address _proceedRecipient
-    ) external override onlyUnpaused onlyRole(_PROCEED_RECIPIENT_MANAGER_ROLE) {
+    ) external override onlyUnpaused onlyRole(PROCEED_RECIPIENT_MANAGER_ROLE) {
         ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();
         _removeProceedRecipientInternal(_proceedRecipient);
     }

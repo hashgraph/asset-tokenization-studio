@@ -4,7 +4,7 @@ pragma solidity ^0.8.17;
 // solhint-disable no-global-import
 import "@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol";
 import { TRexIFactory, FactoryRegulationData, IResolverProxy } from "../../interfaces/IFactory.sol";
-import { _TREX_OWNER_ROLE, _DEFAULT_ADMIN_ROLE } from "../../interfaces/roles.sol";
+import { TREX_OWNER_ROLE, DEFAULT_ADMIN_ROLE } from "../../interfaces/roles.sol";
 
 library SecurityDeploymentLib {
     function deployEquity(
@@ -41,7 +41,7 @@ library SecurityDeploymentLib {
 
         // Check if owner was already assigned the role
         for (uint256 i = 0; i < length; ) {
-            if (_rbacs[i].role == _TREX_OWNER_ROLE && _rbacs[i].members.length > 0) {
+            if (_rbacs[i].role == TREX_OWNER_ROLE && _rbacs[i].members.length > 0) {
                 for (uint256 j = 0; j < _rbacs[i].members.length; ) {
                     if (_tRexOwner == _rbacs[i].members[j]) {
                         ownerMatch = true;
@@ -78,12 +78,12 @@ library SecurityDeploymentLib {
             membersArr[0] = address(this);
         }
 
-        newRbacs[length] = IResolverProxy.Rbac({ role: _TREX_OWNER_ROLE, members: membersArr });
+        newRbacs[length] = IResolverProxy.Rbac({ role: TREX_OWNER_ROLE, members: membersArr });
 
         membersArr = new address[](1);
         membersArr[0] = address(this);
 
-        newRbacs[length + 1] = IResolverProxy.Rbac({ role: _DEFAULT_ADMIN_ROLE, members: membersArr });
+        newRbacs[length + 1] = IResolverProxy.Rbac({ role: DEFAULT_ADMIN_ROLE, members: membersArr });
 
         return newRbacs;
     }

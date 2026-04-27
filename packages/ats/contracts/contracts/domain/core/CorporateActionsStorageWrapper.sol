@@ -6,7 +6,7 @@ import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableS
 import { ICorporateActions } from "../../facets/layer_1/corporateAction/ICorporateActions.sol";
 import { _CORPORATE_ACTION_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { KPI_CA_ADD_ACTION } from "../../constants/values.sol";
-import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
+import { checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 
 struct ActionData {
     bytes32 actionType;
@@ -46,7 +46,7 @@ library CorporateActionsStorageWrapper {
         ca.actionsContentHashes[contentHash] = true;
 
         corporateActionId_ = bytes32(ca.actions.length() + 1);
-        _checkUnexpectedError(!ca.actions.add(corporateActionId_), KPI_CA_ADD_ACTION);
+        checkUnexpectedError(!ca.actions.add(corporateActionId_), KPI_CA_ADD_ACTION);
 
         ca.actionsByType[_actionType].push(corporateActionId_);
 

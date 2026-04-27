@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IDividend } from "./IDividend.sol";
-import { _CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
+import { CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
 import { DIVIDEND_CORPORATE_ACTION_TYPE } from "../../../constants/values.sol";
 import { DividendStorageWrapper } from "../../../domain/asset/dividend/DividendStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
@@ -14,7 +14,7 @@ abstract contract Dividend is IDividend, Modifiers {
         external
         override
         onlyUnpaused
-        onlyRole(_CORPORATE_ACTION_ROLE)
+        onlyRole(CORPORATE_ACTION_ROLE)
         onlyValidDates(newDividend.recordDate, newDividend.executionDate)
         onlyValidTimestamp(newDividend.recordDate)
         returns (uint256 dividendId_)
@@ -29,7 +29,7 @@ abstract contract Dividend is IDividend, Modifiers {
         override
         onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, dividendId - 1)
         onlyUnpaused
-        onlyRole(_CORPORATE_ACTION_ROLE)
+        onlyRole(CORPORATE_ACTION_ROLE)
         returns (bool success_)
     {
         success_ = DividendStorageWrapper.cancelDividend(dividendId);

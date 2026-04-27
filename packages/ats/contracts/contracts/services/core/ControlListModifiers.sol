@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ControlListStorageWrapper } from "../../domain/core/ControlListStorageWrapper.sol";
-import { _checkNotInitialized } from "../InitializationErrors.sol";
+import { checkNotInitialized } from "../InitializationErrors.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
@@ -37,7 +37,7 @@ abstract contract ControlListModifiers {
      * @dev Reverts with AlreadyInitialized if control list is already initialized
      */
     modifier onlyNotControlListInitialized() {
-        _checkNotInitialized(ControlListStorageWrapper.isControlListInitialized());
+        checkNotInitialized(ControlListStorageWrapper.isControlListInitialized());
         _;
     }
 }

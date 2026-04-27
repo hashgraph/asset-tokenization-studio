@@ -42,8 +42,8 @@ describe("Core Facet Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
     await executeRbac(asset, [
-      { role: ATS_ROLES._PAUSER_ROLE, members: [signer_B.address] },
-      { role: ATS_ROLES._TREX_OWNER_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.PAUSER_ROLE, members: [signer_B.address] },
+      { role: ATS_ROLES.TREX_OWNER_ROLE, members: [signer_A.address] },
     ]);
   }
 

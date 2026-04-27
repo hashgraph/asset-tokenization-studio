@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _PROTECTED_PARTITIONS_PARTICIPANT_ROLE } from "../../constants/roles.sol";
+import { PROTECTED_PARTITIONS_PARTICIPANT_ROLE } from "../../constants/roles.sol";
 import { _PROTECTED_PARTITIONS_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IProtectedPartitions } from "../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
@@ -10,15 +10,15 @@ import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
 import { AccessControlStorageWrapper } from "./AccessControlStorageWrapper.sol";
 import { ResolverProxyStorageWrapper } from "./ResolverProxyStorageWrapper.sol";
 import {
-    _getMessageHashTransfer,
-    _getMessageHashRedeem,
-    _getMessageHashCreateHold,
-    _getMessageHashClearingTransfer,
-    _getMessageHashClearingCreateHold,
-    _getMessageHashClearingRedeem,
-    _verify
+    getMessageHashTransfer,
+    getMessageHashRedeem,
+    getMessageHashCreateHold,
+    getMessageHashClearingTransfer,
+    getMessageHashClearingCreateHold,
+    getMessageHashClearingRedeem,
+    verify
 } from "../../infrastructure/utils/ERC712.sol";
-import { _WILD_CARD_ROLE } from "../../constants/roles.sol";
+import { WILD_CARD_ROLE } from "../../constants/roles.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
@@ -66,9 +66,9 @@ library ProtectedPartitionsStorageWrapper {
     function requireUnProtectedPartitionsOrWildCardRole() internal view {
         if (
             ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
-            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, EvmAccessors.getMsgSender())
+            !AccessControlStorageWrapper.hasRole(WILD_CARD_ROLE, EvmAccessors.getMsgSender())
         ) {
-            revert IProtectedPartitions.PartitionsAreProtectedAndNoRole(EvmAccessors.getMsgSender(), _WILD_CARD_ROLE);
+            revert IProtectedPartitions.PartitionsAreProtectedAndNoRole(EvmAccessors.getMsgSender(), WILD_CARD_ROLE);
         }
     }
 
@@ -93,9 +93,9 @@ library ProtectedPartitionsStorageWrapper {
         string memory _name
     ) internal view returns (bool) {
         return
-            _verify(
+            verify(
                 _from,
-                _getMessageHashTransfer(
+                getMessageHashTransfer(
                     _partition,
                     _from,
                     _to,
@@ -130,9 +130,9 @@ library ProtectedPartitionsStorageWrapper {
         string memory _name
     ) internal view returns (bool) {
         return
-            _verify(
+            verify(
                 _from,
-                _getMessageHashRedeem(_partition, _from, _amount, _protectionData.deadline, _protectionData.nonce),
+                getMessageHashRedeem(_partition, _from, _amount, _protectionData.deadline, _protectionData.nonce),
                 _protectionData.signature,
                 _name,
                 Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
@@ -160,9 +160,9 @@ library ProtectedPartitionsStorageWrapper {
         string memory _name
     ) internal view returns (bool) {
         return
-            _verify(
+            verify(
                 _from,
-                _getMessageHashCreateHold(_partition, _from, _protectedHold),
+                getMessageHashCreateHold(_partition, _from, _protectedHold),
                 _signature,
                 _name,
                 Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
@@ -188,9 +188,9 @@ library ProtectedPartitionsStorageWrapper {
         string memory _name
     ) internal view returns (bool) {
         return
-            _verify(
+            verify(
                 _protectedClearingOperation.from,
-                _getMessageHashClearingCreateHold(_protectedClearingOperation, _hold),
+                getMessageHashClearingCreateHold(_protectedClearingOperation, _hold),
                 _signature,
                 _name,
                 Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
@@ -218,9 +218,9 @@ library ProtectedPartitionsStorageWrapper {
         string memory _name
     ) internal view returns (bool) {
         return
-            _verify(
+            verify(
                 _protectedClearingOperation.from,
-                _getMessageHashClearingTransfer(_protectedClearingOperation, _to, _amount),
+                getMessageHashClearingTransfer(_protectedClearingOperation, _to, _amount),
                 _signature,
                 _name,
                 Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
@@ -246,9 +246,9 @@ library ProtectedPartitionsStorageWrapper {
         string memory _name
     ) internal view returns (bool) {
         return
-            _verify(
+            verify(
                 _protectedClearingOperation.from,
-                _getMessageHashClearingRedeem(_protectedClearingOperation, _amount),
+                getMessageHashClearingRedeem(_protectedClearingOperation, _amount),
                 _signature,
                 _name,
                 Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
@@ -258,11 +258,11 @@ library ProtectedPartitionsStorageWrapper {
     }
 
     function protectedPartitionsRole(bytes32 _partition) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(_PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _partition));
+        return keccak256(abi.encodePacked(PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _partition));
     }
 
     function calculateRoleForPartition(bytes32 partition) internal pure returns (bytes32 role) {
-        role = keccak256(abi.encode(_PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partition));
+        role = keccak256(abi.encode(PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partition));
     }
 
     function protectedPartitionsStorage()

@@ -101,7 +101,7 @@ library DividendStorageWrapper {
             dividendFor_.tokenBalance,
             dividendFor_.decimals,
             dividendFor_.recordDateReached
-        ) = getSnapshotBalanceForIfDateReached(
+        ) = _getSnapshotBalanceForIfDateReached(
             registeredDividend.dividend.recordDate,
             registeredDividend.snapshotId,
             account
@@ -154,7 +154,7 @@ library DividendStorageWrapper {
         return ERC1410StorageWrapper.getTotalTokenHolders();
     }
 
-    function getSnapshotBalanceForIfDateReached(
+    function _getSnapshotBalanceForIfDateReached(
         uint256 date,
         uint256 snapshotId,
         address account

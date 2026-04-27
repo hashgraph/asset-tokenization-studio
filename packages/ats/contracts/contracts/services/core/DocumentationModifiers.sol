@@ -17,7 +17,7 @@ abstract contract DocumentationModifiers {
      * @param _name The `bytes32` document name to validate.
      */
     modifier notEmptyName(bytes32 _name) {
-        DocumentationStorageWrapper._checkNotEmptyName(_name);
+        DocumentationStorageWrapper.checkNotEmptyName(_name);
         _;
     }
 
@@ -26,7 +26,7 @@ abstract contract DocumentationModifiers {
      * @param _uri The URI string to validate.
      */
     modifier notEmptyURI(string calldata _uri) {
-        DocumentationStorageWrapper._checkNotEmptyURI(_uri);
+        DocumentationStorageWrapper.checkNotEmptyURI(_uri);
         _;
     }
 
@@ -35,7 +35,7 @@ abstract contract DocumentationModifiers {
      * @param _documentHash The `bytes32` content hash to validate.
      */
     modifier notEmptyHash(bytes32 _documentHash) {
-        DocumentationStorageWrapper._checkNotEmptyHash(_documentHash);
+        DocumentationStorageWrapper.checkNotEmptyHash(_documentHash);
         _;
     }
 
@@ -44,7 +44,7 @@ abstract contract DocumentationModifiers {
      * @param _name The `bytes32` document name whose existence is asserted.
      */
     modifier documentExists(bytes32 _name) {
-        DocumentationStorageWrapper._checkDocumentExists(_name);
+        DocumentationStorageWrapper.checkDocumentExists(_name);
         _;
     }
 }

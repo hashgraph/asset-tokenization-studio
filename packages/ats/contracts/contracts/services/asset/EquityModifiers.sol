@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { EquityStorageWrapper } from "../../domain/asset/EquityStorageWrapper.sol";
-import { _checkNotInitialized } from "../InitializationErrors.sol";
+import { checkNotInitialized } from "../InitializationErrors.sol";
 
 /**
  * @title EquityModifiers
@@ -17,7 +17,7 @@ abstract contract EquityModifiers {
      * @dev Reverts with AlreadyInitialized if equity is already initialized
      */
     modifier onlyNotEquityInitialized() {
-        _checkNotInitialized(EquityStorageWrapper.isEquityInitialized());
+        checkNotInitialized(EquityStorageWrapper.isEquityInitialized());
         _;
     }
 }

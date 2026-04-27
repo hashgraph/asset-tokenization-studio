@@ -7,7 +7,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IFactory } from "./IFactory.sol";
 import { ResolverProxy } from "../infrastructure/proxy/ResolverProxy.sol";
 import { IResolverProxy } from "../infrastructure/proxy/IResolverProxy.sol";
-import { _DEFAULT_ADMIN_ROLE } from "../constants/roles.sol";
+import { DEFAULT_ADMIN_ROLE } from "../constants/roles.sol";
 import { IControlList } from "../facets/layer_1/controlList/IControlList.sol";
 import { ICore } from "../facets/core/ICore.sol";
 import { IERC20Votes } from "../facets/layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
@@ -19,11 +19,11 @@ import { IClearingActions } from "../facets/layer_1/clearing/IClearingActions.so
 import { IBusinessLogicResolver } from "../infrastructure/diamond/IBusinessLogicResolver.sol";
 import {
     FactoryRegulationData,
-    _buildRegulationData,
+    buildRegulationData,
     RegulationData,
     RegulationType,
     RegulationSubType,
-    _checkRegulationTypeAndSubType,
+    checkRegulationTypeAndSubType,
     AdditionalSecurityData
 } from "../constants/regulation.sol";
 import { IEquityUSA } from "../facets/layer_3/equityUSA/IEquityUSA.sol";
@@ -40,7 +40,7 @@ import {
 import { IExternalKycListManagement } from "../facets/layer_1/externalKycList/IExternalKycListManagement.sol";
 import { IKyc } from "../facets/layer_1/kyc/IKyc.sol";
 import { IERC3643 } from "../facets/layer_1/ERC3643/IERC3643.sol";
-import { _validateISIN } from "./isinValidator.sol";
+import { validateISIN } from "./isinValidator.sol";
 import { IFixedRate } from "../facets/layer_2/interestRate/fixedRate/IFixedRate.sol";
 import { IKpiLinkedRate } from "../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
 import { InterestRateStorageWrapper } from "../domain/asset/InterestRateStorageWrapper.sol";
@@ -61,7 +61,7 @@ contract Factory is IFactory {
     }
 
     modifier checkISIN(string calldata isin) {
-        _validateISIN(isin);
+        validateISIN(isin);
         _;
     }
 
@@ -70,7 +70,7 @@ contract Factory is IFactory {
 
         // Looking for admin role within initialization rbacas in order to add the factory
         for (uint256 rbacsIndex = 0; rbacsIndex < rbacs.length; rbacsIndex++) {
-            if (rbacs[rbacsIndex].role == _DEFAULT_ADMIN_ROLE) {
+            if (rbacs[rbacsIndex].role == DEFAULT_ADMIN_ROLE) {
                 if (rbacs[rbacsIndex].members.length > 0) {
                     for (
                         uint256 adminMemberIndex = 0;
@@ -96,7 +96,7 @@ contract Factory is IFactory {
     }
 
     modifier checkRegulation(RegulationType _regulationType, RegulationSubType _regulationSubType) {
-        _checkRegulationTypeAndSubType(_regulationType, _regulationSubType);
+        checkRegulationTypeAndSubType(_regulationType, _regulationSubType);
         _;
     }
 
@@ -142,7 +142,7 @@ contract Factory is IFactory {
         _tryInitialize_equityUSA(
             equityAddress_,
             _equityData.equityDetails,
-            _buildRegulationData(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType),
+            buildRegulationData(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType),
             _factoryRegulationData.additionalSecurityData
         );
 
@@ -253,7 +253,7 @@ contract Factory is IFactory {
         RegulationType _regulationType,
         RegulationSubType _regulationSubType
     ) external pure override returns (RegulationData memory regulationData_) {
-        regulationData_ = _buildRegulationData(_regulationType, _regulationSubType);
+        regulationData_ = buildRegulationData(_regulationType, _regulationSubType);
     }
 
     function _deployBond(
@@ -267,7 +267,7 @@ contract Factory is IFactory {
         _tryInitialize_bondUSA(
             bondAddress_,
             _bondData.bondDetails,
-            _buildRegulationData(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType),
+            buildRegulationData(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType),
             _factoryRegulationData.additionalSecurityData
         );
 

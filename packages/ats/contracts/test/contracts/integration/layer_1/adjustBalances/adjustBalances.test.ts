@@ -44,15 +44,15 @@ describe("Adjust Balances Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target);
     await executeRbac(asset, [
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: ATS_ROLES.PAUSER_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._KYC_ROLE,
+        role: ATS_ROLES.KYC_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._SSI_MANAGER_ROLE,
+        role: ATS_ROLES.SSI_MANAGER_ROLE,
         members: [signer_A.address],
       },
     ]);
@@ -72,7 +72,7 @@ describe("Adjust Balances Tests", () => {
 
   it("GIVEN a paused Token WHEN adjustBalances THEN transaction fails with TokenIsPaused", async () => {
     // Granting Role to account C and Pause
-    await grantRoleAndPauseToken(asset, ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_A, signer_B, signer_C.address);
+    await grantRoleAndPauseToken(asset, ATS_ROLES.ADJUSTMENT_BALANCE_ROLE, signer_A, signer_B, signer_C.address);
 
     // adjustBalances fails
     await expect(asset.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals)).to.be.revertedWithCustomError(
@@ -82,7 +82,7 @@ describe("Adjust Balances Tests", () => {
   });
 
   it("GIVEN a Token WHEN adjustBalances with factor set at 0 THEN transaction fails with FactorIsZero", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ADJUSTMENT_BALANCE_ROLE, signer_C.address);
 
     // adjustBalances fails
     await expect(asset.connect(signer_C).adjustBalances(0, adjustDecimals)).to.be.revertedWithCustomError(
@@ -92,9 +92,9 @@ describe("Adjust Balances Tests", () => {
   });
 
   it("GIVEN an account with adjustBalance role WHEN adjustBalances THEN scheduled tasks get executed succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_A.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ADJUSTMENT_BALANCE_ROLE, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
 
     await asset.connect(signer_A).addIssuer(signer_A.address);
     await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, 0, MAX_UINT256, signer_A.address);
@@ -202,9 +202,9 @@ describe("Adjust Balances Tests", () => {
 
       // Set up standard roles
       await executeRbac(asset, [
-        { role: ATS_ROLES._PAUSER_ROLE, members: [base.user1.address] },
-        { role: ATS_ROLES._KYC_ROLE, members: [base.user1.address] },
-        { role: ATS_ROLES._SSI_MANAGER_ROLE, members: [base.deployer.address] },
+        { role: ATS_ROLES.PAUSER_ROLE, members: [base.user1.address] },
+        { role: ATS_ROLES.KYC_ROLE, members: [base.user1.address] },
+        { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [base.deployer.address] },
       ]);
 
       return {
@@ -225,8 +225,8 @@ describe("Adjust Balances Tests", () => {
     });
 
     it("GIVEN non-migrated totalSupply and balance WHEN adjustBalances is called THEN totalSupply migrates and balance migrates on next interaction", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_A.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ADJUSTMENT_BALANCE_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
 
       await asset.connect(signer_A).addIssuer(signer_A.address);
       await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, 0, MAX_UINT256, signer_A.address);

@@ -77,39 +77,39 @@ describe("Coupon Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target);
     await executeRbac(asset, [
       {
-        role: ATS_ROLES._FREEZE_MANAGER_ROLE,
+        role: ATS_ROLES.FREEZE_MANAGER_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: ATS_ROLES.PAUSER_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._KYC_ROLE,
+        role: ATS_ROLES.KYC_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._MATURITY_REDEEMER_ROLE,
+        role: ATS_ROLES.MATURITY_REDEEMER_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._SSI_MANAGER_ROLE,
+        role: ATS_ROLES.SSI_MANAGER_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._CONTROL_LIST_ROLE,
+        role: ATS_ROLES.CONTROL_LIST_ROLE,
         members: [signer_D.address],
       },
       {
-        role: ATS_ROLES._CLEARING_ROLE,
+        role: ATS_ROLES.CLEARING_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._PROTECTED_PARTITIONS_ROLE,
+        role: ATS_ROLES.PROTECTED_PARTITIONS_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._AGENT_ROLE,
+        role: ATS_ROLES.AGENT_ROLE,
         members: [signer_A.address],
       },
     ]);
@@ -154,13 +154,13 @@ describe("Coupon Tests", () => {
 
   it("GIVEN a paused Token WHEN setCoupon THEN transaction fails with TokenIsPaused", async () => {
     // Granting Role to account C and Pause
-    await grantRoleAndPauseToken(asset, ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
+    await grantRoleAndPauseToken(asset, ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
 
     await expect(asset.connect(signer_C).setCoupon(couponData)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
   });
 
   it("GIVEN an account with corporateActions role WHEN setCoupon with wrong dates THEN transaction fails", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
     const wrongcouponData_1 = {
       recordDate: couponExecutionDateInSeconds.toString(),
       executionDate: couponRecordDateInSeconds.toString(),
@@ -195,7 +195,7 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN an account with corporateActions role WHEN setCoupon with period THEN period is stored correctly", async () => {
-    await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
     const customPeriod = 3 * 24 * 60 * 60; // 3 days in seconds
     const customStartDate = couponEndDateInSeconds - customPeriod;
@@ -233,7 +233,7 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN an account with corporateActions role WHEN setCoupon with period 0 THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
     const minValidPeriodCouponData = {
       recordDate: couponRecordDateInSeconds.toString(),
       executionDate: couponExecutionDateInSeconds.toString(),
@@ -260,7 +260,7 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN an account with corporateActions role WHEN setCoupon THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
     await expect(asset.connect(signer_C).setCoupon(couponData))
       .to.emit(asset, "CouponSet")
@@ -330,9 +330,9 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN an account with corporateActions role WHEN setCoupon and lock THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES._LOCKER_ROLE, signer_C.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.LOCKER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
 
     // issue and lock
     const TotalAmount = numberOfUnits;
@@ -361,7 +361,7 @@ describe("Coupon Tests", () => {
       ]);
 
     await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
-    await asset.connect(signer_A).revokeRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+    await asset.connect(signer_A).revokeRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
 
     const couponFor = await asset.getCouponFor(1, signer_A.address);
     const couponAmountFor = await asset.getCouponAmountFor(1, signer_A.address);
@@ -396,8 +396,8 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN an account with corporateActions role WHEN setCoupon and hold THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
 
     const TotalAmount = numberOfUnits;
     const HeldAmount = TotalAmount - 5;
@@ -433,7 +433,7 @@ describe("Coupon Tests", () => {
       ]);
 
     await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
-    await asset.connect(signer_A).revokeRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+    await asset.connect(signer_A).revokeRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
 
     const couponFor = await asset.getCouponFor(1, signer_A.address);
     const couponAmountFor = await asset.getCouponAmountFor(1, signer_A.address);
@@ -468,7 +468,7 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN an account with bondManager role WHEN setMaturityDate THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._BOND_MANAGER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.BOND_MANAGER_ROLE, signer_C.address);
     const maturityDateBefore = (await asset.getBondDetails()).maturityDate;
     const newMaturityDate = maturityDateBefore + 86400n;
 
@@ -481,7 +481,7 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN an account with bondManager role WHEN setMaturityDate to earlier date THEN transaction fails", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._BOND_MANAGER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.BOND_MANAGER_ROLE, signer_C.address);
     const maturityDateBefore = (await asset.getBondDetails()).maturityDate;
     const dayBeforeCurrentMaturity = maturityDateBefore - 86400n;
 
@@ -506,7 +506,7 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN a paused Token WHEN setMaturityDate THEN transaction fails with TokenIsPaused", async () => {
-    await grantRoleAndPauseToken(asset, ATS_ROLES._BOND_MANAGER_ROLE, signer_A, signer_B, signer_C.address);
+    await grantRoleAndPauseToken(asset, ATS_ROLES.BOND_MANAGER_ROLE, signer_A, signer_B, signer_C.address);
 
     const maturityDateBefore = (await asset.getBondDetails()).maturityDate;
     const newMaturityDate = maturityDateBefore + 86400n;
@@ -520,9 +520,9 @@ describe("Coupon Tests", () => {
   });
 
   it("Given a coupon and account with normal, cleared, held, locked and frozen balance WHEN  getCouponFor THEN sum of balances is correct", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES._LOCKER_ROLE, signer_C.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.LOCKER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
 
     const totalAmount = numberOfUnits;
     const lockedAmount = totalAmount / 5;
@@ -580,7 +580,7 @@ describe("Coupon Tests", () => {
     expect(couponAmountForBefore.denominator).to.equal(0);
 
     await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
-    await asset.revokeRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+    await asset.revokeRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
 
     const couponFor = await asset.getCouponFor(1, signer_A.address);
     const couponAmountForAfter = await asset.getCouponAmountFor(1, signer_A.address);
@@ -623,7 +623,7 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN an account with corporateActions role WHEN cancelling a coupon THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C);
 
     await asset.connect(signer_C).setCoupon(couponData);
 
@@ -637,7 +637,7 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN a coupon after execution date WHEN cancelCoupon THEN transaction fails with CorporateActionAlreadyExecuted", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C);
 
     await asset.connect(signer_C).setCoupon(couponData);
 
@@ -647,7 +647,7 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN a coupon after record date but before execution date WHEN cancelCoupon THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C);
 
     await asset.connect(signer_C).setCoupon(couponData);
 
@@ -659,7 +659,7 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN an account without corporateActions role WHEN cancelCoupon THEN transaction fails with AccountHasNoRole", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C);
 
     await asset.connect(signer_C).setCoupon(couponData);
 
@@ -667,7 +667,7 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN a paused Token WHEN cancelCoupon THEN transaction fails with TokenIsPaused", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C);
 
     await asset.connect(signer_C).setCoupon(couponData);
 
@@ -677,15 +677,15 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN no existing coupon WHEN cancelCoupon with invalid ID THEN transaction fails", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C);
 
     await expect(asset.connect(signer_C).cancelCoupon(999)).to.be.revertedWithCustomError(asset, "WrongIndexForAction");
   });
 
   it("GIVEN a coupon with snapshot WHEN getCouponHolders is called THEN returns token holders from snapshot", async () => {
     const TotalAmount = 1000;
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
     await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
 
     await asset.connect(signer_A).issueByPartition({
@@ -732,8 +732,8 @@ describe("Coupon Tests", () => {
 
   it("GIVEN a coupon without snapshot WHEN getCouponFor is called after record date THEN uses current balance", async () => {
     const TotalAmount = 1000;
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
 
     await asset.connect(signer_A).issueByPartition({
       partition: DEFAULT_PARTITION,
@@ -772,7 +772,7 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN a coupon WHEN getCoupon is called THEN decodes coupon data", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
     couponRecordDateInSeconds = (await getDltTimestamp()) + 1000;
     couponExecutionDateInSeconds = (await getDltTimestamp()) + 2000;
 
@@ -815,7 +815,7 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN invalid startDate > endDate WHEN setCoupon THEN transaction fails with WrongDates", async () => {
-    await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
     const currentTimestamp = await getDltTimestamp();
     const invalidCoupon = {
@@ -833,7 +833,7 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN invalid fixingDate > executionDate WHEN setCoupon THEN transaction fails with WrongDates", async () => {
-    await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
     const currentTimestamp = await getDltTimestamp();
     const invalidCoupon = {
       recordDate: currentTimestamp + TIME_PERIODS_S.DAY,
@@ -850,7 +850,7 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN fixingDate in the past WHEN setCoupon THEN transaction fails with WrongTimestamp", async () => {
-    await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
     const currentTimestamp = await getDltTimestamp();
     const invalidCoupon = {
       recordDate: currentTimestamp + TIME_PERIODS_S.DAY,
@@ -892,7 +892,7 @@ describe("Coupon Tests", () => {
     const scheduledTasksKpi = await ethers.getContractAt("ScheduledCrossOrderedTasks", kpiDiamond.target, signer_A);
     const timeTravelKpi = await ethers.getContractAt("TimeTravelFacet", kpiDiamond.target, signer_A);
 
-    await accessControlKpi.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
+    await accessControlKpi.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
 
     const timestamp = await getDltTimestamp();
 
@@ -982,7 +982,7 @@ describe("Coupon Tests", () => {
     const scheduledTasksKpi = await ethers.getContractAt("ScheduledCrossOrderedTasks", kpiDiamond.target, signer_A);
     const timeTravelKpi = await ethers.getContractAt("TimeTravelFacet", kpiDiamond.target, signer_A);
 
-    await accessControlKpi.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
+    await accessControlKpi.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
 
     const timestamp = await getDltTimestamp();
 

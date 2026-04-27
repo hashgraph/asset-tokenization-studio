@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ExternalListManagementStorageWrapper } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
-import { _checkNotInitialized } from "../InitializationErrors.sol";
+import { checkNotInitialized } from "../InitializationErrors.sol";
 
 /**
  * @title ExternalListModifiers
@@ -13,12 +13,12 @@ import { _checkNotInitialized } from "../InitializationErrors.sol";
  */
 abstract contract ExternalListModifiers {
     modifier onlyNotExternalControlListInitialized() {
-        _checkNotInitialized(ExternalListManagementStorageWrapper.isExternalControlListInitialized());
+        checkNotInitialized(ExternalListManagementStorageWrapper.isExternalControlListInitialized());
         _;
     }
 
     modifier onlyNotKycExternalInitialized() {
-        _checkNotInitialized(ExternalListManagementStorageWrapper.isKycExternalInitialized());
+        checkNotInitialized(ExternalListManagementStorageWrapper.isKycExternalInitialized());
         _;
     }
 }

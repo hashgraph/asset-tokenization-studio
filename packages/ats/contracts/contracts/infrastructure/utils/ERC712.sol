@@ -18,7 +18,7 @@ import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
 import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
 import { ICommonErrors } from "../errors/ICommonErrors.sol";
 
-function _getDomainHash(
+function getDomainHash(
     string memory _contractName,
     string memory _contractVersion,
     uint256 _chainId,
@@ -36,7 +36,7 @@ function _getDomainHash(
         );
 }
 
-function _getMessageHashTransfer(
+function getMessageHashTransfer(
     bytes32 _partition,
     address _from,
     address _to,
@@ -50,7 +50,7 @@ function _getMessageHashTransfer(
         );
 }
 
-function _getMessageHashRedeem(
+function getMessageHashRedeem(
     bytes32 _partition,
     address _from,
     uint256 _amount,
@@ -61,7 +61,7 @@ function _getMessageHashRedeem(
         keccak256(abi.encode(_PROTECTED_REDEEM_FROM_PARTITION_TYPEHASH, _partition, _from, _amount, _deadline, _nonce));
 }
 
-function _getMessageHashCreateHold(
+function getMessageHashCreateHold(
     bytes32 _partition,
     address _from,
     IHoldTypes.ProtectedHold memory _protectedHold
@@ -93,7 +93,7 @@ function _getMessageHashCreateHold(
         );
 }
 
-function _getMessageHashClearingTransfer(
+function getMessageHashClearingTransfer(
     IClearingTypes.ProtectedClearingOperation memory _protectedClearing,
     address _to,
     uint256 _amount
@@ -124,7 +124,7 @@ function _getMessageHashClearingTransfer(
         );
 }
 
-function _getMessageHashClearingCreateHold(
+function getMessageHashClearingCreateHold(
     IClearingTypes.ProtectedClearingOperation memory _protectedClearingOperation,
     IHoldTypes.Hold memory _hold
 ) pure returns (bytes32) {
@@ -162,7 +162,7 @@ function _getMessageHashClearingCreateHold(
         );
 }
 
-function _getMessageHashClearingRedeem(
+function getMessageHashClearingRedeem(
     IClearingTypes.ProtectedClearingOperation memory _protectedClearing,
     uint256 _amount
 ) pure returns (bytes32) {
@@ -191,31 +191,31 @@ function _getMessageHashClearingRedeem(
         );
 }
 
-function _checkNonceAndDeadline(
+function checkNonceAndDeadline(
     uint256 _nonce,
     address _account,
     uint256 _currentNonce,
     uint256 _deadline,
     uint256 _blockTimestamp
 ) pure {
-    if (!_isDeadlineValid(_deadline, _blockTimestamp)) revert ICommonErrors.ExpiredDeadline(_deadline);
-    if (!_isNonceValid(_nonce, _currentNonce)) revert ICommonErrors.WrongNonce(_nonce, _account);
+    if (!isDeadlineValid(_deadline, _blockTimestamp)) revert ICommonErrors.ExpiredDeadline(_deadline);
+    if (!isNonceValid(_nonce, _currentNonce)) revert ICommonErrors.WrongNonce(_nonce, _account);
 }
 
-function _isDeadlineValid(uint256 _deadline, uint256 _blockTimestamp) pure returns (bool) {
+function isDeadlineValid(uint256 _deadline, uint256 _blockTimestamp) pure returns (bool) {
     return _deadline >= _blockTimestamp;
 }
 
-function _isNonceValid(uint256 _nonce, uint256 _currentNonce) pure returns (bool) {
+function isNonceValid(uint256 _nonce, uint256 _currentNonce) pure returns (bool) {
     return _currentNonce < _nonce;
 }
 
-function _recoverSigner(bytes32 _prefixedHash, bytes memory _signature) pure returns (address) {
-    (bytes32 r, bytes32 s, uint8 v) = _splitSignature(_signature);
+function recoverSigner(bytes32 _prefixedHash, bytes memory _signature) pure returns (address) {
+    (bytes32 r, bytes32 s, uint8 v) = splitSignature(_signature);
     return ecrecover(_prefixedHash, v, r, s);
 }
 
-function _splitSignature(bytes memory sig) pure returns (bytes32 r, bytes32 s, uint8 v) {
+function splitSignature(bytes memory sig) pure returns (bytes32 r, bytes32 s, uint8 v) {
     if (sig.length != 65) revert ICommonErrors.WrongSignatureLength();
     // solhint-disable-next-line no-inline-assembly
     assembly {
@@ -229,7 +229,7 @@ function _splitSignature(bytes memory sig) pure returns (bytes32 r, bytes32 s, u
     // implicitly return (r, s, v)
 }
 
-function _verify(
+function verify(
     address _signer,
     bytes32 _functionHash,
     bytes memory _signature,
@@ -238,7 +238,7 @@ function _verify(
     uint256 _chainid,
     address _contractAddress
 ) pure returns (bool) {
-    bytes32 domainHash = _getDomainHash(_contractName, _contractVersion, _chainid, _contractAddress);
+    bytes32 domainHash = getDomainHash(_contractName, _contractVersion, _chainid, _contractAddress);
     bytes32 prefixedHash = keccak256(abi.encodePacked(_SALT, domainHash, _functionHash));
-    return (_recoverSigner(prefixedHash, _signature) == _signer);
+    return (recoverSigner(prefixedHash, _signature) == _signer);
 }

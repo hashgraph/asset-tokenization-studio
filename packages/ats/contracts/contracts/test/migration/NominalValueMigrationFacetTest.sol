@@ -56,11 +56,11 @@ contract NominalValueMigrationFacetTest is Modifiers, IStaticFunctionSelectors {
     // ========================================
 
     function getAggregatedNominalValue() external view returns (uint256) {
-        return NominalValueStorageWrapper._getNominalValue();
+        return NominalValueStorageWrapper.getNominalValue();
     }
 
     function getAggregatedNominalValueDecimals() external view returns (uint8) {
-        return NominalValueStorageWrapper._getNominalValueDecimals();
+        return NominalValueStorageWrapper.getNominalValueDecimals();
     }
 
     // ========================================

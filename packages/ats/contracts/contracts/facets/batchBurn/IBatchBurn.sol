@@ -11,7 +11,7 @@ pragma solidity >=0.8.0 <0.9.0;
 interface IBatchBurn {
     /**
      * @notice Burns tokens from multiple addresses in a single transaction.
-     * @dev Caller must hold `_CONTROLLER_ROLE` or `_AGENT_ROLE`. The token must not be paused
+     * @dev Caller must hold `CONTROLLER_ROLE` or `AGENT_ROLE`. The token must not be paused
      *      and must not be configured for multi-partition. Emits `IERC1644.ControllerRedemption`
      *      for each address processed.
      * @param _userAddresses Addresses from which tokens will be burnt.

@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalControlListManagement } from "./IExternalControlListManagement.sol";
-import { _CONTROL_LIST_MANAGER_ROLE } from "../../../constants/roles.sol";
+import { CONTROL_LIST_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { ExternalListManagementStorageWrapper } from "../../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
@@ -20,7 +20,7 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
     function updateExternalControlLists(
         address[] calldata _controlLists,
         bool[] calldata _actives
-    ) external override onlyUnpaused onlyRole(_CONTROL_LIST_MANAGER_ROLE) returns (bool success_) {
+    ) external override onlyUnpaused onlyRole(CONTROL_LIST_MANAGER_ROLE) returns (bool success_) {
         ArrayValidation.checkUniqueValues(_controlLists, _actives);
         success_ = ExternalListManagementStorageWrapper.updateExternalLists(
             _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
@@ -39,7 +39,7 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
         external
         override
         onlyUnpaused
-        onlyRole(_CONTROL_LIST_MANAGER_ROLE)
+        onlyRole(CONTROL_LIST_MANAGER_ROLE)
         onlyValidAddress(_controlList)
         returns (bool success_)
     {
@@ -55,7 +55,7 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
 
     function removeExternalControlList(
         address _controlList
-    ) external override onlyUnpaused onlyRole(_CONTROL_LIST_MANAGER_ROLE) returns (bool success_) {
+    ) external override onlyUnpaused onlyRole(CONTROL_LIST_MANAGER_ROLE) returns (bool success_) {
         success_ = ExternalListManagementStorageWrapper.removeExternalList(
             _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
             _controlList

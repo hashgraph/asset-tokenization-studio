@@ -36,8 +36,8 @@ describe("LoansPortfolio Token Tests", () => {
     asset = await ethers.getContractAt("IAsset", base.tokenAddress, signer_A);
 
     await executeRbac(asset, [
-      { role: ATS_ROLES._LOANS_PORTFOLIO_MANAGER_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES._PAUSER_ROLE, members: [signer_B.address] },
+      { role: ATS_ROLES.LOANS_PORTFOLIO_MANAGER_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.PAUSER_ROLE, members: [signer_B.address] },
     ]);
 
     loanAsset = await deployLoanToken();
@@ -60,10 +60,10 @@ describe("LoansPortfolio Token Tests", () => {
     const loanIAsset = await ethers.getContractAt("IAsset", loanBase.tokenAddress, signer_A);
 
     await executeRbac(loanIAsset, [
-      { role: ATS_ROLES._ISSUER_ROLE, members: [signer_A?.address] },
-      { role: ATS_ROLES._SSI_MANAGER_ROLE, members: [signer_A?.address] },
-      { role: ATS_ROLES._KYC_ROLE, members: [signer_B?.address] },
-      { role: ATS_ROLES._LOAN_MANAGER_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.ISSUER_ROLE, members: [signer_A?.address] },
+      { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A?.address] },
+      { role: ATS_ROLES.KYC_ROLE, members: [signer_B?.address] },
+      { role: ATS_ROLES.LOAN_MANAGER_ROLE, members: [signer_A.address] },
     ]);
 
     await loanIAsset.addIssuer(signer_A.address);
@@ -180,7 +180,7 @@ describe("LoansPortfolio Token Tests", () => {
         }),
       )
         .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
-        .withArgs(signer_C.address, ATS_ROLES._LOANS_PORTFOLIO_MANAGER_ROLE);
+        .withArgs(signer_C.address, ATS_ROLES.LOANS_PORTFOLIO_MANAGER_ROLE);
     });
 
     it("GIVEN an existing asset WHEN adding the same asset THEN reverts with HoldingsAssetAlreadyExists", async () => {
@@ -299,7 +299,7 @@ describe("LoansPortfolio Token Tests", () => {
 
       await expect(asset.connect(signer_C).removeHoldingsAsset(holdingsAsset))
         .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
-        .withArgs(signer_C.address, ATS_ROLES._LOANS_PORTFOLIO_MANAGER_ROLE);
+        .withArgs(signer_C.address, ATS_ROLES.LOANS_PORTFOLIO_MANAGER_ROLE);
     });
   });
 
@@ -386,7 +386,7 @@ describe("LoansPortfolio Token Tests", () => {
     it("GIVEN an unauthorized account WHEN notifying update THEN reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_C).notifyLoanHoldingsAssetUpdate(await loanAsset.getAddress()))
         .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
-        .withArgs(signer_C.address, ATS_ROLES._LOANS_PORTFOLIO_MANAGER_ROLE);
+        .withArgs(signer_C.address, ATS_ROLES.LOANS_PORTFOLIO_MANAGER_ROLE);
     });
   });
 
@@ -493,7 +493,7 @@ describe("LoansPortfolio Token Tests", () => {
 
       await expect(asset.connect(signer_C).loansPortfolioWithdraw(await loanAsset.getAddress(), signer_A.address, 100n))
         .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
-        .withArgs(signer_C.address, ATS_ROLES._LOANS_PORTFOLIO_MANAGER_ROLE);
+        .withArgs(signer_C.address, ATS_ROLES.LOANS_PORTFOLIO_MANAGER_ROLE);
     });
   });
 

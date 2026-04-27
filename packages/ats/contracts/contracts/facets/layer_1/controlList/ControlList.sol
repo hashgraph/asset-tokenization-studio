@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IControlList } from "./IControlList.sol";
-import { _CONTROL_LIST_ROLE } from "../../../constants/roles.sol";
+import { CONTROL_LIST_ROLE } from "../../../constants/roles.sol";
 import { ControlListStorageWrapper } from "../../../domain/core/ControlListStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
@@ -15,7 +15,7 @@ abstract contract ControlList is IControlList, Modifiers {
 
     function addToControlList(
         address _account
-    ) external override onlyUnpaused onlyRole(_CONTROL_LIST_ROLE) returns (bool success_) {
+    ) external override onlyUnpaused onlyRole(CONTROL_LIST_ROLE) returns (bool success_) {
         success_ = ControlListStorageWrapper.addToControlList(_account);
         if (!success_) {
             revert ListedAccount(_account);
@@ -25,7 +25,7 @@ abstract contract ControlList is IControlList, Modifiers {
 
     function removeFromControlList(
         address _account
-    ) external override onlyUnpaused onlyRole(_CONTROL_LIST_ROLE) returns (bool success_) {
+    ) external override onlyUnpaused onlyRole(CONTROL_LIST_ROLE) returns (bool success_) {
         success_ = ControlListStorageWrapper.removeFromControlList(_account);
         if (!success_) {
             revert UnlistedAccount(_account);

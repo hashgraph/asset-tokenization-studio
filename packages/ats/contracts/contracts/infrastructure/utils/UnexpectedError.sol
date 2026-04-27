@@ -18,6 +18,6 @@ import { ICommonErrors } from "../errors/ICommonErrors.sol";
  * @param _isError Boolean flag indicating whether the impossible condition occurred
  * @param _errorId Unique identifier for the location in code where this is called
  */
-function _checkUnexpectedError(bool _isError, bytes4 _errorId) pure {
+function checkUnexpectedError(bool _isError, bytes4 _errorId) pure {
     if (_isError) revert ICommonErrors.UnexpectedError(_errorId);
 }

@@ -12,7 +12,7 @@ import { ERC1410BasicStorage, ERC1410StorageWrapper } from "./ERC1410StorageWrap
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
-import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
+import { checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 
 struct ERC20Storage {
     string name;
@@ -104,7 +104,7 @@ library ERC20StorageWrapper {
     }
 
     function approve(address owner, address spender, uint256 value) internal returns (bool) {
-        _checkUnexpectedError(owner == address(0), KPI_ERC20_APPROVE_OWNER);
+        checkUnexpectedError(owner == address(0), KPI_ERC20_APPROVE_OWNER);
 
         if (spender == address(0)) {
             revert IAllowanceTypes.SpenderWithZeroAddress();

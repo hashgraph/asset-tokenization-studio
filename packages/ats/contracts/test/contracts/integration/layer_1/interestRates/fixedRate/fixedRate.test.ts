@@ -28,11 +28,11 @@ describe("Fixed Rate Tests", () => {
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: ATS_ROLES.PAUSER_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._INTEREST_RATE_MANAGER_ROLE,
+        role: ATS_ROLES.INTEREST_RATE_MANAGER_ROLE,
         members: [signer_A.address],
       },
     ]);

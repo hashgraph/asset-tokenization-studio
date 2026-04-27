@@ -41,7 +41,7 @@ describe("ScheduledCouponListing Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
     // Grant corporate action role to signer_A
-    await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
+    await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
   }
 
   beforeEach(async () => {

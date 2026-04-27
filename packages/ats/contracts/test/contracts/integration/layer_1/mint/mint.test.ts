@@ -33,7 +33,7 @@ describe("MintFacet Tests", () => {
       diamond = base.diamond;
       signer_A = base.deployer;
       asset = await ethers.getContractAt("IAsset", diamond.target);
-      await asset.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
     }
 
     beforeEach(async () => {
@@ -73,11 +73,11 @@ describe("MintFacet Tests", () => {
       asset = await ethers.getContractAt("IAsset", diamond.target);
 
       await executeRbac(asset, [
-        { role: ATS_ROLES._KYC_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES._SSI_MANAGER_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
+        { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
       ]);
 
-      await asset.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
       await asset.addIssuer(signer_A.address);
       await asset.connect(signer_B).grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
     }

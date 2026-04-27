@@ -60,7 +60,7 @@ describe("HoldByPartition Tests", () => {
 
   const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
     ["bytes32", "bytes32"],
-    [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, DEFAULT_PARTITION],
+    [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, DEFAULT_PARTITION],
   );
   const packedDataWithoutPrefix = packedData.slice(2);
   const ProtectedPartitionRole_1 = ethers.keccak256("0x" + packedDataWithoutPrefix);
@@ -68,43 +68,43 @@ describe("HoldByPartition Tests", () => {
   function set_initRbacs() {
     return [
       {
-        role: ATS_ROLES._ISSUER_ROLE,
+        role: ATS_ROLES.ISSUER_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: ATS_ROLES.PAUSER_ROLE,
         members: [signer_D.address],
       },
       {
-        role: ATS_ROLES._KYC_ROLE,
+        role: ATS_ROLES.KYC_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._SSI_MANAGER_ROLE,
+        role: ATS_ROLES.SSI_MANAGER_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._CLEARING_ROLE,
+        role: ATS_ROLES.CLEARING_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._CORPORATE_ACTION_ROLE,
+        role: ATS_ROLES.CORPORATE_ACTION_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._CONTROL_LIST_ROLE,
+        role: ATS_ROLES.CONTROL_LIST_ROLE,
         members: [signer_E.address],
       },
       {
-        role: ATS_ROLES._CONTROLLER_ROLE,
+        role: ATS_ROLES.CONTROLLER_ROLE,
         members: [signer_C.address],
       },
       {
-        role: ATS_ROLES._PROTECTED_PARTITIONS_ROLE,
+        role: ATS_ROLES.PROTECTED_PARTITIONS_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._AGENT_ROLE,
+        role: ATS_ROLES.AGENT_ROLE,
         members: [signer_A.address],
       },
       { role: ProtectedPartitionRole_1, members: [signer_B.address] },
@@ -227,9 +227,9 @@ describe("HoldByPartition Tests", () => {
       it("GIVEN an account with snapshot role WHEN takeSnapshot and Hold THEN transaction succeeds", async () => {
         const EXPIRATION_TIMESTAMP = dateToUnixTimestamp(`2030-01-01T00:00:35Z`);
 
-        await asset.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES._LOCKER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.LOCKER_ROLE, signer_A.address);
 
         // snapshot
         await asset.connect(signer_A).takeSnapshot();
@@ -908,10 +908,10 @@ describe("HoldByPartition Tests", () => {
 
     describe("Adjust balances", () => {
       async function setPreBalanceAdjustment() {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_C.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CONTROLLER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ADJUSTMENT_BALANCE_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROLLER_ROLE, signer_A.address);
 
         await asset.connect(signer_A).setMaxSupply(maxSupply_Original);
         await asset.connect(signer_A).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply_Partition_1_Original);

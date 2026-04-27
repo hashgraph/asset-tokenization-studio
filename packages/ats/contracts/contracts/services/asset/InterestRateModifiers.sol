@@ -12,28 +12,28 @@ pragma solidity >=0.8.0 <0.9.0;
  * @author Asset Tokenization Studio Team
  */
 import { InterestRateStorageWrapper } from "../../domain/asset/InterestRateStorageWrapper.sol";
-import { _checkNotInitialized } from "../InitializationErrors.sol";
+import { checkNotInitialized } from "../InitializationErrors.sol";
 import { IKpiLinkedRate } from "../../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
 
 abstract contract InterestRateModifiers {
     /// @notice Modifier that ensures fixed rate has not been initialized
     /// @dev Calls _checkNotFixedRateInitialized from InterestRateStorageWrapper
     modifier onlyNotFixedRateInitialized() {
-        _checkNotInitialized(InterestRateStorageWrapper.isFixedRateInitialized());
+        checkNotInitialized(InterestRateStorageWrapper.isFixedRateInitialized());
         _;
     }
 
     /// @notice Modifier that ensures KPI linked rate has not been initialized
     /// @dev Calls _checkNotKpiLinkedRateInitialized from InterestRateStorageWrapper
     modifier onlyNotKpiLinkedRateInitialized() {
-        _checkNotInitialized(InterestRateStorageWrapper.isKpiLinkedRateInitialized());
+        checkNotInitialized(InterestRateStorageWrapper.isKpiLinkedRateInitialized());
         _;
     }
 
     /// @notice Modifier that ensures sustainability performance target rate has not been initialized
     /// @dev Calls _checkNotSustainabilityPerformanceTargetRateInitialized from InterestRateStorageWrapper
     modifier onlyNotSustainabilityPerformanceTargetRateInitialized() {
-        _checkNotInitialized(InterestRateStorageWrapper.isSustainabilityPerformanceTargetRateInitialized());
+        checkNotInitialized(InterestRateStorageWrapper.isSustainabilityPerformanceTargetRateInitialized());
         _;
     }
 

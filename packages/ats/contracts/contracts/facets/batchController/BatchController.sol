@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _CONTROLLER_ROLE, _AGENT_ROLE, _buildRoles } from "../../constants/roles.sol";
+import { CONTROLLER_ROLE, AGENT_ROLE, buildRoles } from "../../constants/roles.sol";
 import { IBatchController } from "./IBatchController.sol";
 import { IController } from "../controller/IController.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
@@ -30,7 +30,7 @@ abstract contract BatchController is IBatchController, Modifiers {
         onlyValidInputAmountsArrayLength(_toList, _amounts)
         onlyWithoutMultiPartition
         onlyControllable
-        onlyAnyRole(_buildRoles(_CONTROLLER_ROLE, _AGENT_ROLE))
+        onlyAnyRole(buildRoles(CONTROLLER_ROLE, AGENT_ROLE))
     {
         address operator = EvmAccessors.getMsgSender();
         uint256 length = _fromList.length;

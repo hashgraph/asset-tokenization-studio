@@ -17,7 +17,6 @@ describe("BatchMint Tests", () => {
   let diamond: ResolverProxy;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
-  let signer_C: HardhatEthersSigner;
   let signer_D: HardhatEthersSigner;
   let signer_E: HardhatEthersSigner;
 
@@ -34,7 +33,6 @@ describe("BatchMint Tests", () => {
     diamond = base.diamond;
     signer_A = base.deployer;
     signer_B = base.user1;
-    signer_C = base.user2;
     signer_D = base.user3;
     signer_E = base.user4;
 
@@ -42,23 +40,23 @@ describe("BatchMint Tests", () => {
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: ATS_ROLES.PAUSER_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._ISSUER_ROLE,
+        role: ATS_ROLES.ISSUER_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._KYC_ROLE,
+        role: ATS_ROLES.KYC_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._SSI_MANAGER_ROLE,
+        role: ATS_ROLES.SSI_MANAGER_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._AGENT_ROLE,
+        role: ATS_ROLES.AGENT_ROLE,
         members: [signer_A.address],
       },
     ]);
@@ -99,7 +97,7 @@ describe("BatchMint Tests", () => {
         const toList = [signer_D.address, signer_E.address];
         const amounts = [mintAmount, mintAmount];
 
-        // signer_B does not have ATS_ROLES._ISSUER_ROLE
+        // signer_B does not have ATS_ROLES.ISSUER_ROLE
         await expect(asset.connect(signer_B).batchMint(toList, amounts)).to.be.revertedWithCustomError(
           asset,
           "AccountHasNoRoles",

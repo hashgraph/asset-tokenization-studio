@@ -44,7 +44,7 @@ describe("Bond Fixed Rate Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
     await executeRbac(asset, [
       {
-        role: ATS_ROLES._CORPORATE_ACTION_ROLE,
+        role: ATS_ROLES.CORPORATE_ACTION_ROLE,
         members: [signer_A.address],
       },
     ]);

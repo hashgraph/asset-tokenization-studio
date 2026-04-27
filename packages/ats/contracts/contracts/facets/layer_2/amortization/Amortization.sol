@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IAmortization } from "./IAmortization.sol";
-import { _AMORTIZATION_ROLE, _CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
+import { AMORTIZATION_ROLE, CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
 import { AMORTIZATION_CORPORATE_ACTION_TYPE } from "../../../constants/values.sol";
 import { AmortizationStorageWrapper } from "../../../domain/asset/amortization/AmortizationStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
@@ -15,7 +15,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         override
         onlyUnpaused
         onlyWithoutMultiPartition
-        onlyRole(_CORPORATE_ACTION_ROLE)
+        onlyRole(CORPORATE_ACTION_ROLE)
         onlyValidDates(_amortization.recordDate, _amortization.executionDate)
         onlyValidTimestamp(_amortization.recordDate)
         onlyValidDates(_amortization.recordDate, _amortization.executionDate)
@@ -33,7 +33,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
-        onlyRole(_CORPORATE_ACTION_ROLE)
+        onlyRole(CORPORATE_ACTION_ROLE)
         onlyNoActiveAmortizationHolds(_amortizationID)
     {
         AmortizationStorageWrapper.cancelAmortization(_amortizationID);
@@ -47,7 +47,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         override
         onlyUnpaused
         onlyWithoutMultiPartition
-        onlyRole(_AMORTIZATION_ROLE)
+        onlyRole(AMORTIZATION_ROLE)
         onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
     {
         AmortizationStorageWrapper.releaseAmortizationHold(_amortizationID, _tokenHolder);
@@ -62,7 +62,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         override
         onlyUnpaused
         onlyWithoutMultiPartition
-        onlyRole(_AMORTIZATION_ROLE)
+        onlyRole(AMORTIZATION_ROLE)
         onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
         onlyPositiveTokenAmount(_tokenAmount, _amortizationID)
         returns (uint256 holdId_)

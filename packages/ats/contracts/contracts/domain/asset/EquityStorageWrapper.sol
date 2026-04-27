@@ -15,7 +15,7 @@ import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
+import { checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 
 struct EquityDataStorage {
     bool votingRight;
@@ -129,8 +129,8 @@ library EquityStorageWrapper {
             putRight: _equityStorage().putRight,
             dividendRight: _equityStorage().dividendRight,
             currency: _equityStorage().currency,
-            nominalValue: NominalValueStorageWrapper._getNominalValue(),
-            nominalValueDecimals: NominalValueStorageWrapper._getNominalValueDecimals()
+            nominalValue: NominalValueStorageWrapper.getNominalValue(),
+            nominalValueDecimals: NominalValueStorageWrapper.getNominalValueDecimals()
         });
     }
 
@@ -153,7 +153,7 @@ library EquityStorageWrapper {
         bytes memory data;
         (, , data, isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(corporateActionId_);
 
-        _checkUnexpectedError(data.length == 0, KPI_EQUITY_BALANCE_ADJ);
+        checkUnexpectedError(data.length == 0, KPI_EQUITY_BALANCE_ADJ);
         (balanceAdjustment_) = abi.decode(data, (IEquity.ScheduledBalanceAdjustment));
     }
 

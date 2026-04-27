@@ -25,7 +25,7 @@ describe("ERC20Permit Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
     await executeRbac(asset, [
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: ATS_ROLES.PAUSER_ROLE,
         members: [signer_A.address],
       },
     ]);
@@ -101,7 +101,7 @@ describe("ERC20Permit Tests", () => {
 
       it("GIVEN a blocked owner account WHEN permit is called THEN the transaction fails with AccountIsBlocked", async () => {
         // Blacklisting accounts
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROL_LIST_ROLE, signer_A.address);
         await asset.connect(signer_A).addToControlList(signer_C.address);
 
         const expiry = (await getDltTimestamp()) + 3600;
@@ -120,7 +120,7 @@ describe("ERC20Permit Tests", () => {
       });
 
       it("GIVEN a blocked spender account WHEN permit is called THEN the transaction fails with AccountIsBlocked", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROL_LIST_ROLE, signer_A.address);
         await asset.connect(signer_A).addToControlList(signer_C.address);
 
         const expiry = (await getDltTimestamp()) + 3600;
@@ -262,7 +262,7 @@ describe("ERC20Permit Tests", () => {
   describe("onlyUnrecoveredAddress modifier for permit", () => {
     it("GIVEN a recovered owner address WHEN calling permit THEN transaction fails with WalletRecovered", async () => {
       // Grant _AGENT_ROLE to recover address
-      await asset.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
 
       // Recover signer_B (owner) address
       await asset.recoveryAddress(signer_B.address, signer_C.address, ADDRESS_ZERO);
@@ -284,7 +284,7 @@ describe("ERC20Permit Tests", () => {
 
     it("GIVEN a recovered spender address WHEN calling permit THEN transaction fails with WalletRecovered", async () => {
       // Grant _AGENT_ROLE to recover address
-      await asset.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
 
       // Recover signer_C (spender) address
       await asset.recoveryAddress(signer_C.address, signer_B.address, ADDRESS_ZERO);

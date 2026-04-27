@@ -239,7 +239,7 @@ library ClearingOps {
         // Call beforeClearingOperation to apply ABAF adjustments (like reference's _beforeClearingOperation)
         beforeClearingOperation(
             _clearingOperationIdentifier,
-            _resolveDestination(_clearingOperationIdentifier, _operationType)
+            resolveDestination(_clearingOperationIdentifier, _operationType)
         );
 
         if (_clearingOperationIdentifier.clearingOperationType == IClearingTypes.ClearingOperationType.Transfer) {
@@ -351,14 +351,14 @@ library ClearingOps {
 
     function transferClearingBalance(bytes32 _partition, address _to, uint256 _amount) internal {
         // Delegate to internal helper with direct StorageWrapper access
-        _transferClearingBalanceInternal(_partition, _to, _amount);
+        transferClearingBalanceInternal(_partition, _to, _amount);
     }
 
     /// @dev Internal variant of transferClearingBalance with direct StorageWrapper access
     /// @param _partition Partition to transfer
     /// @param _to Destination address
     /// @param _amount Amount to transfer
-    function _transferClearingBalanceInternal(bytes32 _partition, address _to, uint256 _amount) internal {
+    function transferClearingBalanceInternal(bytes32 _partition, address _to, uint256 _amount) internal {
         if (ERC1410StorageWrapper.validPartitionForReceiver(_partition, _to)) {
             ERC1410StorageWrapper.increaseBalanceByPartition(_to, _amount, _partition);
             emit IERC1410Types.TransferByPartition(
@@ -391,11 +391,11 @@ library ClearingOps {
         address _destination
     ) internal {
         // Delegate to batched internal function to reduce delegatecall overhead
-        _beforeClearingOperationBatched(_id, _destination);
+        beforeClearingOperationBatched(_id, _destination);
     }
 
     /// @dev Batched version of beforeClearingOperation to reduce delegatecall overhead
-    function _beforeClearingOperationBatched(
+    function beforeClearingOperationBatched(
         IClearingTypes.ClearingOperationIdentifier memory _id,
         address _destination
     ) internal {
@@ -656,7 +656,7 @@ library ClearingOps {
     // INTERNAL VIEW
     // ============================================================================
 
-    function _resolveDestination(
+    function resolveDestination(
         IClearingTypes.ClearingOperationIdentifier calldata _id,
         IClearingTypes.ClearingActionType _actionType
     ) internal view returns (address) {

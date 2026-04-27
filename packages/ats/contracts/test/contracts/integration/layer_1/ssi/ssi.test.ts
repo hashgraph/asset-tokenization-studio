@@ -28,11 +28,11 @@ describe("SSI Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target);
     await executeRbac(asset, [
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: ATS_ROLES.PAUSER_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._SSI_MANAGER_ROLE,
+        role: ATS_ROLES.SSI_MANAGER_ROLE,
         members: [signer_C.address],
       },
     ]);

@@ -43,7 +43,7 @@ describe("ExternalPause Tests", () => {
 
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
 
-    await base.accessControlFacet.grantRole(ATS_ROLES._PAUSE_MANAGER_ROLE, signer_A.address);
+    await base.accessControlFacet.grantRole(ATS_ROLES.PAUSE_MANAGER_ROLE, signer_A.address);
 
     externalPauseMock1 = await (await ethers.getContractFactory("MockedExternalPause", signer_A)).deploy();
     await externalPauseMock1.waitForDeployment();
@@ -328,14 +328,14 @@ describe("ExternalPause Tests", () => {
   });
 
   describe("Access Control Tests", () => {
-    it("GIVEN an account without ATS_ROLES._PAUSE_MANAGER_ROLE WHEN adding an external pause THEN it reverts with AccessControl", async () => {
+    it("GIVEN an account without ATS_ROLES.PAUSE_MANAGER_ROLE WHEN adding an external pause THEN it reverts with AccessControl", async () => {
       const newPause = externalPauseMock3.target as string;
       await expect(
         asset.connect(signer_B).addExternalPause(newPause, { gasLimit: GAS_LIMIT.default }),
       ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
-    it("GIVEN an account with ATS_ROLES._PAUSE_MANAGER_ROLE WHEN adding an external pause THEN it succeeds", async () => {
+    it("GIVEN an account with ATS_ROLES.PAUSE_MANAGER_ROLE WHEN adding an external pause THEN it succeeds", async () => {
       const newPause = externalPauseMock3.target as string;
       expect(await asset.isExternalPause(newPause)).to.be.false;
       await expect(
@@ -348,7 +348,7 @@ describe("ExternalPause Tests", () => {
       expect(await asset.isExternalPause(newPause)).to.be.true;
     });
 
-    it("GIVEN an account without ATS_ROLES._PAUSE_MANAGER_ROLE WHEN removing an external pause THEN it reverts with AccessControl", async () => {
+    it("GIVEN an account without ATS_ROLES.PAUSE_MANAGER_ROLE WHEN removing an external pause THEN it reverts with AccessControl", async () => {
       expect(await asset.isExternalPause(externalPauseMock1.target as string)).to.be.true;
       // --- FIX: Check for custom error ---
       await expect(
@@ -358,7 +358,7 @@ describe("ExternalPause Tests", () => {
       ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
-    it("GIVEN an account with ATS_ROLES._PAUSE_MANAGER_ROLE WHEN removing an external pause THEN it succeeds", async () => {
+    it("GIVEN an account with ATS_ROLES.PAUSE_MANAGER_ROLE WHEN removing an external pause THEN it succeeds", async () => {
       expect(await asset.isExternalPause(externalPauseMock1.target as string)).to.be.true;
       await expect(
         asset.removeExternalPause(externalPauseMock1.target as string, {
@@ -370,7 +370,7 @@ describe("ExternalPause Tests", () => {
       expect(await asset.isExternalPause(externalPauseMock1.target as string)).to.be.false;
     });
 
-    it("GIVEN an account without ATS_ROLES._PAUSE_MANAGER_ROLE WHEN updating external pauses THEN it reverts with AccessControl", async () => {
+    it("GIVEN an account without ATS_ROLES.PAUSE_MANAGER_ROLE WHEN updating external pauses THEN it reverts with AccessControl", async () => {
       const pauses = [externalPauseMock1.target as string];
       const actives = [false];
       expect(await asset.isExternalPause(externalPauseMock1.target as string)).to.be.true;
@@ -381,7 +381,7 @@ describe("ExternalPause Tests", () => {
       ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
-    it("GIVEN an account with ATS_ROLES._PAUSE_MANAGER_ROLE WHEN updating external pauses THEN it succeeds", async () => {
+    it("GIVEN an account with ATS_ROLES.PAUSE_MANAGER_ROLE WHEN updating external pauses THEN it succeeds", async () => {
       expect(await asset.isExternalPause(externalPauseMock1.target as string)).to.be.true;
       expect(await asset.isExternalPause(externalPauseMock2.target as string)).to.be.true;
       const pauses = [externalPauseMock1.target as string, externalPauseMock2.target as string];

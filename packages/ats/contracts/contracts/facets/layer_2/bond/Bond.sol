@@ -3,14 +3,14 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IBondManagement } from "./IBondManagement.sol";
 import { IKyc } from "../../layer_1/kyc/IKyc.sol";
-import { _BOND_MANAGER_ROLE, _MATURITY_REDEEMER_ROLE } from "../../../constants/roles.sol";
+import { BOND_MANAGER_ROLE, MATURITY_REDEEMER_ROLE } from "../../../constants/roles.sol";
 import { KPI_BOND_REDEEM_BALANCE } from "../../../constants/values.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { BondStorageWrapper } from "../../../domain/asset/BondStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
-import { _checkUnexpectedError } from "../../../infrastructure/utils/UnexpectedError.sol";
+import { checkUnexpectedError } from "../../../infrastructure/utils/UnexpectedError.sol";
 
 /**
  * @title Bond
@@ -27,7 +27,7 @@ abstract contract Bond is IBondManagement, Modifiers {
     /**
      * @notice Redeems all token partitions held by a token
      *         holder at bond maturity.
-     * @dev Caller must hold _MATURITY_REDEEMER_ROLE. Contract
+     * @dev Caller must hold MATURITY_REDEEMER_ROLE. Contract
      *      must be unpaused and clearing disabled. Token holder
      *      must be on the allowed list with granted KYC status,
      *      must not be recovered, and the maturity date must
@@ -44,7 +44,7 @@ abstract contract Bond is IBondManagement, Modifiers {
         override
         onlyUnpaused
         onlyClearingDisabled
-        onlyRole(_MATURITY_REDEEMER_ROLE)
+        onlyRole(MATURITY_REDEEMER_ROLE)
         onlyValidAddress(_tokenHolder)
         onlyUnrecoveredAddress(_tokenHolder)
         onlyListedAllowed(_tokenHolder)
@@ -55,7 +55,7 @@ abstract contract Bond is IBondManagement, Modifiers {
         for (uint256 i = 0; i < partitions.length; i++) {
             bytes32 partition = partitions[i];
             uint256 balance = ERC1410StorageWrapper.balanceOfByPartition(partition, _tokenHolder);
-            _checkUnexpectedError(balance == 0, KPI_BOND_REDEEM_BALANCE);
+            checkUnexpectedError(balance == 0, KPI_BOND_REDEEM_BALANCE);
             ERC1410StorageWrapper.redeemByPartition(
                 partition,
                 _tokenHolder,
@@ -70,7 +70,7 @@ abstract contract Bond is IBondManagement, Modifiers {
     /**
      * @notice Redeems a specified amount of tokens from a
      *         single partition at bond maturity.
-     * @dev Caller must hold _MATURITY_REDEEMER_ROLE. Contract
+     * @dev Caller must hold MATURITY_REDEEMER_ROLE. Contract
      *      must be unpaused and clearing disabled. Token holder
      *      must be on the allowed list with granted KYC status,
      *      must not be recovered, and the maturity date must
@@ -91,7 +91,7 @@ abstract contract Bond is IBondManagement, Modifiers {
         override
         onlyUnpaused
         onlyClearingDisabled
-        onlyRole(_MATURITY_REDEEMER_ROLE)
+        onlyRole(MATURITY_REDEEMER_ROLE)
         onlyValidAddress(_tokenHolder)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnrecoveredAddress(_tokenHolder)
@@ -104,7 +104,7 @@ abstract contract Bond is IBondManagement, Modifiers {
 
     /**
      * @notice Updates the bond maturity date to a new timestamp.
-     * @dev Caller must hold _BOND_MANAGER_ROLE. Contract must be
+     * @dev Caller must hold BOND_MANAGER_ROLE. Contract must be
      *      unpaused. The new maturity date must satisfy the
      *      validity check enforced by the onlyValidMaturityDate
      *      modifier. Emits MaturityDateUpdated with the contract
@@ -120,7 +120,7 @@ abstract contract Bond is IBondManagement, Modifiers {
         external
         override
         onlyUnpaused
-        onlyRole(_BOND_MANAGER_ROLE)
+        onlyRole(BOND_MANAGER_ROLE)
         onlyValidMaturityDate(_newMaturityDate)
         returns (bool success_)
     {

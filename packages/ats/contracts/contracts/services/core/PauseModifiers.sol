@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { PauseStorageWrapper } from "../../domain/core/PauseStorageWrapper.sol";
-import { _checkNotInitialized } from "../InitializationErrors.sol";
+import { checkNotInitialized } from "../InitializationErrors.sol";
 
 /**
  * @title PauseModifiers
@@ -13,17 +13,17 @@ import { _checkNotInitialized } from "../InitializationErrors.sol";
  */
 abstract contract PauseModifiers {
     modifier onlyUnpaused() {
-        PauseStorageWrapper._checkUnpaused();
+        PauseStorageWrapper.checkUnpaused();
         _;
     }
 
     modifier onlyPaused() {
-        PauseStorageWrapper._checkPaused();
+        PauseStorageWrapper.checkPaused();
         _;
     }
 
     modifier onlyNotExternalPauseInitialized() {
-        _checkNotInitialized(PauseStorageWrapper.isExternalPauseInitialized());
+        checkNotInitialized(PauseStorageWrapper.isExternalPauseInitialized());
         _;
     }
 }

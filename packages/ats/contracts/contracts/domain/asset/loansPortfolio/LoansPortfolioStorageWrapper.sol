@@ -35,7 +35,7 @@ library LoansPortfolioStorageWrapper {
     }
 
     function initializeLoansPortfolio(ILoansPortfolio.LoansPortfolioDetailsData calldata _loansPortfolioData) internal {
-        LoansPortfolioDataStorage storage s = _loansPortfolioStorage();
+        LoansPortfolioDataStorage storage s = loansPortfolioStorage();
         s.initialized = true;
         storeLoansPortfolioDetails(_loansPortfolioData);
     }
@@ -43,14 +43,14 @@ library LoansPortfolioStorageWrapper {
     function storeLoansPortfolioDetails(
         ILoansPortfolio.LoansPortfolioDetailsData memory _loansPortfolioDetails
     ) internal {
-        LoansPortfolioDataStorage storage s = _loansPortfolioStorage();
+        LoansPortfolioDataStorage storage s = loansPortfolioStorage();
         s.portfolioType = _loansPortfolioDetails.portfolioType;
         s.distributionPolicy = _loansPortfolioDetails.distributionPolicy;
     }
 
     function addHoldingsAsset(ILoansPortfolio.HoldingsAsset memory _holdingsAsset) internal {
         ILoansPortfolio.HoldingsAssetType holdingsAssetType = _holdingsAsset.holdingsAssetType;
-        LoansPortfolioDataStorage storage loanPortfolioStorage = _loansPortfolioStorage();
+        LoansPortfolioDataStorage storage loanPortfolioStorage = loansPortfolioStorage();
 
         if (loanPortfolioStorage.holdingsAssets.contains(_holdingsAsset.assetAddress)) {
             revert ILoansPortfolioStorageWrapper.HoldingsAssetAlreadyExists(_holdingsAsset.assetAddress);
@@ -71,7 +71,7 @@ library LoansPortfolioStorageWrapper {
         address assetAddress = _holdingsAsset.assetAddress;
         checkHoldingAssetExists(assetAddress);
 
-        LoansPortfolioDataStorage storage loanPortfolioStorage = _loansPortfolioStorage();
+        LoansPortfolioDataStorage storage loanPortfolioStorage = loansPortfolioStorage();
 
         if (holdingsAssetType == ILoansPortfolio.HoldingsAssetType.LOAN) {
             _removeLoanHoldingsAsset(loanPortfolioStorage, assetAddress);
@@ -86,7 +86,7 @@ library LoansPortfolioStorageWrapper {
 
     function notifyLoanHoldingsAssetUpdate(address _holdingsAssetAddress) internal {
         checkHoldingAssetExists(_holdingsAssetAddress);
-        LoansPortfolioDataStorage storage loanPortfolioStorage = _loansPortfolioStorage();
+        LoansPortfolioDataStorage storage loanPortfolioStorage = loansPortfolioStorage();
 
         ILoan.LoanDetailsData memory loanDetails = ILoan(_holdingsAssetAddress).getLoanDetails();
 
@@ -130,7 +130,7 @@ library LoansPortfolioStorageWrapper {
     }
 
     function checkHoldingAssetExists(address _assetAddress) internal view {
-        if (!_loansPortfolioStorage().holdingsAssets.contains(_assetAddress)) {
+        if (!loansPortfolioStorage().holdingsAssets.contains(_assetAddress)) {
             revert ILoansPortfolioStorageWrapper.HoldingAssetNotFound(_assetAddress);
         }
     }
@@ -139,7 +139,7 @@ library LoansPortfolioStorageWrapper {
         view
         returns (ILoansPortfolio.LoansPortfolioDetailsData memory loansPortfolioDetails_)
     {
-        LoansPortfolioDataStorage storage s = _loansPortfolioStorage();
+        LoansPortfolioDataStorage storage s = loansPortfolioStorage();
         loansPortfolioDetails_ = ILoansPortfolio.LoansPortfolioDetailsData({
             portfolioType: s.portfolioType,
             distributionPolicy: s.distributionPolicy
@@ -147,19 +147,19 @@ library LoansPortfolioStorageWrapper {
     }
 
     function getSecuredLoansRatio() internal view returns (uint256 numerator_, uint256 denominator_) {
-        return _getLoanRatioFor(_loansPortfolioStorage().securedLoanHoldingsAssets);
+        return _getLoanRatioFor(loansPortfolioStorage().securedLoanHoldingsAssets);
     }
 
     function getPerformingLoansRatio() internal view returns (uint256 numerator_, uint256 denominator_) {
-        return _getLoanRatioFor(_loansPortfolioStorage().performingLoanHoldingsAssets);
+        return _getLoanRatioFor(loansPortfolioStorage().performingLoanHoldingsAssets);
     }
 
     function getNonPerformingLoansRatio() internal view returns (uint256 numerator_, uint256 denominator_) {
-        return _getLoanRatioFor(_loansPortfolioStorage().nonPerformingLoanHoldingsAssets);
+        return _getLoanRatioFor(loansPortfolioStorage().nonPerformingLoanHoldingsAssets);
     }
 
     function getDefaultedLoansRatio() internal view returns (uint256 numerator_, uint256 denominator_) {
-        return _getLoanRatioFor(_loansPortfolioStorage().defaultedLoanHoldingsAssets);
+        return _getLoanRatioFor(loansPortfolioStorage().defaultedLoanHoldingsAssets);
     }
 
     function getGeographicalExposure()
@@ -167,7 +167,7 @@ library LoansPortfolioStorageWrapper {
         view
         returns (ILoansPortfolio.GeographicalExposureData[] memory geographicalExposure_)
     {
-        LoansPortfolioDataStorage storage storage_ = _loansPortfolioStorage();
+        LoansPortfolioDataStorage storage storage_ = loansPortfolioStorage();
         uint256 countryCount = storage_.loanHoldingsAssetsByCountryKeys.length();
 
         if (countryCount == 0) {
@@ -190,52 +190,52 @@ library LoansPortfolioStorageWrapper {
     }
 
     function getNumberOfPerformingLoans() internal view returns (uint256 numberOfPerformingLoans_) {
-        numberOfPerformingLoans_ = _loansPortfolioStorage().performingLoanHoldingsAssets.length();
+        numberOfPerformingLoans_ = loansPortfolioStorage().performingLoanHoldingsAssets.length();
     }
 
     function getNumberOfNonPerformingLoans() internal view returns (uint256 numberOfNonPerformingLoans_) {
-        numberOfNonPerformingLoans_ = _loansPortfolioStorage().nonPerformingLoanHoldingsAssets.length();
+        numberOfNonPerformingLoans_ = loansPortfolioStorage().nonPerformingLoanHoldingsAssets.length();
     }
 
     function getNumberDefaultedLoans() internal view returns (uint256 numberDefaultedLoans_) {
-        numberDefaultedLoans_ = _loansPortfolioStorage().defaultedLoanHoldingsAssets.length();
+        numberDefaultedLoans_ = loansPortfolioStorage().defaultedLoanHoldingsAssets.length();
     }
 
     function getNumberOfAssets() internal view returns (uint256 numberOfAssets_) {
-        numberOfAssets_ = _loansPortfolioStorage().holdingsAssets.length();
+        numberOfAssets_ = loansPortfolioStorage().holdingsAssets.length();
     }
 
     function isLoansPortfolioInitialized() internal view returns (bool) {
-        return _loansPortfolioStorage().initialized;
+        return loansPortfolioStorage().initialized;
     }
 
     function getNumberOfLoans() internal view returns (uint256 numberOfLoans_) {
-        numberOfLoans_ = _loansPortfolioStorage().loanHoldingsAssets.length();
+        numberOfLoans_ = loansPortfolioStorage().loanHoldingsAssets.length();
     }
 
     function getNumberOfCash() internal view returns (uint256 numberOfCash_) {
-        numberOfCash_ = _loansPortfolioStorage().cashHoldingsAssets.length();
+        numberOfCash_ = loansPortfolioStorage().cashHoldingsAssets.length();
     }
 
     function getHoldingsAssets(
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory assets_) {
-        assets_ = _loansPortfolioStorage().holdingsAssets.getFromSet(_pageIndex, _pageLength);
+        assets_ = loansPortfolioStorage().holdingsAssets.getFromSet(_pageIndex, _pageLength);
     }
 
     function getLoanHoldingsAssetsPaginated(
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory assets_) {
-        assets_ = _loansPortfolioStorage().loanHoldingsAssets.getFromSet(_pageIndex, _pageLength);
+        assets_ = loansPortfolioStorage().loanHoldingsAssets.getFromSet(_pageIndex, _pageLength);
     }
 
     function getHoldingsAssetBalances(
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory assets_, uint256[] memory tokenBalances_) {
-        assets_ = _loansPortfolioStorage().holdingsAssets.getFromSet(_pageIndex, _pageLength);
+        assets_ = loansPortfolioStorage().holdingsAssets.getFromSet(_pageIndex, _pageLength);
         uint256 arraySize = assets_.length;
         tokenBalances_ = new uint256[](arraySize);
 
@@ -247,7 +247,7 @@ library LoansPortfolioStorageWrapper {
         }
     }
 
-    function _loansPortfolioStorage() internal pure returns (LoansPortfolioDataStorage storage loansPortfolioData_) {
+    function loansPortfolioStorage() internal pure returns (LoansPortfolioDataStorage storage loansPortfolioData_) {
         bytes32 position = _LOANS_PORTFOLIO_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -372,7 +372,7 @@ library LoansPortfolioStorageWrapper {
     function _getLoanRatioFor(
         EnumerableSet.AddressSet storage _subSet
     ) private view returns (uint256 numerator_, uint256 denominator_) {
-        denominator_ = _loansPortfolioStorage().loanHoldingsAssets.length();
+        denominator_ = loansPortfolioStorage().loanHoldingsAssets.length();
         if (denominator_ == 0) return (0, 0);
         numerator_ = _subSet.length();
     }

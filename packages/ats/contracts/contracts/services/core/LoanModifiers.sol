@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _LOAN_MANAGER_ROLE, _LOANS_PORTFOLIO_MANAGER_ROLE } from "../../constants/roles.sol";
+import { LOAN_MANAGER_ROLE, LOANS_PORTFOLIO_MANAGER_ROLE } from "../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
@@ -17,10 +17,10 @@ abstract contract LoanModifiers {
      * @dev Modifier that validates msg.sender has LOAN_MANAGER_ROLE
      *
      * Requirements:
-     * - msg.sender must have _LOAN_MANAGER_ROLE
+     * - msg.sender must have LOAN_MANAGER_ROLE
      */
     modifier onlyLoanManager() {
-        AccessControlStorageWrapper.checkRole(_LOAN_MANAGER_ROLE, EvmAccessors.getMsgSender());
+        AccessControlStorageWrapper.checkRole(LOAN_MANAGER_ROLE, EvmAccessors.getMsgSender());
         _;
     }
 
@@ -28,10 +28,10 @@ abstract contract LoanModifiers {
      * @dev Modifier that validates msg.sender has LOANS_PORTFOLIO_MANAGER_ROLE
      *
      * Requirements:
-     * - msg.sender must have _LOANS_PORTFOLIO_MANAGER_ROLE
+     * - msg.sender must have LOANS_PORTFOLIO_MANAGER_ROLE
      */
     modifier onlyLoansPortfolioManager() {
-        AccessControlStorageWrapper.checkRole(_LOANS_PORTFOLIO_MANAGER_ROLE, EvmAccessors.getMsgSender());
+        AccessControlStorageWrapper.checkRole(LOANS_PORTFOLIO_MANAGER_ROLE, EvmAccessors.getMsgSender());
         _;
     }
 }

@@ -9,7 +9,7 @@ import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsSt
 import { ERC1594StorageWrapper } from "../asset/ERC1594StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../asset/ERC20StorageWrapper.sol";
 import { ThirdPartyType } from "../asset/types/ThirdPartyType.sol";
-import { _checkNonceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
+import { checkNonceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 /// @title ClearingProtectedOps - Protected clearing operations with EIP-712 signatures
@@ -22,7 +22,7 @@ library ClearingProtectedOps {
         address _to,
         bytes calldata _signature
     ) public returns (bool success_, uint256 clearingId_) {
-        _checkNonceAndDeadline(
+        checkNonceAndDeadline(
             _protectedClearingOperation.nonce,
             _protectedClearingOperation.from,
             NonceStorageWrapper.getNonceFor(_protectedClearingOperation.from),
@@ -57,7 +57,7 @@ library ClearingProtectedOps {
         uint256 _amount,
         bytes calldata _signature
     ) public returns (bool success_, uint256 clearingId_) {
-        _checkNonceAndDeadline(
+        checkNonceAndDeadline(
             _protectedClearingOperation.nonce,
             _protectedClearingOperation.from,
             NonceStorageWrapper.getNonceFor(_protectedClearingOperation.from),
@@ -90,7 +90,7 @@ library ClearingProtectedOps {
         IHoldTypes.Hold calldata _hold,
         bytes calldata _signature
     ) public returns (bool success_, uint256 clearingId_) {
-        _checkNonceAndDeadline(
+        checkNonceAndDeadline(
             _protectedClearingOperation.nonce,
             _protectedClearingOperation.from,
             NonceStorageWrapper.getNonceFor(_protectedClearingOperation.from),

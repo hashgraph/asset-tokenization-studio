@@ -8,7 +8,7 @@ import { ProceedRecipientsStorageWrapper } from "./ProceedRecipientsStorageWrapp
 import { CouponStorageWrapper } from "./coupon/CouponStorageWrapper.sol";
 import { DecimalsLib } from "../../infrastructure/utils/DecimalsLib.sol";
 import { KPI_LINKED_RATE_COUPON } from "../../constants/values.sol";
-import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
+import { checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 
 /**
  * @title KpiLinkedRateLib
@@ -116,7 +116,7 @@ library KpiLinkedRateLib {
         (ICouponTypes.RegisteredCoupon memory previousCoupon, , ) = CouponStorageWrapper.getCoupon(previousCouponId);
 
         // Previous coupon rate must be set
-        _checkUnexpectedError(
+        checkUnexpectedError(
             previousCoupon.coupon.rateStatus != ICouponTypes.RateCalculationStatus.SET,
             KPI_LINKED_RATE_COUPON
         );
