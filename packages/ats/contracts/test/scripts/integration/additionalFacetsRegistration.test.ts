@@ -290,7 +290,7 @@ describe("registerAdditionalFacets - Integration Tests", () => {
         "CapFacet",
         "ControlListFacet",
         "SnapshotsFacet",
-        "ERC20Facet",
+        "TransferFacet",
         "DiamondFacet",
         "AdjustBalancesFacet",
       ];
@@ -332,12 +332,8 @@ describe("registerAdditionalFacets - Integration Tests", () => {
       const erc1410Factory = await ethers.getContractFactory("ERC1410ReadFacet", deployer);
       const erc1410 = await deployContract(erc1410Factory, {});
 
-      // ERC1594Facet needs TokenCoreOps library linking
-      const erc1594RequiredLibs = getFacetRequiredLibraries("ERC1594Facet");
-      const erc1594Factory = await ethers.getContractFactory("ERC1594Facet", {
-        signer: deployer,
-        libraries: erc1594RequiredLibs.length > 0 ? getLibLinks(...erc1594RequiredLibs) : undefined,
-      });
+      // ERC1594Facet
+      const erc1594Factory = await ethers.getContractFactory("ERC1594Facet", deployer);
       const erc1594 = await deployContract(erc1594Factory as any, {});
 
       const newFacetsWithKeys = [

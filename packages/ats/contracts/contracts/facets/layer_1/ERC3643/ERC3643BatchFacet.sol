@@ -11,13 +11,7 @@ contract ERC3643BatchFacet is ERC3643Batch, IStaticFunctionSelectors {
         staticResolverKey_ = _ERC3643_BATCH_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 1;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.batchTransfer.selector;
-        }
-    }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {}
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         uint256 selectorIndex = 1;

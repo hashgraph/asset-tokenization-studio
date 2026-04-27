@@ -97,6 +97,14 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
+    function setName(string calldata) external pure {
+        revert NotImplemented();
+    }
+
+    function setSymbol(string calldata) external pure {
+        revert NotImplemented();
+    }
+
     function updateMaturityDate(uint256) external pure returns (bool) {
         revert NotImplemented();
     }
@@ -288,7 +296,7 @@ contract AssetMock is IAssetMock {
     }
 
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC20(ERC20Metadata calldata) external pure {
+    function initializeCore(ERC20Metadata calldata) external pure {
         revert NotImplemented();
     }
 
@@ -321,6 +329,10 @@ contract AssetMock is IAssetMock {
     }
 
     function decimalsAt(uint256) external pure returns (uint8) {
+        revert NotImplemented();
+    }
+
+    function version() external pure returns (string memory) {
         revert NotImplemented();
     }
 

@@ -1,19 +1,39 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IERC20 } from "../layer_1/ERC1400/ERC20/IERC20.sol";
+import { IFactory } from "../../factory/IFactory.sol";
 
 /**
  * @title ICore
  * @notice Consolidated interface for the token "Core" domain: identity-defining methods
  *         (ERC20 metadata readers, ERC3643 name/symbol setters, and version).
+ *         Also owns the `ERC20MetadataInfo` and `ERC20Metadata` structs, since the only
+ *         initializer for this data (`initializeCore`) lives in CoreFacet.
  */
 interface ICore {
     /**
-     * @notice Initializes the Core domain (name, symbol, decimals and the rest of the ERC20 metadata).
-     * @dev Writes into the same storage as `initialize_ERC20`; only one of the two may run.
+     * @notice Basic ERC-20 token identity fields.
      */
-    function initializeCore(IERC20.ERC20Metadata calldata metadata) external;
+    struct ERC20MetadataInfo {
+        string name;
+        string symbol;
+        string isin;
+        uint8 decimals;
+    }
+
+    /**
+     * @notice Full metadata bundle passed to `initializeCore`.
+     */
+    struct ERC20Metadata {
+        ERC20MetadataInfo info;
+        IFactory.SecurityType securityType;
+    }
+
+    /**
+     * @notice Initializes the Core domain (name, symbol, decimals and the rest of the ERC20 metadata).
+     * @param metadata The full ERC-20 metadata bundle to persist.
+     */
+    function initializeCore(ERC20Metadata calldata metadata) external;
 
     /**
      * @notice Updates the token name. Restricted to the TREX owner role.
@@ -43,7 +63,7 @@ interface ICore {
     /**
      * @notice Returns the full metadata struct of the security token.
      */
-    function getERC20Metadata() external view returns (IERC20.ERC20Metadata memory);
+    function getERC20Metadata() external view returns (ERC20Metadata memory);
 
     /**
      * @notice Returns the ERC3643 version string of the token.

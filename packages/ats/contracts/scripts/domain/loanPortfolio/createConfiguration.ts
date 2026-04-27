@@ -49,7 +49,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "CorporateActionsFacet",
   "DiamondFacet",
   "CoreFacet",
-  "ERC20Facet",
+  "TransferFacet",
   "CoreAdjustedFacet",
   "FreezeFacet",
   "KycFacet",
@@ -74,10 +74,12 @@ const LOANS_PORTFOLIO_FACETS = [
   "BatchControllerFacet",
   "BatchBurnFacet",
   "BatchMintFacet",
+  "BatchTransferFacet",
   "ERC3643ManagementFacet",
   "ERC3643OperationsFacet",
   "ERC3643ReadFacet",
   "ComplianceFacet",
+  "MintFacet",
 
   // Nominal Value
   "NominalValueFacet",

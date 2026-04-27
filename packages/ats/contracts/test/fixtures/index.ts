@@ -16,7 +16,7 @@ export { deployAtsInfrastructureFixture } from "./infrastructure.fixture";
 export {
   deployBlrFixture,
   registerCommonFacetsFixture,
-  registerERC20FacetFixture,
+  registerTransferFacetFixture,
   registerMigrationFacetFixture,
 } from "./integration.fixture";
 
