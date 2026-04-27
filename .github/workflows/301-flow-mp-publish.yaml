@@ -1,4 +1,4 @@
-name: "300: [FLOW] MP Publish"
+name: "301: [FLOW] MP Publish"
 
 on:
   # Manual trigger with dry-run option
@@ -47,7 +47,7 @@ jobs:
       - name: Setup NodeJS Environment
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 22.20.0
+          node-version-file: .nvmrc
           registry-url: https://registry.npmjs.org
 
       - name: Update npm
@@ -124,7 +124,7 @@ jobs:
   publish-mass-payout:
     name: Publish Mass Payout Packages
     needs: build-mass-payout
-    runs-on: ubuntu-latest
+    runs-on: token-studio-linux-medium
     timeout-minutes: 15
     env:
       DRY_RUN: ${{ inputs.dry-run-enabled }}
@@ -138,7 +138,7 @@ jobs:
       - name: Setup NodeJS Environment
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 22.20.0
+          node-version-file: .nvmrc
           registry-url: https://registry.npmjs.org
 
       - name: Update npm

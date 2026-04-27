@@ -1,4 +1,4 @@
-name: "100: [FLOW] ATS Deployment Test"
+name: "102: [FLOW] ATS Deployment Test"
 
 on:
   pull_request:
@@ -35,7 +35,6 @@ jobs:
     runs-on: token-studio-linux-large
     timeout-minutes: 10
     env:
-      NODE_OPTIONS: "--max-old-space-size=32768"
       CONTRACT_SIZER_RUN_ON_COMPILE: "false"
       REPORT_GAS: "false"
 
@@ -51,7 +50,7 @@ jobs:
       - name: Setup NodeJS Environment
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 22.20.0
+          node-version-file: .nvmrc
 
       - name: Restore dependencies from cache
         id: deps-cache
@@ -102,7 +101,6 @@ jobs:
     runs-on: token-studio-linux-large
     timeout-minutes: 15
     env:
-      NODE_OPTIONS: "--max-old-space-size=32768"
       CONTRACT_SIZER_RUN_ON_COMPILE: "false"
       REPORT_GAS: "false"
 
@@ -118,7 +116,7 @@ jobs:
       - name: Setup NodeJS Environment
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 22.20.0
+          node-version-file: .nvmrc
 
       - name: Restore dependencies from cache
         id: deps-cache
@@ -223,7 +221,6 @@ jobs:
     runs-on: token-studio-linux-large
     timeout-minutes: 30
     env:
-      NODE_OPTIONS: "--max-old-space-size=32768"
       CONTRACT_SIZER_RUN_ON_COMPILE: "false"
       REPORT_GAS: "false"
 
@@ -239,7 +236,7 @@ jobs:
       - name: Setup NodeJS Environment
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 22.20.0
+          node-version-file: .nvmrc
 
       - name: Check Docker availability
         id: docker-check
