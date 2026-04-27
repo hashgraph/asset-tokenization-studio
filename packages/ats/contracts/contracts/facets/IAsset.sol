@@ -63,7 +63,6 @@ import { ITransferAndLock } from "./layer_3/transferAndLock/ITransferAndLock.sol
 import { ICoupon } from "./layer_2/coupon/ICoupon.sol";
 import { IDividend } from "./layer_2/dividend/IDividend.sol";
 import { IKpis } from "./layer_2/kpi/kpiLatest/IKpis.sol";
-import { IScheduledSnapshots } from "./layer_2/scheduledTask/scheduledSnapshot/IScheduledSnapshots.sol";
 import { IProtectedPartitions } from "./layer_1/protectedPartition/IProtectedPartitions.sol";
 import { IProceedRecipients } from "./layer_2/proceedRecipient/IProceedRecipients.sol";
 import { ICap } from "./layer_1/cap/ICap.sol";
@@ -133,7 +132,6 @@ interface IAsset is
     IERC1410,
     IERC3643,
     IScheduledCrossOrderedTasks,
-    IScheduledSnapshots,
     IBond,
     IEquity,
     ISecurity,

@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-27T08:54:21.205Z
- * Facets: 89
+ * Generated: 2026-04-27T12:38:05.146Z
+ * Facets: 88
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -94,7 +94,6 @@ import {
   ScheduledCrossOrderedTasksFacet__factory,
   ScheduledCrossOrderedTasksKpiLinkedRateFacet__factory,
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet__factory,
-  ScheduledSnapshotsFacet__factory,
   SnapshotsFacet__factory,
   SsiManagementFacet__factory,
   SustainabilityPerformanceTargetRateFacet__factory,
@@ -168,7 +167,6 @@ import {
   ScheduledCrossOrderedTasksFacetTimeTravel__factory,
   ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel__factory,
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
-  ScheduledSnapshotsFacetTimeTravel__factory,
   SnapshotsFacetTimeTravel__factory,
   SsiManagementFacetTimeTravel__factory,
   SustainabilityPerformanceTargetRateFacetTimeTravel__factory,
@@ -11861,35 +11859,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       new ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
   },
 
-  ScheduledSnapshotsFacet: {
-    name: "ScheduledSnapshotsFacet",
-    resolverKey: {
-      name: "_SCHEDULED_SNAPSHOTS_RESOLVER_KEY",
-      value: "0x100f681e33d02a1124c2c05a537a1229eca89767c5e6e8720066ca74bfb85793",
-    },
-    inheritance: ["ScheduledSnapshots", "IStaticFunctionSelectors"],
-    methods: [
-      {
-        name: "getScheduledSnapshots",
-        signature: {
-          full: "function getScheduledSnapshots(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledSnapshot_)",
-          canonical: "getScheduledSnapshots(uint256,uint256)",
-        },
-        selector: "0xca21c53a",
-      },
-      {
-        name: "scheduledSnapshotCount",
-        signature: {
-          full: "function scheduledSnapshotCount() view returns (uint256)",
-          canonical: "scheduledSnapshotCount()",
-        },
-        selector: "0xa19e91fe",
-      },
-    ],
-    factory: (signer) => new ScheduledSnapshotsFacet__factory(signer),
-    timeTravelFactory: (signer) => new ScheduledSnapshotsFacetTimeTravel__factory(signer),
-  },
-
   SnapshotsFacet: {
     name: "SnapshotsFacet",
     resolverKey: {
@@ -11963,6 +11932,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x0749c323",
       },
       {
+        name: "getScheduledSnapshots",
+        signature: {
+          full: "function getScheduledSnapshots(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledSnapshot_)",
+          canonical: "getScheduledSnapshots(uint256,uint256)",
+        },
+        selector: "0xca21c53a",
+      },
+      {
         name: "getTokenHoldersAtSnapshot",
         signature: {
           full: "function getTokenHoldersAtSnapshot(uint256 _snapshotID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
@@ -12017,6 +11994,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "partitionsOfAtSnapshot(uint256,address)",
         },
         selector: "0x09e84301",
+      },
+      {
+        name: "scheduledSnapshotCount",
+        signature: {
+          full: "function scheduledSnapshotCount() view returns (uint256)",
+          canonical: "scheduledSnapshotCount()",
+        },
+        selector: "0xa19e91fe",
       },
       {
         name: "takeSnapshot",
@@ -13384,7 +13369,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 89 as const;
+export const TOTAL_FACETS = 88 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

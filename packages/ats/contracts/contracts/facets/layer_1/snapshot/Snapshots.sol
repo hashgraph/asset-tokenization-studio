@@ -6,6 +6,7 @@ import { SNAPSHOT_ROLE } from "../../../constants/roles.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { SnapshotsStorageWrapper } from "../../../domain/asset/SnapshotsStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";
+import { ScheduledTask } from "../../layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract Snapshots is ISnapshots, Modifiers {
@@ -130,5 +131,16 @@ abstract contract Snapshots is ISnapshots, Modifiers {
         address _tokenHolder
     ) external view returns (uint256 balance_) {
         balance_ = SnapshotsStorageWrapper.frozenBalanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
+    }
+
+    function scheduledSnapshotCount() external view override returns (uint256) {
+        return ScheduledTasksStorageWrapper.getScheduledSnapshotCount();
+    }
+
+    function getScheduledSnapshots(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override returns (ScheduledTask[] memory scheduledSnapshot_) {
+        scheduledSnapshot_ = ScheduledTasksStorageWrapper.getScheduledSnapshots(_pageIndex, _pageLength);
     }
 }

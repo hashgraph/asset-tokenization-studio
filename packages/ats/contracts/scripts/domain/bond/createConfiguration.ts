@@ -105,7 +105,6 @@ const BOND_FACETS = [
   "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
   "ScheduledCouponListingFacet",
-  "ScheduledSnapshotsFacet",
   "SsiManagementFacet",
   "TransferAndLockFacet",
 

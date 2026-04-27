@@ -99,7 +99,6 @@ const BOND_FIXED_RATE_FACETS = [
   "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
   "ScheduledCouponListingFacet",
-  "ScheduledSnapshotsFacet",
   "SsiManagementFacet",
 
   // Interest Rate (rate-specific)

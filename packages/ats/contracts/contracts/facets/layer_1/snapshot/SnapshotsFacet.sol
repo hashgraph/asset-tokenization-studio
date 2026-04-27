@@ -13,7 +13,7 @@ contract SnapshotsFacet is Snapshots, IStaticFunctionSelectors {
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](18);
+        staticFunctionSelectors_ = new bytes4[](20);
         staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
         staticFunctionSelectors_[selectorIndex++] = this.balanceOfAtSnapshot.selector;
         staticFunctionSelectors_[selectorIndex++] = this.balancesOfAtSnapshot.selector;
@@ -32,6 +32,8 @@ contract SnapshotsFacet is Snapshots, IStaticFunctionSelectors {
         staticFunctionSelectors_[selectorIndex++] = this.decimalsAtSnapshot.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getTokenHoldersAtSnapshot.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getTotalTokenHoldersAtSnapshot.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.scheduledSnapshotCount.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getScheduledSnapshots.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
