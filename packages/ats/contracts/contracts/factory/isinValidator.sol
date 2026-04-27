@@ -14,12 +14,12 @@ import {
 error WrongISIN(string isin);
 error WrongISINChecksum(string isin);
 
-function validateISIN(string calldata _isin) pure {
+function _validateISIN(string calldata _isin) pure {
     checkLength(_isin);
     checkChecksum(_isin);
 }
 
-function checkLength(string calldata _isin) pure {
+function _checkLength(string calldata _isin) pure {
     if (bytes(_isin).length != _ISIN_LENGTH) {
         revert WrongISIN(_isin);
     }
@@ -27,7 +27,7 @@ function checkLength(string calldata _isin) pure {
 
 // solhint-disable-next-line max-line-length
 // https://fastercapital.com/questions/how-to-check-if-an-isin-code-is-valid-and-compliant-with-the-iso-6166-standard.html
-function checkChecksum(string calldata _isin) pure {
+function _checkChecksum(string calldata _isin) pure {
     bytes memory isin = bytes(_isin);
     (uint8[] memory conv, uint8 convLength) = convertISINToNumber(isin);
     if (byteToCode(isin[_CHECKSUM_POSITION_IN_ISIN]) != calculateChecksum(conv, convLength)) {
@@ -35,7 +35,7 @@ function checkChecksum(string calldata _isin) pure {
     }
 }
 
-function convertISINToNumber(bytes memory _isin) pure returns (uint8[] memory conv_, uint8 convLength_) {
+function _convertISINToNumber(bytes memory _isin) pure returns (uint8[] memory conv_, uint8 convLength_) {
     unchecked {
         conv_ = new uint8[](_CHECKSUM_POSITION_IN_ISIN * 2);
         for (uint256 index; index < _CHECKSUM_POSITION_IN_ISIN; ++index) {
@@ -51,7 +51,7 @@ function convertISINToNumber(bytes memory _isin) pure returns (uint8[] memory co
     }
 }
 
-function calculateChecksum(uint8[] memory _conv, uint8 _convLength) pure returns (uint8 checksum_) {
+function _calculateChecksum(uint8[] memory _conv, uint8 _convLength) pure returns (uint8 checksum_) {
     unchecked {
         uint256 pairing = (_convLength + 1) % 2;
         uint256 checksum;
@@ -68,7 +68,7 @@ function calculateChecksum(uint8[] memory _conv, uint8 _convLength) pure returns
     }
 }
 
-function byteToCode(bytes1 _character) pure returns (uint8 code_) {
+function _byteToCode(bytes1 _character) pure returns (uint8 code_) {
     code_ = uint8(_character);
     code_ = code_ > _ASCII_9 ? code_ - _ASCII_7 : code_ - _ASCII_0;
 }

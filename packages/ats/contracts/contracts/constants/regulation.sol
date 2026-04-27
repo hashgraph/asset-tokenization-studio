@@ -88,7 +88,7 @@ struct RegulationData {
 
 error RegulationTypeAndSubTypeForbidden(RegulationType regulationType, RegulationSubType regulationSubType);
 
-function buildRegulationData(
+function _buildRegulationData(
     RegulationType _regulationType,
     RegulationSubType _regulationSubType
 ) pure returns (RegulationData memory regulationData_) {
@@ -104,7 +104,7 @@ function buildRegulationData(
     });
 }
 
-function buildDealSize(
+function _buildDealSize(
     RegulationType _regulationType,
     RegulationSubType _regulationSubType
 ) pure returns (uint256 dealSize_) {
@@ -117,7 +117,7 @@ function buildDealSize(
     dealSize_ = REGD_506_C_DEAL_SIZE;
 }
 
-function buildAccreditedInvestors(
+function _buildAccreditedInvestors(
     RegulationType _regulationType,
     RegulationSubType _regulationSubType
 ) pure returns (AccreditedInvestors accreditedInvestors_) {
@@ -130,7 +130,7 @@ function buildAccreditedInvestors(
     accreditedInvestors_ = REGD_506_C_ACCREDITED_INVESTORS;
 }
 
-function buildMaxNonAccreditedInvestors(
+function _buildMaxNonAccreditedInvestors(
     RegulationType _regulationType,
     RegulationSubType _regulationSubType
 ) pure returns (uint256 maxNonAccreditedInvestors_) {
@@ -143,7 +143,7 @@ function buildMaxNonAccreditedInvestors(
     maxNonAccreditedInvestors_ = REGD_506_C_MAX_NON_ACCREDITED_INVESTORS;
 }
 
-function buildManualInvestorVerification(
+function _buildManualInvestorVerification(
     RegulationType _regulationType,
     RegulationSubType _regulationSubType
 ) pure returns (ManualInvestorVerification manualInvestorVerification_) {
@@ -156,7 +156,7 @@ function buildManualInvestorVerification(
     manualInvestorVerification_ = REGD_506_C_MANUAL_INVESTOR_VERIFICATION;
 }
 
-function buildInternationalInvestors(
+function _buildInternationalInvestors(
     RegulationType _regulationType,
     RegulationSubType _regulationSubType
 ) pure returns (InternationalInvestors internationalInvestors_) {
@@ -169,7 +169,7 @@ function buildInternationalInvestors(
     internationalInvestors_ = REGD_506_C_INTERNATIONAL_INVESTORS;
 }
 
-function buildResaleHoldPeriod(
+function _buildResaleHoldPeriod(
     RegulationType _regulationType,
     RegulationSubType _regulationSubType
 ) pure returns (ResaleHoldPeriod resaleHoldPeriod_) {
@@ -182,14 +182,14 @@ function buildResaleHoldPeriod(
     resaleHoldPeriod_ = REGD_506_C_RESALE_HOLD_PERIOD;
 }
 
-function checkRegulationTypeAndSubType(RegulationType _regulationType, RegulationSubType _regulationSubType) pure {
+function _checkRegulationTypeAndSubType(RegulationType _regulationType, RegulationSubType _regulationSubType) pure {
     if (isValidTypeAndSubType(_regulationType, _regulationSubType)) {
         return;
     }
     revert RegulationTypeAndSubTypeForbidden(_regulationType, _regulationSubType);
 }
 
-function isValidTypeAndSubType(
+function _isValidTypeAndSubType(
     RegulationType _regulationType,
     RegulationSubType _regulationSubType
 ) pure returns (bool isValid_) {
@@ -198,14 +198,14 @@ function isValidTypeAndSubType(
         isValidTypeAndSubTypeForRegD(_regulationType, _regulationSubType);
 }
 
-function isValidTypeAndSubTypeForRegS(
+function _isValidTypeAndSubTypeForRegS(
     RegulationType _regulationType,
     RegulationSubType _regulationSubType
 ) pure returns (bool isValid_) {
     isValid_ = _regulationType == RegulationType.REG_S && _regulationSubType == RegulationSubType.NONE;
 }
 
-function isValidTypeAndSubTypeForRegD(
+function _isValidTypeAndSubTypeForRegD(
     RegulationType _regulationType,
     RegulationSubType _regulationSubType
 ) pure returns (bool isValid_) {

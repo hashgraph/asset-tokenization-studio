@@ -18,7 +18,7 @@ import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
 import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
 import { ICommonErrors } from "../errors/ICommonErrors.sol";
 
-function getDomainHash(
+function _getDomainHash(
     string memory _contractName,
     string memory _contractVersion,
     uint256 _chainId,
@@ -36,7 +36,7 @@ function getDomainHash(
         );
 }
 
-function getMessageHashTransfer(
+function _getMessageHashTransfer(
     bytes32 _partition,
     address _from,
     address _to,
@@ -50,7 +50,7 @@ function getMessageHashTransfer(
         );
 }
 
-function getMessageHashRedeem(
+function _getMessageHashRedeem(
     bytes32 _partition,
     address _from,
     uint256 _amount,
@@ -61,7 +61,7 @@ function getMessageHashRedeem(
         keccak256(abi.encode(_PROTECTED_REDEEM_FROM_PARTITION_TYPEHASH, _partition, _from, _amount, _deadline, _nonce));
 }
 
-function getMessageHashCreateHold(
+function _getMessageHashCreateHold(
     bytes32 _partition,
     address _from,
     IHoldTypes.ProtectedHold memory _protectedHold
@@ -93,7 +93,7 @@ function getMessageHashCreateHold(
         );
 }
 
-function getMessageHashClearingTransfer(
+function _getMessageHashClearingTransfer(
     IClearingTypes.ProtectedClearingOperation memory _protectedClearing,
     address _to,
     uint256 _amount
@@ -124,7 +124,7 @@ function getMessageHashClearingTransfer(
         );
 }
 
-function getMessageHashClearingCreateHold(
+function _getMessageHashClearingCreateHold(
     IClearingTypes.ProtectedClearingOperation memory _protectedClearingOperation,
     IHoldTypes.Hold memory _hold
 ) pure returns (bytes32) {
@@ -162,7 +162,7 @@ function getMessageHashClearingCreateHold(
         );
 }
 
-function getMessageHashClearingRedeem(
+function _getMessageHashClearingRedeem(
     IClearingTypes.ProtectedClearingOperation memory _protectedClearing,
     uint256 _amount
 ) pure returns (bytes32) {
@@ -191,7 +191,7 @@ function getMessageHashClearingRedeem(
         );
 }
 
-function checkNonceAndDeadline(
+function _checkNonceAndDeadline(
     uint256 _nonce,
     address _account,
     uint256 _currentNonce,
@@ -202,20 +202,20 @@ function checkNonceAndDeadline(
     if (!isNonceValid(_nonce, _currentNonce)) revert ICommonErrors.WrongNonce(_nonce, _account);
 }
 
-function isDeadlineValid(uint256 _deadline, uint256 _blockTimestamp) pure returns (bool) {
+function _isDeadlineValid(uint256 _deadline, uint256 _blockTimestamp) pure returns (bool) {
     return _deadline >= _blockTimestamp;
 }
 
-function isNonceValid(uint256 _nonce, uint256 _currentNonce) pure returns (bool) {
+function _isNonceValid(uint256 _nonce, uint256 _currentNonce) pure returns (bool) {
     return _currentNonce < _nonce;
 }
 
-function recoverSigner(bytes32 _prefixedHash, bytes memory _signature) pure returns (address) {
+function _recoverSigner(bytes32 _prefixedHash, bytes memory _signature) pure returns (address) {
     (bytes32 r, bytes32 s, uint8 v) = splitSignature(_signature);
     return ecrecover(_prefixedHash, v, r, s);
 }
 
-function splitSignature(bytes memory sig) pure returns (bytes32 r, bytes32 s, uint8 v) {
+function _splitSignature(bytes memory sig) pure returns (bytes32 r, bytes32 s, uint8 v) {
     if (sig.length != 65) revert ICommonErrors.WrongSignatureLength();
     // solhint-disable-next-line no-inline-assembly
     assembly {
@@ -229,7 +229,7 @@ function splitSignature(bytes memory sig) pure returns (bytes32 r, bytes32 s, ui
     // implicitly return (r, s, v)
 }
 
-function verify(
+function _verify(
     address _signer,
     bytes32 _functionHash,
     bytes memory _signature,

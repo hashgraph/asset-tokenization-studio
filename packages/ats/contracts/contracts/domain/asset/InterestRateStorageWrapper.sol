@@ -7,9 +7,6 @@ import { _SUSTAINABILITY_PERFORMANCE_TARGET_RATE_STORAGE_POSITION } from "../../
 import { IKpiLinkedRateErrors } from "../../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRateErrors.sol";
 /* solhint-disable max-line-length */
 import {
-    ISustainabilityPerformanceTargetRate
-} from "../../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
-import {
     ISustainabilityPerformanceTargetRateTypes
 } from "../../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRateTypes.sol";
 /* solhint-enable max-line-length */
