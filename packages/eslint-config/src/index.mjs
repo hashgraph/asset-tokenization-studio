@@ -66,6 +66,7 @@ export const baseRules = {
         argsIgnorePattern: "^_",
         varsIgnorePattern: "^_",
         caughtErrorsIgnorePattern: "^_",
+        ignoreRestSiblings: true,
       },
     ],
     "unused-imports/no-unused-imports": "error",

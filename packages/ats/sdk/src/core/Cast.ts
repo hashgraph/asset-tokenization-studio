@@ -18,7 +18,7 @@ export const isConstructible = (value: any): value is Constructible => {
       },
     })();
     return true;
-  } catch (err) {
+  } catch {
     return false;
   }
 };

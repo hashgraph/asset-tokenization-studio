@@ -30,7 +30,7 @@ describe(`${Landing.name}`, () => {
     const component = render(<Landing />);
 
     await waitFor(() => {
-      expect(component.getByTestId("landing-page"));
+      expect(component.getByTestId("landing-page")).toBeInTheDocument();
     });
 
     expect(component.asFragment()).toMatchSnapshot("disconnected");
@@ -49,7 +49,7 @@ describe(`${Landing.name}`, () => {
     const component = render(<Landing />);
 
     await waitFor(() => {
-      expect(component.getByTestId("landing-page"));
+      expect(component.getByTestId("landing-page")).toBeInTheDocument();
     });
 
     const button = component.getByTestId("connect-to-metamask-landing-button");
@@ -68,7 +68,7 @@ describe(`${Landing.name}`, () => {
     const component = render(<Landing />);
 
     await waitFor(() => {
-      expect(component.getByTestId("landing-page"));
+      expect(component.getByTestId("landing-page")).toBeInTheDocument();
     });
 
     const button = component.getByTestId("connect-to-metamask-landing-button");
@@ -125,7 +125,7 @@ describe(`${Landing.name}`, () => {
 
     await waitFor(() => {
       expect(global.window.open).toHaveBeenCalledWith(METAMASK_URL, "_blank");
-      expect(component.getByTestId("landing-page"));
+      expect(component.getByTestId("landing-page")).toBeInTheDocument();
     });
 
     window.open = oldWindowOpen;

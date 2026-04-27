@@ -135,7 +135,7 @@ export const isValidCouponPeriod = (val: string) => {
 
     const validation = validateCouponPeriod(periodValue);
     return validation === true || validation;
-  } catch (error) {
+  } catch {
     return "Invalid coupon period";
   }
 };

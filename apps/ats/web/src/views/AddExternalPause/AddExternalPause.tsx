@@ -74,7 +74,7 @@ export const AddExternalPause = () => {
           description: tMessages("addExternalPause.descriptionSuccess"),
         });
       }
-    } catch (error) {
+    } catch {
       toast.show({
         status: "error",
         title: tMessages("addExternalPause.error"),

@@ -425,7 +425,7 @@ describe("🧪 Equity test", () => {
 
     let thrownError;
     try {
-      const result = await Equity.cancelScheduledBalanceAdjustment(
+      await Equity.cancelScheduledBalanceAdjustment(
         new GetScheduledBalanceAdjustmentRequest({
           securityId: equity.evmDiamondAddress!.toString(),
           balanceAdjustmentId: 1,

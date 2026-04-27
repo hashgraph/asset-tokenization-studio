@@ -23,21 +23,7 @@ export const useStatusIcons = () => {
   };
 
   const getStatusVariants = (status: ProcessStatusType | DistributionsDetailsStatus) => {
-    let tagVariant:
-      | "active"
-      | "paused"
-      | "scheduled"
-      | "inProgress"
-      | "completed"
-      | "failed"
-      | "cancelled"
-      | "success"
-      | "retrying"
-      | "error";
-
-    let progressVariant: "inProgress" | "success" | "error";
-
-    const getStatusVariants = (status: ProcessStatus | DistributionsDetailsStatus) => {
+    const resolveStatusVariants = (status: ProcessStatus | DistributionsDetailsStatus) => {
       if (status === ProcessStatus.COMPLETED) {
         return {
           tagVariant: "success" as const,
@@ -98,11 +84,7 @@ export const useStatusIcons = () => {
       };
     };
 
-    const variants = getStatusVariants(status);
-    tagVariant = variants.tagVariant;
-    progressVariant = variants.progressVariant;
-
-    return { tagVariant, progressVariant };
+    return resolveStatusVariants(status);
   };
 
   return {
