@@ -13,10 +13,9 @@ contract ClearingHoldCreationFacet is ClearingHoldCreation, IStaticFunctionSelec
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
+        staticFunctionSelectors_ = new bytes4[](4);
         staticFunctionSelectors_[selectorIndex++] = this.clearingCreateHoldByPartition.selector;
         staticFunctionSelectors_[selectorIndex++] = this.clearingCreateHoldFromByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.operatorClearingCreateHoldByPartition.selector;
         staticFunctionSelectors_[selectorIndex++] = this.protectedClearingCreateHoldByPartition.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getClearingCreateHoldForByPartition.selector;
     }

@@ -877,31 +877,6 @@ describe("Clearing Tests", () => {
         expect(clearing1.operatorData).to.equal(opData1);
         expect(clearing2.operatorData).to.equal(opData2);
       });
-
-      it("GIVEN an authorized operator WHEN creating clearing holds THEN holds are created correctly", async () => {
-        await asset.connect(signer_A).authorizeOperator(signer_B.address);
-
-        const hold1 = {
-          ...hold,
-          amount: _AMOUNT / 10,
-          to: signer_C.address,
-        };
-
-        const hold2 = {
-          ...hold,
-          amount: _AMOUNT / 10,
-          to: signer_D.address,
-        };
-
-        await asset.connect(signer_B).operatorClearingCreateHoldByPartition(clearingOperationFrom, hold1);
-        await asset.connect(signer_B).operatorClearingCreateHoldByPartition(clearingOperationFrom, hold2);
-
-        const clearing1 = await asset.getClearingCreateHoldForByPartition(_DEFAULT_PARTITION, signer_A.address, 1);
-        const clearing2 = await asset.getClearingCreateHoldForByPartition(_DEFAULT_PARTITION, signer_A.address, 2);
-
-        expect(clearing1.holdTo).to.equal(signer_C.address);
-        expect(clearing2.holdTo).to.equal(signer_D.address);
-      });
     });
 
     describe("AccessControl", () => {
@@ -2967,62 +2942,6 @@ describe("Clearing Tests", () => {
 
           await expect(
             asset.connect(signer_A).clearingCreateHoldFromByPartition(clearingOperationFromB, hold),
-          ).to.be.revertedWithCustomError(asset, "WalletRecovered");
-        });
-      });
-
-      describe("operatorClearingCreateHoldByPartition", () => {
-        it("GIVEN a recovered msgSender WHEN calling operatorClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
-          await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
-          await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
-
-          const clearingOperationFromB = {
-            ...clearingOperationFrom,
-            from: signer_B.address,
-          };
-
-          await expect(
-            asset.connect(signer_A).operatorClearingCreateHoldByPartition(clearingOperationFromB, hold),
-          ).to.be.revertedWithCustomError(asset, "WalletRecovered");
-        });
-
-        it("GIVEN a recovered from address WHEN calling operatorClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
-          await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
-          await asset.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
-
-          const clearingOperationFromB = {
-            ...clearingOperationFrom,
-            from: signer_B.address,
-          };
-
-          await expect(
-            asset.connect(signer_A).operatorClearingCreateHoldByPartition(clearingOperationFromB, hold),
-          ).to.be.revertedWithCustomError(asset, "WalletRecovered");
-        });
-
-        it("GIVEN a recovered hold.to WHEN calling operatorClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
-          // Give signer_B some tokens and authorize operator
-          await asset.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
-          await asset.issueByPartition({
-            partition: _DEFAULT_PARTITION,
-            tokenHolder: signer_B.address,
-            value: _AMOUNT,
-            data: _DATA,
-          });
-          await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
-          // Recover the hold.to address (signer_C - the actual hold.to)
-          await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
-
-          const clearingOperationFromB = {
-            ...clearingOperationFrom,
-            from: signer_B.address,
-          };
-
-          await expect(
-            asset.connect(signer_A).operatorClearingCreateHoldByPartition(clearingOperationFromB, hold),
           ).to.be.revertedWithCustomError(asset, "WalletRecovered");
         });
       });
