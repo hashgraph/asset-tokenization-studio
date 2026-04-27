@@ -22,7 +22,6 @@ import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol
 import { ClearingStorageWrapper } from "./ClearingStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { ControlListStorageWrapper } from "../core/ControlListStorageWrapper.sol";
-import { IControlList } from "../../facets/layer_1/controlList/IControlList.sol";
 import { KycStorageWrapper } from "../core/KycStorageWrapper.sol";
 
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";

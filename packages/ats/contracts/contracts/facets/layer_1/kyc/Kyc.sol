@@ -6,12 +6,12 @@ import { IKyc } from "./IKyc.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { KycStorageWrapper } from "../../../domain/core/KycStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { checkNotInitialized } from "../../../services/InitializationErrors.sol";
+import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract Kyc is IKyc, Modifiers {
     function initializeInternalKyc(bool _internalKycActivated) external {
-        checkNotInitialized(KycStorageWrapper.isKycInitialized());
+        _checkNotInitialized(KycStorageWrapper.isKycInitialized());
         KycStorageWrapper.initializeInternalKyc(_internalKycActivated);
     }
 

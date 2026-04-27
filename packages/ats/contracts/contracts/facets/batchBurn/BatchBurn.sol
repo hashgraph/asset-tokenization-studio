@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { CONTROLLER_ROLE, AGENT_ROLE, buildRoles } from "../../constants/roles.sol";
+import { CONTROLLER_ROLE, AGENT_ROLE, _buildRoles } from "../../constants/roles.sol";
 import { IBatchBurn } from "./IBatchBurn.sol";
 import { IController } from "../controller/IController.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
@@ -29,7 +29,7 @@ abstract contract BatchBurn is IBatchBurn, Modifiers {
         onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
         onlyWithoutMultiPartition
         onlyControllable
-        onlyAnyRole(buildRoles(CONTROLLER_ROLE, AGENT_ROLE))
+        onlyAnyRole(_buildRoles(CONTROLLER_ROLE, AGENT_ROLE))
     {
         uint256 length = _userAddresses.length;
         for (uint256 i; i < length; ) {

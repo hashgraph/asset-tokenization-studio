@@ -6,7 +6,6 @@ import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableS
 import { ExternalListManagementStorageWrapper } from "./ExternalListManagementStorageWrapper.sol";
 import { _CONTROL_LIST_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
-import { IControlList } from "../../facets/layer_1/controlList/IControlList.sol";
 
 struct ControlListStorage {
     bool isWhiteList;
