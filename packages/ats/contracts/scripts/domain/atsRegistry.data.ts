@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-27T08:28:32.744Z
- * Facets: 90
+ * Generated: 2026-04-27T08:36:56.807Z
+ * Facets: 89
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -62,7 +62,6 @@ import {
   ERC1594Facet__factory,
   ERC20PermitFacet__factory,
   ERC20VotesFacet__factory,
-  ERC3643BatchFacet__factory,
   ERC3643ManagementFacet__factory,
   ERC3643OperationsFacet__factory,
   ERC3643ReadFacet__factory,
@@ -143,7 +142,6 @@ import {
   ERC1594FacetTimeTravel__factory,
   ERC20PermitFacetTimeTravel__factory,
   ERC20VotesFacetTimeTravel__factory,
-  ERC3643BatchFacetTimeTravel__factory,
   ERC3643ManagementFacetTimeTravel__factory,
   ERC3643OperationsFacetTimeTravel__factory,
   ERC3643ReadFacetTimeTravel__factory,
@@ -7379,116 +7377,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       new ERC20VotesFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
-  ERC3643BatchFacet: {
-    name: "ERC3643BatchFacet",
-    resolverKey: {
-      name: "_ERC3643_BATCH_RESOLVER_KEY",
-      value: "0x00332311d9f0c311b31b87399043a90feb10341fcbb4d7f4ed6e3c0072a3c392",
-    },
-    inheritance: ["ERC3643Batch", "IStaticFunctionSelectors"],
-    events: [
-      {
-        name: "AgentAdded",
-        signature: { full: "event AgentAdded(address indexed _agent)", canonical: "AgentAdded(address)" },
-        topic0: "0xf68e73cec97f2d70aa641fb26e87a4383686e2efacb648f2165aeb02ac562ec5",
-      },
-      {
-        name: "AgentRemoved",
-        signature: { full: "event AgentRemoved(address indexed _agent)", canonical: "AgentRemoved(address)" },
-        topic0: "0xed9c8ad8d5a0a66898ea49d2956929c93ae2e8bd50281b2ed897c5d1a6737e0b",
-      },
-      {
-        name: "ComplianceAdded",
-        signature: { full: "event ComplianceAdded(address indexed compliance)", canonical: "ComplianceAdded(address)" },
-        topic0: "0x7f3a888862559648ec01d97deb7b5012bff86dc91e654a1de397170db40e35b6",
-      },
-      {
-        name: "IdentityRegistryAdded",
-        signature: {
-          full: "event IdentityRegistryAdded(address indexed identityRegistry)",
-          canonical: "IdentityRegistryAdded(address)",
-        },
-        topic0: "0xd2be862d755bca7e0d39772b2cab3a5578da9c285f69199f4c063c2294a7f36c",
-      },
-      {
-        name: "RecoverySuccess",
-        signature: {
-          full: "event RecoverySuccess(address _lostWallet, address _newWallet, address _investorOnchainID)",
-          canonical: "RecoverySuccess(address,address,address)",
-        },
-        topic0: "0xf0c9129a94f30f1caaceb63e44b9811d0a3edf1d6c23757f346093af5553fed0",
-      },
-      {
-        name: "UpdatedTokenInformation",
-        signature: {
-          full: "event UpdatedTokenInformation(string indexed newName, string indexed newSymbol, uint8 newDecimals, string newVersion, address indexed newOnchainID)",
-          canonical: "UpdatedTokenInformation(string,string,uint8,string,address)",
-        },
-        topic0: "0x6a1105ac8148a3c319adbc369f9072573e8a11d3a3d195e067e7c40767ec54d1",
-      },
-    ],
-    errors: [
-      {
-        name: "AccessControlRequired",
-        signature: {
-          full: "error AccessControlRequired(bytes32 role, address sender)",
-          canonical: "AccessControlRequired(bytes32,address)",
-        },
-        selector: "0x10210dec",
-      },
-      {
-        name: "AddressNotVerified",
-        signature: { full: "error AddressNotVerified()", canonical: "AddressNotVerified()" },
-        selector: "0x209d2853",
-      },
-      {
-        name: "CannotRecoverWallet",
-        signature: { full: "error CannotRecoverWallet()", canonical: "CannotRecoverWallet()" },
-        selector: "0x505389ae",
-      },
-      {
-        name: "ComplianceCallFailed",
-        signature: { full: "error ComplianceCallFailed()", canonical: "ComplianceCallFailed()" },
-        selector: "0x67fba102",
-      },
-      {
-        name: "ComplianceNotAllowed",
-        signature: { full: "error ComplianceNotAllowed()", canonical: "ComplianceNotAllowed()" },
-        selector: "0x66eb1b54",
-      },
-      {
-        name: "IdentityRegistryCallFailed",
-        signature: { full: "error IdentityRegistryCallFailed()", canonical: "IdentityRegistryCallFailed()" },
-        selector: "0xad87849e",
-      },
-      {
-        name: "InputAmountsArrayLengthMismatch",
-        signature: { full: "error InputAmountsArrayLengthMismatch()", canonical: "InputAmountsArrayLengthMismatch()" },
-        selector: "0x64f13710",
-      },
-      {
-        name: "InputBoolArrayLengthMismatch",
-        signature: { full: "error InputBoolArrayLengthMismatch()", canonical: "InputBoolArrayLengthMismatch()" },
-        selector: "0x07ac0eb9",
-      },
-      {
-        name: "InsufficientFrozenBalance",
-        signature: {
-          full: "error InsufficientFrozenBalance(address user, uint256 requestedUnfreeze, uint256 availableFrozen, bytes32 partition)",
-          canonical: "InsufficientFrozenBalance(address,uint256,uint256,bytes32)",
-        },
-        selector: "0xefafde54",
-      },
-      {
-        name: "WalletRecovered",
-        signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
-        selector: "0xf9f9bcf9",
-      },
-    ],
-    factory: (signer) => new ERC3643BatchFacet__factory(signer),
-    timeTravelFactory: (signer) => new ERC3643BatchFacetTimeTravel__factory(signer),
-  },
-
   ERC3643ManagementFacet: {
     name: "ERC3643ManagementFacet",
     resolverKey: {
@@ -13498,7 +13386,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 90 as const;
+export const TOTAL_FACETS = 89 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

@@ -62,7 +62,6 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "ERC20PermitFacet",
   "NoncesFacet",
   "ERC20VotesFacet",
-  "ERC3643BatchFacet",
   "BatchControllerFacet",
   "BatchBurnFacet",
   "BatchMintFacet",

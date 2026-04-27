@@ -126,7 +126,6 @@ export const CONTRACT_NAMES = [
   "ERC3643ManagementFacet",
   "ERC3643ReadFacet",
   "ERC3643OperationsFacet",
-  "ERC3643BatchFacet",
   "BatchControllerFacet",
   "BatchBurnFacet",
   "BatchMintFacet",
