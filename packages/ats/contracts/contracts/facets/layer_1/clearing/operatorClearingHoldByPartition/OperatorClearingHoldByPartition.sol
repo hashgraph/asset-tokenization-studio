@@ -8,7 +8,14 @@ import { ClearingOps } from "../../../../domain/orchestrator/ClearingOps.sol";
 import { ThirdPartyType } from "../../../../domain/asset/types/ThirdPartyType.sol";
 import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
+/**
+ * @title OperatorClearingHoldByPartition
+ * @author Asset Tokenization Studio Team
+ * @notice Abstract contract implementing hold creation for clearing operations by partition.
+ * @dev Implementation logic for authorised operator-led clearing holds.
+ */
 abstract contract OperatorClearingHoldByPartition is IOperatorClearingHoldByPartition, Modifiers {
+    /// @inheritdoc IOperatorClearingHoldByPartition
     function operatorClearingCreateHoldByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
         IHoldTypes.Hold calldata _hold

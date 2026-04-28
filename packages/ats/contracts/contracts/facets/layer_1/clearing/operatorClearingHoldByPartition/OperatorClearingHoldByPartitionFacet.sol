@@ -6,11 +6,19 @@ import { OperatorClearingHoldByPartition } from "./OperatorClearingHoldByPartiti
 import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { _OPERATOR_CLEARING_HOLDBYPARTITION_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 
+/**
+ * @title OperatorClearingHoldByPartitionFacet
+ * @author Asset Tokenization Studio Team
+ * @notice Diamond facet for partition-scoped operator clearing hold operations.
+ * @dev Exposes clearing hold functionality to the Diamond proxy.
+ */
 contract OperatorClearingHoldByPartitionFacet is OperatorClearingHoldByPartition, IStaticFunctionSelectors {
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _OPERATOR_CLEARING_HOLDBYPARTITION_RESOLVER_KEY;
     }
 
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex = 1;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);
@@ -19,6 +27,7 @@ contract OperatorClearingHoldByPartitionFacet is OperatorClearingHoldByPartition
         }
     }
 
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         uint256 selectorIndex = 1;
         staticInterfaceIds_ = new bytes4[](selectorIndex);
