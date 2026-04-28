@@ -6,15 +6,13 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
-import { EMPTY_STRING, ZERO, EMPTY_HEX_BYTES, ADDRESS_ZERO } from "@scripts";
-import { ResolverProxy, IAsset } from "@contract-types";
+import { DEFAULT_PARTITION, EMPTY_STRING, ZERO, EMPTY_HEX_BYTES, ADDRESS_ZERO } from "@scripts";
+import { ResolverProxy, IAsset, IHoldTypes } from "@contract-types";
 
-const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const _WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
 const _AMOUNT = 1000;
 const _DATA = "0x1234";
-const EMPTY_VC_ID = EMPTY_STRING;
-let holdIdentifier: any;
+let holdIdentifier: IHoldTypes.HoldIdentifierStruct;
 enum ThirdPartyType {
   NULL,
   AUTHORIZED,
@@ -38,7 +36,7 @@ describe("ControllerHoldByPartition Tests", () => {
   let currentTimestamp = 0;
   let expirationTimestamp = 0;
 
-  let hold: any;
+  let hold: IHoldTypes.HoldStruct;
 
   function set_initRbacs() {
     return [
@@ -83,12 +81,12 @@ describe("ControllerHoldByPartition Tests", () => {
 
   async function setFacets(asset: IAsset) {
     await asset.connect(signer_A).addIssuer(signer_A.address);
-    await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-    await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-    await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+    await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_STRING, ZERO, MAX_UINT256, signer_A.address);
+    await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_STRING, ZERO, MAX_UINT256, signer_A.address);
+    await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_STRING, ZERO, MAX_UINT256, signer_A.address);
 
     await asset.connect(signer_B).issueByPartition({
-      partition: _DEFAULT_PARTITION,
+      partition: DEFAULT_PARTITION,
       tokenHolder: signer_A.address,
       value: _AMOUNT,
       data: EMPTY_HEX_BYTES,
@@ -148,9 +146,9 @@ describe("ControllerHoldByPartition Tests", () => {
       holdThirdPartyAddress_expected: string,
     ) {
       const balance = await asset.balanceOf(signer_A.address);
-      const heldAmount = await asset.getHeldAmountForByPartition(_DEFAULT_PARTITION, signer_A.address);
-      const holdCount = await asset.getHoldCountForByPartition(_DEFAULT_PARTITION, signer_A.address);
-      const holdIds = await asset.getHoldsIdForByPartition(_DEFAULT_PARTITION, signer_A.address, 0, 100);
+      const heldAmount = await asset.getHeldAmountForByPartition(DEFAULT_PARTITION, signer_A.address);
+      const holdCount = await asset.getHoldCountForByPartition(DEFAULT_PARTITION, signer_A.address);
+      const holdIds = await asset.getHoldsIdForByPartition(DEFAULT_PARTITION, signer_A.address, 0, 100);
 
       expect(balance).to.equal(balance_expected);
       expect(heldAmount).to.equal(totalHeldAmount_expected);
@@ -186,7 +184,7 @@ describe("ControllerHoldByPartition Tests", () => {
         data: _DATA,
       };
       holdIdentifier = {
-        partition: _DEFAULT_PARTITION,
+        partition: DEFAULT_PARTITION,
         tokenHolder: signer_A.address,
         holdId: 1,
       };
@@ -199,7 +197,7 @@ describe("ControllerHoldByPartition Tests", () => {
 
       it("GIVEN a paused Token WHEN controllerCreateHoldByPartition THEN transaction fails with TokenIsPaused", async () => {
         await expect(
-          asset.controllerCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
+          asset.controllerCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
         ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
       });
     });
@@ -209,7 +207,7 @@ describe("ControllerHoldByPartition Tests", () => {
         await expect(
           asset
             .connect(signer_B)
-            .controllerCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
+            .controllerCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
         ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
       });
     });
@@ -226,7 +224,7 @@ describe("ControllerHoldByPartition Tests", () => {
         await expect(
           asset
             .connect(signer_C)
-            .controllerCreateHoldByPartition(_DEFAULT_PARTITION, ADDRESS_ZERO, hold_wrong, EMPTY_HEX_BYTES),
+            .controllerCreateHoldByPartition(DEFAULT_PARTITION, ADDRESS_ZERO, hold_wrong, EMPTY_HEX_BYTES),
         ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
       });
 
@@ -236,7 +234,7 @@ describe("ControllerHoldByPartition Tests", () => {
         await expect(
           asset
             .connect(signer_C)
-            .controllerCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
+            .controllerCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
         ).to.be.revertedWithCustomError(asset, "TokenIsNotControllable");
       });
 
@@ -254,7 +252,7 @@ describe("ControllerHoldByPartition Tests", () => {
         await expect(
           asset
             .connect(signer_C)
-            .controllerCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold_wrong, EMPTY_HEX_BYTES),
+            .controllerCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, hold_wrong, EMPTY_HEX_BYTES),
         ).to.be.revertedWithCustomError(asset, "InsufficientBalance");
       });
 
@@ -270,7 +268,7 @@ describe("ControllerHoldByPartition Tests", () => {
         await expect(
           asset
             .connect(signer_C)
-            .controllerCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold_wrong, EMPTY_HEX_BYTES),
+            .controllerCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, hold_wrong, EMPTY_HEX_BYTES),
         ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
       });
 
@@ -289,7 +287,7 @@ describe("ControllerHoldByPartition Tests", () => {
         await expect(
           asset
             .connect(signer_C)
-            .controllerCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold_wrong, EMPTY_HEX_BYTES),
+            .controllerCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, hold_wrong, EMPTY_HEX_BYTES),
         ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
       });
 
@@ -309,10 +307,10 @@ describe("ControllerHoldByPartition Tests", () => {
         await expect(
           asset
             .connect(signer_C)
-            .controllerCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, operatorData),
+            .controllerCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, hold, operatorData),
         )
           .to.emit(asset, "ControllerHeldByPartition")
-          .withArgs(signer_C.address, signer_A.address, _DEFAULT_PARTITION, 1, Object.values(hold), operatorData);
+          .withArgs(signer_C.address, signer_A.address, DEFAULT_PARTITION, 1, Object.values(hold), operatorData);
 
         await checkCreatedHold_expected(
           0,
