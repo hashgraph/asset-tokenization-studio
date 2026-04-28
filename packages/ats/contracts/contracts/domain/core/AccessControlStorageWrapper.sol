@@ -8,16 +8,6 @@ import { _ACCESS_CONTROL_STORAGE_POSITION } from "../../constants/storagePositio
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { IAccessControl } from "../../facets/layer_1/accessControl/IAccessControl.sol";
 
-/**
- * @title AccessControlStorageWrapper
- * @dev Library providing access control storage operations with Diamond Storage Pattern
- *
- * This library uses ERC-2535 Diamond Storage Pattern to store role data in a specific storage slot.
- * It provides storage operations, read functions, and guard checks for role-based access control.
- *
- * @notice Use with `using AccessControlStorageWrapper for RoleDataStorage;` or call functions directly
- * @author Asset Tokenization Studio Team
- */
 struct RoleData {
     bytes32 roleAdmin;
     EnumerableSet.AddressSet roleMembers;
@@ -28,6 +18,16 @@ struct RoleDataStorage {
     mapping(address => EnumerableSet.Bytes32Set) memberRoles;
 }
 
+/**
+ * @title AccessControlStorageWrapper
+ * @dev Library providing access control storage operations with Diamond Storage Pattern
+ *
+ * This library uses ERC-2535 Diamond Storage Pattern to store role data in a specific storage slot.
+ * It provides storage operations, read functions, and guard checks for role-based access control.
+ *
+ * @notice Use with `using AccessControlStorageWrapper for RoleDataStorage;` or call functions directly
+ * @author Asset Tokenization Studio Team
+ */
 library AccessControlStorageWrapper {
     using Pagination for EnumerableSet.AddressSet;
     using Pagination for EnumerableSet.Bytes32Set;

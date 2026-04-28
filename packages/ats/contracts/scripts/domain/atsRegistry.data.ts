@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-27T17:55:57.005Z
- * Facets: 88
+ * Generated: 2026-04-28T08:20:09.676Z
+ * Facets: 89
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -46,6 +46,7 @@ import {
   ComplianceFacet__factory,
   ControlListFacet__factory,
   ControllerFacet__factory,
+  ControllerHoldByPartitionFacet__factory,
   CoreAdjustedFacet__factory,
   CoreFacet__factory,
   CorporateActionsFacet__factory,
@@ -125,6 +126,7 @@ import {
   ComplianceFacetTimeTravel__factory,
   ControlListFacetTimeTravel__factory,
   ControllerFacetTimeTravel__factory,
+  ControllerHoldByPartitionFacetTimeTravel__factory,
   CorporateActionsFacetTimeTravel__factory,
   CouponFacetTimeTravel__factory,
   CouponFixedRateFacetTimeTravel__factory,
@@ -2308,7 +2310,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   BurnFacet: {
     name: "BurnFacet",
-    description: "Diamond facet exposing the ERC-1594 redemption and ERC-3643 burn surfaces.",
+    description:
+      "Diamond facet exposing the ERC-1594 redemption and ERC-3643 burn surfaces, registered under `_BURN_RESOLVER_KEY`.",
     resolverKey: {
       name: "_BURN_RESOLVER_KEY",
       value: "0x16c38166ed323ed9296016a0c71ccf46c67708d8c7dac2fca906f1a51c144f83",
@@ -4263,6 +4266,226 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     factory: (signer) => new ControllerFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
     timeTravelFactory: (signer) => new ControllerFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
+  },
+
+  ControllerHoldByPartitionFacet: {
+    name: "ControllerHoldByPartitionFacet",
+    description:
+      "Provides the diamond facet interface for partition-based hold control operations within the controller system.",
+    resolverKey: {
+      name: "_CONTROLLER_HOLD_BY_PARTITION_RESOLVER_KEY",
+      value: "0x9e49506d2dfd484ed2aa6f2fd6f90a9efd8ae79466f93fa70571a95ddda4659c",
+    },
+    inheritance: ["ControllerHoldByPartition", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "controllerCreateHoldByPartition",
+        signature: {
+          full: "function controllerCreateHoldByPartition(bytes32 _partition, address _from, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
+          canonical: "controllerCreateHoldByPartition(bytes32,address,(uint256,uint256,address,address,bytes),bytes)",
+        },
+        selector: "0x5f3d8171",
+      },
+    ],
+    events: [
+      {
+        name: "ControllerHeldByPartition",
+        signature: {
+          full: "event ControllerHeldByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 holdId, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, bytes operatorData)",
+          canonical:
+            "ControllerHeldByPartition(address,address,bytes32,uint256,(uint256,uint256,address,address,bytes),bytes)",
+        },
+        topic0: "0x9c351ddf8b7b71a1ce0a58696d6128d479e0988ce349f51a44e84241addffca8",
+      },
+      {
+        name: "HeldByPartition",
+        signature: {
+          full: "event HeldByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 holdId, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, bytes operatorData)",
+          canonical: "HeldByPartition(address,address,bytes32,uint256,(uint256,uint256,address,address,bytes),bytes)",
+        },
+        topic0: "0xc5c40f4f39271cfbce3124ffa5441f632998927732cf26ac2038f2bfd15365d8",
+      },
+      {
+        name: "HeldFromByPartition",
+        signature: {
+          full: "event HeldFromByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 holdId, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, bytes operatorData)",
+          canonical:
+            "HeldFromByPartition(address,address,bytes32,uint256,(uint256,uint256,address,address,bytes),bytes)",
+        },
+        topic0: "0x94c04848aef3d5b4fb6473bdb17ce2ff4b6374b909cc2009156f4eb0a1d880b9",
+      },
+      {
+        name: "HoldByPartitionExecuted",
+        signature: {
+          full: "event HoldByPartitionExecuted(address indexed tokenHolder, bytes32 indexed partition, uint256 holdId, uint256 amount, address to)",
+          canonical: "HoldByPartitionExecuted(address,bytes32,uint256,uint256,address)",
+        },
+        topic0: "0x4fb20409d1b2a56fa4c5b29c11d9b1e148649db67860c5648a8a86f35edf8582",
+      },
+      {
+        name: "HoldByPartitionReclaimed",
+        signature: {
+          full: "event HoldByPartitionReclaimed(address indexed operator, address indexed tokenHolder, bytes32 indexed partition, uint256 holdId, uint256 amount)",
+          canonical: "HoldByPartitionReclaimed(address,address,bytes32,uint256,uint256)",
+        },
+        topic0: "0xee0ec155026031ca64823d8fbf00832ff3f96c7da0994432ddc1a32c72022a09",
+      },
+      {
+        name: "HoldByPartitionReleased",
+        signature: {
+          full: "event HoldByPartitionReleased(address indexed tokenHolder, bytes32 indexed partition, uint256 holdId, uint256 amount)",
+          canonical: "HoldByPartitionReleased(address,bytes32,uint256,uint256)",
+        },
+        topic0: "0x6c167944f4b372d42d168efc93004d7e517cb82a501d67490af33f95530ca50e",
+      },
+      {
+        name: "OperatorHeldByPartition",
+        signature: {
+          full: "event OperatorHeldByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 holdId, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, bytes operatorData)",
+          canonical:
+            "OperatorHeldByPartition(address,address,bytes32,uint256,(uint256,uint256,address,address,bytes),bytes)",
+        },
+        topic0: "0x01660369819a0bc795379d82e3319b24a6538fc22d81f19255d90a716909853f",
+      },
+      {
+        name: "ProtectedHeldByPartition",
+        signature: {
+          full: "event ProtectedHeldByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 holdId, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, bytes operatorData)",
+          canonical:
+            "ProtectedHeldByPartition(address,address,bytes32,uint256,(uint256,uint256,address,address,bytes),bytes)",
+        },
+        topic0: "0x9e04f881c3c90f436a99de08b14d5ce9654a885f586e2625c1f4824c948728f7",
+      },
+      {
+        name: "Transfer",
+        signature: {
+          full: "event Transfer(address indexed from, address indexed to, uint256 value)",
+          canonical: "Transfer(address,address,uint256)",
+        },
+        topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+      },
+      {
+        name: "TransferByPartition",
+        signature: {
+          full: "event TransferByPartition(bytes32 indexed _fromPartition, address _operator, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)",
+          canonical: "TransferByPartition(bytes32,address,address,address,uint256,bytes,bytes)",
+        },
+        topic0: "0xff4e9a26af4eb73b8bacfaa4abd4fea03d9448e7b912dc5ff4019048875aa2d4",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRole",
+        signature: {
+          full: "error AccountHasNoRole(address account, bytes32 role)",
+          canonical: "AccountHasNoRole(address,bytes32)",
+        },
+        selector: "0xa1180aad",
+      },
+      {
+        name: "HoldExpirationNotReached",
+        signature: { full: "error HoldExpirationNotReached()", canonical: "HoldExpirationNotReached()" },
+        selector: "0x20aa310e",
+      },
+      {
+        name: "HoldExpirationReached",
+        signature: { full: "error HoldExpirationReached()", canonical: "HoldExpirationReached()" },
+        selector: "0x0415b9f9",
+      },
+      {
+        name: "InsufficientBalance",
+        signature: {
+          full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
+          canonical: "InsufficientBalance(address,uint256,uint256,bytes32)",
+        },
+        selector: "0x5d6824c4",
+      },
+      {
+        name: "InsufficientHoldBalance",
+        signature: {
+          full: "error InsufficientHoldBalance(uint256 holdAmount, uint256 amount)",
+          canonical: "InsufficientHoldBalance(uint256,uint256)",
+        },
+        selector: "0x7ff7d816",
+      },
+      {
+        name: "InvalidDestinationAddress",
+        signature: {
+          full: "error InvalidDestinationAddress(address holdDestination, address to)",
+          canonical: "InvalidDestinationAddress(address,address)",
+        },
+        selector: "0xdb0a3012",
+      },
+      {
+        name: "InvalidPartition",
+        signature: {
+          full: "error InvalidPartition(address account, bytes32 partition)",
+          canonical: "InvalidPartition(address,bytes32)",
+        },
+        selector: "0xbf84f4ec",
+      },
+      {
+        name: "IsNotEscrow",
+        signature: { full: "error IsNotEscrow()", canonical: "IsNotEscrow()" },
+        selector: "0xf86f2a37",
+      },
+      {
+        name: "PartitionNotAllowedInSinglePartitionMode",
+        signature: {
+          full: "error PartitionNotAllowedInSinglePartitionMode(bytes32 partition)",
+          canonical: "PartitionNotAllowedInSinglePartitionMode(bytes32)",
+        },
+        selector: "0xb96d9539",
+      },
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+      {
+        name: "TokenIsNotControllable",
+        signature: { full: "error TokenIsNotControllable()", canonical: "TokenIsNotControllable()" },
+        selector: "0xf4b7b072",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+      {
+        name: "WrongExpirationTimestamp",
+        signature: { full: "error WrongExpirationTimestamp()", canonical: "WrongExpirationTimestamp()" },
+        selector: "0xe39f4776",
+      },
+      {
+        name: "WrongHoldId",
+        signature: { full: "error WrongHoldId()", canonical: "WrongHoldId()" },
+        selector: "0x7e90c2c9",
+      },
+      {
+        name: "ZeroAddressNotAllowed",
+        signature: { full: "error ZeroAddressNotAllowed()", canonical: "ZeroAddressNotAllowed()" },
+        selector: "0x8579befe",
+      },
+    ],
+    factory: (signer) => new ControllerHoldByPartitionFacet__factory(signer),
+    timeTravelFactory: (signer) => new ControllerHoldByPartitionFacetTimeTravel__factory(signer),
   },
 
   ControlListFacet: {
@@ -8816,14 +9039,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["HoldManagement", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "controllerCreateHoldByPartition",
-        signature: {
-          full: "function controllerCreateHoldByPartition(bytes32 _partition, address _from, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
-          canonical: "controllerCreateHoldByPartition(bytes32,address,(uint256,uint256,address,address,bytes),bytes)",
-        },
-        selector: "0x5f3d8171",
-      },
-      {
         name: "operatorCreateHoldByPartition",
         signature: {
           full: "function operatorCreateHoldByPartition(bytes32 _partition, address _from, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
@@ -9034,11 +9249,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
-      },
-      {
-        name: "TokenIsNotControllable",
-        signature: { full: "error TokenIsNotControllable()", canonical: "TokenIsNotControllable()" },
-        selector: "0xf4b7b072",
       },
       {
         name: "TokenIsPaused",
@@ -13067,7 +13277,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 88 as const;
+export const TOTAL_FACETS = 89 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -13547,6 +13757,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   DividendStorageWrapper: {
     name: "DividendStorageWrapper",
+    description: "Provides internal functions to manage lifecycle and queries for dividend corporate actions.",
     methods: [],
   },
 
@@ -13568,7 +13779,18 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   ERC1594StorageWrapper: {
     name: "ERC1594StorageWrapper",
+    description:
+      "Library providing the core issuance, redemption, and compliance checking logic for the ERC1594 token standard. Handles storage management, balance mutations via ERC20/ERC1410 wrappers, and multi-layered access controls (KYC, identity, compliance, control lists, allowances, partitions).",
     methods: [],
+    errors: [
+      { name: "data", signature: { full: "data(empty)", canonical: "data(empty)" }, selector: "0x78ba4e81" },
+      {
+        name: "payload",
+        signature: { full: "payload(address,bytes)", canonical: "payload(address,bytes)" },
+        selector: "0x6434449d",
+      },
+      { name: "selectors", signature: { full: "selectors()", canonical: "selectors()" }, selector: "0x6e25b978" },
+    ],
   },
 
   ERC1644StorageWrapper: {
@@ -13593,6 +13815,8 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   ERC3643StorageWrapper: {
     name: "ERC3643StorageWrapper",
+    description:
+      "Library that encapsulates storage management and core operations for an ERC3643-compliant token, including freeze/unfreeze, agent management, compliance, identity registry, and wallet recovery.",
     methods: [],
   },
 
@@ -13725,6 +13949,8 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   InterestRateStorageWrapper: {
     name: "InterestRateStorageWrapper",
+    description:
+      "Library providing setters, getters, validation, and storage access for three interest rate models using deterministic storage slots.",
     methods: [],
   },
 
@@ -13741,6 +13967,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   LoansPortfolioStorageWrapper: {
     name: "LoansPortfolioStorageWrapper",
+    description: "Library providing storage management and query functions for a loans portfolio.",
     methods: [],
   },
 
@@ -13758,6 +13985,8 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   NominalValueStorageWrapper: {
     name: "NominalValueStorageWrapper",
+    description:
+      "Storage wrapper for nominal value data, aggregating legacy bond and equity storage for backward compatibility during migration.",
     methods: [],
   },
 
@@ -13779,6 +14008,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   ProtectedPartitionsStorageWrapper: {
     name: "ProtectedPartitionsStorageWrapper",
+    description: "Library providing storage access and logic for protected partitions.",
     methods: [],
   },
 
@@ -13789,6 +14019,8 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   ScheduledTasksStorageWrapper: {
     name: "ScheduledTasksStorageWrapper",
+    description:
+      "Storage and execution layer for managing time‑based scheduled tasks (snapshots, coupon listings, balance adjustments, cross‑ordered tasks).",
     methods: [],
     errors: [
       {
@@ -13806,6 +14038,8 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   SnapshotsStorageWrapper: {
     name: "SnapshotsStorageWrapper",
+    description:
+      "Provides internal functions to manage snapshot histories for balances, partitions, locked, held, frozen, and cleared state, as well as total supply and token holder data.",
     methods: [],
   },
 
@@ -13821,6 +14055,8 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   VotingStorageWrapper: {
     name: "VotingStorageWrapper",
+    description:
+      "Library providing internal functions to manage voting rights corporate actions, including creation, cancellation, retrieval, and snapshot balance lookup.",
     methods: [],
   },
 };

@@ -14,6 +14,7 @@ import { ICouponTypes } from "../../facets/layer_2/coupon/ICouponTypes.sol";
 
 /**
  * @title SustainabilityPerformanceTargetRateLib
+ * @notice Library that computes the interest rate for bonds with Sustainability Performance Targets (SPT).
  * @dev Library for calculating Sustainability Performance Target (SPT) interest rates.
  * This library implements the rate calculation logic for bonds with sustainability performance targets.
  *
@@ -25,6 +26,7 @@ import { ICouponTypes } from "../../facets/layer_2/coupon/ICouponTypes.sol";
  * Rate calculation formula:
  * 1. If fixing date is before start period: use start rate
  * 2. Otherwise: base rate + total bonuses - total penalties
+ * @author Asset Tokenization Studio Team
  */
 library SustainabilityPerformanceTargetRateLib {
     function calculateSustainabilityPerformanceTargetInterestRate(

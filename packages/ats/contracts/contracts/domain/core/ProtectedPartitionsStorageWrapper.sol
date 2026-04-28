@@ -22,6 +22,14 @@ import { WILD_CARD_ROLE } from "../../constants/roles.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
+/**
+ * @notice Storage layout for the protected partitions module.
+ * @param initialized Whether the protected partitions feature has been initialised.
+ * @param arePartitionsProtected Whether token partitions are currently protected.
+ * @param DEPRECATED_contractName Deprecated field, formerly held the contract name.
+ * @param DEPRECATED_contractVersion Deprecated field, formerly held the contract version.
+ * @param DEPRECATED_nonces Deprecated mapping of address to nonce.
+ */
 struct ProtectedPartitionsDataStorage {
     bool initialized;
     bool arePartitionsProtected;
@@ -33,6 +41,15 @@ struct ProtectedPartitionsDataStorage {
     mapping(address => uint256) DEPRECATED_nonces;
 }
 
+/**
+ * @title ProtectedPartitionsStorageWrapper
+ * @notice Library providing storage access and logic for protected partitions.
+ * @dev Provides functions to initialise, set, query, and validate protected partition state,
+ *      as well as EIP-712 signature verification for transfers, redeems, holds, and clearing
+ *      operations. All storage is accessed via a fixed slot defined in
+ *      `_PROTECTED_PARTITIONS_STORAGE_POSITION`.
+ * @author Asset Tokenization Studio Team
+ */
 library ProtectedPartitionsStorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ProtectedPartitions(bool _protectPartitions) internal returns (bool success_) {

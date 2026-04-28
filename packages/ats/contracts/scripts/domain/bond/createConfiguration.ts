@@ -87,6 +87,7 @@ const BOND_FACETS = [
   "ClearingTransferFacet",
   "HoldFacet",
   "HoldManagementFacet",
+  "ControllerHoldByPartitionFacet",
   "HoldByPartitionFacet",
 
   // External Management

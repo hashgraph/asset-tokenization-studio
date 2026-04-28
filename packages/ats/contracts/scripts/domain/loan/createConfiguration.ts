@@ -82,6 +82,7 @@ const LOAN_FACETS = [
   // Hold
   "HoldFacet",
   "HoldManagementFacet",
+  "ControllerHoldByPartitionFacet",
   "HoldByPartitionFacet",
 
   // Clearing & Settlement
