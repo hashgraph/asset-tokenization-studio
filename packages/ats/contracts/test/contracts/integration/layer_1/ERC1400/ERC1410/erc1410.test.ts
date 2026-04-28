@@ -1562,7 +1562,9 @@ describe("Clearing Tests", () => {
             clearingOperation.expirationTimestamp,
             clearingOperation.data,
             EMPTY_HEX_BYTES,
-          );
+          )
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_A.address, ADDRESS_ZERO, _AMOUNT);
 
         clearingIdentifier.clearingId = 1;
         await checkCreatedClearingValues(
@@ -1664,7 +1666,9 @@ describe("Clearing Tests", () => {
             clearingOperation.expirationTimestamp,
             clearingOperation.data,
             EMPTY_HEX_BYTES,
-          );
+          )
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_A.address, ADDRESS_ZERO, _AMOUNT);
 
         clearingIdentifier.clearingId = 1;
         await checkCreatedClearingValues(
@@ -1759,7 +1763,9 @@ describe("Clearing Tests", () => {
             clearingOperation.expirationTimestamp,
             clearingOperation.data,
             EMPTY_HEX_BYTES,
-          );
+          )
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_A.address, ADDRESS_ZERO, _AMOUNT);
         ((clearingIdentifier.clearingId = 1),
           await checkCreatedClearingValues(
             clearingIdentifier,

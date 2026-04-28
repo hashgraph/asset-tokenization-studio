@@ -54,6 +54,8 @@ library ClearingOps {
         TokenCoreOps.reduceBalanceByPartition(_from, _amount, partition);
         ClearingStorageWrapper.increaseClearedAmounts(_from, partition, _amount);
 
+        emit ITransfer.Transfer(_from, address(0), _amount);
+
         ClearingStorageWrapper.setClearingTransferData(
             _from,
             partition,
@@ -109,6 +111,8 @@ library ClearingOps {
         TokenCoreOps.reduceBalanceByPartition(_from, _amount, partition);
         ClearingStorageWrapper.increaseClearedAmounts(_from, partition, _amount);
 
+        emit ITransfer.Transfer(_from, address(0), _amount);
+
         ClearingStorageWrapper.setClearingRedeemData(
             _from,
             partition,
@@ -161,6 +165,8 @@ library ClearingOps {
 
         TokenCoreOps.reduceBalanceByPartition(_from, _hold.amount, partition);
         ClearingStorageWrapper.increaseClearedAmounts(_from, partition, _hold.amount);
+
+        emit ITransfer.Transfer(_from, address(0), _hold.amount);
 
         ClearingStorageWrapper.setClearingHoldCreationData(
             _from,

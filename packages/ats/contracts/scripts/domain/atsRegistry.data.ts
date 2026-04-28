@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-27T17:55:57.005Z
+ * Generated: 2026-04-28T11:46:25.880Z
  * Facets: 88
  * Infrastructure: 2
  *
@@ -2308,7 +2308,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   BurnFacet: {
     name: "BurnFacet",
-    description: "Diamond facet exposing the ERC-1594 redemption and ERC-3643 burn surfaces.",
+    description:
+      "Diamond facet exposing the ERC-1594 redemption and ERC-3643 burn surfaces, registered under `_BURN_RESOLVER_KEY`.",
     resolverKey: {
       name: "_BURN_RESOLVER_KEY",
       value: "0x16c38166ed323ed9296016a0c71ccf46c67708d8c7dac2fca906f1a51c144f83",

@@ -258,6 +258,8 @@ library ERC1410StorageWrapper {
             increaseBalanceByPartition(issueData.tokenHolder, issueData.value, issueData.partition);
         }
 
+        emit ITransfer.Transfer(address(0), issueData.tokenHolder, issueData.value);
+
         increaseTotalSupplyByPartition(issueData.partition, issueData.value);
 
         if (issueData.partition == _DEFAULT_PARTITION) {
@@ -300,6 +302,8 @@ library ERC1410StorageWrapper {
         beforeTokenTransfer(partition, from, address(0), value);
 
         reduceBalanceByPartition(from, value, partition);
+
+        emit ITransfer.Transfer(from, address(0), value);
 
         // RULE 2: Emit TransferByPartition when ERC1410BasicStorage.partitions change
         emit IERC1410Types.TransferByPartition(partition, operator, from, address(0), value, data, operatorData);

@@ -136,6 +136,8 @@ library ERC3643StorageWrapper {
         st.frozenTokensByPartition[_account][_partition] += _amount;
 
         ERC1410StorageWrapper.reduceBalanceByPartition(_account, _amount, _partition);
+
+        emit ITransfer.Transfer(_account, address(0), _amount);
     }
 
     function unfreezeTokensByPartition(bytes32 _partition, address _account, uint256 _amount) internal {
