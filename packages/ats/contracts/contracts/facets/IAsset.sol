@@ -59,6 +59,7 @@ import { ISecurity } from "./layer_2/security/ISecurity.sol";
 import { ISsiManagement } from "./layer_1/ssi/ISsiManagement.sol";
 import { ITimeTravel } from "../test/testTimeTravel/ITimeTravel.sol";
 import { IBalanceTracker } from "./balanceTracker/IBalanceTracker.sol";
+import { IBalanceTrackerAdjusted } from "./balanceTrackerAdjusted/IBalanceTrackerAdjusted.sol";
 import { ITransferAndLock } from "./layer_3/transferAndLock/ITransferAndLock.sol";
 import { ICoupon } from "./layer_2/coupon/ICoupon.sol";
 import { IDividend } from "./layer_2/dividend/IDividend.sol";
@@ -88,10 +89,10 @@ import { IComplianceFacet } from "./compliance/IComplianceFacet.sol";
 import { IMint } from "./mint/IMint.sol";
 import { IHoldFacet } from "./hold/IHoldFacet.sol";
 import { IBatchController } from "./batchController/IBatchController.sol";
-import { IERC1594 } from "./layer_1/ERC1400/ERC1594/IERC1594.sol";
-
+import { IBurn } from "./burn/IBurn.sol";
 import { IDocumentation } from "./documentation/IDocumentation.sol";
 import { IController } from "./controller/IController.sol";
+import { IControllerHoldByPartition } from "./controllerHoldByPartition/IControllerHoldByPartition.sol";
 import { IERC20Permit } from "./layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
 import { IControlList } from "./layer_1/controlList/IControlList.sol";
 import { IBatchBurn } from "./batchBurn/IBatchBurn.sol";
@@ -135,6 +136,7 @@ interface IAsset is
     IERC20Votes,
     IERC1410,
     IERC3643,
+    IBurn,
     IScheduledCrossOrderedTasks,
     IScheduledSnapshots,
     IBond,
@@ -157,6 +159,7 @@ interface IAsset is
     IDividend,
     // Additional Layer 1
     IBalanceTracker,
+    IBalanceTrackerAdjusted,
     ICap,
     INonces,
     ITotalBalance,
@@ -180,9 +183,9 @@ interface IAsset is
     IBatchController,
     IHoldByPartition,
     IMint,
-    IERC1594,
     IDocumentation,
     IController,
+    IControllerHoldByPartition,
     IERC20Permit,
     // Control
     IControlList,

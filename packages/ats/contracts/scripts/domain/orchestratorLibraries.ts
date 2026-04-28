@@ -109,12 +109,12 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   ERC1410TokenHolderFacet: ["tokenCoreOps"],
   ERC1410ReadFacet: ["tokenCoreOps"],
   ERC1410IssuerFacet: ["tokenCoreOps"],
-  ERC1594Facet: ["tokenCoreOps"],
   ControllerFacet: ["tokenCoreOps"],
   BatchControllerFacet: ["tokenCoreOps"],
   BatchBurnFacet: ["tokenCoreOps"],
   BatchTransferFacet: ["tokenCoreOps"],
-  ERC3643OperationsFacet: ["tokenCoreOps"],
+  MintFacet: ["tokenCoreOps"],
+  BurnFacet: ["tokenCoreOps"],
   // HoldOps dependencies - hold/lock operations
   HoldManagementFacet: ["holdOps"],
   HoldFacet: ["holdOps"],
@@ -131,6 +131,7 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   SnapshotsFacet: ["clearingReadOps"],
   TotalBalanceFacet: ["clearingReadOps"],
   BalanceTrackerFacet: ["clearingReadOps"],
+  BalanceTrackerAdjustedFacet: ["clearingReadOps"],
   // Layer 2/3 Bond read facets transitively reach ClearingReadOps via SnapshotsStorageWrapper
   BondUSAReadFacet: ["clearingReadOps"],
   BondUSAReadFixedRateFacet: ["clearingReadOps"],

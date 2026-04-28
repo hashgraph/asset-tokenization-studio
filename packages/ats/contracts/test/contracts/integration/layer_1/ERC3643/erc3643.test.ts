@@ -159,28 +159,6 @@ describe("ERC3643 Tests", () => {
       });
     });
 
-    describe("burn", () => {
-      it("GIVEN an initialized token WHEN burning THEN transaction success", async () => {
-        //happy path
-        await asset.mint(signer_E.address, AMOUNT);
-
-        expect(await asset.burn(signer_E.address, AMOUNT / 2))
-          .to.emit(asset, "Redeemed")
-          .withArgs(signer_D.address, signer_E.address, AMOUNT / 2);
-
-        expect(await asset.allowance(signer_E.address, signer_D.address)).to.be.equal(0);
-        expect(await asset.totalSupply()).to.be.equal(AMOUNT / 2);
-        expect(await asset.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
-        expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.be.equal(AMOUNT / 2);
-        expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.be.equal(AMOUNT / 2);
-      });
-      it("GIVEN a paused token WHEN attempting to burn TokenIsPaused error", async () => {
-        await asset.connect(signer_B).pause();
-
-        await expect(asset.burn(signer_A.address, AMOUNT)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
-      });
-    });
-
     describe("setName", () => {
       it("GIVEN an initialized token WHEN updating the name THEN setName emits UpdatedTokenInformation with updated name and current metadata", async () => {
         const retrieved_name = await asset.name();
@@ -2240,13 +2218,6 @@ describe("ERC3643 Tests", () => {
       ).to.be.revertedWithCustomError(asset, "NotAllowedInMultiPartitionMode");
     });
 
-    it("GIVEN an initialized token WHEN burning THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
-      // burn with data fails
-      await expect(
-        asset.connect(signer_C).burn(signer_C.address, 2 * BALANCE_OF_C_ORIGINAL),
-      ).to.be.revertedWithCustomError(asset, "NotAllowedInMultiPartitionMode");
-    });
-
     it("GIVEN an account with balance WHEN forcedTransfer THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
       // transfer with data fails
       await expect(
@@ -2349,9 +2320,6 @@ describe("ERC3643 Tests", () => {
       await loadFixture(deployERC3643TokenIsControllableFixture);
     });
 
-    it("GIVEN token is controllable WHEN burning THEN transaction fails with TokenIsNotControllable", async () => {
-      await expect(asset.burn(signer_E.address, AMOUNT)).to.be.revertedWithCustomError(asset, "TokenIsNotControllable");
-    });
     it("GIVEN token is controllable WHEN forcedTransfer THEN transaction fails with TokenIsNotControllable", async () => {
       await expect(asset.forcedTransfer(signer_E.address, signer_D.address, AMOUNT)).to.be.revertedWithCustomError(
         asset,

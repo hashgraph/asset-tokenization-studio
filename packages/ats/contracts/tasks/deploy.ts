@@ -47,7 +47,6 @@ task(
       erc1410ManagementFacet,
       erc1410IssuerFacet,
       erc1410TokenHolderFacet,
-      erc1594Facet,
       documentationFacet,
       controllerFacet,
       snapshotsFacet,
@@ -77,10 +76,11 @@ task(
       externalKycListManagementFacet,
       protectedPartitionsFacet,
       erc3643ManagementFacet,
-      erc3643OperationsFacet,
       erc3643ReadFacet,
       freezeFacet,
       erc20PermitFacet,
+      burnFacet,
+      mintFacet,
     } = await deployAtsFullInfrastructure(
       new DeployAtsFullInfrastructureCommand({
         signer: signer,
@@ -109,7 +109,6 @@ task(
       "ERC1410 Management Facet": erc1410ManagementFacet.address,
       "ERC1410 Issuer Facet": erc1410IssuerFacet.address,
       "ERC1410 TokenHolder Facet": erc1410TokenHolderFacet.address,
-      "ERC1594 Facet": erc1594Facet.address,
       "Documentation Facet": documentationFacet.address,
       "Controller Facet": controllerFacet.address,
       "Snapshots Facet": snapshotsFacet.address,
@@ -139,10 +138,11 @@ task(
       "External Kyc List Management Facet": externalKycListManagementFacet.address,
       "Protected Partitions Facet": protectedPartitionsFacet.address,
       "ERC3643 Management Facet": erc3643ManagementFacet.address,
-      "ERC3643 Operations Facet": erc3643OperationsFacet.address,
       "ERC3643 Read Facet": erc3643ReadFacet.address,
       "Freeze Facet": freezeFacet.address,
       "ERC20Permit Facet": erc20PermitFacet.address,
+      "Burn Facet": burnFacet.address,
+      "Mint Facet": mintFacet.address,
     };
 
     const contractAddress = [];

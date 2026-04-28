@@ -7,6 +7,7 @@ import { IController } from "../controller/IController.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { ITransfer } from "../transfer/ITransfer.sol";
 
 /**
  * @title BatchBurn
@@ -14,7 +15,7 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  *         in a single, atomic transaction.
  * @dev Caller must hold `CONTROLLER_ROLE` or `AGENT_ROLE`. The token must be unpaused and
  *      configured for a single partition. Delegates burn execution to `TokenCoreOps` and
- *      emits `IERC1644.ControllerRedemption` for each address processed.
+ *      emits `IController.ControllerRedemption` for each address processed.
  *      Intended to be inherited by `BatchBurnFacet`.
  * @author Asset Tokenization Studio Team
  */
@@ -32,9 +33,11 @@ abstract contract BatchBurn is IBatchBurn, Modifiers {
         onlyAnyRole(_buildRoles(CONTROLLER_ROLE, AGENT_ROLE))
     {
         uint256 length = _userAddresses.length;
+        address sender = EvmAccessors.getMsgSender();
         for (uint256 i; i < length; ) {
             TokenCoreOps.burn(_userAddresses[i], _amounts[i]);
-            emit IController.ControllerRedemption(EvmAccessors.getMsgSender(), _userAddresses[i], _amounts[i], "", "");
+            emit ITransfer.Transfer(_userAddresses[i], address(0), _amounts[i]);
+            emit IController.ControllerRedemption(sender, _userAddresses[i], _amounts[i], "", "");
             unchecked {
                 ++i;
             }

@@ -34,6 +34,15 @@ import { SustainabilityPerformanceTargetRateLib } from "./SustainabilityPerforma
 import { ICouponTypes } from "../../facets/layer_2/coupon/ICouponTypes.sol";
 import { KpiLinkedRateLib } from "./KpiLinkedRateLib.sol";
 
+/**
+ * @title ScheduledTasksStorageWrapper
+ * @notice Storage and execution layer for managing time‑based scheduled tasks
+ *         (snapshots, coupon listings, balance adjustments, cross‑ordered tasks).
+ * @dev Provides internal helpers to add, trigger, query and dispatch scheduled
+ *      tasks by type. Relies on `ScheduledTasksLib` for core queue logic and on
+ *      dedicated storage wrappers for per‑type state.
+ * @author Asset Tokenization Studio Team
+ */
 library ScheduledTasksStorageWrapper {
     error WrongTimestamp(uint256 timeStamp);
 

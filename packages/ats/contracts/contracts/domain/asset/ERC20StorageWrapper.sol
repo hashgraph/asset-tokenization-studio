@@ -167,12 +167,10 @@ library ERC20StorageWrapper {
 
     function mint(address to, uint256 value) internal {
         ERC1410StorageWrapper.issueByPartition(IERC1410Types.IssueData(_DEFAULT_PARTITION, to, value, ""));
-        emit ITransfer.Transfer(address(0), to, value);
     }
 
     function burn(address from, uint256 value) internal {
         ERC1410StorageWrapper.redeemByPartition(_DEFAULT_PARTITION, from, address(0), value, "", "");
-        emit ITransfer.Transfer(from, address(0), value);
     }
 
     function burnFrom(address account, uint256 value) internal {
