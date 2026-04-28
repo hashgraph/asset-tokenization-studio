@@ -181,7 +181,7 @@ export interface DeploymentCheckpoint {
 
     /**
      * Orchestrator libraries deployment (step 2.5)
-     * Required for library-dependent facets like ERC1410IssuerFacet
+     * Required for library-dependent facets like MintByPartitionFacet
      */
     libraries?: {
       tokenCoreOps: string;

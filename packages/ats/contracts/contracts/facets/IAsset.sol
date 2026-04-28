@@ -88,6 +88,7 @@ import {
 import { IClearingRead } from "./layer_1/clearing/IClearingRead.sol";
 import { IComplianceFacet } from "./compliance/IComplianceFacet.sol";
 import { IMint } from "./mint/IMint.sol";
+import { IMintByPartition } from "./mintByPartition/IMintByPartition.sol";
 import { IHoldFacet } from "./hold/IHoldFacet.sol";
 import { IBatchController } from "./batchController/IBatchController.sol";
 import { IBurn } from "./burn/IBurn.sol";
@@ -185,6 +186,7 @@ interface IAsset is
     IBatchController,
     IHoldByPartition,
     IMint,
+    IMintByPartition,
     IDocumentation,
     IController,
     IControllerHoldByPartition,

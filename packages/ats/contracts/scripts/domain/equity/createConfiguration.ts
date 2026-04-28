@@ -55,7 +55,7 @@ const EQUITY_FACETS = [
   "BalanceTrackerByPartitionFacet",
 
   // ERC Standards (13)
-  "ERC1410IssuerFacet",
+  "MintByPartitionFacet",
   "ERC1410ManagementFacet",
   "ERC1410ReadFacet",
   "ERC1410TokenHolderFacet",

@@ -86,7 +86,7 @@ export const CONTRACT_NAMES = [
   "ERC20Votes", //TODO
   "ERC1410ReadFacet",
   "ERC1410ManagementFacet",
-  "ERC1410IssuerFacet",
+  "MintByPartitionFacet",
   "ERC1410TokenHolderFacet",
   "BurnFacet",
   "DocumentationFacet",
