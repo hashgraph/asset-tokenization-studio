@@ -55,6 +55,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "KycFacet",
   "PauseFacet",
   "BalanceTrackerFacet",
+  "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
   "SsiManagementFacet",
   "BalanceTrackerByPartitionFacet",

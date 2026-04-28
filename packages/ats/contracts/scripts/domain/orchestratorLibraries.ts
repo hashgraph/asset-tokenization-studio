@@ -130,6 +130,7 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   SnapshotsFacet: ["clearingReadOps"],
   BalanceTrackerFacet: ["clearingReadOps"],
   BalanceTrackerByPartitionFacet: ["clearingReadOps"],
+  BalanceTrackerAdjustedFacet: ["clearingReadOps"],
   // Layer 2/3 Bond read facets transitively reach ClearingReadOps via SnapshotsStorageWrapper
   BondUSAReadFacet: ["clearingReadOps"],
   BondUSAReadFixedRateFacet: ["clearingReadOps"],

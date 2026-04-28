@@ -48,6 +48,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "KycFacet",
   "PauseFacet",
   "BalanceTrackerFacet",
+  "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
   "BalanceTrackerByPartitionFacet",
 
