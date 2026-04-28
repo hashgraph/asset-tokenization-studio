@@ -10,7 +10,7 @@ import { NominalValueStorageWrapper } from "../../domain/asset/nominalValue/Nomi
 
 /**
  * @dev Test facet for NominalValue storage migration testing.
- * Exposes storage accessors to set up legacy storage state and verify migration behavior.
+ * Exposes storage accessors to set up legacy storage state and _verify migration behavior.
  * This facet is for testing purposes only and should not be deployed to production.
  */
 contract NominalValueMigrationFacetTest is Modifiers, IStaticFunctionSelectors {

@@ -123,8 +123,8 @@ abstract contract ERC3643Modifiers {
      * Requirements:
      * - Both `from` and `to` must be registered in the identity registry.
      *
-     * @param _from The sender/source address to verify.
-     * @param _to The recipient/target address to verify.
+     * @param _from The sender/source address to _verify.
+     * @param _to The recipient/target address to _verify.
      */
     modifier onlyIdentifiedAddresses(address _from, address _to) {
         ERC1594StorageWrapper.requireIdentified(_from, _to);

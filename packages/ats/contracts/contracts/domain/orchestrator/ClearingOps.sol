@@ -10,6 +10,9 @@ import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Type
 import { ITransfer } from "../../facets/transfer/ITransfer.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
+import {
+    IOperatorClearingHoldByPartition
+} from "../../facets/layer_1/clearing/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
 import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
@@ -452,7 +455,7 @@ library ClearingOps {
             return;
         }
 
-        // Approve: verify identity/compliance (tokens are burned, no transfer back)
+        // Approve: _verify identity/compliance (tokens are burned, no transfer back)
         TokenCoreOps.checkIdentity(_id.tokenHolder, address(0));
         TokenCoreOps.checkCompliance(_id.tokenHolder, address(0), false);
     }
@@ -891,7 +894,7 @@ library ClearingOps {
             return;
         }
         if (_thirdPartyType == ThirdPartyType.OPERATOR) {
-            emit IClearingTypes.ClearedOperatorHoldByPartition(
+            emit IOperatorClearingHoldByPartition.ClearedOperatorHoldByPartition(
                 EvmAccessors.getMsgSender(),
                 _from,
                 _partition,

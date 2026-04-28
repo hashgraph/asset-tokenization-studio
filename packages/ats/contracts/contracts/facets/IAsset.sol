@@ -81,6 +81,9 @@ import { IClearingActions } from "./layer_1/clearing/IClearingActions.sol";
 import { IClearingTransfer } from "./layer_1/clearing/IClearingTransfer.sol";
 import { IClearingRedeem } from "./layer_1/clearing/IClearingRedeem.sol";
 import { IClearingHoldCreation } from "./layer_1/clearing/IClearingHoldCreation.sol";
+import {
+    IOperatorClearingHoldByPartition
+} from "./layer_1/clearing/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol";
 import { IClearingRead } from "./layer_1/clearing/IClearingRead.sol";
 import { IComplianceFacet } from "./compliance/IComplianceFacet.sol";
 import { IMint } from "./mint/IMint.sol";
@@ -172,6 +175,7 @@ interface IAsset is
     IClearingTransfer,
     IClearingRedeem,
     IClearingHoldCreation,
+    IOperatorClearingHoldByPartition,
     IClearingRead,
     // Additional ERC
     IComplianceFacet,
