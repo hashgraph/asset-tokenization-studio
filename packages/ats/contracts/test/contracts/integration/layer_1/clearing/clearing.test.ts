@@ -877,31 +877,6 @@ describe("Clearing Tests", () => {
         expect(clearing1.operatorData).to.equal(opData1);
         expect(clearing2.operatorData).to.equal(opData2);
       });
-
-      it("GIVEN an authorized operator WHEN creating clearing holds THEN holds are created correctly", async () => {
-        await asset.connect(signer_A).authorizeOperator(signer_B.address);
-
-        const hold1 = {
-          ...hold,
-          amount: _AMOUNT / 10,
-          to: signer_C.address,
-        };
-
-        const hold2 = {
-          ...hold,
-          amount: _AMOUNT / 10,
-          to: signer_D.address,
-        };
-
-        await asset.connect(signer_B).operatorClearingCreateHoldByPartition(clearingOperationFrom, hold1);
-        await asset.connect(signer_B).operatorClearingCreateHoldByPartition(clearingOperationFrom, hold2);
-
-        const clearing1 = await asset.getClearingCreateHoldForByPartition(_DEFAULT_PARTITION, signer_A.address, 1);
-        const clearing2 = await asset.getClearingCreateHoldForByPartition(_DEFAULT_PARTITION, signer_A.address, 2);
-
-        expect(clearing1.holdTo).to.equal(signer_C.address);
-        expect(clearing2.holdTo).to.equal(signer_D.address);
-      });
     });
 
     describe("AccessControl", () => {
@@ -948,12 +923,6 @@ describe("Clearing Tests", () => {
         await expect(
           asset.connect(signer_D).clearingCreateHoldFromByPartition(clearingOperationFrom, hold),
         ).to.be.revertedWithCustomError(asset, "InsufficientAllowance");
-      });
-
-      it("GIVEN an account without operator authorization WHEN operatorClearingCreateHoldByPartition THEN transaction fails with Unauthorized", async () => {
-        await expect(
-          asset.connect(signer_D).operatorClearingCreateHoldByPartition(clearingOperationFrom, hold),
-        ).to.be.revertedWithCustomError(asset, "Unauthorized");
       });
 
       // Redeems

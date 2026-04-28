@@ -47,7 +47,8 @@ const BOND_FACETS = [
   "PauseFacet",
   "SnapshotsFacet",
   "BalanceTrackerFacet",
-  "TotalBalanceFacet",
+  "BalanceTrackerAdjustedFacet",
+  "BalanceTrackerByPartitionFacet",
 
   // Core
   "CoreFacet",
@@ -60,7 +61,7 @@ const BOND_FACETS = [
 
   // ERC Standards
   "TransferFacet",
-  "ERC1410IssuerFacet",
+  "MintByPartitionFacet",
   "ERC1410ManagementFacet",
   "ERC1410ReadFacet",
   "ERC1410TokenHolderFacet",
@@ -82,11 +83,14 @@ const BOND_FACETS = [
   // Clearing & Settlement
   "ClearingActionsFacet",
   "ClearingHoldCreationFacet",
+  "OperatorClearingHoldByPartitionFacet",
   "ClearingReadFacet",
   "ClearingRedeemFacet",
   "ClearingTransferFacet",
   "HoldFacet",
   "HoldManagementFacet",
+  "ControllerHoldByPartitionFacet",
+  "ProtectedHoldByPartitionFacet",
   "HoldByPartitionFacet",
 
   // External Management

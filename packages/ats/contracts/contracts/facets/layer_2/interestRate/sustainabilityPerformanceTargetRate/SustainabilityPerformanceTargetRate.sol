@@ -20,7 +20,7 @@ contract SustainabilityPerformanceTargetRate is ISustainabilityPerformanceTarget
         onlyNotSustainabilityPerformanceTargetRateInitialized
         onlyValidEqualLength(_impactData.length, _projects.length)
     {
-        InterestRateStorageWrapper.initialize_SustainabilityPerformanceTargetRate(
+        InterestRateStorageWrapper.initializeSustainabilityPerformanceTargetRate(
             _interestRate,
             _impactData,
             _projects,

@@ -150,3 +150,7 @@ AGENTS.md
 
 # Engram AI agent memory
 .engram/
+
+# Added by code-review-graph
+.code-review-graph/
+.atl/

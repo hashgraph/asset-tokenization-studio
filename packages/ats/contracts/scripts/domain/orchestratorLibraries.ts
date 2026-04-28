@@ -109,6 +109,8 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   ERC1410TokenHolderFacet: ["tokenCoreOps"],
   ERC1410ReadFacet: ["tokenCoreOps"],
   ERC1410IssuerFacet: ["tokenCoreOps"],
+  MintByPartitionFacet: ["tokenCoreOps"],
+  ERC1594Facet: ["tokenCoreOps"],
   ControllerFacet: ["tokenCoreOps"],
   BatchControllerFacet: ["tokenCoreOps"],
   BatchBurnFacet: ["tokenCoreOps"],
@@ -124,12 +126,14 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   ClearingTransferFacet: ["clearingOps", "clearingProtectedOps"],
   ClearingRedeemFacet: ["clearingOps", "clearingProtectedOps"],
   ClearingHoldCreationFacet: ["clearingOps", "clearingProtectedOps"],
+  OperatorClearingHoldByPartitionFacet: ["clearingOps"],
   // ClearingReadOps dependencies - clearing read operations
   ClearingReadFacet: ["clearingReadOps"],
-  // SnapshotsFacet + TotalBalanceFacet + BalanceTrackerFacet depend on SnapshotsStorageWrapper which uses ClearingReadOps
+  // SnapshotsFacet + BalanceTrackerFacet + BalanceTrackerByPartitionFacet depend on SnapshotsStorageWrapper which uses ClearingReadOps
   SnapshotsFacet: ["clearingReadOps"],
-  TotalBalanceFacet: ["clearingReadOps"],
   BalanceTrackerFacet: ["clearingReadOps"],
+  BalanceTrackerByPartitionFacet: ["clearingReadOps"],
+  BalanceTrackerAdjustedFacet: ["clearingReadOps"],
   // Layer 2/3 Bond read facets transitively reach ClearingReadOps via SnapshotsStorageWrapper
   BondUSAReadFacet: ["clearingReadOps"],
   BondUSAReadFixedRateFacet: ["clearingReadOps"],

@@ -59,6 +59,7 @@ import { ISecurity } from "./layer_2/security/ISecurity.sol";
 import { ISsiManagement } from "./layer_1/ssi/ISsiManagement.sol";
 import { ITimeTravel } from "../test/testTimeTravel/ITimeTravel.sol";
 import { IBalanceTracker } from "./balanceTracker/IBalanceTracker.sol";
+import { IBalanceTrackerAdjusted } from "./balanceTrackerAdjusted/IBalanceTrackerAdjusted.sol";
 import { ITransferAndLock } from "./layer_3/transferAndLock/ITransferAndLock.sol";
 import { ICoupon } from "./layer_2/coupon/ICoupon.sol";
 import { IDividend } from "./layer_2/dividend/IDividend.sol";
@@ -68,7 +69,7 @@ import { IProtectedPartitions } from "./layer_1/protectedPartition/IProtectedPar
 import { IProceedRecipients } from "./layer_2/proceedRecipient/IProceedRecipients.sol";
 import { ICap } from "./layer_1/cap/ICap.sol";
 import { INonces } from "./layer_1/nonce/INonces.sol";
-import { ITotalBalance } from "./layer_1/totalBalance/ITotalBalance.sol";
+import { IBalanceTrackerByPartition } from "./balanceTrackerByPartition/IBalanceTrackerByPartition.sol";
 import { IScheduledCouponListing } from "./layer_2/scheduledTask/scheduledCouponListing/IScheduledCouponListing.sol";
 import {
     IScheduledBalanceAdjustments
@@ -80,14 +81,20 @@ import { IClearingActions } from "./layer_1/clearing/IClearingActions.sol";
 import { IClearingTransfer } from "./layer_1/clearing/IClearingTransfer.sol";
 import { IClearingRedeem } from "./layer_1/clearing/IClearingRedeem.sol";
 import { IClearingHoldCreation } from "./layer_1/clearing/IClearingHoldCreation.sol";
+import {
+    IOperatorClearingHoldByPartition
+} from "./layer_1/clearing/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol";
 import { IClearingRead } from "./layer_1/clearing/IClearingRead.sol";
 import { IComplianceFacet } from "./compliance/IComplianceFacet.sol";
 import { IMint } from "./mint/IMint.sol";
+import { IMintByPartition } from "./mintByPartition/IMintByPartition.sol";
 import { IHoldFacet } from "./hold/IHoldFacet.sol";
 import { IBatchController } from "./batchController/IBatchController.sol";
 import { IBurn } from "./burn/IBurn.sol";
 import { IDocumentation } from "./documentation/IDocumentation.sol";
 import { IController } from "./controller/IController.sol";
+import { IControllerHoldByPartition } from "./controllerHoldByPartition/IControllerHoldByPartition.sol";
+import { IProtectedHoldByPartition } from "./protectedHoldByPartition/IProtectedHoldByPartition.sol";
 import { IERC20Permit } from "./layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
 import { IControlList } from "./layer_1/controlList/IControlList.sol";
 import { IBatchBurn } from "./batchBurn/IBatchBurn.sol";
@@ -154,9 +161,10 @@ interface IAsset is
     IDividend,
     // Additional Layer 1
     IBalanceTracker,
+    IBalanceTrackerAdjusted,
     ICap,
     INonces,
-    ITotalBalance,
+    IBalanceTrackerByPartition,
     IFixedRate,
     // Scheduled Tasks
     IScheduledCouponListing,
@@ -169,6 +177,7 @@ interface IAsset is
     IClearingTransfer,
     IClearingRedeem,
     IClearingHoldCreation,
+    IOperatorClearingHoldByPartition,
     IClearingRead,
     // Additional ERC
     IComplianceFacet,
@@ -176,8 +185,11 @@ interface IAsset is
     IBatchController,
     IHoldByPartition,
     IMint,
+    IMintByPartition,
     IDocumentation,
     IController,
+    IControllerHoldByPartition,
+    IProtectedHoldByPartition,
     IERC20Permit,
     // Control
     IControlList,

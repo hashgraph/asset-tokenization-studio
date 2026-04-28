@@ -55,12 +55,13 @@ const LOANS_PORTFOLIO_FACETS = [
   "KycFacet",
   "PauseFacet",
   "BalanceTrackerFacet",
+  "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
   "SsiManagementFacet",
-  "TotalBalanceFacet",
+  "BalanceTrackerByPartitionFacet",
 
   // ERC Standards
-  "ERC1410IssuerFacet",
+  "MintByPartitionFacet",
   "ERC1410ManagementFacet",
   "ERC1410ReadFacet",
   "ERC1410TokenHolderFacet",
@@ -85,12 +86,15 @@ const LOANS_PORTFOLIO_FACETS = [
   // Hold
   "HoldFacet",
   "HoldManagementFacet",
+  "ControllerHoldByPartitionFacet",
+  "ProtectedHoldByPartitionFacet",
   "HoldByPartitionFacet",
 
   // Clearing & Settlement
   "ClearingTransferFacet",
   "ClearingRedeemFacet",
   "ClearingHoldCreationFacet",
+  "OperatorClearingHoldByPartitionFacet",
   "ClearingReadFacet",
   "ClearingActionsFacet",
 
