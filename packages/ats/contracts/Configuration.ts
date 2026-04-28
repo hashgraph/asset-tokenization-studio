@@ -114,6 +114,7 @@ export const CONTRACT_NAMES = [
   "KycFacet",
   "SsiManagementFacet",
   "ClearingHoldCreationFacet",
+  "OperatorClearingHoldByPartitionFacet",
   "ClearingRedeemFacet",
   "ClearingTransferFacet",
   "ClearingReadFacet",

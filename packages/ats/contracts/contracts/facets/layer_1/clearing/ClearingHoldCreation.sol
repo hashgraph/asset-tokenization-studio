@@ -76,35 +76,6 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, Modifiers {
         );
     }
 
-    function operatorClearingCreateHoldByPartition(
-        ClearingOperationFrom calldata _clearingOperationFrom,
-        IHoldTypes.Hold calldata _hold
-    )
-        external
-        override
-        onlyUnpaused
-        onlyClearingActivated
-        onlyValidOperatorClearingCreateHoldByPartition(
-            _hold.expirationTimestamp,
-            _clearingOperationFrom.clearingOperation.expirationTimestamp,
-            EvmAccessors.getMsgSender(),
-            _hold.to,
-            _clearingOperationFrom.from,
-            _hold.escrow,
-            _clearingOperationFrom.clearingOperation.partition
-        )
-        onlyUnProtectedPartitionsOrWildCardRole
-        returns (bool success_, uint256 clearingId_)
-    {
-        (success_, clearingId_) = ClearingOps.clearingHoldCreationCreation(
-            _clearingOperationFrom.clearingOperation,
-            _clearingOperationFrom.from,
-            _hold,
-            _clearingOperationFrom.operatorData,
-            ThirdPartyType.OPERATOR
-        );
-    }
-
     function protectedClearingCreateHoldByPartition(
         ProtectedClearingOperation calldata _protectedClearingOperation,
         IHoldTypes.Hold calldata _hold,

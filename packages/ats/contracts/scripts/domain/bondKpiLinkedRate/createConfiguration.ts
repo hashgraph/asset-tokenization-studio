@@ -75,6 +75,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   // Clearing & Settlement
   "ClearingActionsFacet",
   "ClearingHoldCreationFacet",
+  "OperatorClearingHoldByPartitionFacet",
   "ClearingReadFacet",
   "ClearingRedeemFacet",
   "ClearingTransferFacet",

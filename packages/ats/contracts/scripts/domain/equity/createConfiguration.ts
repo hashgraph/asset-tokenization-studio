@@ -76,6 +76,7 @@ const EQUITY_FACETS = [
   // Clearing & Settlement (8)
   "ClearingActionsFacet",
   "ClearingHoldCreationFacet",
+  "OperatorClearingHoldByPartitionFacet",
   "ClearingReadFacet",
   "ClearingRedeemFacet",
   "ClearingTransferFacet",
