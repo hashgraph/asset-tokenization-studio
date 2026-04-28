@@ -69,7 +69,7 @@ import { IProtectedPartitions } from "./layer_1/protectedPartition/IProtectedPar
 import { IProceedRecipients } from "./layer_2/proceedRecipient/IProceedRecipients.sol";
 import { ICap } from "./layer_1/cap/ICap.sol";
 import { INonces } from "./layer_1/nonce/INonces.sol";
-import { ITotalBalance } from "./layer_1/totalBalance/ITotalBalance.sol";
+import { IBalanceTrackerByPartition } from "./balanceTrackerByPartition/IBalanceTrackerByPartition.sol";
 import { IScheduledCouponListing } from "./layer_2/scheduledTask/scheduledCouponListing/IScheduledCouponListing.sol";
 import {
     IScheduledBalanceAdjustments
@@ -162,7 +162,7 @@ interface IAsset is
     IBalanceTrackerAdjusted,
     ICap,
     INonces,
-    ITotalBalance,
+    IBalanceTrackerByPartition,
     IFixedRate,
     // Scheduled Tasks
     IScheduledCouponListing,

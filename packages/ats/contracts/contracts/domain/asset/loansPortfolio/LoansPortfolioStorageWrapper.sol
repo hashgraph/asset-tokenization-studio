@@ -9,6 +9,7 @@ import { ILoansPortfolio } from "../../../facets/layer_2/loansPortfolio/ILoansPo
 import { ILoan } from "../../../facets/layer_2/loan/ILoan.sol";
 import { IERC1410Types } from "../../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { IERC1410 } from "../../../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
+import { IBalanceTrackerByPartition } from "../../../facets/balanceTrackerByPartition/IBalanceTrackerByPartition.sol";
 import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
 
 /**
@@ -381,7 +382,10 @@ library LoansPortfolioStorageWrapper {
         uint256 arraySize = assets_.length;
         tokenBalances_ = new uint256[](arraySize);
         for (uint256 i; i < arraySize; ) {
-            tokenBalances_[i] = IERC1410(assets_[i]).balanceOfByPartition(_DEFAULT_PARTITION, address(this));
+            tokenBalances_[i] = IBalanceTrackerByPartition(assets_[i]).balanceOfByPartition(
+                _DEFAULT_PARTITION,
+                address(this)
+            );
             unchecked {
                 ++i;
             }
