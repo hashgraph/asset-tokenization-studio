@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-27T17:55:57.005Z
- * Facets: 88
+ * Generated: 2026-04-28T07:47:10.929Z
+ * Facets: 89
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -23,6 +23,7 @@ import {
   AdjustBalancesFacet__factory,
   AllowanceFacet__factory,
   AmortizationFacet__factory,
+  BalanceTrackerAdjustedFacet__factory,
   BalanceTrackerFacet__factory,
   BatchBurnFacet__factory,
   BatchControllerFacet__factory,
@@ -910,6 +911,28 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     factory: (signer) => new AmortizationFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+  },
+
+  BalanceTrackerAdjustedFacet: {
+    name: "BalanceTrackerAdjustedFacet",
+    description:
+      "Diamond facet that exposes historical, timestamp-parameterised balance queries through the `IBalanceTrackerAdjusted` interface, registered under `_BALANCE_TRACKER_ADJUSTED_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_BALANCE_TRACKER_ADJUSTED_RESOLVER_KEY",
+      value: "0x4aa82b9c4bc25297ffd0abda4fd7f5b1cb7a373353f5b0cc1985bc6ddbe2f64b",
+    },
+    inheritance: ["BalanceTrackerAdjusted", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "balanceOfAt",
+        signature: {
+          full: "function balanceOfAt(address _tokenHolder, uint256 _timestamp) view returns (uint256)",
+          canonical: "balanceOfAt(address,uint256)",
+        },
+        selector: "0x4ee2cd7e",
+      },
+    ],
+    factory: (signer) => new BalanceTrackerAdjustedFacet__factory(signer),
   },
 
   BalanceTrackerFacet: {
@@ -2308,7 +2331,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   BurnFacet: {
     name: "BurnFacet",
-    description: "Diamond facet exposing the ERC-1594 redemption and ERC-3643 burn surfaces.",
+    description:
+      "Diamond facet exposing the ERC-1594 redemption and ERC-3643 burn surfaces, registered under `_BURN_RESOLVER_KEY`.",
     resolverKey: {
       name: "_BURN_RESOLVER_KEY",
       value: "0x16c38166ed323ed9296016a0c71ccf46c67708d8c7dac2fca906f1a51c144f83",
@@ -6625,14 +6649,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["ERC1410Read", "IStaticFunctionSelectors"],
     methods: [
-      {
-        name: "balanceOfAt",
-        signature: {
-          full: "function balanceOfAt(address _tokenHolder, uint256 _timestamp) view returns (uint256)",
-          canonical: "balanceOfAt(address,uint256)",
-        },
-        selector: "0x4ee2cd7e",
-      },
       {
         name: "balanceOfByPartition",
         signature: {
@@ -13067,7 +13083,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 88 as const;
+export const TOTAL_FACETS = 89 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

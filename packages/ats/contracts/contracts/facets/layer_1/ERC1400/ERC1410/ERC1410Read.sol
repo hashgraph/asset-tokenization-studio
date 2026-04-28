@@ -11,10 +11,6 @@ import { IPause } from "../../../../facets/layer_1/pause/IPause.sol";
 import { Eip1066 } from "../../../../constants/eip1066.sol";
 
 abstract contract ERC1410Read is IERC1410Read, Modifiers {
-    function balanceOfAt(address _tokenHolder, uint256 _timestamp) external view returns (uint256) {
-        return ERC1410StorageWrapper.balanceOfAdjustedAt(_tokenHolder, _timestamp);
-    }
-
     function balanceOfByPartition(bytes32 _partition, address _tokenHolder) external view returns (uint256) {
         return
             ERC1410StorageWrapper.balanceOfByPartitionAdjustedAt(

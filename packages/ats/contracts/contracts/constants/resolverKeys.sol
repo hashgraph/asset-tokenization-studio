@@ -495,6 +495,9 @@ bytes32 constant _TOTAL_BALANCE_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_
 // keccak256("security.token.standard.balanceTracker.resolverKey");
 bytes32 constant _BALANCE_TRACKER_RESOLVER_KEY = 0xe5224fce279d87fd0876a56f9f00d1596cef92571a27c651c09f9b0462efb974;
 
+// keccak256('security.token.standard.balanceTrackerAdjusted.resolverKey');
+bytes32 constant _BALANCE_TRACKER_ADJUSTED_RESOLVER_KEY = 0x4aa82b9c4bc25297ffd0abda4fd7f5b1cb7a373353f5b0cc1985bc6ddbe2f64b;
+
 // Layer 2 Resolver Keys
 
 // keccak256('security.token.standard.equity.resolverKey');
