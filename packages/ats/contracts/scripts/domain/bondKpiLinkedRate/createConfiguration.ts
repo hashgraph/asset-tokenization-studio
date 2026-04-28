@@ -49,7 +49,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "PauseFacet",
   "BalanceTrackerFacet",
   "SnapshotsFacet",
-  "TotalBalanceFacet",
+  "BalanceTrackerByPartitionFacet",
 
   // ERC Standards
   "ERC1410IssuerFacet",

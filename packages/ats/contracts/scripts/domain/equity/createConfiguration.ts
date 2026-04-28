@@ -50,7 +50,7 @@ const EQUITY_FACETS = [
   "PauseFacet",
   "BalanceTrackerFacet",
   "SnapshotsFacet",
-  "TotalBalanceFacet",
+  "BalanceTrackerByPartitionFacet",
 
   // ERC Standards (13)
   "ERC1410IssuerFacet",

@@ -483,9 +483,6 @@ bytes32 constant _NONCES_KPI_LINKED_RATE_RESOLVER_KEY = 0xc267b98bd9bdee7ecfccb0
 // keccak256("security.token.standard.nonces.SustainabilityPerformanceTarget.rate.resolverKey");
 bytes32 constant _NONCES_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x631217f1fdd4036273035308e6637d8cdef1927db4eef0af68e5aac13a70892e;
 
-// keccak256("security.token.standard.totalBalance.resolverKey");
-bytes32 constant _TOTAL_BALANCE_RESOLVER_KEY = 0xd1873ecc41f0658d1ac1c9bf3fe6a4da2071b04edc7f7d3b4520d029c3ce64d5;
-
 // keccak256("security.token.standard.totalBalance.fixed.rate.resolverKey");
 bytes32 constant _TOTAL_BALANCE_FIXED_RATE_RESOLVER_KEY = 0x0f902d5eda4d9e41f9c3ad2bb5367bb6a2e9df580335d82a5210bbda16cc76f2;
 
@@ -497,6 +494,9 @@ bytes32 constant _TOTAL_BALANCE_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_
 
 // keccak256("security.token.standard.balanceTracker.resolverKey");
 bytes32 constant _BALANCE_TRACKER_RESOLVER_KEY = 0xe5224fce279d87fd0876a56f9f00d1596cef92571a27c651c09f9b0462efb974;
+
+// keccak256('security.token.standard.balanceTrackerByPartition.resolverKey');
+bytes32 constant _BALANCE_TRACKER_BY_PARTITION_RESOLVER_KEY = 0x5e8d2cfc1836db4646bfee17c45aafdf6666f41b7ce69811bc816e803d5b2e1b;
 
 // Layer 2 Resolver Keys
 

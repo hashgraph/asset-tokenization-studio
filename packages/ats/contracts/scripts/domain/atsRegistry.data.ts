@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-28T08:20:09.676Z
+ * Generated: 2026-04-28T09:12:08.138Z
  * Facets: 89
  * Infrastructure: 2
  *
@@ -23,6 +23,7 @@ import {
   AdjustBalancesFacet__factory,
   AllowanceFacet__factory,
   AmortizationFacet__factory,
+  BalanceTrackerByPartitionFacet__factory,
   BalanceTrackerFacet__factory,
   BatchBurnFacet__factory,
   BatchControllerFacet__factory,
@@ -99,7 +100,6 @@ import {
   SsiManagementFacet__factory,
   SustainabilityPerformanceTargetRateFacet__factory,
   TimeTravelFacet__factory,
-  TotalBalanceFacet__factory,
   TransferAndLockFacet__factory,
   TransferAndLockFixedRateFacet__factory,
   TransferAndLockKpiLinkedRateFacet__factory,
@@ -171,7 +171,6 @@ import {
   SnapshotsFacetTimeTravel__factory,
   SsiManagementFacetTimeTravel__factory,
   SustainabilityPerformanceTargetRateFacetTimeTravel__factory,
-  TotalBalanceFacetTimeTravel__factory,
   TransferAndLockFacetTimeTravel__factory,
   TransferAndLockFixedRateFacetTimeTravel__factory,
   TransferAndLockKpiLinkedRateFacetTimeTravel__factory,
@@ -912,6 +911,44 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     factory: (signer) => new AmortizationFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+  },
+
+  BalanceTrackerByPartitionFacet: {
+    name: "BalanceTrackerByPartitionFacet",
+    description:
+      "Diamond facet that exposes partition-scoped token balance and total supply queries through the `IBalanceTrackerByPartition` interface, registered under `_BALANCE_TRACKER_BY_PARTITION_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_BALANCE_TRACKER_BY_PARTITION_RESOLVER_KEY",
+      value: "0x5e8d2cfc1836db4646bfee17c45aafdf6666f41b7ce69811bc816e803d5b2e1b",
+    },
+    inheritance: ["BalanceTrackerByPartition", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "balanceOfByPartition",
+        signature: {
+          full: "function balanceOfByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256)",
+          canonical: "balanceOfByPartition(bytes32,address)",
+        },
+        selector: "0x30e82803",
+      },
+      {
+        name: "getTotalBalanceForByPartition",
+        signature: {
+          full: "function getTotalBalanceForByPartition(bytes32 _partition, address _account) view returns (uint256)",
+          canonical: "getTotalBalanceForByPartition(bytes32,address)",
+        },
+        selector: "0xf29416ed",
+      },
+      {
+        name: "totalSupplyByPartition",
+        signature: {
+          full: "function totalSupplyByPartition(bytes32 _partition) view returns (uint256)",
+          canonical: "totalSupplyByPartition(bytes32)",
+        },
+        selector: "0xa26734dc",
+      },
+    ],
+    factory: (signer) => new BalanceTrackerByPartitionFacet__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   BalanceTrackerFacet: {
@@ -6849,22 +6886,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["ERC1410Read", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "balanceOfAt",
-        signature: {
-          full: "function balanceOfAt(address _tokenHolder, uint256 _timestamp) view returns (uint256)",
-          canonical: "balanceOfAt(address,uint256)",
-        },
-        selector: "0x4ee2cd7e",
-      },
-      {
-        name: "balanceOfByPartition",
-        signature: {
-          full: "function balanceOfByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256)",
-          canonical: "balanceOfByPartition(bytes32,address)",
-        },
-        selector: "0x30e82803",
-      },
-      {
         name: "canRedeemByPartition",
         signature: {
           full: "function canRedeemByPartition(address _from, bytes32 _partition, uint256 _value, bytes _data, bytes _operatorData) view returns (bool, bytes1, bytes32)",
@@ -6908,14 +6929,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "partitionsOf(address)",
         },
         selector: "0x740ab8f4",
-      },
-      {
-        name: "totalSupplyByPartition",
-        signature: {
-          full: "function totalSupplyByPartition(bytes32 _partition) view returns (uint256)",
-          canonical: "totalSupplyByPartition(bytes32)",
-        },
-        selector: "0xa26734dc",
       },
     ],
     events: [
@@ -12365,28 +12378,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     factory: (signer) => new TimeTravelFacet__factory(signer),
-  },
-
-  TotalBalanceFacet: {
-    name: "TotalBalanceFacet",
-    resolverKey: {
-      name: "_TOTAL_BALANCE_RESOLVER_KEY",
-      value: "0xd1873ecc41f0658d1ac1c9bf3fe6a4da2071b04edc7f7d3b4520d029c3ce64d5",
-    },
-    inheritance: ["TotalBalance", "IStaticFunctionSelectors"],
-    methods: [
-      {
-        name: "getTotalBalanceForByPartition",
-        signature: {
-          full: "function getTotalBalanceForByPartition(bytes32 _partition, address _account) view returns (uint256)",
-          canonical: "getTotalBalanceForByPartition(bytes32,address)",
-        },
-        selector: "0xf29416ed",
-      },
-    ],
-    factory: (signer) => new TotalBalanceFacet__factory(getLibLinks("clearingReadOps") as any, signer),
-    timeTravelFactory: (signer) =>
-      new TotalBalanceFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   TransferAndLockFacet: {

@@ -42,7 +42,7 @@ const BOND_FIXED_RATE_FACETS = [
   "PauseFacet",
   "BalanceTrackerFacet",
   "SnapshotsFacet",
-  "TotalBalanceFacet",
+  "BalanceTrackerByPartitionFacet",
 
   // Core
   "CoreFacet",

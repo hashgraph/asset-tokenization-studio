@@ -57,7 +57,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "BalanceTrackerFacet",
   "SnapshotsFacet",
   "SsiManagementFacet",
-  "TotalBalanceFacet",
+  "BalanceTrackerByPartitionFacet",
 
   // ERC Standards
   "ERC1410IssuerFacet",
