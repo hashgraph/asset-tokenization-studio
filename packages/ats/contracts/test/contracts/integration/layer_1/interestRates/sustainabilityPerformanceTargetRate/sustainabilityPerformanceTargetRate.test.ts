@@ -38,15 +38,15 @@ describe("Sustainability Performance Target Rate Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
     await executeRbac(asset, [
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: ATS_ROLES.PAUSER_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._INTEREST_RATE_MANAGER_ROLE,
+        role: ATS_ROLES.INTEREST_RATE_MANAGER_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._PROCEED_RECIPIENT_MANAGER_ROLE,
+        role: ATS_ROLES.PROCEED_RECIPIENT_MANAGER_ROLE,
         members: [signer_A.address],
       },
     ]);
@@ -100,7 +100,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
       1,
       [
         {
-          role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+          role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
           members: [signer_A.address],
         },
       ],
@@ -113,7 +113,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
     // Set up roles
     await executeRbac(newasset, [
       {
-        role: ATS_ROLES._PROCEED_RECIPIENT_MANAGER_ROLE,
+        role: ATS_ROLES.PROCEED_RECIPIENT_MANAGER_ROLE,
         members: [signer_A.address],
       },
     ]);

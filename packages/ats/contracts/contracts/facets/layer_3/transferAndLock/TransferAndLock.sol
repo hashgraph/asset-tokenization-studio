@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
-import { _LOCKER_ROLE } from "../../../constants/roles.sol";
+import { LOCKER_ROLE } from "../../../constants/roles.sol";
 import { ITransferAndLock } from "./ITransferAndLock.sol";
 import { IERC1410Types } from "../../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
@@ -21,7 +21,7 @@ abstract contract TransferAndLock is ITransferAndLock, Modifiers {
         external
         override
         onlyUnpaused
-        onlyRole(_LOCKER_ROLE)
+        onlyRole(LOCKER_ROLE)
         onlyWithValidExpirationTimestamp(_expirationTimestamp)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnProtectedPartitionsOrWildCardRole
@@ -62,7 +62,7 @@ abstract contract TransferAndLock is ITransferAndLock, Modifiers {
         external
         override
         onlyUnpaused
-        onlyRole(_LOCKER_ROLE)
+        onlyRole(LOCKER_ROLE)
         onlyWithValidExpirationTimestamp(_expirationTimestamp)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole

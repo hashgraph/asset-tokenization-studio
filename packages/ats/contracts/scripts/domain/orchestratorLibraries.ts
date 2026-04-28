@@ -102,7 +102,7 @@ export function getFacetRequiredLibraries(facetName: string): Array<keyof typeof
 
 export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY_KEYS>> = {
   // TokenCoreOps dependencies - ERC20 and ERC1410 token operations
-  ERC20Facet: ["tokenCoreOps"],
+  TransferFacet: ["tokenCoreOps"],
   ERC20ReadFacet: ["tokenCoreOps"],
   ERC20VotesFacet: ["clearingReadOps"],
   ERC1410ManagementFacet: ["tokenCoreOps"],
@@ -110,13 +110,15 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   ERC1410ReadFacet: ["tokenCoreOps"],
   ERC1410IssuerFacet: ["tokenCoreOps"],
   ERC1594Facet: ["tokenCoreOps"],
-  ERC1644Facet: ["tokenCoreOps"],
-  ERC3643BatchFacet: ["tokenCoreOps"],
+  ControllerFacet: ["tokenCoreOps"],
+  BatchControllerFacet: ["tokenCoreOps"],
+  BatchBurnFacet: ["tokenCoreOps"],
+  BatchTransferFacet: ["tokenCoreOps"],
   ERC3643OperationsFacet: ["tokenCoreOps"],
   // HoldOps dependencies - hold/lock operations
   HoldManagementFacet: ["holdOps"],
-  HoldReadFacet: ["holdOps"],
-  HoldTokenHolderFacet: ["holdOps"],
+  HoldFacet: ["holdOps"],
+  HoldByPartitionFacet: ["holdOps"],
   // ClearingOps dependencies - clearing transfer operations
   ClearingActionsFacet: ["clearingOps"],
   ClearingTransferFacet: ["clearingOps", "clearingProtectedOps"],

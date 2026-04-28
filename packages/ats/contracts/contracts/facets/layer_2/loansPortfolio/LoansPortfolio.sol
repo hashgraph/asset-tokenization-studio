@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ILoansPortfolio } from "./ILoansPortfolio.sol";
-import { _LOANS_PORTFOLIO_MANAGER_ROLE } from "../../../constants/roles.sol";
+import { LOANS_PORTFOLIO_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { RegulationData, AdditionalSecurityData } from "../../../constants/regulation.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { LoansPortfolioStorageWrapper } from "../../../domain/asset/loansPortfolio/LoansPortfolioStorageWrapper.sol";
@@ -24,7 +24,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         external
         override
         onlyUnpaused
-        onlyRole(_LOANS_PORTFOLIO_MANAGER_ROLE)
+        onlyRole(LOANS_PORTFOLIO_MANAGER_ROLE)
         notZeroAddress(_holdingsAsset.assetAddress)
         onlySupportedHoldingsAssetType(_holdingsAsset)
         returns (bool success_)
@@ -39,7 +39,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         external
         override
         onlyUnpaused
-        onlyRole(_LOANS_PORTFOLIO_MANAGER_ROLE)
+        onlyRole(LOANS_PORTFOLIO_MANAGER_ROLE)
         notZeroAddress(_holdingsAsset.assetAddress)
         onlySupportedHoldingsAssetType(_holdingsAsset)
         returns (bool success_)
@@ -54,7 +54,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         external
         override
         onlyUnpaused
-        onlyRole(_LOANS_PORTFOLIO_MANAGER_ROLE)
+        onlyRole(LOANS_PORTFOLIO_MANAGER_ROLE)
         notZeroAddress(_holdingsAssetAddress)
         returns (bool success_)
     {
@@ -70,7 +70,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         external
         override
         onlyUnpaused
-        onlyRole(_LOANS_PORTFOLIO_MANAGER_ROLE)
+        onlyRole(LOANS_PORTFOLIO_MANAGER_ROLE)
         notZeroAddress(_assetAddress)
         notZeroAddress(_to)
         returns (bool success_)

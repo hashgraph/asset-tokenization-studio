@@ -8,7 +8,7 @@ import {
   IFactory,
   type AccessControl,
   type ControlList,
-  type ERC1644,
+  type ControllerFacet,
   type CoreFacet,
 } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -46,19 +46,19 @@ describe("Factory Tests", () => {
   let businessLogicResolver: BusinessLogicResolver;
   let accessControlFacet: AccessControl;
   let controlListFacet: ControlList;
-  let erc1644Facet: ERC1644;
+  let controllerFacet: ControllerFacet;
   let coreFacet: CoreFacet;
 
   const listOfRoles = [
-    ATS_ROLES._DEFAULT_ADMIN_ROLE,
-    ATS_ROLES._CONTROL_LIST_ROLE,
-    ATS_ROLES._CORPORATE_ACTION_ROLE,
-    ATS_ROLES._ISSUER_ROLE,
-    ATS_ROLES._DOCUMENTER_ROLE,
-    ATS_ROLES._CONTROLLER_ROLE,
-    ATS_ROLES._PAUSER_ROLE,
-    ATS_ROLES._SNAPSHOT_ROLE,
-    ATS_ROLES._LOCKER_ROLE,
+    ATS_ROLES.DEFAULT_ADMIN_ROLE,
+    ATS_ROLES.CONTROL_LIST_ROLE,
+    ATS_ROLES.CORPORATE_ACTION_ROLE,
+    ATS_ROLES.ISSUER_ROLE,
+    ATS_ROLES.DOCUMENTER_ROLE,
+    ATS_ROLES.CONTROLLER_ROLE,
+    ATS_ROLES.PAUSER_ROLE,
+    ATS_ROLES.SNAPSHOT_ROLE,
+    ATS_ROLES.LOCKER_ROLE,
   ];
   let listOfMembers: string[];
 
@@ -83,7 +83,7 @@ describe("Factory Tests", () => {
 
     controlListFacet = await ethers.getContractAt("ControlList", equityAddress);
 
-    erc1644Facet = await ethers.getContractAt("ERC1644", equityAddress);
+    controllerFacet = await ethers.getContractAt("ControllerFacet", equityAddress);
 
     coreFacet = await ethers.getContractAt("CoreFacet", equityAddress);
   }
@@ -270,7 +270,7 @@ describe("Factory Tests", () => {
       it("GIVEN rbacs with empty members array for admin role WHEN deploying equity THEN reverts with NoInitialAdmins", async () => {
         const emptyAdminRbacs: Rbac[] = [
           {
-            role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+            role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
             members: [],
           },
         ];
@@ -295,7 +295,7 @@ describe("Factory Tests", () => {
       it("GIVEN rbacs with only zero address as admin WHEN deploying bond THEN reverts with NoInitialAdmins", async () => {
         const zeroAddressAdminRbacs: Rbac[] = [
           {
-            role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+            role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
             members: [ADDRESS_ZERO],
           },
         ];
@@ -322,7 +322,7 @@ describe("Factory Tests", () => {
       it("GIVEN rbacs with no admin role WHEN deploying equity THEN reverts with NoInitialAdmins", async () => {
         const noAdminRbacs: Rbac[] = [
           {
-            role: ATS_ROLES._CONTROL_LIST_ROLE,
+            role: ATS_ROLES.CONTROL_LIST_ROLE,
             members: [signer_A.address],
           },
         ];
@@ -347,7 +347,7 @@ describe("Factory Tests", () => {
       it("GIVEN rbacs with admin role having valid address after zero address WHEN deploying equity THEN passes validation", async () => {
         const mixedAdminRbacs: Rbac[] = [
           {
-            role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+            role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
             members: [ADDRESS_ZERO, signer_A.address],
           },
         ];
@@ -369,11 +369,11 @@ describe("Factory Tests", () => {
       it("GIVEN rbacs with multiple roles where admin role is last WHEN deploying bond THEN passes validation", async () => {
         const orderedRbacs: Rbac[] = [
           {
-            role: ATS_ROLES._CONTROL_LIST_ROLE,
+            role: ATS_ROLES.CONTROL_LIST_ROLE,
             members: [signer_A.address],
           },
           {
-            role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+            role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
             members: [signer_B.address],
           },
         ];
@@ -711,7 +711,7 @@ describe("Factory Tests", () => {
       const whiteList = await controlListFacet.getControlListType();
       expect(whiteList).to.be.equal(equityData.security.isWhiteList);
 
-      const controllable = await erc1644Facet.isControllable();
+      const controllable = await controllerFacet.isControllable();
       expect(controllable).to.be.equal(equityData.security.isControllable);
 
       const metadata = await coreFacet.getERC20Metadata();
@@ -886,7 +886,7 @@ describe("Factory Tests", () => {
       const whiteList = await controlListFacet.getControlListType();
       expect(whiteList).to.be.equal(bondData.security.isWhiteList);
 
-      const controllable = await erc1644Facet.isControllable();
+      const controllable = await controllerFacet.isControllable();
       expect(controllable).to.be.equal(bondData.security.isControllable);
 
       const metadata = await coreFacet.getERC20Metadata();
@@ -1846,7 +1846,7 @@ describe("Factory Tests", () => {
     it("GIVEN rbacs with empty members array for admin role WHEN deploying equity THEN transaction fails", async () => {
       const emptyAdminRbacs: Rbac[] = [
         {
-          role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+          role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
           members: [], // Empty members array
         },
       ];
@@ -1873,7 +1873,7 @@ describe("Factory Tests", () => {
     it("GIVEN rbacs with only zero address as admin WHEN deploying equity THEN transaction fails", async () => {
       const zeroAddressAdminRbacs: Rbac[] = [
         {
-          role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+          role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
           members: [ADDRESS_ZERO], // Only zero address
         },
       ];
@@ -1900,11 +1900,11 @@ describe("Factory Tests", () => {
     it("GIVEN rbacs with multiple roles but no admin role WHEN deploying equity THEN transaction fails", async () => {
       const noAdminRbacs: Rbac[] = [
         {
-          role: ATS_ROLES._CONTROL_LIST_ROLE,
+          role: ATS_ROLES.CONTROL_LIST_ROLE,
           members: [signer_A.address],
         },
         {
-          role: ATS_ROLES._ISSUER_ROLE,
+          role: ATS_ROLES.ISSUER_ROLE,
           members: [signer_B.address],
         },
       ];
@@ -1931,7 +1931,7 @@ describe("Factory Tests", () => {
     it("GIVEN rbacs with admin role having zero address followed by valid address WHEN deploying equity THEN transaction succeeds", async () => {
       const mixedAdminRbacs: Rbac[] = [
         {
-          role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+          role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
           members: [ADDRESS_ZERO, signer_A.address], // Zero address first, then valid address
         },
       ];
@@ -1955,15 +1955,15 @@ describe("Factory Tests", () => {
     it("GIVEN rbacs with non-admin roles followed by admin role WHEN deploying bond THEN transaction succeeds", async () => {
       const orderedRbacs: Rbac[] = [
         {
-          role: ATS_ROLES._CONTROL_LIST_ROLE,
+          role: ATS_ROLES.CONTROL_LIST_ROLE,
           members: [signer_A.address],
         },
         {
-          role: ATS_ROLES._ISSUER_ROLE,
+          role: ATS_ROLES.ISSUER_ROLE,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+          role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
           members: [signer_A.address],
         },
       ];

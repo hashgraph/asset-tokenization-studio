@@ -68,7 +68,7 @@ library SnapshotsStorageWrapper {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     function takeSnapshot() internal returns (uint256 snapshotID_) {
-        snapshotStorage().currentSnapshotId.increment();
+        _snapshotStorage().currentSnapshotId.increment();
         return getCurrentSnapshotId();
     }
 
@@ -105,15 +105,15 @@ library SnapshotsStorageWrapper {
     }
 
     function updateAbafSnapshot() internal {
-        updateSnapshot(snapshotStorage().abafSnapshots, AdjustBalancesStorageWrapper.getAbaf());
+        updateSnapshot(_snapshotStorage().abafSnapshots, AdjustBalancesStorageWrapper.getAbaf());
     }
 
     function updateDecimalsSnapshot() internal {
-        updateSnapshot(snapshotStorage().decimals, ERC20StorageWrapper.decimals());
+        updateSnapshot(_snapshotStorage().decimals, ERC20StorageWrapper.decimals());
     }
 
     function updateAssetTotalSupplySnapshot() internal {
-        updateSnapshot(snapshotStorage().totalSupplySnapshots, ERC20StorageWrapper.totalSupply());
+        updateSnapshot(_snapshotStorage().totalSupplySnapshots, ERC20StorageWrapper.totalSupply());
     }
 
     /**
@@ -130,10 +130,10 @@ library SnapshotsStorageWrapper {
 
         if (abaf == abafAtCurrentSnapshot) {
             updateAccountSnapshot(
-                snapshotStorage().accountBalanceSnapshots[account],
+                _snapshotStorage().accountBalanceSnapshots[account],
                 ERC20StorageWrapper.balanceOf(account),
-                snapshotStorage().accountPartitionBalanceSnapshots[account][partition],
-                snapshotStorage().accountPartitionMetadata[account],
+                _snapshotStorage().accountPartitionBalanceSnapshots[account][partition],
+                _snapshotStorage().accountPartitionMetadata[account],
                 ERC1410StorageWrapper.balanceOfByPartition(partition, account),
                 ERC1410StorageWrapper.partitionsOf(account)
             );
@@ -155,10 +155,10 @@ library SnapshotsStorageWrapper {
         balanceForPartition /= factor;
 
         updateAccountSnapshot(
-            snapshotStorage().accountBalanceSnapshots[account],
+            _snapshotStorage().accountBalanceSnapshots[account],
             balance,
-            snapshotStorage().accountPartitionBalanceSnapshots[account][partition],
-            snapshotStorage().accountPartitionMetadata[account],
+            _snapshotStorage().accountPartitionBalanceSnapshots[account][partition],
+            _snapshotStorage().accountPartitionMetadata[account],
             balanceForPartition,
             ERC1410StorageWrapper.partitionsOf(account)
         );
@@ -177,7 +177,7 @@ library SnapshotsStorageWrapper {
     }
 
     function updateAccountLockedBalancesSnapshot(address account, bytes32 partition) internal {
-        SnapshotStorage storage $ = snapshotStorage();
+        SnapshotStorage storage $ = _snapshotStorage();
         updateSnapshot($.accountLockedBalanceSnapshots[account], LockStorageWrapper.getLockedAmountFor(account));
         updateSnapshot(
             $.accountPartitionLockedBalanceSnapshots[account][partition],
@@ -186,7 +186,7 @@ library SnapshotsStorageWrapper {
     }
 
     function updateAccountHeldBalancesSnapshot(address account, bytes32 partition) internal {
-        SnapshotStorage storage $ = snapshotStorage();
+        SnapshotStorage storage $ = _snapshotStorage();
         updateSnapshot($.accountHeldBalanceSnapshots[account], HoldStorageWrapper.getHeldAmountFor(account));
         updateSnapshot(
             $.accountPartitionHeldBalanceSnapshots[account][partition],
@@ -195,7 +195,7 @@ library SnapshotsStorageWrapper {
     }
 
     function updateAccountFrozenBalancesSnapshot(address account, bytes32 partition) internal {
-        SnapshotStorage storage $ = snapshotStorage();
+        SnapshotStorage storage $ = _snapshotStorage();
         updateSnapshot($.accountFrozenBalanceSnapshots[account], ERC3643StorageWrapper.getFrozenAmountFor(account));
         updateSnapshot(
             $.accountPartitionFrozenBalanceSnapshots[account][partition],
@@ -204,7 +204,7 @@ library SnapshotsStorageWrapper {
     }
 
     function updateAccountClearedBalancesSnapshot(address account, bytes32 partition) internal {
-        SnapshotStorage storage $ = snapshotStorage();
+        SnapshotStorage storage $ = _snapshotStorage();
         updateSnapshot($.accountClearedBalanceSnapshots[account], ClearingStorageWrapper.getClearedAmountFor(account));
         updateSnapshot(
             $.accountPartitionClearedBalanceSnapshots[account][partition],
@@ -213,7 +213,7 @@ library SnapshotsStorageWrapper {
     }
 
     function updateTotalSupplySnapshot(bytes32 partition) internal {
-        SnapshotStorage storage $ = snapshotStorage();
+        SnapshotStorage storage $ = _snapshotStorage();
         updateSnapshot($.totalSupplySnapshots, ERC20StorageWrapper.totalSupply());
         updateSnapshot(
             $.totalSupplyByPartitionSnapshots[partition],
@@ -223,17 +223,17 @@ library SnapshotsStorageWrapper {
 
     function updateTokenHolderSnapshot(address account) internal {
         updateSnapshotAddress(
-            snapshotStorage().tokenHoldersSnapshots[ERC1410StorageWrapper.getTokenHolderIndex(account)],
+            _snapshotStorage().tokenHoldersSnapshots[ERC1410StorageWrapper.getTokenHolderIndex(account)],
             account
         );
     }
 
     function updateTotalTokenHolderSnapshot() internal {
-        updateSnapshot(snapshotStorage().totalTokenHoldersSnapshots, ERC1410StorageWrapper.getTotalTokenHolders());
+        updateSnapshot(_snapshotStorage().totalTokenHoldersSnapshots, ERC1410StorageWrapper.getTotalTokenHolders());
     }
 
     function abafAtSnapshot(uint256 snapshotID) internal view returns (uint256 abaf_) {
-        (bool snapshotted, uint256 value) = valueAt(snapshotID, snapshotStorage().abafSnapshots);
+        (bool snapshotted, uint256 value) = valueAt(snapshotID, _snapshotStorage().abafSnapshots);
         return
             snapshotted
                 ? value
@@ -241,7 +241,7 @@ library SnapshotsStorageWrapper {
     }
 
     function decimalsAtSnapshot(uint256 snapshotID) internal view returns (uint8 decimals_) {
-        (bool snapshotted, uint256 value) = valueAt(snapshotID, snapshotStorage().decimals);
+        (bool snapshotted, uint256 value) = valueAt(snapshotID, _snapshotStorage().decimals);
         return
             snapshotted
                 ? uint8(value)
@@ -292,7 +292,7 @@ library SnapshotsStorageWrapper {
     }
 
     function partitionsOfAtSnapshot(uint256 snapshotID, address tokenHolder) internal view returns (bytes32[] memory) {
-        PartitionSnapshots storage partitionSnapshots = snapshotStorage().accountPartitionMetadata[tokenHolder];
+        PartitionSnapshots storage partitionSnapshots = _snapshotStorage().accountPartitionMetadata[tokenHolder];
 
         (bool found, uint256 index) = indexFor(snapshotID, partitionSnapshots.ids);
 
@@ -311,7 +311,7 @@ library SnapshotsStorageWrapper {
         return
             balanceOfAtAdjusted(
                 snapshotId,
-                snapshotStorage().accountBalanceSnapshots[tokenHolder],
+                _snapshotStorage().accountBalanceSnapshots[tokenHolder],
                 AdjustBalancesStorageWrapper.balanceOfAdjustedAt(
                     tokenHolder,
                     TimeTravelStorageWrapper.getBlockTimestamp()
@@ -331,7 +331,7 @@ library SnapshotsStorageWrapper {
             uint256 index = start + i + 1;
             (bool snapshotted, address value) = addressValueAt(
                 snapshotId,
-                snapshotStorage().tokenHoldersSnapshots[index]
+                _snapshotStorage().tokenHoldersSnapshots[index]
             );
 
             tk[i] = snapshotted ? value : ERC1410StorageWrapper.getTokenHolder(index);
@@ -342,7 +342,7 @@ library SnapshotsStorageWrapper {
     }
 
     function totalTokenHoldersAt(uint256 snapshotId) internal view returns (uint256) {
-        (bool snapshotted, uint256 value) = valueAt(snapshotId, snapshotStorage().totalTokenHoldersSnapshots);
+        (bool snapshotted, uint256 value) = valueAt(snapshotId, _snapshotStorage().totalTokenHoldersSnapshots);
         return snapshotted ? value : ERC1410StorageWrapper.getTotalTokenHolders();
     }
 
@@ -354,7 +354,7 @@ library SnapshotsStorageWrapper {
         return
             balanceOfAtAdjusted(
                 snapshotId,
-                snapshotStorage().accountPartitionBalanceSnapshots[account][partition],
+                _snapshotStorage().accountPartitionBalanceSnapshots[account][partition],
                 AdjustBalancesStorageWrapper.balanceOfByPartitionAdjustedAt(
                     partition,
                     account,
@@ -370,7 +370,7 @@ library SnapshotsStorageWrapper {
         return
             balanceOfAtAdjusted(
                 snapshotID,
-                snapshotStorage().totalSupplyByPartitionSnapshots[partition],
+                _snapshotStorage().totalSupplyByPartitionSnapshots[partition],
                 AdjustBalancesStorageWrapper.totalSupplyByPartitionAdjustedAt(
                     partition,
                     TimeTravelStorageWrapper.getBlockTimestamp()
@@ -385,7 +385,7 @@ library SnapshotsStorageWrapper {
         return
             balanceOfAtAdjusted(
                 snapshotID,
-                snapshotStorage().accountLockedBalanceSnapshots[tokenHolder],
+                _snapshotStorage().accountLockedBalanceSnapshots[tokenHolder],
                 LockStorageWrapper.getLockedAmountForAdjustedAt(
                     tokenHolder,
                     TimeTravelStorageWrapper.getBlockTimestamp()
@@ -401,7 +401,7 @@ library SnapshotsStorageWrapper {
         return
             balanceOfAtAdjusted(
                 snapshotID,
-                snapshotStorage().accountPartitionLockedBalanceSnapshots[tokenHolder][partition],
+                _snapshotStorage().accountPartitionLockedBalanceSnapshots[tokenHolder][partition],
                 LockStorageWrapper.getLockedAmountForByPartitionAdjustedAt(
                     partition,
                     tokenHolder,
@@ -414,7 +414,7 @@ library SnapshotsStorageWrapper {
         return
             balanceOfAtAdjusted(
                 snapshotID,
-                snapshotStorage().accountHeldBalanceSnapshots[tokenHolder],
+                _snapshotStorage().accountHeldBalanceSnapshots[tokenHolder],
                 HoldStorageWrapper.getHeldAmountForAdjustedAt(tokenHolder, TimeTravelStorageWrapper.getBlockTimestamp())
             );
     }
@@ -427,7 +427,7 @@ library SnapshotsStorageWrapper {
         return
             balanceOfAtAdjusted(
                 snapshotID,
-                snapshotStorage().accountPartitionHeldBalanceSnapshots[tokenHolder][partition],
+                _snapshotStorage().accountPartitionHeldBalanceSnapshots[tokenHolder][partition],
                 HoldStorageWrapper.getHeldAmountForByPartitionAdjustedAt(
                     partition,
                     tokenHolder,
@@ -443,7 +443,7 @@ library SnapshotsStorageWrapper {
         return
             balanceOfAtAdjusted(
                 snapshotID,
-                snapshotStorage().accountFrozenBalanceSnapshots[tokenHolder],
+                _snapshotStorage().accountFrozenBalanceSnapshots[tokenHolder],
                 ERC3643StorageWrapper.getFrozenAmountForAdjustedAt(
                     tokenHolder,
                     TimeTravelStorageWrapper.getBlockTimestamp()
@@ -459,7 +459,7 @@ library SnapshotsStorageWrapper {
         return
             balanceOfAtAdjusted(
                 snapshotID,
-                snapshotStorage().accountPartitionFrozenBalanceSnapshots[tokenHolder][partition],
+                _snapshotStorage().accountPartitionFrozenBalanceSnapshots[tokenHolder][partition],
                 ERC3643StorageWrapper.getFrozenAmountForByPartitionAdjustedAt(
                     partition,
                     tokenHolder,
@@ -475,7 +475,7 @@ library SnapshotsStorageWrapper {
         return
             balanceOfAtAdjusted(
                 snapshotID,
-                snapshotStorage().accountClearedBalanceSnapshots[tokenHolder],
+                _snapshotStorage().accountClearedBalanceSnapshots[tokenHolder],
                 ClearingReadOps.getClearedAmountForAdjustedAt(tokenHolder, TimeTravelStorageWrapper.getBlockTimestamp())
             );
     }
@@ -488,7 +488,7 @@ library SnapshotsStorageWrapper {
         return
             balanceOfAtAdjusted(
                 snapshotID,
-                snapshotStorage().accountPartitionClearedBalanceSnapshots[tokenHolder][partition],
+                _snapshotStorage().accountPartitionClearedBalanceSnapshots[tokenHolder][partition],
                 ClearingReadOps.getClearedAmountForByPartitionAdjustedAt(
                     partition,
                     tokenHolder,
@@ -514,12 +514,12 @@ library SnapshotsStorageWrapper {
     }
 
     function totalSupplyAt(uint256 snapshotId) internal view returns (uint256) {
-        (bool snapshotted, uint256 value) = valueAt(snapshotId, snapshotStorage().totalSupplySnapshots);
+        (bool snapshotted, uint256 value) = valueAt(snapshotId, _snapshotStorage().totalSupplySnapshots);
         return snapshotted ? value : ERC20StorageWrapper.totalSupply();
     }
 
     function getCurrentSnapshotId() internal view returns (uint256) {
-        return snapshotStorage().currentSnapshotId.current();
+        return _snapshotStorage().currentSnapshotId.current();
     }
 
     function valueAt(uint256 snapshotId, Snapshots storage snapshots) internal view returns (bool, uint256) {
@@ -573,7 +573,7 @@ library SnapshotsStorageWrapper {
             : ERC20StorageWrapper.decimalsAdjustedAt(_date);
     }
 
-    function snapshotStorage() private pure returns (SnapshotStorage storage snapshotStorage_) {
+    function _snapshotStorage() private pure returns (SnapshotStorage storage snapshotStorage_) {
         bytes32 position = _SNAPSHOT_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {

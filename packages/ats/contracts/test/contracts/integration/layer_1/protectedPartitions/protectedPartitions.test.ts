@@ -13,7 +13,7 @@ const amount = 1;
 
 const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
   ["bytes32", "bytes32"],
-  [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, DEFAULT_PARTITION],
+  [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, DEFAULT_PARTITION],
 );
 const packedDataWithoutPrefix = packedData.slice(2);
 
@@ -202,7 +202,7 @@ describe("ProtectedPartitions Tests", () => {
     issue_Amount: number,
     issue_Partition: string,
   ) {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._WILD_CARD_ROLE, wildCard_Account);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.WILD_CARD_ROLE, wildCard_Account);
 
     await asset.connect(signer_B).issueByPartition({
       partition: issue_Partition,
@@ -245,19 +245,19 @@ describe("ProtectedPartitions Tests", () => {
   function set_initRbacs(): any[] {
     return [
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: ATS_ROLES.PAUSER_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._CONTROL_LIST_ROLE,
+        role: ATS_ROLES.CONTROL_LIST_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._ISSUER_ROLE,
+        role: ATS_ROLES.ISSUER_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._PROTECTED_PARTITIONS_ROLE,
+        role: ATS_ROLES.PROTECTED_PARTITIONS_ROLE,
         members: [signer_B.address],
       },
       {
@@ -265,23 +265,23 @@ describe("ProtectedPartitions Tests", () => {
         members: [signer_A.address, signer_B.address],
       },
       {
-        role: ATS_ROLES._LOCKER_ROLE,
+        role: ATS_ROLES.LOCKER_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._KYC_ROLE,
+        role: ATS_ROLES.KYC_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._SSI_MANAGER_ROLE,
+        role: ATS_ROLES.SSI_MANAGER_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._CLEARING_ROLE,
+        role: ATS_ROLES.CLEARING_ROLE,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES._CLEARING_VALIDATOR_ROLE,
+        role: ATS_ROLES.CLEARING_VALIDATOR_ROLE,
         members: [signer_A.address],
       },
     ];

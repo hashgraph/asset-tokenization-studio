@@ -49,7 +49,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "CorporateActionsFacet",
   "DiamondFacet",
   "CoreFacet",
-  "ERC20Facet",
+  "TransferFacet",
   "CoreAdjustedFacet",
   "FreezeFacet",
   "KycFacet",
@@ -66,24 +66,27 @@ const LOANS_PORTFOLIO_FACETS = [
   "ERC1410TokenHolderFacet",
   "ERC1594Facet",
   "DocumentationFacet",
-  "ERC1644Facet",
+  "ControllerFacet",
   "ERC20PermitFacet",
   "NoncesFacet",
   "ERC20VotesFacet",
-  "ERC3643BatchFacet",
+  "BatchControllerFacet",
+  "BatchBurnFacet",
+  "BatchMintFacet",
+  "BatchTransferFacet",
   "ERC3643ManagementFacet",
   "ERC3643OperationsFacet",
   "ERC3643ReadFacet",
   "ComplianceFacet",
+  "MintFacet",
 
   // Nominal Value
   "NominalValueFacet",
 
   // Hold
   "HoldFacet",
-  "HoldReadFacet",
   "HoldManagementFacet",
-  "HoldTokenHolderFacet",
+  "HoldByPartitionFacet",
 
   // Clearing & Settlement
   "ClearingTransferFacet",

@@ -59,13 +59,13 @@ const LOAN_FACETS = [
   "AllowanceFacet",
 
   // ERC Standards
-  "ERC20Facet",
+  "TransferFacet",
   "CoreAdjustedFacet",
   "ERC20PermitFacet",
   "ERC20VotesFacet",
   "ERC1594Facet",
   "DocumentationFacet",
-  "ERC1644Facet",
+  "ControllerFacet",
   "ERC1410ReadFacet",
   "ERC1410ManagementFacet",
   "ERC1410IssuerFacet",
@@ -73,14 +73,17 @@ const LOAN_FACETS = [
   "ERC3643ManagementFacet",
   "ERC3643OperationsFacet",
   "ERC3643ReadFacet",
-  "ERC3643BatchFacet",
+  "BatchControllerFacet",
+  "BatchBurnFacet",
+  "BatchMintFacet",
+  "BatchTransferFacet",
   "ComplianceFacet",
+  "MintFacet",
 
   // Hold
   "HoldFacet",
-  "HoldReadFacet",
   "HoldManagementFacet",
-  "HoldTokenHolderFacet",
+  "HoldByPartitionFacet",
 
   // Clearing & Settlement
   "ClearingTransferFacet",

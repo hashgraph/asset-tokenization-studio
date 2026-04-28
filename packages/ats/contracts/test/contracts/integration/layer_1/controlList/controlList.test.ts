@@ -29,7 +29,7 @@ describe("Control List Tests", () => {
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
-    await executeRbac(asset, [{ role: ATS_ROLES._PAUSER_ROLE, members: [signer_B.address] }]);
+    await executeRbac(asset, [{ role: ATS_ROLES.PAUSER_ROLE, members: [signer_B.address] }]);
   }
 
   beforeEach(async () => {
@@ -51,19 +51,19 @@ describe("Control List Tests", () => {
   });
 
   it("GIVEN a paused Token WHEN addToControlList THEN transaction fails with TokenIsPaused", async () => {
-    await grantRoleAndPauseToken(asset, ATS_ROLES._CONTROL_LIST_ROLE, signer_A, signer_B, signer_C.address);
+    await grantRoleAndPauseToken(asset, ATS_ROLES.CONTROL_LIST_ROLE, signer_A, signer_B, signer_C.address);
 
     await expect(asset.connect(signer_C).addToControlList(signer_D.address)).to.be.rejectedWith("TokenIsPaused");
   });
 
   it("GIVEN a paused Token WHEN removeFromControlList THEN transaction fails with TokenIsPaused", async () => {
-    await grantRoleAndPauseToken(asset, ATS_ROLES._CONTROL_LIST_ROLE, signer_A, signer_B, signer_C.address);
+    await grantRoleAndPauseToken(asset, ATS_ROLES.CONTROL_LIST_ROLE, signer_A, signer_B, signer_C.address);
 
     await expect(asset.connect(signer_C).removeFromControlList(signer_D.address)).to.be.rejectedWith("TokenIsPaused");
   });
 
   it("GIVEN an account with controlList role WHEN addToControlList and removeFromControlList THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_B.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROL_LIST_ROLE, signer_B.address);
 
     let check_signer_B = await asset.isInControlList(signer_B.address);
     expect(check_signer_B).to.equal(false);
@@ -109,7 +109,7 @@ describe("Control List Tests", () => {
   });
 
   it("GIVEN an account already in control list WHEN addToControlList is called again THEN transaction fails with ListedAccount", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_B.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROL_LIST_ROLE, signer_B.address);
 
     // Add account to control list
     await asset.connect(signer_B).addToControlList(signer_C.address);
@@ -124,7 +124,7 @@ describe("Control List Tests", () => {
   });
 
   it("GIVEN an account not in control list WHEN removeFromControlList is called THEN transaction fails with UnlistedAccount", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_B.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROL_LIST_ROLE, signer_B.address);
 
     // Verify account is not in the list
     expect(await asset.isInControlList(signer_C.address)).to.equal(false);

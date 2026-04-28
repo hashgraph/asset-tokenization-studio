@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearingActions } from "./IClearingActions.sol";
 import { IClearingTypes } from "./IClearingTypes.sol";
-import { _CLEARING_VALIDATOR_ROLE, _CLEARING_ROLE } from "../../../constants/roles.sol";
+import { CLEARING_VALIDATOR_ROLE, CLEARING_ROLE } from "../../../constants/roles.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWrapper.sol";
 import { ClearingOps } from "../../../domain/orchestrator/ClearingOps.sol";
@@ -14,12 +14,12 @@ abstract contract ClearingActions is IClearingActions, Modifiers {
         ClearingStorageWrapper.initializeClearing(_clearingActive);
     }
 
-    function activateClearing() external onlyUnpaused onlyRole(_CLEARING_ROLE) returns (bool success_) {
+    function activateClearing() external onlyUnpaused onlyRole(CLEARING_ROLE) returns (bool success_) {
         emit ClearingActivated(EvmAccessors.getMsgSender());
         success_ = ClearingStorageWrapper.setClearing(true);
     }
 
-    function deactivateClearing() external onlyUnpaused onlyRole(_CLEARING_ROLE) returns (bool success_) {
+    function deactivateClearing() external onlyUnpaused onlyRole(CLEARING_ROLE) returns (bool success_) {
         emit ClearingDeactivated(EvmAccessors.getMsgSender());
         success_ = ClearingStorageWrapper.setClearing(false);
     }
@@ -30,7 +30,7 @@ abstract contract ClearingActions is IClearingActions, Modifiers {
         external
         override
         onlyUnpaused
-        onlyRole(_CLEARING_VALIDATOR_ROLE)
+        onlyRole(CLEARING_VALIDATOR_ROLE)
         onlyClearingActivated
         onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
         onlyWithValidClearingId(_clearingOperationIdentifier)
@@ -59,7 +59,7 @@ abstract contract ClearingActions is IClearingActions, Modifiers {
         external
         override
         onlyUnpaused
-        onlyRole(_CLEARING_VALIDATOR_ROLE)
+        onlyRole(CLEARING_VALIDATOR_ROLE)
         onlyClearingActivated
         onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
         onlyWithValidClearingId(_clearingOperationIdentifier)

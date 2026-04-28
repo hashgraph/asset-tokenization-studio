@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IVoting } from "./IVoting.sol";
 import { IVotingTypes } from "./IVotingTypes.sol";
-import { _CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
+import { CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
 import { VOTING_RIGHTS_CORPORATE_ACTION_TYPE } from "../../../constants/values.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { VotingStorageWrapper } from "../../../domain/asset/voting/VotingStorageWrapper.sol";
@@ -20,7 +20,7 @@ abstract contract Voting is IVoting, Modifiers {
         external
         override
         onlyUnpaused
-        onlyRole(_CORPORATE_ACTION_ROLE)
+        onlyRole(CORPORATE_ACTION_ROLE)
         onlyValidTimestamp(_newVoting.recordDate)
         returns (uint256 voteID_)
     {
@@ -36,7 +36,7 @@ abstract contract Voting is IVoting, Modifiers {
         external
         override
         onlyUnpaused
-        onlyRole(_CORPORATE_ACTION_ROLE)
+        onlyRole(CORPORATE_ACTION_ROLE)
         onlyMatchingActionType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteId - 1)
         returns (bool success_)
     {

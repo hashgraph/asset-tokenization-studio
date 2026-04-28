@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IBusinessLogicResolver } from "./IBusinessLogicResolver.sol";
 import { DiamondCutManager } from "./DiamondCutManager.sol";
-import { _DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
@@ -17,7 +17,7 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
         onlyUninitialized(_businessLogicResolverStorage().initialized)
         returns (bool success_)
     {
-        AccessControlStorageWrapper.grantRole(_DEFAULT_ADMIN_ROLE, EvmAccessors.getMsgSender());
+        AccessControlStorageWrapper.grantRole(DEFAULT_ADMIN_ROLE, EvmAccessors.getMsgSender());
 
         _businessLogicResolverStorage().initialized = true;
         success_ = true;
@@ -25,7 +25,7 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
 
     function registerBusinessLogics(
         BusinessLogicRegistryData[] calldata _businessLogics
-    ) external override onlyValidKeys(_businessLogics) onlyRole(_DEFAULT_ADMIN_ROLE) onlyUnpaused {
+    ) external override onlyValidKeys(_businessLogics) onlyRole(DEFAULT_ADMIN_ROLE) onlyUnpaused {
         uint256 latestVersion = _registerBusinessLogics(_businessLogics);
 
         emit BusinessLogicsRegistered(_businessLogics, latestVersion);
@@ -34,14 +34,14 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     function addSelectorsToBlacklist(
         bytes32 _configurationId,
         bytes4[] calldata _selectors
-    ) external override onlyRole(_DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         _addSelectorsToBlacklist(_configurationId, _selectors);
     }
 
     function removeSelectorsFromBlacklist(
         bytes32 _configurationId,
         bytes4[] calldata _selectors
-    ) external override onlyRole(_DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         _removeSelectorsFromBlacklist(_configurationId, _selectors);
     }
 

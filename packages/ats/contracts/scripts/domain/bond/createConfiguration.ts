@@ -59,22 +59,26 @@ const BOND_FACETS = [
   "CoreAdjustedFacet",
 
   // ERC Standards
-  "ERC20Facet",
+  "TransferFacet",
   "ERC1410IssuerFacet",
   "ERC1410ManagementFacet",
   "ERC1410ReadFacet",
   "ERC1410TokenHolderFacet",
   "ERC1594Facet",
   "DocumentationFacet",
-  "ERC1644Facet",
+  "ControllerFacet",
   "ERC20PermitFacet",
   "NoncesFacet",
   "ERC20VotesFacet",
-  "ERC3643BatchFacet",
+  "BatchControllerFacet",
+  "BatchBurnFacet",
+  "BatchMintFacet",
+  "BatchTransferFacet",
   "ERC3643ManagementFacet",
   "ERC3643OperationsFacet",
   "ERC3643ReadFacet",
   "ComplianceFacet",
+  "MintFacet",
 
   // Clearing & Settlement
   "ClearingActionsFacet",
@@ -84,8 +88,7 @@ const BOND_FACETS = [
   "ClearingTransferFacet",
   "HoldFacet",
   "HoldManagementFacet",
-  "HoldReadFacet",
-  "HoldTokenHolderFacet",
+  "HoldByPartitionFacet",
 
   // External Management
   "ExternalControlListManagementFacet",

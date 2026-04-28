@@ -8,7 +8,7 @@ import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableS
 import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
-import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
+import { ITransfer } from "../../facets/transfer/ITransfer.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { ThirdPartyType } from "./types/ThirdPartyType.sol";
@@ -23,7 +23,6 @@ import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { ControlListStorageWrapper } from "../core/ControlListStorageWrapper.sol";
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
-import { IControlList } from "../../facets/layer_1/controlList/IControlList.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
@@ -569,7 +568,7 @@ library HoldStorageWrapper {
             _operatorData,
             ""
         );
-        emit IERC20.Transfer(_from, address(0), amount);
+        emit ITransfer.Transfer(_from, address(0), amount);
     }
 
     function _decreaseOrRemoveHold(IHoldTypes.HoldIdentifier calldata _holdIdentifier, uint256 _amount) private {
@@ -618,7 +617,7 @@ library HoldStorageWrapper {
             "",
             ""
         );
-        emit IERC20.Transfer(address(0), _to, _amount);
+        emit ITransfer.Transfer(address(0), _to, _amount);
     }
 
     function _validateHoldOperation(

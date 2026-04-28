@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _ERC3643_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { _AGENT_ROLE } from "../../constants/roles.sol";
+import { AGENT_ROLE } from "../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
 import { IAccessControl } from "../../facets/layer_1/accessControl/IAccessControl.sol";
@@ -22,7 +22,7 @@ import { LockStorageWrapper } from "../asset/LockStorageWrapper.sol";
 import { HoldStorageWrapper } from "../asset/HoldStorageWrapper.sol";
 import { ClearingStorageWrapper } from "../asset/ClearingStorageWrapper.sol";
 import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
-import { IERC20 } from "../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
+import { ITransfer } from "../../facets/transfer/ITransfer.sol";
 
 library ERC3643StorageWrapper {
     using LowLevelCall for address;
@@ -59,14 +59,14 @@ library ERC3643StorageWrapper {
     }
 
     function addAgent(address _agent) internal {
-        if (!AccessControlStorageWrapper.grantRole(_AGENT_ROLE, _agent)) {
-            revert IAccessControl.AccountAssignedToRole(_AGENT_ROLE, _agent);
+        if (!AccessControlStorageWrapper.grantRole(AGENT_ROLE, _agent)) {
+            revert IAccessControl.AccountAssignedToRole(AGENT_ROLE, _agent);
         }
     }
 
     function removeAgent(address _agent) internal {
-        if (!AccessControlStorageWrapper.revokeRole(_AGENT_ROLE, _agent)) {
-            revert IAccessControl.AccountNotAssignedToRole(_AGENT_ROLE, _agent);
+        if (!AccessControlStorageWrapper.revokeRole(AGENT_ROLE, _agent)) {
+            revert IAccessControl.AccountNotAssignedToRole(AGENT_ROLE, _agent);
         }
     }
 
@@ -149,7 +149,7 @@ library ERC3643StorageWrapper {
         st.frozenTokensByPartition[_account][_partition] -= _amount;
 
         transferFrozenBalance(_partition, _account, _amount);
-        emit IERC20.Transfer(address(0), _account, _amount);
+        emit ITransfer.Transfer(address(0), _account, _amount);
     }
 
     function transferFrozenBalance(bytes32 _partition, address _to, uint256 _amount) internal {

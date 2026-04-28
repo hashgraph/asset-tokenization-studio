@@ -78,13 +78,13 @@ describe("Failure Injection Utilities", () => {
       });
 
       it("should parse facet:FacetName format (string target)", () => {
-        setEnv(CHECKPOINT_TEST_FAIL_AT_ENV, "facet:ERC20Facet");
+        setEnv(CHECKPOINT_TEST_FAIL_AT_ENV, "facet:TransferFacet");
 
         const config = parseFailureConfig();
 
         expect(config).to.not.be.null;
         expect(config!.type).to.equal("facet");
-        expect(config!.target).to.equal("ERC20Facet");
+        expect(config!.target).to.equal("TransferFacet");
       });
 
       it("should parse step:stepName format", () => {
@@ -249,15 +249,15 @@ describe("Failure Injection Utilities", () => {
 
     describe("string target (facet name)", () => {
       it("should return true when facet name matches target", () => {
-        setEnv(CHECKPOINT_TEST_FAIL_AT_ENV, "facet:ERC20Facet");
+        setEnv(CHECKPOINT_TEST_FAIL_AT_ENV, "facet:TransferFacet");
 
-        const result = shouldFailAtFacet(10, "ERC20Facet");
+        const result = shouldFailAtFacet(10, "TransferFacet");
 
         expect(result).to.be.true;
       });
 
       it("should return false when facet name does not match", () => {
-        setEnv(CHECKPOINT_TEST_FAIL_AT_ENV, "facet:ERC20Facet");
+        setEnv(CHECKPOINT_TEST_FAIL_AT_ENV, "facet:TransferFacet");
 
         const result = shouldFailAtFacet(10, "PauseFacet");
 
@@ -265,7 +265,7 @@ describe("Failure Injection Utilities", () => {
       });
 
       it("should be case-sensitive", () => {
-        setEnv(CHECKPOINT_TEST_FAIL_AT_ENV, "facet:ERC20Facet");
+        setEnv(CHECKPOINT_TEST_FAIL_AT_ENV, "facet:TransferFacet");
 
         const result = shouldFailAtFacet(10, "erc20facet");
 
@@ -305,10 +305,10 @@ describe("Failure Injection Utilities", () => {
     });
 
     it("should create message for string facet target", () => {
-      const message = createTestFailureMessage("facet", "ERC20Facet");
+      const message = createTestFailureMessage("facet", "TransferFacet");
 
       expect(message).to.include("[TEST]");
-      expect(message).to.include("ERC20Facet");
+      expect(message).to.include("TransferFacet");
       expect(message).to.include("checkpoint testing");
     });
 

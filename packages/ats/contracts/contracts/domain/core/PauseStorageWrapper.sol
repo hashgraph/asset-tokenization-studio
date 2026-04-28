@@ -82,11 +82,11 @@ library PauseStorageWrapper {
         return ExternalListManagementStorageWrapper.externalListStorage(_PAUSE_MANAGEMENT_STORAGE_POSITION).initialized;
     }
 
-    function _checkUnpaused() internal view {
+    function checkUnpaused() internal view {
         if (isPaused()) revert IPause.TokenIsPaused();
     }
 
-    function _checkPaused() internal view {
+    function checkPaused() internal view {
         if (!isPaused()) revert IPause.TokenIsUnpaused();
     }
 }

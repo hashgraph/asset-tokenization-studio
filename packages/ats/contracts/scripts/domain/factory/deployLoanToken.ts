@@ -2,7 +2,7 @@
 
 import { ethers, type EventLog } from "ethers";
 import type { IFactory, ResolverProxy } from "@contract-types";
-import { ResolverProxy__factory, ERC20Facet__factory } from "@contract-types";
+import { ResolverProxy__factory, CoreFacet__factory } from "@contract-types";
 import { GAS_LIMIT } from "@scripts/infrastructure";
 import { ATS_ROLES } from "../constants";
 import { LoanDetailsDataParams, FactoryRegulationDataParams, Rbac, SecurityDataParams } from "./types";
@@ -49,7 +49,7 @@ export async function deployLoanFromFactory(
   // Build RBAC array with admin
   const rbacs: Rbac[] = [
     {
-      role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+      role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
       members: [adminAccount],
     },
     ...securityDataParams.rbacs,
@@ -116,7 +116,7 @@ export async function deployLoanFromFactory(
 
   // Initialize ERC20 metadata (name, symbol, decimals)
   const diamond = ResolverProxy__factory.connect(diamondAddress, factory.runner);
-  const erc20Facet = ERC20Facet__factory.connect(diamondAddress, factory.runner);
+  const coreFacet = CoreFacet__factory.connect(diamondAddress, factory.runner);
 
   const erc20Metadata = {
     info: {
@@ -128,8 +128,8 @@ export async function deployLoanFromFactory(
     securityType: 5,
   };
 
-  // Initialize ERC20
-  await erc20Facet.initialize_ERC20(erc20Metadata, { gasLimit: GAS_LIMIT.default });
+  // Initialize core (ERC20 metadata)
+  await coreFacet.initializeCore(erc20Metadata, { gasLimit: GAS_LIMIT.default });
 
   // Return diamond proxy as ResolverProxy contract
   return diamond;

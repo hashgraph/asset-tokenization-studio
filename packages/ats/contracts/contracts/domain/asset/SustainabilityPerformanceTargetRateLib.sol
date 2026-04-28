@@ -53,7 +53,7 @@ library SustainabilityPerformanceTargetRateLib {
                 project
             );
 
-            (uint256 penaltyRate, uint256 bonusRate) = _calculateRateAdjustmentForProject(
+            (uint256 penaltyRate, uint256 bonusRate) = calculateRateAdjustmentForProject(
                 impactData,
                 kpiValue,
                 kpiExists
@@ -67,27 +67,27 @@ library SustainabilityPerformanceTargetRateLib {
         }
 
         return (
-            _applyRateAdjustments(interestRate.baseRate, totalPenaltyRate, totalBonusRate),
+            applyRateAdjustments(interestRate.baseRate, totalPenaltyRate, totalBonusRate),
             interestRate.rateDecimals
         );
     }
 
-    function _calculateRateAdjustmentForProject(
+    function calculateRateAdjustmentForProject(
         ISPTRErrors.ImpactData memory impactData,
         uint256 kpiValue,
         bool kpiExists
     ) internal pure returns (uint256 penaltyRate_, uint256 bonusRate_) {
         if (impactData.impactDataMode == ISPTRErrors.ImpactDataMode.PENALTY) {
-            if (_shouldApplyPenalty(impactData, kpiValue, kpiExists)) penaltyRate_ = impactData.deltaRate;
+            if (shouldApplyPenalty(impactData, kpiValue, kpiExists)) penaltyRate_ = impactData.deltaRate;
             return (penaltyRate_, 0);
         }
 
-        if (_shouldApplyBonus(impactData, kpiValue, kpiExists)) bonusRate_ = impactData.deltaRate;
+        if (shouldApplyBonus(impactData, kpiValue, kpiExists)) bonusRate_ = impactData.deltaRate;
 
         return (0, bonusRate_);
     }
 
-    function _shouldApplyPenalty(
+    function shouldApplyPenalty(
         ISPTRErrors.ImpactData memory impactData,
         uint256 kpiValue,
         bool kpiExists
@@ -99,7 +99,7 @@ library SustainabilityPerformanceTargetRateLib {
         return kpiValue > impactData.baseLine;
     }
 
-    function _shouldApplyBonus(
+    function shouldApplyBonus(
         ISPTRErrors.ImpactData memory impactData,
         uint256 kpiValue,
         bool kpiExists
@@ -111,7 +111,7 @@ library SustainabilityPerformanceTargetRateLib {
         return kpiValue < impactData.baseLine;
     }
 
-    function _applyRateAdjustments(
+    function applyRateAdjustments(
         uint256 baseRate,
         uint256 totalPenaltyRate,
         uint256 totalBonusRate

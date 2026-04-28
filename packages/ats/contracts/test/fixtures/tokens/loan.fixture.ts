@@ -12,7 +12,6 @@
  * @see https://hardhat.org/hardhat-network-helpers/docs/reference#loadfixture
  */
 
-import { isinGenerator } from "@thomaschaplin/isin-generator";
 import { ethers } from "hardhat";
 import { ZeroAddress, ethers as ethersTypes } from "ethers";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -31,10 +30,10 @@ import {
   ControlListFacet__factory,
   CouponFacet__factory,
   NominalValueFacet__factory,
-  ERC20Facet__factory,
+  CoreFacet__factory,
   ERC3643ManagementFacet__factory,
   ERC20VotesFacet__factory,
-  ERC1644Facet__factory,
+  ControllerFacet__factory,
   ERC1594Facet__factory,
   ERC1410ManagementFacet__factory,
   FreezeFacet__factory,
@@ -243,7 +242,7 @@ export async function deployLoanTokenFixture({
   // Deploy TestFactory
 
   // Deploy ResolverProxy via TestFactory
-  const rbacs = [{ role: ATS_ROLES._DEFAULT_ADMIN_ROLE, members: [deployer.address] }];
+  const rbacs = [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [deployer.address] }];
 
   // Get BLR proxy address (use deployment data to avoid TypeScript type mismatch)
   const blrProxyAddress = infrastructure.deployment.infrastructure.blr.proxy;
@@ -257,10 +256,10 @@ export async function deployLoanTokenFixture({
   const pauseFacet = PauseFacet__factory.connect(proxyAddress, deployer);
   const kycFacet = KycFacet__factory.connect(proxyAddress, deployer);
   const controlListFacet = ControlListFacet__factory.connect(proxyAddress, deployer);
-  const erc20Facet = ERC20Facet__factory.connect(proxyAddress, deployer);
+  const coreFacet = CoreFacet__factory.connect(proxyAddress, deployer);
   const freezeFacet = FreezeFacet__factory.connect(proxyAddress, deployer);
   const capFacet = CapFacet__factory.connect(proxyAddress, deployer);
-  const erc1644Facet = ERC1644Facet__factory.connect(proxyAddress, deployer);
+  const controllerFacet = ControllerFacet__factory.connect(proxyAddress, deployer);
   const erc1594Facet = ERC1594Facet__factory.connect(proxyAddress, deployer);
   const erc1410ManagementFacet = ERC1410ManagementFacet__factory.connect(proxyAddress, deployer);
   const erc3643ManagementFacet = ERC3643ManagementFacet__factory.connect(proxyAddress, deployer);
@@ -281,8 +280,8 @@ export async function deployLoanTokenFixture({
 
   await controlListFacet.initializeControlList(securityData.isWhiteList);
   await erc1410ManagementFacet.initialize_ERC1410(securityData.isMultiPartition);
-  await erc1644Facet.initialize_ERC1644(securityData.isControllable);
-  await erc20Facet.initialize_ERC20({
+  await controllerFacet.initializeController(securityData.isControllable);
+  await coreFacet.initializeCore({
     info: {
       name: securityData.erc20MetadataInfo.name,
       symbol: securityData.erc20MetadataInfo.symbol,
@@ -330,10 +329,10 @@ export async function deployLoanTokenFixture({
     pauseFacet,
     kycFacet,
     controlListFacet,
-    erc20Facet,
+    coreFacet,
     freezeFacet,
     capFacet,
-    erc1644Facet,
+    controllerFacet,
     erc1594Facet,
     erc1410ManagementFacet,
     erc3643ManagementFacet,

@@ -67,15 +67,15 @@ describe("Equity Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target);
     await executeRbac(asset, [
       {
-        role: ATS_ROLES._PAUSER_ROLE,
+        role: ATS_ROLES.PAUSER_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._KYC_ROLE,
+        role: ATS_ROLES.KYC_ROLE,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES._SSI_MANAGER_ROLE,
+        role: ATS_ROLES.SSI_MANAGER_ROLE,
         members: [signer_A.address],
       },
     ]);
@@ -147,8 +147,8 @@ describe("Equity Tests", () => {
 
   describe("Dividends", () => {
     it("GIVEN dividend with executed snapshot WHEN getting dividend holders THEN returns holders from snapshot", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
       await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
 
       await asset.connect(signer_C).issueByPartition({
@@ -197,8 +197,8 @@ describe("Equity Tests", () => {
     });
 
     it("GIVEN dividend without executed snapshot WHEN getting total dividend holders THEN returns current total holders", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
 
       // Issue tokens before creating dividend
       await asset.connect(signer_C).issueByPartition({
@@ -249,7 +249,7 @@ describe("Equity Tests", () => {
 
     it("GIVEN a paused Token WHEN setDividend THEN transaction fails with TokenIsPaused", async () => {
       // Granting Role to account C and Pause
-      await grantRoleAndPauseToken(asset, ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
+      await grantRoleAndPauseToken(asset, ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
 
       // set dividend fails
       await expect(asset.connect(signer_C).setDividend(dividendData)).to.be.revertedWithCustomError(
@@ -262,7 +262,7 @@ describe("Equity Tests", () => {
       const currentTimestamp = await asset.blockTimestamp();
       await asset.changeSystemTimestamp(currentTimestamp + 100n);
       // Granting Role to account C
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
       // set dividend
       const wrongDividendData_1 = {
@@ -292,7 +292,7 @@ describe("Equity Tests", () => {
 
     it("GIVEN an account with corporateActions role WHEN setDividend THEN transaction succeeds", async () => {
       // Granting Role to account C
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
       // set dividend
       await expect(asset.connect(signer_C).setDividend(dividendData))
@@ -340,9 +340,9 @@ describe("Equity Tests", () => {
 
     it("GIVEN an account with corporateActions role WHEN setDividend and lock THEN transaction succeeds", async () => {
       // Granting Role to account C
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES._LOCKER_ROLE, signer_C.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.LOCKER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
 
       // issue and lock
       const TotalAmount = number_Of_Shares;
@@ -390,8 +390,8 @@ describe("Equity Tests", () => {
 
     it("GIVEN an account with corporateActions role WHEN setDividend and hold THEN transaction succeeds", async () => {
       // Granting Role to account C
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
 
       // issue and hold
       const TotalAmount = number_Of_Shares;
@@ -445,11 +445,11 @@ describe("Equity Tests", () => {
     });
 
     it("GIVEN scheduled dividends WHEN record date is reached AND scheduled balance adjustments is set after record date THEN dividends are paid without adjusted balance", async () => {
-      await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-      await asset.grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
-      await asset.grantRole(ATS_ROLES._LOCKER_ROLE, signer_C.address);
-      await asset.grantRole(ATS_ROLES._CLEARING_ROLE, signer_C.address);
-      await asset.grantRole(ATS_ROLES._FREEZE_MANAGER_ROLE, signer_C.address);
+      await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+      await asset.grantRole(ATS_ROLES.LOCKER_ROLE, signer_C.address);
+      await asset.grantRole(ATS_ROLES.CLEARING_ROLE, signer_C.address);
+      await asset.grantRole(ATS_ROLES.FREEZE_MANAGER_ROLE, signer_C.address);
 
       const TotalAmount = number_Of_Shares;
       const amounts = TotalAmount / 5n;
@@ -506,9 +506,9 @@ describe("Equity Tests", () => {
     });
 
     it("GIVEN frozen tokens WHEN calculating dividends without snapshot THEN frozen tokens are included in dividend calculation", async () => {
-      await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
-      await asset.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
-      await asset.grantRole(ATS_ROLES._FREEZE_MANAGER_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.FREEZE_MANAGER_ROLE, signer_A.address);
 
       const totalAmount = 1000n;
       const frozenAmount = 300n;
@@ -556,7 +556,7 @@ describe("Equity Tests", () => {
 
     describe("Cancel Dividend", () => {
       it("GIVEN an account without corporateActions role WHEN cancelDividend THEN transaction fails with AccountHasNoRole", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_B.address);
         await asset.connect(signer_B).setDividend(dividendData);
         await expect(asset.connect(signer_C).cancelDividend(1)).to.be.revertedWithCustomError(
           asset,
@@ -565,7 +565,7 @@ describe("Equity Tests", () => {
       });
 
       it("GIVEN a paused Token WHEN cancelDividend THEN transaction fails with TokenIsPaused", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_B.address);
         await asset.connect(signer_B).setDividend(dividendData);
         await asset.connect(signer_B).pause();
 
@@ -573,7 +573,7 @@ describe("Equity Tests", () => {
       });
 
       it("GIVEN a dividend already executed WHEN cancelDividend THEN transaction fails with DividendAlreadyExecuted", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
         await asset.connect(signer_C).setDividend(dividendData);
 
@@ -586,7 +586,7 @@ describe("Equity Tests", () => {
       });
 
       it("GIVEN a dividend not yet executed WHEN cancelDividend THEN transaction succeeds", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
         await asset.connect(signer_C).setDividend(dividendData);
 
@@ -601,7 +601,7 @@ describe("Equity Tests", () => {
       });
 
       it("GIVEN a cancelled dividend WHEN getDividend THEN isDisabled is true", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
         await asset.connect(signer_C).setDividend(dividendData);
 
@@ -614,8 +614,8 @@ describe("Equity Tests", () => {
       });
 
       it("GIVEN a cancelled dividend WHEN getDividendFor THEN isDisabled is true and amount is still available", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
 
         await asset.connect(signer_C).issueByPartition({
           partition: DEFAULT_PARTITION,
@@ -635,13 +635,13 @@ describe("Equity Tests", () => {
       });
 
       it("GIVEN a non-existent dividend WHEN cancelDividend THEN transaction fails", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
         await expect(asset.connect(signer_C).cancelDividend(999)).to.be.rejected;
       });
 
       it("GIVEN multiple dividends WHEN cancelDividend on one THEN only that dividend is cancelled", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
         // Create first dividend
         await asset.connect(signer_C).setDividend(dividendData);
@@ -673,8 +673,8 @@ describe("Equity Tests", () => {
   });
   describe("Voting rights", () => {
     it("GIVEN voting with executed snapshot WHEN getting voting holders THEN returns holders from snapshot", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
       await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
 
       await asset.connect(signer_C).issueByPartition({
@@ -722,8 +722,8 @@ describe("Equity Tests", () => {
     });
 
     it("GIVEN voting without executed snapshot WHEN getting total voting holders THEN returns current total holders", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
 
       // Issue tokens before creating voting
       await asset.connect(signer_C).issueByPartition({
@@ -772,7 +772,7 @@ describe("Equity Tests", () => {
 
     it("GIVEN a paused Token WHEN setVoting THEN transaction fails with TokenIsPaused", async () => {
       // Granting Role to account C and Pause
-      await grantRoleAndPauseToken(asset, ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
+      await grantRoleAndPauseToken(asset, ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
 
       // set voting fails
       await expect(asset.connect(signer_C).setVoting(votingData)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
@@ -781,7 +781,7 @@ describe("Equity Tests", () => {
     it("GIVEN an account with corporateActions role WHEN setVoting with invalid timestamp THEN transaction fails with WrongTimestamp", async () => {
       const currentTimestamp = await asset.blockTimestamp();
       await asset.changeSystemTimestamp(currentTimestamp + 100n);
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
       const invalidVotingData = {
         recordDate: (currentTimestamp - 100n).toString(), // Past timestamp
@@ -795,7 +795,7 @@ describe("Equity Tests", () => {
     });
 
     it("GIVEN voting created WHEN trying to get voting with wrong ID type THEN transaction fails with WrongIndexForAction", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
       // Create a voting
       await asset.connect(signer_C).setVoting(votingData);
@@ -813,7 +813,7 @@ describe("Equity Tests", () => {
     });
 
     it("GIVEN dividends created WHEN trying to get dividend with wrong ID type THEN transaction fails with WrongIndexForAction", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
       // Create a dividend
       await asset.connect(signer_C).setDividend(dividendData);
@@ -842,14 +842,14 @@ describe("Equity Tests", () => {
 
     it("GIVEN a paused Token WHEN setVoting THEN transaction fails with TokenIsPaused", async () => {
       // Granting Role to account C and Pause
-      await grantRoleAndPauseToken(asset, ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
+      await grantRoleAndPauseToken(asset, ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
 
       // set dividend fails
       await expect(asset.connect(signer_C).setVoting(votingData)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
     });
 
     it("GIVEN a duplicate voting WHEN setVoting THEN transaction fails with VotingRightsCreationFailed", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
       await asset.connect(signer_C).setVoting(votingData);
 
@@ -861,7 +861,7 @@ describe("Equity Tests", () => {
 
     it("GIVEN an account with corporateActions role WHEN setVoting THEN transaction succeeds", async () => {
       // Granting Role to account C
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
       // set dividend
       await expect(asset.connect(signer_C).setVoting(votingData))
@@ -899,9 +899,9 @@ describe("Equity Tests", () => {
 
     it("GIVEN an account with corporateActions role WHEN setVoting and lock THEN transaction succeeds", async () => {
       // Granting Role to account C
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES._LOCKER_ROLE, signer_C.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.LOCKER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
 
       // issue and lock
       const TotalAmount = number_Of_Shares;
@@ -940,13 +940,13 @@ describe("Equity Tests", () => {
     });
     describe("Cancel Voting", () => {
       it("GIVEN an account without corporateActions role WHEN cancelVoting THEN transaction fails with AccountHasNoRole", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_B.address);
         await asset.connect(signer_B).setVoting(votingData);
         await expect(asset.connect(signer_C).cancelVoting(1)).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
       });
 
       it("GIVEN a paused Token WHEN cancelVoting THEN transaction fails with TokenIsPaused", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_B.address);
         await asset.connect(signer_B).setVoting(votingData);
         await asset.connect(signer_B).pause();
 
@@ -954,7 +954,7 @@ describe("Equity Tests", () => {
       });
 
       it("GIVEN a voting already recorded WHEN cancelVoting THEN transaction fails with VotingAlreadyRecorded", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
         await asset.connect(signer_C).setVoting(votingData);
 
@@ -967,7 +967,7 @@ describe("Equity Tests", () => {
       });
 
       it("GIVEN a voting not yet recorded WHEN cancelVoting THEN transaction succeeds", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
         await asset.connect(signer_C).setVoting(votingData);
 
@@ -981,13 +981,13 @@ describe("Equity Tests", () => {
       });
 
       it("GIVEN a non-existent voting WHEN cancelVoting THEN transaction fails", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
         await expect(asset.connect(signer_C).cancelVoting(999)).to.be.rejected;
       });
 
       it("GIVEN multiple votings WHEN cancelVoting on one THEN only that voting is cancelled", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
         await asset.connect(signer_C).setVoting(votingData);
 
@@ -1021,7 +1021,7 @@ describe("Equity Tests", () => {
 
     it("GIVEN a paused Token WHEN setScheduledBalanceAdjustment THEN transaction fails with TokenIsPaused", async () => {
       // Granting Role to account C and Pause
-      await grantRoleAndPauseToken(asset, ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
+      await grantRoleAndPauseToken(asset, ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
 
       // set dividend fails
       await expect(
@@ -1032,7 +1032,7 @@ describe("Equity Tests", () => {
     it("GIVEN an account with corporateActions role WHEN setScheduledBalanceAdjustment with invalid timestamp THEN transaction fails with WrongTimestamp", async () => {
       const currentTimestamp = await asset.blockTimestamp();
       await asset.changeSystemTimestamp(currentTimestamp + 100n);
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
       const invalidBalanceAdjustmentData = {
         executionDate: (currentTimestamp - 100n).toString(), // Past timestamp
@@ -1046,7 +1046,7 @@ describe("Equity Tests", () => {
     });
 
     it("GIVEN an account with corporateActions role WHEN setScheduledBalanceAdjustment with invalid factor THEN transaction fails with FactorIsZero", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
       const invalidBalanceAdjustmentData = {
         executionDate: balanceAdjustmentExecutionDateInSeconds.toString(),
@@ -1060,7 +1060,7 @@ describe("Equity Tests", () => {
     });
 
     it("GIVEN balance adjustment created WHEN trying to get balance adjustment with wrong ID type THEN transaction fails with WrongIndexForAction", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
       // Create a balance adjustment
       await asset.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
@@ -1074,7 +1074,7 @@ describe("Equity Tests", () => {
 
     it("GIVEN an account with corporateActions role WHEN setScheduledBalanceAdjustment THEN transaction succeeds", async () => {
       // Granting Role to account C
-      await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
       // set dividend
       await expect(asset.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData))
@@ -1100,7 +1100,7 @@ describe("Equity Tests", () => {
 
     describe("Cancel Scheduled Balance Adjustment", () => {
       it("GIVEN an account without corporateActions role WHEN cancelScheduledBalanceAdjustment THEN transaction fails with AccountHasNoRole", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_B.address);
         await asset.connect(signer_B).setScheduledBalanceAdjustment(balanceAdjustmentData);
         await expect(asset.connect(signer_C).cancelScheduledBalanceAdjustment(1)).to.be.revertedWithCustomError(
           asset,
@@ -1109,7 +1109,7 @@ describe("Equity Tests", () => {
       });
 
       it("GIVEN a paused Token WHEN cancelScheduledBalanceAdjustment THEN transaction fails with TokenIsPaused", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_B.address);
         await asset.connect(signer_B).setScheduledBalanceAdjustment(balanceAdjustmentData);
         await asset.connect(signer_B).pause();
 
@@ -1120,7 +1120,7 @@ describe("Equity Tests", () => {
       });
 
       it("GIVEN a balance adjustment already executed WHEN cancelScheduledBalanceAdjustment THEN transaction fails with BalanceAdjustmentAlreadyExecuted", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
         await asset.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
 
@@ -1133,7 +1133,7 @@ describe("Equity Tests", () => {
       });
 
       it("GIVEN a balance adjustment not yet executed WHEN cancelScheduledBalanceAdjustment THEN transaction succeeds", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
         await asset.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
 
@@ -1147,13 +1147,13 @@ describe("Equity Tests", () => {
       });
 
       it("GIVEN a non-existent balance adjustment WHEN cancelScheduledBalanceAdjustment THEN transaction fails", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
         await expect(asset.connect(signer_C).cancelScheduledBalanceAdjustment(999)).to.be.rejected;
       });
 
       it("GIVEN multiple balance adjustments WHEN cancelScheduledBalanceAdjustment on one THEN only that adjustment is cancelled", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
         // Create first balance adjustment
         await asset.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
@@ -1184,8 +1184,8 @@ describe("Equity Tests", () => {
       });
 
       it("GIVEN a cancelled balance adjustment WHEN triggerScheduledCrossOrderedTasks is called THEN scheduled task executes but token balance remains unchanged", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
 
         const tokenAmount = 1000n;
         await asset.connect(signer_C).issueByPartition({

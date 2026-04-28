@@ -88,10 +88,7 @@ task("erc3643-clone-interfaces", async (_, hre) => {
     { original: "IFactory", removeImports: false },
     { original: "IResolverProxy" },
     { original: "IStaticFunctionSelectors" },
-    {
-      original: "contracts/facets/layer_1/ERC1400/ERC20/IERC20.sol:IERC20",
-      removeImports: false,
-    },
+    { original: "ICore", removeImports: false },
     // Coupon Interest Rates interfaces
     { original: "IFixedRate" },
     { original: "IKpiLinkedRate" },

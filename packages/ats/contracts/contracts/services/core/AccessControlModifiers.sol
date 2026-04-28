@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { AccessControlStorageWrapper, RoleDataStorage } from "../../domain/core/AccessControlStorageWrapper.sol";
-import { _FREEZE_MANAGER_ROLE, _AGENT_ROLE } from "../../constants/roles.sol";
+import { FREEZE_MANAGER_ROLE, AGENT_ROLE } from "../../constants/roles.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
@@ -34,6 +34,14 @@ abstract contract AccessControlModifiers {
      */
     modifier onlyRole(bytes32 _role) virtual {
         AccessControlStorageWrapper.checkRole(_role, EvmAccessors.getMsgSender());
+        _;
+    }
+
+    modifier onlyAdminRole() virtual {
+        AccessControlStorageWrapper.checkRole(
+            AccessControlStorageWrapper.getRoleAdmin(AGENT_ROLE),
+            EvmAccessors.getMsgSender()
+        );
         _;
     }
 
@@ -90,8 +98,8 @@ abstract contract AccessControlModifiers {
      */
     modifier onlyFreezeRoles(address _account) virtual {
         bytes32[] memory roles = new bytes32[](2);
-        roles[0] = _FREEZE_MANAGER_ROLE;
-        roles[1] = _AGENT_ROLE;
+        roles[0] = FREEZE_MANAGER_ROLE;
+        roles[1] = AGENT_ROLE;
         AccessControlStorageWrapper.checkAnyRole(roles, _account);
         _;
     }

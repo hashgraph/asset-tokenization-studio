@@ -42,7 +42,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "CorporateActionsFacet",
   "DiamondFacet", // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
   "CoreFacet",
-  "ERC20Facet",
+  "TransferFacet",
   "CoreAdjustedFacet",
   "FreezeFacet",
   "KycFacet",
@@ -58,15 +58,19 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "ERC1410TokenHolderFacet",
   "ERC1594Facet",
   "DocumentationFacet",
-  "ERC1644Facet",
+  "ControllerFacet",
   "ERC20PermitFacet",
   "NoncesFacet",
   "ERC20VotesFacet",
-  "ERC3643BatchFacet",
+  "BatchControllerFacet",
+  "BatchBurnFacet",
+  "BatchMintFacet",
+  "BatchTransferFacet",
   "ERC3643ManagementFacet",
   "ERC3643OperationsFacet",
   "ERC3643ReadFacet",
   "ComplianceFacet",
+  "MintFacet",
 
   // Clearing & Settlement
   "ClearingActionsFacet",
@@ -76,8 +80,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "ClearingTransferFacet",
   "HoldFacet",
   "HoldManagementFacet",
-  "HoldReadFacet",
-  "HoldTokenHolderFacet",
+  "HoldByPartitionFacet",
 
   // External Management
   "ExternalControlListManagementFacet",
