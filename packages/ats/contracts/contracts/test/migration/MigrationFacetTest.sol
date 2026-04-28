@@ -7,7 +7,7 @@ import { ERC20StorageWrapper } from "../../domain/asset/ERC20StorageWrapper.sol"
 
 /**
  * @dev Test facet for ERC20 storage migration testing.
- * Exposes storage accessors to set up legacy storage state and verify migration behavior.
+ * Exposes storage accessors to set up legacy storage state and _verify migration behavior.
  * This is an abstract contract to avoid implementing interface requirements not relevant for testing.
  * This facet is for testing purposes only and should not be deployed to production.
  */

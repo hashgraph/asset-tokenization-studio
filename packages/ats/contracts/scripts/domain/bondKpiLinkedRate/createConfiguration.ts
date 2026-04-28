@@ -48,15 +48,15 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "KycFacet",
   "PauseFacet",
   "BalanceTrackerFacet",
+  "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
-  "TotalBalanceFacet",
+  "BalanceTrackerByPartitionFacet",
 
   // ERC Standards
   "ERC1410IssuerFacet",
   "ERC1410ManagementFacet",
   "ERC1410ReadFacet",
   "ERC1410TokenHolderFacet",
-  "ERC1594Facet",
   "DocumentationFacet",
   "ControllerFacet",
   "ERC20PermitFacet",
@@ -67,19 +67,21 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "BatchMintFacet",
   "BatchTransferFacet",
   "ERC3643ManagementFacet",
-  "ERC3643OperationsFacet",
   "ERC3643ReadFacet",
   "ComplianceFacet",
   "MintFacet",
+  "BurnFacet",
 
   // Clearing & Settlement
   "ClearingActionsFacet",
   "ClearingHoldCreationFacet",
+  "OperatorClearingHoldByPartitionFacet",
   "ClearingReadFacet",
   "ClearingRedeemFacet",
   "ClearingTransferFacet",
   "HoldFacet",
   "HoldManagementFacet",
+  "ControllerHoldByPartitionFacet",
   "HoldByPartitionFacet",
 
   // External Management

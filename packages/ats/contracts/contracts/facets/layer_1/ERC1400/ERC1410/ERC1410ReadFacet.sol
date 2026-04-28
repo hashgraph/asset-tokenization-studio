@@ -12,21 +12,23 @@ contract ERC1410ReadFacet is ERC1410Read, IStaticFunctionSelectors {
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](9);
-        staticFunctionSelectors_[selectorIndex++] = this.balanceOfAt.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.balanceOfByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.totalSupplyByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.partitionsOf.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.isMultiPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.isOperator.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.isOperatorForPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.canTransferByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.canRedeemByPartition.selector;
+        uint256 selectorIndex = 6;
+        staticFunctionSelectors_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this.canRedeemByPartition.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.canTransferByPartition.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.isOperatorForPartition.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.isOperator.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.isMultiPartition.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.partitionsOf.selector;
+        }
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(IERC1410Read).interfaceId;
+        uint256 selectorIndex = 1;
+        staticInterfaceIds_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticInterfaceIds_[--selectorIndex] = type(IERC1410Read).interfaceId;
+        }
     }
 }

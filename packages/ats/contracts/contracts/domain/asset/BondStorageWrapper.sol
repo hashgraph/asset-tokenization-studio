@@ -11,6 +11,7 @@ import { _BOND_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 /// @title Bond Storage Wrapper
 /// @notice Library for managing Bond token storage operations.
 /// @dev Provides structured access to BondDataStorage with migration support for NominalValue.
+/// @author Asset Tokenization Studio Team
 library BondStorageWrapper {
     struct BondDataStorage {
         bytes3 currency;

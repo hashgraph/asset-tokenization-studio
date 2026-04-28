@@ -394,12 +394,12 @@ const FUND_FACETS = [
   // ERC Standards (choose what you need)
   "ERC1410IssuerFacet",
   "ERC1410ReadFacet",
-  "ERC1594Facet",
+  "MintFacet",
+  "BurnFacet",
   "ERC20PermitFacet",
 
   // Compliance (if needed)
   "ERC3643ManagementFacet",
-  "ERC3643OperationsFacet",
   "ERC3643ReadFacet",
 
   // Fund-Specific (your custom facets)

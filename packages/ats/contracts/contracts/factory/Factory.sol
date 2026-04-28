@@ -14,7 +14,7 @@ import { IERC20Votes } from "../facets/layer_1/ERC1400/ERC20Votes/IERC20Votes.so
 import { IController } from "../facets/controller/IController.sol";
 import { IERC1410 } from "../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
 import { ICap } from "../facets/layer_1/cap/ICap.sol";
-import { IERC1594 } from "../facets/layer_1/ERC1400/ERC1594/IERC1594.sol";
+import { IMint } from "../facets/mint/IMint.sol";
 import { IClearingActions } from "../facets/layer_1/clearing/IClearingActions.sol";
 import { IBusinessLogicResolver } from "../infrastructure/diamond/IBusinessLogicResolver.sol";
 import {
@@ -382,7 +382,7 @@ contract Factory is IFactory {
     }
 
     function _tryInitialize_ERC1594(address securityAddress_) private {
-        try IERC1594(securityAddress_).initialize_ERC1594() {
+        try IMint(securityAddress_).initialize_ERC1594() {
             // success
         } catch {
             // facet not present - skip initialization

@@ -19,21 +19,6 @@ interface IHoldManagement is IHoldTypes {
     ) external returns (bool success_, uint256 holdId_);
 
     /**
-     * @notice Creates a hold on the tokens of a token holder, by a controller, on a specific partition
-     * @dev Can only be called by a user with the controller role
-     * @param _partition The partition on which the hold is created
-     * @param _from The address from which the tokens will be held
-     * @param _hold The hold details
-     * @param _operatorData Additional data attached to the hold creation by the controller
-     */
-    function controllerCreateHoldByPartition(
-        bytes32 _partition,
-        address _from,
-        IHoldTypes.Hold calldata _hold,
-        bytes calldata _operatorData
-    ) external returns (bool success_, uint256 holdId_);
-
-    /**
      * @notice Creates a hold on the tokens of a token holder
      * @dev Can only be called by a user with the protected partitions role
      * @param _partition The partition on which the hold is created

@@ -12,7 +12,7 @@ interface IBatchBurn {
     /**
      * @notice Burns tokens from multiple addresses in a single transaction.
      * @dev Caller must hold `CONTROLLER_ROLE` or `AGENT_ROLE`. The token must not be paused
-     *      and must not be configured for multi-partition. Emits `IERC1644.ControllerRedemption`
+     *      and must not be configured for multi-partition. Emits `IController.ControllerRedemption`
      *      for each address processed.
      * @param _userAddresses Addresses from which tokens will be burnt.
      * @param _amounts Corresponding token amounts to burn. Must be the same length as `_userAddresses`.
