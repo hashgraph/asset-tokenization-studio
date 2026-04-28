@@ -13,7 +13,6 @@ import {
     ProtectedHold,
     HoldIdentifier,
     HoldData,
-    OperationType,
     HoldDataStorage
 } from "../../../facets/layer_1/hold/IHold.sol";
 import { LowLevelCall } from "../../../infrastructure/utils/LowLevelCall.sol";
@@ -25,6 +24,16 @@ import { checkNounceAndDeadline } from "../../../infrastructure/utils/ERC712Lib.
 abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrapper {
     using EnumerableSet for EnumerableSet.UintSet;
     using LowLevelCall for address;
+
+    modifier onlyActiveHoldWithValidEscrow(HoldIdentifier calldata _holdIdentifier) override {
+        _checkActiveHoldWithValidEscrow(_holdIdentifier);
+        _;
+    }
+
+    modifier onlyExpiredHold(HoldIdentifier calldata _holdIdentifier) override {
+        _checkExpiredHold(_holdIdentifier);
+        _;
+    }
 
     function _createHoldByPartition(
         bytes32 _partition,
@@ -97,7 +106,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
     ) internal override returns (bool success_, bytes32 partition_) {
         _beforeExecuteHold(_holdIdentifier, _to);
 
-        success_ = _operateHoldByPartition(_holdIdentifier, _to, _amount, OperationType.Execute);
+        success_ = _operateHoldByPartition(_holdIdentifier, _to, _amount);
         partition_ = _holdIdentifier.partition;
 
         HoldData memory holdData = _getHold(_holdIdentifier);
@@ -108,7 +117,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
     }
 
     function _releaseHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier,
+        HoldIdentifier memory _holdIdentifier,
         uint256 _amount
     ) internal override returns (bool success_) {
         _beforeReleaseHold(_holdIdentifier);
@@ -117,12 +126,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
 
         _restoreHoldAllowance(holdData.thirdPartyType, _holdIdentifier, _amount);
 
-        success_ = _operateHoldByPartition(
-            _holdIdentifier,
-            _holdIdentifier.tokenHolder,
-            _amount,
-            OperationType.Release
-        );
+        success_ = _operateHoldByPartition(_holdIdentifier, _holdIdentifier.tokenHolder, _amount);
 
         holdData = _getHold(_holdIdentifier);
 
@@ -141,39 +145,17 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
 
         _restoreHoldAllowance(holdData.thirdPartyType, _holdIdentifier, amount_);
 
-        success_ = _operateHoldByPartition(
-            _holdIdentifier,
-            _holdIdentifier.tokenHolder,
-            amount_,
-            OperationType.Reclaim
-        );
+        success_ = _operateHoldByPartition(_holdIdentifier, _holdIdentifier.tokenHolder, amount_);
 
         _removeLabafHold(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _holdIdentifier.holdId);
     }
 
     function _operateHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier,
+        HoldIdentifier memory _holdIdentifier,
         address _to,
-        uint256 _amount,
-        OperationType _operation
+        uint256 _amount
     ) internal override returns (bool success_) {
         HoldData memory holdData = _getHold(_holdIdentifier);
-
-        if (_operation == OperationType.Execute) {
-            if (!_isAbleToAccess(_holdIdentifier.tokenHolder)) {
-                revert AccountIsBlocked(_holdIdentifier.tokenHolder);
-            }
-
-            if (holdData.hold.to != address(0) && _to != holdData.hold.to) {
-                revert IHold.InvalidDestinationAddress(holdData.hold.to, _to);
-            }
-        }
-        if (_operation != OperationType.Reclaim) {
-            if (_isHoldExpired(holdData.hold)) revert IHold.HoldExpirationReached();
-            if (!_isEscrow(holdData.hold, _msgSender())) revert IHold.IsNotEscrow();
-        } else if (_operation == OperationType.Reclaim && !_isHoldExpired(holdData.hold)) {
-            revert IHold.HoldExpirationNotReached();
-        }
 
         _checkHoldAmount(_amount, holdData);
 
@@ -182,7 +164,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         success_ = true;
     }
 
-    function _transferHold(HoldIdentifier calldata _holdIdentifier, address _to, uint256 _amount) internal override {
+    function _transferHold(HoldIdentifier memory _holdIdentifier, address _to, uint256 _amount) internal override {
         if (_decreaseHeldAmount(_holdIdentifier, _amount) == 0) {
             _removeHold(_holdIdentifier);
         }
@@ -210,7 +192,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
     }
 
     function _decreaseHeldAmount(
-        HoldIdentifier calldata _holdIdentifier,
+        HoldIdentifier memory _holdIdentifier,
         uint256 _amount
     ) internal override returns (uint256 newHoldBalance_) {
         HoldDataStorage storage holdStorage = _holdStorage();
@@ -230,7 +212,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
             .amount;
     }
 
-    function _removeHold(HoldIdentifier calldata _holdIdentifier) internal override {
+    function _removeHold(HoldIdentifier memory _holdIdentifier) internal override {
         HoldDataStorage storage holdStorage = _holdStorage();
 
         holdStorage.holdIdsByAccountAndPartition[_holdIdentifier.tokenHolder][_holdIdentifier.partition].remove(
@@ -287,13 +269,13 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         _updateAccountHeldBalancesSnapshot(_tokenHolder, _partition);
     }
 
-    function _beforeExecuteHold(HoldIdentifier calldata _holdIdentifier, address _to) internal override {
+    function _beforeExecuteHold(HoldIdentifier memory _holdIdentifier, address _to) internal override {
         _adjustHoldBalances(_holdIdentifier, _to);
         _updateAccountSnapshot(_to, _holdIdentifier.partition);
         _updateAccountHeldBalancesSnapshot(_holdIdentifier.tokenHolder, _holdIdentifier.partition);
     }
 
-    function _beforeReleaseHold(HoldIdentifier calldata _holdIdentifier) internal override {
+    function _beforeReleaseHold(HoldIdentifier memory _holdIdentifier) internal override {
         _beforeExecuteHold(_holdIdentifier, _holdIdentifier.tokenHolder);
     }
 
@@ -301,7 +283,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         _beforeExecuteHold(_holdIdentifier, _holdIdentifier.tokenHolder);
     }
 
-    function _adjustHoldBalances(HoldIdentifier calldata _holdIdentifier, address _to) internal override {
+    function _adjustHoldBalances(HoldIdentifier memory _holdIdentifier, address _to) internal override {
         _triggerAndSyncAll(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _to);
 
         uint256 abaf = _updateTotalHold(_holdIdentifier.partition, _holdIdentifier.tokenHolder);
@@ -372,7 +354,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
     }
 
     function _getHoldForByPartitionAdjustedAt(
-        HoldIdentifier calldata _holdIdentifier,
+        HoldIdentifier memory _holdIdentifier,
         uint256 _timestamp
     )
         internal
@@ -415,9 +397,15 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         ][_holdIdentifier.holdId];
     }
 
+    function _validateHoldForExecute(HoldIdentifier calldata _holdIdentifier, address _to) internal view override {
+        _checkUnblockedTokenHolder(_holdIdentifier.tokenHolder);
+        _checkValidHoldDestination(_holdIdentifier, _to);
+        _checkActiveHoldWithValidEscrow(_holdIdentifier);
+    }
+
     function _restoreHoldAllowance(
         ThirdPartyType _thirdPartyType,
-        HoldIdentifier calldata _holdIdentifier,
+        HoldIdentifier memory _holdIdentifier,
         uint256 _amount
     ) private {
         if (_thirdPartyType != ThirdPartyType.AUTHORIZED) return;
@@ -428,5 +416,28 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
             ][_holdIdentifier.holdId],
             _amount
         );
+    }
+
+    function _checkUnblockedTokenHolder(address _tokenHolder) private view {
+        if (!_isAbleToAccess(_tokenHolder)) {
+            revert AccountIsBlocked(_tokenHolder);
+        }
+    }
+
+    function _checkValidHoldDestination(HoldIdentifier calldata _holdIdentifier, address _to) private view {
+        HoldData memory holdData = _getHold(_holdIdentifier);
+        if (holdData.hold.to != address(0) && _to != holdData.hold.to) {
+            revert IHold.InvalidDestinationAddress(holdData.hold.to, _to);
+        }
+    }
+
+    function _checkActiveHoldWithValidEscrow(HoldIdentifier calldata _holdIdentifier) private view {
+        HoldData memory holdData = _getHold(_holdIdentifier);
+        if (_isHoldExpired(holdData.hold)) revert IHold.HoldExpirationReached();
+        if (!_isEscrow(holdData.hold, _msgSender())) revert IHold.IsNotEscrow();
+    }
+
+    function _checkExpiredHold(HoldIdentifier calldata _holdIdentifier) private view {
+        if (!_isHoldExpired(_getHold(_holdIdentifier).hold)) revert IHold.HoldExpirationNotReached();
     }
 }

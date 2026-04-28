@@ -17,9 +17,7 @@ import { CancelClearingOperationByPartitionCommandError } from "./error/CancelCl
 import { KycStatus } from "@domain/context/kyc/Kyc";
 
 @CommandHandler(CancelClearingOperationByPartitionCommand)
-export class CancelClearingOperationByPartitionCommandHandler
-  implements ICommandHandler<CancelClearingOperationByPartitionCommand>
-{
+export class CancelClearingOperationByPartitionCommandHandler implements ICommandHandler<CancelClearingOperationByPartitionCommand> {
   constructor(
     @lazyInject(AccountService)
     private readonly accountService: AccountService,

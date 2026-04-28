@@ -12,8 +12,10 @@ export type PartsStyleInterpolation<TParts extends string[]> = Partial<
 >;
 
 // Used for multi styles
-export interface BaseMultiStyleConfiguration<TParts extends string[]>
-  extends Omit<ChakraComponentMultiStyleConfig, "parts" | "sizes" | "baseStyle" | "variants"> {
+export interface BaseMultiStyleConfiguration<TParts extends string[]> extends Omit<
+  ChakraComponentMultiStyleConfig,
+  "parts" | "sizes" | "baseStyle" | "variants"
+> {
   parts: TParts;
   sizes?:
     | Record<string, PartsStyleInterpolation<TParts>>

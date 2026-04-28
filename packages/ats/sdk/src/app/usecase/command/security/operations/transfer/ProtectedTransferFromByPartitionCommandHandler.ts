@@ -18,9 +18,7 @@ import ContractService from "@service/contract/ContractService";
 import { ProtectedTransferFromByPartitionCommandError } from "./error/ProtectedTransferFromByPartitionCommandError";
 
 @CommandHandler(ProtectedTransferFromByPartitionCommand)
-export class ProtectedTransferFromByPartitionCommandHandler
-  implements ICommandHandler<ProtectedTransferFromByPartitionCommand>
-{
+export class ProtectedTransferFromByPartitionCommandHandler implements ICommandHandler<ProtectedTransferFromByPartitionCommand> {
   constructor(
     @lazyInject(SecurityService)
     private readonly securityService: SecurityService,

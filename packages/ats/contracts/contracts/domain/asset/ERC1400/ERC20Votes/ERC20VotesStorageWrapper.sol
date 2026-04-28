@@ -24,10 +24,6 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         bool initialized;
     }
 
-    event DelegateChanged(address indexed delegator, address indexed fromDelegate, address indexed toDelegate);
-
-    event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance);
-
     // solhint-disable-next-line func-name-mixedcase
     function _initialize_ERC20Votes(bool _activated) internal override {
         ERC20VotesStorage storage erc20VotesStorage = _erc20VotesStorage();
@@ -97,7 +93,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
 
         _erc20VotesStorage().delegates[delegator] = delegatee;
 
-        emit DelegateChanged(delegator, currentDelegate, delegatee);
+        emit IERC20Votes.DelegateChanged(delegator, currentDelegate, delegatee);
 
         _moveVotingPower(currentDelegate, delegatee, delegatorBalance);
     }
@@ -124,7 +120,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
             op,
             amount
         );
-        emit DelegateVotesChanged(account, oldWeight, newWeight);
+        emit IERC20Votes.DelegateVotesChanged(account, oldWeight, newWeight);
     }
 
     function _writeCheckpoint(

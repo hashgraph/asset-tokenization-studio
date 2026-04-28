@@ -3,12 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import {
-  type ResolverProxy,
-  ScheduledCouponListingFacet,
-  BondUSAKpiLinkedRateFacet,
-  AccessControl,
-} from "@contract-types";
+import { type ResolverProxy, type IAsset } from "@contract-types";
 import { deployBondKpiLinkedRateTokenFixture, getDltTimestamp } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ATS_ROLES, TIME_PERIODS_S } from "@scripts";
@@ -17,9 +12,7 @@ describe("ScheduledCouponListing Tests", () => {
   let diamond: ResolverProxy;
   let signer_A: HardhatEthersSigner;
 
-  let scheduledCouponListingFacet: ScheduledCouponListingFacet;
-  let bondFacet: BondUSAKpiLinkedRateFacet;
-  let accessControlFacet: AccessControl;
+  let asset: IAsset;
 
   let startingDate = 0;
   let maturityDate = 0;
@@ -45,12 +38,10 @@ describe("ScheduledCouponListing Tests", () => {
     diamond = base.diamond;
     signer_A = base.deployer;
 
-    scheduledCouponListingFacet = await ethers.getContractAt("ScheduledCouponListingFacet", diamond.target);
-    bondFacet = await ethers.getContractAt("BondUSAKpiLinkedRateFacetTimeTravel", diamond.target);
-    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
+    asset = await ethers.getContractAt("IAsset", diamond.target);
 
     // Grant corporate action role to signer_A
-    await accessControlFacet.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
+    await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
   }
 
   beforeEach(async () => {
@@ -59,7 +50,7 @@ describe("ScheduledCouponListing Tests", () => {
 
   describe("scheduledCouponListingCount", () => {
     it("GIVEN no scheduled coupons WHEN scheduledCouponListingCount THEN returns 0", async () => {
-      const count = await scheduledCouponListingFacet.scheduledCouponListingCount();
+      const count = await asset.scheduledCouponListingCount();
       expect(count).to.equal(0);
     });
 
@@ -69,7 +60,7 @@ describe("ScheduledCouponListing Tests", () => {
         const fixingDate = startingDate + TIME_PERIODS_S.MONTH * (i + 1);
         const executionDate = fixingDate + TIME_PERIODS_S.WEEK;
 
-        await bondFacet.setCoupon({
+        await asset.setCoupon({
           recordDate: fixingDate.toString(),
           executionDate: executionDate.toString(),
           rate: 0,
@@ -81,7 +72,7 @@ describe("ScheduledCouponListing Tests", () => {
         });
       }
 
-      const count = await scheduledCouponListingFacet.scheduledCouponListingCount();
+      const count = await asset.scheduledCouponListingCount();
       expect(count).to.equal(3);
     });
   });
@@ -93,7 +84,7 @@ describe("ScheduledCouponListing Tests", () => {
         const fixingDate = startingDate + TIME_PERIODS_S.MONTH * (i + 1);
         const executionDate = fixingDate + TIME_PERIODS_S.WEEK;
 
-        await bondFacet.setCoupon({
+        await asset.setCoupon({
           recordDate: fixingDate.toString(),
           executionDate: executionDate.toString(),
           rate: 0,
@@ -107,27 +98,27 @@ describe("ScheduledCouponListing Tests", () => {
     });
 
     it("GIVEN scheduled coupons WHEN getScheduledCouponListing with page 0 and length 10 THEN returns all coupons", async () => {
-      const coupons = await scheduledCouponListingFacet.getScheduledCouponListing(0, 10);
+      const coupons = await asset.getScheduledCouponListing(0, 10);
       expect(coupons.length).to.equal(5);
     });
 
     it("GIVEN scheduled coupons WHEN getScheduledCouponListing with page 0 and length 3 THEN returns first 3 coupons", async () => {
-      const coupons = await scheduledCouponListingFacet.getScheduledCouponListing(0, 3);
+      const coupons = await asset.getScheduledCouponListing(0, 3);
       expect(coupons.length).to.equal(3);
     });
 
     it("GIVEN scheduled coupons WHEN getScheduledCouponListing with page 1 and length 3 THEN returns next 2 coupons", async () => {
-      const coupons = await scheduledCouponListingFacet.getScheduledCouponListing(1, 3);
+      const coupons = await asset.getScheduledCouponListing(1, 3);
       expect(coupons.length).to.equal(2);
     });
 
     it("GIVEN scheduled coupons WHEN getScheduledCouponListing with page 2 and length 3 THEN returns empty array", async () => {
-      const coupons = await scheduledCouponListingFacet.getScheduledCouponListing(2, 3);
+      const coupons = await asset.getScheduledCouponListing(2, 3);
       expect(coupons.length).to.equal(0);
     });
 
     it("GIVEN scheduled coupons WHEN getScheduledCouponListing THEN returns tasks with correct structure", async () => {
-      const coupons = await scheduledCouponListingFacet.getScheduledCouponListing(0, 1);
+      const coupons = await asset.getScheduledCouponListing(0, 1);
       expect(coupons.length).to.equal(1);
       const coupon = {
         scheduledTimestamp: coupons[0].scheduledTimestamp,

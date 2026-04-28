@@ -7,12 +7,17 @@
 import { CommandBus } from "@core/command/CommandBus";
 import {
   _PARTITION_ID_1,
+  CANCEL_AMORTIZATION_EVENT,
   CANCEL_COUPON_EVENT,
   CANCEL_DIVIDEND_EVENT,
   CANCEL_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
   CANCEL_VOTING_EVENT,
   EVM_ZERO_ADDRESS,
   GAS,
+  NOMINAL_VALUE_SET_EVENT,
+  RELEASE_AMORTIZATION_HOLD_EVENT,
+  SET_AMORTIZATION_EVENT,
+  SET_AMORTIZATION_HOLD_EVENT,
   SET_COUPON_EVENT,
   SET_DIVIDEND_EVENT,
   SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
@@ -57,12 +62,14 @@ import {
   AccessControlFacet__factory,
   Bond__factory,
   CapFacet__factory,
+  Coupon__factory,
   ClearingActionsFacet__factory,
   ClearingHoldCreationFacet__factory,
   ClearingRedeemFacet__factory,
   ClearingTransferFacet__factory,
   ControlListFacet__factory,
   DiamondFacet__factory,
+  Dividend__factory,
   Equity__factory,
   ERC1410IssuerFacet__factory,
   ERC1410ManagementFacet__factory,
@@ -79,8 +86,11 @@ import {
   FreezeFacet__factory,
   HoldManagementFacet__factory,
   HoldTokenHolderFacet__factory,
-  IBondRead,
+  ICoupon,
+  IDividend,
   IEquity,
+  IVoting,
+  VotingFacet__factory,
   KpiLinkedRate__factory,
   Kpis__factory,
   KycFacet__factory,
@@ -97,6 +107,8 @@ import {
   SsiManagementFacet__factory,
   TransferAndLockFacet__factory,
   TREXFactoryAts__factory,
+  NominalValue__factory,
+  AmortizationFacet__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { ContractId } from "@hiero-ledger/sdk";
 import EventService from "@service/event/EventService";
@@ -577,7 +589,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       executionDate: ${executionDate},
       amount : ${amount}  `,
     );
-    const dividendStruct: IEquity.DividendStruct = {
+    const dividendStruct: IDividend.DividendStruct = {
       recordDate: recordDate.toBigInt(),
       executionDate: executionDate.toBigInt(),
       amount: amount.toBigInt(),
@@ -585,7 +597,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return this.executeTransaction(
-      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      Dividend__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setDividend",
       [dividendStruct],
       GAS.SET_DIVIDENDS,
@@ -595,7 +607,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
 
   async cancelDividend(security: EvmAddress, dividendId: number): Promise<TransactionResponse> {
     return this.executeTransaction(
-      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      Dividend__factory.connect(security.toString(), this.getSignerOrProvider()),
       "cancelDividend",
       [dividendId],
       GAS.CANCEL_DIVIDEND,
@@ -608,13 +620,13 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `equity: ${security} ,
       recordDate :${recordDate} , `,
     );
-    const votingStruct: IEquity.VotingStruct = {
+    const votingStruct: IVoting.VotingStruct = {
       recordDate: recordDate.toBigInt(),
       data: data,
     };
 
     return this.executeTransaction(
-      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      VotingFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setVoting",
       [votingStruct],
       GAS.SET_VOTING_RIGHTS,
@@ -643,7 +655,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       endDate: ${endDate},
       fixingDate: ${fixingDate}`,
     );
-    const couponStruct: IBondRead.CouponStruct = {
+    const couponStruct: ICoupon.CouponStruct = {
       recordDate: recordDate.toBigInt(),
       executionDate: executionDate.toBigInt(),
       rate: rate.toBigInt(),
@@ -655,7 +667,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return this.executeTransaction(
-      Bond__factory.connect(security.toString(), this.getSignerOrProvider()),
+      Coupon__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setCoupon",
       [couponStruct],
       GAS.SET_COUPON,
@@ -667,7 +679,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Cancelling coupon: ${couponId} for bond: ${security}`);
 
     return this.executeTransaction(
-      Bond__factory.connect(security.toString(), this.getSignerOrProvider()),
+      Coupon__factory.connect(security.toString(), this.getSignerOrProvider()),
       "cancelCoupon",
       [couponId],
       GAS.CANCEL_COUPON,
@@ -679,7 +691,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Cancelling voting: ${votingId} for equity: ${security}`);
 
     return this.executeTransaction(
-      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      VotingFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "cancelVoting",
       [votingId],
       GAS.CANCEL_VOTING,
@@ -2719,13 +2731,104 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
-  async cancelScheduledBalanceAdjustment(security: EvmAddress, balanceAdjustmentId: number): Promise<TransactionResponse> {
+  async cancelScheduledBalanceAdjustment(
+    security: EvmAddress,
+    balanceAdjustmentId: number,
+  ): Promise<TransactionResponse> {
     return this.executeTransaction(
       Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
       "cancelScheduledBalanceAdjustment",
       [balanceAdjustmentId],
       GAS.CANCEL_SCHEDULED_BALANCE_ADJUSTMENT,
       CANCEL_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
+    );
+  }
+
+  async setNominalValue(
+    security: EvmAddress,
+    nominalValue: string,
+    nominalValueDecimals: number,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Setting nominal value for security: ${security.toString()}`);
+
+    return this.executeTransaction(
+      NominalValue__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "setNominalValue",
+      [nominalValue, nominalValueDecimals],
+      GAS.SET_NOMINAL_VALUE,
+      NOMINAL_VALUE_SET_EVENT,
+    );
+  }
+
+  async setAmortization(
+    security: EvmAddress,
+    recordDate: BigDecimal,
+    executionDate: BigDecimal,
+    tokensToRedeem: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Setting amortization: security=${security}, recordDate=${recordDate}, executionDate=${executionDate}, tokensToRedeem=${tokensToRedeem}`,
+    );
+
+    const amortizationStruct = {
+      recordDate: recordDate.toBigInt(),
+      executionDate: executionDate.toBigInt(),
+      tokensToRedeem: tokensToRedeem.toBigInt(),
+    };
+
+    return this.executeTransaction(
+      AmortizationFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "setAmortization",
+      [amortizationStruct],
+      GAS.SET_AMORTIZATION,
+      SET_AMORTIZATION_EVENT,
+    );
+  }
+
+  async cancelAmortization(security: EvmAddress, amortizationId: number): Promise<TransactionResponse> {
+    LogService.logTrace(`Cancelling amortization: ${amortizationId} for security: ${security}`);
+    return this.executeTransaction(
+      AmortizationFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "cancelAmortization",
+      [amortizationId],
+      GAS.CANCEL_AMORTIZATION,
+      CANCEL_AMORTIZATION_EVENT,
+    );
+  }
+
+  async setAmortizationHold(
+    security: EvmAddress,
+    amortizationId: number,
+    tokenHolder: EvmAddress,
+    tokenAmount: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Setting amortization hold: security=${security}, amortizationId=${amortizationId}, tokenHolder=${tokenHolder}, tokenAmount=${tokenAmount}`,
+    );
+
+    return this.executeTransaction(
+      AmortizationFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "setAmortizationHold",
+      [amortizationId, tokenHolder.toString(), tokenAmount.toBigInt()],
+      GAS.SET_AMORTIZATION_HOLD,
+      SET_AMORTIZATION_HOLD_EVENT,
+    );
+  }
+
+  async releaseAmortizationHold(
+    security: EvmAddress,
+    amortizationId: number,
+    tokenHolder: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Releasing amortization hold: security=${security}, amortizationId=${amortizationId}, tokenHolder=${tokenHolder}`,
+    );
+    return this.executeTransaction(
+      AmortizationFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "releaseAmortizationHold",
+      [amortizationId, tokenHolder.toString()],
+      GAS.RELEASE_AMORTIZATION_HOLD,
+      RELEASE_AMORTIZATION_HOLD_EVENT,
     );
   }
 }

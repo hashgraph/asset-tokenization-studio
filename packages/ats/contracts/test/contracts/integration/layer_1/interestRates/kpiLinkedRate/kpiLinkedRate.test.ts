@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, Pause, KpiLinkedRate } from "@contract-types";
+import { type ResolverProxy, type IAsset, KpiLinkedRate } from "@contract-types";
 import { ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { DEFAULT_BOND_KPI_LINKED_RATE_PARAMS, deployBondKpiLinkedRateTokenFixture } from "@test";
@@ -16,7 +16,7 @@ describe("Kpi Linked Rate Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let kpiLinkedRateFacet: KpiLinkedRate;
-  let pauseFacet: Pause;
+  let asset: IAsset;
 
   async function deploySecurityFixtureMultiPartition() {
     const base = await deployBondKpiLinkedRateTokenFixture();
@@ -25,7 +25,8 @@ describe("Kpi Linked Rate Tests", () => {
     signer_B = base.user2;
     signer_C = base.user3;
 
-    await executeRbac(base.accessControlFacet, [
+    asset = await ethers.getContractAt("IAsset", diamond.target);
+    await executeRbac(asset, [
       {
         role: ATS_ROLES._PAUSER_ROLE,
         members: [signer_B.address],
@@ -37,7 +38,6 @@ describe("Kpi Linked Rate Tests", () => {
     ]);
 
     kpiLinkedRateFacet = await ethers.getContractAt("KpiLinkedRate", diamond.target, signer_A);
-    pauseFacet = await ethers.getContractAt("Pause", diamond.target, signer_A);
   }
 
   beforeEach(async () => {
@@ -71,7 +71,7 @@ describe("Kpi Linked Rate Tests", () => {
   describe("Paused", () => {
     beforeEach(async () => {
       // Pausing the token
-      await pauseFacet.connect(signer_B).pause();
+      await asset.connect(signer_B).pause();
     });
 
     it("GIVEN a paused Token WHEN setInterestRate THEN transaction fails with TokenIsPaused", async () => {

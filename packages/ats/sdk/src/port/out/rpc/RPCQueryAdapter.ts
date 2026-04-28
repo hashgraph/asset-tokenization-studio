@@ -14,12 +14,17 @@ import EvmAddress from "@domain/context/contract/EvmAddress";
 import { MirrorNodeAdapter } from "../mirror/MirrorNodeAdapter";
 import { Security } from "@domain/context/security/Security";
 import { BondDetails } from "@domain/context/bond/BondDetails";
-import { Dividend } from "@domain/context/equity/Dividend";
+import { Dividend } from "@domain/context/dividend/Dividend";
+import { RegisteredAmortization } from "@domain/context/amortization/RegisteredAmortization";
+import { Amortization } from "@domain/context/amortization/Amortization";
+import { AmortizationFor } from "@domain/context/amortization/AmortizationFor";
+import { AmortizationPaymentAmount } from "@domain/context/amortization/AmortizationPaymentAmount";
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import { HederaId } from "@domain/context/shared/HederaId";
 import {
   AccessControlFacet__factory,
   BondRead__factory,
+  Coupon__factory,
   CapFacet__factory,
   ClearingActionsFacet__factory,
   ClearingHoldCreationFacet__factory,
@@ -28,6 +33,7 @@ import {
   ClearingTransferFacet__factory,
   ControlListFacet__factory,
   DiamondFacet__factory,
+  Dividend__factory,
   Equity__factory,
   ERC1410ReadFacet__factory,
   ERC20Votes__factory,
@@ -62,6 +68,9 @@ import {
   Kpis__factory,
   KpiLinkedRate__factory,
   ScheduledCouponListingFacet__factory,
+  NominalValue__factory,
+  VotingFacet__factory,
+  AmortizationFacet__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { ScheduledSnapshot } from "@domain/context/security/ScheduledSnapshot";
 import { VotingRights } from "@domain/context/equity/VotingRights";
@@ -80,7 +89,7 @@ import {
   CastResaleHoldPeriodorscation,
 } from "@domain/context/factory/RegulationType";
 import { ScheduledBalanceAdjustment } from "@domain/context/equity/ScheduledBalanceAdjustment";
-import { DividendFor } from "@domain/context/equity/DividendFor";
+import { DividendFor } from "@domain/context/dividend/DividendFor";
 import { VotingFor } from "@domain/context/equity/VotingFor";
 import { Kyc } from "@domain/context/kyc/Kyc";
 import { KycAccountData } from "@domain/context/kyc/KycAccountData";
@@ -94,7 +103,7 @@ import {
 import { HoldDetails } from "@domain/context/security/Hold";
 import { CouponAmountFor } from "@domain/context/bond/CouponAmountFor";
 import { PrincipalFor } from "@domain/context/bond/PrincipalFor";
-import { DividendAmountFor } from "@domain/context/equity/DividendAmountFor";
+import { DividendAmountFor } from "@domain/context/dividend/DividendAmountFor";
 import { CastRateStatus } from "@domain/context/bond/RateStatus";
 import { CouponFor } from "@domain/context/bond/CouponFor";
 
@@ -371,7 +380,7 @@ export class RPCQueryAdapter {
   async getDividendFor(address: EvmAddress, target: EvmAddress, dividend: number): Promise<DividendFor> {
     LogService.logTrace(`Getting dividends for`);
 
-    const dividendFor = await this.connect(Equity__factory, address.toString()).getDividendFor(
+    const dividendFor = await this.connect(Dividend__factory, address.toString()).getDividendFor(
       dividend,
       target.toString(),
     );
@@ -386,7 +395,7 @@ export class RPCQueryAdapter {
   async getDividendAmountFor(address: EvmAddress, target: EvmAddress, dividend: number): Promise<DividendAmountFor> {
     LogService.logTrace(`Getting dividends amount for`);
 
-    const dividendAmountFor = await this.connect(Equity__factory, address.toString()).getDividendAmountFor(
+    const dividendAmountFor = await this.connect(Dividend__factory, address.toString()).getDividendAmountFor(
       dividend,
       target.toString(),
     );
@@ -401,7 +410,7 @@ export class RPCQueryAdapter {
   async getDividend(address: EvmAddress, dividend: number): Promise<Dividend> {
     LogService.logTrace(`Getting dividends`);
 
-    const { registeredDividend_, isDisabled_ } = await this.connect(Equity__factory, address.toString()).getDividend(
+    const { registeredDividend_, isDisabled_ } = await this.connect(Dividend__factory, address.toString()).getDividend(
       dividend,
     );
 
@@ -418,7 +427,7 @@ export class RPCQueryAdapter {
   async getDividendsCount(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting dividends count`);
 
-    const dividendsCount = await this.connect(Equity__factory, address.toString()).getDividendsCount();
+    const dividendsCount = await this.connect(Dividend__factory, address.toString()).getDividendsCount();
 
     return Number(dividendsCount);
   }
@@ -426,7 +435,10 @@ export class RPCQueryAdapter {
   async getVotingFor(address: EvmAddress, target: EvmAddress, voting: number): Promise<VotingFor> {
     LogService.logTrace(`Getting voting for`);
 
-    const votingFor = await this.connect(Equity__factory, address.toString()).getVotingFor(voting, target.toString());
+    const votingFor = await this.connect(VotingFacet__factory, address.toString()).getVotingFor(
+      voting,
+      target.toString(),
+    );
 
     return new VotingFor(new BigDecimal(votingFor.tokenBalance), Number(votingFor.decimals), votingFor.isDisabled);
   }
@@ -434,7 +446,9 @@ export class RPCQueryAdapter {
   async getVoting(address: EvmAddress, voting: number): Promise<VotingRights> {
     LogService.logTrace(`Getting voting`);
 
-    const { registeredVoting_, isDisabled_ } = await this.connect(Equity__factory, address.toString()).getVoting(voting);
+    const { registeredVoting_, isDisabled_ } = await this.connect(VotingFacet__factory, address.toString()).getVoting(
+      voting,
+    );
 
     return new VotingRights(
       Number(registeredVoting_.voting.recordDate),
@@ -447,7 +461,7 @@ export class RPCQueryAdapter {
   async getVotingsCount(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting votings count`);
 
-    const votingsCount = await this.connect(Equity__factory, address.toString()).getVotingCount();
+    const votingsCount = await this.connect(VotingFacet__factory, address.toString()).getVotingCount();
 
     return Number(votingsCount);
   }
@@ -455,15 +469,86 @@ export class RPCQueryAdapter {
   async getCouponFor(address: EvmAddress, target: EvmAddress, coupon: number): Promise<CouponFor> {
     LogService.logTrace(`Getting Coupon for`);
 
-    const couponFor = await this.connect(BondRead__factory, address.toString()).getCouponFor(coupon, target.toString());
+    const couponFor = await this.connect(Coupon__factory, address.toString()).getCouponFor(coupon, target.toString());
 
-    return new CouponFor(new BigDecimal(couponFor.tokenBalance), Number(couponFor.decimals), couponFor.isDisabled);
+    const couponDomain = new Coupon(
+      Number(couponFor.coupon.recordDate),
+      Number(couponFor.coupon.executionDate),
+      new BigDecimal(couponFor.coupon.rate.toString()),
+      Number(couponFor.coupon.rateDecimals),
+      Number(couponFor.coupon.startDate),
+      Number(couponFor.coupon.endDate),
+      Number(couponFor.coupon.fixingDate),
+      CastRateStatus.fromBigint(couponFor.coupon.rateStatus),
+    );
+
+    const couponAmountDomain = new CouponAmountFor(
+      couponFor.couponAmount.numerator.toString(),
+      couponFor.couponAmount.denominator.toString(),
+      couponFor.couponAmount.recordDateReached,
+    );
+
+    return new CouponFor(
+      new BigDecimal(couponFor.tokenBalance),
+      new BigDecimal(couponFor.nominalValue),
+      Number(couponFor.decimals),
+      couponFor.recordDateReached,
+      couponDomain,
+      couponAmountDomain,
+      couponFor.isDisabled,
+    );
+  }
+
+  async getCouponsFor(
+    address: EvmAddress,
+    couponId: number,
+    pageIndex: number,
+    pageLength: number,
+  ): Promise<{ coupons: CouponFor[]; accounts: string[] }> {
+    LogService.logTrace(`Getting Coupons for`);
+
+    const result = await this.connect(Coupon__factory, address.toString()).getCouponsFor(
+      couponId,
+      pageIndex,
+      pageLength,
+    );
+
+    const coupons = result.couponFor_.map((couponFor) => {
+      const couponDomain = new Coupon(
+        Number(couponFor.coupon.recordDate),
+        Number(couponFor.coupon.executionDate),
+        new BigDecimal(couponFor.coupon.rate.toString()),
+        Number(couponFor.coupon.rateDecimals),
+        Number(couponFor.coupon.startDate),
+        Number(couponFor.coupon.endDate),
+        Number(couponFor.coupon.fixingDate),
+        CastRateStatus.fromBigint(couponFor.coupon.rateStatus),
+      );
+
+      const couponAmountDomain = new CouponAmountFor(
+        couponFor.couponAmount.numerator.toString(),
+        couponFor.couponAmount.denominator.toString(),
+        couponFor.couponAmount.recordDateReached,
+      );
+
+      return new CouponFor(
+        new BigDecimal(couponFor.tokenBalance),
+        new BigDecimal(couponFor.nominalValue),
+        Number(couponFor.decimals),
+        couponFor.recordDateReached,
+        couponDomain,
+        couponAmountDomain,
+        couponFor.isDisabled,
+      );
+    });
+
+    return { coupons, accounts: [...result.accounts_] };
   }
 
   async getCouponAmountFor(address: EvmAddress, target: EvmAddress, coupon: number): Promise<CouponAmountFor> {
     LogService.logTrace(`Getting Coupon Amount for`);
 
-    const couponAmountFor = await this.connect(BondRead__factory, address.toString()).getCouponAmountFor(
+    const couponAmountFor = await this.connect(Coupon__factory, address.toString()).getCouponAmountFor(
       coupon,
       target.toString(),
     );
@@ -486,7 +571,7 @@ export class RPCQueryAdapter {
   async getCoupon(address: EvmAddress, coupon: number): Promise<Coupon> {
     LogService.logTrace(`Getting Coupon`);
 
-    const { registeredCoupon_, isDisabled_ } = await this.connect(BondRead__factory, address.toString()).getCoupon(
+    const { registeredCoupon_, isDisabled_ } = await this.connect(Coupon__factory, address.toString()).getCoupon(
       coupon,
     );
 
@@ -507,7 +592,7 @@ export class RPCQueryAdapter {
   async getCouponCount(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting Coupon count`);
 
-    const couponCount = await this.connect(BondRead__factory, address.toString()).getCouponCount();
+    const couponCount = await this.connect(Coupon__factory, address.toString()).getCouponCount();
 
     return Number(couponCount);
   }
@@ -1303,13 +1388,13 @@ export class RPCQueryAdapter {
 
   async getCouponHolders(address: EvmAddress, couponId: number, start: number, end: number): Promise<string[]> {
     LogService.logTrace(`Getting coupon holders for coupon ${couponId} for security ${address.toString()}`);
-    return await this.connect(BondRead__factory, address.toString()).getCouponHolders(couponId, start, end);
+    return await this.connect(Coupon__factory, address.toString()).getCouponHolders(couponId, start, end);
   }
 
   async getTotalCouponHolders(address: EvmAddress, couponId: number): Promise<number> {
     LogService.logTrace(`Getting total coupon holders for coupon ${couponId} for security ${address.toString()}`);
 
-    const total = await this.connect(BondRead__factory, address.toString()).getTotalCouponHolders(couponId);
+    const total = await this.connect(Coupon__factory, address.toString()).getTotalCouponHolders(couponId);
 
     return Number(total);
   }
@@ -1317,7 +1402,7 @@ export class RPCQueryAdapter {
   async getCouponFromOrderedListAt(address: EvmAddress, pos: number): Promise<number> {
     LogService.logTrace(`Getting coupon from ordered list at position ${pos} for security ${address.toString()}`);
 
-    const couponId = await this.connect(BondRead__factory, address.toString()).getCouponFromOrderedListAt(pos);
+    const couponId = await this.connect(Coupon__factory, address.toString()).getCouponFromOrderedListAt(pos);
 
     return Number(couponId);
   }
@@ -1329,48 +1414,48 @@ export class RPCQueryAdapter {
 
     // If pagination parameters are provided, use paginated call
     if (pageIndex !== undefined && pageLength !== undefined) {
-      const couponIds = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedList(
+      const couponIds = await this.connect(Coupon__factory, address.toString()).getCouponsOrderedList(
         pageIndex,
         pageLength,
       );
-      return couponIds.map((id) => Number(id));
+      return couponIds.map((id: bigint) => Number(id));
     }
 
     // Otherwise get all coupons (simulate by getting first page with large length)
-    const couponIds = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedList(0, 1000);
-    return couponIds.map((id) => Number(id));
+    const couponIds = await this.connect(Coupon__factory, address.toString()).getCouponsOrderedList(0, 1000);
+    return couponIds.map((id: bigint) => Number(id));
   }
 
   async getCouponsOrderedListTotal(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting coupons ordered list total for security ${address.toString()}`);
 
-    const total = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedListTotal();
+    const total = await this.connect(Coupon__factory, address.toString()).getCouponsOrderedListTotal();
 
     return Number(total);
   }
 
   async getDividendHolders(address: EvmAddress, dividendId: number, start: number, end: number): Promise<string[]> {
     LogService.logTrace(`Getting dividend holders for dividend ${dividendId} for security ${address.toString()}`);
-    return await this.connect(Equity__factory, address.toString()).getDividendHolders(dividendId, start, end);
+    return await this.connect(Dividend__factory, address.toString()).getDividendHolders(dividendId, start, end);
   }
 
   async getTotalDividendHolders(address: EvmAddress, dividendId: number): Promise<number> {
     LogService.logTrace(`Getting total dividend holders for dividend ${dividendId} for security ${address.toString()}`);
 
-    const total = await this.connect(Equity__factory, address.toString()).getTotalDividendHolders(dividendId);
+    const total = await this.connect(Dividend__factory, address.toString()).getTotalDividendHolders(dividendId);
 
     return Number(total);
   }
 
   async getVotingHolders(address: EvmAddress, voteId: number, start: number, end: number): Promise<string[]> {
     LogService.logTrace(`Getting voting holders for vote ${voteId} for security ${address.toString()}`);
-    return await this.connect(Equity__factory, address.toString()).getVotingHolders(voteId, start, end);
+    return await this.connect(VotingFacet__factory, address.toString()).getVotingHolders(voteId, start, end);
   }
 
   async getTotalVotingHolders(address: EvmAddress, voteId: number): Promise<number> {
     LogService.logTrace(`Getting total voting holders for vote ${voteId} for security ${address.toString()}`);
 
-    const total = await this.connect(Equity__factory, address.toString()).getTotalVotingHolders(voteId);
+    const total = await this.connect(VotingFacet__factory, address.toString()).getTotalVotingHolders(voteId);
 
     return Number(total);
   }
@@ -1434,11 +1519,12 @@ export class RPCQueryAdapter {
 
   async getCorporateAction(
     address: EvmAddress,
-    corporateActionId: string
+    corporateActionId: string,
   ): Promise<{ actionType: string; actionTypeId: number; data: string; isDisabled: boolean }> {
     LogService.logTrace(`Getting corporate action ${corporateActionId} for security: ${address.toString()}`);
-    const result = await this.connect(CorporateActionsFacet__factory, address.toString())
-      .getCorporateAction(corporateActionId);
+    const result = await this.connect(CorporateActionsFacet__factory, address.toString()).getCorporateAction(
+      corporateActionId,
+    );
 
     return {
       actionType: result.actionType_,
@@ -1451,11 +1537,13 @@ export class RPCQueryAdapter {
   async getCorporateActions(
     address: EvmAddress,
     start: number,
-    end: number
+    end: number,
   ): Promise<{ actionTypes: string[]; actionTypeIds: number[]; datas: string[]; isDisabled: boolean[] }> {
     LogService.logTrace(`Getting corporate actions from ${start} to ${end} for security: ${address.toString()}`);
-    const result = await this.connect(CorporateActionsFacet__factory, address.toString())
-      .getCorporateActions(start, end);
+    const result = await this.connect(CorporateActionsFacet__factory, address.toString()).getCorporateActions(
+      start,
+      end,
+    );
 
     return {
       actionTypes: result.actionTypes_,
@@ -1469,11 +1557,16 @@ export class RPCQueryAdapter {
     address: EvmAddress,
     actionType: string,
     start: number,
-    end: number
+    end: number,
   ): Promise<{ actionTypes: string[]; actionTypeIds: number[]; datas: string[]; isDisabled: boolean[] }> {
-    LogService.logTrace(`Getting corporate actions of type ${actionType} from ${start} to ${end} for security: ${address.toString()}`);
-    const result = await this.connect(CorporateActionsFacet__factory, address.toString())
-      .getCorporateActionsByType(actionType, start, end);
+    LogService.logTrace(
+      `Getting corporate actions of type ${actionType} from ${start} to ${end} for security: ${address.toString()}`,
+    );
+    const result = await this.connect(CorporateActionsFacet__factory, address.toString()).getCorporateActionsByType(
+      actionType,
+      start,
+      end,
+    );
 
     return {
       actionTypes: result.actionTypes_,
@@ -1554,5 +1647,189 @@ export class RPCQueryAdapter {
       pageIndex,
       pageLength,
     );
+  }
+
+  async getNominalValue(address: EvmAddress): Promise<BigDecimal> {
+    LogService.logTrace(`Getting nominal value for security: ${address.toString()}`);
+    const result = await this.connect(NominalValue__factory, address.toString()).getNominalValue();
+    return new BigDecimal(result.toString());
+  }
+
+  async getNominalValueDecimals(address: EvmAddress): Promise<number> {
+    LogService.logTrace(`Getting nominal value decimals for security: ${address.toString()}`);
+    const result = await this.connect(NominalValue__factory, address.toString()).getNominalValueDecimals();
+    return Number(result);
+  }
+
+  async getAmortization(address: EvmAddress, amortizationId: number): Promise<RegisteredAmortization> {
+    LogService.logTrace(`Getting amortization: ${amortizationId}`);
+
+    const { registeredAmortization_, isDisabled_ } = await this.connect(
+      AmortizationFacet__factory,
+      address.toString(),
+    ).getAmortization(amortizationId);
+
+    return new RegisteredAmortization(
+      new Amortization(
+        Number(registeredAmortization_.amortization.recordDate),
+        Number(registeredAmortization_.amortization.executionDate),
+        new BigDecimal(registeredAmortization_.amortization.tokensToRedeem.toString()),
+      ),
+      Number(registeredAmortization_.snapshotId),
+      isDisabled_,
+    );
+  }
+
+  async getAmortizationFor(address: EvmAddress, target: EvmAddress, amortizationId: number): Promise<AmortizationFor> {
+    LogService.logTrace(`Getting amortization for: ${target.toString()}, amortizationId: ${amortizationId}`);
+
+    const af = await this.connect(AmortizationFacet__factory, address.toString()).getAmortizationFor(
+      amortizationId,
+      target.toString(),
+    );
+
+    return new AmortizationFor(
+      af.account,
+      Number(af.recordDate),
+      Number(af.executionDate),
+      Number(af.holdId),
+      af.holdActive,
+      new BigDecimal(af.tokenHeldAmount.toString()),
+      Number(af.decimalsHeld),
+      new BigDecimal(af.abafAtHold.toString()),
+      new BigDecimal(af.tokenBalance.toString()),
+      Number(af.decimalsBalance),
+      af.recordDateReached,
+      new BigDecimal(af.abafAtSnapshot.toString()),
+      new BigDecimal(af.nominalValue.toString()),
+      Number(af.nominalValueDecimals),
+    );
+  }
+
+  async getAmortizationsFor(
+    address: EvmAddress,
+    amortizationId: number,
+    start: number,
+    end: number,
+  ): Promise<AmortizationFor[]> {
+    LogService.logTrace(`Getting amortizations for: amortizationId=${amortizationId}`);
+
+    const result = await this.connect(AmortizationFacet__factory, address.toString()).getAmortizationsFor(
+      amortizationId,
+      start,
+      end,
+    );
+
+    return result.map(
+      (af) =>
+        new AmortizationFor(
+          af.account,
+          Number(af.recordDate),
+          Number(af.executionDate),
+          Number(af.holdId),
+          af.holdActive,
+          new BigDecimal(af.tokenHeldAmount.toString()),
+          Number(af.decimalsHeld),
+          new BigDecimal(af.abafAtHold.toString()),
+          new BigDecimal(af.tokenBalance.toString()),
+          Number(af.decimalsBalance),
+          af.recordDateReached,
+          new BigDecimal(af.abafAtSnapshot.toString()),
+          new BigDecimal(af.nominalValue.toString()),
+          Number(af.nominalValueDecimals),
+        ),
+    );
+  }
+
+  async getAmortizationsCount(address: EvmAddress): Promise<number> {
+    LogService.logTrace(`Getting amortizations count`);
+
+    const count = await this.connect(AmortizationFacet__factory, address.toString()).getAmortizationsCount();
+
+    return Number(count);
+  }
+
+  async getAmortizationHolders(
+    address: EvmAddress,
+    amortizationId: number,
+    start: number,
+    end: number,
+  ): Promise<string[]> {
+    LogService.logTrace(`Getting amortization holders for amortizationId: ${amortizationId}`);
+
+    return await this.connect(AmortizationFacet__factory, address.toString()).getAmortizationHolders(
+      amortizationId,
+      start,
+      end,
+    );
+  }
+
+  async getTotalAmortizationHolders(address: EvmAddress, amortizationId: number): Promise<number> {
+    LogService.logTrace(`Getting total amortization holders for amortizationId: ${amortizationId}`);
+
+    const total = await this.connect(AmortizationFacet__factory, address.toString()).getTotalAmortizationHolders(
+      amortizationId,
+    );
+
+    return Number(total);
+  }
+
+  async getAmortizationPaymentAmount(
+    address: EvmAddress,
+    amortizationId: number,
+    tokenHolder: EvmAddress,
+  ): Promise<AmortizationPaymentAmount> {
+    LogService.logTrace(
+      `Getting amortization payment amount: amortizationId=${amortizationId}, tokenHolder=${tokenHolder.toString()}`,
+    );
+
+    const { tokenAmount_, decimals_ } = await this.connect(
+      AmortizationFacet__factory,
+      address.toString(),
+    ).getAmortizationPaymentAmount(amortizationId, tokenHolder.toString());
+
+    return new AmortizationPaymentAmount(new BigDecimal(tokenAmount_.toString()), Number(decimals_));
+  }
+
+  async getActiveAmortizationHoldHolders(
+    address: EvmAddress,
+    amortizationId: number,
+    start: number,
+    end: number,
+  ): Promise<string[]> {
+    LogService.logTrace(`Getting active amortization hold holders for amortizationId: ${amortizationId}`);
+
+    return await this.connect(AmortizationFacet__factory, address.toString()).getActiveAmortizationHoldHolders(
+      amortizationId,
+      start,
+      end,
+    );
+  }
+
+  async getTotalActiveAmortizationHoldHolders(address: EvmAddress, amortizationId: number): Promise<number> {
+    LogService.logTrace(`Getting total active amortization hold holders for amortizationId: ${amortizationId}`);
+
+    const total = await this.connect(
+      AmortizationFacet__factory,
+      address.toString(),
+    ).getTotalActiveAmortizationHoldHolders(amortizationId);
+
+    return Number(total);
+  }
+
+  async getActiveAmortizationIds(address: EvmAddress, start: number, end: number): Promise<number[]> {
+    LogService.logTrace(`Getting active amortization IDs`);
+
+    const ids = await this.connect(AmortizationFacet__factory, address.toString()).getActiveAmortizationIds(start, end);
+
+    return ids.map(Number);
+  }
+
+  async getTotalActiveAmortizationIds(address: EvmAddress): Promise<number> {
+    LogService.logTrace(`Getting total active amortization IDs`);
+
+    const total = await this.connect(AmortizationFacet__factory, address.toString()).getTotalActiveAmortizationIds();
+
+    return Number(total);
   }
 }

@@ -117,6 +117,9 @@ uint256 constant _PARTITION_SIZE = 2;
 // keccak256('security.token.standard.bond.storage');
 bytes32 constant _BOND_STORAGE_POSITION = 0x251123c390edd911567d4210605f2dfb26d83878c58bd871f56946d08ffd1f2b;
 
+// keccak256('security.token.standard.coupon.storage');
+bytes32 constant _COUPON_STORAGE_POSITION = 0x79c5b8f4968a14226894648408bdac3dd5ca35b5a2c206fad6dbd1aa25b6a774;
+
 // keccak256('security.token.standard.equity.storage');
 bytes32 constant _EQUITY_STORAGE_POSITION = 0xa5469e676cbd7933388e0b85a29d4408325f3dd05785ee648c5375e79d0aa651;
 
@@ -131,6 +134,12 @@ bytes32 constant _SUSTAINABILITY_PERFORMANCE_TARGET_RATE_STORAGE_POSITION = 0x93
 
 // keccak256('security.token.standard.nominalValue.storage');
 bytes32 constant _NOMINAL_VALUE_STORAGE_POSITION = 0xc0fde456b6db4817b54ba988cff47f70c0e04c5da2d340c51e72c7d679d44c40;
+
+// keccak256('security.token.standard.amortization.storage');
+bytes32 constant _AMORTIZATION_STORAGE_POSITION = 0x811809f3b5cf04ae28619650750f871e7fd7d91ca60e5d1c85e15eb170c74524;
+
+// keccak256('security.token.standard.loan.storage');
+bytes32 constant _LOAN_STORAGE_POSITION = 0xba4367297cc8fc62ed465c54dcfac3cb93467ba2a306e53faaf186248954fc81;
 
 // Layer 3 Unique Constants
 // keccak256('security.token.standard.security.storage');

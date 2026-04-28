@@ -3,7 +3,14 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ethers } from "hardhat";
 import { expect } from "chai";
-import { AccessControl, Pause, BusinessLogicResolver } from "@contract-types";
+import {
+  AccessControl,
+  FreezeFacet,
+  Pause,
+  BusinessLogicResolver,
+  AccessControlFacet,
+  PauseFacet,
+} from "@contract-types";
 import { EQUITY_CONFIG_ID, ATS_ROLES } from "@scripts";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 
@@ -15,6 +22,9 @@ describe("BusinessLogicResolver", () => {
   let businessLogicResolver: BusinessLogicResolver;
   let accessControl: AccessControl;
   let pause: Pause;
+  let freezeFacet: FreezeFacet;
+  let accessControlFacet: AccessControlFacet;
+  let pauseFacet: PauseFacet;
 
   enum VersionStatus {
     NONE = 0,
@@ -50,6 +60,9 @@ describe("BusinessLogicResolver", () => {
     await accessControl.grantRole(ATS_ROLES._PAUSER_ROLE, signer_B.address);
 
     pause = await ethers.getContractAt("Pause", businessLogicResolver.target);
+    freezeFacet = await (await ethers.getContractFactory("FreezeFacet", signer_A)).deploy();
+    accessControlFacet = await (await ethers.getContractFactory("AccessControlFacet", signer_A)).deploy();
+    pauseFacet = await (await ethers.getContractFactory("PauseFacet", signer_A)).deploy();
   }
 
   beforeEach(async () => {
@@ -139,31 +152,40 @@ describe("BusinessLogicResolver", () => {
 
     it("GIVEN an empty registry WHEN registerBusinessLogics THEN queries responds with correct values", async () => {
       const LATEST_VERSION = 1;
-      const BUSINESS_LOGICS_TO_REGISTER = BUSINESS_LOGIC_KEYS.slice(0, 2);
+      const BUSINESS_LOGICS_TO_REGISTER = [
+        {
+          businessLogicKey: await freezeFacet.getStaticResolverKey(),
+          businessLogicAddress: await freezeFacet.getAddress(),
+        },
+        {
+          businessLogicKey: await accessControlFacet.getStaticResolverKey(),
+          businessLogicAddress: await accessControlFacet.getAddress(),
+        },
+      ];
       expect(await businessLogicResolver.registerBusinessLogics(BUSINESS_LOGICS_TO_REGISTER))
         .to.emit(businessLogicResolver, "BusinessLogicsRegistered")
         .withArgs(BUSINESS_LOGICS_TO_REGISTER, LATEST_VERSION);
 
       expect(await businessLogicResolver.getLatestVersion()).is.equal(LATEST_VERSION);
       expect(await businessLogicResolver.getVersionStatus(LATEST_VERSION)).to.be.equal(VersionStatus.ACTIVATED);
-      expect(await businessLogicResolver.resolveLatestBusinessLogic(BUSINESS_LOGIC_KEYS[0].businessLogicKey)).is.equal(
-        BUSINESS_LOGIC_KEYS[0].businessLogicAddress,
-      );
-      expect(await businessLogicResolver.resolveLatestBusinessLogic(BUSINESS_LOGIC_KEYS[1].businessLogicKey)).is.equal(
-        BUSINESS_LOGIC_KEYS[1].businessLogicAddress,
-      );
+      expect(
+        await businessLogicResolver.resolveLatestBusinessLogic(BUSINESS_LOGICS_TO_REGISTER[0].businessLogicKey),
+      ).is.equal(BUSINESS_LOGICS_TO_REGISTER[0].businessLogicAddress);
+      expect(
+        await businessLogicResolver.resolveLatestBusinessLogic(BUSINESS_LOGICS_TO_REGISTER[1].businessLogicKey),
+      ).is.equal(BUSINESS_LOGICS_TO_REGISTER[1].businessLogicAddress);
       expect(
         await businessLogicResolver.resolveBusinessLogicByVersion(
-          BUSINESS_LOGIC_KEYS[0].businessLogicKey,
+          BUSINESS_LOGICS_TO_REGISTER[0].businessLogicKey,
           LATEST_VERSION,
         ),
-      ).to.be.equal(BUSINESS_LOGIC_KEYS[0].businessLogicAddress);
+      ).to.be.equal(BUSINESS_LOGICS_TO_REGISTER[0].businessLogicAddress);
       expect(
         await businessLogicResolver.resolveBusinessLogicByVersion(
-          BUSINESS_LOGIC_KEYS[1].businessLogicKey,
+          BUSINESS_LOGICS_TO_REGISTER[1].businessLogicKey,
           LATEST_VERSION,
         ),
-      ).to.be.equal(BUSINESS_LOGIC_KEYS[1].businessLogicAddress);
+      ).to.be.equal(BUSINESS_LOGICS_TO_REGISTER[1].businessLogicAddress);
       expect(await businessLogicResolver.getBusinessLogicCount()).is.equal(BUSINESS_LOGICS_TO_REGISTER.length);
       expect(await businessLogicResolver.getBusinessLogicKeys(0, 10)).is.deep.equal(
         BUSINESS_LOGICS_TO_REGISTER.map((businessLogic) => businessLogic.businessLogicKey),
@@ -171,53 +193,83 @@ describe("BusinessLogicResolver", () => {
     });
 
     it("GIVEN a list of logics WHEN registerBusinessLogics in batch THEN success", async () => {
-      await businessLogicResolver.registerBusinessLogics(BUSINESS_LOGIC_KEYS.slice(0, 2));
-      await businessLogicResolver.registerBusinessLogics(BUSINESS_LOGIC_KEYS.slice(2, BUSINESS_LOGIC_KEYS.length));
+      const BUSINESS_LOGICS_TO_REGISTER = [
+        {
+          businessLogicKey: await freezeFacet.getStaticResolverKey(),
+          businessLogicAddress: await freezeFacet.getAddress(),
+        },
+        {
+          businessLogicKey: await accessControlFacet.getStaticResolverKey(),
+          businessLogicAddress: await accessControlFacet.getAddress(),
+        },
+        {
+          businessLogicKey: await pauseFacet.getStaticResolverKey(),
+          businessLogicAddress: await pauseFacet.getAddress(),
+        },
+      ];
+      await businessLogicResolver.registerBusinessLogics(BUSINESS_LOGICS_TO_REGISTER.slice(0, 2));
+      await businessLogicResolver.registerBusinessLogics(
+        BUSINESS_LOGICS_TO_REGISTER.slice(2, BUSINESS_LOGICS_TO_REGISTER.length),
+      );
 
-      expect(await businessLogicResolver.getBusinessLogicCount()).is.equal(BUSINESS_LOGIC_KEYS.length);
-      expect(await businessLogicResolver.getBusinessLogicKeys(0, BUSINESS_LOGIC_KEYS.length)).is.deep.equal(
-        BUSINESS_LOGIC_KEYS.map((businessLogic) => businessLogic.businessLogicKey),
+      expect(await businessLogicResolver.getBusinessLogicCount()).is.equal(BUSINESS_LOGICS_TO_REGISTER.length);
+      expect(await businessLogicResolver.getBusinessLogicKeys(0, BUSINESS_LOGICS_TO_REGISTER.length)).is.deep.equal(
+        BUSINESS_LOGICS_TO_REGISTER.map((businessLogic) => businessLogic.businessLogicKey),
       );
     });
 
     it("GIVEN an registry with 1 version WHEN registerBusinessLogics with different keys THEN queries responds with correct values", async () => {
-      await businessLogicResolver.registerBusinessLogics(BUSINESS_LOGIC_KEYS.slice(0, 2));
+      const BUSINESS_LOGICS_TO_REGISTER = [
+        {
+          businessLogicKey: await freezeFacet.getStaticResolverKey(),
+          businessLogicAddress: await freezeFacet.getAddress(),
+        },
+        {
+          businessLogicKey: await accessControlFacet.getStaticResolverKey(),
+          businessLogicAddress: await accessControlFacet.getAddress(),
+        },
+        {
+          businessLogicKey: await pauseFacet.getStaticResolverKey(),
+          businessLogicAddress: await pauseFacet.getAddress(),
+        },
+      ];
+
+      await businessLogicResolver.registerBusinessLogics(BUSINESS_LOGICS_TO_REGISTER.slice(0, 2));
 
       const LATEST_VERSION = 2;
-      const BUSINESS_LOGICS_TO_REGISTER = BUSINESS_LOGIC_KEYS.slice(0, 3);
       expect(await businessLogicResolver.registerBusinessLogics(BUSINESS_LOGICS_TO_REGISTER))
         .to.emit(businessLogicResolver, "BusinessLogicsRegistered")
         .withArgs(BUSINESS_LOGICS_TO_REGISTER, LATEST_VERSION);
 
       expect(await businessLogicResolver.getLatestVersion()).is.equal(LATEST_VERSION);
       expect(await businessLogicResolver.getVersionStatus(LATEST_VERSION)).to.be.equal(VersionStatus.ACTIVATED);
-      expect(await businessLogicResolver.resolveLatestBusinessLogic(BUSINESS_LOGIC_KEYS[0].businessLogicKey)).is.equal(
-        BUSINESS_LOGIC_KEYS[0].businessLogicAddress,
-      );
-      expect(await businessLogicResolver.resolveLatestBusinessLogic(BUSINESS_LOGIC_KEYS[1].businessLogicKey)).is.equal(
-        BUSINESS_LOGIC_KEYS[1].businessLogicAddress,
-      );
-      expect(await businessLogicResolver.resolveLatestBusinessLogic(BUSINESS_LOGIC_KEYS[2].businessLogicKey)).is.equal(
-        BUSINESS_LOGIC_KEYS[2].businessLogicAddress,
-      );
+      expect(
+        await businessLogicResolver.resolveLatestBusinessLogic(BUSINESS_LOGICS_TO_REGISTER[0].businessLogicKey),
+      ).is.equal(BUSINESS_LOGICS_TO_REGISTER[0].businessLogicAddress);
+      expect(
+        await businessLogicResolver.resolveLatestBusinessLogic(BUSINESS_LOGICS_TO_REGISTER[1].businessLogicKey),
+      ).is.equal(BUSINESS_LOGICS_TO_REGISTER[1].businessLogicAddress);
+      expect(
+        await businessLogicResolver.resolveLatestBusinessLogic(BUSINESS_LOGICS_TO_REGISTER[2].businessLogicKey),
+      ).is.equal(BUSINESS_LOGICS_TO_REGISTER[2].businessLogicAddress);
       expect(
         await businessLogicResolver.resolveBusinessLogicByVersion(
-          BUSINESS_LOGIC_KEYS[0].businessLogicKey,
+          BUSINESS_LOGICS_TO_REGISTER[0].businessLogicKey,
           LATEST_VERSION,
         ),
-      ).to.be.equal(BUSINESS_LOGIC_KEYS[0].businessLogicAddress);
+      ).to.be.equal(BUSINESS_LOGICS_TO_REGISTER[0].businessLogicAddress);
       expect(
         await businessLogicResolver.resolveBusinessLogicByVersion(
-          BUSINESS_LOGIC_KEYS[1].businessLogicKey,
+          BUSINESS_LOGICS_TO_REGISTER[1].businessLogicKey,
           LATEST_VERSION,
         ),
-      ).to.be.equal(BUSINESS_LOGIC_KEYS[1].businessLogicAddress);
+      ).to.be.equal(BUSINESS_LOGICS_TO_REGISTER[1].businessLogicAddress);
       expect(
         await businessLogicResolver.resolveBusinessLogicByVersion(
-          BUSINESS_LOGIC_KEYS[2].businessLogicKey,
+          BUSINESS_LOGICS_TO_REGISTER[2].businessLogicKey,
           LATEST_VERSION,
         ),
-      ).to.be.equal(BUSINESS_LOGIC_KEYS[2].businessLogicAddress);
+      ).to.be.equal(BUSINESS_LOGICS_TO_REGISTER[2].businessLogicAddress);
       expect(await businessLogicResolver.getBusinessLogicCount()).is.equal(BUSINESS_LOGICS_TO_REGISTER.length);
       expect(await businessLogicResolver.getBusinessLogicKeys(0, 10)).is.deep.equal(
         BUSINESS_LOGICS_TO_REGISTER.map((businessLogic) => businessLogic.businessLogicKey),
@@ -258,6 +310,22 @@ describe("BusinessLogicResolver", () => {
       // Remove a selector that doesn't exist
       await businessLogicResolver.removeSelectorsFromBlacklist(EQUITY_CONFIG_ID, blackListedSelectors);
       expect(await businessLogicResolver.getSelectorsBlacklist(EQUITY_CONFIG_ID, 0, 100)).to.deep.equal([]);
+    });
+
+    it("GIVEN a facet registered with a mismatched key WHEN registerBusinessLogics THEN fails with BusinessLogicKeyMismatch", async () => {
+      const actualResolverKey = await freezeFacet.getStaticResolverKey();
+      const lastChar = actualResolverKey.slice(-1);
+      const mutatedChar = lastChar === "0" ? "1" : "0";
+
+      const wrongKey = actualResolverKey.slice(0, -1) + mutatedChar;
+
+      await expect(
+        businessLogicResolver.registerBusinessLogics([
+          { businessLogicKey: wrongKey, businessLogicAddress: freezeFacet.target },
+        ]),
+      )
+        .to.be.revertedWithCustomError(businessLogicResolver, "BusinessLogicKeyMismatch")
+        .withArgs(freezeFacet.target, actualResolverKey, wrongKey);
     });
   });
 });

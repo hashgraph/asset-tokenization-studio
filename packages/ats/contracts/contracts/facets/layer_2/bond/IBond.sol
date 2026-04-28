@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBondRead } from "./IBondRead.sol";
-interface IBond {
+import { IBondStorageWrapper } from "../../../domain/asset/bond/IBondStorageWrapper.sol";
+
+interface IBond is IBondStorageWrapper {
     event MaturityDateUpdated(
         address indexed bondId,
         uint256 indexed maturityDate,
@@ -22,18 +23,6 @@ interface IBond {
      * @param _amount The amount of bonds to be redeemed.
      */
     function redeemAtMaturityByPartition(address _tokenHolder, bytes32 _partition, uint256 _amount) external;
-
-    /**
-     * @notice Sets a new coupon for the bond
-     * @param _newCoupon The new coupon to be set
-     */
-    function setCoupon(IBondRead.Coupon calldata _newCoupon) external returns (uint256 couponID_);
-
-    /**
-     * @notice Cancels an existing coupon for the bond
-     * @param _couponID The ID of the coupon to be cancelled
-     */
-    function cancelCoupon(uint256 _couponID) external returns (bool success_);
 
     /**
      * @notice Updates the maturity date of the bond.

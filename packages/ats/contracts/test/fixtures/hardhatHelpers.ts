@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { type Pause, type AccessControl } from "@contract-types";
+import { type IAsset } from "@contract-types";
 import { Signer } from "ethers";
 import { ethers } from "hardhat";
 
 export async function grantRoleAndPauseToken(
-  accessControlFacet: AccessControl,
-  pauseFacet: Pause,
+  accessControlFacet: IAsset,
+  pauseFacet: IAsset,
   role: string,
   signerAccessControl: Signer,
   signerPause: Signer,

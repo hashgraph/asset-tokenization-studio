@@ -2,9 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IBond } from "./IBond.sol";
-import { IBondRead } from "./IBondRead.sol";
 import { IKyc } from "../../layer_1/kyc/IKyc.sol";
-import { _CORPORATE_ACTION_ROLE, _BOND_MANAGER_ROLE, _MATURITY_REDEEMER_ROLE } from "../../../constants/roles.sol";
+import { _BOND_MANAGER_ROLE, _MATURITY_REDEEMER_ROLE } from "../../../constants/roles.sol";
 import { Internals } from "../../../domain/Internals.sol";
 
 abstract contract Bond is IBond, Internals {
@@ -49,30 +48,6 @@ abstract contract Bond is IBond, Internals {
         onlyAfterCurrentMaturityDate(_blockTimestamp())
     {
         _redeemByPartition(_partition, _tokenHolder, _msgSender(), _amount, "", "");
-    }
-
-    function setCoupon(
-        IBondRead.Coupon calldata _newCoupon
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_CORPORATE_ACTION_ROLE)
-        validateDates(_newCoupon.startDate, _newCoupon.endDate)
-        validateDates(_newCoupon.recordDate, _newCoupon.executionDate)
-        validateDates(_newCoupon.fixingDate, _newCoupon.executionDate)
-        onlyValidTimestamp(_newCoupon.recordDate)
-        onlyValidTimestamp(_newCoupon.fixingDate)
-        returns (uint256 couponID_)
-    {
-        bytes32 corporateActionID;
-        (corporateActionID, couponID_) = _setCoupon(_newCoupon);
-    }
-
-    function cancelCoupon(
-        uint256 _couponID
-    ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (bool success_) {
-        (success_) = _cancelCoupon(_couponID);
     }
 
     function updateMaturityDate(

@@ -406,7 +406,7 @@ describe("Equity Token Deployment", () => {
       const regulationData = createMockRegulationData();
 
       await expect(deployEquityFromFactory(params, regulationData)).to.be.rejectedWith(
-        "EquityDeployed event not found",
+        'Event log for "EquityDeployed" not found in transaction receipt',
       );
     });
 
@@ -416,7 +416,7 @@ describe("Equity Token Deployment", () => {
       const regulationData = createMockRegulationData();
 
       await expect(deployEquityFromFactory(params, regulationData)).to.be.rejectedWith(
-        "EquityDeployed event not found",
+        "Invalid diamond address from EquityDeployed event",
       );
     });
 

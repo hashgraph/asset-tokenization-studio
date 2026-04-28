@@ -6,7 +6,7 @@ import { _ERC20PERMIT_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../../../consta
 /* solhint-disable max-line-length */
 import {
     CommonKpiLinkedInterestRate
-} from "../../../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
+} from "../../../../../domain/asset/extension/coupon/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
 /* solhint-enable max-line-length */
 
 contract ERC20PermitKpiLinkedRateFacet is ERC20PermitFacetBase, CommonKpiLinkedInterestRate {

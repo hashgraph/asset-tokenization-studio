@@ -11,6 +11,9 @@ bytes32 constant _ADJUSTMENT_BALANCE_ROLE = 0x6d0d63b623e69df3a6ea8aebd01f360a02
 // keccak256('security.token.standard.role.agent');
 bytes32 constant _AGENT_ROLE = 0xc4aed0454da9bde6defa5baf93bb49d4690626fc243d138104e12d1def783ea6;
 
+// keccak256('security.token.standard.role.amortization');
+bytes32 constant _AMORTIZATION_ROLE = 0x29b3565c49b924f0c461060cea1eabe7d7136c83f454f891574239e9f8ee9431;
+
 // keccak256('security.token.standard.role.bondManager');
 bytes32 constant _BOND_MANAGER_ROLE = 0x8e99f55d84328dd46dd7790df91f368b44ea448d246199c88b97896b3f83f65d;
 
@@ -91,6 +94,9 @@ bytes32 constant _TREX_OWNER_ROLE = 0x03ce2fdc316501dd97f5219e6ad908a3238f1e90f9
 
 // keccak256('security.token.standard.role.wildcard');
 bytes32 constant _WILD_CARD_ROLE = 0x96658f163b67573bbf1e3f9e9330b199b3ac2f6ec0139ea95f622e20a5df2f46;
+
+// keccak256('security.token.standard.role.loanManager');
+bytes32 constant _LOAN_MANAGER_ROLE = 0xc085daff7cbf912b30437b0b95363f3920f33cbd53213a269a2fc5d44ee8289d;
 
 // keccak256('security.token.standard.role.nominalValue');
 bytes32 constant _NOMINAL_VALUE_ROLE = 0x127c185a9f04723376575bc896cc0d3cf15a32dd0db17f01168dcac5d2de6102;

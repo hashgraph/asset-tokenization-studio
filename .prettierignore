@@ -45,3 +45,9 @@ gas-report.txt
 
 # Documentation
 Smart Contracts Audit Report.pdf
+
+# AI agent files
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+.agents/

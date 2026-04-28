@@ -3,14 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import {
-  type ResolverProxy,
-  type BondUSAKpiLinkedRateFacet,
-  type ScheduledCouponListing,
-  type AccessControl,
-  type ScheduledCrossOrderedTasks,
-  type TimeTravelFacet,
-} from "@contract-types";
+import { type ResolverProxy, type IAsset } from "@contract-types";
 import { ATS_ROLES, TIME_PERIODS_S, dateToUnixTimestamp } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployBondKpiLinkedRateTokenFixture, getDltTimestamp } from "@test";
@@ -22,11 +15,7 @@ describe("Scheduled Coupon Listing Tests", () => {
 
   let account_C: string;
 
-  let bondFacet: BondUSAKpiLinkedRateFacet;
-  let scheduledCouponListingFacet: ScheduledCouponListing;
-  let scheduledTasksFacet: ScheduledCrossOrderedTasks;
-  let accessControlFacet: AccessControl;
-  let timeTravelFacet: TimeTravelFacet;
+  let asset: IAsset;
 
   let startingDate = 0;
   let maturityDate = 0;
@@ -53,13 +42,9 @@ describe("Scheduled Coupon Listing Tests", () => {
     [, , signer_C] = await ethers.getSigners();
     account_C = signer_C.address;
 
-    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
-    bondFacet = await ethers.getContractAt("BondUSAKpiLinkedRateFacetTimeTravel", diamond.target);
-    scheduledCouponListingFacet = await ethers.getContractAt("ScheduledCouponListingFacet", diamond.target);
-    scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasks", diamond.target);
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
+    asset = await ethers.getContractAt("IAsset", diamond.target);
 
-    await accessControlFacet.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, account_C);
+    await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, account_C);
   }
 
   beforeEach(async () => {
@@ -108,17 +93,17 @@ describe("Scheduled Coupon Listing Tests", () => {
       rateDecimals: couponRateDecimals,
       rateStatus: 0,
     };
-    await bondFacet.connect(signer_C).setCoupon(couponData_2);
-    await bondFacet.connect(signer_C).setCoupon(couponData_3);
-    await bondFacet.connect(signer_C).setCoupon(couponData_1);
+    await asset.connect(signer_C).setCoupon(couponData_2);
+    await asset.connect(signer_C).setCoupon(couponData_3);
+    await asset.connect(signer_C).setCoupon(couponData_1);
 
     const coupon_2_Id = "0x0000000000000000000000000000000000000000000000000000000000000001";
     const coupon_3_Id = "0x0000000000000000000000000000000000000000000000000000000000000002";
     const coupon_1_Id = "0x0000000000000000000000000000000000000000000000000000000000000003";
 
     // check scheduled CouponListing
-    let scheduledCouponListingCount = await scheduledCouponListingFacet.scheduledCouponListingCount();
-    let scheduledCouponListing = await scheduledCouponListingFacet.getScheduledCouponListing(0, 100);
+    let scheduledCouponListingCount = await asset.scheduledCouponListingCount();
+    let scheduledCouponListing = await asset.getScheduledCouponListing(0, 100);
 
     expect(scheduledCouponListingCount).to.equal(3);
     expect(scheduledCouponListing.length).to.equal(scheduledCouponListingCount);
@@ -130,11 +115,11 @@ describe("Scheduled Coupon Listing Tests", () => {
     expect(scheduledCouponListing[2].data).to.equal(coupon_1_Id);
 
     // AFTER FIRST SCHEDULED CouponListing ------------------------------------------------------------------
-    await timeTravelFacet.changeSystemTimestamp(couponsFixingDateInSeconds_1 + 1);
-    await scheduledTasksFacet.connect(signer_A).triggerPendingScheduledCrossOrderedTasks();
+    await asset.changeSystemTimestamp(couponsFixingDateInSeconds_1 + 1);
+    await asset.connect(signer_A).triggerPendingScheduledCrossOrderedTasks();
 
-    scheduledCouponListingCount = await scheduledCouponListingFacet.scheduledCouponListingCount();
-    scheduledCouponListing = await scheduledCouponListingFacet.getScheduledCouponListing(0, 100);
+    scheduledCouponListingCount = await asset.scheduledCouponListingCount();
+    scheduledCouponListing = await asset.getScheduledCouponListing(0, 100);
 
     expect(scheduledCouponListingCount).to.equal(2);
     expect(scheduledCouponListing.length).to.equal(scheduledCouponListingCount);
@@ -144,11 +129,11 @@ describe("Scheduled Coupon Listing Tests", () => {
     expect(scheduledCouponListing[1].data).to.equal(coupon_2_Id);
 
     // AFTER SECOND SCHEDULED CouponListing ------------------------------------------------------------------
-    await timeTravelFacet.changeSystemTimestamp(couponsFixingDateInSeconds_2 + 1);
-    await scheduledTasksFacet.connect(signer_A).triggerScheduledCrossOrderedTasks(100);
+    await asset.changeSystemTimestamp(couponsFixingDateInSeconds_2 + 1);
+    await asset.connect(signer_A).triggerScheduledCrossOrderedTasks(100);
 
-    scheduledCouponListingCount = await scheduledCouponListingFacet.scheduledCouponListingCount();
-    scheduledCouponListing = await scheduledCouponListingFacet.getScheduledCouponListing(0, 100);
+    scheduledCouponListingCount = await asset.scheduledCouponListingCount();
+    scheduledCouponListing = await asset.getScheduledCouponListing(0, 100);
 
     expect(scheduledCouponListingCount).to.equal(1);
     expect(scheduledCouponListing.length).to.equal(scheduledCouponListingCount);
@@ -156,11 +141,11 @@ describe("Scheduled Coupon Listing Tests", () => {
     expect(scheduledCouponListing[0].data).to.equal(coupon_3_Id);
 
     // AFTER THIRD SCHEDULED CouponListing ------------------------------------------------------------------
-    await timeTravelFacet.changeSystemTimestamp(couponsFixingDateInSeconds_3 + 1);
-    await scheduledTasksFacet.connect(signer_A).triggerScheduledCrossOrderedTasks(0);
+    await asset.changeSystemTimestamp(couponsFixingDateInSeconds_3 + 1);
+    await asset.connect(signer_A).triggerScheduledCrossOrderedTasks(0);
 
-    scheduledCouponListingCount = await scheduledCouponListingFacet.scheduledCouponListingCount();
-    scheduledCouponListing = await scheduledCouponListingFacet.getScheduledCouponListing(0, 100);
+    scheduledCouponListingCount = await asset.scheduledCouponListingCount();
+    scheduledCouponListing = await asset.getScheduledCouponListing(0, 100);
 
     expect(scheduledCouponListingCount).to.equal(0);
     expect(scheduledCouponListing.length).to.equal(scheduledCouponListingCount);

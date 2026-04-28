@@ -7,7 +7,7 @@ import {
 import { ScheduledCrossOrderedTasksFacetBase } from "../ScheduledCrossOrderedTasksFacetBase.sol";
 // prettier-ignore
 /* solhint-disable max-line-length */
-import { CommonSustainabilityPerformanceTargetInterestRate } from "../../../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
+import { CommonSustainabilityPerformanceTargetInterestRate } from "../../../../../domain/asset/extension/coupon/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
 /* solhint-enable max-line-length */
 
 contract ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet is

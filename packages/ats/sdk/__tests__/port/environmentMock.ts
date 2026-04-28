@@ -7,7 +7,7 @@ import { SecurityRole } from "@domain/context/security/SecurityRole";
 import { EquityDetails } from "@domain/context/equity/EquityDetails";
 import { BondDetails } from "@domain/context/bond/BondDetails";
 import { CouponDetails } from "@domain/context/bond/CouponDetails";
-import { Dividend } from "@domain/context/equity/Dividend";
+import { Dividend } from "@domain/context/dividend/Dividend";
 import { VotingRights } from "@domain/context/equity/VotingRights";
 import { Coupon } from "@domain/context/bond/Coupon";
 import { ScheduledSnapshot } from "@domain/context/security/ScheduledSnapshot";
@@ -27,7 +27,7 @@ import Injectable from "@core/injectable/Injectable";
 import { CLIENT_PUBLIC_KEY_ECDSA } from "../config";
 import { CastRegulationSubType, CastRegulationType } from "@domain/context/factory/RegulationType";
 import { ScheduledBalanceAdjustment } from "@domain/context/equity/ScheduledBalanceAdjustment";
-import { DividendFor } from "@domain/context/equity/DividendFor";
+import { DividendFor } from "@domain/context/dividend/DividendFor";
 import { VotingFor } from "@domain/context/equity/VotingFor";
 import { Kyc } from "@domain/context/kyc/Kyc";
 import { KycAccountData } from "@domain/context/kyc/KycAccountData";
@@ -39,6 +39,8 @@ import {
 } from "@domain/context/security/Clearing";
 import { HoldDetails } from "@domain/context/security/Hold";
 import { RateStatus } from "@domain/context/bond/RateStatus";
+import { CouponFor } from "@domain/context/bond/CouponFor";
+import { CouponAmountFor } from "@domain/context/bond/CouponAmountFor";
 
 //* Mock console.log() method
 global.console.log = jest.fn();
@@ -610,12 +612,19 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
 
   singletonInstance.getCouponFor = jest.fn(async (address: EvmAddress, target: EvmAddress, coupon: number) => {
     const couponsBalances = couponsFor.get(coupon);
+    const balanceStr = couponsBalances
+      ? (couponsBalances.get("0x" + target.toString().toUpperCase().substring(2)) ?? "0")
+      : "0";
 
-    if (!couponsBalances) return BigDecimal.fromString("0", securityInfo.decimals);
-
-    const balance = couponsBalances.get("0x" + target.toString().toUpperCase().substring(2));
-    if (balance) return BigDecimal.fromString(balance, securityInfo.decimals);
-    return BigDecimal.fromString("0", securityInfo.decimals);
+    return new CouponFor(
+      BigDecimal.fromString(balanceStr, securityInfo.decimals),
+      BigDecimal.fromString("0", 0),
+      securityInfo.decimals,
+      false,
+      coupons[coupon - 1],
+      new CouponAmountFor("5", "3", true),
+      false,
+    );
   });
 
   singletonInstance.getCouponAmountFor = jest.fn(async (address: EvmAddress, target: EvmAddress, coupon: number) => {
@@ -666,6 +675,12 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
     }
     return pos + 1;
   });
+
+  singletonInstance.getCouponsFor = jest.fn(
+    async (address: EvmAddress, couponId: number, pageIndex: number, pageLength: number) => {
+      return { coupons: [], accounts: [] };
+    },
+  );
 
   singletonInstance.getAccountSecurityRelationship = jest.fn(async (address: EvmAddress, target: EvmAddress) => {});
 

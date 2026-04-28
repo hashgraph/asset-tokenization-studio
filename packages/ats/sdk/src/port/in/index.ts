@@ -4,7 +4,9 @@ import Account from "./account/Account";
 import Role from "./role/Role";
 import Security from "./security/Security";
 import Equity from "./equity/Equity";
+import Dividend from "./dividend/Dividend";
 import Bond from "./bond/Bond";
+import Coupon from "./coupon/Coupon";
 import Event from "./event/Event";
 import Network from "./network/Network";
 import Factory from "./factory/Factory";
@@ -16,11 +18,14 @@ import ExternalControlListsManagement from "./externalControlListsManagement/Ext
 import ExternalKycListsManagement from "./externalKycListsManagement/ExternalKycListsManagement";
 import FixedRate from "./interestRates/fixedRate/FixedRate";
 import KpiLinkedRate from "./interestRates/kpiLinkedRate/KpiLinkedRate";
+import Amortization from "./security/amortization/Amortization";
 
 export {
   Security,
   Equity,
+  Dividend,
   Bond,
+  Coupon,
   Account,
   Role,
   Event,
@@ -34,6 +39,7 @@ export {
   ExternalKycListsManagement,
   FixedRate,
   KpiLinkedRate,
+  Amortization,
 };
 
 export * from "./request";
@@ -41,7 +47,9 @@ export * from "./response";
 
 export * from "./security/Security";
 export * from "./equity/Equity";
+export * from "./dividend/Dividend";
 export * from "./bond/Bond";
+export * from "./coupon/Coupon";
 export * from "./account/Account";
 export * from "./role/Role";
 export * from "./event/Event";
@@ -56,3 +64,4 @@ export * from "./externalControlListsManagement/ExternalControlListsManagement";
 export * from "./externalKycListsManagement/ExternalKycListsManagement";
 export * from "./interestRates/fixedRate/FixedRate";
 export * from "./interestRates/kpiLinkedRate/KpiLinkedRate";
+export * from "./security/amortization/Amortization";

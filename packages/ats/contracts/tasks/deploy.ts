@@ -22,9 +22,8 @@ task(
   .addOptionalParam("fileName", "The output file name", "deployed-contracts", types.string)
   .setAction(async (args: DeployAllArgs, hre) => {
     // Inlined to avoid circular dependency
-    const { deployAtsFullInfrastructure, DeployAtsFullInfrastructureCommand, addresstoHederaId } = await import(
-      "@scripts"
-    );
+    const { deployAtsFullInfrastructure, DeployAtsFullInfrastructureCommand, addresstoHederaId } =
+      await import("@scripts");
     const network = hre.network.name as Network;
     console.log(`Executing deployAll on ${hre.network.name} ...`);
     const { signer }: GetSignerResult = await hre.run("getSigner", {

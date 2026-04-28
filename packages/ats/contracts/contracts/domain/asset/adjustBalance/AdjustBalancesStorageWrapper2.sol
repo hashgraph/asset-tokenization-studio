@@ -35,10 +35,8 @@ abstract contract AdjustBalancesStorageWrapper2 is IAdjustBalancesStorageWrapper
         bytes32 _partition,
         address _account
     ) internal view override returns (uint256) {
-        uint256 partitionsIndex = _erc1410BasicStorage().partitionToIndex[_account][_partition];
-
-        if (partitionsIndex == 0) return 1;
-        return _zeroToOne(_adjustBalancesStorage().labafUserPartition[_account][partitionsIndex - 1]);
+        return
+            _getLabafByUserAndPartitionIndex(_erc1410BasicStorage().partitionToIndex[_account][_partition], _account);
     }
 
     function _getLabafByUserAndPartitionIndex(

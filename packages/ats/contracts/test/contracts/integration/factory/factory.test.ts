@@ -29,6 +29,7 @@ import {
 } from "@scripts";
 import { Rbac, SecurityType } from "@scripts/domain";
 import { getBondDetails } from "@test";
+import { decodeEvent } from "@scripts/infrastructure";
 
 describe("Factory Tests", () => {
   let signer_A: HardhatEthersSigner;
@@ -461,6 +462,54 @@ describe("Factory Tests", () => {
     });
   });
 
+  describe("Generic Proxy tests", () => {
+    it("GIVEN an empty Resolver WHEN deploying a new resolverProxy THEN transaction fails", async () => {
+      await expect(factory.deployProxy(ADDRESS_ZERO, EQUITY_CONFIG_ID, 1, init_rbacs)).to.be.rejectedWith(
+        "EmptyResolver",
+      );
+    });
+
+    it("GIVEN no admin WHEN deploying a new resolverProxy THEN transaction fails", async () => {
+      await expect(factory.deployProxy(businessLogicResolver, EQUITY_CONFIG_ID, 1, [])).to.be.rejectedWith(
+        "NoInitialAdmins",
+      );
+    });
+
+    it("GIVEN the proper information WHEN deploying a new resolverProxy THEN transaction succeeds", async () => {
+      const expectedProxyAddress = await factory
+        .getFunction("deployProxy")
+        .staticCall(businessLogicResolver, EQUITY_CONFIG_ID, 1, init_rbacs);
+
+      const tx = factory.deployProxy(businessLogicResolver, EQUITY_CONFIG_ID, 1, init_rbacs);
+      await expect(tx).to.emit(factory, "ProxyDeployed");
+
+      const result = await tx;
+      const receipt = await result.wait();
+
+      const deployedProxyEvent = await decodeEvent(factory, "ProxyDeployed", receipt);
+
+      const proxyAddress = deployedProxyEvent.proxyAddress;
+      const resolver = deployedProxyEvent.resolver;
+      const configKey = deployedProxyEvent.configKey;
+      const version = deployedProxyEvent.version;
+      const rbac = deployedProxyEvent.rbac;
+
+      expect(proxyAddress).not.to.equal(ADDRESS_ZERO);
+      expect(proxyAddress).to.equal(expectedProxyAddress);
+      expect(resolver).to.equal(businessLogicResolver);
+      expect(configKey).to.equal(EQUITY_CONFIG_ID);
+      expect(version).to.equal(1);
+      expect(rbac.length).to.equal(init_rbacs.length);
+
+      for (let i = 0; i < init_rbacs.length; i++) {
+        expect(rbac[i][0]).to.be.equal(listOfRoles[i]);
+        expect(rbac[i][1].length).to.equal(listOfMembers.length);
+        expect(rbac[i][1][0]).to.be.equal(listOfMembers[0]);
+        expect(rbac[i][1][1]).to.be.equal(listOfMembers[1]);
+      }
+    });
+  });
+
   describe("Equity tests", () => {
     it("GIVEN an empty Resolver WHEN deploying a new resolverProxy THEN transaction fails", async () => {
       const equityData = {
@@ -589,16 +638,8 @@ describe("Factory Tests", () => {
 
       const result = await tx;
       const receipt = await result.wait();
-      const deployedEquityEvent = receipt!.logs
-        .map((log) => {
-          try {
-            return factory.interface.parseLog({ topics: log.topics as string[], data: log.data });
-          } catch {
-            return null;
-          }
-        })
-        .find((parsed) => parsed?.name === "EquityDeployed");
-      const equityAddress = deployedEquityEvent!.args!.equityAddress;
+      const deployedEquityEvent = await decodeEvent(factory, "EquityDeployed", receipt);
+      const equityAddress = deployedEquityEvent.equityAddress;
 
       await readFacets(equityAddress);
 
@@ -754,16 +795,8 @@ describe("Factory Tests", () => {
 
       const result = await tx;
       const receipt = await result.wait();
-      const deployedBondEvent = receipt!.logs
-        .map((log) => {
-          try {
-            return factory.interface.parseLog({ topics: log.topics as string[], data: log.data });
-          } catch {
-            return null;
-          }
-        })
-        .find((parsed) => parsed?.name === "BondDeployed");
-      const bondAddress = deployedBondEvent!.args!.bondAddress;
+      const deployedBondEvent = await decodeEvent(factory, "BondDeployed", receipt);
+      const bondAddress = deployedBondEvent.bondAddress;
 
       await readFacets(bondAddress);
 
@@ -799,7 +832,8 @@ describe("Factory Tests", () => {
       expect(bondDetails.nominalValueDecimals).to.be.deep.equal(bondData.bondDetails.nominalValueDecimals);
       expect(bondDetails.startingDate).to.be.deep.equal(bondData.bondDetails.startingDate);
       expect(bondDetails.maturityDate).to.be.deep.equal(bondData.bondDetails.maturityDate);
-      const couponCount = await bondFacet.getCouponCount();
+      const couponFacet = await ethers.getContractAt("CouponFacet", bondAddress);
+      const couponCount = await couponFacet.getCouponCount();
       expect(couponCount).to.equal(0);
 
       // Coupon count assertion removed - no automatic coupons created
@@ -1000,16 +1034,8 @@ describe("Factory Tests", () => {
 
       const result = await tx;
       const receipt = await result.wait();
-      const deployedBondEvent = receipt!.logs
-        .map((log) => {
-          try {
-            return factory.interface.parseLog({ topics: log.topics as string[], data: log.data });
-          } catch {
-            return null;
-          }
-        })
-        .find((parsed) => parsed?.name === "BondFixedRateDeployed");
-      const bondAddress = deployedBondEvent!.args!.bondAddress;
+      const deployedBondEvent = await decodeEvent(factory, "BondFixedRateDeployed", receipt);
+      const bondAddress = deployedBondEvent.bondAddress;
 
       // Verify fixed rate was set
       const fixedRateFacet = await ethers.getContractAt("FixedRate", bondAddress);
@@ -1165,16 +1191,8 @@ describe("Factory Tests", () => {
 
       const result = await tx;
       const receipt = await result.wait();
-      const deployedBondEvent = receipt!.logs
-        .map((log) => {
-          try {
-            return factory.interface.parseLog({ topics: log.topics as string[], data: log.data });
-          } catch {
-            return null;
-          }
-        })
-        .find((parsed) => parsed?.name === "BondKpiLinkedRateDeployed");
-      const bondAddress = deployedBondEvent!.args!.bondAddress;
+      const deployedBondEvent = await decodeEvent(factory, "BondKpiLinkedRateDeployed", receipt);
+      const bondAddress = deployedBondEvent.bondAddress;
 
       // Verify KPI linked rate was set
       const kpiLinkedRateFacet = await ethers.getContractAt("KpiLinkedRate", bondAddress);
@@ -1550,16 +1568,8 @@ describe("Factory Tests", () => {
 
       const result = await tx;
       const receipt = await result.wait();
-      const deployedBondEvent = receipt!.logs
-        .map((log) => {
-          try {
-            return factory.interface.parseLog({ topics: log.topics as string[], data: log.data });
-          } catch {
-            return null;
-          }
-        })
-        .find((parsed) => parsed?.name === "BondSustainabilityPerformanceTargetRateDeployed");
-      const bondAddress = deployedBondEvent!.args!.bondAddress;
+      const deployedBondEvent = await decodeEvent(factory, "BondSustainabilityPerformanceTargetRateDeployed", receipt);
+      const bondAddress = deployedBondEvent.bondAddress;
 
       // Verify sustainability rate was set
       const sustainabilityRateFacet = await ethers.getContractAt("SustainabilityPerformanceTargetRate", bondAddress);

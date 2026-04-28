@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-interface IControlList {
+import { IControlListStorageWrapper } from "../../../domain/core/controlList/IControlListStorageWrapper.sol";
+
+interface IControlList is IControlListStorageWrapper {
     /**
      * @dev Emitted when an account is added to the controllist
      *

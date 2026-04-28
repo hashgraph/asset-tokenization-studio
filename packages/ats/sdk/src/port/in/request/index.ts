@@ -18,13 +18,14 @@ import PauseRequest from "./security/operations/pause/PauseRequest";
 import ControlListRequest from "./security/operations/controlList/ControlListRequest";
 import GetControlListCountRequest from "./security/operations/controlList/GetControlListCountRequest";
 import GetControlListMembersRequest from "./security/operations/controlList/GetControlListMembersRequest";
-import GetDividendForRequest from "./equity/GetDividendForRequest";
-import GetDividendRequest from "./equity/GetDividendRequest";
-import GetAllDividendsRequest from "./equity/GetAllDividendsRequest";
+import GetDividendForRequest from "./dividend/GetDividendForRequest";
+import GetDividendRequest from "./dividend/GetDividendRequest";
+import GetAllDividendsRequest from "./dividend/GetAllDividendsRequest";
 import GetVotingRightsForRequest from "./equity/GetVotingRightsForRequest";
 import GetVotingRightsRequest from "./equity/GetVotingRightsRequest";
 import GetAllVotingRightsRequest from "./equity/GetAllVotingRightsRequest";
 import GetCouponForRequest from "./bond/GetCouponForRequest";
+import GetCouponsForRequest from "./bond/GetCouponsForRequest";
 import GetCouponRequest from "./bond/GetCouponRequest";
 import GetCouponsOrderedListRequest from "./bond/GetCouponsOrderedListRequest";
 import GetCouponsOrderedListTotalRequest from "./bond/GetCouponsOrderedListTotalRequest";
@@ -34,8 +35,8 @@ import GetRolesForRequest from "./security/roles/GetRolesForRequest";
 import GetRoleMemberCountRequest from "./security/roles/GetRoleMemberCountRequest";
 import GetRoleMembersRequest from "./security/roles/GetRoleMembersRequest";
 import GetSecurityDetailsRequest from "./security/GetSecurityDetailsRequest";
-import SetDividendRequest from "./equity/SetDividendRequest";
-import CancelDividendRequest from "./equity/CancelDividendRequest";
+import SetDividendRequest from "./dividend/SetDividendRequest";
+import CancelDividendRequest from "./dividend/CancelDividendRequest";
 import SetCouponRequest from "./bond/SetCouponRequest";
 import SetVotingRightsRequest from "./equity/SetVotingRightsRequest";
 import GetBondDetailsRequest from "./bond/GetBondDetailsRequest";
@@ -153,6 +154,24 @@ import RevokeKycMockRequest from "./security/externalKycLists/mock/RevokeKycMock
 import GetKycStatusMockRequest from "./security/externalKycLists/mock/GetKycStatusMockRequest";
 import SetNameRequest from "./security/operations/tokeMetadata/SetNameRequest";
 import SetSymbolRequest from "./security/operations/tokeMetadata/SetSymbolRequest";
+import SetNominalValueRequest from "./security/operations/nominalValue/SetNominalValueRequest";
+import GetNominalValueRequest from "./security/operations/nominalValue/GetNominalValueRequest";
+import GetNominalValueDecimalsRequest from "./security/operations/nominalValue/GetNominalValueDecimalsRequest";
+import SetAmortizationRequest from "./security/amortization/SetAmortizationRequest";
+import CancelAmortizationRequest from "./security/amortization/CancelAmortizationRequest";
+import SetAmortizationHoldRequest from "./security/amortization/SetAmortizationHoldRequest";
+import ReleaseAmortizationHoldRequest from "./security/amortization/ReleaseAmortizationHoldRequest";
+import GetAmortizationRequest from "./security/amortization/GetAmortizationRequest";
+import GetAmortizationForRequest from "./security/amortization/GetAmortizationForRequest";
+import GetAmortizationsForRequest from "./security/amortization/GetAmortizationsForRequest";
+import GetAmortizationsCountRequest from "./security/amortization/GetAmortizationsCountRequest";
+import GetAmortizationHoldersRequest from "./security/amortization/GetAmortizationHoldersRequest";
+import GetTotalAmortizationHoldersRequest from "./security/amortization/GetTotalAmortizationHoldersRequest";
+import GetAmortizationPaymentAmountRequest from "./security/amortization/GetAmortizationPaymentAmountRequest";
+import GetActiveAmortizationHoldHoldersRequest from "./security/amortization/GetActiveAmortizationHoldHoldersRequest";
+import GetTotalActiveAmortizationHoldHoldersRequest from "./security/amortization/GetTotalActiveAmortizationHoldHoldersRequest";
+import GetActiveAmortizationIdsRequest from "./security/amortization/GetActiveAmortizationIdsRequest";
+import GetTotalActiveAmortizationIdsRequest from "./security/amortization/GetTotalActiveAmortizationIdsRequest";
 import SetOnchainIDRequest from "./security/operations/tokeMetadata/SetOnchainIDRequest";
 import SetComplianceRequest from "./security/compliance/SetComplianceRequest";
 import ComplianceRequest from "./security/compliance/ComplianceRequest";
@@ -186,8 +205,8 @@ import GetTotalTokenHoldersAtSnapshotRequest from "./security/operations/snapsho
 import BalancesOfAtSnapshotRequest from "./snapshots/BalancesOfAtSnapshotRequest";
 import GetCouponHoldersRequest from "./bond/GetCouponHoldersRequest";
 import GetTotalCouponHoldersRequest from "./bond/GetTotalCouponHoldersRequest";
-import GetDividendHoldersRequest from "./equity/GetDividendHoldersRequest";
-import GetTotalDividendHoldersRequest from "./equity/GetTotalDividendHoldersRequest";
+import GetDividendHoldersRequest from "./dividend/GetDividendHoldersRequest";
+import GetTotalDividendHoldersRequest from "./dividend/GetTotalDividendHoldersRequest";
 import GetTotalVotingHoldersRequest from "./equity/GetTotalVotingHoldersRequest";
 import GetVotingHoldersRequest from "./equity/GetVotingHoldersRequest";
 import GetSecurityHoldersRequest from "./security/GetSecurityHoldersRequest";
@@ -250,6 +269,7 @@ export {
   GetVotingRightsRequest,
   GetAllVotingRightsRequest,
   GetCouponForRequest,
+  GetCouponsForRequest,
   GetCouponFromOrderedListAtRequest,
   GetPrincipalForRequest,
   GetCouponRequest,
@@ -447,4 +467,22 @@ export {
   CancelCouponRequest,
   CancelScheduledBalanceAdjustmentRequest,
   CancelVotingRequest,
+  SetNominalValueRequest,
+  GetNominalValueRequest,
+  GetNominalValueDecimalsRequest,
+  SetAmortizationRequest,
+  CancelAmortizationRequest,
+  SetAmortizationHoldRequest,
+  ReleaseAmortizationHoldRequest,
+  GetAmortizationRequest,
+  GetAmortizationForRequest,
+  GetAmortizationsForRequest,
+  GetAmortizationsCountRequest,
+  GetAmortizationHoldersRequest,
+  GetTotalAmortizationHoldersRequest,
+  GetAmortizationPaymentAmountRequest,
+  GetActiveAmortizationHoldHoldersRequest,
+  GetTotalActiveAmortizationHoldHoldersRequest,
+  GetActiveAmortizationIdsRequest,
+  GetTotalActiveAmortizationIdsRequest,
 };

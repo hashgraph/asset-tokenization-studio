@@ -5,7 +5,7 @@ import { KpisFacetBase } from "../KpisFacetBase.sol";
 /* solhint-disable max-line-length */
 import {
     CommonSustainabilityPerformanceTargetInterestRate
-} from "../../../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
+} from "../../../../../domain/asset/extension/coupon/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
 /* solhint-enable max-line-length */
 import {
     _KPIS_LATEST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY

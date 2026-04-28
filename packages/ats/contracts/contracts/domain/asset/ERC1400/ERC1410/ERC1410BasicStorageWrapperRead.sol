@@ -6,6 +6,7 @@ import { _ERC1410_BASIC_STORAGE_POSITION } from "../../../../constants/storagePo
 import { IERC1410StorageWrapper } from "../../../../domain/asset/ERC1400/ERC1410/IERC1410StorageWrapper.sol";
 import { LockStorageWrapper1 } from "../../lock/LockStorageWrapper1.sol";
 import { LibCommon } from "../../../../infrastructure/utils/LibCommon.sol";
+import { IExternalListManagement } from "../../../../domain/core/externalList/IExternalListManagement.sol";
 
 abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper, LockStorageWrapper1 {
     // Represents a fungible set of tokens.
@@ -200,12 +201,7 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper, Lock
     }
 
     function _validPartition(bytes32 _partition, address _holder) internal view override returns (bool) {
-        ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
-        if (erc1410Storage.partitionToIndex[_holder][_partition] == 0) {
-            return false;
-        } else {
-            return true;
-        }
+        return _validPartitionForReceiver(_partition, _holder);
     }
 
     function _validPartitionForReceiver(bytes32 _partition, address _to) internal view override returns (bool) {
@@ -230,7 +226,7 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper, Lock
     }
 
     function _checkValidAddress(address account) internal pure override {
-        if (account == address(0)) revert ZeroAddressNotAllowed();
+        if (account == address(0)) revert IExternalListManagement.ZeroAddressNotAllowed();
     }
 
     function _adjustPartitionBalanceFor(
