@@ -34,7 +34,8 @@ import {
   ERC3643ManagementFacet__factory,
   ERC20VotesFacet__factory,
   ControllerFacet__factory,
-  ERC1594Facet__factory,
+  MintFacet__factory,
+  BurnFacet__factory,
   ERC1410ManagementFacet__factory,
   FreezeFacet__factory,
   KycFacet__factory,
@@ -260,7 +261,8 @@ export async function deployLoanTokenFixture({
   const freezeFacet = FreezeFacet__factory.connect(proxyAddress, deployer);
   const capFacet = CapFacet__factory.connect(proxyAddress, deployer);
   const controllerFacet = ControllerFacet__factory.connect(proxyAddress, deployer);
-  const erc1594Facet = ERC1594Facet__factory.connect(proxyAddress, deployer);
+  const mintFacet = MintFacet__factory.connect(proxyAddress, deployer);
+  const burnFacet = BurnFacet__factory.connect(proxyAddress, deployer);
   const erc1410ManagementFacet = ERC1410ManagementFacet__factory.connect(proxyAddress, deployer);
   const erc3643ManagementFacet = ERC3643ManagementFacet__factory.connect(proxyAddress, deployer);
   const erc20VotesFacet = ERC20VotesFacet__factory.connect(proxyAddress, deployer);
@@ -290,7 +292,7 @@ export async function deployLoanTokenFixture({
     },
     securityType: 1, // SecurityType.Equity (reuse for loan)
   });
-  await erc1594Facet.initialize_ERC1594();
+  await mintFacet.initialize_ERC1594();
   await capFacet.initialize_Cap(securityData.maxSupply, []);
   await protectedPartitionsFacet.initialize_ProtectedPartitions(securityData.arePartitionsProtected);
   await clearingActionsFacet.initializeClearing(securityData.clearingActive);
@@ -333,7 +335,8 @@ export async function deployLoanTokenFixture({
     freezeFacet,
     capFacet,
     controllerFacet,
-    erc1594Facet,
+    mintFacet,
+    burnFacet,
     erc1410ManagementFacet,
     erc3643ManagementFacet,
     erc20VotesFacet,

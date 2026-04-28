@@ -14,7 +14,6 @@ import { IIdentityRegistry } from "../../facets/layer_1/ERC3643/IIdentityRegistr
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { ITransfer } from "../../facets/transfer/ITransfer.sol";
-import { IMint } from "../../facets/mint/IMint.sol";
 import { IAllowanceTypes } from "../../facets/allowance/IAllowanceTypes.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
@@ -27,7 +26,8 @@ import { KycStorageWrapper } from "../core/KycStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { AccessControlStorageWrapper } from "../core/AccessControlStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { IERC1594 } from "../../facets/layer_1/ERC1400/ERC1594/IERC1594.sol";
+import { IMint } from "../../facets/mint/IMint.sol";
+import { IBurn } from "../../facets/burn/IBurn.sol";
 
 struct ERC1594Storage {
     bool issuance;
@@ -43,19 +43,16 @@ library ERC1594StorageWrapper {
         ds.initialized = true;
     }
 
-    function issue(address tokenHolder, uint256 value, bytes memory data) internal {
+    function issue(address tokenHolder, uint256 value) internal {
         ERC20StorageWrapper.mint(tokenHolder, value);
-        emit IMint.Issued(EvmAccessors.getMsgSender(), tokenHolder, value, data);
     }
 
-    function redeem(uint256 value, bytes memory data) internal {
+    function redeem(uint256 value) internal {
         ERC20StorageWrapper.burn(EvmAccessors.getMsgSender(), value);
-        emit IERC1594.Redeemed(address(0), EvmAccessors.getMsgSender(), value, data);
     }
 
-    function redeemFrom(address tokenHolder, uint256 value, bytes memory data) internal {
+    function redeemFrom(address tokenHolder, uint256 value) internal {
         ERC20StorageWrapper.burnFrom(tokenHolder, value);
-        emit IERC1594.Redeemed(EvmAccessors.getMsgSender(), tokenHolder, value, data);
     }
 
     function isIssuable() internal view returns (bool) {
