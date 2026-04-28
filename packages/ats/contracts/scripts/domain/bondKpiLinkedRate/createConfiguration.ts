@@ -80,6 +80,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "ClearingTransferFacet",
   "HoldFacet",
   "HoldManagementFacet",
+  "ControllerHoldByPartitionFacet",
   "HoldByPartitionFacet",
 
   // External Management

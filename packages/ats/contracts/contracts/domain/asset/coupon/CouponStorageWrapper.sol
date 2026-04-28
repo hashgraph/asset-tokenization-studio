@@ -28,6 +28,7 @@ import { _COUPON_STORAGE_POSITION } from "../../../constants/storagePositions.so
 /// @title Coupon Storage Wrapper
 /// @notice Library for managing Coupon storage operations.
 /// @dev Provides structured access to CouponDataStorage at a dedicated storage slot.
+/// @author Asset Tokenization Studio Team
 library CouponStorageWrapper {
     struct CouponDataStorage {
         uint256[] couponsOrderedListByIds;

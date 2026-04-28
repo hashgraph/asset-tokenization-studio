@@ -39,6 +39,7 @@ struct EquityDataStorage {
 /// @title Equity Storage Wrapper
 /// @notice Library for managing Equity token storage operations.
 /// @dev Provides structured access to EquityDataStorage with migration support for NominalValue.
+/// @author Asset Tokenization Studio Team
 library EquityStorageWrapper {
     function initializeEquityDetails(IEquity.EquityDetailsData memory equityDetailsData) internal {
         EquityDataStorage storage $ = _equityStorage();

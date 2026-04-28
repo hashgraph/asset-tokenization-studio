@@ -4,14 +4,17 @@ pragma solidity >=0.8.0 <0.9.0;
 import "../EquityStorageWrapper.sol";
 import { _NOMINAL_VALUE_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { BondStorageWrapper } from "../BondStorageWrapper.sol";
-import { Bond } from "../../../facets/layer_2/bond/Bond.sol";
 
-/// @notice Storage wrapper for NominalValue feature.
-/// @dev Reads nominal value from the dedicated NominalValue slot, and aggregates
-/// with legacy bond/equity storage fields for backward compatibility during migration.
-/// MIGRATION: Once all legacy tokens have been migrated, remove the legacy reads
-/// and simplify getNominalValue / getNominalValueDecimals to return only the
-/// dedicated storage values.
+/**
+ * @title NominalValueStorageWrapper - Nominal Value Storage Wrapper
+ * @notice Storage wrapper for nominal value data, aggregating legacy bond and
+ *         equity storage for backward compatibility during migration.
+ * @dev Reads nominal value from the dedicated storage slot and aggregates it
+ *      with legacy bond and equity storage fields. Once all legacy tokens have
+ *      been migrated, the legacy reads should be removed and the getters
+ *      simplified to return only the dedicated storage values.
+ * @author Asset Tokenization Studio Team
+ */
 library NominalValueStorageWrapper {
     struct NominalValueDataStorage {
         uint256 nominalValue;
