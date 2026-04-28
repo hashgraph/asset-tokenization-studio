@@ -70,6 +70,7 @@ import { IProceedRecipients } from "./layer_2/proceedRecipient/IProceedRecipient
 import { ICap } from "./layer_1/cap/ICap.sol";
 import { INonces } from "./layer_1/nonce/INonces.sol";
 import { IBalanceTrackerByPartition } from "./balanceTrackerByPartition/IBalanceTrackerByPartition.sol";
+import { IBalanceTrackerAtSnapshot } from "./balanceTrackerAtSnapshot/IBalanceTrackerAtSnapshot.sol";
 import { IScheduledCouponListing } from "./layer_2/scheduledTask/scheduledCouponListing/IScheduledCouponListing.sol";
 import {
     IScheduledBalanceAdjustments
@@ -166,6 +167,7 @@ interface IAsset is
     ICap,
     INonces,
     IBalanceTrackerByPartition,
+    IBalanceTrackerAtSnapshot,
     IFixedRate,
     // Scheduled Tasks
     IScheduledCouponListing,

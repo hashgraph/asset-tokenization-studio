@@ -12,31 +12,32 @@ contract SnapshotsFacet is Snapshots, IStaticFunctionSelectors {
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](18);
-        staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.balanceOfAtSnapshot.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.balancesOfAtSnapshot.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.totalSupplyAtSnapshot.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.balanceOfAtSnapshotByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.partitionsOfAtSnapshot.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.totalSupplyAtSnapshotByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.lockedBalanceOfAtSnapshot.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.lockedBalanceOfAtSnapshotByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.heldBalanceOfAtSnapshot.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.heldBalanceOfAtSnapshotByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.clearedBalanceOfAtSnapshot.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.clearedBalanceOfAtSnapshotByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.frozenBalanceOfAtSnapshot.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.frozenBalanceOfAtSnapshotByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.decimalsAtSnapshot.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getTokenHoldersAtSnapshot.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getTotalTokenHoldersAtSnapshot.selector;
+        uint256 selectorIndex = 15;
+        staticFunctionSelectors_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this.getTotalTokenHoldersAtSnapshot.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getTokenHoldersAtSnapshot.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.decimalsAtSnapshot.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.frozenBalanceOfAtSnapshotByPartition.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.frozenBalanceOfAtSnapshot.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.clearedBalanceOfAtSnapshotByPartition.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.clearedBalanceOfAtSnapshot.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.heldBalanceOfAtSnapshotByPartition.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.heldBalanceOfAtSnapshot.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.lockedBalanceOfAtSnapshotByPartition.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.lockedBalanceOfAtSnapshot.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.totalSupplyAtSnapshotByPartition.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.partitionsOfAtSnapshot.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.balanceOfAtSnapshotByPartition.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.takeSnapshot.selector;
+        }
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ISnapshots).interfaceId;
+        uint256 selectorIndex = 1;
+        staticInterfaceIds_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticInterfaceIds_[--selectorIndex] = type(ISnapshots).interfaceId;
+        }
     }
 }
