@@ -47,3 +47,11 @@ class _LRU {
 // For ESM, use jest.mock or manual global override if needed
 // Example for Jest:
 // jest.mock('lru-cache', () => LRU);
+
+// crypto.randomUUID is not available in JSDOM — polyfill from Node.js crypto
+if (typeof globalThis.crypto === "undefined") {
+  globalThis.crypto = {};
+}
+if (typeof globalThis.crypto.randomUUID !== "function") {
+  globalThis.crypto.randomUUID = require("node:crypto").randomUUID;
+}
