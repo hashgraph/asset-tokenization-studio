@@ -43,6 +43,7 @@ const BOND_FACETS = [
   "CorporateActionsFacet",
   "DiamondFacet", // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
   "FreezeFacet",
+  "BatchFreezeFacet",
   "KycFacet",
   "PauseFacet",
   "SnapshotsFacet",

@@ -354,6 +354,9 @@ bytes32 constant _BATCH_TRANSFER_RESOLVER_KEY = 0x2c2bcad4399109e963ba5d1f9b9731
 // keccak256("security.token.standard.freeze.resolverKey");
 bytes32 constant _FREEZE_RESOLVER_KEY = 0x49f765e7155d979a148049c2a0ebed5e028b11799061897a255f99314f0bd3f1;
 
+// keccak256('security.token.standard.batchFreeze.resolverKey');
+bytes32 constant _BATCH_FREEZE_RESOLVER_KEY = 0x2f58eaa3e08a94a58af659b6fd0a0c4e30bd5e789982c50863ce4e499535711c;
+
 // keccak256("security.token.standard.externalcontrollist.resolverKey");
 bytes32 constant _EXTERNAL_CONTROL_LIST_RESOLVER_KEY = 0x490196911bc65200514fb4568861a36670854901dffa91bc27577664fdace575;
 

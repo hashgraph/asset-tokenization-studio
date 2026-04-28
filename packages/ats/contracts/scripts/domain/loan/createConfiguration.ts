@@ -52,6 +52,7 @@ const LOAN_FACETS = [
   "KycFacet",
   "SsiManagementFacet",
   "FreezeFacet",
+  "BatchFreezeFacet",
   "PauseFacet",
 
   // Core

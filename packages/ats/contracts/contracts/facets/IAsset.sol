@@ -76,6 +76,7 @@ import {
 } from "./layer_2/scheduledTask/scheduledBalanceAdjustment/IScheduledBalanceAdjustments.sol";
 import { ILock } from "./layer_1/lock/ILock.sol";
 import { IFreeze } from "./layer_1/freeze/IFreeze.sol";
+import { IBatchFreeze } from "./batchFreeze/IBatchFreeze.sol";
 import { ISnapshots } from "./layer_1/snapshot/ISnapshots.sol";
 import { IClearingActions } from "./layer_1/clearing/IClearingActions.sol";
 import { IClearingTransfer } from "./layer_1/clearing/IClearingTransfer.sol";
@@ -171,6 +172,7 @@ interface IAsset is
     IScheduledBalanceAdjustments,
     ILock,
     IFreeze,
+    IBatchFreeze,
     ISnapshots,
     // Clearing interfaces
     IClearingActions,

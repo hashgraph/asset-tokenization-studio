@@ -45,6 +45,7 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "TransferFacet",
   "CoreAdjustedFacet",
   "FreezeFacet",
+  "BatchFreezeFacet",
   "KycFacet",
   "PauseFacet",
   "BalanceTrackerFacet",
