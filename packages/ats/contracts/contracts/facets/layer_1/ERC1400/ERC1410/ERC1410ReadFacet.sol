@@ -7,12 +7,10 @@ import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStat
 import { _ERC1410_READ_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 
 contract ERC1410ReadFacet is ERC1410Read, IStaticFunctionSelectors {
-    /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _ERC1410_READ_RESOLVER_KEY;
     }
 
-    /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex = 6;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);
@@ -26,7 +24,6 @@ contract ERC1410ReadFacet is ERC1410Read, IStaticFunctionSelectors {
         }
     }
 
-    /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         uint256 selectorIndex = 1;
         staticInterfaceIds_ = new bytes4[](selectorIndex);
