@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { QUERY_HANDLER_METADATA, QUERY_METADATA } from "@core/Constants";
-import { v4 } from "uuid";
 import { BaseQuery } from "@core/query/Query";
 import { Constructor } from "@core/Type";
 import { injectable } from "tsyringe";
@@ -17,7 +16,7 @@ export const QueryHandler = (query: BaseQuery): ClassDecorator => {
   return (target: object) => {
     injectable()(target as Constructor<typeof target>);
     if (!Reflect.hasMetadata(QUERY_METADATA, query)) {
-      Reflect.defineMetadata(QUERY_METADATA, { id: v4() }, query);
+      Reflect.defineMetadata(QUERY_METADATA, { id: crypto.randomUUID() }, query);
     }
     Reflect.defineMetadata(QUERY_HANDLER_METADATA, query, target);
   };
