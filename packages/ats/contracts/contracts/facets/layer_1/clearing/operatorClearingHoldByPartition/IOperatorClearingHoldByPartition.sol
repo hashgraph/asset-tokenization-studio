@@ -12,6 +12,28 @@ import { IClearingTypes } from "../IClearingTypes.sol";
  */
 interface IOperatorClearingHoldByPartition is IClearingTypes {
     /**
+     * @notice Emitted when an authorised operator schedules a hold creation through the clearing flow.
+     * @param operator Account that invoked the clearing hold creation (the operator).
+     * @param tokenHolder Address whose balance is being committed to the hold.
+     * @param partition Partition under which the hold is scheduled.
+     * @param clearingId Identifier assigned to the queued clearing operation.
+     * @param hold Hold parameters that will be created on approval.
+     * @param expirationDate Expiration of the clearing operation itself.
+     * @param data Arbitrary payload attached to the clearing operation.
+     * @param operatorData Operator-supplied payload accompanying the request.
+     */
+    event ClearedOperatorHoldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        IHoldTypes.Hold hold,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
+    /**
      * @notice Creates a hold for a clearing operation by partition from a third party.
      * @dev Caller must be an authorised token holder operator.
      * @param _clearingOperationFrom Details of the clearing operation.

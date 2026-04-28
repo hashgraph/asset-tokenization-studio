@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-27T09:17:20.617Z
+ * Generated: 2026-04-28T10:48:23.091Z
  * Facets: 90
  * Infrastructure: 2
  *
@@ -2577,15 +2577,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x252da371b753edb80209b16882bb593cf10ba3ae90a37e60b3fb9b5cbb21cc5f",
       },
       {
-        name: "ClearedOperatorHoldByPartition",
-        signature: {
-          full: "event ClearedOperatorHoldByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 clearingId, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, uint256 expirationDate, bytes data, bytes operatorData)",
-          canonical:
-            "ClearedOperatorHoldByPartition(address,address,bytes32,uint256,(uint256,uint256,address,address,bytes),uint256,bytes,bytes)",
-        },
-        topic0: "0x17dd09a4db5e9e5b1d8c758e255d3bb96a271cc551b1cedfb89724befce7b04b",
-      },
-      {
         name: "ClearedOperatorRedeemByPartition",
         signature: {
           full: "event ClearedOperatorRedeemByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 clearingId, uint256 amount, uint256 expirationDate, bytes data, bytes operatorData)",
@@ -2829,15 +2820,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
             "ClearedHoldFromByPartition(address,address,bytes32,uint256,(uint256,uint256,address,address,bytes),uint256,bytes,bytes)",
         },
         topic0: "0x252da371b753edb80209b16882bb593cf10ba3ae90a37e60b3fb9b5cbb21cc5f",
-      },
-      {
-        name: "ClearedOperatorHoldByPartition",
-        signature: {
-          full: "event ClearedOperatorHoldByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 clearingId, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, uint256 expirationDate, bytes data, bytes operatorData)",
-          canonical:
-            "ClearedOperatorHoldByPartition(address,address,bytes32,uint256,(uint256,uint256,address,address,bytes),uint256,bytes,bytes)",
-        },
-        topic0: "0x17dd09a4db5e9e5b1d8c758e255d3bb96a271cc551b1cedfb89724befce7b04b",
       },
       {
         name: "ClearedOperatorRedeemByPartition",
@@ -3121,15 +3103,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x252da371b753edb80209b16882bb593cf10ba3ae90a37e60b3fb9b5cbb21cc5f",
       },
       {
-        name: "ClearedOperatorHoldByPartition",
-        signature: {
-          full: "event ClearedOperatorHoldByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 clearingId, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, uint256 expirationDate, bytes data, bytes operatorData)",
-          canonical:
-            "ClearedOperatorHoldByPartition(address,address,bytes32,uint256,(uint256,uint256,address,address,bytes),uint256,bytes,bytes)",
-        },
-        topic0: "0x17dd09a4db5e9e5b1d8c758e255d3bb96a271cc551b1cedfb89724befce7b04b",
-      },
-      {
         name: "ClearedOperatorRedeemByPartition",
         signature: {
           full: "event ClearedOperatorRedeemByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 clearingId, uint256 amount, uint256 expirationDate, bytes data, bytes operatorData)",
@@ -3346,15 +3319,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
             "ClearedHoldFromByPartition(address,address,bytes32,uint256,(uint256,uint256,address,address,bytes),uint256,bytes,bytes)",
         },
         topic0: "0x252da371b753edb80209b16882bb593cf10ba3ae90a37e60b3fb9b5cbb21cc5f",
-      },
-      {
-        name: "ClearedOperatorHoldByPartition",
-        signature: {
-          full: "event ClearedOperatorHoldByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 clearingId, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, uint256 expirationDate, bytes data, bytes operatorData)",
-          canonical:
-            "ClearedOperatorHoldByPartition(address,address,bytes32,uint256,(uint256,uint256,address,address,bytes),uint256,bytes,bytes)",
-        },
-        topic0: "0x17dd09a4db5e9e5b1d8c758e255d3bb96a271cc551b1cedfb89724befce7b04b",
       },
       {
         name: "ClearedOperatorRedeemByPartition",
@@ -3645,15 +3609,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
             "ClearedHoldFromByPartition(address,address,bytes32,uint256,(uint256,uint256,address,address,bytes),uint256,bytes,bytes)",
         },
         topic0: "0x252da371b753edb80209b16882bb593cf10ba3ae90a37e60b3fb9b5cbb21cc5f",
-      },
-      {
-        name: "ClearedOperatorHoldByPartition",
-        signature: {
-          full: "event ClearedOperatorHoldByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 clearingId, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, uint256 expirationDate, bytes data, bytes operatorData)",
-          canonical:
-            "ClearedOperatorHoldByPartition(address,address,bytes32,uint256,(uint256,uint256,address,address,bytes),uint256,bytes,bytes)",
-        },
-        topic0: "0x17dd09a4db5e9e5b1d8c758e255d3bb96a271cc551b1cedfb89724befce7b04b",
       },
       {
         name: "ClearedOperatorRedeemByPartition",
@@ -10870,6 +10825,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   OperatorClearingHoldByPartitionFacet: {
     name: "OperatorClearingHoldByPartitionFacet",
+    description: "Diamond facet for partition-scoped operator clearing hold operations.",
     resolverKey: {
       name: "_OPERATOR_CLEARING_HOLDBYPARTITION_RESOLVER_KEY",
       value: "0xd57eac3a4394fdead2591bfb2fb7f7557f204b6c5b3787821394cb3f57a8ef90",
