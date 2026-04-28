@@ -75,7 +75,7 @@
     "@walletconnect/sign-client": "2.19.2",
     "@walletconnect/universal-provider": "2.21.9",
     "@walletconnect/utils": "2.19.2",
-    "axios": "^1.7.9",
+    "axios": "^1.15.0",
     "cd": "^0.3.3",
     "chai": "^4.3.8",
     "chai-as-promised": "^7.1.1",
