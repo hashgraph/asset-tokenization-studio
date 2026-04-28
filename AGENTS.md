@@ -303,6 +303,14 @@ done
 - **DI:** `tsyringe` (`reflect-metadata` required).
 - **CQRS:** Commands for writes, Queries for reads.
 
+### TypeScript Imports (project-wide)
+
+Applies to every TS / TSX file in the monorepo (contracts scripts/tests, SDK, web, mass-payout):
+
+- **Cross-module:** use TypeScript path aliases (`@scripts/...`, `@contract-types`, `@test`, `@core`, `@app/...` — see each package's `tsconfig.json`).
+- **Same-module:** use relative paths (`./sibling`, `../sibling`).
+- **Never import from a module's own barrel (`index.ts`)** — causes circular dependencies. Re-export from the barrel, but consume internal siblings via relative paths only.
+
 ### Git & Commits
 
 - **Conventional Commits:** `<type>(<scope>): <subject>`.
@@ -321,3 +329,15 @@ done
 - The SDK requires `NODE_OPTIONS=--max-old-space-size=16384` for test runs
 - Ethers v6 is used throughout — never use v5 patterns (`BigNumber`, `contract.address`, `_signTypedData`)
 - Commits require DCO sign-off (`--signoff`) and GPG signature (`-S`). Do not skip hooks with `--no-verify`
+
+## Local Overrides
+
+Personal, untracked notes live in `*.local.md` files at the repo root. Each agent's loader follows the `@import` lines below and silently skips any file that does not exist, so contributors can keep private rules without diverging from the tracked source of truth.
+
+- `AGENTS.local.md` — shared overrides loaded by every agent
+- `CLAUDE.local.md` — Claude Code-specific overrides
+- `GEMINI.local.md` — Gemini CLI-specific overrides
+
+@AGENTS.local.md
+@CLAUDE.local.md
+@GEMINI.local.md

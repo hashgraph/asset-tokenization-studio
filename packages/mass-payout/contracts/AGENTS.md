@@ -4,7 +4,20 @@ Solidity contracts for the **Scheduler Payment Distribution** flow. Uses **Hardh
 
 ## Quick Reference
 
+All commands are exposed at the **monorepo root** with the `mass-payout:contracts:*` prefix — see root `AGENTS.md` § Build & Development Commands:
+
 ```bash
+npm run mass-payout:contracts:build      # Compile contracts
+npm run mass-payout:contracts:test       # Hardhat tests
+npm run mass-payout:contracts:compile    # Solidity compilation only
+npm run mass-payout:lint                 # Solhint (workspace-wide)
+npm run mass-payout:format               # Prettier (workspace-wide)
+```
+
+Or from inside this package, run the unprefixed scripts:
+
+```bash
+cd packages/mass-payout/contracts
 npm run build      # Compile contracts
 npm run test       # Hardhat tests
 npm run lint       # Solhint

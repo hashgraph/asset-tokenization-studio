@@ -136,10 +136,12 @@ asset-tokenization-studio.iml
 # AI files — local agent workspaces are gitignored.
 # AGENTS.md (root) plus its CLAUDE.md / GEMINI.md symlinks are committed.
 # Skills live under .agents/skills/ and are committed.
+# Personal overrides live in *.local.md (e.g. CLAUDE.local.md) and stay local.
 .kiro/
 .claude/
 .gemini/
 .opencode/
+*.local.md
 
 .tasks/
 

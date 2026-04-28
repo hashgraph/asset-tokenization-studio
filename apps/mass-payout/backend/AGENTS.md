@@ -4,13 +4,25 @@ NestJS API backing the Scheduler Payment Distribution flow. Persists state in **
 
 ## Quick Reference
 
+All commands are exposed at the **monorepo root** with the `mass-payout:backend:*` prefix — see root `AGENTS.md` § Build & Development Commands:
+
 ```bash
-npm run start      # Run in production mode
-npm run start:dev  # Watch mode
-npm run build      # Build NestJS app
-npm run test       # Jest tests
-npm run lint       # ESLint
-npm run format     # Prettier
+npm run mass-payout:backend:build    # Build NestJS app
+npm run mass-payout:backend:test     # Jest tests
+npm run mass-payout:lint             # ESLint (workspace-wide)
+npm run mass-payout:format           # Prettier (workspace-wide)
+```
+
+Or from inside this package, run the unprefixed scripts (includes dev-only `start:dev` watch mode):
+
+```bash
+cd apps/mass-payout/backend
+npm run start          # Run in production mode
+npm run start:dev      # Watch mode (dev-only)
+npm run build          # Build NestJS app
+npm run test           # Jest tests
+npm run lint           # ESLint
+npm run format         # Prettier
 ```
 
 ## Scope

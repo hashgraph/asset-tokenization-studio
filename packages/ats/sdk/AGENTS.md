@@ -4,12 +4,22 @@ TypeScript SDK for the Asset Tokenization Studio. Uses **Jest** for testing.
 
 ## Quick Reference
 
+All commands are exposed at the **monorepo root** with the `ats:sdk:*` prefix — see root `AGENTS.md` § Build & Development Commands:
+
 ```bash
-npm run build                      # Build ESM + CJS
-npm run test                       # All tests (Jest, runInBand)
-npx jest path/to/file.test.ts      # Single test
-npm run lint                       # ESLint
-npm run format                     # Prettier
+npm run ats:sdk:build              # Build ESM + CJS
+npm run ats:sdk:test               # All tests (Jest, runInBand)
+```
+
+Or from inside this package, run the unprefixed scripts:
+
+```bash
+cd packages/ats/sdk
+npm run build                          # Build ESM + CJS
+npm run test                           # All tests (Jest, runInBand)
+npm run test -- path/to/file.test.ts   # Single test
+npm run lint                           # ESLint
+npm run format                         # Prettier
 ```
 
 ## Architecture — Hexagonal + DDD + CQRS
