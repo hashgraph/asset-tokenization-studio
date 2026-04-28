@@ -10,10 +10,10 @@ module.exports = {
     // Line length and formatting
     "max-line-length": ["error", 120],
     "max-states-count": ["off", 15],
-    quotes: ["error", "double"],
+    quotes: ["error", "double"], // Align with Prettier singleQuote: false
 
     // Code quality and safety
-    "no-empty-blocks": "off", // Disabled to allow try/catch empty blocks in Factory.sol
+    "no-empty-blocks": "off",
     "no-unused-vars": "error",
     "payable-fallback": "error",
     "reason-string": ["error", { maxLength: 80 }],
@@ -50,5 +50,7 @@ module.exports = {
 
     // Time-related rules (disabled as commonly needed in DeFi)
     "not-rely-on-time": "off",
+
+    "use-natspec": "warn",
   },
 };
