@@ -52,7 +52,7 @@ const EQUITY_FACETS = [
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
-  "TotalBalanceFacet",
+  "BalanceTrackerByPartitionFacet",
 
   // ERC Standards (13)
   "ERC1410IssuerFacet",
@@ -77,6 +77,7 @@ const EQUITY_FACETS = [
   // Clearing & Settlement (8)
   "ClearingActionsFacet",
   "ClearingHoldCreationFacet",
+  "OperatorClearingHoldByPartitionFacet",
   "ClearingReadFacet",
   "ClearingRedeemFacet",
   "ClearingTransferFacet",

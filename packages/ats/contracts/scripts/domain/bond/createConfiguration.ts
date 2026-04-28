@@ -49,7 +49,7 @@ const BOND_FACETS = [
   "SnapshotsFacet",
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
-  "TotalBalanceFacet",
+  "BalanceTrackerByPartitionFacet",
 
   // Core
   "CoreFacet",
@@ -84,6 +84,7 @@ const BOND_FACETS = [
   // Clearing & Settlement
   "ClearingActionsFacet",
   "ClearingHoldCreationFacet",
+  "OperatorClearingHoldByPartitionFacet",
   "ClearingReadFacet",
   "ClearingRedeemFacet",
   "ClearingTransferFacet",

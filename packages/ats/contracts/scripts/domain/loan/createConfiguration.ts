@@ -46,6 +46,7 @@ const LOAN_FACETS = [
   "AccessControlFacet",
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
+  "BalanceTrackerByPartitionFacet",
   "CapFacet",
   "ControlListFacet",
   "KycFacet",
@@ -91,6 +92,7 @@ const LOAN_FACETS = [
   "ClearingTransferFacet",
   "ClearingRedeemFacet",
   "ClearingHoldCreationFacet",
+  "OperatorClearingHoldByPartitionFacet",
   "ClearingReadFacet",
   "ClearingActionsFacet",
 

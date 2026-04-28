@@ -44,7 +44,7 @@ const BOND_FIXED_RATE_FACETS = [
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
-  "TotalBalanceFacet",
+  "BalanceTrackerByPartitionFacet",
 
   // Core
   "CoreFacet",
@@ -79,6 +79,7 @@ const BOND_FIXED_RATE_FACETS = [
   // Clearing & Settlement
   "ClearingActionsFacet",
   "ClearingHoldCreationFacet",
+  "OperatorClearingHoldByPartitionFacet",
   "ClearingReadFacet",
   "ClearingRedeemFacet",
   "ClearingTransferFacet",

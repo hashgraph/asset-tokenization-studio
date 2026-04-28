@@ -7,22 +7,29 @@ import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticF
 import { _CLEARING_HOLDCREATION_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
 contract ClearingHoldCreationFacet is ClearingHoldCreation, IStaticFunctionSelectors {
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _CLEARING_HOLDCREATION_RESOLVER_KEY;
     }
 
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
-        staticFunctionSelectors_[selectorIndex++] = this.clearingCreateHoldByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.clearingCreateHoldFromByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.operatorClearingCreateHoldByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.protectedClearingCreateHoldByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getClearingCreateHoldForByPartition.selector;
+        uint256 selectorIndex = 4;
+        staticFunctionSelectors_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this.clearingCreateHoldByPartition.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.clearingCreateHoldFromByPartition.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.protectedClearingCreateHoldByPartition.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getClearingCreateHoldForByPartition.selector;
+        }
     }
 
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(IClearingHoldCreation).interfaceId;
+        uint256 selectorIndex = 1;
+        staticInterfaceIds_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticInterfaceIds_[--selectorIndex] = type(IClearingHoldCreation).interfaceId;
+        }
     }
 }

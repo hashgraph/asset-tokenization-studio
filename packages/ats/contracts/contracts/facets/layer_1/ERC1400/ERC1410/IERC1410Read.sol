@@ -9,10 +9,6 @@ import { IERC1410Types } from "./IERC1410Types.sol";
  * for ERC1410 tokens including balance queries, partition information, and operator queries.
  */
 interface IERC1410Read is IERC1410Types {
-    function balanceOfByPartition(bytes32 _partition, address _tokenHolder) external view returns (uint256);
-
-    function totalSupplyByPartition(bytes32 _partition) external view returns (uint256);
-
     /**
      * @notice Use to get the list of partitions `_tokenHolder` is associated with
      * @param _tokenHolder An address corresponds whom partition list is queried

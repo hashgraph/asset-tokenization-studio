@@ -51,7 +51,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
-  "TotalBalanceFacet",
+  "BalanceTrackerByPartitionFacet",
 
   // ERC Standards
   "ERC1410IssuerFacet",
@@ -76,6 +76,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   // Clearing & Settlement
   "ClearingActionsFacet",
   "ClearingHoldCreationFacet",
+  "OperatorClearingHoldByPartitionFacet",
   "ClearingReadFacet",
   "ClearingRedeemFacet",
   "ClearingTransferFacet",
