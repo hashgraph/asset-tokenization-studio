@@ -133,15 +133,13 @@ asset-tokenization-studio.iml
 # IntelliJ Idea
 /.idea/
 
-# AI files
+# AI files — local agent workspaces are gitignored.
+# AGENTS.md (root) plus its CLAUDE.md / GEMINI.md symlinks are committed.
+# Skills live under .agents/skills/ and are committed.
 .kiro/
-.claude/*
-!.claude/skills/
-.claude/skills/*
-!.claude/skills/solidity-natspec/
+.claude/
+.gemini/
 .opencode/
-CLAUDE.md
-AGENTS.md
 
 .tasks/
 

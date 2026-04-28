@@ -204,7 +204,7 @@ Environment files: copy `.env.example` → `.env` in each package/app directory.
 
 ## PR Guidelines
 
-- Target **`develop`** branch (not `main`)
+- Target the integration branch (**`develop`** or **`development`** depending on the active workflow), not `main`
 - Changeset file required (bypass with labels: `no-changeset`, `docs-only`, `chore`, `hotfix`)
 - CI runs tests only for changed modules
 
@@ -228,7 +228,7 @@ packages/
   ats/sdk/AGENTS.md           # Package-specific context
 ```
 
-No agent-specific directories (`.claude/`, `.gemini/`, etc.) are committed to the repo. Each agent reads this file and self-configures on session start.
+Agent-specific workspaces (`.claude/`, `.gemini/`, …) are **local-only** (gitignored) — each agent generates them on session start. Only two committed concessions exist for cross-agent compatibility: `CLAUDE.md` and `GEMINI.md` at the repo root are kept as **symlinks to `AGENTS.md`**, so every agent reads the same source of truth without duplication.
 
 ### How It Works
 
@@ -267,7 +267,7 @@ Step-by-step instructions for the agent...
 
 When starting a session, each agent must self-configure based on its own requirements:
 
-**Claude Code** — Skills must be symlinked to `.claude/commands/` for slash command support:
+**Claude Code** — Reads `CLAUDE.md` (shipped as a symlink to `AGENTS.md`) for project context. Skills must additionally be symlinked into the local-only `.claude/commands/` directory for slash command support:
 
 ```bash
 mkdir -p .claude/commands
@@ -277,7 +277,7 @@ for skill in .agents/skills/*/SKILL.md; do
 done
 ```
 
-**Gemini CLI** — Uses `GEMINI.md` for foundational mandates. To ensure consistency, `GEMINI.md` should reference this file as the primary source of truth.
+**Gemini CLI** — Reads `GEMINI.md` for foundational mandates. The repo ships `GEMINI.md` as a symlink to `AGENTS.md` so the contexts cannot drift.
 
 **OpenAI Codex / Cursor / VS Code / Others** — No setup needed. These agents discover `.agents/skills/` natively.
 
@@ -302,6 +302,7 @@ done
 ### Available Skills
 
 - `update-docs` — Update project documentation based on recent commits
+- `solidity-natspec` — Produce and validate audit-ready NatSpec on `.sol` files. Auto-triggers when any contract under `packages/ats/contracts/**` is created or modified, or on explicit request (`/solidity-natspec [path]`) for a full pass
 
 ### Notes
 

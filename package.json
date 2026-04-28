@@ -43,7 +43,7 @@
     "clean:full": "npm run clean:workspaces && npm run clean:root && npm run clean:deps:full && echo '\\n✅ Complete cleanup finished — workspaces, dependencies, and root junk removed'",
     "lint:staged:js": "eslint --cache",
     "lint:staged:sol": "solhint --config packages/ats/contracts/solhint.config.js",
-    "format:staged": "prettier --write",
+    "format:staged": "node format-staged.js",
     "format:staged:check": "prettier --check",
     "pre-commit": "lint-staged",
     "commitlint": "commitlint --edit",

@@ -17,16 +17,20 @@ These standards are supported by Claude Code, Gemini CLI, OpenAI Codex, Cursor, 
 
 ```
 AGENTS.md                         # Root context — any AI agent reads this
+CLAUDE.md                         # Symlink → AGENTS.md (committed, for Claude Code)
+GEMINI.md                         # Symlink → AGENTS.md (committed, for Gemini CLI)
 .agents/
   skills/                         # Agent Skills (agentskills.io standard)
     update-docs/
       SKILL.md                    # Skill definition with YAML frontmatter
+    solidity-natspec/
+      SKILL.md
 packages/
   ats/contracts/AGENTS.md         # Package-scoped context
   ats/sdk/AGENTS.md               # Package-scoped context
 ```
 
-No agent-specific directories (`.claude/`, `.gemini/`, etc.) are committed. Each agent reads `AGENTS.md` and self-configures on session start.
+Agent-specific directories (`.claude/`, `.gemini/`, etc.) are **not committed** — they are local-only workspaces each agent generates on session start. The only committed concession is the pair of root symlinks `CLAUDE.md` and `GEMINI.md` pointing to `AGENTS.md`, so every agent reads the same source of truth without duplication.
 
 ## How It Works
 
@@ -58,24 +62,25 @@ Skills in `.agents/skills/` are **auto-discovered** by most compatible agents �
 
 **Current skills:**
 
-| Skill         | Description                                          |
-| ------------- | ---------------------------------------------------- |
-| `update-docs` | Update project documentation based on recent commits |
+| Skill              | Description                                                                                                                                            |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `update-docs`      | Update project documentation based on recent commits                                                                                                   |
+| `solidity-natspec` | Produce and validate audit-ready NatSpec on `.sol` files. Auto-triggers on any contract under `packages/ats/contracts/**`, or via `/solidity-natspec`. |
 
 ### 3. Agent Self-Configuration
 
 Each agent reads `AGENTS.md` on session start and configures itself:
 
-| Agent             | `.agents/skills/` discovery | Extra setup needed                                |
-| ----------------- | --------------------------- | ------------------------------------------------- |
-| Gemini CLI        | Native                      | None                                              |
-| OpenAI Codex      | Native                      | None                                              |
-| Cursor            | Native                      | None                                              |
-| VS Code (Copilot) | Native                      | None                                              |
-| GitHub Copilot    | Native                      | None                                              |
-| Claude Code       | Not native                  | Symlinks to `.claude/commands/` (created on init) |
+| Agent             | `.agents/skills/` discovery | Extra setup needed                                                                                           |
+| ----------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Gemini CLI        | Native                      | None — reads `GEMINI.md` (committed symlink to `AGENTS.md`)                                                  |
+| OpenAI Codex      | Native                      | None                                                                                                         |
+| Cursor            | Native                      | None                                                                                                         |
+| VS Code (Copilot) | Native                      | None                                                                                                         |
+| GitHub Copilot    | Native                      | None                                                                                                         |
+| Claude Code       | Not native                  | Reads `CLAUDE.md` (committed symlink to `AGENTS.md`); skills must be linked into `.claude/commands/` on init |
 
-For Claude Code, the `AGENTS.md` includes init instructions to create the required symlinks automatically.
+For Claude Code, `CLAUDE.md` is already provided as a symlink in the repo; the agent additionally creates the local-only `.claude/commands/` symlinks on session start using the snippet documented in `AGENTS.md`.
 
 ## Adding a New Skill
 
@@ -109,5 +114,5 @@ No repo changes needed. If the agent supports AGENTS.md or Agent Skills, it work
 
 - **Keep `AGENTS.md` as the single source of truth** — No duplication across agent-specific files
 - **Follow the [Agent Skills spec](https://agentskills.io/specification)** — Use proper `name` and `description` frontmatter
-- **No agent-specific directories in the repo** — Agents self-configure at runtime
+- **No agent-specific directories committed** — Agents self-configure at runtime; only the `CLAUDE.md` and `GEMINI.md` root symlinks to `AGENTS.md` are committed
 - **Package-level `AGENTS.md`** — Only add when the package has specific conventions that differ from the root
