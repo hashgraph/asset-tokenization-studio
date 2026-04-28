@@ -47,6 +47,7 @@ const BOND_FACETS = [
   "PauseFacet",
   "SnapshotsFacet",
   "BalanceTrackerFacet",
+  "BalanceTrackerAdjustedFacet",
   "TotalBalanceFacet",
 
   // Core

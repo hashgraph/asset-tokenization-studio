@@ -48,6 +48,7 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "KycFacet",
   "PauseFacet",
   "BalanceTrackerFacet",
+  "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
   "TotalBalanceFacet",
 
