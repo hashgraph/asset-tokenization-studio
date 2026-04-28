@@ -38,6 +38,7 @@ const BOND_FIXED_RATE_FACETS = [
   "CorporateActionsFacet",
   "DiamondFacet",
   "FreezeFacet",
+  "BatchFreezeFacet",
   "KycFacet",
   "PauseFacet",
   "BalanceTrackerFacet",

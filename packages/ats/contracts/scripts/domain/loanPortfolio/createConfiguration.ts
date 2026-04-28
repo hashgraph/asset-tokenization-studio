@@ -52,6 +52,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "TransferFacet",
   "CoreAdjustedFacet",
   "FreezeFacet",
+  "BatchFreezeFacet",
   "KycFacet",
   "PauseFacet",
   "BalanceTrackerFacet",

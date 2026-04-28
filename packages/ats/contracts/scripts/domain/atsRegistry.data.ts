@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-28T09:21:54.438Z
- * Facets: 90
+ * Generated: 2026-04-28T10:44:02.805Z
+ * Facets: 91
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -27,6 +27,7 @@ import {
   BalanceTrackerFacet__factory,
   BatchBurnFacet__factory,
   BatchControllerFacet__factory,
+  BatchFreezeFacet__factory,
   BatchMintFacet__factory,
   BatchTransferFacet__factory,
   BondUSAFacet__factory,
@@ -1119,6 +1120,171 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     factory: (signer) => new BatchControllerFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
     timeTravelFactory: (signer) =>
       new BatchControllerFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
+  },
+
+  BatchFreezeFacet: {
+    name: "BatchFreezeFacet",
+    description:
+      "Diamond facet that exposes batch freeze and unfreeze operations through the `IBatchFreeze` interface, registered under `_BATCH_FREEZE_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_BATCH_FREEZE_RESOLVER_KEY",
+      value: "0x2f58eaa3e08a94a58af659b6fd0a0c4e30bd5e789982c50863ce4e499535711c",
+    },
+    inheritance: ["BatchFreeze", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "batchFreezePartialTokens",
+        signature: {
+          full: "function batchFreezePartialTokens(address[] _userAddresses, uint256[] _amounts)",
+          canonical: "batchFreezePartialTokens(address[],uint256[])",
+        },
+        selector: "0xfc7e5fa8",
+      },
+      {
+        name: "batchSetAddressFrozen",
+        signature: {
+          full: "function batchSetAddressFrozen(address[] _userAddresses, bool[] _freeze)",
+          canonical: "batchSetAddressFrozen(address[],bool[])",
+        },
+        selector: "0x1a7af379",
+      },
+      {
+        name: "batchUnfreezePartialTokens",
+        signature: {
+          full: "function batchUnfreezePartialTokens(address[] _userAddresses, uint256[] _amounts)",
+          canonical: "batchUnfreezePartialTokens(address[],uint256[])",
+        },
+        selector: "0x4710362d",
+      },
+    ],
+    events: [
+      {
+        name: "AddressFrozen",
+        signature: {
+          full: "event AddressFrozen(address indexed userAddress, bool indexed isFrozen, address indexed owner)",
+          canonical: "AddressFrozen(address,bool,address)",
+        },
+        topic0: "0x7fa523c84ab8d7fc5b72f08b9e46dbbf10c39e119a075b3e317002d14bc9f436",
+      },
+      {
+        name: "TokensFrozen",
+        signature: {
+          full: "event TokensFrozen(address indexed account, uint256 amount, bytes32 partition)",
+          canonical: "TokensFrozen(address,uint256,bytes32)",
+        },
+        topic0: "0xd736f88140588a48bf2ce0d40c8ed9eea7d10162e5667cf5054c78ac9a28b2e2",
+      },
+      {
+        name: "TokensUnfrozen",
+        signature: {
+          full: "event TokensUnfrozen(address indexed account, uint256 amount, bytes32 partition)",
+          canonical: "TokensUnfrozen(address,uint256,bytes32)",
+        },
+        topic0: "0x8b0e34ce56cda141218491fb231baf3165de0352a77ac6f07e7583b301d9452d",
+      },
+      {
+        name: "Transfer",
+        signature: {
+          full: "event Transfer(address indexed from, address indexed to, uint256 value)",
+          canonical: "Transfer(address,address,uint256)",
+        },
+        topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+      },
+      {
+        name: "TransferByPartition",
+        signature: {
+          full: "event TransferByPartition(bytes32 indexed _fromPartition, address _operator, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)",
+          canonical: "TransferByPartition(bytes32,address,address,address,uint256,bytes,bytes)",
+        },
+        topic0: "0xff4e9a26af4eb73b8bacfaa4abd4fea03d9448e7b912dc5ff4019048875aa2d4",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRoles",
+        signature: {
+          full: "error AccountHasNoRoles(address account, bytes32[] roles)",
+          canonical: "AccountHasNoRoles(address,bytes32[])",
+        },
+        selector: "0x90e55392",
+      },
+      {
+        name: "InputAmountsArrayLengthMismatch",
+        signature: { full: "error InputAmountsArrayLengthMismatch()", canonical: "InputAmountsArrayLengthMismatch()" },
+        selector: "0x64f13710",
+      },
+      {
+        name: "InputBoolArrayLengthMismatch",
+        signature: { full: "error InputBoolArrayLengthMismatch()", canonical: "InputBoolArrayLengthMismatch()" },
+        selector: "0x07ac0eb9",
+      },
+      {
+        name: "InsufficientBalance",
+        signature: {
+          full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
+          canonical: "InsufficientBalance(address,uint256,uint256,bytes32)",
+        },
+        selector: "0x5d6824c4",
+      },
+      {
+        name: "InsufficientFrozenBalance",
+        signature: {
+          full: "error InsufficientFrozenBalance(address user, uint256 requestedUnfreeze, uint256 availableFrozen, bytes32 partition)",
+          canonical: "InsufficientFrozenBalance(address,uint256,uint256,bytes32)",
+        },
+        selector: "0xefafde54",
+      },
+      {
+        name: "InvalidPartition",
+        signature: {
+          full: "error InvalidPartition(address account, bytes32 partition)",
+          canonical: "InvalidPartition(address,bytes32)",
+        },
+        selector: "0xbf84f4ec",
+      },
+      {
+        name: "NotAllowedInMultiPartitionMode",
+        signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
+        selector: "0x76d08f88",
+      },
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+      {
+        name: "WalletRecovered",
+        signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
+        selector: "0xf9f9bcf9",
+      },
+      {
+        name: "ZeroAddressNotAllowed",
+        signature: { full: "error ZeroAddressNotAllowed()", canonical: "ZeroAddressNotAllowed()" },
+        selector: "0x8579befe",
+      },
+    ],
+    factory: (signer) => new BatchFreezeFacet__factory(signer),
   },
 
   BatchMintFacet: {
@@ -8411,30 +8577,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["Freeze", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "batchFreezePartialTokens",
-        signature: {
-          full: "function batchFreezePartialTokens(address[] _userAddresses, uint256[] _amounts)",
-          canonical: "batchFreezePartialTokens(address[],uint256[])",
-        },
-        selector: "0xfc7e5fa8",
-      },
-      {
-        name: "batchSetAddressFrozen",
-        signature: {
-          full: "function batchSetAddressFrozen(address[] _userAddresses, bool[] _freeze)",
-          canonical: "batchSetAddressFrozen(address[],bool[])",
-        },
-        selector: "0x1a7af379",
-      },
-      {
-        name: "batchUnfreezePartialTokens",
-        signature: {
-          full: "function batchUnfreezePartialTokens(address[] _userAddresses, uint256[] _amounts)",
-          canonical: "batchUnfreezePartialTokens(address[],uint256[])",
-        },
-        selector: "0x4710362d",
-      },
-      {
         name: "freezePartialTokens",
         signature: {
           full: "function freezePartialTokens(address _userAddress, uint256 _amount)",
@@ -8525,16 +8667,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountHasNoRoles(address,bytes32[])",
         },
         selector: "0x90e55392",
-      },
-      {
-        name: "InputAmountsArrayLengthMismatch",
-        signature: { full: "error InputAmountsArrayLengthMismatch()", canonical: "InputAmountsArrayLengthMismatch()" },
-        selector: "0x64f13710",
-      },
-      {
-        name: "InputBoolArrayLengthMismatch",
-        signature: { full: "error InputBoolArrayLengthMismatch()", canonical: "InputBoolArrayLengthMismatch()" },
-        selector: "0x07ac0eb9",
       },
       {
         name: "InsufficientBalance",
@@ -13292,7 +13424,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 90 as const;
+export const TOTAL_FACETS = 91 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

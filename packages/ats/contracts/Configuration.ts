@@ -131,6 +131,7 @@ export const CONTRACT_NAMES = [
   "BatchMintFacet",
   "BatchTransferFacet",
   "FreezeFacet",
+  "BatchFreezeFacet",
   "TREXFactoryAts",
   "ComplianceMock",
   "IdentityRegistryMock",
