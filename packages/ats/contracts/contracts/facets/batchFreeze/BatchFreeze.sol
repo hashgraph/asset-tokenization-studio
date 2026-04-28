@@ -28,11 +28,16 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
         onlyValidInputBoolArrayLength(_userAddresses, _freeze)
         onlyFreezeRoles(EvmAccessors.getMsgSender())
     {
-        for (uint256 i = 0; i < _userAddresses.length; ++i) {
+        uint256 length = _userAddresses.length;
+        address sender = EvmAccessors.getMsgSender();
+        for (uint256 i; i < length; ) {
             ExternalListManagementStorageWrapper.checkValidAddress(_userAddresses[i]);
             ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
             ERC3643StorageWrapper.setAddressFrozen(_userAddresses[i], _freeze[i]);
-            emit IFreeze.AddressFrozen(_userAddresses[i], _freeze[i], EvmAccessors.getMsgSender());
+            emit IFreeze.AddressFrozen(_userAddresses[i], _freeze[i], sender);
+            unchecked {
+                ++i;
+            }
         }
     }
 
@@ -45,13 +50,17 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
         onlyUnpaused
         onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
         onlyWithoutMultiPartition
-        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
+        onlyFreezeRoles(EvmAccessors.getMsgSender())
     {
-        for (uint256 i = 0; i < _userAddresses.length; ++i) {
+        uint256 length = _userAddresses.length;
+        for (uint256 i; i < length; ) {
             ERC1410StorageWrapper.requireValidAddress(_userAddresses[i]);
             ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
             ERC3643StorageWrapper.freezeTokens(_userAddresses[i], _amounts[i]);
             emit IFreeze.TokensFrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);
+            unchecked {
+                ++i;
+            }
         }
     }
 
@@ -64,13 +73,17 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
         onlyUnpaused
         onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
         onlyWithoutMultiPartition
-        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
+        onlyFreezeRoles(EvmAccessors.getMsgSender())
     {
-        for (uint256 i = 0; i < _userAddresses.length; ++i) {
+        uint256 length = _userAddresses.length;
+        for (uint256 i; i < length; ) {
             ERC1410StorageWrapper.requireValidAddress(_userAddresses[i]);
             ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
             ERC3643StorageWrapper.unfreezeTokens(_userAddresses[i], _amounts[i], 0);
             emit IFreeze.TokensUnfrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);
+            unchecked {
+                ++i;
+            }
         }
     }
 }
