@@ -4,12 +4,11 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type IAsset, type ResolverProxy } from "@contract-types";
-import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
+import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO } from "@scripts";
+import { ATS_ROLES, EMPTY_STRING, ZERO } from "@scripts";
 
 const AMOUNT = 1000;
-const BALANCE_OF_C_ORIGINAL = 2 * AMOUNT;
 const DATA = "0x1234";
 const MAX_SUPPLY = 10000000;
 const EMPTY_VC_ID = EMPTY_STRING;
@@ -23,68 +22,6 @@ describe("ERC1594 Tests", () => {
   let signer_E: HardhatEthersSigner;
 
   let asset: IAsset;
-
-  describe("Multi partition mode", () => {
-    async function deploySecurityFixtureMultiPartition() {
-      const base = await deployEquityTokenFixture({
-        equityDataParams: {
-          securityData: {
-            isMultiPartition: true,
-            internalKycActivated: true,
-          },
-        },
-      });
-      diamond = base.diamond;
-      signer_A = base.deployer;
-      signer_B = base.user1;
-      signer_C = base.user2;
-      signer_D = base.user3;
-      signer_E = base.user4;
-
-      asset = await ethers.getContractAt("IAsset", diamond.target);
-      await executeRbac(asset, [
-        {
-          role: ATS_ROLES.PAUSER_ROLE,
-          members: [signer_B.address],
-        },
-        {
-          role: ATS_ROLES.CLEARING_ROLE,
-          members: [signer_B.address],
-        },
-        {
-          role: ATS_ROLES.KYC_ROLE,
-          members: [signer_B.address],
-        },
-      ]);
-
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
-    }
-
-    beforeEach(async () => {
-      await loadFixture(deploySecurityFixtureMultiPartition);
-    });
-
-    it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-      await expect(asset.initialize_ERC1594()).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
-    });
-
-    describe("NotAllowedInMultiPartitionMode", () => {
-      it("GIVEN an initialized token WHEN redeem THEN fails with NotAllowedInMultiPartitionMode", async () => {
-        // transfer with data fails
-        await expect(asset.connect(signer_C).redeem(2 * BALANCE_OF_C_ORIGINAL, DATA)).to.be.revertedWithCustomError(
-          asset,
-          "NotAllowedInMultiPartitionMode",
-        );
-      });
-
-      it("GIVEN an initialized token WHEN redeemFrom THEN fails with NotAllowedInMultiPartitionMode", async () => {
-        // transfer with data fails
-        await expect(
-          asset.connect(signer_C).redeemFrom(signer_D.address, 2 * BALANCE_OF_C_ORIGINAL, DATA),
-        ).to.be.revertedWithCustomError(asset, "NotAllowedInMultiPartitionMode");
-      });
-    });
-  });
 
   describe("Single partition mode", () => {
     async function deploySecurityFixtureSinglePartition() {
@@ -289,165 +226,6 @@ describe("ERC1594 Tests", () => {
           );
         },
       );
-    });
-
-    it("GIVEN an account with balance WHEN redeem THEN transaction succeeds", async () => {
-      // issue succeeds
-      await asset.connect(signer_C).issue(signer_E.address, AMOUNT, DATA);
-
-      expect(await asset.connect(signer_E).redeem(AMOUNT / 2, DATA))
-        .to.emit(asset, "Redeemed")
-        .withArgs(signer_E.address, signer_E.address, AMOUNT / 2);
-      expect(await asset.totalSupply()).to.be.equal(AMOUNT / 2);
-      expect(await asset.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
-      expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.be.equal(AMOUNT / 2);
-      expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.be.equal(AMOUNT / 2);
-    });
-
-    it(
-      "GIVEN an account with balance and another with allowance " + "WHEN redeemFrom " + "THEN transaction succeeds",
-      async () => {
-        // issue succeeds
-        await asset.issue(signer_E.address, AMOUNT, DATA);
-
-        await asset.connect(signer_E).approve(signer_D.address, AMOUNT / 2);
-
-        expect(await asset.connect(signer_D).redeemFrom(signer_E.address, AMOUNT / 2, DATA))
-          .to.emit(asset, "Redeemed")
-          .withArgs(signer_D.address, signer_E.address, AMOUNT / 2);
-
-        expect(await asset.connect(signer_E).allowance(signer_E.address, signer_D.address)).to.be.equal(0);
-        expect(await asset.totalSupply()).to.be.equal(AMOUNT / 2);
-        expect(await asset.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
-        expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.be.equal(AMOUNT / 2);
-        expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.be.equal(AMOUNT / 2);
-      },
-    );
-
-    describe("Recovered Addresses", () => {
-      beforeEach(async () => {
-        // Grant AGENT_ROLE to signer_A for recovery operations
-        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
-
-        // Issue tokens to signer_E and signer_C
-        await asset.issue(signer_E.address, AMOUNT, DATA);
-        await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
-        await asset.issue(signer_C.address, AMOUNT, DATA);
-      });
-
-      it("GIVEN a recovered msgSender WHEN redeemFrom THEN transaction fails with WalletRecovered", async () => {
-        // Approve BEFORE recovering the address
-        await asset.connect(signer_E).approve(signer_C.address, AMOUNT / 2);
-
-        // Recover signer_C's address
-        await asset.recoveryAddress(signer_C.address, signer_D.address, ethers.ZeroAddress);
-
-        // Verify recovery was successful
-        expect(await asset.isAddressRecovered(signer_C.address)).to.be.true;
-
-        // signer_C is now recovered and cannot call redeemFrom
-        await expect(
-          asset.connect(signer_C).redeemFrom(signer_E.address, AMOUNT / 2, DATA),
-        ).to.be.revertedWithCustomError(asset, "WalletRecovered");
-      });
-
-      it("GIVEN a recovered tokenHolder WHEN redeemFrom THEN transaction fails with WalletRecovered", async () => {
-        // Recover signer_E's address
-        await asset.recoveryAddress(signer_E.address, signer_D.address, ethers.ZeroAddress);
-
-        // Verify recovery was successful
-        expect(await asset.isAddressRecovered(signer_E.address)).to.be.true;
-
-        // Try to redeem from recovered address (signer_E) using signer_C
-        await expect(
-          asset.connect(signer_C).redeemFrom(signer_E.address, AMOUNT / 2, DATA),
-        ).to.be.revertedWithCustomError(asset, "WalletRecovered");
-      });
-    });
-
-    describe("Protected Partitions with Wild Card Role", () => {
-      beforeEach(async () => {
-        // Deploy a new token with protected partitions
-        const infrastructure = await loadFixture(deployAtsInfrastructureFixture);
-        const base = await deployEquityTokenFixture({
-          equityDataParams: {
-            securityData: {
-              internalKycActivated: true,
-              maxSupply: MAX_SUPPLY,
-              arePartitionsProtected: true,
-            },
-          },
-          infrastructure,
-        });
-
-        diamond = base.diamond;
-        signer_A = base.deployer;
-        signer_B = base.user1;
-        signer_C = base.user2;
-        signer_D = base.user3;
-        signer_E = base.user4;
-
-        asset = await ethers.getContractAt("IAsset", diamond.target);
-        await executeRbac(asset, [
-          {
-            role: ATS_ROLES.ISSUER_ROLE,
-            members: [signer_C.address],
-          },
-          {
-            role: ATS_ROLES.KYC_ROLE,
-            members: [signer_B.address],
-          },
-          {
-            role: ATS_ROLES.SSI_MANAGER_ROLE,
-            members: [signer_A.address],
-          },
-          {
-            role: ATS_ROLES.PROTECTED_PARTITIONS_ROLE,
-            members: [signer_A.address],
-          },
-          {
-            role: ATS_ROLES.WILD_CARD_ROLE,
-            members: [signer_E.address],
-          },
-        ]);
-
-        // Setup KYC
-        await asset.connect(signer_A).addIssuer(signer_E.address);
-        await asset.connect(signer_B).grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
-        await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
-
-        // Protect partitions
-        await asset.connect(signer_A).protectPartitions();
-
-        // Issue tokens to signer_E
-        await asset.connect(signer_C).issue(signer_E.address, AMOUNT, DATA);
-      });
-
-      it("GIVEN protected partitions and wildcard role WHEN redeem THEN transaction succeeds", async () => {
-        expect(await asset.connect(signer_E).redeem(AMOUNT / 2, DATA))
-          .to.emit(asset, "Redeemed")
-          .withArgs(ethers.ZeroAddress, signer_E.address, AMOUNT / 2);
-
-        expect(await asset.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
-        expect(await asset.totalSupply()).to.be.equal(AMOUNT / 2);
-      });
-
-      it("GIVEN protected partitions without wildcard role WHEN redeem THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
-        // signer_D doesn't have wildcard role
-        await expect(asset.connect(signer_D).redeem(AMOUNT / 2, DATA)).to.be.revertedWithCustomError(
-          asset,
-          "PartitionsAreProtectedAndNoRole",
-        );
-      });
-
-      it("GIVEN protected partitions without wildcard role WHEN redeemFrom THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
-        // signer_E approves signer_D (who doesn't have wildcard role)
-        await asset.approve(signer_D.address, AMOUNT / 2);
-
-        await expect(
-          asset.connect(signer_D).redeemFrom(signer_E.address, AMOUNT / 2, DATA),
-        ).to.be.revertedWithCustomError(asset, "PartitionsAreProtectedAndNoRole");
-      });
     });
   });
 });

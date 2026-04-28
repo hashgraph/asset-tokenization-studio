@@ -6,6 +6,9 @@ import { IMint } from "./IMint.sol";
 import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { ITransfer } from "../transfer/ITransfer.sol";
+import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title Mint
@@ -16,6 +19,13 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
  *      compliance checks, and differ only in the calldata payload they accept.
  */
 abstract contract Mint is IMint, Modifiers {
+    /// @inheritdoc IMint
+    /// @dev Reverts via `onlyNotERC1594Initialized` if the facet is already initialised.
+    // solhint-disable-next-line func-name-mixedcase
+    function initialize_ERC1594() external override onlyNotERC1594Initialized {
+        ERC1594StorageWrapper.initialize();
+    }
+
     /// @inheritdoc IMint
     function issue(
         address _tokenHolder,
@@ -31,7 +41,9 @@ abstract contract Mint is IMint, Modifiers {
         onlyIdentifiedAddresses(address(0), _tokenHolder)
         onlyCompliant(address(0), _tokenHolder, false)
     {
-        ERC1594StorageWrapper.issue(_tokenHolder, _value, _data);
+        TokenCoreOps.issue(_tokenHolder, _value);
+        emit ITransfer.Transfer(address(0), _tokenHolder, _value);
+        emit IMint.Issued(EvmAccessors.getMsgSender(), _tokenHolder, _value, _data);
     }
 
     /// @inheritdoc IMint
@@ -48,7 +60,9 @@ abstract contract Mint is IMint, Modifiers {
         onlyIdentifiedAddresses(address(0), _to)
         onlyCompliant(address(0), _to, false)
     {
-        ERC1594StorageWrapper.issue(_to, _amount, "");
+        TokenCoreOps.issue(_to, _amount);
+        emit ITransfer.Transfer(address(0), _to, _amount);
+        emit IMint.Issued(EvmAccessors.getMsgSender(), _to, _amount, "");
     }
 
     /// @inheritdoc IMint

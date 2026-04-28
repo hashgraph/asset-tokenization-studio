@@ -85,8 +85,7 @@ import { IComplianceFacet } from "./compliance/IComplianceFacet.sol";
 import { IMint } from "./mint/IMint.sol";
 import { IHoldFacet } from "./hold/IHoldFacet.sol";
 import { IBatchController } from "./batchController/IBatchController.sol";
-import { IERC1594 } from "./layer_1/ERC1400/ERC1594/IERC1594.sol";
-
+import { IBurn } from "./burn/IBurn.sol";
 import { IDocumentation } from "./documentation/IDocumentation.sol";
 import { IController } from "./controller/IController.sol";
 import { IControllerHoldByPartition } from "./controllerHoldByPartition/IControllerHoldByPartition.sol";
@@ -133,6 +132,7 @@ interface IAsset is
     IERC20Votes,
     IERC1410,
     IERC3643,
+    IBurn,
     IScheduledCrossOrderedTasks,
     IScheduledSnapshots,
     IBond,
@@ -177,7 +177,6 @@ interface IAsset is
     IBatchController,
     IHoldByPartition,
     IMint,
-    IERC1594,
     IDocumentation,
     IController,
     IControllerHoldByPartition,

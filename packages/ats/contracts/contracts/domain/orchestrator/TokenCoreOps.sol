@@ -92,8 +92,16 @@ library TokenCoreOps {
         ERC20StorageWrapper.burn(_from, _value);
     }
 
-    function burnFrom(address _account, uint256 _value) public {
-        ERC20StorageWrapper.burnFrom(_account, _value);
+    function issue(address _tokenHolder, uint256 _value) public {
+        ERC1594StorageWrapper.issue(_tokenHolder, _value);
+    }
+
+    function redeem(uint256 _value) public {
+        ERC1594StorageWrapper.redeem(_value);
+    }
+
+    function redeemFrom(address _tokenHolder, uint256 _value) public {
+        ERC1594StorageWrapper.redeemFrom(_tokenHolder, _value);
     }
 
     function approve(address _owner, address _spender, uint256 _value) public returns (bool) {

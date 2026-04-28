@@ -473,7 +473,8 @@ The ATS contracts implement a **4-layer hierarchical design** using the **Diamon
 - `ERC1410ReadFacet`: Read-only token state queries
 - `ERC1410TokenHolderFacet`: Token holder operations
 - `ERC20Facet`: ERC20 compatibility layer
-- `ERC1594Facet`: Security token issuance and redemption
+- `MintFacet`: Security token issuance
+- `BurnFacet`: Security token redemption
 - `ERC1644Facet`: Controller operations for forced transfers
 
 **ERC3643 (T-REX) Compliance Facets:**

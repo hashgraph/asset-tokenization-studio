@@ -10,7 +10,7 @@ import { _MINT_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
  * @title MintFacet
  * @author Asset Tokenization Studio Team
  * @notice Diamond facet exposing the consolidated token issuance entry points.
- * @dev Registers three selectors: `isIssuable`, `issue` and `mint`. Inherits the business logic
+ * @dev Registers four selectors: `initialize_ERC1594`, `isIssuable`, `issue` and `mint`. Inherits the business logic
  *      from the `Mint` abstract contract.
  */
 contract MintFacet is Mint, IStaticFunctionSelectors {
@@ -21,12 +21,13 @@ contract MintFacet is Mint, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 3;
+        uint256 selectorIndex = 4;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);
         unchecked {
             staticFunctionSelectors_[--selectorIndex] = this.mint.selector;
             staticFunctionSelectors_[--selectorIndex] = this.issue.selector;
             staticFunctionSelectors_[--selectorIndex] = this.isIssuable.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.initialize_ERC1594.selector;
         }
     }
 

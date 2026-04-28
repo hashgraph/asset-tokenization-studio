@@ -21,6 +21,14 @@ interface IMint {
     event Issued(address indexed _operator, address indexed _to, uint256 _value, bytes _data);
 
     /**
+     * @notice Initialises the ERC-1594 StorageWrapper on the calling contract.
+     * @dev Can only be invoked once per contract; subsequent calls revert via the
+     *      `onlyNotERC1594Initialized` modifier on the implementation.
+     */
+    // solhint-disable-next-line func-name-mixedcase
+    function initialize_ERC1594() external;
+
+    /**
      * @notice Issues new tokens to a token holder under the ERC-1594 semantics.
      * @dev Restricted to issuer or agent roles. Increases the total supply and emits
      *      `IERC1594.Issued`. Only callable in single-partition mode and when the token is

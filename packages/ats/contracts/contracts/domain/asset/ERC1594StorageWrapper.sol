@@ -13,7 +13,6 @@ import { IIdentityRegistry } from "../../facets/layer_1/ERC3643/IIdentityRegistr
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { ITransfer } from "../../facets/transfer/ITransfer.sol";
-import { IMint } from "../../facets/mint/IMint.sol";
 import { IAllowanceTypes } from "../../facets/allowance/IAllowanceTypes.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
@@ -25,7 +24,8 @@ import { KycStorageWrapper } from "../core/KycStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { AccessControlStorageWrapper } from "../core/AccessControlStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { IERC1594 } from "../../facets/layer_1/ERC1400/ERC1594/IERC1594.sol";
+import { IMint } from "../../facets/mint/IMint.sol";
+import { IBurn } from "../../facets/burn/IBurn.sol";
 
 /**
  * @notice Tracks whether token issuance is enabled and whether the module
@@ -73,11 +73,9 @@ library ERC1594StorageWrapper {
      * to modify the balance.
      * @param tokenHolder Address receiving the newly issued tokens.
      * @param value Amount of tokens to issue.
-     * @param data Arbitrary data forwarded to the `Issued` event.
      */
-    function issue(address tokenHolder, uint256 value, bytes memory data) internal {
+    function issue(address tokenHolder, uint256 value) internal {
         ERC20StorageWrapper.mint(tokenHolder, value);
-        emit IMint.Issued(EvmAccessors.getMsgSender(), tokenHolder, value, data);
     }
 
     /**
@@ -85,11 +83,9 @@ library ERC1594StorageWrapper {
      * @dev The redeemer is both the sender and the token holder. Uses
      * `ERC20StorageWrapper.burn` to reduce the balance.
      * @param value Amount of tokens to redeem.
-     * @param data Arbitrary data forwarded to the `Redeemed` event.
      */
-    function redeem(uint256 value, bytes memory data) internal {
+    function redeem(uint256 value) internal {
         ERC20StorageWrapper.burn(EvmAccessors.getMsgSender(), value);
-        emit IERC1594.Redeemed(address(0), EvmAccessors.getMsgSender(), value, data);
     }
 
     /**
@@ -98,11 +94,9 @@ library ERC1594StorageWrapper {
      * @dev Reverts if allowance is insufficient. Uses `ERC20StorageWrapper.burnFrom`.
      * @param tokenHolder Address whose tokens will be burned.
      * @param value Amount of tokens to redeem.
-     * @param data Arbitrary data forwarded to the `Redeemed` event.
      */
-    function redeemFrom(address tokenHolder, uint256 value, bytes memory data) internal {
+    function redeemFrom(address tokenHolder, uint256 value) internal {
         ERC20StorageWrapper.burnFrom(tokenHolder, value);
-        emit IERC1594.Redeemed(EvmAccessors.getMsgSender(), tokenHolder, value, data);
     }
 
     /**
