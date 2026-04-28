@@ -12,10 +12,9 @@ contract HoldManagementFacet is HoldManagement, IStaticFunctionSelectors {
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 2;
+        uint256 selectorIndex = 1;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);
         unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.protectedCreateHoldByPartition.selector;
             staticFunctionSelectors_[--selectorIndex] = this.operatorCreateHoldByPartition.selector;
         }
     }

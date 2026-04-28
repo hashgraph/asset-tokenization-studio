@@ -39,26 +39,6 @@ const transferType = {
 
 const EMPTY_VC_ID = EMPTY_STRING;
 
-const holdType = {
-  Hold: [
-    { name: "amount", type: "uint256" },
-    { name: "expirationTimestamp", type: "uint256" },
-    { name: "escrow", type: "address" },
-    { name: "to", type: "address" },
-    { name: "data", type: "bytes" },
-  ],
-  ProtectedHold: [
-    { name: "hold", type: "Hold" },
-    { name: "deadline", type: "uint256" },
-    { name: "nonce", type: "uint256" },
-  ],
-  protectedCreateHoldByPartition: [
-    { name: "_partition", type: "bytes32" },
-    { name: "_from", type: "address" },
-    { name: "_protectedHold", type: "ProtectedHold" },
-  ],
-};
-
 const clearingTransferType = {
   ClearingOperation: [
     { name: "partition", type: "bytes32" },
@@ -152,12 +132,6 @@ interface HoldData {
   data: string;
 }
 
-interface ProtectedHoldData {
-  hold: HoldData;
-  deadline: bigint;
-  nonce: number;
-}
-
 interface ClearingOperationData {
   partition: string;
   expirationTimestamp: bigint;
@@ -188,7 +162,6 @@ describe("ProtectedPartitions Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
-  let protectedHold: ProtectedHoldData;
   let hold: HoldData;
   let clearingOperation: ClearingOperationData;
   let clearingOperationFrom: ClearingOperationFromData;
@@ -345,12 +318,6 @@ describe("ProtectedPartitions Tests", () => {
       data: "0x1234",
     };
 
-    protectedHold = {
-      hold: hold,
-      deadline: BigInt(MAX_UINT256.toString()),
-      nonce: 1,
-    };
-
     basicTransferInfo = {
       to: signer_B.address,
       value: amount,
@@ -390,68 +357,6 @@ describe("ProtectedPartitions Tests", () => {
     await expect(asset.initialize_ProtectedPartitions(true)).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
   });
 
-  describe("Generic Hold check Tests", () => {
-    it("GIVEN a paused security WHEN performing a protected hold THEN transaction fails with Paused", async () => {
-      await setProtected();
-
-      await asset.connect(signer_B).pause();
-
-      await expect(
-        asset.protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
-    });
-
-    it("GIVEN a security with clearing active WHEN performing a protected hold THEN transaction fails with ClearingIsActivated", async () => {
-      await setProtected();
-
-      await asset.connect(signer_A).activateClearing();
-
-      await expect(
-        asset.protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
-      ).to.be.revertedWithCustomError(asset, "ClearingIsActivated");
-    });
-
-    it("GIVEN a account without the participant role WHEN performing a protected hold THEN transaction fails with AccountHasNoRole", async () => {
-      await setProtected();
-
-      await expect(
-        asset
-          .connect(signer_C)
-          .protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
-      ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
-    });
-
-    it("GIVEN a zero address tokenHolder account WHEN performing a protected hold from it THEN transaction fails with ZeroAddressNotAllowed", async () => {
-      await setProtected();
-
-      await expect(
-        asset.protectedCreateHoldByPartition(DEFAULT_PARTITION, ADDRESS_ZERO, protectedHold, "0x1234"),
-      ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
-    });
-
-    it("GIVEN a zero address escrow account WHEN performing a protected hold from it THEN transaction fails with ZeroAddressNotAllowed", async () => {
-      await setProtected();
-
-      protectedHold.hold.escrow = ADDRESS_ZERO;
-
-      await expect(
-        asset.protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
-      ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
-    });
-
-    it("GIVEN a wrong expiration date WHEN performing a protected hold from it THEN transaction fails with WrongExpirationTimestamp", async () => {
-      await setProtected();
-
-      protectedHold.hold.expirationTimestamp = 1n;
-
-      await expect(
-        asset
-          .connect(signer_B)
-          .protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
-      ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
-    });
-  });
-
   describe("Generic set Partition Status Tests", () => {
     it("GIVEN a paused security role WHEN protecting or unprotecting partitions THEN transaction fails with Paused", async () => {
       await setProtected();
@@ -488,14 +393,6 @@ describe("ProtectedPartitions Tests", () => {
 
       const partitionsProtectedStatus = await asset.arePartitionsProtected();
       expect(partitionsProtectedStatus).to.be.true;
-    });
-
-    it("GIVEN an unprotected partitions equity WHEN performing a protected hold THEN transaction fails with PartitionsAreUnProtected", async () => {
-      await expect(
-        asset
-          .connect(signer_B)
-          .protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
-      ).to.be.revertedWithCustomError(asset, "PartitionsAreUnProtected");
     });
   });
 
@@ -723,78 +620,8 @@ describe("ProtectedPartitions Tests", () => {
 
         await asset.connect(signer_A).revokeOperator(signer_B.address);
       });
-
-      it("GIVEN a wrong deadline WHEN performing a protected hold THEN transaction fails with ExpiredDeadline", async () => {
-        protectedHold.deadline = 1n;
-
-        await expect(
-          asset
-            .connect(signer_B)
-            .protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
-        ).to.be.revertedWithCustomError(asset, "ExpiredDeadline");
-      });
-
-      it("GIVEN a wrong signature length WHEN performing a protected hold THEN transaction fails with WrongSignatureLength", async () => {
-        await expect(
-          asset
-            .connect(signer_B)
-            .protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x12"),
-        ).to.be.revertedWithCustomError(asset, "WrongSignatureLength");
-      });
-
-      it("GIVEN a wrong signature WHEN performing a protected hold THEN transaction fails with WrongSignature", async () => {
-        await expect(
-          asset
-            .connect(signer_B)
-            .protectedCreateHoldByPartition(
-              DEFAULT_PARTITION,
-              signer_A.address,
-              protectedHold,
-              "0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344",
-            ),
-        ).to.be.revertedWithCustomError(asset, "WrongSignature");
-      });
-
-      it("GIVEN a wrong nonce WHEN performing a protected hold THEN transaction fails with WrongNonce", async () => {
-        protectedHold.nonce = 0;
-
-        await expect(
-          asset
-            .connect(signer_B)
-            .protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
-        ).to.be.revertedWithCustomError(asset, "WrongNonce");
-      });
-
-      it("GIVEN a correct signature WHEN performing a protected hold THEN transaction succeeds", async () => {
-        const message = {
-          _partition: DEFAULT_PARTITION,
-          _from: signer_A.address,
-          _protectedHold: protectedHold,
-        };
-
-        /*const domainSeparator =
-                    ethers.TypedDataEncoder.hashDomain(domain)
-                const messageHash = ethers.TypedDataEncoder.hash(
-                    domain,
-                    transferType,
-                    message
-                )*/
-
-        // Sign the message hash
-        const signature = await signer_A.signTypedData(domain, holdType, message);
-
-        await asset.connect(signer_B).issueByPartition({
-          partition: DEFAULT_PARTITION,
-          tokenHolder: signer_A.address,
-          value: protectedHold.hold.amount,
-          data: "0x",
-        });
-
-        await asset
-          .connect(signer_B)
-          .protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, signature);
-      });
     });
+
     describe("Clearing Tests", () => {
       beforeEach(async () => {
         await asset.connect(signer_A).activateClearing();

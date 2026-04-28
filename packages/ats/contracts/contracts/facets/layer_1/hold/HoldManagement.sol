@@ -4,7 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IHoldTypes } from "./IHoldTypes.sol";
 import { IHoldManagement } from "./IHoldManagement.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
-import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { HoldStorageWrapper } from "../../../domain/asset/HoldStorageWrapper.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
@@ -74,57 +73,5 @@ abstract contract HoldManagement is IHoldManagement, Modifiers {
         );
 
         emit OperatorHeldByPartition(EvmAccessors.getMsgSender(), _from, _partition, holdId_, _hold, _operatorData);
-    }
-
-    /**
-     * @dev Creates a hold on a protected partition with signature verification
-     *
-     * Requirements:
-     * - Contract must not be paused
-     * - Caller must have partition-specific role
-     * - From address must be valid
-     * - Escrow address must be valid
-     * - From address must not be recovered
-     * - To address must not be recovered
-     * - Expiration timestamp must be in the future
-     * - Partitions must be protected
-     * - Clearing must be disabled
-     *
-     * @param _partition The protected partition identifier
-     * @param _from The token holder address
-     * @param _protectedHold Protected hold parameters with signature
-     * @param _signature Cryptographic signature for authorization
-     * @return success_ Operation success status
-     * @return holdId_ The created hold identifier
-     *
-     * Emits ProtectedHeldByPartition event on success
-     */
-    function protectedCreateHoldByPartition(
-        bytes32 _partition,
-        address _from,
-        IHoldTypes.ProtectedHold memory _protectedHold,
-        bytes calldata _signature
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition))
-        notZeroAddress(_from)
-        notZeroAddress(_protectedHold.hold.escrow)
-        onlyClearingDisabled
-        onlyValidExpirationTimestamp(_protectedHold.hold.expirationTimestamp)
-        onlyUnrecoveredAddress(_from)
-        onlyUnrecoveredAddress(_protectedHold.hold.to)
-        onlyProtectedPartitions
-        returns (bool success_, uint256 holdId_)
-    {
-        (success_, holdId_) = HoldStorageWrapper.protectedCreateHoldByPartition(
-            _partition,
-            _from,
-            _protectedHold,
-            _signature
-        );
-
-        emit ProtectedHeldByPartition(EvmAccessors.getMsgSender(), _from, _partition, holdId_, _protectedHold.hold, "");
     }
 }

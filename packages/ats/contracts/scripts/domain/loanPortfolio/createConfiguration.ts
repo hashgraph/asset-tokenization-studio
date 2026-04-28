@@ -87,6 +87,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "HoldFacet",
   "HoldManagementFacet",
   "ControllerHoldByPartitionFacet",
+  "ProtectedHoldByPartitionFacet",
   "HoldByPartitionFacet",
 
   // Clearing & Settlement

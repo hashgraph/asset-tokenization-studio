@@ -83,6 +83,7 @@ const EQUITY_FACETS = [
   "HoldFacet",
   "HoldManagementFacet",
   "ControllerHoldByPartitionFacet",
+  "ProtectedHoldByPartitionFacet",
   "HoldByPartitionFacet",
 
   // External Management (3)
