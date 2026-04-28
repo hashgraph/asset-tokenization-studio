@@ -215,17 +215,27 @@ This project uses the [AGENTS.md](https://agents.md/) convention for agent conte
 ### Structure
 
 ```
-AGENTS.md                     # Project context for any AI agent (this file)
+AGENTS.md                                 # Root context for any AI agent (this file)
+CLAUDE.md                                 # Symlink → AGENTS.md (committed, for Claude Code)
+GEMINI.md                                 # Symlink → AGENTS.md (committed, for Gemini CLI)
 .agents/
-  skills/                     # Agent Skills (agentskills.io standard)
+  skills/                                 # Agent Skills (agentskills.io standard)
     <skill-name>/
-      SKILL.md                # Required: metadata + instructions
-      scripts/                # Optional: executable code
-      references/             # Optional: documentation
-      assets/                 # Optional: templates, resources
+      SKILL.md                            # Required: metadata + instructions
+      scripts/                            # Optional: executable code
+      references/                         # Optional: documentation
+      assets/                             # Optional: templates, resources
 packages/
-  ats/contracts/AGENTS.md     # Package-specific context
-  ats/sdk/AGENTS.md           # Package-specific context
+  ats/contracts/AGENTS.md                 # ATS Solidity contracts (Diamond, ethers v6)
+  ats/sdk/AGENTS.md                       # ATS TypeScript SDK (hexagonal, CQRS)
+  eslint-config/AGENTS.md                 # Shared ESLint preset
+  mass-payout/contracts/AGENTS.md         # Mass Payout Solidity contracts
+  mass-payout/sdk/AGENTS.md               # Mass Payout TypeScript SDK
+apps/
+  ats/web/AGENTS.md                       # ATS dApp (React + Vite + Chakra UI)
+  mass-payout/backend/AGENTS.md           # Mass Payout NestJS API (PostgreSQL)
+  mass-payout/frontend/AGENTS.md          # Mass Payout admin panel (React + Chakra)
+  docs/AGENTS.md                          # Docusaurus documentation site
 ```
 
 Agent-specific workspaces (`.claude/`, `.gemini/`, …) are **local-only** (gitignored) — each agent generates them on session start. Only two committed concessions exist for cross-agent compatibility: `CLAUDE.md` and `GEMINI.md` at the repo root are kept as **symlinks to `AGENTS.md`**, so every agent reads the same source of truth without duplication.
@@ -234,7 +244,7 @@ Agent-specific workspaces (`.claude/`, `.gemini/`, …) are **local-only** (giti
 
 1. **`AGENTS.md`** (root) is the single source of truth for project context — any agent reads it.
 2. **Skills** live in `.agents/skills/<name>/SKILL.md` following the [Agent Skills spec](https://agentskills.io/specification). They are auto-discovered by most compatible agents (Gemini CLI, OpenAI Codex, Cursor, VS Code, GitHub Copilot, etc.).
-3. **Package-level `AGENTS.md`** provides context scoped to a specific package.
+3. **Package- and app-level `AGENTS.md`** provide context scoped to a specific module. Every workspace under `packages/` and `apps/` ships one — start there before reading the root file when working inside a single module.
 
 ### Agent Skills Format
 

@@ -16,18 +16,26 @@ These standards are supported by Claude Code, Gemini CLI, OpenAI Codex, Cursor, 
 ## Directory Structure
 
 ```
-AGENTS.md                         # Root context — any AI agent reads this
-CLAUDE.md                         # Symlink → AGENTS.md (committed, for Claude Code)
-GEMINI.md                         # Symlink → AGENTS.md (committed, for Gemini CLI)
+AGENTS.md                                 # Root context — any AI agent reads this
+CLAUDE.md                                 # Symlink → AGENTS.md (committed, for Claude Code)
+GEMINI.md                                 # Symlink → AGENTS.md (committed, for Gemini CLI)
 .agents/
-  skills/                         # Agent Skills (agentskills.io standard)
+  skills/                                 # Agent Skills (agentskills.io standard)
     update-docs/
-      SKILL.md                    # Skill definition with YAML frontmatter
+      SKILL.md                            # Skill definition with YAML frontmatter
     solidity-natspec/
       SKILL.md
 packages/
-  ats/contracts/AGENTS.md         # Package-scoped context
-  ats/sdk/AGENTS.md               # Package-scoped context
+  ats/contracts/AGENTS.md                 # ATS Solidity contracts (Diamond, ethers v6)
+  ats/sdk/AGENTS.md                       # ATS TypeScript SDK (hexagonal, CQRS)
+  eslint-config/AGENTS.md                 # Shared ESLint preset
+  mass-payout/contracts/AGENTS.md         # Mass Payout Solidity contracts
+  mass-payout/sdk/AGENTS.md               # Mass Payout TypeScript SDK
+apps/
+  ats/web/AGENTS.md                       # ATS dApp (React + Vite + Chakra UI)
+  mass-payout/backend/AGENTS.md           # Mass Payout NestJS API (PostgreSQL)
+  mass-payout/frontend/AGENTS.md          # Mass Payout admin panel
+  docs/AGENTS.md                          # Docusaurus documentation site
 ```
 
 Agent-specific directories (`.claude/`, `.gemini/`, etc.) are **not committed** — they are local-only workspaces each agent generates on session start. The only committed concession is the pair of root symlinks `CLAUDE.md` and `GEMINI.md` pointing to `AGENTS.md`, so every agent reads the same source of truth without duplication.
@@ -43,7 +51,7 @@ The root `AGENTS.md` contains everything an agent needs to understand the projec
 - Architecture overview (diamond pattern, hexagonal SDK, CQRS)
 - Coding conventions (ethers v6, commit format, etc.)
 
-Package-level `AGENTS.md` files (e.g., `packages/ats/contracts/AGENTS.md`) provide additional context scoped to that package.
+Package- and app-level `AGENTS.md` files provide additional context scoped to that module. Every workspace under `packages/` and `apps/` ships one — agents working inside a single module should read the local file first, then the root for cross-cutting context.
 
 ### 2. Skills (`.agents/skills/`)
 
@@ -115,4 +123,4 @@ No repo changes needed. If the agent supports AGENTS.md or Agent Skills, it work
 - **Keep `AGENTS.md` as the single source of truth** — No duplication across agent-specific files
 - **Follow the [Agent Skills spec](https://agentskills.io/specification)** — Use proper `name` and `description` frontmatter
 - **No agent-specific directories committed** — Agents self-configure at runtime; only the `CLAUDE.md` and `GEMINI.md` root symlinks to `AGENTS.md` are committed
-- **Package-level `AGENTS.md`** — Only add when the package has specific conventions that differ from the root
+- **Package- and app-level `AGENTS.md`** — Every workspace under `packages/` and `apps/` ships one with its quick reference, scope, and conventions; root context covers the cross-cutting parts
