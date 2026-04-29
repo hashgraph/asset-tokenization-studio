@@ -47,11 +47,13 @@ const LOAN_FACETS = [
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
   "BalanceTrackerByPartitionFacet",
+  "BalanceTrackerAtSnapshotFacet",
   "CapFacet",
   "ControlListFacet",
   "KycFacet",
   "SsiManagementFacet",
   "FreezeFacet",
+  "BatchFreezeFacet",
   "PauseFacet",
 
   // Core
@@ -69,7 +71,7 @@ const LOAN_FACETS = [
   "ControllerFacet",
   "ERC1410ReadFacet",
   "ERC1410ManagementFacet",
-  "ERC1410IssuerFacet",
+  "MintByPartitionFacet",
   "ERC1410TokenHolderFacet",
   "ERC3643ManagementFacet",
   "ERC3643ReadFacet",
@@ -85,6 +87,7 @@ const LOAN_FACETS = [
   "HoldFacet",
   "HoldManagementFacet",
   "ControllerHoldByPartitionFacet",
+  "ProtectedHoldByPartitionFacet",
   "HoldByPartitionFacet",
 
   // Clearing & Settlement

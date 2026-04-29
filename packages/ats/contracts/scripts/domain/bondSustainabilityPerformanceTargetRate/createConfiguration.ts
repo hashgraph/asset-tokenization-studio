@@ -45,15 +45,17 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "TransferFacet",
   "CoreAdjustedFacet",
   "FreezeFacet",
+  "BatchFreezeFacet",
   "KycFacet",
   "PauseFacet",
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
   "BalanceTrackerByPartitionFacet",
+  "BalanceTrackerAtSnapshotFacet",
 
   // ERC Standards
-  "ERC1410IssuerFacet",
+  "MintByPartitionFacet",
   "ERC1410ManagementFacet",
   "ERC1410ReadFacet",
   "ERC1410TokenHolderFacet",
@@ -82,6 +84,7 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "HoldFacet",
   "HoldManagementFacet",
   "ControllerHoldByPartitionFacet",
+  "ProtectedHoldByPartitionFacet",
   "HoldByPartitionFacet",
 
   // External Management

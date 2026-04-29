@@ -4,9 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IFreeze } from "./IFreeze.sol";
 import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
-import { ExternalListManagementStorageWrapper } from "../../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
-import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
@@ -100,92 +98,6 @@ abstract contract Freeze is IFreeze, Modifiers {
     {
         ERC3643StorageWrapper.unfreezeTokens(_userAddress, _amount, 0);
         emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
-    }
-
-    /**
-     * @notice Batch set address frozen status
-     * @dev Only callable when not paused
-     *
-     * Requirements:
-     * - Arrays must have same length
-     * - All addresses must be valid and not recovered
-     *
-     * @param _userAddresses Array of addresses to freeze/unfreeze
-     * @param _freeze Array of freeze statuses
-     */
-    function batchSetAddressFrozen(
-        address[] calldata _userAddresses,
-        bool[] calldata _freeze
-    )
-        external
-        onlyUnpaused
-        onlyValidInputBoolArrayLength(_userAddresses, _freeze)
-        onlyFreezeRoles(EvmAccessors.getMsgSender())
-    {
-        for (uint256 i = 0; i < _userAddresses.length; ++i) {
-            ExternalListManagementStorageWrapper.checkValidAddress(_userAddresses[i]);
-            ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
-            ERC3643StorageWrapper.setAddressFrozen(_userAddresses[i], _freeze[i]);
-            emit AddressFrozen(_userAddresses[i], _freeze[i], EvmAccessors.getMsgSender());
-        }
-    }
-
-    /**
-     * @notice Batch freeze partial tokens
-     * @dev Only callable when not paused
-     *
-     * Requirements:
-     * - Arrays must have same length
-     * - All addresses must be valid and not recovered
-     *
-     * @param _userAddresses Array of addresses to freeze tokens for
-     * @param _amounts Array of amounts to freeze
-     */
-    function batchFreezePartialTokens(
-        address[] calldata _userAddresses,
-        uint256[] calldata _amounts
-    )
-        external
-        onlyUnpaused
-        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
-        onlyWithoutMultiPartition
-        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
-    {
-        for (uint256 i = 0; i < _userAddresses.length; ++i) {
-            ERC1410StorageWrapper.requireValidAddress(_userAddresses[i]);
-            ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
-            ERC3643StorageWrapper.freezeTokens(_userAddresses[i], _amounts[i]);
-            emit TokensFrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);
-        }
-    }
-
-    /**
-     * @notice Batch unfreeze partial tokens
-     * @dev Only callable when not paused
-     *
-     * Requirements:
-     * - Arrays must have same length
-     * - All addresses must be valid and not recovered
-     *
-     * @param _userAddresses Array of addresses to unfreeze tokens for
-     * @param _amounts Array of amounts to unfreeze
-     */
-    function batchUnfreezePartialTokens(
-        address[] calldata _userAddresses,
-        uint256[] calldata _amounts
-    )
-        external
-        onlyUnpaused
-        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
-        onlyWithoutMultiPartition
-        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
-    {
-        for (uint256 i = 0; i < _userAddresses.length; ++i) {
-            ERC1410StorageWrapper.requireValidAddress(_userAddresses[i]);
-            ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
-            ERC3643StorageWrapper.unfreezeTokens(_userAddresses[i], _amounts[i], 0);
-            emit TokensUnfrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);
-        }
     }
 
     /**

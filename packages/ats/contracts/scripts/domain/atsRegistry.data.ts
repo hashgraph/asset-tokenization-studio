@@ -24,10 +24,12 @@ import {
   AllowanceFacet__factory,
   AmortizationFacet__factory,
   BalanceTrackerAdjustedFacet__factory,
+  BalanceTrackerAtSnapshotFacet__factory,
   BalanceTrackerByPartitionFacet__factory,
   BalanceTrackerFacet__factory,
   BatchBurnFacet__factory,
   BatchControllerFacet__factory,
+  BatchFreezeFacet__factory,
   BatchMintFacet__factory,
   BatchTransferFacet__factory,
   BondUSAFacet__factory,
@@ -59,7 +61,6 @@ import {
   DiamondFacet__factory,
   DividendFacet__factory,
   DocumentationFacet__factory,
-  ERC1410IssuerFacet__factory,
   ERC1410ManagementFacet__factory,
   ERC1410ReadFacet__factory,
   ERC1410TokenHolderFacet__factory,
@@ -83,6 +84,7 @@ import {
   LoanFacet__factory,
   LoansPortfolioFacet__factory,
   LockFacet__factory,
+  MintByPartitionFacet__factory,
   MintFacet__factory,
   NominalValueFacet__factory,
   NoncesFacet__factory,
@@ -91,6 +93,7 @@ import {
   ProceedRecipientsFacet__factory,
   ProceedRecipientsKpiLinkedRateFacet__factory,
   ProceedRecipientsSustainabilityPerformanceTargetRateFacet__factory,
+  ProtectedHoldByPartitionFacet__factory,
   ProtectedPartitionsFacet__factory,
   ScheduledBalanceAdjustmentsFacet__factory,
   ScheduledCouponListingFacet__factory,
@@ -135,7 +138,6 @@ import {
   CouponSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   DiamondFacetTimeTravel__factory,
   DividendFacetTimeTravel__factory,
-  ERC1410IssuerFacetTimeTravel__factory,
   ERC1410ManagementFacetTimeTravel__factory,
   ERC1410ReadFacetTimeTravel__factory,
   ERC1410TokenHolderFacetTimeTravel__factory,
@@ -935,6 +937,59 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     factory: (signer) => new BalanceTrackerAdjustedFacet__factory(signer),
   },
 
+  BalanceTrackerAtSnapshotFacet: {
+    name: "BalanceTrackerAtSnapshotFacet",
+    description:
+      "Diamond facet that exposes snapshotted balance and total-supply queries through the `IBalanceTrackerAtSnapshot` interface, registered under `_BALANCE_TRACKER_AT_SNAPSHOT_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_BALANCE_TRACKER_AT_SNAPSHOT_RESOLVER_KEY",
+      value: "0x315cba9013a79ef28ff25fb15fef21d233a1161f13129c357af5417d2f9ed165",
+    },
+    inheritance: ["BalanceTrackerAtSnapshot", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "balanceOfAtSnapshot",
+        signature: {
+          full: "function balanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+          canonical: "balanceOfAtSnapshot(uint256,address)",
+        },
+        selector: "0x8e00ae2e",
+      },
+      {
+        name: "balancesOfAtSnapshot",
+        signature: {
+          full: "function balancesOfAtSnapshot(uint256 _snapshotID, uint256 _pageIndex, uint256 _pageLength) view returns ((address holder, uint256 balance)[] balances_)",
+          canonical: "balancesOfAtSnapshot(uint256,uint256,uint256)",
+        },
+        selector: "0xe956875c",
+      },
+      {
+        name: "totalSupplyAtSnapshot",
+        signature: {
+          full: "function totalSupplyAtSnapshot(uint256 _snapshotID) view returns (uint256 totalSupply_)",
+          canonical: "totalSupplyAtSnapshot(uint256)",
+        },
+        selector: "0xda35f8f6",
+      },
+    ],
+    errors: [
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+    ],
+    factory: (signer) => new BalanceTrackerAtSnapshotFacet__factory(signer),
+  },
+
   BalanceTrackerByPartitionFacet: {
     name: "BalanceTrackerByPartitionFacet",
     description:
@@ -1155,6 +1210,171 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     factory: (signer) => new BatchControllerFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
     timeTravelFactory: (signer) =>
       new BatchControllerFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
+  },
+
+  BatchFreezeFacet: {
+    name: "BatchFreezeFacet",
+    description:
+      "Diamond facet that exposes batch freeze and unfreeze operations through the `IBatchFreeze` interface, registered under `_BATCH_FREEZE_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_BATCH_FREEZE_RESOLVER_KEY",
+      value: "0x2f58eaa3e08a94a58af659b6fd0a0c4e30bd5e789982c50863ce4e499535711c",
+    },
+    inheritance: ["BatchFreeze", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "batchFreezePartialTokens",
+        signature: {
+          full: "function batchFreezePartialTokens(address[] _userAddresses, uint256[] _amounts)",
+          canonical: "batchFreezePartialTokens(address[],uint256[])",
+        },
+        selector: "0xfc7e5fa8",
+      },
+      {
+        name: "batchSetAddressFrozen",
+        signature: {
+          full: "function batchSetAddressFrozen(address[] _userAddresses, bool[] _freeze)",
+          canonical: "batchSetAddressFrozen(address[],bool[])",
+        },
+        selector: "0x1a7af379",
+      },
+      {
+        name: "batchUnfreezePartialTokens",
+        signature: {
+          full: "function batchUnfreezePartialTokens(address[] _userAddresses, uint256[] _amounts)",
+          canonical: "batchUnfreezePartialTokens(address[],uint256[])",
+        },
+        selector: "0x4710362d",
+      },
+    ],
+    events: [
+      {
+        name: "AddressFrozen",
+        signature: {
+          full: "event AddressFrozen(address indexed userAddress, bool indexed isFrozen, address indexed owner)",
+          canonical: "AddressFrozen(address,bool,address)",
+        },
+        topic0: "0x7fa523c84ab8d7fc5b72f08b9e46dbbf10c39e119a075b3e317002d14bc9f436",
+      },
+      {
+        name: "TokensFrozen",
+        signature: {
+          full: "event TokensFrozen(address indexed account, uint256 amount, bytes32 partition)",
+          canonical: "TokensFrozen(address,uint256,bytes32)",
+        },
+        topic0: "0xd736f88140588a48bf2ce0d40c8ed9eea7d10162e5667cf5054c78ac9a28b2e2",
+      },
+      {
+        name: "TokensUnfrozen",
+        signature: {
+          full: "event TokensUnfrozen(address indexed account, uint256 amount, bytes32 partition)",
+          canonical: "TokensUnfrozen(address,uint256,bytes32)",
+        },
+        topic0: "0x8b0e34ce56cda141218491fb231baf3165de0352a77ac6f07e7583b301d9452d",
+      },
+      {
+        name: "Transfer",
+        signature: {
+          full: "event Transfer(address indexed from, address indexed to, uint256 value)",
+          canonical: "Transfer(address,address,uint256)",
+        },
+        topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+      },
+      {
+        name: "TransferByPartition",
+        signature: {
+          full: "event TransferByPartition(bytes32 indexed _fromPartition, address _operator, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)",
+          canonical: "TransferByPartition(bytes32,address,address,address,uint256,bytes,bytes)",
+        },
+        topic0: "0xff4e9a26af4eb73b8bacfaa4abd4fea03d9448e7b912dc5ff4019048875aa2d4",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRoles",
+        signature: {
+          full: "error AccountHasNoRoles(address account, bytes32[] roles)",
+          canonical: "AccountHasNoRoles(address,bytes32[])",
+        },
+        selector: "0x90e55392",
+      },
+      {
+        name: "InputAmountsArrayLengthMismatch",
+        signature: { full: "error InputAmountsArrayLengthMismatch()", canonical: "InputAmountsArrayLengthMismatch()" },
+        selector: "0x64f13710",
+      },
+      {
+        name: "InputBoolArrayLengthMismatch",
+        signature: { full: "error InputBoolArrayLengthMismatch()", canonical: "InputBoolArrayLengthMismatch()" },
+        selector: "0x07ac0eb9",
+      },
+      {
+        name: "InsufficientBalance",
+        signature: {
+          full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
+          canonical: "InsufficientBalance(address,uint256,uint256,bytes32)",
+        },
+        selector: "0x5d6824c4",
+      },
+      {
+        name: "InsufficientFrozenBalance",
+        signature: {
+          full: "error InsufficientFrozenBalance(address user, uint256 requestedUnfreeze, uint256 availableFrozen, bytes32 partition)",
+          canonical: "InsufficientFrozenBalance(address,uint256,uint256,bytes32)",
+        },
+        selector: "0xefafde54",
+      },
+      {
+        name: "InvalidPartition",
+        signature: {
+          full: "error InvalidPartition(address account, bytes32 partition)",
+          canonical: "InvalidPartition(address,bytes32)",
+        },
+        selector: "0xbf84f4ec",
+      },
+      {
+        name: "NotAllowedInMultiPartitionMode",
+        signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
+        selector: "0x76d08f88",
+      },
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+      {
+        name: "WalletRecovered",
+        signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
+        selector: "0xf9f9bcf9",
+      },
+      {
+        name: "ZeroAddressNotAllowed",
+        signature: { full: "error ZeroAddressNotAllowed()", canonical: "ZeroAddressNotAllowed()" },
+        selector: "0x8579befe",
+      },
+    ],
+    factory: (signer) => new BatchFreezeFacet__factory(signer),
   },
 
   BatchMintFacet: {
@@ -6462,162 +6682,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) => new EquityUSAFacetTimeTravel__factory(signer),
   },
 
-  ERC1410IssuerFacet: {
-    name: "ERC1410IssuerFacet",
-    resolverKey: {
-      name: "_ERC1410_ISSUER_RESOLVER_KEY",
-      value: "0x6e82b75f32c9647cc00b4c3eabbef5a82677f3e91d5d196eb4dd6a0365941344",
-    },
-    inheritance: ["ERC1410Issuer", "IStaticFunctionSelectors"],
-    methods: [
-      {
-        name: "issueByPartition",
-        signature: {
-          full: "function issueByPartition((bytes32 partition, address tokenHolder, uint256 value, bytes data) _issueData)",
-          canonical: "issueByPartition((bytes32,address,uint256,bytes))",
-        },
-        selector: "0x18180262",
-      },
-    ],
-    events: [
-      {
-        name: "AuthorizedOperator",
-        signature: {
-          full: "event AuthorizedOperator(address indexed operator, address indexed tokenHolder)",
-          canonical: "AuthorizedOperator(address,address)",
-        },
-        topic0: "0xf4caeb2d6ca8932a215a353d0703c326ec2d81fc68170f320eb2ab49e9df61f9",
-      },
-      {
-        name: "AuthorizedOperatorByPartition",
-        signature: {
-          full: "event AuthorizedOperatorByPartition(bytes32 indexed partition, address indexed operator, address indexed tokenHolder)",
-          canonical: "AuthorizedOperatorByPartition(bytes32,address,address)",
-        },
-        topic0: "0x3646a897c70797ecc134b0adc32f471b07bf1d6f451133b0384badab531e3fd6",
-      },
-      {
-        name: "IssuedByPartition",
-        signature: {
-          full: "event IssuedByPartition(bytes32 indexed partition, address indexed operator, address indexed to, uint256 value, bytes data)",
-          canonical: "IssuedByPartition(bytes32,address,address,uint256,bytes)",
-        },
-        topic0: "0x5af1c8f424b104b6ba4e3c0885f2ed9fef04a9b1ea39cd9ed362432105c0791a",
-      },
-      {
-        name: "RedeemedByPartition",
-        signature: {
-          full: "event RedeemedByPartition(bytes32 indexed partition, address indexed operator, address indexed from, uint256 value, bytes data, bytes operatorData)",
-          canonical: "RedeemedByPartition(bytes32,address,address,uint256,bytes,bytes)",
-        },
-        topic0: "0xa4f62471c9bdf88115b97203943c74c59b655913ee5ee592706d84ef53fb6be2",
-      },
-      {
-        name: "RevokedOperator",
-        signature: {
-          full: "event RevokedOperator(address indexed operator, address indexed tokenHolder)",
-          canonical: "RevokedOperator(address,address)",
-        },
-        topic0: "0x50546e66e5f44d728365dc3908c63bc5cfeeab470722c1677e3073a6ac294aa1",
-      },
-      {
-        name: "RevokedOperatorByPartition",
-        signature: {
-          full: "event RevokedOperatorByPartition(bytes32 indexed partition, address indexed operator, address indexed tokenHolder)",
-          canonical: "RevokedOperatorByPartition(bytes32,address,address)",
-        },
-        topic0: "0x3b287c4f1bab4df949b33bceacef984f544dc5d5479930d00e4ee8c9d8dd96f2",
-      },
-      {
-        name: "TransferByPartition",
-        signature: {
-          full: "event TransferByPartition(bytes32 indexed _fromPartition, address _operator, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)",
-          canonical: "TransferByPartition(bytes32,address,address,address,uint256,bytes,bytes)",
-        },
-        topic0: "0xff4e9a26af4eb73b8bacfaa4abd4fea03d9448e7b912dc5ff4019048875aa2d4",
-      },
-    ],
-    errors: [
-      {
-        name: "AccessControlRequired",
-        signature: {
-          full: "error AccessControlRequired(bytes32 role, address sender)",
-          canonical: "AccessControlRequired(bytes32,address)",
-        },
-        selector: "0x10210dec",
-      },
-      {
-        name: "AccountHasNoRoles",
-        signature: {
-          full: "error AccountHasNoRoles(address account, bytes32[] roles)",
-          canonical: "AccountHasNoRoles(address,bytes32[])",
-        },
-        selector: "0x90e55392",
-      },
-      {
-        name: "InvalidPartition",
-        signature: {
-          full: "error InvalidPartition(address account, bytes32 partition)",
-          canonical: "InvalidPartition(address,bytes32)",
-        },
-        selector: "0xbf84f4ec",
-      },
-      {
-        name: "MaxSupplyReached",
-        signature: { full: "error MaxSupplyReached(uint256 maxSupply)", canonical: "MaxSupplyReached(uint256)" },
-        selector: "0xf9f84915",
-      },
-      {
-        name: "MaxSupplyReachedForPartition",
-        signature: {
-          full: "error MaxSupplyReachedForPartition(bytes32 partition, uint256 maxSupply)",
-          canonical: "MaxSupplyReachedForPartition(bytes32,uint256)",
-        },
-        selector: "0x57c004a9",
-      },
-      {
-        name: "NotAllowedInMultiPartitionMode",
-        signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
-        selector: "0x76d08f88",
-      },
-      {
-        name: "PartitionNotAllowedInSinglePartitionMode",
-        signature: {
-          full: "error PartitionNotAllowedInSinglePartitionMode(bytes32 partition)",
-          canonical: "PartitionNotAllowedInSinglePartitionMode(bytes32)",
-        },
-        selector: "0xb96d9539",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
-      {
-        name: "Unauthorized",
-        signature: {
-          full: "error Unauthorized(address operator, address tokenHolder, bytes32 partition)",
-          canonical: "Unauthorized(address,address,bytes32)",
-        },
-        selector: "0x1e09743f",
-      },
-      {
-        name: "WalletRecovered",
-        signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
-        selector: "0xf9f9bcf9",
-      },
-      {
-        name: "ZeroPartition",
-        signature: { full: "error ZeroPartition()", canonical: "ZeroPartition()" },
-        selector: "0x4a6f30c3",
-      },
-      { name: "ZeroValue", signature: { full: "error ZeroValue()", canonical: "ZeroValue()" }, selector: "0x7c946ed7" },
-    ],
-    factory: (signer) => new ERC1410IssuerFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
-    timeTravelFactory: (signer) =>
-      new ERC1410IssuerFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
-  },
-
   ERC1410ManagementFacet: {
     name: "ERC1410ManagementFacet",
     resolverKey: {
@@ -8369,30 +8433,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["Freeze", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "batchFreezePartialTokens",
-        signature: {
-          full: "function batchFreezePartialTokens(address[] _userAddresses, uint256[] _amounts)",
-          canonical: "batchFreezePartialTokens(address[],uint256[])",
-        },
-        selector: "0xfc7e5fa8",
-      },
-      {
-        name: "batchSetAddressFrozen",
-        signature: {
-          full: "function batchSetAddressFrozen(address[] _userAddresses, bool[] _freeze)",
-          canonical: "batchSetAddressFrozen(address[],bool[])",
-        },
-        selector: "0x1a7af379",
-      },
-      {
-        name: "batchUnfreezePartialTokens",
-        signature: {
-          full: "function batchUnfreezePartialTokens(address[] _userAddresses, uint256[] _amounts)",
-          canonical: "batchUnfreezePartialTokens(address[],uint256[])",
-        },
-        selector: "0x4710362d",
-      },
-      {
         name: "freezePartialTokens",
         signature: {
           full: "function freezePartialTokens(address _userAddress, uint256 _amount)",
@@ -8483,16 +8523,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountHasNoRoles(address,bytes32[])",
         },
         selector: "0x90e55392",
-      },
-      {
-        name: "InputAmountsArrayLengthMismatch",
-        signature: { full: "error InputAmountsArrayLengthMismatch()", canonical: "InputAmountsArrayLengthMismatch()" },
-        selector: "0x64f13710",
-      },
-      {
-        name: "InputBoolArrayLengthMismatch",
-        signature: { full: "error InputBoolArrayLengthMismatch()", canonical: "InputBoolArrayLengthMismatch()" },
-        selector: "0x07ac0eb9",
       },
       {
         name: "InsufficientBalance",
@@ -9019,15 +9049,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xc6062c3c",
       },
-      {
-        name: "protectedCreateHoldByPartition",
-        signature: {
-          full: "function protectedCreateHoldByPartition(bytes32 _partition, address _from, ((uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, uint256 deadline, uint256 nonce) _protectedHold, bytes _signature) returns (bool success_, uint256 holdId_)",
-          canonical:
-            "protectedCreateHoldByPartition(bytes32,address,((uint256,uint256,address,address,bytes),uint256,uint256),bytes)",
-        },
-        selector: "0xc17f3554",
-      },
     ],
     events: [
       {
@@ -9125,22 +9146,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x10210dec",
       },
       {
-        name: "AccountHasNoRole",
-        signature: {
-          full: "error AccountHasNoRole(address account, bytes32 role)",
-          canonical: "AccountHasNoRole(address,bytes32)",
-        },
-        selector: "0xa1180aad",
-      },
-      {
         name: "ClearingIsActivated",
         signature: { full: "error ClearingIsActivated()", canonical: "ClearingIsActivated()" },
         selector: "0x5b2e3086",
-      },
-      {
-        name: "ExpiredDeadline",
-        signature: { full: "error ExpiredDeadline(uint256 deadline)", canonical: "ExpiredDeadline(uint256)" },
-        selector: "0x724a779a",
       },
       {
         name: "HoldExpirationNotReached",
@@ -9206,11 +9214,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x55347310",
       },
       {
-        name: "PartitionsAreUnProtected",
-        signature: { full: "error PartitionsAreUnProtected()", canonical: "PartitionsAreUnProtected()" },
-        selector: "0x05681565",
-      },
-      {
         name: "SnapshotIdDoesNotExists",
         signature: {
           full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
@@ -9250,24 +9253,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "WrongHoldId",
         signature: { full: "error WrongHoldId()", canonical: "WrongHoldId()" },
         selector: "0x7e90c2c9",
-      },
-      {
-        name: "WrongNonce",
-        signature: {
-          full: "error WrongNonce(uint256 nonce, address account)",
-          canonical: "WrongNonce(uint256,address)",
-        },
-        selector: "0x2fb817aa",
-      },
-      {
-        name: "WrongSignature",
-        signature: { full: "error WrongSignature()", canonical: "WrongSignature()" },
-        selector: "0x356a4418",
-      },
-      {
-        name: "WrongSignatureLength",
-        signature: { full: "error WrongSignatureLength()", canonical: "WrongSignatureLength()" },
-        selector: "0x5763538a",
       },
       {
         name: "ZeroAddressNotAllowed",
@@ -10566,6 +10551,77 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) => new LockFacetTimeTravel__factory(signer),
   },
 
+  MintByPartitionFacet: {
+    name: "MintByPartitionFacet",
+    description:
+      "Diamond facet exposing the ERC-1410 `issueByPartition` operation, registered under `_MINT_BY_PARTITION_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_MINT_BY_PARTITION_RESOLVER_KEY",
+      value: "0x3ea08f77d09ff7af30dc84e68a8009e7ba785b772982e71c6914fd2e960bf58f",
+    },
+    inheritance: ["MintByPartition", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "issueByPartition",
+        signature: {
+          full: "function issueByPartition((bytes32 partition, address tokenHolder, uint256 value, bytes data) _issueData)",
+          canonical: "issueByPartition((bytes32,address,uint256,bytes))",
+        },
+        selector: "0x18180262",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRoles",
+        signature: {
+          full: "error AccountHasNoRoles(address account, bytes32[] roles)",
+          canonical: "AccountHasNoRoles(address,bytes32[])",
+        },
+        selector: "0x90e55392",
+      },
+      {
+        name: "MaxSupplyReached",
+        signature: { full: "error MaxSupplyReached(uint256 maxSupply)", canonical: "MaxSupplyReached(uint256)" },
+        selector: "0xf9f84915",
+      },
+      {
+        name: "MaxSupplyReachedForPartition",
+        signature: {
+          full: "error MaxSupplyReachedForPartition(bytes32 partition, uint256 maxSupply)",
+          canonical: "MaxSupplyReachedForPartition(bytes32,uint256)",
+        },
+        selector: "0x57c004a9",
+      },
+      {
+        name: "PartitionNotAllowedInSinglePartitionMode",
+        signature: {
+          full: "error PartitionNotAllowedInSinglePartitionMode(bytes32 partition)",
+          canonical: "PartitionNotAllowedInSinglePartitionMode(bytes32)",
+        },
+        selector: "0xb96d9539",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+      {
+        name: "WalletRecovered",
+        signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
+        selector: "0xf9f9bcf9",
+      },
+    ],
+    factory: (signer) => new MintByPartitionFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+  },
+
   MintFacet: {
     name: "MintFacet",
     description: "Diamond facet exposing the consolidated token issuance entry points.",
@@ -11521,6 +11577,251 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       new ProceedRecipientsSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
   },
 
+  ProtectedHoldByPartitionFacet: {
+    name: "ProtectedHoldByPartitionFacet",
+    description:
+      "Diamond facet that registers the `protectedCreateHoldByPartition` selector under `_PROTECTED_HOLD_BY_PARTITION_RESOLVER_KEY` on the Diamond proxy.",
+    resolverKey: {
+      name: "_PROTECTED_HOLD_BY_PARTITION_RESOLVER_KEY",
+      value: "0x12c5881cfa073bf7497f90103e5b2a7f9a93f11147137ec2a1389b60904d0157",
+    },
+    inheritance: ["ProtectedHoldByPartition", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "protectedCreateHoldByPartition",
+        signature: {
+          full: "function protectedCreateHoldByPartition(bytes32 _partition, address _from, ((uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, uint256 deadline, uint256 nonce) _protectedHold, bytes _signature) returns (bool success_, uint256 holdId_)",
+          canonical:
+            "protectedCreateHoldByPartition(bytes32,address,((uint256,uint256,address,address,bytes),uint256,uint256),bytes)",
+        },
+        selector: "0xc17f3554",
+      },
+    ],
+    events: [
+      {
+        name: "ControllerHeldByPartition",
+        signature: {
+          full: "event ControllerHeldByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 holdId, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, bytes operatorData)",
+          canonical:
+            "ControllerHeldByPartition(address,address,bytes32,uint256,(uint256,uint256,address,address,bytes),bytes)",
+        },
+        topic0: "0x9c351ddf8b7b71a1ce0a58696d6128d479e0988ce349f51a44e84241addffca8",
+      },
+      {
+        name: "HeldByPartition",
+        signature: {
+          full: "event HeldByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 holdId, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, bytes operatorData)",
+          canonical: "HeldByPartition(address,address,bytes32,uint256,(uint256,uint256,address,address,bytes),bytes)",
+        },
+        topic0: "0xc5c40f4f39271cfbce3124ffa5441f632998927732cf26ac2038f2bfd15365d8",
+      },
+      {
+        name: "HeldFromByPartition",
+        signature: {
+          full: "event HeldFromByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 holdId, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, bytes operatorData)",
+          canonical:
+            "HeldFromByPartition(address,address,bytes32,uint256,(uint256,uint256,address,address,bytes),bytes)",
+        },
+        topic0: "0x94c04848aef3d5b4fb6473bdb17ce2ff4b6374b909cc2009156f4eb0a1d880b9",
+      },
+      {
+        name: "HoldByPartitionExecuted",
+        signature: {
+          full: "event HoldByPartitionExecuted(address indexed tokenHolder, bytes32 indexed partition, uint256 holdId, uint256 amount, address to)",
+          canonical: "HoldByPartitionExecuted(address,bytes32,uint256,uint256,address)",
+        },
+        topic0: "0x4fb20409d1b2a56fa4c5b29c11d9b1e148649db67860c5648a8a86f35edf8582",
+      },
+      {
+        name: "HoldByPartitionReclaimed",
+        signature: {
+          full: "event HoldByPartitionReclaimed(address indexed operator, address indexed tokenHolder, bytes32 indexed partition, uint256 holdId, uint256 amount)",
+          canonical: "HoldByPartitionReclaimed(address,address,bytes32,uint256,uint256)",
+        },
+        topic0: "0xee0ec155026031ca64823d8fbf00832ff3f96c7da0994432ddc1a32c72022a09",
+      },
+      {
+        name: "HoldByPartitionReleased",
+        signature: {
+          full: "event HoldByPartitionReleased(address indexed tokenHolder, bytes32 indexed partition, uint256 holdId, uint256 amount)",
+          canonical: "HoldByPartitionReleased(address,bytes32,uint256,uint256)",
+        },
+        topic0: "0x6c167944f4b372d42d168efc93004d7e517cb82a501d67490af33f95530ca50e",
+      },
+      {
+        name: "OperatorHeldByPartition",
+        signature: {
+          full: "event OperatorHeldByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 holdId, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, bytes operatorData)",
+          canonical:
+            "OperatorHeldByPartition(address,address,bytes32,uint256,(uint256,uint256,address,address,bytes),bytes)",
+        },
+        topic0: "0x01660369819a0bc795379d82e3319b24a6538fc22d81f19255d90a716909853f",
+      },
+      {
+        name: "ProtectedHeldByPartition",
+        signature: {
+          full: "event ProtectedHeldByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 holdId, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, bytes operatorData)",
+          canonical:
+            "ProtectedHeldByPartition(address,address,bytes32,uint256,(uint256,uint256,address,address,bytes),bytes)",
+        },
+        topic0: "0x9e04f881c3c90f436a99de08b14d5ce9654a885f586e2625c1f4824c948728f7",
+      },
+      {
+        name: "Transfer",
+        signature: {
+          full: "event Transfer(address indexed from, address indexed to, uint256 value)",
+          canonical: "Transfer(address,address,uint256)",
+        },
+        topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+      },
+      {
+        name: "TransferByPartition",
+        signature: {
+          full: "event TransferByPartition(bytes32 indexed _fromPartition, address _operator, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)",
+          canonical: "TransferByPartition(bytes32,address,address,address,uint256,bytes,bytes)",
+        },
+        topic0: "0xff4e9a26af4eb73b8bacfaa4abd4fea03d9448e7b912dc5ff4019048875aa2d4",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRole",
+        signature: {
+          full: "error AccountHasNoRole(address account, bytes32 role)",
+          canonical: "AccountHasNoRole(address,bytes32)",
+        },
+        selector: "0xa1180aad",
+      },
+      {
+        name: "ClearingIsActivated",
+        signature: { full: "error ClearingIsActivated()", canonical: "ClearingIsActivated()" },
+        selector: "0x5b2e3086",
+      },
+      {
+        name: "ExpiredDeadline",
+        signature: { full: "error ExpiredDeadline(uint256 deadline)", canonical: "ExpiredDeadline(uint256)" },
+        selector: "0x724a779a",
+      },
+      {
+        name: "HoldExpirationNotReached",
+        signature: { full: "error HoldExpirationNotReached()", canonical: "HoldExpirationNotReached()" },
+        selector: "0x20aa310e",
+      },
+      {
+        name: "HoldExpirationReached",
+        signature: { full: "error HoldExpirationReached()", canonical: "HoldExpirationReached()" },
+        selector: "0x0415b9f9",
+      },
+      {
+        name: "InsufficientBalance",
+        signature: {
+          full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
+          canonical: "InsufficientBalance(address,uint256,uint256,bytes32)",
+        },
+        selector: "0x5d6824c4",
+      },
+      {
+        name: "InsufficientHoldBalance",
+        signature: {
+          full: "error InsufficientHoldBalance(uint256 holdAmount, uint256 amount)",
+          canonical: "InsufficientHoldBalance(uint256,uint256)",
+        },
+        selector: "0x7ff7d816",
+      },
+      {
+        name: "InvalidDestinationAddress",
+        signature: {
+          full: "error InvalidDestinationAddress(address holdDestination, address to)",
+          canonical: "InvalidDestinationAddress(address,address)",
+        },
+        selector: "0xdb0a3012",
+      },
+      {
+        name: "InvalidPartition",
+        signature: {
+          full: "error InvalidPartition(address account, bytes32 partition)",
+          canonical: "InvalidPartition(address,bytes32)",
+        },
+        selector: "0xbf84f4ec",
+      },
+      {
+        name: "IsNotEscrow",
+        signature: { full: "error IsNotEscrow()", canonical: "IsNotEscrow()" },
+        selector: "0xf86f2a37",
+      },
+      {
+        name: "PartitionsAreUnProtected",
+        signature: { full: "error PartitionsAreUnProtected()", canonical: "PartitionsAreUnProtected()" },
+        selector: "0x05681565",
+      },
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+      {
+        name: "WalletRecovered",
+        signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
+        selector: "0xf9f9bcf9",
+      },
+      {
+        name: "WrongExpirationTimestamp",
+        signature: { full: "error WrongExpirationTimestamp()", canonical: "WrongExpirationTimestamp()" },
+        selector: "0xe39f4776",
+      },
+      {
+        name: "WrongHoldId",
+        signature: { full: "error WrongHoldId()", canonical: "WrongHoldId()" },
+        selector: "0x7e90c2c9",
+      },
+      {
+        name: "WrongNonce",
+        signature: {
+          full: "error WrongNonce(uint256 nonce, address account)",
+          canonical: "WrongNonce(uint256,address)",
+        },
+        selector: "0x2fb817aa",
+      },
+      {
+        name: "WrongSignature",
+        signature: { full: "error WrongSignature()", canonical: "WrongSignature()" },
+        selector: "0x356a4418",
+      },
+      {
+        name: "WrongSignatureLength",
+        signature: { full: "error WrongSignatureLength()", canonical: "WrongSignatureLength()" },
+        selector: "0x5763538a",
+      },
+      {
+        name: "ZeroAddressNotAllowed",
+        signature: { full: "error ZeroAddressNotAllowed()", canonical: "ZeroAddressNotAllowed()" },
+        selector: "0x8579befe",
+      },
+    ],
+    factory: (signer) => new ProtectedHoldByPartitionFacet__factory(signer),
+  },
+
   ProtectedPartitionsFacet: {
     name: "ProtectedPartitionsFacet",
     resolverKey: {
@@ -11982,28 +12283,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["Snapshots", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "balanceOfAtSnapshot",
-        signature: {
-          full: "function balanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
-          canonical: "balanceOfAtSnapshot(uint256,address)",
-        },
-        selector: "0x8e00ae2e",
-      },
-      {
         name: "balanceOfAtSnapshotByPartition",
         signature: {
           full: "function balanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
           canonical: "balanceOfAtSnapshotByPartition(bytes32,uint256,address)",
         },
         selector: "0xe002bcdf",
-      },
-      {
-        name: "balancesOfAtSnapshot",
-        signature: {
-          full: "function balancesOfAtSnapshot(uint256 _snapshotID, uint256 _pageIndex, uint256 _pageLength) view returns ((address holder, uint256 balance)[] balances_)",
-          canonical: "balancesOfAtSnapshot(uint256,uint256,uint256)",
-        },
-        selector: "0xe956875c",
       },
       {
         name: "clearedBalanceOfAtSnapshot",
@@ -12121,14 +12406,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "takeSnapshot",
         signature: { full: "function takeSnapshot() returns (uint256 snapshotID_)", canonical: "takeSnapshot()" },
         selector: "0xb3d3d37e",
-      },
-      {
-        name: "totalSupplyAtSnapshot",
-        signature: {
-          full: "function totalSupplyAtSnapshot(uint256 _snapshotID) view returns (uint256 totalSupply_)",
-          canonical: "totalSupplyAtSnapshot(uint256)",
-        },
-        selector: "0xda35f8f6",
       },
       {
         name: "totalSupplyAtSnapshotByPartition",
@@ -13461,7 +13738,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 90 as const;
+export const TOTAL_FACETS = 94 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

@@ -69,12 +69,14 @@ import { IProceedRecipients } from "./layer_2/proceedRecipient/IProceedRecipient
 import { ICap } from "./layer_1/cap/ICap.sol";
 import { INonces } from "./layer_1/nonce/INonces.sol";
 import { IBalanceTrackerByPartition } from "./balanceTrackerByPartition/IBalanceTrackerByPartition.sol";
+import { IBalanceTrackerAtSnapshot } from "./balanceTrackerAtSnapshot/IBalanceTrackerAtSnapshot.sol";
 import { IScheduledCouponListing } from "./layer_2/scheduledTask/scheduledCouponListing/IScheduledCouponListing.sol";
 import {
     IScheduledBalanceAdjustments
 } from "./layer_2/scheduledTask/scheduledBalanceAdjustment/IScheduledBalanceAdjustments.sol";
 import { ILock } from "./layer_1/lock/ILock.sol";
 import { IFreeze } from "./layer_1/freeze/IFreeze.sol";
+import { IBatchFreeze } from "./batchFreeze/IBatchFreeze.sol";
 import { ISnapshots } from "./layer_1/snapshot/ISnapshots.sol";
 import { IClearingActions } from "./layer_1/clearing/IClearingActions.sol";
 import { IClearingTransfer } from "./layer_1/clearing/IClearingTransfer.sol";
@@ -86,12 +88,14 @@ import {
 import { IClearingRead } from "./layer_1/clearing/IClearingRead.sol";
 import { IComplianceFacet } from "./compliance/IComplianceFacet.sol";
 import { IMint } from "./mint/IMint.sol";
+import { IMintByPartition } from "./mintByPartition/IMintByPartition.sol";
 import { IHoldFacet } from "./hold/IHoldFacet.sol";
 import { IBatchController } from "./batchController/IBatchController.sol";
 import { IBurn } from "./burn/IBurn.sol";
 import { IDocumentation } from "./documentation/IDocumentation.sol";
 import { IController } from "./controller/IController.sol";
 import { IControllerHoldByPartition } from "./controllerHoldByPartition/IControllerHoldByPartition.sol";
+import { IProtectedHoldByPartition } from "./protectedHoldByPartition/IProtectedHoldByPartition.sol";
 import { IERC20Permit } from "./layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
 import { IControlList } from "./layer_1/controlList/IControlList.sol";
 import { IBatchBurn } from "./batchBurn/IBatchBurn.sol";
@@ -161,12 +165,14 @@ interface IAsset is
     ICap,
     INonces,
     IBalanceTrackerByPartition,
+    IBalanceTrackerAtSnapshot,
     IFixedRate,
     // Scheduled Tasks
     IScheduledCouponListing,
     IScheduledBalanceAdjustments,
     ILock,
     IFreeze,
+    IBatchFreeze,
     ISnapshots,
     // Clearing interfaces
     IClearingActions,
@@ -181,9 +187,11 @@ interface IAsset is
     IBatchController,
     IHoldByPartition,
     IMint,
+    IMintByPartition,
     IDocumentation,
     IController,
     IControllerHoldByPartition,
+    IProtectedHoldByPartition,
     IERC20Permit,
     // Control
     IControlList,

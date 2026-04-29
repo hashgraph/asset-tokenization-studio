@@ -57,36 +57,6 @@ interface IFreeze {
     function setAddressFrozen(address _userAddress, bool _freezeStatus) external;
 
     /**
-     * @notice Batch freezes or unfreezes multiple addresses
-     * @param _userAddresses Array of addresses to freeze/unfreeze
-     * @param _freeze Array of freeze statuses (true = freeze, false = unfreeze)
-     * @dev Requires arrays to have the same length
-     * @dev Emits AddressFrozen events for each address
-     * @dev Only callable by addresses with FREEZE_MANAGER_ROLE or AGENT_ROLE
-     */
-    function batchSetAddressFrozen(address[] calldata _userAddresses, bool[] calldata _freeze) external;
-
-    /**
-     * @notice Batch freezes partial tokens for multiple addresses
-     * @param _userAddresses Array of addresses to freeze tokens for
-     * @param _amounts Array of amounts to freeze
-     * @dev Requires arrays to have the same length
-     * @dev Only works in single partition mode
-     * @dev Emits TokensFrozen events for each address
-     */
-    function batchFreezePartialTokens(address[] calldata _userAddresses, uint256[] calldata _amounts) external;
-
-    /**
-     * @notice Batch unfreezes partial tokens for multiple addresses
-     * @param _userAddresses Array of addresses to unfreeze tokens for
-     * @param _amounts Array of amounts to unfreeze
-     * @dev Requires arrays to have the same length
-     * @dev Only works in single partition mode
-     * @dev Emits TokensUnfrozen events for each address
-     */
-    function batchUnfreezePartialTokens(address[] calldata _userAddresses, uint256[] calldata _amounts) external;
-
-    /**
      * @notice Returns the total amount of tokens currently frozen for a user
      * @param _userAddress The address to query
      * @return The total frozen token amount across all partitions
