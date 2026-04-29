@@ -6,11 +6,22 @@ import { Snapshots } from "./Snapshots.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { _SNAPSHOTS_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
+/**
+ * @title SnapshotsFacet
+ * @author Asset Tokenization Studio Team
+ * @notice Diamond facet exposing snapshot creation and historical balance, supply, partition,
+ *         hold, lock, clearing, freeze and token-holder enquiries to the Diamond proxy.
+ * @dev Wires the {Snapshots} implementation into the Diamond resolver by advertising its
+ *      resolver key, external function selectors and supported interface id. Holds no storage
+ *      of its own; all state and logic live in the inherited {Snapshots} contract.
+ */
 contract SnapshotsFacet is Snapshots, IStaticFunctionSelectors {
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _SNAPSHOTS_RESOLVER_KEY;
     }
 
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex = 15;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);
@@ -33,6 +44,7 @@ contract SnapshotsFacet is Snapshots, IStaticFunctionSelectors {
         }
     }
 
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         uint256 selectorIndex = 1;
         staticInterfaceIds_ = new bytes4[](selectorIndex);
