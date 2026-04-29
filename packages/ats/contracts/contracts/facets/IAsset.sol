@@ -81,7 +81,7 @@ import {
     IScheduledBalanceAdjustments
 } from "./layer_2/scheduledTask/scheduledBalanceAdjustment/IScheduledBalanceAdjustments.sol";
 import { ILock } from "./layer_1/lock/ILock.sol";
-import { IFreeze } from "./layer_1/freeze/IFreeze.sol";
+import { IFreeze } from "./freeze/IFreeze.sol";
 import { IBatchFreeze } from "./batchFreeze/IBatchFreeze.sol";
 import { ISnapshots } from "./layer_1/snapshot/ISnapshots.sol";
 import { ICoreAtSnapshot } from "./coreAtSnapshot/ICoreAtSnapshot.sol";

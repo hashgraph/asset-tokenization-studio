@@ -2,11 +2,11 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IFreeze } from "./IFreeze.sol";
-import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
-import { Modifiers } from "../../../services/Modifiers.sol";
-import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
+import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title Freeze
