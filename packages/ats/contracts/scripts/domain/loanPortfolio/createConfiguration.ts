@@ -62,6 +62,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "BalanceTrackerByPartitionFacet",
   "BalanceTrackerAtSnapshotFacet",
   "BalanceTrackerAtSnapshotByPartitionFacet",
+  "ClearingAtSnapshotFacet",
 
   // ERC Standards
   "MintByPartitionFacet",

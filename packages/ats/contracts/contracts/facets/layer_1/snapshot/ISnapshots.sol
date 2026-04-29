@@ -79,11 +79,6 @@ interface ISnapshots {
         address _tokenHolder
     ) external view returns (uint256 balance_);
 
-    function clearedBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view returns (uint256 balance_);
-
     function clearedBalanceOfAtSnapshotByPartition(
         bytes32 _partition,
         uint256 _snapshotID,

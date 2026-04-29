@@ -110,6 +110,7 @@ export const CONTRACT_NAMES = [
   "BalanceTrackerByPartitionFacet",
   "BalanceTrackerAtSnapshotFacet",
   "BalanceTrackerAtSnapshotByPartitionFacet",
+  "ClearingAtSnapshotFacet",
   "ProtectedPartitionsFacet",
   "HoldFacet",
   "HoldByPartitionFacet",

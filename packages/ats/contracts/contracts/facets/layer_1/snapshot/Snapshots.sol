@@ -95,14 +95,6 @@ abstract contract Snapshots is ISnapshots, Modifiers {
     }
 
     /// @inheritdoc ISnapshots
-    function clearedBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view returns (uint256 balance_) {
-        balance_ = SnapshotsStorageWrapper.clearedBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    /// @inheritdoc ISnapshots
     function clearedBalanceOfAtSnapshotByPartition(
         bytes32 _partition,
         uint256 _snapshotID,
