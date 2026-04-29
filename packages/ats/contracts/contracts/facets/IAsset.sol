@@ -14,7 +14,7 @@ import { IBondUSA } from "./layer_3/bondUSA/IBondUSA.sol";
 // Layer 1 — ERC1400
 
 // Layer 1 — ERC3643
-import { ICorporateActions } from "./corporateAction/ICorporateActions.sol";
+import { ICorporateActions } from "./corporateActions/ICorporateActions.sol";
 import { IDiamond } from "../infrastructure/proxy/IDiamond.sol";
 
 // Core
@@ -34,7 +34,7 @@ import { IERC3643 } from "./layer_1/ERC3643/IERC3643.sol";
 import { IEquity } from "./layer_2/equity/IEquity.sol";
 import { IEquityUSA } from "./layer_3/equityUSA/IEquityUSA.sol";
 import { IExternalControlList } from "./layer_1/externalControlList/IExternalControlList.sol";
-import { IExternalControlListManagement } from "./layer_1/externalControlList/IExternalControlListManagement.sol";
+import { IExternalControlListManagement } from "./externalControlListManagement/IExternalControlListManagement.sol";
 import { IExternalKycList } from "./layer_1/externalKycList/IExternalKycList.sol";
 import { IExternalKycListManagement } from "./layer_1/externalKycList/IExternalKycListManagement.sol";
 import { IExternalPauseManagement } from "./layer_1/externalPause/IExternalPauseManagement.sol";

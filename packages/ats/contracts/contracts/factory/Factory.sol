@@ -36,7 +36,7 @@ import { IProtectedPartitions } from "../facets/layer_1/protectedPartition/IProt
 import { IExternalPauseManagement } from "../facets/layer_1/externalPause/IExternalPauseManagement.sol";
 import {
     IExternalControlListManagement
-} from "../facets/layer_1/externalControlList/IExternalControlListManagement.sol";
+} from "../facets/externalControlListManagement/IExternalControlListManagement.sol";
 import { IExternalKycListManagement } from "../facets/layer_1/externalKycList/IExternalKycListManagement.sol";
 import { IKyc } from "../facets/layer_1/kyc/IKyc.sol";
 import { IERC3643 } from "../facets/layer_1/ERC3643/IERC3643.sol";
