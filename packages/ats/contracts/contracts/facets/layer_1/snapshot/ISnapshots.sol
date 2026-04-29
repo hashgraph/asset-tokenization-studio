@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-// Snapshotted values have arrays of ids and the value corresponding to that id. These could be an array of a
+import { ScheduledTask } from "../../layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
+
+// Snapshot values have arrays of ids and the value corresponding to that id. These could be an array of a
 // Snapshot struct, but that would impede usage of functions that work on an array.
 struct Snapshots {
     uint256[] ids;
@@ -129,4 +131,17 @@ interface ISnapshots {
      * @notice Returns the total number of token holders at the time of a given snapshot
      */
     function getTotalTokenHoldersAtSnapshot(uint256 _snapshotID) external view returns (uint256);
+
+    /**
+     * @notice Returns the number of snapshots scheduled to run on this asset.
+     */
+    function scheduledSnapshotCount() external view returns (uint256);
+
+    /**
+     * @notice Returns a paginated list of scheduled snapshots.
+     */
+    function getScheduledSnapshots(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (ScheduledTask[] memory scheduledSnapshot_);
 }
