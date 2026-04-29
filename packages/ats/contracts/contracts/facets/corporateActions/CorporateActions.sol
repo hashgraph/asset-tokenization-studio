@@ -5,7 +5,19 @@ import { ICorporateActions } from "./ICorporateActions.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { CorporateActionsStorageWrapper } from "../../domain/core/CorporateActionsStorageWrapper.sol";
 
+/**
+ * @title CorporateActions
+ * @author Asset Tokenization Studio Team
+ * @notice Abstract contract implementing read-only corporate action query logic for a security
+ *         token. Exposes retrieval of individual actions, paginated lists, type-scoped views,
+ *         and content-hash deduplication checks.
+ * @dev Implements `ICorporateActions`. All data is stored at `_CORPORATE_ACTION_STORAGE_POSITION`
+ *      via `CorporateActionsStorageWrapper`. Write operations (add, cancel, update) are provided
+ *      by domain-specific abstract contracts that extend this one. Intended to be inherited
+ *      exclusively by `CorporateActionsFacet`.
+ */
 abstract contract CorporateActions is ICorporateActions, Modifiers {
+    /// @inheritdoc ICorporateActions
     function getCorporateAction(
         bytes32 _corporateActionId
     )
@@ -19,6 +31,7 @@ abstract contract CorporateActions is ICorporateActions, Modifiers {
         );
     }
 
+    /// @inheritdoc ICorporateActions
     function getCorporateActions(
         uint256 _pageIndex,
         uint256 _pageLength
@@ -39,10 +52,12 @@ abstract contract CorporateActions is ICorporateActions, Modifiers {
         );
     }
 
+    /// @inheritdoc ICorporateActions
     function getCorporateActionCount() external view override returns (uint256 corporateActionCount_) {
         corporateActionCount_ = CorporateActionsStorageWrapper.getCorporateActionCount();
     }
 
+    /// @inheritdoc ICorporateActions
     function getCorporateActionIds(
         uint256 _pageIndex,
         uint256 _pageLength
@@ -50,12 +65,14 @@ abstract contract CorporateActions is ICorporateActions, Modifiers {
         corporateActionIds_ = CorporateActionsStorageWrapper.getCorporateActionIds(_pageIndex, _pageLength);
     }
 
+    /// @inheritdoc ICorporateActions
     function getCorporateActionCountByType(
         bytes32 _actionType
     ) external view override returns (uint256 corporateActionCount_) {
         corporateActionCount_ = CorporateActionsStorageWrapper.getCorporateActionCountByType(_actionType);
     }
 
+    /// @inheritdoc ICorporateActions
     function getCorporateActionsByType(
         bytes32 actionType,
         uint256 pageIndex,
@@ -78,6 +95,7 @@ abstract contract CorporateActions is ICorporateActions, Modifiers {
         );
     }
 
+    /// @inheritdoc ICorporateActions
     function getCorporateActionIdsByType(
         bytes32 _actionType,
         uint256 _pageIndex,
@@ -90,6 +108,7 @@ abstract contract CorporateActions is ICorporateActions, Modifiers {
         );
     }
 
+    /// @inheritdoc ICorporateActions
     function actionContentHashExists(bytes32 _contentHash) external view returns (bool) {
         return CorporateActionsStorageWrapper.actionContentHashExists(_contentHash);
     }

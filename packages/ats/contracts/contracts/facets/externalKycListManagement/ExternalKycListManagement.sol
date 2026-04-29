@@ -10,12 +10,26 @@ import { ArrayValidation } from "../../infrastructure/utils/ArrayValidation.sol"
 import { IKyc } from "../layer_1/kyc/IKyc.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
+/**
+ * @title ExternalKycListManagement
+ * @author Asset Tokenization Studio Team
+ * @notice Abstract contract implementing external KYC list management logic for a security token.
+ *         Maintains a list of trusted third-party KYC provider contracts whose combined KYC
+ *         evaluation must be satisfied for an account to be considered externally KYC-granted.
+ * @dev Implements `IExternalKycListManagement`. The external KYC list is stored in diamond storage
+ *      at `_KYC_MANAGEMENT_STORAGE_POSITION` via `ExternalListManagementStorageWrapper`.
+ *      All mutating functions after initialisation are gated by `KYC_MANAGER_ROLE` and the
+ *      `onlyUnpaused` modifier inherited from `Modifiers`. Intended to be inherited exclusively
+ *      by `ExternalKycListManagementFacet`.
+ */
 abstract contract ExternalKycListManagement is IExternalKycListManagement, Modifiers {
+    /// @inheritdoc IExternalKycListManagement
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ExternalKycLists(address[] calldata _kycLists) external override onlyNotKycExternalInitialized {
         ExternalListManagementStorageWrapper.initialize_ExternalKycLists(_kycLists);
     }
 
+    /// @inheritdoc IExternalKycListManagement
     function updateExternalKycLists(
         address[] calldata _kycLists,
         bool[] calldata _actives
@@ -32,6 +46,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
         emit ExternalKycListsUpdated(EvmAccessors.getMsgSender(), _kycLists, _actives);
     }
 
+    /// @inheritdoc IExternalKycListManagement
     function addExternalKycList(
         address _kycLists
     ) external override onlyUnpaused onlyRole(KYC_MANAGER_ROLE) onlyValidAddress(_kycLists) returns (bool success_) {
@@ -42,6 +57,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
         emit AddedToExternalKycLists(EvmAccessors.getMsgSender(), _kycLists);
     }
 
+    /// @inheritdoc IExternalKycListManagement
     function removeExternalKycList(
         address _kycLists
     ) external override onlyUnpaused onlyRole(KYC_MANAGER_ROLE) returns (bool success_) {
@@ -52,18 +68,22 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
         emit RemovedFromExternalKycLists(EvmAccessors.getMsgSender(), _kycLists);
     }
 
+    /// @inheritdoc IExternalKycListManagement
     function isExternalKycList(address _kycList) external view override returns (bool) {
         return ExternalListManagementStorageWrapper.isExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycList);
     }
 
+    /// @inheritdoc IExternalKycListManagement
     function isExternallyGranted(address _account, IKyc.KycStatus _kycStatus) external view override returns (bool) {
         return ExternalListManagementStorageWrapper.isExternallyGranted(_account, _kycStatus);
     }
 
+    /// @inheritdoc IExternalKycListManagement
     function getExternalKycListsCount() external view override returns (uint256 externalKycListsCount_) {
         return ExternalListManagementStorageWrapper.getExternalListsCount(_KYC_MANAGEMENT_STORAGE_POSITION);
     }
 
+    /// @inheritdoc IExternalKycListManagement
     function getExternalKycListsMembers(
         uint256 _pageIndex,
         uint256 _pageLength

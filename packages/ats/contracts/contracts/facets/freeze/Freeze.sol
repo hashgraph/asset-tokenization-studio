@@ -11,24 +11,18 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 /**
  * @title Freeze
  * @author Asset Tokenization Studio Team
- * @notice Abstract contract for freezing addresses and partial tokens
- *
- * Provides functionality for freezing addresses and partial token amounts
- * with role-based access control. Inherits ERC3643Modifiers for compliance checks.
+ * @notice Abstract contract implementing address and partial token freeze logic for a security
+ *         token. Supports both address-level freezing (blocking all operations) and
+ *         amount-level freezing (locking a specific token balance).
+ * @dev Implements `IFreeze`. Freeze state is delegated to `ERC3643StorageWrapper`. Partial
+ *      freeze/unfreeze operations are restricted to single-partition tokens via the
+ *      `onlyWithoutMultiPartition` modifier. All mutating functions require `FREEZE_MANAGER_ROLE`
+ *      or `AGENT_ROLE` via `onlyFreezeRoles`. `getFrozenTokens` delegates timestamp resolution
+ *      to `TimeTravelStorageWrapper` so the same code path is exercisable in test environments.
+ *      Intended to be inherited exclusively by `FreezeFacet`.
  */
 abstract contract Freeze is IFreeze, Modifiers {
-    /**
-     * @notice Set address frozen status
-     * @dev Only callable by FREEZE_MANAGER_ROLE or AGENT_ROLE
-     *
-     * Requirements:
-     * - Address must be valid
-     * - Caller must have FREEZE_MANAGER_ROLE or AGENT_ROLE
-     * - Address must not be recovered
-     *
-     * @param _userAddress The address to freeze/unfreeze
-     * @param _freezStatus True to freeze, false to unfreeze
-     */
+    /// @inheritdoc IFreeze
     function setAddressFrozen(
         address _userAddress,
         bool _freezStatus
@@ -44,18 +38,7 @@ abstract contract Freeze is IFreeze, Modifiers {
         emit AddressFrozen(_userAddress, _freezStatus, EvmAccessors.getMsgSender());
     }
 
-    /**
-     * @notice Freeze partial tokens for address
-     * @dev Only callable when not paused
-     *
-     * Requirements:
-     * - Address must be valid
-     * - Address must not be recovered
-     * - Token must not use multi-partition
-     *
-     * @param _userAddress The address to freeze tokens for
-     * @param _amount The amount to freeze
-     */
+    /// @inheritdoc IFreeze
     function freezePartialTokens(
         address _userAddress,
         uint256 _amount
@@ -72,18 +55,7 @@ abstract contract Freeze is IFreeze, Modifiers {
         emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
     }
 
-    /**
-     * @notice Unfreeze partial tokens for address
-     * @dev Only callable when not paused
-     *
-     * Requirements:
-     * - Address must be valid
-     * - Address must not be recovered
-     * - Token must not use multi-partition
-     *
-     * @param _userAddress The address to unfreeze tokens for
-     * @param _amount The amount to unfreeze
-     */
+    /// @inheritdoc IFreeze
     function unfreezePartialTokens(
         address _userAddress,
         uint256 _amount
@@ -100,11 +72,7 @@ abstract contract Freeze is IFreeze, Modifiers {
         emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
     }
 
-    /**
-     * @notice Get frozen tokens for address
-     * @param _userAddress The address to query
-     * @return Frozen token amount
-     */
+    /// @inheritdoc IFreeze
     function getFrozenTokens(address _userAddress) external view override returns (uint256) {
         return
             ERC3643StorageWrapper.getFrozenAmountForAdjustedAt(

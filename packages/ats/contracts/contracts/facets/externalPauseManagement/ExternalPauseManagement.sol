@@ -10,12 +10,26 @@ import { Modifiers } from "../../services/Modifiers.sol";
 import { ArrayValidation } from "../../infrastructure/utils/ArrayValidation.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
+/**
+ * @title ExternalPauseManagement
+ * @author Asset Tokenization Studio Team
+ * @notice Abstract contract implementing external pause management logic for a security token.
+ *         Maintains a list of trusted third-party pause contracts whose combined pause state
+ *         contributes to the token's global pause evaluation.
+ * @dev Implements `IExternalPauseManagement`. The external pause list is stored in diamond storage
+ *      at `_PAUSE_MANAGEMENT_STORAGE_POSITION` via `ExternalListManagementStorageWrapper`.
+ *      All mutating functions after initialisation are gated by `PAUSE_MANAGER_ROLE` and the
+ *      `onlyUnpaused` modifier inherited from `Modifiers`. Intended to be inherited exclusively
+ *      by `ExternalPauseManagementFacet`.
+ */
 abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers {
+    /// @inheritdoc IExternalPauseManagement
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ExternalPauses(address[] calldata _pauses) external override onlyNotExternalPauseInitialized {
         PauseStorageWrapper.initialize_ExternalPauses(_pauses);
     }
 
+    /// @inheritdoc IExternalPauseManagement
     function updateExternalPauses(
         address[] calldata _pauses,
         bool[] calldata _actives
@@ -32,6 +46,7 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers
         emit ExternalPausesUpdated(EvmAccessors.getMsgSender(), _pauses, _actives);
     }
 
+    /// @inheritdoc IExternalPauseManagement
     function addExternalPause(
         address _pause
     ) external override onlyUnpaused onlyRole(PAUSE_MANAGER_ROLE) onlyValidAddress(_pause) returns (bool success_) {
@@ -42,6 +57,7 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers
         emit AddedToExternalPauses(EvmAccessors.getMsgSender(), _pause);
     }
 
+    /// @inheritdoc IExternalPauseManagement
     function removeExternalPause(
         address _pause
     ) external override onlyUnpaused onlyRole(PAUSE_MANAGER_ROLE) returns (bool success_) {
@@ -52,14 +68,17 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers
         emit RemovedFromExternalPauses(EvmAccessors.getMsgSender(), _pause);
     }
 
+    /// @inheritdoc IExternalPauseManagement
     function isExternalPause(address _pause) external view override returns (bool) {
         return ExternalListManagementStorageWrapper.isExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
     }
 
+    /// @inheritdoc IExternalPauseManagement
     function getExternalPausesCount() external view override returns (uint256 externalPausesCount_) {
         return ExternalListManagementStorageWrapper.getExternalListsCount(_PAUSE_MANAGEMENT_STORAGE_POSITION);
     }
 
+    /// @inheritdoc IExternalPauseManagement
     function getExternalPausesMembers(
         uint256 _pageIndex,
         uint256 _pageLength
