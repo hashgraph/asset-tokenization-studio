@@ -84,7 +84,11 @@ library InitializerStorageWrapper {
                 ResolverProxyStorageWrapper.getResolverProxyVersion(),
                 _facetId
             );
-        initializerStorage().facetVersionStatus[_facetId][versionId] = _status;
+        setFacetStatusForVersion(_facetId, versionId, _status);
+    }
+
+    function setFacetStatusForVersion(bytes32 _facetId, uint256 _versionId, uint256 _status) internal {
+        initializerStorage().facetVersionStatus[_facetId][_versionId] = _status;
     }
 
     function setFacetLastVersion(bytes32 _facetId) internal {
@@ -95,7 +99,11 @@ library InitializerStorageWrapper {
                 ResolverProxyStorageWrapper.getResolverProxyVersion(),
                 _facetId
             );
-        initializerStorage().facetLastVersion[_facetId] = versionId;
+        setFacetLastVersionTo(_facetId, versionId);
+    }
+
+    function setFacetLastVersionTo(bytes32 _facetId, uint256 _versionId) internal {
+        initializerStorage().facetLastVersion[_facetId] = _versionId;
     }
 
     function checkOperational(bytes32 configId, uint256 versionId) internal view {
