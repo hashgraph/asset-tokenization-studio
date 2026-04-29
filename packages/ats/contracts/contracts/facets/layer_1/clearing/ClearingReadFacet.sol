@@ -12,17 +12,19 @@ contract ClearingReadFacet is ClearingRead, IStaticFunctionSelectors {
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
-        staticFunctionSelectors_[selectorIndex++] = this.getClearedAmountFor.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getClearedAmountForByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getClearingCountForByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getClearingsIdForByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getClearingThirdParty.selector;
+        uint256 selectorIndex = 2;
+        staticFunctionSelectors_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this.getClearingThirdParty.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getClearedAmountFor.selector;
+        }
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(IClearingRead).interfaceId;
+        uint256 selectorIndex = 1;
+        staticInterfaceIds_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticInterfaceIds_[--selectorIndex] = type(IClearingRead).interfaceId;
+        }
     }
 }

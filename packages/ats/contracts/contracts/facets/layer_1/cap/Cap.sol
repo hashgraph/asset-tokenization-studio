@@ -35,30 +35,7 @@ abstract contract Cap is ICap, Modifiers {
         success_ = true;
     }
 
-    function setMaxSupplyByPartition(
-        bytes32 _partition,
-        uint256 _maxSupply
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(CAP_ROLE)
-        onlyValidNewMaxSupplyByPartition(_partition, _maxSupply, TimeTravelStorageWrapper.getBlockTimestamp())
-        returns (bool success_)
-    {
-        CapStorageWrapper.setMaxSupplyByPartition(_partition, _maxSupply, TimeTravelStorageWrapper.getBlockTimestamp());
-        success_ = true;
-    }
-
     function getMaxSupply() external view override returns (uint256 maxSupply_) {
         return CapStorageWrapper.getMaxSupplyAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
-    }
-
-    function getMaxSupplyByPartition(bytes32 _partition) external view override returns (uint256 maxSupply_) {
-        return
-            CapStorageWrapper.getMaxSupplyByPartitionAdjustedAt(
-                _partition,
-                TimeTravelStorageWrapper.getBlockTimestamp()
-            );
     }
 }

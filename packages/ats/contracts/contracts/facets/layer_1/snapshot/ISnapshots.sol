@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-// Snapshotted values have arrays of ids and the value corresponding to that id. These could be an array of a
+import { ScheduledTask } from "../../layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
+
+// Snapshot values have arrays of ids and the value corresponding to that id. These could be an array of a
 // Snapshot struct, but that would impede usage of functions that work on an array.
 struct Snapshots {
     uint256[] ids;
@@ -45,45 +47,9 @@ interface ISnapshots {
     function decimalsAtSnapshot(uint256 _snapshotID) external view returns (uint8 decimals_);
 
     /**
-     * @notice Returns a HolderBalance array with account and balance at the time of a given snapshot
-     */
-    function balancesOfAtSnapshot(
-        uint256 _snapshotID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (HolderBalance[] memory balances_);
-
-    /**
-     * @notice Returns the balance of an account at the time of a given snapshot
-     */
-    function balanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) external view returns (uint256 balance_);
-
-    /**
-     * @notice Returns the balance of an account for a given partition at the time of a given snapshot
-     */
-    function balanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view returns (uint256 balance_);
-
-    /**
      * @notice Returns the list of partitions held by an account at the time of a given snapshot
      */
     function partitionsOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) external view returns (bytes32[] memory);
-
-    /**
-     * @notice Returns the total supply at the time of a given snapshot
-     */
-    function totalSupplyAtSnapshot(uint256 _snapshotID) external view returns (uint256 totalSupply_);
-
-    /**
-     * @notice Returns the total supply for a given partition at the time of a given snapshot
-     */
-    function totalSupplyAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID
-    ) external view returns (uint256 totalSupply_);
 
     /**
      * @notice Returns the locked balance of an account at the time of a given snapshot
@@ -148,4 +114,17 @@ interface ISnapshots {
      * @notice Returns the total number of token holders at the time of a given snapshot
      */
     function getTotalTokenHoldersAtSnapshot(uint256 _snapshotID) external view returns (uint256);
+
+    /**
+     * @notice Returns the number of snapshots scheduled to run on this asset.
+     */
+    function scheduledSnapshotCount() external view returns (uint256);
+
+    /**
+     * @notice Returns a paginated list of scheduled snapshots.
+     */
+    function getScheduledSnapshots(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (ScheduledTask[] memory scheduledSnapshot_);
 }

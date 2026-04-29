@@ -878,3 +878,162 @@ describe("Snapshots Tests", () => {
     });
   });
 });
+
+describe("Scheduled Snapshots Tests", () => {
+  let diamond: ResolverProxy;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
+
+  let asset: IAsset;
+
+  async function deploySecurityFixtureSinglePartition() {
+    const base = await deployEquityTokenFixture();
+    diamond = base.diamond;
+    signer_A = base.deployer;
+    signer_B = base.user2;
+    signer_C = base.user3;
+
+    asset = await ethers.getContractAt("IAsset", diamond.target);
+
+    await executeRbac(asset, [
+      {
+        role: ATS_ROLES.PAUSER_ROLE,
+        members: [signer_B.address],
+      },
+    ]);
+  }
+
+  beforeEach(async () => {
+    await loadFixture(deploySecurityFixtureSinglePartition);
+  });
+
+  it("GIVEN a token WHEN triggerSnapshots THEN transaction succeeds", async () => {
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+
+    // set dividend
+    const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp("2030-01-01T00:00:06Z");
+    const dividendsRecordDateInSeconds_2 = dateToUnixTimestamp("2030-01-01T00:00:12Z");
+    const dividendsRecordDateInSeconds_3 = dateToUnixTimestamp("2030-01-01T00:00:18Z");
+    const dividendsExecutionDateInSeconds = dateToUnixTimestamp("2030-01-01T00:01:00Z");
+    const dividendsAmountPerEquity = 1;
+    const dividendAmountDecimalsPerEquity = 3;
+    const dividendData_1 = {
+      recordDate: dividendsRecordDateInSeconds_1.toString(),
+      executionDate: dividendsExecutionDateInSeconds.toString(),
+      amount: dividendsAmountPerEquity,
+      amountDecimals: dividendAmountDecimalsPerEquity,
+    };
+    const dividendData_2 = {
+      recordDate: dividendsRecordDateInSeconds_2.toString(),
+      executionDate: dividendsExecutionDateInSeconds.toString(),
+      amount: dividendsAmountPerEquity,
+      amountDecimals: dividendAmountDecimalsPerEquity,
+    };
+    const dividendData_3 = {
+      recordDate: dividendsRecordDateInSeconds_3.toString(),
+      executionDate: dividendsExecutionDateInSeconds.toString(),
+      amount: dividendsAmountPerEquity,
+      amountDecimals: dividendAmountDecimalsPerEquity,
+    };
+    await asset.connect(signer_C).setDividend(dividendData_2);
+    await asset.connect(signer_C).setDividend(dividendData_3);
+    await asset.connect(signer_C).setDividend(dividendData_1);
+
+    const dividend_2_Id = "0x0000000000000000000000000000000000000000000000000000000000000001";
+    const dividend_3_Id = "0x0000000000000000000000000000000000000000000000000000000000000002";
+    const dividend_1_Id = "0x0000000000000000000000000000000000000000000000000000000000000003";
+
+    // check schedled snapshots
+    let scheduledSnapshotCount = await asset.scheduledSnapshotCount();
+    let scheduledSnapshots = await asset.getScheduledSnapshots(0, 100);
+
+    expect(scheduledSnapshotCount).to.equal(3);
+    expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount);
+    expect(scheduledSnapshots[0].scheduledTimestamp).to.equal(dividendsRecordDateInSeconds_3);
+    expect(scheduledSnapshots[0].data).to.equal(dividend_3_Id);
+    expect(scheduledSnapshots[1].scheduledTimestamp).to.equal(dividendsRecordDateInSeconds_2);
+    expect(scheduledSnapshots[1].data).to.equal(dividend_2_Id);
+    expect(scheduledSnapshots[2].scheduledTimestamp).to.equal(dividendsRecordDateInSeconds_1);
+    expect(scheduledSnapshots[2].data).to.equal(dividend_1_Id);
+
+    // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
+    await asset.changeSystemTimestamp(dividendsRecordDateInSeconds_1 + 1);
+    await expect(asset.connect(signer_A).triggerPendingScheduledCrossOrderedTasks())
+      .to.emit(asset, "SnapshotTriggered")
+      .withArgs(1, dividend_1_Id);
+
+    scheduledSnapshotCount = await asset.scheduledSnapshotCount();
+    scheduledSnapshots = await asset.getScheduledSnapshots(0, 100);
+
+    expect(scheduledSnapshotCount).to.equal(2);
+    expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount);
+    expect(scheduledSnapshots[0].scheduledTimestamp).to.equal(dividendsRecordDateInSeconds_3);
+    expect(scheduledSnapshots[0].data).to.equal(dividend_3_Id);
+    expect(scheduledSnapshots[1].scheduledTimestamp).to.equal(dividendsRecordDateInSeconds_2);
+    expect(scheduledSnapshots[1].data).to.equal(dividend_2_Id);
+
+    // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
+    await asset.changeSystemTimestamp(dividendsRecordDateInSeconds_2 + 1);
+    await expect(asset.connect(signer_A).triggerScheduledCrossOrderedTasks(100))
+      .to.emit(asset, "SnapshotTriggered")
+      .withArgs(2, dividend_2_Id);
+
+    scheduledSnapshotCount = await asset.scheduledSnapshotCount();
+    scheduledSnapshots = await asset.getScheduledSnapshots(0, 100);
+
+    expect(scheduledSnapshotCount).to.equal(1);
+    expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount);
+    expect(scheduledSnapshots[0].scheduledTimestamp).to.equal(dividendsRecordDateInSeconds_3);
+    expect(scheduledSnapshots[0].data).to.equal(dividend_3_Id);
+
+    // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
+    await asset.changeSystemTimestamp(dividendsRecordDateInSeconds_3 + 1);
+    await expect(asset.connect(signer_A).triggerScheduledCrossOrderedTasks(0))
+      .to.emit(asset, "SnapshotTriggered")
+      .withArgs(3, dividend_3_Id);
+
+    scheduledSnapshotCount = await asset.scheduledSnapshotCount();
+    scheduledSnapshots = await asset.getScheduledSnapshots(0, 100);
+
+    expect(scheduledSnapshotCount).to.equal(0);
+    expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount);
+  });
+
+  it("GIVEN a disabled corporate action WHEN triggerSnapshots is called THEN snapshot is not executed", async () => {
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+
+    const dividendsRecordDateInSeconds = dateToUnixTimestamp("2030-01-01T00:00:06Z");
+    const dividendsExecutionDateInSeconds = dateToUnixTimestamp("2030-01-01T00:01:00Z");
+    const dividendsAmountPerEquity = 1;
+    const dividendAmountDecimalsPerEquity = 3;
+    const dividendData = {
+      recordDate: dividendsRecordDateInSeconds.toString(),
+      executionDate: dividendsExecutionDateInSeconds.toString(),
+      amount: dividendsAmountPerEquity,
+      amountDecimals: dividendAmountDecimalsPerEquity,
+    };
+    await asset.connect(signer_C).setDividend(dividendData);
+
+    let scheduledSnapshotCount = await asset.scheduledSnapshotCount();
+    expect(scheduledSnapshotCount).to.equal(1);
+
+    const [dividendBefore] = await asset.getDividend(1);
+    expect(dividendBefore.snapshotId).to.equal(0);
+
+    await asset.connect(signer_C).cancelDividend(1);
+
+    await asset.changeSystemTimestamp(dividendsRecordDateInSeconds + 1);
+
+    await expect(asset.connect(signer_A).triggerPendingScheduledCrossOrderedTasks()).not.to.emit(
+      asset,
+      "SnapshotTriggered",
+    );
+
+    scheduledSnapshotCount = await asset.scheduledSnapshotCount();
+    expect(scheduledSnapshotCount).to.equal(0);
+
+    const [dividendAfter] = await asset.getDividend(1);
+    expect(dividendAfter.snapshotId).to.equal(0);
+  });
+});
