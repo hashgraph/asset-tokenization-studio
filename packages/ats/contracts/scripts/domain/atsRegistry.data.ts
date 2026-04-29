@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-29T07:49:44.474Z
- * Facets: 94
+ * Generated: 2026-04-29T12:11:08.436Z
+ * Facets: 96
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -14021,7 +14021,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 95 as const;
+export const TOTAL_FACETS = 96 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
