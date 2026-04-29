@@ -5,7 +5,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import {
     IScheduledCrossOrderedTasks
 } from "./layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
-import { IAccessControl } from "./layer_1/accessControl/IAccessControl.sol";
+import { IAccessControl } from "./accessControl/IAccessControl.sol";
 import { IAdjustBalances } from "./layer_2/adjustBalance/IAdjustBalances.sol";
 import { IAmortization } from "./layer_2/amortization/IAmortization.sol";
 import { IBond } from "./layer_2/bond/IBond.sol";

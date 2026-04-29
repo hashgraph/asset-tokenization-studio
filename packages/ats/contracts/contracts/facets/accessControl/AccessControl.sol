@@ -2,9 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IAccessControl } from "./IAccessControl.sol";
-import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { Modifiers } from "../../../services/Modifiers.sol";
-import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract AccessControl is IAccessControl, Modifiers {
     function grantRole(

@@ -5,7 +5,7 @@ import { _ERC3643_STORAGE_POSITION } from "../../constants/storagePositions.sol"
 import { AGENT_ROLE } from "../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
-import { IAccessControl } from "../../facets/layer_1/accessControl/IAccessControl.sol";
+import { IAccessControl } from "../../facets/accessControl/IAccessControl.sol";
 import { IIdentityRegistry } from "../../facets/layer_1/ERC3643/IIdentityRegistry.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";

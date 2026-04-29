@@ -3,8 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IAccessControl } from "./IAccessControl.sol";
 import { AccessControl } from "./AccessControl.sol";
-import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { _ACCESS_CONTROL_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
+import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { _ACCESS_CONTROL_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 contract AccessControlFacet is AccessControl, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
