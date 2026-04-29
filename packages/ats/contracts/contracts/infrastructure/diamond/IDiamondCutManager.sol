@@ -197,6 +197,13 @@ interface IDiamondCutManager {
         uint256 _pageLength
     ) external view returns (bytes32[] memory facetIds_);
 
+    function getFacetConfigurationsByConfigurationIdAndVersion(
+        bytes32 _configurationId,
+        uint256 _version,
+        uint256 _start,
+        uint256 _end
+    ) external view returns (FacetConfiguration[] memory facetConfigurations_);
+
     /**
      * @notice Returns the facet addresses con configuration
      * @param _configurationId key to filter the facets.
@@ -243,4 +250,10 @@ interface IDiamondCutManager {
         uint256 _version,
         bytes32 _facetId
     ) external view returns (address facetAddress_);
+
+    function getFacetVersionByConfigurationIdVersionAndFacetId(
+        bytes32 _configurationId,
+        uint256 _version,
+        bytes32 _facetId
+    ) external view returns (uint256 facetVersion_);
 }

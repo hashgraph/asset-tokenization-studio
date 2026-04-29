@@ -169,3 +169,5 @@ bytes4 constant KPI_BOND_REDEEM_BALANCE = 0x00000009;
 
 /// @dev ID for KpiLinkedRateLib._getPreviousCouponRate()
 bytes4 constant KPI_LINKED_RATE_COUPON = 0x0000000A;
+
+uint256 constant MAX_INITIALIZER_FACET_INDEX = 10;

@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-28T13:21:51.327Z
- * Facets: 93
+ * Generated: 2026-04-29T12:02:37.657Z
+ * Facets: 94
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -76,6 +76,7 @@ import {
   HoldByPartitionFacet__factory,
   HoldFacet__factory,
   HoldManagementFacet__factory,
+  InitializerFacet__factory,
   KpiLinkedRateFacet__factory,
   KpisKpiLinkedRateFacet__factory,
   KpisSustainabilityPerformanceTargetRateFacet__factory,
@@ -9375,6 +9376,51 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
   },
 
+  InitializerFacet: {
+    name: "InitializerFacet",
+    description: "InitializerFacet",
+    resolverKey: {
+      name: "_INITIALIZER_RESOLVER_KEY",
+      value: "0x65c891d003e7dc436f2c3d0863d599d91867c8695fee29923a476a2be3ec540f",
+    },
+    inheritance: ["Initializer", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "getFacetLastVersion",
+        signature: {
+          full: "function getFacetLastVersion(bytes32 _facetId) view returns (uint256 lastVersion_)",
+          canonical: "getFacetLastVersion(bytes32)",
+        },
+        selector: "0xccc02360",
+      },
+      {
+        name: "getFacetVersionStatus",
+        signature: {
+          full: "function getFacetVersionStatus(bytes32 _facetId, uint256 _versionId) view returns (uint256 status_)",
+          canonical: "getFacetVersionStatus(bytes32,uint256)",
+        },
+        selector: "0xab8365aa",
+      },
+      {
+        name: "getOperationalStatus",
+        signature: {
+          full: "function getOperationalStatus(bytes32 _configId, uint256 _versionId) view returns (uint256 status_)",
+          canonical: "getOperationalStatus(bytes32,uint256)",
+        },
+        selector: "0x6da4c898",
+      },
+      {
+        name: "setOperationalStatus",
+        signature: {
+          full: "function setOperationalStatus() returns (bool isOperational_, uint256 lastFacetIndex_)",
+          canonical: "setOperationalStatus()",
+        },
+        selector: "0x720ab28e",
+      },
+    ],
+    factory: (signer) => new InitializerFacet__factory(signer),
+  },
+
   KpiLinkedRateFacet: {
     name: "KpiLinkedRateFacet",
     resolverKey: {
@@ -13723,7 +13769,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 93 as const;
+export const TOTAL_FACETS = 94 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -13839,6 +13885,14 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
         selector: "0x9e6030d1",
       },
       {
+        name: "getFacetConfigurationsByConfigurationIdAndVersion",
+        signature: {
+          full: "function getFacetConfigurationsByConfigurationIdAndVersion(bytes32 _configurationId, uint256 _version, uint256 _start, uint256 _end) view returns ((bytes32 id, uint256 version)[] facetConfigurations_)",
+          canonical: "getFacetConfigurationsByConfigurationIdAndVersion(bytes32,uint256,uint256,uint256)",
+        },
+        selector: "0x52971448",
+      },
+      {
         name: "getFacetIdByConfigurationIdVersionAndSelector",
         signature: {
           full: "function getFacetIdByConfigurationIdVersionAndSelector(bytes32 _configurationId, uint256 _version, bytes4 _selector) view returns (bytes32 facetId_)",
@@ -13869,6 +13923,14 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
           canonical: "getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(bytes32,uint256,bytes32)",
         },
         selector: "0xf1d3d2f9",
+      },
+      {
+        name: "getFacetVersionByConfigurationIdVersionAndFacetId",
+        signature: {
+          full: "function getFacetVersionByConfigurationIdVersionAndFacetId(bytes32 _configurationId, uint256 _version, bytes32 _facetId) view returns (uint256 facetVersion_)",
+          canonical: "getFacetVersionByConfigurationIdVersionAndFacetId(bytes32,uint256,bytes32)",
+        },
+        selector: "0x9135310a",
       },
       {
         name: "getFacetsByConfigurationIdAndVersion",
@@ -14393,6 +14455,11 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     ],
   },
 
+  InitializerStorageWrapper: {
+    name: "InitializerStorageWrapper",
+    methods: [],
+  },
+
   InterestRateStorageWrapper: {
     name: "InterestRateStorageWrapper",
     description:
@@ -14510,7 +14577,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 41 as const;
+export const TOTAL_STORAGE_WRAPPERS = 42 as const;
 
 /**
  * All role identifiers extracted from contracts.

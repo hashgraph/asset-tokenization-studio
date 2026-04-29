@@ -166,6 +166,21 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         );
     }
 
+    function getFacetConfigurationsByConfigurationIdAndVersion(
+        bytes32 _configurationId,
+        uint256 _version,
+        uint256 _start,
+        uint256 _end
+    ) external view override returns (FacetConfiguration[] memory facetConfigurations_) {
+        facetConfigurations_ = _getFacetConfigurationsByConfigurationIdAndVersion(
+            _diamondCutManagerStorage(),
+            _configurationId,
+            _version,
+            _start,
+            _end
+        );
+    }
+
     function getFacetAddressesByConfigurationIdAndVersion(
         bytes32 _configurationId,
         uint256 _version,
@@ -213,6 +228,19 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         bytes32 _facetId
     ) external view override returns (address facetAddress_) {
         facetAddress_ = _getFacetAddressByConfigurationIdVersionAndFacetId(
+            _diamondCutManagerStorage(),
+            _configurationId,
+            _version,
+            _facetId
+        );
+    }
+
+    function getFacetVersionByConfigurationIdVersionAndFacetId(
+        bytes32 _configurationId,
+        uint256 _version,
+        bytes32 _facetId
+    ) external view returns (uint256 facetVersion_) {
+        facetVersion_ = _getFacetVersionByConfigurationIdVersionAndFacetId(
             _diamondCutManagerStorage(),
             _configurationId,
             _version,
