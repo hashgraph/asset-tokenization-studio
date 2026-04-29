@@ -37,7 +37,7 @@ import { IExternalPauseManagement } from "../facets/layer_1/externalPause/IExter
 import {
     IExternalControlListManagement
 } from "../facets/externalControlListManagement/IExternalControlListManagement.sol";
-import { IExternalKycListManagement } from "../facets/layer_1/externalKycList/IExternalKycListManagement.sol";
+import { IExternalKycListManagement } from "../facets/externalKycListManagement/IExternalKycListManagement.sol";
 import { IKyc } from "../facets/layer_1/kyc/IKyc.sol";
 import { IERC3643 } from "../facets/layer_1/ERC3643/IERC3643.sol";
 import { _validateISIN } from "./isinValidator.sol";

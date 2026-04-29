@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IKyc } from "../kyc/IKyc.sol";
+import { IKyc } from "../layer_1/kyc/IKyc.sol";
 
 interface IExternalKycListManagement {
     event ExternalKycListsUpdated(address indexed operator, address[] kycLists, bool[] actives);

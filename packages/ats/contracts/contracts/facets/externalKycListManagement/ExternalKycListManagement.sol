@@ -2,13 +2,13 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalKycListManagement } from "./IExternalKycListManagement.sol";
-import { KYC_MANAGER_ROLE } from "../../../constants/roles.sol";
-import { _KYC_MANAGEMENT_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
-import { ExternalListManagementStorageWrapper } from "../../../domain/core/ExternalListManagementStorageWrapper.sol";
-import { Modifiers } from "../../../services/Modifiers.sol";
-import { ArrayValidation } from "../../../infrastructure/utils/ArrayValidation.sol";
-import { IKyc } from "../kyc/IKyc.sol";
-import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+import { KYC_MANAGER_ROLE } from "../../constants/roles.sol";
+import { _KYC_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { ExternalListManagementStorageWrapper } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { ArrayValidation } from "../../infrastructure/utils/ArrayValidation.sol";
+import { IKyc } from "../layer_1/kyc/IKyc.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ExternalKycListManagement is IExternalKycListManagement, Modifiers {
     // solhint-disable-next-line func-name-mixedcase

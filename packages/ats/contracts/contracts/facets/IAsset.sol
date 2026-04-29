@@ -36,7 +36,7 @@ import { IEquityUSA } from "./layer_3/equityUSA/IEquityUSA.sol";
 import { IExternalControlList } from "./layer_1/externalControlList/IExternalControlList.sol";
 import { IExternalControlListManagement } from "./externalControlListManagement/IExternalControlListManagement.sol";
 import { IExternalKycList } from "./layer_1/externalKycList/IExternalKycList.sol";
-import { IExternalKycListManagement } from "./layer_1/externalKycList/IExternalKycListManagement.sol";
+import { IExternalKycListManagement } from "./externalKycListManagement/IExternalKycListManagement.sol";
 import { IExternalPauseManagement } from "./layer_1/externalPause/IExternalPauseManagement.sol";
 import { IFixedRate } from "./layer_2/interestRate/fixedRate/IFixedRate.sol";
 
