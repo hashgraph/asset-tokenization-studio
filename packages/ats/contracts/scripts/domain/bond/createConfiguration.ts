@@ -66,6 +66,7 @@ const BOND_FACETS = [
   "ERC1410ManagementFacet",
   "ERC1410ReadFacet",
   "ERC1410TokenHolderFacet",
+  "BurnByPartitionFacet",
   "DocumentationFacet",
   "ControllerFacet",
   "ERC20PermitFacet",
