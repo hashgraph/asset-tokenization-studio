@@ -38,20 +38,6 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Modifiers {
             );
     }
 
-    function redeemByPartition(
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data
-    )
-        external
-        override
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanRedeemFromByPartition(EvmAccessors.getMsgSender(), _partition, _value)
-    {
-        TokenCoreOps.redeemByPartition(_partition, EvmAccessors.getMsgSender(), address(0), _value, _data, "");
-    }
-
     function triggerAndSyncAll(bytes32 _partition, address _from, address _to) external onlyUnpaused {
         ERC1410StorageWrapper.triggerAndSyncAll(_partition, _from, _to);
     }

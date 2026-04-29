@@ -23,14 +23,6 @@ interface IERC1410TokenHolder is IERC1410Types {
     ) external returns (bytes32);
 
     /**
-     * @notice Decreases totalSupply and the corresponding amount of the specified partition of _msgSender()
-     * @param _partition The partition to allocate the decrease in balance
-     * @param _value The amount by which to decrease the balance
-     * @param _data Additional data attached to the burning of tokens
-     */
-    function redeemByPartition(bytes32 _partition, uint256 _value, bytes calldata _data) external;
-
-    /**
      * @notice Triggers any pending scheduled tasks and records user balance if needed
      */
     function triggerAndSyncAll(bytes32 _partition, address _from, address _to) external;

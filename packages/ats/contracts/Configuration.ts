@@ -89,6 +89,7 @@ export const CONTRACT_NAMES = [
   "MintByPartitionFacet",
   "ERC1410TokenHolderFacet",
   "BurnFacet",
+  "BurnByPartitionFacet",
   "DocumentationFacet",
   "ControllerFacet",
   "DiamondFacet",

@@ -66,6 +66,9 @@ bytes32 constant _BURN_RESOLVER_KEY = 0x16c38166ed323ed9296016a0c71ccf46c67708d8
 // keccak256("security.token.standard.mint.bypartition.resolverKey");
 bytes32 constant _MINT_BY_PARTITION_RESOLVER_KEY = 0x3ea08f77d09ff7af30dc84e68a8009e7ba785b772982e71c6914fd2e960bf58f;
 
+// keccak256("security.token.standard.burnByPartition.resolverKey");
+bytes32 constant _BURN_BY_PARTITION_RESOLVER_KEY = 0x359839235451adf632322273659c503520ed6c6f69927c2486abb38396512e0d;
+
 // keccak256("security.token.standard.core.resolverKey");
 bytes32 constant _CORE_RESOLVER_KEY = 0x6b7d10d5f354a1dd56d2152e6a9c56b614c4c2c9d08f5289a72824dfc13132eb;
 

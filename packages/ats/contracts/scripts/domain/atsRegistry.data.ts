@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-29T07:32:20.845Z
- * Facets: 93
+ * Generated: 2026-04-29T07:49:44.474Z
+ * Facets: 94
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -40,6 +40,7 @@ import {
   BondUSAReadKpiLinkedRateFacet__factory,
   BondUSAReadSustainabilityPerformanceTargetRateFacet__factory,
   BondUSASustainabilityPerformanceTargetRateFacet__factory,
+  BurnByPartitionFacet__factory,
   BurnFacet__factory,
   CapFacet__factory,
   ClearingActionsFacet__factory,
@@ -2585,6 +2586,54 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     factory: (signer) => new BondUSASustainabilityPerformanceTargetRateFacet__factory(signer),
     timeTravelFactory: (signer) => new BondUSASustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
+  },
+
+  BurnByPartitionFacet: {
+    name: "BurnByPartitionFacet",
+    description:
+      "Diamond facet exposing the ERC-1410 `redeemByPartition` operation, registered under `_BURN_BY_PARTITION_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_BURN_BY_PARTITION_RESOLVER_KEY",
+      value: "0x359839235451adf632322273659c503520ed6c6f69927c2486abb38396512e0d",
+    },
+    inheritance: ["BurnByPartition", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "redeemByPartition",
+        signature: {
+          full: "function redeemByPartition(bytes32 _partition, uint256 _value, bytes _data)",
+          canonical: "redeemByPartition(bytes32,uint256,bytes)",
+        },
+        selector: "0x62eb0068",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "PartitionNotAllowedInSinglePartitionMode",
+        signature: {
+          full: "error PartitionNotAllowedInSinglePartitionMode(bytes32 partition)",
+          canonical: "PartitionNotAllowedInSinglePartitionMode(bytes32)",
+        },
+        selector: "0xb96d9539",
+      },
+      {
+        name: "PartitionsAreProtectedAndNoRole",
+        signature: {
+          full: "error PartitionsAreProtectedAndNoRole(address account, bytes32 role)",
+          canonical: "PartitionsAreProtectedAndNoRole(address,bytes32)",
+        },
+        selector: "0x55347310",
+      },
+    ],
+    factory: (signer) => new BurnByPartitionFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   BurnFacet: {
@@ -7082,14 +7131,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "authorizeOperatorByPartition(bytes32,address)",
         },
         selector: "0x103ef9e1",
-      },
-      {
-        name: "redeemByPartition",
-        signature: {
-          full: "function redeemByPartition(bytes32 _partition, uint256 _value, bytes _data)",
-          canonical: "redeemByPartition(bytes32,uint256,bytes)",
-        },
-        selector: "0x62eb0068",
       },
       {
         name: "revokeOperator",
@@ -13740,7 +13781,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 93 as const;
+export const TOTAL_FACETS = 94 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

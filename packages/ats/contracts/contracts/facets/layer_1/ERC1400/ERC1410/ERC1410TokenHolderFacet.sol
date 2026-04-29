@@ -12,19 +12,23 @@ contract ERC1410TokenHolderFacet is ERC1410TokenHolder, IStaticFunctionSelectors
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](7);
-        staticFunctionSelectors_[selectorIndex++] = this.transferByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.redeemByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.authorizeOperator.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.revokeOperator.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.authorizeOperatorByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.revokeOperatorByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.triggerAndSyncAll.selector;
+        uint256 selectorIndex = 6;
+        staticFunctionSelectors_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this.triggerAndSyncAll.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.revokeOperatorByPartition.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.authorizeOperatorByPartition.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.revokeOperator.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.authorizeOperator.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.transferByPartition.selector;
+        }
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(IERC1410TokenHolder).interfaceId;
+        uint256 selectorIndex = 1;
+        staticInterfaceIds_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticInterfaceIds_[--selectorIndex] = type(IERC1410TokenHolder).interfaceId;
+        }
     }
 }
