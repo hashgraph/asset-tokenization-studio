@@ -39,6 +39,7 @@ const EQUITY_FACETS = [
   "AccessControlFacet",
   "AllowanceFacet",
   "CapFacet",
+  "CapByPartitionFacet",
   "ControlListFacet",
   "CorporateActionsFacet",
   "DiamondFacet", // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
@@ -54,6 +55,7 @@ const EQUITY_FACETS = [
   "SnapshotsFacet",
   "BalanceTrackerByPartitionFacet",
   "BalanceTrackerAtSnapshotFacet",
+  "BalanceTrackerAtSnapshotByPartitionFacet",
 
   // ERC Standards (13)
   "MintByPartitionFacet",
@@ -78,7 +80,9 @@ const EQUITY_FACETS = [
 
   // Clearing & Settlement (8)
   "ClearingActionsFacet",
+  "ClearingByPartitionFacet",
   "ClearingHoldCreationFacet",
+  "ClearingHoldByPartitionFacet",
   "OperatorClearingHoldByPartitionFacet",
   "ClearingReadFacet",
   "ClearingRedeemFacet",

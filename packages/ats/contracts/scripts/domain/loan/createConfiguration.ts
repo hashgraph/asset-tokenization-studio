@@ -48,7 +48,9 @@ const LOAN_FACETS = [
   "BalanceTrackerAdjustedFacet",
   "BalanceTrackerByPartitionFacet",
   "BalanceTrackerAtSnapshotFacet",
+  "BalanceTrackerAtSnapshotByPartitionFacet",
   "CapFacet",
+  "CapByPartitionFacet",
   "ControlListFacet",
   "KycFacet",
   "SsiManagementFacet",
@@ -95,9 +97,11 @@ const LOAN_FACETS = [
   "ClearingTransferFacet",
   "ClearingRedeemFacet",
   "ClearingHoldCreationFacet",
+  "ClearingHoldByPartitionFacet",
   "OperatorClearingHoldByPartitionFacet",
   "ClearingReadFacet",
   "ClearingActionsFacet",
+  "ClearingByPartitionFacet",
 
   // Scheduled Tasks
   "ScheduledBalanceAdjustmentsFacet",

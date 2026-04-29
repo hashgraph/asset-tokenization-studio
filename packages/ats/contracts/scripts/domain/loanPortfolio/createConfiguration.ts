@@ -45,6 +45,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "AccessControlFacet",
   "AllowanceFacet",
   "CapFacet",
+  "CapByPartitionFacet",
   "ControlListFacet",
   "CorporateActionsFacet",
   "DiamondFacet",
@@ -61,6 +62,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "SsiManagementFacet",
   "BalanceTrackerByPartitionFacet",
   "BalanceTrackerAtSnapshotFacet",
+  "BalanceTrackerAtSnapshotByPartitionFacet",
 
   // ERC Standards
   "MintByPartitionFacet",
@@ -100,6 +102,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "OperatorClearingHoldByPartitionFacet",
   "ClearingReadFacet",
   "ClearingActionsFacet",
+  "ClearingByPartitionFacet",
 
   // Scheduled Tasks
   "ScheduledBalanceAdjustmentsFacet",

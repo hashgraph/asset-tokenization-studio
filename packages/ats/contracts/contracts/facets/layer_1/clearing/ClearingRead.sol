@@ -12,43 +12,6 @@ abstract contract ClearingRead is IClearingRead {
             ClearingReadOps.getClearedAmountForAdjustedAt(_tokenHolder, TimeTravelStorageWrapper.getBlockTimestamp());
     }
 
-    function getClearedAmountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view returns (uint256 amount_) {
-        return
-            ClearingReadOps.getClearedAmountForByPartitionAdjustedAt(
-                _partition,
-                _tokenHolder,
-                TimeTravelStorageWrapper.getBlockTimestamp()
-            );
-    }
-
-    function getClearingCountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        ClearingOperationType _clearingOperationType
-    ) external view override returns (uint256 clearingCount_) {
-        return ClearingStorageWrapper.getClearingCountForByPartition(_partition, _tokenHolder, _clearingOperationType);
-    }
-
-    function getClearingsIdForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        ClearingOperationType _clearingOperationType,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view override returns (uint256[] memory clearingsId_) {
-        return
-            ClearingStorageWrapper.getClearingsIdForByPartition(
-                _partition,
-                _tokenHolder,
-                _clearingOperationType,
-                _pageIndex,
-                _pageLength
-            );
-    }
-
     function getClearingThirdParty(
         bytes32 _partition,
         address _tokenHolder,

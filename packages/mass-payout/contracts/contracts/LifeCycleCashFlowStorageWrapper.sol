@@ -13,6 +13,9 @@ import { ICore } from "@hashgraph/asset-tokenization-contracts/contracts/facets/
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { ISnapshots } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_1/snapshot/ISnapshots.sol";
+import {
+    IBalanceTrackerAtSnapshot
+} from "@hashgraph/asset-tokenization-contracts/contracts/facets/balanceTrackerAtSnapshot/IBalanceTrackerAtSnapshot.sol";
 import { IBond } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/bond/IBond.sol";
 import { ICoupon } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/coupon/ICoupon.sol";
 import { IBondRead } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/bond/IBondRead.sol";
@@ -335,7 +338,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
     function _getSnapshotAmountByAmount(
         ILifeCycleCashFlow.SnapshotAmountInfo memory amountInfo
     ) internal view returns (uint256) {
-        uint256 holderTokens = ISnapshots(amountInfo.asset).balanceOfAtSnapshot(
+        uint256 holderTokens = IBalanceTrackerAtSnapshot(amountInfo.asset).balanceOfAtSnapshot(
             amountInfo.snapshotID,
             amountInfo.holder
         );
@@ -355,7 +358,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
     function _getSnapshotAmountByPercentage(
         ILifeCycleCashFlow.SnapshotAmountInfo memory amountInfo
     ) internal view returns (uint256) {
-        uint256 holderTokens = ISnapshots(amountInfo.asset).balanceOfAtSnapshot(
+        uint256 holderTokens = IBalanceTrackerAtSnapshot(amountInfo.asset).balanceOfAtSnapshot(
             amountInfo.snapshotID,
             amountInfo.holder
         );
@@ -793,7 +796,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      * @return The asset total supply
      */
     function _getTotalSupplyAtSnapshot(address _asset, uint256 _snapshotID) private view returns (uint256) {
-        return ISnapshots(_asset).totalSupplyAtSnapshot(_snapshotID);
+        return IBalanceTrackerAtSnapshot(_asset).totalSupplyAtSnapshot(_snapshotID);
     }
 
     /*

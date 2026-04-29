@@ -34,6 +34,7 @@ const BOND_FIXED_RATE_FACETS = [
   // Core Functionality
   "AccessControlFacet",
   "CapFacet",
+  "CapByPartitionFacet",
   "ControlListFacet",
   "CorporateActionsFacet",
   "DiamondFacet",
@@ -46,6 +47,7 @@ const BOND_FIXED_RATE_FACETS = [
   "SnapshotsFacet",
   "BalanceTrackerByPartitionFacet",
   "BalanceTrackerAtSnapshotFacet",
+  "BalanceTrackerAtSnapshotByPartitionFacet",
 
   // Core
   "CoreFacet",
@@ -80,7 +82,9 @@ const BOND_FIXED_RATE_FACETS = [
 
   // Clearing & Settlement
   "ClearingActionsFacet",
+  "ClearingByPartitionFacet",
   "ClearingHoldCreationFacet",
+  "ClearingHoldByPartitionFacet",
   "OperatorClearingHoldByPartitionFacet",
   "ClearingReadFacet",
   "ClearingRedeemFacet",
