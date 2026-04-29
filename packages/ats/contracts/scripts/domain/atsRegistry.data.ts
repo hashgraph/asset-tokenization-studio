@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-29T08:57:19.038Z
- * Facets: 95
+ * Generated: 2026-04-28T14:40:10.800Z
+ * Facets: 94
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -41,6 +41,7 @@ import {
   BondUSAReadKpiLinkedRateFacet__factory,
   BondUSAReadSustainabilityPerformanceTargetRateFacet__factory,
   BondUSASustainabilityPerformanceTargetRateFacet__factory,
+  BurnByPartitionFacet__factory,
   BurnFacet__factory,
   CapFacet__factory,
   ClearingActionsFacet__factory,
@@ -101,7 +102,6 @@ import {
   ScheduledCrossOrderedTasksFacet__factory,
   ScheduledCrossOrderedTasksKpiLinkedRateFacet__factory,
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet__factory,
-  ScheduledSnapshotsFacet__factory,
   SnapshotsFacet__factory,
   SsiManagementFacet__factory,
   SustainabilityPerformanceTargetRateFacet__factory,
@@ -172,7 +172,6 @@ import {
   ScheduledCrossOrderedTasksFacetTimeTravel__factory,
   ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel__factory,
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
-  ScheduledSnapshotsFacetTimeTravel__factory,
   SnapshotsFacetTimeTravel__factory,
   SsiManagementFacetTimeTravel__factory,
   SustainabilityPerformanceTargetRateFacetTimeTravel__factory,
@@ -2633,6 +2632,54 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     factory: (signer) => new BondUSASustainabilityPerformanceTargetRateFacet__factory(signer),
     timeTravelFactory: (signer) => new BondUSASustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
+  },
+
+  BurnByPartitionFacet: {
+    name: "BurnByPartitionFacet",
+    description:
+      "Diamond facet exposing the ERC-1410 `redeemByPartition` operation, registered under `_BURN_BY_PARTITION_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_BURN_BY_PARTITION_RESOLVER_KEY",
+      value: "0x359839235451adf632322273659c503520ed6c6f69927c2486abb38396512e0d",
+    },
+    inheritance: ["BurnByPartition", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "redeemByPartition",
+        signature: {
+          full: "function redeemByPartition(bytes32 _partition, uint256 _value, bytes _data)",
+          canonical: "redeemByPartition(bytes32,uint256,bytes)",
+        },
+        selector: "0x62eb0068",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "PartitionNotAllowedInSinglePartitionMode",
+        signature: {
+          full: "error PartitionNotAllowedInSinglePartitionMode(bytes32 partition)",
+          canonical: "PartitionNotAllowedInSinglePartitionMode(bytes32)",
+        },
+        selector: "0xb96d9539",
+      },
+      {
+        name: "PartitionsAreProtectedAndNoRole",
+        signature: {
+          full: "error PartitionsAreProtectedAndNoRole(address account, bytes32 role)",
+          canonical: "PartitionsAreProtectedAndNoRole(address,bytes32)",
+        },
+        selector: "0x55347310",
+      },
+    ],
+    factory: (signer) => new BurnByPartitionFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   BurnFacet: {
@@ -7130,14 +7177,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "authorizeOperatorByPartition(bytes32,address)",
         },
         selector: "0x103ef9e1",
-      },
-      {
-        name: "redeemByPartition",
-        signature: {
-          full: "function redeemByPartition(bytes32 _partition, uint256 _value, bytes _data)",
-          canonical: "redeemByPartition(bytes32,uint256,bytes)",
-        },
-        selector: "0x62eb0068",
       },
       {
         name: "revokeOperator",
@@ -12322,37 +12361,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       new ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
   },
 
-  ScheduledSnapshotsFacet: {
-    name: "ScheduledSnapshotsFacet",
-    resolverKey: {
-      name: "_SCHEDULED_SNAPSHOTS_RESOLVER_KEY",
-      value: "0x100f681e33d02a1124c2c05a537a1229eca89767c5e6e8720066ca74bfb85793",
-    },
-    inheritance: ["ScheduledSnapshots", "IStaticFunctionSelectors"],
-    methods: [
-      {
-        name: "getScheduledSnapshots",
-        signature: {
-          full: "function getScheduledSnapshots(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledSnapshot_)",
-          canonical: "getScheduledSnapshots(uint256,uint256)",
-        },
-        selector: "0xca21c53a",
-      },
-      {
-        name: "scheduledSnapshotCount",
-        signature: {
-          full: "function scheduledSnapshotCount() view returns (uint256)",
-          canonical: "scheduledSnapshotCount()",
-        },
-        selector: "0xa19e91fe",
-      },
-    ],
-    factory: (signer) => new ScheduledSnapshotsFacet__factory(signer),
-    timeTravelFactory: (signer) => new ScheduledSnapshotsFacetTimeTravel__factory(signer),
-  },
-
   SnapshotsFacet: {
     name: "SnapshotsFacet",
+    description:
+      "Diamond facet that exposes snapshot creation, scheduling, and historical balance, supply, and partition queries through the `ISnapshots` interface.",
     description:
       "Diamond facet exposing snapshot creation and historical balance, supply, partition, hold, lock, clearing, freeze and token-holder enquiries to the Diamond proxy.",
     resolverKey: {
@@ -12400,6 +12412,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "frozenBalanceOfAtSnapshotByPartition(bytes32,uint256,address)",
         },
         selector: "0x0749c323",
+      },
+      {
+        name: "getScheduledSnapshots",
+        signature: {
+          full: "function getScheduledSnapshots(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledSnapshot_)",
+          canonical: "getScheduledSnapshots(uint256,uint256)",
+        },
+        selector: "0xca21c53a",
       },
       {
         name: "getTokenHoldersAtSnapshot",
@@ -12456,6 +12476,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "partitionsOfAtSnapshot(uint256,address)",
         },
         selector: "0x09e84301",
+      },
+      {
+        name: "scheduledSnapshotCount",
+        signature: {
+          full: "function scheduledSnapshotCount() view returns (uint256)",
+          canonical: "scheduledSnapshotCount()",
+        },
+        selector: "0xa19e91fe",
       },
       {
         name: "takeSnapshot",

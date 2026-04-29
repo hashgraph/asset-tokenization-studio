@@ -63,6 +63,7 @@ const BOND_FIXED_RATE_FACETS = [
   "ERC1410ManagementFacet",
   "ERC1410ReadFacet",
   "ERC1410TokenHolderFacet",
+  "BurnByPartitionFacet",
   "DocumentationFacet",
   "ControllerFacet",
   "ERC20PermitFacet",
@@ -105,7 +106,6 @@ const BOND_FIXED_RATE_FACETS = [
   "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
   "ScheduledCouponListingFacet",
-  "ScheduledSnapshotsFacet",
   "SsiManagementFacet",
 
   // Interest Rate (rate-specific)

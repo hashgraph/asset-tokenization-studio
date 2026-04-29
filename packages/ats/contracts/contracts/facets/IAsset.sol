@@ -64,7 +64,6 @@ import { ITransferAndLock } from "./layer_3/transferAndLock/ITransferAndLock.sol
 import { ICoupon } from "./layer_2/coupon/ICoupon.sol";
 import { IDividend } from "./layer_2/dividend/IDividend.sol";
 import { IKpis } from "./layer_2/kpi/kpiLatest/IKpis.sol";
-import { IScheduledSnapshots } from "./layer_2/scheduledTask/scheduledSnapshot/IScheduledSnapshots.sol";
 import { IProtectedPartitions } from "./layer_1/protectedPartition/IProtectedPartitions.sol";
 import { IProceedRecipients } from "./layer_2/proceedRecipient/IProceedRecipients.sol";
 import { ICap } from "./layer_1/cap/ICap.sol";
@@ -93,6 +92,7 @@ import { IClearingRead } from "./layer_1/clearing/IClearingRead.sol";
 import { IComplianceFacet } from "./compliance/IComplianceFacet.sol";
 import { IMint } from "./mint/IMint.sol";
 import { IMintByPartition } from "./mintByPartition/IMintByPartition.sol";
+import { IBurnByPartition } from "./burnByPartition/IBurnByPartition.sol";
 import { IHoldFacet } from "./hold/IHoldFacet.sol";
 import { IBatchController } from "./batchController/IBatchController.sol";
 import { IBurn } from "./burn/IBurn.sol";
@@ -145,7 +145,6 @@ interface IAsset is
     IERC3643,
     IBurn,
     IScheduledCrossOrderedTasks,
-    IScheduledSnapshots,
     IBond,
     IEquity,
     ISecurity,
@@ -194,6 +193,7 @@ interface IAsset is
     IHoldByPartition,
     IMint,
     IMintByPartition,
+    IBurnByPartition,
     IDocumentation,
     IController,
     IControllerHoldByPartition,
