@@ -4,8 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IClearingByPartition } from "./IClearingByPartition.sol";
 import { CLEARING_VALIDATOR_ROLE } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
-import { ProtectedPartitionsStorageWrapper } from "../../domain/core/ProtectedPartitionsStorageWrapper.sol";
-import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { ClearingOps } from "../../domain/orchestrator/ClearingOps.sol";
 import { ClearingReadOps } from "../../domain/orchestrator/ClearingReadOps.sol";
@@ -205,6 +203,8 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
         onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(_to)
         onlyUnrecoveredAddress(_clearingOperationFrom.from)
+        onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
+        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 clearingId_)
     {
         return _clearingTransferFromByPartition(_clearingOperationFrom, _amount, _to);
@@ -285,10 +285,6 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
         uint256 _amount,
         address _to
     ) internal returns (bool success_, uint256 clearingId_) {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        );
-        ProtectedPartitionsStorageWrapper.requireUnProtectedPartitionsOrWildCardRole();
         (success_, clearingId_) = ClearingOps.clearingTransferCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
