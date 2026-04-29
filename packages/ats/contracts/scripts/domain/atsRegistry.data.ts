@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-29T07:46:57.501Z
- * Facets: 95
+ * Generated: 2026-04-29T07:49:44.474Z
+ * Facets: 94
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -101,7 +101,6 @@ import {
   ScheduledCrossOrderedTasksFacet__factory,
   ScheduledCrossOrderedTasksKpiLinkedRateFacet__factory,
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet__factory,
-  ScheduledSnapshotsFacet__factory,
   SnapshotsFacet__factory,
   SsiManagementFacet__factory,
   SustainabilityPerformanceTargetRateFacet__factory,
@@ -172,7 +171,6 @@ import {
   ScheduledCrossOrderedTasksFacetTimeTravel__factory,
   ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel__factory,
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
-  ScheduledSnapshotsFacetTimeTravel__factory,
   SnapshotsFacetTimeTravel__factory,
   SsiManagementFacetTimeTravel__factory,
   SustainabilityPerformanceTargetRateFacetTimeTravel__factory,
@@ -12317,39 +12315,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       new ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
   },
 
-  ScheduledSnapshotsFacet: {
-    name: "ScheduledSnapshotsFacet",
-    resolverKey: {
-      name: "_SCHEDULED_SNAPSHOTS_RESOLVER_KEY",
-      value: "0x100f681e33d02a1124c2c05a537a1229eca89767c5e6e8720066ca74bfb85793",
-    },
-    inheritance: ["ScheduledSnapshots", "IStaticFunctionSelectors"],
-    methods: [
-      {
-        name: "getScheduledSnapshots",
-        signature: {
-          full: "function getScheduledSnapshots(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledSnapshot_)",
-          canonical: "getScheduledSnapshots(uint256,uint256)",
-        },
-        selector: "0xca21c53a",
-      },
-      {
-        name: "scheduledSnapshotCount",
-        signature: {
-          full: "function scheduledSnapshotCount() view returns (uint256)",
-          canonical: "scheduledSnapshotCount()",
-        },
-        selector: "0xa19e91fe",
-      },
-    ],
-    factory: (signer) => new ScheduledSnapshotsFacet__factory(signer),
-    timeTravelFactory: (signer) => new ScheduledSnapshotsFacetTimeTravel__factory(signer),
-  },
-
   SnapshotsFacet: {
     name: "SnapshotsFacet",
     description:
-      "Diamond facet exposing snapshot creation and historical balance, supply, partition, hold, lock, clearing, freeze and token-holder enquiries to the Diamond proxy.",
+      "Diamond facet that exposes snapshot creation, scheduling, and historical balance, supply, and partition queries through the `ISnapshots` interface.",
     resolverKey: {
       name: "_SNAPSHOTS_RESOLVER_KEY",
       value: "0x9a3fc46d83536ef6b87eb4fec37302bfd1a7c18e81ea2da853b911b44cf5b0cf",
@@ -12403,6 +12372,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "frozenBalanceOfAtSnapshotByPartition(bytes32,uint256,address)",
         },
         selector: "0x0749c323",
+      },
+      {
+        name: "getScheduledSnapshots",
+        signature: {
+          full: "function getScheduledSnapshots(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledSnapshot_)",
+          canonical: "getScheduledSnapshots(uint256,uint256)",
+        },
+        selector: "0xca21c53a",
       },
       {
         name: "getTokenHoldersAtSnapshot",
@@ -12459,6 +12436,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "partitionsOfAtSnapshot(uint256,address)",
         },
         selector: "0x09e84301",
+      },
+      {
+        name: "scheduledSnapshotCount",
+        signature: {
+          full: "function scheduledSnapshotCount() view returns (uint256)",
+          canonical: "scheduledSnapshotCount()",
+        },
+        selector: "0xa19e91fe",
       },
       {
         name: "takeSnapshot",
@@ -13796,7 +13781,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 95 as const;
+export const TOTAL_FACETS = 94 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
