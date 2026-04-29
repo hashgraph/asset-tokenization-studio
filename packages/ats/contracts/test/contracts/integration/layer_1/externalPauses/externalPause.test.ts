@@ -33,7 +33,7 @@ describe("ExternalPause Tests", () => {
       equityDataParams: {
         securityData: {
           isMultiPartition: true,
-          externalPauses: [initMock1.target as string, initMock2.target as string], // These trigger the for loop in initialize_ExternalPauses
+          externalPauses: [initMock1.target as string, initMock2.target as string], // These trigger the for loop in initializeExternalPauses
         },
       },
     });
@@ -399,8 +399,8 @@ describe("ExternalPause Tests", () => {
   });
 
   describe("Initialize Tests", () => {
-    it("GIVEN already initialized WHEN initialize_ExternalPauses is called again THEN it reverts with AlreadyInitialized", async () => {
-      await expect(asset.initialize_ExternalPauses([])).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+    it("GIVEN already initialized WHEN initializeExternalPauses is called again THEN it reverts with AlreadyInitialized", async () => {
+      await expect(asset.initializeExternalPauses([])).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
     });
   });
 });

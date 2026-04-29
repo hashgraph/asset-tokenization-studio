@@ -62,8 +62,7 @@ interface IExternalPauseManagement {
      *      The leading-underscore naming convention signals this is an initialiser function.
      * @param _pauses Initial array of external pause contract addresses to register.
      */
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ExternalPauses(address[] calldata _pauses) external;
+    function initializeExternalPauses(address[] calldata _pauses) external;
 
     /**
      * @notice Adds or removes multiple external pause contracts in a single transaction.

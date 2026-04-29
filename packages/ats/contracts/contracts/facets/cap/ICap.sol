@@ -100,8 +100,7 @@ interface ICap {
      * @param maxSupply The global maximum token supply to set.
      * @param partitionCap Array of per-partition cap configurations to initialise.
      */
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_Cap(uint256 maxSupply, PartitionCap[] calldata partitionCap) external;
+    function initializeCap(uint256 maxSupply, PartitionCap[] calldata partitionCap) external;
 
     /**
      * @notice Updates the global maximum supply of the token.

@@ -64,8 +64,7 @@ interface IExternalControlListManagement {
      *      signals this is an initialiser function.
      * @param _controlLists Initial array of external control list contract addresses to register.
      */
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ExternalControlLists(address[] calldata _controlLists) external;
+    function initializeExternalControlLists(address[] calldata _controlLists) external;
 
     /**
      * @notice Adds or removes multiple external control list contracts in a single transaction.

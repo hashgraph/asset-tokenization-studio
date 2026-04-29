@@ -64,8 +64,7 @@ interface IExternalKycListManagement {
      *      The leading-underscore naming convention signals this is an initialiser function.
      * @param _kycLists Initial array of external KYC list contract addresses to register.
      */
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ExternalKycLists(address[] calldata _kycLists) external;
+    function initializeExternalKycLists(address[] calldata _kycLists) external;
 
     /**
      * @notice Adds or removes multiple external KYC list contracts in a single transaction.

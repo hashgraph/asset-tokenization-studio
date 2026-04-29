@@ -24,11 +24,10 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract ExternalControlListManagement is IExternalControlListManagement, Modifiers {
     /// @inheritdoc IExternalControlListManagement
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ExternalControlLists(
+    function initializeExternalControlLists(
         address[] calldata _controlLists
     ) external override onlyNotExternalControlListInitialized {
-        ExternalListManagementStorageWrapper.initialize_ExternalControlLists(_controlLists);
+        ExternalListManagementStorageWrapper.initializeExternalControlLists(_controlLists);
     }
 
     /// @inheritdoc IExternalControlListManagement

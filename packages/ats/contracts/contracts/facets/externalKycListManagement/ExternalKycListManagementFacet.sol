@@ -26,7 +26,7 @@ contract ExternalKycListManagementFacet is ExternalKycListManagement, IStaticFun
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](8);
-        staticFunctionSelectors_[selectorIndex++] = this.initialize_ExternalKycLists.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.initializeExternalKycLists.selector;
         staticFunctionSelectors_[selectorIndex++] = this.updateExternalKycLists.selector;
         staticFunctionSelectors_[selectorIndex++] = this.addExternalKycList.selector;
         staticFunctionSelectors_[selectorIndex++] = this.removeExternalKycList.selector;

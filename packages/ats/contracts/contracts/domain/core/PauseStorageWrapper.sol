@@ -47,8 +47,7 @@ library PauseStorageWrapper {
         emit IPause.TokenUnpaused(EvmAccessors.getMsgSender());
     }
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ExternalPauses(address[] calldata _pauses) internal {
+    function initializeExternalPauses(address[] calldata _pauses) internal {
         uint256 length = _pauses.length;
         for (uint256 index; index < length; ) {
             ExternalListManagementStorageWrapper.checkValidAddress(_pauses[index]);

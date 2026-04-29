@@ -407,9 +407,9 @@ describe("ExternalKycList Management Tests", () => {
   });
 
   describe("Initialize Tests", () => {
-    it("GIVEN an already initialized contract WHEN initialize_ExternalKycLists is called again THEN it reverts with ContractAlreadyInitialized", async () => {
+    it("GIVEN an already initialized contract WHEN initializeExternalKycLists is called again THEN it reverts with ContractAlreadyInitialized", async () => {
       const newKycLists = [externalKycListMock3.target as string];
-      await expect(asset.connect(signer_A).initialize_ExternalKycLists(newKycLists)).to.be.revertedWithCustomError(
+      await expect(asset.connect(signer_A).initializeExternalKycLists(newKycLists)).to.be.revertedWithCustomError(
         asset,
         "AlreadyInitialized",
       );

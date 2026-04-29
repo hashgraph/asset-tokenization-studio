@@ -88,7 +88,7 @@ describe("Cap Tests", () => {
   });
 
   it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-    await expect(asset.initialize_Cap(5, [])).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+    await expect(asset.initializeCap(5, [])).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
   });
 
   describe("Paused", () => {

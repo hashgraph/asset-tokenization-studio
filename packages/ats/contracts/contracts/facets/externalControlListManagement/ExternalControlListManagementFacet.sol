@@ -26,7 +26,7 @@ contract ExternalControlListManagementFacet is ExternalControlListManagement, IS
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](7);
-        staticFunctionSelectors_[selectorIndex++] = this.initialize_ExternalControlLists.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.initializeExternalControlLists.selector;
         staticFunctionSelectors_[selectorIndex++] = this.updateExternalControlLists.selector;
         staticFunctionSelectors_[selectorIndex++] = this.addExternalControlList.selector;
         staticFunctionSelectors_[selectorIndex++] = this.removeExternalControlList.selector;

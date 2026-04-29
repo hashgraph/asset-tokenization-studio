@@ -21,8 +21,7 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
  */
 abstract contract Cap is ICap, Modifiers {
     /// @inheritdoc ICap
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_Cap(
+    function initializeCap(
         uint256 maxSupply,
         PartitionCap[] calldata partitionCap
     )
@@ -31,7 +30,7 @@ abstract contract Cap is ICap, Modifiers {
         onlyNotCapInitialized
         onlyValidNewMaxSupply(maxSupply, TimeTravelStorageWrapper.getBlockTimestamp())
     {
-        CapStorageWrapper.initialize_Cap(maxSupply, partitionCap);
+        CapStorageWrapper.initializeCap(maxSupply, partitionCap);
     }
 
     /// @inheritdoc ICap

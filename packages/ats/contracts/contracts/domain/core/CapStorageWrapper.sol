@@ -15,8 +15,7 @@ struct CapDataStorage {
 }
 
 library CapStorageWrapper {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_Cap(uint256 maxSupply, ICap.PartitionCap[] calldata partitionCap) internal {
+    function initializeCap(uint256 maxSupply, ICap.PartitionCap[] calldata partitionCap) internal {
         CapDataStorage storage cs = capStorage();
         cs.maxSupply = maxSupply;
         uint256 length = partitionCap.length;

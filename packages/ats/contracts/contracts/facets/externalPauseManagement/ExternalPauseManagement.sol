@@ -24,9 +24,8 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers {
     /// @inheritdoc IExternalPauseManagement
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ExternalPauses(address[] calldata _pauses) external override onlyNotExternalPauseInitialized {
-        PauseStorageWrapper.initialize_ExternalPauses(_pauses);
+    function initializeExternalPauses(address[] calldata _pauses) external override onlyNotExternalPauseInitialized {
+        PauseStorageWrapper.initializeExternalPauses(_pauses);
     }
 
     /// @inheritdoc IExternalPauseManagement

@@ -26,7 +26,7 @@ contract ExternalPauseManagementFacet is ExternalPauseManagement, IStaticFunctio
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](7);
-        staticFunctionSelectors_[selectorIndex++] = this.initialize_ExternalPauses.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.initializeExternalPauses.selector;
         staticFunctionSelectors_[selectorIndex++] = this.updateExternalPauses.selector;
         staticFunctionSelectors_[selectorIndex++] = this.addExternalPause.selector;
         staticFunctionSelectors_[selectorIndex++] = this.removeExternalPause.selector;

@@ -336,7 +336,7 @@ contract Factory is IFactory {
         _tryInitialize_ERC1594(securityAddress_);
 
         // configure cap (CapFacet should be present)
-        ICap(securityAddress_).initialize_Cap(_securityData.maxSupply, new ICap.PartitionCap[](0));
+        ICap(securityAddress_).initializeCap(_securityData.maxSupply, new ICap.PartitionCap[](0));
 
         // configure protected partitions (should be present)
         IProtectedPartitions(securityAddress_).initialize_ProtectedPartitions(_securityData.arePartitionsProtected);
@@ -345,10 +345,10 @@ contract Factory is IFactory {
         _tryInitializeClearing(securityAddress_, _securityData.clearingActive);
 
         // configure external pauses (should be present)
-        IExternalPauseManagement(securityAddress_).initialize_ExternalPauses(_securityData.externalPauses);
+        IExternalPauseManagement(securityAddress_).initializeExternalPauses(_securityData.externalPauses);
 
         // configure external control lists (should be present)
-        IExternalControlListManagement(securityAddress_).initialize_ExternalControlLists(
+        IExternalControlListManagement(securityAddress_).initializeExternalControlLists(
             _securityData.externalControlLists
         );
 
@@ -356,7 +356,7 @@ contract Factory is IFactory {
         IKyc(securityAddress_).initializeInternalKyc(_securityData.internalKycActivated);
 
         // configure external KYC lists (should be present)
-        IExternalKycListManagement(securityAddress_).initialize_ExternalKycLists(_securityData.externalKycLists);
+        IExternalKycListManagement(securityAddress_).initializeExternalKycLists(_securityData.externalKycLists);
 
         // configure ERC20Votes (ERC20VotesFacet may not be present)
         _tryInitialize_ERC20Votes(securityAddress_, _securityData.erc20VotesActivated);
