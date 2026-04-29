@@ -14,7 +14,7 @@ import { IBondUSA } from "./layer_3/bondUSA/IBondUSA.sol";
 // Layer 1 — ERC1400
 
 // Layer 1 — ERC3643
-import { ICorporateActions } from "./layer_1/corporateAction/ICorporateActions.sol";
+import { ICorporateActions } from "./corporateAction/ICorporateActions.sol";
 import { IDiamond } from "../infrastructure/proxy/IDiamond.sol";
 
 // Core

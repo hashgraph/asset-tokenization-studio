@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { ICorporateActions } from "../../facets/layer_1/corporateAction/ICorporateActions.sol";
+import { ICorporateActions } from "../../facets/corporateAction/ICorporateActions.sol";
 import { _CORPORATE_ACTION_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { KPI_CA_ADD_ACTION } from "../../constants/values.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
