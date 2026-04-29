@@ -67,6 +67,7 @@ import { IKpis } from "./layer_2/kpi/kpiLatest/IKpis.sol";
 import { IProtectedPartitions } from "./layer_1/protectedPartition/IProtectedPartitions.sol";
 import { IProceedRecipients } from "./layer_2/proceedRecipient/IProceedRecipients.sol";
 import { ICap } from "./layer_1/cap/ICap.sol";
+import { ICapByPartition } from "./capByPartition/ICapByPartition.sol";
 import { INonces } from "./layer_1/nonce/INonces.sol";
 import { IBalanceTrackerByPartition } from "./balanceTrackerByPartition/IBalanceTrackerByPartition.sol";
 import { IBalanceTrackerAtSnapshot } from "./balanceTrackerAtSnapshot/IBalanceTrackerAtSnapshot.sol";
@@ -168,6 +169,7 @@ interface IAsset is
     IBalanceTracker,
     IBalanceTrackerAdjusted,
     ICap,
+    ICapByPartition,
     INonces,
     IBalanceTrackerByPartition,
     IBalanceTrackerAtSnapshot,
