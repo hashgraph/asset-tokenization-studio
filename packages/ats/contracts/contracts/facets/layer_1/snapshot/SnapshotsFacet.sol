@@ -9,11 +9,12 @@ import { _SNAPSHOTS_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 /**
  * @title SnapshotsFacet
  * @author Asset Tokenization Studio Team
- * @notice Diamond facet exposing snapshot creation and historical balance, supply, partition,
- *         hold, lock, clearing, freeze and token-holder enquiries to the Diamond proxy.
- * @dev Wires the {Snapshots} implementation into the Diamond resolver by advertising its
- *      resolver key, external function selectors and supported interface id. Holds no storage
- *      of its own; all state and logic live in the inherited {Snapshots} contract.
+ * @notice Diamond facet that exposes snapshot creation, scheduling, and historical balance,
+ *         supply, and partition queries through the `ISnapshots` interface.
+ * @dev Inherits behaviour from `Snapshots` and satisfies `IStaticFunctionSelectors` for
+ *      registration in the Diamond proxy under `_SNAPSHOTS_RESOLVER_KEY`. Selectors are
+ *      written into a fixed-size array using pre-decrement indexing inside an `unchecked`
+ *      block; the declared `selectorIndex` initial value must match the array length.
  */
 contract SnapshotsFacet is Snapshots, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
@@ -23,7 +24,7 @@ contract SnapshotsFacet is Snapshots, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 15;
+        uint256 selectorIndex = 17;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);
         unchecked {
             staticFunctionSelectors_[--selectorIndex] = this.getTotalTokenHoldersAtSnapshot.selector;
@@ -41,15 +42,14 @@ contract SnapshotsFacet is Snapshots, IStaticFunctionSelectors {
             staticFunctionSelectors_[--selectorIndex] = this.partitionsOfAtSnapshot.selector;
             staticFunctionSelectors_[--selectorIndex] = this.balanceOfAtSnapshotByPartition.selector;
             staticFunctionSelectors_[--selectorIndex] = this.takeSnapshot.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getScheduledSnapshots.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.scheduledSnapshotCount.selector;
         }
     }
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        uint256 selectorIndex = 1;
-        staticInterfaceIds_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticInterfaceIds_[--selectorIndex] = type(ISnapshots).interfaceId;
-        }
+        staticInterfaceIds_ = new bytes4[](1);
+        staticInterfaceIds_[0] = type(ISnapshots).interfaceId;
     }
 }
