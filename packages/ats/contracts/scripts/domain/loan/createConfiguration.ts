@@ -48,6 +48,7 @@ const LOAN_FACETS = [
   "BalanceTrackerAdjustedFacet",
   "BalanceTrackerByPartitionFacet",
   "BalanceTrackerAtSnapshotFacet",
+  "BalanceTrackerAtSnapshotByPartitionFacet",
   "CapFacet",
   "ControlListFacet",
   "KycFacet",
