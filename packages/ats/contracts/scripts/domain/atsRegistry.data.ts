@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-28T14:40:10.800Z
- * Facets: 94
+ * Generated: 2026-04-29T09:50:37.570Z
+ * Facets: 95
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -12365,8 +12365,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     name: "SnapshotsFacet",
     description:
       "Diamond facet that exposes snapshot creation, scheduling, and historical balance, supply, and partition queries through the `ISnapshots` interface.",
-    description:
-      "Diamond facet exposing snapshot creation and historical balance, supply, partition, hold, lock, clearing, freeze and token-holder enquiries to the Diamond proxy.",
     resolverKey: {
       name: "_SNAPSHOTS_RESOLVER_KEY",
       value: "0x9a3fc46d83536ef6b87eb4fec37302bfd1a7c18e81ea2da853b911b44cf5b0cf",
