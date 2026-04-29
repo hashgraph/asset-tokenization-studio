@@ -37,7 +37,7 @@ import { IExternalControlList } from "./layer_1/externalControlList/IExternalCon
 import { IExternalControlListManagement } from "./externalControlListManagement/IExternalControlListManagement.sol";
 import { IExternalKycList } from "./layer_1/externalKycList/IExternalKycList.sol";
 import { IExternalKycListManagement } from "./externalKycListManagement/IExternalKycListManagement.sol";
-import { IExternalPauseManagement } from "./layer_1/externalPause/IExternalPauseManagement.sol";
+import { IExternalPauseManagement } from "./externalPauseManagement/IExternalPauseManagement.sol";
 import { IFixedRate } from "./layer_2/interestRate/fixedRate/IFixedRate.sol";
 
 // Layer 2

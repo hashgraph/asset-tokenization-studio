@@ -33,7 +33,7 @@ import { IProceedRecipients } from "../facets/layer_2/proceedRecipient/IProceedR
 import { INominalValue } from "../facets/layer_2/nominalValue/INominalValue.sol";
 import { ScheduledTasksStorageWrapper } from "../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { IProtectedPartitions } from "../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
-import { IExternalPauseManagement } from "../facets/layer_1/externalPause/IExternalPauseManagement.sol";
+import { IExternalPauseManagement } from "../facets/externalPauseManagement/IExternalPauseManagement.sol";
 import {
     IExternalControlListManagement
 } from "../facets/externalControlListManagement/IExternalControlListManagement.sol";

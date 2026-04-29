@@ -2,13 +2,13 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalPauseManagement } from "./IExternalPauseManagement.sol";
-import { PAUSE_MANAGER_ROLE } from "../../../constants/roles.sol";
-import { _PAUSE_MANAGEMENT_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
-import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
-import { ExternalListManagementStorageWrapper } from "../../../domain/core/ExternalListManagementStorageWrapper.sol";
-import { Modifiers } from "../../../services/Modifiers.sol";
-import { ArrayValidation } from "../../../infrastructure/utils/ArrayValidation.sol";
-import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+import { PAUSE_MANAGER_ROLE } from "../../constants/roles.sol";
+import { _PAUSE_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { PauseStorageWrapper } from "../../domain/core/PauseStorageWrapper.sol";
+import { ExternalListManagementStorageWrapper } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { ArrayValidation } from "../../infrastructure/utils/ArrayValidation.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
