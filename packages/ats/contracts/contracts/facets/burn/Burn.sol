@@ -10,7 +10,6 @@ import { Modifiers } from "../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { ProtectedPartitionRoleValidator } from "../../infrastructure/utils/ProtectedPartitionRoleValidator.sol";
-import { ITransfer } from "../transfer/ITransfer.sol";
 
 /**
  * @title Burn
@@ -37,7 +36,6 @@ abstract contract Burn is IBurn, Modifiers, ProtectedPartitionRoleValidator {
     {
         address sender = EvmAccessors.getMsgSender();
         TokenCoreOps.burn(_userAddress, _amount);
-        emit ITransfer.Transfer(_userAddress, address(0), _amount);
         emit IController.ControllerRedemption(sender, _userAddress, _amount, "", "");
     }
 
@@ -54,7 +52,6 @@ abstract contract Burn is IBurn, Modifiers, ProtectedPartitionRoleValidator {
     {
         address sender = EvmAccessors.getMsgSender();
         TokenCoreOps.redeem(_value);
-        emit ITransfer.Transfer(sender, address(0), _value);
         emit IBurn.Redeemed(address(0), sender, _value, _data);
     }
 
@@ -74,7 +71,6 @@ abstract contract Burn is IBurn, Modifiers, ProtectedPartitionRoleValidator {
     {
         address sender = EvmAccessors.getMsgSender();
         TokenCoreOps.redeemFrom(_tokenHolder, _value);
-        emit ITransfer.Transfer(_tokenHolder, address(0), _value);
         emit IBurn.Redeemed(sender, _tokenHolder, _value, _data);
     }
 }

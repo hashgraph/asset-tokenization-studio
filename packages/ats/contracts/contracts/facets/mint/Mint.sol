@@ -6,7 +6,6 @@ import { IMint } from "./IMint.sol";
 import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { ITransfer } from "../transfer/ITransfer.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
@@ -42,7 +41,6 @@ abstract contract Mint is IMint, Modifiers {
         onlyCompliant(address(0), _tokenHolder, false)
     {
         TokenCoreOps.issue(_tokenHolder, _value);
-        emit ITransfer.Transfer(address(0), _tokenHolder, _value);
         emit IMint.Issued(EvmAccessors.getMsgSender(), _tokenHolder, _value, _data);
     }
 
@@ -61,7 +59,6 @@ abstract contract Mint is IMint, Modifiers {
         onlyCompliant(address(0), _to, false)
     {
         TokenCoreOps.issue(_to, _amount);
-        emit ITransfer.Transfer(address(0), _to, _amount);
         emit IMint.Issued(EvmAccessors.getMsgSender(), _to, _amount, "");
     }
 

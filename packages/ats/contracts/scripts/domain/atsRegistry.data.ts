@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-29T07:49:44.474Z
+ * Generated: 2026-04-29T15:46:13.249Z
  * Facets: 94
  * Infrastructure: 2
  *
@@ -1092,14 +1092,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         topic0: "0x876b7cb47aa150b3a5516188b19ed308752ad4d0ae9a702543353b78163f7589",
       },
-      {
-        name: "Transfer",
-        signature: {
-          full: "event Transfer(address indexed from, address indexed to, uint256 value)",
-          canonical: "Transfer(address,address,uint256)",
-        },
-        topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
-      },
     ],
     errors: [
       {
@@ -1405,14 +1397,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "Issued(address,address,uint256,bytes)",
         },
         topic0: "0x0e9905d62635f049c2f4e11678ebf9dc3d1f8c4a653e290759b772e47ba00d00",
-      },
-      {
-        name: "Transfer",
-        signature: {
-          full: "event Transfer(address indexed from, address indexed to, uint256 value)",
-          canonical: "Transfer(address,address,uint256)",
-        },
-        topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
       },
     ],
     errors: [
@@ -2681,14 +2665,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "Redeemed(address,address,uint256,bytes)",
         },
         topic0: "0xb7d0d6b60740753e9f16692a2f479472a1385aec2420fa43225b02f2ffa1afe7",
-      },
-      {
-        name: "Transfer",
-        signature: {
-          full: "event Transfer(address indexed from, address indexed to, uint256 value)",
-          canonical: "Transfer(address,address,uint256)",
-        },
-        topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
       },
     ],
     errors: [
@@ -10704,14 +10680,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "Issued(address,address,uint256,bytes)",
         },
         topic0: "0x0e9905d62635f049c2f4e11678ebf9dc3d1f8c4a653e290759b772e47ba00d00",
-      },
-      {
-        name: "Transfer",
-        signature: {
-          full: "event Transfer(address indexed from, address indexed to, uint256 value)",
-          canonical: "Transfer(address,address,uint256)",
-        },
-        topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
       },
     ],
     errors: [
