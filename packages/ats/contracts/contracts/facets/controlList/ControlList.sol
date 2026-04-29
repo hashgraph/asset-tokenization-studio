@@ -2,10 +2,10 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IControlList } from "./IControlList.sol";
-import { CONTROL_LIST_ROLE } from "../../../constants/roles.sol";
-import { ControlListStorageWrapper } from "../../../domain/core/ControlListStorageWrapper.sol";
-import { Modifiers } from "../../../services/Modifiers.sol";
-import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+import { CONTROL_LIST_ROLE } from "../../constants/roles.sol";
+import { ControlListStorageWrapper } from "../../domain/core/ControlListStorageWrapper.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ControlList is IControlList, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
