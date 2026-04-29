@@ -98,6 +98,7 @@ const LOAN_FACETS = [
   "OperatorClearingHoldByPartitionFacet",
   "ClearingReadFacet",
   "ClearingActionsFacet",
+  "ClearingByPartitionFacet",
 
   // Scheduled Tasks
   "ScheduledBalanceAdjustmentsFacet",

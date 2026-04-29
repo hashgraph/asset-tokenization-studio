@@ -12,17 +12,19 @@ contract ClearingTransferFacet is ClearingTransfer, IStaticFunctionSelectors {
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
-        staticFunctionSelectors_[selectorIndex++] = this.clearingTransferByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.clearingTransferFromByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.operatorClearingTransferByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.protectedClearingTransferByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getClearingTransferForByPartition.selector;
+        uint256 selectorIndex = 2;
+        staticFunctionSelectors_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this.protectedClearingTransferByPartition.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.operatorClearingTransferByPartition.selector;
+        }
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(IClearingTransfer).interfaceId;
+        uint256 selectorIndex = 1;
+        staticInterfaceIds_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticInterfaceIds_[--selectorIndex] = type(IClearingTransfer).interfaceId;
+        }
     }
 }
