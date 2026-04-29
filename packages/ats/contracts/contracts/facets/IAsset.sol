@@ -72,6 +72,7 @@ import { ICapByPartition } from "./capByPartition/ICapByPartition.sol";
 import { INonces } from "./nonces/INonces.sol";
 import { IBalanceTrackerByPartition } from "./balanceTrackerByPartition/IBalanceTrackerByPartition.sol";
 import { IBalanceTrackerAtSnapshot } from "./balanceTrackerAtSnapshot/IBalanceTrackerAtSnapshot.sol";
+import { IBalanceTrackerAtSnapshot } from "./balanceTrackerAtSnapshot/IBalanceTrackerAtSnapshot.sol";
 import {
     IBalanceTrackerAtSnapshotByPartition
 } from "./balanceTrackerAtSnapshotByPartition/IBalanceTrackerAtSnapshotByPartition.sol";
