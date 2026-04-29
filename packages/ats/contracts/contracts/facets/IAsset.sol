@@ -66,7 +66,7 @@ import { IDividend } from "./layer_2/dividend/IDividend.sol";
 import { IKpis } from "./layer_2/kpi/kpiLatest/IKpis.sol";
 import { IProtectedPartitions } from "./layer_1/protectedPartition/IProtectedPartitions.sol";
 import { IProceedRecipients } from "./layer_2/proceedRecipient/IProceedRecipients.sol";
-import { ICap } from "./layer_1/cap/ICap.sol";
+import { ICap } from "./cap/ICap.sol";
 import { ICapByPartition } from "./capByPartition/ICapByPartition.sol";
 import { INonces } from "./layer_1/nonce/INonces.sol";
 import { IBalanceTrackerByPartition } from "./balanceTrackerByPartition/IBalanceTrackerByPartition.sol";

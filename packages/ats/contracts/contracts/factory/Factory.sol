@@ -13,7 +13,7 @@ import { ICore } from "../facets/core/ICore.sol";
 import { IERC20Votes } from "../facets/layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
 import { IController } from "../facets/controller/IController.sol";
 import { IERC1410 } from "../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
-import { ICap } from "../facets/layer_1/cap/ICap.sol";
+import { ICap } from "../facets/cap/ICap.sol";
 import { IMint } from "../facets/mint/IMint.sol";
 import { IClearing } from "../facets/clearing/IClearing.sol";
 import { IBusinessLogicResolver } from "../infrastructure/diamond/IBusinessLogicResolver.sol";

@@ -2,10 +2,10 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ICap } from "./ICap.sol";
-import { CAP_ROLE } from "../../../constants/roles.sol";
-import { Modifiers } from "../../../services/Modifiers.sol";
-import { CapStorageWrapper } from "../../../domain/core/CapStorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { CAP_ROLE } from "../../constants/roles.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { CapStorageWrapper } from "../../domain/core/CapStorageWrapper.sol";
+import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 abstract contract Cap is ICap, Modifiers {
     // solhint-disable-next-line func-name-mixedcase

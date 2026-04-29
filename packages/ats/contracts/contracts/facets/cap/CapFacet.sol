@@ -3,8 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ICap } from "./ICap.sol";
 import { Cap } from "./Cap.sol";
-import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { _CAP_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
+import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { _CAP_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 contract CapFacet is Cap, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
