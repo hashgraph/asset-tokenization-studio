@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-28T12:52:18.682Z
- * Facets: 90
+ * Generated: 2026-04-29T07:32:20.845Z
+ * Facets: 93
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -12276,6 +12276,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   SnapshotsFacet: {
     name: "SnapshotsFacet",
+    description:
+      "Diamond facet that exposes snapshot creation, scheduling, and historical balance, supply, and partition queries through the `ISnapshots` interface.",
     resolverKey: {
       name: "_SNAPSHOTS_RESOLVER_KEY",
       value: "0x9a3fc46d83536ef6b87eb4fec37302bfd1a7c18e81ea2da853b911b44cf5b0cf",
@@ -13738,7 +13740,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 94 as const;
+export const TOTAL_FACETS = 93 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
