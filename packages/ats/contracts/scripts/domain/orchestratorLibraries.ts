@@ -128,6 +128,7 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   ClearingRedeemFacet: ["clearingOps", "clearingProtectedOps"],
   ClearingHoldCreationFacet: ["clearingOps", "clearingProtectedOps"],
   OperatorClearingHoldByPartitionFacet: ["clearingOps"],
+  ClearingByPartitionFacet: ["clearingOps", "clearingReadOps"],
   // ClearingReadOps dependencies - clearing read operations
   ClearingReadFacet: ["clearingReadOps"],
   // SnapshotsFacet + BalanceTrackerFacet + BalanceTrackerByPartitionFacet depend on SnapshotsStorageWrapper which uses ClearingReadOps

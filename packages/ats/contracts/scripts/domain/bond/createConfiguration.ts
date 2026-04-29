@@ -86,6 +86,7 @@ const BOND_FACETS = [
 
   // Clearing & Settlement
   "ClearingActionsFacet",
+  "ClearingByPartitionFacet",
   "ClearingHoldCreationFacet",
   "OperatorClearingHoldByPartitionFacet",
   "ClearingReadFacet",
