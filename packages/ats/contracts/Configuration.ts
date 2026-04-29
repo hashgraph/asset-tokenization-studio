@@ -91,6 +91,7 @@ export const CONTRACT_NAMES = [
   "BurnFacet",
   "BurnByPartitionFacet",
   "ClearingByPartitionFacet",
+  "ClearingHoldByPartitionFacet",
   "DocumentationFacet",
   "ControllerFacet",
   "DiamondFacet",
