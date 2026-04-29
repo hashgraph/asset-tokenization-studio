@@ -7,6 +7,9 @@ import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC20StorageWrapper } from "../../domain/asset/ERC20StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { _CORE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 
 /**
  * @title Core
@@ -16,17 +19,22 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
  */
 abstract contract Core is ICore, Modifiers {
     /// @inheritdoc ICore
-    function initializeCore(ICore.ERC20Metadata calldata metadata) external override onlyNotERC20Initialized {
+    function initializeCore(
+        ICore.ERC20Metadata calldata metadata
+    ) external override onlyFacetNotRegistered(_CORE_RESOLVER_KEY) onlyRole(DEFAULT_ADMIN_ROLE) {
         ERC20StorageWrapper.initializeERC20(metadata);
+        InitializerStorageWrapper.setFacetToReady(_CORE_RESOLVER_KEY);
     }
 
     /// @inheritdoc ICore
-    function setName(string calldata _name) external override onlyUnpaused onlyRole(TREX_OWNER_ROLE) {
+    function setName(string calldata _name) external override onlyUnpaused onlyRole(TREX_OWNER_ROLE) onlyOperational {
         ERC3643StorageWrapper.setName(_name);
     }
 
     /// @inheritdoc ICore
-    function setSymbol(string calldata _symbol) external override onlyUnpaused onlyRole(TREX_OWNER_ROLE) {
+    function setSymbol(
+        string calldata _symbol
+    ) external override onlyUnpaused onlyRole(TREX_OWNER_ROLE) onlyOperational {
         ERC3643StorageWrapper.setSymbol(_symbol);
     }
 

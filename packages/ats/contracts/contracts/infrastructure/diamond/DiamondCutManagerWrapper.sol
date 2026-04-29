@@ -19,6 +19,8 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         mapping(bytes32 => bytes32[]) facetIds;
         // keccak256(configurationId, version)
         mapping(bytes32 => uint256[]) facetVersions;
+        //keccak256(configurationId, version, facetId)
+        mapping(bytes32 => uint256) facetIdPosition;
         // keccak256(configurationId, version, selector)
         mapping(bytes32 => address) facetAddress;
         // keccak256(configurationId, version, facetId)
@@ -91,6 +93,9 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
             uint256 facetVersion = _facetConfigurations[index].version;
             _dcms.facetIds[configVersionHash].push(facetId);
             _dcms.facetVersions[configVersionHash].push(facetVersion);
+            _dcms.facetIdPosition[_buildHash(_configurationId, _version, facetId)] = _dcms
+                .facetIds[configVersionHash]
+                .length;
             bytes32 configVersionFacetHash = _buildHash(_configurationId, _version, facetId);
 
             address addr = _resolveBusinessLogicByVersion(facetId, facetVersion);
@@ -288,6 +293,31 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         );
     }
 
+    function _getFacetConfigurationsByConfigurationIdAndVersion(
+        DiamondCutManagerStorage storage _dcms,
+        bytes32 _configurationId,
+        uint256 _version,
+        uint256 _start,
+        uint256 _end
+    ) internal view returns (FacetConfiguration[] memory facetConfigurations_) {
+        bytes32 configVersionHash = _buildHash(_configurationId, _resolveVersion(_dcms, _configurationId, _version));
+
+        uint256 size = Pagination.getSize(_start, _end, _dcms.facetIds[configVersionHash].length);
+
+        facetConfigurations_ = new FacetConfiguration[](size);
+
+        for (uint256 index = 0; index < size; ) {
+            uint256 realIndex = _start + index;
+            facetConfigurations_[index] = FacetConfiguration({
+                id: _dcms.facetIds[configVersionHash][realIndex],
+                version: _dcms.facetVersions[configVersionHash][realIndex]
+            });
+            unchecked {
+                ++index;
+            }
+        }
+    }
+
     function _getFacetAddressesByConfigurationIdAndVersion(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -351,6 +381,21 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         facetAddress_ = _dcms.addr[
             _buildHash(_configurationId, _resolveVersion(_dcms, _configurationId, _version), _facetId)
         ];
+    }
+
+    function _getFacetVersionByConfigurationIdVersionAndFacetId(
+        DiamondCutManagerStorage storage _dcms,
+        bytes32 _configurationId,
+        uint256 _version,
+        bytes32 _facetId
+    ) internal view returns (uint256 facetVersion_) {
+        uint256 pos = _dcms.facetIdPosition[_buildHash(_configurationId, _version, _facetId)];
+
+        if (pos == 0) {
+            revert FacetIdNotRegistered(_configurationId, _facetId);
+        }
+
+        facetVersion_ = _dcms.facetVersions[_buildHash(_configurationId, _version)][pos - 1];
     }
 
     function _diamondCutManagerStorage() internal pure returns (DiamondCutManagerStorage storage ds) {

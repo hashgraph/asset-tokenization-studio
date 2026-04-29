@@ -14,15 +14,6 @@ import { _checkNotInitialized } from "../InitializationErrors.sol";
  */
 abstract contract ERC20Modifiers {
     /**
-     * @notice Modifier to ensure ERC20 has not been initialized
-     * @dev Reverts with AlreadyInitialized if ERC20 is already initialized
-     */
-    modifier onlyNotERC20Initialized() {
-        _checkNotInitialized(ERC20StorageWrapper.isERC20Initialized());
-        _;
-    }
-
-    /**
      * @notice Modifier to ensure ERC20Votes has not been initialized
      * @dev Reverts with AlreadyInitialized if ERC20Votes is already initialized
      */
