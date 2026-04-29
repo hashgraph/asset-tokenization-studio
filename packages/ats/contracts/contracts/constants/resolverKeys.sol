@@ -45,6 +45,9 @@ bytes32 constant _PAUSE_RESOLVER_KEY = 0x9429fd9ef38f89f41bd9ec33fd5c94b287ed1c2
 // keccak256("security.token.standard.cap.resolverKey");
 bytes32 constant _CAP_RESOLVER_KEY = 0xfb3f8aac36661b5540c571d821c80dc9db7ede5ca2a4204ee562b3356f0c026b;
 
+// keccak256('security.token.standard.capByPartition.resolverKey');
+bytes32 constant _CAP_BY_PARTITION_RESOLVER_KEY = 0x1141b1e6f40d5d3b69ddf3d6da31a79b8a64309e999c931ac0ed437c789b737f;
+
 // keccak256("security.token.standard.cap.fixed.rate.resolverKey");
 bytes32 constant _CAP_FIXED_RATE_RESOLVER_KEY = 0x288b5a4b82f38369168fd49de3e5e68c76fc0394c2e89817b70a65368ba4dcf7;
 
