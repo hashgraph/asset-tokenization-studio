@@ -47,11 +47,13 @@ const LOAN_FACETS = [
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
   "BalanceTrackerByPartitionFacet",
+  "BalanceTrackerAtSnapshotFacet",
   "CapFacet",
   "ControlListFacet",
   "KycFacet",
   "SsiManagementFacet",
   "FreezeFacet",
+  "BatchFreezeFacet",
   "PauseFacet",
 
   // Core
@@ -71,6 +73,7 @@ const LOAN_FACETS = [
   "ERC1410ManagementFacet",
   "MintByPartitionFacet",
   "ERC1410TokenHolderFacet",
+  "BurnByPartitionFacet",
   "ERC3643ManagementFacet",
   "ERC3643ReadFacet",
   "BatchControllerFacet",
@@ -97,7 +100,6 @@ const LOAN_FACETS = [
   "ClearingActionsFacet",
 
   // Scheduled Tasks
-  "ScheduledSnapshotsFacet",
   "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
 

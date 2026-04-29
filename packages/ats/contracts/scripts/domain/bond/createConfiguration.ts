@@ -43,12 +43,14 @@ const BOND_FACETS = [
   "CorporateActionsFacet",
   "DiamondFacet", // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
   "FreezeFacet",
+  "BatchFreezeFacet",
   "KycFacet",
   "PauseFacet",
   "SnapshotsFacet",
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
   "BalanceTrackerByPartitionFacet",
+  "BalanceTrackerAtSnapshotFacet",
 
   // Core
   "CoreFacet",
@@ -65,6 +67,7 @@ const BOND_FACETS = [
   "ERC1410ManagementFacet",
   "ERC1410ReadFacet",
   "ERC1410TokenHolderFacet",
+  "BurnByPartitionFacet",
   "DocumentationFacet",
   "ControllerFacet",
   "ERC20PermitFacet",
@@ -108,7 +111,6 @@ const BOND_FACETS = [
   "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
   "ScheduledCouponListingFacet",
-  "ScheduledSnapshotsFacet",
   "SsiManagementFacet",
   "TransferAndLockFacet",
 

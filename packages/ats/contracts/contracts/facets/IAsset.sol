@@ -64,18 +64,19 @@ import { ITransferAndLock } from "./layer_3/transferAndLock/ITransferAndLock.sol
 import { ICoupon } from "./layer_2/coupon/ICoupon.sol";
 import { IDividend } from "./layer_2/dividend/IDividend.sol";
 import { IKpis } from "./layer_2/kpi/kpiLatest/IKpis.sol";
-import { IScheduledSnapshots } from "./layer_2/scheduledTask/scheduledSnapshot/IScheduledSnapshots.sol";
 import { IProtectedPartitions } from "./layer_1/protectedPartition/IProtectedPartitions.sol";
 import { IProceedRecipients } from "./layer_2/proceedRecipient/IProceedRecipients.sol";
 import { ICap } from "./layer_1/cap/ICap.sol";
 import { INonces } from "./layer_1/nonce/INonces.sol";
 import { IBalanceTrackerByPartition } from "./balanceTrackerByPartition/IBalanceTrackerByPartition.sol";
+import { IBalanceTrackerAtSnapshot } from "./balanceTrackerAtSnapshot/IBalanceTrackerAtSnapshot.sol";
 import { IScheduledCouponListing } from "./layer_2/scheduledTask/scheduledCouponListing/IScheduledCouponListing.sol";
 import {
     IScheduledBalanceAdjustments
 } from "./layer_2/scheduledTask/scheduledBalanceAdjustment/IScheduledBalanceAdjustments.sol";
 import { ILock } from "./layer_1/lock/ILock.sol";
 import { IFreeze } from "./layer_1/freeze/IFreeze.sol";
+import { IBatchFreeze } from "./batchFreeze/IBatchFreeze.sol";
 import { ISnapshots } from "./layer_1/snapshot/ISnapshots.sol";
 import { IClearingActions } from "./layer_1/clearing/IClearingActions.sol";
 import { IClearingTransfer } from "./layer_1/clearing/IClearingTransfer.sol";
@@ -88,6 +89,7 @@ import { IClearingRead } from "./layer_1/clearing/IClearingRead.sol";
 import { IComplianceFacet } from "./compliance/IComplianceFacet.sol";
 import { IMint } from "./mint/IMint.sol";
 import { IMintByPartition } from "./mintByPartition/IMintByPartition.sol";
+import { IBurnByPartition } from "./burnByPartition/IBurnByPartition.sol";
 import { IHoldFacet } from "./hold/IHoldFacet.sol";
 import { IBatchController } from "./batchController/IBatchController.sol";
 import { IBurn } from "./burn/IBurn.sol";
@@ -140,7 +142,6 @@ interface IAsset is
     IERC3643,
     IBurn,
     IScheduledCrossOrderedTasks,
-    IScheduledSnapshots,
     IBond,
     IEquity,
     ISecurity,
@@ -165,12 +166,14 @@ interface IAsset is
     ICap,
     INonces,
     IBalanceTrackerByPartition,
+    IBalanceTrackerAtSnapshot,
     IFixedRate,
     // Scheduled Tasks
     IScheduledCouponListing,
     IScheduledBalanceAdjustments,
     ILock,
     IFreeze,
+    IBatchFreeze,
     ISnapshots,
     // Clearing interfaces
     IClearingActions,
@@ -186,6 +189,7 @@ interface IAsset is
     IHoldByPartition,
     IMint,
     IMintByPartition,
+    IBurnByPartition,
     IDocumentation,
     IController,
     IControllerHoldByPartition,
