@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _PAUSE_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { _PAUSE_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IExternalPause } from "../../facets/layer_1/externalPause/IExternalPause.sol";
-import { IPause } from "../../facets/layer_1/pause/IPause.sol";
+import { IPause } from "../../facets/pause/IPause.sol";
 import {
     ExternalListManagementStorageWrapper,
     ExternalListDataStorage

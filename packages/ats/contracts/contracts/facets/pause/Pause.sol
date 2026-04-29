@@ -2,9 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IPause } from "./IPause.sol";
-import { PAUSER_ROLE } from "../../../constants/roles.sol";
-import { Modifiers } from "../../../services/Modifiers.sol";
-import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { PAUSER_ROLE } from "../../constants/roles.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { PauseStorageWrapper } from "../../domain/core/PauseStorageWrapper.sol";
 
 abstract contract Pause is IPause, Modifiers {
     function pause() external override onlyUnpaused onlyRole(PAUSER_ROLE) returns (bool success_) {

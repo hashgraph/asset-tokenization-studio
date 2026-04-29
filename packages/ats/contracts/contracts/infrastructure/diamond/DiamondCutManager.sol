@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
-import { Pause } from "../../facets/layer_1/pause/Pause.sol";
+import { Pause } from "../../facets/pause/Pause.sol";
 import { AccessControl } from "../../facets/accessControl/AccessControl.sol";
 import { DiamondCutManagerWrapper } from "./DiamondCutManagerWrapper.sol";
 import { IDiamondLoupe } from "../proxy/IDiamondLoupe.sol";
