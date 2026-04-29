@@ -19,6 +19,8 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         mapping(bytes32 => bytes32[]) facetIds;
         // keccak256(configurationId, version)
         mapping(bytes32 => uint256[]) facetVersions;
+        //keccak256(configurationId, version, facetId)
+        mapping(bytes32 => uint256) facetIdPosition;
         // keccak256(configurationId, version, selector)
         mapping(bytes32 => address) facetAddress;
         // keccak256(configurationId, version, facetId)
@@ -31,8 +33,6 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         mapping(bytes32 => bytes4[]) interfaceIds;
         // keccak256(configurationId, version, interfaceId)
         mapping(bytes32 => bool) supportsInterface;
-        //keccak256(configurationId, version, facetId)
-        mapping(bytes32 => uint256) facetVersion;
     }
 
     function _createConfiguration(
@@ -93,6 +93,9 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
             uint256 facetVersion = _facetConfigurations[index].version;
             _dcms.facetIds[configVersionHash].push(facetId);
             _dcms.facetVersions[configVersionHash].push(facetVersion);
+            _dcms.facetIdPosition[_buildHash(_configurationId, _version, facetId)] = _dcms
+                .facetIds[configVersionHash]
+                .length;
             bytes32 configVersionFacetHash = _buildHash(_configurationId, _version, facetId);
 
             address addr = _resolveBusinessLogicByVersion(facetId, facetVersion);
@@ -106,7 +109,6 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
             }
 
             _dcms.addr[configVersionFacetHash] = addr;
-            _dcms.facetVersion[configVersionFacetHash] = facetVersion;
 
             IStaticFunctionSelectors staticFunctionSelectors = IStaticFunctionSelectors(addr);
 
@@ -387,9 +389,13 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         uint256 _version,
         bytes32 _facetId
     ) internal view returns (uint256 facetVersion_) {
-        facetVersion_ = _dcms.facetVersion[
-            _buildHash(_configurationId, _resolveVersion(_dcms, _configurationId, _version), _facetId)
-        ];
+        uint256 pos = _dcms.facetIdPosition[_buildHash(_configurationId, _version, _facetId)];
+
+        if (pos == 0) {
+            revert FacetIdNotRegistered(_configurationId, _facetId);
+        }
+
+        facetVersion_ = _dcms.facetVersions[_buildHash(_configurationId, _version)][pos - 1];
     }
 
     function _diamondCutManagerStorage() internal pure returns (DiamondCutManagerStorage storage ds) {
