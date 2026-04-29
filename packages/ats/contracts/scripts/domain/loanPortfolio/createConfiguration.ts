@@ -45,6 +45,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "AccessControlFacet",
   "AllowanceFacet",
   "CapFacet",
+  "CapByPartitionFacet",
   "ControlListFacet",
   "CorporateActionsFacet",
   "DiamondFacet",

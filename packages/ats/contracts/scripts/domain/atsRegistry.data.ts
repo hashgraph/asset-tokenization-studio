@@ -43,6 +43,7 @@ import {
   BondUSASustainabilityPerformanceTargetRateFacet__factory,
   BurnByPartitionFacet__factory,
   BurnFacet__factory,
+  CapByPartitionFacet__factory,
   CapFacet__factory,
   ClearingActionsFacet__factory,
   ClearingAtSnapshotFacet__factory,
@@ -2796,6 +2797,85 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     factory: (signer) => new BurnFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
+  CapByPartitionFacet: {
+    name: "CapByPartitionFacet",
+    description:
+      "Diamond facet that exposes the per-partition maximum supply cap surface through the `ICapByPartition` interface, registered under `_CAP_BY_PARTITION_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_CAP_BY_PARTITION_RESOLVER_KEY",
+      value: "0x1141b1e6f40d5d3b69ddf3d6da31a79b8a64309e999c931ac0ed437c789b737f",
+    },
+    inheritance: ["CapByPartition", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "getMaxSupplyByPartition",
+        signature: {
+          full: "function getMaxSupplyByPartition(bytes32 _partition) view returns (uint256 maxSupply_)",
+          canonical: "getMaxSupplyByPartition(bytes32)",
+        },
+        selector: "0x79f3653f",
+      },
+      {
+        name: "setMaxSupplyByPartition",
+        signature: {
+          full: "function setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply) returns (bool success_)",
+          canonical: "setMaxSupplyByPartition(bytes32,uint256)",
+        },
+        selector: "0x99b69647",
+      },
+    ],
+    events: [
+      {
+        name: "MaxSupplyByPartitionSet",
+        signature: {
+          full: "event MaxSupplyByPartitionSet(address indexed operator, bytes32 indexed partition, uint256 newMaxSupply, uint256 previousMaxSupply)",
+          canonical: "MaxSupplyByPartitionSet(address,bytes32,uint256,uint256)",
+        },
+        topic0: "0x9c0c8826170fa45c79bf64a2913df8ccc3e77407aba502d85946253332a4d749",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRole",
+        signature: {
+          full: "error AccountHasNoRole(address account, bytes32 role)",
+          canonical: "AccountHasNoRole(address,bytes32)",
+        },
+        selector: "0xa1180aad",
+      },
+      {
+        name: "NewMaxSupplyByPartitionTooHigh",
+        signature: {
+          full: "error NewMaxSupplyByPartitionTooHigh(bytes32 partition, uint256 newMaxSupplyByPartition, uint256 maxSupply)",
+          canonical: "NewMaxSupplyByPartitionTooHigh(bytes32,uint256,uint256)",
+        },
+        selector: "0x21aa64a7",
+      },
+      {
+        name: "NewMaxSupplyForPartitionTooLow",
+        signature: {
+          full: "error NewMaxSupplyForPartitionTooLow(bytes32 partition, uint256 maxSupply, uint256 totalSupply)",
+          canonical: "NewMaxSupplyForPartitionTooLow(bytes32,uint256,uint256)",
+        },
+        selector: "0x820c68a8",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+    ],
+    factory: (signer) => new CapByPartitionFacet__factory(signer),
+  },
+
   CapFacet: {
     name: "CapFacet",
     resolverKey: {
@@ -2808,14 +2888,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "getMaxSupply",
         signature: { full: "function getMaxSupply() view returns (uint256 maxSupply_)", canonical: "getMaxSupply()" },
         selector: "0x4c0f38c2",
-      },
-      {
-        name: "getMaxSupplyByPartition",
-        signature: {
-          full: "function getMaxSupplyByPartition(bytes32 _partition) view returns (uint256 maxSupply_)",
-          canonical: "getMaxSupplyByPartition(bytes32)",
-        },
-        selector: "0x79f3653f",
       },
       {
         name: "initialize_Cap",
@@ -2832,14 +2904,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "setMaxSupply(uint256)",
         },
         selector: "0x6f8b44b0",
-      },
-      {
-        name: "setMaxSupplyByPartition",
-        signature: {
-          full: "function setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply) returns (bool success_)",
-          canonical: "setMaxSupplyByPartition(bytes32,uint256)",
-        },
-        selector: "0x99b69647",
       },
     ],
     events: [
