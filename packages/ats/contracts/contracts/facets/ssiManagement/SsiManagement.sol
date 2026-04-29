@@ -2,10 +2,10 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ISsiManagement } from "./ISsiManagement.sol";
-import { SSI_MANAGER_ROLE } from "../../../constants/roles.sol";
-import { Modifiers } from "../../../services/Modifiers.sol";
-import { SsiManagementStorageWrapper } from "../../../domain/core/SsiManagementStorageWrapper.sol";
-import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+import { SSI_MANAGER_ROLE } from "../../constants/roles.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { SsiManagementStorageWrapper } from "../../domain/core/SsiManagementStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract SsiManagement is ISsiManagement, Modifiers {
     function setRevocationRegistryAddress(

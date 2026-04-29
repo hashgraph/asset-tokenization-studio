@@ -56,7 +56,7 @@ import { IVoting } from "./layer_2/voting/IVoting.sol";
 
 // Layer 3
 import { ISecurity } from "./layer_2/security/ISecurity.sol";
-import { ISsiManagement } from "./layer_1/ssi/ISsiManagement.sol";
+import { ISsiManagement } from "./ssiManagement/ISsiManagement.sol";
 import { ITimeTravel } from "../test/testTimeTravel/ITimeTravel.sol";
 import { IBalanceTracker } from "./balanceTracker/IBalanceTracker.sol";
 import { IBalanceTrackerAdjusted } from "./balanceTrackerAdjusted/IBalanceTrackerAdjusted.sol";
