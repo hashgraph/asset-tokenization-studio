@@ -68,7 +68,7 @@ import { IProtectedPartitions } from "./layer_1/protectedPartition/IProtectedPar
 import { IProceedRecipients } from "./layer_2/proceedRecipient/IProceedRecipients.sol";
 import { ICap } from "./cap/ICap.sol";
 import { ICapByPartition } from "./capByPartition/ICapByPartition.sol";
-import { INonces } from "./layer_1/nonce/INonces.sol";
+import { INonces } from "./nonces/INonces.sol";
 import { IBalanceTrackerByPartition } from "./balanceTrackerByPartition/IBalanceTrackerByPartition.sol";
 import { IBalanceTrackerAtSnapshot } from "./balanceTrackerAtSnapshot/IBalanceTrackerAtSnapshot.sol";
 import {
