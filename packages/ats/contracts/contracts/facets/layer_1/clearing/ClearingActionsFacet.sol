@@ -12,19 +12,21 @@ contract ClearingActionsFacet is ClearingActions, IStaticFunctionSelectors {
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](7);
-        staticFunctionSelectors_[selectorIndex++] = this.initializeClearing.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.activateClearing.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.deactivateClearing.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.approveClearingOperationByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.cancelClearingOperationByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.reclaimClearingOperationByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.isClearingActivated.selector;
+        uint256 selectorIndex = 4;
+        staticFunctionSelectors_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this.isClearingActivated.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.deactivateClearing.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.activateClearing.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.initializeClearing.selector;
+        }
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(IClearingActions).interfaceId;
+        uint256 selectorIndex = 1;
+        staticInterfaceIds_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticInterfaceIds_[--selectorIndex] = type(IClearingActions).interfaceId;
+        }
     }
 }
