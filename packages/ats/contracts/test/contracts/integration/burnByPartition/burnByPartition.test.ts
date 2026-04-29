@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { expect } from "chai";
-import { ethers, network } from "hardhat";
+import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type IAsset, type ResolverProxy } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
