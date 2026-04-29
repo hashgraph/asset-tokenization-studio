@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ISnapshots, HolderBalance } from "./ISnapshots.sol";
+import { ISnapshots } from "./ISnapshots.sol";
 import { SNAPSHOT_ROLE } from "../../../constants/roles.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { SnapshotsStorageWrapper } from "../../../domain/asset/SnapshotsStorageWrapper.sol";
@@ -17,21 +17,6 @@ abstract contract Snapshots is ISnapshots, Modifiers {
 
     function decimalsAtSnapshot(uint256 _snapshotID) external view returns (uint8 decimals_) {
         decimals_ = SnapshotsStorageWrapper.decimalsAtSnapshot(_snapshotID);
-    }
-
-    function balancesOfAtSnapshot(
-        uint256 _snapshotID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view override returns (HolderBalance[] memory balances_) {
-        balances_ = SnapshotsStorageWrapper.balancesOfAtSnapshot(_snapshotID, _pageIndex, _pageLength);
-    }
-
-    function balanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view override returns (uint256 balance_) {
-        balance_ = SnapshotsStorageWrapper.balanceOfAtSnapshot(_snapshotID, _tokenHolder);
     }
 
     function getTokenHoldersAtSnapshot(
@@ -59,10 +44,6 @@ abstract contract Snapshots is ISnapshots, Modifiers {
         address _tokenHolder
     ) external view override returns (bytes32[] memory) {
         return SnapshotsStorageWrapper.partitionsOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function totalSupplyAtSnapshot(uint256 _snapshotID) external view override returns (uint256 totalSupply_) {
-        totalSupply_ = SnapshotsStorageWrapper.totalSupplyAtSnapshot(_snapshotID);
     }
 
     function totalSupplyAtSnapshotByPartition(
