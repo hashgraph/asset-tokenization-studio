@@ -54,16 +54,6 @@ abstract contract Snapshots is ISnapshots, Modifiers {
         return SnapshotsStorageWrapper.totalTokenHoldersAt(_snapshotID);
     }
 
-    /// @inheritdoc ISnapshots
-    function balanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view override returns (uint256 balance_) {
-        balance_ = SnapshotsStorageWrapper.balanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
-    }
-
-    /// @inheritdoc ISnapshots
     function partitionsOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
@@ -71,14 +61,6 @@ abstract contract Snapshots is ISnapshots, Modifiers {
         return SnapshotsStorageWrapper.partitionsOfAtSnapshot(_snapshotID, _tokenHolder);
     }
 
-    function totalSupplyAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID
-    ) external view override returns (uint256 totalSupply_) {
-        totalSupply_ = SnapshotsStorageWrapper.totalSupplyAtSnapshotByPartition(_partition, _snapshotID);
-    }
-
-    /// @inheritdoc ISnapshots
     function lockedBalanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder

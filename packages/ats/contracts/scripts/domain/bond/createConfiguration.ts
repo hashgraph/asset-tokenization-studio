@@ -51,6 +51,7 @@ const BOND_FACETS = [
   "BalanceTrackerAdjustedFacet",
   "BalanceTrackerByPartitionFacet",
   "BalanceTrackerAtSnapshotFacet",
+  "BalanceTrackerAtSnapshotByPartitionFacet",
 
   // Core
   "CoreFacet",

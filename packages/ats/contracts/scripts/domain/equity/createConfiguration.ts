@@ -54,6 +54,7 @@ const EQUITY_FACETS = [
   "SnapshotsFacet",
   "BalanceTrackerByPartitionFacet",
   "BalanceTrackerAtSnapshotFacet",
+  "BalanceTrackerAtSnapshotByPartitionFacet",
 
   // ERC Standards (13)
   "MintByPartitionFacet",

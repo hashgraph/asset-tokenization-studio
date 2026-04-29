@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-29T09:41:11.353Z
- * Facets: 95
+ * Generated: 2026-04-29T12:11:08.436Z
+ * Facets: 96
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -24,6 +24,7 @@ import {
   AllowanceFacet__factory,
   AmortizationFacet__factory,
   BalanceTrackerAdjustedFacet__factory,
+  BalanceTrackerAtSnapshotByPartitionFacet__factory,
   BalanceTrackerAtSnapshotFacet__factory,
   BalanceTrackerByPartitionFacet__factory,
   BalanceTrackerFacet__factory,
@@ -937,6 +938,51 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     factory: (signer) => new BalanceTrackerAdjustedFacet__factory(signer),
+  },
+
+  BalanceTrackerAtSnapshotByPartitionFacet: {
+    name: "BalanceTrackerAtSnapshotByPartitionFacet",
+    description:
+      "Diamond facet that exposes snapshotted partition-scoped balance and total-supply queries through the `IBalanceTrackerAtSnapshotByPartition` interface, registered under `_BALANCE_TRACKER_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_BALANCE_TRACKER_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY",
+      value: "0x1d00004473b3453aa2cd7490fb523dbff7071733cf0c64334784429a6f227514",
+    },
+    inheritance: ["BalanceTrackerAtSnapshotByPartition", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "balanceOfAtSnapshotByPartition",
+        signature: {
+          full: "function balanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+          canonical: "balanceOfAtSnapshotByPartition(bytes32,uint256,address)",
+        },
+        selector: "0xe002bcdf",
+      },
+      {
+        name: "totalSupplyAtSnapshotByPartition",
+        signature: {
+          full: "function totalSupplyAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID) view returns (uint256 totalSupply_)",
+          canonical: "totalSupplyAtSnapshotByPartition(bytes32,uint256)",
+        },
+        selector: "0x9657ddb9",
+      },
+    ],
+    errors: [
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+    ],
+    factory: (signer) => new BalanceTrackerAtSnapshotByPartitionFacet__factory(signer),
   },
 
   BalanceTrackerAtSnapshotFacet: {
@@ -12536,14 +12582,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["Snapshots", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "balanceOfAtSnapshotByPartition",
-        signature: {
-          full: "function balanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
-          canonical: "balanceOfAtSnapshotByPartition(bytes32,uint256,address)",
-        },
-        selector: "0xe002bcdf",
-      },
-      {
         name: "clearedBalanceOfAtSnapshot",
         signature: {
           full: "function clearedBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
@@ -12659,14 +12697,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "takeSnapshot",
         signature: { full: "function takeSnapshot() returns (uint256 snapshotID_)", canonical: "takeSnapshot()" },
         selector: "0xb3d3d37e",
-      },
-      {
-        name: "totalSupplyAtSnapshotByPartition",
-        signature: {
-          full: "function totalSupplyAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID) view returns (uint256 totalSupply_)",
-          canonical: "totalSupplyAtSnapshotByPartition(bytes32,uint256)",
-        },
-        selector: "0x9657ddb9",
       },
     ],
     events: [
@@ -13991,7 +14021,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 95 as const;
+export const TOTAL_FACETS = 96 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
