@@ -5,6 +5,7 @@ import { _INITIALIZER_STORAGE_POSITION } from "../../constants/storagePositions.
 import { ResolverProxyStorageWrapper } from "./ResolverProxyStorageWrapper.sol";
 import { MAX_INITIALIZER_FACET_INDEX } from "../../constants/values.sol";
 import { IDiamondCutManager } from "../../infrastructure/diamond/IDiamondCutManager.sol";
+import { IInitializer } from "../../facets/initializer/IInitializer.sol";
 
 struct InitializerDataStorage {
     // configVersionStatus encoding: 0 = not started, 1 = fully operational, >1 = (resume facet index + 1)
@@ -76,6 +77,11 @@ library InitializerStorageWrapper {
         }
     }
 
+    function setFacetToReady(bytes32 _facetId) internal {
+        setFacetStatus(_facetId, 1);
+        setFacetLastVersion(_facetId);
+    }
+
     function setFacetStatus(bytes32 _facetId, uint256 _status) internal {
         uint256 versionId = ResolverProxyStorageWrapper
             .getBusinessLogicResolver()
@@ -108,17 +114,40 @@ library InitializerStorageWrapper {
 
     function checkOperational(bytes32 configId, uint256 versionId) internal view {
         if (getOperationalStatus(configId, versionId) != 1) {
-            revert("Asset not operational");
+            revert IInitializer.AssetNotOperational(configId, versionId);
         }
     }
-    function checkNonOperational(bytes32 configId, uint256 versionId) internal view {
-        if (getOperationalStatus(configId, versionId) == 1) {
-            revert("Asset operational");
-        }
-    }
+
     function checkFacetNotReady(bytes32 _facetId, uint256 _versionId) internal view {
         if (getFacetVersionStatus(_facetId, _versionId) == 1) {
-            revert("Facet is ready");
+            revert IInitializer.FacetReady(_facetId, _versionId);
+        }
+    }
+
+    function checkFacetRegistered(bytes32 _facetId, uint256[] calldata _fromLastVersions) internal view {
+        bool found;
+        uint256 i = 0;
+
+        uint256 lastVersion = InitializerStorageWrapper.getFacetLastVersion(_facetId);
+
+        while (i < _fromLastVersions.length && !found) {
+            if (lastVersion == _fromLastVersions[i]) {
+                found = true;
+            }
+            i++;
+        }
+        if (!found) {
+            revert IInitializer.FacetPreviousVersionNotAccepted(_facetId, lastVersion, _fromLastVersions);
+        }
+    }
+
+    // If last version == 0
+    function checkFacetNotRegistered(bytes32 _facetId) internal view {
+        if (InitializerStorageWrapper.getFacetLastVersion(_facetId) != 0) {
+            revert IInitializer.FacetAlreadyRegistered(
+                _facetId,
+                InitializerStorageWrapper.getFacetLastVersion(_facetId)
+            );
         }
     }
 

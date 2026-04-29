@@ -19,13 +19,6 @@ abstract contract InitializerModifiers {
         );
         _;
     }
-    modifier onlyNonOperational() {
-        InitializerStorageWrapper.checkNonOperational(
-            ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
-            ResolverProxyStorageWrapper.getResolverProxyVersion()
-        );
-        _;
-    }
 
     // Using the Facet address (immutable variable) retrieves facet id and version from the BLR
     // Checks facetVersionStatus against reserved value "ready"
@@ -46,26 +39,13 @@ abstract contract InitializerModifiers {
     // Makes sure that an upgrade method is only executed if the previous facet version was in a list of accepted ones.
     // "empty array" means that all previous versions are accepted.
     modifier onlyFacetRegistered(bytes32 _facetId, uint256[] calldata _fromLastVersions) {
-        bool found;
-        uint256 i = 0;
-
-        while (i < _fromLastVersions.length && !found) {
-            if (InitializerStorageWrapper.getFacetLastVersion(_facetId) == _fromLastVersions[i]) {
-                found = true;
-            }
-            i++;
-        }
-        if (!found) {
-            revert("Facet not registered with an acceptable previous version");
-        }
+        InitializerStorageWrapper.checkFacetRegistered(_facetId, _fromLastVersions);
         _;
     }
 
     // If last version == 0
     modifier onlyFacetNotRegistered(bytes32 _facetId) {
-        if (InitializerStorageWrapper.getFacetLastVersion(_facetId) != 0) {
-            revert("Facet already registered");
-        }
+        InitializerStorageWrapper.checkFacetNotRegistered(_facetId);
         _;
     }
 }

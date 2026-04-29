@@ -53,17 +53,6 @@ abstract contract ERC3643Modifiers {
     }
 
     /**
-     * @dev Modifier that validates ERC1644 has not been initialized
-     *
-     * Requirements:
-     * - ERC1644 must not be initialized
-     */
-    modifier onlyNotControllerInitialized() {
-        _checkNotInitialized(ERC1644StorageWrapper.isERC1644Initialized());
-        _;
-    }
-
-    /**
      * @dev Modifier that validates address is not recovered
      *
      * Requirements:

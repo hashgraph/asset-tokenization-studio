@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-29T12:02:37.657Z
+ * Generated: 2026-04-29T13:46:50.321Z
  * Facets: 94
  * Infrastructure: 2
  *
@@ -4367,9 +4367,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x209d2853",
       },
       {
-        name: "AlreadyInitialized",
-        signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
-        selector: "0x0dc149f0",
+        name: "AssetNotOperational",
+        signature: {
+          full: "error AssetNotOperational(bytes32 configId, uint256 versionId)",
+          canonical: "AssetNotOperational(bytes32,uint256)",
+        },
+        selector: "0xcea298d9",
       },
       {
         name: "CannotRecoverWallet",
@@ -4385,6 +4388,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "ComplianceNotAllowed",
         signature: { full: "error ComplianceNotAllowed()", canonical: "ComplianceNotAllowed()" },
         selector: "0x66eb1b54",
+      },
+      {
+        name: "FacetAlreadyRegistered",
+        signature: {
+          full: "error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion)",
+          canonical: "FacetAlreadyRegistered(bytes32,uint256)",
+        },
+        selector: "0x05ebbb24",
       },
       {
         name: "IdentityRegistryCallFailed",
@@ -4883,9 +4894,20 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
-        name: "AlreadyInitialized",
-        signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
-        selector: "0x0dc149f0",
+        name: "AssetNotOperational",
+        signature: {
+          full: "error AssetNotOperational(bytes32 configId, uint256 versionId)",
+          canonical: "AssetNotOperational(bytes32,uint256)",
+        },
+        selector: "0xcea298d9",
+      },
+      {
+        name: "FacetAlreadyRegistered",
+        signature: {
+          full: "error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion)",
+          canonical: "FacetAlreadyRegistered(bytes32,uint256)",
+        },
+        selector: "0x05ebbb24",
       },
       {
         name: "TokenIsPaused",
@@ -9416,6 +9438,40 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "setOperationalStatus()",
         },
         selector: "0x720ab28e",
+      },
+    ],
+    errors: [
+      {
+        name: "AssetNotOperational",
+        signature: {
+          full: "error AssetNotOperational(bytes32 configId, uint256 versionId)",
+          canonical: "AssetNotOperational(bytes32,uint256)",
+        },
+        selector: "0xcea298d9",
+      },
+      {
+        name: "FacetAlreadyRegistered",
+        signature: {
+          full: "error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion)",
+          canonical: "FacetAlreadyRegistered(bytes32,uint256)",
+        },
+        selector: "0x05ebbb24",
+      },
+      {
+        name: "FacetPreviousVersionNotAccepted",
+        signature: {
+          full: "error FacetPreviousVersionNotAccepted(bytes32 facetId, uint256 lastVersion, uint256[] expectedVersions)",
+          canonical: "FacetPreviousVersionNotAccepted(bytes32,uint256,uint256[])",
+        },
+        selector: "0x5712fd94",
+      },
+      {
+        name: "FacetReady",
+        signature: {
+          full: "error FacetReady(bytes32 facetId, uint256 versionId)",
+          canonical: "FacetReady(bytes32,uint256)",
+        },
+        selector: "0xb5a1ee4f",
       },
     ],
     factory: (signer) => new InitializerFacet__factory(signer),
