@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-30T10:06:16.434Z
+ * Generated: 2026-04-30T10:52:10.115Z
  * Facets: 102
  * Infrastructure: 2
  *
@@ -66,6 +66,7 @@ import {
   CouponFacet__factory,
   CouponFixedRateFacet__factory,
   CouponKpiLinkedRateFacet__factory,
+  CouponListingFacet__factory,
   CouponSustainabilityPerformanceTargetRateFacet__factory,
   DiamondFacet__factory,
   DividendFacet__factory,
@@ -105,7 +106,6 @@ import {
   ProtectedHoldByPartitionFacet__factory,
   ProtectedPartitionsFacet__factory,
   ScheduledBalanceAdjustmentsFacet__factory,
-  ScheduledCouponListingFacet__factory,
   ScheduledCrossOrderedTasksFacet__factory,
   ScheduledCrossOrderedTasksKpiLinkedRateFacet__factory,
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet__factory,
@@ -175,7 +175,6 @@ import {
   ProceedRecipientsSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ProtectedPartitionsFacetTimeTravel__factory,
   ScheduledBalanceAdjustmentsFacetTimeTravel__factory,
-  ScheduledCouponListingFacetTimeTravel__factory,
   ScheduledCrossOrderedTasksFacetTimeTravel__factory,
   ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel__factory,
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
@@ -6041,14 +6040,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbba7b56d",
       },
       {
-        name: "getCouponFromOrderedListAt",
-        signature: {
-          full: "function getCouponFromOrderedListAt(uint256 _pos) view returns (uint256 couponID_)",
-          canonical: "getCouponFromOrderedListAt(uint256)",
-        },
-        selector: "0x65a88a2c",
-      },
-      {
         name: "getCouponHolders",
         signature: {
           full: "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
@@ -6063,22 +6054,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "getCouponsFor(uint256,uint256,uint256)",
         },
         selector: "0x7327ad90",
-      },
-      {
-        name: "getCouponsOrderedList",
-        signature: {
-          full: "function getCouponsOrderedList(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] couponIDs_)",
-          canonical: "getCouponsOrderedList(uint256,uint256)",
-        },
-        selector: "0xd7133de1",
-      },
-      {
-        name: "getCouponsOrderedListTotal",
-        signature: {
-          full: "function getCouponsOrderedListTotal() view returns (uint256 total_)",
-          canonical: "getCouponsOrderedListTotal()",
-        },
-        selector: "0xee1d26eb",
       },
       {
         name: "getTotalCouponHolders",
@@ -6269,14 +6244,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbba7b56d",
       },
       {
-        name: "getCouponFromOrderedListAt",
-        signature: {
-          full: "function getCouponFromOrderedListAt(uint256 _pos) view returns (uint256 couponID_)",
-          canonical: "getCouponFromOrderedListAt(uint256)",
-        },
-        selector: "0x65a88a2c",
-      },
-      {
         name: "getCouponHolders",
         signature: {
           full: "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
@@ -6291,22 +6258,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "getCouponsFor(uint256,uint256,uint256)",
         },
         selector: "0x7327ad90",
-      },
-      {
-        name: "getCouponsOrderedList",
-        signature: {
-          full: "function getCouponsOrderedList(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] couponIDs_)",
-          canonical: "getCouponsOrderedList(uint256,uint256)",
-        },
-        selector: "0xd7133de1",
-      },
-      {
-        name: "getCouponsOrderedListTotal",
-        signature: {
-          full: "function getCouponsOrderedListTotal() view returns (uint256 total_)",
-          canonical: "getCouponsOrderedListTotal()",
-        },
-        selector: "0xee1d26eb",
       },
       {
         name: "getTotalCouponHolders",
@@ -6504,14 +6455,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbba7b56d",
       },
       {
-        name: "getCouponFromOrderedListAt",
-        signature: {
-          full: "function getCouponFromOrderedListAt(uint256 _pos) view returns (uint256 couponID_)",
-          canonical: "getCouponFromOrderedListAt(uint256)",
-        },
-        selector: "0x65a88a2c",
-      },
-      {
         name: "getCouponHolders",
         signature: {
           full: "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
@@ -6526,22 +6469,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "getCouponsFor(uint256,uint256,uint256)",
         },
         selector: "0x7327ad90",
-      },
-      {
-        name: "getCouponsOrderedList",
-        signature: {
-          full: "function getCouponsOrderedList(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] couponIDs_)",
-          canonical: "getCouponsOrderedList(uint256,uint256)",
-        },
-        selector: "0xd7133de1",
-      },
-      {
-        name: "getCouponsOrderedListTotal",
-        signature: {
-          full: "function getCouponsOrderedListTotal() view returns (uint256 total_)",
-          canonical: "getCouponsOrderedListTotal()",
-        },
-        selector: "0xee1d26eb",
       },
       {
         name: "getTotalCouponHolders",
@@ -6684,6 +6611,60 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       new CouponKpiLinkedRateFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
+  CouponListingFacet: {
+    name: "CouponListingFacet",
+    description:
+      "Diamond facet that exposes coupon and scheduled-coupon listing queries via `ICouponListing`, registered under `_COUPON_LISTING_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_COUPON_LISTING_RESOLVER_KEY",
+      value: "0x09830f922c6bb4e736cc4cc426ceec0888c8b95b2cc21b67f16dab889ad4c47e",
+    },
+    inheritance: ["CouponListing", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "getCouponFromOrderedListAt",
+        signature: {
+          full: "function getCouponFromOrderedListAt(uint256 _pos) view returns (uint256 couponID_)",
+          canonical: "getCouponFromOrderedListAt(uint256)",
+        },
+        selector: "0x65a88a2c",
+      },
+      {
+        name: "getCouponsOrderedList",
+        signature: {
+          full: "function getCouponsOrderedList(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] couponIDs_)",
+          canonical: "getCouponsOrderedList(uint256,uint256)",
+        },
+        selector: "0xd7133de1",
+      },
+      {
+        name: "getCouponsOrderedListTotal",
+        signature: {
+          full: "function getCouponsOrderedListTotal() view returns (uint256 total_)",
+          canonical: "getCouponsOrderedListTotal()",
+        },
+        selector: "0xee1d26eb",
+      },
+      {
+        name: "getScheduledCouponListing",
+        signature: {
+          full: "function getScheduledCouponListing(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledCouponListing_)",
+          canonical: "getScheduledCouponListing(uint256,uint256)",
+        },
+        selector: "0x2fcfe49c",
+      },
+      {
+        name: "scheduledCouponListingCount",
+        signature: {
+          full: "function scheduledCouponListingCount() view returns (uint256)",
+          canonical: "scheduledCouponListingCount()",
+        },
+        selector: "0x80a84271",
+      },
+    ],
+    factory: (signer) => new CouponListingFacet__factory(signer),
+  },
+
   CouponSustainabilityPerformanceTargetRateFacet: {
     name: "CouponSustainabilityPerformanceTargetRateFacet",
     resolverKey: {
@@ -6733,14 +6714,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbba7b56d",
       },
       {
-        name: "getCouponFromOrderedListAt",
-        signature: {
-          full: "function getCouponFromOrderedListAt(uint256 _pos) view returns (uint256 couponID_)",
-          canonical: "getCouponFromOrderedListAt(uint256)",
-        },
-        selector: "0x65a88a2c",
-      },
-      {
         name: "getCouponHolders",
         signature: {
           full: "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
@@ -6755,22 +6728,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "getCouponsFor(uint256,uint256,uint256)",
         },
         selector: "0x7327ad90",
-      },
-      {
-        name: "getCouponsOrderedList",
-        signature: {
-          full: "function getCouponsOrderedList(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] couponIDs_)",
-          canonical: "getCouponsOrderedList(uint256,uint256)",
-        },
-        selector: "0xd7133de1",
-      },
-      {
-        name: "getCouponsOrderedListTotal",
-        signature: {
-          full: "function getCouponsOrderedListTotal() view returns (uint256 total_)",
-          canonical: "getCouponsOrderedListTotal()",
-        },
-        selector: "0xee1d26eb",
       },
       {
         name: "getTotalCouponHolders",
@@ -12776,35 +12733,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     factory: (signer) => new ScheduledBalanceAdjustmentsFacet__factory(signer),
     timeTravelFactory: (signer) => new ScheduledBalanceAdjustmentsFacetTimeTravel__factory(signer),
-  },
-
-  ScheduledCouponListingFacet: {
-    name: "ScheduledCouponListingFacet",
-    resolverKey: {
-      name: "_SCHEDULED_COUPON_LISTING_RESOLVER_KEY",
-      value: "0x6cc7645ae5bcd122875ce8bd150bd28dda6374546c4c2421e5ae4fdeedb3ab30",
-    },
-    inheritance: ["ScheduledCouponListing", "IStaticFunctionSelectors"],
-    methods: [
-      {
-        name: "getScheduledCouponListing",
-        signature: {
-          full: "function getScheduledCouponListing(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledCouponListing_)",
-          canonical: "getScheduledCouponListing(uint256,uint256)",
-        },
-        selector: "0x2fcfe49c",
-      },
-      {
-        name: "scheduledCouponListingCount",
-        signature: {
-          full: "function scheduledCouponListingCount() view returns (uint256)",
-          canonical: "scheduledCouponListingCount()",
-        },
-        selector: "0x80a84271",
-      },
-    ],
-    factory: (signer) => new ScheduledCouponListingFacet__factory(signer),
-    timeTravelFactory: (signer) => new ScheduledCouponListingFacetTimeTravel__factory(signer),
   },
 
   ScheduledCrossOrderedTasksFacet: {

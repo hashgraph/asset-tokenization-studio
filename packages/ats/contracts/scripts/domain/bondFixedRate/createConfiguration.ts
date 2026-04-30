@@ -112,7 +112,7 @@ const BOND_FIXED_RATE_FACETS = [
   "ProtectedPartitionsFacet",
   "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
-  "ScheduledCouponListingFacet",
+  "CouponListingFacet",
   "SsiManagementFacet",
 
   // Interest Rate (rate-specific)
