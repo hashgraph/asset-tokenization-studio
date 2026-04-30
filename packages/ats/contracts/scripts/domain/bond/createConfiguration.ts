@@ -85,6 +85,7 @@ const BOND_FACETS = [
   "ERC3643ManagementFacet",
   "ERC3643ReadFacet",
   "ComplianceFacet",
+  "ComplianceByPartitionFacet",
   "MintFacet",
   "BurnFacet",
 

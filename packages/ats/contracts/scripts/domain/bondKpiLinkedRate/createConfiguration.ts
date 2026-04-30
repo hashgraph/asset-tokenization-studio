@@ -77,6 +77,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "ERC3643ManagementFacet",
   "ERC3643ReadFacet",
   "ComplianceFacet",
+  "ComplianceByPartitionFacet",
   "MintFacet",
   "BurnFacet",
 

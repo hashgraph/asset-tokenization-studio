@@ -80,6 +80,7 @@ const BOND_FIXED_RATE_FACETS = [
   "ERC3643ManagementFacet",
   "ERC3643ReadFacet",
   "ComplianceFacet",
+  "ComplianceByPartitionFacet",
   "MintFacet",
   "BurnFacet",
 
