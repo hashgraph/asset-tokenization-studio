@@ -38,6 +38,7 @@ const LOAN_FACETS = [
   // Loan Functionality
   "LoanFacet",
   "CouponFacet",
+  "CouponListingFacet",
   "NominalValueFacet",
   "AmortizationFacet",
   "ProceedRecipientsFacet",

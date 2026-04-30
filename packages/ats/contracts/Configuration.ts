@@ -101,7 +101,7 @@ export const CONTRACT_NAMES = [
   "BondUSARead", //TODO
   "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
-  "ScheduledCouponListingFacet",
+  "CouponListingFacet",
   "SnapshotsFacet",
   "CorporateActionsFacet",
   "TransferAndLockFacet",

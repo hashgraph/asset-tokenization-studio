@@ -74,7 +74,7 @@ import { IBalanceTrackerAtSnapshot } from "./balanceTrackerAtSnapshot/IBalanceTr
 import {
     IBalanceTrackerAtSnapshotByPartition
 } from "./balanceTrackerAtSnapshotByPartition/IBalanceTrackerAtSnapshotByPartition.sol";
-import { IScheduledCouponListing } from "./layer_2/scheduledTask/scheduledCouponListing/IScheduledCouponListing.sol";
+import { ICouponListing } from "./couponListing/ICouponListing.sol";
 import {
     IScheduledBalanceAdjustments
 } from "./layer_2/scheduledTask/scheduledBalanceAdjustment/IScheduledBalanceAdjustments.sol";
@@ -178,7 +178,7 @@ interface IAsset is
     IBalanceTrackerAtSnapshotByPartition,
     IFixedRate,
     // Scheduled Tasks
-    IScheduledCouponListing,
+    ICouponListing,
     IScheduledBalanceAdjustments,
     ILock,
     IFreeze,
