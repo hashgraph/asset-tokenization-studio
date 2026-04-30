@@ -24,6 +24,7 @@ import { ScheduledTask } from "../layer_2/scheduledTask/scheduledTasksCommon/ISc
  */
 abstract contract AdjustBalances is IAdjustBalances, Modifiers {
     /// @inheritdoc IAdjustBalances
+    /// @dev Emits {AdjustmentBalanceSet}.
     function adjustBalances(
         uint256 factor,
         uint8 decimals
@@ -34,6 +35,7 @@ abstract contract AdjustBalances is IAdjustBalances, Modifiers {
     }
 
     /// @inheritdoc IAdjustBalances
+    /// @dev May emit {SnapshotTriggered} or {AdjustmentBalanceSet} depending on pending scheduled tasks.
     function triggerAndSyncAll(bytes32 _partition, address _from, address _to) external override onlyUnpaused {
         TokenCoreOps.triggerAndSyncAll(_partition, _from, _to);
     }
@@ -75,10 +77,9 @@ abstract contract AdjustBalances is IAdjustBalances, Modifiers {
         notZeroValue(_balanceAdjustmentId)
         returns (bool success_)
     {
-        (success_) = EquityStorageWrapper.cancelScheduledBalanceAdjustment(_balanceAdjustmentId);
-        if (success_) {
-            emit IAdjustBalances.ScheduledBalanceAdjustmentCancelled(_balanceAdjustmentId, EvmAccessors.getMsgSender());
-        }
+        EquityStorageWrapper.cancelScheduledBalanceAdjustment(_balanceAdjustmentId);
+        emit IAdjustBalances.ScheduledBalanceAdjustmentCancelled(_balanceAdjustmentId, EvmAccessors.getMsgSender());
+        success_ = true;
     }
 
     /// @inheritdoc IAdjustBalances

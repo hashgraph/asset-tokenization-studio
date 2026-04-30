@@ -69,7 +69,7 @@ library EquityStorageWrapper {
         initBalanceAdjustment(corporateActionId_, data);
     }
 
-    function cancelScheduledBalanceAdjustment(uint256 balanceAdjustmentId) internal returns (bool success_) {
+    function cancelScheduledBalanceAdjustment(uint256 balanceAdjustmentId) internal {
         CorporateActionsStorageWrapper.requireMatchingActionType(
             BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
             balanceAdjustmentId - 1
@@ -81,7 +81,6 @@ library EquityStorageWrapper {
             revert IAdjustBalances.BalanceAdjustmentAlreadyExecuted(corporateActionId, balanceAdjustmentId);
         }
         CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
-        success_ = true;
     }
 
     function initBalanceAdjustment(bytes32 actionId, bytes memory data) internal {
