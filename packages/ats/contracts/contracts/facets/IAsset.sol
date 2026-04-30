@@ -74,7 +74,9 @@ import { IBalanceTrackerAtSnapshot } from "./balanceTrackerAtSnapshot/IBalanceTr
 import {
     IBalanceTrackerAtSnapshotByPartition
 } from "./balanceTrackerAtSnapshotByPartition/IBalanceTrackerAtSnapshotByPartition.sol";
-import { IScheduledCouponListing } from "./layer_2/scheduledTask/scheduledCouponListing/IScheduledCouponListing.sol";
+import { IClearingAtSnapshot } from "./clearingAtSnapshot/IClearingAtSnapshot.sol";
+import { IClearingAtSnapshotByPartition } from "./clearingAtSnapshotByPartition/IClearingAtSnapshotByPartition.sol";
+import { ICouponListing } from "./couponListing/ICouponListing.sol";
 import {
     IScheduledBalanceAdjustments
 } from "./layer_2/scheduledTask/scheduledBalanceAdjustment/IScheduledBalanceAdjustments.sol";
@@ -82,6 +84,7 @@ import { ILock } from "./layer_1/lock/ILock.sol";
 import { IFreeze } from "./layer_1/freeze/IFreeze.sol";
 import { IBatchFreeze } from "./batchFreeze/IBatchFreeze.sol";
 import { ISnapshots } from "./layer_1/snapshot/ISnapshots.sol";
+import { ICoreAtSnapshot } from "./coreAtSnapshot/ICoreAtSnapshot.sol";
 import { IClearingTransfer } from "./layer_1/clearing/IClearingTransfer.sol";
 import { IClearingRedeem } from "./layer_1/clearing/IClearingRedeem.sol";
 import { IClearingHoldCreation } from "./layer_1/clearing/IClearingHoldCreation.sol";
@@ -94,12 +97,14 @@ import { IMint } from "./mint/IMint.sol";
 import { IMintByPartition } from "./mintByPartition/IMintByPartition.sol";
 import { IBurnByPartition } from "./burnByPartition/IBurnByPartition.sol";
 import { IClearingByPartition } from "./clearingByPartition/IClearingByPartition.sol";
+import { IClearingHoldByPartition } from "./clearingHoldByPartition/IClearingHoldByPartition.sol";
 import { IHoldFacet } from "./hold/IHoldFacet.sol";
 import { IBatchController } from "./batchController/IBatchController.sol";
 import { IBurn } from "./burn/IBurn.sol";
 import { IDocumentation } from "./documentation/IDocumentation.sol";
 import { IController } from "./controller/IController.sol";
 import { IControllerHoldByPartition } from "./controllerHoldByPartition/IControllerHoldByPartition.sol";
+import { IControllerByPartition } from "./controllerByPartition/IControllerByPartition.sol";
 import { IProtectedHoldByPartition } from "./protectedHoldByPartition/IProtectedHoldByPartition.sol";
 import { IERC20Permit } from "./layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
 import { IControlList } from "./layer_1/controlList/IControlList.sol";
@@ -173,14 +178,17 @@ interface IAsset is
     IBalanceTrackerByPartition,
     IBalanceTrackerAtSnapshot,
     IBalanceTrackerAtSnapshotByPartition,
+    IClearingAtSnapshot,
+    IClearingAtSnapshotByPartition,
     IFixedRate,
     // Scheduled Tasks
-    IScheduledCouponListing,
+    ICouponListing,
     IScheduledBalanceAdjustments,
     ILock,
     IFreeze,
     IBatchFreeze,
     ISnapshots,
+    ICoreAtSnapshot,
     // Clearing interfaces
     IClearing,
     IClearingTransfer,
@@ -188,6 +196,7 @@ interface IAsset is
     IClearingHoldCreation,
     IOperatorClearingHoldByPartition,
     IClearingByPartition,
+    IClearingHoldByPartition,
     // Additional ERC
     IComplianceFacet,
     IHoldFacet,
@@ -199,6 +208,7 @@ interface IAsset is
     IDocumentation,
     IController,
     IControllerHoldByPartition,
+    IControllerByPartition,
     IProtectedHoldByPartition,
     IERC20Permit,
     // Control

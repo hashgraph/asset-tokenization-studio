@@ -38,6 +38,7 @@ const LOAN_FACETS = [
   // Loan Functionality
   "LoanFacet",
   "CouponFacet",
+  "CouponListingFacet",
   "NominalValueFacet",
   "AmortizationFacet",
   "ProceedRecipientsFacet",
@@ -49,6 +50,8 @@ const LOAN_FACETS = [
   "BalanceTrackerByPartitionFacet",
   "BalanceTrackerAtSnapshotFacet",
   "BalanceTrackerAtSnapshotByPartitionFacet",
+  "ClearingAtSnapshotFacet",
+  "ClearingAtSnapshotByPartitionFacet",
   "CapFacet",
   "CapByPartitionFacet",
   "ControlListFacet",
@@ -90,6 +93,7 @@ const LOAN_FACETS = [
   "HoldFacet",
   "HoldManagementFacet",
   "ControllerHoldByPartitionFacet",
+  "ControllerByPartitionFacet",
   "ProtectedHoldByPartitionFacet",
   "HoldByPartitionFacet",
 
@@ -97,6 +101,7 @@ const LOAN_FACETS = [
   "ClearingTransferFacet",
   "ClearingRedeemFacet",
   "ClearingHoldCreationFacet",
+  "ClearingHoldByPartitionFacet",
   "OperatorClearingHoldByPartitionFacet",
   "ClearingFacet",
   "ClearingByPartitionFacet",
@@ -115,6 +120,7 @@ const LOAN_FACETS = [
 
   // Advanced Features
   "SnapshotsFacet",
+  "CoreAtSnapshotFacet",
   "CorporateActionsFacet",
   "TransferAndLockFacet",
   "LockFacet",

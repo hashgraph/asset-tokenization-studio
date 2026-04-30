@@ -93,7 +93,7 @@ task("erc3643-clone-interfaces", async (_, hre) => {
     { original: "IFixedRate" },
     { original: "IKpiLinkedRate" },
     {
-      original: "IScheduledCouponListing",
+      original: "ICouponListing",
       removeImports: false,
     },
   ];

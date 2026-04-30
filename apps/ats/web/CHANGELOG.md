@@ -1,5 +1,23 @@
 # @hashgraph/asset-tokenization-dapp
 
+## 7.0.0
+
+### Patch Changes
+
+- 2b68e6c: Fix HederaWalletConnect reconnection and disconnect flow
+  - Upgrade `@reown/appkit` (and related packages) from 1.8.10 to 1.8.19 to resolve SVG rendering errors in the modal and the `adapterType` undefined crash when creating AppKit after a disconnect
+  - Add a 500 ms wait after AppKit is first created so that its background `initialize()` task (which calls `unSyncExistingConnection → ModalController.close`) completes before the pairing modal is opened — this prevents the modal from being immediately closed on the first connect attempt
+  - Wrap `createAppKit` in a try/catch that clears all adapter singletons on failure so that a subsequent connect attempt retries from a clean state instead of hitting `NotInitialized`
+  - Replace the inline `reset() + window.location.reload()` in the Header disconnect button with a proper call to `SDKService.disconnectWallet()` (via `useSDKDisconnectFromMetamask`) so the WalletConnect session is cleanly terminated and navigation back to the landing page is handled by the router, without a full page reload
+  - Remove leftover debug `console.log` from the `walletDisconnect` event handler
+
+- Updated dependencies [4431f2e]
+- Updated dependencies [add9335]
+- Updated dependencies [2b68e6c]
+- Updated dependencies [ca1807d]
+- Updated dependencies [a166566]
+  - @hashgraph/asset-tokenization-sdk@7.0.0
+
 ## 6.0.0
 
 ### Major Changes
@@ -225,8 +243,5 @@
 ### Patch Changes
 
 - Display proceed recipients' data in text format in ats web
-- Add REACT_APP_NETWORK to .env to be able to select testnet, previewnet or mainnet
-- Fix Hedera ID validation rule to accept until 9 digits after "0.0."
-- Fix maxWidth in EditRole component to prevent text from overflowing to the left when resizing the window to a smaller size
 - Updated dependencies
   - @hashgraph/asset-tokenization-sdk@1.17.0

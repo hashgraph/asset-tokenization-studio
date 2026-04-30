@@ -1,5 +1,25 @@
 # @hashgraph/asset-tokenization-contracts
 
+## 7.0.0
+
+### Major Changes
+
+- 0fe41df: refactor split voting functions in a new facet
+- 2502ada: split equity facet from equity facet
+- add9335: split coupon from bondFacet
+
+### Minor Changes
+
+- 9d8d309: new asset loan
+- be18d8d: Add AmortizationFacet for Loan and LoanPortfolio asset types. Amortization enables scheduling and querying factor-based principal-return payments as corporate actions. Includes AmortizationStorageWrapper, full Diamond integration, and a complete integration test suite.
+- c7d4744: Factory generic method to deploy resolver proxies implemented
+- 6fe8bc2: BLR now checks that business logics keys corresponds to the key returned by the corresponding introspection method of the business logic address when registering new facets. This double check reduces the chances of an admin setting by mistake the wrong address for a facet.
+
+### Patch Changes
+
+- 052272a: Tests updated to use a single asset interface for all facets
+- 777e272: Some minor changes were made in a couple os smart contracts in order to reduce redundant code.
+
 ## 6.0.0
 
 ### Major Changes

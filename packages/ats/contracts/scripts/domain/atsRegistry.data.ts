@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-30T09:51:12.463Z
- * Facets: 96
+ * Generated: 2026-04-30T10:52:10.115Z
+ * Facets: 102
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -45,21 +45,28 @@ import {
   BurnFacet__factory,
   CapByPartitionFacet__factory,
   CapFacet__factory,
+  ClearingActionsFacet__factory,
+  ClearingAtSnapshotByPartitionFacet__factory,
+  ClearingAtSnapshotFacet__factory,
   ClearingByPartitionFacet__factory,
-  ClearingFacet__factory,
+  ClearingHoldByPartitionFacet__factory,
   ClearingHoldCreationFacet__factory,
+  ClearingReadFacet__factory,
   ClearingRedeemFacet__factory,
   ClearingTransferFacet__factory,
   ComplianceFacet__factory,
   ControlListFacet__factory,
+  ControllerByPartitionFacet__factory,
   ControllerFacet__factory,
   ControllerHoldByPartitionFacet__factory,
   CoreAdjustedFacet__factory,
+  CoreAtSnapshotFacet__factory,
   CoreFacet__factory,
   CorporateActionsFacet__factory,
   CouponFacet__factory,
   CouponFixedRateFacet__factory,
   CouponKpiLinkedRateFacet__factory,
+  CouponListingFacet__factory,
   CouponSustainabilityPerformanceTargetRateFacet__factory,
   DiamondFacet__factory,
   DividendFacet__factory,
@@ -99,7 +106,6 @@ import {
   ProtectedHoldByPartitionFacet__factory,
   ProtectedPartitionsFacet__factory,
   ScheduledBalanceAdjustmentsFacet__factory,
-  ScheduledCouponListingFacet__factory,
   ScheduledCrossOrderedTasksFacet__factory,
   ScheduledCrossOrderedTasksKpiLinkedRateFacet__factory,
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet__factory,
@@ -125,7 +131,9 @@ import {
   BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   BondUSASustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   CapFacetTimeTravel__factory,
+  ClearingActionsFacetTimeTravel__factory,
   ClearingHoldCreationFacetTimeTravel__factory,
+  ClearingReadFacetTimeTravel__factory,
   ClearingRedeemFacetTimeTravel__factory,
   ClearingTransferFacetTimeTravel__factory,
   ComplianceFacetTimeTravel__factory,
@@ -167,7 +175,6 @@ import {
   ProceedRecipientsSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ProtectedPartitionsFacetTimeTravel__factory,
   ScheduledBalanceAdjustmentsFacetTimeTravel__factory,
-  ScheduledCouponListingFacetTimeTravel__factory,
   ScheduledCrossOrderedTasksFacetTimeTravel__factory,
   ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel__factory,
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
@@ -2994,6 +3001,302 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) => new CapFacetTimeTravel__factory(signer),
   },
 
+  ClearingActionsFacet: {
+    name: "ClearingActionsFacet",
+    resolverKey: {
+      name: "_CLEARING_ACTIONS_RESOLVER_KEY",
+      value: "0x5472dfc5c92ad7a8651518ea7d3854d3b6494e5bcaa19f91cd61bf93bf6f2a74",
+    },
+    inheritance: ["ClearingActions", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "activateClearing",
+        signature: { full: "function activateClearing() returns (bool success_)", canonical: "activateClearing()" },
+        selector: "0xab2d18a9",
+      },
+      {
+        name: "deactivateClearing",
+        signature: { full: "function deactivateClearing() returns (bool success_)", canonical: "deactivateClearing()" },
+        selector: "0x65c21860",
+      },
+      {
+        name: "initializeClearing",
+        signature: { full: "function initializeClearing(bool _clearingActive)", canonical: "initializeClearing(bool)" },
+        selector: "0x86a0b46a",
+      },
+      {
+        name: "isClearingActivated",
+        signature: { full: "function isClearingActivated() view returns (bool)", canonical: "isClearingActivated()" },
+        selector: "0x4b4d8990",
+      },
+    ],
+    events: [
+      {
+        name: "ClearedHoldByPartition",
+        signature: {
+          full: "event ClearedHoldByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 clearingId, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, uint256 expirationDate, bytes data, bytes operatorData)",
+          canonical:
+            "ClearedHoldByPartition(address,address,bytes32,uint256,(uint256,uint256,address,address,bytes),uint256,bytes,bytes)",
+        },
+        topic0: "0x8013fdb8047ec68adc0c0daf69054177bb5d8480b67f726aeefe6762fe0c01ed",
+      },
+      {
+        name: "ClearedHoldFromByPartition",
+        signature: {
+          full: "event ClearedHoldFromByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 clearingId, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, uint256 expirationDate, bytes data, bytes operatorData)",
+          canonical:
+            "ClearedHoldFromByPartition(address,address,bytes32,uint256,(uint256,uint256,address,address,bytes),uint256,bytes,bytes)",
+        },
+        topic0: "0x252da371b753edb80209b16882bb593cf10ba3ae90a37e60b3fb9b5cbb21cc5f",
+      },
+      {
+        name: "ClearedOperatorRedeemByPartition",
+        signature: {
+          full: "event ClearedOperatorRedeemByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 clearingId, uint256 amount, uint256 expirationDate, bytes data, bytes operatorData)",
+          canonical: "ClearedOperatorRedeemByPartition(address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        },
+        topic0: "0xfec64ec403134db0b1e479976a765b3e364f24c765f7c73ce9bf4b31e13ed3c8",
+      },
+      {
+        name: "ClearedOperatorTransferByPartition",
+        signature: {
+          full: "event ClearedOperatorTransferByPartition(address indexed operator, address indexed tokenHolder, address indexed to, bytes32 partition, uint256 clearingId, uint256 amount, uint256 expirationDate, bytes data, bytes operatorData)",
+          canonical:
+            "ClearedOperatorTransferByPartition(address,address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        },
+        topic0: "0x8d9578064c4e2cadfe39cab8d79866d9e1c16956b958c6cbaedcec51f80d234a",
+      },
+      {
+        name: "ClearedRedeemByPartition",
+        signature: {
+          full: "event ClearedRedeemByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 clearingId, uint256 amount, uint256 expirationDate, bytes data, bytes operatorData)",
+          canonical: "ClearedRedeemByPartition(address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        },
+        topic0: "0x7aaaa46250ad330b8cea62db34f608101d55300f94dd9b5ddbe83142bb51dc5f",
+      },
+      {
+        name: "ClearedRedeemFromByPartition",
+        signature: {
+          full: "event ClearedRedeemFromByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 clearingId, uint256 amount, uint256 expirationDate, bytes data, bytes operatorData)",
+          canonical: "ClearedRedeemFromByPartition(address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        },
+        topic0: "0x376e6c31cfecec25cc3fede988557cb98dee3c5ffa5976b48a0b614b84c45d79",
+      },
+      {
+        name: "ClearedTransferByPartition",
+        signature: {
+          full: "event ClearedTransferByPartition(address indexed operator, address indexed tokenHolder, address indexed to, bytes32 partition, uint256 clearingId, uint256 amount, uint256 expirationDate, bytes data, bytes operatorData)",
+          canonical: "ClearedTransferByPartition(address,address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        },
+        topic0: "0x3d9505d4e04c873230c8ad112ce725e8338ab4fa6c98a7699ea41d4d63c2758f",
+      },
+      {
+        name: "ClearedTransferFromByPartition",
+        signature: {
+          full: "event ClearedTransferFromByPartition(address indexed operator, address indexed tokenHolder, address indexed to, bytes32 partition, uint256 clearingId, uint256 amount, uint256 expirationDate, bytes data, bytes operatorData)",
+          canonical:
+            "ClearedTransferFromByPartition(address,address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        },
+        topic0: "0x374f3552ea6ef855812358112ab8344010038fd2d56b9f47a1d9cb0320c275a2",
+      },
+      {
+        name: "ClearingActivated",
+        signature: {
+          full: "event ClearingActivated(address indexed operator)",
+          canonical: "ClearingActivated(address)",
+        },
+        topic0: "0x569080e4e18c204a1d28f09348d781d7cfb170428b2fd33e1f9b7df132674e15",
+      },
+      {
+        name: "ClearingDeactivated",
+        signature: {
+          full: "event ClearingDeactivated(address indexed operator)",
+          canonical: "ClearingDeactivated(address)",
+        },
+        topic0: "0xdb053585e5b33d19247ef59f5b465bcbb9774e6e5ce23932a7e3ffe829cd80a1",
+      },
+      {
+        name: "ClearingOperationApproved",
+        signature: {
+          full: "event ClearingOperationApproved(address indexed operator, address indexed tokenHolder, bytes32 indexed partition, uint256 clearingId, uint8 clearingOperationType, bytes operationData)",
+          canonical: "ClearingOperationApproved(address,address,bytes32,uint256,uint8,bytes)",
+        },
+        topic0: "0xc7c17dbfb7abbcc2a0ce6f48690f2fe9ae170920a1521b5c1d4d097a0d1a333f",
+      },
+      {
+        name: "ClearingOperationCanceled",
+        signature: {
+          full: "event ClearingOperationCanceled(address indexed operator, address indexed tokenHolder, bytes32 indexed partition, uint256 clearingId, uint8 clearingOperationType)",
+          canonical: "ClearingOperationCanceled(address,address,bytes32,uint256,uint8)",
+        },
+        topic0: "0x15a648856e27e7efec2173850a08afd84f952f7a0475cd26d49622ed6a561985",
+      },
+      {
+        name: "ClearingOperationReclaimed",
+        signature: {
+          full: "event ClearingOperationReclaimed(address indexed operator, address indexed tokenHolder, bytes32 indexed partition, uint256 clearingId, uint8 clearingOperationType)",
+          canonical: "ClearingOperationReclaimed(address,address,bytes32,uint256,uint8)",
+        },
+        topic0: "0x4d9191a307eb4a435af4b64dc128c2274a5907783338a0a1768296b3178896b6",
+      },
+      {
+        name: "ProtectedClearedHoldByPartition",
+        signature: {
+          full: "event ProtectedClearedHoldByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 clearingId, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, uint256 expirationDate, bytes data, bytes operatorData)",
+          canonical:
+            "ProtectedClearedHoldByPartition(address,address,bytes32,uint256,(uint256,uint256,address,address,bytes),uint256,bytes,bytes)",
+        },
+        topic0: "0x4808c12d75242665f58dad2f7f4c34c3a56ab0bdfc9a0e7ffa17241c43b822ea",
+      },
+      {
+        name: "ProtectedClearedRedeemByPartition",
+        signature: {
+          full: "event ProtectedClearedRedeemByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 clearingId, uint256 amount, uint256 expirationDate, bytes data, bytes operatorData)",
+          canonical: "ProtectedClearedRedeemByPartition(address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        },
+        topic0: "0xdd233f03eaed8aec1fe549f12e218c32dc2e73b3d5777bdeb33afa43e2fa2230",
+      },
+      {
+        name: "ProtectedClearedTransferByPartition",
+        signature: {
+          full: "event ProtectedClearedTransferByPartition(address indexed operator, address indexed tokenHolder, address indexed to, bytes32 partition, uint256 clearingId, uint256 amount, uint256 expirationDate, bytes data, bytes operatorData)",
+          canonical:
+            "ProtectedClearedTransferByPartition(address,address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        },
+        topic0: "0x8aea721bf4270b3b07d0974586b57ecd35862ae7a8b733530161d941489283f1",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRole",
+        signature: {
+          full: "error AccountHasNoRole(address account, bytes32 role)",
+          canonical: "AccountHasNoRole(address,bytes32)",
+        },
+        selector: "0xa1180aad",
+      },
+      {
+        name: "AlreadyInitialized",
+        signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
+        selector: "0x0dc149f0",
+      },
+      {
+        name: "ClearingIsActivated",
+        signature: { full: "error ClearingIsActivated()", canonical: "ClearingIsActivated()" },
+        selector: "0x5b2e3086",
+      },
+      {
+        name: "ClearingIsDisabled",
+        signature: { full: "error ClearingIsDisabled()", canonical: "ClearingIsDisabled()" },
+        selector: "0x9f2523d3",
+      },
+      {
+        name: "ExpirationDateNotReached",
+        signature: { full: "error ExpirationDateNotReached()", canonical: "ExpirationDateNotReached()" },
+        selector: "0xaffb3088",
+      },
+      {
+        name: "ExpirationDateReached",
+        signature: { full: "error ExpirationDateReached()", canonical: "ExpirationDateReached()" },
+        selector: "0x5ea0e3b0",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+      {
+        name: "WrongClearingId",
+        signature: { full: "error WrongClearingId()", canonical: "WrongClearingId()" },
+        selector: "0x2e37608c",
+      },
+    ],
+    factory: (signer) => new ClearingActionsFacet__factory(signer),
+    timeTravelFactory: (signer) => new ClearingActionsFacetTimeTravel__factory(signer),
+  },
+
+  ClearingAtSnapshotByPartitionFacet: {
+    name: "ClearingAtSnapshotByPartitionFacet",
+    description:
+      "Diamond facet that exposes the snapshotted partition-scoped cleared-balance query through the `IClearingAtSnapshotByPartition` interface, registered under `_CLEARING_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_CLEARING_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY",
+      value: "0x28a0e168340e454e3c0e6fbe7dccb80c91178f4e2ee50776e28bbc5c19063e88",
+    },
+    inheritance: ["ClearingAtSnapshotByPartition", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "clearedBalanceOfAtSnapshotByPartition",
+        signature: {
+          full: "function clearedBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+          canonical: "clearedBalanceOfAtSnapshotByPartition(bytes32,uint256,address)",
+        },
+        selector: "0x386e1405",
+      },
+    ],
+    errors: [
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+    ],
+    factory: (signer) => new ClearingAtSnapshotByPartitionFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+  },
+
+  ClearingAtSnapshotFacet: {
+    name: "ClearingAtSnapshotFacet",
+    description:
+      "Diamond facet that exposes the snapshotted aggregate cleared-balance query through the `IClearingAtSnapshot` interface, registered under `_CLEARING_AT_SNAPSHOT_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_CLEARING_AT_SNAPSHOT_RESOLVER_KEY",
+      value: "0x88a00625e4e1a614a4cc0587b393c50817f00c10065905ecc7d65fce85e951dc",
+    },
+    inheritance: ["ClearingAtSnapshot", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "clearedBalanceOfAtSnapshot",
+        signature: {
+          full: "function clearedBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+          canonical: "clearedBalanceOfAtSnapshot(uint256,address)",
+        },
+        selector: "0x2bc16e9b",
+      },
+    ],
+    errors: [
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+    ],
+    factory: (signer) => new ClearingAtSnapshotFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+  },
+
   ClearingByPartitionFacet: {
     name: "ClearingByPartitionFacet",
     description:
@@ -3320,53 +3623,39 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       new ClearingByPartitionFacet__factory(getLibLinks("clearingOps", "clearingReadOps") as any, signer),
   },
 
-  ClearingFacet: {
-    name: "ClearingFacet",
-    description: "Diamond facet exposing the clearing module global state and account-level reads.",
+  ClearingHoldByPartitionFacet: {
+    name: "ClearingHoldByPartitionFacet",
+    description: "Facet exposing the unprotected clearing hold creation operations by partition.",
     resolverKey: {
-      name: "_CLEARING_RESOLVER_KEY",
-      value: "0x43432f8c1c15888e9f2825356efbd94b604920165ac59da52595f66b1adbbc9f",
+      name: "_CLEARING_HOLDBYPARTITION_RESOLVER_KEY",
+      value: "0x3e96db9c134bb9c633652055190877ed7467692bf17ca4b9a1aa49773fa01303",
     },
-    inheritance: ["Clearing", "IStaticFunctionSelectors"],
+    inheritance: ["ClearingHoldByPartition", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "activateClearing",
-        signature: { full: "function activateClearing() returns (bool success_)", canonical: "activateClearing()" },
-        selector: "0xab2d18a9",
-      },
-      {
-        name: "deactivateClearing",
-        signature: { full: "function deactivateClearing() returns (bool success_)", canonical: "deactivateClearing()" },
-        selector: "0x65c21860",
-      },
-      {
-        name: "getClearedAmountFor",
+        name: "clearingCreateHoldByPartition",
         signature: {
-          full: "function getClearedAmountFor(address _tokenHolder) view returns (uint256 amount_)",
-          canonical: "getClearedAmountFor(address)",
+          full: "function clearingCreateHoldByPartition((bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+          canonical: "clearingCreateHoldByPartition((bytes32,uint256,bytes),(uint256,uint256,address,address,bytes))",
         },
-        selector: "0x46f8bc94",
+        selector: "0x6ceae590",
       },
       {
-        name: "getClearingThirdParty",
+        name: "clearingCreateHoldFromByPartition",
         signature: {
-          full: "function getClearingThirdParty(bytes32 _partition, address _tokenHolder, uint8 _clearingOperationType, uint256 _clearingId) view returns (address thirdParty_)",
-          canonical: "getClearingThirdParty(bytes32,address,uint8,uint256)",
+          full: "function clearingCreateHoldFromByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+          canonical:
+            "clearingCreateHoldFromByPartition(((bytes32,uint256,bytes),address,bytes),(uint256,uint256,address,address,bytes))",
         },
-        selector: "0x2714916d",
+        selector: "0x5f1cf8c9",
       },
       {
-        name: "initializeClearing",
+        name: "getClearingCreateHoldForByPartition",
         signature: {
-          full: "function initializeClearing(bool _activateClearing)",
-          canonical: "initializeClearing(bool)",
+          full: "function getClearingCreateHoldForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns ((uint256 amount, uint256 expirationTimestamp, bytes data, address holdEscrow, uint256 holdExpirationTimestamp, address holdTo, bytes holdData, bytes operatorData, uint8 operatorType) clearingHoldCreationData_)",
+          canonical: "getClearingCreateHoldForByPartition(bytes32,address,uint256)",
         },
-        selector: "0x86a0b46a",
-      },
-      {
-        name: "isClearingActivated",
-        signature: { full: "function isClearingActivated() view returns (bool)", canonical: "isClearingActivated()" },
-        selector: "0x4b4d8990",
+        selector: "0x190eb09b",
       },
     ],
     events: [
@@ -3515,19 +3804,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x10210dec",
       },
       {
-        name: "AccountHasNoRole",
-        signature: {
-          full: "error AccountHasNoRole(address account, bytes32 role)",
-          canonical: "AccountHasNoRole(address,bytes32)",
-        },
-        selector: "0xa1180aad",
-      },
-      {
-        name: "AlreadyInitialized",
-        signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
-        selector: "0x0dc149f0",
-      },
-      {
         name: "ClearingIsActivated",
         signature: { full: "error ClearingIsActivated()", canonical: "ClearingIsActivated()" },
         selector: "0x5b2e3086",
@@ -3548,17 +3824,49 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5ea0e3b0",
       },
       {
+        name: "PartitionNotAllowedInSinglePartitionMode",
+        signature: {
+          full: "error PartitionNotAllowedInSinglePartitionMode(bytes32 partition)",
+          canonical: "PartitionNotAllowedInSinglePartitionMode(bytes32)",
+        },
+        selector: "0xb96d9539",
+      },
+      {
+        name: "PartitionsAreProtectedAndNoRole",
+        signature: {
+          full: "error PartitionsAreProtectedAndNoRole(address account, bytes32 role)",
+          canonical: "PartitionsAreProtectedAndNoRole(address,bytes32)",
+        },
+        selector: "0x55347310",
+      },
+      {
         name: "TokenIsPaused",
         signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
         selector: "0x649815a5",
+      },
+      {
+        name: "WalletRecovered",
+        signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
+        selector: "0xf9f9bcf9",
       },
       {
         name: "WrongClearingId",
         signature: { full: "error WrongClearingId()", canonical: "WrongClearingId()" },
         selector: "0x2e37608c",
       },
+      {
+        name: "WrongExpirationTimestamp",
+        signature: { full: "error WrongExpirationTimestamp()", canonical: "WrongExpirationTimestamp()" },
+        selector: "0xe39f4776",
+      },
+      {
+        name: "ZeroAddressNotAllowed",
+        signature: { full: "error ZeroAddressNotAllowed()", canonical: "ZeroAddressNotAllowed()" },
+        selector: "0x8579befe",
+      },
     ],
-    factory: (signer) => new ClearingFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    factory: (signer) =>
+      new ClearingHoldByPartitionFacet__factory(getLibLinks("clearingOps", "clearingReadOps") as any, signer),
   },
 
   ClearingHoldCreationFacet: {
@@ -3569,31 +3877,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["ClearingHoldCreation", "IStaticFunctionSelectors"],
     methods: [
-      {
-        name: "clearingCreateHoldByPartition",
-        signature: {
-          full: "function clearingCreateHoldByPartition((bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
-          canonical: "clearingCreateHoldByPartition((bytes32,uint256,bytes),(uint256,uint256,address,address,bytes))",
-        },
-        selector: "0x6ceae590",
-      },
-      {
-        name: "clearingCreateHoldFromByPartition",
-        signature: {
-          full: "function clearingCreateHoldFromByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
-          canonical:
-            "clearingCreateHoldFromByPartition(((bytes32,uint256,bytes),address,bytes),(uint256,uint256,address,address,bytes))",
-        },
-        selector: "0x5f1cf8c9",
-      },
-      {
-        name: "getClearingCreateHoldForByPartition",
-        signature: {
-          full: "function getClearingCreateHoldForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns ((uint256 amount, uint256 expirationTimestamp, bytes data, address holdEscrow, uint256 holdExpirationTimestamp, address holdTo, bytes holdData, bytes operatorData, uint8 operatorType) clearingHoldCreationData_)",
-          canonical: "getClearingCreateHoldForByPartition(bytes32,address,uint256)",
-        },
-        selector: "0x190eb09b",
-      },
       {
         name: "protectedClearingCreateHoldByPartition",
         signature: {
@@ -3778,22 +4061,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5ea0e3b0",
       },
       {
-        name: "PartitionNotAllowedInSinglePartitionMode",
-        signature: {
-          full: "error PartitionNotAllowedInSinglePartitionMode(bytes32 partition)",
-          canonical: "PartitionNotAllowedInSinglePartitionMode(bytes32)",
-        },
-        selector: "0xb96d9539",
-      },
-      {
-        name: "PartitionsAreProtectedAndNoRole",
-        signature: {
-          full: "error PartitionsAreProtectedAndNoRole(address account, bytes32 role)",
-          canonical: "PartitionsAreProtectedAndNoRole(address,bytes32)",
-        },
-        selector: "0x55347310",
-      },
-      {
         name: "PartitionsAreUnProtected",
         signature: { full: "error PartitionsAreUnProtected()", canonical: "PartitionsAreUnProtected()" },
         selector: "0x05681565",
@@ -3824,16 +4091,202 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x8579befe",
       },
     ],
-    factory: (signer) =>
-      new ClearingHoldCreationFacet__factory(
-        getLibLinks("clearingOps", "clearingProtectedOps", "clearingReadOps") as any,
-        signer,
-      ),
+    factory: (signer) => new ClearingHoldCreationFacet__factory(getLibLinks("clearingProtectedOps") as any, signer),
     timeTravelFactory: (signer) =>
-      new ClearingHoldCreationFacetTimeTravel__factory(
-        getLibLinks("clearingOps", "clearingProtectedOps", "clearingReadOps") as any,
-        signer,
-      ),
+      new ClearingHoldCreationFacetTimeTravel__factory(getLibLinks("clearingProtectedOps") as any, signer),
+  },
+
+  ClearingReadFacet: {
+    name: "ClearingReadFacet",
+    resolverKey: {
+      name: "_CLEARING_READ_RESOLVER_KEY",
+      value: "0xebb2e29bdf4edaf4ca66a3f9b7735087f9d0474d56d856e53c94ef00596c0b1e",
+    },
+    inheritance: ["ClearingRead", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "getClearedAmountFor",
+        signature: {
+          full: "function getClearedAmountFor(address _tokenHolder) view returns (uint256 amount_)",
+          canonical: "getClearedAmountFor(address)",
+        },
+        selector: "0x46f8bc94",
+      },
+      {
+        name: "getClearingThirdParty",
+        signature: {
+          full: "function getClearingThirdParty(bytes32 _partition, address _tokenHolder, uint8 _clearingOpeartionType, uint256 _clearingId) view returns (address thirdParty_)",
+          canonical: "getClearingThirdParty(bytes32,address,uint8,uint256)",
+        },
+        selector: "0x2714916d",
+      },
+    ],
+    events: [
+      {
+        name: "ClearedHoldByPartition",
+        signature: {
+          full: "event ClearedHoldByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 clearingId, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, uint256 expirationDate, bytes data, bytes operatorData)",
+          canonical:
+            "ClearedHoldByPartition(address,address,bytes32,uint256,(uint256,uint256,address,address,bytes),uint256,bytes,bytes)",
+        },
+        topic0: "0x8013fdb8047ec68adc0c0daf69054177bb5d8480b67f726aeefe6762fe0c01ed",
+      },
+      {
+        name: "ClearedHoldFromByPartition",
+        signature: {
+          full: "event ClearedHoldFromByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 clearingId, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, uint256 expirationDate, bytes data, bytes operatorData)",
+          canonical:
+            "ClearedHoldFromByPartition(address,address,bytes32,uint256,(uint256,uint256,address,address,bytes),uint256,bytes,bytes)",
+        },
+        topic0: "0x252da371b753edb80209b16882bb593cf10ba3ae90a37e60b3fb9b5cbb21cc5f",
+      },
+      {
+        name: "ClearedOperatorRedeemByPartition",
+        signature: {
+          full: "event ClearedOperatorRedeemByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 clearingId, uint256 amount, uint256 expirationDate, bytes data, bytes operatorData)",
+          canonical: "ClearedOperatorRedeemByPartition(address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        },
+        topic0: "0xfec64ec403134db0b1e479976a765b3e364f24c765f7c73ce9bf4b31e13ed3c8",
+      },
+      {
+        name: "ClearedOperatorTransferByPartition",
+        signature: {
+          full: "event ClearedOperatorTransferByPartition(address indexed operator, address indexed tokenHolder, address indexed to, bytes32 partition, uint256 clearingId, uint256 amount, uint256 expirationDate, bytes data, bytes operatorData)",
+          canonical:
+            "ClearedOperatorTransferByPartition(address,address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        },
+        topic0: "0x8d9578064c4e2cadfe39cab8d79866d9e1c16956b958c6cbaedcec51f80d234a",
+      },
+      {
+        name: "ClearedRedeemByPartition",
+        signature: {
+          full: "event ClearedRedeemByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 clearingId, uint256 amount, uint256 expirationDate, bytes data, bytes operatorData)",
+          canonical: "ClearedRedeemByPartition(address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        },
+        topic0: "0x7aaaa46250ad330b8cea62db34f608101d55300f94dd9b5ddbe83142bb51dc5f",
+      },
+      {
+        name: "ClearedRedeemFromByPartition",
+        signature: {
+          full: "event ClearedRedeemFromByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 clearingId, uint256 amount, uint256 expirationDate, bytes data, bytes operatorData)",
+          canonical: "ClearedRedeemFromByPartition(address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        },
+        topic0: "0x376e6c31cfecec25cc3fede988557cb98dee3c5ffa5976b48a0b614b84c45d79",
+      },
+      {
+        name: "ClearedTransferByPartition",
+        signature: {
+          full: "event ClearedTransferByPartition(address indexed operator, address indexed tokenHolder, address indexed to, bytes32 partition, uint256 clearingId, uint256 amount, uint256 expirationDate, bytes data, bytes operatorData)",
+          canonical: "ClearedTransferByPartition(address,address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        },
+        topic0: "0x3d9505d4e04c873230c8ad112ce725e8338ab4fa6c98a7699ea41d4d63c2758f",
+      },
+      {
+        name: "ClearedTransferFromByPartition",
+        signature: {
+          full: "event ClearedTransferFromByPartition(address indexed operator, address indexed tokenHolder, address indexed to, bytes32 partition, uint256 clearingId, uint256 amount, uint256 expirationDate, bytes data, bytes operatorData)",
+          canonical:
+            "ClearedTransferFromByPartition(address,address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        },
+        topic0: "0x374f3552ea6ef855812358112ab8344010038fd2d56b9f47a1d9cb0320c275a2",
+      },
+      {
+        name: "ClearingActivated",
+        signature: {
+          full: "event ClearingActivated(address indexed operator)",
+          canonical: "ClearingActivated(address)",
+        },
+        topic0: "0x569080e4e18c204a1d28f09348d781d7cfb170428b2fd33e1f9b7df132674e15",
+      },
+      {
+        name: "ClearingDeactivated",
+        signature: {
+          full: "event ClearingDeactivated(address indexed operator)",
+          canonical: "ClearingDeactivated(address)",
+        },
+        topic0: "0xdb053585e5b33d19247ef59f5b465bcbb9774e6e5ce23932a7e3ffe829cd80a1",
+      },
+      {
+        name: "ClearingOperationApproved",
+        signature: {
+          full: "event ClearingOperationApproved(address indexed operator, address indexed tokenHolder, bytes32 indexed partition, uint256 clearingId, uint8 clearingOperationType, bytes operationData)",
+          canonical: "ClearingOperationApproved(address,address,bytes32,uint256,uint8,bytes)",
+        },
+        topic0: "0xc7c17dbfb7abbcc2a0ce6f48690f2fe9ae170920a1521b5c1d4d097a0d1a333f",
+      },
+      {
+        name: "ClearingOperationCanceled",
+        signature: {
+          full: "event ClearingOperationCanceled(address indexed operator, address indexed tokenHolder, bytes32 indexed partition, uint256 clearingId, uint8 clearingOperationType)",
+          canonical: "ClearingOperationCanceled(address,address,bytes32,uint256,uint8)",
+        },
+        topic0: "0x15a648856e27e7efec2173850a08afd84f952f7a0475cd26d49622ed6a561985",
+      },
+      {
+        name: "ClearingOperationReclaimed",
+        signature: {
+          full: "event ClearingOperationReclaimed(address indexed operator, address indexed tokenHolder, bytes32 indexed partition, uint256 clearingId, uint8 clearingOperationType)",
+          canonical: "ClearingOperationReclaimed(address,address,bytes32,uint256,uint8)",
+        },
+        topic0: "0x4d9191a307eb4a435af4b64dc128c2274a5907783338a0a1768296b3178896b6",
+      },
+      {
+        name: "ProtectedClearedHoldByPartition",
+        signature: {
+          full: "event ProtectedClearedHoldByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 clearingId, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, uint256 expirationDate, bytes data, bytes operatorData)",
+          canonical:
+            "ProtectedClearedHoldByPartition(address,address,bytes32,uint256,(uint256,uint256,address,address,bytes),uint256,bytes,bytes)",
+        },
+        topic0: "0x4808c12d75242665f58dad2f7f4c34c3a56ab0bdfc9a0e7ffa17241c43b822ea",
+      },
+      {
+        name: "ProtectedClearedRedeemByPartition",
+        signature: {
+          full: "event ProtectedClearedRedeemByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 clearingId, uint256 amount, uint256 expirationDate, bytes data, bytes operatorData)",
+          canonical: "ProtectedClearedRedeemByPartition(address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        },
+        topic0: "0xdd233f03eaed8aec1fe549f12e218c32dc2e73b3d5777bdeb33afa43e2fa2230",
+      },
+      {
+        name: "ProtectedClearedTransferByPartition",
+        signature: {
+          full: "event ProtectedClearedTransferByPartition(address indexed operator, address indexed tokenHolder, address indexed to, bytes32 partition, uint256 clearingId, uint256 amount, uint256 expirationDate, bytes data, bytes operatorData)",
+          canonical:
+            "ProtectedClearedTransferByPartition(address,address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        },
+        topic0: "0x8aea721bf4270b3b07d0974586b57ecd35862ae7a8b733530161d941489283f1",
+      },
+    ],
+    errors: [
+      {
+        name: "ClearingIsActivated",
+        signature: { full: "error ClearingIsActivated()", canonical: "ClearingIsActivated()" },
+        selector: "0x5b2e3086",
+      },
+      {
+        name: "ClearingIsDisabled",
+        signature: { full: "error ClearingIsDisabled()", canonical: "ClearingIsDisabled()" },
+        selector: "0x9f2523d3",
+      },
+      {
+        name: "ExpirationDateNotReached",
+        signature: { full: "error ExpirationDateNotReached()", canonical: "ExpirationDateNotReached()" },
+        selector: "0xaffb3088",
+      },
+      {
+        name: "ExpirationDateReached",
+        signature: { full: "error ExpirationDateReached()", canonical: "ExpirationDateReached()" },
+        selector: "0x5ea0e3b0",
+      },
+      {
+        name: "WrongClearingId",
+        signature: { full: "error WrongClearingId()", canonical: "WrongClearingId()" },
+        selector: "0x2e37608c",
+      },
+    ],
+    factory: (signer) => new ClearingReadFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ClearingReadFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   ClearingRedeemFacet: {
@@ -4429,6 +4882,157 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     factory: (signer) => new ComplianceFacet__factory(signer),
     timeTravelFactory: (signer) => new ComplianceFacetTimeTravel__factory(signer),
+  },
+
+  ControllerByPartitionFacet: {
+    name: "ControllerByPartitionFacet",
+    description:
+      "Diamond facet that exposes controller-initiated forced transfer and redemption operations on a specific partition, registered under `_CONTROLLER_BY_PARTITION_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_CONTROLLER_BY_PARTITION_RESOLVER_KEY",
+      value: "0x66d6ddfefca163b54f2a365e7965e1c3f42e2d87254191bcfb5a6e7fb03174a2",
+    },
+    inheritance: ["ControllerByPartition", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "controllerRedeemByPartition",
+        signature: {
+          full: "function controllerRedeemByPartition(bytes32 _partition, address _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)",
+          canonical: "controllerRedeemByPartition(bytes32,address,uint256,bytes,bytes)",
+        },
+        selector: "0xb84777cc",
+      },
+      {
+        name: "controllerTransferByPartition",
+        signature: {
+          full: "function controllerTransferByPartition(bytes32 _partition, address _from, address _to, uint256 _value, bytes _data, bytes _operatorData) returns (bytes32)",
+          canonical: "controllerTransferByPartition(bytes32,address,address,uint256,bytes,bytes)",
+        },
+        selector: "0xfb78befa",
+      },
+    ],
+    events: [
+      {
+        name: "AuthorizedOperator",
+        signature: {
+          full: "event AuthorizedOperator(address indexed operator, address indexed tokenHolder)",
+          canonical: "AuthorizedOperator(address,address)",
+        },
+        topic0: "0xf4caeb2d6ca8932a215a353d0703c326ec2d81fc68170f320eb2ab49e9df61f9",
+      },
+      {
+        name: "AuthorizedOperatorByPartition",
+        signature: {
+          full: "event AuthorizedOperatorByPartition(bytes32 indexed partition, address indexed operator, address indexed tokenHolder)",
+          canonical: "AuthorizedOperatorByPartition(bytes32,address,address)",
+        },
+        topic0: "0x3646a897c70797ecc134b0adc32f471b07bf1d6f451133b0384badab531e3fd6",
+      },
+      {
+        name: "IssuedByPartition",
+        signature: {
+          full: "event IssuedByPartition(bytes32 indexed partition, address indexed operator, address indexed to, uint256 value, bytes data)",
+          canonical: "IssuedByPartition(bytes32,address,address,uint256,bytes)",
+        },
+        topic0: "0x5af1c8f424b104b6ba4e3c0885f2ed9fef04a9b1ea39cd9ed362432105c0791a",
+      },
+      {
+        name: "RedeemedByPartition",
+        signature: {
+          full: "event RedeemedByPartition(bytes32 indexed partition, address indexed operator, address indexed from, uint256 value, bytes data, bytes operatorData)",
+          canonical: "RedeemedByPartition(bytes32,address,address,uint256,bytes,bytes)",
+        },
+        topic0: "0xa4f62471c9bdf88115b97203943c74c59b655913ee5ee592706d84ef53fb6be2",
+      },
+      {
+        name: "RevokedOperator",
+        signature: {
+          full: "event RevokedOperator(address indexed operator, address indexed tokenHolder)",
+          canonical: "RevokedOperator(address,address)",
+        },
+        topic0: "0x50546e66e5f44d728365dc3908c63bc5cfeeab470722c1677e3073a6ac294aa1",
+      },
+      {
+        name: "RevokedOperatorByPartition",
+        signature: {
+          full: "event RevokedOperatorByPartition(bytes32 indexed partition, address indexed operator, address indexed tokenHolder)",
+          canonical: "RevokedOperatorByPartition(bytes32,address,address)",
+        },
+        topic0: "0x3b287c4f1bab4df949b33bceacef984f544dc5d5479930d00e4ee8c9d8dd96f2",
+      },
+      {
+        name: "TransferByPartition",
+        signature: {
+          full: "event TransferByPartition(bytes32 indexed _fromPartition, address _operator, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)",
+          canonical: "TransferByPartition(bytes32,address,address,address,uint256,bytes,bytes)",
+        },
+        topic0: "0xff4e9a26af4eb73b8bacfaa4abd4fea03d9448e7b912dc5ff4019048875aa2d4",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRoles",
+        signature: {
+          full: "error AccountHasNoRoles(address account, bytes32[] roles)",
+          canonical: "AccountHasNoRoles(address,bytes32[])",
+        },
+        selector: "0x90e55392",
+      },
+      {
+        name: "InvalidPartition",
+        signature: {
+          full: "error InvalidPartition(address account, bytes32 partition)",
+          canonical: "InvalidPartition(address,bytes32)",
+        },
+        selector: "0xbf84f4ec",
+      },
+      {
+        name: "NotAllowedInMultiPartitionMode",
+        signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
+        selector: "0x76d08f88",
+      },
+      {
+        name: "PartitionNotAllowedInSinglePartitionMode",
+        signature: {
+          full: "error PartitionNotAllowedInSinglePartitionMode(bytes32 partition)",
+          canonical: "PartitionNotAllowedInSinglePartitionMode(bytes32)",
+        },
+        selector: "0xb96d9539",
+      },
+      {
+        name: "TokenIsNotControllable",
+        signature: { full: "error TokenIsNotControllable()", canonical: "TokenIsNotControllable()" },
+        selector: "0xf4b7b072",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+      {
+        name: "Unauthorized",
+        signature: {
+          full: "error Unauthorized(address operator, address tokenHolder, bytes32 partition)",
+          canonical: "Unauthorized(address,address,bytes32)",
+        },
+        selector: "0x1e09743f",
+      },
+      {
+        name: "ZeroPartition",
+        signature: { full: "error ZeroPartition()", canonical: "ZeroPartition()" },
+        selector: "0x4a6f30c3",
+      },
+      { name: "ZeroValue", signature: { full: "error ZeroValue()", canonical: "ZeroValue()" }, selector: "0x7c946ed7" },
+    ],
+    factory: (signer) => new ControllerByPartitionFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   ControllerFacet: {
@@ -5041,6 +5645,43 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     factory: (signer) => new CoreAdjustedFacet__factory(signer),
   },
 
+  CoreAtSnapshotFacet: {
+    name: "CoreAtSnapshotFacet",
+    description:
+      "Diamond facet that exposes core token properties resolved against a snapshot identifier, registered under `_CORE_AT_SNAPSHOT_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_CORE_AT_SNAPSHOT_RESOLVER_KEY",
+      value: "0x72b3df174c5ac7f128d0d1ae81ec15e1d5abd21d1a0f58f64d78de0108be41de",
+    },
+    inheritance: ["CoreAtSnapshot", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "decimalsAtSnapshot",
+        signature: {
+          full: "function decimalsAtSnapshot(uint256 _snapshotID) view returns (uint8 decimals_)",
+          canonical: "decimalsAtSnapshot(uint256)",
+        },
+        selector: "0x69ed346f",
+      },
+    ],
+    errors: [
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+    ],
+    factory: (signer) => new CoreAtSnapshotFacet__factory(signer),
+  },
+
   CoreFacet: {
     name: "CoreFacet",
     description:
@@ -5399,14 +6040,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbba7b56d",
       },
       {
-        name: "getCouponFromOrderedListAt",
-        signature: {
-          full: "function getCouponFromOrderedListAt(uint256 _pos) view returns (uint256 couponID_)",
-          canonical: "getCouponFromOrderedListAt(uint256)",
-        },
-        selector: "0x65a88a2c",
-      },
-      {
         name: "getCouponHolders",
         signature: {
           full: "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
@@ -5421,22 +6054,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "getCouponsFor(uint256,uint256,uint256)",
         },
         selector: "0x7327ad90",
-      },
-      {
-        name: "getCouponsOrderedList",
-        signature: {
-          full: "function getCouponsOrderedList(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] couponIDs_)",
-          canonical: "getCouponsOrderedList(uint256,uint256)",
-        },
-        selector: "0xd7133de1",
-      },
-      {
-        name: "getCouponsOrderedListTotal",
-        signature: {
-          full: "function getCouponsOrderedListTotal() view returns (uint256 total_)",
-          canonical: "getCouponsOrderedListTotal()",
-        },
-        selector: "0xee1d26eb",
       },
       {
         name: "getTotalCouponHolders",
@@ -5627,14 +6244,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbba7b56d",
       },
       {
-        name: "getCouponFromOrderedListAt",
-        signature: {
-          full: "function getCouponFromOrderedListAt(uint256 _pos) view returns (uint256 couponID_)",
-          canonical: "getCouponFromOrderedListAt(uint256)",
-        },
-        selector: "0x65a88a2c",
-      },
-      {
         name: "getCouponHolders",
         signature: {
           full: "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
@@ -5649,22 +6258,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "getCouponsFor(uint256,uint256,uint256)",
         },
         selector: "0x7327ad90",
-      },
-      {
-        name: "getCouponsOrderedList",
-        signature: {
-          full: "function getCouponsOrderedList(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] couponIDs_)",
-          canonical: "getCouponsOrderedList(uint256,uint256)",
-        },
-        selector: "0xd7133de1",
-      },
-      {
-        name: "getCouponsOrderedListTotal",
-        signature: {
-          full: "function getCouponsOrderedListTotal() view returns (uint256 total_)",
-          canonical: "getCouponsOrderedListTotal()",
-        },
-        selector: "0xee1d26eb",
       },
       {
         name: "getTotalCouponHolders",
@@ -5862,14 +6455,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbba7b56d",
       },
       {
-        name: "getCouponFromOrderedListAt",
-        signature: {
-          full: "function getCouponFromOrderedListAt(uint256 _pos) view returns (uint256 couponID_)",
-          canonical: "getCouponFromOrderedListAt(uint256)",
-        },
-        selector: "0x65a88a2c",
-      },
-      {
         name: "getCouponHolders",
         signature: {
           full: "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
@@ -5884,22 +6469,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "getCouponsFor(uint256,uint256,uint256)",
         },
         selector: "0x7327ad90",
-      },
-      {
-        name: "getCouponsOrderedList",
-        signature: {
-          full: "function getCouponsOrderedList(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] couponIDs_)",
-          canonical: "getCouponsOrderedList(uint256,uint256)",
-        },
-        selector: "0xd7133de1",
-      },
-      {
-        name: "getCouponsOrderedListTotal",
-        signature: {
-          full: "function getCouponsOrderedListTotal() view returns (uint256 total_)",
-          canonical: "getCouponsOrderedListTotal()",
-        },
-        selector: "0xee1d26eb",
       },
       {
         name: "getTotalCouponHolders",
@@ -6042,6 +6611,60 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       new CouponKpiLinkedRateFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
+  CouponListingFacet: {
+    name: "CouponListingFacet",
+    description:
+      "Diamond facet that exposes coupon and scheduled-coupon listing queries via `ICouponListing`, registered under `_COUPON_LISTING_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_COUPON_LISTING_RESOLVER_KEY",
+      value: "0x09830f922c6bb4e736cc4cc426ceec0888c8b95b2cc21b67f16dab889ad4c47e",
+    },
+    inheritance: ["CouponListing", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "getCouponFromOrderedListAt",
+        signature: {
+          full: "function getCouponFromOrderedListAt(uint256 _pos) view returns (uint256 couponID_)",
+          canonical: "getCouponFromOrderedListAt(uint256)",
+        },
+        selector: "0x65a88a2c",
+      },
+      {
+        name: "getCouponsOrderedList",
+        signature: {
+          full: "function getCouponsOrderedList(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] couponIDs_)",
+          canonical: "getCouponsOrderedList(uint256,uint256)",
+        },
+        selector: "0xd7133de1",
+      },
+      {
+        name: "getCouponsOrderedListTotal",
+        signature: {
+          full: "function getCouponsOrderedListTotal() view returns (uint256 total_)",
+          canonical: "getCouponsOrderedListTotal()",
+        },
+        selector: "0xee1d26eb",
+      },
+      {
+        name: "getScheduledCouponListing",
+        signature: {
+          full: "function getScheduledCouponListing(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledCouponListing_)",
+          canonical: "getScheduledCouponListing(uint256,uint256)",
+        },
+        selector: "0x2fcfe49c",
+      },
+      {
+        name: "scheduledCouponListingCount",
+        signature: {
+          full: "function scheduledCouponListingCount() view returns (uint256)",
+          canonical: "scheduledCouponListingCount()",
+        },
+        selector: "0x80a84271",
+      },
+    ],
+    factory: (signer) => new CouponListingFacet__factory(signer),
+  },
+
   CouponSustainabilityPerformanceTargetRateFacet: {
     name: "CouponSustainabilityPerformanceTargetRateFacet",
     resolverKey: {
@@ -6091,14 +6714,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbba7b56d",
       },
       {
-        name: "getCouponFromOrderedListAt",
-        signature: {
-          full: "function getCouponFromOrderedListAt(uint256 _pos) view returns (uint256 couponID_)",
-          canonical: "getCouponFromOrderedListAt(uint256)",
-        },
-        selector: "0x65a88a2c",
-      },
-      {
         name: "getCouponHolders",
         signature: {
           full: "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
@@ -6113,22 +6728,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "getCouponsFor(uint256,uint256,uint256)",
         },
         selector: "0x7327ad90",
-      },
-      {
-        name: "getCouponsOrderedList",
-        signature: {
-          full: "function getCouponsOrderedList(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] couponIDs_)",
-          canonical: "getCouponsOrderedList(uint256,uint256)",
-        },
-        selector: "0xd7133de1",
-      },
-      {
-        name: "getCouponsOrderedListTotal",
-        signature: {
-          full: "function getCouponsOrderedListTotal() view returns (uint256 total_)",
-          canonical: "getCouponsOrderedListTotal()",
-        },
-        selector: "0xee1d26eb",
       },
       {
         name: "getTotalCouponHolders",
@@ -6883,22 +7482,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["ERC1410Management", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "controllerRedeemByPartition",
-        signature: {
-          full: "function controllerRedeemByPartition(bytes32 _partition, address _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)",
-          canonical: "controllerRedeemByPartition(bytes32,address,uint256,bytes,bytes)",
-        },
-        selector: "0xb84777cc",
-      },
-      {
-        name: "controllerTransferByPartition",
-        signature: {
-          full: "function controllerTransferByPartition(bytes32 _partition, address _from, address _to, uint256 _value, bytes _data, bytes _operatorData) returns (bytes32)",
-          canonical: "controllerTransferByPartition(bytes32,address,address,uint256,bytes,bytes)",
-        },
-        selector: "0xfb78befa",
-      },
-      {
         name: "initialize_ERC1410",
         signature: { full: "function initialize_ERC1410(bool _multiPartition)", canonical: "initialize_ERC1410(bool)" },
         selector: "0x7b1df196",
@@ -7012,14 +7595,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
-        name: "AccountHasNoRoles",
-        signature: {
-          full: "error AccountHasNoRoles(address account, bytes32[] roles)",
-          canonical: "AccountHasNoRoles(address,bytes32[])",
-        },
-        selector: "0x90e55392",
-      },
-      {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
@@ -7057,11 +7632,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "PartitionsAreUnProtected",
         signature: { full: "error PartitionsAreUnProtected()", canonical: "PartitionsAreUnProtected()" },
         selector: "0x05681565",
-      },
-      {
-        name: "TokenIsNotControllable",
-        signature: { full: "error TokenIsNotControllable()", canonical: "TokenIsNotControllable()" },
-        selector: "0xf4b7b072",
       },
       {
         name: "TokenIsPaused",
@@ -12165,35 +12735,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) => new ScheduledBalanceAdjustmentsFacetTimeTravel__factory(signer),
   },
 
-  ScheduledCouponListingFacet: {
-    name: "ScheduledCouponListingFacet",
-    resolverKey: {
-      name: "_SCHEDULED_COUPON_LISTING_RESOLVER_KEY",
-      value: "0x6cc7645ae5bcd122875ce8bd150bd28dda6374546c4c2421e5ae4fdeedb3ab30",
-    },
-    inheritance: ["ScheduledCouponListing", "IStaticFunctionSelectors"],
-    methods: [
-      {
-        name: "getScheduledCouponListing",
-        signature: {
-          full: "function getScheduledCouponListing(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledCouponListing_)",
-          canonical: "getScheduledCouponListing(uint256,uint256)",
-        },
-        selector: "0x2fcfe49c",
-      },
-      {
-        name: "scheduledCouponListingCount",
-        signature: {
-          full: "function scheduledCouponListingCount() view returns (uint256)",
-          canonical: "scheduledCouponListingCount()",
-        },
-        selector: "0x80a84271",
-      },
-    ],
-    factory: (signer) => new ScheduledCouponListingFacet__factory(signer),
-    timeTravelFactory: (signer) => new ScheduledCouponListingFacetTimeTravel__factory(signer),
-  },
-
   ScheduledCrossOrderedTasksFacet: {
     name: "ScheduledCrossOrderedTasksFacet",
     resolverKey: {
@@ -12469,30 +13010,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["Snapshots", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "clearedBalanceOfAtSnapshot",
-        signature: {
-          full: "function clearedBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
-          canonical: "clearedBalanceOfAtSnapshot(uint256,address)",
-        },
-        selector: "0x2bc16e9b",
-      },
-      {
-        name: "clearedBalanceOfAtSnapshotByPartition",
-        signature: {
-          full: "function clearedBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
-          canonical: "clearedBalanceOfAtSnapshotByPartition(bytes32,uint256,address)",
-        },
-        selector: "0x386e1405",
-      },
-      {
-        name: "decimalsAtSnapshot",
-        signature: {
-          full: "function decimalsAtSnapshot(uint256 _snapshotID) view returns (uint8 decimals_)",
-          canonical: "decimalsAtSnapshot(uint256)",
-        },
-        selector: "0x69ed346f",
-      },
-      {
         name: "frozenBalanceOfAtSnapshot",
         signature: {
           full: "function frozenBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
@@ -12658,8 +13175,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xc9622656",
       },
     ],
-    factory: (signer) => new SnapshotsFacet__factory(getLibLinks("clearingReadOps") as any, signer),
-    timeTravelFactory: (signer) => new SnapshotsFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
+    factory: (signer) => new SnapshotsFacet__factory(signer),
+    timeTravelFactory: (signer) => new SnapshotsFacetTimeTravel__factory(signer),
   },
 
   SsiManagementFacet: {
@@ -13908,7 +14425,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 96 as const;
+export const TOTAL_FACETS = 102 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
