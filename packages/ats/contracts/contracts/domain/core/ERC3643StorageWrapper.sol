@@ -5,7 +5,7 @@ import { _ERC3643_STORAGE_POSITION } from "../../constants/storagePositions.sol"
 import { AGENT_ROLE } from "../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
-import { IAccessControl } from "../../facets/layer_1/accessControl/IAccessControl.sol";
+import { IAccessControl } from "../../facets/accessControl/IAccessControl.sol";
 import { IIdentityRegistry } from "../../facets/layer_1/ERC3643/IIdentityRegistry.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
@@ -249,6 +249,16 @@ library ERC3643StorageWrapper {
 
     function getFrozenAmountFor(address _userAddress) internal view returns (uint256) {
         return erc3643Storage().frozenTokens[_userAddress];
+    }
+
+    /**
+     * @notice Returns the freezing status of a wallet.
+     * @dev returning true mean that some token or all of them are frozen
+     * @param _userAddress The address of the wallet on which isFrozen is called.
+     * @return The freezing status of a wallet.
+     */
+    function isFrozen(address _userAddress) internal view returns (bool) {
+        return erc3643Storage().frozenTokens[_userAddress] > 0;
     }
 
     function getFrozenAmountForByPartition(bytes32 _partition, address _userAddress) internal view returns (uint256) {
