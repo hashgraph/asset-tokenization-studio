@@ -104,13 +104,6 @@ describe("Cap Tests", () => {
         "TokenIsPaused",
       );
     });
-
-    it("GIVEN a paused Token WHEN setMaxSupplyByPartition THEN transaction fails with TokenIsPaused", async () => {
-      // transfer from with data fails
-      await expect(
-        asset.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupplyByPartition),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
-    });
   });
 
   describe("AccessControl", () => {
@@ -120,13 +113,6 @@ describe("Cap Tests", () => {
         asset,
         "AccountHasNoRole",
       );
-    });
-
-    it("GIVEN an account without cap role WHEN setMaxSupplyByPartition THEN transaction fails with AccountHasNoRole", async () => {
-      // add to list fails
-      await expect(
-        asset.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply),
-      ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
   });
 
@@ -157,35 +143,6 @@ describe("Cap Tests", () => {
         "NewMaxSupplyTooLow",
       );
     });
-
-    it("GIVEN a token WHEN setMaxSupplyByPartition a value that is less than the current total supply THEN transaction fails with NewMaxSupplyForPartitionTooLow", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
-
-      await asset.connect(signer_C).issueByPartition({
-        partition: _PARTITION_ID_1,
-        tokenHolder: signer_A.address,
-        value: maxSupply * 2,
-        data: "0x",
-      });
-
-      // add to list fails
-      await expect(
-        asset.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply),
-      ).to.be.revertedWithCustomError(asset, "NewMaxSupplyForPartitionTooLow");
-    });
-  });
-
-  describe("New Max Supply By Partition Too High", () => {
-    it("GIVEN a token WHEN setMaxSupplyByPartition a value that is less than the current total supply THEN transaction fails with NewMaxSupplyByPartitionTooHigh", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
-
-      // add to list fails
-      await expect(
-        asset.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply * 100),
-      ).to.be.revertedWithCustomError(asset, "NewMaxSupplyByPartitionTooHigh");
-    });
   });
 
   describe("New Max Supply OK", () => {
@@ -199,18 +156,6 @@ describe("Cap Tests", () => {
       const currentMaxSupply = await asset.getMaxSupply();
 
       expect(currentMaxSupply).to.equal(maxSupply * 4);
-    });
-
-    it("GIVEN a token WHEN setMaxSupplyByPartition THEN transaction succeeds", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
-
-      await expect(asset.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply * 2))
-        .to.emit(asset, "MaxSupplyByPartitionSet")
-        .withArgs(signer_C.address, _PARTITION_ID_1, maxSupply * 2, 0);
-
-      const currentMaxSupply = await asset.getMaxSupplyByPartition(_PARTITION_ID_1);
-
-      expect(currentMaxSupply).to.equal(maxSupply * 2);
     });
   });
 

@@ -39,6 +39,7 @@ const EQUITY_FACETS = [
   "AccessControlFacet",
   "AllowanceFacet",
   "CapFacet",
+  "CapByPartitionFacet",
   "ControlListFacet",
   "CorporateActionsFacet",
   "DiamondFacet", // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
@@ -82,6 +83,7 @@ const EQUITY_FACETS = [
   "ClearingActionsFacet",
   "ClearingByPartitionFacet",
   "ClearingHoldCreationFacet",
+  "ClearingHoldByPartitionFacet",
   "OperatorClearingHoldByPartitionFacet",
   "ClearingReadFacet",
   "ClearingRedeemFacet",

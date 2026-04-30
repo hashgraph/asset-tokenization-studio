@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { COMMAND_HANDLER_METADATA, COMMAND_METADATA } from "@core/Constants";
-import { v4 } from "uuid";
 import { BaseCommand } from "@core/command/Command";
 import { injectable } from "tsyringe";
 import { Constructor } from "@core/Type";
@@ -17,7 +16,7 @@ export const CommandHandler = (command: BaseCommand): ClassDecorator => {
   return (target: object) => {
     const tgt = target as Constructor<typeof target>;
     injectable()(tgt);
-    const id = v4();
+    const id = crypto.randomUUID();
     if (!Reflect.hasMetadata(COMMAND_METADATA, command)) {
       Reflect.defineMetadata(COMMAND_METADATA, { id }, command);
     }

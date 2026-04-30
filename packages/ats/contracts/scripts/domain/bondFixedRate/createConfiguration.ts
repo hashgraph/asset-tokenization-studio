@@ -34,6 +34,7 @@ const BOND_FIXED_RATE_FACETS = [
   // Core Functionality
   "AccessControlFacet",
   "CapFacet",
+  "CapByPartitionFacet",
   "ControlListFacet",
   "CorporateActionsFacet",
   "DiamondFacet",
@@ -84,6 +85,7 @@ const BOND_FIXED_RATE_FACETS = [
   "ClearingActionsFacet",
   "ClearingByPartitionFacet",
   "ClearingHoldCreationFacet",
+  "ClearingHoldByPartitionFacet",
   "OperatorClearingHoldByPartitionFacet",
   "ClearingReadFacet",
   "ClearingRedeemFacet",
