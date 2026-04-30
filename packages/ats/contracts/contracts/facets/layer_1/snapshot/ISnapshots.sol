@@ -42,11 +42,6 @@ interface ISnapshots {
     function takeSnapshot() external returns (uint256 snapshotID_);
 
     /**
-     * @notice Returns the decimals at the time of a given snapshot
-     */
-    function decimalsAtSnapshot(uint256 _snapshotID) external view returns (uint8 decimals_);
-
-    /**
      * @notice Returns the list of partitions held by an account at the time of a given snapshot
      */
     function partitionsOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) external view returns (bytes32[] memory);

@@ -82,6 +82,7 @@ import { ILock } from "./layer_1/lock/ILock.sol";
 import { IFreeze } from "./layer_1/freeze/IFreeze.sol";
 import { IBatchFreeze } from "./batchFreeze/IBatchFreeze.sol";
 import { ISnapshots } from "./layer_1/snapshot/ISnapshots.sol";
+import { ICoreAtSnapshot } from "./coreAtSnapshot/ICoreAtSnapshot.sol";
 import { IClearingActions } from "./layer_1/clearing/IClearingActions.sol";
 import { IClearingTransfer } from "./layer_1/clearing/IClearingTransfer.sol";
 import { IClearingRedeem } from "./layer_1/clearing/IClearingRedeem.sol";
@@ -183,6 +184,7 @@ interface IAsset is
     IFreeze,
     IBatchFreeze,
     ISnapshots,
+    ICoreAtSnapshot,
     // Clearing interfaces
     IClearingActions,
     IClearingTransfer,

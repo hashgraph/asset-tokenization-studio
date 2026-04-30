@@ -36,11 +36,6 @@ abstract contract Snapshots is ISnapshots, Modifiers {
         emit SnapshotTaken(EvmAccessors.getMsgSender(), snapshotID_);
     }
 
-    /// @inheritdoc ISnapshots
-    function decimalsAtSnapshot(uint256 _snapshotID) external view returns (uint8 decimals_) {
-        decimals_ = SnapshotsStorageWrapper.decimalsAtSnapshot(_snapshotID);
-    }
-
     function getTokenHoldersAtSnapshot(
         uint256 _snapshotID,
         uint256 _pageIndex,
