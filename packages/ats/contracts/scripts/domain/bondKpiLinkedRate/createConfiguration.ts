@@ -82,7 +82,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "ClearingByPartitionFacet",
   "ClearingHoldCreationFacet",
   "OperatorClearingHoldByPartitionFacet",
-  "ClearingReadFacet",
+  "ClearingFacet",
   "ClearingRedeemFacet",
   "ClearingTransferFacet",
   "HoldFacet",

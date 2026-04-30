@@ -89,7 +89,7 @@ import { IClearingHoldCreation } from "./layer_1/clearing/IClearingHoldCreation.
 import {
     IOperatorClearingHoldByPartition
 } from "./layer_1/clearing/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol";
-import { IClearingRead } from "./layer_1/clearing/IClearingRead.sol";
+import { IClearing } from "./clearing/IClearing.sol";
 import { IComplianceFacet } from "./compliance/IComplianceFacet.sol";
 import { IMint } from "./mint/IMint.sol";
 import { IMintByPartition } from "./mintByPartition/IMintByPartition.sol";
@@ -117,7 +117,7 @@ import { IBatchTransfer } from "./batchTransfer/IBatchTransfer.sol";
  * @dev Intended for use in tests and external tooling to interact with all Diamond methods
  *      through a single typed object, rather than multiple per-facet instances.
  *
- *      Note: IHold already transitively includes IAccessControl, IClearing, IERC1410,
+ *      Note: IHold already transitively includes IAccessControl, IERC1410,
  *      IHoldRead, IHoldManagement, and IHoldTokenHolder. IERC3643 already includes its
  *      sub-interfaces. IERC20Votes includes IERC5805 and IVotes. Solidity C3 linearisation
  *      handles the resulting diamond inheritance without conflicts.
@@ -183,12 +183,12 @@ interface IAsset is
     IBatchFreeze,
     ISnapshots,
     // Clearing interfaces
+    IClearing,
     IClearingActions,
     IClearingTransfer,
     IClearingRedeem,
     IClearingHoldCreation,
     IOperatorClearingHoldByPartition,
-    IClearingRead,
     IClearingByPartition,
     // Additional ERC
     IComplianceFacet,

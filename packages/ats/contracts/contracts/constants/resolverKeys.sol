@@ -249,14 +249,14 @@ bytes32 constant _CLEARING_HOLDCREATION_RESOLVER_KEY = 0x44f99a141c434fac20d69e7
 // keccak256("security.token.standard.operator.clearing.holdByPartition.resolverKey")
 bytes32 constant _OPERATOR_CLEARING_HOLDBYPARTITION_RESOLVER_KEY = 0xd57eac3a4394fdead2591bfb2fb7f7557f204b6c5b3787821394cb3f57a8ef90;
 
-// keccak256("security.token.standard.clearing.read.resolverKey")
-bytes32 constant _CLEARING_READ_RESOLVER_KEY = 0xebb2e29bdf4edaf4ca66a3f9b7735087f9d0474d56d856e53c94ef00596c0b1e;
-
 // keccak256("security.token.standard.clearing.actions.resolverKey")
 bytes32 constant _CLEARING_ACTIONS_RESOLVER_KEY = 0x5472dfc5c92ad7a8651518ea7d3854d3b6494e5bcaa19f91cd61bf93bf6f2a74;
 
 // keccak256("security.token.standard.clearingByPartition.resolverKey");
 bytes32 constant _CLEARING_BY_PARTITION_RESOLVER_KEY = 0xf85991852d77f3c0148a5664d929193035ee310d0ab31bb92a23ee973184f9a4;
+
+// keccak256("security.token.standard.clearing.resolverKey");
+bytes32 constant _CLEARING_RESOLVER_KEY = 0x43432f8c1c15888e9f2825356efbd94b604920165ac59da52595f66b1adbbc9f;
 
 // keccak256("security.token.standard.clearing.transfer.fixed.rate.resolverKey");
 bytes32 constant _CLEARING_TRANSFER_FIXED_RATE_RESOLVER_KEY = 0x1ba056fe3e7ef86779515a9e7f364e84af0f60eb5f4175ac6d6e6e3f4c05fffb;

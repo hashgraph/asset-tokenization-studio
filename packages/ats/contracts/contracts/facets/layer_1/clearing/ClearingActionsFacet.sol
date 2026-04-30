@@ -12,12 +12,9 @@ contract ClearingActionsFacet is ClearingActions, IStaticFunctionSelectors {
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 4;
+        uint256 selectorIndex = 1;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);
         unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.isClearingActivated.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.deactivateClearing.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.activateClearing.selector;
             staticFunctionSelectors_[--selectorIndex] = this.initializeClearing.selector;
         }
     }

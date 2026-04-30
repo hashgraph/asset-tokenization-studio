@@ -98,7 +98,7 @@ const LOAN_FACETS = [
   "ClearingRedeemFacet",
   "ClearingHoldCreationFacet",
   "OperatorClearingHoldByPartitionFacet",
-  "ClearingReadFacet",
+  "ClearingFacet",
   "ClearingActionsFacet",
   "ClearingByPartitionFacet",
 

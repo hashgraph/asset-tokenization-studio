@@ -100,7 +100,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "ClearingRedeemFacet",
   "ClearingHoldCreationFacet",
   "OperatorClearingHoldByPartitionFacet",
-  "ClearingReadFacet",
+  "ClearingFacet",
   "ClearingActionsFacet",
   "ClearingByPartitionFacet",
 
