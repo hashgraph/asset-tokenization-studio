@@ -95,6 +95,7 @@ export const CONTRACT_NAMES = [
   "DocumentationFacet",
   "ControllerFacet",
   "ControllerByPartitionFacet",
+  "ComplianceByPartitionFacet",
   "DiamondFacet",
   "EquityUSAFacet",
   "BondUSAFacet",

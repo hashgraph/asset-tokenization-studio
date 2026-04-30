@@ -86,6 +86,7 @@ const LOAN_FACETS = [
   "BatchMintFacet",
   "BatchTransferFacet",
   "ComplianceFacet",
+  "ComplianceByPartitionFacet",
   "MintFacet",
   "BurnFacet",
 

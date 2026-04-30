@@ -93,6 +93,7 @@ import {
 } from "./layer_1/clearing/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol";
 import { IClearing } from "./clearing/IClearing.sol";
 import { IComplianceFacet } from "./compliance/IComplianceFacet.sol";
+import { IComplianceByPartition } from "./complianceByPartition/IComplianceByPartition.sol";
 import { IMint } from "./mint/IMint.sol";
 import { IMintByPartition } from "./mintByPartition/IMintByPartition.sol";
 import { IBurnByPartition } from "./burnByPartition/IBurnByPartition.sol";
@@ -199,6 +200,7 @@ interface IAsset is
     IClearingHoldByPartition,
     // Additional ERC
     IComplianceFacet,
+    IComplianceByPartition,
     IHoldFacet,
     IBatchController,
     IHoldByPartition,

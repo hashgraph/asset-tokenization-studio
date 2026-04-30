@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-30T13:05:13.180Z
- * Facets: 101
+ * Generated: 2026-04-30T14:27:45.533Z
+ * Facets: 102
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -53,6 +53,7 @@ import {
   ClearingHoldCreationFacet__factory,
   ClearingRedeemFacet__factory,
   ClearingTransferFacet__factory,
+  ComplianceByPartitionFacet__factory,
   ComplianceFacet__factory,
   ControlListFacet__factory,
   ControllerByPartitionFacet__factory,
@@ -4636,6 +4637,36 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       new ClearingTransferFacetTimeTravel__factory(getLibLinks("clearingOps", "clearingProtectedOps") as any, signer),
   },
 
+  ComplianceByPartitionFacet: {
+    name: "ComplianceByPartitionFacet",
+    description:
+      "Diamond facet that exposes partition-aware transfer-eligibility and redemption checks via `IComplianceByPartition`, registered under `_COMPLIANCE_BY_PARTITION_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_COMPLIANCE_BY_PARTITION_RESOLVER_KEY",
+      value: "0x2ff58a09acbd5a34785ae81220d04d7cbcbb3ad9943a40de722fff33b92b2074",
+    },
+    inheritance: ["ComplianceByPartition", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "canRedeemByPartition",
+        signature: {
+          full: "function canRedeemByPartition(address _from, bytes32 _partition, uint256 _value, bytes _data, bytes _operatorData) view returns (bool, bytes1, bytes32)",
+          canonical: "canRedeemByPartition(address,bytes32,uint256,bytes,bytes)",
+        },
+        selector: "0x7b7322c4",
+      },
+      {
+        name: "canTransferByPartition",
+        signature: {
+          full: "function canTransferByPartition(address _from, address _to, bytes32 _partition, uint256 _value, bytes _data, bytes _operatorData) view returns (bool, bytes1, bytes32)",
+          canonical: "canTransferByPartition(address,address,bytes32,uint256,bytes,bytes)",
+        },
+        selector: "0xa7b518b1",
+      },
+    ],
+    factory: (signer) => new ComplianceByPartitionFacet__factory(signer),
+  },
+
   ComplianceFacet: {
     name: "ComplianceFacet",
     description: "Diamond facet exposing transfer-eligibility checks and compliance contract management.",
@@ -7502,22 +7533,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["ERC1410Read", "IStaticFunctionSelectors"],
     methods: [
-      {
-        name: "canRedeemByPartition",
-        signature: {
-          full: "function canRedeemByPartition(address _from, bytes32 _partition, uint256 _value, bytes _data, bytes _operatorData) view returns (bool, bytes1, bytes32)",
-          canonical: "canRedeemByPartition(address,bytes32,uint256,bytes,bytes)",
-        },
-        selector: "0x7b7322c4",
-      },
-      {
-        name: "canTransferByPartition",
-        signature: {
-          full: "function canTransferByPartition(address _from, address _to, bytes32 _partition, uint256 _value, bytes _data, bytes _operatorData) view returns (bool, bytes1, bytes32)",
-          canonical: "canTransferByPartition(address,address,bytes32,uint256,bytes,bytes)",
-        },
-        selector: "0xa7b518b1",
-      },
       {
         name: "isMultiPartition",
         signature: { full: "function isMultiPartition() view returns (bool)", canonical: "isMultiPartition()" },
@@ -14277,7 +14292,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 101 as const;
+export const TOTAL_FACETS = 102 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

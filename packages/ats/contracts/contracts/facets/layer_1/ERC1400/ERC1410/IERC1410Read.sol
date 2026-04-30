@@ -43,32 +43,4 @@ interface IERC1410Read is IERC1410Types {
         address _operator,
         address _tokenHolder
     ) external view returns (bool);
-
-    /**
-     * @notice Checks if a transfer or redemption can be made by partition
-     * @dev This function assumes that if the caller has an admin role, the transfer will be performed
-     *      using the associated method. For example, if msg.sender is an opeartor in _to, the transfer will be
-     *      performed using operatorTransferByPartition. Using other methods can lead to unconsistent results
-     */
-    function canTransferByPartition(
-        address _from,
-        address _to,
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) external view returns (bool, bytes1, bytes32);
-
-    /**
-     * @notice Checks if a redemption can be made by partition
-     * @dev This function also assumes that if the caller has an admin role, the redemption will be performed
-     *      using the associated method
-     */
-    function canRedeemByPartition(
-        address _from,
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) external view returns (bool, bytes1, bytes32);
 }
