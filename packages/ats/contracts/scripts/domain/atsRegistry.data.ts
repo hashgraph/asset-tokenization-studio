@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-30T12:03:54.163Z
+ * Generated: 2026-04-30T13:05:13.180Z
  * Facets: 101
  * Infrastructure: 2
  *
@@ -193,6 +193,8 @@ import { getLibLinks } from "./orchestratorLibraries";
 export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   AccessControlFacet: {
     name: "AccessControlFacet",
+    description:
+      "Diamond facet that exposes role-based access control operations — grant, revoke, renounce, batch apply, and paginated role/member queries — as selectable proxy functions.",
     resolverKey: {
       name: "_ACCESS_CONTROL_RESOLVER_KEY",
       value: "0x011768a41cb4fe76a26f444eec15d81a0d84e919a36336d72c6539cf41c0fcf6",
@@ -2878,6 +2880,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   CapFacet: {
     name: "CapFacet",
+    description:
+      "Diamond facet that exposes maximum supply management operations — initialisation, cap update, and cap query — as selectable proxy functions.",
     resolverKey: {
       name: "_CAP_RESOLVER_KEY",
       value: "0xfb3f8aac36661b5540c571d821c80dc9db7ede5ca2a4204ee562b3356f0c026b",
@@ -2890,12 +2894,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x4c0f38c2",
       },
       {
-        name: "initialize_Cap",
+        name: "initializeCap",
         signature: {
-          full: "function initialize_Cap(uint256 maxSupply, (bytes32 partition, uint256 maxSupply)[] partitionCap)",
-          canonical: "initialize_Cap(uint256,(bytes32,uint256)[])",
+          full: "function initializeCap(uint256 maxSupply, (bytes32 partition, uint256 maxSupply)[] partitionCap)",
+          canonical: "initializeCap(uint256,(bytes32,uint256)[])",
         },
-        selector: "0x56210c4e",
+        selector: "0x53c808ca",
       },
       {
         name: "setMaxSupply",
@@ -5326,6 +5330,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ControlListFacet: {
     name: "ControlListFacet",
+    description:
+      "Diamond facet that exposes control list management operations — initialisation, member add/remove, membership and type queries, and pagination — as selectable proxy functions.",
     resolverKey: {
       name: "_CONTROL_LIST_RESOLVER_KEY",
       value: "0xfbb1491bfcecd95f79409bd5a4b69a4ba1e5573573372f5d2d66c11e3016414c",
@@ -5605,6 +5611,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   CorporateActionsFacet: {
     name: "CorporateActionsFacet",
+    description:
+      "Diamond facet that exposes corporate action query operations — single-record lookup, paginated lists, type-scoped views, and content-hash checks — as selectable proxy functions.",
     resolverKey: {
       name: "_CORPORATE_ACTIONS_RESOLVER_KEY",
       value: "0x3cc74200ccfb5d585a6d170f8824979dbf1b592e0a41eef41cf6d86cf4882077",
@@ -8453,6 +8461,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ExternalControlListManagementFacet: {
     name: "ExternalControlListManagementFacet",
+    description:
+      "Diamond facet that exposes external control list management operations — initialisation, batch updates, individual add/remove, membership checks, and pagination — as selectable proxy functions.",
     resolverKey: {
       name: "_EXTERNAL_CONTROL_LIST_RESOLVER_KEY",
       value: "0x490196911bc65200514fb4568861a36670854901dffa91bc27577664fdace575",
@@ -8484,12 +8494,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xc4aa9df3",
       },
       {
-        name: "initialize_ExternalControlLists",
+        name: "initializeExternalControlLists",
         signature: {
-          full: "function initialize_ExternalControlLists(address[] _controlLists)",
-          canonical: "initialize_ExternalControlLists(address[])",
+          full: "function initializeExternalControlLists(address[] _controlLists)",
+          canonical: "initializeExternalControlLists(address[])",
         },
-        selector: "0x0a0a114f",
+        selector: "0xcedb960a",
       },
       {
         name: "isExternalControlList",
@@ -8610,6 +8620,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ExternalKycListManagementFacet: {
     name: "ExternalKycListManagementFacet",
+    description:
+      "Diamond facet that exposes external KYC list management operations — initialisation, batch updates, individual add/remove, membership checks, KYC grant evaluation, and pagination — as selectable proxy functions.",
     resolverKey: {
       name: "_EXTERNAL_KYC_LIST_RESOLVER_KEY",
       value: "0x32f05e55195d945105aff8ac4b041d4680824578bd72c6a34e4aa906a59237f1",
@@ -8641,12 +8653,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x999a2459",
       },
       {
-        name: "initialize_ExternalKycLists",
+        name: "initializeExternalKycLists",
         signature: {
-          full: "function initialize_ExternalKycLists(address[] _kycLists)",
-          canonical: "initialize_ExternalKycLists(address[])",
+          full: "function initializeExternalKycLists(address[] _kycLists)",
+          canonical: "initializeExternalKycLists(address[])",
         },
-        selector: "0x3ac7fadc",
+        selector: "0xf2a06d06",
       },
       {
         name: "isExternalKycList",
@@ -8772,6 +8784,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ExternalPauseManagementFacet: {
     name: "ExternalPauseManagementFacet",
+    description:
+      "Diamond facet that exposes external pause management operations — initialisation, batch updates, individual add/remove, membership checks, and pagination — as selectable proxy functions.",
     resolverKey: {
       name: "_EXTERNAL_PAUSE_RESOLVER_KEY",
       value: "0x158025f9e40c5d145e7915a14d5e97459728d98c715d8329359e305df737ee3c",
@@ -8803,12 +8817,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5b175a35",
       },
       {
-        name: "initialize_ExternalPauses",
+        name: "initializeExternalPauses",
         signature: {
-          full: "function initialize_ExternalPauses(address[] _pauses)",
-          canonical: "initialize_ExternalPauses(address[])",
+          full: "function initializeExternalPauses(address[] _pauses)",
+          canonical: "initializeExternalPauses(address[])",
         },
-        selector: "0x8f88d0d5",
+        selector: "0x12c82777",
       },
       {
         name: "isExternalPause",
@@ -9003,6 +9017,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   FreezeFacet: {
     name: "FreezeFacet",
+    description:
+      "Diamond facet that exposes freeze management operations — partial token freeze/unfreeze and address-level freeze toggling — as selectable proxy functions.",
     resolverKey: {
       name: "_FREEZE_RESOLVER_KEY",
       value: "0x49f765e7155d979a148049c2a0ebed5e028b11799061897a255f99314f0bd3f1",
@@ -9024,6 +9040,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "getFrozenTokens(address)",
         },
         selector: "0x158b1a57",
+      },
+      {
+        name: "isFrozen",
+        signature: {
+          full: "function isFrozen(address _userAddress) view returns (bool)",
+          canonical: "isFrozen(address)",
+        },
+        selector: "0xe5839836",
       },
       {
         name: "setAddressFrozen",
@@ -11367,6 +11391,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   NoncesFacet: {
     name: "NoncesFacet",
+    description: "Diamond facet that exposes per-account nonce reads as a selectable proxy function.",
     resolverKey: {
       name: "_NONCES_RESOLVER_KEY",
       value: "0xb235fd4aa74228c048d55d58514cd3393ef934423864ef7ddca6d302041c2bd1",
@@ -11631,6 +11656,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   PauseFacet: {
     name: "PauseFacet",
+    description:
+      "Diamond facet that exposes pause management operations — pause, unpause, and pause state query — as selectable proxy functions.",
     resolverKey: {
       name: "_PAUSE_RESOLVER_KEY",
       value: "0x9429fd9ef38f89f41bd9ec33fd5c94b287ed1c27a98938da43835ac761b2f92c",
@@ -13004,6 +13031,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   SsiManagementFacet: {
     name: "SsiManagementFacet",
+    description:
+      "Diamond facet that exposes Self-Sovereign Identity (SSI) management operations — trusted issuer list and revocation registry address — as selectable proxy functions.",
     resolverKey: {
       name: "_SSI_MANAGEMENT_RESOLVER_KEY",
       value: "0x46df6aaf3742e0cbad136a74fb679b686e087dcc3a3d92d1c4ce2f3ef1b508a0",
