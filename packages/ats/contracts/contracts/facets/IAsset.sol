@@ -5,7 +5,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import {
     IScheduledCrossOrderedTasks
 } from "./layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
-import { IAccessControl } from "./layer_1/accessControl/IAccessControl.sol";
+import { IAccessControl } from "./accessControl/IAccessControl.sol";
 import { IAdjustBalances } from "./layer_2/adjustBalance/IAdjustBalances.sol";
 import { IAmortization } from "./layer_2/amortization/IAmortization.sol";
 import { IBond } from "./layer_2/bond/IBond.sol";
@@ -14,7 +14,7 @@ import { IBondUSA } from "./layer_3/bondUSA/IBondUSA.sol";
 // Layer 1 — ERC1400
 
 // Layer 1 — ERC3643
-import { ICorporateActions } from "./layer_1/corporateAction/ICorporateActions.sol";
+import { ICorporateActions } from "./corporateActions/ICorporateActions.sol";
 import { IDiamond } from "../infrastructure/proxy/IDiamond.sol";
 
 // Core
@@ -34,10 +34,10 @@ import { IERC3643 } from "./layer_1/ERC3643/IERC3643.sol";
 import { IEquity } from "./layer_2/equity/IEquity.sol";
 import { IEquityUSA } from "./layer_3/equityUSA/IEquityUSA.sol";
 import { IExternalControlList } from "./layer_1/externalControlList/IExternalControlList.sol";
-import { IExternalControlListManagement } from "./layer_1/externalControlList/IExternalControlListManagement.sol";
+import { IExternalControlListManagement } from "./externalControlListManagement/IExternalControlListManagement.sol";
 import { IExternalKycList } from "./layer_1/externalKycList/IExternalKycList.sol";
-import { IExternalKycListManagement } from "./layer_1/externalKycList/IExternalKycListManagement.sol";
-import { IExternalPauseManagement } from "./layer_1/externalPause/IExternalPauseManagement.sol";
+import { IExternalKycListManagement } from "./externalKycListManagement/IExternalKycListManagement.sol";
+import { IExternalPauseManagement } from "./externalPauseManagement/IExternalPauseManagement.sol";
 import { IFixedRate } from "./layer_2/interestRate/fixedRate/IFixedRate.sol";
 
 // Layer 2
@@ -50,13 +50,13 @@ import { IKyc } from "./layer_1/kyc/IKyc.sol";
 // directly when testing KPI-linked or SPTR interest rate facets.
 import { ILoan } from "./layer_2/loan/ILoan.sol";
 import { INominalValue } from "./layer_2/nominalValue/INominalValue.sol";
-import { IPause } from "./layer_1/pause/IPause.sol";
+import { IPause } from "./pause/IPause.sol";
 import { ILoansPortfolio } from "./layer_2/loansPortfolio/ILoansPortfolio.sol";
 import { IVoting } from "./layer_2/voting/IVoting.sol";
 
 // Layer 3
 import { ISecurity } from "./layer_2/security/ISecurity.sol";
-import { ISsiManagement } from "./layer_1/ssi/ISsiManagement.sol";
+import { ISsiManagement } from "./ssiManagement/ISsiManagement.sol";
 import { ITimeTravel } from "../test/testTimeTravel/ITimeTravel.sol";
 import { IBalanceTracker } from "./balanceTracker/IBalanceTracker.sol";
 import { IBalanceTrackerAdjusted } from "./balanceTrackerAdjusted/IBalanceTrackerAdjusted.sol";
@@ -66,9 +66,9 @@ import { IDividend } from "./layer_2/dividend/IDividend.sol";
 import { IKpis } from "./layer_2/kpi/kpiLatest/IKpis.sol";
 import { IProtectedPartitions } from "./layer_1/protectedPartition/IProtectedPartitions.sol";
 import { IProceedRecipients } from "./layer_2/proceedRecipient/IProceedRecipients.sol";
-import { ICap } from "./layer_1/cap/ICap.sol";
+import { ICap } from "./cap/ICap.sol";
 import { ICapByPartition } from "./capByPartition/ICapByPartition.sol";
-import { INonces } from "./layer_1/nonce/INonces.sol";
+import { INonces } from "./nonces/INonces.sol";
 import { IBalanceTrackerByPartition } from "./balanceTrackerByPartition/IBalanceTrackerByPartition.sol";
 import { IBalanceTrackerAtSnapshot } from "./balanceTrackerAtSnapshot/IBalanceTrackerAtSnapshot.sol";
 import {
@@ -81,7 +81,7 @@ import {
     IScheduledBalanceAdjustments
 } from "./layer_2/scheduledTask/scheduledBalanceAdjustment/IScheduledBalanceAdjustments.sol";
 import { ILock } from "./layer_1/lock/ILock.sol";
-import { IFreeze } from "./layer_1/freeze/IFreeze.sol";
+import { IFreeze } from "./freeze/IFreeze.sol";
 import { IBatchFreeze } from "./batchFreeze/IBatchFreeze.sol";
 import { ISnapshots } from "./layer_1/snapshot/ISnapshots.sol";
 import { ICoreAtSnapshot } from "./coreAtSnapshot/ICoreAtSnapshot.sol";
@@ -107,7 +107,7 @@ import { IControllerHoldByPartition } from "./controllerHoldByPartition/IControl
 import { IControllerByPartition } from "./controllerByPartition/IControllerByPartition.sol";
 import { IProtectedHoldByPartition } from "./protectedHoldByPartition/IProtectedHoldByPartition.sol";
 import { IERC20Permit } from "./layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
-import { IControlList } from "./layer_1/controlList/IControlList.sol";
+import { IControlList } from "./controlList/IControlList.sol";
 import { IBatchBurn } from "./batchBurn/IBatchBurn.sol";
 import { IBatchMint } from "./batchMint/IBatchMint.sol";
 import { IBatchTransfer } from "./batchTransfer/IBatchTransfer.sol";

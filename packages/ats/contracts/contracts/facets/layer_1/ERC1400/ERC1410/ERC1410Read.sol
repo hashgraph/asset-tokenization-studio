@@ -6,7 +6,7 @@ import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWr
 import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
 import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
-import { IPause } from "../../../../facets/layer_1/pause/IPause.sol";
+import { IPause } from "../../../../facets/pause/IPause.sol";
 import { Eip1066 } from "../../../../constants/eip1066.sol";
 
 abstract contract ERC1410Read is IERC1410Read, Modifiers {

@@ -8,12 +8,12 @@ import { IFactory } from "./IFactory.sol";
 import { ResolverProxy } from "../infrastructure/proxy/ResolverProxy.sol";
 import { IResolverProxy } from "../infrastructure/proxy/IResolverProxy.sol";
 import { DEFAULT_ADMIN_ROLE } from "../constants/roles.sol";
-import { IControlList } from "../facets/layer_1/controlList/IControlList.sol";
+import { IControlList } from "../facets/controlList/IControlList.sol";
 import { ICore } from "../facets/core/ICore.sol";
 import { IERC20Votes } from "../facets/layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
 import { IController } from "../facets/controller/IController.sol";
 import { IERC1410 } from "../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
-import { ICap } from "../facets/layer_1/cap/ICap.sol";
+import { ICap } from "../facets/cap/ICap.sol";
 import { IMint } from "../facets/mint/IMint.sol";
 import { IClearing } from "../facets/clearing/IClearing.sol";
 import { IBusinessLogicResolver } from "../infrastructure/diamond/IBusinessLogicResolver.sol";
@@ -33,11 +33,11 @@ import { IProceedRecipients } from "../facets/layer_2/proceedRecipient/IProceedR
 import { INominalValue } from "../facets/layer_2/nominalValue/INominalValue.sol";
 import { ScheduledTasksStorageWrapper } from "../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { IProtectedPartitions } from "../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
-import { IExternalPauseManagement } from "../facets/layer_1/externalPause/IExternalPauseManagement.sol";
+import { IExternalPauseManagement } from "../facets/externalPauseManagement/IExternalPauseManagement.sol";
 import {
     IExternalControlListManagement
-} from "../facets/layer_1/externalControlList/IExternalControlListManagement.sol";
-import { IExternalKycListManagement } from "../facets/layer_1/externalKycList/IExternalKycListManagement.sol";
+} from "../facets/externalControlListManagement/IExternalControlListManagement.sol";
+import { IExternalKycListManagement } from "../facets/externalKycListManagement/IExternalKycListManagement.sol";
 import { IKyc } from "../facets/layer_1/kyc/IKyc.sol";
 import { IERC3643 } from "../facets/layer_1/ERC3643/IERC3643.sol";
 import { _validateISIN } from "./isinValidator.sol";
@@ -336,7 +336,7 @@ contract Factory is IFactory {
         _tryInitialize_ERC1594(securityAddress_);
 
         // configure cap (CapFacet should be present)
-        ICap(securityAddress_).initialize_Cap(_securityData.maxSupply, new ICap.PartitionCap[](0));
+        ICap(securityAddress_).initializeCap(_securityData.maxSupply, new ICap.PartitionCap[](0));
 
         // configure protected partitions (should be present)
         IProtectedPartitions(securityAddress_).initialize_ProtectedPartitions(_securityData.arePartitionsProtected);
@@ -345,10 +345,10 @@ contract Factory is IFactory {
         _tryInitializeClearing(securityAddress_, _securityData.clearingActive);
 
         // configure external pauses (should be present)
-        IExternalPauseManagement(securityAddress_).initialize_ExternalPauses(_securityData.externalPauses);
+        IExternalPauseManagement(securityAddress_).initializeExternalPauses(_securityData.externalPauses);
 
         // configure external control lists (should be present)
-        IExternalControlListManagement(securityAddress_).initialize_ExternalControlLists(
+        IExternalControlListManagement(securityAddress_).initializeExternalControlLists(
             _securityData.externalControlLists
         );
 
@@ -356,7 +356,7 @@ contract Factory is IFactory {
         IKyc(securityAddress_).initializeInternalKyc(_securityData.internalKycActivated);
 
         // configure external KYC lists (should be present)
-        IExternalKycListManagement(securityAddress_).initialize_ExternalKycLists(_securityData.externalKycLists);
+        IExternalKycListManagement(securityAddress_).initializeExternalKycLists(_securityData.externalKycLists);
 
         // configure ERC20Votes (ERC20VotesFacet may not be present)
         _tryInitialize_ERC20Votes(securityAddress_, _securityData.erc20VotesActivated);

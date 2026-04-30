@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { _SSI_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { ISsiManagement } from "../../facets/layer_1/ssi/ISsiManagement.sol";
+import { ISsiManagement } from "../../facets/ssiManagement/ISsiManagement.sol";
 
 struct SsiManagementStorage {
     EnumerableSet.AddressSet issuerList;

@@ -293,13 +293,13 @@ export async function deployLoanTokenFixture({
     securityType: 1, // SecurityType.Equity (reuse for loan)
   });
   await mintFacet.initialize_ERC1594();
-  await capFacet.initialize_Cap(securityData.maxSupply, []);
+  await capFacet.initializeCap(securityData.maxSupply, []);
   await protectedPartitionsFacet.initialize_ProtectedPartitions(securityData.arePartitionsProtected);
   await clearingFacet.initializeClearing(securityData.clearingActive);
-  await externalPauseManagementFacet.initialize_ExternalPauses([]);
-  await externalControlListManagementFacet.initialize_ExternalControlLists([]);
+  await externalPauseManagementFacet.initializeExternalPauses([]);
+  await externalControlListManagementFacet.initializeExternalControlLists([]);
   await kycFacet.initializeInternalKyc(securityData.internalKycActivated);
-  await externalKycListManagementFacet.initialize_ExternalKycLists([]);
+  await externalKycListManagementFacet.initializeExternalKycLists([]);
   await erc20VotesFacet.initialize_ERC20Votes(securityData.erc20VotesActivated);
   await erc3643ManagementFacet.initialize_ERC3643(ZeroAddress, ZeroAddress);
   await nominalValueFacet.initialize_NominalValue(
