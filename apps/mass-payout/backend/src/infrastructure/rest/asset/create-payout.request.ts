@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { AmountType, PayoutSubtype, Recurrency } from "@domain/model/distribution"
-import { IsEnum, IsNotEmpty, IsOptional, ValidateIf } from "class-validator"
-import { IsFutureDateString } from "@utils/IsFutureDateString"
-import { IsPositiveNumberString } from "@utils/IsPositiveNumberString"
-import { ApiProperty } from "@nestjs/swagger"
+import { AmountType, PayoutSubtype, Recurrency } from "@domain/model/distribution";
+import { IsEnum, IsNotEmpty, IsOptional, ValidateIf } from "class-validator";
+import { IsFutureDateString } from "@utils/IsFutureDateString";
+import { IsPositiveNumberString } from "@utils/IsPositiveNumberString";
+import { ApiProperty } from "@nestjs/swagger";
 
 export class CreatePayoutRequest {
   @ApiProperty({
@@ -12,7 +12,7 @@ export class CreatePayoutRequest {
     example: "IMMEDIATE | ONE_OFF | RECURRING | AUTOMATED",
   })
   @IsEnum(PayoutSubtype)
-  subtype: PayoutSubtype
+  subtype: PayoutSubtype;
 
   @ApiProperty({
     description: "The payout execution date when the subtype is ONE_OFF or RECURRING",
@@ -21,7 +21,7 @@ export class CreatePayoutRequest {
   })
   @ValidateIf((o) => o.subtype && (o.subtype === PayoutSubtype.ONE_OFF || o.subtype === PayoutSubtype.RECURRING))
   @IsFutureDateString()
-  executeAt?: string
+  executeAt?: string;
 
   @ApiProperty({
     description: "The recurrency of the payout",
@@ -30,7 +30,7 @@ export class CreatePayoutRequest {
   })
   @ValidateIf((o) => o.recurrency)
   @IsEnum(Recurrency)
-  recurrency?: Recurrency
+  recurrency?: Recurrency;
 
   @ApiProperty({
     description: "The amount of the payout when the distribution corresponds to a snapshot payment",
@@ -38,19 +38,19 @@ export class CreatePayoutRequest {
   })
   @IsNotEmpty()
   @IsPositiveNumberString()
-  amount: string
+  amount: string;
 
   @ApiProperty({
     description: "The amount type when the distribution corresponds to a snapshot payment",
     example: "FIXED | PERCENTAGE",
   })
   @IsEnum(AmountType)
-  amountType: AmountType
+  amountType: AmountType;
 
   @ApiProperty({
     description: "The concept",
     example: "Settlement",
   })
   @IsOptional()
-  concept: string
+  concept: string;
 }

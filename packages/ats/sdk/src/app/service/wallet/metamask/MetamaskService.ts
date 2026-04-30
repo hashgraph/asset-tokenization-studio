@@ -55,7 +55,9 @@ export default class MetamaskService extends Service {
   }
 
   async init(debug = false): Promise<string> {
-    !debug && (await this.connectMetamask(false));
+    if (!debug) {
+      await this.connectMetamask(false);
+    }
     const eventData = {
       initData: { account: this.account, pairing: "", topic: "" },
       wallet: SupportedWallets.METAMASK,
@@ -72,7 +74,9 @@ export default class MetamaskService extends Service {
       this.account.publicKey = accountMirror.publicKey;
     }
     Injectable.registerTransactionHandler(handler);
-    !debug && (await this.connectMetamask());
+    if (!debug) {
+      await this.connectMetamask();
+    }
     LogService.logTrace("Metamask registered as handler");
     return Promise.resolve({ account });
   }

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { applyDecorators, Controller, UseFilters, UsePipes, ValidationPipe } from "@nestjs/common"
-import { RestExceptionFilter } from "@infrastructure/rest/rest-exception.filter"
+import { applyDecorators, Controller, UseFilters, UsePipes, ValidationPipe } from "@nestjs/common";
+import { RestExceptionFilter } from "@infrastructure/rest/rest-exception.filter";
 
 export function RestController(prefix?: string) {
   return applyDecorators(
@@ -14,5 +14,5 @@ export function RestController(prefix?: string) {
       }),
     ),
     UseFilters(new RestExceptionFilter()),
-  )
+  );
 }

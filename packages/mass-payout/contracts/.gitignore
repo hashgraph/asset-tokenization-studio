@@ -47,4 +47,7 @@ typechain-types
 #Slither
 Slither/*
 
+# Compiled JS artefacts beside their TS source (TypeScript build output)
+scripts/results/*.js
+
 

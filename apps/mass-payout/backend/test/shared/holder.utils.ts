@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { faker } from "@faker-js/faker"
-import { Holder, HolderStatus } from "@domain/model/holder"
-import { BatchPayoutUtils } from "@test/shared/batch-payout.utils"
+import { faker } from "@faker-js/faker";
+import { Holder, HolderStatus } from "@domain/model/holder";
+import { BatchPayoutUtils } from "@test/shared/batch-payout.utils";
 
-const fakeHederaId = () => `${faker.number.int()}.${faker.number.int()}.${faker.number.int({ min: 1 })}`
+const fakeHederaId = () => `${faker.number.int()}.${faker.number.int()}.${faker.number.int({ min: 1 })}`;
 
 export class HolderUtils {
   static newInstance(data?: Partial<Holder>): Holder {
@@ -19,6 +19,6 @@ export class HolderUtils {
       data?.amount ?? null,
       data?.createdAt,
       data?.updatedAt,
-    )
+    );
   }
 }

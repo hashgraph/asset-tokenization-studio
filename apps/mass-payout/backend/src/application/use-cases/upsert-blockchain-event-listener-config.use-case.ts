@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { BlockchainEventListenerConfig } from "@domain/model/blockchain-listener"
-import { BlockchainEventListenerConfigRepository } from "@domain/ports/blockchain-event-config-repository.port"
-import { Inject, Injectable } from "@nestjs/common"
-import { GetBlockchainEventListenerConfigUseCase } from "./get-blockchain-event-listener-config.use-case"
+import { BlockchainEventListenerConfig } from "@domain/model/blockchain-listener";
+import { BlockchainEventListenerConfigRepository } from "@domain/ports/blockchain-event-config-repository.port";
+import { Inject, Injectable } from "@nestjs/common";
+import { GetBlockchainEventListenerConfigUseCase } from "./get-blockchain-event-listener-config.use-case";
 
 @Injectable()
 export class UpsertBlockchainEventListenerConfigUseCase {
@@ -14,6 +14,6 @@ export class UpsertBlockchainEventListenerConfigUseCase {
   ) {}
 
   async execute(updatedConfig: BlockchainEventListenerConfig): Promise<BlockchainEventListenerConfig> {
-    return await this.configRepository.save(updatedConfig)
+    return await this.configRepository.save(updatedConfig);
   }
 }

@@ -21,7 +21,7 @@ describe(`${MainLayout.name}`, () => {
     expect(component.asFragment()).toMatchSnapshot("disconnected");
   });
 
-  test("if user is not connected should not render sidebar", async () => {
+  test("if user is connected should render sidebar", async () => {
     const connected = {
       initialStoreState,
       connectionStatus: WalletStatus.connected,

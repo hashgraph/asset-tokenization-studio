@@ -31,7 +31,7 @@ describe(`${Header.name}`, () => {
     const component = render(<Header />);
 
     expect(component.getByTestId("header-layout")).toBeInTheDocument();
-    expect(component.getByText((content, _element) => content.startsWith("0x")));
+    expect(component.getByText((content, _element) => content.startsWith("0x"))).toBeInTheDocument();
     expect(component.asFragment()).toMatchSnapshot("connected");
   });
 });

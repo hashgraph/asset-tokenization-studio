@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { BatchPayoutStatus } from "@domain/model/batch-payout"
-import { Distribution, DistributionStatus, DistributionType, PayoutSubtype } from "@domain/model/distribution"
-import { HolderStatus } from "@domain/model/holder"
-import { BatchPayoutRepository } from "@domain/ports/batch-payout-repository.port"
-import { DistributionRepository } from "@domain/ports/distribution-repository.port"
-import { HolderRepository } from "@domain/ports/holder-repository.port"
-import { Inject, Injectable } from "@nestjs/common"
+import { BatchPayoutStatus } from "@domain/model/batch-payout";
+import { Distribution, DistributionStatus, DistributionType, PayoutSubtype } from "@domain/model/distribution";
+import { HolderStatus } from "@domain/model/holder";
+import { BatchPayoutRepository } from "@domain/ports/batch-payout-repository.port";
+import { DistributionRepository } from "@domain/ports/distribution-repository.port";
+import { HolderRepository } from "@domain/ports/holder-repository.port";
+import { Inject, Injectable } from "@nestjs/common";
 
 @Injectable()
 export class UpdateDistributionStatusDomainService {
@@ -20,33 +20,33 @@ export class UpdateDistributionStatusDomainService {
   ) {}
 
   async execute(distribution: Distribution): Promise<Distribution> {
-    const batchPayouts = await this.batchPayoutRepository.getBatchPayoutsByDistribution(distribution)
+    const batchPayouts = await this.batchPayoutRepository.getBatchPayoutsByDistribution(distribution);
     if (batchPayouts.length === 0) {
-      return distribution
+      return distribution;
     }
 
-    const areAllBatchPayoutsCompleted = batchPayouts.every((p) => p.status === BatchPayoutStatus.COMPLETED)
+    const areAllBatchPayoutsCompleted = batchPayouts.every((p) => p.status === BatchPayoutStatus.COMPLETED);
 
     if (areAllBatchPayoutsCompleted) {
-      distribution = this.setDistributionStatusToCompleted(distribution)
+      distribution = this.setDistributionStatusToCompleted(distribution);
     } else {
-      const distributionWithUpdatedStatus = await this.determineStatusFromHolders(distribution)
-      distribution = distributionWithUpdatedStatus
+      const distributionWithUpdatedStatus = await this.determineStatusFromHolders(distribution);
+      distribution = distributionWithUpdatedStatus;
     }
-    return await this.distributionRepository.updateDistribution(distribution)
+    return await this.distributionRepository.updateDistribution(distribution);
   }
 
   private async determineStatusFromHolders(distribution: Distribution): Promise<Distribution> {
-    const holders = await this.holderRepository.getAllHoldersByDistributionId(distribution.id)
-    const hasAnyHolder = holders.some((holder) => holder.status === HolderStatus.FAILED)
+    const holders = await this.holderRepository.getAllHoldersByDistributionId(distribution.id);
+    const hasAnyHolder = holders.some((holder) => holder.status === HolderStatus.FAILED);
 
     if (hasAnyHolder) {
-      return this.setDistributionStatusToFailed(distribution)
+      return this.setDistributionStatusToFailed(distribution);
     } else {
       if (distribution.status !== DistributionStatus.IN_PROGRESS) {
-        return this.setDistributionStatusToInProgress(distribution)
+        return this.setDistributionStatusToInProgress(distribution);
       } else {
-        return distribution
+        return distribution;
       }
     }
   }
@@ -61,7 +61,7 @@ export class UpdateDistributionStatusDomainService {
         DistributionStatus.IN_PROGRESS,
         distribution.createdAt,
         new Date(),
-      )
+      );
     } else if (distribution.details.type === DistributionType.PAYOUT) {
       if (distribution.details.subtype === PayoutSubtype.IMMEDIATE) {
         return Distribution.createExistingImmediate(
@@ -74,7 +74,7 @@ export class UpdateDistributionStatusDomainService {
           distribution.details.amount,
           distribution.details.amountType,
           distribution.details.concept,
-        )
+        );
       } else if (distribution.details.subtype === PayoutSubtype.ONE_OFF) {
         return Distribution.createExistingOneOff(
           distribution.id,
@@ -87,7 +87,7 @@ export class UpdateDistributionStatusDomainService {
           distribution.createdAt,
           new Date(),
           distribution.details.concept,
-        )
+        );
       } else if (distribution.details.subtype === PayoutSubtype.RECURRING) {
         return Distribution.createExistingRecurring(
           distribution.id,
@@ -101,7 +101,7 @@ export class UpdateDistributionStatusDomainService {
           distribution.createdAt,
           new Date(),
           distribution.details.concept,
-        )
+        );
       } else if (distribution.details.subtype === PayoutSubtype.AUTOMATED) {
         return Distribution.createExistingAutomated(
           distribution.id,
@@ -113,7 +113,7 @@ export class UpdateDistributionStatusDomainService {
           DistributionStatus.IN_PROGRESS,
           distribution.createdAt,
           new Date(),
-        )
+        );
       }
     }
   }
@@ -128,7 +128,7 @@ export class UpdateDistributionStatusDomainService {
         DistributionStatus.FAILED,
         distribution.createdAt,
         new Date(),
-      )
+      );
     } else if (distribution.details.type === DistributionType.PAYOUT) {
       if (distribution.details.subtype === PayoutSubtype.IMMEDIATE) {
         return Distribution.createExistingImmediate(
@@ -141,7 +141,7 @@ export class UpdateDistributionStatusDomainService {
           distribution.details.amount,
           distribution.details.amountType,
           distribution.details.concept,
-        )
+        );
       } else if (distribution.details.subtype === PayoutSubtype.ONE_OFF) {
         return Distribution.createExistingOneOff(
           distribution.id,
@@ -154,7 +154,7 @@ export class UpdateDistributionStatusDomainService {
           distribution.createdAt,
           new Date(),
           distribution.details.concept,
-        )
+        );
       } else if (distribution.details.subtype === PayoutSubtype.RECURRING) {
         return Distribution.createExistingRecurring(
           distribution.id,
@@ -168,7 +168,7 @@ export class UpdateDistributionStatusDomainService {
           distribution.createdAt,
           new Date(),
           distribution.details.concept,
-        )
+        );
       } else if (distribution.details.subtype === PayoutSubtype.AUTOMATED) {
         return Distribution.createExistingAutomated(
           distribution.id,
@@ -180,7 +180,7 @@ export class UpdateDistributionStatusDomainService {
           DistributionStatus.FAILED,
           distribution.createdAt,
           new Date(),
-        )
+        );
       }
     }
   }
@@ -195,7 +195,7 @@ export class UpdateDistributionStatusDomainService {
         DistributionStatus.COMPLETED,
         distribution.createdAt,
         new Date(),
-      )
+      );
     } else if (distribution.details.type === DistributionType.PAYOUT) {
       if (distribution.details.subtype === PayoutSubtype.IMMEDIATE) {
         return Distribution.createExistingImmediate(
@@ -208,7 +208,7 @@ export class UpdateDistributionStatusDomainService {
           distribution.details.amount,
           distribution.details.amountType,
           distribution.details.concept,
-        )
+        );
       } else if (distribution.details.subtype === PayoutSubtype.ONE_OFF) {
         return Distribution.createExistingOneOff(
           distribution.id,
@@ -221,7 +221,7 @@ export class UpdateDistributionStatusDomainService {
           distribution.createdAt,
           new Date(),
           distribution.details.concept,
-        )
+        );
       } else if (distribution.details.subtype === PayoutSubtype.RECURRING) {
         return Distribution.createExistingRecurring(
           distribution.id,
@@ -235,7 +235,7 @@ export class UpdateDistributionStatusDomainService {
           distribution.createdAt,
           new Date(),
           distribution.details.concept,
-        )
+        );
       } else if (distribution.details.subtype === PayoutSubtype.AUTOMATED) {
         return Distribution.createExistingAutomated(
           distribution.id,
@@ -247,7 +247,7 @@ export class UpdateDistributionStatusDomainService {
           DistributionStatus.COMPLETED,
           distribution.createdAt,
           new Date(),
-        )
+        );
       }
     }
   }

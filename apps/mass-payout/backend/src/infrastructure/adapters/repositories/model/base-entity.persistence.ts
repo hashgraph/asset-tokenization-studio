@@ -1,22 +1,22 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { Column, CreateDateColumn, UpdateDateColumn } from "typeorm"
-import { BaseEntity } from "@domain/model/base-entity"
+import { Column, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import { BaseEntity } from "@domain/model/base-entity";
 
 export class BaseEntityPersistence {
   @Column({ type: "uuid", primary: true })
-  id: string
+  id: string;
 
   @CreateDateColumn()
-  createdAt: Date
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date
+  updatedAt: Date;
 
   static fromEntity<T extends BaseEntity, P extends BaseEntityPersistence>(entity: T, entityPersistence: P): P {
-    entityPersistence.id = entity.id
-    entityPersistence.createdAt = entity.createdAt
-    entityPersistence.updatedAt = entity.updatedAt
-    return entityPersistence
+    entityPersistence.id = entity.id;
+    entityPersistence.createdAt = entity.createdAt;
+    entityPersistence.updatedAt = entity.updatedAt;
+    return entityPersistence;
   }
 }

@@ -1,0 +1,26 @@
+name: "104: [FLOW] MP Lint and Format"
+
+on:
+  pull_request:
+    paths:
+      - "packages/mass-payout/**"
+      - "apps/mass-payout/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/104-flow-mp-lint.yaml"
+      - ".github/workflows/800-call-lint-format.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-and-format:
+    name: lint-and-format
+    uses: ./.github/workflows/800-call-lint-format.yaml
+    with:
+      module: mass-payout

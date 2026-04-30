@@ -99,7 +99,9 @@ export class AssetService {
     const { filters, page = 0, sort = [], size = 10 } = params;
 
     const query = new URLSearchParams();
-    filters?.value && query.append("search", filters.value);
+    if (filters?.value) {
+      query.append("search", filters.value);
+    }
     query.append("page", (page + 1).toString()); // Backend expects 1-based
     query.append("limit", size.toString());
 

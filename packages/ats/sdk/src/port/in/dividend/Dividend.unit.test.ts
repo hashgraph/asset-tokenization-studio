@@ -11,12 +11,11 @@ import {
   GetTotalDividendHoldersRequest,
   CancelDividendRequest,
 } from "../request";
-import { HederaIdPropsFixture, TransactionIdFixture } from "@test/fixtures/shared/DataFixture";
+import { TransactionIdFixture } from "@test/fixtures/shared/DataFixture";
 import LogService from "@service/log/LogService";
 import { QueryBus } from "@core/query/QueryBus";
 import ValidatedRequest from "@core/validation/ValidatedArgs";
 import { ValidationError } from "@core/validation/ValidationError";
-import NetworkService from "@service/network/NetworkService";
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import { ONE_THOUSAND } from "@domain/context/shared/SecurityDate";
 
@@ -43,7 +42,6 @@ import { GetVotingCountQuery } from "@query/equity/votingRights/getVotingCount/G
 describe("Dividend", () => {
   let commandBusMock: jest.Mocked<CommandBus>;
   let queryBusMock: jest.Mocked<QueryBus>;
-  let networkServiceMock: jest.Mocked<NetworkService>;
 
   let setDividendRequest: SetDividendRequest;
   let getDividendForRequest: GetDividendForRequest;
@@ -56,19 +54,11 @@ describe("Dividend", () => {
   let handleValidationSpy: jest.SpyInstance;
 
   const transactionId = TransactionIdFixture.create().id;
-  const factoryAddress = HederaIdPropsFixture.create().value;
-  const resolverAddress = HederaIdPropsFixture.create().value;
 
   beforeEach(() => {
     commandBusMock = createMock<CommandBus>();
     queryBusMock = createMock<QueryBus>();
     handleValidationSpy = jest.spyOn(ValidatedRequest, "handleValidation");
-    networkServiceMock = createMock<NetworkService>({
-      configuration: {
-        factoryAddress: factoryAddress,
-        resolverAddress: resolverAddress,
-      },
-    });
     jest.spyOn(LogService, "logError").mockImplementation(() => {});
     (DividendToken as any).commandBus = commandBusMock;
     (DividendToken as any).queryBus = queryBusMock;

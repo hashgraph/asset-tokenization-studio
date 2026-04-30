@@ -13,10 +13,16 @@ import {
   EMPTY_HEX_BYTES,
   EMPTY_STRING,
 } from "@scripts";
-import { getDltTimestamp, grantRoleAndPauseToken } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployBondTokenFixture, deployBondKpiLinkedRateTokenFixture } from "@test";
-import { executeRbac, MAX_UINT256 } from "@test";
+import {
+  getDltTimestamp,
+  grantRoleAndPauseToken,
+  deployBondTokenFixture,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-imports
+  deployBondKpiLinkedRateTokenFixture,
+  executeRbac,
+  MAX_UINT256,
+} from "@test";
 
 const numberOfUnits = 1000;
 let startingDate = 0;

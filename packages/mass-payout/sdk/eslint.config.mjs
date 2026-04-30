@@ -39,6 +39,10 @@ export default [
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unsafe-function-type": "off",
       "@typescript-eslint/no-empty-object-type": "off",
+      // Defer to the TypeScript-aware variant which understands function
+      // overloads (the base rule misreports overload signatures as duplicates).
+      "no-dupe-class-members": "off",
+      "@typescript-eslint/no-dupe-class-members": "error",
     },
   },
 ];

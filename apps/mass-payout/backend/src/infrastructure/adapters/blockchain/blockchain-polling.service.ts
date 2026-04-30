@@ -1,68 +1,68 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { ProcessBlockchainEventsUseCase } from "@application/use-cases/process-blockchain-events.use-case"
-import { ConfigKeys } from "@config/config-keys"
-import { BlockchainPollingPort } from "@domain/ports/blockchain-polling.port"
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common"
-import { ConfigService } from "@nestjs/config"
+import { ProcessBlockchainEventsUseCase } from "@application/use-cases/process-blockchain-events.use-case";
+import { ConfigKeys } from "@config/config-keys";
+import { BlockchainPollingPort } from "@domain/ports/blockchain-polling.port";
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class BlockchainPollingService implements OnModuleInit, OnModuleDestroy, BlockchainPollingPort {
-  private readonly logger = new Logger(BlockchainPollingService.name)
-  private intervalId: NodeJS.Timeout | null = null
-  private readonly pollTimeout: number
-  private readonly isEnabled: boolean = true
+  private readonly logger = new Logger(BlockchainPollingService.name);
+  private intervalId: NodeJS.Timeout | null = null;
+  private readonly pollTimeout: number;
+  private readonly isEnabled: boolean = true;
 
   constructor(
     private readonly processBlockchainEventsUseCase: ProcessBlockchainEventsUseCase,
     private readonly configService: ConfigService,
   ) {
-    this.pollTimeout = configService.get(ConfigKeys.BLOCKCHAIN_LISTENER_POLL_TIMEOUT)
+    this.pollTimeout = configService.get(ConfigKeys.BLOCKCHAIN_LISTENER_POLL_TIMEOUT);
   }
 
   onModuleInit() {
     if (this.isEnabled) {
-      this.start()
+      this.start();
     }
   }
 
   onModuleDestroy() {
-    this.stop()
+    this.stop();
   }
 
   async start(): Promise<void> {
     if (this.intervalId || !this.isEnabled) {
-      return
+      return;
     }
-    this.logger.log(`Blockchain polling started: (interval: ${this.pollTimeout}ms)`)
-    await this.executeWithErrorHandling()
+    this.logger.log(`Blockchain polling started: (interval: ${this.pollTimeout}ms)`);
+    await this.executeWithErrorHandling();
     this.intervalId = setInterval(async () => {
-      await this.executeWithErrorHandling()
-    }, this.pollTimeout)
+      await this.executeWithErrorHandling();
+    }, this.pollTimeout);
   }
 
   stop(): void {
     if (this.intervalId) {
-      clearInterval(this.intervalId)
-      this.intervalId = null
-      this.logger.log("Blockchain Polling stopped")
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+      this.logger.log("Blockchain Polling stopped");
     }
   }
 
   restart(): void {
-    this.stop()
-    this.start()
+    this.stop();
+    this.start();
   }
 
   get isRunning(): boolean {
-    return this.intervalId !== null
+    return this.intervalId !== null;
   }
 
   private async executeWithErrorHandling(): Promise<void> {
     try {
-      await this.processBlockchainEventsUseCase.execute()
+      await this.processBlockchainEventsUseCase.execute();
     } catch (error) {
-      this.logger.error(`Blockchain polling error: ${error.message}`, error.stack)
+      this.logger.error(`Blockchain polling error: ${error.message}`, error.stack);
     }
   }
 }

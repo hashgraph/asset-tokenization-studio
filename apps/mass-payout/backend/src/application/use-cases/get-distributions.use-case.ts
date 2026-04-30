@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { PageOptions } from "@domain/model/page"
-import { DistributionRepository } from "@domain/ports/distribution-repository.port"
-import { Inject, Injectable } from "@nestjs/common"
+import { PageOptions } from "@domain/model/page";
+import { DistributionRepository } from "@domain/ports/distribution-repository.port";
+import { Inject, Injectable } from "@nestjs/common";
 
 @Injectable()
 export class GetDistributionsUseCase {
@@ -12,6 +12,6 @@ export class GetDistributionsUseCase {
   ) {}
 
   async execute(pageOptions: PageOptions) {
-    return this.distributionRepository.getDistributions(pageOptions)
+    return this.distributionRepository.getDistributions(pageOptions);
   }
 }

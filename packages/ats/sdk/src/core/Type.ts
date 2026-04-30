@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/ban-types */
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 export interface Type<T = any> extends Function {
   new (...args: any[]): T;
 }

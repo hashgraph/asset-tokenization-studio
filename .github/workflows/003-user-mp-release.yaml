@@ -1,4 +1,4 @@
-name: "000: [USER] MP Release"
+name: "003: [USER] MP Release"
 
 on:
   # Manual trigger with preview/release option
@@ -43,7 +43,7 @@ jobs:
       - name: Setup NodeJS Environment
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 22.20.0
+          node-version-file: .nvmrc
 
       - name: Install dependencies
         run: npm ci

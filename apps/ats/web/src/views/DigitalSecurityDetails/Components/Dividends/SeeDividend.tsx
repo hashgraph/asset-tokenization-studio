@@ -169,7 +169,7 @@ export const SeeDividend = () => {
     setDividendsAmountForRequest(dividendsAmountForReq);
   };
 
-  let dividendsPaymentDay = dividends?.executionDate?.toDateString() || "";
+  const dividendsPaymentDay = dividends?.executionDate?.toDateString() || "";
 
   const calculateAmount = () => {
     const numerator = Number(dividendsAmountFor?.numerator) || 0;
