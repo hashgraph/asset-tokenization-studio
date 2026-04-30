@@ -48,12 +48,14 @@ const BOND_FACETS = [
   "KycFacet",
   "PauseFacet",
   "SnapshotsFacet",
+  "CoreAtSnapshotFacet",
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
   "BalanceTrackerByPartitionFacet",
   "BalanceTrackerAtSnapshotFacet",
   "BalanceTrackerAtSnapshotByPartitionFacet",
   "ClearingAtSnapshotFacet",
+  "ClearingAtSnapshotByPartitionFacet",
 
   // Core
   "CoreFacet",
@@ -90,6 +92,7 @@ const BOND_FACETS = [
   "ClearingActionsFacet",
   "ClearingByPartitionFacet",
   "ClearingHoldCreationFacet",
+  "ClearingHoldByPartitionFacet",
   "OperatorClearingHoldByPartitionFacet",
   "ClearingReadFacet",
   "ClearingRedeemFacet",
@@ -97,6 +100,7 @@ const BOND_FACETS = [
   "HoldFacet",
   "HoldManagementFacet",
   "ControllerHoldByPartitionFacet",
+  "ControllerByPartitionFacet",
   "ProtectedHoldByPartitionFacet",
   "HoldByPartitionFacet",
 

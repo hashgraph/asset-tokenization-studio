@@ -53,10 +53,12 @@ const EQUITY_FACETS = [
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
+  "CoreAtSnapshotFacet",
   "BalanceTrackerByPartitionFacet",
   "BalanceTrackerAtSnapshotFacet",
   "BalanceTrackerAtSnapshotByPartitionFacet",
   "ClearingAtSnapshotFacet",
+  "ClearingAtSnapshotByPartitionFacet",
 
   // ERC Standards (13)
   "MintByPartitionFacet",
@@ -83,6 +85,7 @@ const EQUITY_FACETS = [
   "ClearingActionsFacet",
   "ClearingByPartitionFacet",
   "ClearingHoldCreationFacet",
+  "ClearingHoldByPartitionFacet",
   "OperatorClearingHoldByPartitionFacet",
   "ClearingReadFacet",
   "ClearingRedeemFacet",
@@ -90,6 +93,7 @@ const EQUITY_FACETS = [
   "HoldFacet",
   "HoldManagementFacet",
   "ControllerHoldByPartitionFacet",
+  "ControllerByPartitionFacet",
   "ProtectedHoldByPartitionFacet",
   "HoldByPartitionFacet",
 

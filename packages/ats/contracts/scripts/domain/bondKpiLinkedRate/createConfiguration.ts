@@ -52,10 +52,12 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
+  "CoreAtSnapshotFacet",
   "BalanceTrackerByPartitionFacet",
   "BalanceTrackerAtSnapshotFacet",
   "BalanceTrackerAtSnapshotByPartitionFacet",
   "ClearingAtSnapshotFacet",
+  "ClearingAtSnapshotByPartitionFacet",
 
   // ERC Standards
   "MintByPartitionFacet",
@@ -82,6 +84,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "ClearingActionsFacet",
   "ClearingByPartitionFacet",
   "ClearingHoldCreationFacet",
+  "ClearingHoldByPartitionFacet",
   "OperatorClearingHoldByPartitionFacet",
   "ClearingReadFacet",
   "ClearingRedeemFacet",
@@ -89,6 +92,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "HoldFacet",
   "HoldManagementFacet",
   "ControllerHoldByPartitionFacet",
+  "ControllerByPartitionFacet",
   "ProtectedHoldByPartitionFacet",
   "HoldByPartitionFacet",
 

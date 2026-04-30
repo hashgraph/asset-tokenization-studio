@@ -59,11 +59,13 @@ const LOANS_PORTFOLIO_FACETS = [
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
+  "CoreAtSnapshotFacet",
   "SsiManagementFacet",
   "BalanceTrackerByPartitionFacet",
   "BalanceTrackerAtSnapshotFacet",
   "BalanceTrackerAtSnapshotByPartitionFacet",
   "ClearingAtSnapshotFacet",
+  "ClearingAtSnapshotByPartitionFacet",
 
   // ERC Standards
   "MintByPartitionFacet",
@@ -93,6 +95,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "HoldFacet",
   "HoldManagementFacet",
   "ControllerHoldByPartitionFacet",
+  "ControllerByPartitionFacet",
   "ProtectedHoldByPartitionFacet",
   "HoldByPartitionFacet",
 

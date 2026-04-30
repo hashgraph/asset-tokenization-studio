@@ -1,5 +1,7 @@
 # @hashgraph/mass-payout-sdk
 
+## 1.1.2
+
 ## 1.1.1
 
 ### Patch Changes

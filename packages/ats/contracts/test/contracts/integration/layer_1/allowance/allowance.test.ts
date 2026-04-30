@@ -159,6 +159,40 @@ describe("Allowance Facet Tests", () => {
           "TokenIsPaused",
         );
       });
+
+      it("GIVEN a blacklisted caller WHEN increaseAllowance THEN reverts with AccountIsBlocked", async () => {
+        await asset.addToControlList(signer_C.address);
+        await expect(assetSignerC.increaseAllowance(signer_D.address, amount)).to.be.revertedWithCustomError(
+          asset,
+          "AccountIsBlocked",
+        );
+      });
+
+      it("GIVEN a blacklisted spender WHEN increaseAllowance THEN reverts with AccountIsBlocked", async () => {
+        await asset.addToControlList(signer_D.address);
+        await expect(assetSignerC.increaseAllowance(signer_D.address, amount)).to.be.revertedWithCustomError(
+          asset,
+          "AccountIsBlocked",
+        );
+      });
+
+      it("GIVEN a recovered caller WHEN increaseAllowance THEN reverts with WalletRecovered", async () => {
+        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+        await asset.recoveryAddress(signer_C.address, signer_A.address, ADDRESS_ZERO);
+        await expect(assetSignerC.increaseAllowance(signer_D.address, amount)).to.be.revertedWithCustomError(
+          asset,
+          "WalletRecovered",
+        );
+      });
+
+      it("GIVEN a recovered spender WHEN increaseAllowance THEN reverts with WalletRecovered", async () => {
+        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+        await asset.recoveryAddress(signer_D.address, signer_A.address, ADDRESS_ZERO);
+        await expect(assetSignerC.increaseAllowance(signer_D.address, amount)).to.be.revertedWithCustomError(
+          asset,
+          "WalletRecovered",
+        );
+      });
     });
 
     describe("decreaseAllowance", () => {
@@ -190,6 +224,40 @@ describe("Allowance Facet Tests", () => {
         await expect(assetSignerC.decreaseAllowance(signer_D.address, amount)).to.be.revertedWithCustomError(
           asset,
           "TokenIsPaused",
+        );
+      });
+
+      it("GIVEN a blacklisted caller WHEN decreaseAllowance THEN reverts with AccountIsBlocked", async () => {
+        await asset.addToControlList(signer_C.address);
+        await expect(assetSignerC.decreaseAllowance(signer_D.address, amount)).to.be.revertedWithCustomError(
+          asset,
+          "AccountIsBlocked",
+        );
+      });
+
+      it("GIVEN a blacklisted spender WHEN decreaseAllowance THEN reverts with AccountIsBlocked", async () => {
+        await asset.addToControlList(signer_D.address);
+        await expect(assetSignerC.decreaseAllowance(signer_D.address, amount)).to.be.revertedWithCustomError(
+          asset,
+          "AccountIsBlocked",
+        );
+      });
+
+      it("GIVEN a recovered caller WHEN decreaseAllowance THEN reverts with WalletRecovered", async () => {
+        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+        await asset.recoveryAddress(signer_C.address, signer_A.address, ADDRESS_ZERO);
+        await expect(assetSignerC.decreaseAllowance(signer_D.address, amount)).to.be.revertedWithCustomError(
+          asset,
+          "WalletRecovered",
+        );
+      });
+
+      it("GIVEN a recovered spender WHEN decreaseAllowance THEN reverts with WalletRecovered", async () => {
+        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+        await asset.recoveryAddress(signer_D.address, signer_A.address, ADDRESS_ZERO);
+        await expect(assetSignerC.decreaseAllowance(signer_D.address, amount)).to.be.revertedWithCustomError(
+          asset,
+          "WalletRecovered",
         );
       });
     });

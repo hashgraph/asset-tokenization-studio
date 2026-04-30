@@ -1,5 +1,11 @@
 # @hashgraph/asset-tokenization-studio-docs
 
+## 1.3.0
+
+### Minor Changes
+
+- ea1e226: feat: enable local search bar in documentation site
+
 ## 1.2.0
 
 ### Minor Changes

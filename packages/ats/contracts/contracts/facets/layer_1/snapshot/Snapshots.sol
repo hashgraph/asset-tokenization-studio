@@ -36,11 +36,6 @@ abstract contract Snapshots is ISnapshots, Modifiers {
         emit SnapshotTaken(EvmAccessors.getMsgSender(), snapshotID_);
     }
 
-    /// @inheritdoc ISnapshots
-    function decimalsAtSnapshot(uint256 _snapshotID) external view returns (uint8 decimals_) {
-        decimals_ = SnapshotsStorageWrapper.decimalsAtSnapshot(_snapshotID);
-    }
-
     function getTokenHoldersAtSnapshot(
         uint256 _snapshotID,
         uint256 _pageIndex,
@@ -95,12 +90,11 @@ abstract contract Snapshots is ISnapshots, Modifiers {
     }
 
     /// @inheritdoc ISnapshots
-    function clearedBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
+    function clearedBalanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
     ) external view returns (uint256 balance_) {
-        balance_ = SnapshotsStorageWrapper.clearedBalanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
+        balance_ = SnapshotsStorageWrapper.clearedBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
     }
 
     /// @inheritdoc ISnapshots
