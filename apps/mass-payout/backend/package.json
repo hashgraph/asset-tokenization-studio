@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@faker-js/faker": "9.8.0",
-    "@hashgraph/asset-tokenization-sdk": "*",
+    "@hashgraph/asset-tokenization-sdk": "^7.0.0",
     "@hiero-ledger/sdk": "2.79.0",
     "@nestjs/cli": "10.3.2",
     "@nestjs/common": "10.4.22",
