@@ -62,16 +62,9 @@ describe("CouponListing Tests", () => {
     });
 
     const kpiDiamond = kpiLinkedRateBase.diamond;
-    const couponKpiLinkedRateFacet = await ethers.getContractAt(
-      "CouponKpiLinkedRateFacetTimeTravel",
-      kpiDiamond.target,
-      signer_A,
-    );
-    const accessControlKpi = await ethers.getContractAt("AccessControl", kpiDiamond.target, signer_A);
-    const scheduledTasksKpi = await ethers.getContractAt("ScheduledCrossOrderedTasks", kpiDiamond.target, signer_A);
-    const timeTravelKpi = await ethers.getContractAt("TimeTravelFacet", kpiDiamond.target, signer_A);
+    const kpiAsset = await ethers.getContractAt("IAsset", kpiDiamond.target, signer_A);
 
-    await accessControlKpi.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+    await kpiAsset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
 
     const timestamp = await getDltTimestamp();
 
@@ -97,44 +90,35 @@ describe("CouponListing Tests", () => {
       rateStatus: 0,
     };
 
-    await expect(couponKpiLinkedRateFacet.connect(signer_A).setCoupon(coupon1)).to.emit(
-      couponKpiLinkedRateFacet,
-      "CouponSet",
-    );
+    await expect(kpiAsset.setCoupon(coupon1)).to.emit(kpiAsset, "CouponSet");
+    await expect(kpiAsset.setCoupon(coupon2)).to.emit(kpiAsset, "CouponSet");
 
-    await expect(await couponKpiLinkedRateFacet.connect(signer_A).setCoupon(coupon2)).to.emit(
-      couponKpiLinkedRateFacet,
-      "CouponSet",
-    );
-
-    let orderedList = await couponKpiLinkedRateFacet.getCouponsOrderedList(0, 10);
+    let orderedList = await kpiAsset.getCouponsOrderedList(0, 10);
     expect(orderedList).to.be.an("array").with.lengthOf(0);
 
-    await timeTravelKpi.changeSystemTimestamp(timestamp + TIME_PERIODS_S.DAY + 1);
+    await kpiAsset.changeSystemTimestamp(timestamp + TIME_PERIODS_S.DAY + 1);
+    await kpiAsset.triggerPendingScheduledCrossOrderedTasks();
 
-    await scheduledTasksKpi.connect(signer_A).triggerScheduledCrossOrderedTasks(100);
-
-    orderedList = await couponKpiLinkedRateFacet.getCouponsOrderedList(0, 10);
+    orderedList = await kpiAsset.getCouponsOrderedList(0, 10);
     expect(orderedList).to.be.an("array").with.lengthOf(1);
     expect(orderedList[0]).to.equal(1); // couponId 1
 
-    await timeTravelKpi.changeSystemTimestamp(timestamp + TIME_PERIODS_S.DAY * 2 + 1);
+    await kpiAsset.changeSystemTimestamp(timestamp + TIME_PERIODS_S.DAY * 2 + 1);
+    await kpiAsset.triggerPendingScheduledCrossOrderedTasks();
 
-    await scheduledTasksKpi.connect(signer_A).triggerScheduledCrossOrderedTasks(100);
-
-    orderedList = await couponKpiLinkedRateFacet.getCouponsOrderedList(0, 10);
+    orderedList = await kpiAsset.getCouponsOrderedList(0, 10);
     expect(orderedList).to.be.an("array").with.lengthOf(2);
     expect(orderedList[0]).to.equal(1); // couponId 1
     expect(orderedList[1]).to.equal(2); // couponId 2
 
     // Verify getCouponFromOrderedListAt works correctly
-    const couponIdAtPos0 = await couponKpiLinkedRateFacet.getCouponFromOrderedListAt(0);
-    const couponIdAtPos1 = await couponKpiLinkedRateFacet.getCouponFromOrderedListAt(1);
+    const couponIdAtPos0 = await kpiAsset.getCouponFromOrderedListAt(0);
+    const couponIdAtPos1 = await kpiAsset.getCouponFromOrderedListAt(1);
     expect(couponIdAtPos0).to.equal(1);
     expect(couponIdAtPos1).to.equal(2);
 
     // Verify getCouponsOrderedListTotal
-    const totalCouponsInOrderedList = await couponKpiLinkedRateFacet.getCouponsOrderedListTotal();
+    const totalCouponsInOrderedList = await kpiAsset.getCouponsOrderedListTotal();
     expect(totalCouponsInOrderedList).to.equal(2);
   });
 
@@ -152,16 +136,9 @@ describe("CouponListing Tests", () => {
     });
 
     const kpiDiamond = kpiLinkedRateBase.diamond;
-    const couponKpiLinkedRateFacet = await ethers.getContractAt(
-      "CouponKpiLinkedRateFacetTimeTravel",
-      kpiDiamond.target,
-      signer_A,
-    );
-    const accessControlKpi = await ethers.getContractAt("AccessControl", kpiDiamond.target, signer_A);
-    const scheduledTasksKpi = await ethers.getContractAt("ScheduledCrossOrderedTasks", kpiDiamond.target, signer_A);
-    const timeTravelKpi = await ethers.getContractAt("TimeTravelFacet", kpiDiamond.target, signer_A);
+    const kpiAsset = await ethers.getContractAt("IAsset", kpiDiamond.target, signer_A);
 
-    await accessControlKpi.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+    await kpiAsset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
 
     const timestamp = await getDltTimestamp();
 
@@ -176,30 +153,28 @@ describe("CouponListing Tests", () => {
       rateStatus: 0,
     };
 
-    await expect(couponKpiLinkedRateFacet.connect(signer_A).setCoupon(coupon1)).to.emit(
-      couponKpiLinkedRateFacet,
-      "CouponSet",
-    );
+    await expect(kpiAsset.setCoupon(coupon1)).to.emit(kpiAsset, "CouponSet");
 
     // Trigger scheduled tasks to move coupon1 to ordered list
-    await timeTravelKpi.changeSystemTimestamp(timestamp + TIME_PERIODS_S.DAY + 1);
-    await scheduledTasksKpi.connect(signer_A).triggerScheduledCrossOrderedTasks(100);
+    await kpiAsset.changeSystemTimestamp(timestamp + TIME_PERIODS_S.DAY + 1);
+    await kpiAsset.triggerPendingScheduledCrossOrderedTasks();
 
     // Add deprecated coupons to bond storage (simulating legacy data from before refactor)
-    // This must be done AFTER triggers complete to avoid errors when triggers try to process fake IDs
+    // testOnlyAddDeprecatedCoupon is a test-helper only on TimeTravelFacet, not on IAsset
+    const timeTravelKpi = await ethers.getContractAt("TimeTravelFacet", kpiDiamond.target, signer_A);
     await timeTravelKpi.testOnlyAddDeprecatedCoupon(100);
 
     // 1 deprecated (in bond storage) + 1 new (in coupon storage)
-    const totalCoupons = await couponKpiLinkedRateFacet.getCouponsOrderedListTotal();
+    const totalCoupons = await kpiAsset.getCouponsOrderedListTotal();
     expect(totalCoupons).to.equal(2);
 
-    const pos0 = await couponKpiLinkedRateFacet.getCouponFromOrderedListAt(0);
+    const pos0 = await kpiAsset.getCouponFromOrderedListAt(0);
     expect(pos0).to.equal(100); // from deprecated bond storage
 
-    const pos3 = await couponKpiLinkedRateFacet.getCouponFromOrderedListAt(1);
-    expect(pos3).to.equal(1); // first new coupon
+    const pos1 = await kpiAsset.getCouponFromOrderedListAt(1);
+    expect(pos1).to.equal(1); // first new coupon
 
-    const fullList = await couponKpiLinkedRateFacet.getCouponsOrderedList(0, 10);
+    const fullList = await kpiAsset.getCouponsOrderedList(0, 10);
     expect(fullList).to.have.lengthOf(2);
     expect(fullList[0]).to.equal(100); // deprecated
     expect(fullList[1]).to.equal(1); // new storage
@@ -231,7 +206,7 @@ describe("CouponListing Tests", () => {
         const fixingDate = startingDate + TIME_PERIODS_S.MONTH * (i + 1);
         const executionDate = fixingDate + TIME_PERIODS_S.WEEK;
 
-        await asset.setCoupon({
+        await asset.connect(signer_A).setCoupon({
           recordDate: fixingDate.toString(),
           executionDate: executionDate.toString(),
           rate: 0,
@@ -256,7 +231,7 @@ describe("CouponListing Tests", () => {
         const fixingDate = startingDate + TIME_PERIODS_S.MONTH * (i + 1);
         const executionDate = fixingDate + TIME_PERIODS_S.WEEK;
 
-        await asset.setCoupon({
+        await asset.connect(signer_A).setCoupon({
           recordDate: fixingDate.toString(),
           executionDate: executionDate.toString(),
           rate: 0,
