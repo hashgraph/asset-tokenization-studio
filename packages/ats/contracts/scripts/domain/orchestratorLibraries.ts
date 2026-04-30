@@ -133,14 +133,14 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   ClearingByPartitionFacet: ["clearingOps", "clearingReadOps"],
   // ClearingReadOps dependencies - clearing read operations
   ClearingReadFacet: ["clearingReadOps"],
-  // SnapshotsFacet + BalanceTrackerFacet + BalanceTrackerByPartitionFacet depend on SnapshotsStorageWrapper which uses ClearingReadOps
-  SnapshotsFacet: ["clearingReadOps"],
+  // BalanceTrackerFacet + BalanceTrackerByPartitionFacet depend on SnapshotsStorageWrapper which uses ClearingReadOps
   CoreAtSnapshotFacet: ["clearingReadOps"],
   BalanceTrackerFacet: ["clearingReadOps"],
   BalanceTrackerByPartitionFacet: ["clearingReadOps"],
   BalanceTrackerAdjustedFacet: ["clearingReadOps"],
   BalanceTrackerAtSnapshotFacet: ["clearingReadOps"],
   BalanceTrackerAtSnapshotByPartitionFacet: ["clearingReadOps"],
+  ClearingAtSnapshotFacet: ["clearingReadOps"],
   ClearingAtSnapshotByPartitionFacet: ["clearingReadOps"],
   // Layer 2/3 Bond read facets transitively reach ClearingReadOps via SnapshotsStorageWrapper
   BondUSAReadFacet: ["clearingReadOps"],
