@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { ConfigKeys } from "@config/config-keys"
-import { AssetPersistence } from "@infrastructure/adapters/repositories/model/asset.persistence"
-import { BatchPayoutPersistence } from "@infrastructure/adapters/repositories/model/batch-payout.persistence"
-import { BlockchainEventListenerConfigPersistence } from "@infrastructure/adapters/repositories/model/blockchain-event-listener-config.persistence"
-import { DistributionPersistence } from "@infrastructure/adapters/repositories/model/distribution.persistence"
-import { HolderPersistence } from "@infrastructure/adapters/repositories/model/holder.persistence"
-import { DynamicModule, Module } from "@nestjs/common"
-import { ConfigService } from "@nestjs/config"
-import { TypeOrmModule, TypeOrmModuleOptions } from "@nestjs/typeorm"
-import { EntityClassOrSchema } from "@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type"
+import { ConfigKeys } from "@config/config-keys";
+import { AssetPersistence } from "@infrastructure/adapters/repositories/model/asset.persistence";
+import { BatchPayoutPersistence } from "@infrastructure/adapters/repositories/model/batch-payout.persistence";
+import { BlockchainEventListenerConfigPersistence } from "@infrastructure/adapters/repositories/model/blockchain-event-listener-config.persistence";
+import { DistributionPersistence } from "@infrastructure/adapters/repositories/model/distribution.persistence";
+import { HolderPersistence } from "@infrastructure/adapters/repositories/model/holder.persistence";
+import { DynamicModule, Module } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { TypeOrmModule, TypeOrmModuleOptions } from "@nestjs/typeorm";
+import { EntityClassOrSchema } from "@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type";
 
 export const ENTITIES: EntityClassOrSchema[] = [
   AssetPersistence,
@@ -17,8 +17,8 @@ export const ENTITIES: EntityClassOrSchema[] = [
   HolderPersistence,
   BatchPayoutPersistence,
   BlockchainEventListenerConfigPersistence,
-]
-const ORM_TYPE: string = "postgres"
+];
+const ORM_TYPE: string = "postgres";
 
 @Module({})
 export class PostgresModule {
@@ -33,13 +33,13 @@ export class PostgresModule {
             return {
               ...this.getDefaultPostgreSqlConfig(configService),
               ...typeOrmOptions,
-            } as TypeOrmModuleOptions
+            } as TypeOrmModuleOptions;
           },
         }),
         TypeOrmModule.forFeature(entities),
       ],
       exports: [TypeOrmModule],
-    }
+    };
   }
 
   static getDefaultPostgreSqlConfig(configService: ConfigService): TypeOrmModuleOptions {
@@ -58,6 +58,6 @@ export class PostgresModule {
       migrationsRun: false,
       //migrations: ["dist/src/migrations/*{.ts,.js}"],
       autoLoadEntities: true,
-    } as TypeOrmModuleOptions
+    } as TypeOrmModuleOptions;
   }
 }

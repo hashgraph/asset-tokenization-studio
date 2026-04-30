@@ -14,6 +14,7 @@ import {
 import { ExecuteBondCashOutByAddressesCommandError } from "./error/ExecuteBondCashOutByAddressesCommandError";
 
 @CommandHandler(ExecuteBondCashOutByAddressesCommand)
+// eslint-disable-next-line max-len
 export class ExecuteBondCashOutByAddressesCommandHandler implements ICommandHandler<ExecuteBondCashOutByAddressesCommand> {
   constructor(
     private readonly transactionService: TransactionService,

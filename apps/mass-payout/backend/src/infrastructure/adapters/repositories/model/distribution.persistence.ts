@@ -7,80 +7,80 @@ import {
   DistributionType,
   PayoutSubtype,
   Recurrency,
-} from "@domain/model/distribution"
-import { CorporateActionId } from "@domain/model/value-objects/corporate-action-id"
-import { SnapshotId } from "@domain/model/value-objects/snapshot-id"
-import { AssetPersistence } from "@infrastructure/adapters/repositories/model/asset.persistence"
-import { Column, Entity, JoinColumn, ManyToOne } from "typeorm"
-import { BaseEntityPersistence } from "./base-entity.persistence"
+} from "@domain/model/distribution";
+import { CorporateActionId } from "@domain/model/value-objects/corporate-action-id";
+import { SnapshotId } from "@domain/model/value-objects/snapshot-id";
+import { AssetPersistence } from "@infrastructure/adapters/repositories/model/asset.persistence";
+import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
+import { BaseEntityPersistence } from "./base-entity.persistence";
 
 @Entity("Distribution")
 export class DistributionPersistence extends BaseEntityPersistence {
   @Column({ name: "asset_id", type: "uuid" })
-  assetId: string
+  assetId: string;
 
   @ManyToOne(() => AssetPersistence, { onDelete: "CASCADE", nullable: false })
   @JoinColumn({ name: "asset_id" })
-  asset: AssetPersistence
+  asset: AssetPersistence;
 
   @Column({ nullable: true })
-  corporateActionID?: string
+  corporateActionID?: string;
 
   @Column({ nullable: true })
-  snapshotId?: string
+  snapshotId?: string;
 
   @Column({ nullable: true })
-  amount?: string
+  amount?: string;
 
   @Column({ type: "enum", enum: AmountType, nullable: true })
-  amountType?: AmountType
+  amountType?: AmountType;
 
   @Column({ type: "timestamp with time zone", nullable: true })
-  executionDate?: Date
+  executionDate?: Date;
 
   @Column({ type: "enum", enum: Recurrency, nullable: true })
-  recurrency?: Recurrency
+  recurrency?: Recurrency;
 
   @Column({ type: "enum", enum: DistributionType, nullable: false })
-  type: DistributionType
+  type: DistributionType;
 
   @Column({ type: "enum", enum: PayoutSubtype, nullable: true })
-  subtype?: PayoutSubtype
+  subtype?: PayoutSubtype;
 
   @Column({ type: "enum", enum: DistributionStatus, nullable: false })
-  status: DistributionStatus
+  status: DistributionStatus;
 
   @Column({ nullable: true })
-  concept?: string
+  concept?: string;
 
   static fromDistribution(distribution: Distribution): DistributionPersistence {
-    const persistence = new DistributionPersistence()
-    persistence.id = distribution.id
-    persistence.assetId = distribution.asset.id
-    persistence.asset = AssetPersistence.fromAsset(distribution.asset)
-    persistence.type = distribution.details.type
-    persistence.status = distribution.status
-    persistence.createdAt = distribution.createdAt
-    persistence.updatedAt = distribution.updatedAt
+    const persistence = new DistributionPersistence();
+    persistence.id = distribution.id;
+    persistence.assetId = distribution.asset.id;
+    persistence.asset = AssetPersistence.fromAsset(distribution.asset);
+    persistence.type = distribution.details.type;
+    persistence.status = distribution.status;
+    persistence.createdAt = distribution.createdAt;
+    persistence.updatedAt = distribution.updatedAt;
 
     if (distribution.details.type === DistributionType.CORPORATE_ACTION) {
-      persistence.corporateActionID = distribution.details.corporateActionId.value
-      persistence.executionDate = distribution.details.executionDate
+      persistence.corporateActionID = distribution.details.corporateActionId.value;
+      persistence.executionDate = distribution.details.executionDate;
     } else if (distribution.details.type === DistributionType.PAYOUT) {
-      persistence.subtype = distribution.details.subtype
-      persistence.snapshotId = distribution.details.snapshotId?.value
-      persistence.amount = distribution.details.amount
-      persistence.amountType = distribution.details.amountType
-      persistence.concept = distribution.details.concept
+      persistence.subtype = distribution.details.subtype;
+      persistence.snapshotId = distribution.details.snapshotId?.value;
+      persistence.amount = distribution.details.amount;
+      persistence.amountType = distribution.details.amountType;
+      persistence.concept = distribution.details.concept;
       if (distribution.details.subtype === PayoutSubtype.ONE_OFF) {
-        persistence.executionDate = distribution.details.executeAt
+        persistence.executionDate = distribution.details.executeAt;
       } else if (distribution.details.subtype === PayoutSubtype.RECURRING) {
-        persistence.executionDate = distribution.details.executeAt
-        persistence.recurrency = distribution.details.recurrency
+        persistence.executionDate = distribution.details.executeAt;
+        persistence.recurrency = distribution.details.recurrency;
       }
     }
 
-    return persistence
+    return persistence;
   }
 
   toDistribution(): Distribution {
@@ -93,7 +93,7 @@ export class DistributionPersistence extends BaseEntityPersistence {
         this.status,
         this.createdAt,
         this.updatedAt,
-      )
+      );
     } else if (this.type === DistributionType.PAYOUT) {
       if (this.subtype === PayoutSubtype.IMMEDIATE) {
         return Distribution.createExistingImmediate(
@@ -106,7 +106,7 @@ export class DistributionPersistence extends BaseEntityPersistence {
           this.amount,
           this.amountType,
           this.concept,
-        )
+        );
       } else if (this.subtype === PayoutSubtype.ONE_OFF) {
         return Distribution.createExistingOneOff(
           this.id,
@@ -119,7 +119,7 @@ export class DistributionPersistence extends BaseEntityPersistence {
           this.createdAt,
           this.updatedAt,
           this.concept,
-        )
+        );
       } else if (this.subtype === PayoutSubtype.RECURRING) {
         return Distribution.createExistingRecurring(
           this.id,
@@ -133,7 +133,7 @@ export class DistributionPersistence extends BaseEntityPersistence {
           this.createdAt,
           this.updatedAt,
           this.concept,
-        )
+        );
       } else if (this.subtype === PayoutSubtype.AUTOMATED) {
         return Distribution.createExistingAutomated(
           this.id,
@@ -145,10 +145,10 @@ export class DistributionPersistence extends BaseEntityPersistence {
           this.status,
           this.createdAt,
           this.updatedAt,
-        )
+        );
       }
     }
 
-    throw new Error("Invalid distribution type or subtype")
+    throw new Error("Invalid distribution type or subtype");
   }
 }

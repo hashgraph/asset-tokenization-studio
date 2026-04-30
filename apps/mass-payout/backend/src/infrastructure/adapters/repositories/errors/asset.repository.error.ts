@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { CustomError } from "@domain/errors/shared/custom.error"
-import { Asset } from "@domain/model/asset"
+import { CustomError } from "@domain/errors/shared/custom.error";
+import { Asset } from "@domain/model/asset";
 
 export class AssetRepositoryError extends CustomError {
   static readonly ERRORS = {
@@ -16,12 +16,12 @@ export class AssetRepositoryError extends CustomError {
     GET_ASSETS: () => "Error getting assets",
     GET_SYNC_ENABLED_ASSETS: () => "Error getting sync enabled assets",
     DELETE_ASSETS: (ids: string[]) => `Error deleting assets with ids: ${JSON.stringify(ids)}.`,
-  }
+  };
 
   constructor(
     message: string,
     public originalError?: Error,
   ) {
-    super(message, originalError)
+    super(message, originalError);
   }
 }

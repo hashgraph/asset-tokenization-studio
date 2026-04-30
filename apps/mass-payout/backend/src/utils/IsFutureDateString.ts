@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { registerDecorator, ValidationArguments, ValidationOptions } from "class-validator"
+import { registerDecorator, ValidationArguments, ValidationOptions } from "class-validator";
 
 export function IsFutureDateString(validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
@@ -11,15 +11,15 @@ export function IsFutureDateString(validationOptions?: ValidationOptions) {
       options: validationOptions,
       validator: {
         validate(value: any) {
-          if (typeof value !== "string") return false
-          const date = new Date(value)
-          if (isNaN(date.getTime())) return false
-          return date > new Date()
+          if (typeof value !== "string") return false;
+          const date = new Date(value);
+          if (isNaN(date.getTime())) return false;
+          return date > new Date();
         },
         defaultMessage(args: ValidationArguments) {
-          return `${args.property} must be a future date`
+          return `${args.property} must be a future date`;
         },
       },
-    })
-  }
+    });
+  };
 }

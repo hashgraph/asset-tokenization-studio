@@ -5,9 +5,9 @@
  */
 export interface HederaTransactionHashResponse {
   /** The EVM transaction hash in hexadecimal format with 0x prefix */
-  hederaTransactionHash: string
+  hederaTransactionHash: string;
   /** Whether the hash was retrieved from Mirror Node API or generated as fallback */
-  isFromMirrorNode: boolean
+  isFromMirrorNode: boolean;
 }
 
 /**
@@ -23,9 +23,9 @@ export interface HederaService {
    * @returns Promise with Hedera transaction hash response
    * @throws Error if transaction ID format is invalid
    */
-  getParentHederaTransactionHash(transactionId: string): Promise<HederaTransactionHashResponse>
+  getParentHederaTransactionHash(transactionId: string): Promise<HederaTransactionHashResponse>;
 
-  getEvmAddressFromHedera(hederaAddress: string): Promise<string>
+  getEvmAddressFromHedera(hederaAddress: string): Promise<string>;
 
-  getHederaAddressFromEvm(evmAddress: string): Promise<string>
+  getHederaAddressFromEvm(evmAddress: string): Promise<string>;
 }

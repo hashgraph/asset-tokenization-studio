@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { ConfigModule } from "@nestjs/config"
-import { DynamicModule, Module } from "@nestjs/common"
-import { ConfigKeys } from "@config/config-keys"
-import Joi from "joi"
+import { ConfigModule } from "@nestjs/config";
+import { DynamicModule, Module } from "@nestjs/common";
+import { ConfigKeys } from "@config/config-keys";
+import Joi from "joi";
 
 @Module({})
 export class ConfigurationModule {
-  private static DEFAULT_ENV_FILE = "/.env"
+  private static DEFAULT_ENV_FILE = "/.env";
 
   static forRoot(envFile?: string): DynamicModule {
     return {
@@ -23,6 +23,6 @@ export class ConfigurationModule {
         }),
       ],
       exports: [ConfigModule],
-    }
+    };
   }
 }

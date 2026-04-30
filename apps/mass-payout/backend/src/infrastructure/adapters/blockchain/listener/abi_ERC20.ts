@@ -152,5 +152,5 @@ const abiERC20 = [
     stateMutability: "nonpayable",
     type: "function",
   },
-]
-export default abiERC20
+];
+export default abiERC20;
