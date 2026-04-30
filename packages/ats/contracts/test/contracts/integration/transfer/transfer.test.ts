@@ -201,7 +201,9 @@ describe("Transfer Facet Tests", () => {
         ]);
         expect(await asset.connect(signer_E).transferWithData(signer_D.address, amount / 2, DATA))
           .to.emit(asset, "TransferWithData")
-          .withArgs(signer_E.address, signer_D.address, amount / 2, DATA);
+          .withArgs(signer_E.address, signer_D.address, amount / 2, DATA)
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_E.address, signer_D.address, amount / 2);
 
         expect(await asset.balanceOf(signer_E.address)).to.be.equal(amount / 2);
         expect(await asset.balanceOf(signer_D.address)).to.be.equal(amount / 2);
@@ -236,7 +238,9 @@ describe("Transfer Facet Tests", () => {
 
         expect(await asset.connect(signer_D).transferFromWithData(signer_E.address, signer_D.address, amount / 2, DATA))
           .to.emit(asset, "TransferFromWithData")
-          .withArgs(signer_D.address, signer_E.address, signer_D.address, amount / 2, DATA);
+          .withArgs(signer_D.address, signer_E.address, signer_D.address, amount / 2, DATA)
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_E.address, signer_D.address, amount / 2);
 
         expect(await asset.allowance(signer_E.address, signer_D.address)).to.be.equal(0);
         expect(await asset.balanceOf(signer_E.address)).to.be.equal(amount / 2);

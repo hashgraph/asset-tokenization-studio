@@ -202,7 +202,9 @@ describe("ProtectedHoldByPartition Tests", () => {
             protectedHold.hold.data,
           ],
           "0x",
-        );
+        )
+        .to.emit(asset, "Transfer")
+        .withArgs(signer_A.address, ethers.ZeroAddress, protectedHold.hold.amount);
 
       const holdIdentifier = {
         partition: DEFAULT_PARTITION,

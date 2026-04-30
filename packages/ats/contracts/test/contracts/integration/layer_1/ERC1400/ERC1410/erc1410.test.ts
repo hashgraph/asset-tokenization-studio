@@ -3529,6 +3529,112 @@ describe("Clearing Tests", () => {
     });
   });
 
+  describe("ERC1410 Transfer Paths", async () => {
+    beforeEach(async () => {
+      await loadFixture(deploySecurityFixtureMultiPartition);
+      await asset.connect(signer_A).deactivateClearing();
+    });
+
+    describe("bug Transfer", async () => {
+      it("GIVEN valid parameters WHEN transferByPartition THEN transaction succeeds and emits Transfer", async () => {
+        await expect(
+          asset
+            .connect(signer_A)
+            .transferByPartition(_DEFAULT_PARTITION, { to: signer_C.address, value: _AMOUNT }, "0x"),
+        )
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_A.address, signer_C.address, _AMOUNT);
+      });
+    });
+
+    describe("operatorTransferByPartition", async () => {
+      it("GIVEN valid parameters WHEN operatorTransferByPartition THEN transaction succeeds and emits Transfer", async () => {
+        await asset.connect(signer_A).authorizeOperatorByPartition(_DEFAULT_PARTITION, signer_B.address);
+
+        const operatorTransferData = {
+          partition: _DEFAULT_PARTITION,
+          from: signer_A.address,
+          to: signer_B.address,
+          value: _AMOUNT,
+          data: "0x",
+          operatorData: "0x",
+        };
+
+        await expect(asset.connect(signer_B).operatorTransferByPartition(operatorTransferData))
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_A.address, signer_B.address, _AMOUNT);
+      });
+    });
+
+    describe("protectedTransferFromByPartition", async () => {
+      beforeEach(async () => {
+        const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
+          ["bytes32", "bytes32"],
+          [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+        );
+        const packedDataWithoutPrefix = packedData.slice(2);
+        const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
+
+        await asset.connect(signer_A).grantRole(protectedPartitionRole, signer_A.address);
+        await asset.connect(signer_A).grantRole(protectedPartitionRole, signer_B.address);
+        await asset.connect(signer_A).grantRole(protectedPartitionRole, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.PROTECTED_PARTITIONS_ROLE, signer_A.address);
+        await asset.connect(signer_A).protectPartitions();
+      });
+
+      it("GIVEN valid signature WHEN protectedTransferFromByPartition THEN transaction succeeds and emits Transfer", async () => {
+        const domainSeparator = {
+          name: (await asset.getERC20Metadata()).info.name,
+          version: (await asset.getConfigInfo()).version_.toString(),
+          chainId: await network.provider.send("eth_chainId"),
+          verifyingContract: diamond.target as string,
+        };
+
+        const transferType = {
+          protectedTransferFromByPartition: [
+            { name: "_partition", type: "bytes32" },
+            { name: "_from", type: "address" },
+            { name: "_to", type: "address" },
+            { name: "_amount", type: "uint256" },
+            { name: "_deadline", type: "uint256" },
+            { name: "_nonce", type: "uint256" },
+          ],
+        };
+
+        const message = {
+          _partition: _DEFAULT_PARTITION,
+          _from: signer_A.address,
+          _to: signer_C.address,
+          _amount: _AMOUNT,
+          _deadline: MAX_UINT256,
+          _nonce: 1,
+        };
+
+        const signature = await signer_A.signTypedData(domainSeparator, transferType, message);
+
+        const protectionData = {
+          deadline: MAX_UINT256,
+          nonce: 1,
+          signature: signature,
+        };
+
+        await expect(
+          asset
+            .connect(signer_B)
+            .protectedTransferFromByPartition(
+              _DEFAULT_PARTITION,
+              signer_A.address,
+              signer_C.address,
+              _AMOUNT,
+              protectionData,
+            ),
+        )
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_A.address, signer_C.address, _AMOUNT);
+      });
+    });
+  });
+
   describe("Multi Partition", async () => {
     beforeEach(async () => {
       await loadFixture(deploySecurityFixtureMultiPartition);

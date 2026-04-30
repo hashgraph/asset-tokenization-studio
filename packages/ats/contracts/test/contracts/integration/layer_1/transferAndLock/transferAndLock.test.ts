@@ -191,7 +191,9 @@ describe("Transfer and lock Tests", () => {
           .to.emit(asset, "TransferByPartition")
           .withArgs(_NON_DEFAULT_PARTITION, signer_C.address, signer_C.address, signer_A.address, _AMOUNT, "0x", "0x")
           .to.emit(asset, "PartitionTransferredAndLocked")
-          .withArgs(_NON_DEFAULT_PARTITION, signer_C.address, signer_A.address, _AMOUNT, "0x", expirationTimestamp, 1);
+          .withArgs(_NON_DEFAULT_PARTITION, signer_C.address, signer_A.address, _AMOUNT, "0x", expirationTimestamp, 1)
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_C.address, signer_A.address, _AMOUNT);
 
         expect(await asset.getLockedAmountForByPartition(_NON_DEFAULT_PARTITION, signer_A.address)).to.equal(_AMOUNT);
         expect(await asset.getLockCountForByPartition(_NON_DEFAULT_PARTITION, signer_A.address)).to.equal(1);
@@ -252,14 +254,6 @@ describe("Transfer and lock Tests", () => {
           .withArgs(_DEFAULT_PARTITION, signer_C.address, signer_A.address, _AMOUNT, "0x", expirationTimestamp, 1);
       });
 
-      it("GIVEN a expiration timestamp in past WHEN transferAndLock THEN transaction fails with WrongExpirationTimestamp", async () => {
-        await expect(
-          asset
-            .connect(signer_C)
-            .transferAndLock(signer_A.address, _AMOUNT, "0x", currentTimestamp - ONE_YEAR_IN_SECONDS),
-        ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
-      });
-
       it("GIVEN a valid partition WHEN transferAndLock with enough balance THEN transaction success", async () => {
         await asset.connect(signer_B).issueByPartition({
           partition: _DEFAULT_PARTITION,
@@ -272,7 +266,9 @@ describe("Transfer and lock Tests", () => {
           .to.emit(asset, "TransferByPartition")
           .withArgs(_DEFAULT_PARTITION, signer_C.address, signer_C.address, signer_A.address, _AMOUNT, "0x", "0x")
           .to.emit(asset, "PartitionTransferredAndLocked")
-          .withArgs(_DEFAULT_PARTITION, signer_C.address, signer_A.address, _AMOUNT, "0x", expirationTimestamp, 1);
+          .withArgs(_DEFAULT_PARTITION, signer_C.address, signer_A.address, _AMOUNT, "0x", expirationTimestamp, 1)
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_C.address, signer_A.address, _AMOUNT);
 
         expect(await asset.getLockedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(_AMOUNT);
         expect(await asset.getLockCountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(1);

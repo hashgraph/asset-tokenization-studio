@@ -407,7 +407,9 @@ describe("ERC3643 Tests", () => {
 
         await expect(asset.unfreezePartialTokens(signer_E.address, amount))
           .to.emit(asset, "TokensUnfrozen")
-          .withArgs(signer_E.address, amount, DEFAULT_PARTITION);
+          .withArgs(signer_E.address, amount, DEFAULT_PARTITION)
+          .to.emit(asset, "Transfer")
+          .withArgs(ethers.ZeroAddress, signer_E.address, amount);
         expect(await asset.getFrozenTokens(signer_E.address)).to.be.equal(0);
         expect(await asset.balanceOf(signer_E.address)).to.be.equal(amount);
       });

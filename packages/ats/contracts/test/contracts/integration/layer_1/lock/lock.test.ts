@@ -238,7 +238,9 @@ describe("Lock Tests", () => {
             .lockByPartition(_NON_DEFAULT_PARTITION, _AMOUNT, signer_A.address, expirationTimestamp),
         )
           .to.emit(asset, "LockedByPartition")
-          .withArgs(signer_C.address, signer_A.address, _NON_DEFAULT_PARTITION, 1, _AMOUNT, expirationTimestamp);
+          .withArgs(signer_C.address, signer_A.address, _NON_DEFAULT_PARTITION, 1, _AMOUNT, expirationTimestamp)
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
 
         expect(await asset.getLockedAmountForByPartition(_NON_DEFAULT_PARTITION, signer_A.address)).to.equal(_AMOUNT);
         expect(await asset.getLockCountForByPartition(_NON_DEFAULT_PARTITION, signer_A.address)).to.equal(1);
@@ -609,7 +611,9 @@ describe("Lock Tests", () => {
           asset.connect(signer_C).lockByPartition(_DEFAULT_PARTITION, _AMOUNT, signer_A.address, expirationTimestamp),
         )
           .to.emit(asset, "LockedByPartition")
-          .withArgs(signer_C.address, signer_A.address, _DEFAULT_PARTITION, 1, _AMOUNT, expirationTimestamp);
+          .withArgs(signer_C.address, signer_A.address, _DEFAULT_PARTITION, 1, _AMOUNT, expirationTimestamp)
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
 
         expect(await asset.getLockedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(_AMOUNT);
         expect(await asset.getLockCountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(1);
@@ -644,7 +648,9 @@ describe("Lock Tests", () => {
 
         await expect(asset.connect(signer_C).lock(_AMOUNT, signer_A.address, expirationTimestamp))
           .to.emit(asset, "LockedByPartition")
-          .withArgs(signer_C.address, signer_A.address, _DEFAULT_PARTITION, 1, _AMOUNT, expirationTimestamp);
+          .withArgs(signer_C.address, signer_A.address, _DEFAULT_PARTITION, 1, _AMOUNT, expirationTimestamp)
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
 
         expect(await asset.getLockedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(_AMOUNT);
         expect(await asset.getLockCountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(1);
@@ -679,7 +685,9 @@ describe("Lock Tests", () => {
         await asset.changeSystemTimestamp(expirationTimestamp + 1);
         await expect(asset.connect(signer_C).releaseByPartition(_DEFAULT_PARTITION, 1, signer_A.address))
           .to.emit(asset, "LockByPartitionReleased")
-          .withArgs(signer_C.address, signer_A.address, _DEFAULT_PARTITION, 1);
+          .withArgs(signer_C.address, signer_A.address, _DEFAULT_PARTITION, 1)
+          .to.emit(asset, "Transfer")
+          .withArgs(ethers.ZeroAddress, signer_A.address, _AMOUNT);
 
         expect(await asset.getLockedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(0);
         expect(await asset.getLockCountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(0);
@@ -736,10 +744,14 @@ describe("Lock Tests", () => {
         await asset.changeSystemTimestamp(expirationTimestamp + 1);
         await expect(asset.connect(signer_C).release(1, signer_A.address))
           .to.emit(asset, "LockByPartitionReleased")
-          .withArgs(signer_C.address, signer_A.address, _DEFAULT_PARTITION, 1);
+          .withArgs(signer_C.address, signer_A.address, _DEFAULT_PARTITION, 1)
+          .to.emit(asset, "Transfer")
+          .withArgs(ethers.ZeroAddress, signer_A.address, _AMOUNT - 1);
         await expect(asset.connect(signer_C).release(2, signer_A.address))
           .to.emit(asset, "LockByPartitionReleased")
-          .withArgs(signer_C.address, signer_A.address, _DEFAULT_PARTITION, 2);
+          .withArgs(signer_C.address, signer_A.address, _DEFAULT_PARTITION, 2)
+          .to.emit(asset, "Transfer")
+          .withArgs(ethers.ZeroAddress, signer_A.address, 1);
 
         expect(await asset.getLockedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(0);
         expect(await asset.getLockCountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(0);

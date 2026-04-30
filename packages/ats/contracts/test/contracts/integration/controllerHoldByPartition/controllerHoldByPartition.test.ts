@@ -310,7 +310,9 @@ describe("ControllerHoldByPartition Tests", () => {
             .controllerCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, hold, operatorData),
         )
           .to.emit(asset, "ControllerHeldByPartition")
-          .withArgs(signer_C.address, signer_A.address, DEFAULT_PARTITION, 1, Object.values(hold), operatorData);
+          .withArgs(signer_C.address, signer_A.address, DEFAULT_PARTITION, 1, Object.values(hold), operatorData)
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
 
         await checkCreatedHold_expected(
           0,

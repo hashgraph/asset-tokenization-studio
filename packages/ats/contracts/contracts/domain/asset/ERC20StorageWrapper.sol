@@ -148,7 +148,6 @@ library ERC20StorageWrapper {
             spender,
             ""
         );
-        emit ITransfer.Transfer(from, to, value);
         return true;
     }
 
@@ -161,7 +160,6 @@ library ERC20StorageWrapper {
             address(0),
             ""
         );
-        emit ITransfer.Transfer(from, to, value);
         return true;
     }
 

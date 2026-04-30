@@ -240,7 +240,9 @@ describe("ClearingByPartitionFacet Tests", () => {
           EXPIRATION_TIMESTAMP,
           EMPTY_HEX_BYTES,
           EMPTY_HEX_BYTES,
-        );
+        )
+        .to.emit(asset, "Transfer")
+        .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
 
       expect(await asset.balanceOf(signer_A.address)).to.equal(balanceBefore - BigInt(_AMOUNT));
       expect(await asset.allowance(signer_A.address, signer_B.address)).to.equal(0);
@@ -847,7 +849,9 @@ describe("ClearingByPartitionFacet Tests", () => {
 
       await expect(asset.connect(signer_A).approveClearingOperationByPartition(identifier))
         .to.emit(asset, "ClearingOperationApproved")
-        .withArgs(signer_A.address, signer_A.address, _DEFAULT_PARTITION, 1, ClearingOperationType.Transfer, "0x");
+        .withArgs(signer_A.address, signer_A.address, _DEFAULT_PARTITION, 1, ClearingOperationType.Transfer, "0x")
+        .to.emit(asset, "Transfer")
+        .withArgs(ethers.ZeroAddress, signer_B.address, _AMOUNT);
 
       expect(await asset.balanceOf(signer_A.address)).to.equal(balanceA_before - BigInt(_AMOUNT));
       expect(await asset.balanceOf(signer_B.address)).to.equal(balanceB_before + BigInt(_AMOUNT));
@@ -1005,7 +1009,9 @@ describe("ClearingByPartitionFacet Tests", () => {
 
       await expect(asset.connect(signer_A).cancelClearingOperationByPartition(identifier))
         .to.emit(asset, "ClearingOperationCanceled")
-        .withArgs(signer_A.address, signer_A.address, _DEFAULT_PARTITION, 1, ClearingOperationType.Redeem);
+        .withArgs(signer_A.address, signer_A.address, _DEFAULT_PARTITION, 1, ClearingOperationType.Redeem)
+        .to.emit(asset, "Transfer")
+        .withArgs(ethers.ZeroAddress, signer_A.address, _AMOUNT);
 
       expect(await asset.balanceOf(signer_A.address)).to.equal(balanceBefore);
       expect(await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(0);
@@ -1117,7 +1123,142 @@ describe("ClearingByPartitionFacet Tests", () => {
     });
   });
 
-  // ─── reclaimClearingOperationByPartition ──────────────────────────────────
+  // ─── bug Transfer: clearingRedeemByPartition ────────────────────────────────
+
+  describe("bug Transfer: clearingRedeemByPartition", () => {
+    it("GIVEN a holder WHEN clearingRedeemByPartition THEN Transfer event is emitted", async () => {
+      const clearingOperation = {
+        partition: _DEFAULT_PARTITION,
+        expirationTimestamp: EXPIRATION_TIMESTAMP,
+        data: EMPTY_HEX_BYTES,
+      };
+      await expect(asset.connect(signer_A).clearingRedeemByPartition(clearingOperation, _AMOUNT))
+        .to.emit(asset, "Transfer")
+        .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
+    });
+  });
+
+  // ─── bug Transfer: operatorClearingRedeemByPartition ─────────────────────────
+
+  describe("bug Transfer: operatorClearingRedeemByPartition", () => {
+    it("GIVEN an authorized operator WHEN operatorClearingRedeemByPartition THEN Transfer event is emitted", async () => {
+      await asset.connect(signer_A).authorizeOperator(signer_B.address);
+      await expect(
+        asset.connect(signer_B).operatorClearingRedeemByPartition(
+          {
+            clearingOperation: {
+              partition: _DEFAULT_PARTITION,
+              expirationTimestamp: EXPIRATION_TIMESTAMP,
+              data: EMPTY_HEX_BYTES,
+            },
+            from: signer_A.address,
+            operatorData: EMPTY_HEX_BYTES,
+          },
+          _AMOUNT,
+        ),
+      )
+        .to.emit(asset, "Transfer")
+        .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
+    });
+  });
+
+  // ─── bug Transfer: clearingRedeemFromByPartition ───────────────────────────
+
+  describe("bug Transfer: clearingRedeemFromByPartition", () => {
+    it("GIVEN a caller with allowance WHEN clearingRedeemFromByPartition THEN Transfer event is emitted", async () => {
+      await asset.connect(signer_A).increaseAllowance(signer_B.address, _AMOUNT);
+      const clearingOperationFrom = {
+        clearingOperation: {
+          partition: _DEFAULT_PARTITION,
+          expirationTimestamp: EXPIRATION_TIMESTAMP,
+          data: EMPTY_HEX_BYTES,
+        },
+        from: signer_A.address,
+        operatorData: EMPTY_HEX_BYTES,
+      };
+
+      await expect(asset.connect(signer_B).clearingRedeemFromByPartition(clearingOperationFrom, _AMOUNT))
+        .to.emit(asset, "Transfer")
+        .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
+    });
+  });
+
+  // ─── bug Transfer: protectedClearingRedeemByPartition ──────────────────────
+
+  describe("bug Transfer: protectedClearingRedeemByPartition", () => {
+    it("GIVEN a holder with valid signature WHEN protectedClearingRedeemByPartition THEN Transfer event is emitted", async () => {
+      await asset.connect(signer_A).protectPartitions();
+
+      const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
+        ["bytes32", "bytes32"],
+        [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+      );
+      const packedDataWithoutPrefix = packedData.slice(2);
+      const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
+      await asset.grantRole(protectedPartitionRole, signer_A.address);
+
+      const nonce = Number(await asset.nonces(signer_A.address)) + 1;
+
+      const protectedClearingOperation = {
+        clearingOperation: {
+          partition: _DEFAULT_PARTITION,
+          expirationTimestamp: EXPIRATION_TIMESTAMP,
+          data: EMPTY_HEX_BYTES,
+        },
+        from: signer_A.address,
+        deadline: EXPIRATION_TIMESTAMP,
+        nonce: nonce,
+      };
+
+      // Prepare EIP-712 domain
+      const name = (await asset.getERC20Metadata()).info.name;
+      const version = (await asset.getConfigInfo()).version_.toString();
+      const chainId = await network.provider.send("eth_chainId");
+
+      const domain = {
+        name: name,
+        version: version,
+        chainId: parseInt(chainId, 16),
+        verifyingContract: diamond.target.toString(),
+      };
+
+      const types = {
+        ClearingOperation: [
+          { name: "partition", type: "bytes32" },
+          { name: "expirationTimestamp", type: "uint256" },
+          { name: "data", type: "bytes" },
+        ],
+        ProtectedClearingOperation: [
+          { name: "clearingOperation", type: "ClearingOperation" },
+          { name: "from", type: "address" },
+          { name: "deadline", type: "uint256" },
+          { name: "nonce", type: "uint256" },
+        ],
+        protectedClearingRedeemByPartition: [
+          {
+            name: "_protectedClearingOperation",
+            type: "ProtectedClearingOperation",
+          },
+          { name: "_amount", type: "uint256" },
+        ],
+      };
+
+      const message = {
+        _protectedClearingOperation: protectedClearingOperation,
+        _amount: _AMOUNT,
+      };
+
+      const signature = await signer_A.signTypedData(domain, types, message);
+
+      await expect(
+        asset.connect(signer_A).protectedClearingRedeemByPartition(protectedClearingOperation, _AMOUNT, signature),
+      )
+        .to.emit(asset, "Transfer")
+        .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
+    });
+  });
+
+  // ─── bug Transfer: reclaimClearingOperationByPartition ─────────────────────
 
   describe("reclaimClearingOperationByPartition", () => {
     it("GIVEN an expired clearing WHEN reclaimClearingOperationByPartition THEN balance restored and clearedAmount zeroed", async () => {
@@ -1143,7 +1284,9 @@ describe("ClearingByPartitionFacet Tests", () => {
 
       await expect(asset.connect(signer_A).reclaimClearingOperationByPartition(identifier))
         .to.emit(asset, "ClearingOperationReclaimed")
-        .withArgs(signer_A.address, signer_A.address, _DEFAULT_PARTITION, 1, ClearingOperationType.Redeem);
+        .withArgs(signer_A.address, signer_A.address, _DEFAULT_PARTITION, 1, ClearingOperationType.Redeem)
+        .to.emit(asset, "Transfer")
+        .withArgs(ethers.ZeroAddress, signer_A.address, _AMOUNT);
 
       expect(await asset.balanceOf(signer_A.address)).to.equal(balanceBefore);
       expect(await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(0);
@@ -1358,6 +1501,137 @@ describe("ClearingByPartitionFacet Tests", () => {
       );
       expect(page2.length).to.equal(1);
       expect(page2[0]).to.equal(3);
+    });
+  });
+
+  // ─── bug Transfer: clearing transfer functions to ZeroAddress ─────────────────
+
+  describe("bug Transfer", () => {
+    it("A1: GIVEN a holder WHEN clearingTransferByPartition THEN Transfer to ZeroAddress", async () => {
+      const clearingOperation = {
+        partition: _DEFAULT_PARTITION,
+        expirationTimestamp: EXPIRATION_TIMESTAMP,
+        data: EMPTY_HEX_BYTES,
+      };
+      await expect(asset.connect(signer_A).clearingTransferByPartition(clearingOperation, _AMOUNT, signer_B.address))
+        .to.emit(asset, "Transfer")
+        .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
+    });
+
+    it("A2: GIVEN a caller with allowance WHEN clearingTransferFromByPartition THEN Transfer to ZeroAddress", async () => {
+      await asset.connect(signer_A).increaseAllowance(signer_B.address, _AMOUNT);
+      await expect(
+        asset.connect(signer_B).clearingTransferFromByPartition(
+          {
+            clearingOperation: {
+              partition: _DEFAULT_PARTITION,
+              expirationTimestamp: EXPIRATION_TIMESTAMP,
+              data: EMPTY_HEX_BYTES,
+            },
+            from: signer_A.address,
+            operatorData: EMPTY_HEX_BYTES,
+          },
+          _AMOUNT,
+          signer_C.address,
+        ),
+      )
+        .to.emit(asset, "Transfer")
+        .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
+    });
+
+    it("A3: GIVEN an authorized operator WHEN operatorClearingTransferByPartition THEN Transfer to ZeroAddress", async () => {
+      await asset.connect(signer_A).authorizeOperator(signer_B.address);
+      await expect(
+        asset.connect(signer_B).operatorClearingTransferByPartition(
+          {
+            clearingOperation: {
+              partition: _DEFAULT_PARTITION,
+              expirationTimestamp: EXPIRATION_TIMESTAMP,
+              data: EMPTY_HEX_BYTES,
+            },
+            from: signer_A.address,
+            operatorData: EMPTY_HEX_BYTES,
+          },
+          _AMOUNT,
+          signer_C.address,
+        ),
+      )
+        .to.emit(asset, "Transfer")
+        .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
+    });
+
+    it("A4: GIVEN a holder with valid signature WHEN protectedClearingTransferByPartition THEN Transfer to ZeroAddress", async () => {
+      await asset.connect(signer_A).protectPartitions();
+
+      const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
+        ["bytes32", "bytes32"],
+        [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+      );
+      const packedDataWithoutPrefix = packedData.slice(2);
+      const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
+      await asset.grantRole(protectedPartitionRole, signer_A.address);
+
+      const nonce = Number(await asset.nonces(signer_A.address)) + 1;
+
+      const protectedClearingOperation = {
+        clearingOperation: {
+          partition: _DEFAULT_PARTITION,
+          expirationTimestamp: EXPIRATION_TIMESTAMP,
+          data: EMPTY_HEX_BYTES,
+        },
+        from: signer_A.address,
+        deadline: EXPIRATION_TIMESTAMP,
+        nonce: nonce,
+      };
+
+      const name = (await asset.getERC20Metadata()).info.name;
+      const version = (await asset.getConfigInfo()).version_.toString();
+      const chainId = await network.provider.send("eth_chainId");
+
+      const domain = {
+        name: name,
+        version: version,
+        chainId: parseInt(chainId, 16),
+        verifyingContract: diamond.target.toString(),
+      };
+
+      const types = {
+        ClearingOperation: [
+          { name: "partition", type: "bytes32" },
+          { name: "expirationTimestamp", type: "uint256" },
+          { name: "data", type: "bytes" },
+        ],
+        ProtectedClearingOperation: [
+          { name: "clearingOperation", type: "ClearingOperation" },
+          { name: "from", type: "address" },
+          { name: "deadline", type: "uint256" },
+          { name: "nonce", type: "uint256" },
+        ],
+        protectedClearingTransferByPartition: [
+          {
+            name: "_protectedClearingOperation",
+            type: "ProtectedClearingOperation",
+          },
+          { name: "_amount", type: "uint256" },
+          { name: "_to", type: "address" },
+        ],
+      };
+
+      const message = {
+        _protectedClearingOperation: protectedClearingOperation,
+        _amount: _AMOUNT,
+        _to: signer_C.address,
+      };
+
+      const signature = await signer_A.signTypedData(domain, types, message);
+
+      await expect(
+        asset
+          .connect(signer_A)
+          .protectedClearingTransferByPartition(protectedClearingOperation, _AMOUNT, signer_C.address, signature),
+      )
+        .to.emit(asset, "Transfer")
+        .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
     });
   });
 });
