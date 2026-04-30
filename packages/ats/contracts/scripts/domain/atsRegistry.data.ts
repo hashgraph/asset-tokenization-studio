@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-29T12:24:13.303Z
- * Facets: 97
+ * Generated: 2026-04-30T10:06:16.434Z
+ * Facets: 102
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -13082,30 +13082,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["Snapshots", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "clearedBalanceOfAtSnapshotByPartition",
-        signature: {
-          full: "function clearedBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
-          canonical: "clearedBalanceOfAtSnapshotByPartition(bytes32,uint256,address)",
-        },
-        selector: "0x386e1405",
-      },
-      {
-        name: "decimalsAtSnapshot",
-        signature: {
-          full: "function decimalsAtSnapshot(uint256 _snapshotID) view returns (uint8 decimals_)",
-          canonical: "decimalsAtSnapshot(uint256)",
-        },
-        selector: "0x69ed346f",
-      },
-      {
-        name: "clearedBalanceOfAtSnapshot",
-        signature: {
-          full: "function clearedBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
-          canonical: "clearedBalanceOfAtSnapshot(uint256,address)",
-        },
-        selector: "0x2bc16e9b",
-      },
-      {
         name: "frozenBalanceOfAtSnapshot",
         signature: {
           full: "function frozenBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
@@ -13271,8 +13247,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xc9622656",
       },
     ],
-    factory: (signer) => new SnapshotsFacet__factory(getLibLinks("clearingReadOps") as any, signer),
-    timeTravelFactory: (signer) => new SnapshotsFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
+    factory: (signer) => new SnapshotsFacet__factory(signer),
+    timeTravelFactory: (signer) => new SnapshotsFacetTimeTravel__factory(signer),
   },
 
   SsiManagementFacet: {
@@ -14521,7 +14497,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 98 as const;
+export const TOTAL_FACETS = 102 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
