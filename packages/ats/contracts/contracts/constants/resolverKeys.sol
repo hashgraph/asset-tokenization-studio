@@ -557,18 +557,6 @@ bytes32 constant _BOND_KPI_LINKED_READ_RESOLVER_KEY = 0xcced91a2a03bf45bd62730a7
 // keccak256('security.token.standard.bond.SustainabilityPerformanceTarget.read.resolverKey');
 bytes32 constant _BOND_SUSTAINABILITY_PERFORMANCE_TARGET_READ_RESOLVER_KEY = 0x339d458f2928ef5148317aab39e4375a27e6c531d2e5b9de2d4fb23ad0e8b504;
 
-// keccak256('security.token.standard.scheduled.balanceAdjustments.resolverKey');
-bytes32 constant _SCHEDULED_BALANCE_ADJUSTMENTS_RESOLVER_KEY = 0xc418e67a48260d700e5f85863ad6fa6593206a4385728f8baba1572d631535e0;
-
-// keccak256("security.token.standard.scheduled.balanceAdjustments.fixed.rate.resolverKey")
-bytes32 constant _SCHEDULED_BALANCE_ADJUSTMENTS_FIXED_RATE_RESOLVER_KEY = 0xb3336a1ececdcd807fd6e81cc57e9392c75bf3fd303a2f5df0b11c0dda87ce7f;
-
-// keccak256("security.token.standard.scheduled.balanceAdjustments.kpilinked.rate.resolverKey")
-bytes32 constant _SCHEDULED_BALANCE_ADJUSTMENTS_KPI_LINKED_RATE_RESOLVER_KEY = 0x3da33aed4e04baa1b9c39bd96d0bc7be51ecaa1468eff7f632c29fb134644cb4;
-
-// keccak256("security.token.standard.scheduled.balanceAdjustments.SustainabilityPerformanceTarget.rate.resolverKey")
-bytes32 constant _SCHEDULED_BALANCE_ADJUSTMENTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x1168df5bb8a348d137af6e29915c261dc82c495f72484a046ac4f750899625f4;
-
 // keccak256('security.token.standard.scheduled.couponListing.resolverKey');
 bytes32 constant _SCHEDULED_COUPON_LISTING_RESOLVER_KEY = 0x6cc7645ae5bcd122875ce8bd150bd28dda6374546c4c2421e5ae4fdeedb3ab30;
 

@@ -9,7 +9,7 @@ import {
 import {
     IScheduledCrossOrderedTasks
 } from "../../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
-import { IEquity } from "../../facets/layer_2/equity/IEquity.sol";
+import { IAdjustBalances } from "../../facets/adjustBalances/IAdjustBalances.sol";
 import { ISnapshots } from "../../facets/layer_1/snapshot/ISnapshots.sol";
 import {
     _SCHEDULED_SNAPSHOTS_STORAGE_POSITION,
@@ -231,9 +231,9 @@ library ScheduledTasksStorageWrapper {
                     abi.decode(scheduledTask.data, (bytes32))
                 );
 
-                IEquity.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
+                IAdjustBalances.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
                     balanceAdjustmentData,
-                    (IEquity.ScheduledBalanceAdjustment)
+                    (IAdjustBalances.ScheduledBalanceAdjustment)
                 );
                 pendingABAF_ *= balanceAdjustment.factor;
                 pendingDecimals_ += balanceAdjustment.decimals;
@@ -383,9 +383,9 @@ library ScheduledTasksStorageWrapper {
 
         if (isDisabled_) return;
 
-        IEquity.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
+        IAdjustBalances.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
             balanceAdjustmentData,
-            (IEquity.ScheduledBalanceAdjustment)
+            (IAdjustBalances.ScheduledBalanceAdjustment)
         );
 
         AdjustBalancesStorageWrapper.adjustBalances(balanceAdjustment.factor, balanceAdjustment.decimals);

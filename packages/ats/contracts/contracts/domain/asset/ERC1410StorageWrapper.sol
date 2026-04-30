@@ -7,7 +7,7 @@ import {
     _ERC1410_BASIC_STORAGE_POSITION,
     _ERC1410_OPERATOR_STORAGE_POSITION
 } from "../../constants/storagePositions.sol";
-import { AddressValidation } from "../../infrastructure/utils/AddressValidation.sol";
+import { DefaultValueValidation } from "../../infrastructure/utils/DefaultValueValidation.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC20VotesStorageWrapper } from "./ERC20VotesStorageWrapper.sol";
@@ -631,7 +631,7 @@ library ERC1410StorageWrapper {
     }
 
     function requireValidAddress(address account) internal pure {
-        AddressValidation.checkZeroAddress(account);
+        DefaultValueValidation.checkZeroAddress(account);
     }
 
     function erc1410BasicStorage() internal pure returns (ERC1410BasicStorage storage erc1410BasicStorage_) {

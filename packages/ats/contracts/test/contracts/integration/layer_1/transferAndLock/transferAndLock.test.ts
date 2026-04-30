@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type ResolverProxy, type IAsset } from "@contract-types";
 import { ZERO, EMPTY_STRING, ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
+import { deployEquityTokenFixture, getDltTimestamp, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
 
 const _NON_DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000011";
@@ -92,7 +92,7 @@ describe("Transfer and lock Tests", () => {
   }
 
   beforeEach(async () => {
-    currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
+    currentTimestamp = await getDltTimestamp();
     expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS;
   });
 
@@ -225,7 +225,13 @@ describe("Transfer and lock Tests", () => {
         await expect(
           asset
             .connect(signer_C)
-            .transferAndLockByPartition(_NON_DEFAULT_PARTITION, signer_A.address, _AMOUNT, "0x", currentTimestamp),
+            .transferAndLockByPartition(
+              _NON_DEFAULT_PARTITION,
+              signer_A.address,
+              _AMOUNT,
+              "0x",
+              (await getDltTimestamp()) + 1,
+            ),
         )
           .to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode")
           .withArgs(_NON_DEFAULT_PARTITION);

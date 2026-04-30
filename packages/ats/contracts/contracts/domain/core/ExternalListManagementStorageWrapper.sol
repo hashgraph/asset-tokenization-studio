@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { AddressValidation } from "../../infrastructure/utils/AddressValidation.sol";
+import { DefaultValueValidation } from "../../infrastructure/utils/DefaultValueValidation.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IExternalControlList } from "../../facets/layer_1/externalControlList/IExternalControlList.sol";
@@ -136,7 +136,7 @@ library ExternalListManagementStorageWrapper {
     }
 
     function checkValidAddress(address _addr) internal pure {
-        AddressValidation.checkZeroAddress(_addr);
+        DefaultValueValidation.checkZeroAddress(_addr);
     }
 
     function externalListStorage(

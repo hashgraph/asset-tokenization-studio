@@ -12,10 +12,9 @@ contract ERC1410TokenHolderFacet is ERC1410TokenHolder, IStaticFunctionSelectors
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 6;
+        uint256 selectorIndex = 5;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);
         unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.triggerAndSyncAll.selector;
             staticFunctionSelectors_[--selectorIndex] = this.revokeOperatorByPartition.selector;
             staticFunctionSelectors_[--selectorIndex] = this.authorizeOperatorByPartition.selector;
             staticFunctionSelectors_[--selectorIndex] = this.revokeOperator.selector;

@@ -50,4 +50,6 @@ interface ICommonErrors {
     error AccountIsBlocked(address account);
 
     error ZeroAddressNotAllowed();
+
+    error ZeroValueNotAllowed();
 }
