@@ -206,6 +206,19 @@ describe("BatchFreeze Tests", () => {
         expect(finalFrozenE).to.equal(initialFrozenE + BigInt(freezeAmount));
       });
 
+      describe("bug Transfer", () => {
+        it("GIVEN freeze manager WHEN batchFreezePartialTokens THEN Transfer event is emitted for each account", async () => {
+          const userAddresses = [signer_D.address, signer_E.address];
+          const amounts = [freezeAmount, freezeAmount];
+
+          await expect(asset.batchFreezePartialTokens(userAddresses, amounts))
+            .to.emit(asset, "Transfer")
+            .withArgs(signer_D.address, ethers.ZeroAddress, freezeAmount)
+            .to.emit(asset, "Transfer")
+            .withArgs(signer_E.address, ethers.ZeroAddress, freezeAmount);
+        });
+      });
+
       it("GIVEN an invalid input amounts array THEN transaction fails with InputAmountsArrayLengthMismatch", async () => {
         const mintAmount = AMOUNT / 2;
         const toList = [signer_D.address];
@@ -244,6 +257,19 @@ describe("BatchFreeze Tests", () => {
 
         expect(finalFrozenD).to.equal(initialFrozenD - BigInt(unfreezeAmount));
         expect(finalFrozenE).to.equal(initialFrozenE - BigInt(unfreezeAmount));
+      });
+
+      describe("bug Transfer", () => {
+        it("GIVEN frozen tokens WHEN batchUnfreezePartialTokens THEN Transfer event is emitted for each account", async () => {
+          const userAddresses = [signer_D.address, signer_E.address];
+          const amounts = [unfreezeAmount, unfreezeAmount];
+
+          await expect(asset.batchUnfreezePartialTokens(userAddresses, amounts))
+            .to.emit(asset, "Transfer")
+            .withArgs(ethers.ZeroAddress, signer_D.address, unfreezeAmount)
+            .to.emit(asset, "Transfer")
+            .withArgs(ethers.ZeroAddress, signer_E.address, unfreezeAmount);
+        });
       });
 
       it("GIVEN insufficient frozen tokens WHEN batchUnfreezePartialTokens THEN transaction fails", async () => {

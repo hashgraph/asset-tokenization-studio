@@ -111,5 +111,19 @@ describe("MintFacet Tests", () => {
       expect(await asset.totalSupply()).to.be.equal(AMOUNT / 2);
       expect(await asset.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
     });
+
+    describe("bug Transfer", () => {
+      it("GIVEN an issuer WHEN issue THEN Transfer event is emitted from address(0) to receiver", async () => {
+        await expect(asset.issue(signer_E.address, AMOUNT / 2, DATA))
+          .to.emit(asset, "Transfer")
+          .withArgs(ethers.ZeroAddress, signer_E.address, AMOUNT / 2);
+      });
+
+      it("GIVEN an issuer WHEN mint THEN Transfer event is emitted from address(0) to receiver", async () => {
+        await expect(asset.mint(signer_E.address, AMOUNT / 2))
+          .to.emit(asset, "Transfer")
+          .withArgs(ethers.ZeroAddress, signer_E.address, AMOUNT / 2);
+      });
+    });
   });
 });

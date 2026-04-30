@@ -204,8 +204,9 @@ library ERC1410StorageWrapper {
             increaseBalanceByPartition(basicTransferInfo.to, basicTransferInfo.value, partition);
         }
 
-        // Emit transfer event AFTER all partition balance changes are complete.
+        // Emit transfer events AFTER all partition balance changes are complete.
         // This ensures TransferByPartition is emitted when partitions[] changes.
+        // ERC-20 Transfer is also required per EIP-20 for off-chain indexer traceability.
         emit IERC1410Types.TransferByPartition(
             partition,
             operator,
@@ -215,6 +216,8 @@ library ERC1410StorageWrapper {
             data,
             operatorData
         );
+
+        emit ITransfer.Transfer(from, basicTransferInfo.to, basicTransferInfo.value);
 
         if (from != basicTransferInfo.to && partition == _DEFAULT_PARTITION) {
             (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
@@ -258,6 +261,8 @@ library ERC1410StorageWrapper {
             increaseBalanceByPartition(issueData.tokenHolder, issueData.value, issueData.partition);
         }
 
+        emit ITransfer.Transfer(address(0), issueData.tokenHolder, issueData.value);
+
         increaseTotalSupplyByPartition(issueData.partition, issueData.value);
 
         if (issueData.partition == _DEFAULT_PARTITION) {
@@ -300,6 +305,8 @@ library ERC1410StorageWrapper {
         beforeTokenTransfer(partition, from, address(0), value);
 
         reduceBalanceByPartition(from, value, partition);
+
+        emit ITransfer.Transfer(from, address(0), value);
 
         // RULE 2: Emit TransferByPartition when ERC1410BasicStorage.partitions change
         emit IERC1410Types.TransferByPartition(partition, operator, from, address(0), value, data, operatorData);

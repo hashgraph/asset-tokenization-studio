@@ -7,7 +7,6 @@ import { IController } from "../controller/IController.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
-import { ITransfer } from "../transfer/ITransfer.sol";
 
 /**
  * @title BatchBurn
@@ -36,7 +35,6 @@ abstract contract BatchBurn is IBatchBurn, Modifiers {
         address sender = EvmAccessors.getMsgSender();
         for (uint256 i; i < length; ) {
             TokenCoreOps.burn(_userAddresses[i], _amounts[i]);
-            emit ITransfer.Transfer(_userAddresses[i], address(0), _amounts[i]);
             emit IController.ControllerRedemption(sender, _userAddresses[i], _amounts[i], "", "");
             unchecked {
                 ++i;

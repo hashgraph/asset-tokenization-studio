@@ -123,6 +123,19 @@ describe("BatchTransfer Tests", () => {
         expect(finalBalanceD).to.equal(initialBalanceD + BigInt(transferAmount));
       });
 
+      describe("bug Transfer", () => {
+        it("GIVEN a valid sender WHEN batchTransfer THEN Transfer event is emitted for each receiver", async () => {
+          const toList = [signer_F.address, signer_D.address];
+          const amounts = [transferAmount, transferAmount];
+
+          await expect(asset.connect(signer_E).batchTransfer(toList, amounts))
+            .to.emit(asset, "Transfer")
+            .withArgs(signer_E.address, signer_F.address, transferAmount)
+            .to.emit(asset, "Transfer")
+            .withArgs(signer_E.address, signer_D.address, transferAmount);
+        });
+      });
+
       it("GIVEN insufficient balance WHEN batchTransfer THEN transaction fails", async () => {
         const toList = [signer_F.address, signer_D.address];
         // Total amount > balance
