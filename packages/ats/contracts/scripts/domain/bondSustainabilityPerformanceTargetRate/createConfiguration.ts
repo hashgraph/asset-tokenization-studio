@@ -81,12 +81,11 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "BurnFacet",
 
   // Clearing & Settlement
-  "ClearingActionsFacet",
   "ClearingByPartitionFacet",
   "ClearingHoldCreationFacet",
   "ClearingHoldByPartitionFacet",
   "OperatorClearingHoldByPartitionFacet",
-  "ClearingReadFacet",
+  "ClearingFacet",
   "ClearingRedeemFacet",
   "ClearingTransferFacet",
   "HoldFacet",

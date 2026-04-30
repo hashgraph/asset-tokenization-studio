@@ -81,13 +81,12 @@ const EQUITY_FACETS = [
   "MintFacet",
   "BurnFacet",
 
-  // Clearing & Settlement (8)
-  "ClearingActionsFacet",
+  // Clearing & Settlement (7)
   "ClearingByPartitionFacet",
   "ClearingHoldCreationFacet",
   "ClearingHoldByPartitionFacet",
   "OperatorClearingHoldByPartitionFacet",
-  "ClearingReadFacet",
+  "ClearingFacet",
   "ClearingRedeemFacet",
   "ClearingTransferFacet",
   "HoldFacet",

@@ -41,7 +41,7 @@ import {
   KycFacet__factory,
   PauseFacet__factory,
   ProtectedPartitionsFacet__factory,
-  ClearingActionsFacet__factory,
+  ClearingFacet__factory,
   ExternalKycListManagementFacet__factory,
   ExternalControlListManagementFacet__factory,
   ExternalPauseManagementFacet__factory,
@@ -269,7 +269,7 @@ export async function deployLoanTokenFixture({
   const couponFacet = CouponFacet__factory.connect(proxyAddress, deployer);
   const nominalValueFacet = NominalValueFacet__factory.connect(proxyAddress, deployer);
   const protectedPartitionsFacet = ProtectedPartitionsFacet__factory.connect(proxyAddress, deployer);
-  const clearingActionsFacet = ClearingActionsFacet__factory.connect(proxyAddress, deployer);
+  const clearingFacet = ClearingFacet__factory.connect(proxyAddress, deployer);
   const externalKycListManagementFacet = ExternalKycListManagementFacet__factory.connect(proxyAddress, deployer);
   const externalControlListManagementFacet = ExternalControlListManagementFacet__factory.connect(
     proxyAddress,
@@ -295,7 +295,7 @@ export async function deployLoanTokenFixture({
   await mintFacet.initialize_ERC1594();
   await capFacet.initialize_Cap(securityData.maxSupply, []);
   await protectedPartitionsFacet.initialize_ProtectedPartitions(securityData.arePartitionsProtected);
-  await clearingActionsFacet.initializeClearing(securityData.clearingActive);
+  await clearingFacet.initializeClearing(securityData.clearingActive);
   await externalPauseManagementFacet.initialize_ExternalPauses([]);
   await externalControlListManagementFacet.initialize_ExternalControlLists([]);
   await kycFacet.initializeInternalKyc(securityData.internalKycActivated);
@@ -343,7 +343,7 @@ export async function deployLoanTokenFixture({
     couponFacet,
     nominalValueFacet,
     protectedPartitionsFacet,
-    clearingActionsFacet,
+    clearingFacet,
     externalKycListManagementFacet,
     externalControlListManagementFacet,
     externalPauseManagementFacet,
