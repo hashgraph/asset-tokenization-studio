@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-29T13:35:58.966Z
- * Facets: 98
+ * Generated: 2026-04-30T07:57:10.491Z
+ * Facets: 99
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -54,6 +54,7 @@ import {
   ClearingTransferFacet__factory,
   ComplianceFacet__factory,
   ControlListFacet__factory,
+  ControllerByPartitionFacet__factory,
   ControllerFacet__factory,
   ControllerHoldByPartitionFacet__factory,
   CoreAdjustedFacet__factory,
@@ -4807,6 +4808,157 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) => new ComplianceFacetTimeTravel__factory(signer),
   },
 
+  ControllerByPartitionFacet: {
+    name: "ControllerByPartitionFacet",
+    description:
+      "Diamond facet that exposes controller-initiated forced transfer and redemption operations on a specific partition, registered under `_CONTROLLER_BY_PARTITION_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_CONTROLLER_BY_PARTITION_RESOLVER_KEY",
+      value: "0x66d6ddfefca163b54f2a365e7965e1c3f42e2d87254191bcfb5a6e7fb03174a2",
+    },
+    inheritance: ["ControllerByPartition", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "controllerRedeemByPartition",
+        signature: {
+          full: "function controllerRedeemByPartition(bytes32 _partition, address _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)",
+          canonical: "controllerRedeemByPartition(bytes32,address,uint256,bytes,bytes)",
+        },
+        selector: "0xb84777cc",
+      },
+      {
+        name: "controllerTransferByPartition",
+        signature: {
+          full: "function controllerTransferByPartition(bytes32 _partition, address _from, address _to, uint256 _value, bytes _data, bytes _operatorData) returns (bytes32)",
+          canonical: "controllerTransferByPartition(bytes32,address,address,uint256,bytes,bytes)",
+        },
+        selector: "0xfb78befa",
+      },
+    ],
+    events: [
+      {
+        name: "AuthorizedOperator",
+        signature: {
+          full: "event AuthorizedOperator(address indexed operator, address indexed tokenHolder)",
+          canonical: "AuthorizedOperator(address,address)",
+        },
+        topic0: "0xf4caeb2d6ca8932a215a353d0703c326ec2d81fc68170f320eb2ab49e9df61f9",
+      },
+      {
+        name: "AuthorizedOperatorByPartition",
+        signature: {
+          full: "event AuthorizedOperatorByPartition(bytes32 indexed partition, address indexed operator, address indexed tokenHolder)",
+          canonical: "AuthorizedOperatorByPartition(bytes32,address,address)",
+        },
+        topic0: "0x3646a897c70797ecc134b0adc32f471b07bf1d6f451133b0384badab531e3fd6",
+      },
+      {
+        name: "IssuedByPartition",
+        signature: {
+          full: "event IssuedByPartition(bytes32 indexed partition, address indexed operator, address indexed to, uint256 value, bytes data)",
+          canonical: "IssuedByPartition(bytes32,address,address,uint256,bytes)",
+        },
+        topic0: "0x5af1c8f424b104b6ba4e3c0885f2ed9fef04a9b1ea39cd9ed362432105c0791a",
+      },
+      {
+        name: "RedeemedByPartition",
+        signature: {
+          full: "event RedeemedByPartition(bytes32 indexed partition, address indexed operator, address indexed from, uint256 value, bytes data, bytes operatorData)",
+          canonical: "RedeemedByPartition(bytes32,address,address,uint256,bytes,bytes)",
+        },
+        topic0: "0xa4f62471c9bdf88115b97203943c74c59b655913ee5ee592706d84ef53fb6be2",
+      },
+      {
+        name: "RevokedOperator",
+        signature: {
+          full: "event RevokedOperator(address indexed operator, address indexed tokenHolder)",
+          canonical: "RevokedOperator(address,address)",
+        },
+        topic0: "0x50546e66e5f44d728365dc3908c63bc5cfeeab470722c1677e3073a6ac294aa1",
+      },
+      {
+        name: "RevokedOperatorByPartition",
+        signature: {
+          full: "event RevokedOperatorByPartition(bytes32 indexed partition, address indexed operator, address indexed tokenHolder)",
+          canonical: "RevokedOperatorByPartition(bytes32,address,address)",
+        },
+        topic0: "0x3b287c4f1bab4df949b33bceacef984f544dc5d5479930d00e4ee8c9d8dd96f2",
+      },
+      {
+        name: "TransferByPartition",
+        signature: {
+          full: "event TransferByPartition(bytes32 indexed _fromPartition, address _operator, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)",
+          canonical: "TransferByPartition(bytes32,address,address,address,uint256,bytes,bytes)",
+        },
+        topic0: "0xff4e9a26af4eb73b8bacfaa4abd4fea03d9448e7b912dc5ff4019048875aa2d4",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRoles",
+        signature: {
+          full: "error AccountHasNoRoles(address account, bytes32[] roles)",
+          canonical: "AccountHasNoRoles(address,bytes32[])",
+        },
+        selector: "0x90e55392",
+      },
+      {
+        name: "InvalidPartition",
+        signature: {
+          full: "error InvalidPartition(address account, bytes32 partition)",
+          canonical: "InvalidPartition(address,bytes32)",
+        },
+        selector: "0xbf84f4ec",
+      },
+      {
+        name: "NotAllowedInMultiPartitionMode",
+        signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
+        selector: "0x76d08f88",
+      },
+      {
+        name: "PartitionNotAllowedInSinglePartitionMode",
+        signature: {
+          full: "error PartitionNotAllowedInSinglePartitionMode(bytes32 partition)",
+          canonical: "PartitionNotAllowedInSinglePartitionMode(bytes32)",
+        },
+        selector: "0xb96d9539",
+      },
+      {
+        name: "TokenIsNotControllable",
+        signature: { full: "error TokenIsNotControllable()", canonical: "TokenIsNotControllable()" },
+        selector: "0xf4b7b072",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+      {
+        name: "Unauthorized",
+        signature: {
+          full: "error Unauthorized(address operator, address tokenHolder, bytes32 partition)",
+          canonical: "Unauthorized(address,address,bytes32)",
+        },
+        selector: "0x1e09743f",
+      },
+      {
+        name: "ZeroPartition",
+        signature: { full: "error ZeroPartition()", canonical: "ZeroPartition()" },
+        selector: "0x4a6f30c3",
+      },
+      { name: "ZeroValue", signature: { full: "error ZeroValue()", canonical: "ZeroValue()" }, selector: "0x7c946ed7" },
+    ],
+    factory: (signer) => new ControllerByPartitionFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+  },
+
   ControllerFacet: {
     name: "ControllerFacet",
     description: "Diamond facet exposing ERC-1644 forced-transfer operations and ERC-3643 agent management.",
@@ -7259,22 +7411,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["ERC1410Management", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "controllerRedeemByPartition",
-        signature: {
-          full: "function controllerRedeemByPartition(bytes32 _partition, address _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)",
-          canonical: "controllerRedeemByPartition(bytes32,address,uint256,bytes,bytes)",
-        },
-        selector: "0xb84777cc",
-      },
-      {
-        name: "controllerTransferByPartition",
-        signature: {
-          full: "function controllerTransferByPartition(bytes32 _partition, address _from, address _to, uint256 _value, bytes _data, bytes _operatorData) returns (bytes32)",
-          canonical: "controllerTransferByPartition(bytes32,address,address,uint256,bytes,bytes)",
-        },
-        selector: "0xfb78befa",
-      },
-      {
         name: "initialize_ERC1410",
         signature: { full: "function initialize_ERC1410(bool _multiPartition)", canonical: "initialize_ERC1410(bool)" },
         selector: "0x7b1df196",
@@ -7388,14 +7524,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
-        name: "AccountHasNoRoles",
-        signature: {
-          full: "error AccountHasNoRoles(address account, bytes32[] roles)",
-          canonical: "AccountHasNoRoles(address,bytes32[])",
-        },
-        selector: "0x90e55392",
-      },
-      {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
@@ -7433,11 +7561,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "PartitionsAreUnProtected",
         signature: { full: "error PartitionsAreUnProtected()", canonical: "PartitionsAreUnProtected()" },
         selector: "0x05681565",
-      },
-      {
-        name: "TokenIsNotControllable",
-        signature: { full: "error TokenIsNotControllable()", canonical: "TokenIsNotControllable()" },
-        selector: "0xf4b7b072",
       },
       {
         name: "TokenIsPaused",
@@ -14284,7 +14407,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 98 as const;
+export const TOTAL_FACETS = 99 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

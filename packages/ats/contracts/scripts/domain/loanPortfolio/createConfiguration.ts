@@ -92,6 +92,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "HoldFacet",
   "HoldManagementFacet",
   "ControllerHoldByPartitionFacet",
+  "ControllerByPartitionFacet",
   "ProtectedHoldByPartitionFacet",
   "HoldByPartitionFacet",
 
