@@ -15,7 +15,7 @@ import { IController } from "../facets/controller/IController.sol";
 import { IERC1410 } from "../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
 import { ICap } from "../facets/layer_1/cap/ICap.sol";
 import { IMint } from "../facets/mint/IMint.sol";
-import { IClearingActions } from "../facets/layer_1/clearing/IClearingActions.sol";
+import { IClearing } from "../facets/clearing/IClearing.sol";
 import { IBusinessLogicResolver } from "../infrastructure/diamond/IBusinessLogicResolver.sol";
 import {
     FactoryRegulationData,
@@ -341,7 +341,7 @@ contract Factory is IFactory {
         // configure protected partitions (should be present)
         IProtectedPartitions(securityAddress_).initialize_ProtectedPartitions(_securityData.arePartitionsProtected);
 
-        // configure clearing (ClearingActionsFacet may not be present)
+        // configure clearing (ClearingFacet may not be present)
         _tryInitializeClearing(securityAddress_, _securityData.clearingActive);
 
         // configure external pauses (should be present)
@@ -390,7 +390,7 @@ contract Factory is IFactory {
     }
 
     function _tryInitializeClearing(address securityAddress_, bool clearingActive) private {
-        try IClearingActions(securityAddress_).initializeClearing(clearingActive) {
+        try IClearing(securityAddress_).initializeClearing(clearingActive) {
             // success
         } catch {
             // facet not present - skip initialization

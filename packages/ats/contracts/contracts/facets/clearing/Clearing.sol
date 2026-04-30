@@ -14,12 +14,18 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  * @title Clearing
  * @author Asset Tokenization Studio Team
  * @notice Abstract implementation of the clearing module's global state and account-level reads.
- * @dev Implements the clearing activation lifecycle and the account-scoped read queries on top
- *      of `ClearingStorageWrapper` and `ClearingReadOps`. Mutating entry points enforce the
- *      `onlyUnpaused` and `onlyRole(CLEARING_ROLE)` guards. Intended to be inherited by
- *      `ClearingFacet`.
+ * @dev Implements the one-shot initializer, the activation lifecycle and the account-scoped
+ *      read queries on top of `ClearingStorageWrapper` and `ClearingReadOps`. The activation
+ *      toggles enforce the `onlyUnpaused` and `onlyRole(CLEARING_ROLE)` guards;
+ *      `initializeClearing` is gated by `onlyNotClearingInitialized`. Intended to be inherited
+ *      by `ClearingFacet`.
  */
 abstract contract Clearing is IClearing, Modifiers {
+    /// @inheritdoc IClearing
+    function initializeClearing(bool _activateClearing) external override onlyNotClearingInitialized {
+        ClearingStorageWrapper.initializeClearing(_activateClearing);
+    }
+
     /// @inheritdoc IClearing
     function activateClearing() external override onlyUnpaused onlyRole(CLEARING_ROLE) returns (bool success_) {
         emit ClearingActivated(EvmAccessors.getMsgSender());

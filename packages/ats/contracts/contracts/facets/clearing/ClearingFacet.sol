@@ -10,9 +10,9 @@ import { _CLEARING_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
  * @title ClearingFacet
  * @author Asset Tokenization Studio Team
  * @notice Diamond facet exposing the clearing module global state and account-level reads.
- * @dev Registers five selectors under `_CLEARING_RESOLVER_KEY`: `activateClearing`,
- *      `deactivateClearing`, `isClearingActivated`, `getClearedAmountFor`, and
- *      `getClearingThirdParty`. Inherits the implementation from `Clearing`. Requires
+ * @dev Registers six selectors under `_CLEARING_RESOLVER_KEY`: `initializeClearing`,
+ *      `activateClearing`, `deactivateClearing`, `isClearingActivated`, `getClearedAmountFor`,
+ *      and `getClearingThirdParty`. Inherits the implementation from `Clearing`. Requires
  *      `ClearingReadOps` library linking at deployment.
  */
 contract ClearingFacet is Clearing, IStaticFunctionSelectors {
@@ -23,7 +23,7 @@ contract ClearingFacet is Clearing, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 5;
+        uint256 selectorIndex = 6;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);
         unchecked {
             staticFunctionSelectors_[--selectorIndex] = this.getClearingThirdParty.selector;
@@ -31,6 +31,7 @@ contract ClearingFacet is Clearing, IStaticFunctionSelectors {
             staticFunctionSelectors_[--selectorIndex] = this.isClearingActivated.selector;
             staticFunctionSelectors_[--selectorIndex] = this.deactivateClearing.selector;
             staticFunctionSelectors_[--selectorIndex] = this.activateClearing.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.initializeClearing.selector;
         }
     }
 

@@ -123,7 +123,6 @@ export const CONTRACT_NAMES = [
   "OperatorClearingHoldByPartitionFacet",
   "ClearingRedeemFacet",
   "ClearingTransferFacet",
-  "ClearingActionsFacet",
   "ProceedRecipientsFacet",
   "ExternalPauseManagementFacet",
   "ExternalControlListManagementFacet",

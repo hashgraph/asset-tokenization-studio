@@ -7,12 +7,20 @@ import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
  * @title IClearing
  * @author Asset Tokenization Studio Team
  * @notice Interface for the clearing module global state and account-level read queries.
- * @dev Exposes the lifecycle toggles (`activateClearing` / `deactivateClearing`),
- *      the activation status query (`isClearingActivated`), and the account-scoped
- *      read queries (`getClearedAmountFor`, `getClearingThirdParty`).
+ * @dev Exposes the one-shot initializer (`initializeClearing`), the lifecycle toggles
+ *      (`activateClearing` / `deactivateClearing`), the activation status query
+ *      (`isClearingActivated`), and the account-scoped read queries
+ *      (`getClearedAmountFor`, `getClearingThirdParty`).
  *      Partition-scoped operations and reads remain on `IClearingByPartition`.
  */
 interface IClearing is IClearingTypes {
+    /**
+     * @notice Initializes the clearing module with the given activation state
+     * @dev Can only be called once per token; subsequent calls revert with `AlreadyInitialized`
+     * @param _activateClearing Whether clearing should be activated on initialization
+     */
+    function initializeClearing(bool _activateClearing) external;
+
     /**
      * @notice Activates the clearing functionality
      * @return success_ True when the activation completes successfully

@@ -101,7 +101,6 @@ const LOANS_PORTFOLIO_FACETS = [
   "ClearingHoldCreationFacet",
   "OperatorClearingHoldByPartitionFacet",
   "ClearingFacet",
-  "ClearingActionsFacet",
   "ClearingByPartitionFacet",
 
   // Scheduled Tasks

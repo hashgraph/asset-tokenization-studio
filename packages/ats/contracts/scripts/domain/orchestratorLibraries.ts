@@ -123,7 +123,6 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   HoldFacet: ["holdOps"],
   HoldByPartitionFacet: ["holdOps"],
   // ClearingOps dependencies - clearing transfer operations
-  ClearingActionsFacet: ["clearingOps"],
   ClearingTransferFacet: ["clearingOps", "clearingProtectedOps"],
   ClearingRedeemFacet: ["clearingOps", "clearingProtectedOps"],
   ClearingHoldCreationFacet: ["clearingOps", "clearingProtectedOps"],
