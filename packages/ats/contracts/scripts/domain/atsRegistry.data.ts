@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-04-30T10:29:35.304Z
- * Facets: 101
+ * Generated: 2026-04-30T10:52:10.115Z
+ * Facets: 102
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -47,6 +47,7 @@ import {
   CapFacet__factory,
   ClearingActionsFacet__factory,
   ClearingAtSnapshotByPartitionFacet__factory,
+  ClearingAtSnapshotFacet__factory,
   ClearingByPartitionFacet__factory,
   ClearingHoldByPartitionFacet__factory,
   ClearingHoldCreationFacet__factory,
@@ -3257,6 +3258,43 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     factory: (signer) => new ClearingAtSnapshotByPartitionFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+  },
+
+  ClearingAtSnapshotFacet: {
+    name: "ClearingAtSnapshotFacet",
+    description:
+      "Diamond facet that exposes the snapshotted aggregate cleared-balance query through the `IClearingAtSnapshot` interface, registered under `_CLEARING_AT_SNAPSHOT_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_CLEARING_AT_SNAPSHOT_RESOLVER_KEY",
+      value: "0x88a00625e4e1a614a4cc0587b393c50817f00c10065905ecc7d65fce85e951dc",
+    },
+    inheritance: ["ClearingAtSnapshot", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "clearedBalanceOfAtSnapshot",
+        signature: {
+          full: "function clearedBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+          canonical: "clearedBalanceOfAtSnapshot(uint256,address)",
+        },
+        selector: "0x2bc16e9b",
+      },
+    ],
+    errors: [
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+    ],
+    factory: (signer) => new ClearingAtSnapshotFacet__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   ClearingByPartitionFacet: {
@@ -12972,14 +13010,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["Snapshots", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "clearedBalanceOfAtSnapshot",
-        signature: {
-          full: "function clearedBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
-          canonical: "clearedBalanceOfAtSnapshot(uint256,address)",
-        },
-        selector: "0x2bc16e9b",
-      },
-      {
         name: "frozenBalanceOfAtSnapshot",
         signature: {
           full: "function frozenBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
@@ -13145,8 +13175,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xc9622656",
       },
     ],
-    factory: (signer) => new SnapshotsFacet__factory(getLibLinks("clearingReadOps") as any, signer),
-    timeTravelFactory: (signer) => new SnapshotsFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
+    factory: (signer) => new SnapshotsFacet__factory(signer),
+    timeTravelFactory: (signer) => new SnapshotsFacetTimeTravel__factory(signer),
   },
 
   SsiManagementFacet: {
@@ -14395,7 +14425,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 101 as const;
+export const TOTAL_FACETS = 102 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
