@@ -80,4 +80,12 @@ interface IFreeze {
      * @return The total frozen token amount for `_userAddress` across all partitions.
      */
     function getFrozenTokens(address _userAddress) external view returns (uint256);
+
+    /**
+     * @notice Returns the freezing status of a wallet.
+     * @dev returning true mean that some token or all of them are frozen
+     * @param _userAddress The address of the wallet on which isFrozen is called.
+     * @return The freezing status of a wallet.
+     */
+    function isFrozen(address _userAddress) external view returns (bool);
 }

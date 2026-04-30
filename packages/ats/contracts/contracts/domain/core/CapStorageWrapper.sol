@@ -28,10 +28,9 @@ library CapStorageWrapper {
         cs.initialized = true;
     }
 
-    function setMaxSupply(uint256 _maxSupply, uint256 _timestamp) internal {
-        uint256 previousMaxSupply = getMaxSupplyAdjustedAt(_timestamp);
+    function setMaxSupply(uint256 _maxSupply, uint256 _timestamp) internal returns (uint256 previousMaxSupply) {
+        previousMaxSupply = getMaxSupplyAdjustedAt(_timestamp);
         capStorage().maxSupply = _maxSupply;
-        emit ICap.MaxSupplySet(EvmAccessors.getMsgSender(), _maxSupply, previousMaxSupply);
     }
 
     function setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply, uint256 _timestamp) internal {

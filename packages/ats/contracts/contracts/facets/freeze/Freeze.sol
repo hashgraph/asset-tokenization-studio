@@ -80,4 +80,9 @@ abstract contract Freeze is IFreeze, Modifiers {
                 TimeTravelStorageWrapper.getBlockTimestamp()
             );
     }
+
+    /// @inheritdoc IFreeze
+    function isFrozen(address _userAddress) external view override returns (bool) {
+        return ERC3643StorageWrapper.isFrozen(_userAddress);
+    }
 }

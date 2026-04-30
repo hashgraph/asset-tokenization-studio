@@ -40,11 +40,6 @@ library PauseStorageWrapper {
     // solhint-disable-next-line ordering
     function setPause(bool _paused) internal {
         pauseStorage().paused = _paused;
-        if (_paused) {
-            emit IPause.TokenPaused(EvmAccessors.getMsgSender());
-            return;
-        }
-        emit IPause.TokenUnpaused(EvmAccessors.getMsgSender());
     }
 
     function initializeExternalPauses(address[] calldata _pauses) internal {

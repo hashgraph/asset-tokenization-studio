@@ -23,9 +23,10 @@ contract FreezeFacet is Freeze, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 4;
+        uint256 selectorIndex = 5;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);
         unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this.isFrozen.selector;
             staticFunctionSelectors_[--selectorIndex] = this.getFrozenTokens.selector;
             staticFunctionSelectors_[--selectorIndex] = this.setAddressFrozen.selector;
             staticFunctionSelectors_[--selectorIndex] = this.unfreezePartialTokens.selector;

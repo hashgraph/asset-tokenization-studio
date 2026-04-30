@@ -6,6 +6,7 @@ import { CAP_ROLE } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../domain/core/CapStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title Cap
@@ -46,7 +47,11 @@ abstract contract Cap is ICap, Modifiers {
         onlyValidNewMaxSupply(maxSupply, TimeTravelStorageWrapper.getBlockTimestamp())
         returns (bool success_)
     {
-        CapStorageWrapper.setMaxSupply(maxSupply, TimeTravelStorageWrapper.getBlockTimestamp());
+        emit ICap.MaxSupplySet(
+            EvmAccessors.getMsgSender(),
+            maxSupply,
+            CapStorageWrapper.setMaxSupply(maxSupply, TimeTravelStorageWrapper.getBlockTimestamp())
+        );
         success_ = true;
     }
 

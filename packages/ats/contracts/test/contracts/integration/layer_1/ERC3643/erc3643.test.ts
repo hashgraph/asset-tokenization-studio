@@ -354,6 +354,7 @@ describe("ERC3643 Tests", () => {
           .to.emit(asset, "TokensFrozen")
           .withArgs(signer_E.address, amount, DEFAULT_PARTITION);
         expect(await asset.getFrozenTokens(signer_E.address)).to.be.equal(amount);
+        expect(await asset.isFrozen(signer_E.address)).to.be.true;
         expect(await asset.balanceOf(signer_E.address)).to.be.equal(0);
       });
 
@@ -389,12 +390,14 @@ describe("ERC3643 Tests", () => {
         await asset.freezePartialTokens(signer_E.address, amount);
 
         expect(await asset.getFrozenTokens(signer_E.address)).to.be.equal(amount);
+        expect(await asset.isFrozen(signer_E.address)).to.be.true;
         expect(await asset.balanceOf(signer_E.address)).to.be.equal(0);
 
         await expect(asset.unfreezePartialTokens(signer_E.address, amount))
           .to.emit(asset, "TokensUnfrozen")
           .withArgs(signer_E.address, amount, DEFAULT_PARTITION);
         expect(await asset.getFrozenTokens(signer_E.address)).to.be.equal(0);
+        expect(await asset.isFrozen(signer_E.address)).to.be.false;
         expect(await asset.balanceOf(signer_E.address)).to.be.equal(amount);
       });
 

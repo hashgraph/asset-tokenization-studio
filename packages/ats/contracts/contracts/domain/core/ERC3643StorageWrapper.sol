@@ -251,6 +251,16 @@ library ERC3643StorageWrapper {
         return erc3643Storage().frozenTokens[_userAddress];
     }
 
+    /**
+     * @notice Returns the freezing status of a wallet.
+     * @dev returning true mean that some token or all of them are frozen
+     * @param _userAddress The address of the wallet on which isFrozen is called.
+     * @return The freezing status of a wallet.
+     */
+    function isFrozen(address _userAddress) internal view returns (bool) {
+        return erc3643Storage().frozenTokens[_userAddress] > 0;
+    }
+
     function getFrozenAmountForByPartition(bytes32 _partition, address _userAddress) internal view returns (uint256) {
         return erc3643Storage().frozenTokensByPartition[_userAddress][_partition];
     }
