@@ -5,7 +5,7 @@ import { IProceedRecipients } from "./IProceedRecipients.sol";
 import { PROCEED_RECIPIENT_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProceedRecipientsStorageWrapper } from "../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
-import { AddressValidation } from "../../../infrastructure/utils/AddressValidation.sol";
+import { DefaultValueValidation } from "../../../infrastructure/utils/DefaultValueValidation.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
@@ -65,7 +65,7 @@ abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
     }
 
     function _addProceedRecipientInternal(address _proceedRecipient, bytes calldata _data) internal {
-        AddressValidation.checkZeroAddress(_proceedRecipient);
+        DefaultValueValidation.checkZeroAddress(_proceedRecipient);
         ProceedRecipientsStorageWrapper.requireNotProceedRecipient(_proceedRecipient);
         ProceedRecipientsStorageWrapper.addProceedRecipient(_proceedRecipient, _data);
         emit ProceedRecipientAdded(EvmAccessors.getMsgSender(), _proceedRecipient, _data);

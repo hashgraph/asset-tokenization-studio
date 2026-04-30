@@ -108,7 +108,6 @@ const LOANS_PORTFOLIO_FACETS = [
   "ClearingByPartitionFacet",
 
   // Scheduled Tasks
-  "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
   "CouponListingFacet",
 

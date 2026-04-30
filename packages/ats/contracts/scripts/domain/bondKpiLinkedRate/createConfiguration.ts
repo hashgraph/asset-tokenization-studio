@@ -106,7 +106,6 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "NominalValueFacet",
   "ProceedRecipientsKpiLinkedRateFacet", // rate-specific: triggers scheduled tasks
   "ProtectedPartitionsFacet",
-  "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksKpiLinkedRateFacet", // rate-specific: _onCouponListed override
   "CouponListingFacet",
   "SsiManagementFacet",

@@ -15,16 +15,12 @@ contract EquityUSAFacet is EquityUSA, IStaticFunctionSelectors {
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](9);
+        staticFunctionSelectors_ = new bytes4[](5);
         staticFunctionSelectors_[selectorIndex++] = this._initialize_equityUSA.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getEquityDetails.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.setScheduledBalanceAdjustment.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getScheduledBalanceAdjustment.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getScheduledBalanceAdjustmentCount.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getSecurityRegulationData.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getSecurityHolders.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getTotalSecurityHolders.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.cancelScheduledBalanceAdjustment.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {

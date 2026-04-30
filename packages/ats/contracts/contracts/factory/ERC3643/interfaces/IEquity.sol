@@ -27,47 +27,5 @@ interface TRexIEquity {
         uint8 nominalValueDecimals;
     }
 
-    struct ScheduledBalanceAdjustment {
-        uint256 executionDate;
-        uint256 factor;
-        uint8 decimals;
-    }
-
-    event ScheduledBalanceAdjustmentSet(
-        bytes32 corporateActionId,
-        uint256 balanceAdjustmentId,
-        address indexed operator,
-        uint256 indexed executionDate,
-        uint256 factor,
-        uint256 decimals
-    );
-
-    event ScheduledBalanceAdjustmentCancelled(uint256 balanceAdjustmentId, address indexed operator);
-
-    error BalanceAdjustmentCreationFailed();
-    error BalanceAdjustmentAlreadyExecuted(bytes32 corporateActionId, uint256 balanceAdjustmentId);
-
-    /**
-     * @notice Sets a new scheduled balance adjustment
-     * @dev The task is added to the queue and executed when the execution date is reached
-     */
-    function setScheduledBalanceAdjustment(
-        ScheduledBalanceAdjustment calldata _newBalanceAdjustment
-    ) external returns (uint256 balanceAdjustmentID_);
-
-    function cancelScheduledBalanceAdjustment(uint256 _balanceAdjustmentID) external returns (bool success_);
-
     function getEquityDetails() external view returns (EquityDetailsData memory equityDetailsData_);
-
-    /**
-     * @notice Returns the details of a previously scheduled balance adjustment
-     */
-    function getScheduledBalanceAdjustment(
-        uint256 _balanceAdjustmentID
-    ) external view returns (ScheduledBalanceAdjustment memory balanceAdjustment_, bool isDisabled_);
-
-    /**
-     * @notice Returns the total number of scheduled balance adjustments
-     */
-    function getScheduledBalanceAdjustmentCount() external view returns (uint256 balanceAdjustmentCount_);
 }

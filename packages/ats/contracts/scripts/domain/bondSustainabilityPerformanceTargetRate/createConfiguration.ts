@@ -106,7 +106,6 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "NominalValueFacet",
   "ProceedRecipientsSustainabilityPerformanceTargetRateFacet", // rate-specific: triggers scheduled tasks
   "ProtectedPartitionsFacet",
-  "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet", // rate-specific: _onCouponListed override
   "CouponListingFacet",
   "SsiManagementFacet",
