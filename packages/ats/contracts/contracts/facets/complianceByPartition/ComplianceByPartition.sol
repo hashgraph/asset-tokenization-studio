@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IComplianceByPartition } from "./IComplianceByPartition.sol";
 import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
 import { PauseStorageWrapper } from "../../domain/core/PauseStorageWrapper.sol";
-import { IPause } from "../layer_1/pause/IPause.sol";
+import { IPause } from "../pause/IPause.sol";
 import { Eip1066 } from "../../constants/eip1066.sol";
 
 /**
