@@ -52,9 +52,11 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
+  "CoreAtSnapshotFacet",
   "BalanceTrackerByPartitionFacet",
   "BalanceTrackerAtSnapshotFacet",
   "BalanceTrackerAtSnapshotByPartitionFacet",
+  "ClearingAtSnapshotByPartitionFacet",
 
   // ERC Standards
   "MintByPartitionFacet",

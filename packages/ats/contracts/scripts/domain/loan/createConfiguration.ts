@@ -50,6 +50,7 @@ const LOAN_FACETS = [
   "BalanceTrackerByPartitionFacet",
   "BalanceTrackerAtSnapshotFacet",
   "BalanceTrackerAtSnapshotByPartitionFacet",
+  "ClearingAtSnapshotByPartitionFacet",
   "CapFacet",
   "CapByPartitionFacet",
   "ControlListFacet",
@@ -119,6 +120,7 @@ const LOAN_FACETS = [
 
   // Advanced Features
   "SnapshotsFacet",
+  "CoreAtSnapshotFacet",
   "CorporateActionsFacet",
   "TransferAndLockFacet",
   "LockFacet",

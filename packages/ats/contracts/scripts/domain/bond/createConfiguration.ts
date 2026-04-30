@@ -48,11 +48,13 @@ const BOND_FACETS = [
   "KycFacet",
   "PauseFacet",
   "SnapshotsFacet",
+  "CoreAtSnapshotFacet",
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
   "BalanceTrackerByPartitionFacet",
   "BalanceTrackerAtSnapshotFacet",
   "BalanceTrackerAtSnapshotByPartitionFacet",
+  "ClearingAtSnapshotByPartitionFacet",
 
   // Core
   "CoreFacet",
