@@ -29,7 +29,6 @@ contract SnapshotsFacet is Snapshots, IStaticFunctionSelectors {
         unchecked {
             staticFunctionSelectors_[--selectorIndex] = this.getTotalTokenHoldersAtSnapshot.selector;
             staticFunctionSelectors_[--selectorIndex] = this.getTokenHoldersAtSnapshot.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.decimalsAtSnapshot.selector;
             staticFunctionSelectors_[--selectorIndex] = this.frozenBalanceOfAtSnapshotByPartition.selector;
             staticFunctionSelectors_[--selectorIndex] = this.frozenBalanceOfAtSnapshot.selector;
             staticFunctionSelectors_[--selectorIndex] = this.clearedBalanceOfAtSnapshot.selector;
@@ -46,7 +45,10 @@ contract SnapshotsFacet is Snapshots, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(ISnapshots).interfaceId;
+        uint256 selectorIndex = 1;
+        staticInterfaceIds_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticInterfaceIds_[--selectorIndex] = type(ISnapshots).interfaceId;
+        }
     }
 }

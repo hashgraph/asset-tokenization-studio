@@ -103,6 +103,7 @@ export const CONTRACT_NAMES = [
   "ScheduledCrossOrderedTasksFacet",
   "ScheduledCouponListingFacet",
   "SnapshotsFacet",
+  "CoreAtSnapshotFacet",
   "CorporateActionsFacet",
   "TransferAndLockFacet",
   "LockFacet",
