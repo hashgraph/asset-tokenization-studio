@@ -10,6 +10,7 @@ Technical references and guides for the Asset Tokenization Studio project.
 
 ## Contents
 
-### [Guides](./guides/ci-cd-workflows)
+### Guides
 
-Additional technical guides and references.
+- [CI/CD Workflows](./guides/ci-cd-workflows) — Automated CI/CD pipeline documentation
+- [AI Agent Integration](./guides/ai-agent-integration) — How AI coding agents are configured in this project
