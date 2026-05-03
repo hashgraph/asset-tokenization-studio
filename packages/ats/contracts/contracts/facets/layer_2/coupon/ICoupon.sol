@@ -104,22 +104,4 @@ interface ICoupon is ICouponTypes {
     /// @param _couponID The ID of the coupon
     /// @return The total number of coupon holders
     function getTotalCouponHolders(uint256 _couponID) external view returns (uint256);
-
-    /// @notice Retrieves a coupon ID from the ordered list at a specific position
-    /// @param _pos The position in the ordered coupon list
-    /// @return couponID_ The coupon ID at the specified position
-    function getCouponFromOrderedListAt(uint256 _pos) external view returns (uint256 couponID_);
-
-    /// @notice Retrieves a paginated list of coupon IDs in order
-    /// @param _pageIndex The page index for pagination
-    /// @param _pageLength The number of coupons per page
-    /// @return couponIDs_ Array of coupon IDs for the specified page
-    function getCouponsOrderedList(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (uint256[] memory couponIDs_);
-
-    /// @notice Retrieves the total number of coupons in the ordered list
-    /// @return total_ The total count of coupons
-    function getCouponsOrderedListTotal() external view returns (uint256 total_);
 }

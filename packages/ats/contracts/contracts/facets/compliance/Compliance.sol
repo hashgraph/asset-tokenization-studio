@@ -6,7 +6,7 @@ import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { IComplianceFacet } from "./IComplianceFacet.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { PauseStorageWrapper } from "../../domain/core/PauseStorageWrapper.sol";
-import { IPause } from "../layer_1/pause/IPause.sol";
+import { IPause } from "../pause/IPause.sol";
 import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { Eip1066 } from "../../constants/eip1066.sol";

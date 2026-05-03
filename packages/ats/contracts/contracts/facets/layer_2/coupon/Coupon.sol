@@ -7,7 +7,6 @@ import { CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
 import { COUPON_CORPORATE_ACTION_TYPE } from "../../../constants/values.sol";
 import { CouponStorageWrapper } from "../../../domain/asset/coupon/CouponStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
-import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 abstract contract Coupon is ICoupon, Modifiers {
     function setCoupon(
@@ -123,23 +122,6 @@ abstract contract Coupon is ICoupon, Modifiers {
         uint256 _couponID
     ) external view override onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1) returns (uint256) {
         return CouponStorageWrapper.getTotalCouponHolders(_couponID);
-    }
-
-    function getCouponFromOrderedListAt(uint256 _pos) external view override returns (uint256 couponID_) {
-        couponID_ = CouponStorageWrapper.getCouponFromOrderedListAt(_pos);
-    }
-
-    function getCouponsOrderedList(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view override returns (uint256[] memory couponIDs_) {
-        couponIDs_ = CouponStorageWrapper.getCouponsOrderedList(_pageIndex, _pageLength);
-    }
-
-    function getCouponsOrderedListTotal() external view override returns (uint256 total_) {
-        total_ = CouponStorageWrapper.getCouponsOrderedListTotalAdjustedAt(
-            TimeTravelStorageWrapper.getBlockTimestamp()
-        );
     }
 
     function _prepareCoupon(

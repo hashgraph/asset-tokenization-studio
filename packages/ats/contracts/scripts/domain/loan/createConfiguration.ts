@@ -38,6 +38,7 @@ const LOAN_FACETS = [
   // Loan Functionality
   "LoanFacet",
   "CouponFacet",
+  "CouponListingFacet",
   "NominalValueFacet",
   "AmortizationFacet",
   "ProceedRecipientsFacet",
@@ -49,6 +50,8 @@ const LOAN_FACETS = [
   "BalanceTrackerByPartitionFacet",
   "BalanceTrackerAtSnapshotFacet",
   "BalanceTrackerAtSnapshotByPartitionFacet",
+  "ClearingAtSnapshotFacet",
+  "ClearingAtSnapshotByPartitionFacet",
   "CapFacet",
   "CapByPartitionFacet",
   "ControlListFacet",
@@ -83,6 +86,7 @@ const LOAN_FACETS = [
   "BatchMintFacet",
   "BatchTransferFacet",
   "ComplianceFacet",
+  "ComplianceByPartitionFacet",
   "MintFacet",
   "BurnFacet",
 
@@ -90,6 +94,7 @@ const LOAN_FACETS = [
   "HoldFacet",
   "HoldManagementFacet",
   "ControllerHoldByPartitionFacet",
+  "ControllerByPartitionFacet",
   "ProtectedHoldByPartitionFacet",
   "HoldByPartitionFacet",
 
@@ -99,8 +104,7 @@ const LOAN_FACETS = [
   "ClearingHoldCreationFacet",
   "ClearingHoldByPartitionFacet",
   "OperatorClearingHoldByPartitionFacet",
-  "ClearingReadFacet",
-  "ClearingActionsFacet",
+  "ClearingFacet",
   "ClearingByPartitionFacet",
 
   // Scheduled Tasks
@@ -117,6 +121,7 @@ const LOAN_FACETS = [
 
   // Advanced Features
   "SnapshotsFacet",
+  "CoreAtSnapshotFacet",
   "CorporateActionsFacet",
   "TransferAndLockFacet",
   "LockFacet",

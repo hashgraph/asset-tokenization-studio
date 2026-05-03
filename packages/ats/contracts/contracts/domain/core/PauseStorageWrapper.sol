@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _PAUSE_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { _PAUSE_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IExternalPause } from "../../facets/layer_1/externalPause/IExternalPause.sol";
-import { IPause } from "../../facets/layer_1/pause/IPause.sol";
+import { IPause } from "../../facets/pause/IPause.sol";
 import {
     ExternalListManagementStorageWrapper,
     ExternalListDataStorage
@@ -40,15 +40,9 @@ library PauseStorageWrapper {
     // solhint-disable-next-line ordering
     function setPause(bool _paused) internal {
         pauseStorage().paused = _paused;
-        if (_paused) {
-            emit IPause.TokenPaused(EvmAccessors.getMsgSender());
-            return;
-        }
-        emit IPause.TokenUnpaused(EvmAccessors.getMsgSender());
     }
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ExternalPauses(address[] calldata _pauses) internal {
+    function initializeExternalPauses(address[] calldata _pauses) internal {
         uint256 length = _pauses.length;
         for (uint256 index; index < length; ) {
             ExternalListManagementStorageWrapper.checkValidAddress(_pauses[index]);

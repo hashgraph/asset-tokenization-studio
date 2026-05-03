@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _CAP_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { MAX_UINT256 } from "../../constants/values.sol";
-import { ICap } from "../../facets/layer_1/cap/ICap.sol";
+import { ICap } from "../../facets/cap/ICap.sol";
 import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../asset/ERC1410StorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
@@ -15,8 +15,7 @@ struct CapDataStorage {
 }
 
 library CapStorageWrapper {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_Cap(uint256 maxSupply, ICap.PartitionCap[] calldata partitionCap) internal {
+    function initializeCap(uint256 maxSupply, ICap.PartitionCap[] calldata partitionCap) internal {
         CapDataStorage storage cs = capStorage();
         cs.maxSupply = maxSupply;
         uint256 length = partitionCap.length;
@@ -29,10 +28,9 @@ library CapStorageWrapper {
         cs.initialized = true;
     }
 
-    function setMaxSupply(uint256 _maxSupply, uint256 _timestamp) internal {
-        uint256 previousMaxSupply = getMaxSupplyAdjustedAt(_timestamp);
+    function setMaxSupply(uint256 _maxSupply, uint256 _timestamp) internal returns (uint256 previousMaxSupply) {
+        previousMaxSupply = getMaxSupplyAdjustedAt(_timestamp);
         capStorage().maxSupply = _maxSupply;
-        emit ICap.MaxSupplySet(EvmAccessors.getMsgSender(), _maxSupply, previousMaxSupply);
     }
 
     function setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply, uint256 _timestamp) internal {

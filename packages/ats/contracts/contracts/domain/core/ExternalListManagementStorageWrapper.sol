@@ -60,8 +60,7 @@ library ExternalListManagementStorageWrapper {
         externalListStorage(_position).initialized = true;
     }
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ExternalControlLists(address[] calldata _controlLists) internal {
+    function initializeExternalControlLists(address[] calldata _controlLists) internal {
         uint256 length = _controlLists.length;
         for (uint256 index; index < length; ) {
             checkValidAddress(_controlLists[index]);
@@ -73,8 +72,7 @@ library ExternalListManagementStorageWrapper {
         setExternalListInitialized(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION);
     }
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ExternalKycLists(address[] calldata _kycLists) internal {
+    function initializeExternalKycLists(address[] calldata _kycLists) internal {
         uint256 length = _kycLists.length;
         for (uint256 index; index < length; ) {
             checkValidAddress(_kycLists[index]);
