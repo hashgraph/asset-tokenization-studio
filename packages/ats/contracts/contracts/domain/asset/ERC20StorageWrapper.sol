@@ -37,6 +37,19 @@ library ERC20StorageWrapper {
         erc20Stor.initialized = true;
     }
 
+    /// @notice Updates ERC-20 balances and emits the EIP-20 Transfer event.
+    /// @dev Single source of truth for all balance-changing operations.
+    ///      `from == address(0)` skips the debit (mint path).
+    ///      `to == address(0)` skips the credit (burn path).
+    /// @param from  Account whose balance is reduced (address(0) for mints).
+    /// @param to    Account whose balance is increased (address(0) for burns).
+    /// @param amount Token amount transferred.
+    function performTransfer(address from, address to, uint256 amount) internal {
+        if (from != address(0)) reduceBalance(from, amount);
+        if (to != address(0)) increaseBalance(to, amount);
+        emit ITransfer.Transfer(from, to, amount);
+    }
+
     function increaseBalance(address to, uint256 value) internal {
         migrateBalanceIfNeeded(to);
         unchecked {

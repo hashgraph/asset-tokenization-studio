@@ -71,7 +71,12 @@ library ERC1410StorageWrapper {
         erc1410BasicStorage().initialized = true;
     }
 
-    function reduceBalanceByPartition(address from, uint256 value, bytes32 partition) internal {
+    /// @notice Reduces the ERC-1410 partition balance only — does NOT touch ERC-20 storage.
+    /// @dev Callers are responsible for emitting Transfer via `ERC20StorageWrapper.performTransfer`.
+    /// @param from      Token holder whose partition balance is reduced.
+    /// @param value     Amount to deduct.
+    /// @param partition Partition identifier.
+    function _reducePartitionOnly(address from, uint256 value, bytes32 partition) internal {
         if (!validPartition(partition, from)) {
             revert IERC1410Types.InvalidPartition(from, partition);
         }
@@ -91,6 +96,10 @@ library ERC1410StorageWrapper {
         } else {
             erc1410Storage.partitions[from][index].amount -= value;
         }
+    }
+
+    function reduceBalanceByPartition(address from, uint256 value, bytes32 partition) internal {
+        _reducePartitionOnly(from, value, partition);
         ERC20StorageWrapper.reduceBalance(from, value);
     }
 
@@ -105,7 +114,12 @@ library ERC1410StorageWrapper {
         erc1410Storage.partitions[holder].pop();
     }
 
-    function increaseBalanceByPartition(address from, uint256 value, bytes32 partition) internal {
+    /// @notice Increases the ERC-1410 partition balance only — does NOT touch ERC-20 storage.
+    /// @dev Callers are responsible for emitting Transfer via `ERC20StorageWrapper.performTransfer`.
+    /// @param from      Token holder whose partition balance is increased.
+    /// @param value     Amount to credit.
+    /// @param partition Partition identifier.
+    function _increasePartitionOnly(address from, uint256 value, bytes32 partition) internal {
         if (!validPartition(partition, from)) {
             revert IERC1410Types.InvalidPartition(from, partition);
         }
@@ -113,17 +127,29 @@ library ERC1410StorageWrapper {
         ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
 
         erc1410Storage.partitions[from][erc1410Storage.partitionToIndex[from][partition] - 1].amount += value;
+    }
+
+    function increaseBalanceByPartition(address from, uint256 value, bytes32 partition) internal {
+        _increasePartitionOnly(from, value, partition);
         ERC20StorageWrapper.increaseBalance(from, value);
     }
 
-    function addPartitionTo(uint256 value, address account, bytes32 partition) internal {
+    /// @notice Adds a new partition entry for an account — does NOT touch ERC-20 storage.
+    /// @dev Callers are responsible for emitting Transfer via `ERC20StorageWrapper.performTransfer`.
+    /// @param value     Initial partition amount.
+    /// @param account   Token holder receiving the partition.
+    /// @param partition Partition identifier.
+    function _addPartitionToOnly(uint256 value, address account, bytes32 partition) internal {
         AdjustBalancesStorageWrapper.pushLabafUserPartition(account, AdjustBalancesStorageWrapper.getAbaf());
 
         ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
 
         erc1410Storage.partitions[account].push(Partition(value, partition));
         erc1410Storage.partitionToIndex[account][partition] = erc1410BasicStorage().partitions[account].length;
+    }
 
+    function addPartitionTo(uint256 value, address account, bytes32 partition) internal {
+        _addPartitionToOnly(value, account, partition);
         if (value != 0) ERC20StorageWrapper.increaseBalance(account, value);
     }
 
@@ -196,13 +222,15 @@ library ERC1410StorageWrapper {
     ) internal returns (bytes32) {
         beforeTokenTransfer(partition, from, basicTransferInfo.to, basicTransferInfo.value);
 
-        reduceBalanceByPartition(from, basicTransferInfo.value, partition);
+        _reducePartitionOnly(from, basicTransferInfo.value, partition);
 
         if (!validPartitionForReceiver(partition, basicTransferInfo.to)) {
-            addPartitionTo(basicTransferInfo.value, basicTransferInfo.to, partition);
+            _addPartitionToOnly(basicTransferInfo.value, basicTransferInfo.to, partition);
         } else {
-            increaseBalanceByPartition(basicTransferInfo.to, basicTransferInfo.value, partition);
+            _increasePartitionOnly(basicTransferInfo.to, basicTransferInfo.value, partition);
         }
+
+        ERC20StorageWrapper.performTransfer(from, basicTransferInfo.to, basicTransferInfo.value);
 
         // Emit transfer events AFTER all partition balance changes are complete.
         // This ensures TransferByPartition is emitted when partitions[] changes.
@@ -216,8 +244,6 @@ library ERC1410StorageWrapper {
             data,
             operatorData
         );
-
-        emit ITransfer.Transfer(from, basicTransferInfo.to, basicTransferInfo.value);
 
         if (from != basicTransferInfo.to && partition == _DEFAULT_PARTITION) {
             (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
@@ -256,12 +282,12 @@ library ERC1410StorageWrapper {
         beforeTokenTransfer(issueData.partition, address(0), issueData.tokenHolder, issueData.value);
 
         if (!validPartitionForReceiver(issueData.partition, issueData.tokenHolder)) {
-            addPartitionTo(issueData.value, issueData.tokenHolder, issueData.partition);
+            _addPartitionToOnly(issueData.value, issueData.tokenHolder, issueData.partition);
         } else {
-            increaseBalanceByPartition(issueData.tokenHolder, issueData.value, issueData.partition);
+            _increasePartitionOnly(issueData.tokenHolder, issueData.value, issueData.partition);
         }
 
-        emit ITransfer.Transfer(address(0), issueData.tokenHolder, issueData.value);
+        ERC20StorageWrapper.performTransfer(address(0), issueData.tokenHolder, issueData.value);
 
         increaseTotalSupplyByPartition(issueData.partition, issueData.value);
 
@@ -304,9 +330,9 @@ library ERC1410StorageWrapper {
     ) internal {
         beforeTokenTransfer(partition, from, address(0), value);
 
-        reduceBalanceByPartition(from, value, partition);
+        _reducePartitionOnly(from, value, partition);
 
-        emit ITransfer.Transfer(from, address(0), value);
+        ERC20StorageWrapper.performTransfer(from, address(0), value);
 
         // RULE 2: Emit TransferByPartition when ERC1410BasicStorage.partitions change
         emit IERC1410Types.TransferByPartition(partition, operator, from, address(0), value, data, operatorData);

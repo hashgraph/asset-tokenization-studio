@@ -5,7 +5,7 @@ import { _LOCK_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { ILock } from "../../facets/layer_1/lock/ILock.sol";
-import { ITransfer } from "../../facets/transfer/ITransfer.sol";
+import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
@@ -65,7 +65,7 @@ library LockStorageWrapper {
         updateLockedBalancesBeforeRelease(partition, lockId, tokenHolder);
 
         uint256 lockAmount = _removeLock(partition, tokenHolder, lockId);
-        _restoreReleasedAmount(partition, tokenHolder, lockAmount);
+        _restoreReleasedAmountOnly(partition, tokenHolder, lockAmount);
 
         _emitReleaseEvents(partition, operator, tokenHolder, lockAmount);
 
@@ -293,7 +293,7 @@ library LockStorageWrapper {
         uint256 expirationTimestamp
     ) private {
         updateLockedBalancesBeforeLock(partition, amount, tokenHolder, expirationTimestamp);
-        ERC1410StorageWrapper.reduceBalanceByPartition(tokenHolder, amount, partition);
+        ERC1410StorageWrapper._reducePartitionOnly(tokenHolder, amount, partition);
     }
 
     function _storeLock(
@@ -332,22 +332,21 @@ library LockStorageWrapper {
         AdjustBalancesStorageWrapper.removeLabafLock(partition, tokenHolder, lockId);
     }
 
-    function _restoreReleasedAmount(bytes32 partition, address tokenHolder, uint256 lockAmount) private {
+    function _restoreReleasedAmountOnly(bytes32 partition, address tokenHolder, uint256 lockAmount) private {
         if (!ERC1410StorageWrapper.validPartitionForReceiver(partition, tokenHolder)) {
-            ERC1410StorageWrapper.addPartitionTo(lockAmount, tokenHolder, partition);
+            ERC1410StorageWrapper._addPartitionToOnly(lockAmount, tokenHolder, partition);
             return;
         }
-
-        ERC1410StorageWrapper.increaseBalanceByPartition(tokenHolder, lockAmount, partition);
+        ERC1410StorageWrapper._increasePartitionOnly(tokenHolder, lockAmount, partition);
     }
 
     function _emitLockEvents(bytes32 partition, address operator, address tokenHolder, uint256 amount) private {
+        ERC20StorageWrapper.performTransfer(tokenHolder, address(0), amount);
         emit IERC1410Types.TransferByPartition(partition, operator, tokenHolder, address(0), amount, "", "");
-        emit ITransfer.Transfer(tokenHolder, address(0), amount);
     }
 
     function _emitReleaseEvents(bytes32 partition, address operator, address tokenHolder, uint256 lockAmount) private {
+        ERC20StorageWrapper.performTransfer(address(0), tokenHolder, lockAmount);
         emit IERC1410Types.TransferByPartition(partition, operator, address(0), tokenHolder, lockAmount, "", "");
-        emit ITransfer.Transfer(address(0), tokenHolder, lockAmount);
     }
 }
