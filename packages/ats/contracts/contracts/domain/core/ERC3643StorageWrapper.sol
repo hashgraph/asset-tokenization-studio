@@ -144,7 +144,7 @@ library ERC3643StorageWrapper {
         st.frozenTokens[_account] += _amount;
         st.frozenTokensByPartition[_account][_partition] += _amount;
 
-        ERC1410StorageWrapper._reducePartitionOnly(_account, _amount, _partition);
+        ERC1410StorageWrapper.reducePartitionOnly(_account, _amount, _partition);
         ERC20StorageWrapper.performTransfer(_account, address(0), _amount);
     }
 
@@ -160,19 +160,6 @@ library ERC3643StorageWrapper {
 
         _transferFrozenBalanceOnly(_partition, _account, _amount);
         ERC20StorageWrapper.performTransfer(address(0), _account, _amount);
-    }
-
-    function _transferFrozenBalanceOnly(bytes32 _partition, address _to, uint256 _amount) internal {
-        if (ERC1410StorageWrapper.validPartitionForReceiver(_partition, _to)) {
-            ERC1410StorageWrapper._increasePartitionOnly(_to, _amount, _partition);
-            return;
-        }
-        ERC1410StorageWrapper._addPartitionToOnly(_amount, _to, _partition);
-    }
-
-    function transferFrozenBalance(bytes32 _partition, address _to, uint256 _amount) internal {
-        _transferFrozenBalanceOnly(_partition, _to, _amount);
-        ERC20StorageWrapper.increaseBalance(_to, _amount);
     }
 
     function updateTotalFreeze(bytes32 _partition, address _tokenHolder) internal returns (uint256 abaf_) {
@@ -375,6 +362,14 @@ library ERC3643StorageWrapper {
         if (_addresses.length != _status.length) {
             revert IERC3643Types.InputBoolArrayLengthMismatch();
         }
+    }
+
+    function _transferFrozenBalanceOnly(bytes32 _partition, address _to, uint256 _amount) private {
+        if (ERC1410StorageWrapper.validPartitionForReceiver(_partition, _to)) {
+            ERC1410StorageWrapper.increasePartitionOnly(_to, _amount, _partition);
+            return;
+        }
+        ERC1410StorageWrapper.addPartitionToOnly(_amount, _to, _partition);
     }
 
     function _checkUnfreezeAmount(

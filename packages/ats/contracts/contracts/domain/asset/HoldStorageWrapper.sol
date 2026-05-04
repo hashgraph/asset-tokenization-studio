@@ -57,7 +57,7 @@ library HoldStorageWrapper {
         uint256 abaf = updateTotalHold(_partition, _from);
 
         beforeHold(_partition, _from);
-        ERC1410StorageWrapper._reducePartitionOnly(_from, _hold.amount, _partition);
+        ERC1410StorageWrapper.reducePartitionOnly(_from, _hold.amount, _partition);
 
         holdId_ = _storeHold(_partition, _from, _hold, _operatorData, _thirdPartyType, abaf);
 
@@ -582,10 +582,10 @@ library HoldStorageWrapper {
         uint256 _amount
     ) private {
         if (ERC1410StorageWrapper.validPartitionForReceiver(_holdIdentifier.partition, _to)) {
-            ERC1410StorageWrapper._increasePartitionOnly(_to, _amount, _holdIdentifier.partition);
+            ERC1410StorageWrapper.increasePartitionOnly(_to, _amount, _holdIdentifier.partition);
             return;
         }
-        ERC1410StorageWrapper._addPartitionToOnly(_amount, _to, _holdIdentifier.partition);
+        ERC1410StorageWrapper.addPartitionToOnly(_amount, _to, _holdIdentifier.partition);
     }
 
     function _notifyTransferComplianceIfNeeded(

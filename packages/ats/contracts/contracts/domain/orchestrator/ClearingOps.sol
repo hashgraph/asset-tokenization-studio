@@ -84,7 +84,7 @@ library ClearingOps {
             address(0)
         );
 
-        ERC1410StorageWrapper._reducePartitionOnly(_from, _amount, partition);
+        ERC1410StorageWrapper.reducePartitionOnly(_from, _amount, partition);
         ClearingStorageWrapper.increaseClearedAmounts(_from, partition, _amount);
 
         ERC20StorageWrapper.performTransfer(_from, address(0), _amount);
@@ -158,7 +158,7 @@ library ClearingOps {
             address(0)
         );
 
-        ERC1410StorageWrapper._reducePartitionOnly(_from, _amount, partition);
+        ERC1410StorageWrapper.reducePartitionOnly(_from, _amount, partition);
         ClearingStorageWrapper.increaseClearedAmounts(_from, partition, _amount);
 
         ERC20StorageWrapper.performTransfer(_from, address(0), _amount);
@@ -228,7 +228,7 @@ library ClearingOps {
             address(0)
         );
 
-        ERC1410StorageWrapper._reducePartitionOnly(_from, _hold.amount, partition);
+        ERC1410StorageWrapper.reducePartitionOnly(_from, _hold.amount, partition);
         ClearingStorageWrapper.increaseClearedAmounts(_from, partition, _hold.amount);
 
         ERC20StorageWrapper.performTransfer(_from, address(0), _hold.amount);
@@ -544,7 +544,7 @@ library ClearingOps {
      */
     function transferClearingBalanceInternal(bytes32 _partition, address _to, uint256 _amount) internal {
         if (ERC1410StorageWrapper.validPartitionForReceiver(_partition, _to)) {
-            ERC1410StorageWrapper._increasePartitionOnly(_to, _amount, _partition);
+            ERC1410StorageWrapper.increasePartitionOnly(_to, _amount, _partition);
             emit IERC1410Types.TransferByPartition(
                 _partition,
                 EvmAccessors.getMsgSender(),
@@ -556,7 +556,7 @@ library ClearingOps {
             );
             return ERC20StorageWrapper.performTransfer(address(0), _to, _amount);
         }
-        ERC1410StorageWrapper._addPartitionToOnly(_amount, _to, _partition);
+        ERC1410StorageWrapper.addPartitionToOnly(_amount, _to, _partition);
         emit IERC1410Types.TransferByPartition(
             _partition,
             EvmAccessors.getMsgSender(),

@@ -78,7 +78,7 @@ abstract contract Transfer is ITransfer, Modifiers {
         onlyUnProtectedPartitionsOrWildCardRole
         onlyCanTransferFromByPartition(_from, _to, _DEFAULT_PARTITION, _value)
     {
-        TokenCoreOps.transferFrom(msg.sender, _from, _to, _value);
-        emit TransferFromWithData(msg.sender, _from, _to, _value, _data);
+        TokenCoreOps.transferFrom(EvmAccessors.getMsgSender(), _from, _to, _value);
+        emit TransferFromWithData(EvmAccessors.getMsgSender(), _from, _to, _value, _data);
     }
 }

@@ -48,7 +48,7 @@ abstract contract Burn is IBurn, Modifiers, ProtectedPartitionRoleValidator {
         override
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanRedeemFromByPartition(msg.sender, _DEFAULT_PARTITION, _value)
+        onlyCanRedeemFromByPartition(EvmAccessors.getMsgSender(), _DEFAULT_PARTITION, _value)
     {
         address sender = EvmAccessors.getMsgSender();
         TokenCoreOps.redeem(_value);
@@ -63,7 +63,7 @@ abstract contract Burn is IBurn, Modifiers, ProtectedPartitionRoleValidator {
     )
         external
         override
-        onlyUnrecoveredAddress(msg.sender)
+        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(_tokenHolder)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole

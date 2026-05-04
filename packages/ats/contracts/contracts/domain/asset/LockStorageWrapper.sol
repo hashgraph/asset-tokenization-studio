@@ -293,7 +293,7 @@ library LockStorageWrapper {
         uint256 expirationTimestamp
     ) private {
         updateLockedBalancesBeforeLock(partition, amount, tokenHolder, expirationTimestamp);
-        ERC1410StorageWrapper._reducePartitionOnly(tokenHolder, amount, partition);
+        ERC1410StorageWrapper.reducePartitionOnly(tokenHolder, amount, partition);
     }
 
     function _storeLock(
@@ -334,10 +334,10 @@ library LockStorageWrapper {
 
     function _restoreReleasedAmountOnly(bytes32 partition, address tokenHolder, uint256 lockAmount) private {
         if (!ERC1410StorageWrapper.validPartitionForReceiver(partition, tokenHolder)) {
-            ERC1410StorageWrapper._addPartitionToOnly(lockAmount, tokenHolder, partition);
+            ERC1410StorageWrapper.addPartitionToOnly(lockAmount, tokenHolder, partition);
             return;
         }
-        ERC1410StorageWrapper._increasePartitionOnly(tokenHolder, lockAmount, partition);
+        ERC1410StorageWrapper.increasePartitionOnly(tokenHolder, lockAmount, partition);
     }
 
     function _emitLockEvents(bytes32 partition, address operator, address tokenHolder, uint256 amount) private {

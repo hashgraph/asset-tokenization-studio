@@ -119,20 +119,6 @@ library TokenCoreOps {
         ERC20StorageWrapper.beforeAllowanceUpdate(_owner, _spender);
     }
 
-    // Public functions — Balance Operations (for ClearingOps)
-
-    function reduceBalanceByPartition(address _from, uint256 _amount, bytes32 _partition) public {
-        ERC1410StorageWrapper.reduceBalanceByPartition(_from, _amount, _partition);
-    }
-
-    function increaseBalanceByPartition(address _to, uint256 _amount, bytes32 _partition) public {
-        ERC1410StorageWrapper.increaseBalanceByPartition(_to, _amount, _partition);
-    }
-
-    function addPartitionTo(uint256 _amount, address _to, bytes32 _partition) public {
-        ERC1410StorageWrapper.addPartitionTo(_amount, _to, _partition);
-    }
-
     /// @notice Transfers tokens on the default partition, delegating to ERC-20 storage.
     /// @dev The `Transfer` event is emitted by `ERC20StorageWrapper.performTransfer` internally.
     /// @param _from    Source address.
