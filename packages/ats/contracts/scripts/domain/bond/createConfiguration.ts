@@ -115,6 +115,7 @@ const BOND_FACETS = [
   // Advanced Features
   "AdjustBalancesFacet",
   "CouponFacet",
+  "CouponSecurityHoldersFacet",
   "LockFacet",
   "NominalValueFacet",
   "ProceedRecipientsFacet",

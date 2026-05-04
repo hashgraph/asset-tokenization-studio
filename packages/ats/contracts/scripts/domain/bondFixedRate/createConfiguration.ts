@@ -118,6 +118,8 @@ const BOND_FIXED_RATE_FACETS = [
   "CouponListingFacet",
   "SsiManagementFacet",
 
+  "CouponSecurityHoldersFacet",
+
   // Interest Rate (rate-specific)
   "CouponFixedRateFacet",
   "FixedRateFacet",

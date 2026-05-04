@@ -67,6 +67,7 @@ import {
   CouponFixedRateFacet__factory,
   CouponKpiLinkedRateFacet__factory,
   CouponListingFacet__factory,
+  CouponSecurityHoldersFacet__factory,
   CouponSustainabilityPerformanceTargetRateFacet__factory,
   DiamondFacet__factory,
   DividendFacet__factory,
@@ -5903,30 +5904,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbba7b56d",
       },
       {
-        name: "getCouponHolders",
-        signature: {
-          full: "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
-          canonical: "getCouponHolders(uint256,uint256,uint256)",
-        },
-        selector: "0xa92e8371",
-      },
-      {
-        name: "getCouponsFor",
-        signature: {
-          full: "function getCouponsFor(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 tokenBalance, uint256 nominalValue, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, (uint256 numerator, uint256 denominator, bool recordDateReached) couponAmount, bool isDisabled)[] couponFor_, address[] accounts_)",
-          canonical: "getCouponsFor(uint256,uint256,uint256)",
-        },
-        selector: "0x7327ad90",
-      },
-      {
-        name: "getTotalCouponHolders",
-        signature: {
-          full: "function getTotalCouponHolders(uint256 _couponID) view returns (uint256)",
-          canonical: "getTotalCouponHolders(uint256)",
-        },
-        selector: "0xec116ae3",
-      },
-      {
         name: "setCoupon",
         signature: {
           full: "function setCoupon((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
@@ -6105,30 +6082,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "getCouponFor(uint256,address)",
         },
         selector: "0xbba7b56d",
-      },
-      {
-        name: "getCouponHolders",
-        signature: {
-          full: "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
-          canonical: "getCouponHolders(uint256,uint256,uint256)",
-        },
-        selector: "0xa92e8371",
-      },
-      {
-        name: "getCouponsFor",
-        signature: {
-          full: "function getCouponsFor(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 tokenBalance, uint256 nominalValue, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, (uint256 numerator, uint256 denominator, bool recordDateReached) couponAmount, bool isDisabled)[] couponFor_, address[] accounts_)",
-          canonical: "getCouponsFor(uint256,uint256,uint256)",
-        },
-        selector: "0x7327ad90",
-      },
-      {
-        name: "getTotalCouponHolders",
-        signature: {
-          full: "function getTotalCouponHolders(uint256 _couponID) view returns (uint256)",
-          canonical: "getTotalCouponHolders(uint256)",
-        },
-        selector: "0xec116ae3",
       },
       {
         name: "setCoupon",
@@ -6318,30 +6271,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbba7b56d",
       },
       {
-        name: "getCouponHolders",
-        signature: {
-          full: "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
-          canonical: "getCouponHolders(uint256,uint256,uint256)",
-        },
-        selector: "0xa92e8371",
-      },
-      {
-        name: "getCouponsFor",
-        signature: {
-          full: "function getCouponsFor(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 tokenBalance, uint256 nominalValue, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, (uint256 numerator, uint256 denominator, bool recordDateReached) couponAmount, bool isDisabled)[] couponFor_, address[] accounts_)",
-          canonical: "getCouponsFor(uint256,uint256,uint256)",
-        },
-        selector: "0x7327ad90",
-      },
-      {
-        name: "getTotalCouponHolders",
-        signature: {
-          full: "function getTotalCouponHolders(uint256 _couponID) view returns (uint256)",
-          canonical: "getTotalCouponHolders(uint256)",
-        },
-        selector: "0xec116ae3",
-      },
-      {
         name: "setCoupon",
         signature: {
           full: "function setCoupon((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
@@ -6528,6 +6457,101 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     factory: (signer) => new CouponListingFacet__factory(signer),
   },
 
+  CouponSecurityHoldersFacet: {
+    name: "CouponSecurityHoldersFacet",
+    description:
+      "Diamond facet that exposes coupon security-holder queries via `ICouponSecurityHolders`, registered under `_COUPON_SECURITY_HOLDERS_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_COUPON_SECURITY_HOLDERS_RESOLVER_KEY",
+      value: "0x2dbf6db0e4dddb14cd72f1a882c1520fdbd592db82b5f3d2562ace6c9eb5cc23",
+    },
+    inheritance: ["CouponSecurityHolders", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "getCouponHolders",
+        signature: {
+          full: "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+          canonical: "getCouponHolders(uint256,uint256,uint256)",
+        },
+        selector: "0xa92e8371",
+      },
+      {
+        name: "getCouponsFor",
+        signature: {
+          full: "function getCouponsFor(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 tokenBalance, uint256 nominalValue, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, (uint256 numerator, uint256 denominator, bool recordDateReached) couponAmount, bool isDisabled)[] couponFor_, address[] holders_)",
+          canonical: "getCouponsFor(uint256,uint256,uint256)",
+        },
+        selector: "0x7327ad90",
+      },
+      {
+        name: "getTotalCouponHolders",
+        signature: {
+          full: "function getTotalCouponHolders(uint256 _couponID) view returns (uint256)",
+          canonical: "getTotalCouponHolders(uint256)",
+        },
+        selector: "0xec116ae3",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "CouponNotFound",
+        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
+        selector: "0x69a80e75",
+      },
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
+      },
+      {
+        name: "WrongImpactDataValues",
+        signature: {
+          full: "error WrongImpactDataValues((uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData)",
+          canonical: "WrongImpactDataValues((uint256,uint256,uint256,uint8,uint256))",
+        },
+        selector: "0xa60b6cba",
+      },
+      {
+        name: "WrongIndexForAction",
+        signature: {
+          full: "error WrongIndexForAction(uint256 index, bytes32 actionType)",
+          canonical: "WrongIndexForAction(uint256,bytes32)",
+        },
+        selector: "0xd3924f4e",
+      },
+      {
+        name: "WrongInterestRateValues",
+        signature: {
+          full: "error WrongInterestRateValues((uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate)",
+          canonical: "WrongInterestRateValues((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8))",
+        },
+        selector: "0x570cf0d3",
+      },
+    ],
+    factory: (signer) => new CouponSecurityHoldersFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+  },
+
   CouponSustainabilityPerformanceTargetRateFacet: {
     name: "CouponSustainabilityPerformanceTargetRateFacet",
     resolverKey: {
@@ -6575,30 +6599,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "getCouponFor(uint256,address)",
         },
         selector: "0xbba7b56d",
-      },
-      {
-        name: "getCouponHolders",
-        signature: {
-          full: "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
-          canonical: "getCouponHolders(uint256,uint256,uint256)",
-        },
-        selector: "0xa92e8371",
-      },
-      {
-        name: "getCouponsFor",
-        signature: {
-          full: "function getCouponsFor(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 tokenBalance, uint256 nominalValue, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, (uint256 numerator, uint256 denominator, bool recordDateReached) couponAmount, bool isDisabled)[] couponFor_, address[] accounts_)",
-          canonical: "getCouponsFor(uint256,uint256,uint256)",
-        },
-        selector: "0x7327ad90",
-      },
-      {
-        name: "getTotalCouponHolders",
-        signature: {
-          full: "function getTotalCouponHolders(uint256 _couponID) view returns (uint256)",
-          canonical: "getTotalCouponHolders(uint256)",
-        },
-        selector: "0xec116ae3",
       },
       {
         name: "setCoupon",
@@ -14346,6 +14346,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
+export const TOTAL_FACETS = 103 as const;
 export const TOTAL_FACETS = 103 as const;
 
 /**
