@@ -45,6 +45,7 @@ const BOND_FIXED_RATE_FACETS = [
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
+  "FreezeAtSnapshotFacet",
   "CoreAtSnapshotFacet",
   "BalanceTrackerByPartitionFacet",
   "BalanceTrackerAtSnapshotFacet",
@@ -60,6 +61,9 @@ const BOND_FIXED_RATE_FACETS = [
 
   // CoreAdjusted
   "CoreAdjustedFacet",
+
+  //Metadata
+  "MetadataFacet",
 
   // ERC Standards
   "TransferFacet",

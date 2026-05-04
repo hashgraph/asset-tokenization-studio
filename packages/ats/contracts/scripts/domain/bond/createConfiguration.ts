@@ -48,6 +48,7 @@ const BOND_FACETS = [
   "KycFacet",
   "PauseFacet",
   "SnapshotsFacet",
+  "FreezeAtSnapshotFacet",
   "CoreAtSnapshotFacet",
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
@@ -65,6 +66,9 @@ const BOND_FACETS = [
 
   // CoreAdjusted
   "CoreAdjustedFacet",
+
+  //Metadata
+  "MetadataFacet",
 
   // ERC Standards
   "TransferFacet",

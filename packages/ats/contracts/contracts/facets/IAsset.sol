@@ -63,6 +63,7 @@ import { IBalanceTrackerAdjusted } from "./balanceTrackerAdjusted/IBalanceTracke
 import { ITransferAndLock } from "./layer_3/transferAndLock/ITransferAndLock.sol";
 import { ICoupon } from "./layer_2/coupon/ICoupon.sol";
 import { IDividend } from "./layer_2/dividend/IDividend.sol";
+import { IDividendSecurityHolders } from "./dividendSecurityHolders/IDividendSecurityHolders.sol";
 import { IKpis } from "./layer_2/kpi/kpiLatest/IKpis.sol";
 import { IProtectedPartitions } from "./layer_1/protectedPartition/IProtectedPartitions.sol";
 import { IProceedRecipients } from "./layer_2/proceedRecipient/IProceedRecipients.sol";
@@ -85,6 +86,7 @@ import { ILock } from "./layer_1/lock/ILock.sol";
 import { IFreeze } from "./freeze/IFreeze.sol";
 import { IBatchFreeze } from "./batchFreeze/IBatchFreeze.sol";
 import { ISnapshots } from "./layer_1/snapshot/ISnapshots.sol";
+import { IFreezeAtSnapshot } from "./freezeAtSnapshot/IFreezeAtSnapshot.sol";
 import { ICoreAtSnapshot } from "./coreAtSnapshot/ICoreAtSnapshot.sol";
 import { IClearingTransfer } from "./layer_1/clearing/IClearingTransfer.sol";
 import { IClearingRedeem } from "./layer_1/clearing/IClearingRedeem.sol";
@@ -114,6 +116,7 @@ import { IControlList } from "./controlList/IControlList.sol";
 import { IBatchBurn } from "./batchBurn/IBatchBurn.sol";
 import { IBatchMint } from "./batchMint/IBatchMint.sol";
 import { IBatchTransfer } from "./batchTransfer/IBatchTransfer.sol";
+import { IMetadata } from "./metadata/IMetadata.sol";
 
 // solhint-disable no-empty-blocks
 /**
@@ -173,6 +176,7 @@ interface IAsset is
     ICoupon,
     ICouponSecurityHolders,
     IDividend,
+    IDividendSecurityHolders,
     // Additional Layer 1
     IBalanceTracker,
     IBalanceTrackerAdjusted,
@@ -192,6 +196,7 @@ interface IAsset is
     IFreeze,
     IBatchFreeze,
     ISnapshots,
+    IFreezeAtSnapshot,
     ICoreAtSnapshot,
     // Clearing interfaces
     IClearing,
@@ -223,5 +228,6 @@ interface IAsset is
     IExternalControlListManagement,
     IBatchBurn,
     IBatchMint,
-    IBatchTransfer
+    IBatchTransfer,
+    IMetadata
 {}
