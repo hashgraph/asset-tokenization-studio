@@ -171,6 +171,9 @@ bytes32 constant _ERC1644_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 
 // keccak256("security.token.standard.snapshots.resolverKey");
 bytes32 constant _SNAPSHOTS_RESOLVER_KEY = 0x9a3fc46d83536ef6b87eb4fec37302bfd1a7c18e81ea2da853b911b44cf5b0cf;
 
+// keccak256("security.token.standard.freeze.at.snapshot.resolverKey");
+bytes32 constant _FREEZE_AT_SNAPSHOT_RESOLVER_KEY = 0x554064f549ff9eaa803cb2be55ec6fca6974b28c5784cb9378aaf194d0804af3;
+
 // keccak256("security.token.standard.core.at.snapshot.resolverKey")
 bytes32 constant _CORE_AT_SNAPSHOT_RESOLVER_KEY = 0x72b3df174c5ac7f128d0d1ae81ec15e1d5abd21d1a0f58f64d78de0108be41de;
 
