@@ -106,6 +106,7 @@ export const CONTRACT_NAMES = [
   "CouponSecurityHoldersFacet",
   "SnapshotsFacet",
   "FreezeAtSnapshotFacet",
+  "FreezeAtSnapshotByPartitionFacet",
   "CoreAtSnapshotFacet",
   "CorporateActionsFacet",
   "TransferAndLockFacet",

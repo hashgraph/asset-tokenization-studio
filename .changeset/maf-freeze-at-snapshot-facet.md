@@ -2,18 +2,22 @@
 "@hashgraph/asset-tokenization-contracts": minor
 ---
 
-# FreezeAtSnapshotFacet split
+# FreezeAtSnapshot / FreezeAtSnapshotByPartition split
 
-Extract `frozenBalanceOfAtSnapshot` from `SnapshotsFacet` into a dedicated `FreezeAtSnapshotFacet` registered under `_FREEZE_AT_SNAPSHOT_RESOLVER_KEY`.
+Extract `frozenBalanceOfAtSnapshot` and `frozenBalanceOfAtSnapshotByPartition` from `SnapshotsFacet` into two dedicated facets:
+
+- `FreezeAtSnapshotFacet` registered under `_FREEZE_AT_SNAPSHOT_RESOLVER_KEY`.
+- `FreezeAtSnapshotByPartitionFacet` registered under `_FREEZE_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY`.
 
 ## Changes
 
 - Added `contracts/facets/freezeAtSnapshot/IFreezeAtSnapshot.sol`, `FreezeAtSnapshot.sol`, `FreezeAtSnapshotFacet.sol`.
-- Added `_FREEZE_AT_SNAPSHOT_RESOLVER_KEY` constant in `resolverKeys.sol`.
-- Removed `frozenBalanceOfAtSnapshot` from `Snapshots.sol`, `SnapshotsFacet.sol`, and `ISnapshots.sol` (12 → 11 selectors). `frozenBalanceOfAtSnapshotByPartition` stays in `SnapshotsFacet`.
-- `IAsset` now also inherits `IFreezeAtSnapshot`.
-- Updated `Configuration.ts` and all 7 `createConfiguration.ts` scripts (bond, bondFixedRate, bondKpiLinkedRate, bondSustainabilityPerformanceTargetRate, equity, loan, loanPortfolio) to register `FreezeAtSnapshotFacet` alongside `SnapshotsFacet`.
+- Added `contracts/facets/freezeAtSnapshotByPartition/IFreezeAtSnapshotByPartition.sol`, `FreezeAtSnapshotByPartition.sol`, `FreezeAtSnapshotByPartitionFacet.sol`.
+- Added `_FREEZE_AT_SNAPSHOT_RESOLVER_KEY` and `_FREEZE_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY` constants in `resolverKeys.sol`.
+- Removed `frozenBalanceOfAtSnapshot` and `frozenBalanceOfAtSnapshotByPartition` from `Snapshots.sol`, `SnapshotsFacet.sol`, and `ISnapshots.sol` (12 → 10 selectors).
+- `IAsset` now also inherits `IFreezeAtSnapshot` and `IFreezeAtSnapshotByPartition`.
+- Updated `Configuration.ts` and all 7 `createConfiguration.ts` scripts (bond, bondFixedRate, bondKpiLinkedRate, bondSustainabilityPerformanceTargetRate, equity, loan, loanPortfolio) to register both new facets alongside `SnapshotsFacet`.
 
 ## Non-breaking
 
-The 4-byte selector of `frozenBalanceOfAtSnapshot` is unchanged (`0x5e6c70ec`). Any call to `asset.frozenBalanceOfAtSnapshot(...)` through `IAsset` continues to work without modification.
+The 4-byte selectors of both functions are unchanged (`0x5e6c70ec` for `frozenBalanceOfAtSnapshot`, `0x0749c323` for `frozenBalanceOfAtSnapshotByPartition`). Any call to either function through `IAsset` continues to work without modification.
