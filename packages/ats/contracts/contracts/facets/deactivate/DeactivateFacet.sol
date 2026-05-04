@@ -25,14 +25,15 @@ contract DeactivateFacet is Deactivate, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex = 2;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        staticFunctionSelectors_[--selectorIndex] = this.deactivate.selector;
-        staticFunctionSelectors_[--selectorIndex] = this.isDeactivated.selector;
+        unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this.deactivate.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.isDeactivated.selector;
+        }
     }
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IDeactivate).interfaceId;
+        staticInterfaceIds_[0] = type(IDeactivate).interfaceId;
     }
 }

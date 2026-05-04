@@ -71,7 +71,9 @@ library DividendStorageWrapper {
      * @return success_ Always true if no revert occurred
      */
     function cancelDividend(uint256 dividendId) internal returns (bool success_) {
-        (IDividendTypes.RegisteredDividend memory registeredDividend, bytes32 corporateActionId, ) = getDividend(dividendId);
+        (IDividendTypes.RegisteredDividend memory registeredDividend, bytes32 corporateActionId, ) = getDividend(
+            dividendId
+        );
 
         if (registeredDividend.dividend.executionDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
             revert IDividend.DividendAlreadyExecuted(corporateActionId, dividendId);
@@ -121,7 +123,11 @@ library DividendStorageWrapper {
     )
         internal
         view
-        returns (IDividendTypes.RegisteredDividend memory registeredDividend_, bytes32 corporateActionId_, bool isDisabled_)
+        returns (
+            IDividendTypes.RegisteredDividend memory registeredDividend_,
+            bytes32 corporateActionId_,
+            bool isDisabled_
+        )
     {
         corporateActionId_ = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
             DIVIDEND_CORPORATE_ACTION_TYPE,
