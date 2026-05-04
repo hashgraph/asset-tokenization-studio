@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-04T09:32:47.043Z
- * Facets: 103
+ * Generated: 2026-05-04T12:39:24.084Z
+ * Facets: 104
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -14346,8 +14346,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 103 as const;
-export const TOTAL_FACETS = 103 as const;
+export const TOTAL_FACETS = 104 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -15055,6 +15054,8 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   MetadataStorageWrapper: {
     name: "MetadataStorageWrapper",
+    description:
+      "Library providing diamond storage access and the read/write primitives used by the metadata facet to persist arbitrary key/value entries on a security token.",
     methods: [],
   },
 
