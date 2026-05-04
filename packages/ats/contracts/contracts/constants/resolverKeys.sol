@@ -117,6 +117,9 @@ bytes32 constant _ERC20PERMIT_KPI_LINKED_RATE_RESOLVER_KEY = 0x468437a5a7a128b24
 // keccak256("security.token.standard.erc20permit.SustainabilityPerformanceTarget.rate.resolverKey");
 bytes32 constant _ERC20PERMIT_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x3bf8d35ad3c3320d95184dd4f9a0bfc2e56b151318d9d27eefa74461d24f5c61;
 
+// keccak256("security.token.standard.eip712.resolverKey");
+bytes32 constant _EIP712_RESOLVER_KEY = 0xe19e9ba358b25b281ecf7a998a7040a7cea72e6fb09fa5ceab8598a59927bee4;
+
 // keccak256("security.token.standard.documentation.resolverKey");
 bytes32 constant _DOCUMENTATION_RESOLVER_KEY = 0x57129a8daf2f0c8049f790465a8c176b7e9fdd5f8cbe1f7f9c6c3a70351ea521;
 

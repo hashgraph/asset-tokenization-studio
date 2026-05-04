@@ -71,6 +71,7 @@ const EQUITY_FACETS = [
   "DocumentationFacet",
   "ControllerFacet",
   "ERC20PermitFacet",
+  "EIP712Facet",
   "NoncesFacet",
   "DeactivateFacet",
   "ERC20VotesFacet",

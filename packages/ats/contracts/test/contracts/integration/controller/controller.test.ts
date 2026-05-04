@@ -166,6 +166,22 @@ describe("Controller Tests", () => {
         expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.equal(amount);
         expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_D.address)).to.equal(amount);
       });
+
+      describe("bug Transfer", () => {
+        it("GIVEN a controller WHEN controllerTransfer THEN Transfer event is emitted from sender to receiver", async () => {
+          await expect(
+            asset.connect(signer_B).controllerTransfer(signer_D.address, signer_E.address, amount, data, operatorData),
+          )
+            .to.emit(asset, "Transfer")
+            .withArgs(signer_D.address, signer_E.address, amount);
+        });
+
+        it("GIVEN a controller WHEN controllerRedeem THEN Transfer event is emitted from holder to address(0)", async () => {
+          await expect(asset.connect(signer_B).controllerRedeem(signer_D.address, amount, data, operatorData))
+            .to.emit(asset, "Transfer")
+            .withArgs(signer_D.address, ethers.ZeroAddress, amount);
+        });
+      });
     });
 
     describe("finalizeControllable", () => {
@@ -214,6 +230,8 @@ describe("Controller Tests", () => {
 
         expect(await asset.forcedTransfer(signer_E.address, signer_D.address, amount))
           .to.emit(asset, "Transferred")
+          .withArgs(signer_E.address, signer_D.address, amount)
+          .to.emit(asset, "Transfer")
           .withArgs(signer_E.address, signer_D.address, amount);
 
         expect(await asset.totalSupply()).to.be.equal(amount * 2);
