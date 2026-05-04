@@ -78,6 +78,7 @@ import {
 import { IClearingAtSnapshot } from "./clearingAtSnapshot/IClearingAtSnapshot.sol";
 import { IClearingAtSnapshotByPartition } from "./clearingAtSnapshotByPartition/IClearingAtSnapshotByPartition.sol";
 import { IHoldAtSnapshotByPartition } from "./holdAtSnapshotByPartition/IHoldAtSnapshotByPartition.sol";
+import { IHoldAtSnapshot } from "./holdAtSnapshot/IHoldAtSnapshot.sol";
 import { ICouponListing } from "./couponListing/ICouponListing.sol";
 import { ICouponSecurityHolders } from "./couponSecurityHolders/ICouponSecurityHolders.sol";
 import {
@@ -118,6 +119,7 @@ import { IBatchBurn } from "./batchBurn/IBatchBurn.sol";
 import { IBatchMint } from "./batchMint/IBatchMint.sol";
 import { IBatchTransfer } from "./batchTransfer/IBatchTransfer.sol";
 import { IMetadata } from "./metadata/IMetadata.sol";
+import { IDeactivate } from "./deactivate/IDeactivate.sol";
 
 // solhint-disable no-empty-blocks
 /**
@@ -190,6 +192,7 @@ interface IAsset is
     IClearingAtSnapshot,
     IClearingAtSnapshotByPartition,
     IHoldAtSnapshotByPartition,
+    IHoldAtSnapshot,
     IFixedRate,
     // Scheduled Tasks
     ICouponListing,
@@ -231,5 +234,6 @@ interface IAsset is
     IBatchBurn,
     IBatchMint,
     IBatchTransfer,
-    IMetadata
+    IMetadata,
+    IDeactivate
 {}
