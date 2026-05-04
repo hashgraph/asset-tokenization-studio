@@ -62,6 +62,9 @@ const BOND_FIXED_RATE_FACETS = [
   // CoreAdjusted
   "CoreAdjustedFacet",
 
+  //Metadata
+  "MetadataFacet",
+
   // ERC Standards
   "TransferFacet",
   "MintByPartitionFacet",

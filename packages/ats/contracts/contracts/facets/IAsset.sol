@@ -115,6 +115,7 @@ import { IControlList } from "./controlList/IControlList.sol";
 import { IBatchBurn } from "./batchBurn/IBatchBurn.sol";
 import { IBatchMint } from "./batchMint/IBatchMint.sol";
 import { IBatchTransfer } from "./batchTransfer/IBatchTransfer.sol";
+import { IMetadata } from "./metadata/IMetadata.sol";
 
 // solhint-disable no-empty-blocks
 /**
@@ -225,5 +226,6 @@ interface IAsset is
     IExternalControlListManagement,
     IBatchBurn,
     IBatchMint,
-    IBatchTransfer
+    IBatchTransfer,
+    IMetadata
 {}
