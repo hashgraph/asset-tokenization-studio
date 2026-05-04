@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-04T10:09:29.455Z
- * Facets: 103
+ * Generated: 2026-05-04T12:07:57.634Z
+ * Facets: 104
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -69,6 +69,7 @@ import {
   CouponListingFacet__factory,
   CouponSecurityHoldersFacet__factory,
   CouponSustainabilityPerformanceTargetRateFacet__factory,
+  DeactivateFacet__factory,
   DiamondFacet__factory,
   DividendFacet__factory,
   DocumentationFacet__factory,
@@ -6742,6 +6743,57 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         getLibLinks("clearingReadOps") as any,
         signer,
       ),
+  },
+
+  DeactivateFacet: {
+    name: "DeactivateFacet",
+    description: "DeactivateFacet",
+    resolverKey: {
+      name: "_DEACTIVATE_RESOLVER_KEY",
+      value: "0x28edc8979475f616e9ee33c89ffa66022cb1bd6d3c555cbb4c4acaefa3974f96",
+    },
+    inheritance: ["Deactivate", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "deactivate",
+        signature: { full: "function deactivate()", canonical: "deactivate()" },
+        selector: "0x51b42b00",
+      },
+      {
+        name: "isDeactivated",
+        signature: { full: "function isDeactivated() view returns (bool)", canonical: "isDeactivated()" },
+        selector: "0x6dcf811d",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRole",
+        signature: {
+          full: "error AccountHasNoRole(address account, bytes32 role)",
+          canonical: "AccountHasNoRole(address,bytes32)",
+        },
+        selector: "0xa1180aad",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+    ],
+    factory: (signer) => new DeactivateFacet__factory(signer),
   },
 
   DiamondFacet: {
@@ -14292,7 +14344,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 103 as const;
+export const TOTAL_FACETS = 104 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -14770,6 +14822,11 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [],
   },
 
+  DeactivateStorageWrapper: {
+    name: "DeactivateStorageWrapper",
+    methods: [],
+  },
+
   DividendStorageWrapper: {
     name: "DividendStorageWrapper",
     description: "Provides internal functions to manage lifecycle and queries for dividend corporate actions.",
@@ -15079,7 +15136,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 41 as const;
+export const TOTAL_STORAGE_WRAPPERS = 42 as const;
 
 /**
  * All role identifiers extracted from contracts.
@@ -15096,6 +15153,7 @@ export const ROLES = {
   CONTROL_LIST_ROLE: "0xca537e1c88c9f52dc5692c96c482841c3bea25aafc5f3bfe96f645b5f800cac3",
   CONTROLLER_ROLE: "0xa72964c08512ad29f46841ce735cff038789243c2b506a89163cc99f76d06c0f",
   CORPORATE_ACTION_ROLE: "0x8a139eeb747b9809192ae3de1b88acfd2568c15241a5c4f85db0443a536d77d6",
+  DEACTIVATE_ROLE: "0x145ad831ea56153ed7168c7801290d85409e09d7dec17409bcc37e47a035c79f",
   DEFAULT_ADMIN_ROLE: "0x0000000000000000000000000000000000000000000000000000000000000000",
   DOCUMENTER_ROLE: "0x83ace103a76d3729b4ba1350ad27522bbcda9a1a589d1e5091f443e76abccf41",
   FREEZE_MANAGER_ROLE: "0xd0e5294c1fc630933e135c5b668c5d577576754d33964d700bbbcdbfd7e1361b",
@@ -15124,4 +15182,4 @@ export const ROLES = {
 /**
  * Total number of unique roles in the registry.
  */
-export const TOTAL_ROLES = 34 as const;
+export const TOTAL_ROLES = 35 as const;
