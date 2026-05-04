@@ -33,18 +33,18 @@ interface ICouponSecurityHolders is ICouponTypes {
      * @notice Returns coupon information for every holder of a given coupon, paginated.
      * @dev Internally resolves the holder page then retrieves per-holder coupon details.
      *      The two returned arrays share the same index: `couponFor_[i]` corresponds
-     *      to `accounts_[i]`.
+     *      to `holders_[i]`.
      * @param _couponID    Identifier of the target coupon (1-based index).
      * @param _pageIndex   Zero-based page number for pagination.
      * @param _pageLength  Maximum number of records to return per page.
      * @return couponFor_  Per-holder coupon details for the requested page.
-     * @return accounts_   Holder addresses corresponding to each entry in `couponFor_`.
+     * @return holders_   Holder addresses corresponding to each entry in `couponFor_`.
      */
     function getCouponsFor(
         uint256 _couponID,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) external view returns (CouponFor[] memory couponFor_, address[] memory accounts_);
+    ) external view returns (CouponFor[] memory couponFor_, address[] memory holders_);
 
     /**
      * @notice Returns the total number of security holders eligible for a coupon.
