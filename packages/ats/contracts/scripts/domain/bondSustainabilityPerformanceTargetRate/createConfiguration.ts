@@ -71,6 +71,7 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "DocumentationFacet",
   "ControllerFacet",
   "ERC20PermitFacet",
+  "EIP712Facet",
   "NoncesFacet",
   "ERC20VotesFacet",
   "BatchControllerFacet",

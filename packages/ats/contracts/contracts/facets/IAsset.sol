@@ -112,6 +112,7 @@ import { IControllerHoldByPartition } from "./controllerHoldByPartition/IControl
 import { IControllerByPartition } from "./controllerByPartition/IControllerByPartition.sol";
 import { IProtectedHoldByPartition } from "./protectedHoldByPartition/IProtectedHoldByPartition.sol";
 import { IERC20Permit } from "./layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
+import { IEIP712 } from "./eip712/IEIP712.sol";
 import { IControlList } from "./controlList/IControlList.sol";
 import { IBatchBurn } from "./batchBurn/IBatchBurn.sol";
 import { IBatchMint } from "./batchMint/IBatchMint.sol";
@@ -222,6 +223,7 @@ interface IAsset is
     IControllerByPartition,
     IProtectedHoldByPartition,
     IERC20Permit,
+    IEIP712,
     // Control
     IControlList,
     IExternalControlList,

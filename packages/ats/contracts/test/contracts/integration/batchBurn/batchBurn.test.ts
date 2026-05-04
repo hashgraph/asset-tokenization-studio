@@ -114,6 +114,19 @@ describe("BatchBurn Tests", () => {
       expect(finalTotalSupply).to.equal(initialTotalSupply - BigInt(burnAmount * 2));
     });
 
+    describe("bug Transfer", () => {
+      it("GIVEN approved operator WHEN batchBurn THEN Transfer event is emitted for each holder", async () => {
+        const userAddresses = [signer_D.address, signer_E.address];
+        const amounts = [burnAmount, burnAmount];
+
+        await expect(asset.connect(signer_A).batchBurn(userAddresses, amounts))
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_D.address, ethers.ZeroAddress, burnAmount)
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_E.address, ethers.ZeroAddress, burnAmount);
+      });
+    });
+
     it("GIVEN an invalid input amounts array THEN transaction fails with InputAmountsArrayLengthMismatch", async () => {
       const userAddresses = [signer_D.address];
       const amounts = [burnAmount, burnAmount];

@@ -82,6 +82,7 @@ export const CONTRACT_NAMES = [
   "CoreFacet",
   "ERC20Facet",
   "ERC20PermitFacet",
+  "EIP712Facet",
   "ERC1410ScheduledTasksFacet",
   "ERC20Votes", //TODO
   "ERC1410ReadFacet",

@@ -81,6 +81,7 @@ const BOND_FACETS = [
   "DocumentationFacet",
   "ControllerFacet",
   "ERC20PermitFacet",
+  "EIP712Facet",
   "NoncesFacet",
   "ERC20VotesFacet",
   "BatchControllerFacet",
