@@ -14,9 +14,7 @@ import {
 import { ExecuteDistributionByAddressesCommandError } from "./error/ExecuteDistributionByAddressesCommandError";
 
 @CommandHandler(ExecuteDistributionByAddressesCommand)
-export class ExecuteDistributionByAddressesCommandHandler
-  implements ICommandHandler<ExecuteDistributionByAddressesCommand>
-{
+export class ExecuteDistributionByAddressesCommandHandler implements ICommandHandler<ExecuteDistributionByAddressesCommand> {
   constructor(
     private readonly transactionService: TransactionService,
     private readonly contractService: ContractService,
