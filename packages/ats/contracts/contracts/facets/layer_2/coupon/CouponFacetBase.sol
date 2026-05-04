@@ -7,14 +7,11 @@ import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticF
 
 abstract contract CouponFacetBase is Coupon, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 9;
+        uint256 selectorIndex = 6;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);
         unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.getTotalCouponHolders.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getCouponHolders.selector;
             staticFunctionSelectors_[--selectorIndex] = this.getCouponCount.selector;
             staticFunctionSelectors_[--selectorIndex] = this.getCouponAmountFor.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getCouponsFor.selector;
             staticFunctionSelectors_[--selectorIndex] = this.getCouponFor.selector;
             staticFunctionSelectors_[--selectorIndex] = this.getCoupon.selector;
             staticFunctionSelectors_[--selectorIndex] = this.cancelCoupon.selector;
