@@ -77,6 +77,7 @@ import {
 import { IClearingAtSnapshot } from "./clearingAtSnapshot/IClearingAtSnapshot.sol";
 import { IClearingAtSnapshotByPartition } from "./clearingAtSnapshotByPartition/IClearingAtSnapshotByPartition.sol";
 import { ICouponListing } from "./couponListing/ICouponListing.sol";
+import { ICouponSecurityHolders } from "./couponSecurityHolders/ICouponSecurityHolders.sol";
 import {
     IScheduledBalanceAdjustments
 } from "./layer_2/scheduledTask/scheduledBalanceAdjustment/IScheduledBalanceAdjustments.sol";
@@ -170,6 +171,7 @@ interface IAsset is
     ITransferAndLock,
     // Corporate Actions
     ICoupon,
+    ICouponSecurityHolders,
     IDividend,
     // Additional Layer 1
     IBalanceTracker,

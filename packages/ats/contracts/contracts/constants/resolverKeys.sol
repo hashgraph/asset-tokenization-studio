@@ -602,6 +602,9 @@ bytes32 constant _COUPON_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0
 // keccak256("security.token.standard.couponListing.resolverKey");
 bytes32 constant _COUPON_LISTING_RESOLVER_KEY = 0x09830f922c6bb4e736cc4cc426ceec0888c8b95b2cc21b67f16dab889ad4c47e;
 
+// keccak256("security.token.standard.coupon.securityHolders.resolverKey");
+bytes32 constant _COUPON_SECURITY_HOLDERS_RESOLVER_KEY = 0x2dbf6db0e4dddb14cd72f1a882c1520fdbd592db82b5f3d2562ace6c9eb5cc23;
+
 // keccak256('security.token.standard.scheduled.tasks.resolverKey');
 bytes32 constant _SCHEDULED_TASKS_RESOLVER_KEY = 0xa4934195ab83f1497ce5fc99b68d0f41694716bcfba5f232aa6c8e0d4d504f08;
 

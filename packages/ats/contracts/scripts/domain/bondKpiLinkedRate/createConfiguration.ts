@@ -114,6 +114,8 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "SsiManagementFacet",
   "TransferAndLockFacet",
 
+  "CouponSecurityHoldersFacet",
+
   // Interest Rate (rate-specific - keep variant names)
   "CouponKpiLinkedRateFacet",
   "KpiLinkedRateFacet",

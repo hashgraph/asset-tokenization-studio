@@ -114,6 +114,8 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "SsiManagementFacet",
   "TransferAndLockFacet",
 
+  "CouponSecurityHoldersFacet",
+
   // Interest Rate (rate-specific - keep variant names)
   "CouponSustainabilityPerformanceTargetRateFacet",
   "SustainabilityPerformanceTargetRateFacet",
