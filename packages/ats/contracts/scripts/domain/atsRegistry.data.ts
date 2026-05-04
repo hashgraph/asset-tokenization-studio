@@ -89,6 +89,7 @@ import {
   FixedRateFacet__factory,
   FreezeAtSnapshotFacet__factory,
   FreezeFacet__factory,
+  HoldAtSnapshotFacet__factory,
   HoldByPartitionFacet__factory,
   HoldFacet__factory,
   HoldManagementFacet__factory,
@@ -9415,6 +9416,43 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) => new FreezeFacetTimeTravel__factory(signer),
   },
 
+  HoldAtSnapshotFacet: {
+    name: "HoldAtSnapshotFacet",
+    description:
+      "Diamond facet that exposes the held-balance-at-snapshot query via `IHoldAtSnapshot`, registered under `_HOLD_AT_SNAPSHOT_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_HOLD_AT_SNAPSHOT_RESOLVER_KEY",
+      value: "0x799547b5a870e2f0d0e9664f133d288ad8cd2a1b267be8ae0085030adb2d858d",
+    },
+    inheritance: ["HoldAtSnapshot", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "heldBalanceOfAtSnapshot",
+        signature: {
+          full: "function heldBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+          canonical: "heldBalanceOfAtSnapshot(uint256,address)",
+        },
+        selector: "0xb52e39aa",
+      },
+    ],
+    errors: [
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+    ],
+    factory: (signer) => new HoldAtSnapshotFacet__factory(signer),
+  },
+
   HoldByPartitionFacet: {
     name: "HoldByPartitionFacet",
     description:
@@ -13308,14 +13346,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "getTotalTokenHoldersAtSnapshot(uint256)",
         },
         selector: "0x867126e1",
-      },
-      {
-        name: "heldBalanceOfAtSnapshot",
-        signature: {
-          full: "function heldBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
-          canonical: "heldBalanceOfAtSnapshot(uint256,address)",
-        },
-        selector: "0xb52e39aa",
       },
       {
         name: "heldBalanceOfAtSnapshotByPartition",
