@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IDividendTypes } from "./IDividendTypes.sol";
+import { IDividendTypes } from "../../dividend/IDividendTypes.sol";
 
 interface IDividend is IDividendTypes {
     event DividendSet(
@@ -38,12 +38,4 @@ interface IDividend is IDividendTypes {
     ) external view returns (DividendAmountFor memory dividendAmountFor_);
 
     function getDividendsCount() external view returns (uint256 dividendCount_);
-
-    function getDividendHolders(
-        uint256 dividendId,
-        uint256 pageIndex,
-        uint256 pageLength
-    ) external view returns (address[] memory holders_);
-
-    function getTotalDividendHolders(uint256 dividendId) external view returns (uint256);
 }

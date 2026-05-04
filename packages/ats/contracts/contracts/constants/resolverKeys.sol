@@ -674,6 +674,9 @@ bytes32 constant _VOTING_RESOLVER_KEY = 0x97e0ffc69e5d5dd7c4635bfce0a5cf15b1c313
 // keccak256("security.token.standard.dividend.resolverKey")
 bytes32 constant _DIVIDEND_RESOLVER_KEY = 0x63752e3f4bd54d9fec1ad1667ef4de4f80e9a6484fb94f93ea4312aef9c19bea;
 
+// keccak256("security.token.standard.dividendSecurityHolders.resolverKey")
+bytes32 constant _DIVIDEND_SECURITY_HOLDERS_RESOLVER_KEY = 0xc6f22894c7b5a791b1ec8ba97fced37ce7b17c9e0ffea29bf1c1064a0edd85ad;
+
 // keccak256('security.token.standard.amortization.resolverKey');
 bytes32 constant _AMORTIZATION_RESOLVER_KEY = 0xe45d89550ef8988da0d14267142ce98f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d;
 
