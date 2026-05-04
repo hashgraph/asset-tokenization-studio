@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type IAsset, type ResolverProxy } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -13,6 +13,11 @@ const MAX_SUPPLY = 10000000;
 const EMPTY_VC_ID = EMPTY_STRING;
 const WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
 const CUSTOM_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
+
+// Compute partition-specific role for protected redemptions
+const PARTITION_SPECIFIC_ROLE = ethers.keccak256(
+  ethers.solidityPacked(["bytes32", "bytes32"], [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, DEFAULT_PARTITION]),
+);
 
 describe("BurnByPartitionFacet Tests", () => {
   let diamond: ResolverProxy;
@@ -29,6 +34,7 @@ describe("BurnByPartitionFacet Tests", () => {
           securityData: {
             internalKycActivated: true,
             maxSupply: MAX_SUPPLY,
+            arePartitionsProtected: true,
           },
         },
       });
@@ -44,6 +50,9 @@ describe("BurnByPartitionFacet Tests", () => {
         { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
         { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
         { role: ATS_ROLES.PAUSER_ROLE, members: [signer_C.address] },
+        { role: ATS_ROLES.PROTECTED_PARTITIONS_ROLE, members: [signer_E.address] },
+        { role: PARTITION_SPECIFIC_ROLE, members: [signer_E.address] },
+        { role: ATS_ROLES.WILD_CARD_ROLE, members: [signer_E.address] },
       ]);
 
       await asset.addIssuer(signer_A.address);
@@ -102,6 +111,58 @@ describe("BurnByPartitionFacet Tests", () => {
 
       expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.equal(AMOUNT - redeemAmount);
       expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.equal(AMOUNT - redeemAmount);
+    });
+
+    describe("bug Transfer", () => {
+      it("GIVEN a token holder WHEN redeemByPartition THEN Transfer event is emitted from holder to address(0)", async () => {
+        await expect(asset.connect(signer_E).redeemByPartition(DEFAULT_PARTITION, AMOUNT, EMPTY_HEX_BYTES))
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_E.address, ethers.ZeroAddress, AMOUNT);
+      });
+
+      it("GIVEN a token holder WHEN protectedRedeemFromByPartition THEN Transfer event is emitted from holder to address(0)", async () => {
+        const domain = {
+          name: (await asset.getERC20Metadata()).info.name,
+          version: (await asset.getConfigInfo()).version_.toString(),
+          chainId: await network.provider.send("eth_chainId"),
+          verifyingContract: diamond.target as string,
+        };
+
+        const redeemType = {
+          protectedRedeemFromByPartition: [
+            { name: "_partition", type: "bytes32" },
+            { name: "_from", type: "address" },
+            { name: "_amount", type: "uint256" },
+            { name: "_deadline", type: "uint256" },
+            { name: "_nonce", type: "uint256" },
+          ],
+        };
+
+        const protectionData = {
+          deadline: MAX_UINT256,
+          nonce: 1,
+          signature: "0x",
+        };
+
+        const message = {
+          _partition: DEFAULT_PARTITION,
+          _from: signer_E.address,
+          _amount: AMOUNT,
+          _deadline: protectionData.deadline,
+          _nonce: protectionData.nonce,
+        };
+
+        const signature = await signer_E.signTypedData(domain, redeemType, message);
+        protectionData.signature = signature;
+
+        await expect(
+          asset
+            .connect(signer_E)
+            .protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_E.address, AMOUNT, protectionData),
+        )
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_E.address, ethers.ZeroAddress, AMOUNT);
+      });
     });
   });
 
@@ -166,6 +227,26 @@ describe("BurnByPartitionFacet Tests", () => {
 
       expect(await asset.balanceOfByPartition(CUSTOM_PARTITION, signer_E.address)).to.equal(0);
       expect(await asset.totalSupplyByPartition(CUSTOM_PARTITION)).to.equal(0);
+    });
+
+    describe("bug Transfer", () => {
+      it("GIVEN an authorized operator WHEN operatorRedeemByPartition THEN Transfer event is emitted from holder to address(0)", async () => {
+        await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+        await asset.issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_B.address,
+          value: AMOUNT,
+          data: EMPTY_HEX_BYTES,
+        });
+        await asset.connect(signer_B).authorizeOperator(signer_E.address);
+        await expect(
+          asset
+            .connect(signer_E)
+            .operatorRedeemByPartition(DEFAULT_PARTITION, signer_B.address, AMOUNT, EMPTY_HEX_BYTES, EMPTY_HEX_BYTES),
+        )
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_B.address, ethers.ZeroAddress, AMOUNT);
+      });
     });
   });
 });

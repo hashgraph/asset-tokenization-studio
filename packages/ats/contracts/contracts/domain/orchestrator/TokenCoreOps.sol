@@ -9,7 +9,6 @@ import { ERC1410StorageWrapper } from "../asset/ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../asset/ERC20StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../asset/ERC1594StorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
-import { ITransfer } from "../../facets/transfer/ITransfer.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { IProtectedPartitions } from "../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 
@@ -120,23 +119,13 @@ library TokenCoreOps {
         ERC20StorageWrapper.beforeAllowanceUpdate(_owner, _spender);
     }
 
-    // Public functions — Balance Operations (for ClearingOps)
-
-    function reduceBalanceByPartition(address _from, uint256 _amount, bytes32 _partition) public {
-        ERC1410StorageWrapper.reduceBalanceByPartition(_from, _amount, _partition);
-    }
-
-    function increaseBalanceByPartition(address _to, uint256 _amount, bytes32 _partition) public {
-        ERC1410StorageWrapper.increaseBalanceByPartition(_to, _amount, _partition);
-    }
-
-    function addPartitionTo(uint256 _amount, address _to, bytes32 _partition) public {
-        ERC1410StorageWrapper.addPartitionTo(_amount, _to, _partition);
-    }
-
-    function transferDefaultPartition(address _sender, address _from, address _to, uint256 _amount) public {
+    /// @notice Transfers tokens on the default partition, delegating to ERC-20 storage.
+    /// @dev The `Transfer` event is emitted by `ERC20StorageWrapper.performTransfer` internally.
+    /// @param _from    Source address.
+    /// @param _to      Destination address.
+    /// @param _amount  Amount to transfer.
+    function transferDefaultPartition(address _from, address _to, uint256 _amount) public {
         ERC20StorageWrapper.transfer(_from, _to, _amount);
-        emit ITransfer.Transfer(_sender, _to, _amount);
     }
 
     function increaseAllowedBalance(address _owner, address _spender, uint256 _amount) public {

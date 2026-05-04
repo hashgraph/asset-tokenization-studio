@@ -549,7 +549,9 @@ describe("HoldByPartition Tests", () => {
       it("GIVEN a Token WHEN createHoldByPartition hold THEN transaction succeeds", async () => {
         await expect(asset.createHoldByPartition(_DEFAULT_PARTITION, hold))
           .to.emit(asset, "HeldByPartition")
-          .withArgs(signer_A.address, signer_A.address, _DEFAULT_PARTITION, 1, Object.values(hold), EMPTY_HEX_BYTES);
+          .withArgs(signer_A.address, signer_A.address, _DEFAULT_PARTITION, 1, Object.values(hold), EMPTY_HEX_BYTES)
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
 
         await checkCreatedHold(ThirdPartyType.NULL);
       });
@@ -563,7 +565,9 @@ describe("HoldByPartition Tests", () => {
           asset.connect(signer_B).createHoldFromByPartition(_DEFAULT_PARTITION, signer_A.address, hold, operatorData),
         )
           .to.emit(asset, "HeldFromByPartition")
-          .withArgs(signer_B.address, signer_A.address, _DEFAULT_PARTITION, 1, Object.values(hold), operatorData);
+          .withArgs(signer_B.address, signer_A.address, _DEFAULT_PARTITION, 1, Object.values(hold), operatorData)
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
 
         await checkCreatedHold(ThirdPartyType.AUTHORIZED, signer_B.address, operatorData);
       });
@@ -717,7 +721,9 @@ describe("HoldByPartition Tests", () => {
 
         await expect(asset.connect(signer_B).executeHoldByPartition(holdIdentifier, signer_C.address, _AMOUNT))
           .to.emit(asset, "HoldByPartitionExecuted")
-          .withArgs(signer_A.address, _DEFAULT_PARTITION, 1, _AMOUNT, signer_C.address);
+          .withArgs(signer_A.address, _DEFAULT_PARTITION, 1, _AMOUNT, signer_C.address)
+          .to.emit(asset, "Transfer")
+          .withArgs(ethers.ZeroAddress, signer_C.address, _AMOUNT);
 
         await checkCreatedHold_expected(
           0,
@@ -747,7 +753,9 @@ describe("HoldByPartition Tests", () => {
 
         await expect(asset.connect(signer_B).releaseHoldByPartition(holdIdentifier, _AMOUNT))
           .to.emit(asset, "HoldByPartitionReleased")
-          .withArgs(signer_A.address, _DEFAULT_PARTITION, 1, _AMOUNT);
+          .withArgs(signer_A.address, _DEFAULT_PARTITION, 1, _AMOUNT)
+          .to.emit(asset, "Transfer")
+          .withArgs(ethers.ZeroAddress, signer_A.address, _AMOUNT);
 
         await checkCreatedHold_expected(
           _AMOUNT,
@@ -797,7 +805,9 @@ describe("HoldByPartition Tests", () => {
 
         await expect(asset.connect(signer_B).reclaimHoldByPartition(holdIdentifier))
           .to.emit(asset, "HoldByPartitionReclaimed")
-          .withArgs(signer_B.address, signer_A.address, _DEFAULT_PARTITION, 1, _AMOUNT);
+          .withArgs(signer_B.address, signer_A.address, _DEFAULT_PARTITION, 1, _AMOUNT)
+          .to.emit(asset, "Transfer")
+          .withArgs(ethers.ZeroAddress, signer_A.address, _AMOUNT);
 
         await checkCreatedHold_expected(
           _AMOUNT,
@@ -832,6 +842,20 @@ describe("HoldByPartition Tests", () => {
         .withArgs(signer_A.address, signer_B.address, _AMOUNT);
 
       expect(await asset.allowance(signer_A.address, signer_B.address)).to.be.equal(_AMOUNT);
+    });
+
+    describe("bug Transfer", () => {
+      it("GIVEN operator authorized WHEN operatorCreateHoldByPartition THEN Transfer event emitted", async () => {
+        await asset.connect(signer_A).authorizeOperator(signer_B.address);
+
+        await expect(
+          asset
+            .connect(signer_B)
+            .operatorCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
+        )
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
+      });
     });
   });
 

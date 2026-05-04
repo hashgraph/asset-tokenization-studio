@@ -82,10 +82,12 @@ This repository follows the [Hiero naming convention](https://github.com/hiero-l
 
 ### Release Workflows
 
-- **`.github/workflows/300-flow-ats-publish.yaml`** / **`.github/workflows/301-flow-mp-publish.yaml`**: Publishes packages to npm
-  - Triggered by: Release tags (`v*-ats`, `v*-mp`)
+- **`.github/workflows/300-flow-ats-publish.yaml`**: Publishes ATS packages to npm
+  - Triggered by: Release tags (`v*-ats`)
 
 - **ATS Release** / **Mass Payout Release**: Semi-automated release processes with manual version bumping (see [Release Process](#release-process) below)
+
+> Mass Payout has a release flow (versioning, tags, GitHub release notes) but is **not** published to npm. The `Mass Payout Release` workflow creates the tag and the GitHub release; there is no MP publish workflow.
 
 ## Understanding Conditional Workflows
 
@@ -156,6 +158,8 @@ git push origin development
 
 ### Mass Payout Release
 
+Mass Payout follows the same flow as ATS for versioning, tagging, and GitHub releases — but **does not publish to npm**.
+
 **Step 1: Local Version Bump**
 
 ```bash
@@ -166,7 +170,7 @@ npx changeset version --ignore "@hashgraph/asset-tokenization-*"
 git diff
 
 # Commit with GPG signature and DCO sign-off (REQUIRED)
-git commit --signoff -S -m "chore: release Mass Payout packages v2.0.0"
+git commit --signoff -S -m "chore: release Mass Payout packages vX.Y.Z"
 
 # Push
 git push
@@ -176,7 +180,9 @@ git push
 
 1. Go to **Actions** → **Mass Payout Release**
 2. Click **Run workflow**
-3. Select **preview** or **release**
+3. Select **preview** (dry-run) or **release**
+
+The workflow validates the version, creates and pushes the `vX.Y.Z-mp` tag, and creates a GitHub release with auto-generated notes. **No npm publish happens** — MP packages are intentionally private and not published.
 
 **Step 3: Post-Release Sync (MANDATORY)**
 
@@ -199,17 +205,16 @@ git push origin development
 
 ## Workflows Reference
 
-| Workflow                | File                                    | Trigger                | Purpose                   |
-| ----------------------- | --------------------------------------- | ---------------------- | ------------------------- |
-| **Changeset Check**     | `000-flow-changeset-check.yaml`         | PR to develop          | Validate changeset exists |
-| **PR Formatting**       | `001-flow-pull-request-formatting.yaml` | PR events              | Title and assignee checks |
-| **ATS Release**         | `002-user-ats-release.yaml`             | Manual                 | Create ATS release tag    |
-| **MP Release**          | `003-user-mp-release.yaml`              | Manual                 | Create MP release tag     |
-| **ATS Tests**           | `100-flow-ats-test.yaml`                | PR to main (ATS files) | Run ATS package tests     |
-| **MP Test**             | `101-flow-mp-test.yaml`                 | PR to main (MP files)  | Run Mass Payout tests     |
-| **ATS Deployment Test** | `102-flow-ats-deployment-test.yaml`     | PR (contracts files)   | Test contract deployments |
-| **ATS Publish**         | `300-flow-ats-publish.yaml`             | Tag push `v*-ats`      | Publish to npm            |
-| **MP Publish**          | `301-flow-mp-publish.yaml`              | Tag push `v*-mp`       | Publish to npm            |
+| Workflow                | File                                    | Trigger                | Purpose                                         |
+| ----------------------- | --------------------------------------- | ---------------------- | ----------------------------------------------- |
+| **Changeset Check**     | `000-flow-changeset-check.yaml`         | PR to develop          | Validate changeset exists                       |
+| **PR Formatting**       | `001-flow-pull-request-formatting.yaml` | PR events              | Title and assignee checks                       |
+| **ATS Release**         | `002-user-ats-release.yaml`             | Manual                 | Create ATS release tag                          |
+| **MP Release**          | `003-user-mp-release.yaml`              | Manual                 | Create MP tag + GitHub release (no npm publish) |
+| **ATS Tests**           | `100-flow-ats-test.yaml`                | PR to main (ATS files) | Run ATS package tests                           |
+| **MP Test**             | `101-flow-mp-test.yaml`                 | PR to main (MP files)  | Run Mass Payout tests                           |
+| **ATS Deployment Test** | `102-flow-ats-deployment-test.yaml`     | PR (contracts files)   | Test contract deployments                       |
+| **ATS Publish**         | `300-flow-ats-publish.yaml`             | Tag push `v*-ats`      | Publish to npm                                  |
 
 ## Troubleshooting
 

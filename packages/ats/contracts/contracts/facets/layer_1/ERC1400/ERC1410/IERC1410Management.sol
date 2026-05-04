@@ -8,37 +8,12 @@ import { IProtectedPartitions } from "../../../../facets/layer_1/protectedPartit
 /**
  * @title IERC1410Management
  * @dev Interface for the ERC1410Management contract providing all management operations
- * for ERC1410 tokens including operator management and controller functions.
+ * for ERC1410 tokens including operator management and protected-partition functions.
  */
 interface IERC1410Management is IERC1410Types {
     // Initialization function
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1410(bool _multiPartition) external;
-
-    /**
-     * @notice Forces a transfer in a partition from a token holder to a destination address
-     * @dev Can only be used by the controller role
-     */
-    function controllerTransferByPartition(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) external returns (bytes32);
-
-    /**
-     * @notice Forces a redeem in a partition from a token holder
-     * @dev Can only be used by the controller role
-     */
-    function controllerRedeemByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) external;
 
     /**
      * @notice Transfers the ownership of tokens from a specified partition from one address to another address

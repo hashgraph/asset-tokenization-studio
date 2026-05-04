@@ -1,5 +1,37 @@
 # @hashgraph/asset-tokenization-sdk
 
+## 7.0.0
+
+### Major Changes
+
+- add9335: Migrated all coupon operations from `BondToken` to a new dedicated `CouponToken` export, replacing `BondRead__factory` and `Bond__factory` with `Coupon__factory` across all coupon queries and transactions. Added new `getCouponsFor` method for paginated coupon balances per account.
+
+### Minor Changes
+
+- 4431f2e: Implemented all methods from the AmortizationFacet in the SDK.
+- ca1807d: Add nominal value support to the SDK: new commands and queries wrapping the NominalValueFacet so dapp consumers can set and read nominal values on equity and bond tokens. Contracts-side facet already shipped in contracts 6.0.0 (commit 8b538ed).
+
+### Patch Changes
+
+- 2b68e6c: Fix HederaWalletConnect reconnection and disconnect flow
+  - Upgrade `@reown/appkit` (and related packages) from 1.8.10 to 1.8.19 to resolve SVG rendering errors in the modal and the `adapterType` undefined crash when creating AppKit after a disconnect
+  - Add a 500 ms wait after AppKit is first created so that its background `initialize()` task (which calls `unSyncExistingConnection → ModalController.close`) completes before the pairing modal is opened — this prevents the modal from being immediately closed on the first connect attempt
+  - Wrap `createAppKit` in a try/catch that clears all adapter singletons on failure so that a subsequent connect attempt retries from a clean state instead of hitting `NotInitialized`
+  - Replace the inline `reset() + window.location.reload()` in the Header disconnect button with a proper call to `SDKService.disconnectWallet()` (via `useSDKDisconnectFromMetamask`) so the WalletConnect session is cleanly terminated and navigation back to the landing page is handled by the router, without a full page reload
+  - Remove leftover debug `console.log` from the `walletDisconnect` event handler
+
+- a166566: Migrated all voting operations in the SDK from `Equity__factory` to the new `VotingFacet__factory`, aligning with the contract refactor that split voting logic into a dedicated `VotingFacet`. Updated mass-payout contracts to import `IVoting` for voting structs/methods and `ICoupon` for coupon holders, and updated the backend adapter and tests to use `CouponToken` instead of `BondToken` for `getAllCoupons` and `getTotalCouponHolders`.
+- Updated dependencies [9d8d309]
+- Updated dependencies [be18d8d]
+- Updated dependencies [052272a]
+- Updated dependencies [c7d4744]
+- Updated dependencies [0fe41df]
+- Updated dependencies [2502ada]
+- Updated dependencies [777e272]
+- Updated dependencies [6fe8bc2]
+- Updated dependencies [add9335]
+  - @hashgraph/asset-tokenization-contracts@7.0.0
+
 ## 6.0.0
 
 ### Major Changes

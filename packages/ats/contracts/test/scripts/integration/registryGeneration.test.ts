@@ -203,8 +203,8 @@ describe("Registry Generation Pipeline - Integration Tests", () => {
   describe("Exported Building Blocks", () => {
     it("should export detectLayer function", () => {
       const mockContract = {
-        filePath: "/path/to/contracts/facets/layer_1/AccessControl.sol",
-        relativePath: "facets/layer_1/AccessControl.sol",
+        filePath: "/path/to/contracts/facets/AccessControl.sol",
+        relativePath: "facets/AccessControl.sol",
         directory: "/path/to/contracts/facets/layer_1",
         fileName: "AccessControl",
         contractNames: ["AccessControl"],

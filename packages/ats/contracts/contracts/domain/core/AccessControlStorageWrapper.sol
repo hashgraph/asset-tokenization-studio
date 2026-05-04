@@ -6,7 +6,7 @@ import { ArrayValidation } from "../../infrastructure/utils/ArrayValidation.sol"
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { _ACCESS_CONTROL_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
-import { IAccessControl } from "../../facets/layer_1/accessControl/IAccessControl.sol";
+import { IAccessControl } from "../../facets/accessControl/IAccessControl.sol";
 
 struct RoleData {
     bytes32 roleAdmin;

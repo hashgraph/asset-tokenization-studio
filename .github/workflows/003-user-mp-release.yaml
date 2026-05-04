@@ -141,8 +141,7 @@ jobs:
             echo "| Tag | ${TAG_NAME} |" >> "${GITHUB_STEP_SUMMARY}"
             echo "| GitHub Release | ✅ Created |" >> "${GITHUB_STEP_SUMMARY}"
             echo "" >> "${GITHUB_STEP_SUMMARY}"
-            echo "**Next Steps:**" >> "${GITHUB_STEP_SUMMARY}"
-            echo "- NPM publishing will be triggered automatically via 300-flow-mp-publish.yaml" >> "${GITHUB_STEP_SUMMARY}"
+            echo "> Mass Payout packages are not published to npm; this release only creates the tag and GitHub release notes." >> "${GITHUB_STEP_SUMMARY}"
           else
             echo "## ❌ Mass Payout Release Failed" >> "${GITHUB_STEP_SUMMARY}"
             echo "Check the logs above for details on what went wrong." >> "${GITHUB_STEP_SUMMARY}"

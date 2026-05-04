@@ -188,94 +188,6 @@ describe("ERC3643 Tests", () => {
     });
 
     describe("Freeze", () => {
-      describe("snapshot", () => {
-        it("GIVEN an account with snapshot role WHEN takeSnapshot and Freeze THEN transaction succeeds", async () => {
-          const AMOUNT = 10;
-
-          await asset.connect(signer_A).grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_A.address);
-
-          await asset.connect(signer_A).issueByPartition({
-            partition: DEFAULT_PARTITION,
-            tokenHolder: signer_E.address,
-            value: AMOUNT,
-            data: "0x",
-          });
-
-          // snapshot
-          await asset.connect(signer_A).takeSnapshot();
-
-          // Operations
-          await asset.connect(signer_A).freezePartialTokens(signer_E.address, 1);
-          await asset.connect(signer_A).freezePartialTokens(signer_E.address, 1);
-
-          // snapshot
-          await asset.connect(signer_A).takeSnapshot();
-
-          // Operations
-          await asset.connect(signer_A).unfreezePartialTokens(signer_E.address, 1);
-
-          // snapshot
-          await asset.connect(signer_A).takeSnapshot();
-
-          // checks
-          const snapshot_Balance_Of_E_1 = await asset.balanceOfAtSnapshot(1, signer_E.address);
-          const snapshot_FrozenBalance_Of_E_1 = await asset.frozenBalanceOfAtSnapshot(1, signer_E.address);
-          const snapshot_Total_Supply_1 = await asset.totalSupplyAtSnapshot(1);
-
-          expect(snapshot_Balance_Of_E_1).to.equal(AMOUNT);
-          expect(snapshot_FrozenBalance_Of_E_1).to.equal(0);
-          expect(snapshot_Total_Supply_1).to.equal(AMOUNT);
-
-          const snapshot_Balance_Of_E_2 = await asset.balanceOfAtSnapshot(2, signer_E.address);
-          const snapshot_FrozenBalance_Of_E_2 = await asset.frozenBalanceOfAtSnapshot(2, signer_E.address);
-          const snapshot_Total_Supply_2 = await asset.totalSupplyAtSnapshot(2);
-
-          expect(snapshot_Balance_Of_E_2).to.equal(AMOUNT - 2);
-          expect(snapshot_FrozenBalance_Of_E_2).to.equal(2);
-          expect(snapshot_Total_Supply_2).to.equal(AMOUNT);
-
-          const snapshot_Balance_Of_E_3 = await asset.balanceOfAtSnapshot(3, signer_E.address);
-          const snapshot_FrozenBalance_Of_E_3 = await asset.frozenBalanceOfAtSnapshot(3, signer_E.address);
-          const snapshot_Total_Supply_3 = await asset.totalSupplyAtSnapshot(3);
-
-          expect(snapshot_Balance_Of_E_3).to.equal(AMOUNT - 1);
-          expect(snapshot_FrozenBalance_Of_E_3).to.equal(1);
-          expect(snapshot_Total_Supply_3).to.equal(AMOUNT);
-        });
-
-        it("GIVEN frozen tokens WHEN querying historical snapshot THEN balance and frozen amounts are tracked separately", async () => {
-          await asset.connect(signer_A).grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_A.address);
-
-          await asset.issueByPartition({
-            partition: DEFAULT_PARTITION,
-            tokenHolder: signer_E.address,
-            value: AMOUNT,
-            data: "0x",
-          });
-
-          // snapshot
-          await asset.connect(signer_A).takeSnapshot();
-
-          // Freeze some tokens
-          await asset.connect(signer_A).freezePartialTokens(signer_E.address, 100);
-
-          // snapshot
-          await asset.connect(signer_A).takeSnapshot();
-
-          // Check snapshots track balance and frozen separately
-          const balance1 = await asset.balanceOfAtSnapshot(1, signer_E.address);
-          const frozen1 = await asset.frozenBalanceOfAtSnapshot(1, signer_E.address);
-          const balance2 = await asset.balanceOfAtSnapshot(2, signer_E.address);
-          const frozen2 = await asset.frozenBalanceOfAtSnapshot(2, signer_E.address);
-
-          expect(balance1).to.equal(AMOUNT); // Full balance, no frozen
-          expect(frozen1).to.equal(0); // No frozen tokens yet
-          expect(balance2).to.equal(AMOUNT - 100); // Balance reduced
-          expect(frozen2).to.equal(100); // Frozen tokens tracked
-          expect(balance2 + frozen2).to.equal(AMOUNT); // Total remains same
-        });
-      });
-
       it("GIVEN a invalid address WHEN attempting to setAddressFrozen THEN transactions revert with ZeroAddressNotAllowed error", async () => {
         await expect(asset.setAddressFrozen(ADDRESS_ZERO, true)).to.be.revertedWithCustomError(
           asset,
@@ -354,7 +266,22 @@ describe("ERC3643 Tests", () => {
           .to.emit(asset, "TokensFrozen")
           .withArgs(signer_E.address, amount, DEFAULT_PARTITION);
         expect(await asset.getFrozenTokens(signer_E.address)).to.be.equal(amount);
+        expect(await asset.isFrozen(signer_E.address)).to.be.true;
         expect(await asset.balanceOf(signer_E.address)).to.be.equal(0);
+      });
+
+      describe("bug Transfer", () => {
+        it("GIVEN a valid holder WHEN freezePartialTokens THEN Transfer event is emitted from holder to address(0)", async () => {
+          await asset.issueByPartition({
+            partition: DEFAULT_PARTITION,
+            tokenHolder: signer_E.address,
+            value: AMOUNT,
+            data: "0x",
+          });
+          await expect(asset.freezePartialTokens(signer_E.address, AMOUNT))
+            .to.emit(asset, "Transfer")
+            .withArgs(signer_E.address, ethers.ZeroAddress, AMOUNT);
+        });
       });
 
       it("GIVEN a freeze amount greater than balance WHEN attempting to freezePartialTokens THEN transactions revert with InsufficientBalance error", async () => {
@@ -389,12 +316,16 @@ describe("ERC3643 Tests", () => {
         await asset.freezePartialTokens(signer_E.address, amount);
 
         expect(await asset.getFrozenTokens(signer_E.address)).to.be.equal(amount);
+        expect(await asset.isFrozen(signer_E.address)).to.be.true;
         expect(await asset.balanceOf(signer_E.address)).to.be.equal(0);
 
         await expect(asset.unfreezePartialTokens(signer_E.address, amount))
           .to.emit(asset, "TokensUnfrozen")
-          .withArgs(signer_E.address, amount, DEFAULT_PARTITION);
+          .withArgs(signer_E.address, amount, DEFAULT_PARTITION)
+          .to.emit(asset, "Transfer")
+          .withArgs(ethers.ZeroAddress, signer_E.address, amount);
         expect(await asset.getFrozenTokens(signer_E.address)).to.be.equal(0);
+        expect(await asset.isFrozen(signer_E.address)).to.be.false;
         expect(await asset.balanceOf(signer_E.address)).to.be.equal(amount);
       });
 

@@ -52,6 +52,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "CoreFacet",
   "TransferFacet",
   "CoreAdjustedFacet",
+  "MetadataFacet",
   "FreezeFacet",
   "BatchFreezeFacet",
   "KycFacet",
@@ -59,10 +60,14 @@ const LOANS_PORTFOLIO_FACETS = [
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
+  "FreezeAtSnapshotFacet",
+  "CoreAtSnapshotFacet",
   "SsiManagementFacet",
   "BalanceTrackerByPartitionFacet",
   "BalanceTrackerAtSnapshotFacet",
   "BalanceTrackerAtSnapshotByPartitionFacet",
+  "ClearingAtSnapshotFacet",
+  "ClearingAtSnapshotByPartitionFacet",
 
   // ERC Standards
   "MintByPartitionFacet",
@@ -73,6 +78,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "DocumentationFacet",
   "ControllerFacet",
   "ERC20PermitFacet",
+  "EIP712Facet",
   "NoncesFacet",
   "ERC20VotesFacet",
   "BatchControllerFacet",
@@ -82,6 +88,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "ERC3643ManagementFacet",
   "ERC3643ReadFacet",
   "ComplianceFacet",
+  "ComplianceByPartitionFacet",
   "MintFacet",
   "BurnFacet",
 
@@ -92,6 +99,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "HoldFacet",
   "HoldManagementFacet",
   "ControllerHoldByPartitionFacet",
+  "ControllerByPartitionFacet",
   "ProtectedHoldByPartitionFacet",
   "HoldByPartitionFacet",
 
@@ -100,14 +108,13 @@ const LOANS_PORTFOLIO_FACETS = [
   "ClearingRedeemFacet",
   "ClearingHoldCreationFacet",
   "OperatorClearingHoldByPartitionFacet",
-  "ClearingReadFacet",
-  "ClearingActionsFacet",
+  "ClearingFacet",
   "ClearingByPartitionFacet",
 
   // Scheduled Tasks
   "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
-  "ScheduledCouponListingFacet",
+  "CouponListingFacet",
 
   // External Management
   "ExternalPauseManagementFacet",

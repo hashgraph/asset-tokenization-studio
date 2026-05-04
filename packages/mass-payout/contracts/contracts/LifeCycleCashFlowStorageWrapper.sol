@@ -18,10 +18,15 @@ import {
 } from "@hashgraph/asset-tokenization-contracts/contracts/facets/balanceTrackerAtSnapshot/IBalanceTrackerAtSnapshot.sol";
 import { IBond } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/bond/IBond.sol";
 import { ICoupon } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/coupon/ICoupon.sol";
+import {
+    ICouponSecurityHolders
+} from "@hashgraph/asset-tokenization-contracts/contracts/facets/couponSecurityHolders/ICouponSecurityHolders.sol";
 import { IBondRead } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/bond/IBondRead.sol";
-import { ICoupon } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/coupon/ICoupon.sol";
 import { IEquity } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/equity/IEquity.sol";
 import { IDividend } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/dividend/IDividend.sol";
+import {
+    IDividendSecurityHolders
+} from "@hashgraph/asset-tokenization-contracts/contracts/facets/dividendSecurityHolders/IDividendSecurityHolders.sol";
 import { ISecurity } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/security/ISecurity.sol";
 import { _PERCENTAGE_DECIMALS_SIZE } from "./constants/values.sol";
 import { _LIFECYCLE_CASH_FLOW_STORAGE_POSITION } from "./constants/storagePositions.sol";
@@ -731,9 +736,9 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         uint256 _pageLength
     ) private view returns (address[] memory holders_) {
         if (_assetType == ILifeCycleCashFlow.AssetType.Equity) {
-            return IDividend(_asset).getDividendHolders(_distributionID, _pageIndex, _pageLength);
+            return IDividendSecurityHolders(_asset).getDividendHolders(_distributionID, _pageIndex, _pageLength);
         } else {
-            return ICoupon(_asset).getCouponHolders(_distributionID, _pageIndex, _pageLength);
+            return ICouponSecurityHolders(_asset).getCouponHolders(_distributionID, _pageIndex, _pageLength);
         }
     }
 
