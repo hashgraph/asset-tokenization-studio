@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IDividend } from "./IDividend.sol";
+import { IDividendTypes } from "../../dividend/IDividendTypes.sol";
 import { CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
 import { DIVIDEND_CORPORATE_ACTION_TYPE } from "../../../constants/values.sol";
 import { DividendStorageWrapper } from "../../../domain/asset/dividend/DividendStorageWrapper.sol";
@@ -9,7 +10,7 @@ import { Modifiers } from "../../../services/Modifiers.sol";
 
 abstract contract Dividend is IDividend, Modifiers {
     function setDividend(
-        IDividend.Dividend calldata newDividend
+        IDividendTypes.Dividend calldata newDividend
     )
         external
         override
@@ -42,7 +43,7 @@ abstract contract Dividend is IDividend, Modifiers {
         view
         override
         onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, dividendId - 1)
-        returns (IDividend.RegisteredDividend memory registeredDividend_, bool isDisabled_)
+        returns (IDividendTypes.RegisteredDividend memory registeredDividend_, bool isDisabled_)
     {
         (registeredDividend_, , isDisabled_) = DividendStorageWrapper.getDividend(dividendId);
     }
@@ -55,7 +56,7 @@ abstract contract Dividend is IDividend, Modifiers {
         view
         override
         onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, dividendId - 1)
-        returns (IDividend.DividendFor memory dividendFor_)
+        returns (IDividendTypes.DividendFor memory dividendFor_)
     {
         return DividendStorageWrapper.getDividendFor(dividendId, account);
     }
@@ -68,32 +69,12 @@ abstract contract Dividend is IDividend, Modifiers {
         view
         override
         onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, dividendId - 1)
-        returns (IDividend.DividendAmountFor memory dividendAmountFor_)
+        returns (IDividendTypes.DividendAmountFor memory dividendAmountFor_)
     {
         return DividendStorageWrapper.getDividendAmountFor(dividendId, account);
     }
 
     function getDividendsCount() external view override returns (uint256 dividendCount_) {
         return DividendStorageWrapper.getDividendsCount();
-    }
-
-    function getDividendHolders(
-        uint256 dividendId,
-        uint256 pageIndex,
-        uint256 pageLength
-    )
-        external
-        view
-        override
-        onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, dividendId - 1)
-        returns (address[] memory holders_)
-    {
-        return DividendStorageWrapper.getDividendHolders(dividendId, pageIndex, pageLength);
-    }
-
-    function getTotalDividendHolders(
-        uint256 dividendId
-    ) external view override onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, dividendId - 1) returns (uint256) {
-        return DividendStorageWrapper.getTotalDividendHolders(dividendId);
     }
 }
