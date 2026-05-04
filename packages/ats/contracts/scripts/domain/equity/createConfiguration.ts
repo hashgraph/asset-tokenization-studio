@@ -24,10 +24,10 @@ import { EQUITY_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
 
 /**
- * Equity-specific facets list (43 facets total).
+ * Equity-specific facets list (44 facets total).
  *
  * This is an explicit positive list of all facets required for equity tokens.
- * Includes all common facets plus EquityUSAFacet, VotingFacet, and DividendFacet.
+ * Includes all common facets plus EquityUSAFacet, VotingFacet, DividendFacet, and DividendSecurityHoldersFacet.
  *
  * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
  * so we only include DiamondFacet to avoid selector collisions.
@@ -103,9 +103,10 @@ const EQUITY_FACETS = [
   "ExternalKycListManagementFacet",
   "ExternalPauseManagementFacet",
 
-  // Advanced Features (10)
+  // Advanced Features (11)
   "AdjustBalancesFacet",
   "DividendFacet",
+  "DividendSecurityHoldersFacet",
   "LockFacet",
   "NominalValueFacet",
   "ProtectedPartitionsFacet",

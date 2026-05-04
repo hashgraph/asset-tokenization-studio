@@ -6,9 +6,7 @@ import { IFactory } from "@hashgraph/asset-tokenization-contracts/contracts/fact
 import { ICouponTypes } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/coupon/ICouponTypes.sol";
 import { IVotingTypes } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/voting/IVotingTypes.sol";
 // solhint-disable max-line-length
-import {
-    IDividendTypes
-} from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/dividend/IDividendTypes.sol";
+import { IDividendTypes } from "@hashgraph/asset-tokenization-contracts/contracts/facets/dividend/IDividendTypes.sol";
 
 // solhint-disable no-unused-vars
 contract AssetMock is IAssetMock {

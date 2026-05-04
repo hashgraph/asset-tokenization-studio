@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-04T12:33:35.665Z
- * Facets: 104
+ * Generated: 2026-05-04T13:12:31.660Z
+ * Facets: 105
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -71,6 +71,7 @@ import {
   CouponSustainabilityPerformanceTargetRateFacet__factory,
   DiamondFacet__factory,
   DividendFacet__factory,
+  DividendSecurityHoldersFacet__factory,
   DocumentationFacet__factory,
   ERC1410ManagementFacet__factory,
   ERC1410ReadFacet__factory,
@@ -6950,28 +6951,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x85f196b0",
       },
       {
-        name: "getDividendHolders",
-        signature: {
-          full: "function getDividendHolders(uint256 dividendId, uint256 pageIndex, uint256 pageLength) view returns (address[] holders_)",
-          canonical: "getDividendHolders(uint256,uint256,uint256)",
-        },
-        selector: "0xeba3918e",
-      },
-      {
         name: "getDividendsCount",
         signature: {
           full: "function getDividendsCount() view returns (uint256 dividendCount_)",
           canonical: "getDividendsCount()",
         },
         selector: "0x9e676952",
-      },
-      {
-        name: "getTotalDividendHolders",
-        signature: {
-          full: "function getTotalDividendHolders(uint256 dividendId) view returns (uint256)",
-          canonical: "getTotalDividendHolders(uint256)",
-        },
-        selector: "0xd61a022b",
       },
       {
         name: "setDividend",
@@ -7077,6 +7062,67 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     factory: (signer) => new DividendFacet__factory(getLibLinks("clearingReadOps") as any, signer),
     timeTravelFactory: (signer) => new DividendFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
+  },
+
+  DividendSecurityHoldersFacet: {
+    name: "DividendSecurityHoldersFacet",
+    description:
+      "Diamond facet exposing the read-only dividend holder queries (`getDividendHolders`, `getTotalDividendHolders`) under `_DIVIDEND_SECURITY_HOLDERS_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_DIVIDEND_SECURITY_HOLDERS_RESOLVER_KEY",
+      value: "0xc6f22894c7b5a791b1ec8ba97fced37ce7b17c9e0ffea29bf1c1064a0edd85ad",
+    },
+    inheritance: ["DividendSecurityHolders", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "getDividendHolders",
+        signature: {
+          full: "function getDividendHolders(uint256 dividendId, uint256 pageIndex, uint256 pageLength) view returns (address[] holders_)",
+          canonical: "getDividendHolders(uint256,uint256,uint256)",
+        },
+        selector: "0xeba3918e",
+      },
+      {
+        name: "getTotalDividendHolders",
+        signature: {
+          full: "function getTotalDividendHolders(uint256 dividendId) view returns (uint256)",
+          canonical: "getTotalDividendHolders(uint256)",
+        },
+        selector: "0xd61a022b",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+      {
+        name: "WrongIndexForAction",
+        signature: {
+          full: "error WrongIndexForAction(uint256 index, bytes32 actionType)",
+          canonical: "WrongIndexForAction(uint256,bytes32)",
+        },
+        selector: "0xd3924f4e",
+      },
+    ],
+    factory: (signer) => new DividendSecurityHoldersFacet__factory(signer),
   },
 
   DocumentationFacet: {
@@ -14322,7 +14368,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 104 as const;
+export const TOTAL_FACETS = 105 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
