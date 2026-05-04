@@ -42,11 +42,11 @@ abstract contract CouponSecurityHolders is ICouponSecurityHolders, Modifiers {
         onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
         returns (ICouponTypes.CouponFor[] memory couponFor_, address[] memory holders_)
     {
-        address[] memory holders = CouponStorageWrapper.getCouponHolders(_couponID, _pageIndex, _pageLength);
-        holders_ = holders;
-        couponFor_ = new ICouponTypes.CouponFor[](holders.length);
-        for (uint256 i; i < holders.length; ) {
-            couponFor_[i] = CouponStorageWrapper.getCouponFor(_couponID, holders[i]);
+        holders_ = CouponStorageWrapper.getCouponHolders(_couponID, _pageIndex, _pageLength);
+        uint256 length = holders_.length;
+        couponFor_ = new ICouponTypes.CouponFor[](length);
+        for (uint256 i; i < length; ) {
+            couponFor_[i] = CouponStorageWrapper.getCouponFor(_couponID, holders_[i]);
             unchecked {
                 ++i;
             }
