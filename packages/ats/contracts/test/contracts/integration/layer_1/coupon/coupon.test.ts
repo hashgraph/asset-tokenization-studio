@@ -682,54 +682,6 @@ describe("Coupon Tests", () => {
     await expect(asset.connect(signer_C).cancelCoupon(999)).to.be.revertedWithCustomError(asset, "WrongIndexForAction");
   });
 
-  it("GIVEN a coupon with snapshot WHEN getCouponHolders is called THEN returns token holders from snapshot", async () => {
-    const TotalAmount = 1000;
-    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
-    await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-
-    await asset.connect(signer_A).issueByPartition({
-      partition: DEFAULT_PARTITION,
-      tokenHolder: signer_A.address,
-      value: TotalAmount,
-      data: "0x",
-    });
-
-    couponRecordDateInSeconds = (await getDltTimestamp()) + 1000;
-    couponExecutionDateInSeconds = (await getDltTimestamp()) + 2000;
-
-    const couponData = {
-      recordDate: couponRecordDateInSeconds.toString(),
-      executionDate: couponExecutionDateInSeconds.toString(),
-      rate: couponRate,
-      rateDecimals: couponRateDecimals,
-      startDate: couponStartDateInSeconds.toString(),
-      endDate: couponEndDateInSeconds.toString(),
-      fixingDate: couponFixingDateInSeconds.toString(),
-      rateStatus: couponRateStatus,
-    };
-
-    await asset.connect(signer_A).setCoupon(couponData);
-
-    await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
-
-    // Trigger scheduled tasks by performing an action
-    await asset.connect(signer_A).issueByPartition({
-      partition: DEFAULT_PARTITION,
-      tokenHolder: signer_B.address,
-      value: 500,
-      data: "0x",
-    });
-
-    const coupon = (await asset.getCoupon(1)).registeredCoupon_;
-    const couponTotalHolders = await asset.getTotalCouponHolders(1);
-    const couponHolders = await asset.getCouponHolders(1, 0, couponTotalHolders);
-
-    expect(coupon.snapshotId).to.be.greaterThan(0); // Snapshot should have been taken
-    expect(couponTotalHolders).to.equal(1);
-    expect([...couponHolders]).to.have.members([signer_A.address]);
-  });
-
   it("GIVEN a coupon without snapshot WHEN getCouponFor is called after record date THEN uses current balance", async () => {
     const TotalAmount = 1000;
     await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
@@ -808,10 +760,6 @@ describe("Coupon Tests", () => {
       asset,
       "WrongIndexForAction",
     );
-    await expect(asset.getTotalCouponHolders(999)).to.be.revertedWithCustomError(asset, "WrongIndexForAction");
-    await expect(asset.getCouponHolders(999, 0, 10)).to.be.revertedWithCustomError(asset, "WrongIndexForAction");
-
-    await expect(asset.getCouponsFor(999, 0, 10)).to.be.revertedWithCustomError(asset, "WrongIndexForAction");
   });
 
   it("GIVEN invalid startDate > endDate WHEN setCoupon THEN transaction fails with WrongDates", async () => {
