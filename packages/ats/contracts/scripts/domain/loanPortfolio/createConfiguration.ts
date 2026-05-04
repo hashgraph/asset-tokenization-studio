@@ -60,6 +60,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
   "FreezeAtSnapshotFacet",
+  "FreezeAtSnapshotByPartitionFacet",
   "CoreAtSnapshotFacet",
   "SsiManagementFacet",
   "BalanceTrackerByPartitionFacet",
