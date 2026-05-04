@@ -65,28 +65,6 @@ abstract contract Coupon is ICoupon, Modifiers {
         couponFor_ = CouponStorageWrapper.getCouponFor(_couponID, _account);
     }
 
-    function getCouponsFor(
-        uint256 _couponID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    )
-        external
-        view
-        override
-        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
-        returns (ICouponTypes.CouponFor[] memory couponFor_, address[] memory accounts_)
-    {
-        address[] memory holders = CouponStorageWrapper.getCouponHolders(_couponID, _pageIndex, _pageLength);
-        accounts_ = holders;
-        couponFor_ = new ICouponTypes.CouponFor[](holders.length);
-        for (uint256 i; i < holders.length; ) {
-            couponFor_[i] = CouponStorageWrapper.getCouponFor(_couponID, holders[i]);
-            unchecked {
-                ++i;
-            }
-        }
-    }
-
     function getCouponAmountFor(
         uint256 _couponID,
         address _account
@@ -102,26 +80,6 @@ abstract contract Coupon is ICoupon, Modifiers {
 
     function getCouponCount() external view override returns (uint256 couponCount_) {
         couponCount_ = CouponStorageWrapper.getCouponCount();
-    }
-
-    function getCouponHolders(
-        uint256 _couponID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    )
-        external
-        view
-        override
-        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
-        returns (address[] memory holders_)
-    {
-        holders_ = CouponStorageWrapper.getCouponHolders(_couponID, _pageIndex, _pageLength);
-    }
-
-    function getTotalCouponHolders(
-        uint256 _couponID
-    ) external view override onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1) returns (uint256) {
-        return CouponStorageWrapper.getTotalCouponHolders(_couponID);
     }
 
     function _prepareCoupon(

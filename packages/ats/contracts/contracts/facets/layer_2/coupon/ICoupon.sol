@@ -63,18 +63,6 @@ interface ICoupon is ICouponTypes {
     /// @return couponFor_ Coupon information for the specified account
     function getCouponFor(uint256 _couponID, address _account) external view returns (CouponFor memory couponFor_);
 
-    /// @notice Retrieves coupon information for a specific coupon ID
-    /// @param _couponID The ID of the coupon
-    /// @param _pageIndex The page index for pagination
-    /// @param _pageLength The number of records per page
-    /// @return couponFor_ List of coupon information for accounts corresponding to the coupon ID
-    /// @return accounts_ List of account addresses corresponding to the coupon information
-    function getCouponsFor(
-        uint256 _couponID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (CouponFor[] memory couponFor_, address[] memory accounts_);
-
     /// @notice Retrieves coupon amount numerator and denominator for a specific account and coupon ID
     /// @param _couponID The ID of the coupon
     /// @param _account The account address
@@ -87,21 +75,4 @@ interface ICoupon is ICouponTypes {
     /// @notice Retrieves the total number of coupons set for the security
     /// @return couponCount_ The total count of coupons
     function getCouponCount() external view returns (uint256 couponCount_);
-
-    /// @notice Retrieves a paginated list of coupon holders for a specific coupon ID
-    /// @param _couponID The ID of the coupon
-    /// @param _pageIndex The page index for pagination
-    /// @param _pageLength The number of holders per page
-    /// @return holders_ Array of holder addresses
-    function getCouponHolders(
-        uint256 _couponID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (address[] memory holders_);
-
-    /// @notice Retrieves the total number of coupon holders for a specific coupon ID
-    /// @dev It is the list of token holders at the snapshot taken at the record date
-    /// @param _couponID The ID of the coupon
-    /// @return The total number of coupon holders
-    function getTotalCouponHolders(uint256 _couponID) external view returns (uint256);
 }

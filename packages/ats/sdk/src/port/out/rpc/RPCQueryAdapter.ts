@@ -501,7 +501,7 @@ export class RPCQueryAdapter {
       );
     });
 
-    return { coupons, accounts: [...result.accounts_] };
+    return { coupons, accounts: [...result.holders_] };
   }
 
   async getCouponAmountFor(address: EvmAddress, target: EvmAddress, coupon: number): Promise<CouponAmountFor> {
