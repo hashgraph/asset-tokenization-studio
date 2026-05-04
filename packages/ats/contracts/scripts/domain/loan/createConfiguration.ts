@@ -71,6 +71,7 @@ const LOAN_FACETS = [
   "TransferFacet",
   "CoreAdjustedFacet",
   "ERC20PermitFacet",
+  "EIP712Facet",
   "ERC20VotesFacet",
   "DocumentationFacet",
   "ControllerFacet",
