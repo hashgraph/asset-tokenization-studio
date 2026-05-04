@@ -80,6 +80,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "ERC20PermitFacet",
   "EIP712Facet",
   "NoncesFacet",
+  "DeactivateFacet",
   "ERC20VotesFacet",
   "BatchControllerFacet",
   "BatchBurnFacet",

@@ -32,6 +32,7 @@ import { LoanModifiers } from "./LoanModifiers.sol";
 import { PartitionModifiers } from "./PartitionModifiers.sol";
 import { PartitionValidationModifiers } from "./PartitionValidationModifiers.sol";
 import { PauseModifiers } from "./PauseModifiers.sol";
+import { DeactivateModifiers } from "./DeactivateModifiers.sol";
 
 abstract contract CoreModifiers is
     AccessControlModifiers,
@@ -45,7 +46,8 @@ abstract contract CoreModifiers is
     LoanModifiers,
     PartitionModifiers,
     PartitionValidationModifiers,
-    PauseModifiers
+    PauseModifiers,
+    DeactivateModifiers
 {
     // This contract aggregates all core modifiers through inheritance
     // No additional logic needed - modifiers are provided by parent contracts
