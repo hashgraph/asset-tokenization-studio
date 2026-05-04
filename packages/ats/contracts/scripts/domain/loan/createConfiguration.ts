@@ -70,6 +70,7 @@ const LOAN_FACETS = [
   // ERC Standards
   "TransferFacet",
   "CoreAdjustedFacet",
+  "MetadataFacet",
   "ERC20PermitFacet",
   "ERC20VotesFacet",
   "DocumentationFacet",

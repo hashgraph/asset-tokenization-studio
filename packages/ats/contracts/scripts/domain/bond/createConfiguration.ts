@@ -66,6 +66,9 @@ const BOND_FACETS = [
   // CoreAdjusted
   "CoreAdjustedFacet",
 
+  //Metadata
+  "MetadataFacet",
+
   // ERC Standards
   "TransferFacet",
   "MintByPartitionFacet",
