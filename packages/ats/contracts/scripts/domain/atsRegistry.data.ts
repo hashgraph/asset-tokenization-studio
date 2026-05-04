@@ -84,6 +84,7 @@ import {
   ExternalKycListManagementFacet__factory,
   ExternalPauseManagementFacet__factory,
   FixedRateFacet__factory,
+  FreezeAtSnapshotFacet__factory,
   FreezeFacet__factory,
   HoldByPartitionFacet__factory,
   HoldFacet__factory,
@@ -9031,6 +9032,43 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) => new FixedRateFacetTimeTravel__factory(signer),
   },
 
+  FreezeAtSnapshotFacet: {
+    name: "FreezeAtSnapshotFacet",
+    description:
+      "Diamond facet exposing snapshot-aware frozen balance queries via `IFreezeAtSnapshot`, registered under `_FREEZE_AT_SNAPSHOT_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_FREEZE_AT_SNAPSHOT_RESOLVER_KEY",
+      value: "0x554064f549ff9eaa803cb2be55ec6fca6974b28c5784cb9378aaf194d0804af3",
+    },
+    inheritance: ["FreezeAtSnapshot", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "frozenBalanceOfAtSnapshot",
+        signature: {
+          full: "function frozenBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+          canonical: "frozenBalanceOfAtSnapshot(uint256,address)",
+        },
+        selector: "0x5e6c70ec",
+      },
+    ],
+    errors: [
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+    ],
+    factory: (signer) => new FreezeAtSnapshotFacet__factory(signer),
+  },
+
   FreezeFacet: {
     name: "FreezeFacet",
     description:
@@ -12929,14 +12967,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["Snapshots", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "frozenBalanceOfAtSnapshot",
-        signature: {
-          full: "function frozenBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
-          canonical: "frozenBalanceOfAtSnapshot(uint256,address)",
-        },
-        selector: "0x5e6c70ec",
-      },
-      {
         name: "frozenBalanceOfAtSnapshotByPartition",
         signature: {
           full: "function frozenBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
@@ -14346,6 +14376,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
+export const TOTAL_FACETS = 104 as const;
 export const TOTAL_FACETS = 104 as const;
 
 /**
