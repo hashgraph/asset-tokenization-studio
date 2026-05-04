@@ -1,4 +1,4 @@
-name: "100: [FLOW] MP Test"
+name: "101: [FLOW] MP Test"
 
 on:
   push:
@@ -25,7 +25,6 @@ jobs:
     runs-on: token-studio-linux-large
     timeout-minutes: 45
     env:
-      NODE_OPTIONS: "--max-old-space-size=32768"
       CONTRACT_SIZER_RUN_ON_COMPILE: "false"
       REPORT_GAS: "false"
       CLIENT_PRIVATE_KEY_ECDSA_1: ${{ secrets.CLIENT_PRIVATE_KEY_ECDSA_1 }}
@@ -64,7 +63,7 @@ jobs:
       - name: Setup NodeJS Environment
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 22.20.0
+          node-version-file: .nvmrc
 
       - name: Install dependencies
         run: npm ci

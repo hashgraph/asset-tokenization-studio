@@ -1,0 +1,18 @@
+name: "201: [FLOW] ATS Lint and Format"
+
+on:
+  pull_request:
+    paths:
+      - "packages/ats/**"
+      - "apps/ats/**"
+      - "package.json"
+      - "eslint.config.mjs"
+      - "prettier.config.mjs"
+      - ".prettierignore"
+      - "solhint.config.js"
+      - ".github/workflows/200-call-lint-format.yaml"
+      - ".github/workflows/201-flow-ats-lint.yaml"
+
+jobs:
+  lint-and-format:
+    uses: ./.github/workflows/200-call-lint-format.yaml
