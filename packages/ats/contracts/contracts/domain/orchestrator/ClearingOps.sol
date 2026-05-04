@@ -5,9 +5,9 @@ import { ClearingStorageWrapper } from "../asset/ClearingStorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";
 import { TokenCoreOps } from "./TokenCoreOps.sol";
 import { ERC1410StorageWrapper } from "../asset/ERC1410StorageWrapper.sol";
+import { ERC20StorageWrapper } from "../asset/ERC20StorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
-import { ITransfer } from "../../facets/transfer/ITransfer.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
 import {
@@ -84,8 +84,11 @@ library ClearingOps {
             address(0)
         );
 
-        TokenCoreOps.reduceBalanceByPartition(_from, _amount, partition);
+        ERC1410StorageWrapper.reducePartitionOnly(_from, _amount, partition);
         ClearingStorageWrapper.increaseClearedAmounts(_from, partition, _amount);
+
+        ERC20StorageWrapper.performTransfer(_from, address(0), _amount);
+
         ClearingStorageWrapper.setClearingTransferData(
             _from,
             partition,
@@ -155,8 +158,11 @@ library ClearingOps {
             address(0)
         );
 
-        TokenCoreOps.reduceBalanceByPartition(_from, _amount, partition);
+        ERC1410StorageWrapper.reducePartitionOnly(_from, _amount, partition);
         ClearingStorageWrapper.increaseClearedAmounts(_from, partition, _amount);
+
+        ERC20StorageWrapper.performTransfer(_from, address(0), _amount);
+
         ClearingStorageWrapper.setClearingRedeemData(
             _from,
             partition,
@@ -222,8 +228,11 @@ library ClearingOps {
             address(0)
         );
 
-        TokenCoreOps.reduceBalanceByPartition(_from, _hold.amount, partition);
+        ERC1410StorageWrapper.reducePartitionOnly(_from, _hold.amount, partition);
         ClearingStorageWrapper.increaseClearedAmounts(_from, partition, _hold.amount);
+
+        ERC20StorageWrapper.performTransfer(_from, address(0), _hold.amount);
+
         ClearingStorageWrapper.setClearingHoldCreationData(
             _from,
             partition,
@@ -535,7 +544,7 @@ library ClearingOps {
      */
     function transferClearingBalanceInternal(bytes32 _partition, address _to, uint256 _amount) internal {
         if (ERC1410StorageWrapper.validPartitionForReceiver(_partition, _to)) {
-            ERC1410StorageWrapper.increaseBalanceByPartition(_to, _amount, _partition);
+            ERC1410StorageWrapper.increasePartitionOnly(_to, _amount, _partition);
             emit IERC1410Types.TransferByPartition(
                 _partition,
                 EvmAccessors.getMsgSender(),
@@ -545,20 +554,19 @@ library ClearingOps {
                 "",
                 ""
             );
-            emit ITransfer.Transfer(address(0), _to, _amount);
-        } else {
-            ERC1410StorageWrapper.addPartitionTo(_amount, _to, _partition);
-            emit IERC1410Types.TransferByPartition(
-                _partition,
-                EvmAccessors.getMsgSender(),
-                address(0),
-                _to,
-                _amount,
-                "",
-                ""
-            );
-            emit ITransfer.Transfer(address(0), _to, _amount);
+            return ERC20StorageWrapper.performTransfer(address(0), _to, _amount);
         }
+        ERC1410StorageWrapper.addPartitionToOnly(_amount, _to, _partition);
+        emit IERC1410Types.TransferByPartition(
+            _partition,
+            EvmAccessors.getMsgSender(),
+            address(0),
+            _to,
+            _amount,
+            "",
+            ""
+        );
+        ERC20StorageWrapper.performTransfer(address(0), _to, _amount);
     }
 
     /**
