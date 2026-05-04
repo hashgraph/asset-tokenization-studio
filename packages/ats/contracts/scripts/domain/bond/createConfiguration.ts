@@ -48,6 +48,7 @@ const BOND_FACETS = [
   "KycFacet",
   "PauseFacet",
   "SnapshotsFacet",
+  "HoldAtSnapshotFacet",
   "FreezeAtSnapshotFacet",
   "CoreAtSnapshotFacet",
   "BalanceTrackerFacet",
