@@ -28,9 +28,4 @@ abstract contract ERC20Permit is IERC20Permit, Modifiers {
     {
         ERC20PermitStorageWrapper.permit(owner, spender, value, deadline, v, r, s);
     }
-
-    // solhint-disable-next-line func-name-mixedcase
-    function DOMAIN_SEPARATOR() external view override returns (bytes32) {
-        return ERC20PermitStorageWrapper.DOMAIN_SEPARATOR();
-    }
 }

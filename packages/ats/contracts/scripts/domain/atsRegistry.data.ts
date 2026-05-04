@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-04T13:12:31.660Z
- * Facets: 105
+ * Generated: 2026-05-04T14:40:00.426Z
+ * Facets: 107
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -73,6 +73,7 @@ import {
   DividendFacet__factory,
   DividendSecurityHoldersFacet__factory,
   DocumentationFacet__factory,
+  EIP712Facet__factory,
   ERC1410ManagementFacet__factory,
   ERC1410ReadFacet__factory,
   ERC1410TokenHolderFacet__factory,
@@ -7191,6 +7192,28 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     factory: (signer) => new DocumentationFacet__factory(signer),
   },
 
+  EIP712Facet: {
+    name: "EIP712Facet",
+    description:
+      "Diamond facet that exposes the EIP-712 domain separator via `IEIP712`, registered under `_EIP712_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_EIP712_RESOLVER_KEY",
+      value: "0xe19e9ba358b25b281ecf7a998a7040a7cea72e6fb09fa5ceab8598a59927bee4",
+    },
+    inheritance: ["EIP712", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "DOMAIN_SEPARATOR",
+        signature: {
+          full: "function DOMAIN_SEPARATOR() view returns (bytes32 domainSeparator_)",
+          canonical: "DOMAIN_SEPARATOR()",
+        },
+        selector: "0x3644e515",
+      },
+    ],
+    factory: (signer) => new EIP712Facet__factory(signer),
+  },
+
   EquityUSAFacet: {
     name: "EquityUSAFacet",
     resolverKey: {
@@ -7882,11 +7905,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["ERC20Permit", "IStaticFunctionSelectors"],
     methods: [
-      {
-        name: "DOMAIN_SEPARATOR",
-        signature: { full: "function DOMAIN_SEPARATOR() view returns (bytes32)", canonical: "DOMAIN_SEPARATOR()" },
-        selector: "0x3644e515",
-      },
       {
         name: "permit",
         signature: {
@@ -14390,7 +14408,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 105 as const;
+export const TOTAL_FACETS = 107 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
