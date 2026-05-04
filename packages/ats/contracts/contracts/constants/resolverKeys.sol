@@ -537,6 +537,9 @@ bytes32 constant _BALANCE_TRACKER_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY = 0x1d00
 // keccak256('security.token.standard.clearingAtSnapshotByPartition.resolverKey');
 bytes32 constant _CLEARING_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY = 0x28a0e168340e454e3c0e6fbe7dccb80c91178f4e2ee50776e28bbc5c19063e88;
 
+// keccak256("security.token.standard.holdAtSnapshotByPartition.resolverKey");
+bytes32 constant _HOLD_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY = 0xa843a6a38df62d52595e1b2e9b439339fe835afcb70c7dac1a7cf5db53ba7c2d;
+
 // Layer 2 Resolver Keys
 
 // keccak256('security.token.standard.equity.resolverKey');
