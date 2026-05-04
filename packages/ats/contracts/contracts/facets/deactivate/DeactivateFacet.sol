@@ -8,6 +8,12 @@ import { _DEACTIVATE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title DeactivateFacet
+ * @author Asset Tokenization Studio Team
+ * @notice Diamond facet that exposes the irreversible deactivation operations — `deactivate`
+ *         and the `isDeactivated` query — as selectable proxy functions.
+ * @dev Inherits `Deactivate` for the business logic and implements `IStaticFunctionSelectors`
+ *      for the Diamond resolver pattern. The resolver key `_DEACTIVATE_RESOLVER_KEY`
+ *      identifies this facet within the diamond proxy.
  */
 contract DeactivateFacet is Deactivate, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors

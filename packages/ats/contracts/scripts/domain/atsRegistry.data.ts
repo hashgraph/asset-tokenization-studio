@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-04T12:07:57.634Z
+ * Generated: 2026-05-04T12:30:39.888Z
  * Facets: 104
  * Infrastructure: 2
  *
@@ -6747,7 +6747,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   DeactivateFacet: {
     name: "DeactivateFacet",
-    description: "DeactivateFacet",
+    description:
+      "Diamond facet that exposes the irreversible deactivation operations — `deactivate` and the `isDeactivated` query — as selectable proxy functions.",
     resolverKey: {
       name: "_DEACTIVATE_RESOLVER_KEY",
       value: "0x28edc8979475f616e9ee33c89ffa66022cb1bd6d3c555cbb4c4acaefa3974f96",
@@ -14824,6 +14825,8 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   DeactivateStorageWrapper: {
     name: "DeactivateStorageWrapper",
+    description:
+      "Library providing read, write, and guard operations for the token deactivation flag using the ERC-2535 Diamond Storage Pattern.",
     methods: [],
   },
 
