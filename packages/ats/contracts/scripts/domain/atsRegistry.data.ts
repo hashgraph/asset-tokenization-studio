@@ -14376,8 +14376,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 104 as const;
-export const TOTAL_FACETS = 104 as const;
+export const TOTAL_FACETS = 105 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
