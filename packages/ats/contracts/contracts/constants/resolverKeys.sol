@@ -706,5 +706,8 @@ bytes32 constant _TRANSFER_AND_LOCK_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOL
 // keccak256("security.token.standard.metadata.resolverKey");
 bytes32 constant _METADATA_RESOLVER_KEY = 0x4c3bd2753f7bc002cfee0180298759848c0f294a3bdb6c27eb76ea165a47b29d;
 
+// keccak256("security.token.standard.deactivate.resolverKey");
+bytes32 constant _DEACTIVATE_RESOLVER_KEY = 0x28edc8979475f616e9ee33c89ffa66022cb1bd6d3c555cbb4c4acaefa3974f96;
+
 // keccak256("security.token.standard.initializer.resolverKey");
 bytes32 constant _INITIALIZER_RESOLVER_KEY = 0x65c891d003e7dc436f2c3d0863d599d91867c8695fee29923a476a2be3ec540f;

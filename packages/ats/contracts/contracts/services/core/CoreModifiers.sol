@@ -32,6 +32,7 @@ import { LoanModifiers } from "./LoanModifiers.sol";
 import { PartitionModifiers } from "./PartitionModifiers.sol";
 import { PartitionValidationModifiers } from "./PartitionValidationModifiers.sol";
 import { PauseModifiers } from "./PauseModifiers.sol";
+import { DeactivateModifiers } from "./DeactivateModifiers.sol";
 import { InitializerModifiers } from "./InitializerModifiers.sol";
 
 abstract contract CoreModifiers is
@@ -46,6 +47,8 @@ abstract contract CoreModifiers is
     LoanModifiers,
     PartitionModifiers,
     PartitionValidationModifiers,
+    PauseModifiers,
+    DeactivateModifiers
     PauseModifiers,
     InitializerModifiers
 {
