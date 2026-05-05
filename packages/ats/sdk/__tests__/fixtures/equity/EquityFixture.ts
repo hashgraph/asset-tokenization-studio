@@ -22,11 +22,11 @@ import GetVotingRightsForRequest from "@port/in/request/equity/GetVotingRightsFo
 import GetVotingRightsRequest from "@port/in/request/equity/GetVotingRightsRequest";
 import GetAllVotingRightsRequest from "@port/in/request/equity/GetAllVotingRightsRequest";
 import SetScheduledBalanceAdjustmentRequest from "@port/in/request/equity/SetScheduledBalanceAdjustmentRequest";
-import GetScheduledBalanceAdjustmentCountRequest from "@port/in/request/equity/GetScheduledBalanceAdjustmentsCountRequest";
+import GetPendingBalanceAdjustmentCountRequest from "@port/in/request/equity/GetPendingBalanceAdjustmentsCountRequest";
 import GetScheduledBalanceAdjustmentRequest from "@port/in/request/equity/GetScheduledBalanceAdjustmentRequest";
 import GetAllScheduledBalanceAdjustmentsRequest from "@port/in/request/equity/GetAllScheduledBalanceAdjustmentst";
 import { ScheduledBalanceAdjustment } from "@domain/context/equity/ScheduledBalanceAdjustment";
-import { GetScheduledBalanceAdjustmentCountQuery } from "@query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery";
+import { GetPendingBalanceAdjustmentCountQuery } from "@query/equity/balanceAdjustments/getPendingBalanceAdjustmentCount/GetPendingBalanceAdjustmentsCountQuery";
 import { Dividend } from "@domain/context/dividend/Dividend";
 import { GetDividendsCountQuery } from "@query/dividend/getDividendsCount/GetDividendsCountQuery";
 import { GetDividendQuery } from "@query/dividend/getDividend/GetDividendQuery";
@@ -182,10 +182,11 @@ export const SetScheduledBalanceAdjustmentRequestFixture = createFixture<SetSche
   },
 );
 
-export const GetScheduledBalanceAdjustmentCountRequestFixture =
-  createFixture<GetScheduledBalanceAdjustmentCountRequest>((request) => {
+export const GetPendingBalanceAdjustmentCountRequestFixture = createFixture<GetPendingBalanceAdjustmentCountRequest>(
+  (request) => {
     request.securityId.as(() => HederaIdPropsFixture.create().value);
-  });
+  },
+);
 
 export const GetScheduledBalanceAdjustmentRequestFixture = createFixture<GetScheduledBalanceAdjustmentRequest>(
   (request) => {
@@ -229,7 +230,7 @@ export const GetScheduledBalanceAdjustmentQueryFixture = createFixture<GetSchedu
   query.balanceAdjustmentId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
 });
 
-export const GetScheduledBalanceAdjustmentCountQueryFixture = createFixture<GetScheduledBalanceAdjustmentCountQuery>(
+export const GetPendingBalanceAdjustmentCountQueryFixture = createFixture<GetPendingBalanceAdjustmentCountQuery>(
   (query) => {
     query.securityId.as(() => new HederaId(HederaIdPropsFixture.create().value));
   },

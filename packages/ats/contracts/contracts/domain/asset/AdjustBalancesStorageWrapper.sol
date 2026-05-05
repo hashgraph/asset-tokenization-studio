@@ -9,7 +9,7 @@ import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { CapStorageWrapper } from "../core/CapStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
-import { IAdjustBalances } from "../../facets/layer_2/adjustBalance/IAdjustBalances.sol";
+import { IAdjustBalances } from "../../facets/adjustBalances/IAdjustBalances.sol";
 
 struct AdjustBalancesStorage {
     mapping(address => uint256[]) labafUserPartition;

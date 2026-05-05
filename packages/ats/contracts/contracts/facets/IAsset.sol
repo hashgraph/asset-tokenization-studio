@@ -6,7 +6,7 @@ import {
     IScheduledCrossOrderedTasks
 } from "./layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
 import { IAccessControl } from "./accessControl/IAccessControl.sol";
-import { IAdjustBalances } from "./layer_2/adjustBalance/IAdjustBalances.sol";
+import { IAdjustBalances } from "./adjustBalances/IAdjustBalances.sol";
 import { IAmortization } from "./layer_2/amortization/IAmortization.sol";
 import { IBond } from "./layer_2/bond/IBond.sol";
 import { IBondUSA } from "./layer_3/bondUSA/IBondUSA.sol";
@@ -80,9 +80,7 @@ import { IClearingAtSnapshotByPartition } from "./clearingAtSnapshotByPartition/
 import { IHoldAtSnapshot } from "./holdAtSnapshot/IHoldAtSnapshot.sol";
 import { ICouponListing } from "./couponListing/ICouponListing.sol";
 import { ICouponSecurityHolders } from "./couponSecurityHolders/ICouponSecurityHolders.sol";
-import {
-    IScheduledBalanceAdjustments
-} from "./layer_2/scheduledTask/scheduledBalanceAdjustment/IScheduledBalanceAdjustments.sol";
+
 import { ILock } from "./layer_1/lock/ILock.sol";
 import { IFreeze } from "./freeze/IFreeze.sol";
 import { IBatchFreeze } from "./batchFreeze/IBatchFreeze.sol";
@@ -194,7 +192,6 @@ interface IAsset is
     IFixedRate,
     // Scheduled Tasks
     ICouponListing,
-    IScheduledBalanceAdjustments,
     ILock,
     IFreeze,
     IBatchFreeze,
