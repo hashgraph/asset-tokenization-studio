@@ -32,7 +32,7 @@ export default class CheckNums {
     try {
       BigInt(value);
       return true;
-    } catch (err) {
+    } catch {
       return false;
     }
   }
@@ -42,7 +42,7 @@ export default class CheckNums {
       if (value instanceof BigDecimal) return true;
       BigDecimal.fromString(value);
       return true;
-    } catch (err) {
+    } catch {
       return false;
     }
   }
@@ -56,7 +56,7 @@ export default class CheckNums {
   public static isNumber(value: any): value is number | bigint {
     try {
       return !isNaN(parseInt(value)) || !this.isBigInt(value);
-    } catch (error) {
+    } catch {
       return false;
     }
   }

@@ -86,7 +86,9 @@ export default class ValidatedArgs<T extends BaseArgs> extends Validation {
   private pushValidations(key: ValidatedArgsKey<T>, vals: ValidationResponse[]): void {
     try {
       const err = this.runValidation(key, this.getProperty(key as keyof this));
-      err && vals.push(err);
+      if (err) {
+        vals.push(err);
+      }
     } catch (err) {
       vals.push(new ValidationResponse(key.toString(), [err as BaseError]));
     }

@@ -123,7 +123,9 @@ export const MaturityDateItem = ({ securityId }: { securityId: string }) => {
         id="confirmMaturityDate"
         isOpen={showConfirmPopUp}
         onClose={() => {
-          !isLoading && setShowConfirmPopUp(false);
+          if (!isLoading) {
+            setShowConfirmPopUp(false);
+          }
         }}
         closeOnOverlayClick={!isLoading}
         icon={<PhosphorIcon as={Info} size="md" />}
@@ -138,7 +140,9 @@ export const MaturityDateItem = ({ securityId }: { securityId: string }) => {
           handleSubmit(onSubmit)();
         }}
         onCancel={() => {
-          !isLoading && setShowConfirmPopUp(false);
+          if (!isLoading) {
+            setShowConfirmPopUp(false);
+          }
         }}
       />
     </Flex>

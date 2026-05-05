@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { BatchPayout } from "@domain/model/batch-payout"
-import { AmountType, Distribution, PayoutSubtype, PayoutDetails } from "@domain/model/distribution"
-import { AssetTokenizationStudioService } from "@domain/ports/asset-tokenization-studio.port"
-import { BatchPayoutRepository } from "@domain/ports/batch-payout-repository.port"
-import { DistributionRepository } from "@domain/ports/distribution-repository.port"
-import { LifeCycleCashFlowPort } from "@domain/ports/life-cycle-cash-flow.port"
-import { OnChainDistributionRepositoryPort } from "@domain/ports/on-chain-distribution-repository.port"
-import { BasePayoutDomainService } from "@domain/services/base-payout.domain-service"
-import { CreateHoldersDomainService } from "@domain/services/create-holders.domain-service"
-import { UpdateBatchPayoutStatusDomainService } from "@domain/services/update-batch-payout-status.domain-service"
-import { UpdateDistributionStatusDomainService } from "@domain/services/update-distribution-status.domain-service"
-import { ValidateAssetPauseStateDomainService } from "@domain/services/validate-asset-pause-state.domain-service"
-import { Inject, Injectable } from "@nestjs/common"
-import { ConfigService } from "@nestjs/config"
-import { ExecuteDistributionResponse } from "@domain/ports/execute-distribution-response.interface"
-import { HederaService } from "@domain/ports/hedera.port"
+import { BatchPayout } from "@domain/model/batch-payout";
+import { AmountType, Distribution, PayoutSubtype, PayoutDetails } from "@domain/model/distribution";
+import { AssetTokenizationStudioService } from "@domain/ports/asset-tokenization-studio.port";
+import { BatchPayoutRepository } from "@domain/ports/batch-payout-repository.port";
+import { DistributionRepository } from "@domain/ports/distribution-repository.port";
+import { LifeCycleCashFlowPort } from "@domain/ports/life-cycle-cash-flow.port";
+import { OnChainDistributionRepositoryPort } from "@domain/ports/on-chain-distribution-repository.port";
+import { BasePayoutDomainService } from "@domain/services/base-payout.domain-service";
+import { CreateHoldersDomainService } from "@domain/services/create-holders.domain-service";
+import { UpdateBatchPayoutStatusDomainService } from "@domain/services/update-batch-payout-status.domain-service";
+import { UpdateDistributionStatusDomainService } from "@domain/services/update-distribution-status.domain-service";
+import { ValidateAssetPauseStateDomainService } from "@domain/services/validate-asset-pause-state.domain-service";
+import { Inject, Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { ExecuteDistributionResponse } from "@domain/ports/execute-distribution-response.interface";
+import { HederaService } from "@domain/ports/hedera.port";
 
 @Injectable()
 export class ExecutePayoutDistributionDomainService extends BasePayoutDomainService {
@@ -47,57 +47,57 @@ export class ExecutePayoutDistributionDomainService extends BasePayoutDomainServ
       batchPayoutRepository,
       hederaService,
       configService,
-    )
+    );
   }
 
   override async execute(distribution: Distribution): Promise<void> {
-    distribution.verifyIsPayout()
-    await this.validateAssetPauseStateDomainService.validateDomainPauseState(distribution.asset, distribution.id)
+    distribution.verifyIsPayout();
+    await this.validateAssetPauseStateDomainService.validateDomainPauseState(distribution.asset, distribution.id);
 
     const distributionWithInProgressStatus =
-      this.updateDistributionStatusDomainService.setDistributionStatusToInProgress(distribution)
-    await this.distributionRepository.updateDistribution(distributionWithInProgressStatus)
+      this.updateDistributionStatusDomainService.setDistributionStatusToInProgress(distribution);
+    await this.distributionRepository.updateDistribution(distributionWithInProgressStatus);
 
-    await this.createSnapshot(distributionWithInProgressStatus)
+    await this.createSnapshot(distributionWithInProgressStatus);
     if ((distribution.details as any).subtype === PayoutSubtype.RECURRING) {
-      await this.createNextRecurringDistribution(distributionWithInProgressStatus)
+      await this.createNextRecurringDistribution(distributionWithInProgressStatus);
     }
-    const batchPayouts = await this.createBatchPayouts(distributionWithInProgressStatus)
-    await this.processBatchPayouts(batchPayouts)
+    const batchPayouts = await this.createBatchPayouts(distributionWithInProgressStatus);
+    await this.processBatchPayouts(batchPayouts);
   }
 
   protected override async getHoldersCount(distribution: Distribution): Promise<number> {
-    distribution.verifyIsPayout()
+    distribution.verifyIsPayout();
 
-    const payoutDetails = distribution.details as PayoutDetails
+    const payoutDetails = distribution.details as PayoutDetails;
     if (!payoutDetails.snapshotId) {
-      throw new Error(`SnapshotId is missing for distribution ${distribution.id}`)
+      throw new Error(`SnapshotId is missing for distribution ${distribution.id}`);
     }
 
-    const holdersCount = await this.onChainDistributionRepository.getHoldersCountForSnapshotId(distribution)
+    const holdersCount = await this.onChainDistributionRepository.getHoldersCountForSnapshotId(distribution);
 
     if (holdersCount <= 0) {
-      throw new Error(`No holders found for distribution ${distribution.id}`)
+      throw new Error(`No holders found for distribution ${distribution.id}`);
     }
 
-    return holdersCount
+    return holdersCount;
   }
 
   protected override async executeHederaCall(
     batch: BatchPayout,
     pageIndex: number,
   ): Promise<ExecuteDistributionResponse> {
-    const distribution = batch.distribution
-    const asset = distribution.asset
+    const distribution = batch.distribution;
+    const asset = distribution.asset;
 
-    distribution.verifyIsPayout()
+    distribution.verifyIsPayout();
 
-    const payoutDetails = distribution.details as PayoutDetails
+    const payoutDetails = distribution.details as PayoutDetails;
     if (!payoutDetails.snapshotId) {
-      throw new Error(`SnapshotId is missing for distribution ${distribution.id}`)
+      throw new Error(`SnapshotId is missing for distribution ${distribution.id}`);
     }
 
-    const snapshotId = payoutDetails.snapshotId.value
+    const snapshotId = payoutDetails.snapshotId.value;
 
     if (payoutDetails.amountType == AmountType.FIXED) {
       return this.onChainLifeCycleCashFlowService.executeAmountSnapshot(
@@ -107,7 +107,7 @@ export class ExecutePayoutDistributionDomainService extends BasePayoutDomainServ
         pageIndex,
         batch.holdersNumber,
         payoutDetails.amount,
-      )
+      );
     } else {
       return this.onChainLifeCycleCashFlowService.executePercentageSnapshot(
         asset.lifeCycleCashFlowHederaAddress,
@@ -116,17 +116,17 @@ export class ExecutePayoutDistributionDomainService extends BasePayoutDomainServ
         pageIndex,
         batch.holdersNumber,
         payoutDetails.amount,
-      )
+      );
     }
   }
 
   private async createSnapshot(distribution: Distribution): Promise<void> {
-    const snapshot = await this.assetTokenizationStudioService.takeSnapshot(distribution.asset.hederaTokenAddress)
-    distribution.updateSnapshotId(snapshot)
-    await this.distributionRepository.updateDistribution(distribution)
+    const snapshot = await this.assetTokenizationStudioService.takeSnapshot(distribution.asset.hederaTokenAddress);
+    distribution.updateSnapshotId(snapshot);
+    await this.distributionRepository.updateDistribution(distribution);
   }
 
   private async createNextRecurringDistribution(distribution: Distribution): Promise<void> {
-    await this.distributionRepository.saveDistribution(distribution.createNextRecurring())
+    await this.distributionRepository.saveDistribution(distribution.createNextRecurring());
   }
 }
