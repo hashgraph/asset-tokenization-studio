@@ -254,27 +254,6 @@ describe("Snapshots Tests", () => {
       signer_C.address,
     );
 
-    const snapshot_HeldBalance_Of_A_1_Partition_1 = await asset.heldBalanceOfAtSnapshotByPartition(
-      _PARTITION_ID_1,
-      1,
-      signer_A.address,
-    );
-    const snapshot_HeldBalance_Of_C_1_Partition_1 = await asset.heldBalanceOfAtSnapshotByPartition(
-      _PARTITION_ID_1,
-      1,
-      signer_C.address,
-    );
-    const snapshot_HeldBalance_Of_A_1_Partition_2 = await asset.heldBalanceOfAtSnapshotByPartition(
-      _PARTITION_ID_2,
-      1,
-      signer_A.address,
-    );
-    const snapshot_HeldBalance_Of_C_1_Partition_2 = await asset.heldBalanceOfAtSnapshotByPartition(
-      _PARTITION_ID_2,
-      1,
-      signer_C.address,
-    );
-
     const snapshot_Partitions_Of_A_1 = await asset.partitionsOfAtSnapshot(1, signer_A.address);
     const snapshot_Partitions_Of_C_1 = await asset.partitionsOfAtSnapshot(1, signer_C.address);
     const snapshot_TotalSupply_1 = await asset.totalSupplyAtSnapshot(1);
@@ -333,27 +312,6 @@ describe("Snapshots Tests", () => {
       signer_C.address,
     );
 
-    const snapshot_HeldBalance_Of_A_2_Partition_1 = await asset.heldBalanceOfAtSnapshotByPartition(
-      _PARTITION_ID_1,
-      2,
-      signer_A.address,
-    );
-    const snapshot_HeldBalance_Of_C_2_Partition_1 = await asset.heldBalanceOfAtSnapshotByPartition(
-      _PARTITION_ID_1,
-      2,
-      signer_C.address,
-    );
-    const snapshot_HeldBalance_Of_A_2_Partition_2 = await asset.heldBalanceOfAtSnapshotByPartition(
-      _PARTITION_ID_2,
-      2,
-      signer_A.address,
-    );
-    const snapshot_HeldBalance_Of_C_2_Partition_2 = await asset.heldBalanceOfAtSnapshotByPartition(
-      _PARTITION_ID_2,
-      2,
-      signer_C.address,
-    );
-
     const snapshot_Partitions_Of_A_2 = await asset.partitionsOfAtSnapshot(2, signer_A.address);
     const snapshot_Partitions_Of_C_2 = await asset.partitionsOfAtSnapshot(2, signer_C.address);
     const snapshot_TotalSupply_2 = await asset.totalSupplyAtSnapshot(2);
@@ -379,11 +337,6 @@ describe("Snapshots Tests", () => {
     expect(snapshot_LockedBalance_Of_C_1_Partition_1).to.equal(0);
     expect(snapshot_LockedBalance_Of_A_1_Partition_2).to.equal(0);
     expect(snapshot_LockedBalance_Of_C_1_Partition_2).to.equal(0);
-
-    expect(snapshot_HeldBalance_Of_A_1_Partition_1).to.equal(0);
-    expect(snapshot_HeldBalance_Of_C_1_Partition_1).to.equal(0);
-    expect(snapshot_HeldBalance_Of_A_1_Partition_2).to.equal(0);
-    expect(snapshot_HeldBalance_Of_C_1_Partition_2).to.equal(0);
 
     expect(snapshot_Partitions_Of_C_1.length).to.equal(1);
     expect(snapshot_Partitions_Of_C_1[0]).to.equal(_PARTITION_ID_1);
@@ -423,11 +376,6 @@ describe("Snapshots Tests", () => {
     expect(snapshot_LockedBalance_Of_C_2_Partition_1).to.equal(lockedAmountOf_C_Partition_1);
     expect(snapshot_LockedBalance_Of_A_2_Partition_2).to.equal(lockedAmountOf_A_Partition_2);
     expect(snapshot_LockedBalance_Of_C_2_Partition_2).to.equal(0);
-
-    expect(snapshot_HeldBalance_Of_A_2_Partition_1).to.equal(heldAmountOf_A_Partition_1);
-    expect(snapshot_HeldBalance_Of_C_2_Partition_1).to.equal(heldAmountOf_C_Partition_1);
-    expect(snapshot_HeldBalance_Of_A_2_Partition_2).to.equal(heldAmountOf_A_Partition_2);
-    expect(snapshot_HeldBalance_Of_C_2_Partition_2).to.equal(0);
 
     expect(snapshot_Partitions_Of_C_2.length).to.equal(1);
     expect(snapshot_Partitions_Of_C_2[0]).to.equal(_PARTITION_ID_1);

@@ -24,13 +24,12 @@ contract SnapshotsFacet is Snapshots, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 10;
+        uint256 selectorIndex = 9;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);
         unchecked {
             staticFunctionSelectors_[--selectorIndex] = this.getTotalTokenHoldersAtSnapshot.selector;
             staticFunctionSelectors_[--selectorIndex] = this.getTokenHoldersAtSnapshot.selector;
             staticFunctionSelectors_[--selectorIndex] = this.frozenBalanceOfAtSnapshotByPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.heldBalanceOfAtSnapshotByPartition.selector;
             staticFunctionSelectors_[--selectorIndex] = this.lockedBalanceOfAtSnapshotByPartition.selector;
             staticFunctionSelectors_[--selectorIndex] = this.lockedBalanceOfAtSnapshot.selector;
             staticFunctionSelectors_[--selectorIndex] = this.partitionsOfAtSnapshot.selector;

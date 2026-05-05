@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-04T14:59:04.448Z
- * Facets: 108
+ * Generated: 2026-05-04T21:11:59.436Z
+ * Facets: 110
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -89,6 +89,7 @@ import {
   FixedRateFacet__factory,
   FreezeAtSnapshotFacet__factory,
   FreezeFacet__factory,
+  HoldAtSnapshotByPartitionFacet__factory,
   HoldAtSnapshotFacet__factory,
   HoldByPartitionFacet__factory,
   HoldFacet__factory,
@@ -9326,6 +9327,43 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) => new FreezeFacetTimeTravel__factory(signer),
   },
 
+  HoldAtSnapshotByPartitionFacet: {
+    name: "HoldAtSnapshotByPartitionFacet",
+    description:
+      "Diamond facet that exposes the snapshotted partition-scoped held-balance query through the `IHoldAtSnapshotByPartition` interface, registered under `_HOLD_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_HOLD_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY",
+      value: "0xa843a6a38df62d52595e1b2e9b439339fe835afcb70c7dac1a7cf5db53ba7c2d",
+    },
+    inheritance: ["HoldAtSnapshotByPartition", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "heldBalanceOfAtSnapshotByPartition",
+        signature: {
+          full: "function heldBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+          canonical: "heldBalanceOfAtSnapshotByPartition(bytes32,uint256,address)",
+        },
+        selector: "0x977a3a71",
+      },
+    ],
+    errors: [
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+    ],
+    factory: (signer) => new HoldAtSnapshotByPartitionFacet__factory(signer),
+  },
+
   HoldAtSnapshotFacet: {
     name: "HoldAtSnapshotFacet",
     description:
@@ -13084,14 +13122,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x867126e1",
       },
       {
-        name: "heldBalanceOfAtSnapshotByPartition",
-        signature: {
-          full: "function heldBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
-          canonical: "heldBalanceOfAtSnapshotByPartition(bytes32,uint256,address)",
-        },
-        selector: "0x977a3a71",
-      },
-      {
         name: "lockedBalanceOfAtSnapshot",
         signature: {
           full: "function lockedBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
@@ -14453,7 +14483,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 108 as const;
+export const TOTAL_FACETS = 110 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

@@ -61,6 +61,7 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "BalanceTrackerAtSnapshotByPartitionFacet",
   "ClearingAtSnapshotFacet",
   "ClearingAtSnapshotByPartitionFacet",
+  "HoldAtSnapshotByPartitionFacet",
 
   // ERC Standards
   "MintByPartitionFacet",
