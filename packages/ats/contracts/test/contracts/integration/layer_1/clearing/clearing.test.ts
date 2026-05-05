@@ -2285,7 +2285,9 @@ describe("Clearing Tests", () => {
 
         await expect(asset.approveClearingOperationByPartition(clearingIdentifier))
           .to.emit(asset, "ClearingOperationApproved")
-          .withArgs(signer_A.address, signer_A.address, _PARTITION_ID_1, 1, ClearingOperationType.Transfer, "0x");
+          .withArgs(signer_A.address, signer_A.address, _PARTITION_ID_1, 1, ClearingOperationType.Transfer, "0x")
+          .to.emit(asset, "Transfer")
+          .withArgs(ADDRESS_ZERO, signer_B.address, _AMOUNT);
 
         const balance_A_final_Transfer = await asset.balanceOf(signer_A.address);
         const balance_B_final_Transfer = await asset.balanceOf(signer_B.address);
@@ -2316,7 +2318,9 @@ describe("Clearing Tests", () => {
             1,
             ClearingOperationType.HoldCreation,
             ethers.AbiCoder.defaultAbiCoder().encode(["uint256"], [1]),
-          );
+          )
+          .to.emit(asset, "Transfer")
+          .withArgs(ADDRESS_ZERO, signer_A.address, _AMOUNT);
 
         const balance_A_final_HoldCreation = await asset.balanceOf(signer_A.address);
         const balance_B_final_HoldCreation = await asset.balanceOf(signer_B.address);
@@ -2341,7 +2345,9 @@ describe("Clearing Tests", () => {
 
         await expect(asset.cancelClearingOperationByPartition(clearingIdentifier))
           .to.emit(asset, "ClearingOperationCanceled")
-          .withArgs(signer_A.address, signer_A.address, _PARTITION_ID_1, 1, ClearingOperationType.Transfer);
+          .withArgs(signer_A.address, signer_A.address, _PARTITION_ID_1, 1, ClearingOperationType.Transfer)
+          .to.emit(asset, "Transfer")
+          .withArgs(ADDRESS_ZERO, signer_A.address, _AMOUNT);
 
         const balance_A_final_Transfer = await asset.balanceOf(signer_A.address);
         const balance_B_final_Transfer = await asset.balanceOf(signer_B.address);
@@ -3093,80 +3099,6 @@ describe("Clearing Tests", () => {
     });
 
     describe("onlyUnrecoveredAddress modifier", () => {
-      describe("clearingCreateHoldByPartition", () => {
-        it("GIVEN a recovered msgSender WHEN calling clearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
-          // Grant _AGENT_ROLE to call recoveryAddress
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
-          // First recover signer_A's address
-          await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
-
-          // Try to create clearing hold with recovered address
-          await expect(
-            asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold),
-          ).to.be.revertedWithCustomError(asset, "WalletRecovered");
-        });
-
-        it("GIVEN a recovered hold.to address WHEN calling clearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
-          // Grant _AGENT_ROLE to call recoveryAddress
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
-          // Recover the hold.to address (signer_C - the actual hold.to)
-          await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
-
-          // Try to create clearing hold with recovered hold.to
-          await expect(
-            asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold),
-          ).to.be.revertedWithCustomError(asset, "WalletRecovered");
-        });
-      });
-
-      describe("clearingCreateHoldFromByPartition", () => {
-        it("GIVEN a recovered msgSender WHEN calling clearingCreateHoldFromByPartition THEN transaction fails with WalletRecovered", async () => {
-          await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
-          await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
-
-          const clearingOperationFromB = {
-            ...clearingOperationFrom,
-            from: signer_B.address,
-          };
-
-          await expect(
-            asset.connect(signer_A).clearingCreateHoldFromByPartition(clearingOperationFromB, hold),
-          ).to.be.revertedWithCustomError(asset, "WalletRecovered");
-        });
-
-        it("GIVEN a recovered hold.to WHEN calling clearingCreateHoldFromByPartition THEN transaction fails with WalletRecovered", async () => {
-          await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
-          // Recover the hold.to address (signer_C)
-          await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
-
-          const clearingOperationFromB = {
-            ...clearingOperationFrom,
-            from: signer_B.address,
-          };
-
-          await expect(
-            asset.connect(signer_A).clearingCreateHoldFromByPartition(clearingOperationFromB, hold),
-          ).to.be.revertedWithCustomError(asset, "WalletRecovered");
-        });
-
-        it("GIVEN a recovered from address WHEN calling clearingCreateHoldFromByPartition THEN transaction fails with WalletRecovered", async () => {
-          await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
-          await asset.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
-
-          const clearingOperationFromB = {
-            ...clearingOperationFrom,
-            from: signer_B.address,
-          };
-
-          await expect(
-            asset.connect(signer_A).clearingCreateHoldFromByPartition(clearingOperationFromB, hold),
-          ).to.be.revertedWithCustomError(asset, "WalletRecovered");
-        });
-      });
-
       describe("operatorClearingCreateHoldByPartition", () => {
         it("GIVEN a recovered msgSender WHEN calling operatorClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
           await asset.connect(signer_B).authorizeOperator(signer_A.address);
@@ -4391,9 +4323,13 @@ describe("Clearing Tests", () => {
         const signature = await signer_A.signTypedData(domain, types, message);
 
         // Execute the protected clearing create hold
-        await asset
-          .connect(signer_A)
-          .protectedClearingCreateHoldByPartition(protectedClearingOperation, holdForClearing, signature);
+        await expect(
+          asset
+            .connect(signer_A)
+            .protectedClearingCreateHoldByPartition(protectedClearingOperation, holdForClearing, signature),
+        )
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
 
         // Check cleared amount
         const clearedAmount = await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address);

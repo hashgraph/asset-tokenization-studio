@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { AddressValidation } from "../../infrastructure/utils/AddressValidation.sol";
+import { DefaultValueValidation } from "../../infrastructure/utils/DefaultValueValidation.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IExternalControlList } from "../../facets/layer_1/externalControlList/IExternalControlList.sol";
@@ -60,8 +60,7 @@ library ExternalListManagementStorageWrapper {
         externalListStorage(_position).initialized = true;
     }
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ExternalControlLists(address[] calldata _controlLists) internal {
+    function initializeExternalControlLists(address[] calldata _controlLists) internal {
         uint256 length = _controlLists.length;
         for (uint256 index; index < length; ) {
             checkValidAddress(_controlLists[index]);
@@ -73,8 +72,7 @@ library ExternalListManagementStorageWrapper {
         setExternalListInitialized(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION);
     }
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ExternalKycLists(address[] calldata _kycLists) internal {
+    function initializeExternalKycLists(address[] calldata _kycLists) internal {
         uint256 length = _kycLists.length;
         for (uint256 index; index < length; ) {
             checkValidAddress(_kycLists[index]);
@@ -138,7 +136,7 @@ library ExternalListManagementStorageWrapper {
     }
 
     function checkValidAddress(address _addr) internal pure {
-        AddressValidation.checkZeroAddress(_addr);
+        DefaultValueValidation.checkZeroAddress(_addr);
     }
 
     function externalListStorage(

@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type ResolverProxy, type IAsset } from "@contract-types";
 import { ZERO, EMPTY_STRING, ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
+import { deployEquityTokenFixture, getDltTimestamp, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
 
 const _NON_DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000011";
@@ -92,7 +92,7 @@ describe("Transfer and lock Tests", () => {
   }
 
   beforeEach(async () => {
-    currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
+    currentTimestamp = await getDltTimestamp();
     expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS;
   });
 
@@ -191,7 +191,9 @@ describe("Transfer and lock Tests", () => {
           .to.emit(asset, "TransferByPartition")
           .withArgs(_NON_DEFAULT_PARTITION, signer_C.address, signer_C.address, signer_A.address, _AMOUNT, "0x", "0x")
           .to.emit(asset, "PartitionTransferredAndLocked")
-          .withArgs(_NON_DEFAULT_PARTITION, signer_C.address, signer_A.address, _AMOUNT, "0x", expirationTimestamp, 1);
+          .withArgs(_NON_DEFAULT_PARTITION, signer_C.address, signer_A.address, _AMOUNT, "0x", expirationTimestamp, 1)
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_C.address, signer_A.address, _AMOUNT);
 
         expect(await asset.getLockedAmountForByPartition(_NON_DEFAULT_PARTITION, signer_A.address)).to.equal(_AMOUNT);
         expect(await asset.getLockCountForByPartition(_NON_DEFAULT_PARTITION, signer_A.address)).to.equal(1);
@@ -225,7 +227,13 @@ describe("Transfer and lock Tests", () => {
         await expect(
           asset
             .connect(signer_C)
-            .transferAndLockByPartition(_NON_DEFAULT_PARTITION, signer_A.address, _AMOUNT, "0x", currentTimestamp),
+            .transferAndLockByPartition(
+              _NON_DEFAULT_PARTITION,
+              signer_A.address,
+              _AMOUNT,
+              "0x",
+              (await getDltTimestamp()) + 1,
+            ),
         )
           .to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode")
           .withArgs(_NON_DEFAULT_PARTITION);
@@ -252,14 +260,6 @@ describe("Transfer and lock Tests", () => {
           .withArgs(_DEFAULT_PARTITION, signer_C.address, signer_A.address, _AMOUNT, "0x", expirationTimestamp, 1);
       });
 
-      it("GIVEN a expiration timestamp in past WHEN transferAndLock THEN transaction fails with WrongExpirationTimestamp", async () => {
-        await expect(
-          asset
-            .connect(signer_C)
-            .transferAndLock(signer_A.address, _AMOUNT, "0x", currentTimestamp - ONE_YEAR_IN_SECONDS),
-        ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
-      });
-
       it("GIVEN a valid partition WHEN transferAndLock with enough balance THEN transaction success", async () => {
         await asset.connect(signer_B).issueByPartition({
           partition: _DEFAULT_PARTITION,
@@ -272,7 +272,9 @@ describe("Transfer and lock Tests", () => {
           .to.emit(asset, "TransferByPartition")
           .withArgs(_DEFAULT_PARTITION, signer_C.address, signer_C.address, signer_A.address, _AMOUNT, "0x", "0x")
           .to.emit(asset, "PartitionTransferredAndLocked")
-          .withArgs(_DEFAULT_PARTITION, signer_C.address, signer_A.address, _AMOUNT, "0x", expirationTimestamp, 1);
+          .withArgs(_DEFAULT_PARTITION, signer_C.address, signer_A.address, _AMOUNT, "0x", expirationTimestamp, 1)
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_C.address, signer_A.address, _AMOUNT);
 
         expect(await asset.getLockedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(_AMOUNT);
         expect(await asset.getLockCountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(1);

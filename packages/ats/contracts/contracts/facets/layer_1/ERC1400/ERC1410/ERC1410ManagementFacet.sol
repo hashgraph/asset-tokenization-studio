@@ -12,19 +12,22 @@ contract ERC1410ManagementFacet is ERC1410Management, IStaticFunctionSelectors {
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](7);
-        staticFunctionSelectors_[selectorIndex++] = this.initialize_ERC1410.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.controllerTransferByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.controllerRedeemByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.operatorTransferByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.operatorRedeemByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.protectedTransferFromByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.protectedRedeemFromByPartition.selector;
+        uint256 selectorIndex = 5;
+        staticFunctionSelectors_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this.protectedRedeemFromByPartition.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.protectedTransferFromByPartition.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.operatorRedeemByPartition.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.operatorTransferByPartition.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.initialize_ERC1410.selector;
+        }
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(IERC1410Management).interfaceId;
+        uint256 selectorIndex = 1;
+        staticInterfaceIds_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticInterfaceIds_[--selectorIndex] = type(IERC1410Management).interfaceId;
+        }
     }
 }

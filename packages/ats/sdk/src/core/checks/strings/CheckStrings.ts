@@ -28,7 +28,7 @@ export default class CheckStrings {
     try {
       HederaId.from(value);
       return true;
-    } catch (err) {
+    } catch {
       return false;
     }
   }

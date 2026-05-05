@@ -4,10 +4,10 @@ export class OrderPageOptions {
   static DEFAULT: OrderPageOptions = {
     order: "DESC",
     orderBy: "createdAt",
-  }
+  };
 
-  order: "asc" | "desc" | "ASC" | "DESC"
-  orderBy: string
+  order: "asc" | "desc" | "ASC" | "DESC";
+  orderBy: string;
 }
 
 export class PageOptions {
@@ -15,17 +15,17 @@ export class PageOptions {
     page: 1,
     limit: 10,
     order: OrderPageOptions.DEFAULT,
-  }
+  };
 
-  page: number
-  limit: number
-  order: OrderPageOptions
+  page: number;
+  limit: number;
+  order: OrderPageOptions;
 }
 
 export interface Page<T> {
-  items: T[]
-  total: number
-  page: number
-  limit: number
-  totalPages: number
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }

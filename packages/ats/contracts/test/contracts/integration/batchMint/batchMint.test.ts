@@ -92,6 +92,20 @@ describe("BatchMint Tests", () => {
         expect(finalTotalSupply).to.be.equal(initialTotalSupply + BigInt(mintAmount * 2));
       });
 
+      describe("bug Transfer", () => {
+        it("GIVEN issuer WHEN batchMint THEN Transfer event is emitted for each receiver", async () => {
+          const mintAmount = AMOUNT / 2;
+          const toList = [signer_D.address, signer_E.address];
+          const amounts = [mintAmount, mintAmount];
+
+          await expect(asset.batchMint(toList, amounts))
+            .to.emit(asset, "Transfer")
+            .withArgs(ethers.ZeroAddress, signer_D.address, mintAmount)
+            .to.emit(asset, "Transfer")
+            .withArgs(ethers.ZeroAddress, signer_E.address, mintAmount);
+        });
+      });
+
       it("GIVEN an account without issuer role WHEN batchMint THEN transaction fails with AccountHasNoRole", async () => {
         const mintAmount = AMOUNT / 2;
         const toList = [signer_D.address, signer_E.address];

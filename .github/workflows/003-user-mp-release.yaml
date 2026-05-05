@@ -1,4 +1,4 @@
-name: "000: [USER] MP Release"
+name: "003: [USER] MP Release"
 
 on:
   # Manual trigger with preview/release option
@@ -43,7 +43,7 @@ jobs:
       - name: Setup NodeJS Environment
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 22.20.0
+          node-version-file: .nvmrc
 
       - name: Install dependencies
         run: npm ci
@@ -141,8 +141,7 @@ jobs:
             echo "| Tag | ${TAG_NAME} |" >> "${GITHUB_STEP_SUMMARY}"
             echo "| GitHub Release | ✅ Created |" >> "${GITHUB_STEP_SUMMARY}"
             echo "" >> "${GITHUB_STEP_SUMMARY}"
-            echo "**Next Steps:**" >> "${GITHUB_STEP_SUMMARY}"
-            echo "- NPM publishing will be triggered automatically via 300-flow-mp-publish.yaml" >> "${GITHUB_STEP_SUMMARY}"
+            echo "> Mass Payout packages are not published to npm; this release only creates the tag and GitHub release notes." >> "${GITHUB_STEP_SUMMARY}"
           else
             echo "## ❌ Mass Payout Release Failed" >> "${GITHUB_STEP_SUMMARY}"
             echo "Check the logs above for details on what went wrong." >> "${GITHUB_STEP_SUMMARY}"

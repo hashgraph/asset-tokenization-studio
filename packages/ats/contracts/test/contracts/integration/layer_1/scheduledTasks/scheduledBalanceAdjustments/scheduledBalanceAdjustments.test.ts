@@ -77,7 +77,7 @@ describe("Scheduled BalanceAdjustments Tests", () => {
 
     // check schedled BalanceAdjustments
 
-    let scheduledBalanceAdjustmentCount = await asset.connect(signer_A).scheduledBalanceAdjustmentCount();
+    let scheduledBalanceAdjustmentCount = await asset.connect(signer_A).getPendingBalanceAdjustmentCount();
     let scheduledBalanceAdjustments = await asset.connect(signer_A).getScheduledBalanceAdjustments(0, 100);
 
     expect(scheduledBalanceAdjustmentCount).to.equal(3);
@@ -93,7 +93,7 @@ describe("Scheduled BalanceAdjustments Tests", () => {
     await asset.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_1 + 1);
     await asset.connect(signer_A).triggerPendingScheduledCrossOrderedTasks();
 
-    scheduledBalanceAdjustmentCount = await asset.connect(signer_A).scheduledBalanceAdjustmentCount();
+    scheduledBalanceAdjustmentCount = await asset.connect(signer_A).getPendingBalanceAdjustmentCount();
     scheduledBalanceAdjustments = await asset.connect(signer_A).getScheduledBalanceAdjustments(0, 100);
 
     expect(scheduledBalanceAdjustmentCount).to.equal(2);
@@ -107,7 +107,7 @@ describe("Scheduled BalanceAdjustments Tests", () => {
     await asset.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_2 + 1);
     await asset.connect(signer_A).triggerScheduledCrossOrderedTasks(100);
 
-    scheduledBalanceAdjustmentCount = await asset.connect(signer_A).scheduledBalanceAdjustmentCount();
+    scheduledBalanceAdjustmentCount = await asset.connect(signer_A).getPendingBalanceAdjustmentCount();
     scheduledBalanceAdjustments = await asset.connect(signer_A).getScheduledBalanceAdjustments(0, 100);
 
     expect(scheduledBalanceAdjustmentCount).to.equal(1);
@@ -119,7 +119,7 @@ describe("Scheduled BalanceAdjustments Tests", () => {
     await asset.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_3 + 1);
     await asset.connect(signer_A).triggerScheduledCrossOrderedTasks(0);
 
-    scheduledBalanceAdjustmentCount = await asset.connect(signer_A).scheduledBalanceAdjustmentCount();
+    scheduledBalanceAdjustmentCount = await asset.connect(signer_A).getPendingBalanceAdjustmentCount();
     scheduledBalanceAdjustments = await asset.connect(signer_A).getScheduledBalanceAdjustments(0, 100);
 
     expect(scheduledBalanceAdjustmentCount).to.equal(0);

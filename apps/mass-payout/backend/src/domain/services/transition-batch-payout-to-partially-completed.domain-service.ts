@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { BatchPayout, BatchPayoutStatus } from "@domain/model/batch-payout"
-import { BatchPayoutRepository } from "@domain/ports/batch-payout-repository.port"
-import { UpdateDistributionStatusDomainService } from "@domain/services/update-distribution-status.domain-service"
-import { Inject, Injectable } from "@nestjs/common"
+import { BatchPayout, BatchPayoutStatus } from "@domain/model/batch-payout";
+import { BatchPayoutRepository } from "@domain/ports/batch-payout-repository.port";
+import { UpdateDistributionStatusDomainService } from "@domain/services/update-distribution-status.domain-service";
+import { Inject, Injectable } from "@nestjs/common";
 
 @Injectable()
 export class TransitionBatchPayoutToPartiallyCompletedDomainService {
@@ -16,16 +16,16 @@ export class TransitionBatchPayoutToPartiallyCompletedDomainService {
 
   async execute(batchPayout: BatchPayout): Promise<BatchPayout> {
     if (this.canTransitionToPartiallyCompleted(batchPayout)) {
-      const updatedBatchPayout = this.setBatchPayoutStatusToPartiallyCompleted(batchPayout)
-      const savedBatchPayout = await this.batchPayoutRepository.saveBatchPayout(updatedBatchPayout)
-      await this.updateDistributionStatusDomainService.execute(savedBatchPayout.distribution)
-      return savedBatchPayout
+      const updatedBatchPayout = this.setBatchPayoutStatusToPartiallyCompleted(batchPayout);
+      const savedBatchPayout = await this.batchPayoutRepository.saveBatchPayout(updatedBatchPayout);
+      await this.updateDistributionStatusDomainService.execute(savedBatchPayout.distribution);
+      return savedBatchPayout;
     }
-    return batchPayout
+    return batchPayout;
   }
 
   private canTransitionToPartiallyCompleted(batchPayout: BatchPayout): boolean {
-    return batchPayout.status !== BatchPayoutStatus.COMPLETED && batchPayout.status !== BatchPayoutStatus.FAILED
+    return batchPayout.status !== BatchPayoutStatus.COMPLETED && batchPayout.status !== BatchPayoutStatus.FAILED;
   }
 
   private setBatchPayoutStatusToPartiallyCompleted(batchPayout: BatchPayout): BatchPayout {
@@ -39,6 +39,6 @@ export class TransitionBatchPayoutToPartiallyCompletedDomainService {
       BatchPayoutStatus.PARTIALLY_COMPLETED,
       batchPayout.createdAt,
       batchPayout.updatedAt,
-    )
+    );
   }
 }

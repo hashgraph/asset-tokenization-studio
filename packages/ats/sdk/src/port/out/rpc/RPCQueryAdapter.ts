@@ -501,7 +501,7 @@ export class RPCQueryAdapter {
       );
     });
 
-    return { coupons, accounts: [...result.accounts_] };
+    return { coupons, accounts: [...result.holders_] };
   }
 
   async getCouponAmountFor(address: EvmAddress, target: EvmAddress, coupon: number): Promise<CouponAmountFor> {
@@ -807,15 +807,15 @@ export class RPCQueryAdapter {
     );
   }
 
-  async getScheduledBalanceAdjustmentCount(address: EvmAddress): Promise<number> {
-    LogService.logTrace(`Getting scheduled balance adjustment count`);
+  async getPendingBalanceAdjustmentCount(address: EvmAddress): Promise<number> {
+    LogService.logTrace(`Getting pending balance adjustment count`);
 
-    const scheduledBalanceAdjustmentCount = await this.connect(
+    const pendingBalanceAdjustmentCount = await this.connect(
       IAsset__factory,
       address.toString(),
-    ).getScheduledBalanceAdjustmentCount();
+    ).getPendingBalanceAdjustmentCount();
 
-    return Number(scheduledBalanceAdjustmentCount);
+    return Number(pendingBalanceAdjustmentCount);
   }
 
   async getHeldAmountFor(address: EvmAddress, targetId: EvmAddress): Promise<number> {

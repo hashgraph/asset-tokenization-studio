@@ -2,7 +2,6 @@
 
 import { Injectable } from "@nestjs/common";
 import { COMMAND_HANDLER_METADATA, COMMAND_METADATA } from "../Constants";
-import { v4 } from "uuid";
 import { BaseCommand } from "../command/Command.js";
 import { Constructor } from "../Type.js";
 
@@ -17,7 +16,7 @@ export const CommandHandler = (command: BaseCommand): ClassDecorator => {
   return (target: object) => {
     const tgt = target as Constructor<typeof target>;
     Injectable()(tgt);
-    const id = v4();
+    const id = crypto.randomUUID();
     if (!Reflect.hasMetadata(COMMAND_METADATA, command)) {
       Reflect.defineMetadata(COMMAND_METADATA, { id }, command);
     }

@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { CONTROLLER_ROLE, AGENT_ROLE } from "../../../../constants/roles.sol";
 import { IERC1410Types } from "./IERC1410Types.sol";
 import { IERC1410Management } from "./IERC1410Management.sol";
 import { IProtectedPartitions } from "../../../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
-import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
@@ -16,57 +14,6 @@ abstract contract ERC1410Management is IERC1410Management, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1410(bool _multiPartition) external override onlyNotERC1410Initialized {
         ERC1410StorageWrapper.initialize_ERC1410(_multiPartition);
-    }
-
-    function controllerTransferByPartition(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyControllable
-        returns (bytes32)
-    {
-        bytes32[] memory roles = new bytes32[](2);
-        roles[0] = CONTROLLER_ROLE;
-        roles[1] = AGENT_ROLE;
-        AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
-        return
-            TokenCoreOps.transferByPartition(
-                _from,
-                IERC1410Types.BasicTransferInfo(_to, _value),
-                _partition,
-                _data,
-                EvmAccessors.getMsgSender(),
-                _operatorData
-            );
-    }
-
-    function controllerRedeemByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) external override onlyUnpaused onlyDefaultPartitionWithSinglePartition(_partition) onlyControllable {
-        bytes32[] memory roles = new bytes32[](2);
-        roles[0] = CONTROLLER_ROLE;
-        roles[1] = AGENT_ROLE;
-        AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
-        TokenCoreOps.redeemByPartition(
-            _partition,
-            _tokenHolder,
-            EvmAccessors.getMsgSender(),
-            _value,
-            _data,
-            _operatorData
-        );
     }
 
     function operatorTransferByPartition(

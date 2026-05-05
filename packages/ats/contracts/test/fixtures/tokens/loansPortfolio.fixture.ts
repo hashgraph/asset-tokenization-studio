@@ -37,7 +37,7 @@ import {
   KycFacet__factory,
   PauseFacet__factory,
   ProtectedPartitionsFacet__factory,
-  ClearingActionsFacet__factory,
+  ClearingFacet__factory,
   ExternalKycListManagementFacet__factory,
   ExternalControlListManagementFacet__factory,
   ExternalPauseManagementFacet__factory,
@@ -143,7 +143,7 @@ export async function deployLoansPortfolioTokenFixture({
   const erc20VotesFacet = ERC20VotesFacet__factory.connect(proxyAddress, deployer);
   const nominalValueFacet = NominalValueFacet__factory.connect(proxyAddress, deployer);
   const protectedPartitionsFacet = ProtectedPartitionsFacet__factory.connect(proxyAddress, deployer);
-  const clearingActionsFacet = ClearingActionsFacet__factory.connect(proxyAddress, deployer);
+  const clearingFacet = ClearingFacet__factory.connect(proxyAddress, deployer);
   const externalKycListManagementFacet = ExternalKycListManagementFacet__factory.connect(proxyAddress, deployer);
   const externalControlListManagementFacet = ExternalControlListManagementFacet__factory.connect(
     proxyAddress,
@@ -166,13 +166,13 @@ export async function deployLoansPortfolioTokenFixture({
     securityType: 1, // SecurityType.Equity (reuse for loan portfolio)
   });
   await mintFacet.initialize_ERC1594();
-  await capFacet.initialize_Cap(securityData.maxSupply, []);
+  await capFacet.initializeCap(securityData.maxSupply, []);
   await protectedPartitionsFacet.initialize_ProtectedPartitions(securityData.arePartitionsProtected);
-  await clearingActionsFacet.initializeClearing(securityData.clearingActive);
-  await externalPauseManagementFacet.initialize_ExternalPauses([]);
-  await externalControlListManagementFacet.initialize_ExternalControlLists([]);
+  await clearingFacet.initializeClearing(securityData.clearingActive);
+  await externalPauseManagementFacet.initializeExternalPauses([]);
+  await externalControlListManagementFacet.initializeExternalControlLists([]);
   await kycFacet.initializeInternalKyc(securityData.internalKycActivated);
-  await externalKycListManagementFacet.initialize_ExternalKycLists([]);
+  await externalKycListManagementFacet.initializeExternalKycLists([]);
   await erc20VotesFacet.initialize_ERC20Votes(false);
   await erc3643ManagementFacet.initialize_ERC3643(ZeroAddress, ZeroAddress);
   await nominalValueFacet.initialize_NominalValue(

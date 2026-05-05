@@ -7,7 +7,7 @@ import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticF
 
 abstract contract DividendFacetBase is Dividend, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        staticFunctionSelectors_ = new bytes4[](8);
+        staticFunctionSelectors_ = new bytes4[](6);
         uint256 selectorIndex;
         staticFunctionSelectors_[selectorIndex++] = this.setDividend.selector;
         staticFunctionSelectors_[selectorIndex++] = this.cancelDividend.selector;
@@ -15,8 +15,6 @@ abstract contract DividendFacetBase is Dividend, IStaticFunctionSelectors {
         staticFunctionSelectors_[selectorIndex++] = this.getDividendFor.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getDividendAmountFor.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getDividendsCount.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getDividendHolders.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getTotalDividendHolders.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {

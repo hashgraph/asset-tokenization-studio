@@ -1,5 +1,18 @@
 # @hashgraph/mass-payout-backend
 
+## 1.1.2
+
+### Patch Changes
+
+- a166566: Migrated all voting operations in the SDK from `Equity__factory` to the new `VotingFacet__factory`, aligning with the contract refactor that split voting logic into a dedicated `VotingFacet`. Updated mass-payout contracts to import `IVoting` for voting structs/methods and `ICoupon` for coupon holders, and updated the backend adapter and tests to use `CouponToken` instead of `BondToken` for `getAllCoupons` and `getTotalCouponHolders`.
+- Updated dependencies [4431f2e]
+- Updated dependencies [add9335]
+- Updated dependencies [2b68e6c]
+- Updated dependencies [ca1807d]
+- Updated dependencies [a166566]
+  - @hashgraph/asset-tokenization-sdk@7.0.0
+  - @hashgraph/mass-payout-sdk@1.1.2
+
 ## 1.1.1
 
 ### Patch Changes

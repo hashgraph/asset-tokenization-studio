@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IBatchFreeze } from "./IBatchFreeze.sol";
-import { IFreeze } from "../layer_1/freeze/IFreeze.sol";
+import { IFreeze } from "../freeze/IFreeze.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ExternalListManagementStorageWrapper } from "../../domain/core/ExternalListManagementStorageWrapper.sol";

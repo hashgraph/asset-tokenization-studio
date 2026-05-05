@@ -42,55 +42,15 @@ interface ISnapshots {
     function takeSnapshot() external returns (uint256 snapshotID_);
 
     /**
-     * @notice Returns the decimals at the time of a given snapshot
-     */
-    function decimalsAtSnapshot(uint256 _snapshotID) external view returns (uint8 decimals_);
-
-    /**
      * @notice Returns the list of partitions held by an account at the time of a given snapshot
      */
     function partitionsOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) external view returns (bytes32[] memory);
-
-    /**
-     * @notice Returns the locked balance of an account at the time of a given snapshot
-     */
-    function lockedBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view returns (uint256 balance_);
 
     /**
      * @notice Returns the locked balance of an account for a given partition at the time of a given snapshot
      */
     function lockedBalanceOfAtSnapshotByPartition(
         bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view returns (uint256 balance_);
-
-    function heldBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view returns (uint256 balance_);
-
-    function heldBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view returns (uint256 balance_);
-
-    function clearedBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view returns (uint256 balance_);
-
-    function clearedBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view returns (uint256 balance_);
-
-    function frozenBalanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
     ) external view returns (uint256 balance_);

@@ -5,7 +5,7 @@ import { _ERC3643_STORAGE_POSITION } from "../../constants/storagePositions.sol"
 import { AGENT_ROLE } from "../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
-import { IAccessControl } from "../../facets/layer_1/accessControl/IAccessControl.sol";
+import { IAccessControl } from "../../facets/accessControl/IAccessControl.sol";
 import { IIdentityRegistry } from "../../facets/layer_1/ERC3643/IIdentityRegistry.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
@@ -22,7 +22,6 @@ import { LockStorageWrapper } from "../asset/LockStorageWrapper.sol";
 import { HoldStorageWrapper } from "../asset/HoldStorageWrapper.sol";
 import { ClearingStorageWrapper } from "../asset/ClearingStorageWrapper.sol";
 import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
-import { ITransfer } from "../../facets/transfer/ITransfer.sol";
 
 /**
  * @title ERC3643StorageWrapper
@@ -145,7 +144,8 @@ library ERC3643StorageWrapper {
         st.frozenTokens[_account] += _amount;
         st.frozenTokensByPartition[_account][_partition] += _amount;
 
-        ERC1410StorageWrapper.reduceBalanceByPartition(_account, _amount, _partition);
+        ERC1410StorageWrapper.reducePartitionOnly(_account, _amount, _partition);
+        ERC20StorageWrapper.performTransfer(_account, address(0), _amount);
     }
 
     function unfreezeTokensByPartition(bytes32 _partition, address _account, uint256 _amount) internal {
@@ -158,16 +158,8 @@ library ERC3643StorageWrapper {
         st.frozenTokens[_account] -= _amount;
         st.frozenTokensByPartition[_account][_partition] -= _amount;
 
-        transferFrozenBalance(_partition, _account, _amount);
-        emit ITransfer.Transfer(address(0), _account, _amount);
-    }
-
-    function transferFrozenBalance(bytes32 _partition, address _to, uint256 _amount) internal {
-        if (ERC1410StorageWrapper.validPartitionForReceiver(_partition, _to)) {
-            ERC1410StorageWrapper.increaseBalanceByPartition(_to, _amount, _partition);
-            return;
-        }
-        ERC1410StorageWrapper.addPartitionTo(_amount, _to, _partition);
+        _transferFrozenBalanceOnly(_partition, _account, _amount);
+        ERC20StorageWrapper.performTransfer(address(0), _account, _amount);
     }
 
     function updateTotalFreeze(bytes32 _partition, address _tokenHolder) internal returns (uint256 abaf_) {
@@ -249,6 +241,16 @@ library ERC3643StorageWrapper {
 
     function getFrozenAmountFor(address _userAddress) internal view returns (uint256) {
         return erc3643Storage().frozenTokens[_userAddress];
+    }
+
+    /**
+     * @notice Returns the freezing status of a wallet.
+     * @dev returning true mean that some token or all of them are frozen
+     * @param _userAddress The address of the wallet on which isFrozen is called.
+     * @return The freezing status of a wallet.
+     */
+    function isFrozen(address _userAddress) internal view returns (bool) {
+        return erc3643Storage().frozenTokens[_userAddress] > 0;
     }
 
     function getFrozenAmountForByPartition(bytes32 _partition, address _userAddress) internal view returns (uint256) {
@@ -360,6 +362,14 @@ library ERC3643StorageWrapper {
         if (_addresses.length != _status.length) {
             revert IERC3643Types.InputBoolArrayLengthMismatch();
         }
+    }
+
+    function _transferFrozenBalanceOnly(bytes32 _partition, address _to, uint256 _amount) private {
+        if (ERC1410StorageWrapper.validPartitionForReceiver(_partition, _to)) {
+            ERC1410StorageWrapper.increasePartitionOnly(_to, _amount, _partition);
+            return;
+        }
+        ERC1410StorageWrapper.addPartitionToOnly(_amount, _to, _partition);
     }
 
     function _checkUnfreezeAmount(

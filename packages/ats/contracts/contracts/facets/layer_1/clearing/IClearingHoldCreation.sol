@@ -6,29 +6,6 @@ import { IClearingTypes } from "./IClearingTypes.sol";
 
 interface IClearingHoldCreation is IClearingTypes {
     /**
-     * @notice Creates a hold for a clearing operation by partition
-     *
-     * @param _clearingOperation The clearing operation details
-     * @param _hold The hold details
-     */
-    function clearingCreateHoldByPartition(
-        IClearingTypes.ClearingOperation calldata _clearingOperation,
-        IHoldTypes.Hold calldata _hold
-    ) external returns (bool success_, uint256 clearingId_);
-
-    /**
-     * @notice Creates a hold for a clearing operation by partition from a third party
-     * @dev Caller needs to have approval to transfer the tokens from the token holder
-     *
-     * @param _clearingOperationFrom The clearing operation details
-     * @param _hold The hold details
-     */
-    function clearingCreateHoldFromByPartition(
-        IClearingTypes.ClearingOperationFrom calldata _clearingOperationFrom,
-        IHoldTypes.Hold calldata _hold
-    ) external returns (bool success_, uint256 clearingId_);
-
-    /**
      * @notice Creates a hold for a clearing operation by partition from a third party
      * @dev Can only be called by the protected partitions role
      *
@@ -41,19 +18,4 @@ interface IClearingHoldCreation is IClearingTypes {
         IHoldTypes.Hold calldata _hold,
         bytes calldata _signature
     ) external returns (bool success_, uint256 clearingId_);
-
-    /**
-     * @notice Gets the clearing hold creation data for a given partition, token holder and clearing ID
-     *
-     * @param _partition The partition of the token
-     * @param _tokenHolder The address of the token holder
-     * @param _clearingId The ID of the clearing operation
-     *
-     * @return clearingHoldCreationData_ The clearing hold creation data
-     */
-    function getClearingCreateHoldForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _clearingId
-    ) external view returns (IClearingTypes.ClearingHoldCreationData memory clearingHoldCreationData_);
 }

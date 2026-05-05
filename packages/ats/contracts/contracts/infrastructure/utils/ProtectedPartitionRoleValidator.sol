@@ -85,30 +85,4 @@ abstract contract ProtectedPartitionRoleValidator {
         }
         _;
     }
-
-    /**
-     * @dev Internal function to check if msg.sender has partition role
-     *
-     * @param partition The partition to check role for
-     * @return hasRole_ True if msg.sender has the required role
-     */
-    function _hasPartitionRole(bytes32 partition) internal view returns (bool hasRole_) {
-        hasRole_ = AccessControlStorageWrapper.hasRole(
-            ProtectedPartitionsStorageWrapper.protectedPartitionsRole(partition),
-            EvmAccessors.getMsgSender()
-        );
-    }
-
-    /**
-     * @dev Internal function to check if msg.sender has wildcard or partition role
-     *
-     * @param partition The partition to check role for
-     * @return hasRole_ True if msg.sender has wildcard or partition role
-     */
-    function _hasWildCardOrPartitionRole(bytes32 partition) internal view returns (bool hasRole_) {
-        bytes32[] memory roles = new bytes32[](2);
-        roles[0] = ProtectedPartitionsStorageWrapper.protectedPartitionsRole(partition);
-        roles[1] = WILD_CARD_ROLE;
-        hasRole_ = AccessControlStorageWrapper.hasAnyRole(roles, EvmAccessors.getMsgSender());
-    }
 }

@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { BaseEntity } from "@domain/model/base-entity"
-import { isNil } from "@nestjs/common/utils/shared.utils"
+import { BaseEntity } from "@domain/model/base-entity";
+import { isNil } from "@nestjs/common/utils/shared.utils";
 import {
   HolderBatchPayoutIdMissingError,
   HolderEvmAddressInvalidError,
   HolderHederaAddressInvalidError,
   HolderRetryCounterNegativeError,
-} from "@domain/errors/holder.error"
-import { BatchPayout } from "@domain/model/batch-payout"
+} from "@domain/errors/holder.error";
+import { BatchPayout } from "@domain/model/batch-payout";
 
 export enum HolderStatus {
   PENDING = "PENDING",
@@ -18,14 +18,14 @@ export enum HolderStatus {
 }
 
 export class Holder extends BaseEntity {
-  readonly batchPayout: BatchPayout
-  readonly holderHederaAddress: string
-  readonly holderEvmAddress: string
-  retryCounter: number
-  status: HolderStatus
-  readonly lastError?: string
-  readonly nextRetryAt?: Date
-  amount?: string
+  readonly batchPayout: BatchPayout;
+  readonly holderHederaAddress: string;
+  readonly holderEvmAddress: string;
+  retryCounter: number;
+  status: HolderStatus;
+  readonly lastError?: string;
+  readonly nextRetryAt?: Date;
+  amount?: string;
 
   private constructor(
     id: string,
@@ -40,16 +40,16 @@ export class Holder extends BaseEntity {
     createdAt: Date = new Date(),
     updatedAt: Date = createdAt,
   ) {
-    super(id, createdAt, updatedAt)
-    this.batchPayout = batchPayout
-    this.holderHederaAddress = holderHederaAddress
-    this.holderEvmAddress = holderEvmAddress
-    this.retryCounter = retryCounter
-    this.status = status
-    this.nextRetryAt = nextRetryAt
-    this.lastError = lastError
-    this.amount = amount
-    this.validateFields()
+    super(id, createdAt, updatedAt);
+    this.batchPayout = batchPayout;
+    this.holderHederaAddress = holderHederaAddress;
+    this.holderEvmAddress = holderEvmAddress;
+    this.retryCounter = retryCounter;
+    this.status = status;
+    this.nextRetryAt = nextRetryAt;
+    this.lastError = lastError;
+    this.amount = amount;
+    this.validateFields();
   }
 
   static create(
@@ -76,7 +76,7 @@ export class Holder extends BaseEntity {
       amount,
       createdAt,
       updatedAt,
-    )
+    );
   }
 
   static createExisting(
@@ -104,33 +104,33 @@ export class Holder extends BaseEntity {
       amount,
       createdAt,
       updatedAt,
-    )
+    );
   }
 
   retrying(): void {
-    this.status = HolderStatus.RETRYING
+    this.status = HolderStatus.RETRYING;
   }
 
   succeed(amount: string): void {
-    this.status = HolderStatus.SUCCESS
-    this.amount = amount
+    this.status = HolderStatus.SUCCESS;
+    this.amount = amount;
   }
 
   failed(): void {
-    this.status = HolderStatus.FAILED
-    this.retryCounter++
+    this.status = HolderStatus.FAILED;
+    this.retryCounter++;
   }
 
   private validateFields(): void {
-    this.validateBatchPayout()
-    this.validateHolderHederaAddress()
-    this.validateHolderEvmAddress()
-    this.validateRetryCounter()
+    this.validateBatchPayout();
+    this.validateHolderHederaAddress();
+    this.validateHolderEvmAddress();
+    this.validateRetryCounter();
   }
 
   private validateBatchPayout(): void {
     if (isNil(this.batchPayout)) {
-      throw new HolderBatchPayoutIdMissingError()
+      throw new HolderBatchPayoutIdMissingError();
     }
   }
 
@@ -139,20 +139,20 @@ export class Holder extends BaseEntity {
     // TODO restore regexp validation after solving problem with hedera address from evm address
     if (isNil(this.holderHederaAddress)) {
       // || !hederaAddressRegex.test(this.holderHederaAddress)) {
-      throw new HolderHederaAddressInvalidError()
+      throw new HolderHederaAddressInvalidError();
     }
   }
 
   private validateHolderEvmAddress(): void {
-    const evmAddressRegex = /^0x[a-fA-F0-9]{40}$/
+    const evmAddressRegex = /^0x[a-fA-F0-9]{40}$/;
     if (isNil(this.holderEvmAddress) || !evmAddressRegex.test(this.holderEvmAddress)) {
-      throw new HolderEvmAddressInvalidError()
+      throw new HolderEvmAddressInvalidError();
     }
   }
 
   private validateRetryCounter(): void {
     if (isNil(this.retryCounter) || this.retryCounter < 0) {
-      throw new HolderRetryCounterNegativeError()
+      throw new HolderRetryCounterNegativeError();
     }
   }
 }

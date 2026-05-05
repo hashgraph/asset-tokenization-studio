@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // AUTO-GENERATED — DO NOT EDIT.
-// Source: contracts/facets/layer_1/accessControl/IAccessControl.sol
+// Source: contracts/facets/accessControl/IAccessControl.sol
 // Regenerated on every `npx hardhat compile` by the
 // `erc3643-clone-interfaces` task in `tasks/compile.ts`.
 // Edits to this file will be silently overwritten.
@@ -8,152 +8,144 @@ pragma solidity ^0.8.17;
 
 /**
  * @title IAccessControl
- * @notice Interface for role-based access control management,
- *         including grant, revoke, renounce, and query operations.
- * @dev Defines the standard for managing role assignments with
- *      paginated retrieval of role members and account roles.
- *      Supports bulk role application via applyRoles.
  * @author Asset Tokenization Studio Team
+ * @notice Interface for role-based access control on a security token. Supports granting,
+ *         revoking, and renouncing roles, batch application via `applyRoles`, and paginated
+ *         queries for role members and account roles.
+ * @dev Part of the Diamond facet system. Role state is stored via
+ *      `AccessControlStorageWrapper`. Each role has an admin role; only accounts holding a
+ *      role's admin role may grant or revoke it. `applyRoles` enforces this per-role in the
+ *      storage layer. Role and member sets are backed by `EnumerableSet`, ensuring O(1) membership
+ *      checks and deterministic pagination.
  */
 interface TRexIAccessControl {
     /**
-     * @notice Emitted when the administrative role for a given
-     *         role is changed.
-     * @param role The role whose admin role was changed
-     * @param previousAdminRole The previous admin role for the
-     *         role
-     * @param newAdminRole The new admin role for the role
+     * @notice Emitted when the admin role for a given role is changed.
+     * @param role The role whose admin role was updated.
+     * @param previousAdminRole The previous admin role.
+     * @param newAdminRole The new admin role.
      */
     event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);
 
     /**
      * @notice Emitted when a role is granted to an account.
-     * @param operator The address that performed the grant
-     *         operation
-     * @param account The account that received the role
-     * @param role The role that was granted
+     * @param operator The address that performed the grant.
+     * @param account The account that received the role.
+     * @param role The role that was granted.
      */
     event RoleGranted(address indexed operator, address indexed account, bytes32 indexed role);
 
     /**
      * @notice Emitted when a role is revoked from an account.
-     * @param operator The address that performed the revoke
-     *         operation
-     * @param account The account from which the role was revoked
-     * @param role The role that was revoked
+     * @param operator The address that performed the revocation.
+     * @param account The account from which the role was revoked.
+     * @param role The role that was revoked.
      */
     event RoleRevoked(address indexed operator, address indexed account, bytes32 indexed role);
 
     /**
-     * @notice Emitted when an account voluntarily renounces a
-     *         role.
-     * @param account The account that renounced the role
-     * @param role The role that was renounced
+     * @notice Emitted when an account voluntarily renounces a role it holds.
+     * @param account The account that renounced the role.
+     * @param role The role that was renounced.
      */
     event RoleRenounced(address indexed account, bytes32 indexed role);
 
     /**
-     * @notice Emitted when multiple roles are applied to an
-     *         account in a single operation.
-     * @param roles The roles that were applied
-     * @param actives Whether each corresponding role was granted
-     *         (true) or revoked (false)
-     * @param account The account to which the roles were applied
+     * @notice Emitted when multiple roles are applied to an account in a single operation.
+     * @param roles The roles that were processed.
+     * @param actives Corresponding grant/revoke flags; `true` means granted, `false` revoked.
+     * @param account The account to which the roles were applied.
      */
     event RolesApplied(bytes32[] roles, bool[] actives, address account);
 
     /**
-     * @notice Triggered when an account does not hold a required
-     *         role.
-     * @param account The account that lacks the role
-     * @param role The role that is not held
+     * @notice Thrown when an account does not hold a required role.
+     * @param account The account that lacks the role.
+     * @param role The role that is not held.
      */
     error AccountHasNoRole(address account, bytes32 role);
 
     /**
-     * @notice Triggered when an account does not hold any of the
-     *         specified roles.
-     * @param account The account that lacks the roles
-     * @param roles The roles that are not held
+     * @notice Thrown when an account does not hold any of the specified roles.
+     * @param account The account that lacks the roles.
+     * @param roles The roles that are not held.
      */
     error AccountHasNoRoles(address account, bytes32[] roles);
 
     /**
-     * @notice Triggered when the roles array and actives array
-     *         lengths differ.
-     * @param rolesLength Length of the roles array
-     * @param activesLength Length of the actives array
+     * @notice Thrown when the `roles` and `actives` arrays passed to `applyRoles` differ in
+     *         length.
+     * @param rolesLength Length of the roles array.
+     * @param activesLength Length of the actives array.
      */
     error RolesAndActivesLengthMismatch(uint256 rolesLength, uint256 activesLength);
 
     /**
-     * @notice Triggered when an account is already assigned to a
-     *         role that cannot be duplicated.
-     * @param role The role to which the account is already
-     *         assigned
-     * @param account The account already holding the role
+     * @notice Thrown when attempting to grant a role to an account that already holds it.
+     * @param role The role the account already holds.
+     * @param account The account already assigned to the role.
      */
     error AccountAssignedToRole(bytes32 role, address account);
 
     /**
-     * @notice Triggered when an account is not assigned to a
-     *         role that is required to be held before the
-     *         operation.
-     * @param role The role to which the account is not assigned
-     * @param account The account not holding the role
+     * @notice Thrown when attempting to revoke or renounce a role from an account that does not
+     *         hold it.
+     * @param role The role the account does not hold.
+     * @param account The account not assigned to the role.
      */
     error AccountNotAssignedToRole(bytes32 role, address account);
 
     /**
-     * @notice Triggered when a bulk role application fails to
-     *         persist all requested changes.
-     * @param roles The roles that were attempted to be applied
-     * @param actives The grant/revoke flags that were attempted
-     * @param account The account targeted by the role
-     *         application
+     * @notice Thrown when a batch role application via `applyRoles` fails to persist all
+     *         requested changes.
+     * @param roles The roles that were attempted.
+     * @param actives The corresponding grant/revoke flags that were attempted.
+     * @param account The account targeted by the operation.
      */
     error RolesNotApplied(bytes32[] roles, bool[] actives, address account);
 
     /**
      * @notice Grants a role to an account.
-     * @dev The caller must be authorised to grant the specified
-     *      role. Emits a RoleGranted event on success.
-     * @param _role The role identifier to grant
-     * @param _account The account to receive the role
-     * @return success_ Whether the grant operation succeeded
+     * @dev The caller must hold the admin role of `_role` (resolved dynamically via
+     *      `getRoleAdmin`). Reverts with `AccountAssignedToRole` if the account already holds
+     *      the role. Emits `RoleGranted`.
+     * @param _role The role identifier to grant.
+     * @param _account The account to receive the role.
+     * @return success_ True if the role was successfully granted.
      */
     function grantRole(bytes32 _role, address _account) external returns (bool success_);
 
     /**
      * @notice Revokes a role from an account.
-     * @dev The caller must be authorised to revoke the specified
-     *      role. Emits a RoleRevoked event on success.
-     * @param _role The role identifier to revoke
-     * @param _account The account to lose the role
-     * @return success_ Whether the revoke operation succeeded
+     * @dev The caller must hold the admin role of `_role` (resolved dynamically via
+     *      `getRoleAdmin`). Reverts with `AccountNotAssignedToRole` if the account does not hold
+     *      the role. Emits `RoleRevoked`.
+     * @param _role The role identifier to revoke.
+     * @param _account The account to lose the role.
+     * @return success_ True if the role was successfully revoked.
      */
     function revokeRole(bytes32 _role, address _account) external returns (bool success_);
 
     /**
-     * @notice Allows the caller to renounce a role held by
-     *         their own account.
-     * @dev Emits a RoleRenounced event on success.
-     * @param _role The role identifier to renounce
-     * @return success_ Whether the renounce operation succeeded
+     * @notice Allows the caller to renounce a role held by their own account.
+     * @dev Operates on `msg.sender` only; no admin role is required. Reverts with
+     *      `AccountNotAssignedToRole` if the caller does not hold the role. Emits
+     *      `RoleRenounced`.
+     * @param _role The role identifier to renounce.
+     * @return success_ True if the role was successfully renounced.
      */
     function renounceRole(bytes32 _role) external returns (bool success_);
 
     /**
-     * @notice Applies multiple role grants or revocations to an
-     *         account in a single transaction.
-     * @dev The roles and actives arrays must have equal length.
-     *      Emits a RolesApplied event on success.
-     * @param _roles Array of role identifiers to apply
-     * @param _actives Array of flags; true to grant, false to
-     *         revoke, each corresponding to the role at the same
-     *         index in _roles
-     * @param _account The account to which roles are applied
-     * @return success_ Whether the apply operation succeeded
+     * @notice Applies multiple role grants or revocations to an account in a single transaction.
+     * @dev The caller must hold the admin role for each role in `_roles` (checked per entry in
+     *      the storage layer). `_roles` and `_actives` must have equal length and contain no
+     *      duplicate role entries. Grant entries where the account already holds the role and
+     *      revoke entries where it does not are silently skipped. Emits `RolesApplied`.
+     * @param _roles Array of role identifiers to process.
+     * @param _actives Corresponding flags; `true` grants the role, `false` revokes it.
+     * @param _account The account to which roles are applied.
+     * @return success_ True if the batch application completed without error.
      */
     function applyRoles(
         bytes32[] calldata _roles,
@@ -162,21 +154,20 @@ interface TRexIAccessControl {
     ) external returns (bool success_);
 
     /**
-     * @notice Returns the number of roles currently assigned to
-     *         an account.
-     * @param _account The account to query
-     * @return roleCount_ The number of roles held by the account
+     * @notice Returns the number of roles currently assigned to an account.
+     * @param _account The account to query.
+     * @return roleCount_ The number of roles held by `_account`.
      */
     function getRoleCountFor(address _account) external view returns (uint256 roleCount_);
 
     /**
-     * @notice Returns a paginated list of roles assigned to an
-     *         account.
-     * @dev Pagination skips _pageIndex * _pageLength entries.
-     * @param _account The account to query
-     * @param _pageIndex Zero-based page index for pagination
-     * @param _pageLength Number of roles to return per page
-     * @return roles_ The array of role identifiers for the page
+     * @notice Returns a paginated slice of roles assigned to an account.
+     * @dev The list offset is computed as `_pageIndex * _pageLength`. Returns an empty array when
+     *      the offset meets or exceeds the role count for the account.
+     * @param _account The account to query.
+     * @param _pageIndex Zero-based page index.
+     * @param _pageLength Maximum number of roles to return per page.
+     * @return roles_ Array of role identifiers held by `_account` for the requested page.
      */
     function getRolesFor(
         address _account,
@@ -185,22 +176,20 @@ interface TRexIAccessControl {
     ) external view returns (bytes32[] memory roles_);
 
     /**
-     * @notice Returns the number of accounts currently holding a
-     *         role.
-     * @param _role The role identifier to query
-     * @return memberCount_ The number of accounts with the role
+     * @notice Returns the number of accounts currently holding a role.
+     * @param _role The role identifier to query.
+     * @return memberCount_ The number of accounts assigned to `_role`.
      */
     function getRoleMemberCount(bytes32 _role) external view returns (uint256 memberCount_);
 
     /**
-     * @notice Returns a paginated list of accounts holding a
-     *         role.
-     * @dev Pagination skips _pageIndex * _pageLength entries.
-     * @param _role The role identifier to query
-     * @param _pageIndex Zero-based page index for pagination
-     * @param _pageLength Number of members to return per page
-     * @return members_ The array of account addresses for the
-     *         page
+     * @notice Returns a paginated slice of accounts holding a role.
+     * @dev The list offset is computed as `_pageIndex * _pageLength`. Returns an empty array when
+     *      the offset meets or exceeds the member count for the role.
+     * @param _role The role identifier to query.
+     * @param _pageIndex Zero-based page index.
+     * @param _pageLength Maximum number of addresses to return per page.
+     * @return members_ Array of account addresses holding `_role` for the requested page.
      */
     function getRoleMembers(
         bytes32 _role,
@@ -210,9 +199,9 @@ interface TRexIAccessControl {
 
     /**
      * @notice Checks whether an account holds a specific role.
-     * @param _role The role identifier to check
-     * @param _account The account to check
-     * @return Whether the account holds the specified role
+     * @param _role The role identifier to check.
+     * @param _account The account to check.
+     * @return True if `_account` holds `_role`, false otherwise.
      */
     function hasRole(bytes32 _role, address _account) external view returns (bool);
 }
