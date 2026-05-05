@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-04T21:11:59.436Z
+ * Generated: 2026-05-05T08:55:49.721Z
  * Facets: 110
  * Infrastructure: 2
  *
@@ -100,6 +100,7 @@ import {
   KycFacet__factory,
   LoanFacet__factory,
   LoansPortfolioFacet__factory,
+  LockAtSnapshotFacet__factory,
   LockFacet__factory,
   MetadataFacet__factory,
   MintByPartitionFacet__factory,
@@ -11114,6 +11115,43 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) => new LoansPortfolioFacetTimeTravel__factory(signer),
   },
 
+  LockAtSnapshotFacet: {
+    name: "LockAtSnapshotFacet",
+    description:
+      "Diamond facet that exposes the locked-balance-at-snapshot query via `ILockAtSnapshot`, registered under `_LOCK_AT_SNAPSHOT_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_LOCK_AT_SNAPSHOT_RESOLVER_KEY",
+      value: "0xd0a412f3e7cd9c9475b5482a548616fc5e2ea67832b8fcd66d2e6a7086c503e9",
+    },
+    inheritance: ["LockAtSnapshot", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "lockedBalanceOfAtSnapshot",
+        signature: {
+          full: "function lockedBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+          canonical: "lockedBalanceOfAtSnapshot(uint256,address)",
+        },
+        selector: "0xd9e6f164",
+      },
+    ],
+    errors: [
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+    ],
+    factory: (signer) => new LockAtSnapshotFacet__factory(signer),
+  },
+
   LockFacet: {
     name: "LockFacet",
     resolverKey: {
@@ -13120,14 +13158,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "getTotalTokenHoldersAtSnapshot(uint256)",
         },
         selector: "0x867126e1",
-      },
-      {
-        name: "lockedBalanceOfAtSnapshot",
-        signature: {
-          full: "function lockedBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
-          canonical: "lockedBalanceOfAtSnapshot(uint256,address)",
-        },
-        selector: "0xd9e6f164",
       },
       {
         name: "lockedBalanceOfAtSnapshotByPartition",

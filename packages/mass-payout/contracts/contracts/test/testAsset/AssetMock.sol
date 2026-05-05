@@ -3,6 +3,7 @@ pragma solidity 0.8.22;
 
 import { IAssetMock } from "./interfaces/IAssetMock.sol";
 // solhint-disable-next-line max-line-length
+// solhint-disable max-line-length
 import {
     ScheduledTask
 } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
