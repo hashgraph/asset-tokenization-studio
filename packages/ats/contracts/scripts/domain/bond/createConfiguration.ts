@@ -124,6 +124,7 @@ const BOND_FACETS = [
   "CouponFacet",
   "CouponSecurityHoldersFacet",
   "LockFacet",
+  "LockByPartitionFacet",
   "NominalValueFacet",
   "ProceedRecipientsFacet",
   "ProtectedPartitionsFacet",

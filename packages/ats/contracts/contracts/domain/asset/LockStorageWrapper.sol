@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _LOCK_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { ILock } from "../../facets/layer_1/lock/ILock.sol";
+import { ILockTypes } from "../../facets/layer_1/lock/ILockTypes.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
@@ -17,7 +17,7 @@ import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 struct LockDataStorage {
     mapping(address => uint256) totalLockedAmountByAccount;
     mapping(address => mapping(bytes32 => uint256)) totalLockedAmountByAccountAndPartition;
-    mapping(address => mapping(bytes32 => mapping(uint256 => ILock.LockData))) locksByAccountPartitionAndId;
+    mapping(address => mapping(bytes32 => mapping(uint256 => ILockTypes.LockData))) locksByAccountPartitionAndId;
     mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) lockIdsByAccountAndPartition;
     mapping(address => mapping(bytes32 => uint256)) nextLockIdByAccountAndPartition;
 }
@@ -155,7 +155,7 @@ library LockStorageWrapper {
         bytes32 partition,
         address tokenHolder,
         uint256 lockId
-    ) internal view returns (ILock.LockData memory) {
+    ) internal view returns (ILockTypes.LockData memory) {
         return lockStorage().locksByAccountPartitionAndId[tokenHolder][partition][lockId];
     }
 
@@ -178,11 +178,11 @@ library LockStorageWrapper {
     }
 
     function requireValidLockId(bytes32 partition, address tokenHolder, uint256 lockId) internal view {
-        if (!isLockIdValid(partition, tokenHolder, lockId)) revert ILock.WrongLockId();
+        if (!isLockIdValid(partition, tokenHolder, lockId)) revert ILockTypes.WrongLockId();
     }
 
     function requireLockedExpirationTimestamp(bytes32 partition, address tokenHolder, uint256 lockId) internal view {
-        if (!isLockedExpirationTimestamp(partition, tokenHolder, lockId)) revert ILock.LockExpirationNotReached();
+        if (!isLockedExpirationTimestamp(partition, tokenHolder, lockId)) revert ILockTypes.LockExpirationNotReached();
     }
 
     function getLockedAmountForByPartition(bytes32 partition, address tokenHolder) internal view returns (uint256) {
@@ -210,7 +210,7 @@ library LockStorageWrapper {
         address tokenHolder,
         uint256 lockId
     ) internal view returns (uint256 amount, uint256 expirationTimestamp) {
-        ILock.LockData memory lock = getLock(partition, tokenHolder, lockId);
+        ILockTypes.LockData memory lock = getLock(partition, tokenHolder, lockId);
         amount = lock.amount;
         expirationTimestamp = lock.expirationTimestamp;
     }
@@ -309,7 +309,7 @@ library LockStorageWrapper {
 
         AdjustBalancesStorageWrapper.setLockLabafById(partition, tokenHolder, lockId_, abaf);
 
-        lockStorageRef.locksByAccountPartitionAndId[tokenHolder][partition][lockId_] = ILock.LockData(
+        lockStorageRef.locksByAccountPartitionAndId[tokenHolder][partition][lockId_] = ILockTypes.LockData(
             lockId_,
             amount,
             expirationTimestamp
