@@ -1,0 +1,61 @@
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
+
+import { IProtectedClearingHoldByPartition } from "./IProtectedClearingHoldByPartition.sol";
+import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
+import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { ProtectedPartitionsStorageWrapper } from "../../domain/core/ProtectedPartitionsStorageWrapper.sol";
+import { ClearingProtectedOps } from "../../domain/orchestrator/ClearingProtectedOps.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+
+/**
+ * @title ProtectedClearingHoldByPartition
+ * @author Asset Tokenization Studio Team
+ * @notice Abstract facet implementation for the protected variant of partition-scoped clearing
+ *         hold creation, extracted from `ClearingHoldCreation` as part of the MAF (Modular
+ *         Asset Factory) decomposition.
+ * @dev Forwards write logic to `ClearingProtectedOps.protectedClearingCreateHoldByPartition`.
+ *      Authorisation is enforced by a partition-specific role obtained from
+ *      `ProtectedPartitionsStorageWrapper`. Storage layout is unchanged; this contract only
+ *      owns the selector exposure.
+ */
+abstract contract ProtectedClearingHoldByPartition is IProtectedClearingHoldByPartition, Modifiers {
+    /// @inheritdoc IProtectedClearingHoldByPartition
+    function protectedClearingCreateHoldByPartition(
+        IClearingTypes.ProtectedClearingOperation calldata _protectedClearingOperation,
+        IHoldTypes.Hold calldata _hold,
+        bytes calldata _signature
+    )
+        external
+        override
+        onlyUnpaused
+        onlyUnrecoveredAddress(_protectedClearingOperation.from)
+        onlyUnrecoveredAddress(_hold.to)
+        onlyProtectedPartitions
+        onlyValidAddress(_protectedClearingOperation.from)
+        onlyWithValidExpirationTimestamp(_protectedClearingOperation.clearingOperation.expirationTimestamp)
+        onlyRole(
+            ProtectedPartitionsStorageWrapper.protectedPartitionsRole(
+                _protectedClearingOperation.clearingOperation.partition
+            )
+        )
+        onlyClearingActivated
+        returns (bool success_, uint256 clearingId_)
+    {
+        (success_, clearingId_) = ClearingProtectedOps.protectedClearingCreateHoldByPartition(
+            _protectedClearingOperation,
+            _hold,
+            _signature
+        );
+
+        emit ProtectedClearingHeldByPartition(
+            EvmAccessors.getMsgSender(),
+            _protectedClearingOperation.from,
+            _protectedClearingOperation.clearingOperation.partition,
+            clearingId_,
+            _hold,
+            ""
+        );
+    }
+}

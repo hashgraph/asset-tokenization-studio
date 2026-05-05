@@ -103,7 +103,7 @@ const BOND_FIXED_RATE_FACETS = [
 
   // Clearing & Settlement
   "ClearingByPartitionFacet",
-  "ClearingHoldCreationFacet",
+  "ProtectedClearingHoldByPartitionFacet",
   "ClearingHoldByPartitionFacet",
   "OperatorClearingHoldByPartitionFacet",
   "ClearingFacet",

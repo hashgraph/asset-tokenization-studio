@@ -109,7 +109,7 @@ const LOAN_FACETS = [
   // Clearing & Settlement
   "OperatorClearingByPartitionFacet",
   "ProtectedClearingByPartitionFacet",
-  "ClearingHoldCreationFacet",
+  "ProtectedClearingHoldByPartitionFacet",
   "ClearingHoldByPartitionFacet",
   "OperatorClearingHoldByPartitionFacet",
   "ClearingFacet",

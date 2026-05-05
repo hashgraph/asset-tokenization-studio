@@ -118,7 +118,7 @@ const LOANS_PORTFOLIO_FACETS = [
   // Clearing & Settlement
   "OperatorClearingByPartitionFacet",
   "ProtectedClearingByPartitionFacet",
-  "ClearingHoldCreationFacet",
+  "ProtectedClearingHoldByPartitionFacet",
   "OperatorClearingHoldByPartitionFacet",
   "ClearingFacet",
   "ClearingByPartitionFacet",

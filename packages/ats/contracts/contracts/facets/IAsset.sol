@@ -105,6 +105,9 @@ import { ICoreAtSnapshot } from "./coreAtSnapshot/ICoreAtSnapshot.sol";
 import { IOperatorClearingByPartition } from "./operatorClearingByPartition/IOperatorClearingByPartition.sol";
 import { IClearingHoldCreation } from "./layer_1/clearing/IClearingHoldCreation.sol";
 import {
+    IProtectedClearingHoldByPartition
+} from "./protectedClearingHoldByPartition/IProtectedClearingHoldByPartition.sol";
+import {
     IOperatorClearingHoldByPartition
 } from "./layer_1/clearing/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol";
 import { IClearing } from "./clearing/IClearing.sol";
@@ -232,6 +235,7 @@ interface IAsset is
     IClearing,
     IOperatorClearingByPartition,
     IClearingHoldCreation,
+    IProtectedClearingHoldByPartition,
     IOperatorClearingHoldByPartition,
     IClearingByPartition,
     IClearingHoldByPartition,

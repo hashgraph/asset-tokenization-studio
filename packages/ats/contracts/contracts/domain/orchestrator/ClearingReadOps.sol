@@ -4,7 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ClearingStorageWrapper } from "../asset/ClearingStorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";
 import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
-import { IClearingHoldCreation } from "../../facets/layer_1/clearing/IClearingHoldCreation.sol";
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 
 /// @title ClearingReadOps
@@ -100,7 +99,7 @@ library ClearingReadOps {
         address _tokenHolder,
         uint256 _clearingId,
         uint256 _timestamp
-    ) public view returns (IClearingHoldCreation.ClearingHoldCreationData memory clearingHoldCreationData_) {
+    ) public view returns (IClearingTypes.ClearingHoldCreationData memory clearingHoldCreationData_) {
         clearingHoldCreationData_ = ClearingStorageWrapper.getClearingHoldCreationForByPartition(
             _partition,
             _tokenHolder,
