@@ -1,0 +1,55 @@
+name: "800: [CALL] Lint and Format"
+
+on:
+  workflow_call:
+    inputs:
+      module:
+        description: "Module slug used to derive script names (e.g. 'ats' or 'mass-payout')."
+        required: true
+        type: string
+      runs-on:
+        description: "Runner label."
+        required: false
+        type: string
+        default: token-studio-linux-medium
+      timeout-minutes:
+        description: "Job timeout in minutes."
+        required: false
+        type: number
+        default: 15
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
+
+jobs:
+  lint-and-format:
+    name: lint-and-format
+    runs-on: ${{ inputs.runs-on }}
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Setup NodeJS Environment
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check format
+        run: npm run ${{ inputs.module }}:format:check
+
+      - name: Lint
+        run: npm run ${{ inputs.module }}:lint

@@ -1,0 +1,26 @@
+name: "103: [FLOW] ATS Lint and Format"
+
+on:
+  pull_request:
+    paths:
+      - "packages/ats/**"
+      - "apps/ats/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/103-flow-ats-lint.yaml"
+      - ".github/workflows/800-call-lint-format.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-and-format:
+    name: lint-and-format
+    uses: ./.github/workflows/800-call-lint-format.yaml
+    with:
+      module: ats
