@@ -14,10 +14,6 @@ abstract contract ERC1410Read is IERC1410Read, Modifiers {
         return ERC1410StorageWrapper.isMultiPartition();
     }
 
-    function isOperator(address _operator, address _tokenHolder) public view returns (bool) {
-        return ERC1410StorageWrapper.isOperator(_operator, _tokenHolder);
-    }
-
     function isOperatorForPartition(
         bytes32 _partition,
         address _operator,

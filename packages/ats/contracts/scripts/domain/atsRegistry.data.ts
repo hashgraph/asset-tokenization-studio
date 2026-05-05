@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-05T13:29:30.651Z
- * Facets: 114
+ * Generated: 2026-05-05T14:20:54.133Z
+ * Facets: 115
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -112,6 +112,7 @@ import {
   NominalValueFacet__factory,
   NoncesFacet__factory,
   OperatorClearingHoldByPartitionFacet__factory,
+  OperatorFacet__factory,
   PauseFacet__factory,
   ProceedRecipientsFacet__factory,
   ProceedRecipientsKpiLinkedRateFacet__factory,
@@ -7582,14 +7583,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbd09cc54",
       },
       {
-        name: "isOperator",
-        signature: {
-          full: "function isOperator(address _operator, address _tokenHolder) view returns (bool)",
-          canonical: "isOperator(address,address)",
-        },
-        selector: "0xb6363cf2",
-      },
-      {
         name: "isOperatorForPartition",
         signature: {
           full: "function isOperatorForPartition(bytes32 _partition, address _operator, address _tokenHolder) view returns (bool)",
@@ -7722,22 +7715,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["ERC1410TokenHolder", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "authorizeOperator",
-        signature: { full: "function authorizeOperator(address _operator)", canonical: "authorizeOperator(address)" },
-        selector: "0x959b8c3f",
-      },
-      {
         name: "authorizeOperatorByPartition",
         signature: {
           full: "function authorizeOperatorByPartition(bytes32 _partition, address _operator)",
           canonical: "authorizeOperatorByPartition(bytes32,address)",
         },
         selector: "0x103ef9e1",
-      },
-      {
-        name: "revokeOperator",
-        signature: { full: "function revokeOperator(address _operator)", canonical: "revokeOperator(address)" },
-        selector: "0xfad8b32a",
       },
       {
         name: "revokeOperatorByPartition",
@@ -12175,6 +12158,70 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     factory: (signer) => new OperatorClearingHoldByPartitionFacet__factory(getLibLinks("clearingOps") as any, signer),
   },
 
+  OperatorFacet: {
+    name: "OperatorFacet",
+    description: "Diamond facet that exposes operator management operations as selectable proxy functions.",
+    resolverKey: {
+      name: "_OPERATOR_RESOLVER_KEY",
+      value: "0x51edd1c99284e90fe906b4688cd46c5a665145ae32ebfd2df614ca0cd610e325",
+    },
+    inheritance: ["Operator", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "authorizeOperator",
+        signature: { full: "function authorizeOperator(address _operator)", canonical: "authorizeOperator(address)" },
+        selector: "0x959b8c3f",
+      },
+      {
+        name: "isOperator",
+        signature: {
+          full: "function isOperator(address _operator, address _tokenHolder) view returns (bool)",
+          canonical: "isOperator(address,address)",
+        },
+        selector: "0xb6363cf2",
+      },
+      {
+        name: "revokeOperator",
+        signature: { full: "function revokeOperator(address _operator)", canonical: "revokeOperator(address)" },
+        selector: "0xfad8b32a",
+      },
+    ],
+    events: [
+      {
+        name: "AuthorizedOperator",
+        signature: {
+          full: "event AuthorizedOperator(address indexed operator, address indexed tokenHolder)",
+          canonical: "AuthorizedOperator(address,address)",
+        },
+        topic0: "0xf4caeb2d6ca8932a215a353d0703c326ec2d81fc68170f320eb2ab49e9df61f9",
+      },
+      {
+        name: "RevokedOperator",
+        signature: {
+          full: "event RevokedOperator(address indexed operator, address indexed tokenHolder)",
+          canonical: "RevokedOperator(address,address)",
+        },
+        topic0: "0x50546e66e5f44d728365dc3908c63bc5cfeeab470722c1677e3073a6ac294aa1",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+    ],
+    factory: (signer) => new OperatorFacet__factory(signer),
+  },
+
   PauseFacet: {
     name: "PauseFacet",
     description:
@@ -14721,7 +14768,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 114 as const;
+export const TOTAL_FACETS = 115 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

@@ -27,6 +27,7 @@ import { IAllowance } from "./allowance/IAllowance.sol";
 
 // Layer 1 — External lists
 import { IERC1410 } from "./layer_1/ERC1400/ERC1410/IERC1410.sol";
+import { IOperator } from "./operator/IOperator.sol";
 import { ITransfer } from "./transfer/ITransfer.sol";
 
 // Layer 1 — Remaining facets
@@ -160,6 +161,7 @@ interface IAsset is
     ITransfer,
     IERC20Votes,
     IERC1410,
+    IOperator,
     IERC3643,
     IBurn,
     IScheduledCrossOrderedTasks,
