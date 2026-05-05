@@ -140,7 +140,7 @@ export const useAssetDistributionsColumns = ({ tabType }: { tabType?: "upcoming"
         size: currentSizes.trigger || 120,
         enableSorting: false,
         cell: ({ row }) => {
-          let recurrency = row.original?.recurrency?.toLowerCase();
+          const recurrency = row.original?.recurrency?.toLowerCase();
           const typeTriggerMap: Record<string, string> = {
             IMMEDIATE: "Single Time",
             ONE_OFF: `Single Time`,

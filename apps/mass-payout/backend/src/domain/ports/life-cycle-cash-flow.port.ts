@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { LifeCycleCashFlowAddress } from "@domain/model/life-cycle-cash-flow-address.value-object"
-import { ExecuteDistributionResponse } from "@domain/ports/execute-distribution-response.interface"
+import { LifeCycleCashFlowAddress } from "@domain/model/life-cycle-cash-flow-address.value-object";
+import { ExecuteDistributionResponse } from "@domain/ports/execute-distribution-response.interface";
 
 export interface LifeCycleCashFlowPort {
-  deployContract(hederaTokenAddress: string, hederaUsdcAddress: string): Promise<LifeCycleCashFlowAddress>
+  deployContract(hederaTokenAddress: string, hederaUsdcAddress: string): Promise<LifeCycleCashFlowAddress>;
 
-  pause(assetId: string): Promise<boolean>
+  pause(assetId: string): Promise<boolean>;
 
-  unpause(assetId: string): Promise<boolean>
+  unpause(assetId: string): Promise<boolean>;
 
-  isPaused(assetId: string): Promise<boolean>
+  isPaused(assetId: string): Promise<boolean>;
 
   executeDistribution(
     lifeCycleCashFlowId: string,
@@ -18,14 +18,14 @@ export interface LifeCycleCashFlowPort {
     distributionID: number,
     pageIndex: number,
     pageLength: number,
-  ): Promise<ExecuteDistributionResponse>
+  ): Promise<ExecuteDistributionResponse>;
 
   executeDistributionByAddresses(
     lifeCycleCashFlowId: string,
     asset: string,
     distributionID: number,
     holders: string[],
-  ): Promise<ExecuteDistributionResponse>
+  ): Promise<ExecuteDistributionResponse>;
 
   executeAmountSnapshot(
     lifeCycleCashFlowId: string,
@@ -34,7 +34,7 @@ export interface LifeCycleCashFlowPort {
     pageIndex: number,
     pageLength: number,
     amount: string,
-  ): Promise<ExecuteDistributionResponse>
+  ): Promise<ExecuteDistributionResponse>;
 
   executeAmountSnapshotByAddresses(
     lifeCycleCashFlowId: string,
@@ -42,7 +42,7 @@ export interface LifeCycleCashFlowPort {
     snapshotId: number,
     holders: string[],
     amount: string,
-  ): Promise<ExecuteDistributionResponse>
+  ): Promise<ExecuteDistributionResponse>;
 
   executePercentageSnapshot(
     lifeCycleCashFlowId: string,
@@ -51,7 +51,7 @@ export interface LifeCycleCashFlowPort {
     pageIndex: number,
     pageLength: number,
     percentage: string,
-  ): Promise<ExecuteDistributionResponse>
+  ): Promise<ExecuteDistributionResponse>;
 
   executePercentageSnapshotByAddresses(
     lifeCycleCashFlowId: string,
@@ -59,5 +59,5 @@ export interface LifeCycleCashFlowPort {
     snapshotId: number,
     holders: string[],
     percentage: string,
-  ): Promise<ExecuteDistributionResponse>
+  ): Promise<ExecuteDistributionResponse>;
 }

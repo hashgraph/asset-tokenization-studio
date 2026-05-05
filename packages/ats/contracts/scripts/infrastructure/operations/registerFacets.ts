@@ -214,16 +214,22 @@ export async function registerFacets(
       businessLogicName: facet.name,
     }));
 
-    const iterations = businessLogics.length / FACET_REGISTRATION_BATCH_SIZE;
+    const iterations = Math.ceil(businessLogics.length / FACET_REGISTRATION_BATCH_SIZE);
     const transactionHashes = [];
     const blockNumbers = [];
     const transactionGas = [];
 
-    for (let i = 0; i <= iterations; i++) {
+    for (let i = 0; i < iterations; i++) {
       const businessLogicsSlice = businessLogics.slice(
         i * FACET_REGISTRATION_BATCH_SIZE,
         (i + 1) * FACET_REGISTRATION_BATCH_SIZE,
       );
+
+      // Skip empty slices (defensive guard)
+      if (businessLogicsSlice.length === 0) {
+        continue;
+      }
+
       const tx = await blr.registerBusinessLogics(businessLogicsSlice, {
         gasLimit: GAS_LIMIT.high,
         ...hederaGasOverrides(),
