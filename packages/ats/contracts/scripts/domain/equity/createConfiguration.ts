@@ -57,12 +57,14 @@ const EQUITY_FACETS = [
   "HoldAtSnapshotFacet",
   "FreezeAtSnapshotFacet",
   "FreezeAtSnapshotByPartitionFacet",
+  "LockAtSnapshotFacet",
   "CoreAtSnapshotFacet",
   "BalanceTrackerByPartitionFacet",
   "BalanceTrackerAtSnapshotFacet",
   "BalanceTrackerAtSnapshotByPartitionFacet",
   "ClearingAtSnapshotFacet",
   "ClearingAtSnapshotByPartitionFacet",
+  "HoldAtSnapshotByPartitionFacet",
 
   // ERC Standards (13)
   "MintByPartitionFacet",
@@ -115,7 +117,6 @@ const EQUITY_FACETS = [
   "LockFacet",
   "NominalValueFacet",
   "ProtectedPartitionsFacet",
-  "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
   "SsiManagementFacet",
   "TransferAndLockFacet",

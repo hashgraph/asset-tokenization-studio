@@ -63,6 +63,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "HoldAtSnapshotFacet",
   "FreezeAtSnapshotFacet",
   "FreezeAtSnapshotByPartitionFacet",
+  "LockAtSnapshotFacet",
   "CoreAtSnapshotFacet",
   "SsiManagementFacet",
   "BalanceTrackerByPartitionFacet",
@@ -70,6 +71,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "BalanceTrackerAtSnapshotByPartitionFacet",
   "ClearingAtSnapshotFacet",
   "ClearingAtSnapshotByPartitionFacet",
+  "HoldAtSnapshotByPartitionFacet",
 
   // ERC Standards
   "MintByPartitionFacet",
@@ -115,7 +117,6 @@ const LOANS_PORTFOLIO_FACETS = [
   "ClearingByPartitionFacet",
 
   // Scheduled Tasks
-  "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
   "CouponListingFacet",
 

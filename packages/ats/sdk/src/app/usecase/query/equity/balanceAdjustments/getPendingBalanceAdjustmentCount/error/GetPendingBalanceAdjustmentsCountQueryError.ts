@@ -3,9 +3,9 @@
 import { QueryError } from "@query/error/QueryError";
 import BaseError from "@core/error/BaseError";
 
-export class GetScheduledBalanceAdjustmentsCountQueryError extends QueryError {
+export class GetPendingBalanceAdjustmentsCountQueryError extends QueryError {
   constructor(error: Error) {
-    const msg = `An error occurred while querying scheduled balance adjustments count: ${error.message}`;
+    const msg = `An error occurred while querying pending balance adjustments count: ${error.message}`;
     super(msg, error instanceof BaseError ? error.errorCode : undefined);
   }
 }

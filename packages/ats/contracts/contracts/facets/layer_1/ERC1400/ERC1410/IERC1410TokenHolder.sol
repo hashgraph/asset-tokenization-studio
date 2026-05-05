@@ -23,11 +23,6 @@ interface IERC1410TokenHolder is IERC1410Types {
     ) external returns (bytes32);
 
     /**
-     * @notice Triggers any pending scheduled tasks and records user balance if needed
-     */
-    function triggerAndSyncAll(bytes32 _partition, address _from, address _to) external;
-
-    /**
      * @notice Authorises an operator for all partitions of `msg.sender`
      * @param _operator An address which is being authorised
      */

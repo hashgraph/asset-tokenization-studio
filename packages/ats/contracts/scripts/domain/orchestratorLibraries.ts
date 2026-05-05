@@ -119,6 +119,7 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   BatchTransferFacet: ["tokenCoreOps"],
   MintFacet: ["tokenCoreOps"],
   BurnFacet: ["tokenCoreOps"],
+  AdjustBalancesFacet: ["tokenCoreOps"],
   // HoldOps dependencies - hold/lock operations
   HoldManagementFacet: ["holdOps"],
   HoldFacet: ["holdOps"],

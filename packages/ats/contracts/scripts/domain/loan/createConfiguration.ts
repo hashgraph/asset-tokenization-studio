@@ -53,6 +53,7 @@ const LOAN_FACETS = [
   "BalanceTrackerAtSnapshotByPartitionFacet",
   "ClearingAtSnapshotFacet",
   "ClearingAtSnapshotByPartitionFacet",
+  "HoldAtSnapshotByPartitionFacet",
   "CapFacet",
   "CapByPartitionFacet",
   "ControlListFacet",
@@ -111,7 +112,6 @@ const LOAN_FACETS = [
   "ClearingByPartitionFacet",
 
   // Scheduled Tasks
-  "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
 
   // External Management
@@ -127,6 +127,7 @@ const LOAN_FACETS = [
   "HoldAtSnapshotFacet",
   "FreezeAtSnapshotFacet",
   "FreezeAtSnapshotByPartitionFacet",
+  "LockAtSnapshotFacet",
   "CoreAtSnapshotFacet",
   "CorporateActionsFacet",
   "TransferAndLockFacet",
