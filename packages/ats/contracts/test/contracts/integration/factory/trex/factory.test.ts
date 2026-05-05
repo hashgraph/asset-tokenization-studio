@@ -16,7 +16,6 @@ import {
   CoreFacet__factory,
   ModularCompliance__factory,
   IdentityRegistryStorage__factory,
-  IERC3643__factory,
   OwnableUpgradeable__factory,
   IIdentityRegistry__factory,
   IdentityFacet__factory,
