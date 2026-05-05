@@ -16,7 +16,7 @@ import { ISnapshots } from "@hashgraph/asset-tokenization-contracts/contracts/fa
 import {
     IBalanceTrackerAtSnapshot
 } from "@hashgraph/asset-tokenization-contracts/contracts/facets/balanceTrackerAtSnapshot/IBalanceTrackerAtSnapshot.sol";
-import { IBond } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/bond/IBond.sol";
+import { IMaturity } from "@hashgraph/asset-tokenization-contracts/contracts/facets/maturity/IMaturity.sol";
 import { ICoupon } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/coupon/ICoupon.sol";
 import {
     ICouponSecurityHolders
@@ -616,7 +616,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
                     ++failedIndex;
                 }
             } else {
-                IBond(_bond).fullRedeemAtMaturity(holder);
+                IMaturity(_bond).fullRedeemAtMaturity(holder);
                 succeededAddresses_[succeededIndex] = holder;
                 paidAmount_[succeededIndex] = cashAmount;
                 unchecked {
