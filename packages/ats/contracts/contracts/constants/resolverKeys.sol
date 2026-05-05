@@ -543,6 +543,9 @@ bytes32 constant _HOLD_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY = 0xa843a6a38df62d5
 // keccak256('security.token.standard.holdAtSnapshot.resolverKey');
 bytes32 constant _HOLD_AT_SNAPSHOT_RESOLVER_KEY = 0x799547b5a870e2f0d0e9664f133d288ad8cd2a1b267be8ae0085030adb2d858d;
 
+// keccak256('security.token.standard.lockAtSnapshot.resolverKey');
+bytes32 constant _LOCK_AT_SNAPSHOT_RESOLVER_KEY = 0xd0a412f3e7cd9c9475b5482a548616fc5e2ea67832b8fcd66d2e6a7086c503e9;
+
 // Layer 2 Resolver Keys
 
 // keccak256('security.token.standard.equity.resolverKey');
