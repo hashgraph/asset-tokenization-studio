@@ -135,6 +135,9 @@ const BOND_FIXED_RATE_FACETS = [
   "CouponFixedRateFacet",
   "FixedRateFacet",
 
+  // Maturity By Partition
+  "MaturityByPartitionFacet",
+
   // Jurisdiction-Specific
   "BondUSAFixedRateFacet",
   "BondUSAReadFacet",

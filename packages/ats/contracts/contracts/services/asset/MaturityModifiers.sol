@@ -16,13 +16,14 @@ import { BondStorageWrapper } from "../../domain/asset/BondStorageWrapper.sol";
  */
 abstract contract MaturityModifiers {
     /**
-     * @dev Modifier that validates maturity date
+     * @dev Modifier that validates maturity date has passed
      *
      * Requirements:
-     * - Provided date must be valid (after current time)
-     * - Used for maturity date updates and redemption operations
+     * - Provided timestamp must be greater than the stored maturity date
+     * - Used for maturity redemption operations (verifies maturity has passed)
+     * - Also used in maturity date updates (verifies proposed date is valid)
      *
-     * @param _maturityDate The maturity date to validate
+     * @param _maturityDate The timestamp to validate against stored maturity date
      */
     modifier onlyValidMaturityDate(uint256 _maturityDate) {
         BondStorageWrapper.requireValidMaturityDate(_maturityDate);
