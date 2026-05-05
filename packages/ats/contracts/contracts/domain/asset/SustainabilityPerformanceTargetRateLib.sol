@@ -10,7 +10,7 @@ import { InterestRateStorageWrapper } from "./InterestRateStorageWrapper.sol";
 import { KpisStorageWrapper } from "./KpisStorageWrapper.sol";
 import { ProceedRecipientsStorageWrapper } from "./ProceedRecipientsStorageWrapper.sol";
 import { CouponStorageWrapper } from "./coupon/CouponStorageWrapper.sol";
-import { ICouponTypes } from "../../facets/layer_2/coupon/ICouponTypes.sol";
+import { ICouponTypes } from "../../facets/coupon/ICouponTypes.sol";
 
 /**
  * @title SustainabilityPerformanceTargetRateLib
