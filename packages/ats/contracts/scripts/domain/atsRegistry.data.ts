@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-05T10:21:05.693Z
+ * Generated: 2026-05-05T10:15:54.425Z
  * Facets: 111
  * Infrastructure: 2
  *
@@ -87,6 +87,7 @@ import {
   ExternalKycListManagementFacet__factory,
   ExternalPauseManagementFacet__factory,
   FixedRateFacet__factory,
+  FreezeAtSnapshotByPartitionFacet__factory,
   FreezeAtSnapshotFacet__factory,
   FreezeFacet__factory,
   HoldAtSnapshotByPartitionFacet__factory,
@@ -94,7 +95,6 @@ import {
   HoldByPartitionFacet__factory,
   HoldFacet__factory,
   HoldManagementFacet__factory,
-  IdentityFacet__factory,
   KpiLinkedRateFacet__factory,
   KpisKpiLinkedRateFacet__factory,
   KpisSustainabilityPerformanceTargetRateFacet__factory,
@@ -8236,6 +8236,19 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x9285948a",
       },
+      {
+        name: "setIdentityRegistry",
+        signature: {
+          full: "function setIdentityRegistry(address _identityRegistry)",
+          canonical: "setIdentityRegistry(address)",
+        },
+        selector: "0xcbf3f861",
+      },
+      {
+        name: "setOnchainID",
+        signature: { full: "function setOnchainID(address _onchainID)", canonical: "setOnchainID(address)" },
+        selector: "0x3d1ddc5b",
+      },
     ],
     events: [
       {
@@ -8410,6 +8423,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf128004d",
       },
       {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+      {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
         selector: "0xc9622656",
@@ -8433,12 +8451,22 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["ERC3643Read", "IStaticFunctionSelectors"],
     methods: [
       {
+        name: "identityRegistry",
+        signature: { full: "function identityRegistry() view returns (address)", canonical: "identityRegistry()" },
+        selector: "0x134e18f4",
+      },
+      {
         name: "isAddressRecovered",
         signature: {
           full: "function isAddressRecovered(address _wallet) view returns (bool)",
           canonical: "isAddressRecovered(address)",
         },
         selector: "0x1b997ec2",
+      },
+      {
+        name: "onchainID",
+        signature: { full: "function onchainID() view returns (address)", canonical: "onchainID()" },
+        selector: "0xaba63705",
       },
     ],
     events: [
@@ -9090,6 +9118,43 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     factory: (signer) => new FixedRateFacet__factory(signer),
     timeTravelFactory: (signer) => new FixedRateFacetTimeTravel__factory(signer),
+  },
+
+  FreezeAtSnapshotByPartitionFacet: {
+    name: "FreezeAtSnapshotByPartitionFacet",
+    description:
+      "Diamond facet exposing partition-aware snapshot frozen balance queries via `IFreezeAtSnapshotByPartition`, registered under `_FREEZE_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_FREEZE_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY",
+      value: "0x80cbb1bc5d072c294e5b54560d3a253a0592491a06044b579cd0d36f31102b42",
+    },
+    inheritance: ["FreezeAtSnapshotByPartition", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "frozenBalanceOfAtSnapshotByPartition",
+        signature: {
+          full: "function frozenBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+          canonical: "frozenBalanceOfAtSnapshotByPartition(bytes32,uint256,address)",
+        },
+        selector: "0x0749c323",
+      },
+    ],
+    errors: [
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+    ],
+    factory: (signer) => new FreezeAtSnapshotByPartitionFacet__factory(signer),
   },
 
   FreezeAtSnapshotFacet: {
@@ -10083,84 +10148,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf8981789",
       },
     ],
-  },
-
-  IdentityFacet: {
-    name: "IdentityFacet",
-    description:
-      "Diamond facet exposing identity-registry and onchainID configuration via `IIdentity`, registered under `_IDENTITY_RESOLVER_KEY`.",
-    resolverKey: {
-      name: "_IDENTITY_RESOLVER_KEY",
-      value: "0x10f18bbac52ee688501dc4b08de190f748b8a00622cb165ccdce1f14beb74dab",
-    },
-    inheritance: ["Identity", "IStaticFunctionSelectors"],
-    methods: [
-      {
-        name: "identityRegistry",
-        signature: { full: "function identityRegistry() view returns (address)", canonical: "identityRegistry()" },
-        selector: "0x134e18f4",
-      },
-      {
-        name: "onchainID",
-        signature: { full: "function onchainID() view returns (address)", canonical: "onchainID()" },
-        selector: "0xaba63705",
-      },
-      {
-        name: "setIdentityRegistry",
-        signature: {
-          full: "function setIdentityRegistry(address _identityRegistry)",
-          canonical: "setIdentityRegistry(address)",
-        },
-        selector: "0xcbf3f861",
-      },
-      {
-        name: "setOnchainID",
-        signature: { full: "function setOnchainID(address _onchainID)", canonical: "setOnchainID(address)" },
-        selector: "0x3d1ddc5b",
-      },
-    ],
-    events: [
-      {
-        name: "IdentityRegistryAdded",
-        signature: {
-          full: "event IdentityRegistryAdded(address indexed identityRegistry)",
-          canonical: "IdentityRegistryAdded(address)",
-        },
-        topic0: "0xd2be862d755bca7e0d39772b2cab3a5578da9c285f69199f4c063c2294a7f36c",
-      },
-      {
-        name: "UpdatedTokenInformation",
-        signature: {
-          full: "event UpdatedTokenInformation(string indexed newName, string indexed newSymbol, uint8 newDecimals, string newVersion, address indexed newOnchainID)",
-          canonical: "UpdatedTokenInformation(string,string,uint8,string,address)",
-        },
-        topic0: "0x6a1105ac8148a3c319adbc369f9072573e8a11d3a3d195e067e7c40767ec54d1",
-      },
-    ],
-    errors: [
-      {
-        name: "AccessControlRequired",
-        signature: {
-          full: "error AccessControlRequired(bytes32 role, address sender)",
-          canonical: "AccessControlRequired(bytes32,address)",
-        },
-        selector: "0x10210dec",
-      },
-      {
-        name: "AccountHasNoRole",
-        signature: {
-          full: "error AccountHasNoRole(address account, bytes32 role)",
-          canonical: "AccountHasNoRole(address,bytes32)",
-        },
-        selector: "0xa1180aad",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
-    ],
-    factory: (signer) => new IdentityFacet__factory(signer),
   },
 
   IHoldFacet: {
@@ -13178,14 +13165,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["Snapshots", "IStaticFunctionSelectors"],
     methods: [
-      {
-        name: "frozenBalanceOfAtSnapshotByPartition",
-        signature: {
-          full: "function frozenBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
-          canonical: "frozenBalanceOfAtSnapshotByPartition(bytes32,uint256,address)",
-        },
-        selector: "0x0749c323",
-      },
       {
         name: "getScheduledSnapshots",
         signature: {
