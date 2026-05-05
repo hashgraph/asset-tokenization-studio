@@ -62,7 +62,7 @@ import UpdateResolverRequest from "./management/UpdateResolverRequest";
 import UpdateMaturityDateRequest from "./bond/UpdateMaturityDateRequest";
 import SetScheduledBalanceAdjustmentRequest from "./equity/SetScheduledBalanceAdjustmentRequest";
 import GetScheduledBalanceAdjustmentRequest from "./equity/GetScheduledBalanceAdjustmentRequest";
-import GetScheduledBalanceAdjustmentCountRequest from "./equity/GetScheduledBalanceAdjustmentsCountRequest";
+import GetPendingBalanceAdjustmentCountRequest from "./equity/GetPendingBalanceAdjustmentsCountRequest";
 import GetAllScheduledBalanceAdjustmentsRequest from "./equity/GetAllScheduledBalanceAdjustmentst";
 import GetLastAggregatedBalanceAdjustmentFactorForRequest from "./equity/GetLastAggregatedBalanceAdjustmentFactorForRequest";
 import GetAggregatedBalanceAdjustmentFactorRequest from "./account/GetAggregatedBalanceAdjustmentFactorRequest";
@@ -310,7 +310,7 @@ export {
   UpdateMaturityDateRequest,
   SetScheduledBalanceAdjustmentRequest,
   GetScheduledBalanceAdjustmentRequest,
-  GetScheduledBalanceAdjustmentCountRequest,
+  GetPendingBalanceAdjustmentCountRequest,
   GetAllScheduledBalanceAdjustmentsRequest,
   GetLastAggregatedBalanceAdjustmentFactorForRequest,
   GetAggregatedBalanceAdjustmentFactorRequest,

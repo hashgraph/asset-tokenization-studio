@@ -8,7 +8,10 @@ import { ICore } from "@hashgraph/asset-tokenization-contracts/contracts/facets/
 import { ICoupon } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/coupon/ICoupon.sol";
 import { IEquity } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/equity/IEquity.sol";
 import { IVoting } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/voting/IVoting.sol";
+import {
+    IAdjustBalances
+} from "@hashgraph/asset-tokenization-contracts/contracts/facets/adjustBalances/IAdjustBalances.sol";
 
-interface IAssetMock is IBond, ICoupon, IEquity, IVoting, ICore {
+interface IAssetMock is IBond, ICoupon, IEquity, IVoting, ICore, IAdjustBalances {
     error NotImplemented();
 }

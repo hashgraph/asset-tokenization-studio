@@ -19,7 +19,7 @@ import {
   PauseRequest,
   Security,
   GetScheduledBalanceAdjustmentRequest,
-  GetScheduledBalanceAdjustmentCountRequest,
+  GetPendingBalanceAdjustmentCountRequest,
   GetAllScheduledBalanceAdjustmentsRequest,
 } from "@port/in";
 import { CLIENT_ACCOUNT_ECDSA, FACTORY_ADDRESS, RESOLVER_ADDRESS } from "@test/config";
@@ -452,8 +452,8 @@ describe("🧪 Equity test", () => {
       }),
     );
 
-    const count = await Equity.getScheduledBalanceAdjustmentsCount(
-      new GetScheduledBalanceAdjustmentCountRequest({
+    const count = await Equity.getPendingBalanceAdjustmentsCount(
+      new GetPendingBalanceAdjustmentCountRequest({
         securityId: equity.evmDiamondAddress!.toString(),
       }),
     );

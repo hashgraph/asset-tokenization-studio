@@ -11,7 +11,7 @@ import {
   GetVotingRightsRequest,
   GetVotingRightsForRequest,
   GetAllVotingRightsRequest,
-  GetScheduledBalanceAdjustmentCountRequest,
+  GetPendingBalanceAdjustmentCountRequest,
   GetScheduledBalanceAdjustmentRequest,
   GetAllScheduledBalanceAdjustmentsRequest,
   GetVotingHoldersRequest,
@@ -40,7 +40,7 @@ import {
   GetAllScheduledBalanceAdjustmentsRequestFixture,
   GetAllVotingRightsRequestFixture,
   GetEquityDetailsRequestFixture,
-  GetScheduledBalanceAdjustmentCountRequestFixture,
+  GetPendingBalanceAdjustmentCountRequestFixture,
   GetScheduledBalanceAdjustmentRequestFixture,
   GetTotalVotingHoldersRequestFixture,
   GetVotingHoldersRequestFixture,
@@ -63,7 +63,7 @@ import { GetVotingQuery } from "@query/equity/votingRights/getVoting/GetVotingQu
 import { GetVotingCountQuery } from "@query/equity/votingRights/getVotingCount/GetVotingCountQuery";
 import { SetScheduledBalanceAdjustmentCommand } from "@command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand";
 import { GetScheduledBalanceAdjustmentQuery } from "@query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery";
-import { GetScheduledBalanceAdjustmentCountQuery } from "@query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery";
+import { GetPendingBalanceAdjustmentCountQuery } from "@query/equity/balanceAdjustments/getPendingBalanceAdjustmentCount/GetPendingBalanceAdjustmentsCountQuery";
 import { CancelScheduledBalanceAdjustmentCommand } from "@command/equity/balanceAdjustments/cancelScheduledBalanceAdjustment/CancelScheduledBalanceAdjustmentCommand";
 import { GetVotingHoldersQuery } from "@query/equity/votingRights/getVotingHolders/GetVotingHoldersQuery";
 import { GetTotalVotingHoldersQuery } from "@query/equity/votingRights/getTotalVotingHolders/GetTotalVotingHoldersQuery";
@@ -82,7 +82,7 @@ describe("Equity", () => {
   let getVotingRightsRequest: GetVotingRightsRequest;
   let getAllVotingRightsRequest: GetAllVotingRightsRequest;
   let setScheduledBalanceAdjustmentRequest: SetScheduledBalanceAdjustmentRequest;
-  let getScheduledBalanceAdjustmentCountRequest: GetScheduledBalanceAdjustmentCountRequest;
+  let getPendingBalanceAdjustmentCountRequest: GetPendingBalanceAdjustmentCountRequest;
   let getScheduledBalanceAdjustmentRequest: GetScheduledBalanceAdjustmentRequest;
   let cancelScheduledBalanceAdjustmentRequest: CancelScheduledBalanceAdjustmentRequest;
   let getAllScheduledBalanceAdjustmentsRequest: GetAllScheduledBalanceAdjustmentsRequest;
@@ -974,28 +974,28 @@ describe("Equity", () => {
     });
   });
 
-  describe("getScheduledBalanceAdjustmentsCount", () => {
-    getScheduledBalanceAdjustmentCountRequest = new GetScheduledBalanceAdjustmentCountRequest(
-      GetScheduledBalanceAdjustmentCountRequestFixture.create(),
+  describe("getPendingBalanceAdjustmentsCount", () => {
+    getPendingBalanceAdjustmentCountRequest = new GetPendingBalanceAdjustmentCountRequest(
+      GetPendingBalanceAdjustmentCountRequestFixture.create(),
     );
-    it("should get scheduled balance adjustments count successfully", async () => {
+    it("should get pending balance adjustments count successfully", async () => {
       const expectedResponse = {
         payload: 1,
       };
 
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await EquityToken.getScheduledBalanceAdjustmentsCount(getScheduledBalanceAdjustmentCountRequest);
+      const result = await EquityToken.getPendingBalanceAdjustmentsCount(getPendingBalanceAdjustmentCountRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        "GetScheduledBalanceAdjustmentCountRequest",
-        getScheduledBalanceAdjustmentCountRequest,
+        "GetPendingBalanceAdjustmentCountRequest",
+        getPendingBalanceAdjustmentCountRequest,
       );
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetScheduledBalanceAdjustmentCountQuery(getScheduledBalanceAdjustmentCountRequest.securityId),
+        new GetPendingBalanceAdjustmentCountQuery(getPendingBalanceAdjustmentCountRequest.securityId),
       );
 
       expect(result).toEqual(expectedResponse.payload);
@@ -1006,27 +1006,27 @@ describe("Equity", () => {
       queryBusMock.execute.mockRejectedValue(error);
 
       await expect(
-        EquityToken.getScheduledBalanceAdjustmentsCount(getScheduledBalanceAdjustmentCountRequest),
+        EquityToken.getPendingBalanceAdjustmentsCount(getPendingBalanceAdjustmentCountRequest),
       ).rejects.toThrow("Query execution failed");
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        "GetScheduledBalanceAdjustmentCountRequest",
-        getScheduledBalanceAdjustmentCountRequest,
+        "GetPendingBalanceAdjustmentCountRequest",
+        getPendingBalanceAdjustmentCountRequest,
       );
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetScheduledBalanceAdjustmentCountQuery(getScheduledBalanceAdjustmentCountRequest.securityId),
+        new GetPendingBalanceAdjustmentCountQuery(getPendingBalanceAdjustmentCountRequest.securityId),
       );
     });
 
     it("should throw error if securityId is invalid", async () => {
-      getScheduledBalanceAdjustmentCountRequest = new GetScheduledBalanceAdjustmentCountRequest({
-        ...GetScheduledBalanceAdjustmentCountRequestFixture.create(),
+      getPendingBalanceAdjustmentCountRequest = new GetPendingBalanceAdjustmentCountRequest({
+        ...GetPendingBalanceAdjustmentCountRequestFixture.create(),
         securityId: "invalid",
       });
 
       await expect(
-        EquityToken.getScheduledBalanceAdjustmentsCount(getScheduledBalanceAdjustmentCountRequest),
+        EquityToken.getPendingBalanceAdjustmentsCount(getPendingBalanceAdjustmentCountRequest),
       ).rejects.toThrow(ValidationError);
     });
   });
@@ -1057,7 +1057,7 @@ describe("Equity", () => {
 
       expect(queryBusMock.execute).toHaveBeenNthCalledWith(
         1,
-        new GetScheduledBalanceAdjustmentCountQuery(getAllScheduledBalanceAdjustmentsRequest.securityId),
+        new GetPendingBalanceAdjustmentCountQuery(getAllScheduledBalanceAdjustmentsRequest.securityId),
       );
 
       expect(queryBusMock.execute).toHaveBeenNthCalledWith(
@@ -1094,7 +1094,7 @@ describe("Equity", () => {
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetScheduledBalanceAdjustmentCountQuery(getAllScheduledBalanceAdjustmentsRequest.securityId),
+        new GetPendingBalanceAdjustmentCountQuery(getAllScheduledBalanceAdjustmentsRequest.securityId),
       );
 
       expect(result).toStrictEqual([]);
@@ -1114,7 +1114,7 @@ describe("Equity", () => {
       );
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetScheduledBalanceAdjustmentCountQuery(getAllScheduledBalanceAdjustmentsRequest.securityId),
+        new GetPendingBalanceAdjustmentCountQuery(getAllScheduledBalanceAdjustmentsRequest.securityId),
       );
     });
   });

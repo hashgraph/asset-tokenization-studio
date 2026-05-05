@@ -6,17 +6,17 @@ import { ErrorCode } from "@core/error/BaseError";
 import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
 import EvmAddress from "@domain/context/contract/EvmAddress";
 import ContractService from "@service/contract/ContractService";
-import { GetScheduledBalanceAdjustmentCountQueryFixture } from "@test/fixtures/equity/EquityFixture";
-import { GetScheduledBalanceAdjustmentCountQueryHandler } from "./GetScheduledBalanceAdjustmentsCountQueryHandler";
+import { GetPendingBalanceAdjustmentCountQueryFixture } from "@test/fixtures/equity/EquityFixture";
+import { GetPendingBalanceAdjustmentCountQueryHandler } from "./GetPendingBalanceAdjustmentsCountQueryHandler";
 import {
-  GetScheduledBalanceAdjustmentCountQuery,
-  GetScheduledBalanceAdjustmentCountQueryResponse,
-} from "./GetScheduledBalanceAdjustmentsCountQuery";
-import { GetScheduledBalanceAdjustmentsCountQueryError } from "./error/GetScheduledBalanceAdjustmentsCountQueryError";
+  GetPendingBalanceAdjustmentCountQuery,
+  GetPendingBalanceAdjustmentCountQueryResponse,
+} from "./GetPendingBalanceAdjustmentsCountQuery";
+import { GetPendingBalanceAdjustmentsCountQueryError } from "./error/GetPendingBalanceAdjustmentsCountQueryError";
 
-describe("GetScheduledBalanceAdjustmentCountQueryHandler", () => {
-  let handler: GetScheduledBalanceAdjustmentCountQueryHandler;
-  let query: GetScheduledBalanceAdjustmentCountQuery;
+describe("GetPendingBalanceAdjustmentCountQueryHandler", () => {
+  let handler: GetPendingBalanceAdjustmentCountQueryHandler;
+  let query: GetPendingBalanceAdjustmentCountQuery;
 
   const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
   const contractServiceMock = createMock<ContractService>();
@@ -26,8 +26,8 @@ describe("GetScheduledBalanceAdjustmentCountQueryHandler", () => {
   const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
-    handler = new GetScheduledBalanceAdjustmentCountQueryHandler(queryAdapterServiceMock, contractServiceMock);
-    query = GetScheduledBalanceAdjustmentCountQueryFixture.create();
+    handler = new GetPendingBalanceAdjustmentCountQueryHandler(queryAdapterServiceMock, contractServiceMock);
+    query = GetPendingBalanceAdjustmentCountQueryFixture.create();
   });
 
   afterEach(() => {
@@ -35,33 +35,33 @@ describe("GetScheduledBalanceAdjustmentCountQueryHandler", () => {
   });
 
   describe("execute", () => {
-    it("throws GetScheduledBalanceAdjustmentsCountQueryError when query fails with uncaught error", async () => {
+    it("throws GetPendingBalanceAdjustmentsCountQueryError when query fails with uncaught error", async () => {
       const fakeError = new Error(errorMsg);
 
       contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
       const resultPromise = handler.execute(query);
 
-      await expect(resultPromise).rejects.toBeInstanceOf(GetScheduledBalanceAdjustmentsCountQueryError);
+      await expect(resultPromise).rejects.toBeInstanceOf(GetPendingBalanceAdjustmentsCountQueryError);
 
       await expect(resultPromise).rejects.toMatchObject({
         message: expect.stringContaining(
-          `An error occurred while querying scheduled balance adjustments count: ${errorMsg}`,
+          `An error occurred while querying pending balance adjustments count: ${errorMsg}`,
         ),
         errorCode: ErrorCode.UncaughtQueryError,
       });
     });
-    it("should successfully get scheduled balance adjustment count", async () => {
+    it("should successfully get pending balance adjustment count", async () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);
-      queryAdapterServiceMock.getScheduledBalanceAdjustmentCount.mockResolvedValue(1);
+      queryAdapterServiceMock.getPendingBalanceAdjustmentCount.mockResolvedValue(1);
 
       const result = await handler.execute(query);
 
-      expect(result).toBeInstanceOf(GetScheduledBalanceAdjustmentCountQueryResponse);
+      expect(result).toBeInstanceOf(GetPendingBalanceAdjustmentCountQueryResponse);
       expect(result.payload).toBe(1);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(query.securityId);
-      expect(queryAdapterServiceMock.getScheduledBalanceAdjustmentCount).toHaveBeenCalledWith(evmAddress);
+      expect(queryAdapterServiceMock.getPendingBalanceAdjustmentCount).toHaveBeenCalledWith(evmAddress);
     });
   });
 });

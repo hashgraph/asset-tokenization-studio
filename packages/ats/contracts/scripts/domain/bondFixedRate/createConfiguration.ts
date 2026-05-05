@@ -54,6 +54,7 @@ const BOND_FIXED_RATE_FACETS = [
   "BalanceTrackerAtSnapshotByPartitionFacet",
   "ClearingAtSnapshotFacet",
   "ClearingAtSnapshotByPartitionFacet",
+  "HoldAtSnapshotByPartitionFacet",
 
   // Core
   "CoreFacet",
@@ -118,7 +119,6 @@ const BOND_FIXED_RATE_FACETS = [
   "NominalValueFacet",
   "ProceedRecipientsFacet",
   "ProtectedPartitionsFacet",
-  "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
   "CouponListingFacet",
   "SsiManagementFacet",
