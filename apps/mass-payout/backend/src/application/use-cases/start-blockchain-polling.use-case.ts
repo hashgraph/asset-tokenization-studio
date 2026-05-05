@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { BlockchainPollingPort } from "@domain/ports/blockchain-polling.port"
-import { Inject, Injectable } from "@nestjs/common"
+import { BlockchainPollingPort } from "@domain/ports/blockchain-polling.port";
+import { Inject, Injectable } from "@nestjs/common";
 
 @Injectable()
 export class StartBlockchainPollingUseCase {
@@ -11,6 +11,6 @@ export class StartBlockchainPollingUseCase {
   ) {}
 
   async execute(): Promise<void> {
-    this.blockchainPollingService.start()
+    this.blockchainPollingService.start();
   }
 }

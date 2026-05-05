@@ -28,6 +28,14 @@ export default [
   // Mocha test overlay
   mochaPreset,
 
+  // Test files: long description strings are acceptable
+  {
+    files: ["**/*.test.ts", "**/*.spec.ts", "test/**/*.ts"],
+    rules: {
+      "max-len": "off",
+    },
+  },
+
   // Contracts-specific overrides
   {
     files: ["**/*.ts"],
