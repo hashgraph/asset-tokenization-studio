@@ -24,14 +24,6 @@ interface IERC1410Read is IERC1410Types {
     function isMultiPartition() external view returns (bool);
 
     /**
-     * @notice Determines whether `_operator` is an operator for all partitions of `_tokenHolder`
-     * @param _operator The operator to check
-     * @param _tokenHolder The token holder to check
-     * @return Whether the `_operator` is an operator for all partitions of `_tokenHolder
-     */
-    function isOperator(address _operator, address _tokenHolder) external view returns (bool);
-
-    /**
      * @notice Determines whether `_operator` is an operator for a specified partition of `_tokenHolder`
      * @param _partition The partition to check
      * @param _operator The operator to check
