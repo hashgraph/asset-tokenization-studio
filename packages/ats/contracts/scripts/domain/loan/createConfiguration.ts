@@ -127,6 +127,7 @@ const LOAN_FACETS = [
   "HoldAtSnapshotFacet",
   "LockAtSnapshotByPartitionFacet",
   "FreezeAtSnapshotFacet",
+  "LockAtSnapshotFacet",
   "CoreAtSnapshotFacet",
   "CorporateActionsFacet",
   "TransferAndLockFacet",
