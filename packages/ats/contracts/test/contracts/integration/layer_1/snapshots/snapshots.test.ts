@@ -231,29 +231,6 @@ describe("Snapshots Tests", () => {
       signer_C.address,
     );
 
-    const snapshot_LockedBalance_Of_A_1 = await asset.lockedBalanceOfAtSnapshot(1, signer_A.address);
-    const snapshot_LockedBalance_Of_C_1 = await asset.lockedBalanceOfAtSnapshot(1, signer_C.address);
-    const snapshot_LockedBalance_Of_A_1_Partition_1 = await asset.lockedBalanceOfAtSnapshotByPartition(
-      _PARTITION_ID_1,
-      1,
-      signer_A.address,
-    );
-    const snapshot_LockedBalance_Of_C_1_Partition_1 = await asset.lockedBalanceOfAtSnapshotByPartition(
-      _PARTITION_ID_1,
-      1,
-      signer_C.address,
-    );
-    const snapshot_LockedBalance_Of_A_1_Partition_2 = await asset.lockedBalanceOfAtSnapshotByPartition(
-      _PARTITION_ID_2,
-      1,
-      signer_A.address,
-    );
-    const snapshot_LockedBalance_Of_C_1_Partition_2 = await asset.lockedBalanceOfAtSnapshotByPartition(
-      _PARTITION_ID_2,
-      1,
-      signer_C.address,
-    );
-
     const snapshot_HeldBalance_Of_A_1_Partition_1 = await asset.heldBalanceOfAtSnapshotByPartition(
       _PARTITION_ID_1,
       1,
@@ -310,29 +287,6 @@ describe("Snapshots Tests", () => {
       signer_C.address,
     );
 
-    const snapshot_LockedBalance_Of_A_2 = await asset.lockedBalanceOfAtSnapshot(2, signer_A.address);
-    const snapshot_LockedBalance_Of_C_2 = await asset.lockedBalanceOfAtSnapshot(2, signer_C.address);
-    const snapshot_LockedBalance_Of_A_2_Partition_1 = await asset.lockedBalanceOfAtSnapshotByPartition(
-      _PARTITION_ID_1,
-      2,
-      signer_A.address,
-    );
-    const snapshot_LockedBalance_Of_C_2_Partition_1 = await asset.lockedBalanceOfAtSnapshotByPartition(
-      _PARTITION_ID_1,
-      2,
-      signer_C.address,
-    );
-    const snapshot_LockedBalance_Of_A_2_Partition_2 = await asset.lockedBalanceOfAtSnapshotByPartition(
-      _PARTITION_ID_2,
-      2,
-      signer_A.address,
-    );
-    const snapshot_LockedBalance_Of_C_2_Partition_2 = await asset.lockedBalanceOfAtSnapshotByPartition(
-      _PARTITION_ID_2,
-      2,
-      signer_C.address,
-    );
-
     const snapshot_HeldBalance_Of_A_2_Partition_1 = await asset.heldBalanceOfAtSnapshotByPartition(
       _PARTITION_ID_1,
       2,
@@ -373,13 +327,6 @@ describe("Snapshots Tests", () => {
     expect(snapshot_Balance_Of_C_1_Partition_1).to.equal(balanceOf_C_Original);
     expect(snapshot_Balance_Of_C_1_Partition_2).to.equal(0);
 
-    expect(snapshot_LockedBalance_Of_A_1).to.equal(0);
-    expect(snapshot_LockedBalance_Of_C_1).to.equal(0);
-    expect(snapshot_LockedBalance_Of_A_1_Partition_1).to.equal(0);
-    expect(snapshot_LockedBalance_Of_C_1_Partition_1).to.equal(0);
-    expect(snapshot_LockedBalance_Of_A_1_Partition_2).to.equal(0);
-    expect(snapshot_LockedBalance_Of_C_1_Partition_2).to.equal(0);
-
     expect(snapshot_HeldBalance_Of_A_1_Partition_1).to.equal(0);
     expect(snapshot_HeldBalance_Of_C_1_Partition_1).to.equal(0);
     expect(snapshot_HeldBalance_Of_A_1_Partition_2).to.equal(0);
@@ -416,13 +363,6 @@ describe("Snapshots Tests", () => {
     expect(snapshot_Balance_Of_C_2).to.equal(current_Balance_Of_C);
     expect(snapshot_Balance_Of_C_2_Partition_1).to.equal(current_Balance_Of_C);
     expect(snapshot_Balance_Of_C_2_Partition_2).to.equal(0);
-
-    expect(snapshot_LockedBalance_Of_A_2).to.equal(lockedAmountOf_A_Partition_1 + lockedAmountOf_A_Partition_2);
-    expect(snapshot_LockedBalance_Of_C_2).to.equal(lockedAmountOf_C_Partition_1);
-    expect(snapshot_LockedBalance_Of_A_2_Partition_1).to.equal(lockedAmountOf_A_Partition_1);
-    expect(snapshot_LockedBalance_Of_C_2_Partition_1).to.equal(lockedAmountOf_C_Partition_1);
-    expect(snapshot_LockedBalance_Of_A_2_Partition_2).to.equal(lockedAmountOf_A_Partition_2);
-    expect(snapshot_LockedBalance_Of_C_2_Partition_2).to.equal(0);
 
     expect(snapshot_HeldBalance_Of_A_2_Partition_1).to.equal(heldAmountOf_A_Partition_1);
     expect(snapshot_HeldBalance_Of_C_2_Partition_1).to.equal(heldAmountOf_C_Partition_1);

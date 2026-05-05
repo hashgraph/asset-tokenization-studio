@@ -78,6 +78,7 @@ import {
 import { IClearingAtSnapshot } from "./clearingAtSnapshot/IClearingAtSnapshot.sol";
 import { IClearingAtSnapshotByPartition } from "./clearingAtSnapshotByPartition/IClearingAtSnapshotByPartition.sol";
 import { IHoldAtSnapshot } from "./holdAtSnapshot/IHoldAtSnapshot.sol";
+import { ILockAtSnapshot } from "./lockAtSnapshot/ILockAtSnapshot.sol";
 import { ICouponListing } from "./couponListing/ICouponListing.sol";
 import { ICouponSecurityHolders } from "./couponSecurityHolders/ICouponSecurityHolders.sol";
 import {
@@ -191,6 +192,7 @@ interface IAsset is
     IClearingAtSnapshot,
     IClearingAtSnapshotByPartition,
     IHoldAtSnapshot,
+    ILockAtSnapshot,
     IFixedRate,
     // Scheduled Tasks
     ICouponListing,
