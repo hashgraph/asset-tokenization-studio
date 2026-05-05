@@ -20,6 +20,9 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract MaturityByPartition is IMaturityByPartition, Modifiers {
     /// @inheritdoc IMaturityByPartition
+    /// @dev Delegates storage writes to `ERC1410StorageWrapper.redeemByPartition`. Preserves
+    ///      all modifier semantics from the original `Bond.redeemAtMaturityByPartition`
+    ///      implementation.
     function redeemAtMaturityByPartition(
         address _tokenHolder,
         bytes32 _partition,
