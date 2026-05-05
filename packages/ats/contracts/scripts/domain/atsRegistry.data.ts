@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-05T11:02:27.373Z
+ * Generated: 2026-05-05T11:31:20.256Z
  * Facets: 113
  * Infrastructure: 2
  *
@@ -149,10 +149,6 @@ import {
   ControllerFacetTimeTravel__factory,
   ControllerHoldByPartitionFacetTimeTravel__factory,
   CorporateActionsFacetTimeTravel__factory,
-  CouponFacetTimeTravel__factory,
-  CouponFixedRateFacetTimeTravel__factory,
-  CouponKpiLinkedRateFacetTimeTravel__factory,
-  CouponSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   DiamondFacetTimeTravel__factory,
   ERC1410ManagementFacetTimeTravel__factory,
   ERC1410ReadFacetTimeTravel__factory,
@@ -5884,6 +5880,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   CouponFacet: {
     name: "CouponFacet",
+    description:
+      "Diamond facet exposing the standard (non-rate-variant) coupon writer surface (`setCoupon`, `cancelCoupon`) alongside the per-record reads under `_COUPON_RESOLVER_KEY`.",
     resolverKey: {
       name: "_COUPON_RESOLVER_KEY",
       value: "0xa404f705370f56f56364ac9aa1092c1002b2bfcd7020c1bb5ca7489f8061efa7",
@@ -6059,11 +6057,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     factory: (signer) => new CouponFacet__factory(getLibLinks("clearingReadOps") as any, signer),
-    timeTravelFactory: (signer) => new CouponFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   CouponFixedRateFacet: {
     name: "CouponFixedRateFacet",
+    description:
+      "Diamond facet variant of the coupon writer that resolves the rate from the configured fixed-rate setting of the bond at scheduling time. Registered under `_COUPON_FIXED_RATE_RESOLVER_KEY`.",
     resolverKey: {
       name: "_COUPON_FIXED_RATE_RESOLVER_KEY",
       value: "0x2e0b1146e97bc72f92441d75c9cfa74185548319741c7f292fe0014252933ae9",
@@ -6244,13 +6243,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     factory: (signer) => new CouponFixedRateFacet__factory(getLibLinks("clearingReadOps") as any, signer),
-    timeTravelFactory: (signer) =>
-      new CouponFixedRateFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   CouponKpiLinkedRateFacet: {
     name: "CouponKpiLinkedRateFacet",
-    description: "Facet for coupon management in KPI-linked rate bonds",
+    description:
+      "Diamond facet variant of the coupon writer for KPI-linked-rate bonds. The rate is left pending at scheduling time and resolved dynamically at execution against the KPI data of the bond. Registered under `_COUPON_KPI_LINKED_RATE_RESOLVER_KEY`.",
     resolverKey: {
       name: "_COUPON_KPI_LINKED_RATE_RESOLVER_KEY",
       value: "0x45f4a1774eac5a47f3cbc755bf5332ca30d8a6bb0330d479c77590dd0d5aab18",
@@ -6426,8 +6424,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     factory: (signer) => new CouponKpiLinkedRateFacet__factory(getLibLinks("clearingReadOps") as any, signer),
-    timeTravelFactory: (signer) =>
-      new CouponKpiLinkedRateFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   CouponListingFacet: {
@@ -6581,6 +6577,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   CouponSustainabilityPerformanceTargetRateFacet: {
     name: "CouponSustainabilityPerformanceTargetRateFacet",
+    description:
+      "Diamond facet variant of the coupon writer for Sustainability-Performance-Target (SPT) bonds. The rate is left pending at scheduling time and resolved dynamically at execution against the SPT achievement state of the bond. Registered under `_COUPON_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY`.",
     resolverKey: {
       name: "_COUPON_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
       value: "0x435034f1d262736f434867e5f70c71157492ebd5a90e9e4455b2868f5bda6b6e",
@@ -6765,11 +6763,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     factory: (signer) =>
       new CouponSustainabilityPerformanceTargetRateFacet__factory(getLibLinks("clearingReadOps") as any, signer),
-    timeTravelFactory: (signer) =>
-      new CouponSustainabilityPerformanceTargetRateFacetTimeTravel__factory(
-        getLibLinks("clearingReadOps") as any,
-        signer,
-      ),
   },
 
   DeactivateFacet: {
