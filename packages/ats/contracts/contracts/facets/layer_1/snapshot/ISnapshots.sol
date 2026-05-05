@@ -54,15 +54,6 @@ interface ISnapshots {
         address _tokenHolder
     ) external view returns (uint256 balance_);
 
-    /**
-     * @notice Returns the locked balance of an account for a given partition at the time of a given snapshot
-     */
-    function lockedBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view returns (uint256 balance_);
-
     function heldBalanceOfAtSnapshotByPartition(
         bytes32 _partition,
         uint256 _snapshotID,

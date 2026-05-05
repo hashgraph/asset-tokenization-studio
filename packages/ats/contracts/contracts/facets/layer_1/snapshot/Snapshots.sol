@@ -64,15 +64,6 @@ abstract contract Snapshots is ISnapshots, Modifiers {
     }
 
     /// @inheritdoc ISnapshots
-    function lockedBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view override returns (uint256 balance_) {
-        balance_ = SnapshotsStorageWrapper.lockedBalanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
-    }
-
-    /// @inheritdoc ISnapshots
     function heldBalanceOfAtSnapshotByPartition(
         bytes32 _partition,
         uint256 _snapshotID,
