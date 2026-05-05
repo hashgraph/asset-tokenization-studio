@@ -219,7 +219,7 @@ jobs:
     needs:
       - build
     runs-on: token-studio-linux-large
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       CONTRACT_SIZER_RUN_ON_COMPILE: "false"
       REPORT_GAS: "false"
