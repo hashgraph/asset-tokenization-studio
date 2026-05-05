@@ -5,7 +5,7 @@ import { GetAccountBalanceQueryHandler } from "@query/account/balance/GetAccount
 import { SetScheduledBalanceAdjustmentCommandHandler } from "@command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommandHandler";
 import { BalanceOfQueryHandler } from "@query/security/balanceof/BalanceOfQueryHandler";
 import { GetScheduledBalanceAdjustmentQueryHandler } from "@query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQueryHandler";
-import { GetScheduledBalanceAdjustmentCountQueryHandler } from "@query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQueryHandler";
+import { GetPendingBalanceAdjustmentCountQueryHandler } from "@query/equity/balanceAdjustments/getPendingBalanceAdjustmentCount/GetPendingBalanceAdjustmentsCountQueryHandler";
 
 export const COMMAND_HANDLERS_BALANCE = [
   {
@@ -29,6 +29,6 @@ export const QUERY_HANDLERS_BALANCE = [
   },
   {
     token: TOKENS.QUERY_HANDLER,
-    useClass: GetScheduledBalanceAdjustmentCountQueryHandler,
+    useClass: GetPendingBalanceAdjustmentCountQueryHandler,
   },
 ];

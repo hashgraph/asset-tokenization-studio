@@ -124,7 +124,6 @@ const BOND_FACETS = [
   "NominalValueFacet",
   "ProceedRecipientsFacet",
   "ProtectedPartitionsFacet",
-  "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
   "CouponListingFacet",
   "SsiManagementFacet",

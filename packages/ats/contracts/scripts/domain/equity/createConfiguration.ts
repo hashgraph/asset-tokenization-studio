@@ -114,7 +114,6 @@ const EQUITY_FACETS = [
   "LockFacet",
   "NominalValueFacet",
   "ProtectedPartitionsFacet",
-  "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
   "SsiManagementFacet",
   "TransferAndLockFacet",

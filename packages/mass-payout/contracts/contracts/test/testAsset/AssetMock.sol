@@ -2,6 +2,10 @@
 pragma solidity 0.8.22;
 
 import { IAssetMock } from "./interfaces/IAssetMock.sol";
+// solhint-disable-next-line max-line-length
+import {
+    ScheduledTask
+} from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { IFactory } from "@hashgraph/asset-tokenization-contracts/contracts/factory/IFactory.sol";
 import { ICouponTypes } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/coupon/ICouponTypes.sol";
 import { IVotingTypes } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/voting/IVotingTypes.sol";
@@ -249,7 +253,23 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    function getScheduledBalanceAdjustmentCount() external pure returns (uint256) {
+    function getPendingBalanceAdjustmentCount() external pure returns (uint256) {
+        revert NotImplemented();
+    }
+
+    function adjustBalances(uint256, uint8) external pure returns (bool) {
+        revert NotImplemented();
+    }
+
+    function getBalanceAdjustmentCount() external pure returns (uint256) {
+        revert NotImplemented();
+    }
+
+    function getScheduledBalanceAdjustments(uint256, uint256) external pure returns (ScheduledTask[] memory) {
+        revert NotImplemented();
+    }
+
+    function triggerAndSyncAll(bytes32, address, address) external pure {
         revert NotImplemented();
     }
 

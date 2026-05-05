@@ -60,7 +60,6 @@ import TransactionResponse from "@domain/context/transaction/TransactionResponse
 import { SecurityDataBuilder } from "@domain/context/util/SecurityDataBuilder";
 import {
   IAsset__factory,
-  IEquity,
   KpiLinkedRate__factory,
   Factory__factory,
   MockedBlacklist__factory,
@@ -69,6 +68,7 @@ import {
   MockedWhitelist__factory,
   TREXFactoryAts__factory,
 } from "@hashgraph/asset-tokenization-contracts";
+import type { IAdjustBalances } from "@hashgraph/asset-tokenization-contracts";
 import { ContractId } from "@hiero-ledger/sdk";
 import EventService from "@service/event/EventService";
 import LogService from "@service/log/LogService";
@@ -896,7 +896,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
             factor: ${factor},
             decimals : ${decimals}  `,
     );
-    const scheduledBalanceAdjustmentStruct: IEquity.ScheduledBalanceAdjustmentStruct = {
+    const scheduledBalanceAdjustmentStruct: IAdjustBalances.ScheduledBalanceAdjustmentStruct = {
       executionDate: executionDate.toBigInt(),
       factor: factor.toBigInt(),
       decimals: decimals.toBigInt(),

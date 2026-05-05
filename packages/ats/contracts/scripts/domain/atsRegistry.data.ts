@@ -113,7 +113,6 @@ import {
   ProceedRecipientsSustainabilityPerformanceTargetRateFacet__factory,
   ProtectedHoldByPartitionFacet__factory,
   ProtectedPartitionsFacet__factory,
-  ScheduledBalanceAdjustmentsFacet__factory,
   ScheduledCrossOrderedTasksFacet__factory,
   ScheduledCrossOrderedTasksKpiLinkedRateFacet__factory,
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet__factory,
@@ -128,7 +127,6 @@ import {
   TransferFacet__factory,
   VotingFacet__factory,
   AccessControlFacetTimeTravel__factory,
-  AdjustBalancesFacetTimeTravel__factory,
   BatchControllerFacetTimeTravel__factory,
   BondUSAFacetTimeTravel__factory,
   BondUSAFixedRateFacetTimeTravel__factory,
@@ -180,7 +178,6 @@ import {
   ProceedRecipientsKpiLinkedRateFacetTimeTravel__factory,
   ProceedRecipientsSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ProtectedPartitionsFacetTimeTravel__factory,
-  ScheduledBalanceAdjustmentsFacetTimeTravel__factory,
   ScheduledCrossOrderedTasksFacetTimeTravel__factory,
   ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel__factory,
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
@@ -402,6 +399,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   AdjustBalancesFacet: {
     name: "AdjustBalancesFacet",
+    description:
+      "Diamond facet that consolidates all 8 balance-adjustment selectors under a single `_BALANCE_ADJUSTMENTS_RESOLVER_KEY`.",
     resolverKey: {
       name: "_BALANCE_ADJUSTMENTS_RESOLVER_KEY",
       value: "0x2bbe9fb018f1e7dd12b4442154e7fdfd75aec7b0a65d07debf49de4ece5fe8b8",
@@ -416,6 +415,62 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xe2d77e44",
       },
+      {
+        name: "cancelScheduledBalanceAdjustment",
+        signature: {
+          full: "function cancelScheduledBalanceAdjustment(uint256 _balanceAdjustmentId) returns (bool success_)",
+          canonical: "cancelScheduledBalanceAdjustment(uint256)",
+        },
+        selector: "0x564387f9",
+      },
+      {
+        name: "getBalanceAdjustmentCount",
+        signature: {
+          full: "function getBalanceAdjustmentCount() view returns (uint256 balanceAdjustmentCount_)",
+          canonical: "getBalanceAdjustmentCount()",
+        },
+        selector: "0x0fdaff21",
+      },
+      {
+        name: "getPendingBalanceAdjustmentCount",
+        signature: {
+          full: "function getPendingBalanceAdjustmentCount() view returns (uint256)",
+          canonical: "getPendingBalanceAdjustmentCount()",
+        },
+        selector: "0x24b1dce6",
+      },
+      {
+        name: "getScheduledBalanceAdjustment",
+        signature: {
+          full: "function getScheduledBalanceAdjustment(uint256 _balanceAdjustmentID) view returns ((uint256 executionDate, uint256 factor, uint8 decimals) balanceAdjustment_, bool isDisabled_)",
+          canonical: "getScheduledBalanceAdjustment(uint256)",
+        },
+        selector: "0x3d5338e8",
+      },
+      {
+        name: "getScheduledBalanceAdjustments",
+        signature: {
+          full: "function getScheduledBalanceAdjustments(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledBalanceAdjustment_)",
+          canonical: "getScheduledBalanceAdjustments(uint256,uint256)",
+        },
+        selector: "0xcb884d41",
+      },
+      {
+        name: "setScheduledBalanceAdjustment",
+        signature: {
+          full: "function setScheduledBalanceAdjustment((uint256 executionDate, uint256 factor, uint8 decimals) _newBalanceAdjustment) returns (uint256 balanceAdjustmentID_)",
+          canonical: "setScheduledBalanceAdjustment((uint256,uint256,uint8))",
+        },
+        selector: "0xd1661084",
+      },
+      {
+        name: "triggerAndSyncAll",
+        signature: {
+          full: "function triggerAndSyncAll(bytes32 _partition, address _from, address _to)",
+          canonical: "triggerAndSyncAll(bytes32,address,address)",
+        },
+        selector: "0x6afb79db",
+      },
     ],
     events: [
       {
@@ -425,6 +480,22 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AdjustmentBalanceSet(address,uint256,uint8)",
         },
         topic0: "0x312510931206ef5f91f1ef19e1a01253812b7201fb8b2d5d4afa056cce53e34a",
+      },
+      {
+        name: "ScheduledBalanceAdjustmentCancelled",
+        signature: {
+          full: "event ScheduledBalanceAdjustmentCancelled(uint256 balanceAdjustmentId, address indexed operator)",
+          canonical: "ScheduledBalanceAdjustmentCancelled(uint256,address)",
+        },
+        topic0: "0x94a946c45b2317528f3b8fed727c5627bed2062d7fe7a83a5c6b38aa2dcc178a",
+      },
+      {
+        name: "ScheduledBalanceAdjustmentSet",
+        signature: {
+          full: "event ScheduledBalanceAdjustmentSet(bytes32 corporateActionId, uint256 balanceAdjustmentId, address indexed operator, uint256 indexed executionDate, uint256 factor, uint256 decimals)",
+          canonical: "ScheduledBalanceAdjustmentSet(bytes32,uint256,address,uint256,uint256,uint256)",
+        },
+        topic0: "0x71cd63a6f86ff487645dcceb29d3eac904f16d7006cfa7b1da3ea951a77a9666",
       },
       {
         name: "SnapshotTriggered",
@@ -453,6 +524,19 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
+        name: "BalanceAdjustmentAlreadyExecuted",
+        signature: {
+          full: "error BalanceAdjustmentAlreadyExecuted(bytes32 corporateActionId, uint256 balanceAdjustmentId)",
+          canonical: "BalanceAdjustmentAlreadyExecuted(bytes32,uint256)",
+        },
+        selector: "0xd0447e7d",
+      },
+      {
+        name: "BalanceAdjustmentCreationFailed",
+        signature: { full: "error BalanceAdjustmentCreationFailed()", canonical: "BalanceAdjustmentCreationFailed()" },
+        selector: "0x0c68e660",
+      },
+      {
         name: "CouponNotFound",
         signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
         selector: "0x69a80e75",
@@ -461,6 +545,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "FactorIsZero",
         signature: { full: "error FactorIsZero()", canonical: "FactorIsZero()" },
         selector: "0x936e9b6d",
+      },
+      {
+        name: "InvalidTimestamp",
+        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
+        selector: "0xb7d09497",
       },
       {
         name: "TokenIsPaused",
@@ -472,9 +561,21 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
         selector: "0xc9622656",
       },
+      {
+        name: "WrongIndexForAction",
+        signature: {
+          full: "error WrongIndexForAction(uint256 index, bytes32 actionType)",
+          canonical: "WrongIndexForAction(uint256,bytes32)",
+        },
+        selector: "0xd3924f4e",
+      },
+      {
+        name: "ZeroValueNotAllowed",
+        signature: { full: "error ZeroValueNotAllowed()", canonical: "ZeroValueNotAllowed()" },
+        selector: "0x9cf8540c",
+      },
     ],
-    factory: (signer) => new AdjustBalancesFacet__factory(signer),
-    timeTravelFactory: (signer) => new AdjustBalancesFacetTimeTravel__factory(signer),
+    factory: (signer) => new AdjustBalancesFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   AllowanceFacet: {
@@ -5870,6 +5971,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error ZeroAddressNotAllowed()", canonical: "ZeroAddressNotAllowed()" },
         selector: "0x8579befe",
       },
+      {
+        name: "ZeroValueNotAllowed",
+        signature: { full: "error ZeroValueNotAllowed()", canonical: "ZeroValueNotAllowed()" },
+        selector: "0x9cf8540c",
+      },
     ],
     factory: (signer) => new CorporateActionsFacet__factory(signer),
     timeTravelFactory: (signer) => new CorporateActionsFacetTimeTravel__factory(signer),
@@ -7367,36 +7473,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x8c505179",
       },
       {
-        name: "cancelScheduledBalanceAdjustment",
-        signature: {
-          full: "function cancelScheduledBalanceAdjustment(uint256 _balanceAdjustmentId) returns (bool success_)",
-          canonical: "cancelScheduledBalanceAdjustment(uint256)",
-        },
-        selector: "0x564387f9",
-      },
-      {
         name: "getEquityDetails",
         signature: {
           full: "function getEquityDetails() view returns ((bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) equityDetailsData_)",
           canonical: "getEquityDetails()",
         },
         selector: "0xefcdcad8",
-      },
-      {
-        name: "getScheduledBalanceAdjustment",
-        signature: {
-          full: "function getScheduledBalanceAdjustment(uint256 _balanceAdjustmentID) view returns ((uint256 executionDate, uint256 factor, uint8 decimals) balanceAdjustment_, bool isDisabled_)",
-          canonical: "getScheduledBalanceAdjustment(uint256)",
-        },
-        selector: "0x3d5338e8",
-      },
-      {
-        name: "getScheduledBalanceAdjustmentCount",
-        signature: {
-          full: "function getScheduledBalanceAdjustmentCount() view returns (uint256 balanceAdjustmentCount_)",
-          canonical: "getScheduledBalanceAdjustmentCount()",
-        },
-        selector: "0x7c62c7fc",
       },
       {
         name: "getSecurityHolders",
@@ -7422,32 +7504,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xbd007c8f",
       },
-      {
-        name: "setScheduledBalanceAdjustment",
-        signature: {
-          full: "function setScheduledBalanceAdjustment((uint256 executionDate, uint256 factor, uint8 decimals) _newBalanceAdjustment) returns (uint256 balanceAdjustmentID_)",
-          canonical: "setScheduledBalanceAdjustment((uint256,uint256,uint8))",
-        },
-        selector: "0xd1661084",
-      },
-    ],
-    events: [
-      {
-        name: "ScheduledBalanceAdjustmentCancelled",
-        signature: {
-          full: "event ScheduledBalanceAdjustmentCancelled(uint256 balanceAdjustmentId, address indexed operator)",
-          canonical: "ScheduledBalanceAdjustmentCancelled(uint256,address)",
-        },
-        topic0: "0x94a946c45b2317528f3b8fed727c5627bed2062d7fe7a83a5c6b38aa2dcc178a",
-      },
-      {
-        name: "ScheduledBalanceAdjustmentSet",
-        signature: {
-          full: "event ScheduledBalanceAdjustmentSet(bytes32 corporateActionId, uint256 balanceAdjustmentId, address indexed operator, uint256 indexed executionDate, uint256 factor, uint256 decimals)",
-          canonical: "ScheduledBalanceAdjustmentSet(bytes32,uint256,address,uint256,uint256,uint256)",
-        },
-        topic0: "0x71cd63a6f86ff487645dcceb29d3eac904f16d7006cfa7b1da3ea951a77a9666",
-      },
     ],
     errors: [
       {
@@ -7459,58 +7515,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x10210dec",
       },
       {
-        name: "AccountHasNoRole",
-        signature: {
-          full: "error AccountHasNoRole(address account, bytes32 role)",
-          canonical: "AccountHasNoRole(address,bytes32)",
-        },
-        selector: "0xa1180aad",
-      },
-      {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
-      },
-      {
-        name: "BalanceAdjustmentAlreadyExecuted",
-        signature: {
-          full: "error BalanceAdjustmentAlreadyExecuted(bytes32 corporateActionId, uint256 balanceAdjustmentId)",
-          canonical: "BalanceAdjustmentAlreadyExecuted(bytes32,uint256)",
-        },
-        selector: "0xd0447e7d",
-      },
-      {
-        name: "BalanceAdjustmentCreationFailed",
-        signature: { full: "error BalanceAdjustmentCreationFailed()", canonical: "BalanceAdjustmentCreationFailed()" },
-        selector: "0x0c68e660",
-      },
-      {
-        name: "FactorIsZero",
-        signature: { full: "error FactorIsZero()", canonical: "FactorIsZero()" },
-        selector: "0x936e9b6d",
-      },
-      {
-        name: "InvalidTimestamp",
-        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
-        selector: "0xb7d09497",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
-      {
-        name: "UnexpectedError",
-        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
-        selector: "0xc9622656",
-      },
-      {
-        name: "WrongIndexForAction",
-        signature: {
-          full: "error WrongIndexForAction(uint256 index, bytes32 actionType)",
-          canonical: "WrongIndexForAction(uint256,bytes32)",
-        },
-        selector: "0xd3924f4e",
       },
     ],
     factory: (signer) => new EquityUSAFacet__factory(signer),
@@ -7894,14 +7901,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x3bc9bcd8",
       },
-      {
-        name: "triggerAndSyncAll",
-        signature: {
-          full: "function triggerAndSyncAll(bytes32 _partition, address _from, address _to)",
-          canonical: "triggerAndSyncAll(bytes32,address,address)",
-        },
-        selector: "0x6afb79db",
-      },
     ],
     events: [
       {
@@ -7951,14 +7950,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "RevokedOperatorByPartition(bytes32,address,address)",
         },
         topic0: "0x3b287c4f1bab4df949b33bceacef984f544dc5d5479930d00e4ee8c9d8dd96f2",
-      },
-      {
-        name: "Transfer",
-        signature: {
-          full: "event Transfer(address indexed from, address indexed to, uint256 value)",
-          canonical: "Transfer(address,address,uint256)",
-        },
-        topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
       },
       {
         name: "TransferByPartition",
@@ -13010,35 +13001,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     factory: (signer) => new ProtectedPartitionsFacet__factory(signer),
     timeTravelFactory: (signer) => new ProtectedPartitionsFacetTimeTravel__factory(signer),
-  },
-
-  ScheduledBalanceAdjustmentsFacet: {
-    name: "ScheduledBalanceAdjustmentsFacet",
-    resolverKey: {
-      name: "_SCHEDULED_BALANCE_ADJUSTMENTS_RESOLVER_KEY",
-      value: "0xc418e67a48260d700e5f85863ad6fa6593206a4385728f8baba1572d631535e0",
-    },
-    inheritance: ["ScheduledBalanceAdjustments", "IStaticFunctionSelectors"],
-    methods: [
-      {
-        name: "getScheduledBalanceAdjustments",
-        signature: {
-          full: "function getScheduledBalanceAdjustments(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledBalanceAdjustment_)",
-          canonical: "getScheduledBalanceAdjustments(uint256,uint256)",
-        },
-        selector: "0xcb884d41",
-      },
-      {
-        name: "scheduledBalanceAdjustmentCount",
-        signature: {
-          full: "function scheduledBalanceAdjustmentCount() view returns (uint256)",
-          canonical: "scheduledBalanceAdjustmentCount()",
-        },
-        selector: "0x2de241e3",
-      },
-    ],
-    factory: (signer) => new ScheduledBalanceAdjustmentsFacet__factory(signer),
-    timeTravelFactory: (signer) => new ScheduledBalanceAdjustmentsFacetTimeTravel__factory(signer),
   },
 
   ScheduledCrossOrderedTasksFacet: {
