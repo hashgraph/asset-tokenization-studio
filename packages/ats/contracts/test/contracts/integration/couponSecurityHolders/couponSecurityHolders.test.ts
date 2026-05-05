@@ -30,7 +30,6 @@ describe("CouponSecurityHolders Tests", () => {
   let diamond: ResolverProxy;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
-  let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
 
@@ -46,7 +45,6 @@ describe("CouponSecurityHolders Tests", () => {
     diamond = base.diamond;
     signer_A = base.deployer;
     signer_B = base.user1;
-    signer_C = base.user2;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
     await executeRbac(asset, [

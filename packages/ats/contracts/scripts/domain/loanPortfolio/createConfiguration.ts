@@ -52,6 +52,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "CoreFacet",
   "TransferFacet",
   "CoreAdjustedFacet",
+  "MetadataFacet",
   "FreezeFacet",
   "BatchFreezeFacet",
   "KycFacet",
@@ -59,7 +60,9 @@ const LOANS_PORTFOLIO_FACETS = [
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
+  "HoldAtSnapshotFacet",
   "FreezeAtSnapshotFacet",
+  "LockAtSnapshotFacet",
   "CoreAtSnapshotFacet",
   "SsiManagementFacet",
   "BalanceTrackerByPartitionFacet",
@@ -67,6 +70,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "BalanceTrackerAtSnapshotByPartitionFacet",
   "ClearingAtSnapshotFacet",
   "ClearingAtSnapshotByPartitionFacet",
+  "HoldAtSnapshotByPartitionFacet",
 
   // ERC Standards
   "MintByPartitionFacet",
@@ -77,7 +81,9 @@ const LOANS_PORTFOLIO_FACETS = [
   "DocumentationFacet",
   "ControllerFacet",
   "ERC20PermitFacet",
+  "EIP712Facet",
   "NoncesFacet",
+  "DeactivateFacet",
   "ERC20VotesFacet",
   "BatchControllerFacet",
   "BatchBurnFacet",
@@ -111,7 +117,6 @@ const LOANS_PORTFOLIO_FACETS = [
   "ClearingByPartitionFacet",
 
   // Scheduled Tasks
-  "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
   "CouponListingFacet",
 

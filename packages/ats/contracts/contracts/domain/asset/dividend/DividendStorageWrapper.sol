@@ -7,8 +7,8 @@ import { ERC1410StorageWrapper } from "../ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../core/ERC3643StorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
-import { IDividend } from "../../../facets/layer_2/dividend/IDividend.sol";
-import { IDividendTypes } from "../../../facets/layer_2/dividend/IDividendTypes.sol";
+import { IDividend } from "../../../facets/dividend/IDividend.sol";
+import { IDividendTypes } from "../../../facets/dividend/IDividendTypes.sol";
 import { ScheduledTasksStorageWrapper } from "../ScheduledTasksStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "../SnapshotsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
@@ -71,7 +71,9 @@ library DividendStorageWrapper {
      * @return success_ Always true if no revert occurred
      */
     function cancelDividend(uint256 dividendId) internal returns (bool success_) {
-        (IDividend.RegisteredDividend memory registeredDividend, bytes32 corporateActionId, ) = getDividend(dividendId);
+        (IDividendTypes.RegisteredDividend memory registeredDividend, bytes32 corporateActionId, ) = getDividend(
+            dividendId
+        );
 
         if (registeredDividend.dividend.executionDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
             revert IDividend.DividendAlreadyExecuted(corporateActionId, dividendId);
@@ -121,7 +123,11 @@ library DividendStorageWrapper {
     )
         internal
         view
-        returns (IDividend.RegisteredDividend memory registeredDividend_, bytes32 corporateActionId_, bool isDisabled_)
+        returns (
+            IDividendTypes.RegisteredDividend memory registeredDividend_,
+            bytes32 corporateActionId_,
+            bool isDisabled_
+        )
     {
         corporateActionId_ = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
             DIVIDEND_CORPORATE_ACTION_TYPE,
@@ -157,7 +163,7 @@ library DividendStorageWrapper {
         uint256 dividendId,
         address account
     ) internal view returns (IDividendTypes.DividendFor memory dividendFor_) {
-        (IDividend.RegisteredDividend memory registeredDividend, , bool isDisabled) = getDividend(dividendId);
+        (IDividendTypes.RegisteredDividend memory registeredDividend, , bool isDisabled) = getDividend(dividendId);
 
         dividendFor_.amount = registeredDividend.dividend.amount;
         dividendFor_.amountDecimals = registeredDividend.dividend.amountDecimals;
@@ -229,7 +235,7 @@ library DividendStorageWrapper {
         uint256 pageIndex,
         uint256 pageLength
     ) internal view returns (address[] memory holders_) {
-        (IDividend.RegisteredDividend memory registeredDividend, , ) = getDividend(dividendId);
+        (IDividendTypes.RegisteredDividend memory registeredDividend, , ) = getDividend(dividendId);
 
         if (registeredDividend.dividend.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp())
             return new address[](0);
@@ -248,7 +254,7 @@ library DividendStorageWrapper {
      * @return Total number of holders for the dividend
      */
     function getTotalDividendHolders(uint256 dividendId) internal view returns (uint256) {
-        (IDividend.RegisteredDividend memory registeredDividend, , ) = getDividend(dividendId);
+        (IDividendTypes.RegisteredDividend memory registeredDividend, , ) = getDividend(dividendId);
 
         if (registeredDividend.dividend.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return 0;
 

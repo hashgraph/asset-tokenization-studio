@@ -21,7 +21,7 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 
 import { AccessControlModifiers } from "./AccessControlModifiers.sol";
-import { AddressModifiers } from "./AddressModifiers.sol";
+import { DefaultValuesModifiers } from "./DefaultValuesModifiers.sol";
 import { CapModifiers } from "./CapModifiers.sol";
 import { ControlListModifiers } from "./ControlListModifiers.sol";
 import { DateValidationModifiers } from "./DateValidationModifiers.sol";
@@ -32,10 +32,11 @@ import { LoanModifiers } from "./LoanModifiers.sol";
 import { PartitionModifiers } from "./PartitionModifiers.sol";
 import { PartitionValidationModifiers } from "./PartitionValidationModifiers.sol";
 import { PauseModifiers } from "./PauseModifiers.sol";
+import { DeactivateModifiers } from "./DeactivateModifiers.sol";
 
 abstract contract CoreModifiers is
     AccessControlModifiers,
-    AddressModifiers,
+    DefaultValuesModifiers,
     CapModifiers,
     ControlListModifiers,
     DateValidationModifiers,
@@ -45,7 +46,8 @@ abstract contract CoreModifiers is
     LoanModifiers,
     PartitionModifiers,
     PartitionValidationModifiers,
-    PauseModifiers
+    PauseModifiers,
+    DeactivateModifiers
 {
     // This contract aggregates all core modifiers through inheritance
     // No additional logic needed - modifiers are provided by parent contracts

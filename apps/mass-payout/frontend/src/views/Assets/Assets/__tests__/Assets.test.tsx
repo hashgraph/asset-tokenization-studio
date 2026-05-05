@@ -264,12 +264,10 @@ describe("Assets Component", () => {
       });
 
       const rows = screen.getAllByRole("row");
-      if (rows.length > 1) {
-        await user.click(rows[1]);
-        expect(routerSpy).toHaveBeenCalledWith("ASSET_DETAIL", {
-          params: { id: expect.any(String) },
-        });
-      }
+      await user.click(rows[1]);
+      expect(routerSpy).toHaveBeenCalledWith("ASSET_DETAIL", {
+        params: { id: expect.any(String) },
+      });
 
       routerSpy.mockRestore();
     });

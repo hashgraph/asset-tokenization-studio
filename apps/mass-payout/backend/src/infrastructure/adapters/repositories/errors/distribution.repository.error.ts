@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { CustomError } from "@domain/errors/shared/custom.error"
-import { Distribution } from "@domain/model/distribution"
+import { CustomError } from "@domain/errors/shared/custom.error";
+import { Distribution } from "@domain/model/distribution";
 
 export class DistributionRepositoryError extends CustomError {
   static readonly ERRORS = {
@@ -15,13 +15,13 @@ export class DistributionRepositoryError extends CustomError {
     UPDATE_DISTRIBUTION: (distribution: Distribution) =>
       `Error updating distribution: ${JSON.stringify(distribution)}.`,
     GET_DISTRIBUTIONS: () => "Error getting distributions.",
-  }
+  };
 
   constructor(
     message: string,
     public originalError?: Error,
   ) {
-    super(message)
-    this.name = DistributionRepositoryError.name
+    super(message);
+    this.name = DistributionRepositoryError.name;
   }
 }

@@ -8,7 +8,6 @@ import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableS
 import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
-import { ITransfer } from "../../facets/transfer/ITransfer.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { ThirdPartyType } from "./types/ThirdPartyType.sol";
@@ -58,7 +57,7 @@ library HoldStorageWrapper {
         uint256 abaf = updateTotalHold(_partition, _from);
 
         beforeHold(_partition, _from);
-        ERC1410StorageWrapper.reduceBalanceByPartition(_from, _hold.amount, _partition);
+        ERC1410StorageWrapper.reducePartitionOnly(_from, _hold.amount, _partition);
 
         holdId_ = _storeHold(_partition, _from, _hold, _operatorData, _thirdPartyType, abaf);
 
@@ -559,6 +558,7 @@ library HoldStorageWrapper {
         uint256 amount,
         bytes memory _operatorData
     ) private {
+        ERC20StorageWrapper.performTransfer(_from, address(0), amount);
         emit IERC1410Types.TransferByPartition(
             _partition,
             EvmAccessors.getMsgSender(),
@@ -568,7 +568,6 @@ library HoldStorageWrapper {
             _operatorData,
             ""
         );
-        emit ITransfer.Transfer(_from, address(0), amount);
     }
 
     function _decreaseOrRemoveHold(IHoldTypes.HoldIdentifier calldata _holdIdentifier, uint256 _amount) private {
@@ -583,11 +582,10 @@ library HoldStorageWrapper {
         uint256 _amount
     ) private {
         if (ERC1410StorageWrapper.validPartitionForReceiver(_holdIdentifier.partition, _to)) {
-            ERC1410StorageWrapper.increaseBalanceByPartition(_to, _amount, _holdIdentifier.partition);
+            ERC1410StorageWrapper.increasePartitionOnly(_to, _amount, _holdIdentifier.partition);
             return;
         }
-
-        ERC1410StorageWrapper.addPartitionTo(_amount, _to, _holdIdentifier.partition);
+        ERC1410StorageWrapper.addPartitionToOnly(_amount, _to, _holdIdentifier.partition);
     }
 
     function _notifyTransferComplianceIfNeeded(
@@ -608,6 +606,7 @@ library HoldStorageWrapper {
         address _to,
         uint256 _amount
     ) private {
+        ERC20StorageWrapper.performTransfer(address(0), _to, _amount);
         emit IERC1410Types.TransferByPartition(
             _holdIdentifier.partition,
             EvmAccessors.getMsgSender(),
@@ -617,7 +616,6 @@ library HoldStorageWrapper {
             "",
             ""
         );
-        emit ITransfer.Transfer(address(0), _to, _amount);
     }
 
     function _validateHoldOperation(

@@ -48,7 +48,9 @@ const BOND_FACETS = [
   "KycFacet",
   "PauseFacet",
   "SnapshotsFacet",
+  "HoldAtSnapshotFacet",
   "FreezeAtSnapshotFacet",
+  "LockAtSnapshotFacet",
   "CoreAtSnapshotFacet",
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
@@ -57,6 +59,7 @@ const BOND_FACETS = [
   "BalanceTrackerAtSnapshotByPartitionFacet",
   "ClearingAtSnapshotFacet",
   "ClearingAtSnapshotByPartitionFacet",
+  "HoldAtSnapshotByPartitionFacet",
 
   // Core
   "CoreFacet",
@@ -66,6 +69,9 @@ const BOND_FACETS = [
 
   // CoreAdjusted
   "CoreAdjustedFacet",
+
+  //Metadata
+  "MetadataFacet",
 
   // ERC Standards
   "TransferFacet",
@@ -77,7 +83,9 @@ const BOND_FACETS = [
   "DocumentationFacet",
   "ControllerFacet",
   "ERC20PermitFacet",
+  "EIP712Facet",
   "NoncesFacet",
+  "DeactivateFacet",
   "ERC20VotesFacet",
   "BatchControllerFacet",
   "BatchBurnFacet",
@@ -119,7 +127,6 @@ const BOND_FACETS = [
   "NominalValueFacet",
   "ProceedRecipientsFacet",
   "ProtectedPartitionsFacet",
-  "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
   "CouponListingFacet",
   "SsiManagementFacet",

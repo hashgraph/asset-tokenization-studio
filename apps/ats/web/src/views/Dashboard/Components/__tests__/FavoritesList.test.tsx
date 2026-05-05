@@ -12,7 +12,7 @@ describe.skip(`${FavoritesList.name}`, () => {
     expect(component.asFragment()).toMatchSnapshot("admin");
   });
 
-  test("should render correctly as admin", () => {
+  test("should render correctly as holder", () => {
     const component = render(<FavoritesList type={User.holder} />);
 
     expect(component.asFragment()).toMatchSnapshot("holder");

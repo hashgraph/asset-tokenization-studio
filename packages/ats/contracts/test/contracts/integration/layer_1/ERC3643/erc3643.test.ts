@@ -269,6 +269,20 @@ describe("ERC3643 Tests", () => {
         expect(await asset.balanceOf(signer_E.address)).to.be.equal(0);
       });
 
+      describe("bug Transfer", () => {
+        it("GIVEN a valid holder WHEN freezePartialTokens THEN Transfer event is emitted from holder to address(0)", async () => {
+          await asset.issueByPartition({
+            partition: DEFAULT_PARTITION,
+            tokenHolder: signer_E.address,
+            value: AMOUNT,
+            data: "0x",
+          });
+          await expect(asset.freezePartialTokens(signer_E.address, AMOUNT))
+            .to.emit(asset, "Transfer")
+            .withArgs(signer_E.address, ethers.ZeroAddress, AMOUNT);
+        });
+      });
+
       it("GIVEN a freeze amount greater than balance WHEN attempting to freezePartialTokens THEN transactions revert with InsufficientBalance error", async () => {
         const amount = 1000;
         await asset.issueByPartition({
@@ -306,7 +320,9 @@ describe("ERC3643 Tests", () => {
 
         await expect(asset.unfreezePartialTokens(signer_E.address, amount))
           .to.emit(asset, "TokensUnfrozen")
-          .withArgs(signer_E.address, amount, DEFAULT_PARTITION);
+          .withArgs(signer_E.address, amount, DEFAULT_PARTITION)
+          .to.emit(asset, "Transfer")
+          .withArgs(ethers.ZeroAddress, signer_E.address, amount);
         expect(await asset.getFrozenTokens(signer_E.address)).to.be.equal(0);
         expect(await asset.isFrozen(signer_E.address)).to.be.false;
         expect(await asset.balanceOf(signer_E.address)).to.be.equal(amount);

@@ -204,6 +204,21 @@ describe("MintByPartitionFacet Tests", () => {
       expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.equal(AMOUNT * 2);
       expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.equal(AMOUNT * 2);
     });
+
+    describe("bug Transfer", () => {
+      it("GIVEN an issuer WHEN issueByPartition THEN Transfer event is emitted from address(0) to receiver", async () => {
+        await expect(
+          asset.issueByPartition({
+            partition: DEFAULT_PARTITION,
+            tokenHolder: signer_E.address,
+            value: AMOUNT,
+            data: EMPTY_HEX_BYTES,
+          }),
+        )
+          .to.emit(asset, "Transfer")
+          .withArgs(ethers.ZeroAddress, signer_E.address, AMOUNT);
+      });
+    });
   });
 
   describe("Multi partition mode", () => {

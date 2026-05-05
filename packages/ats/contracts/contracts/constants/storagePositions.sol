@@ -163,3 +163,9 @@ bytes32 constant _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION = 0xee633a02a6dacfac8
 
 // keccak256('security.token.standard.diamond.cut.manager.storage');
 bytes32 constant _DIAMOND_CUT_MANAGER_STORAGE_POSITION = 0x513cea04238a899b11bd2956c2d5e7863b8b3ef2fbd5750604b6755da9ca1cea;
+
+// keccak256('security.token.standard.metadata.storage');
+bytes32 constant _METADATA_STORAGE_POSITION = 0xbaa5bcf482bdd56ac526ad296ba65a1248c47c553746305334a22573451d24d1;
+
+// keccak256('security.token.standard.deactivate.storage');
+bytes32 constant _DEACTIVATE_STORAGE_POSITION = 0x06257f792d30fc0103eef3c47e444b4cebdbfdcf0ec0f218950e263fe070baae;

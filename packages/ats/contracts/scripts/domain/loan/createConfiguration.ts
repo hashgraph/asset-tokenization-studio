@@ -53,6 +53,7 @@ const LOAN_FACETS = [
   "BalanceTrackerAtSnapshotByPartitionFacet",
   "ClearingAtSnapshotFacet",
   "ClearingAtSnapshotByPartitionFacet",
+  "HoldAtSnapshotByPartitionFacet",
   "CapFacet",
   "CapByPartitionFacet",
   "ControlListFacet",
@@ -71,7 +72,9 @@ const LOAN_FACETS = [
   // ERC Standards
   "TransferFacet",
   "CoreAdjustedFacet",
+  "MetadataFacet",
   "ERC20PermitFacet",
+  "EIP712Facet",
   "ERC20VotesFacet",
   "DocumentationFacet",
   "ControllerFacet",
@@ -110,7 +113,6 @@ const LOAN_FACETS = [
   "ClearingByPartitionFacet",
 
   // Scheduled Tasks
-  "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
 
   // External Management
@@ -123,7 +125,9 @@ const LOAN_FACETS = [
 
   // Advanced Features
   "SnapshotsFacet",
+  "HoldAtSnapshotFacet",
   "FreezeAtSnapshotFacet",
+  "LockAtSnapshotFacet",
   "CoreAtSnapshotFacet",
   "CorporateActionsFacet",
   "TransferAndLockFacet",

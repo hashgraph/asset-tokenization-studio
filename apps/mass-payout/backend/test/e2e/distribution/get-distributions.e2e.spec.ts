@@ -1,55 +1,55 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { AssetType } from "@domain/model/asset-type.enum"
-import { CorporateActionDetails, DistributionStatus, DistributionType } from "@domain/model/distribution"
-import { CorporateActionId } from "@domain/model/value-objects/corporate-action-id"
-import { faker } from "@faker-js/faker"
-import { AssetPersistence } from "@infrastructure/adapters/repositories/model/asset.persistence"
-import { DistributionPersistence } from "@infrastructure/adapters/repositories/model/distribution.persistence"
-import { HttpStatus } from "@nestjs/common"
-import { E2eTestApp } from "@test/e2e/shared/e2e-test.app"
-import { E2eUtils } from "@test/e2e/shared/e2e-utils"
-import { TestConstants } from "@test/e2e/shared/test-constants"
-import { AssetUtils } from "@test/shared/asset.utils"
-import { DistributionUtils } from "@test/shared/distribution.utils"
-import { fakeHederaAddress } from "@test/shared/utils"
-import request from "supertest"
-import { Repository } from "typeorm"
+import { AssetType } from "@domain/model/asset-type.enum";
+import { CorporateActionDetails, DistributionStatus, DistributionType } from "@domain/model/distribution";
+import { CorporateActionId } from "@domain/model/value-objects/corporate-action-id";
+import { faker } from "@faker-js/faker";
+import { AssetPersistence } from "@infrastructure/adapters/repositories/model/asset.persistence";
+import { DistributionPersistence } from "@infrastructure/adapters/repositories/model/distribution.persistence";
+import { HttpStatus } from "@nestjs/common";
+import { E2eTestApp } from "@test/e2e/shared/e2e-test.app";
+import { E2eUtils } from "@test/e2e/shared/e2e-utils";
+import { TestConstants } from "@test/e2e/shared/test-constants";
+import { AssetUtils } from "@test/shared/asset.utils";
+import { DistributionUtils } from "@test/shared/distribution.utils";
+import { fakeHederaAddress } from "@test/shared/utils";
+import request from "supertest";
+import { Repository } from "typeorm";
 
 describe("GET /distributions", () => {
-  let e2eTestApp: E2eTestApp
-  let internalDistributionRepository: Repository<DistributionPersistence>
-  let internalAssetRepository: Repository<AssetPersistence>
-  const endpoint = "/distributions"
+  let e2eTestApp: E2eTestApp;
+  let internalDistributionRepository: Repository<DistributionPersistence>;
+  let internalAssetRepository: Repository<AssetPersistence>;
+  const endpoint = "/distributions";
 
   beforeAll(async () => {
     try {
-      e2eTestApp = await E2eTestApp.create()
+      e2eTestApp = await E2eTestApp.create();
       if (!e2eTestApp) {
-        throw new Error("E2eTestApp.create() returned undefined")
+        throw new Error("E2eTestApp.create() returned undefined");
       }
-      internalDistributionRepository = e2eTestApp.getRepository(DistributionPersistence)
-      internalAssetRepository = e2eTestApp.getRepository(AssetPersistence)
+      internalDistributionRepository = e2eTestApp.getRepository(DistributionPersistence);
+      internalAssetRepository = e2eTestApp.getRepository(AssetPersistence);
     } catch (error) {
-      console.error("Error in beforeAll:", error)
-      throw error
+      console.error("Error in beforeAll:", error);
+      throw error;
     }
-  }, TestConstants.BEFORE_ALL_TIMEOUT)
+  }, TestConstants.BEFORE_ALL_TIMEOUT);
 
   afterAll(async () => {
     if (e2eTestApp) {
-      await e2eTestApp.stop()
+      await e2eTestApp.stop();
     }
-  }, TestConstants.AFTER_ALL_TIMEOUT)
+  }, TestConstants.AFTER_ALL_TIMEOUT);
 
   afterEach(async () => {
     if (internalDistributionRepository) {
-      await E2eUtils.purgeOrRecreate(internalDistributionRepository)
+      await E2eUtils.purgeOrRecreate(internalDistributionRepository);
     }
     if (internalAssetRepository) {
-      await E2eUtils.purgeOrRecreate(internalAssetRepository)
+      await E2eUtils.purgeOrRecreate(internalAssetRepository);
     }
-  }, TestConstants.AFTER_EACH_TIMEOUT)
+  }, TestConstants.AFTER_EACH_TIMEOUT);
 
   it(
     "should return paginated distributions successfully",
@@ -62,11 +62,11 @@ describe("GET /distributions", () => {
         lifeCycleCashFlowHederaAddress: fakeHederaAddress(),
         lifeCycleCashFlowEvmAddress: faker.finance.ethereumAddress(),
         isPaused: false,
-      })
-      await internalAssetRepository.save(AssetPersistence.fromAsset(asset))
+      });
+      await internalAssetRepository.save(AssetPersistence.fromAsset(asset));
 
-      const executionDate1 = faker.date.future()
-      const executionDate2 = faker.date.future()
+      const executionDate1 = faker.date.future();
+      const executionDate2 = faker.date.future();
       const distribution1 = DistributionUtils.newInstance({
         asset,
         details: {
@@ -75,7 +75,7 @@ describe("GET /distributions", () => {
           executionDate: executionDate1,
         },
         status: DistributionStatus.SCHEDULED,
-      })
+      });
       const distribution2 = DistributionUtils.newInstance({
         asset,
         details: {
@@ -84,17 +84,17 @@ describe("GET /distributions", () => {
           executionDate: executionDate2,
         },
         status: DistributionStatus.COMPLETED,
-      })
+      });
 
       await internalDistributionRepository.save([
         DistributionPersistence.fromDistribution(distribution1),
         DistributionPersistence.fromDistribution(distribution2),
-      ])
+      ]);
 
       const response = await request(e2eTestApp.app.getHttpServer())
         .get(endpoint)
         .query({ page: 1, limit: 10 })
-        .expect(HttpStatus.OK)
+        .expect(HttpStatus.OK);
 
       expect(response.body).toEqual({
         items: [
@@ -151,10 +151,10 @@ describe("GET /distributions", () => {
         page: 1,
         limit: 10,
         totalPages: 1,
-      })
+      });
     },
     TestConstants.TEST_TIMEOUT,
-  )
+  );
 
   it(
     "should return empty page when no distributions exist",
@@ -162,7 +162,7 @@ describe("GET /distributions", () => {
       const response = await request(e2eTestApp.app.getHttpServer())
         .get(endpoint)
         .query({ page: 1, limit: 10 })
-        .expect(HttpStatus.OK)
+        .expect(HttpStatus.OK);
 
       expect(response.body).toEqual({
         items: [],
@@ -170,49 +170,49 @@ describe("GET /distributions", () => {
         page: 1,
         limit: 10,
         totalPages: 0,
-      })
+      });
     },
     TestConstants.TEST_TIMEOUT,
-  )
+  );
 
   it(
     "should handle pagination correctly",
     async () => {
-      const asset = AssetUtils.newInstance()
-      await internalAssetRepository.save(AssetPersistence.fromAsset(asset))
+      const asset = AssetUtils.newInstance();
+      await internalAssetRepository.save(AssetPersistence.fromAsset(asset));
 
-      const distributions = Array.from({ length: 15 }, () => DistributionUtils.newInstance({ asset }))
-      await internalDistributionRepository.save(distributions.map((d) => DistributionPersistence.fromDistribution(d)))
+      const distributions = Array.from({ length: 15 }, () => DistributionUtils.newInstance({ asset }));
+      await internalDistributionRepository.save(distributions.map((d) => DistributionPersistence.fromDistribution(d)));
 
       const response = await request(e2eTestApp.app.getHttpServer())
         .get(endpoint)
         .query({ page: 2, limit: 5 })
-        .expect(HttpStatus.OK)
+        .expect(HttpStatus.OK);
 
-      expect(response.body.items).toHaveLength(5)
-      expect(response.body.total).toBe(15)
-      expect(response.body.page).toBe(2)
-      expect(response.body.limit).toBe(5)
+      expect(response.body.items).toHaveLength(5);
+      expect(response.body.total).toBe(15);
+      expect(response.body.page).toBe(2);
+      expect(response.body.limit).toBe(5);
     },
     TestConstants.TEST_TIMEOUT,
-  )
+  );
 
   it(
     "should use default pagination when no parameters provided",
     async () => {
-      const asset = AssetUtils.newInstance()
-      await internalAssetRepository.save(AssetPersistence.fromAsset(asset))
+      const asset = AssetUtils.newInstance();
+      await internalAssetRepository.save(AssetPersistence.fromAsset(asset));
 
-      const distribution = DistributionUtils.newInstance({ asset })
-      await internalDistributionRepository.save(DistributionPersistence.fromDistribution(distribution))
+      const distribution = DistributionUtils.newInstance({ asset });
+      await internalDistributionRepository.save(DistributionPersistence.fromDistribution(distribution));
 
-      const response = await request(e2eTestApp.app.getHttpServer()).get(endpoint).expect(HttpStatus.OK)
+      const response = await request(e2eTestApp.app.getHttpServer()).get(endpoint).expect(HttpStatus.OK);
 
-      expect(response.body.items).toHaveLength(1)
-      expect(response.body.total).toBe(1)
-      expect(response.body.page).toBe(1)
-      expect(response.body.limit).toBe(10)
+      expect(response.body.items).toHaveLength(1);
+      expect(response.body.total).toBe(1);
+      expect(response.body.page).toBe(1);
+      expect(response.body.limit).toBe(10);
     },
     TestConstants.TEST_TIMEOUT,
-  )
-})
+  );
+});

@@ -33,8 +33,7 @@ export default class EventService extends Service {
       throw new EventNotFound(`WalletEvent (${String(event)}) not registered yet`);
     }
     if (!Object.keys(this.emitters).includes(event.toString())) {
-      const type = this.events[event];
-      this.emitters[event] = new EventEmitter<typeof type>();
+      this.emitters[event] = new EventEmitter<(typeof this.events)[E]>();
     }
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return this.emitters[event]!;

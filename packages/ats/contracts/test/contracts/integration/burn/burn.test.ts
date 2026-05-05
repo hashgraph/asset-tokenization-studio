@@ -170,6 +170,15 @@ describe("Burn Tests", () => {
           "AccountHasNoRoles",
         );
       });
+
+      describe("bug Transfer", () => {
+        it("GIVEN a controller WHEN burn THEN Transfer event is emitted from holder to address(0)", async () => {
+          await asset.mint(signer_E.address, AMOUNT);
+          await expect(asset.burn(signer_E.address, AMOUNT / 2))
+            .to.emit(asset, "Transfer")
+            .withArgs(signer_E.address, ethers.ZeroAddress, AMOUNT / 2);
+        });
+      });
     });
 
     describe("redeem", () => {
@@ -219,6 +228,14 @@ describe("Burn Tests", () => {
           asset,
           "InvalidKycStatus",
         );
+      });
+
+      describe("bug Transfer", () => {
+        it("GIVEN a token holder WHEN redeem THEN Transfer event is emitted from holder to address(0)", async () => {
+          await expect(asset.connect(signer_E).redeem(AMOUNT / 2, DATA))
+            .to.emit(asset, "Transfer")
+            .withArgs(signer_E.address, ethers.ZeroAddress, AMOUNT / 2);
+        });
       });
     });
 
@@ -292,6 +309,14 @@ describe("Burn Tests", () => {
           await expect(
             asset.connect(signer_C).redeemFrom(signer_E.address, AMOUNT / 2, DATA),
           ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+        });
+      });
+
+      describe("bug Transfer", () => {
+        it("GIVEN an approved operator WHEN redeemFrom THEN Transfer event is emitted from holder to address(0)", async () => {
+          await expect(asset.connect(signer_D).redeemFrom(signer_E.address, AMOUNT / 2, DATA))
+            .to.emit(asset, "Transfer")
+            .withArgs(signer_E.address, ethers.ZeroAddress, AMOUNT / 2);
         });
       });
     });
