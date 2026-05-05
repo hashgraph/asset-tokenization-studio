@@ -177,6 +177,9 @@ bytes32 constant _SNAPSHOTS_RESOLVER_KEY = 0x9a3fc46d83536ef6b87eb4fec37302bfd1a
 // keccak256("security.token.standard.freeze.at.snapshot.resolverKey");
 bytes32 constant _FREEZE_AT_SNAPSHOT_RESOLVER_KEY = 0x554064f549ff9eaa803cb2be55ec6fca6974b28c5784cb9378aaf194d0804af3;
 
+// keccak256("security.token.standard.freeze.at.snapshot.by.partition.resolverKey");
+bytes32 constant _FREEZE_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY = 0x80cbb1bc5d072c294e5b54560d3a253a0592491a06044b579cd0d36f31102b42;
+
 // keccak256("security.token.standard.core.at.snapshot.resolverKey")
 bytes32 constant _CORE_AT_SNAPSHOT_RESOLVER_KEY = 0x72b3df174c5ac7f128d0d1ae81ec15e1d5abd21d1a0f58f64d78de0108be41de;
 
