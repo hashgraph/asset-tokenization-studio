@@ -10,6 +10,7 @@ import { IAdjustBalances } from "./adjustBalances/IAdjustBalances.sol";
 import { IAmortization } from "./layer_2/amortization/IAmortization.sol";
 import { IBond } from "./layer_2/bond/IBond.sol";
 import { IBondUSA } from "./layer_3/bondUSA/IBondUSA.sol";
+import { IMaturity } from "./maturity/IMaturity.sol";
 
 // Layer 1 — ERC1400
 
@@ -160,6 +161,7 @@ interface IAsset is
     IBurn,
     IScheduledCrossOrderedTasks,
     IBond,
+    IMaturity,
     IEquity,
     ISecurity,
     ICorporateActions,

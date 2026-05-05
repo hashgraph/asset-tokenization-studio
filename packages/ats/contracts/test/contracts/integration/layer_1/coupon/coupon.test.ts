@@ -473,58 +473,6 @@ describe("Coupon Tests", () => {
     );
   });
 
-  it("GIVEN an account with bondManager role WHEN setMaturityDate THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.BOND_MANAGER_ROLE, signer_C.address);
-    const maturityDateBefore = (await asset.getBondDetails()).maturityDate;
-    const newMaturityDate = maturityDateBefore + 86400n;
-
-    await expect(asset.connect(signer_C).updateMaturityDate(newMaturityDate))
-      .to.emit(asset, "MaturityDateUpdated")
-      .withArgs(asset.target, newMaturityDate, maturityDateBefore);
-    const maturityDateAfter = (await asset.getBondDetails()).maturityDate;
-    expect(maturityDateAfter).not.to.be.equal(maturityDateBefore);
-    expect(maturityDateAfter).to.be.equal(newMaturityDate);
-  });
-
-  it("GIVEN an account with bondManager role WHEN setMaturityDate to earlier date THEN transaction fails", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.BOND_MANAGER_ROLE, signer_C.address);
-    const maturityDateBefore = (await asset.getBondDetails()).maturityDate;
-    const dayBeforeCurrentMaturity = maturityDateBefore - 86400n;
-
-    await expect(asset.connect(signer_C).updateMaturityDate(dayBeforeCurrentMaturity)).to.be.revertedWithCustomError(
-      asset,
-      "BondMaturityDateWrong",
-    );
-    const maturityDateAfter = (await asset.getBondDetails()).maturityDate;
-    expect(maturityDateAfter).to.be.equal(maturityDateBefore);
-  });
-
-  it("GIVEN an account without bondManager role WHEN setMaturityDate THEN transaction fails with AccountHasNoRole", async () => {
-    const maturityDateBefore = (await asset.getBondDetails()).maturityDate;
-    const newMaturityDate = maturityDateBefore + 86400n;
-
-    await expect(asset.connect(signer_C).updateMaturityDate(newMaturityDate)).to.be.revertedWithCustomError(
-      asset,
-      "AccountHasNoRole",
-    );
-    const maturityDateAfter = (await asset.getBondDetails()).maturityDate;
-    expect(maturityDateAfter).to.be.equal(maturityDateBefore);
-  });
-
-  it("GIVEN a paused Token WHEN setMaturityDate THEN transaction fails with TokenIsPaused", async () => {
-    await grantRoleAndPauseToken(asset, ATS_ROLES.BOND_MANAGER_ROLE, signer_A, signer_B, signer_C.address);
-
-    const maturityDateBefore = (await asset.getBondDetails()).maturityDate;
-    const newMaturityDate = maturityDateBefore + 86400n;
-
-    await expect(asset.connect(signer_C).updateMaturityDate(newMaturityDate)).to.be.revertedWithCustomError(
-      asset,
-      "TokenIsPaused",
-    );
-    const maturityDateAfter = (await asset.getBondDetails()).maturityDate;
-    expect(maturityDateAfter).to.be.equal(maturityDateBefore);
-  });
-
   it("Given a coupon and account with normal, cleared, held, locked and frozen balance WHEN  getCouponFor THEN sum of balances is correct", async () => {
     await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
     await asset.connect(signer_A).grantRole(ATS_ROLES.LOCKER_ROLE, signer_C.address);
