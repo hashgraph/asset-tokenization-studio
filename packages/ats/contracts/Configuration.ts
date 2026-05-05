@@ -143,6 +143,7 @@ export const CONTRACT_NAMES = [
   "FreezeFacet",
   "ERC3643ManagementFacet",
   "ERC3643ReadFacet",
+  "IdentityFacet",
   "BatchControllerFacet",
   "BatchBurnFacet",
   "BatchMintFacet",

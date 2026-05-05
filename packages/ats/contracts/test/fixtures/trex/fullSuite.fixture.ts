@@ -19,8 +19,12 @@ export async function deployIdentityProxy(
     signer as any, // @onchain-id/solidity uses ethers v5 Signer type
   ).deploy(implementationAuthority, managementKey);
 
-  // @ts-ignore - T-REX contract lacks generated typechain types
-  return ethers.getContractAt("Identity", await identity.getAddress(), signer as any);
+  return new ethers.Contract(
+    await identity.getAddress(),
+    // @ts-ignore - @onchain-id/solidity lacks TypeScript declarations
+    OnchainID.contracts.Identity.abi,
+    signer as any,
+  );
 }
 
 export async function deployFullSuiteFixture() {
