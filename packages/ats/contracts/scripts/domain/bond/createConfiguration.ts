@@ -50,6 +50,7 @@ const BOND_FACETS = [
   "SnapshotsFacet",
   "HoldAtSnapshotFacet",
   "FreezeAtSnapshotFacet",
+  "FreezeAtSnapshotByPartitionFacet",
   "LockAtSnapshotFacet",
   "CoreAtSnapshotFacet",
   "BalanceTrackerFacet",
