@@ -7,7 +7,14 @@ import { ClearingOps } from "../../domain/orchestrator/ClearingOps.sol";
 import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
+/**
+ * @title OperatorClearingByPartition
+ * @author Asset Tokenization Studio Team
+ * @notice Abstract contract implementing redeem and transfer clearing operations for authorised operators by partition.
+ * @dev Implementation logic for operator-led clearing redemptions and transfers.
+ */
 abstract contract OperatorClearingByPartition is IOperatorClearingByPartition, Modifiers {
+    /// @inheritdoc IOperatorClearingByPartition
     function operatorClearingRedeemByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount
@@ -34,6 +41,7 @@ abstract contract OperatorClearingByPartition is IOperatorClearingByPartition, M
         );
     }
 
+    /// @inheritdoc IOperatorClearingByPartition
     function operatorClearingTransferByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount,

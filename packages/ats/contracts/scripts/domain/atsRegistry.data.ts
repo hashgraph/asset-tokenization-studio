@@ -11849,6 +11849,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   OperatorClearingByPartitionFacet: {
     name: "OperatorClearingByPartitionFacet",
+    description: "Diamond facet for partition-scoped operator clearing redeem and transfer operations.",
     resolverKey: {
       name: "_OPERATOR_CLEARING_BY_PARTITION_RESOLVER_KEY",
       value: "0xcfd3ab401449af4b9d7599f2956585b2f8801375c91c16af5991e87030884f8a",
