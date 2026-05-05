@@ -6,22 +6,27 @@ import { ILockTypes } from "../layer_1/lock/ILockTypes.sol";
 /**
  * @title ILockByPartition
  * @author Asset Tokenization Studio Team
- * @notice Interface for partition-aware token lock operations and partition-scoped read queries.
+ * @notice Interface for partition-aware token lock operations and partition-scoped read
+ *         queries.
  * @dev Aggregates the partition-aware write methods (`lockByPartition`, `releaseByPartition`)
  *      and the partition-scoped read methods (`getLockedAmountForByPartition`,
  *      `getLockCountForByPartition`, `getLocksIdForByPartition`, `getLockForByPartition`)
  *      into a single interface separate from the default-partition `ILock` surface.
- *      Inherits `ILockTypes` for the shared `LockData` struct, events and errors.
+ *      Inherits `ILockTypes` for the events and errors shared with `ILock`.
  */
 interface ILockByPartition is ILockTypes {
     /**
-     * @notice Locks a certain amount of tokens held by a tokenHolder, until the expirationTimestamp.
-     * @param _partition The partition to lock the tokens from.
-     * @param _amount The amount of tokens to be locked.
-     * @param _tokenHolder The address of the token holder.
-     * @param _expirationTimestamp The timestamp when the lock expires.
-     * @return success_ Boolean indicating success.
-     * @return lockId_ The created lock identifier.
+     * @notice Locks `_amount` tokens of `_tokenHolder` on `_partition` until
+     *         `_expirationTimestamp`.
+     * @dev Callers must hold `LOCKER_ROLE`. The implementation enforces the unpaused state,
+     *      a future expiration timestamp, an unrecovered token holder and the
+     *      single-partition / default-partition rule. Emits `LockedByPartition`.
+     * @param _partition The partition the tokens are locked on.
+     * @param _amount The amount of tokens to lock.
+     * @param _tokenHolder The address whose tokens are locked.
+     * @param _expirationTimestamp Unix timestamp at which the lock becomes releasable.
+     * @return success_ True when the lock has been recorded.
+     * @return lockId_ Identifier assigned to the new lock for `(partition, tokenHolder)`.
      */
     function lockByPartition(
         bytes32 _partition,
@@ -31,11 +36,15 @@ interface ILockByPartition is ILockTypes {
     ) external returns (bool success_, uint256 lockId_);
 
     /**
-     * @notice Releases a certain lock previously created with `lockByPartition`.
-     * @param _partition The partition to release the lock from.
-     * @param _lockId The id of the lock to be released.
-     * @param _tokenHolder The address of the token holder.
-     * @return success_ Boolean indicating success.
+     * @notice Releases a lock on `_partition` previously created with `lockByPartition`.
+     * @dev Pause-gated and validated against single-partition mode. Reverts with
+     *      `WrongLockId` when `_lockId` is unknown for `(_partition, _tokenHolder)` and with
+     *      `LockExpirationNotReached` before the lock expires. Emits
+     *      `LockByPartitionReleased`.
+     * @param _partition The partition the lock lives on.
+     * @param _lockId Identifier of the lock to release.
+     * @param _tokenHolder The address whose tokens are returned.
+     * @return success_ True when the lock has been removed and the balance returned.
      */
     function releaseByPartition(
         bytes32 _partition,
@@ -44,10 +53,11 @@ interface ILockByPartition is ILockTypes {
     ) external returns (bool success_);
 
     /**
-     * @notice Returns the total amount of tokens currently locked for a specific partition and token holder.
-     * @param _partition The partition to query.
-     * @param _tokenHolder The address of the token holder.
-     * @return amount_ The total locked amount on the given partition.
+     * @notice Returns the total locked amount of `_tokenHolder` on `_partition`, adjusted
+     *         by any pending balance-adjustment factors.
+     * @param _partition The partition the query is scoped to.
+     * @param _tokenHolder The address whose locked amount is queried.
+     * @return amount_ The locked amount on the given partition.
      */
     function getLockedAmountForByPartition(
         bytes32 _partition,
@@ -55,10 +65,10 @@ interface ILockByPartition is ILockTypes {
     ) external view returns (uint256 amount_);
 
     /**
-     * @notice Returns the number of locks for a specific partition and token holder.
-     * @param _partition The partition to query.
-     * @param _tokenHolder The address of the token holder.
-     * @return lockCount_ The number of locks on the given partition.
+     * @notice Returns the number of active locks held by `_tokenHolder` on `_partition`.
+     * @param _partition The partition the query is scoped to.
+     * @param _tokenHolder The address whose lock count is queried.
+     * @return lockCount_ The number of active locks on the given partition.
      */
     function getLockCountForByPartition(
         bytes32 _partition,
@@ -66,12 +76,16 @@ interface ILockByPartition is ILockTypes {
     ) external view returns (uint256 lockCount_);
 
     /**
-     * @notice Returns the list of lock IDs for a specific partition and token holder.
-     * @param _partition The partition to query.
-     * @param _tokenHolder The address of the token holder.
-     * @param _pageIndex The zero-based index of the page to retrieve.
-     * @param _pageLength The maximum number of lock IDs to return.
-     * @return locksId_ The array of lock IDs for the given page.
+     * @notice Returns a paginated list of lock identifiers for `_tokenHolder` on
+     *         `_partition`.
+     * @dev Pagination is bounded by the caller through `_pageLength`; the returned array
+     *      length is at most `_pageLength`. A query past the available range returns an
+     *      empty array.
+     * @param _partition The partition the query is scoped to.
+     * @param _tokenHolder The address whose locks are listed.
+     * @param _pageIndex Zero-based index of the page to retrieve.
+     * @param _pageLength Maximum number of identifiers to return on the page.
+     * @return locksId_ Array of lock identifiers for the requested page.
      */
     function getLocksIdForByPartition(
         bytes32 _partition,
@@ -81,12 +95,15 @@ interface ILockByPartition is ILockTypes {
     ) external view returns (uint256[] memory locksId_);
 
     /**
-     * @notice Returns the details of a specific lock for a specific partition and token holder.
-     * @param _partition The partition to query.
-     * @param _tokenHolder The address of the token holder.
-     * @param _lockId The id of the lock to be queried.
-     * @return amount_ The amount of tokens locked.
-     * @return expirationTimestamp_ The expiration timestamp of the lock.
+     * @notice Returns the amount and expiration of a lock on `_partition`.
+     * @dev Both fields are zero when the identifier does not exist for the given
+     *      `(_partition, _tokenHolder)` pair. The amount is adjusted by any pending
+     *      balance-adjustment factors.
+     * @param _partition The partition the lock lives on.
+     * @param _tokenHolder The address whose lock is queried.
+     * @param _lockId Identifier of the lock to read.
+     * @return amount_ The locked amount, in token base units.
+     * @return expirationTimestamp_ Unix timestamp at which the lock becomes releasable.
      */
     function getLockForByPartition(
         bytes32 _partition,

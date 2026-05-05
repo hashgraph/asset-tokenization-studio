@@ -6,13 +6,25 @@ import { ILock } from "./ILock.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { _LOCK_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
+/**
+ * @title LockFacet
+ * @author Asset Tokenization Studio Team
+ * @notice Diamond facet exposing the default-partition lock surface and the all-partition
+ *         read queries declared in `ILock`, registered under `_LOCK_RESOLVER_KEY`.
+ * @dev Inherits the implementation from `Lock` and satisfies the
+ *      `IStaticFunctionSelectors` contract required by the Diamond proxy for static
+ *      selector registration. Exposes 8 selectors: `lock`, `release`,
+ *      `forceReleaseByPartition`, `getLockByPartition`, `getLockedAmountFor`,
+ *      `getLockCountFor`, `getLocksIdFor`, `getLockFor`. The partition-aware writes and
+ *      partition-scoped reads are served by `LockByPartitionFacet`.
+ */
 contract LockFacet is Lock, IStaticFunctionSelectors {
-    // IStaticFunctionSelectors implementation (external pure - must come last)
-
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _LOCK_RESOLVER_KEY;
     }
 
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](8);
@@ -26,6 +38,7 @@ contract LockFacet is Lock, IStaticFunctionSelectors {
         staticFunctionSelectors_[selectorIndex++] = this.getLockFor.selector;
     }
 
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;

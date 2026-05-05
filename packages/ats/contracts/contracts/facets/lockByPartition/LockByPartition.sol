@@ -11,15 +11,24 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 /**
  * @title LockByPartition
  * @author Asset Tokenization Studio Team
- * @notice Abstract implementation of `ILockByPartition`, providing partition-aware lock writes
- *         and partition-scoped read queries.
- * @dev Combines the partition write operations (`lockByPartition`, `releaseByPartition`) with
- *      the partition-scoped reads (`getLockedAmountForByPartition`, `getLockCountForByPartition`,
- *      `getLocksIdForByPartition`, `getLockForByPartition`). All write methods delegate to
- *      `LockStorageWrapper`. Intended to be inherited by `LockByPartitionFacet`.
+ * @notice Abstract base for the partition-aware lock writes and partition-scoped read
+ *         queries declared in `ILockByPartition`.
+ * @dev Combines the partition write operations (`lockByPartition`, `releaseByPartition`)
+ *      with the partition-scoped reads (`getLockedAmountForByPartition`,
+ *      `getLockCountForByPartition`, `getLocksIdForByPartition`, `getLockForByPartition`).
+ *      All write methods delegate persistence to `LockStorageWrapper`; balance-adjusted
+ *      reads are timestamped via `TimeTravelStorageWrapper.getBlockTimestamp` so they
+ *      remain deterministic under time-travel testing. Intended to be inherited by
+ *      `LockByPartitionFacet`.
  */
 abstract contract LockByPartition is ILockByPartition, Modifiers {
-    /// @inheritdoc ILockByPartition
+    /**
+     * @inheritdoc ILockByPartition
+     * @dev Pause-gated, restricted to `LOCKER_ROLE`, validated against the
+     *      single-partition / default-partition rule and against unrecovered token
+     *      holders. Delegates to `LockStorageWrapper.lockByPartition` and emits
+     *      `LockedByPartition`.
+     */
     function lockByPartition(
         bytes32 _partition,
         uint256 _amount,
@@ -52,7 +61,13 @@ abstract contract LockByPartition is ILockByPartition, Modifiers {
         );
     }
 
-    /// @inheritdoc ILockByPartition
+    /**
+     * @inheritdoc ILockByPartition
+     * @dev Pause-gated and validated against the single-partition / default-partition
+     *      rule. Reverts with `WrongLockId` when `_lockId` is unknown for
+     *      `(_partition, _tokenHolder)` and with `LockExpirationNotReached` before the
+     *      lock expires. Emits `LockByPartitionReleased`.
+     */
     function releaseByPartition(
         bytes32 _partition,
         uint256 _lockId,
@@ -75,7 +90,11 @@ abstract contract LockByPartition is ILockByPartition, Modifiers {
         emit LockByPartitionReleased(EvmAccessors.getMsgSender(), _tokenHolder, _partition, _lockId);
     }
 
-    /// @inheritdoc ILockByPartition
+    /**
+     * @inheritdoc ILockByPartition
+     * @dev Returns the partition figure adjusted by any pending balance-adjustment factors,
+     *      evaluated at `TimeTravelStorageWrapper.getBlockTimestamp()`.
+     */
     function getLockedAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
@@ -105,7 +124,11 @@ abstract contract LockByPartition is ILockByPartition, Modifiers {
         locksId_ = LockStorageWrapper.getLocksIdForByPartition(_partition, _tokenHolder, _pageIndex, _pageLength);
     }
 
-    /// @inheritdoc ILockByPartition
+    /**
+     * @inheritdoc ILockByPartition
+     * @dev Returns the partition figures adjusted by any pending balance-adjustment factors,
+     *      evaluated at `TimeTravelStorageWrapper.getBlockTimestamp()`.
+     */
     function getLockForByPartition(
         bytes32 _partition,
         address _tokenHolder,

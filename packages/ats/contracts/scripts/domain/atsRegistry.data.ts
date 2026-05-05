@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-05T10:36:45.752Z
+ * Generated: 2026-05-05T14:33:39.299Z
  * Facets: 112
  * Infrastructure: 2
  *
@@ -11369,6 +11369,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   LockFacet: {
     name: "LockFacet",
+    description:
+      "Diamond facet exposing the default-partition lock surface and the all-partition read queries declared in `ILock`, registered under `_LOCK_RESOLVER_KEY`.",
     resolverKey: {
       name: "_LOCK_RESOLVER_KEY",
       value: "0xf1364345b3db5ebe5808f2d2d2aaecb9cdb4fddacad1534033060ebc886fc1e9",

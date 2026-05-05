@@ -13,15 +13,17 @@ under `_LOCK_BY_PARTITION_RESOLVER_KEY`.
 
 - Added `contracts/facets/lockByPartition/ILockByPartition.sol`, `LockByPartition.sol`,
   `LockByPartitionFacet.sol`.
-- Introduced `contracts/facets/layer_1/lock/ILockTypes.sol` as the single source of truth for
-  `LockData`, `LockedByPartition`, `LockByPartitionReleased`, `LockExpirationNotReached`,
-  `WrongLockId`. Both `ILock` and `ILockByPartition` now inherit from it.
+- Introduced `contracts/facets/layer_1/lock/ILockTypes.sol` for the Lock domain events
+  and errors shared across both facets — `LockedByPartition`, `LockByPartitionReleased`,
+  `LockExpirationNotReached`, `WrongLockId`. Both `ILock` and `ILockByPartition` inherit
+  from it. The `LockData` struct stays in `ILock` because it is the I/O of a single
+  external method (`getLockByPartition` on `LockFacet`).
 - Removed `lockByPartition`, `releaseByPartition`, `getLockedAmountForByPartition`,
   `getLockCountForByPartition`, `getLocksIdForByPartition`, `getLockForByPartition` from
   `Lock.sol`, `LockFacet.sol`, and `ILock.sol` (14 → 8 selectors).
 - Added `_LOCK_BY_PARTITION_RESOLVER_KEY` constant in `resolverKeys.sol`.
-- Updated `LockStorageWrapper.sol` to reference `ILockTypes` for `LockData`, `WrongLockId`,
-  and `LockExpirationNotReached`.
+- Updated `LockStorageWrapper.sol` to revert with `ILockTypes.WrongLockId` and
+  `ILockTypes.LockExpirationNotReached`. Storage continues to use `ILock.LockData`.
 - `IAsset` now also inherits `ILockByPartition`.
 - Updated `Configuration.ts` and all 7 `createConfiguration.ts` scripts (bond, bondFixedRate,
   bondKpiLinkedRate, bondSustainabilityPerformanceTargetRate, equity, loan, loanPortfolio) to
