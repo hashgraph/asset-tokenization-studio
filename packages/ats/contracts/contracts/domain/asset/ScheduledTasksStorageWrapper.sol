@@ -31,7 +31,7 @@ import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageW
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { InterestRateStorageWrapper } from "./InterestRateStorageWrapper.sol";
 import { SustainabilityPerformanceTargetRateLib } from "./SustainabilityPerformanceTargetRateLib.sol";
-import { ICouponTypes } from "../../facets/layer_2/coupon/ICouponTypes.sol";
+import { ICouponTypes } from "../../facets/coupon/ICouponTypes.sol";
 import { KpiLinkedRateLib } from "./KpiLinkedRateLib.sol";
 
 /**
