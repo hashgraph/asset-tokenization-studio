@@ -78,6 +78,7 @@ import {
 } from "./balanceTrackerAtSnapshotByPartition/IBalanceTrackerAtSnapshotByPartition.sol";
 import { IClearingAtSnapshot } from "./clearingAtSnapshot/IClearingAtSnapshot.sol";
 import { IClearingAtSnapshotByPartition } from "./clearingAtSnapshotByPartition/IClearingAtSnapshotByPartition.sol";
+import { IHoldAtSnapshotByPartition } from "./holdAtSnapshotByPartition/IHoldAtSnapshotByPartition.sol";
 import { IHoldAtSnapshot } from "./holdAtSnapshot/IHoldAtSnapshot.sol";
 import { ICouponListing } from "./couponListing/ICouponListing.sol";
 import { ICouponSecurityHolders } from "./couponSecurityHolders/ICouponSecurityHolders.sol";
@@ -189,6 +190,7 @@ interface IAsset is
     IBalanceTrackerAtSnapshotByPartition,
     IClearingAtSnapshot,
     IClearingAtSnapshotByPartition,
+    IHoldAtSnapshotByPartition,
     IHoldAtSnapshot,
     IFixedRate,
     // Scheduled Tasks
