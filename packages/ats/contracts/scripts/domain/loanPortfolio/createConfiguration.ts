@@ -77,6 +77,7 @@ const LOANS_PORTFOLIO_FACETS = [
   // ERC Standards
   "MintByPartitionFacet",
   "ERC1410ManagementFacet",
+  "ProtectedByPartitionFacet",
   "ERC1410ReadFacet",
   "OperatorFacet",
   "ERC1410TokenHolderFacet",

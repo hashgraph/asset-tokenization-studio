@@ -120,6 +120,7 @@ import { IDocumentation } from "./documentation/IDocumentation.sol";
 import { IController } from "./controller/IController.sol";
 import { IControllerHoldByPartition } from "./controllerHoldByPartition/IControllerHoldByPartition.sol";
 import { IControllerByPartition } from "./controllerByPartition/IControllerByPartition.sol";
+import { IProtectedByPartition } from "./protectedByPartition/IProtectedByPartition.sol";
 import { IProtectedHoldByPartition } from "./protectedHoldByPartition/IProtectedHoldByPartition.sol";
 import { IERC20Permit } from "./layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
 import { IEIP712 } from "./eip712/IEIP712.sol";
@@ -244,6 +245,7 @@ interface IAsset is
     IController,
     IControllerHoldByPartition,
     IControllerByPartition,
+    IProtectedByPartition,
     IProtectedHoldByPartition,
     IERC20Permit,
     IEIP712,

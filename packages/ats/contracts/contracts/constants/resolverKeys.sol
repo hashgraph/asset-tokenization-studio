@@ -252,6 +252,9 @@ bytes32 constant _CONTROLLER_BY_PARTITION_RESOLVER_KEY = 0x66d6ddfefca163b54f2a3
 // keccak256("security.token.standard.protected.hold.by.partition.resolverKey")
 bytes32 constant _PROTECTED_HOLD_BY_PARTITION_RESOLVER_KEY = 0x12c5881cfa073bf7497f90103e5b2a7f9a93f11147137ec2a1389b60904d0157;
 
+// keccak256("security.token.standard.protectedByPartition.resolverKey");
+bytes32 constant _PROTECTED_BY_PARTITION_RESOLVER_KEY = 0x9d0a49341d6d9216381bfd989b60c6b453acb5b2ca6994948003527bd029090d;
+
 // keccak256("security.token.standard.hold.management.fixed.rate.resolverKey")
 bytes32 constant _HOLD_MANAGEMENT_FIXED_RATE_RESOLVER_KEY = 0x8e342108c0845c91b05aef6328f881a5a4cb86d47914f75a3fbd3b9219f740d1;
 

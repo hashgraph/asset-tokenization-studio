@@ -74,6 +74,7 @@ const BOND_FIXED_RATE_FACETS = [
   "TransferFacet",
   "MintByPartitionFacet",
   "ERC1410ManagementFacet",
+  "ProtectedByPartitionFacet",
   "ERC1410ReadFacet",
   "OperatorFacet",
   "ERC1410TokenHolderFacet",
