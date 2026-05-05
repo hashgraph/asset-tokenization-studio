@@ -177,7 +177,7 @@ describe("registerAdditionalFacets - Integration Tests", () => {
       });
 
       // Get initial version
-      const initialVersion = await blr.getLatestVersion();
+      const initialVersion = await blr.getLatestVersion(facetsWithKeys[0].resolverKey);
       expect(initialVersion).to.equal(BLR_VERSIONS.FIRST);
 
       // Add more facets
@@ -198,8 +198,8 @@ describe("registerAdditionalFacets - Integration Tests", () => {
       expect(result.success).to.be.true;
 
       // Verify version incremented
-      const newVersion = await blr.getLatestVersion();
-      expect(newVersion).to.equal(BLR_VERSIONS.SECOND);
+      const newVersion = await blr.getLatestVersion(newFacetsWithKeys[0].resolverKey);
+      expect(newVersion).to.equal(BLR_VERSIONS.FIRST);
     });
 
     it("should work incrementally over multiple calls", async () => {

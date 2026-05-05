@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-05T10:34:14.522Z
+ * Generated: 2026-05-05T11:37:39.820Z
  * Facets: 112
  * Infrastructure: 2
  *
@@ -14739,10 +14739,10 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
       {
         name: "getLatestVersion",
         signature: {
-          full: "function getLatestVersion() view returns (uint256 latestVersion_)",
-          canonical: "getLatestVersion()",
+          full: "function getLatestVersion(bytes32 _businessLogicKey) view returns (uint256 latestVersion_)",
+          canonical: "getLatestVersion(bytes32)",
         },
-        selector: "0x0e6d1de9",
+        selector: "0xdd3b014c",
       },
       {
         name: "getLatestVersionByConfiguration",
@@ -14795,10 +14795,10 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
       {
         name: "getVersionStatus",
         signature: {
-          full: "function getVersionStatus(uint256 _version) view returns (uint8 status_)",
-          canonical: "getVersionStatus(uint256)",
+          full: "function getVersionStatus(bytes32 _businessLogicKey, uint256 _version) view returns (uint8 status_)",
+          canonical: "getVersionStatus(bytes32,uint256)",
         },
-        selector: "0x65b24dfc",
+        selector: "0xd9e4725a",
       },
       {
         name: "grantRole",
