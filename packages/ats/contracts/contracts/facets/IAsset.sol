@@ -62,7 +62,7 @@ import { IBalanceTracker } from "./balanceTracker/IBalanceTracker.sol";
 import { IBalanceTrackerAdjusted } from "./balanceTrackerAdjusted/IBalanceTrackerAdjusted.sol";
 import { ITransferAndLock } from "./layer_3/transferAndLock/ITransferAndLock.sol";
 import { ICoupon } from "./layer_2/coupon/ICoupon.sol";
-import { IDividend } from "./layer_2/dividend/IDividend.sol";
+import { IDividend } from "./dividend/IDividend.sol";
 import { IDividendSecurityHolders } from "./dividendSecurityHolders/IDividendSecurityHolders.sol";
 import { IKpis } from "./layer_2/kpi/kpiLatest/IKpis.sol";
 import { IProtectedPartitions } from "./layer_1/protectedPartition/IProtectedPartitions.sol";
