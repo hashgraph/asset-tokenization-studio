@@ -3,7 +3,7 @@
 import ValidatedRequest from "@core/validation/ValidatedArgs";
 import FormatValidation from "../FormatValidation";
 
-export default class GetScheduledBalanceAdjustmentCountRequest extends ValidatedRequest<GetScheduledBalanceAdjustmentCountRequest> {
+export default class GetPendingBalanceAdjustmentCountRequest extends ValidatedRequest<GetPendingBalanceAdjustmentCountRequest> {
   securityId: string;
 
   constructor({ securityId }: { securityId: string }) {
