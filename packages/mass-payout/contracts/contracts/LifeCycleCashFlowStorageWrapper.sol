@@ -23,7 +23,7 @@ import {
 } from "@hashgraph/asset-tokenization-contracts/contracts/facets/couponSecurityHolders/ICouponSecurityHolders.sol";
 import { IBondRead } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/bond/IBondRead.sol";
 import { IEquity } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/equity/IEquity.sol";
-import { IDividend } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/dividend/IDividend.sol";
+import { IDividend } from "@hashgraph/asset-tokenization-contracts/contracts/facets/dividend/IDividend.sol";
 import {
     IDividendSecurityHolders
 } from "@hashgraph/asset-tokenization-contracts/contracts/facets/dividendSecurityHolders/IDividendSecurityHolders.sol";
