@@ -30,7 +30,6 @@ const AMOUNT = 1000;
 const MAX_SUPPLY = 10000000;
 const EMPTY_VC_ID = EMPTY_STRING;
 const BALANCE_OF_C_ORIGINAL = 2 * AMOUNT;
-const onchainId = ethers.Wallet.createRandom().address;
 
 describe("ERC3643 Tests", () => {
   let diamond: ResolverProxy;
@@ -345,32 +344,6 @@ describe("ERC3643 Tests", () => {
     });
 
     describe("Identity", () => {
-      it("GIVEN an initialized token WHEN updating the onChanId THEN UpdatedTokenInformation emits OnchainIDUpdated with updated onchainId and current metadata", async () => {
-        const retrieved_onChainId = await asset.onchainID();
-        expect(retrieved_onChainId).to.equal(ADDRESS_ZERO);
-
-        //Update onChainId
-        expect(await asset.setOnchainID(onchainId))
-          .to.emit(asset, "UpdatedTokenInformation")
-          .withArgs(name, symbol, decimals, version, onchainId);
-
-        const retrieved_newOnChainId = await asset.onchainID();
-        expect(retrieved_newOnChainId).to.equal(onchainId);
-      });
-
-      it("GIVEN an initialized token WHEN updating the identityRegistry THEN setIdentityRegistry emits IdentityRegistryAdded with updated identityRegistry", async () => {
-        const retrieved_identityRegistry = await asset.identityRegistry();
-        expect(retrieved_identityRegistry).to.equal(identityRegistryMock.target as string);
-
-        //Update identityRegistry
-        expect(await asset.setIdentityRegistry(identityRegistryMock.target as string))
-          .to.emit(asset, "IdentityRegistryAdded")
-          .withArgs(identityRegistryMock.target as string);
-
-        const retrieved_newIdentityRegistry = await asset.identityRegistry();
-        expect(retrieved_newIdentityRegistry).to.equal(identityRegistryMock.target as string);
-      });
-
       it("GIVEN non verified account with balance WHEN transfer THEN reverts with AddressNotVerified", async () => {
         // Setup
         await asset.mint(signer_E.address, 2 * AMOUNT);
@@ -1082,19 +1055,6 @@ describe("ERC3643 Tests", () => {
           "AccountHasNoRole",
         );
       });
-      it("GIVEN an account without TREX_OWNER role WHEN setOnchainID THEN transaction fails with AccountHasNoRole", async () => {
-        // set onchainID fails
-        await expect(asset.connect(signer_C).setOnchainID(onchainId)).to.be.revertedWithCustomError(
-          asset,
-          "AccountHasNoRole",
-        );
-      });
-      it("GIVEN an account without TREX_OWNER role WHEN setIdentityRegistry THEN transaction fails with AccountHasNoRole", async () => {
-        // set IdentityRegistry fails
-        await expect(
-          asset.connect(signer_C).setIdentityRegistry(identityRegistryMock.target as string),
-        ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
-      });
       it("GIVEN an account without FREEZE MANAGER role WHEN freezePartialTokens THEN transaction fails with AccountHasNoRole", async () => {
         await expect(asset.connect(signer_C).freezePartialTokens(signer_A.address, 10)).to.be.revertedWithCustomError(
           asset,
@@ -1151,11 +1111,6 @@ describe("ERC3643 Tests", () => {
       it("GIVEN a paused token WHEN attempting to update name or symbol THEN transactions revert with TokenIsPaused error", async () => {
         await expect(asset.setName(newName)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
         await expect(asset.setSymbol(newSymbol)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
-        await expect(asset.setOnchainID(onchainId)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
-        await expect(asset.setIdentityRegistry(identityRegistryMock.target as string)).to.be.revertedWithCustomError(
-          asset,
-          "TokenIsPaused",
-        );
       });
     });
     describe("Adjust balances", () => {

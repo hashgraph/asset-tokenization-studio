@@ -6,7 +6,7 @@ import { KPI_KPIS_ADD_COUPON_DATE, KPI_KPIS_SET_MINDATE } from "../../constants/
 import { IKpis } from "../../facets/layer_2/kpi/kpiLatest/IKpis.sol";
 import { Checkpoints } from "../../infrastructure/utils/Checkpoints.sol";
 import { CouponStorageWrapper } from "./coupon/CouponStorageWrapper.sol";
-import { ICouponTypes } from "../../facets/layer_2/coupon/ICouponTypes.sol";
+import { ICouponTypes } from "../../facets/coupon/ICouponTypes.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 

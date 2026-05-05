@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICouponTypes } from "../layer_2/coupon/ICouponTypes.sol";
+import { ICouponTypes } from "../coupon/ICouponTypes.sol";
 
 /**
  * @title ICouponSecurityHolders

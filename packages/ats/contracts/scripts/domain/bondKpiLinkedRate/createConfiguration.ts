@@ -54,6 +54,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
   "HoldAtSnapshotFacet",
+  "LockAtSnapshotByPartitionFacet",
   "FreezeAtSnapshotFacet",
   "FreezeAtSnapshotByPartitionFacet",
   "LockAtSnapshotFacet",
@@ -84,6 +85,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "BatchTransferFacet",
   "ERC3643ManagementFacet",
   "ERC3643ReadFacet",
+  "IdentityFacet",
   "ComplianceFacet",
   "ComplianceByPartitionFacet",
   "MintFacet",
@@ -113,6 +115,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "AdjustBalancesFacet",
   "LockFacet",
   "LockByPartitionFacet",
+  "MaturityFacet",
   "NominalValueFacet",
   "ProceedRecipientsKpiLinkedRateFacet", // rate-specific: triggers scheduled tasks
   "ProtectedPartitionsFacet",

@@ -152,16 +152,11 @@ describe("Bond Tests", () => {
       expect(principalFor.denominator).to.equal(10n ** (bondDetails.nominalValueDecimals + BigInt(DECIMALS)));
     });
 
-    describe("Redeem At Maturity", () => {
-      it("GIVEN a zero address as token holder WHEN redeeming at maturity THEN transaction fails with ZeroAddressNotAllowed", async () => {
+    describe("Redeem At Maturity By Partition", () => {
+      it("GIVEN a zero address as token holder WHEN redeemAtMaturityByPartition THEN transaction fails with ZeroAddressNotAllowed", async () => {
         await expect(
           asset.connect(signer_A).redeemAtMaturityByPartition(ADDRESS_ZERO, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
-
-        await expect(asset.connect(signer_A).fullRedeemAtMaturity(ADDRESS_ZERO)).to.be.revertedWithCustomError(
-          asset,
-          "ZeroAddressNotAllowed",
-        );
       });
 
       it("GIVEN single partition mode WHEN redeeming from a non-default partition THEN transaction fails with PartitionNotAllowedInSinglePartitionMode", async () => {
@@ -170,91 +165,57 @@ describe("Bond Tests", () => {
         ).to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode");
       });
 
-      it("GIVEN the token holder account is blocked WHEN redeeming at maturity THEN transaction fails with AccountIsBlocked", async () => {
+      it("GIVEN the token holder account is blocked WHEN redeemAtMaturityByPartition THEN transaction fails with AccountIsBlocked", async () => {
         await asset.connect(signer_D).addToControlList(signer_B.address);
 
         await expect(
           asset.connect(signer_A).redeemAtMaturityByPartition(signer_B.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(asset, "AccountIsBlocked");
-
-        await expect(asset.connect(signer_A).fullRedeemAtMaturity(signer_B.address)).to.be.revertedWithCustomError(
-          asset,
-          "AccountIsBlocked",
-        );
       });
 
-      it("GIVEN the caller lacks the Maturity Redeemer role WHEN redeeming at maturity THEN transaction fails with AccountHasNoRole", async () => {
+      it("GIVEN the caller lacks the Maturity Redeemer role WHEN redeemAtMaturityByPartition THEN transaction fails with AccountHasNoRole", async () => {
         await expect(
           asset.connect(signer_B).redeemAtMaturityByPartition(signer_C.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
-
-        await expect(asset.connect(signer_B).fullRedeemAtMaturity(signer_C.address)).to.be.revertedWithCustomError(
-          asset,
-          "AccountHasNoRole",
-        );
       });
-      it("GIVEN clearing is activated WHEN redeeming at maturity THEN transaction fails with ClearingIsActivated", async () => {
+
+      it("GIVEN clearing is activated WHEN redeemAtMaturityByPartition THEN transaction fails with ClearingIsActivated", async () => {
         await asset.connect(signer_A).activateClearing();
 
         await expect(
           asset.connect(signer_A).redeemAtMaturityByPartition(signer_C.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(asset, "ClearingIsActivated");
-
-        await expect(asset.connect(signer_A).fullRedeemAtMaturity(signer_C.address)).to.be.revertedWithCustomError(
-          asset,
-          "ClearingIsActivated",
-        );
       });
 
-      it("GIVEN the token is paused WHEN redeeming at maturity THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN the token is paused WHEN redeemAtMaturityByPartition THEN transaction fails with TokenIsPaused", async () => {
         await grantRoleAndPauseToken(asset, ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
 
         await expect(
           asset.connect(signer_C).redeemAtMaturityByPartition(signer_C.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
-
-        await expect(asset.connect(signer_C).fullRedeemAtMaturity(signer_C.address)).to.be.revertedWithCustomError(
-          asset,
-          "TokenIsPaused",
-        );
       });
 
-      it("GIVEN the token holder lacks valid KYC status WHEN redeeming at maturity THEN transaction fails with InvalidKycStatus", async () => {
+      it("GIVEN the token holder lacks valid KYC status WHEN redeemAtMaturityByPartition THEN transaction fails with InvalidKycStatus", async () => {
         await expect(
           asset.connect(signer_A).redeemAtMaturityByPartition(signer_C.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(asset, "InvalidKycStatus");
-
-        await expect(asset.connect(signer_A).fullRedeemAtMaturity(signer_C.address)).to.be.revertedWithCustomError(
-          asset,
-          "InvalidKycStatus",
-        );
       });
 
-      it("GIVEN the current date is before maturity WHEN redeeming at maturity THEN transaction fails with BondMaturityDateWrong", async () => {
+      it("GIVEN the current date is before maturity WHEN redeemAtMaturityByPartition THEN transaction fails with BondMaturityDateWrong", async () => {
         await expect(
           asset.connect(signer_A).redeemAtMaturityByPartition(signer_A.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(asset, "BondMaturityDateWrong");
-
-        await expect(asset.connect(signer_A).fullRedeemAtMaturity(signer_A.address)).to.be.revertedWithCustomError(
-          asset,
-          "BondMaturityDateWrong",
-        );
       });
 
-      it("GIVEN a recovered wallet WHEN redeeming at maturity THEN transaction fails with WalletRecovered", async () => {
+      it("GIVEN a recovered wallet WHEN redeemAtMaturityByPartition THEN transaction fails with WalletRecovered", async () => {
         await asset.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
 
         await expect(
           asset.connect(signer_A).redeemAtMaturityByPartition(signer_A.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(asset, "WalletRecovered");
-
-        await expect(asset.connect(signer_A).fullRedeemAtMaturity(signer_A.address)).to.be.revertedWithCustomError(
-          asset,
-          "WalletRecovered",
-        );
       });
 
-      it("GIVEN all conditions are met WHEN redeeming at maturity THEN transaction succeeds and emits RedeemedByPartition", async () => {
+      it("GIVEN all conditions are met WHEN redeemAtMaturityByPartition THEN transaction succeeds and emits RedeemedByPartition", async () => {
         await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
 
         await asset.connect(signer_C).issueByPartition({
@@ -267,23 +228,6 @@ describe("Bond Tests", () => {
         await asset.changeSystemTimestamp(maturityDate + 1);
 
         await expect(asset.connect(signer_A).redeemAtMaturityByPartition(signer_A.address, DEFAULT_PARTITION, amount))
-          .to.emit(asset, "RedeemedByPartition")
-          .withArgs(DEFAULT_PARTITION, signer_A.address, signer_A.address, amount, "0x", "0x");
-      });
-
-      it("GIVEN all conditions are met WHEN redeeming all at maturity THEN transaction succeeds and emits RedeemedByPartition", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
-
-        await asset.connect(signer_C).issueByPartition({
-          partition: DEFAULT_PARTITION,
-          tokenHolder: signer_A.address,
-          value: amount,
-          data: "0x",
-        });
-
-        await asset.changeSystemTimestamp(maturityDate + 1);
-
-        await expect(asset.connect(signer_A).fullRedeemAtMaturity(signer_A.address))
           .to.emit(asset, "RedeemedByPartition")
           .withArgs(DEFAULT_PARTITION, signer_A.address, signer_A.address, amount, "0x", "0x");
       });
@@ -331,47 +275,6 @@ describe("Bond Tests", () => {
         await expect(asset.connect(signer_A).redeemAtMaturityByPartition(signer_A.address, _PARTITION_ID, amount))
           .to.emit(asset, "RedeemedByPartition")
           .withArgs(_PARTITION_ID, signer_A.address, signer_A.address, amount, "0x", "0x");
-      });
-
-      it("GIVEN a new diamond contract with multi-partition WHEN redeemAtMaturityByPartition is called THEN transaction success", async () => {
-        await deploySecurityFixture(true);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
-        await asset.connect(signer_C).issueByPartition({
-          partition: _PARTITION_ID,
-          tokenHolder: signer_A.address,
-          value: amount,
-          data: "0x",
-        });
-        await asset.connect(signer_C).issueByPartition({
-          partition: DEFAULT_PARTITION,
-          tokenHolder: signer_A.address,
-          value: amount,
-          data: "0x",
-        });
-
-        await asset.changeSystemTimestamp(maturityDate + 1);
-
-        await expect(asset.connect(signer_A).fullRedeemAtMaturity(signer_A.address))
-          .to.emit(asset, "RedeemedByPartition")
-          .withArgs(_PARTITION_ID, signer_A.address, signer_A.address, amount, "0x", "0x")
-          .to.emit(asset, "RedeemedByPartition")
-          .withArgs(DEFAULT_PARTITION, signer_A.address, signer_A.address, amount, "0x", "0x");
-      });
-    });
-    describe("Uncovered Branch Tests", () => {
-      it("GIVEN a token holder with zero balance WHEN fullRedeemAtMaturity is called THEN succeeds without redeeming", async () => {
-        // Create a new user with no tokens
-        const signers = await ethers.getSigners();
-        const newUser = signers[10]; // Use a signer that hasn't been used yet
-
-        // Grant KYC to new user
-        await asset.connect(signer_B).grantKyc(newUser.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-
-        // Move time past maturity
-        await asset.changeSystemTimestamp(maturityDate + TIME_PERIODS_S.DAY);
-
-        // Call fullRedeemAtMaturity on account with zero balance (signer_A has _MATURITY_REDEEMER_ROLE)
-        await expect(asset.connect(signer_A).fullRedeemAtMaturity(newUser.address)).to.not.be.reverted;
       });
     });
   });

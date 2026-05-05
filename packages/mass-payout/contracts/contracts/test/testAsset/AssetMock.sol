@@ -8,7 +8,7 @@ import {
     ScheduledTask
 } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { IFactory } from "@hashgraph/asset-tokenization-contracts/contracts/factory/IFactory.sol";
-import { ICouponTypes } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/coupon/ICouponTypes.sol";
+import { ICouponTypes } from "@hashgraph/asset-tokenization-contracts/contracts/facets/coupon/ICouponTypes.sol";
 import { IVotingTypes } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/voting/IVotingTypes.sol";
 // solhint-disable max-line-length
 import { IDividendTypes } from "@hashgraph/asset-tokenization-contracts/contracts/facets/dividend/IDividendTypes.sol";
