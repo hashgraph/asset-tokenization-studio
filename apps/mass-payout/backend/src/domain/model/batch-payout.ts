@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { BaseEntity } from "@domain/model/base-entity"
-import { isNil } from "@nestjs/common/utils/shared.utils"
+import { BaseEntity } from "@domain/model/base-entity";
+import { isNil } from "@nestjs/common/utils/shared.utils";
 import {
   BatchPayoutDistributionIdMissingError,
   BatchPayoutHederaTransactionIdInvalidError,
   BatchPayoutHederaTransactionHashInvalidError,
   BatchPayoutHoldersNumberInvalidError,
-} from "@domain/errors/batch-payout.error"
-import { Distribution } from "@domain/model/distribution"
+} from "@domain/errors/batch-payout.error";
+import { Distribution } from "@domain/model/distribution";
 
 export enum BatchPayoutStatus {
   PARTIALLY_COMPLETED = "PARTIALLY_COMPLETED",
@@ -18,12 +18,12 @@ export enum BatchPayoutStatus {
 }
 
 export class BatchPayout extends BaseEntity {
-  readonly distribution: Distribution
-  readonly name: string
-  readonly hederaTransactionId: string
-  readonly hederaTransactionHash: string
-  readonly holdersNumber: number
-  readonly status: BatchPayoutStatus
+  readonly distribution: Distribution;
+  readonly name: string;
+  readonly hederaTransactionId: string;
+  readonly hederaTransactionHash: string;
+  readonly holdersNumber: number;
+  readonly status: BatchPayoutStatus;
 
   private constructor(
     id: string,
@@ -36,14 +36,14 @@ export class BatchPayout extends BaseEntity {
     createdAt: Date = new Date(),
     updatedAt: Date = createdAt,
   ) {
-    super(id, createdAt, updatedAt)
-    this.distribution = distribution
-    this.name = name
-    this.hederaTransactionId = hederaTransactionId
-    this.hederaTransactionHash = hederaTransactionHash
-    this.holdersNumber = holdersNumber
-    this.status = status
-    this.validateFields()
+    super(id, createdAt, updatedAt);
+    this.distribution = distribution;
+    this.name = name;
+    this.hederaTransactionId = hederaTransactionId;
+    this.hederaTransactionHash = hederaTransactionHash;
+    this.holdersNumber = holdersNumber;
+    this.status = status;
+    this.validateFields();
   }
 
   static create(
@@ -66,7 +66,7 @@ export class BatchPayout extends BaseEntity {
       status,
       createdAt,
       updatedAt,
-    )
+    );
   }
 
   static createExisting(
@@ -90,39 +90,39 @@ export class BatchPayout extends BaseEntity {
       status,
       createdAt,
       updatedAt,
-    )
+    );
   }
 
   private validateFields(): void {
-    this.validateDistributionId()
-    this.validateHederaTransactionId()
-    this.validateHederaTransactionHash()
-    this.validateHoldersNumber()
+    this.validateDistributionId();
+    this.validateHederaTransactionId();
+    this.validateHederaTransactionHash();
+    this.validateHoldersNumber();
   }
 
   private validateDistributionId(): void {
     if (isNil(this.distribution)) {
-      throw new BatchPayoutDistributionIdMissingError()
+      throw new BatchPayoutDistributionIdMissingError();
     }
   }
 
   private validateHederaTransactionId(): void {
-    const hederaTransactionIdRegex = /^\d+\.\d+\.\d+@\d+\.\d+$/
+    const hederaTransactionIdRegex = /^\d+\.\d+\.\d+@\d+\.\d+$/;
     if (isNil(this.hederaTransactionId) || !hederaTransactionIdRegex.test(this.hederaTransactionId)) {
-      throw new BatchPayoutHederaTransactionIdInvalidError()
+      throw new BatchPayoutHederaTransactionIdInvalidError();
     }
   }
 
   private validateHederaTransactionHash(): void {
-    const hederaTransactionHashRegex = /^0x[a-fA-F0-9]{96,98}$/
+    const hederaTransactionHashRegex = /^0x[a-fA-F0-9]{96,98}$/;
     if (isNil(this.hederaTransactionHash) || !hederaTransactionHashRegex.test(this.hederaTransactionHash)) {
-      throw new BatchPayoutHederaTransactionHashInvalidError()
+      throw new BatchPayoutHederaTransactionHashInvalidError();
     }
   }
 
   private validateHoldersNumber(): void {
     if (isNil(this.holdersNumber) || this.holdersNumber <= 0) {
-      throw new BatchPayoutHoldersNumberInvalidError()
+      throw new BatchPayoutHoldersNumberInvalidError();
     }
   }
 }

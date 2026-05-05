@@ -3,10 +3,10 @@
 exports[`SearchByRole should render correctly 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-1voji0k"
+    class="chakra-stack css-1pa0k2v"
   >
     <div
-      class="chakra-stack css-1utpalr"
+      class="chakra-stack css-1nb7vi4"
     >
       <p
         class="css-1mk5tlk"
@@ -20,19 +20,19 @@ exports[`SearchByRole should render correctly 1`] = `
       </p>
     </div>
     <div
-      class="chakra-stack css-8c063r"
+      class="chakra-stack css-1ao5vqt"
     >
       <div
-        class="chakra-stack css-4tx9j6"
+        class="chakra-stack css-vr8y9b"
       >
         <div
-          class="chakra-stack css-1yxzzu5"
+          class="chakra-stack css-b1sb84"
         >
           <form
-            class="chakra-stack css-1u2nxl"
+            class="chakra-stack css-l67g1w"
           >
             <div
-              class="chakra-stack css-x9mz4b"
+              class="chakra-stack css-96qqtw"
             >
               <div
                 class="chakra-form-control css-1kxonj9"
@@ -63,19 +63,19 @@ exports[`SearchByRole should render correctly 1`] = `
                       class="css-1f43avz-a11yText-A11yText"
                     />
                     <div
-                      class=" css-13cymwt-control"
+                      class="css-13cymwt-control"
                     >
                       <div
-                        class=" css-1fdsijx-ValueContainer"
+                        class="css-hlgwow"
                       >
                         <div
-                          class=" css-1jqq78o-placeholder"
+                          class="css-1jqq78o-placeholder"
                           id="react-select-2-placeholder"
                         >
                           Select role
                         </div>
                         <div
-                          class=" css-qbdosj-Input"
+                          class="css-19bb58m"
                           data-value=""
                         >
                           <input
@@ -98,7 +98,7 @@ exports[`SearchByRole should render correctly 1`] = `
                         </div>
                       </div>
                       <div
-                        class=" css-1hb7zxy-IndicatorsContainer"
+                        class="css-1wy0on6"
                       >
                         <div
                           class="css-sppt3c"
@@ -107,7 +107,7 @@ exports[`SearchByRole should render correctly 1`] = `
                             class="css-amv3mm"
                           >
                             <svg
-                              class="chakra-icon css-j3hfir"
+                              class="chakra-icon css-1bnjyrz"
                               fill="currentColor"
                               focusable="false"
                               height="1em"
@@ -133,7 +133,7 @@ exports[`SearchByRole should render correctly 1`] = `
               </div>
             </div>
             <button
-              class="chakra-button css-frvfum"
+              class="chakra-button css-16f8hdx"
               data-testid="select-role-button"
               disabled=""
               type="submit"
@@ -144,14 +144,14 @@ exports[`SearchByRole should render correctly 1`] = `
         </div>
       </div>
       <div
-        class="chakra-stack css-1tgv9q4"
+        class="chakra-stack css-16p9gj0"
       >
         <div
-          class="chakra-stack css-z0wha2"
+          class="chakra-stack css-1ma2bgy"
           data-testid="security-details"
         >
           <div
-            class="css-d5hr0q"
+            class="css-1dixb64"
           >
             <p
               class="chakra-text css-1an6htx"
@@ -160,12 +160,12 @@ exports[`SearchByRole should render correctly 1`] = `
             </p>
           </div>
           <div
-            class="css-11brmb4"
+            class="css-tvba8"
             data-testid="definition-list-item-Name"
             tabindex="0"
           >
             <p
-              class="chakra-text css-u8o82o"
+              class="chakra-text css-vbc1qe"
             >
               Name
             </p>
@@ -178,12 +178,12 @@ exports[`SearchByRole should render correctly 1`] = `
             </div>
           </div>
           <div
-            class="css-11brmb4"
+            class="css-tvba8"
             data-testid="definition-list-item-Symbol"
             tabindex="0"
           >
             <p
-              class="chakra-text css-u8o82o"
+              class="chakra-text css-vbc1qe"
             >
               Symbol
             </p>
@@ -196,12 +196,12 @@ exports[`SearchByRole should render correctly 1`] = `
             </div>
           </div>
           <div
-            class="css-11brmb4"
+            class="css-tvba8"
             data-testid="definition-list-item-Decimal"
             tabindex="0"
           >
             <p
-              class="chakra-text css-u8o82o"
+              class="chakra-text css-vbc1qe"
             >
               Decimal
             </p>
@@ -214,12 +214,12 @@ exports[`SearchByRole should render correctly 1`] = `
             </div>
           </div>
           <div
-            class="css-11brmb4"
+            class="css-tvba8"
             data-testid="definition-list-item-ISIN"
             tabindex="0"
           >
             <p
-              class="chakra-text css-u8o82o"
+              class="chakra-text css-vbc1qe"
             >
               ISIN
             </p>
@@ -232,12 +232,12 @@ exports[`SearchByRole should render correctly 1`] = `
             </div>
           </div>
           <div
-            class="css-11brmb4"
+            class="css-tvba8"
             data-testid="definition-list-item-ID"
             tabindex="0"
           >
             <p
-              class="chakra-text css-u8o82o"
+              class="chakra-text css-vbc1qe"
             >
               ID
             </p>
@@ -250,14 +250,50 @@ exports[`SearchByRole should render correctly 1`] = `
             </div>
           </div>
           <div
-            class="css-11brmb4"
+            class="css-tvba8"
+            data-testid="definition-list-item-Max Supply"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-vbc1qe"
+            >
+              Max Supply
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-tvba8"
             data-testid="definition-list-item-Total Supply"
             tabindex="0"
           >
             <p
-              class="chakra-text css-u8o82o"
+              class="chakra-text css-vbc1qe"
             >
               Total Supply
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-tvba8"
+            data-testid="definition-list-item-Pending to be minted"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-vbc1qe"
+            >
+              Pending to be minted
             </p>
             <div
               class="chakra-skeleton__group css-1rr4qq7"

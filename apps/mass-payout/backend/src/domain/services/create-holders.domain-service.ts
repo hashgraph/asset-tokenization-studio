@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { BatchPayout } from "@domain/model/batch-payout"
-import { Holder, HolderStatus } from "@domain/model/holder"
-import { Inject, Injectable } from "@nestjs/common"
-import { HolderRepository } from "@domain/ports/holder-repository.port"
-import { isZeroAddress } from "../../utils/isZeroAddress"
-import { HederaService } from "@domain/ports/hedera.port"
+import { BatchPayout } from "@domain/model/batch-payout";
+import { Holder, HolderStatus } from "@domain/model/holder";
+import { Inject, Injectable } from "@nestjs/common";
+import { HolderRepository } from "@domain/ports/holder-repository.port";
+import { isZeroAddress } from "../../utils/isZeroAddress";
+import { HederaService } from "@domain/ports/hedera.port";
 
-export const ONE_HOUR = 60 * 60 * 1000
-const INITIAL_RETRY_COUNT = 0
+export const ONE_HOUR = 60 * 60 * 1000;
+const INITIAL_RETRY_COUNT = 0;
 
 @Injectable()
 export class CreateHoldersDomainService {
@@ -25,10 +25,10 @@ export class CreateHoldersDomainService {
     succeededAddresses: string[],
     paidAmounts: string[],
   ): Promise<Holder[]> {
-    const filteredFailedAddresses = failedAddresses.filter((address) => !isZeroAddress(address))
-    const filteredSucceededAddresses = succeededAddresses.filter((address) => !isZeroAddress(address))
+    const filteredFailedAddresses = failedAddresses.filter((address) => !isZeroAddress(address));
+    const filteredSucceededAddresses = succeededAddresses.filter((address) => !isZeroAddress(address));
 
-    const nextRetryAt = new Date(Date.now() + ONE_HOUR)
+    const nextRetryAt = new Date(Date.now() + ONE_HOUR);
 
     let holders: Holder[] = await Promise.all(
       filteredFailedAddresses.map(async (address) => {
@@ -40,9 +40,9 @@ export class CreateHoldersDomainService {
           HolderStatus.FAILED,
           nextRetryAt,
           "Payment execution failed",
-        )
+        );
       }),
-    )
+    );
 
     const successHolders = await Promise.all(
       filteredSucceededAddresses.map(async (address, index) => {
@@ -55,12 +55,12 @@ export class CreateHoldersDomainService {
           undefined,
           undefined,
           paidAmounts[index],
-        )
+        );
       }),
-    )
+    );
 
-    holders = holders.concat(successHolders)
+    holders = holders.concat(successHolders);
 
-    return await this.holderRepository.saveHolders(holders)
+    return await this.holderRepository.saveHolders(holders);
   }
 }

@@ -11,7 +11,7 @@ const getApiBaseUrl = () => {
       // @ts-ignore
       return (window as any).import.meta.env.VITE_API_URL;
     }
-  } catch (error) {
+  } catch {
     console.warn("Could not access window object to read VITE_API_URL, defaulting to http://localhost:3000");
   }
   return "http://localhost:3000";

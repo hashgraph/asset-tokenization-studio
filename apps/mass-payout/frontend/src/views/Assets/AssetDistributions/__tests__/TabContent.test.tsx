@@ -360,15 +360,17 @@ describe("TabContent", () => {
     });
 
     it("should pass t function to components", () => {
-      renderTabContent();
+      renderTabContent({
+        filteredDistributions: [],
+        totalFilteredElements: 0,
+        isLoading: false,
+      });
 
       const filterControls = screen.getByTestId("filter-controls");
       expect(filterControls).toHaveTextContent("function");
 
-      const emptyState = screen.queryByTestId("empty-distributions-state");
-      if (emptyState) {
-        expect(emptyState).toHaveTextContent("function");
-      }
+      const emptyState = screen.getByTestId("empty-distributions-state");
+      expect(emptyState).toHaveTextContent("function");
     });
 
     it("should handle custom columns", () => {

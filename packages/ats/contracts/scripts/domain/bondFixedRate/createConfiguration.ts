@@ -45,6 +45,7 @@ const BOND_FIXED_RATE_FACETS = [
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
+  "HoldAtSnapshotFacet",
   "FreezeAtSnapshotFacet",
   "FreezeAtSnapshotByPartitionFacet",
   "CoreAtSnapshotFacet",
@@ -63,6 +64,9 @@ const BOND_FIXED_RATE_FACETS = [
   // CoreAdjusted
   "CoreAdjustedFacet",
 
+  //Metadata
+  "MetadataFacet",
+
   // ERC Standards
   "TransferFacet",
   "MintByPartitionFacet",
@@ -73,7 +77,9 @@ const BOND_FIXED_RATE_FACETS = [
   "DocumentationFacet",
   "ControllerFacet",
   "ERC20PermitFacet",
+  "EIP712Facet",
   "NoncesFacet",
+  "DeactivateFacet",
   "ERC20VotesFacet",
   "BatchControllerFacet",
   "BatchBurnFacet",

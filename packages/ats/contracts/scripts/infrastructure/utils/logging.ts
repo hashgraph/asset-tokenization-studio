@@ -165,6 +165,29 @@ export function debug(message: string, data?: unknown): void {
   const output = config.json ? formatJson("DEBUG", message, data) : formatMessage("DEBUG", message, Colors.Gray);
 
   console.log(output);
+
+  // Log data in text mode (JSON mode already includes it via formatJson)
+  if (!config.json && data !== undefined) {
+    if (data instanceof Error) {
+      const errorOutput = [data.name, data.message].filter(Boolean).join(": ");
+      console.log(errorOutput);
+      if (data.stack) {
+        console.log(data.stack);
+      }
+    } else {
+      try {
+        const jsonStr = JSON.stringify(data, (_key, value) => {
+          if (typeof value === "bigint") {
+            return value.toString();
+          }
+          return value;
+        });
+        console.log(jsonStr);
+      } catch {
+        console.log(String(data));
+      }
+    }
+  }
 }
 
 /**
@@ -203,6 +226,29 @@ export function warn(message: string, data?: unknown): void {
   const output = config.json ? formatJson("WARN", message, data) : formatMessage("WARN", message, Colors.Yellow);
 
   console.warn(output);
+
+  // Log data in text mode (JSON mode already includes it via formatJson)
+  if (!config.json && data !== undefined) {
+    if (data instanceof Error) {
+      const errorOutput = [data.name, data.message].filter(Boolean).join(": ");
+      console.warn(errorOutput);
+      if (data.stack) {
+        console.warn(data.stack);
+      }
+    } else {
+      try {
+        const jsonStr = JSON.stringify(data, (_key, value) => {
+          if (typeof value === "bigint") {
+            return value.toString();
+          }
+          return value;
+        });
+        console.warn(jsonStr);
+      } catch {
+        console.warn(String(data));
+      }
+    }
+  }
 }
 
 /**
@@ -222,6 +268,43 @@ export function error(message: string, data?: unknown): void {
   const output = config.json ? formatJson("ERROR", message, data) : formatMessage("ERROR", message, Colors.Red);
 
   console.error(output);
+
+  // Log data in text mode (JSON mode already includes it via formatJson)
+  if (!config.json && data !== undefined) {
+    if (data instanceof Error) {
+      const errorOutput = [data.name, data.message].filter(Boolean).join(": ");
+      console.error(errorOutput);
+      if (data.stack) {
+        console.error(data.stack);
+      }
+      // Also try ethers-specific error fields
+      const ethersError = data as unknown as Record<string, unknown>;
+      if (ethersError.reason) {
+        console.error(`Reason: ${ethersError.reason}`);
+      }
+      if (ethersError.shortMessage) {
+        console.error(`Short: ${ethersError.shortMessage}`);
+      }
+      if (ethersError.code) {
+        console.error(`Code: ${ethersError.code}`);
+      }
+      if (ethersError.data) {
+        console.error(`Data: ${ethersError.data}`);
+      }
+    } else {
+      try {
+        const jsonStr = JSON.stringify(data, (_key, value) => {
+          if (typeof value === "bigint") {
+            return value.toString();
+          }
+          return value;
+        });
+        console.error(jsonStr);
+      } catch {
+        console.error(String(data));
+      }
+    }
+  }
 }
 
 /**

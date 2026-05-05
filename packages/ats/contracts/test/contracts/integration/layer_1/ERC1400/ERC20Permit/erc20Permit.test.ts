@@ -32,22 +32,6 @@ describe("ERC20Permit Tests", () => {
   });
 
   describe("Single Partition", () => {
-    describe("Domain Separator", () => {
-      it("GIVEN a deployed contract WHEN DOMAIN_SEPARATOR is called THEN the correct domain separator is returned", async () => {
-        const domainSeparator = await asset.DOMAIN_SEPARATOR();
-        const CONTRACT_NAME = (await asset.getERC20Metadata()).info.name;
-        const CONTRACT_VERSION = (await asset.getConfigInfo()).version_.toString();
-        const domain = {
-          name: CONTRACT_NAME,
-          version: CONTRACT_VERSION,
-          chainId: await ethers.provider.getNetwork().then((n) => n.chainId),
-          verifyingContract: diamond.target as string,
-        };
-        const domainHash = ethers.TypedDataEncoder.hashDomain(domain);
-        expect(domainSeparator).to.equal(domainHash);
-      });
-    });
-
     describe("permit", () => {
       it("GIVEN a paused token WHEN permit is called THEN the transaction fails with TokenIsPaused", async () => {
         await asset.pause();

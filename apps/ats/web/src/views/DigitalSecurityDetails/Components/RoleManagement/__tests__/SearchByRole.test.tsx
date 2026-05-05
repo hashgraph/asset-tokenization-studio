@@ -14,7 +14,7 @@ describe(`${SearchByRole.name}`, () => {
     expect(component.asFragment()).toMatchSnapshot();
   });
 
-  test.only("should fill form", async () => {
+  test("should fill form", async () => {
     const component = factoryComponent();
 
     const submitButton = component.getByTestId("select-role-button");

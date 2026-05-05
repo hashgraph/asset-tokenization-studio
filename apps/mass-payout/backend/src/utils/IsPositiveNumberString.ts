@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { registerDecorator, ValidationArguments, ValidationOptions } from "class-validator"
+import { registerDecorator, ValidationArguments, ValidationOptions } from "class-validator";
 
 export function IsPositiveNumberString(validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
@@ -12,14 +12,14 @@ export function IsPositiveNumberString(validationOptions?: ValidationOptions) {
       validator: {
         // eslint-disable-next-line unused-imports/no-unused-vars
         validate(value: any, args: ValidationArguments) {
-          if (typeof value !== "string") return false
-          const num = Number(value)
-          return !isNaN(num) && num > 0 && isFinite(num)
+          if (typeof value !== "string") return false;
+          const num = Number(value);
+          return !isNaN(num) && num > 0 && isFinite(num);
         },
         defaultMessage(args: ValidationArguments) {
-          return `${args.property} must be a positive number string`
+          return `${args.property} must be a positive number string`;
         },
       },
-    })
-  }
+    });
+  };
 }

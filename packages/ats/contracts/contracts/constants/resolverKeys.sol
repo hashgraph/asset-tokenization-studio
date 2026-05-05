@@ -117,6 +117,9 @@ bytes32 constant _ERC20PERMIT_KPI_LINKED_RATE_RESOLVER_KEY = 0x468437a5a7a128b24
 // keccak256("security.token.standard.erc20permit.SustainabilityPerformanceTarget.rate.resolverKey");
 bytes32 constant _ERC20PERMIT_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x3bf8d35ad3c3320d95184dd4f9a0bfc2e56b151318d9d27eefa74461d24f5c61;
 
+// keccak256("security.token.standard.eip712.resolverKey");
+bytes32 constant _EIP712_RESOLVER_KEY = 0xe19e9ba358b25b281ecf7a998a7040a7cea72e6fb09fa5ceab8598a59927bee4;
+
 // keccak256("security.token.standard.documentation.resolverKey");
 bytes32 constant _DOCUMENTATION_RESOLVER_KEY = 0x57129a8daf2f0c8049f790465a8c176b7e9fdd5f8cbe1f7f9c6c3a70351ea521;
 
@@ -537,6 +540,9 @@ bytes32 constant _BALANCE_TRACKER_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY = 0x1d00
 // keccak256('security.token.standard.clearingAtSnapshotByPartition.resolverKey');
 bytes32 constant _CLEARING_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY = 0x28a0e168340e454e3c0e6fbe7dccb80c91178f4e2ee50776e28bbc5c19063e88;
 
+// keccak256('security.token.standard.holdAtSnapshot.resolverKey');
+bytes32 constant _HOLD_AT_SNAPSHOT_RESOLVER_KEY = 0x799547b5a870e2f0d0e9664f133d288ad8cd2a1b267be8ae0085030adb2d858d;
+
 // Layer 2 Resolver Keys
 
 // keccak256('security.token.standard.equity.resolverKey');
@@ -677,6 +683,9 @@ bytes32 constant _VOTING_RESOLVER_KEY = 0x97e0ffc69e5d5dd7c4635bfce0a5cf15b1c313
 // keccak256("security.token.standard.dividend.resolverKey")
 bytes32 constant _DIVIDEND_RESOLVER_KEY = 0x63752e3f4bd54d9fec1ad1667ef4de4f80e9a6484fb94f93ea4312aef9c19bea;
 
+// keccak256("security.token.standard.dividendSecurityHolders.resolverKey")
+bytes32 constant _DIVIDEND_SECURITY_HOLDERS_RESOLVER_KEY = 0xc6f22894c7b5a791b1ec8ba97fced37ce7b17c9e0ffea29bf1c1064a0edd85ad;
+
 // keccak256('security.token.standard.amortization.resolverKey');
 bytes32 constant _AMORTIZATION_RESOLVER_KEY = 0xe45d89550ef8988da0d14267142ce98f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d;
 
@@ -699,3 +708,9 @@ bytes32 constant _TRANSFER_AND_LOCK_KPI_LINKED_RATE_RESOLVER_KEY = 0x3e5f7a9b1c2
 
 // keccak256("security.token.standard.transferandlock.SustainabilityPerformanceTarget.rate.resolverKey");
 bytes32 constant _TRANSFER_AND_LOCK_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x9d1e3f5a7b9c0d2e4f6a8b0c1d3e5f7a9b0c2d4e6f8a9b1c3d5e7f9a0b2c4d6e;
+
+// keccak256("security.token.standard.metadata.resolverKey");
+bytes32 constant _METADATA_RESOLVER_KEY = 0x4c3bd2753f7bc002cfee0180298759848c0f294a3bdb6c27eb76ea165a47b29d;
+
+// keccak256("security.token.standard.deactivate.resolverKey");
+bytes32 constant _DEACTIVATE_RESOLVER_KEY = 0x28edc8979475f616e9ee33c89ffa66022cb1bd6d3c555cbb4c4acaefa3974f96;

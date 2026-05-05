@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { Injectable, Logger } from "@nestjs/common"
-import { Asset } from "@domain/model/asset"
-import { AssetPausedError } from "@domain/errors/asset.error"
+import { Injectable, Logger } from "@nestjs/common";
+import { Asset } from "@domain/model/asset";
+import { AssetPausedError } from "@domain/errors/asset.error";
 
 @Injectable()
 export class ValidateAssetPauseStateDomainService {
-  private readonly logger = new Logger(ValidateAssetPauseStateDomainService.name)
+  private readonly logger = new Logger(ValidateAssetPauseStateDomainService.name);
 
   /**
    * Validates the pause state of an asset using only the domain state.
@@ -22,14 +22,14 @@ export class ValidateAssetPauseStateDomainService {
       const logMessage = distributionId
         ? `Attempted to execute operation for paused asset. Asset: ${asset.name} ` +
           `(${asset.hederaTokenAddress}), Distribution ID: ${distributionId}`
-        : `Attempted to execute operation on paused asset. Asset: ${asset.name} (${asset.hederaTokenAddress})`
+        : `Attempted to execute operation on paused asset. Asset: ${asset.name} (${asset.hederaTokenAddress})`;
 
-      this.logger.error(logMessage)
-      throw new AssetPausedError(asset.name, asset.hederaTokenAddress)
+      this.logger.error(logMessage);
+      throw new AssetPausedError(asset.name, asset.hederaTokenAddress);
     }
 
     this.logger.debug(
       `Asset pause state validation passed. Asset: ${asset.name} (${asset.hederaTokenAddress}) is not paused.`,
-    )
+    );
   }
 }

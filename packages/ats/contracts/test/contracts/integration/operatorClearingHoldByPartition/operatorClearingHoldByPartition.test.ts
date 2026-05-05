@@ -166,6 +166,15 @@ describe("OperatorClearingHoldByPartition Tests", () => {
       expect(clearing2.holdTo).to.equal(signer_D.address);
     });
 
+    describe("bug Transfer", () => {
+      it("GIVEN an authorized operator WHEN operatorClearingCreateHoldByPartition THEN Transfer event is emitted from holder to address(0)", async () => {
+        await asset.connect(signer_A).authorizeOperator(signer_B.address);
+        await expect(asset.connect(signer_B).operatorClearingCreateHoldByPartition(clearingOperationFrom, hold))
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
+      });
+    });
+
     describe("AccessControl", () => {
       it("GIVEN an account without operator authorization WHEN operatorClearingCreateHoldByPartition THEN transaction fails with Unauthorized", async () => {
         await expect(

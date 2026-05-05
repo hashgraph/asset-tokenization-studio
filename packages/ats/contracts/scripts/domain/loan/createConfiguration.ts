@@ -71,7 +71,9 @@ const LOAN_FACETS = [
   // ERC Standards
   "TransferFacet",
   "CoreAdjustedFacet",
+  "MetadataFacet",
   "ERC20PermitFacet",
+  "EIP712Facet",
   "ERC20VotesFacet",
   "DocumentationFacet",
   "ControllerFacet",
@@ -122,6 +124,7 @@ const LOAN_FACETS = [
 
   // Advanced Features
   "SnapshotsFacet",
+  "HoldAtSnapshotFacet",
   "FreezeAtSnapshotFacet",
   "FreezeAtSnapshotByPartitionFacet",
   "CoreAtSnapshotFacet",

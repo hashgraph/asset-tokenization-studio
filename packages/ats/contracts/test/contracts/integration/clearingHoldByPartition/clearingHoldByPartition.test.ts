@@ -480,5 +480,137 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
         expect(clearing.amount).to.equal(0);
       });
     });
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // bug Transfer: clearingCreateHoldByPartition to address(0)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    describe("bug Transfer", () => {
+      it("A9: GIVEN clearingCreateHoldByPartition WHEN transfer to address(0) THEN emits Transfer to ZeroAddress", async () => {
+        await expect(
+          asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, {
+            ...hold,
+            to: ethers.ZeroAddress,
+          }),
+        )
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
+      });
+
+      it("A10: GIVEN clearingCreateHoldFromByPartition WHEN transfer to address(0) THEN emits Transfer to ZeroAddress", async () => {
+        await asset.connect(signer_A).increaseAllowance(signer_B.address, _AMOUNT);
+        await expect(
+          asset
+            .connect(signer_B)
+            .clearingCreateHoldFromByPartition(
+              { ...clearingOperationFrom, clearingOperation: { ...clearingOperation } },
+              { ...hold, to: ethers.ZeroAddress },
+            ),
+        )
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
+      });
+
+      it("A11: GIVEN operatorClearingCreateHoldByPartition WHEN transfer to address(0) THEN emits Transfer to ZeroAddress", async () => {
+        await asset.connect(signer_A).authorizeOperator(signer_B.address);
+        await expect(
+          asset.connect(signer_B).operatorClearingCreateHoldByPartition(clearingOperationFrom, {
+            ...hold,
+            to: ethers.ZeroAddress,
+          }),
+        )
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
+      });
+
+      it("A12: GIVEN protectedClearingCreateHoldByPartition WHEN transfer to address(0) THEN emits Transfer to ZeroAddress", async () => {
+        // Setup protected partitions
+        await asset.grantRole(ATS_ROLES.PROTECTED_PARTITIONS_ROLE, signer_A.address);
+        await asset.protectPartitions();
+
+        // Grant role for protected partition
+        const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
+          ["bytes32", "bytes32"],
+          [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+        );
+        const packedDataWithoutPrefix = packedData.slice(2);
+        const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
+        await asset.grantRole(protectedPartitionRole, signer_A.address);
+
+        // Get nonce
+        const nonce = Number(await asset.nonces(signer_A.address)) + 1;
+
+        const protectedClearingOperation = {
+          clearingOperation: {
+            partition: _DEFAULT_PARTITION,
+            expirationTimestamp: expirationTimestamp,
+            data: _DATA,
+          },
+          from: signer_A.address,
+          deadline: expirationTimestamp,
+          nonce: nonce,
+        };
+
+        const holdForClearing = {
+          amount: BigInt(_AMOUNT),
+          expirationTimestamp: BigInt(expirationTimestamp),
+          escrow: signer_B.address,
+          to: ethers.ZeroAddress,
+          data: _DATA,
+        };
+
+        // EIP-712 domain
+        const name = (await asset.getERC20Metadata()).info.name;
+        const version = (await asset.getConfigInfo()).version_.toString();
+        const chainId = await network.provider.send("eth_chainId");
+
+        const domain = {
+          name: name,
+          version: version,
+          chainId: parseInt(chainId, 16),
+          verifyingContract: diamond.target.toString(),
+        };
+
+        const types = {
+          ClearingOperation: [
+            { name: "partition", type: "bytes32" },
+            { name: "expirationTimestamp", type: "uint256" },
+            { name: "data", type: "bytes" },
+          ],
+          ProtectedClearingOperation: [
+            { name: "clearingOperation", type: "ClearingOperation" },
+            { name: "from", type: "address" },
+            { name: "deadline", type: "uint256" },
+            { name: "nonce", type: "uint256" },
+          ],
+          Hold: [
+            { name: "amount", type: "uint256" },
+            { name: "expirationTimestamp", type: "uint256" },
+            { name: "escrow", type: "address" },
+            { name: "to", type: "address" },
+            { name: "data", type: "bytes" },
+          ],
+          protectedClearingCreateHoldByPartition: [
+            { name: "_protectedClearingOperation", type: "ProtectedClearingOperation" },
+            { name: "_hold", type: "Hold" },
+          ],
+        };
+
+        const message = {
+          _protectedClearingOperation: protectedClearingOperation,
+          _hold: holdForClearing,
+        };
+
+        const signature = await signer_A.signTypedData(domain, types, message);
+
+        await expect(
+          asset
+            .connect(signer_A)
+            .protectedClearingCreateHoldByPartition(protectedClearingOperation, holdForClearing, signature),
+        )
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
+      });
+    });
   });
 });

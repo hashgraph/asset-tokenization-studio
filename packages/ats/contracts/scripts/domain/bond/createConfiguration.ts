@@ -48,6 +48,7 @@ const BOND_FACETS = [
   "KycFacet",
   "PauseFacet",
   "SnapshotsFacet",
+  "HoldAtSnapshotFacet",
   "FreezeAtSnapshotFacet",
   "FreezeAtSnapshotByPartitionFacet",
   "CoreAtSnapshotFacet",
@@ -68,6 +69,9 @@ const BOND_FACETS = [
   // CoreAdjusted
   "CoreAdjustedFacet",
 
+  //Metadata
+  "MetadataFacet",
+
   // ERC Standards
   "TransferFacet",
   "MintByPartitionFacet",
@@ -78,7 +82,9 @@ const BOND_FACETS = [
   "DocumentationFacet",
   "ControllerFacet",
   "ERC20PermitFacet",
+  "EIP712Facet",
   "NoncesFacet",
+  "DeactivateFacet",
   "ERC20VotesFacet",
   "BatchControllerFacet",
   "BatchBurnFacet",

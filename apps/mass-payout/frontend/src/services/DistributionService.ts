@@ -82,10 +82,14 @@ export class DistributionService {
     const { filters, page = 0, sort = [], size = 10, status } = params;
 
     const query = new URLSearchParams();
-    filters?.value && query.append("search", filters.value);
+    if (filters?.value) {
+      query.append("search", filters.value);
+    }
     query.append("page", (page + 1).toString()); // Backend expects 1-based
     query.append("limit", size.toString());
-    status && query.append("status", status);
+    if (status) {
+      query.append("status", status);
+    }
 
     if (sort.length > 0) {
       const firstSort = sort[0];
@@ -126,7 +130,9 @@ export class DistributionService {
     const { distributionId, page = 0, size = 10, search } = params;
 
     const query = new URLSearchParams();
-    search && query.append("search", search);
+    if (search) {
+      query.append("search", search);
+    }
     query.append("page", (page + 1).toString()); // Backend expects 1-based
     query.append("limit", size.toString());
 

@@ -102,6 +102,20 @@ describe("BatchController Tests", () => {
         expect(finalBalanceE).to.equal(initialBalanceE + BigInt(transferAmount * 2));
       });
 
+      describe("bug Transfer", () => {
+        it("GIVEN controller WHEN batchForcedTransfer THEN Transfer event is emitted for each transfer", async () => {
+          const fromList = [signer_F.address, signer_D.address];
+          const toList = [signer_E.address, signer_E.address];
+          const amounts = [transferAmount, transferAmount];
+
+          await expect(asset.connect(signer_A).batchForcedTransfer(fromList, toList, amounts))
+            .to.emit(asset, "Transfer")
+            .withArgs(signer_F.address, signer_E.address, transferAmount)
+            .to.emit(asset, "Transfer")
+            .withArgs(signer_D.address, signer_E.address, transferAmount);
+        });
+      });
+
       it("GIVEN account without controller role WHEN batchForcedTransfer THEN transaction fails with AccountHasNoRole", async () => {
         const fromList = [signer_F.address];
         const toList = [signer_E.address];

@@ -63,6 +63,7 @@ import { IBalanceTrackerAdjusted } from "./balanceTrackerAdjusted/IBalanceTracke
 import { ITransferAndLock } from "./layer_3/transferAndLock/ITransferAndLock.sol";
 import { ICoupon } from "./layer_2/coupon/ICoupon.sol";
 import { IDividend } from "./layer_2/dividend/IDividend.sol";
+import { IDividendSecurityHolders } from "./dividendSecurityHolders/IDividendSecurityHolders.sol";
 import { IKpis } from "./layer_2/kpi/kpiLatest/IKpis.sol";
 import { IProtectedPartitions } from "./layer_1/protectedPartition/IProtectedPartitions.sol";
 import { IProceedRecipients } from "./layer_2/proceedRecipient/IProceedRecipients.sol";
@@ -76,6 +77,7 @@ import {
 } from "./balanceTrackerAtSnapshotByPartition/IBalanceTrackerAtSnapshotByPartition.sol";
 import { IClearingAtSnapshot } from "./clearingAtSnapshot/IClearingAtSnapshot.sol";
 import { IClearingAtSnapshotByPartition } from "./clearingAtSnapshotByPartition/IClearingAtSnapshotByPartition.sol";
+import { IHoldAtSnapshot } from "./holdAtSnapshot/IHoldAtSnapshot.sol";
 import { ICouponListing } from "./couponListing/ICouponListing.sol";
 import { ICouponSecurityHolders } from "./couponSecurityHolders/ICouponSecurityHolders.sol";
 import {
@@ -111,10 +113,13 @@ import { IControllerHoldByPartition } from "./controllerHoldByPartition/IControl
 import { IControllerByPartition } from "./controllerByPartition/IControllerByPartition.sol";
 import { IProtectedHoldByPartition } from "./protectedHoldByPartition/IProtectedHoldByPartition.sol";
 import { IERC20Permit } from "./layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
+import { IEIP712 } from "./eip712/IEIP712.sol";
 import { IControlList } from "./controlList/IControlList.sol";
 import { IBatchBurn } from "./batchBurn/IBatchBurn.sol";
 import { IBatchMint } from "./batchMint/IBatchMint.sol";
 import { IBatchTransfer } from "./batchTransfer/IBatchTransfer.sol";
+import { IMetadata } from "./metadata/IMetadata.sol";
+import { IDeactivate } from "./deactivate/IDeactivate.sol";
 
 // solhint-disable no-empty-blocks
 /**
@@ -174,6 +179,7 @@ interface IAsset is
     ICoupon,
     ICouponSecurityHolders,
     IDividend,
+    IDividendSecurityHolders,
     // Additional Layer 1
     IBalanceTracker,
     IBalanceTrackerAdjusted,
@@ -185,6 +191,7 @@ interface IAsset is
     IBalanceTrackerAtSnapshotByPartition,
     IClearingAtSnapshot,
     IClearingAtSnapshotByPartition,
+    IHoldAtSnapshot,
     IFixedRate,
     // Scheduled Tasks
     ICouponListing,
@@ -219,11 +226,14 @@ interface IAsset is
     IControllerByPartition,
     IProtectedHoldByPartition,
     IERC20Permit,
+    IEIP712,
     // Control
     IControlList,
     IExternalControlList,
     IExternalControlListManagement,
     IBatchBurn,
     IBatchMint,
-    IBatchTransfer
+    IBatchTransfer,
+    IMetadata,
+    IDeactivate
 {}

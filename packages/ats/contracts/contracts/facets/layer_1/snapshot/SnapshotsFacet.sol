@@ -30,7 +30,6 @@ contract SnapshotsFacet is Snapshots, IStaticFunctionSelectors {
             staticFunctionSelectors_[--selectorIndex] = this.getTotalTokenHoldersAtSnapshot.selector;
             staticFunctionSelectors_[--selectorIndex] = this.getTokenHoldersAtSnapshot.selector;
             staticFunctionSelectors_[--selectorIndex] = this.heldBalanceOfAtSnapshotByPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.heldBalanceOfAtSnapshot.selector;
             staticFunctionSelectors_[--selectorIndex] = this.lockedBalanceOfAtSnapshotByPartition.selector;
             staticFunctionSelectors_[--selectorIndex] = this.lockedBalanceOfAtSnapshot.selector;
             staticFunctionSelectors_[--selectorIndex] = this.partitionsOfAtSnapshot.selector;

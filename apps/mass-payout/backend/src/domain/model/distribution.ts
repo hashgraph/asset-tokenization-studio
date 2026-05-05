@@ -8,12 +8,12 @@ import {
   DistributionNotInStatusError,
   DistributionNotPayoutError,
   DistributionRecurrencyMissingError,
-} from "@domain/errors/distribution.error"
-import { Asset } from "@domain/model/asset"
-import { BaseEntity } from "@domain/model/base-entity"
-import { isNil } from "@nestjs/common/utils/shared.utils"
-import { CorporateActionId } from "./value-objects/corporate-action-id"
-import { SnapshotId } from "./value-objects/snapshot-id"
+} from "@domain/errors/distribution.error";
+import { Asset } from "@domain/model/asset";
+import { BaseEntity } from "@domain/model/base-entity";
+import { isNil } from "@nestjs/common/utils/shared.utils";
+import { CorporateActionId } from "./value-objects/corporate-action-id";
+import { SnapshotId } from "./value-objects/snapshot-id";
 
 export enum DistributionStatus {
   SCHEDULED = "SCHEDULED",
@@ -36,10 +36,10 @@ export enum PayoutSubtype {
 }
 
 export type CorporateActionDetails = {
-  type: DistributionType.CORPORATE_ACTION
-  corporateActionId: CorporateActionId
-  executionDate: Date
-}
+  type: DistributionType.CORPORATE_ACTION;
+  corporateActionId: CorporateActionId;
+  executionDate: Date;
+};
 
 export enum Recurrency {
   HOURLY = "HOURLY",
@@ -49,46 +49,46 @@ export enum Recurrency {
 }
 
 type ImmediatePayout = {
-  subtype: PayoutSubtype.IMMEDIATE
-  snapshotId: SnapshotId
-}
+  subtype: PayoutSubtype.IMMEDIATE;
+  snapshotId: SnapshotId;
+};
 
 type OneOffPayout = {
-  subtype: PayoutSubtype.ONE_OFF
-  executeAt: Date
-  snapshotId?: SnapshotId
-}
+  subtype: PayoutSubtype.ONE_OFF;
+  executeAt: Date;
+  snapshotId?: SnapshotId;
+};
 
 type RecurringPayout = {
-  subtype: PayoutSubtype.RECURRING
-  executeAt: Date
-  recurrency: Recurrency
-  snapshotId?: SnapshotId
-}
+  subtype: PayoutSubtype.RECURRING;
+  executeAt: Date;
+  recurrency: Recurrency;
+  snapshotId?: SnapshotId;
+};
 
 type AutomatedPayout = {
-  subtype: PayoutSubtype.AUTOMATED
-  snapshotId?: SnapshotId
-}
+  subtype: PayoutSubtype.AUTOMATED;
+  snapshotId?: SnapshotId;
+};
 
 export type PayoutDetails = {
-  type: DistributionType.PAYOUT
-  amount: string
-  amountType: AmountType
-  concept?: string
-} & (ImmediatePayout | OneOffPayout | RecurringPayout | AutomatedPayout)
+  type: DistributionType.PAYOUT;
+  amount: string;
+  amountType: AmountType;
+  concept?: string;
+} & (ImmediatePayout | OneOffPayout | RecurringPayout | AutomatedPayout);
 
 export enum AmountType {
   FIXED = "FIXED",
   PERCENTAGE = "PERCENTAGE",
 }
 
-export type DistributionDetails = CorporateActionDetails | PayoutDetails
+export type DistributionDetails = CorporateActionDetails | PayoutDetails;
 
 export class Distribution extends BaseEntity {
-  readonly asset: Asset
-  readonly details: DistributionDetails
-  status: DistributionStatus
+  readonly asset: Asset;
+  readonly details: DistributionDetails;
+  status: DistributionStatus;
 
   private constructor(
     id: string,
@@ -99,11 +99,11 @@ export class Distribution extends BaseEntity {
     updatedAt: Date = createdAt,
     isExisting: boolean = false,
   ) {
-    super(id, createdAt, updatedAt)
-    this.asset = asset
-    this.details = details
-    this.status = status
-    this.validateFields(isExisting)
+    super(id, createdAt, updatedAt);
+    this.asset = asset;
+    this.details = details;
+    this.status = status;
+    this.validateFields(isExisting);
   }
 
   static createCorporateAction(
@@ -125,7 +125,7 @@ export class Distribution extends BaseEntity {
       status ?? DistributionStatus.SCHEDULED,
       createdAt,
       updatedAt,
-    )
+    );
   }
 
   static createImmediate(
@@ -152,7 +152,7 @@ export class Distribution extends BaseEntity {
       status ?? DistributionStatus.SCHEDULED,
       createdAt,
       updatedAt,
-    )
+    );
   }
 
   static createOneOff(
@@ -181,7 +181,7 @@ export class Distribution extends BaseEntity {
       status ?? DistributionStatus.SCHEDULED,
       createdAt,
       updatedAt,
-    )
+    );
   }
 
   static createRecurring(
@@ -212,7 +212,7 @@ export class Distribution extends BaseEntity {
       status ?? DistributionStatus.SCHEDULED,
       createdAt,
       updatedAt,
-    )
+    );
   }
 
   static createAutomated(
@@ -239,7 +239,7 @@ export class Distribution extends BaseEntity {
       status ?? DistributionStatus.SCHEDULED,
       createdAt,
       updatedAt,
-    )
+    );
   }
 
   static createExistingAutomated(
@@ -267,7 +267,7 @@ export class Distribution extends BaseEntity {
       status ?? DistributionStatus.SCHEDULED,
       createdAt,
       updatedAt,
-    )
+    );
   }
 
   static createExistingCorporateAction(
@@ -291,7 +291,7 @@ export class Distribution extends BaseEntity {
       createdAt,
       updatedAt,
       true,
-    )
+    );
   }
 
   static createExistingImmediate(
@@ -320,7 +320,7 @@ export class Distribution extends BaseEntity {
       createdAt,
       updatedAt,
       true,
-    )
+    );
   }
 
   static createExistingOneOff(
@@ -351,7 +351,7 @@ export class Distribution extends BaseEntity {
       createdAt,
       updatedAt,
       true,
-    )
+    );
   }
 
   static createExistingRecurring(
@@ -384,11 +384,11 @@ export class Distribution extends BaseEntity {
       createdAt,
       updatedAt,
       true,
-    )
+    );
   }
 
   createNextRecurring(): Distribution {
-    const details: any = this.details as any
+    const details: any = this.details as any;
     return Distribution.createRecurring(
       this.asset,
       this.calculateNextRecurringDate(),
@@ -398,20 +398,20 @@ export class Distribution extends BaseEntity {
       undefined,
       DistributionStatus.SCHEDULED,
       details.concept,
-    )
+    );
   }
 
   updateSnapshotId(snapshot: number): void {
-    const snapshotId = SnapshotId.create(snapshot.toString())
+    const snapshotId = SnapshotId.create(snapshot.toString());
     if (this.details.type !== DistributionType.PAYOUT) {
-      throw new Error("Cannot update snapshot ID for non-payout distribution")
+      throw new Error("Cannot update snapshot ID for non-payout distribution");
     }
-    this.details.snapshotId = snapshotId
+    this.details.snapshotId = snapshotId;
   }
 
   updateExecutionDate(executionDate: Date): Distribution {
     if (this.details.type !== DistributionType.CORPORATE_ACTION) {
-      throw new Error("Cannot update execution date for non-corporate action distribution")
+      throw new Error("Cannot update execution date for non-corporate action distribution");
     }
 
     return new Distribution(
@@ -424,104 +424,104 @@ export class Distribution extends BaseEntity {
       this.status,
       this.createdAt,
       new Date(),
-    )
+    );
   }
 
   calculateNextRecurringDate(): Date {
-    const details: RecurringPayout = this.details as RecurringPayout
-    const nextDate: Date = new Date(details.executeAt)
+    const details: RecurringPayout = this.details as RecurringPayout;
+    const nextDate: Date = new Date(details.executeAt);
     switch (details.recurrency) {
       case Recurrency.HOURLY:
-        nextDate.setHours(nextDate.getHours() + 1)
-        break
+        nextDate.setHours(nextDate.getHours() + 1);
+        break;
       case Recurrency.DAILY:
-        nextDate.setDate(nextDate.getDate() + 1)
-        break
+        nextDate.setDate(nextDate.getDate() + 1);
+        break;
       case Recurrency.WEEKLY:
-        nextDate.setDate(nextDate.getDate() + 7)
-        break
+        nextDate.setDate(nextDate.getDate() + 7);
+        break;
       case Recurrency.MONTHLY:
-        nextDate.setMonth(nextDate.getMonth() + 1)
-        break
+        nextDate.setMonth(nextDate.getMonth() + 1);
+        break;
     }
 
-    return nextDate
+    return nextDate;
   }
 
   verifyIsCorporateAction(): void {
     if (this.details.type !== DistributionType.CORPORATE_ACTION) {
-      throw new DistributionNotCorporateActionError(this.id)
+      throw new DistributionNotCorporateActionError(this.id);
     }
   }
 
   verifyIsPayout(): void {
     if (this.details.type !== DistributionType.PAYOUT) {
-      throw new DistributionNotPayoutError(this.id)
+      throw new DistributionNotPayoutError(this.id);
     }
   }
 
   verifyStatus(status: DistributionStatus): void {
     if (this.status !== status) {
-      throw new DistributionNotInStatusError(this.id, status)
+      throw new DistributionNotInStatusError(this.id, status);
     }
   }
 
   cancel(): void {
-    this.verifyIsPayout()
-    this.verifyStatus(DistributionStatus.SCHEDULED)
+    this.verifyIsPayout();
+    this.verifyStatus(DistributionStatus.SCHEDULED);
 
-    this.status = DistributionStatus.CANCELLED
+    this.status = DistributionStatus.CANCELLED;
   }
 
   private validateFields(isExisting: boolean = false): void {
-    this.validateAsset()
+    this.validateAsset();
 
     if (this.details.type === DistributionType.CORPORATE_ACTION) {
-      this.validateExecutionDate(isExisting)
+      this.validateExecutionDate(isExisting);
     }
 
     if (this.details.type === DistributionType.PAYOUT) {
       if (this.details.subtype === PayoutSubtype.ONE_OFF) {
-        this.validateExecutionDate(isExisting)
+        this.validateExecutionDate(isExisting);
       } else if (this.details.subtype === PayoutSubtype.RECURRING) {
-        this.validateExecutionDate(isExisting)
-        this.validateRecurrency()
+        this.validateExecutionDate(isExisting);
+        this.validateRecurrency();
       }
     }
   }
 
   private validateAsset(): void {
     if (isNil(this.asset)) {
-      throw new DistributionAssetIdMissingError()
+      throw new DistributionAssetIdMissingError();
     }
   }
 
   private validateExecutionDate(isExisting: boolean = false): void {
-    let executionDate: Date | undefined
+    let executionDate: Date | undefined;
 
     if (this.details.type === DistributionType.CORPORATE_ACTION) {
-      executionDate = this.details.executionDate
+      executionDate = this.details.executionDate;
     } else if (
       this.details.type === DistributionType.PAYOUT &&
       (this.details.subtype === PayoutSubtype.ONE_OFF || this.details.subtype === PayoutSubtype.RECURRING)
     ) {
-      executionDate = this.details.executeAt
+      executionDate = this.details.executeAt;
     } else {
-      return
+      return;
     }
 
     if (isNil(executionDate)) {
-      throw new DistributionExecutionDateMissingError()
+      throw new DistributionExecutionDateMissingError();
     }
 
     if (!isExisting && executionDate.getTime() <= new Date().getTime()) {
-      throw new DistributionExecutionDateInPastError()
+      throw new DistributionExecutionDateInPastError();
     }
   }
 
   private validateRecurrency(): void {
     if (isNil((this.details as RecurringPayout).recurrency)) {
-      throw new DistributionRecurrencyMissingError()
+      throw new DistributionRecurrencyMissingError();
     }
   }
 }

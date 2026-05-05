@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { Logger, Module, OnModuleInit, Provider } from "@nestjs/common"
-import { ConnectRequest, InitializationRequest, Network, SupportedWallets } from "@hashgraph/asset-tokenization-sdk"
-import { AssetTokenizationStudioSdkService } from "@infrastructure/adapters/asset-tokenization-studio-sdk.service"
-import { ConfigModule, ConfigService } from "@nestjs/config"
-import { ConfigKeys } from "./config-keys"
+import { Logger, Module, OnModuleInit, Provider } from "@nestjs/common";
+import { ConnectRequest, InitializationRequest, Network, SupportedWallets } from "@hashgraph/asset-tokenization-sdk";
+import { AssetTokenizationStudioSdkService } from "@infrastructure/adapters/asset-tokenization-studio-sdk.service";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { ConfigKeys } from "./config-keys";
 
-export const ATS_NETWORK_INIT = Symbol("ATS_NETWORK_INIT")
+export const ATS_NETWORK_INIT = Symbol("ATS_NETWORK_INIT");
 
 @Module({
   imports: [ConfigModule],
@@ -21,10 +21,10 @@ export const ATS_NETWORK_INIT = Symbol("ATS_NETWORK_INIT")
   exports: ["AssetTokenizationStudioService"],
 })
 export class AssetTokenizationStudioSdkModule implements OnModuleInit {
-  private readonly logger = new Logger(AssetTokenizationStudioSdkModule.name)
+  private readonly logger = new Logger(AssetTokenizationStudioSdkModule.name);
 
   async onModuleInit() {
-    this.logger.log("ATS SDK Module initialized successfully")
+    this.logger.log("ATS SDK Module initialized successfully");
   }
 }
 
@@ -33,20 +33,20 @@ function networkInitProvider(): Provider {
     provide: ATS_NETWORK_INIT,
     inject: [ConfigService],
     useFactory: async (config: ConfigService) => {
-      const logger = new Logger(ATS_NETWORK_INIT.toString())
+      const logger = new Logger(ATS_NETWORK_INIT.toString());
 
       try {
-        const network = config.get<string>(ConfigKeys.ATS_NETWORK, "testnet")
+        const network = config.get<string>(ConfigKeys.ATS_NETWORK, "testnet");
         const mirrorNodeUrl = config.get<string>(
           ConfigKeys.ATS_MIRROR_URL,
           "https://testnet.mirrornode.hedera.com/api/v1/",
-        )
-        const rpcNodeUrl = config.get<string>(ConfigKeys.ATS_RPC_URL, "https://testnet.hashio.io/api")
-        const factoryAddress = config.get<string>(ConfigKeys.ATS_FACTORY_ADDRESS, "0.0.6224505")
-        const resolverAddress = config.get<string>(ConfigKeys.ATS_RESOLVER_ADDRESS, "0.0.6224426")
+        );
+        const rpcNodeUrl = config.get<string>(ConfigKeys.ATS_RPC_URL, "https://testnet.hashio.io/api");
+        const factoryAddress = config.get<string>(ConfigKeys.ATS_FACTORY_ADDRESS, "0.0.6224505");
+        const resolverAddress = config.get<string>(ConfigKeys.ATS_RESOLVER_ADDRESS, "0.0.6224426");
 
-        const mirrorNode = { name: "testMirrorNode", baseUrl: mirrorNodeUrl }
-        const rpcNode = { name: "testRpcNode", baseUrl: rpcNodeUrl }
+        const mirrorNode = { name: "testMirrorNode", baseUrl: mirrorNodeUrl };
+        const rpcNode = { name: "testRpcNode", baseUrl: rpcNodeUrl };
 
         await Network.init(
           new InitializationRequest({
@@ -55,7 +55,7 @@ function networkInitProvider(): Provider {
             mirrorNode,
             rpcNode,
           }),
-        )
+        );
 
         await Network.connect(
           new ConnectRequest({
@@ -75,14 +75,14 @@ function networkInitProvider(): Provider {
               publicKey: config.get<string>(ConfigKeys.DFNS_WALLET_PUBLIC_KEY)!,
             },
           }),
-        )
+        );
 
-        return true
+        return true;
       } catch (error) {
-        logger.error("Failed to initialize ATS SDK Network")
-        logger.error(error.message)
-        throw new Error(`ATS SDK initialization failed: ${error.message}`)
+        logger.error("Failed to initialize ATS SDK Network");
+        logger.error(error.message);
+        throw new Error(`ATS SDK initialization failed: ${error.message}`);
       }
     },
-  }
+  };
 }
