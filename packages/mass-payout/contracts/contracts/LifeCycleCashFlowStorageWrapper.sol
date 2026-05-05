@@ -17,7 +17,7 @@ import {
     IBalanceTrackerAtSnapshot
 } from "@hashgraph/asset-tokenization-contracts/contracts/facets/balanceTrackerAtSnapshot/IBalanceTrackerAtSnapshot.sol";
 import { IMaturity } from "@hashgraph/asset-tokenization-contracts/contracts/facets/maturity/IMaturity.sol";
-import { ICoupon } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/coupon/ICoupon.sol";
+import { ICoupon } from "@hashgraph/asset-tokenization-contracts/contracts/facets/coupon/ICoupon.sol";
 import {
     ICouponSecurityHolders
 } from "@hashgraph/asset-tokenization-contracts/contracts/facets/couponSecurityHolders/ICouponSecurityHolders.sol";
