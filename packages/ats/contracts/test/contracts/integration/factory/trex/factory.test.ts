@@ -3,6 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
+import OnchainID from "@onchain-id/solidity";
 import {
   BusinessLogicResolver,
   TREXFactoryAts,
@@ -18,6 +19,7 @@ import {
   IERC3643__factory,
   OwnableUpgradeable__factory,
   IIdentityRegistry__factory,
+  IdentityFacet__factory,
 } from "@contract-types";
 
 import { deployFullSuiteFixture } from "./fixtures/deploy-full-suite.fixture";
@@ -624,7 +626,7 @@ describe("TREX Factory Tests", () => {
 
       // Get the token address from factory and query its IR
       const firstToken = await factoryAts.getToken("salt-equity-first-for-ir");
-      const firstTokenContract = IERC3643__factory.connect(firstToken.toString(), ethers.provider);
+      const firstTokenContract = IdentityFacet__factory.connect(firstToken.toString(), ethers.provider);
       const firstIR = await firstTokenContract.identityRegistry();
 
       // Verify firstIR is valid
@@ -694,7 +696,11 @@ describe("TREX Factory Tests", () => {
 
     it("GIVEN existing ONCHAINID in tokenDetails WHEN deploying equity THEN uses existing token ID", async () => {
       // Create an identity first
-      const identity = await ethers.deployContract("Identity", [deployer.address, true]);
+      const identity = await new ethers.ContractFactory(
+        OnchainID.contracts.Identity.abi,
+        OnchainID.contracts.Identity.bytecode,
+        deployer,
+      ).deploy(deployer.address, true);
       await identity.waitForDeployment();
 
       tokenDetails.ONCHAINID = identity.target as string;
@@ -1473,7 +1479,7 @@ describe("TREX Factory Tests", () => {
 
       // Get the token address from factory and query its IR
       const firstToken = await factoryAts.getToken("salt-bond-first-for-ir");
-      const firstTokenContract = IERC3643__factory.connect(firstToken.toString(), ethers.provider);
+      const firstTokenContract = IdentityFacet__factory.connect(firstToken.toString(), ethers.provider);
       const firstIR = await firstTokenContract.identityRegistry();
 
       // Verify firstIR is valid
@@ -1544,7 +1550,11 @@ describe("TREX Factory Tests", () => {
     });
 
     it("GIVEN existing ONCHAINID in tokenDetails WHEN deploying bond THEN uses existing token ID", async () => {
-      const identity = await ethers.deployContract("Identity", [deployer.address, true]);
+      const identity = await new ethers.ContractFactory(
+        OnchainID.contracts.Identity.abi,
+        OnchainID.contracts.Identity.bytecode,
+        deployer,
+      ).deploy(deployer.address, true);
       await identity.waitForDeployment();
 
       tokenDetails.ONCHAINID = identity.target as string;
