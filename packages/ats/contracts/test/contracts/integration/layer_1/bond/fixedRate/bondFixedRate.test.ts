@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { ResolverProxy, type IAsset, CouponFacetTimeTravel } from "@contract-types";
+import { ResolverProxy, type IAsset, CouponFixedRateFacet } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES, TIME_PERIODS_S } from "@scripts";
 import { SecurityType } from "@scripts/domain";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -33,7 +33,7 @@ describe("Bond Fixed Rate Tests", () => {
   let signer_A: HardhatEthersSigner;
 
   let asset: IAsset;
-  let couponFixedRateFacet: CouponFacetTimeTravel;
+  let couponFixedRateFacet: CouponFixedRateFacet;
 
   async function deploySecurityFixture() {
     const base = await deployBondFixedRateTokenFixture();
@@ -49,7 +49,7 @@ describe("Bond Fixed Rate Tests", () => {
       },
     ]);
 
-    couponFixedRateFacet = await ethers.getContractAt("CouponFixedRateFacetTimeTravel", diamond.target, signer_A);
+    couponFixedRateFacet = await ethers.getContractAt("CouponFixedRateFacet", diamond.target, signer_A);
   }
 
   beforeEach(async () => {

@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ICouponSecurityHolders } from "./ICouponSecurityHolders.sol";
-import { ICouponTypes } from "../layer_2/coupon/ICouponTypes.sol";
+import { ICouponTypes } from "../coupon/ICouponTypes.sol";
 import { COUPON_CORPORATE_ACTION_TYPE } from "../../constants/values.sol";
 import { CouponStorageWrapper } from "../../domain/asset/coupon/CouponStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
