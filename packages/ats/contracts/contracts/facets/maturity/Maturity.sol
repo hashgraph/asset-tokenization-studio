@@ -40,18 +40,16 @@ abstract contract Maturity is IMaturity, Modifiers {
         onlyValidMaturityDate(TimeTravelStorageWrapper.getBlockTimestamp())
     {
         bytes32[] memory partitions = ERC1410StorageWrapper.partitionsOf(_tokenHolder);
-        for (uint256 i; i < partitions.length; i++) {
+        uint256 length = partitions.length;
+        address sender = EvmAccessors.getMsgSender();
+        for (uint256 i; i < length; ) {
             bytes32 partition = partitions[i];
             uint256 balance = ERC1410StorageWrapper.balanceOfByPartition(partition, _tokenHolder);
             _checkUnexpectedError(balance == 0, KPI_BOND_REDEEM_BALANCE);
-            ERC1410StorageWrapper.redeemByPartition(
-                partition,
-                _tokenHolder,
-                EvmAccessors.getMsgSender(),
-                balance,
-                "",
-                ""
-            );
+            ERC1410StorageWrapper.redeemByPartition(partition, _tokenHolder, sender, balance, "", "");
+            unchecked {
+                ++i;
+            }
         }
     }
 
