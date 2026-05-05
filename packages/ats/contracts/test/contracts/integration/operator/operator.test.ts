@@ -63,9 +63,11 @@ describe("Operator Facet Tests", () => {
   });
 
   describe("authorizeOperator", () => {
-    it("GIVEN KYC'd addresses WHEN authorizeOperator THEN emits AuthorizedOperator and state is updated", async () => {
+    it("GIVEN KYC'd addresses WHEN authorizeOperator THEN emits AuthorizedOperator and OperatorAuthorized and state is updated", async () => {
       await expect(asset.connect(signer_C).authorizeOperator(signer_B.address))
         .to.emit(asset, "AuthorizedOperator")
+        .withArgs(signer_B.address, signer_C.address)
+        .to.emit(asset, "OperatorAuthorized")
         .withArgs(signer_B.address, signer_C.address);
 
       expect(await asset.isOperator(signer_B.address, signer_C.address)).to.equal(true);
@@ -89,11 +91,13 @@ describe("Operator Facet Tests", () => {
   });
 
   describe("revokeOperator", () => {
-    it("GIVEN an authorized operator WHEN revokeOperator THEN emits RevokedOperator and state is updated", async () => {
+    it("GIVEN an authorized operator WHEN revokeOperator THEN emits RevokedOperator and OperatorRevoked and state is updated", async () => {
       await asset.connect(signer_C).authorizeOperator(signer_B.address);
 
       await expect(asset.connect(signer_C).revokeOperator(signer_B.address))
         .to.emit(asset, "RevokedOperator")
+        .withArgs(signer_B.address, signer_C.address)
+        .to.emit(asset, "OperatorRevoked")
         .withArgs(signer_B.address, signer_C.address);
 
       expect(await asset.isOperator(signer_B.address, signer_C.address)).to.equal(false);

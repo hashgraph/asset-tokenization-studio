@@ -6,6 +6,16 @@ pragma solidity >=0.8.0 <0.9.0;
  * @notice Interface for operator management: query, authorize and revoke operators for all partitions.
  */
 interface IOperator {
+    /// @notice Emitted when an operator is authorized by an account for all partitions of the account
+    /// @param operator The account that changed their delegation
+    /// @param tokenHolder The account who authorized the operator
+    event OperatorAuthorized(address indexed operator, address indexed tokenHolder);
+
+    /// @notice Emitted when an operator is revoked by an account for all partitions of the account
+    /// @param operator The account that changed their delegation
+    /// @param tokenHolder The account who revoked the operator
+    event OperatorRevoked(address indexed operator, address indexed tokenHolder);
+
     /**
      * @notice Authorises an operator for all partitions of `msg.sender`
      * @param _operator An address which is being authorised

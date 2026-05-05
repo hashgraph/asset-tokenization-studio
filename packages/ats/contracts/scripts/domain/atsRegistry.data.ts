@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-05T14:20:54.133Z
+ * Generated: 2026-05-05T16:20:02.029Z
  * Facets: 115
  * Infrastructure: 2
  *
@@ -12194,6 +12194,22 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AuthorizedOperator(address,address)",
         },
         topic0: "0xf4caeb2d6ca8932a215a353d0703c326ec2d81fc68170f320eb2ab49e9df61f9",
+      },
+      {
+        name: "OperatorAuthorized",
+        signature: {
+          full: "event OperatorAuthorized(address indexed operator, address indexed tokenHolder)",
+          canonical: "OperatorAuthorized(address,address)",
+        },
+        topic0: "0x4d8c877a9def059a7322c328d7394f8640d101d29c811e10268b9b6125e90253",
+      },
+      {
+        name: "OperatorRevoked",
+        signature: {
+          full: "event OperatorRevoked(address indexed operator, address indexed tokenHolder)",
+          canonical: "OperatorRevoked(address,address)",
+        },
+        topic0: "0xa8082fae8d1bd57faeb4dde45721b46afb72c45e72e5deb2a355bd997f6251a9",
       },
       {
         name: "RevokedOperator",
