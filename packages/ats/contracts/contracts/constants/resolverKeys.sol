@@ -557,6 +557,9 @@ bytes32 constant _LOCK_AT_SNAPSHOT_RESOLVER_KEY = 0xd0a412f3e7cd9c9475b5482a5486
 // keccak256('security.token.standard.equity.resolverKey');
 bytes32 constant _EQUITY_RESOLVER_KEY = 0xfe85fe0513f5a5676011f59495ae16b2b93c981c190e99e61903e5603542c810;
 
+// keccak256("security.token.standard.maturity.resolverKey");
+bytes32 constant _MATURITY_RESOLVER_KEY = 0xcd009b906f79b9bf6dbfaf895e8658a4857b952a76b3f6c36089a5c011768289;
+
 // keccak256('security.token.standard.bond.variable.rate.resolverKey');
 bytes32 constant _BOND_VARIABLE_RATE_RESOLVER_KEY = 0xe6594ee8f54f346ab25268fdc7955031a6b06102355e1446353d89ab1d593de3;
 

@@ -10,6 +10,7 @@ import { IAdjustBalances } from "./adjustBalances/IAdjustBalances.sol";
 import { IAmortization } from "./layer_2/amortization/IAmortization.sol";
 import { IBond } from "./layer_2/bond/IBond.sol";
 import { IBondUSA } from "./layer_3/bondUSA/IBondUSA.sol";
+import { IMaturity } from "./maturity/IMaturity.sol";
 
 // Layer 1 — ERC1400
 
@@ -61,7 +62,7 @@ import { ITimeTravel } from "../test/testTimeTravel/ITimeTravel.sol";
 import { IBalanceTracker } from "./balanceTracker/IBalanceTracker.sol";
 import { IBalanceTrackerAdjusted } from "./balanceTrackerAdjusted/IBalanceTrackerAdjusted.sol";
 import { ITransferAndLock } from "./layer_3/transferAndLock/ITransferAndLock.sol";
-import { ICoupon } from "./layer_2/coupon/ICoupon.sol";
+import { ICoupon } from "./coupon/ICoupon.sol";
 import { IDividend } from "./dividend/IDividend.sol";
 import { IDividendSecurityHolders } from "./dividendSecurityHolders/IDividendSecurityHolders.sol";
 import { IKpis } from "./layer_2/kpi/kpiLatest/IKpis.sol";
@@ -162,6 +163,7 @@ interface IAsset is
     IBurn,
     IScheduledCrossOrderedTasks,
     IBond,
+    IMaturity,
     IEquity,
     ISecurity,
     ICorporateActions,
