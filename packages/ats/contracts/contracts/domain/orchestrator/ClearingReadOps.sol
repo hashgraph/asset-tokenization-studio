@@ -4,8 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ClearingStorageWrapper } from "../asset/ClearingStorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";
 import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
-import { IClearingTransfer } from "../../facets/layer_1/clearing/IClearingTransfer.sol";
-import { IClearingRedeem } from "../../facets/layer_1/clearing/IClearingRedeem.sol";
 import { IClearingHoldCreation } from "../../facets/layer_1/clearing/IClearingHoldCreation.sol";
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 
@@ -48,7 +46,7 @@ library ClearingReadOps {
         address _tokenHolder,
         uint256 _clearingId,
         uint256 _timestamp
-    ) public view returns (IClearingTransfer.ClearingTransferData memory clearingTransferData_) {
+    ) public view returns (IClearingTypes.ClearingTransferData memory clearingTransferData_) {
         clearingTransferData_ = ClearingStorageWrapper.getClearingTransferForByPartition(
             _partition,
             _tokenHolder,
@@ -75,7 +73,7 @@ library ClearingReadOps {
         address _tokenHolder,
         uint256 _clearingId,
         uint256 _timestamp
-    ) public view returns (IClearingRedeem.ClearingRedeemData memory clearingRedeemData_) {
+    ) public view returns (IClearingTypes.ClearingRedeemData memory clearingRedeemData_) {
         clearingRedeemData_ = ClearingStorageWrapper.getClearingRedeemForByPartition(
             _partition,
             _tokenHolder,

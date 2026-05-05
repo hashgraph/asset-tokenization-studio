@@ -102,8 +102,6 @@ import { IFreezeAtSnapshot } from "./freezeAtSnapshot/IFreezeAtSnapshot.sol";
 import { IFreezeAtSnapshotByPartition } from "./freezeAtSnapshotByPartition/IFreezeAtSnapshotByPartition.sol";
 import { IIdentity } from "./identity/IIdentity.sol";
 import { ICoreAtSnapshot } from "./coreAtSnapshot/ICoreAtSnapshot.sol";
-import { IClearingTransfer } from "./layer_1/clearing/IClearingTransfer.sol";
-import { IClearingRedeem } from "./layer_1/clearing/IClearingRedeem.sol";
 import { IOperatorClearingByPartition } from "./operatorClearingByPartition/IOperatorClearingByPartition.sol";
 import { IClearingHoldCreation } from "./layer_1/clearing/IClearingHoldCreation.sol";
 import {
@@ -117,6 +115,7 @@ import { IMintByPartition } from "./mintByPartition/IMintByPartition.sol";
 import { IBurnByPartition } from "./burnByPartition/IBurnByPartition.sol";
 import { IClearingByPartition } from "./clearingByPartition/IClearingByPartition.sol";
 import { IClearingHoldByPartition } from "./clearingHoldByPartition/IClearingHoldByPartition.sol";
+import { IProtectedClearingByPartition } from "./protectedClearingByPartition/IProtectedClearingByPartition.sol";
 import { IHoldFacet } from "./hold/IHoldFacet.sol";
 import { IBatchController } from "./batchController/IBatchController.sol";
 import { IBurn } from "./burn/IBurn.sol";
@@ -231,13 +230,12 @@ interface IAsset is
     ICoreAtSnapshot,
     // Clearing interfaces
     IClearing,
-    IClearingTransfer,
-    IClearingRedeem,
     IOperatorClearingByPartition,
     IClearingHoldCreation,
     IOperatorClearingHoldByPartition,
     IClearingByPartition,
     IClearingHoldByPartition,
+    IProtectedClearingByPartition,
     // Additional ERC
     IComplianceFacet,
     IComplianceByPartition,
