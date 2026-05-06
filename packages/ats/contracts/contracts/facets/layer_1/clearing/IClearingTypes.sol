@@ -142,17 +142,6 @@ interface IClearingTypes {
         bytes operatorData
     );
 
-    event ProtectedClearedHoldByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 clearingId,
-        IHoldTypes.Hold hold,
-        uint256 expirationDate,
-        bytes data,
-        bytes operatorData
-    );
-
     event ClearedTransferByPartition(
         address indexed operator,
         address indexed tokenHolder,

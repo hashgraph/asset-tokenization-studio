@@ -9,28 +9,34 @@ import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
  * @author Asset Tokenization Studio Team
  * @notice Interface for the protected variant of clearing hold creation scoped to a partition,
  *         gated by a per-partition role and an off-chain signature provided by the token holder.
- * @dev Inherits `IClearingTypes` to access the shared `ProtectedClearingOperation` and
- *      `ClearingHoldCreationData` structures. Events are declared inline per the type-placement
- *      rule. This interface is aggregated into the `IAsset` umbrella; the facet itself never
- *      inherits the umbrella.
+ * @dev Inherits `IClearingTypes` for the `ProtectedClearingOperation` struct used in the
+ *      method signature. The `ProtectedClearedHoldByPartition` event is declared on this writer
+ *      interface and emitted inline from
+ *      `ProtectedClearingHoldByPartition.protectedClearingCreateHoldByPartition` after the
+ *      `ClearingProtectedOps` library call returns successfully. This interface is aggregated
+ *      into the `IAsset` umbrella; the facet itself never inherits the umbrella.
  */
 interface IProtectedClearingHoldByPartition is IClearingTypes {
     /**
      * @notice Emitted when a protected clearing hold is created successfully.
      * @param operator The address that initiated the clearing hold creation.
-     * @param from The token holder whose tokens are placed on hold.
+     * @param tokenHolder The token holder whose tokens are placed on hold.
      * @param partition The partition identifier.
      * @param clearingId The identifier assigned to the newly created clearing operation.
      * @param hold The hold details.
+     * @param expirationDate The expiration timestamp of the clearing operation.
      * @param data Additional data passed with the clearing hold creation.
+     * @param operatorData Operator-specific data associated with the operation.
      */
-    event ProtectedClearingHeldByPartition(
+    event ProtectedClearedHoldByPartition(
         address indexed operator,
-        address indexed from,
-        bytes32 indexed partition,
+        address indexed tokenHolder,
+        bytes32 partition,
         uint256 clearingId,
         IHoldTypes.Hold hold,
-        string data
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
     );
 
     /**
@@ -39,7 +45,7 @@ interface IProtectedClearingHoldByPartition is IClearingTypes {
      * @dev Caller must hold the partition-specific role returned by
      *      `ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition)`. The contract
      *      must not be paused, and the partition must be flagged as protected. Emits
-     *      `ProtectedClearingHeldByPartition` on success.
+     *      `ProtectedClearedHoldByPartition` on success.
      * @param _protectedClearingOperation The protected clearing operation details, including the
      *        inner `ClearingOperation`, deadline, and nonce used for signature replay protection.
      * @param _hold The hold details.

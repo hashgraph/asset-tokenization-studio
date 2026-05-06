@@ -48,13 +48,31 @@ abstract contract ProtectedClearingHoldByPartition is IProtectedClearingHoldByPa
             _hold,
             _signature
         );
+        _emitProtectedClearedHold(_protectedClearingOperation, _hold, clearingId_);
+    }
 
-        emit ProtectedClearingHeldByPartition(
+    /**
+     * @notice Emits `ProtectedClearedHoldByPartition` for a successful protected clearing hold.
+     * @dev Extracted to a `private` helper so the external entry point's stack stays within the
+     *      Solidity 16-slot limit; the helper is called exactly once, after the
+     *      `ClearingProtectedOps.protectedClearingCreateHoldByPartition` call returns.
+     * @param _operation  The protected clearing operation (partition, from, expiration, data, ...).
+     * @param _hold       The hold details (amount, expiration, escrow, to, data).
+     * @param _clearingId The identifier assigned to the clearing operation by the library call.
+     */
+    function _emitProtectedClearedHold(
+        IClearingTypes.ProtectedClearingOperation calldata _operation,
+        IHoldTypes.Hold calldata _hold,
+        uint256 _clearingId
+    ) private {
+        emit ProtectedClearedHoldByPartition(
             EvmAccessors.getMsgSender(),
-            _protectedClearingOperation.from,
-            _protectedClearingOperation.clearingOperation.partition,
-            clearingId_,
+            _operation.from,
+            _operation.clearingOperation.partition,
+            _clearingId,
             _hold,
+            _operation.clearingOperation.expirationTimestamp,
+            _operation.clearingOperation.data,
             ""
         );
     }

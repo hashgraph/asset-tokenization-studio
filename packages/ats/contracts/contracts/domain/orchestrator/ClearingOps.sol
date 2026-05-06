@@ -833,12 +833,15 @@ library ClearingOps {
     }
 
     /**
-     * @notice Emits a cleared hold event appropriate to the third party type
-     * @dev Dispatches to one of four event variants:
-     * ClearedHoldByPartition (NULL),
-     * ClearedHoldFromByPartition (AUTHORISED),
-     * ClearedOperatorHoldByPartition (OPERATOR),
-     * ProtectedClearedHoldByPartition (PROTECTED).
+     * @notice Emits a cleared hold event appropriate to the third party type.
+     * @dev Dispatches to one of three event variants:
+     *      `ClearedHoldByPartition` (NULL),
+     *      `ClearedHoldFromByPartition` (AUTHORISED),
+     *      `ClearedOperatorHoldByPartition` (OPERATOR).
+     *      Emits nothing when `_thirdPartyType == PROTECTED` — the protected variant's event
+     *      (`ProtectedClearedHoldByPartition`) is owned and emitted by the writer
+     *      (`ProtectedClearingHoldByPartitionFacet.protectedClearingCreateHoldByPartition`),
+     *      keeping a single emit per external call (per the project event-emission rule).
      * @param _from Token holder
      * @param _partition Partition
      * @param _clearingId Clearing ID
@@ -897,16 +900,6 @@ library ClearingOps {
             );
             return;
         }
-        emit IClearingTypes.ProtectedClearedHoldByPartition(
-            EvmAccessors.getMsgSender(),
-            _from,
-            _partition,
-            _clearingId,
-            _hold,
-            _expirationTimestamp,
-            _data,
-            _operatorData
-        );
     }
 
     // ============================================================================

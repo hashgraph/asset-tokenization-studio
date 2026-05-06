@@ -811,9 +811,21 @@ describe("ProtectedPartitions Tests", () => {
           value: amount,
           data: "0x",
         });
-        await asset
+        const txHold = asset
           .connect(signer_B)
           .protectedClearingCreateHoldByPartition(protectedClearingOperation, hold, signatureHold);
+        await expect(txHold).to.emit(asset, EVENT_NAMES.PROTECTED_CLEARED_HOLD_BY_PARTITION).withArgs(
+          signer_B.address, // operator
+          protectedClearingOperation.from, // tokenHolder
+          protectedClearingOperation.clearingOperation.partition, // partition
+          anyValue, // clearingId (runtime)
+          [hold.amount, hold.expirationTimestamp, hold.escrow, hold.to, hold.data], // hold tuple
+          protectedClearingOperation.clearingOperation.expirationTimestamp, // expirationDate
+          protectedClearingOperation.clearingOperation.data, // data
+          "0x", // operatorData
+        );
+        const receiptHold = await (await txHold).wait();
+        expectExactlyOneEvent(receiptHold!, asset, EVENT_NAMES.PROTECTED_CLEARED_HOLD_BY_PARTITION);
         // REDEEMS
         protectedClearingOperation.nonce = 3;
         const messageRedeem = {
