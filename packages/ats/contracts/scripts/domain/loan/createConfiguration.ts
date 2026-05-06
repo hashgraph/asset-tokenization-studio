@@ -99,7 +99,7 @@ const LOAN_FACETS = [
 
   // Hold
   "HoldFacet",
-  "HoldManagementFacet",
+  "OperatorHoldByPartitionFacet",
   "ControllerHoldByPartitionFacet",
   "ControllerByPartitionFacet",
   "ProtectedHoldByPartitionFacet",
@@ -108,6 +108,7 @@ const LOAN_FACETS = [
   // Clearing & Settlement
   "ClearingTransferFacet",
   "ClearingRedeemFacet",
+  "OperatorClearingByPartitionFacet",
   "ClearingHoldCreationFacet",
   "ClearingHoldByPartitionFacet",
   "OperatorClearingHoldByPartitionFacet",
@@ -137,6 +138,7 @@ const LOAN_FACETS = [
   "CorporateActionsFacet",
   "TransferAndLockFacet",
   "LockFacet",
+  "LockByPartitionFacet",
   "AdjustBalancesFacet",
   "ProtectedPartitionsFacet",
 ] as const;

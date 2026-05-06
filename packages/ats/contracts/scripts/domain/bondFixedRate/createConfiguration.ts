@@ -107,8 +107,9 @@ const BOND_FIXED_RATE_FACETS = [
   "ClearingFacet",
   "ClearingRedeemFacet",
   "ClearingTransferFacet",
+  "OperatorClearingByPartitionFacet",
   "HoldFacet",
-  "HoldManagementFacet",
+  "OperatorHoldByPartitionFacet",
   "ControllerHoldByPartitionFacet",
   "ControllerByPartitionFacet",
   "ProtectedHoldByPartitionFacet",
@@ -122,6 +123,7 @@ const BOND_FIXED_RATE_FACETS = [
   // Advanced Features
   "AdjustBalancesFacet",
   "LockFacet",
+  "LockByPartitionFacet",
   "MaturityFacet",
   "NominalValueFacet",
   "ProceedRecipientsFacet",
