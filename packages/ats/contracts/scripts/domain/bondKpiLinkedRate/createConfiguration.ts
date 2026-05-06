@@ -70,6 +70,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   // ERC Standards
   "MintByPartitionFacet",
   "ERC1410ManagementFacet",
+  "ProtectedByPartitionFacet",
   "ERC1410ReadFacet",
   "OperatorFacet",
   "ERC1410TokenHolderFacet",
@@ -87,7 +88,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "BatchMintFacet",
   "BatchTransferFacet",
   "ERC3643ManagementFacet",
-  "ERC3643ReadFacet",
+  "RecoveryFacet",
   "IdentityFacet",
   "ComplianceFacet",
   "ComplianceByPartitionFacet",
@@ -141,6 +142,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   // Jurisdiction-Specific (write facet and read facet are both rate-specific)
   "BondUSAKpiLinkedRateFacet",
   "BondUSAReadKpiLinkedRateFacet",
+  "PrincipalFacet",
 ] as const;
 
 /**

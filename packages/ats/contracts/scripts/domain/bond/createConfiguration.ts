@@ -80,6 +80,7 @@ const BOND_FACETS = [
   "TransferFacet",
   "MintByPartitionFacet",
   "ERC1410ManagementFacet",
+  "ProtectedByPartitionFacet",
   "ERC1410ReadFacet",
   "OperatorFacet",
   "ERC1410TokenHolderFacet",
@@ -97,7 +98,7 @@ const BOND_FACETS = [
   "BatchMintFacet",
   "BatchTransferFacet",
   "ERC3643ManagementFacet",
-  "ERC3643ReadFacet",
+  "RecoveryFacet",
   "IdentityFacet",
   "ComplianceFacet",
   "ComplianceByPartitionFacet",
@@ -146,6 +147,7 @@ const BOND_FACETS = [
   // Jurisdiction-Specific
   "BondUSAFacet",
   "BondUSAReadFacet",
+  "PrincipalFacet",
 ] as const;
 
 /**

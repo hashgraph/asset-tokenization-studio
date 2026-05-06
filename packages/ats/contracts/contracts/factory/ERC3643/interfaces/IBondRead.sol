@@ -15,9 +15,4 @@ interface TRexIBondRead is IBondTypes {
      * @notice Retrieves the bond details
      */
     function getBondDetails() external view returns (IBondTypes.BondDetailsData memory bondDetailsData_);
-
-    /**
-     * @notice Retrieves principal numerator and denominator for a specific account
-     */
-    function getPrincipalFor(address _account) external view returns (IBondTypes.PrincipalFor memory principalFor_);
 }

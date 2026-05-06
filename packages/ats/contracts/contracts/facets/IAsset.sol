@@ -11,10 +11,12 @@ import { IAmortization } from "./layer_2/amortization/IAmortization.sol";
 import { IBondUSA } from "./layer_3/bondUSA/IBondUSA.sol";
 import { IMaturity } from "./maturity/IMaturity.sol";
 import { IBondRead } from "./layer_2/bond/IBondRead.sol";
+import { IPrincipal } from "./principal/IPrincipal.sol";
 
 // Layer 1 — ERC1400
 
 // Layer 1 — ERC3643
+import { IRecovery } from "./recovery/IRecovery.sol";
 import { ICorporateActions } from "./corporateActions/ICorporateActions.sol";
 import { IDiamond } from "../infrastructure/proxy/IDiamond.sol";
 
@@ -119,6 +121,7 @@ import { IDocumentation } from "./documentation/IDocumentation.sol";
 import { IController } from "./controller/IController.sol";
 import { IControllerHoldByPartition } from "./controllerHoldByPartition/IControllerHoldByPartition.sol";
 import { IControllerByPartition } from "./controllerByPartition/IControllerByPartition.sol";
+import { IProtectedByPartition } from "./protectedByPartition/IProtectedByPartition.sol";
 import { IProtectedHoldByPartition } from "./protectedHoldByPartition/IProtectedHoldByPartition.sol";
 import { IERC20Permit } from "./layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
 import { IEIP712 } from "./eip712/IEIP712.sol";
@@ -168,9 +171,11 @@ interface IAsset is
     IERC1410,
     IOperator,
     IERC3643,
+    IRecovery,
     IBurn,
     IScheduledCrossOrderedTasks,
     IBondRead,
+    IPrincipal,
     IMaturity,
     IEquity,
     ISecurity,
@@ -242,6 +247,7 @@ interface IAsset is
     IController,
     IControllerHoldByPartition,
     IControllerByPartition,
+    IProtectedByPartition,
     IProtectedHoldByPartition,
     IERC20Permit,
     IEIP712,
