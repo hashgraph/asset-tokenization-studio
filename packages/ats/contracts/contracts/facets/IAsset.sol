@@ -11,6 +11,7 @@ import { IAmortization } from "./layer_2/amortization/IAmortization.sol";
 import { IBondUSA } from "./layer_3/bondUSA/IBondUSA.sol";
 import { IMaturity } from "./maturity/IMaturity.sol";
 import { IBondRead } from "./layer_2/bond/IBondRead.sol";
+import { IPrincipal } from "./principal/IPrincipal.sol";
 
 // Layer 1 — ERC1400
 
@@ -168,6 +169,7 @@ interface IAsset is
     IBurn,
     IScheduledCrossOrderedTasks,
     IBondRead,
+    IPrincipal,
     IMaturity,
     IEquity,
     ISecurity,
