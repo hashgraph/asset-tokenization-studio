@@ -44,6 +44,7 @@ import { IFixedRate } from "./layer_2/interestRate/fixedRate/IFixedRate.sol";
 
 // Layer 2
 import { IHold } from "./layer_1/hold/IHold.sol";
+import { IOperatorHoldByPartition } from "./operatorHoldByPartition/IOperatorHoldByPartition.sol";
 import { IHoldByPartition } from "./holdByPartition/IHoldByPartition.sol";
 import { IKyc } from "./layer_1/kyc/IKyc.sol";
 // IKpiLinkedRate and ISustainabilityPerformanceTargetRate are excluded: both define
@@ -135,7 +136,7 @@ import { IDeactivate } from "./deactivate/IDeactivate.sol";
  *      through a single typed object, rather than multiple per-facet instances.
  *
  *      Note: IHold already transitively includes IAccessControl, IERC1410,
- *      IHoldRead, IHoldManagement, and IHoldTokenHolder. IERC3643 already includes its
+ *      IHoldRead, and IHoldTokenHolder. IERC3643 already includes its
  *      sub-interfaces. IERC20Votes includes IERC5805 and IVotes. Solidity C3 linearisation
  *      handles the resulting diamond inheritance without conflicts.
  *
@@ -158,6 +159,7 @@ interface IAsset is
     ITimeTravel,
     IDiamond,
     IHold,
+    IOperatorHoldByPartition,
     ITransfer,
     IERC20Votes,
     IERC1410,

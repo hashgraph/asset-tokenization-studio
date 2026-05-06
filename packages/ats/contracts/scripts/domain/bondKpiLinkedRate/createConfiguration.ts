@@ -101,7 +101,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "ClearingRedeemFacet",
   "ClearingTransferFacet",
   "HoldFacet",
-  "HoldManagementFacet",
+  "OperatorHoldByPartitionFacet",
   "ControllerHoldByPartitionFacet",
   "ControllerByPartitionFacet",
   "ProtectedHoldByPartitionFacet",
