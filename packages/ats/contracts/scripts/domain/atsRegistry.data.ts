@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-06T11:07:21.796Z
- * Facets: 119
+ * Generated: 2026-05-06T11:59:25.400Z
+ * Facets: 120
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -117,6 +117,7 @@ import {
   OperatorFacet__factory,
   OperatorHoldByPartitionFacet__factory,
   PauseFacet__factory,
+  PrincipalFacet__factory,
   ProceedRecipientsFacet__factory,
   ProceedRecipientsKpiLinkedRateFacet__factory,
   ProceedRecipientsSustainabilityPerformanceTargetRateFacet__factory,
@@ -1838,14 +1839,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x4ce02414",
       },
       {
-        name: "getPrincipalFor",
-        signature: {
-          full: "function getPrincipalFor(address _account) view returns ((uint256 numerator, uint256 denominator) principalFor_)",
-          canonical: "getPrincipalFor(address)",
-        },
-        selector: "0x6f131c78",
-      },
-      {
         name: "getSecurityHolders",
         signature: {
           full: "function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
@@ -1887,9 +1880,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x67d08758",
       },
     ],
-    factory: (signer) => new BondUSAReadFacet__factory(getLibLinks("clearingReadOps") as any, signer),
-    timeTravelFactory: (signer) =>
-      new BondUSAReadFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
+    factory: (signer) => new BondUSAReadFacet__factory(signer),
+    timeTravelFactory: (signer) => new BondUSAReadFacetTimeTravel__factory(signer),
   },
 
   BondUSAReadFixedRateFacet: {
@@ -1909,14 +1901,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x4ce02414",
       },
       {
-        name: "getPrincipalFor",
-        signature: {
-          full: "function getPrincipalFor(address _account) view returns ((uint256 numerator, uint256 denominator) principalFor_)",
-          canonical: "getPrincipalFor(address)",
-        },
-        selector: "0x6f131c78",
-      },
-      {
         name: "getSecurityHolders",
         signature: {
           full: "function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
@@ -1958,9 +1942,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x67d08758",
       },
     ],
-    factory: (signer) => new BondUSAReadFixedRateFacet__factory(getLibLinks("clearingReadOps") as any, signer),
-    timeTravelFactory: (signer) =>
-      new BondUSAReadFixedRateFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
+    factory: (signer) => new BondUSAReadFixedRateFacet__factory(signer),
+    timeTravelFactory: (signer) => new BondUSAReadFixedRateFacetTimeTravel__factory(signer),
   },
 
   BondUSAReadKpiLinkedRateFacet: {
@@ -1980,14 +1963,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x4ce02414",
       },
       {
-        name: "getPrincipalFor",
-        signature: {
-          full: "function getPrincipalFor(address _account) view returns ((uint256 numerator, uint256 denominator) principalFor_)",
-          canonical: "getPrincipalFor(address)",
-        },
-        selector: "0x6f131c78",
-      },
-      {
         name: "getSecurityHolders",
         signature: {
           full: "function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
@@ -2029,9 +2004,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x67d08758",
       },
     ],
-    factory: (signer) => new BondUSAReadKpiLinkedRateFacet__factory(getLibLinks("clearingReadOps") as any, signer),
-    timeTravelFactory: (signer) =>
-      new BondUSAReadKpiLinkedRateFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
+    factory: (signer) => new BondUSAReadKpiLinkedRateFacet__factory(signer),
+    timeTravelFactory: (signer) => new BondUSAReadKpiLinkedRateFacetTimeTravel__factory(signer),
   },
 
   BondUSAReadSustainabilityPerformanceTargetRateFacet: {
@@ -2051,14 +2025,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x4ce02414",
       },
       {
-        name: "getPrincipalFor",
-        signature: {
-          full: "function getPrincipalFor(address _account) view returns ((uint256 numerator, uint256 denominator) principalFor_)",
-          canonical: "getPrincipalFor(address)",
-        },
-        selector: "0x6f131c78",
-      },
-      {
         name: "getSecurityHolders",
         signature: {
           full: "function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
@@ -2100,13 +2066,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x67d08758",
       },
     ],
-    factory: (signer) =>
-      new BondUSAReadSustainabilityPerformanceTargetRateFacet__factory(getLibLinks("clearingReadOps") as any, signer),
-    timeTravelFactory: (signer) =>
-      new BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel__factory(
-        getLibLinks("clearingReadOps") as any,
-        signer,
-      ),
+    factory: (signer) => new BondUSAReadSustainabilityPerformanceTargetRateFacet__factory(signer),
+    timeTravelFactory: (signer) => new BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
   },
 
   BondUSASustainabilityPerformanceTargetRateFacet: {
@@ -12185,6 +12146,28 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) => new PauseFacetTimeTravel__factory(signer),
   },
 
+  PrincipalFacet: {
+    name: "PrincipalFacet",
+    description:
+      "Diamond facet exposing principal queries via `IPrincipal`, registered under `_PRINCIPAL_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_PRINCIPAL_RESOLVER_KEY",
+      value: "0xee3abfaeccdcebe74dafa848dd3d3e8c9ad4e286bdb263b740f7c1ae90d9191d",
+    },
+    inheritance: ["Principal", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "getPrincipalFor",
+        signature: {
+          full: "function getPrincipalFor(address _account) view returns ((uint256 numerator, uint256 denominator) principalFor_)",
+          canonical: "getPrincipalFor(address)",
+        },
+        selector: "0x6f131c78",
+      },
+    ],
+    factory: (signer) => new PrincipalFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+  },
+
   ProceedRecipientsFacet: {
     name: "ProceedRecipientsFacet",
     resolverKey: {
@@ -14868,7 +14851,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 119 as const;
+export const TOTAL_FACETS = 120 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

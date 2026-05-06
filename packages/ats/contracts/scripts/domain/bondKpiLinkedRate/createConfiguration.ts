@@ -140,6 +140,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   // Jurisdiction-Specific (write facet and read facet are both rate-specific)
   "BondUSAKpiLinkedRateFacet",
   "BondUSAReadKpiLinkedRateFacet",
+  "PrincipalFacet",
 ] as const;
 
 /**

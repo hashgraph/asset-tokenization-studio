@@ -143,6 +143,7 @@ const BOND_FIXED_RATE_FACETS = [
   // Jurisdiction-Specific
   "BondUSAFixedRateFacet",
   "BondUSAReadFacet",
+  "PrincipalFacet",
 ] as const;
 
 /**

@@ -9,19 +9,19 @@ import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticF
 
 abstract contract BondUSAReadFacetBase is BondRead, IStaticFunctionSelectors, Security {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
-        staticFunctionSelectors_[selectorIndex++] = this.getBondDetails.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getPrincipalFor.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getSecurityRegulationData.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getSecurityHolders.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getTotalSecurityHolders.selector;
+        uint256 selectorIndex = 4;
+        staticFunctionSelectors_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this.getTotalSecurityHolders.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getSecurityHolders.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getSecurityRegulationData.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getBondDetails.selector;
+        }
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](2);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IBondRead).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(ISecurity).interfaceId;
+        staticInterfaceIds_[0] = type(IBondRead).interfaceId;
+        staticInterfaceIds_[1] = type(ISecurity).interfaceId;
     }
 }

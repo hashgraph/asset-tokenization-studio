@@ -596,6 +596,9 @@ bytes32 constant _BOND_KPI_LINKED_READ_RESOLVER_KEY = 0xcced91a2a03bf45bd62730a7
 // keccak256('security.token.standard.bond.SustainabilityPerformanceTarget.read.resolverKey');
 bytes32 constant _BOND_SUSTAINABILITY_PERFORMANCE_TARGET_READ_RESOLVER_KEY = 0x339d458f2928ef5148317aab39e4375a27e6c531d2e5b9de2d4fb23ad0e8b504;
 
+// keccak256('security.token.standard.bond.principal.resolverKey');
+bytes32 constant _PRINCIPAL_RESOLVER_KEY = 0xee3abfaeccdcebe74dafa848dd3d3e8c9ad4e286bdb263b740f7c1ae90d9191d;
+
 // keccak256('security.token.standard.scheduled.couponListing.resolverKey');
 bytes32 constant _SCHEDULED_COUPON_LISTING_RESOLVER_KEY = 0x6cc7645ae5bcd122875ce8bd150bd28dda6374546c4c2421e5ae4fdeedb3ab30;
 
