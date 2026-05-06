@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-05T12:32:14.038Z
+ * Generated: 2026-05-05T12:52:03.559Z
  * Facets: 113
  * Infrastructure: 2
  *
@@ -5886,7 +5886,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_COUPON_RESOLVER_KEY",
       value: "0xa404f705370f56f56364ac9aa1092c1002b2bfcd7020c1bb5ca7489f8061efa7",
     },
-    inheritance: ["CouponFacetBase"],
+    inheritance: ["ICoupon", "Modifiers", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "cancelCoupon",
@@ -6253,7 +6253,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_COUPON_KPI_LINKED_RATE_RESOLVER_KEY",
       value: "0x45f4a1774eac5a47f3cbc755bf5332ca30d8a6bb0330d479c77590dd0d5aab18",
     },
-    inheritance: ["CouponFacetBase"],
+    inheritance: ["ICoupon", "Modifiers", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "cancelCoupon",
@@ -6583,7 +6583,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_COUPON_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
       value: "0x435034f1d262736f434867e5f70c71157492ebd5a90e9e4455b2868f5bda6b6e",
     },
-    inheritance: ["CouponFacetBase"],
+    inheritance: ["ICoupon", "Modifiers", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "cancelCoupon",
