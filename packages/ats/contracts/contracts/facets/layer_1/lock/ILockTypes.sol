@@ -55,7 +55,7 @@ interface ILockTypes {
     /**
      * @notice Reverts when a release is attempted before the lock's expiration timestamp.
      * @dev Used by the `onlyWithLockedExpirationTimestamp` modifier and by
-     *      `LockStorageWrapper.requireLockedExpirationTimestamp`.
+     *      `LockStorageWrapper.checkLockedExpirationTimestamp`.
      */
     error LockExpirationNotReached();
 
@@ -63,7 +63,7 @@ interface ILockTypes {
      * @notice Reverts when a lock identifier does not exist for the given
      *         `(partition, tokenHolder)` pair.
      * @dev Used by the `onlyWithValidLockId` modifier and by
-     *      `LockStorageWrapper.requireValidLockId`.
+     *      `LockStorageWrapper.checkValidLockId`.
      */
     error WrongLockId();
 }

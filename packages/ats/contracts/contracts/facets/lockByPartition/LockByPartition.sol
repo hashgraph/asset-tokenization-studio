@@ -44,21 +44,15 @@ abstract contract LockByPartition is ILockByPartition, Modifiers {
         onlyDefaultPartitionWithSinglePartition(_partition)
         returns (bool success_, uint256 lockId_)
     {
+        address sender = EvmAccessors.getMsgSender();
         (success_, lockId_) = LockStorageWrapper.lockByPartition(
             _partition,
             _amount,
             _tokenHolder,
             _expirationTimestamp,
-            EvmAccessors.getMsgSender()
+            sender
         );
-        emit LockedByPartition(
-            EvmAccessors.getMsgSender(),
-            _tokenHolder,
-            _partition,
-            lockId_,
-            _amount,
-            _expirationTimestamp
-        );
+        emit LockedByPartition(sender, _tokenHolder, _partition, lockId_, _amount, _expirationTimestamp);
     }
 
     /**
@@ -81,13 +75,9 @@ abstract contract LockByPartition is ILockByPartition, Modifiers {
         onlyWithLockedExpirationTimestamp(_partition, _tokenHolder, _lockId)
         returns (bool success_)
     {
-        success_ = LockStorageWrapper.releaseByPartition(
-            _partition,
-            _lockId,
-            _tokenHolder,
-            EvmAccessors.getMsgSender()
-        );
-        emit LockByPartitionReleased(EvmAccessors.getMsgSender(), _tokenHolder, _partition, _lockId);
+        address sender = EvmAccessors.getMsgSender();
+        success_ = LockStorageWrapper.releaseByPartition(_partition, _lockId, _tokenHolder, sender);
+        emit LockByPartitionReleased(sender, _tokenHolder, _partition, _lockId);
     }
 
     /**

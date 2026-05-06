@@ -178,11 +178,11 @@ library LockStorageWrapper {
             revert ICommonErrors.WrongExpirationTimestamp();
     }
 
-    function requireValidLockId(bytes32 partition, address tokenHolder, uint256 lockId) internal view {
+    function checkValidLockId(bytes32 partition, address tokenHolder, uint256 lockId) internal view {
         if (!isLockIdValid(partition, tokenHolder, lockId)) revert ILockTypes.WrongLockId();
     }
 
-    function requireLockedExpirationTimestamp(bytes32 partition, address tokenHolder, uint256 lockId) internal view {
+    function checkLockedExpirationTimestamp(bytes32 partition, address tokenHolder, uint256 lockId) internal view {
         if (!isLockedExpirationTimestamp(partition, tokenHolder, lockId)) revert ILockTypes.LockExpirationNotReached();
     }
 
