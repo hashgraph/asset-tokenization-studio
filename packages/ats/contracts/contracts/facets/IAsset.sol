@@ -91,6 +91,7 @@ import { ILock } from "./layer_1/lock/ILock.sol";
 import { IFreeze } from "./freeze/IFreeze.sol";
 import { IBatchFreeze } from "./batchFreeze/IBatchFreeze.sol";
 import { ISnapshots } from "./layer_1/snapshot/ISnapshots.sol";
+import { ISecurityHoldersAtSnapshot } from "./securityHoldersAtSnapshot/ISecurityHoldersAtSnapshot.sol";
 import { IFreezeAtSnapshot } from "./freezeAtSnapshot/IFreezeAtSnapshot.sol";
 import { IFreezeAtSnapshotByPartition } from "./freezeAtSnapshotByPartition/IFreezeAtSnapshotByPartition.sol";
 import { IIdentity } from "./identity/IIdentity.sol";
@@ -211,6 +212,7 @@ interface IAsset is
     IFreeze,
     IBatchFreeze,
     ISnapshots,
+    ISecurityHoldersAtSnapshot,
     IFreezeAtSnapshot,
     IIdentity,
     IFreezeAtSnapshotByPartition,
