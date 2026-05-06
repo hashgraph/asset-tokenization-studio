@@ -43,7 +43,6 @@ import { IExternalPauseManagement } from "./externalPauseManagement/IExternalPau
 import { IFixedRate } from "./layer_2/interestRate/fixedRate/IFixedRate.sol";
 
 // Layer 2
-import { IHold } from "./layer_1/hold/IHold.sol";
 import { IOperatorHoldByPartition } from "./operatorHoldByPartition/IOperatorHoldByPartition.sol";
 import { IHoldByPartition } from "./holdByPartition/IHoldByPartition.sol";
 import { IKyc } from "./layer_1/kyc/IKyc.sol";
@@ -160,7 +159,6 @@ interface IAsset is
     IKpis,
     ITimeTravel,
     IDiamond,
-    IHold,
     IOperatorHoldByPartition,
     ITransfer,
     IERC20Votes,
