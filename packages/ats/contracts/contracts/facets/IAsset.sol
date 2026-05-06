@@ -98,6 +98,7 @@ import { IIdentity } from "./identity/IIdentity.sol";
 import { ICoreAtSnapshot } from "./coreAtSnapshot/ICoreAtSnapshot.sol";
 import { IClearingTransfer } from "./layer_1/clearing/IClearingTransfer.sol";
 import { IClearingRedeem } from "./layer_1/clearing/IClearingRedeem.sol";
+import { IOperatorClearingByPartition } from "./operatorClearingByPartition/IOperatorClearingByPartition.sol";
 import { IClearingHoldCreation } from "./layer_1/clearing/IClearingHoldCreation.sol";
 import {
     IOperatorClearingHoldByPartition
@@ -221,6 +222,7 @@ interface IAsset is
     IClearing,
     IClearingTransfer,
     IClearingRedeem,
+    IOperatorClearingByPartition,
     IClearingHoldCreation,
     IOperatorClearingHoldByPartition,
     IClearingByPartition,
