@@ -110,6 +110,7 @@ const BOND_FACETS = [
   "ClearingFacet",
   "ClearingRedeemFacet",
   "ClearingTransferFacet",
+  "OperatorClearingByPartitionFacet",
   "HoldFacet",
   "HoldManagementFacet",
   "ControllerHoldByPartitionFacet",
