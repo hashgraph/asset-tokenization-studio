@@ -1,14 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IERC1410Types } from "./IERC1410Types.sol";
-import { IERC1410TokenHolder } from "./IERC1410TokenHolder.sol";
+import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { ITransferByPartition } from "./ITransferByPartition.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
-import { Modifiers } from "../../../../services/Modifiers.sol";
-import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
-import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
-
-abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Modifiers {
+/// @title TransferByPartition
+/// @author Asset Tokenization Studio Team
+/// @notice Abstract base for the TransferByPartition facet, exposing token-holder-initiated
+///         partition transfers.
+/// @dev Stateless; delegates to {TokenCoreOps.transferByPartition}.
+///      Abstract because it is composed into the Diamond alongside other facets.
+abstract contract TransferByPartition is ITransferByPartition, Modifiers {
+    /// @inheritdoc ITransferByPartition
     function transferByPartition(
         bytes32 _partition,
         IERC1410Types.BasicTransferInfo calldata _basicTransferInfo,

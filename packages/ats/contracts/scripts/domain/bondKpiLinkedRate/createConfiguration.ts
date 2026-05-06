@@ -71,7 +71,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "ERC1410ManagementFacet",
   "ERC1410ReadFacet",
   "OperatorFacet",
-  "ERC1410TokenHolderFacet",
+  "TransferByPartitionFacet",
   "OperatorByPartitionFacet",
   "BurnByPartitionFacet",
   "DocumentationFacet",
