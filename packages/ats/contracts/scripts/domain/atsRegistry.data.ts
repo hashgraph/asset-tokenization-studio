@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-06T12:37:24.417Z
- * Facets: 122
+ * Generated: 2026-05-06T13:58:59.774Z
+ * Facets: 123
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -129,6 +129,7 @@ import {
   ScheduledCrossOrderedTasksKpiLinkedRateFacet__factory,
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet__factory,
   SecurityHoldersAtSnapshotFacet__factory,
+  SnapshotsByPartitionFacet__factory,
   SnapshotsFacet__factory,
   SsiManagementFacet__factory,
   SustainabilityPerformanceTargetRateFacet__factory,
@@ -188,6 +189,7 @@ import {
   ScheduledCrossOrderedTasksFacetTimeTravel__factory,
   ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel__factory,
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
+  SnapshotsByPartitionFacetTimeTravel__factory,
   SnapshotsFacetTimeTravel__factory,
   SsiManagementFacetTimeTravel__factory,
   SustainabilityPerformanceTargetRateFacetTimeTravel__factory,
@@ -13559,6 +13561,42 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     factory: (signer) => new SecurityHoldersAtSnapshotFacet__factory(signer),
   },
 
+  SnapshotsByPartitionFacet: {
+    name: "SnapshotsByPartitionFacet",
+    resolverKey: {
+      name: "_SNAPSHOTS_BY_PARTITION_RESOLVER_KEY",
+      value: "0x3b5d7af028f11f553faeb3b68c55dbc6ec4e20b0ae08ffc53f2de483983128a9",
+    },
+    inheritance: ["SnapshotsByPartition", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "partitionsOfAtSnapshot",
+        signature: {
+          full: "function partitionsOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (bytes32[])",
+          canonical: "partitionsOfAtSnapshot(uint256,address)",
+        },
+        selector: "0x09e84301",
+      },
+    ],
+    errors: [
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+    ],
+    factory: (signer) => new SnapshotsByPartitionFacet__factory(signer),
+    timeTravelFactory: (signer) => new SnapshotsByPartitionFacetTimeTravel__factory(signer),
+  },
+
   SnapshotsFacet: {
     name: "SnapshotsFacet",
     description:
@@ -13576,14 +13614,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "getScheduledSnapshots(uint256,uint256)",
         },
         selector: "0xca21c53a",
-      },
-      {
-        name: "partitionsOfAtSnapshot",
-        signature: {
-          full: "function partitionsOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (bytes32[])",
-          canonical: "partitionsOfAtSnapshot(uint256,address)",
-        },
-        selector: "0x09e84301",
       },
       {
         name: "scheduledSnapshotCount",
@@ -14923,7 +14953,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 122 as const;
+export const TOTAL_FACETS = 123 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

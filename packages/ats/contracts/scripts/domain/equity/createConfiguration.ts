@@ -54,6 +54,7 @@ const EQUITY_FACETS = [
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
+  "SnapshotsByPartitionFacet",
   "SecurityHoldersAtSnapshotFacet",
   "HoldAtSnapshotFacet",
   "LockAtSnapshotByPartitionFacet",

@@ -1,0 +1,18 @@
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
+
+import { ISnapshotsTypes } from "../layer_1/snapshot/ISnapshotsTypes.sol";
+
+/// @title ISnapshotsByPartition
+/// @author Asset Tokenization Studio Team
+/// @notice Interface for the SnapshotsByPartition facet, exposing partition-level snapshot reads.
+interface ISnapshotsByPartition is ISnapshotsTypes {
+    /// @notice Returns the list of partitions held by an account at the time of a given snapshot.
+    /// @dev Reverts with {SnapshotIdNull} when `_snapshotID` is zero, and with
+    ///      {SnapshotIdDoesNotExists} when the snapshot identifier does not correspond to a
+    ///      previously taken snapshot.
+    /// @param _snapshotID Identifier of the snapshot to query.
+    /// @param _tokenHolder Address of the account whose partition list is being queried.
+    /// @return Ordered list of partition identifiers held by `_tokenHolder` at snapshot time.
+    function partitionsOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) external view returns (bytes32[] memory);
+}
