@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-05T08:55:49.721Z
- * Facets: 110
+ * Generated: 2026-05-06T15:30:50.113Z
+ * Facets: 111
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -14739,7 +14739,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 110 as const;
+export const TOTAL_FACETS = 111 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -15578,7 +15578,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 43 as const;
+export const TOTAL_STORAGE_WRAPPERS = 44 as const;
 
 /**
  * All role identifiers extracted from contracts.

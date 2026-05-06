@@ -1,6 +1,21 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { AccessControlModifiers } from "./AccessControlModifiers.sol";
+import { DefaultValuesModifiers } from "./DefaultValuesModifiers.sol";
+import { CapModifiers } from "./CapModifiers.sol";
+import { ControlListModifiers } from "./ControlListModifiers.sol";
+import { DateValidationModifiers } from "./DateValidationModifiers.sol";
+import { DocumentationModifiers } from "./DocumentationModifiers.sol";
+import { ExternalListModifiers } from "./ExternalListModifiers.sol";
+import { KycModifiers } from "./KycModifiers.sol";
+import { LoanModifiers } from "./LoanModifiers.sol";
+import { PartitionModifiers } from "./PartitionModifiers.sol";
+import { PartitionValidationModifiers } from "./PartitionValidationModifiers.sol";
+import { PauseModifiers } from "./PauseModifiers.sol";
+import { DeactivateModifiers } from "./DeactivateModifiers.sol";
+import { InitializerModifiers } from "./InitializerModifiers.sol";
+
 /**
  * @title CoreModifiers
  * @notice Aggregator contract that re-exports all core domain modifiers
@@ -19,22 +34,6 @@ pragma solidity >=0.8.0 <0.9.0;
  *
  * @author Asset Tokenization Studio Team
  */
-
-import { AccessControlModifiers } from "./AccessControlModifiers.sol";
-import { DefaultValuesModifiers } from "./DefaultValuesModifiers.sol";
-import { CapModifiers } from "./CapModifiers.sol";
-import { ControlListModifiers } from "./ControlListModifiers.sol";
-import { DateValidationModifiers } from "./DateValidationModifiers.sol";
-import { DocumentationModifiers } from "./DocumentationModifiers.sol";
-import { ExternalListModifiers } from "./ExternalListModifiers.sol";
-import { KycModifiers } from "./KycModifiers.sol";
-import { LoanModifiers } from "./LoanModifiers.sol";
-import { PartitionModifiers } from "./PartitionModifiers.sol";
-import { PartitionValidationModifiers } from "./PartitionValidationModifiers.sol";
-import { PauseModifiers } from "./PauseModifiers.sol";
-import { DeactivateModifiers } from "./DeactivateModifiers.sol";
-import { InitializerModifiers } from "./InitializerModifiers.sol";
-
 abstract contract CoreModifiers is
     AccessControlModifiers,
     DefaultValuesModifiers,
@@ -48,8 +47,7 @@ abstract contract CoreModifiers is
     PartitionModifiers,
     PartitionValidationModifiers,
     PauseModifiers,
-    DeactivateModifiers
-    PauseModifiers,
+    DeactivateModifiers,
     InitializerModifiers
 {
     // This contract aggregates all core modifiers through inheritance
