@@ -22,6 +22,10 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract ProtectedByPartition is IProtectedByPartition, Modifiers {
     /// @inheritdoc IProtectedByPartition
+    /// @dev Emits `ProtectedTransferredByPartition` immediately before the `TokenCoreOps`
+    ///      library call as a stack-too-deep workaround; revert semantics make this
+    ///      functionally equivalent to emitting after a successful return (the event would
+    ///      be rolled back together with the rest of the transaction on revert).
     function protectedTransferFromByPartition(
         bytes32 _partition,
         address _from,
@@ -37,6 +41,15 @@ abstract contract ProtectedByPartition is IProtectedByPartition, Modifiers {
         onlyCanTransferFromByPartition(_from, _to, _partition, _amount)
         returns (bytes32)
     {
+        emit ProtectedTransferredByPartition(
+            EvmAccessors.getMsgSender(),
+            _from,
+            _to,
+            _amount,
+            _partition,
+            _protectionData
+        );
+
         return TokenCoreOps.protectedTransferFromByPartition(_partition, _from, _to, _amount, _protectionData);
     }
 
@@ -55,5 +68,7 @@ abstract contract ProtectedByPartition is IProtectedByPartition, Modifiers {
         onlyCanRedeemFromByPartition(_from, _partition, _amount)
     {
         TokenCoreOps.protectedRedeemFromByPartition(_partition, _from, _amount, _protectionData);
+
+        emit ProtectedRedeemedByPartition(EvmAccessors.getMsgSender(), _from, _amount, _partition, _protectionData);
     }
 }
