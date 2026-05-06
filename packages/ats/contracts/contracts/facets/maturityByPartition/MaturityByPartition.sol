@@ -23,6 +23,7 @@ abstract contract MaturityByPartition is IMaturityByPartition, Modifiers {
     /// @dev Delegates storage writes to `ERC1410StorageWrapper.redeemByPartition`. Preserves
     ///      all modifier semantics from the original `Bond.redeemAtMaturityByPartition`
     ///      implementation.
+    /// @dev Emits: `TransferByPartition`, `RedeemedByPartition`
     function redeemAtMaturityByPartition(
         address _tokenHolder,
         bytes32 _partition,
