@@ -133,7 +133,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "CouponSecurityHoldersFacet",
 
   // Interest Rate (rate-specific - keep variant names)
-  "CouponKpiLinkedRateFacet",
+  "CouponFacet",
   "KpiLinkedRateFacet",
   "KpisKpiLinkedRateFacet",
 

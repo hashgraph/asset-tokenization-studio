@@ -133,7 +133,7 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "CouponSecurityHoldersFacet",
 
   // Interest Rate (rate-specific - keep variant names)
-  "CouponSustainabilityPerformanceTargetRateFacet",
+  "CouponFacet",
   "SustainabilityPerformanceTargetRateFacet",
   "KpisSustainabilityPerformanceTargetRateFacet",
 

@@ -12,21 +12,27 @@ import { Modifiers } from "../../services/Modifiers.sol";
 /**
  * @title Coupon
  * @author Asset Tokenization Studio Team
- * @notice Abstract base of the standard (non-rate-variant) coupon writer surface exposed by
- *         `CouponFacet`. Provides the shared coupon lifecycle (`setCoupon`, `cancelCoupon`)
- *         plus the per-record reads consumers need before executing a coupon.
- * @dev Thin forwarder over `CouponStorageWrapper`; holds no storage of its own. Write paths
- *      are restricted to `CORPORATE_ACTION_ROLE` and gated by the unpaused state. Read paths
- *      are guarded by `onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)`.
- *      Emits `ICoupon.CouponSet` / `ICoupon.CouponCancelled` inline after the underlying
+ * @notice Abstract base of the unified coupon writer surface exposed by `CouponFacet` for
+ *         every bond rate variant (standard, fixed-rate, KPI-linked, SPT). Provides the
+ *         shared coupon lifecycle (`setCoupon`, `cancelCoupon`) plus the per-record reads
+ *         consumers need before executing a coupon.
+ * @dev Thin forwarder over `CouponStorageWrapper`; holds no storage of its own. Write
+ *      paths are restricted to `CORPORATE_ACTION_ROLE` and gated by the unpaused state.
+ *      Read paths are guarded by `onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE,
+ *      _couponID - 1)`. The rate-variant invariants and rate resolution live in
+ *      `CouponStorageWrapper.setCoupon` (write-path mirror of `getCoupon`'s read-path
+ *      dispatch via `InterestRateStorageWrapper.is<Variant>Initialized()`). Emits
+ *      `ICoupon.CouponSet` / `ICoupon.CouponCancelled` inline after the underlying
  *      storage call returns, per the writer-abstract emit-site rule.
  */
 abstract contract Coupon is ICoupon, Modifiers {
     /// @inheritdoc ICoupon
     /// @dev Restricted to `CORPORATE_ACTION_ROLE`; gated by `onlyUnpaused`,
     ///      `onlyValidDates(...)` (three pairs of date validations), and
-    ///      `onlyValidTimestamp` on `recordDate` and `fixingDate`. The standard variant
-    ///      persists the user-supplied coupon as-is.
+    ///      `onlyValidTimestamp` on `recordDate` and `fixingDate`. Variant-specific
+    ///      rate invariants and rate stamping are applied inside
+    ///      `CouponStorageWrapper.setCoupon`; the wrapper returns the post-resolution
+    ///      coupon so the emitted event reflects the persisted state.
     function setCoupon(
         ICouponTypes.Coupon calldata _newCoupon
     )
@@ -42,8 +48,9 @@ abstract contract Coupon is ICoupon, Modifiers {
         returns (uint256 couponID_)
     {
         bytes32 corporateActionId;
-        (corporateActionId, couponID_) = CouponStorageWrapper.setCoupon(_newCoupon);
-        emit ICoupon.CouponSet(corporateActionId, couponID_, EvmAccessors.getMsgSender(), _newCoupon);
+        ICouponTypes.Coupon memory resolved;
+        (corporateActionId, couponID_, resolved) = CouponStorageWrapper.setCoupon(_newCoupon);
+        emit ICoupon.CouponSet(corporateActionId, couponID_, EvmAccessors.getMsgSender(), resolved);
     }
 
     /// @inheritdoc ICoupon
