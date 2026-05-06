@@ -39,6 +39,9 @@ abstract contract OperatorClearingByPartition is IOperatorClearingByPartition, M
             _clearingOperationFrom.operatorData,
             ThirdPartyType.OPERATOR
         );
+
+        /// @dev ClearedOperatorRedeemByPartition event should be emitted here, and not in
+        /// in the ClearingOps.clearingRedeemCreation function
     }
 
     /// @inheritdoc IOperatorClearingByPartition
@@ -69,5 +72,8 @@ abstract contract OperatorClearingByPartition is IOperatorClearingByPartition, M
             _clearingOperationFrom.operatorData,
             ThirdPartyType.OPERATOR
         );
+
+        /// @dev ClearedOperatorTransferByPartition event should be emitted here, and not in
+        /// in the ClearingOps.clearingRedeemCreation function
     }
 }
