@@ -12,11 +12,9 @@ contract ERC1410ManagementFacet is ERC1410Management, IStaticFunctionSelectors {
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 3;
+        uint256 selectorIndex = 1;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);
         unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.protectedRedeemFromByPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.protectedTransferFromByPartition.selector;
             staticFunctionSelectors_[--selectorIndex] = this.initialize_ERC1410.selector;
         }
     }

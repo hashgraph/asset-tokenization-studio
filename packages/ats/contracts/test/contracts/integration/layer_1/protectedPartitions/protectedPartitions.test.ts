@@ -6,7 +6,13 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type ResolverProxy, type IAsset, ComplianceMock } from "@contract-types";
 import { DEFAULT_PARTITION, ZERO, EMPTY_STRING, ADDRESS_ZERO, ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployAtsInfrastructureFixture, deployEquityTokenFixture, MAX_UINT256 } from "@test";
+import {
+  deployAtsInfrastructureFixture,
+  deployEquityTokenFixture,
+  EVENT_NAMES,
+  MAX_UINT256,
+  expectExactlyOneEvent,
+} from "@test";
 import { executeRbac } from "@test";
 
 const amount = 1;
@@ -554,13 +560,22 @@ describe("ProtectedPartitions Tests", () => {
           data: "0x",
         });
 
-        await asset
+        const tx = asset
           .connect(signer_B)
           .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
             deadline: deadline,
             nonce: 1,
             signature: signature,
           });
+        await expect(tx)
+          .to.emit(asset, EVENT_NAMES.PROTECTED_TRANSFERRED_BY_PARTITION)
+          .withArgs(signer_B.address, signer_A.address, signer_B.address, amount, DEFAULT_PARTITION, [
+            deadline,
+            1,
+            signature,
+          ]);
+        const receipt = await (await tx).wait();
+        expectExactlyOneEvent(receipt!, asset, EVENT_NAMES.PROTECTED_TRANSFERRED_BY_PARTITION);
       });
     });
 
@@ -854,13 +869,22 @@ describe("ProtectedPartitions Tests", () => {
           data: "0x",
         });
 
-        await asset
+        const tx = asset
           .connect(signer_B)
           .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
             deadline: deadline,
             nonce: 1,
             signature: signature,
           });
+        await expect(tx)
+          .to.emit(asset, EVENT_NAMES.PROTECTED_TRANSFERRED_BY_PARTITION)
+          .withArgs(signer_B.address, signer_A.address, signer_B.address, amount, DEFAULT_PARTITION, [
+            deadline,
+            1,
+            signature,
+          ]);
+        const receipt = await (await tx).wait();
+        expectExactlyOneEvent(receipt!, asset, EVENT_NAMES.PROTECTED_TRANSFERRED_BY_PARTITION);
         expect(await complianceMock.transferredHit()).to.equal(1);
       });
     });

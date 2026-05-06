@@ -1204,3 +1204,34 @@ export const TEST_OPTIONS = {
    */
   CONFIRMATIONS_INSTANT: 0,
 } as const;
+
+// ============================================================================
+// Event Names
+// ============================================================================
+
+/**
+ * Event names emitted by ATS contract facets, used by the chai `to.emit(...)` matcher
+ * and by topic-hash filters in tests.
+ *
+ * Centralising event-name strings here:
+ * - keeps test files free of magic strings (per the project's no-magic-strings rule);
+ * - documents the canonical writer-interface declaration for each event;
+ * - makes a future event rename a single-point edit instead of a repo-wide grep.
+ *
+ * Extend incrementally as new tests assert on events: add the new entry next to its
+ * writer's existing entries (alphabetical or capability-grouped). Each entry's JSDoc
+ * comment names the writer + external method that emits it, so reviewers can grep
+ * back to the source.
+ */
+export const EVENT_NAMES = {
+  /** Emitted by `ProtectedByPartitionFacet.protectedTransferFromByPartition`. */
+  PROTECTED_TRANSFERRED_BY_PARTITION: "ProtectedTransferredByPartition",
+  /** Emitted by `ProtectedByPartitionFacet.protectedRedeemFromByPartition`. */
+  PROTECTED_REDEEMED_BY_PARTITION: "ProtectedRedeemedByPartition",
+  /** Emitted by `ProtectedClearingByPartitionFacet.protectedClearingRedeemByPartition`. */
+  PROTECTED_CLEARED_REDEEM_BY_PARTITION: "ProtectedClearedRedeemByPartition",
+  /** Emitted by `ProtectedClearingByPartitionFacet.protectedClearingTransferByPartition`. */
+  PROTECTED_CLEARED_TRANSFER_BY_PARTITION: "ProtectedClearedTransferByPartition",
+  /** Emitted by `ProtectedClearingHoldByPartitionFacet.protectedClearingCreateHoldByPartition`. */
+  PROTECTED_CLEARED_HOLD_BY_PARTITION: "ProtectedClearedHoldByPartition",
+} as const;

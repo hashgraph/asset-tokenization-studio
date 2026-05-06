@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-06T11:37:30.462Z
- * Facets: 120
+ * Generated: 2026-05-06T13:58:59.774Z
+ * Facets: 123
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -117,15 +117,18 @@ import {
   OperatorFacet__factory,
   OperatorHoldByPartitionFacet__factory,
   PauseFacet__factory,
+  PrincipalFacet__factory,
   ProceedRecipientsFacet__factory,
   ProceedRecipientsKpiLinkedRateFacet__factory,
   ProceedRecipientsSustainabilityPerformanceTargetRateFacet__factory,
+  ProtectedByPartitionFacet__factory,
   ProtectedHoldByPartitionFacet__factory,
   ProtectedPartitionsFacet__factory,
   RecoveryFacet__factory,
   ScheduledCrossOrderedTasksFacet__factory,
   ScheduledCrossOrderedTasksKpiLinkedRateFacet__factory,
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet__factory,
+  SecurityHoldersAtSnapshotFacet__factory,
   SnapshotsByPartitionFacet__factory,
   SnapshotsFacet__factory,
   SsiManagementFacet__factory,
@@ -1840,14 +1843,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x4ce02414",
       },
       {
-        name: "getPrincipalFor",
-        signature: {
-          full: "function getPrincipalFor(address _account) view returns ((uint256 numerator, uint256 denominator) principalFor_)",
-          canonical: "getPrincipalFor(address)",
-        },
-        selector: "0x6f131c78",
-      },
-      {
         name: "getSecurityHolders",
         signature: {
           full: "function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
@@ -1889,9 +1884,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x67d08758",
       },
     ],
-    factory: (signer) => new BondUSAReadFacet__factory(getLibLinks("clearingReadOps") as any, signer),
-    timeTravelFactory: (signer) =>
-      new BondUSAReadFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
+    factory: (signer) => new BondUSAReadFacet__factory(signer),
+    timeTravelFactory: (signer) => new BondUSAReadFacetTimeTravel__factory(signer),
   },
 
   BondUSAReadFixedRateFacet: {
@@ -1911,14 +1905,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x4ce02414",
       },
       {
-        name: "getPrincipalFor",
-        signature: {
-          full: "function getPrincipalFor(address _account) view returns ((uint256 numerator, uint256 denominator) principalFor_)",
-          canonical: "getPrincipalFor(address)",
-        },
-        selector: "0x6f131c78",
-      },
-      {
         name: "getSecurityHolders",
         signature: {
           full: "function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
@@ -1960,9 +1946,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x67d08758",
       },
     ],
-    factory: (signer) => new BondUSAReadFixedRateFacet__factory(getLibLinks("clearingReadOps") as any, signer),
-    timeTravelFactory: (signer) =>
-      new BondUSAReadFixedRateFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
+    factory: (signer) => new BondUSAReadFixedRateFacet__factory(signer),
+    timeTravelFactory: (signer) => new BondUSAReadFixedRateFacetTimeTravel__factory(signer),
   },
 
   BondUSAReadKpiLinkedRateFacet: {
@@ -1982,14 +1967,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x4ce02414",
       },
       {
-        name: "getPrincipalFor",
-        signature: {
-          full: "function getPrincipalFor(address _account) view returns ((uint256 numerator, uint256 denominator) principalFor_)",
-          canonical: "getPrincipalFor(address)",
-        },
-        selector: "0x6f131c78",
-      },
-      {
         name: "getSecurityHolders",
         signature: {
           full: "function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
@@ -2031,9 +2008,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x67d08758",
       },
     ],
-    factory: (signer) => new BondUSAReadKpiLinkedRateFacet__factory(getLibLinks("clearingReadOps") as any, signer),
-    timeTravelFactory: (signer) =>
-      new BondUSAReadKpiLinkedRateFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
+    factory: (signer) => new BondUSAReadKpiLinkedRateFacet__factory(signer),
+    timeTravelFactory: (signer) => new BondUSAReadKpiLinkedRateFacetTimeTravel__factory(signer),
   },
 
   BondUSAReadSustainabilityPerformanceTargetRateFacet: {
@@ -2053,14 +2029,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x4ce02414",
       },
       {
-        name: "getPrincipalFor",
-        signature: {
-          full: "function getPrincipalFor(address _account) view returns ((uint256 numerator, uint256 denominator) principalFor_)",
-          canonical: "getPrincipalFor(address)",
-        },
-        selector: "0x6f131c78",
-      },
-      {
         name: "getSecurityHolders",
         signature: {
           full: "function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
@@ -2102,13 +2070,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x67d08758",
       },
     ],
-    factory: (signer) =>
-      new BondUSAReadSustainabilityPerformanceTargetRateFacet__factory(getLibLinks("clearingReadOps") as any, signer),
-    timeTravelFactory: (signer) =>
-      new BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel__factory(
-        getLibLinks("clearingReadOps") as any,
-        signer,
-      ),
+    factory: (signer) => new BondUSAReadSustainabilityPerformanceTargetRateFacet__factory(signer),
+    timeTravelFactory: (signer) => new BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
   },
 
   BondUSASustainabilityPerformanceTargetRateFacet: {
@@ -6819,22 +6782,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "function initialize_ERC1410(bool _multiPartition)", canonical: "initialize_ERC1410(bool)" },
         selector: "0x7b1df196",
       },
-      {
-        name: "protectedRedeemFromByPartition",
-        signature: {
-          full: "function protectedRedeemFromByPartition(bytes32 _partition, address _from, uint256 _amount, (uint256 deadline, uint256 nonce, bytes signature) _protectionData)",
-          canonical: "protectedRedeemFromByPartition(bytes32,address,uint256,(uint256,uint256,bytes))",
-        },
-        selector: "0x7756e22e",
-      },
-      {
-        name: "protectedTransferFromByPartition",
-        signature: {
-          full: "function protectedTransferFromByPartition(bytes32 _partition, address _from, address _to, uint256 _amount, (uint256 deadline, uint256 nonce, bytes signature) _protectionData) returns (bytes32)",
-          canonical: "protectedTransferFromByPartition(bytes32,address,address,uint256,(uint256,uint256,bytes))",
-        },
-        selector: "0x99b5ef4a",
-      },
     ],
     events: [
       {
@@ -6904,14 +6851,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x10210dec",
       },
       {
-        name: "AccountHasNoRole",
-        signature: {
-          full: "error AccountHasNoRole(address account, bytes32 role)",
-          canonical: "AccountHasNoRole(address,bytes32)",
-        },
-        selector: "0xa1180aad",
-      },
-      {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
@@ -6938,16 +6877,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xb96d9539",
       },
       {
-        name: "PartitionsAreUnProtected",
-        signature: { full: "error PartitionsAreUnProtected()", canonical: "PartitionsAreUnProtected()" },
-        selector: "0x05681565",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
-      {
         name: "Unauthorized",
         signature: {
           full: "error Unauthorized(address operator, address tokenHolder, bytes32 partition)",
@@ -6962,9 +6891,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "ZeroValue", signature: { full: "error ZeroValue()", canonical: "ZeroValue()" }, selector: "0x7c946ed7" },
     ],
-    factory: (signer) => new ERC1410ManagementFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
-    timeTravelFactory: (signer) =>
-      new ERC1410ManagementFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
+    factory: (signer) => new ERC1410ManagementFacet__factory(signer),
+    timeTravelFactory: (signer) => new ERC1410ManagementFacetTimeTravel__factory(signer),
   },
 
   ERC1410ReadFacet: {
@@ -12187,6 +12115,28 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) => new PauseFacetTimeTravel__factory(signer),
   },
 
+  PrincipalFacet: {
+    name: "PrincipalFacet",
+    description:
+      "Diamond facet exposing principal queries via `IPrincipal`, registered under `_PRINCIPAL_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_PRINCIPAL_RESOLVER_KEY",
+      value: "0xee3abfaeccdcebe74dafa848dd3d3e8c9ad4e286bdb263b740f7c1ae90d9191d",
+    },
+    inheritance: ["Principal", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "getPrincipalFor",
+        signature: {
+          full: "function getPrincipalFor(address _account) view returns ((uint256 numerator, uint256 denominator) principalFor_)",
+          canonical: "getPrincipalFor(address)",
+        },
+        selector: "0x6f131c78",
+      },
+    ],
+    factory: (signer) => new PrincipalFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+  },
+
   ProceedRecipientsFacet: {
     name: "ProceedRecipientsFacet",
     resolverKey: {
@@ -12642,6 +12592,82 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     factory: (signer) => new ProceedRecipientsSustainabilityPerformanceTargetRateFacet__factory(signer),
     timeTravelFactory: (signer) =>
       new ProceedRecipientsSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
+  },
+
+  ProtectedByPartitionFacet: {
+    name: "ProtectedByPartitionFacet",
+    description:
+      "Diamond facet that registers the protected partition-scoped transfer and redemption selectors under `_PROTECTED_BY_PARTITION_RESOLVER_KEY` on the Diamond proxy.",
+    resolverKey: {
+      name: "_PROTECTED_BY_PARTITION_RESOLVER_KEY",
+      value: "0x9d0a49341d6d9216381bfd989b60c6b453acb5b2ca6994948003527bd029090d",
+    },
+    inheritance: ["ProtectedByPartition", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "protectedRedeemFromByPartition",
+        signature: {
+          full: "function protectedRedeemFromByPartition(bytes32 _partition, address _from, uint256 _amount, (uint256 deadline, uint256 nonce, bytes signature) _protectionData)",
+          canonical: "protectedRedeemFromByPartition(bytes32,address,uint256,(uint256,uint256,bytes))",
+        },
+        selector: "0x7756e22e",
+      },
+      {
+        name: "protectedTransferFromByPartition",
+        signature: {
+          full: "function protectedTransferFromByPartition(bytes32 _partition, address _from, address _to, uint256 _amount, (uint256 deadline, uint256 nonce, bytes signature) _protectionData) returns (bytes32)",
+          canonical: "protectedTransferFromByPartition(bytes32,address,address,uint256,(uint256,uint256,bytes))",
+        },
+        selector: "0x99b5ef4a",
+      },
+    ],
+    events: [
+      {
+        name: "ProtectedRedeemedByPartition",
+        signature: {
+          full: "event ProtectedRedeemedByPartition(address indexed operator, address indexed from, uint256 amount, bytes32 partition, (uint256 deadline, uint256 nonce, bytes signature) protectionData)",
+          canonical: "ProtectedRedeemedByPartition(address,address,uint256,bytes32,(uint256,uint256,bytes))",
+        },
+        topic0: "0xda1fa8f5fe4e9d87a784ee515873a738d904b476b7e450137abeade2344d0ff6",
+      },
+      {
+        name: "ProtectedTransferredByPartition",
+        signature: {
+          full: "event ProtectedTransferredByPartition(address indexed operator, address indexed from, address indexed to, uint256 amount, bytes32 partition, (uint256 deadline, uint256 nonce, bytes signature) protectionData)",
+          canonical: "ProtectedTransferredByPartition(address,address,address,uint256,bytes32,(uint256,uint256,bytes))",
+        },
+        topic0: "0x2b04bd5cb8d1c2ce7e5a547e1f1735407d46476642d258f585ed48f0a6ad33bd",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRole",
+        signature: {
+          full: "error AccountHasNoRole(address account, bytes32 role)",
+          canonical: "AccountHasNoRole(address,bytes32)",
+        },
+        selector: "0xa1180aad",
+      },
+      {
+        name: "PartitionsAreUnProtected",
+        signature: { full: "error PartitionsAreUnProtected()", canonical: "PartitionsAreUnProtected()" },
+        selector: "0x05681565",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+    ],
+    factory: (signer) => new ProtectedByPartitionFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   ProtectedHoldByPartitionFacet: {
@@ -13490,6 +13516,51 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       new ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
   },
 
+  SecurityHoldersAtSnapshotFacet: {
+    name: "SecurityHoldersAtSnapshotFacet",
+    description:
+      "Diamond facet that exposes paginated token-holder queries at a given snapshot via `ISecurityHoldersAtSnapshot`, registered under `_SECURITY_HOLDERS_AT_SNAPSHOT_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_SECURITY_HOLDERS_AT_SNAPSHOT_RESOLVER_KEY",
+      value: "0x3dc4b3a968b10d149d468d66b43cc0dd0de16009510fe5b6838369087c6d4d4c",
+    },
+    inheritance: ["SecurityHoldersAtSnapshot", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "getTokenHoldersAtSnapshot",
+        signature: {
+          full: "function getTokenHoldersAtSnapshot(uint256 _snapshotID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+          canonical: "getTokenHoldersAtSnapshot(uint256,uint256,uint256)",
+        },
+        selector: "0xd22a73df",
+      },
+      {
+        name: "getTotalTokenHoldersAtSnapshot",
+        signature: {
+          full: "function getTotalTokenHoldersAtSnapshot(uint256 _snapshotID) view returns (uint256)",
+          canonical: "getTotalTokenHoldersAtSnapshot(uint256)",
+        },
+        selector: "0x867126e1",
+      },
+    ],
+    errors: [
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+    ],
+    factory: (signer) => new SecurityHoldersAtSnapshotFacet__factory(signer),
+  },
+
   SnapshotsByPartitionFacet: {
     name: "SnapshotsByPartitionFacet",
     resolverKey: {
@@ -13543,22 +13614,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "getScheduledSnapshots(uint256,uint256)",
         },
         selector: "0xca21c53a",
-      },
-      {
-        name: "getTokenHoldersAtSnapshot",
-        signature: {
-          full: "function getTokenHoldersAtSnapshot(uint256 _snapshotID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
-          canonical: "getTokenHoldersAtSnapshot(uint256,uint256,uint256)",
-        },
-        selector: "0xd22a73df",
-      },
-      {
-        name: "getTotalTokenHoldersAtSnapshot",
-        signature: {
-          full: "function getTotalTokenHoldersAtSnapshot(uint256 _snapshotID) view returns (uint256)",
-          canonical: "getTotalTokenHoldersAtSnapshot(uint256)",
-        },
-        selector: "0x867126e1",
       },
       {
         name: "scheduledSnapshotCount",
@@ -14898,7 +14953,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 120 as const;
+export const TOTAL_FACETS = 123 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

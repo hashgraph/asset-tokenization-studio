@@ -128,6 +128,14 @@ describe("Snapshots Tests", () => {
       "SnapshotIdDoesNotExists",
     );
     await expect(asset.getTotalTokenHoldersAtSnapshot(0)).to.be.revertedWithCustomError(asset, "SnapshotIdNull");
+    await expect(asset.partitionsOfAtSnapshot(1, signer_A.address)).to.be.revertedWithCustomError(
+      asset,
+      "SnapshotIdDoesNotExists",
+    );
+    await expect(asset.partitionsOfAtSnapshot(0, signer_A.address)).to.be.revertedWithCustomError(
+      asset,
+      "SnapshotIdNull",
+    );
   });
 
   it("GIVEN an account with snapshot role WHEN takeSnapshot THEN transaction succeeds", async () => {
@@ -310,68 +318,6 @@ describe("Snapshots Tests", () => {
     expect(snapshot_TotalTokenHolders_2).to.equal(2);
     expect(snapshot_TokenHolders_2.length).to.equal(snapshot_TotalTokenHolders_2);
     expect([...snapshot_TokenHolders_2]).to.have.members([signer_A.address, signer_C.address]);
-  });
-
-  it("GIVEN multiple snapshots WHEN querying token holders pagination THEN returns correct holders list", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_C.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
-
-    await asset.connect(signer_A).addIssuer(signer_A.address);
-    await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-    await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-    await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-
-    await asset.connect(signer_A).issueByPartition({
-      partition: _PARTITION_ID_1,
-      tokenHolder: signer_C.address,
-      value: balanceOf_C_Original,
-      data: "0x",
-    });
-
-    await asset.connect(signer_A).issueByPartition({
-      partition: _PARTITION_ID_1,
-      tokenHolder: signer_A.address,
-      value: amount,
-      data: "0x",
-    });
-
-    await asset.connect(signer_A).issueByPartition({
-      partition: _PARTITION_ID_1,
-      tokenHolder: signer_B.address,
-      value: amount,
-      data: "0x",
-    });
-
-    await asset.connect(signer_C).takeSnapshot();
-
-    const totalHolders = await asset.getTotalTokenHoldersAtSnapshot(1);
-    expect(totalHolders).to.equal(3);
-
-    // Test pagination - get 2 holders per page
-    const holders_page_0 = await asset.getTokenHoldersAtSnapshot(1, 0, 2);
-    expect(holders_page_0.length).to.equal(2);
-    // Verify page 0 contains 2 of the expected holders
-    const expectedHolders = [signer_C.address, signer_A.address, signer_B.address];
-    holders_page_0.forEach((holder) => {
-      expect(expectedHolders).to.include(holder);
-    });
-
-    const holders_page_1 = await asset.getTokenHoldersAtSnapshot(1, 1, 2);
-    expect(holders_page_1.length).to.equal(1);
-    // Verify page 1 contains 1 of the expected holders
-    holders_page_1.forEach((holder) => {
-      expect(expectedHolders).to.include(holder);
-    });
-
-    // Combine all holders from both pages
-    const allHolders = [...holders_page_0, ...holders_page_1];
-    const uniqueHolders = [...new Set(allHolders)];
-    expect(uniqueHolders.length).to.equal(3);
-
-    // Get all holders in one call to verify consistency
-    const allHolders_single_call = await asset.getTokenHoldersAtSnapshot(1, 0, 10);
-    expect(allHolders_single_call.length).to.equal(3);
-    expect([...allHolders_single_call]).to.have.members([signer_C.address, signer_A.address, signer_B.address]);
   });
 
   describe("Scheduled tasks", async () => {

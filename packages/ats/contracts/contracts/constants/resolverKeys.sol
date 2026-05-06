@@ -255,6 +255,9 @@ bytes32 constant _CONTROLLER_BY_PARTITION_RESOLVER_KEY = 0x66d6ddfefca163b54f2a3
 // keccak256("security.token.standard.protected.hold.by.partition.resolverKey")
 bytes32 constant _PROTECTED_HOLD_BY_PARTITION_RESOLVER_KEY = 0x12c5881cfa073bf7497f90103e5b2a7f9a93f11147137ec2a1389b60904d0157;
 
+// keccak256("security.token.standard.protectedByPartition.resolverKey");
+bytes32 constant _PROTECTED_BY_PARTITION_RESOLVER_KEY = 0x9d0a49341d6d9216381bfd989b60c6b453acb5b2ca6994948003527bd029090d;
+
 // keccak256("security.token.standard.hold.management.fixed.rate.resolverKey")
 bytes32 constant _HOLD_MANAGEMENT_FIXED_RATE_RESOLVER_KEY = 0x8e342108c0845c91b05aef6328f881a5a4cb86d47914f75a3fbd3b9219f740d1;
 
@@ -564,6 +567,9 @@ bytes32 constant _LOCK_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY = 0x7c9ad673591726c
 // keccak256('security.token.standard.lockAtSnapshot.resolverKey');
 bytes32 constant _LOCK_AT_SNAPSHOT_RESOLVER_KEY = 0xd0a412f3e7cd9c9475b5482a548616fc5e2ea67832b8fcd66d2e6a7086c503e9;
 
+// keccak256("security.token.standard.security.holders.at.snapshot.resolverKey")
+bytes32 constant _SECURITY_HOLDERS_AT_SNAPSHOT_RESOLVER_KEY = 0x3dc4b3a968b10d149d468d66b43cc0dd0de16009510fe5b6838369087c6d4d4c;
+
 // keccak256(abi.encodePacked("MaturityByPartition"));
 bytes32 constant _MATURITY_BY_PARTITION_RESOLVER_KEY = 0x2b81c0fae3cdccac1d4a19f22a96fdf66979e7714b26548cd486b8428befb253;
 
@@ -598,6 +604,9 @@ bytes32 constant _BOND_KPI_LINKED_READ_RESOLVER_KEY = 0xcced91a2a03bf45bd62730a7
 
 // keccak256('security.token.standard.bond.SustainabilityPerformanceTarget.read.resolverKey');
 bytes32 constant _BOND_SUSTAINABILITY_PERFORMANCE_TARGET_READ_RESOLVER_KEY = 0x339d458f2928ef5148317aab39e4375a27e6c531d2e5b9de2d4fb23ad0e8b504;
+
+// keccak256('security.token.standard.bond.principal.resolverKey');
+bytes32 constant _PRINCIPAL_RESOLVER_KEY = 0xee3abfaeccdcebe74dafa848dd3d3e8c9ad4e286bdb263b740f7c1ae90d9191d;
 
 // keccak256('security.token.standard.scheduled.couponListing.resolverKey');
 bytes32 constant _SCHEDULED_COUPON_LISTING_RESOLVER_KEY = 0x6cc7645ae5bcd122875ce8bd150bd28dda6374546c4c2421e5ae4fdeedb3ab30;
