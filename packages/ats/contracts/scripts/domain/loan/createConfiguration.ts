@@ -86,7 +86,7 @@ const LOAN_FACETS = [
   "OperatorByPartitionFacet",
   "BurnByPartitionFacet",
   "ERC3643ManagementFacet",
-  "ERC3643ReadFacet",
+  "RecoveryFacet",
   "IdentityFacet",
   "BatchControllerFacet",
   "BatchBurnFacet",

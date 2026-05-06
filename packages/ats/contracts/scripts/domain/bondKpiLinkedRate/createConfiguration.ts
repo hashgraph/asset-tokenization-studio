@@ -86,7 +86,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "BatchMintFacet",
   "BatchTransferFacet",
   "ERC3643ManagementFacet",
-  "ERC3643ReadFacet",
+  "RecoveryFacet",
   "IdentityFacet",
   "ComplianceFacet",
   "ComplianceByPartitionFacet",
