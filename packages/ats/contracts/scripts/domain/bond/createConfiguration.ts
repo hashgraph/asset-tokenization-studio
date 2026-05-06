@@ -79,7 +79,6 @@ const BOND_FACETS = [
   "TransferFacet",
   "MintByPartitionFacet",
   "ERC1410ManagementFacet",
-  "ERC1410ReadFacet",
   "OperatorFacet",
   "ERC1410TokenHolderFacet",
   "PartitionsFacet",

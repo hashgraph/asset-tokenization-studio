@@ -329,8 +329,8 @@ describe("registerAdditionalFacets - Integration Tests", () => {
       expect(initialCount).to.equal(TEST_SIZES.MEDIUM_BATCH);
 
       // Add 2 more using registerAdditionalFacets
-      const erc1410Factory = await ethers.getContractFactory("ERC1410ReadFacet", deployer);
-      const erc1410 = await deployContract(erc1410Factory, {});
+      const partitionsFactory = await ethers.getContractFactory("PartitionsFacet", deployer);
+      const partitions = await deployContract(partitionsFactory, {});
 
       // MintFacet — requires TokenCoreOps library link
       if (!hasOrchestratorLibraryAddresses()) {
@@ -346,9 +346,9 @@ describe("registerAdditionalFacets - Integration Tests", () => {
 
       const newFacetsWithKeys = [
         {
-          name: "ERC1410ReadFacet",
-          address: erc1410.address!,
-          resolverKey: atsRegistry.getFacetDefinition("ERC1410ReadFacet")!.resolverKey!.value,
+          name: "PartitionsFacet",
+          address: partitions.address!,
+          resolverKey: atsRegistry.getFacetDefinition("PartitionsFacet")!.resolverKey!.value,
         },
         {
           name: "MintFacet",

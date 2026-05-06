@@ -69,7 +69,6 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   // ERC Standards
   "MintByPartitionFacet",
   "ERC1410ManagementFacet",
-  "ERC1410ReadFacet",
   "OperatorFacet",
   "ERC1410TokenHolderFacet",
   "PartitionsFacet",

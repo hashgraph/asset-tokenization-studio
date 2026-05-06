@@ -70,7 +70,6 @@ const EQUITY_FACETS = [
   // ERC Standards (13)
   "MintByPartitionFacet",
   "ERC1410ManagementFacet",
-  "ERC1410ReadFacet",
   "OperatorFacet",
   "ERC1410TokenHolderFacet",
   "PartitionsFacet",

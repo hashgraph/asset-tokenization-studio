@@ -11,8 +11,7 @@ import { _PARTITIONS_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
  * @author Asset Tokenization Studio Team
  * @notice Diamond facet exposing partition-discovery accessors via `IPartitions`, registered
  *         under `_PARTITIONS_RESOLVER_KEY`.
- * @dev Consolidates `partitionsOf` and `isMultiPartition`, previously hosted in
- *      `ERC1410ReadFacet`. Exposes 2 selectors.
+ * @dev Exposes 2 selectors: `partitionsOf` and `isMultiPartition`.
  */
 contract PartitionsFacet is Partitions, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
