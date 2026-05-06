@@ -36,19 +36,6 @@ abstract contract Snapshots is ISnapshots, Modifiers {
         emit SnapshotTaken(EvmAccessors.getMsgSender(), snapshotID_);
     }
 
-    function getTokenHoldersAtSnapshot(
-        uint256 _snapshotID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (address[] memory holders_) {
-        return SnapshotsStorageWrapper.tokenHoldersAt(_snapshotID, _pageIndex, _pageLength);
-    }
-
-    /// @inheritdoc ISnapshots
-    function getTotalTokenHoldersAtSnapshot(uint256 _snapshotID) external view returns (uint256) {
-        return SnapshotsStorageWrapper.totalTokenHoldersAt(_snapshotID);
-    }
-
     function partitionsOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder

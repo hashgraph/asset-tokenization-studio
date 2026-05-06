@@ -14,6 +14,9 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { ISnapshots } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_1/snapshot/ISnapshots.sol";
 import {
+    ISecurityHoldersAtSnapshot
+} from "@hashgraph/asset-tokenization-contracts/contracts/facets/securityHoldersAtSnapshot/ISecurityHoldersAtSnapshot.sol";
+import {
     IBalanceTrackerAtSnapshot
 } from "@hashgraph/asset-tokenization-contracts/contracts/facets/balanceTrackerAtSnapshot/IBalanceTrackerAtSnapshot.sol";
 import { IMaturity } from "@hashgraph/asset-tokenization-contracts/contracts/facets/maturity/IMaturity.sol";
@@ -758,7 +761,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         uint256 _pageIndex,
         uint256 _pageLength
     ) private view returns (address[] memory) {
-        return ISnapshots(_asset).getTokenHoldersAtSnapshot(_snapshotID, _pageIndex, _pageLength);
+        return ISecurityHoldersAtSnapshot(_asset).getTokenHoldersAtSnapshot(_snapshotID, _pageIndex, _pageLength);
     }
 
     /*

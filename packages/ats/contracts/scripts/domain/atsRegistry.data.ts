@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-06T12:27:40.828Z
- * Facets: 121
+ * Generated: 2026-05-06T12:37:24.417Z
+ * Facets: 122
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -128,6 +128,7 @@ import {
   ScheduledCrossOrderedTasksFacet__factory,
   ScheduledCrossOrderedTasksKpiLinkedRateFacet__factory,
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet__factory,
+  SecurityHoldersAtSnapshotFacet__factory,
   SnapshotsFacet__factory,
   SsiManagementFacet__factory,
   SustainabilityPerformanceTargetRateFacet__factory,
@@ -13513,6 +13514,51 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       new ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
   },
 
+  SecurityHoldersAtSnapshotFacet: {
+    name: "SecurityHoldersAtSnapshotFacet",
+    description:
+      "Diamond facet that exposes paginated token-holder queries at a given snapshot via `ISecurityHoldersAtSnapshot`, registered under `_SECURITY_HOLDERS_AT_SNAPSHOT_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_SECURITY_HOLDERS_AT_SNAPSHOT_RESOLVER_KEY",
+      value: "0x3dc4b3a968b10d149d468d66b43cc0dd0de16009510fe5b6838369087c6d4d4c",
+    },
+    inheritance: ["SecurityHoldersAtSnapshot", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "getTokenHoldersAtSnapshot",
+        signature: {
+          full: "function getTokenHoldersAtSnapshot(uint256 _snapshotID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+          canonical: "getTokenHoldersAtSnapshot(uint256,uint256,uint256)",
+        },
+        selector: "0xd22a73df",
+      },
+      {
+        name: "getTotalTokenHoldersAtSnapshot",
+        signature: {
+          full: "function getTotalTokenHoldersAtSnapshot(uint256 _snapshotID) view returns (uint256)",
+          canonical: "getTotalTokenHoldersAtSnapshot(uint256)",
+        },
+        selector: "0x867126e1",
+      },
+    ],
+    errors: [
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+    ],
+    factory: (signer) => new SecurityHoldersAtSnapshotFacet__factory(signer),
+  },
+
   SnapshotsFacet: {
     name: "SnapshotsFacet",
     description:
@@ -13530,22 +13576,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "getScheduledSnapshots(uint256,uint256)",
         },
         selector: "0xca21c53a",
-      },
-      {
-        name: "getTokenHoldersAtSnapshot",
-        signature: {
-          full: "function getTokenHoldersAtSnapshot(uint256 _snapshotID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
-          canonical: "getTokenHoldersAtSnapshot(uint256,uint256,uint256)",
-        },
-        selector: "0xd22a73df",
-      },
-      {
-        name: "getTotalTokenHoldersAtSnapshot",
-        signature: {
-          full: "function getTotalTokenHoldersAtSnapshot(uint256 _snapshotID) view returns (uint256)",
-          canonical: "getTotalTokenHoldersAtSnapshot(uint256)",
-        },
-        selector: "0x867126e1",
       },
       {
         name: "partitionsOfAtSnapshot",
@@ -14893,7 +14923,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 121 as const;
+export const TOTAL_FACETS = 122 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
