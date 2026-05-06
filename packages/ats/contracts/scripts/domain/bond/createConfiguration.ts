@@ -135,6 +135,7 @@ const BOND_FACETS = [
   // Jurisdiction-Specific
   "BondUSAFacet",
   "BondUSAReadFacet",
+  "PrincipalFacet",
 ] as const;
 
 /**
