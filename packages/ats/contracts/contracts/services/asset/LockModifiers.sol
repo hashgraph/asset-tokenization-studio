@@ -41,7 +41,7 @@ abstract contract LockModifiers {
      * @param _lockId The lock identifier to validate
      */
     modifier onlyWithValidLockId(bytes32 _partition, address _tokenHolder, uint256 _lockId) {
-        LockStorageWrapper.requireValidLockId(_partition, _tokenHolder, _lockId);
+        LockStorageWrapper.checkValidLockId(_partition, _tokenHolder, _lockId);
         _;
     }
 
@@ -57,7 +57,7 @@ abstract contract LockModifiers {
      * @param _lockId The lock identifier to validate
      */
     modifier onlyWithLockedExpirationTimestamp(bytes32 _partition, address _tokenHolder, uint256 _lockId) {
-        LockStorageWrapper.requireLockedExpirationTimestamp(_partition, _tokenHolder, _lockId);
+        LockStorageWrapper.checkLockedExpirationTimestamp(_partition, _tokenHolder, _lockId);
         _;
     }
 }

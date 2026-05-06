@@ -116,6 +116,7 @@ const LOANS_PORTFOLIO_FACETS = [
   // Clearing & Settlement
   "ClearingTransferFacet",
   "ClearingRedeemFacet",
+  "OperatorClearingByPartitionFacet",
   "ClearingHoldCreationFacet",
   "OperatorClearingHoldByPartitionFacet",
   "ClearingFacet",
@@ -133,6 +134,7 @@ const LOANS_PORTFOLIO_FACETS = [
   // Advanced Features
   "AdjustBalancesFacet",
   "LockFacet",
+  "LockByPartitionFacet",
   "ProtectedPartitionsFacet",
   "TransferAndLockFacet",
 ] as const;

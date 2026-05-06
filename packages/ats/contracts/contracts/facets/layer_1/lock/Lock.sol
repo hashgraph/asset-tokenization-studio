@@ -13,12 +13,24 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 /**
  * @title Lock
  * @author Asset Tokenization Studio Team
- * @notice Abstract contract for locking tokens by partition
- *
- * Provides functionality for locking tokens with expiration timestamps
- * and role-based access control. Inherits LockModifiers for expiration validation.
+ * @notice Abstract base for the default-partition lock surface and the all-partition read
+ *         queries exposed by `LockFacet`.
+ * @dev Implements `lock` / `release` for single-partition mode, the controller-or-locker
+ *      `forceReleaseByPartition`, the partition-aware `getLockByPartition` lookup and the
+ *      all-partition read methods declared in `ILock`. Partition-aware writes and
+ *      partition-scoped reads live in the `LockByPartition` facet. All write operations
+ *      delegate persistence to `LockStorageWrapper`; balance-adjusted reads are timestamped
+ *      via `TimeTravelStorageWrapper.getBlockTimestamp` so they remain deterministic under
+ *      time-travel testing.
  */
 abstract contract Lock is ILock, Modifiers {
+    /**
+     * @inheritdoc ILock
+     * @dev Pause-gated, restricted to `LOCKER_ROLE`, only valid in single-partition mode and
+     *      against unrecovered token holders. Delegates to
+     *      `LockStorageWrapper.lockByPartition` against the default partition and emits
+     *      `LockedByPartition`.
+     */
     function lock(
         uint256 _amount,
         address _tokenHolder,
@@ -51,10 +63,10 @@ abstract contract Lock is ILock, Modifiers {
     }
 
     /**
-     * @notice Release tokens (default partition)
-     * @param _lockId The lock identifier
-     * @param _tokenHolder The token holder address
-     * @return success_ Boolean indicating success
+     * @inheritdoc ILock
+     * @dev Pause-gated, only valid in single-partition mode. Reverts with `WrongLockId`
+     *      when `_lockId` is unknown and with `LockExpirationNotReached` before the lock
+     *      expires. Emits `LockByPartitionReleased`.
      */
     function release(
         uint256 _lockId,
@@ -78,103 +90,17 @@ abstract contract Lock is ILock, Modifiers {
     }
 
     /**
-     * @notice Lock tokens by partition
-     * @dev Only callable by LOCKER_ROLE
-     *
-     * Requirements:
-     * - Partition must be valid and single
-     * - Token holder must not be recovered
-     * - Expiration timestamp must be in the future
-     * - Caller must have LOCKER_ROLE
-     *
-     * @param _partition The partition identifier
-     * @param _amount The amount to lock
-     * @param _tokenHolder The token holder address
-     * @param _expirationTimestamp The lock expiration timestamp
-     * @return success_ Boolean indicating success
-     * @return lockId_ The created lock identifier
-     */
-    function lockByPartition(
-        bytes32 _partition,
-        uint256 _amount,
-        address _tokenHolder,
-        uint256 _expirationTimestamp
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(LOCKER_ROLE)
-        onlyValidExpirationTimestamp(_expirationTimestamp)
-        onlyUnrecoveredAddress(_tokenHolder)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        returns (bool success_, uint256 lockId_)
-    {
-        (success_, lockId_) = LockStorageWrapper.lockByPartition(
-            _partition,
-            _amount,
-            _tokenHolder,
-            _expirationTimestamp,
-            EvmAccessors.getMsgSender()
-        );
-        emit LockedByPartition(
-            EvmAccessors.getMsgSender(),
-            _tokenHolder,
-            _partition,
-            lockId_,
-            _amount,
-            _expirationTimestamp
-        );
-    }
-
-    /**
-     * @notice Release tokens by partition
-     *
-     * Requirements:
-     * - Contract must not be paused
-     * - Partition must be valid and single
-     * - Lock ID must be valid
-     * - Lock expiration timestamp must have been reached
-     *
-     * @param _partition The partition identifier
-     * @param _lockId The lock identifier
-     * @param _tokenHolder The token holder address
-     * @return success_ Boolean indicating success
-     */
-    function releaseByPartition(
-        bytes32 _partition,
-        uint256 _lockId,
-        address _tokenHolder
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyWithValidLockId(_partition, _tokenHolder, _lockId)
-        onlyWithLockedExpirationTimestamp(_partition, _tokenHolder, _lockId)
-        returns (bool success_)
-    {
-        success_ = LockStorageWrapper.releaseByPartition(
-            _partition,
-            _lockId,
-            _tokenHolder,
-            EvmAccessors.getMsgSender()
-        );
-        emit LockByPartitionReleased(EvmAccessors.getMsgSender(), _tokenHolder, _partition, _lockId);
-    }
-
-    /**
-     * @notice Force release tokens by partition
-     * @dev Only callable by LOCKER_ROLE or CONTROLLER_ROLE
-     *
-     * Requirements:
-     * - Partition must be valid and single
-     * - Lock ID must be valid
-     * - Caller must have LOCKER_ROLE or CONTROLLER_ROLE
-     *
-     * @param _partition The partition identifier
-     * @param _lockId The lock identifier
-     * @param _tokenHolder The token holder address
-     * @return success_ Boolean indicating success
+     * @notice Releases a lock unconditionally, before its expiration timestamp.
+     * @dev Authorised path used to recover locked balances when the holder is unable to do
+     *      so. Pause-gated, partition validated against single-partition mode and
+     *      restricted to callers holding `LOCKER_ROLE` or `CONTROLLER_ROLE` (checked
+     *      explicitly via `AccessControlStorageWrapper.checkAnyRole`). Skips the
+     *      `LockExpirationNotReached` guard that `releaseByPartition` enforces. Emits
+     *      `LockByPartitionReleased`.
+     * @param _partition The partition the lock lives on.
+     * @param _lockId Identifier of the lock to release.
+     * @param _tokenHolder The address whose tokens are returned.
+     * @return success_ True when the lock has been removed and the balance returned.
      */
     function forceReleaseByPartition(
         bytes32 _partition,
@@ -195,10 +121,16 @@ abstract contract Lock is ILock, Modifiers {
     }
 
     /**
-     * @notice Get lock data by partition
-     * @param _partition The partition identifier
-     * @param _lockId The lock identifier
-     * @return lockData_ Lock data structure
+     * @notice Returns the raw `LockData` entry for a given partition, scoped to the caller.
+     * @dev Reads the lock keyed by the message sender (resolved through `EvmAccessors`),
+     *      not by an explicit token holder. Returns the unadjusted on-chain entry — callers
+     *      that need balance-adjusted figures should use the partition-scoped reads on
+     *      `LockByPartitionFacet`. Marked `virtual` so test doubles such as
+     *      `LockFacetTimeTravel` can override it.
+     * @param _partition The partition the lock lives on.
+     * @param _lockId Identifier of the lock to read.
+     * @return lockData_ The stored lock entry. All fields are zero when the identifier does
+     *         not exist for the caller.
      */
     function getLockByPartition(
         bytes32 _partition,
@@ -207,46 +139,11 @@ abstract contract Lock is ILock, Modifiers {
         lockData_ = LockStorageWrapper.getLock(_partition, EvmAccessors.getMsgSender(), _lockId);
     }
 
-    function getLockedAmountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view override returns (uint256 amount_) {
-        amount_ = LockStorageWrapper.getLockedAmountForByPartitionAdjustedAt(
-            _partition,
-            _tokenHolder,
-            TimeTravelStorageWrapper.getBlockTimestamp()
-        );
-    }
-
-    function getLockCountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view override returns (uint256 lockCount_) {
-        lockCount_ = LockStorageWrapper.getLockCountForByPartition(_partition, _tokenHolder);
-    }
-
-    function getLocksIdForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (uint256[] memory locksId_) {
-        locksId_ = LockStorageWrapper.getLocksIdForByPartition(_partition, _tokenHolder, _pageIndex, _pageLength);
-    }
-
-    function getLockForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _lockId
-    ) external view override returns (uint256 amount_, uint256 expirationTimestamp_) {
-        (amount_, expirationTimestamp_) = LockStorageWrapper.getLockForByPartitionAdjustedAt(
-            _partition,
-            _tokenHolder,
-            _lockId,
-            TimeTravelStorageWrapper.getBlockTimestamp()
-        );
-    }
-
+    /**
+     * @inheritdoc ILock
+     * @dev Returns the default-partition figure adjusted by any pending balance-adjustment
+     *      factors, evaluated at `TimeTravelStorageWrapper.getBlockTimestamp()`.
+     */
     function getLockedAmountFor(address _tokenHolder) external view override returns (uint256 amount_) {
         amount_ = LockStorageWrapper.getLockedAmountForByPartitionAdjustedAt(
             _DEFAULT_PARTITION,
@@ -255,10 +152,12 @@ abstract contract Lock is ILock, Modifiers {
         );
     }
 
+    /// @inheritdoc ILock
     function getLockCountFor(address _tokenHolder) external view override returns (uint256 lockCount_) {
         lockCount_ = LockStorageWrapper.getLockCountFor(_tokenHolder);
     }
 
+    /// @inheritdoc ILock
     function getLocksIdFor(
         address _tokenHolder,
         uint256 _pageIndex,
@@ -267,6 +166,11 @@ abstract contract Lock is ILock, Modifiers {
         locksId_ = LockStorageWrapper.getLocksIdFor(_tokenHolder, _pageIndex, _pageLength);
     }
 
+    /**
+     * @inheritdoc ILock
+     * @dev Returns the default-partition figures adjusted by any pending balance-adjustment
+     *      factors, evaluated at `TimeTravelStorageWrapper.getBlockTimestamp()`.
+     */
     function getLockFor(
         address _tokenHolder,
         uint256 _lockId

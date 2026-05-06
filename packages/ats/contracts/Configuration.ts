@@ -116,6 +116,7 @@ export const CONTRACT_NAMES = [
   "CorporateActionsFacet",
   "TransferAndLockFacet",
   "LockFacet",
+  "LockByPartitionFacet",
   "AdjustBalancesFacet",
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
