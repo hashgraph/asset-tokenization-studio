@@ -6,14 +6,6 @@ import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWr
 import { Modifiers } from "../../../../services/Modifiers.sol";
 
 abstract contract ERC1410Read is IERC1410Read, Modifiers {
-    function partitionsOf(address _tokenHolder) external view returns (bytes32[] memory) {
-        return ERC1410StorageWrapper.partitionsOf(_tokenHolder);
-    }
-
-    function isMultiPartition() external view returns (bool) {
-        return ERC1410StorageWrapper.isMultiPartition();
-    }
-
     function isOperator(address _operator, address _tokenHolder) public view returns (bool) {
         return ERC1410StorageWrapper.isOperator(_operator, _tokenHolder);
     }

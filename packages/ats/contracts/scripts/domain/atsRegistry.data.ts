@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-05T13:29:30.651Z
- * Facets: 114
+ * Generated: 2026-05-06T07:08:50.403Z
+ * Facets: 115
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -112,6 +112,7 @@ import {
   NominalValueFacet__factory,
   NoncesFacet__factory,
   OperatorClearingHoldByPartitionFacet__factory,
+  PartitionsFacet__factory,
   PauseFacet__factory,
   ProceedRecipientsFacet__factory,
   ProceedRecipientsKpiLinkedRateFacet__factory,
@@ -7577,11 +7578,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["ERC1410Read", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "isMultiPartition",
-        signature: { full: "function isMultiPartition() view returns (bool)", canonical: "isMultiPartition()" },
-        selector: "0xbd09cc54",
-      },
-      {
         name: "isOperator",
         signature: {
           full: "function isOperator(address _operator, address _tokenHolder) view returns (bool)",
@@ -7596,14 +7592,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "isOperatorForPartition(bytes32,address,address)",
         },
         selector: "0x6d77cad6",
-      },
-      {
-        name: "partitionsOf",
-        signature: {
-          full: "function partitionsOf(address _tokenHolder) view returns (bytes32[])",
-          canonical: "partitionsOf(address)",
-        },
-        selector: "0x740ab8f4",
       },
     ],
     events: [
@@ -12175,6 +12163,33 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     factory: (signer) => new OperatorClearingHoldByPartitionFacet__factory(getLibLinks("clearingOps") as any, signer),
   },
 
+  PartitionsFacet: {
+    name: "PartitionsFacet",
+    description:
+      "Diamond facet exposing partition-discovery accessors via `IPartitions`, registered under `_PARTITIONS_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_PARTITIONS_RESOLVER_KEY",
+      value: "0xf62cc7e91a59870f983c915c1fc851fa5fee5e694318052473e4dd769bf464a2",
+    },
+    inheritance: ["Partitions", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "isMultiPartition",
+        signature: { full: "function isMultiPartition() view returns (bool)", canonical: "isMultiPartition()" },
+        selector: "0xbd09cc54",
+      },
+      {
+        name: "partitionsOf",
+        signature: {
+          full: "function partitionsOf(address _tokenHolder) view returns (bytes32[])",
+          canonical: "partitionsOf(address)",
+        },
+        selector: "0x740ab8f4",
+      },
+    ],
+    factory: (signer) => new PartitionsFacet__factory(signer),
+  },
+
   PauseFacet: {
     name: "PauseFacet",
     description:
@@ -14721,7 +14736,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 114 as const;
+export const TOTAL_FACETS = 115 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

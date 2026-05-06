@@ -333,6 +333,9 @@ bytes32 constant _KYC_MANAGEMENT_RESOLVER_KEY = 0x8676785f4d841823214e8ee8c497b3
 // keccak256("security.token.standard.identity.resolverKey");
 bytes32 constant _IDENTITY_RESOLVER_KEY = 0x10f18bbac52ee688501dc4b08de190f748b8a00622cb165ccdce1f14beb74dab;
 
+// keccak256("security.token.standard.partitions.resolverKey");
+bytes32 constant _PARTITIONS_RESOLVER_KEY = 0xf62cc7e91a59870f983c915c1fc851fa5fee5e694318052473e4dd769bf464a2;
+
 // keccak256("security.token.standard.erc3643.read.resolverKey");
 bytes32 constant _ERC3643_READ_RESOLVER_KEY = 0x7743c4e9ff26ef34c3c482d2c12dabe076035eb44bf1c736722f04c33c20ef6a;
 

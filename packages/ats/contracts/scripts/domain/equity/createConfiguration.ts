@@ -72,6 +72,7 @@ const EQUITY_FACETS = [
   "ERC1410ManagementFacet",
   "ERC1410ReadFacet",
   "ERC1410TokenHolderFacet",
+  "PartitionsFacet",
   "BurnByPartitionFacet",
   "DocumentationFacet",
   "ControllerFacet",
