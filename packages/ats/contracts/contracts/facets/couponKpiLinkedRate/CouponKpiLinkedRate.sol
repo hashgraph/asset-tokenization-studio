@@ -1,33 +1,27 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICoupon } from "./ICoupon.sol";
-import { ICouponTypes } from "./ICouponTypes.sol";
+import { ICoupon } from "../coupon/ICoupon.sol";
+import { ICouponTypes } from "../coupon/ICouponTypes.sol";
 import { CORPORATE_ACTION_ROLE } from "../../constants/roles.sol";
 import { COUPON_CORPORATE_ACTION_TYPE } from "../../constants/values.sol";
-import { _COUPON_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 import { CouponStorageWrapper } from "../../domain/asset/coupon/CouponStorageWrapper.sol";
-// solhint-disable-next-line max-line-length
-import {
-    ISustainabilityPerformanceTargetRateTypes
-} from "../layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRateTypes.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
-import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 
 /**
- * @title CouponSustainabilityPerformanceTargetRateFacet
+ * @title CouponKpiLinkedRate
  * @author Asset Tokenization Studio Team
- * @notice Diamond facet variant of the coupon writer for Sustainability-Performance-Target
- *         (SPT) bonds. The rate is left pending at scheduling time and resolved
- *         dynamically at execution against the SPT achievement state of the bond.
- *         Registered under `_COUPON_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY`.
- * @dev Library-composition facet (BBND-1710). Calls `CouponStorageWrapper` directly.
- *      Requires the user-supplied coupon to have `rateStatus = PENDING`, `rate = 0`, and
- *      `rateDecimals = 0`; reverts with
- *      `ISustainabilityPerformanceTargetRateTypes.InterestRateIsSustainabilityPerformanceTargetRate`
- *      otherwise.
+ * @notice Abstract base of the KPI-linked-rate coupon writer surface exposed by
+ *         `CouponKpiLinkedRateFacet`. The rate is left pending at scheduling time and
+ *         resolved dynamically at execution against the KPI data of the bond.
+ * @dev Thin forwarder over `CouponStorageWrapper`; holds no storage of its own. Requires
+ *      the user-supplied coupon to have `rateStatus = PENDING`, `rate = 0`, and
+ *      `rateDecimals = 0` because the rate is computed dynamically; reverts with
+ *      `ICoupon.InterestRateIsKpiLinked` otherwise. Emits `ICoupon.CouponSet` /
+ *      `ICoupon.CouponCancelled` inline after the underlying storage call returns.
  */
-contract CouponSustainabilityPerformanceTargetRateFacet is ICoupon, Modifiers, IStaticFunctionSelectors {
+abstract contract CouponKpiLinkedRate is ICoupon, Modifiers {
     /// @inheritdoc ICoupon
     /// @dev Restricted to `CORPORATE_ACTION_ROLE`; gated by `onlyUnpaused`,
     ///      `onlyValidDates(...)` (three pairs of date validations), and
@@ -52,9 +46,11 @@ contract CouponSustainabilityPerformanceTargetRateFacet is ICoupon, Modifiers, I
             _newCoupon.rate != 0 ||
             _newCoupon.rateDecimals != 0
         ) {
-            revert ISustainabilityPerformanceTargetRateTypes.InterestRateIsSustainabilityPerformanceTargetRate();
+            revert ICoupon.InterestRateIsKpiLinked();
         }
-        (, couponID_) = CouponStorageWrapper.setCoupon(_newCoupon);
+        bytes32 corporateActionId;
+        (corporateActionId, couponID_) = CouponStorageWrapper.setCoupon(_newCoupon);
+        emit ICoupon.CouponSet(corporateActionId, couponID_, EvmAccessors.getMsgSender(), _newCoupon);
     }
 
     /// @inheritdoc ICoupon
@@ -71,6 +67,7 @@ contract CouponSustainabilityPerformanceTargetRateFacet is ICoupon, Modifiers, I
         returns (bool success_)
     {
         success_ = CouponStorageWrapper.cancelCoupon(_couponID);
+        emit ICoupon.CouponCancelled(_couponID, EvmAccessors.getMsgSender());
     }
 
     /// @inheritdoc ICoupon
@@ -123,37 +120,5 @@ contract CouponSustainabilityPerformanceTargetRateFacet is ICoupon, Modifiers, I
     /// @inheritdoc ICoupon
     function getCouponCount() external view override returns (uint256 couponCount_) {
         couponCount_ = CouponStorageWrapper.getCouponCount();
-    }
-
-    /// @inheritdoc IStaticFunctionSelectors
-    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _COUPON_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY;
-    }
-
-    /// @inheritdoc IStaticFunctionSelectors
-    /// @dev Selectors are written in reverse via `--selectorIndex` inside an `unchecked`
-    ///      block; the resulting array reads in declaration order (`setCoupon`,
-    ///      `cancelCoupon`, `getCoupon`, `getCouponFor`, `getCouponAmountFor`,
-    ///      `getCouponCount`).
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 6;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.getCouponCount.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getCouponAmountFor.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getCouponFor.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getCoupon.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.cancelCoupon.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.setCoupon.selector;
-        }
-    }
-
-    /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        uint256 selectorsIndex = 1;
-        staticInterfaceIds_ = new bytes4[](selectorsIndex);
-        unchecked {
-            staticInterfaceIds_[--selectorsIndex] = type(ICoupon).interfaceId;
-        }
     }
 }

@@ -1,38 +1,38 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICoupon } from "./ICoupon.sol";
-import { ICouponTypes } from "./ICouponTypes.sol";
-import { IFixedRate } from "../layer_2/interestRate/fixedRate/IFixedRate.sol";
+import { ICoupon } from "../coupon/ICoupon.sol";
+import { ICouponTypes } from "../coupon/ICouponTypes.sol";
 import { CORPORATE_ACTION_ROLE } from "../../constants/roles.sol";
 import { COUPON_CORPORATE_ACTION_TYPE } from "../../constants/values.sol";
-import { _COUPON_FIXED_RATE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 import { CouponStorageWrapper } from "../../domain/asset/coupon/CouponStorageWrapper.sol";
-import { InterestRateStorageWrapper } from "../../domain/asset/InterestRateStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+// solhint-disable-next-line max-line-length
+import {
+    ISustainabilityPerformanceTargetRateTypes
+} from "../layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRateTypes.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
-import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 
 /**
- * @title CouponFixedRateFacet
+ * @title CouponSustainabilityPerformanceTargetRate
  * @author Asset Tokenization Studio Team
- * @notice Diamond facet variant of the coupon writer that resolves the rate from the
- *         configured fixed-rate setting of the bond at scheduling time. Registered under
- *         `_COUPON_FIXED_RATE_RESOLVER_KEY`.
- * @dev Library-composition facet (BBND-1710). Calls `CouponStorageWrapper` for the
- *      coupon lifecycle and `InterestRateStorageWrapper.getRate()` directly for the
- *      fixed-rate value; carries no abstract-base inheritance and no virtual hooks.
- *      Rejects user-supplied rate parameters (must be `PENDING` / `0` / `0`), reads the
- *      configured rate, and stamps `rateStatus = SET` before persistence. Reverts with
- *      `IFixedRate.InterestRateIsFixed` if the caller specifies rate parameters
- *      manually.
+ * @notice Abstract base of the SPT-rate coupon writer surface exposed by
+ *         `CouponSustainabilityPerformanceTargetRateFacet`. The rate is left pending at
+ *         scheduling time and resolved dynamically at execution against the SPT
+ *         achievement state of the bond.
+ * @dev Thin forwarder over `CouponStorageWrapper`; holds no storage of its own. Requires
+ *      the user-supplied coupon to have `rateStatus = PENDING`, `rate = 0`, and
+ *      `rateDecimals = 0`; reverts with
+ *      `ISustainabilityPerformanceTargetRateTypes.InterestRateIsSustainabilityPerformanceTargetRate`
+ *      otherwise. Emits `ICoupon.CouponSet` / `ICoupon.CouponCancelled` inline after the
+ *      underlying storage call returns.
  */
-contract CouponFixedRateFacet is ICoupon, Modifiers, IStaticFunctionSelectors {
+abstract contract CouponSustainabilityPerformanceTargetRate is ICoupon, Modifiers {
     /// @inheritdoc ICoupon
     /// @dev Restricted to `CORPORATE_ACTION_ROLE`; gated by `onlyUnpaused`,
     ///      `onlyValidDates(...)` (three pairs of date validations), and
-    ///      `onlyValidTimestamp` on `recordDate` and `fixingDate`. Resolves the rate
-    ///      inline from `InterestRateStorageWrapper.getRate()` and stamps it onto the
-    ///      coupon before persistence.
+    ///      `onlyValidTimestamp` on `recordDate` and `fixingDate`. Validates that the
+    ///      rate parameters are pending; rejects user-supplied rate values inline.
     function setCoupon(
         ICouponTypes.Coupon calldata _newCoupon
     )
@@ -52,12 +52,11 @@ contract CouponFixedRateFacet is ICoupon, Modifiers, IStaticFunctionSelectors {
             _newCoupon.rate != 0 ||
             _newCoupon.rateDecimals != 0
         ) {
-            revert IFixedRate.InterestRateIsFixed();
+            revert ISustainabilityPerformanceTargetRateTypes.InterestRateIsSustainabilityPerformanceTargetRate();
         }
-        ICouponTypes.Coupon memory prepared = _newCoupon;
-        (prepared.rate, prepared.rateDecimals) = InterestRateStorageWrapper.getRate();
-        prepared.rateStatus = ICouponTypes.RateCalculationStatus.SET;
-        (, couponID_) = CouponStorageWrapper.setCoupon(prepared);
+        bytes32 corporateActionId;
+        (corporateActionId, couponID_) = CouponStorageWrapper.setCoupon(_newCoupon);
+        emit ICoupon.CouponSet(corporateActionId, couponID_, EvmAccessors.getMsgSender(), _newCoupon);
     }
 
     /// @inheritdoc ICoupon
@@ -74,6 +73,7 @@ contract CouponFixedRateFacet is ICoupon, Modifiers, IStaticFunctionSelectors {
         returns (bool success_)
     {
         success_ = CouponStorageWrapper.cancelCoupon(_couponID);
+        emit ICoupon.CouponCancelled(_couponID, EvmAccessors.getMsgSender());
     }
 
     /// @inheritdoc ICoupon
@@ -126,37 +126,5 @@ contract CouponFixedRateFacet is ICoupon, Modifiers, IStaticFunctionSelectors {
     /// @inheritdoc ICoupon
     function getCouponCount() external view override returns (uint256 couponCount_) {
         couponCount_ = CouponStorageWrapper.getCouponCount();
-    }
-
-    /// @inheritdoc IStaticFunctionSelectors
-    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _COUPON_FIXED_RATE_RESOLVER_KEY;
-    }
-
-    /// @inheritdoc IStaticFunctionSelectors
-    /// @dev Selectors are written in reverse via `--selectorIndex` inside an `unchecked`
-    ///      block; the resulting array reads in declaration order (`setCoupon`,
-    ///      `cancelCoupon`, `getCoupon`, `getCouponFor`, `getCouponAmountFor`,
-    ///      `getCouponCount`).
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 6;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.getCouponCount.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getCouponAmountFor.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getCouponFor.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getCoupon.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.cancelCoupon.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.setCoupon.selector;
-        }
-    }
-
-    /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        uint256 selectorsIndex = 1;
-        staticInterfaceIds_ = new bytes4[](selectorsIndex);
-        unchecked {
-            staticInterfaceIds_[--selectorsIndex] = type(ICoupon).interfaceId;
-        }
     }
 }

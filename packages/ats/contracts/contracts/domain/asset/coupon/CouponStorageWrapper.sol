@@ -12,7 +12,6 @@ import { CorporateActionsStorageWrapper } from "../../core/CorporateActionsStora
 import { ERC1410StorageWrapper } from "../ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../core/ERC3643StorageWrapper.sol";
-import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 import { ICoupon } from "../../../facets/coupon/ICoupon.sol";
 import { ICouponTypes } from "../../../facets/coupon/ICouponTypes.sol";
 import { InterestRateStorageWrapper } from "../InterestRateStorageWrapper.sol";
@@ -34,6 +33,15 @@ library CouponStorageWrapper {
         uint256[] couponsOrderedListByIds;
     }
 
+    /**
+     * @notice Persists a new coupon corporate action and schedules its snapshot/listing
+     *         tasks.
+     * @dev Does NOT emit `ICoupon.CouponSet` — the writer abstract emits it inline after
+     *      this call returns, per the project event-emission rule.
+     * @param newCoupon Coupon parameters captured at scheduling time.
+     * @return corporateActionId_ Identifier of the underlying corporate action.
+     * @return couponID_ One-indexed identifier assigned to the new coupon.
+     */
     function setCoupon(
         ICouponTypes.Coupon memory newCoupon
     ) internal returns (bytes32 corporateActionId_, uint256 couponID_) {
@@ -43,10 +51,16 @@ library CouponStorageWrapper {
         );
 
         initCoupon(corporateActionId_, newCoupon);
-
-        emit ICoupon.CouponSet(corporateActionId_, couponID_, EvmAccessors.getMsgSender(), newCoupon);
     }
 
+    /**
+     * @notice Cancels a previously scheduled coupon before its execution date is reached.
+     * @dev Reverts with `ICoupon.CouponAlreadyExecuted` if the execution date has passed.
+     *      Does NOT emit `ICoupon.CouponCancelled` — the writer abstract emits it inline
+     *      after this call returns, per the project event-emission rule.
+     * @param couponId One-indexed identifier of the coupon to cancel.
+     * @return success_ True once the cancellation has been recorded.
+     */
     function cancelCoupon(uint256 couponId) internal returns (bool success_) {
         ICouponTypes.RegisteredCoupon memory registeredCoupon;
         bytes32 corporateActionId;
@@ -59,7 +73,6 @@ library CouponStorageWrapper {
         }
         CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
         success_ = true;
-        emit ICoupon.CouponCancelled(couponId, EvmAccessors.getMsgSender());
     }
 
     function initCoupon(bytes32 actionId, ICouponTypes.Coupon memory newCoupon) internal {

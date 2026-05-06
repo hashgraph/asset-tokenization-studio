@@ -1,26 +1,30 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Coupon } from "./Coupon.sol";
-import { ICoupon } from "./ICoupon.sol";
-import { _COUPON_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
+// solhint-disable-next-line max-line-length
+import { CouponSustainabilityPerformanceTargetRate } from "./CouponSustainabilityPerformanceTargetRate.sol";
+import { ICoupon } from "../coupon/ICoupon.sol";
+// solhint-disable-next-line max-line-length
+import { _COUPON_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 
 /**
- * @title CouponFacet
+ * @title CouponSustainabilityPerformanceTargetRateFacet
  * @author Asset Tokenization Studio Team
- * @notice Diamond facet exposing the standard (non-rate-variant) coupon writer surface
- *         (`setCoupon`, `cancelCoupon`) alongside the per-record reads under
- *         `_COUPON_RESOLVER_KEY`.
- * @dev Inherits the writer logic from `Coupon` and satisfies `IStaticFunctionSelectors`
- *      for Diamond proxy selector registration. Read-only sibling facets
- *      `CouponSecurityHoldersFacet` and `CouponListingFacet` register under their own
- *      resolver keys and operate on the same underlying storage.
+ * @notice Diamond facet variant of the coupon writer for Sustainability-Performance-Target
+ *         (SPT) bonds. The rate is left pending at scheduling time and resolved
+ *         dynamically at execution against the SPT achievement state of the bond.
+ *         Registered under `_COUPON_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY`.
+ * @dev Inherits the writer logic from `CouponSustainabilityPerformanceTargetRate` and
+ *      satisfies `IStaticFunctionSelectors` for Diamond proxy selector registration.
  */
-contract CouponFacet is Coupon, IStaticFunctionSelectors {
+contract CouponSustainabilityPerformanceTargetRateFacet is
+    CouponSustainabilityPerformanceTargetRate,
+    IStaticFunctionSelectors
+{
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _COUPON_RESOLVER_KEY;
+        staticResolverKey_ = _COUPON_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY;
     }
 
     /// @inheritdoc IStaticFunctionSelectors
