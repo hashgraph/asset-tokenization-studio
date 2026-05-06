@@ -1,63 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IERC1410Types } from "./IERC1410Types.sol";
 import { IERC1410Management } from "./IERC1410Management.sol";
 import { IProtectedPartitions } from "../../../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
-import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ERC1410Management is IERC1410Management, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1410(bool _multiPartition) external override onlyNotERC1410Initialized {
         ERC1410StorageWrapper.initialize_ERC1410(_multiPartition);
-    }
-
-    function operatorTransferByPartition(
-        IERC1410Types.OperatorTransferData calldata _operatorTransferData
-    )
-        external
-        override
-        notZeroAddress(_operatorTransferData.to)
-        onlyDefaultPartitionWithSinglePartition(_operatorTransferData.partition)
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanTransferFromByPartition(
-            _operatorTransferData.from,
-            _operatorTransferData.to,
-            _operatorTransferData.partition,
-            _operatorTransferData.value
-        )
-        onlyOperator(_operatorTransferData.partition, _operatorTransferData.from)
-        returns (bytes32)
-    {
-        return TokenCoreOps.operatorTransferByPartition(_operatorTransferData);
-    }
-
-    function operatorRedeemByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    )
-        external
-        override
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanRedeemFromByPartition(_tokenHolder, _partition, _value)
-        onlyOperator(_partition, _tokenHolder)
-    {
-        TokenCoreOps.redeemByPartition(
-            _partition,
-            _tokenHolder,
-            EvmAccessors.getMsgSender(),
-            _value,
-            _data,
-            _operatorData
-        );
     }
 
     function protectedTransferFromByPartition(

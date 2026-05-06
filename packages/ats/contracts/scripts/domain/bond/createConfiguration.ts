@@ -80,8 +80,10 @@ const BOND_FACETS = [
   "MintByPartitionFacet",
   "ERC1410ManagementFacet",
   "ERC1410ReadFacet",
+  "OperatorFacet",
   "ERC1410TokenHolderFacet",
   "PartitionsFacet",
+  "OperatorByPartitionFacet",
   "BurnByPartitionFacet",
   "DocumentationFacet",
   "ControllerFacet",
@@ -135,6 +137,9 @@ const BOND_FACETS = [
   "CouponListingFacet",
   "SsiManagementFacet",
   "TransferAndLockFacet",
+
+  // Maturity By Partition
+  "MaturityByPartitionFacet",
 
   // Jurisdiction-Specific
   "BondUSAFacet",

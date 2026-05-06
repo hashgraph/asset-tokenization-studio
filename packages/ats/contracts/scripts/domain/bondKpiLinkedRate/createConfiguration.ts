@@ -70,8 +70,10 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "MintByPartitionFacet",
   "ERC1410ManagementFacet",
   "ERC1410ReadFacet",
+  "OperatorFacet",
   "ERC1410TokenHolderFacet",
   "PartitionsFacet",
+  "OperatorByPartitionFacet",
   "BurnByPartitionFacet",
   "DocumentationFacet",
   "ControllerFacet",
@@ -130,6 +132,9 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "CouponKpiLinkedRateFacet",
   "KpiLinkedRateFacet",
   "KpisKpiLinkedRateFacet",
+
+  // Maturity By Partition
+  "MaturityByPartitionFacet",
 
   // Jurisdiction-Specific (write facet and read facet are both rate-specific)
   "BondUSAKpiLinkedRateFacet",

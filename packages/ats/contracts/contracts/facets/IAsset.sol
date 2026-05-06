@@ -8,9 +8,9 @@ import {
 import { IAccessControl } from "./accessControl/IAccessControl.sol";
 import { IAdjustBalances } from "./adjustBalances/IAdjustBalances.sol";
 import { IAmortization } from "./layer_2/amortization/IAmortization.sol";
-import { IBond } from "./layer_2/bond/IBond.sol";
 import { IBondUSA } from "./layer_3/bondUSA/IBondUSA.sol";
 import { IMaturity } from "./maturity/IMaturity.sol";
+import { IBondRead } from "./layer_2/bond/IBondRead.sol";
 
 // Layer 1 — ERC1400
 
@@ -27,6 +27,7 @@ import { IAllowance } from "./allowance/IAllowance.sol";
 
 // Layer 1 — External lists
 import { IERC1410 } from "./layer_1/ERC1400/ERC1410/IERC1410.sol";
+import { IOperator } from "./operator/IOperator.sol";
 import { ITransfer } from "./transfer/ITransfer.sol";
 
 // Layer 1 — Remaining facets
@@ -82,6 +83,7 @@ import { IHoldAtSnapshotByPartition } from "./holdAtSnapshotByPartition/IHoldAtS
 import { IHoldAtSnapshot } from "./holdAtSnapshot/IHoldAtSnapshot.sol";
 import { ILockAtSnapshotByPartition } from "./lockAtSnapshotByPartition/ILockAtSnapshotByPartition.sol";
 import { ILockAtSnapshot } from "./lockAtSnapshot/ILockAtSnapshot.sol";
+import { IMaturityByPartition } from "./maturityByPartition/IMaturityByPartition.sol";
 import { ICouponListing } from "./couponListing/ICouponListing.sol";
 import { ICouponSecurityHolders } from "./couponSecurityHolders/ICouponSecurityHolders.sol";
 
@@ -124,6 +126,7 @@ import { IBatchMint } from "./batchMint/IBatchMint.sol";
 import { IBatchTransfer } from "./batchTransfer/IBatchTransfer.sol";
 import { IMetadata } from "./metadata/IMetadata.sol";
 import { IDeactivate } from "./deactivate/IDeactivate.sol";
+import { IOperatorByPartition } from "./operatorByPartition/IOperatorByPartition.sol";
 
 // solhint-disable no-empty-blocks
 /**
@@ -161,10 +164,11 @@ interface IAsset is
     ITransfer,
     IERC20Votes,
     IERC1410,
+    IOperator,
     IERC3643,
     IBurn,
     IScheduledCrossOrderedTasks,
-    IBond,
+    IBondRead,
     IMaturity,
     IEquity,
     ISecurity,
@@ -200,6 +204,7 @@ interface IAsset is
     IHoldAtSnapshot,
     ILockAtSnapshotByPartition,
     ILockAtSnapshot,
+    IMaturityByPartition,
     IFixedRate,
     // Scheduled Tasks
     ICouponListing,
@@ -244,5 +249,6 @@ interface IAsset is
     IBatchMint,
     IBatchTransfer,
     IMetadata,
-    IDeactivate
+    IDeactivate,
+    IOperatorByPartition
 {}
