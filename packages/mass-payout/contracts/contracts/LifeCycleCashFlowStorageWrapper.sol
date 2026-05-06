@@ -25,6 +25,7 @@ import {
     ICouponSecurityHolders
 } from "@hashgraph/asset-tokenization-contracts/contracts/facets/couponSecurityHolders/ICouponSecurityHolders.sol";
 import { IBondRead } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/bond/IBondRead.sol";
+import { IPrincipal } from "@hashgraph/asset-tokenization-contracts/contracts/facets/principal/IPrincipal.sol";
 import { IEquity } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/equity/IEquity.sol";
 import { IDividend } from "@hashgraph/asset-tokenization-contracts/contracts/facets/dividend/IDividend.sol";
 import {
@@ -864,7 +865,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         address _holder,
         uint8 _paymentTokenDecimals
     ) private view returns (uint256) {
-        IBondRead.PrincipalFor memory principalFor = IBondRead(_asset).getPrincipalFor(_holder);
+        IPrincipal.PrincipalFor memory principalFor = IPrincipal(_asset).getPrincipalFor(_holder);
         return (principalFor.numerator * 10 ** _paymentTokenDecimals) / principalFor.denominator;
     }
 
