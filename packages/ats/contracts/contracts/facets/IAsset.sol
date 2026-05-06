@@ -89,6 +89,7 @@ import { ICouponListing } from "./couponListing/ICouponListing.sol";
 import { ICouponSecurityHolders } from "./couponSecurityHolders/ICouponSecurityHolders.sol";
 
 import { ILock } from "./layer_1/lock/ILock.sol";
+import { ILockByPartition } from "./lockByPartition/ILockByPartition.sol";
 import { IFreeze } from "./freeze/IFreeze.sol";
 import { IBatchFreeze } from "./batchFreeze/IBatchFreeze.sol";
 import { ISnapshots } from "./layer_1/snapshot/ISnapshots.sol";
@@ -98,6 +99,7 @@ import { IIdentity } from "./identity/IIdentity.sol";
 import { ICoreAtSnapshot } from "./coreAtSnapshot/ICoreAtSnapshot.sol";
 import { IClearingTransfer } from "./layer_1/clearing/IClearingTransfer.sol";
 import { IClearingRedeem } from "./layer_1/clearing/IClearingRedeem.sol";
+import { IOperatorClearingByPartition } from "./operatorClearingByPartition/IOperatorClearingByPartition.sol";
 import { IClearingHoldCreation } from "./layer_1/clearing/IClearingHoldCreation.sol";
 import {
     IOperatorClearingHoldByPartition
@@ -210,6 +212,7 @@ interface IAsset is
     // Scheduled Tasks
     ICouponListing,
     ILock,
+    ILockByPartition,
     IFreeze,
     IBatchFreeze,
     ISnapshots,
@@ -221,6 +224,7 @@ interface IAsset is
     IClearing,
     IClearingTransfer,
     IClearingRedeem,
+    IOperatorClearingByPartition,
     IClearingHoldCreation,
     IOperatorClearingHoldByPartition,
     IClearingByPartition,

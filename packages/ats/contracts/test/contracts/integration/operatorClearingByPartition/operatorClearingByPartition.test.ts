@@ -1,0 +1,272 @@
+// SPDX-License-Identifier: Apache-2.0
+
+import { expect } from "chai";
+import { ethers } from "hardhat";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+
+import { IAsset, type ResolverProxy } from "@contract-types";
+import { ADDRESS_ZERO, ATS_ROLES, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
+import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
+
+const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
+const _AMOUNT = 1000;
+const _DATA = "0x1234";
+const EMPTY_VC_ID = EMPTY_STRING;
+
+interface ClearingOperation {
+  partition: string;
+  expirationTimestamp: number;
+  data: string;
+}
+
+interface ClearingOperationFrom {
+  clearingOperation: ClearingOperation;
+  from: string;
+  operatorData: string;
+}
+
+let clearingOperation: ClearingOperation;
+let clearingOperationFrom: ClearingOperationFrom;
+
+describe("OperatorClearingByPartition Tests", () => {
+  let diamond: ResolverProxy;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
+  let signer_E: HardhatEthersSigner;
+
+  let asset: IAsset;
+
+  const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
+  let currentTimestamp = 0;
+  let expirationTimestamp = 0;
+
+  async function setFacets(asset: IAsset) {
+    await asset.connect(signer_A).addIssuer(signer_A.address);
+    await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+    await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+    await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+
+    await asset.connect(signer_B).issueByPartition({
+      partition: _DEFAULT_PARTITION,
+      tokenHolder: signer_A.address,
+      value: 3 * _AMOUNT,
+      data: EMPTY_HEX_BYTES,
+    });
+  }
+
+  async function deploySecurityFixtureSinglePartition() {
+    const base = await deployEquityTokenFixture({
+      equityDataParams: {
+        securityData: {
+          isMultiPartition: false,
+          clearingActive: true,
+        },
+      },
+    });
+    diamond = base.diamond;
+    signer_A = base.deployer;
+    signer_B = base.user1;
+    signer_C = base.user2;
+    signer_D = base.user3;
+    signer_E = base.user4;
+
+    asset = await ethers.getContractAt("IAsset", diamond.target);
+
+    await executeRbac(asset, [
+      { role: ATS_ROLES.ISSUER_ROLE, members: [signer_B.address] },
+      { role: ATS_ROLES.PAUSER_ROLE, members: [signer_D.address] },
+      { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
+      { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.CLEARING_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.CLEARING_VALIDATOR_ROLE, members: [signer_A.address] },
+    ]);
+
+    await setFacets(asset);
+  }
+
+  beforeEach(async () => {
+    const block = await ethers.provider.getBlock("latest");
+    if (!block) throw new Error("Failed to get latest block");
+    currentTimestamp = block.timestamp;
+    expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS;
+    [signer_A, signer_B, signer_C, signer_D, signer_E] = await ethers.getSigners();
+
+    clearingOperation = {
+      partition: _DEFAULT_PARTITION,
+      expirationTimestamp,
+      data: _DATA,
+    };
+
+    clearingOperationFrom = {
+      clearingOperation,
+      from: signer_A.address,
+      operatorData: _DATA,
+    };
+  });
+
+  afterEach(async () => {
+    await asset.resetSystemTimestamp();
+  });
+
+  describe("Single Partition", async () => {
+    beforeEach(async () => {
+      await loadFixture(deploySecurityFixtureSinglePartition);
+    });
+
+    describe("operatorClearingTransferByPartition", () => {
+      it("GIVEN an authorized operator WHEN operatorClearingTransferByPartition THEN emits ClearedOperatorTransferByPartition and Transfer", async () => {
+        await asset.connect(signer_A).authorizeOperator(signer_B.address);
+
+        await expect(
+          asset.connect(signer_B).operatorClearingTransferByPartition(clearingOperationFrom, _AMOUNT, signer_C.address),
+        )
+          .to.emit(asset, "ClearedOperatorTransferByPartition")
+          .withArgs(
+            signer_B.address,
+            clearingOperationFrom.from,
+            signer_C.address,
+            clearingOperationFrom.clearingOperation.partition,
+            1,
+            _AMOUNT,
+            clearingOperationFrom.clearingOperation.expirationTimestamp,
+            clearingOperationFrom.clearingOperation.data,
+            clearingOperationFrom.operatorData,
+          )
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_A.address, ADDRESS_ZERO, _AMOUNT);
+      });
+
+      it("GIVEN an authorized operator WHEN operatorClearingTransferByPartition THEN clearing operation is recorded", async () => {
+        await asset.connect(signer_A).authorizeOperator(signer_B.address);
+
+        await asset
+          .connect(signer_B)
+          .operatorClearingTransferByPartition(clearingOperationFrom, _AMOUNT, signer_C.address);
+
+        const clearing = await asset.getClearingTransferForByPartition(_DEFAULT_PARTITION, signer_A.address, 1);
+        expect(clearing.amount).to.equal(_AMOUNT);
+      });
+
+      describe("AccessControl", () => {
+        it("GIVEN an account without operator authorization WHEN operatorClearingTransferByPartition THEN transaction fails with Unauthorized", async () => {
+          await expect(
+            asset
+              .connect(signer_D)
+              .operatorClearingTransferByPartition(clearingOperationFrom, _AMOUNT, signer_A.address),
+          ).to.be.revertedWithCustomError(asset, "Unauthorized");
+        });
+      });
+
+      describe("Paused", () => {
+        it("GIVEN a paused token WHEN operatorClearingTransferByPartition THEN transaction fails with TokenIsPaused", async () => {
+          await asset.connect(signer_D).pause();
+
+          await expect(
+            asset
+              .connect(signer_A)
+              .operatorClearingTransferByPartition(clearingOperationFrom, _AMOUNT, signer_A.address),
+          ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        });
+      });
+
+      describe("onlyUnrecoveredAddress modifier", () => {
+        it("GIVEN a recovered msgSender WHEN operatorClearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
+          await asset.connect(signer_A).authorizeOperator(signer_B.address);
+          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.recoveryAddress(signer_B.address, signer_E.address, ADDRESS_ZERO);
+
+          await expect(
+            asset
+              .connect(signer_B)
+              .operatorClearingTransferByPartition(clearingOperationFrom, _AMOUNT, signer_C.address),
+          ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+        });
+
+        it("GIVEN a recovered from address WHEN operatorClearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
+          await asset.connect(signer_A).authorizeOperator(signer_B.address);
+          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.recoveryAddress(signer_A.address, signer_E.address, ADDRESS_ZERO);
+
+          await expect(
+            asset
+              .connect(signer_B)
+              .operatorClearingTransferByPartition(clearingOperationFrom, _AMOUNT, signer_C.address),
+          ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+        });
+      });
+    });
+
+    describe("operatorClearingRedeemByPartition", () => {
+      it("GIVEN an authorized operator WHEN operatorClearingRedeemByPartition THEN emits ClearedOperatorRedeemByPartition and Transfer", async () => {
+        await asset.connect(signer_A).authorizeOperator(signer_B.address);
+
+        await expect(asset.connect(signer_B).operatorClearingRedeemByPartition(clearingOperationFrom, _AMOUNT))
+          .to.emit(asset, "ClearedOperatorRedeemByPartition")
+          .withArgs(
+            signer_B.address,
+            clearingOperationFrom.from,
+            clearingOperationFrom.clearingOperation.partition,
+            1,
+            _AMOUNT,
+            clearingOperationFrom.clearingOperation.expirationTimestamp,
+            clearingOperationFrom.clearingOperation.data,
+            clearingOperationFrom.operatorData,
+          )
+          .to.emit(asset, "Transfer")
+          .withArgs(signer_A.address, ADDRESS_ZERO, _AMOUNT);
+      });
+
+      it("GIVEN an authorized operator WHEN operatorClearingRedeemByPartition THEN clearing operation is recorded", async () => {
+        await asset.connect(signer_A).authorizeOperator(signer_B.address);
+
+        await asset.connect(signer_B).operatorClearingRedeemByPartition(clearingOperationFrom, _AMOUNT);
+
+        const clearing = await asset.getClearingRedeemForByPartition(_DEFAULT_PARTITION, signer_A.address, 1);
+        expect(clearing.amount).to.equal(_AMOUNT);
+      });
+
+      describe("AccessControl", () => {
+        it("GIVEN an account without operator authorization WHEN operatorClearingRedeemByPartition THEN transaction fails with Unauthorized", async () => {
+          await expect(
+            asset.connect(signer_D).operatorClearingRedeemByPartition(clearingOperationFrom, _AMOUNT),
+          ).to.be.revertedWithCustomError(asset, "Unauthorized");
+        });
+      });
+
+      describe("Paused", () => {
+        it("GIVEN a paused token WHEN operatorClearingRedeemByPartition THEN transaction fails with TokenIsPaused", async () => {
+          await asset.connect(signer_D).pause();
+
+          await expect(
+            asset.connect(signer_A).operatorClearingRedeemByPartition(clearingOperationFrom, _AMOUNT),
+          ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        });
+      });
+
+      describe("onlyUnrecoveredAddress modifier", () => {
+        it("GIVEN a recovered msgSender WHEN operatorClearingRedeemByPartition THEN transaction fails with WalletRecovered", async () => {
+          await asset.connect(signer_A).authorizeOperator(signer_B.address);
+          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.recoveryAddress(signer_B.address, signer_E.address, ADDRESS_ZERO);
+
+          await expect(
+            asset.connect(signer_B).operatorClearingRedeemByPartition(clearingOperationFrom, _AMOUNT),
+          ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+        });
+
+        it("GIVEN a recovered from address WHEN operatorClearingRedeemByPartition THEN transaction fails with WalletRecovered", async () => {
+          await asset.connect(signer_A).authorizeOperator(signer_B.address);
+          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.recoveryAddress(signer_A.address, signer_E.address, ADDRESS_ZERO);
+
+          await expect(
+            asset.connect(signer_B).operatorClearingRedeemByPartition(clearingOperationFrom, _AMOUNT),
+          ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+        });
+      });
+    });
+  });
+});
