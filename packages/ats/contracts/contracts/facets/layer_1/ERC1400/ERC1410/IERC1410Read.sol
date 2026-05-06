@@ -22,17 +22,4 @@ interface IERC1410Read is IERC1410Types {
      *  false : the token contains only one partition, the default one
      */
     function isMultiPartition() external view returns (bool);
-
-    /**
-     * @notice Determines whether `_operator` is an operator for a specified partition of `_tokenHolder`
-     * @param _partition The partition to check
-     * @param _operator The operator to check
-     * @param _tokenHolder The token holder to check
-     * @return Whether the `_operator` is an operator for a specified partition of `_tokenHolder`
-     */
-    function isOperatorForPartition(
-        bytes32 _partition,
-        address _operator,
-        address _tokenHolder
-    ) external view returns (bool);
 }

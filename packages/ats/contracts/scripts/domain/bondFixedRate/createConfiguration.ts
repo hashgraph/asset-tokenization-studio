@@ -77,6 +77,7 @@ const BOND_FIXED_RATE_FACETS = [
   "ERC1410ReadFacet",
   "OperatorFacet",
   "ERC1410TokenHolderFacet",
+  "OperatorByPartitionFacet",
   "BurnByPartitionFacet",
   "DocumentationFacet",
   "ControllerFacet",
@@ -134,6 +135,9 @@ const BOND_FIXED_RATE_FACETS = [
   // Interest Rate (rate-specific)
   "CouponFixedRateFacet",
   "FixedRateFacet",
+
+  // Maturity By Partition
+  "MaturityByPartitionFacet",
 
   // Jurisdiction-Specific
   "BondUSAFixedRateFacet",
