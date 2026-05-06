@@ -21,30 +21,4 @@ interface IERC1410TokenHolder is IERC1410Types {
         BasicTransferInfo calldata _basicTransferInfo,
         bytes memory _data
     ) external returns (bytes32);
-
-    /**
-     * @notice Authorises an operator for all partitions of `msg.sender`
-     * @param _operator An address which is being authorised
-     */
-    function authorizeOperator(address _operator) external;
-
-    /**
-     * @notice Revokes authorisation of an operator previously given for all partitions of `msg.sender`
-     * @param _operator An address which is being de-authorised
-     */
-    function revokeOperator(address _operator) external;
-
-    /**
-     * @notice Authorises an operator for a given partition of `msg.sender`
-     * @param _partition The partition to which the operator is authorised
-     * @param _operator An address which is being authorised
-     */
-    function authorizeOperatorByPartition(bytes32 _partition, address _operator) external;
-
-    /**
-     * @notice Revokes authorisation of an operator previously given for a specified partition of `msg.sender`
-     * @param _partition The partition to which the operator is de-authorised
-     * @param _operator An address which is being de-authorised
-     */
-    function revokeOperatorByPartition(bytes32 _partition, address _operator) external;
 }

@@ -11,34 +11,4 @@ interface IERC3643Management is IERC3643Types {
      */
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC3643(address _compliance, address _identityRegistry) external;
-
-    /**
-     * @dev Sets the onchainID of the token to `_onchainID`.
-     * @dev Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
-     *
-     * This function should only be callable by an authorized entities
-     *
-     * Returns `true` if the transfer was successful.
-     *
-     * Emits an UpdatedTokenInformation event.
-     */
-    function setOnchainID(address _onchainID) external;
-
-    /**
-     * @dev Sets the identity registry contract address.
-     * @dev Mints `_amount` tokens to the address `_to`.
-     *
-     * Emits an IdentityRegistryAdded event.
-     */
-    function setIdentityRegistry(address _identityRegistry) external;
-
-    /**
-     * @notice Transfers the status of a lost wallet to a new wallet
-     * @dev Can only be called by the agent
-     */
-    function recoveryAddress(
-        address _lostWallet,
-        address _newWallet,
-        address _investorOnchainID
-    ) external returns (bool);
 }

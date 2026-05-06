@@ -22,56 +22,11 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
  *      diamond alongside other facets sharing the {Modifiers} base.
  */
 abstract contract Snapshots is ISnapshots, Modifiers {
-    /**
-     * @inheritdoc ISnapshots
-     * @dev Gated by `onlyUnpaused` and `onlyRole(SNAPSHOT_ROLE)`. Before assigning a new snapshot
-     *      identifier, any cross-ordered scheduled tasks due at the current block are flushed via
-     *      {ScheduledTasksStorageWrapper.triggerScheduledCrossOrderedTasks} so that their effects
-     *      are reflected in the captured state. Emits {SnapshotTaken} with the resolved sender
-     *      (meta-transaction-aware via {EvmAccessors.getMsgSender}) and the new identifier.
-     */
+    /// @inheritdoc ISnapshots
     function takeSnapshot() external override onlyUnpaused onlyRole(SNAPSHOT_ROLE) returns (uint256 snapshotID_) {
         ScheduledTasksStorageWrapper.triggerScheduledCrossOrderedTasks(0);
         snapshotID_ = SnapshotsStorageWrapper.takeSnapshot();
         emit SnapshotTaken(EvmAccessors.getMsgSender(), snapshotID_);
-    }
-
-    function getTokenHoldersAtSnapshot(
-        uint256 _snapshotID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (address[] memory holders_) {
-        return SnapshotsStorageWrapper.tokenHoldersAt(_snapshotID, _pageIndex, _pageLength);
-    }
-
-    /// @inheritdoc ISnapshots
-    function getTotalTokenHoldersAtSnapshot(uint256 _snapshotID) external view returns (uint256) {
-        return SnapshotsStorageWrapper.totalTokenHoldersAt(_snapshotID);
-    }
-
-    function partitionsOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view override returns (bytes32[] memory) {
-        return SnapshotsStorageWrapper.partitionsOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    /// @inheritdoc ISnapshots
-    function lockedBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view override returns (uint256 balance_) {
-        balance_ = SnapshotsStorageWrapper.lockedBalanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
-    }
-
-    /// @inheritdoc ISnapshots
-    function frozenBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view returns (uint256 balance_) {
-        balance_ = SnapshotsStorageWrapper.frozenBalanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
     }
 
     /// @inheritdoc ISnapshots

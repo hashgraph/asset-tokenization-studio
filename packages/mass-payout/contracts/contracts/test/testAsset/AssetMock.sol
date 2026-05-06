@@ -8,10 +8,12 @@ import {
     ScheduledTask
 } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { IFactory } from "@hashgraph/asset-tokenization-contracts/contracts/factory/IFactory.sol";
-import { ICouponTypes } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/coupon/ICouponTypes.sol";
+import { ICouponTypes } from "@hashgraph/asset-tokenization-contracts/contracts/facets/coupon/ICouponTypes.sol";
 import { IVotingTypes } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/voting/IVotingTypes.sol";
 // solhint-disable max-line-length
 import { IDividendTypes } from "@hashgraph/asset-tokenization-contracts/contracts/facets/dividend/IDividendTypes.sol";
+import { IBondTypes } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/bond/IBondTypes.sol";
+import { IPrincipal } from "@hashgraph/asset-tokenization-contracts/contracts/facets/principal/IPrincipal.sol";
 
 // solhint-disable no-unused-vars
 contract AssetMock is IAssetMock {
@@ -58,7 +60,7 @@ contract AssetMock is IAssetMock {
         holders_[1] = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
     }
 
-    function getPrincipalFor(address) external view returns (PrincipalFor memory principalFor_) {
+    function getPrincipalFor(address) external view returns (IPrincipal.PrincipalFor memory principalFor_) {
         principalFor_.numerator = _numerator;
         principalFor_.denominator = 1;
     }
@@ -112,7 +114,7 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    function getBondDetails() external pure returns (BondDetailsData memory bondDetailsData_) {
+    function getBondDetails() external pure returns (IBondTypes.BondDetailsData memory bondDetailsData_) {
         bondDetailsData_.currency = 0x555344;
         bondDetailsData_.nominalValue = 2345678901;
         bondDetailsData_.nominalValueDecimals = 2;

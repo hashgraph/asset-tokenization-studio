@@ -152,6 +152,13 @@ describe("Bond Tests", () => {
       expect(principalFor.denominator).to.equal(10n ** (bondDetails.nominalValueDecimals + BigInt(DECIMALS)));
     });
 
+    // NOTE: The "Redeem At Maturity" block below contains tests for both redeemAtMaturityByPartition
+    // and fullRedeemAtMaturity. The redeemAtMaturityByPartition function has been extracted to a
+    // dedicated MaturityByPartition facet, and its tests are now in
+    // test/contracts/integration/maturityByPartition/maturityByPartition.test.ts. However, the tests
+    // below are preserved here because they also validate fullRedeemAtMaturity modifier chains.
+    // A follow-up PR can refactor these to remove redeemAtMaturityByPartition calls and keep only
+    // fullRedeemAtMaturity assertions to eliminate duplication.
     describe("Redeem At Maturity", () => {
       it("GIVEN a zero address as token holder WHEN redeeming at maturity THEN transaction fails with ZeroAddressNotAllowed", async () => {
         await expect(
@@ -314,23 +321,6 @@ describe("Bond Tests", () => {
 
         expect(principalFor.numerator).to.equal(bondDetails.nominalValue * BigInt(amount) * 2n);
         expect(principalFor.denominator).to.equal(10n ** (bondDetails.nominalValueDecimals + BigInt(DECIMALS)));
-      });
-
-      it("GIVEN a new diamond contract with multi-partition WHEN redeemAtMaturityByPartition is called THEN transaction success", async () => {
-        await deploySecurityFixture(true);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
-        await asset.connect(signer_C).issueByPartition({
-          partition: _PARTITION_ID,
-          tokenHolder: signer_A.address,
-          value: amount,
-          data: "0x",
-        });
-
-        await asset.changeSystemTimestamp(maturityDate + 1);
-
-        await expect(asset.connect(signer_A).redeemAtMaturityByPartition(signer_A.address, _PARTITION_ID, amount))
-          .to.emit(asset, "RedeemedByPartition")
-          .withArgs(_PARTITION_ID, signer_A.address, signer_A.address, amount, "0x", "0x");
       });
 
       it("GIVEN a new diamond contract with multi-partition WHEN redeemAtMaturityByPartition is called THEN transaction success", async () => {

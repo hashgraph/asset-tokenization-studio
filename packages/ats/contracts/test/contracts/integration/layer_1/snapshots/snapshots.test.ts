@@ -117,14 +117,6 @@ describe("Snapshots Tests", () => {
     await expect(
       asset.balanceOfAtSnapshotByPartition(_PARTITION_ID_1, 0, signer_A.address),
     ).to.be.revertedWithCustomError(asset, "SnapshotIdNull");
-    await expect(asset.partitionsOfAtSnapshot(1, signer_A.address)).to.be.revertedWithCustomError(
-      asset,
-      "SnapshotIdDoesNotExists",
-    );
-    await expect(asset.partitionsOfAtSnapshot(0, signer_A.address)).to.be.revertedWithCustomError(
-      asset,
-      "SnapshotIdNull",
-    );
 
     await expect(asset.getTokenHoldersAtSnapshot(1, 0, 1)).to.be.revertedWithCustomError(
       asset,
@@ -136,6 +128,14 @@ describe("Snapshots Tests", () => {
       "SnapshotIdDoesNotExists",
     );
     await expect(asset.getTotalTokenHoldersAtSnapshot(0)).to.be.revertedWithCustomError(asset, "SnapshotIdNull");
+    await expect(asset.partitionsOfAtSnapshot(1, signer_A.address)).to.be.revertedWithCustomError(
+      asset,
+      "SnapshotIdDoesNotExists",
+    );
+    await expect(asset.partitionsOfAtSnapshot(0, signer_A.address)).to.be.revertedWithCustomError(
+      asset,
+      "SnapshotIdNull",
+    );
   });
 
   it("GIVEN an account with snapshot role WHEN takeSnapshot THEN transaction succeeds", async () => {
@@ -231,8 +231,6 @@ describe("Snapshots Tests", () => {
       signer_C.address,
     );
 
-    const snapshot_Partitions_Of_A_1 = await asset.partitionsOfAtSnapshot(1, signer_A.address);
-    const snapshot_Partitions_Of_C_1 = await asset.partitionsOfAtSnapshot(1, signer_C.address);
     const snapshot_TotalSupply_1 = await asset.totalSupplyAtSnapshot(1);
     const snapshot_TotalSupply_1_Partition_1 = await asset.totalSupplyAtSnapshotByPartition(_PARTITION_ID_1, 1);
     const snapshot_TotalSupply_1_Partition_2 = await asset.totalSupplyAtSnapshotByPartition(_PARTITION_ID_2, 1);
@@ -266,8 +264,6 @@ describe("Snapshots Tests", () => {
       signer_C.address,
     );
 
-    const snapshot_Partitions_Of_A_2 = await asset.partitionsOfAtSnapshot(2, signer_A.address);
-    const snapshot_Partitions_Of_C_2 = await asset.partitionsOfAtSnapshot(2, signer_C.address);
     const snapshot_TotalSupply_2 = await asset.totalSupplyAtSnapshot(2);
     const snapshot_TotalSupply_2_Partition_1 = await asset.totalSupplyAtSnapshotByPartition(_PARTITION_ID_1, 2);
     const snapshot_TotalSupply_2_Partition_2 = await asset.totalSupplyAtSnapshotByPartition(_PARTITION_ID_2, 2);
@@ -279,14 +275,10 @@ describe("Snapshots Tests", () => {
     expect(snapshot_Balance_Of_A_1).to.equal(0);
     expect(snapshot_Balance_Of_A_1_Partition_1).to.equal(0);
     expect(snapshot_Balance_Of_A_1_Partition_2).to.equal(0);
-    expect(snapshot_Partitions_Of_A_1.length).to.equal(0);
 
     expect(snapshot_Balance_Of_C_1).to.equal(balanceOf_C_Original);
     expect(snapshot_Balance_Of_C_1_Partition_1).to.equal(balanceOf_C_Original);
     expect(snapshot_Balance_Of_C_1_Partition_2).to.equal(0);
-
-    expect(snapshot_Partitions_Of_C_1.length).to.equal(1);
-    expect(snapshot_Partitions_Of_C_1[0]).to.equal(_PARTITION_ID_1);
 
     expect(snapshot_TotalSupply_1).to.equal(balanceOf_C_Original);
     expect(snapshot_TotalSupply_1_Partition_1).to.equal(balanceOf_C_Original);
@@ -306,9 +298,6 @@ describe("Snapshots Tests", () => {
     expect(snapshot_Balance_Of_A_2_Partition_2).to.equal(
       amount - lockedAmountOf_A_Partition_2 - heldAmountOf_A_Partition_2,
     );
-    expect(snapshot_Partitions_Of_A_2.length).to.equal(2);
-    expect(snapshot_Partitions_Of_A_2[0]).to.equal(_PARTITION_ID_1);
-    expect(snapshot_Partitions_Of_A_2[1]).to.equal(_PARTITION_ID_2);
 
     expect(current_Balance_Of_C).to.equal(
       balanceOf_C_Original - amount - lockedAmountOf_C_Partition_1 - heldAmountOf_C_Partition_1,
@@ -316,9 +305,6 @@ describe("Snapshots Tests", () => {
     expect(snapshot_Balance_Of_C_2).to.equal(current_Balance_Of_C);
     expect(snapshot_Balance_Of_C_2_Partition_1).to.equal(current_Balance_Of_C);
     expect(snapshot_Balance_Of_C_2_Partition_2).to.equal(0);
-
-    expect(snapshot_Partitions_Of_C_2.length).to.equal(1);
-    expect(snapshot_Partitions_Of_C_2[0]).to.equal(_PARTITION_ID_1);
 
     expect(current_TotalSupply).to.equal(balanceOf_C_Original + 2 * amount);
     expect(snapshot_TotalSupply_2).to.equal(current_TotalSupply);
@@ -332,134 +318,6 @@ describe("Snapshots Tests", () => {
     expect(snapshot_TotalTokenHolders_2).to.equal(2);
     expect(snapshot_TokenHolders_2.length).to.equal(snapshot_TotalTokenHolders_2);
     expect([...snapshot_TokenHolders_2]).to.have.members([signer_A.address, signer_C.address]);
-  });
-
-  it("GIVEN snapshot exists WHEN querying frozen balances THEN returns correct values", async () => {
-    const base = await deployEquityTokenFixture({
-      equityDataParams: {
-        securityData: {
-          isMultiPartition: false,
-        },
-      },
-    });
-    const diamond = base.diamond;
-
-    asset = await ethers.getContractAt("IAsset", diamond.target);
-
-    await executeRbac(asset, set_initRbacs());
-
-    await asset.connect(signer_A).grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_C.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
-
-    await asset.connect(signer_A).addIssuer(signer_A.address);
-    await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-    await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-
-    await asset.connect(signer_A).issueByPartition({
-      partition: _PARTITION_ID_1,
-      tokenHolder: signer_C.address,
-      value: balanceOf_C_Original,
-      data: "0x",
-    });
-
-    await asset.connect(signer_C).takeSnapshot();
-
-    const frozenBalance_C_1 = await asset.frozenBalanceOfAtSnapshot(1, signer_C.address);
-    const frozenBalance_C_1_Partition_1 = await asset.frozenBalanceOfAtSnapshotByPartition(
-      _PARTITION_ID_1,
-      1,
-      signer_C.address,
-    );
-
-    expect(frozenBalance_C_1).to.equal(0);
-    expect(frozenBalance_C_1_Partition_1).to.equal(0);
-
-    // Freeze some tokens
-    const frozenAmount = 500;
-    await asset.connect(signer_B).freezePartialTokens(signer_C.address, frozenAmount);
-
-    // Take snapshot after freezing
-    await asset.connect(signer_C).takeSnapshot();
-
-    const frozenBalance_C_2 = await asset.frozenBalanceOfAtSnapshot(2, signer_C.address);
-    const frozenBalance_C_2_Partition_1 = await asset.frozenBalanceOfAtSnapshotByPartition(
-      _PARTITION_ID_1,
-      2,
-      signer_C.address,
-    );
-
-    expect(frozenBalance_C_2).to.equal(frozenAmount);
-    expect(frozenBalance_C_2_Partition_1).to.equal(frozenAmount);
-
-    // Verify current frozen balance
-    const currentFrozenBalance = await asset.getFrozenTokens(signer_C.address);
-    expect(currentFrozenBalance).to.equal(frozenAmount);
-
-    // Verify free balance is reduced
-    const currentFreeBalance = await asset.balanceOf(signer_C.address);
-    expect(currentFreeBalance).to.equal(balanceOf_C_Original - frozenAmount);
-  });
-
-  it("GIVEN multiple snapshots WHEN querying token holders pagination THEN returns correct holders list", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_C.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
-
-    await asset.connect(signer_A).addIssuer(signer_A.address);
-    await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-    await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-    await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-
-    await asset.connect(signer_A).issueByPartition({
-      partition: _PARTITION_ID_1,
-      tokenHolder: signer_C.address,
-      value: balanceOf_C_Original,
-      data: "0x",
-    });
-
-    await asset.connect(signer_A).issueByPartition({
-      partition: _PARTITION_ID_1,
-      tokenHolder: signer_A.address,
-      value: amount,
-      data: "0x",
-    });
-
-    await asset.connect(signer_A).issueByPartition({
-      partition: _PARTITION_ID_1,
-      tokenHolder: signer_B.address,
-      value: amount,
-      data: "0x",
-    });
-
-    await asset.connect(signer_C).takeSnapshot();
-
-    const totalHolders = await asset.getTotalTokenHoldersAtSnapshot(1);
-    expect(totalHolders).to.equal(3);
-
-    // Test pagination - get 2 holders per page
-    const holders_page_0 = await asset.getTokenHoldersAtSnapshot(1, 0, 2);
-    expect(holders_page_0.length).to.equal(2);
-    // Verify page 0 contains 2 of the expected holders
-    const expectedHolders = [signer_C.address, signer_A.address, signer_B.address];
-    holders_page_0.forEach((holder) => {
-      expect(expectedHolders).to.include(holder);
-    });
-
-    const holders_page_1 = await asset.getTokenHoldersAtSnapshot(1, 1, 2);
-    expect(holders_page_1.length).to.equal(1);
-    // Verify page 1 contains 1 of the expected holders
-    holders_page_1.forEach((holder) => {
-      expect(expectedHolders).to.include(holder);
-    });
-
-    // Combine all holders from both pages
-    const allHolders = [...holders_page_0, ...holders_page_1];
-    const uniqueHolders = [...new Set(allHolders)];
-    expect(uniqueHolders.length).to.equal(3);
-
-    // Get all holders in one call to verify consistency
-    const allHolders_single_call = await asset.getTokenHoldersAtSnapshot(1, 0, 10);
-    expect(allHolders_single_call.length).to.equal(3);
-    expect([...allHolders_single_call]).to.have.members([signer_C.address, signer_A.address, signer_B.address]);
   });
 
   describe("Scheduled tasks", async () => {

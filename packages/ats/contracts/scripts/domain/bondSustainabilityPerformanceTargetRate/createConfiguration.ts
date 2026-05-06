@@ -53,8 +53,12 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
+  "SnapshotsByPartitionFacet",
+  "SecurityHoldersAtSnapshotFacet",
   "HoldAtSnapshotFacet",
+  "LockAtSnapshotByPartitionFacet",
   "FreezeAtSnapshotFacet",
+  "FreezeAtSnapshotByPartitionFacet",
   "LockAtSnapshotFacet",
   "CoreAtSnapshotFacet",
   "BalanceTrackerByPartitionFacet",
@@ -67,8 +71,11 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   // ERC Standards
   "MintByPartitionFacet",
   "ERC1410ManagementFacet",
+  "ProtectedByPartitionFacet",
   "ERC1410ReadFacet",
+  "OperatorFacet",
   "ERC1410TokenHolderFacet",
+  "OperatorByPartitionFacet",
   "BurnByPartitionFacet",
   "DocumentationFacet",
   "ControllerFacet",
@@ -82,7 +89,8 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "BatchMintFacet",
   "BatchTransferFacet",
   "ERC3643ManagementFacet",
-  "ERC3643ReadFacet",
+  "RecoveryFacet",
+  "IdentityFacet",
   "ComplianceFacet",
   "ComplianceByPartitionFacet",
   "MintFacet",
@@ -96,8 +104,9 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "ClearingFacet",
   "ClearingRedeemFacet",
   "ClearingTransferFacet",
+  "OperatorClearingByPartitionFacet",
   "HoldFacet",
-  "HoldManagementFacet",
+  "OperatorHoldByPartitionFacet",
   "ControllerHoldByPartitionFacet",
   "ControllerByPartitionFacet",
   "ProtectedHoldByPartitionFacet",
@@ -111,6 +120,8 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   // Advanced Features
   "AdjustBalancesFacet",
   "LockFacet",
+  "LockByPartitionFacet",
+  "MaturityFacet",
   "NominalValueFacet",
   "ProceedRecipientsSustainabilityPerformanceTargetRateFacet", // rate-specific: triggers scheduled tasks
   "ProtectedPartitionsFacet",
@@ -126,9 +137,13 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "SustainabilityPerformanceTargetRateFacet",
   "KpisSustainabilityPerformanceTargetRateFacet",
 
+  // Maturity By Partition
+  "MaturityByPartitionFacet",
+
   // Jurisdiction-Specific (write facet and read facet are both rate-specific)
   "BondUSASustainabilityPerformanceTargetRateFacet",
   "BondUSAReadSustainabilityPerformanceTargetRateFacet",
+  "PrincipalFacet",
 ] as const;
 
 /**

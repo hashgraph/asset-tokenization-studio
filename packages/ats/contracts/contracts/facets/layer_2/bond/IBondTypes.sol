@@ -12,11 +12,6 @@ interface IBondTypes {
         uint256 maturityDate;
     }
 
-    struct PrincipalFor {
-        uint256 numerator;
-        uint256 denominator;
-    }
-
     event MaturityDateUpdated(
         address indexed bondId,
         uint256 indexed maturityDate,

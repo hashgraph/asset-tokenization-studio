@@ -2,24 +2,20 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IBondUSA } from "./IBondUSA.sol";
-import { IBond } from "../../layer_2/bond/IBond.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { BondUSA } from "./BondUSA.sol";
 
 abstract contract BondUSAFacetBase is BondUSA, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](4);
-        staticFunctionSelectors_[selectorIndex++] = this._initialize_bondUSA.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.updateMaturityDate.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.redeemAtMaturityByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.fullRedeemAtMaturity.selector;
+        uint256 selectorIndex = 1;
+        staticFunctionSelectors_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this._initialize_bondUSA.selector;
+        }
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](2);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IBond).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(IBondUSA).interfaceId;
+        staticInterfaceIds_ = new bytes4[](1);
+        staticInterfaceIds_[0] = type(IBondUSA).interfaceId;
     }
 }
