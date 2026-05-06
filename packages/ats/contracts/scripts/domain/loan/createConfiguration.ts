@@ -81,6 +81,7 @@ const LOAN_FACETS = [
   "ERC1410ReadFacet",
   "OperatorFacet",
   "ERC1410ManagementFacet",
+  "ProtectedByPartitionFacet",
   "MintByPartitionFacet",
   "TransferByPartitionFacet",
   "OperatorByPartitionFacet",
@@ -128,6 +129,8 @@ const LOAN_FACETS = [
 
   // Advanced Features
   "SnapshotsFacet",
+  "SnapshotsByPartitionFacet",
+  "SecurityHoldersAtSnapshotFacet",
   "HoldAtSnapshotFacet",
   "LockAtSnapshotByPartitionFacet",
   "FreezeAtSnapshotFacet",

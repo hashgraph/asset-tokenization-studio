@@ -60,6 +60,8 @@ const LOANS_PORTFOLIO_FACETS = [
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
+  "SnapshotsByPartitionFacet",
+  "SecurityHoldersAtSnapshotFacet",
   "HoldAtSnapshotFacet",
   "LockAtSnapshotByPartitionFacet",
   "FreezeAtSnapshotFacet",
@@ -77,6 +79,7 @@ const LOANS_PORTFOLIO_FACETS = [
   // ERC Standards
   "MintByPartitionFacet",
   "ERC1410ManagementFacet",
+  "ProtectedByPartitionFacet",
   "ERC1410ReadFacet",
   "OperatorFacet",
   "TransferByPartitionFacet",

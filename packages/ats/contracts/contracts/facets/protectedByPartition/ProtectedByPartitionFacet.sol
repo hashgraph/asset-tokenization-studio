@@ -1,0 +1,41 @@
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
+
+import { IProtectedByPartition } from "./IProtectedByPartition.sol";
+import { ProtectedByPartition } from "./ProtectedByPartition.sol";
+import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { _PROTECTED_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
+
+/**
+ * @title ProtectedByPartitionFacet
+ * @author Asset Tokenization Studio Team
+ * @notice Diamond facet that registers the protected partition-scoped transfer and
+ *         redemption selectors under `_PROTECTED_BY_PARTITION_RESOLVER_KEY` on the
+ *         Diamond proxy.
+ * @dev Composed via `ProtectedByPartition` for behaviour and `IStaticFunctionSelectors`
+ *      for selector advertisement. Exposes two external selectors:
+ *      - `protectedTransferFromByPartition`
+ *      - `protectedRedeemFromByPartition`
+ */
+contract ProtectedByPartitionFacet is ProtectedByPartition, IStaticFunctionSelectors {
+    /// @inheritdoc IStaticFunctionSelectors
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
+        staticResolverKey_ = _PROTECTED_BY_PARTITION_RESOLVER_KEY;
+    }
+
+    /// @inheritdoc IStaticFunctionSelectors
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
+        uint256 selectorIndex = 2;
+        staticFunctionSelectors_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this.protectedRedeemFromByPartition.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.protectedTransferFromByPartition.selector;
+        }
+    }
+
+    /// @inheritdoc IStaticFunctionSelectors
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
+        staticInterfaceIds_ = new bytes4[](1);
+        staticInterfaceIds_[0] = type(IProtectedByPartition).interfaceId;
+    }
+}

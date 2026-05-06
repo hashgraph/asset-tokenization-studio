@@ -48,6 +48,8 @@ const BOND_FACETS = [
   "KycFacet",
   "PauseFacet",
   "SnapshotsFacet",
+  "SnapshotsByPartitionFacet",
+  "SecurityHoldersAtSnapshotFacet",
   "HoldAtSnapshotFacet",
   "LockAtSnapshotByPartitionFacet",
   "FreezeAtSnapshotFacet",
@@ -79,6 +81,7 @@ const BOND_FACETS = [
   "TransferFacet",
   "MintByPartitionFacet",
   "ERC1410ManagementFacet",
+  "ProtectedByPartitionFacet",
   "ERC1410ReadFacet",
   "OperatorFacet",
   "TransferByPartitionFacet",
@@ -145,6 +148,7 @@ const BOND_FACETS = [
   // Jurisdiction-Specific
   "BondUSAFacet",
   "BondUSAReadFacet",
+  "PrincipalFacet",
 ] as const;
 
 /**

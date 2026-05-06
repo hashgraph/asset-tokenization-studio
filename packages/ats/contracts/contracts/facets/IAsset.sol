@@ -11,6 +11,7 @@ import { IAmortization } from "./layer_2/amortization/IAmortization.sol";
 import { IBondUSA } from "./layer_3/bondUSA/IBondUSA.sol";
 import { IMaturity } from "./maturity/IMaturity.sol";
 import { IBondRead } from "./layer_2/bond/IBondRead.sol";
+import { IPrincipal } from "./principal/IPrincipal.sol";
 
 // Layer 1 — ERC1400
 
@@ -94,6 +95,8 @@ import { ILockByPartition } from "./lockByPartition/ILockByPartition.sol";
 import { IFreeze } from "./freeze/IFreeze.sol";
 import { IBatchFreeze } from "./batchFreeze/IBatchFreeze.sol";
 import { ISnapshots } from "./layer_1/snapshot/ISnapshots.sol";
+import { ISnapshotsByPartition } from "./snapshotsByPartition/ISnapshotsByPartition.sol";
+import { ISecurityHoldersAtSnapshot } from "./securityHoldersAtSnapshot/ISecurityHoldersAtSnapshot.sol";
 import { IFreezeAtSnapshot } from "./freezeAtSnapshot/IFreezeAtSnapshot.sol";
 import { IFreezeAtSnapshotByPartition } from "./freezeAtSnapshotByPartition/IFreezeAtSnapshotByPartition.sol";
 import { IIdentity } from "./identity/IIdentity.sol";
@@ -120,6 +123,7 @@ import { IDocumentation } from "./documentation/IDocumentation.sol";
 import { IController } from "./controller/IController.sol";
 import { IControllerHoldByPartition } from "./controllerHoldByPartition/IControllerHoldByPartition.sol";
 import { IControllerByPartition } from "./controllerByPartition/IControllerByPartition.sol";
+import { IProtectedByPartition } from "./protectedByPartition/IProtectedByPartition.sol";
 import { IProtectedHoldByPartition } from "./protectedHoldByPartition/IProtectedHoldByPartition.sol";
 import { IERC20Permit } from "./layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
 import { IEIP712 } from "./eip712/IEIP712.sol";
@@ -173,6 +177,7 @@ interface IAsset is
     IBurn,
     IScheduledCrossOrderedTasks,
     IBondRead,
+    IPrincipal,
     IMaturity,
     IEquity,
     ISecurity,
@@ -217,6 +222,8 @@ interface IAsset is
     IFreeze,
     IBatchFreeze,
     ISnapshots,
+    ISnapshotsByPartition,
+    ISecurityHoldersAtSnapshot,
     IFreezeAtSnapshot,
     IIdentity,
     IFreezeAtSnapshotByPartition,
@@ -243,6 +250,7 @@ interface IAsset is
     IController,
     IControllerHoldByPartition,
     IControllerByPartition,
+    IProtectedByPartition,
     IProtectedHoldByPartition,
     IERC20Permit,
     IEIP712,

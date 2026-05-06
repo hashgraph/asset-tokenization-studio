@@ -106,6 +106,7 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   ERC20ReadFacet: ["tokenCoreOps"],
   ERC20VotesFacet: ["clearingReadOps"],
   ERC1410ManagementFacet: ["tokenCoreOps"],
+  ProtectedByPartitionFacet: ["tokenCoreOps"],
   ControllerByPartitionFacet: ["tokenCoreOps"],
   TransferByPartitionFacet: ["tokenCoreOps"],
   ERC1410ReadFacet: ["tokenCoreOps"],

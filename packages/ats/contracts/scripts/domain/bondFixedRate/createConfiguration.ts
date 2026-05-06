@@ -45,6 +45,8 @@ const BOND_FIXED_RATE_FACETS = [
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
+  "SnapshotsByPartitionFacet",
+  "SecurityHoldersAtSnapshotFacet",
   "HoldAtSnapshotFacet",
   "LockAtSnapshotByPartitionFacet",
   "FreezeAtSnapshotFacet",
@@ -74,6 +76,7 @@ const BOND_FIXED_RATE_FACETS = [
   "TransferFacet",
   "MintByPartitionFacet",
   "ERC1410ManagementFacet",
+  "ProtectedByPartitionFacet",
   "ERC1410ReadFacet",
   "OperatorFacet",
   "TransferByPartitionFacet",
@@ -143,6 +146,7 @@ const BOND_FIXED_RATE_FACETS = [
   // Jurisdiction-Specific
   "BondUSAFixedRateFacet",
   "BondUSAReadFacet",
+  "PrincipalFacet",
 ] as const;
 
 /**
