@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { IBondTypes } from "../../facets/layer_2/bond/IBondTypes.sol";
+import { IPrincipal } from "../../facets/principal/IPrincipal.sol";
 import { NominalValueStorageWrapper } from "./nominalValue/NominalValueStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { _BOND_STORAGE_POSITION } from "../../constants/storagePositions.sol";
@@ -95,7 +96,7 @@ library BondStorageWrapper {
         return _bondStorage().maturityDate;
     }
 
-    function getPrincipalFor(address account) internal view returns (IBondTypes.PrincipalFor memory principalFor_) {
+    function getPrincipalFor(address account) internal view returns (IPrincipal.PrincipalFor memory principalFor_) {
         IBondTypes.BondDetailsData memory bondDetails = getBondDetails();
 
         principalFor_.numerator =

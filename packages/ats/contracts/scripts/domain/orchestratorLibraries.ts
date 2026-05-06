@@ -120,7 +120,7 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   BurnFacet: ["tokenCoreOps"],
   AdjustBalancesFacet: ["tokenCoreOps"],
   // HoldOps dependencies - hold/lock operations
-  HoldManagementFacet: ["holdOps"],
+  OperatorHoldByPartitionFacet: ["holdOps"],
   HoldFacet: ["holdOps"],
   HoldByPartitionFacet: ["holdOps"],
   // ClearingOps dependencies - clearing transfer operations

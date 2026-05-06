@@ -102,6 +102,7 @@ export const CONTRACT_NAMES = [
   "EquityUSAFacet",
   "BondUSAFacet",
   "BondUSARead", //TODO
+  "PrincipalFacet",
   "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
   "CouponListingFacet",
@@ -128,7 +129,7 @@ export const CONTRACT_NAMES = [
   "ProtectedPartitionsFacet",
   "HoldFacet",
   "HoldByPartitionFacet",
-  "HoldManagementFacet",
+  "OperatorHoldByPartitionFacet",
   "TimeTravel",
   "KycFacet",
   "SsiManagementFacet",
