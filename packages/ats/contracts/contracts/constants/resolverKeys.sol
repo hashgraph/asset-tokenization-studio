@@ -258,6 +258,9 @@ bytes32 constant _CLEARING_REDEEM_RESOLVER_KEY = 0xb341e7aa749da43976c189209de51
 // keccak256("security.token.standard.clearing.holdCreation.resolverKey")
 bytes32 constant _CLEARING_HOLDCREATION_RESOLVER_KEY = 0x44f99a141c434fac20d69e7511932ee344d5b37b61851976c83a5df4ca468152;
 
+// keccak256("security.token.standard.operatorClearingByPartition.resolverKey")
+bytes32 constant _OPERATOR_CLEARING_BY_PARTITION_RESOLVER_KEY = 0xcfd3ab401449af4b9d7599f2956585b2f8801375c91c16af5991e87030884f8a;
+
 // keccak256("security.token.standard.operator.clearing.holdByPartition.resolverKey")
 bytes32 constant _OPERATOR_CLEARING_HOLDBYPARTITION_RESOLVER_KEY = 0xd57eac3a4394fdead2591bfb2fb7f7557f204b6c5b3787821394cb3f57a8ef90;
 
