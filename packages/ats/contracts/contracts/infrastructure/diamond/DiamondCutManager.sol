@@ -44,6 +44,24 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         emit DiamondBatchConfigurationCanceled(_configurationId);
     }
 
+    function computeTransitionDiff(
+        bytes32 _fromConfigId,
+        uint256 _fromVersion,
+        bytes32 _toConfigId,
+        uint256 _toVersion
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+        _computeTransitionDiff(_fromConfigId, _fromVersion, _toConfigId, _toVersion);
+    }
+
+    function getTransitionDiff(
+        bytes32 _fromConfigId,
+        uint256 _fromVersion,
+        bytes32 _toConfigId,
+        uint256 _toVersion
+    ) external view override returns (uint256 totalFacets_, uint256 unchangedFacets_, bool isRegistered_) {
+        return _getTransitionDiff(_fromConfigId, _fromVersion, _toConfigId, _toVersion);
+    }
+
     function resolveResolverProxyCall(
         bytes32 _configurationId,
         uint256 _version,

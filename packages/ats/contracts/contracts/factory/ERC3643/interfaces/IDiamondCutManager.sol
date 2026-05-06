@@ -9,35 +9,40 @@ pragma solidity ^0.8.17;
 import { TRexIDiamondLoupe as IDiamondLoupe } from "./IDiamondLoupe.sol";
 
 /**
- * @title Resolver Proxy Manager
- * @notice This contract is used to manage configurations of resolverProxy's.
- *		 Each resolverProxy must have a resolverProxy configuration id. It could ask to the ResolverProxyCutManger by:
- *      * Maintain the list of business logic that forms part of a resolverProxy configuration.
- *      * Maintain and resolve the list of function selectors by each configuration knowing its business logic address.
- *      * Maintain and resolve the list of interface ids by each configuration.
- *      By each configurationId:
- *      * latestVersion: number of versions registered.
- *      * Version: Each version registered contains
- *        * Version number.
- *        * A list of facets
- *          * facetId
- *          * list of selectors
- *          * list of interfaceIds
+ * @title IDiamondCutManager
+ * @author Asset Tokenization Studio Team
+ * @notice Interface for managing diamond-facet configurations and version resolution.
+ * @dev Maintains the mapping between configuration IDs, versions, facets, selectors,
+ *   and interface IDs. Each configuration can have multiple versions; each version
+ *   contains a set of facets with their selectors and interface IDs. Used by the
+ *   Business Logic Resolver to route calls and enumerate supported interfaces.
  */
 interface TRexIDiamondCutManager {
+    /**
+     * @notice Lightweight pairing of a facet identifier with its target version.
+     * @param id The facet's business-logic key (resolver key).
+     * @param version The version of that facet to include in the configuration.
+     */
     struct FacetConfiguration {
         bytes32 id;
         uint256 version;
     }
 
-    /// @notice emited when createConfiguration is executed
+    /// @notice Emitted when a full configuration is created in a single transaction.
+    /// @param configurationId Identifier of the new configuration.
+    /// @param facetConfigurations Facets and versions included in the configuration.
+    /// @param version Version number assigned to the configuration.
     event DiamondConfigurationCreated(
         bytes32 configurationId,
         FacetConfiguration[] facetConfigurations,
         uint256 version
     );
 
-    /// @notice emited when createBatchConfiguration is executed
+    /// @notice Emitted for each batch when creating a large configuration incrementally.
+    /// @param configurationId Identifier of the configuration being built.
+    /// @param facetConfigurations Facets added in this batch.
+    /// @param _isLastBatch True when this is the final batch completing the configuration.
+    /// @param version Version number assigned to the configuration.
     event DiamondBatchConfigurationCreated(
         bytes32 configurationId,
         FacetConfiguration[] facetConfigurations,
@@ -45,25 +50,50 @@ interface TRexIDiamondCutManager {
         uint256 version
     );
 
-    /// @notice emited when cancelBatchConfiguration is executed
+    /// @notice Emitted when an in-progress batch configuration is cancelled.
+    /// @param configurationId Identifier of the cancelled configuration.
     event DiamondBatchConfigurationCanceled(bytes32 configurationId);
 
-    // @notice Not able to use bytes32(0) with configurationId
+    /// @notice Emitted when a transition diff summary is registered for a config change.
+    /// @param fromConfigId Source configuration identifier.
+    /// @param fromVersion Source version.
+    /// @param toConfigId Target configuration identifier.
+    /// @param toVersion Target version.
+    event TransitionDiffRegistered(
+        bytes32 indexed fromConfigId,
+        uint256 indexed fromVersion,
+        bytes32 indexed toConfigId,
+        uint256 toVersion,
+        uint256 totalFacets,
+        uint256 unchangedFacets
+    );
+
+    /// @notice Thrown when a configuration uses the zero bytes32 value as its identifier.
     error DefaultValueForConfigurationIdNotPermitted();
 
-    /// @notice Not able to use a facetId unregistered
+    /// @notice Thrown when a configuration references a facet ID that has not been registered.
+    /// @param configurationId Configuration containing the invalid facet.
+    /// @param facetId Facet identifier that was not found.
     error FacetIdNotRegistered(bytes32 configurationId, bytes32 facetId);
 
-    /// @notice Not able to duplicate facetId in list
+    /// @notice Thrown when a configuration lists the same facet ID more than once.
+    /// @param facetId Duplicate facet identifier.
     error DuplicatedFacetInConfiguration(bytes32 facetId);
 
-    /// @notice error that occurs when try to create a configuration and the configuration key doesn't exists
+    /// @notice Thrown when an operation references an unknown configuration+version pair.
+    /// @param resolverProxyConfigurationId Identifier that was not found.
+    /// @param version Version that was not found.
     error ResolverProxyConfigurationNoRegistered(bytes32 resolverProxyConfigurationId, uint256 version);
 
-    /// @notice error that occurs when try to add a selector and the selector is blacklisted
+    /// @notice Thrown when attempting to register a function selector that is blacklisted.
+    /// @param selector The disallowed four-byte selector.
     error SelectorBlacklisted(bytes4 selector);
 
-    /// @notice error that occurs when try to add a selector and the selector is already registered
+    /// @notice Thrown when a selector is already registered under a different facet in the same configuration.
+    /// @param configurationId Configuration where the collision occurred.
+    /// @param version Version where the collision occurred.
+    /// @param facetId Facet that already owns the selector.
+    /// @param selector Selector that is already taken.
     error SelectorAlreadyRegistered(bytes32 configurationId, uint256 version, bytes32 facetId, bytes4 selector);
 
     /**
@@ -99,6 +129,20 @@ interface TRexIDiamondCutManager {
      * @param _version configured version in the resolverProxy.
      */
     function checkResolverProxyConfigurationRegistered(bytes32 _configurationId, uint256 _version) external;
+
+    /**
+     * @notice Computes and stores the transition diff summary between two config+versions.
+     * @param _fromConfigId Source configuration identifier.
+     * @param _fromVersion Source version.
+     * @param _toConfigId Target configuration identifier.
+     * @param _toVersion Target version.
+     */
+    function computeTransitionDiff(
+        bytes32 _fromConfigId,
+        uint256 _fromVersion,
+        bytes32 _toConfigId,
+        uint256 _toVersion
+    ) external;
 
     /**
      * @notice Resolve the facet address knowing configuration, version and selector.
@@ -161,11 +205,25 @@ interface TRexIDiamondCutManager {
      */
     function getLatestVersionByConfiguration(bytes32 _configurationId) external view returns (uint256 latestVersion_);
 
+    /**
+     * @notice Returns the number of facets in a configuration version.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query.
+     * @return facetsLength_ Number of facets in the configuration.
+     */
     function getFacetsLengthByConfigurationIdAndVersion(
         bytes32 _configurationId,
         uint256 _version
     ) external view returns (uint256 facetsLength_);
 
+    /**
+     * @notice Returns the facet details in a paginated list.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query.
+     * @param _pageIndex Page number (0-based).
+     * @param _pageLength Items per page.
+     * @return facets_ Array of facet structures (address + selectors).
+     */
     function getFacetsByConfigurationIdAndVersion(
         bytes32 _configurationId,
         uint256 _version,
@@ -173,12 +231,28 @@ interface TRexIDiamondCutManager {
         uint256 _pageLength
     ) external view returns (IDiamondLoupe.Facet[] memory facets_);
 
+    /**
+     * @notice Returns the number of selectors registered for a specific facet.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query.
+     * @param _facetId Facet identifier.
+     * @return facetSelectorsLength_ Number of selectors.
+     */
     function getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(
         bytes32 _configurationId,
         uint256 _version,
         bytes32 _facetId
     ) external view returns (uint256 facetSelectorsLength_);
 
+    /**
+     * @notice Returns the selectors for a specific facet in a paginated list.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query.
+     * @param _facetId Facet identifier.
+     * @param _pageIndex Page number (0-based).
+     * @param _pageLength Items per page.
+     * @return facetSelectors_ Array of four-byte selectors.
+     */
     function getFacetSelectorsByConfigurationIdVersionAndFacetId(
         bytes32 _configurationId,
         uint256 _version,
@@ -202,6 +276,14 @@ interface TRexIDiamondCutManager {
         uint256 _pageLength
     ) external view returns (bytes32[] memory facetIds_);
 
+    /**
+     * @notice Returns the facet-version pairings for a configuration in a range.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query.
+     * @param _start Start index (inclusive).
+     * @param _end End index (exclusive).
+     * @return facetConfigurations_ Array of facet id + version pairs.
+     */
     function getFacetConfigurationsByConfigurationIdAndVersion(
         bytes32 _configurationId,
         uint256 _version,
@@ -224,6 +306,13 @@ interface TRexIDiamondCutManager {
         uint256 _pageLength
     ) external view returns (address[] memory facetAddresses_);
 
+    /**
+     * @notice Returns the facet ID that owns a given function selector.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query.
+     * @param _selector Four-byte function selector.
+     * @return facetId_ Identifier of the facet that handles the selector.
+     */
     function getFacetIdByConfigurationIdVersionAndSelector(
         bytes32 _configurationId,
         uint256 _version,
@@ -231,11 +320,24 @@ interface TRexIDiamondCutManager {
     ) external view returns (bytes32 facetId_);
 
     /**
-     * @notice Returns the facet information.
-     * @param _configurationId key to filter the facets.
-     * @param _version the version to filter the facets.
-     * @param _facetId the business logic key
-     * @return facet_ the facet information
+     * @notice Returns the facet version registered for a specific facet in a configuration.
+     * @param _configurationId Configuration identifier.
+     * @param _version Configuration version to query.
+     * @param _facetId Facet identifier.
+     * @return facetVersion_ Version number of the facet within the configuration.
+     */
+    function getFacetVersionByConfigurationIdVersionAndFacetId(
+        bytes32 _configurationId,
+        uint256 _version,
+        bytes32 _facetId
+    ) external view returns (uint256 facetVersion_);
+
+    /**
+     * @notice Returns the full facet record for a specific facet in a configuration version.
+     * @param _configurationId Configuration identifier.
+     * @param _version Configuration version to query.
+     * @param _facetId Facet identifier.
+     * @return facet_ The facet record (address + selectors).
      */
     function getFacetByConfigurationIdVersionAndFacetId(
         bytes32 _configurationId,
@@ -244,11 +346,11 @@ interface TRexIDiamondCutManager {
     ) external view returns (IDiamondLoupe.Facet memory facet_);
 
     /**
-     * @notice Returns the facet address.
-     * @param _configurationId key to filter the facets.
-     * @param _version the version to filter the facets.
-     * @param _facetId the business logic key
-     * @return facetAddress_ the facet information
+     * @notice Returns the implementation address for a specific facet in a configuration version.
+     * @param _configurationId Configuration identifier.
+     * @param _version Configuration version to query.
+     * @param _facetId Facet identifier.
+     * @return facetAddress_ Address of the facet implementation.
      */
     function getFacetAddressByConfigurationIdVersionAndFacetId(
         bytes32 _configurationId,
@@ -256,9 +358,20 @@ interface TRexIDiamondCutManager {
         bytes32 _facetId
     ) external view returns (address facetAddress_);
 
-    function getFacetVersionByConfigurationIdVersionAndFacetId(
-        bytes32 _configurationId,
-        uint256 _version,
-        bytes32 _facetId
-    ) external view returns (uint256 facetVersion_);
+    /**
+     * @notice Returns the pre-computed transition diff for a pair of configs.
+     * @param _fromConfigId Source configuration identifier.
+     * @param _fromVersion Source version.
+     * @param _toConfigId Target configuration identifier.
+     * @param _toVersion Target version.
+     * @return totalFacets_ Total facets in new version.
+     * @return unchangedFacets_ Facets identical with old config.
+     * @return isRegistered_ True if diff was computed.
+     */
+    function getTransitionDiff(
+        bytes32 _fromConfigId,
+        uint256 _fromVersion,
+        bytes32 _toConfigId,
+        uint256 _toVersion
+    ) external view returns (uint256 totalFacets_, uint256 unchangedFacets_, bool isRegistered_);
 }

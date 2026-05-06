@@ -33,14 +33,6 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         mapping(bytes32 => bytes4[]) interfaceIds;
         // keccak256(configurationId, version, interfaceId)
         mapping(bytes32 => bool) supportsInterface;
-        // keccak256(fromConfigId, fromVersion, toConfigId, toVersion) => TransitionDiff
-        mapping(bytes32 => TransitionDiff) transitionDiffs;
-    }
-
-    struct TransitionDiff {
-        uint256 totalFacets;
-        uint256 unchangedFacets;
-        bool isRegistered;
     }
 
     function _createConfiguration(
@@ -73,13 +65,8 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
             _dcms.configurations.push(_configurationId);
             _dcms.activeConfigurations[_configurationId] = true;
         }
-        uint256 prevVersion = _dcms.latestVersion[_configurationId];
-        uint256 newVersion = _dcms.batchVersion[_configurationId];
-        _dcms.latestVersion[_configurationId] = newVersion;
+        _dcms.latestVersion[_configurationId] = _dcms.batchVersion[_configurationId];
         delete _dcms.batchVersion[_configurationId];
-        if (_isPreviousVersionRegistered(prevVersion)) {
-            _computeTransitionDiff(_configurationId, prevVersion, _configurationId, newVersion);
-        }
     }
 
     function _startBatchConfiguration(bytes32 _configurationId) internal returns (uint256 batchVersion_) {
@@ -162,54 +149,6 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         delete dcms.facetVersions[configVersionHash];
         delete dcms.facetIds[configVersionHash];
         delete dcms.batchVersion[_configurationId];
-    }
-
-    /**
-     * @notice Computes and stores the transition diff between two configuration versions.
-     * @dev The diff counts how many facets in _toVersion are unchanged with respect to _fromVersion
-     *   (same facetId present in both, same facet version).  The result is used by
-     *   InitializerStorageWrapper._prepareReinitialization to derive k = total - unchanged,
-     *   the number of facets that need re-initialization.
-     *   Idempotent: returns immediately if the diff for this (from, to) pair is already registered.
-     * @param _fromConfigId Source configuration identifier.
-     * @param _fromVersion Source version.
-     * @param _toConfigId Target configuration identifier.
-     * @param _toVersion Target version.
-     */
-    function _computeTransitionDiff(
-        bytes32 _fromConfigId,
-        uint256 _fromVersion,
-        bytes32 _toConfigId,
-        uint256 _toVersion
-    ) internal {
-        DiamondCutManagerStorage storage ds = _diamondCutManagerStorage();
-
-        _checkExplicitVersionRegistered(ds, _toConfigId, _toVersion);
-
-        bytes32 key = _buildTransitionDiffKey(_fromConfigId, _fromVersion, _toConfigId, _toVersion);
-        if (ds.transitionDiffs[key].isRegistered) return;
-
-        bytes32 tHash = _buildHash(_toConfigId, _toVersion);
-        bytes32[] memory ids = ds.facetIds[tHash];
-        uint256 total = ids.length;
-        uint256 unchanged;
-
-        bytes32 fromHash = _buildHash(_fromConfigId, _fromVersion);
-        for (uint256 index; index < total; ) {
-            uint256 pos = ds.facetIdPosition[_buildHash(_fromConfigId, _fromVersion, ids[index])];
-            if (pos > 0 && ds.facetVersions[fromHash][pos - 1] == ds.facetVersions[tHash][index]) {
-                unchecked {
-                    ++unchanged;
-                }
-            }
-            unchecked {
-                ++index;
-            }
-        }
-
-        ds.transitionDiffs[key] = _buildTransitionDiff(total, unchanged);
-
-        emit TransitionDiffRegistered(_fromConfigId, _fromVersion, _toConfigId, _toVersion, total, unchanged);
     }
 
     function _isOngoingConfiguration(bytes32 _configurationId) internal view returns (bool) {
@@ -459,18 +398,6 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         facetVersion_ = _dcms.facetVersions[_buildHash(_configurationId, _version)][pos - 1];
     }
 
-    function _getTransitionDiff(
-        bytes32 _fromConfigId,
-        uint256 _fromVersion,
-        bytes32 _toConfigId,
-        uint256 _toVersion
-    ) internal view returns (uint256 totalFacets_, uint256 unchangedFacets_, bool isRegistered_) {
-        TransitionDiff memory diff = _diamondCutManagerStorage().transitionDiffs[
-            _buildTransitionDiffKey(_fromConfigId, _fromVersion, _toConfigId, _toVersion)
-        ];
-        return (diff.totalFacets, diff.unchangedFacets, diff.isRegistered);
-    }
-
     function _diamondCutManagerStorage() internal pure returns (DiamondCutManagerStorage storage ds) {
         bytes32 position = _DIAMOND_CUT_MANAGER_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
@@ -585,41 +512,6 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
                 ++index;
             }
         }
-    }
-
-    /// @dev Reverts if _version is explicit (> 0) and not yet registered in the BLR.
-    ///   Version 0 means "use latest" and is always valid — no check needed.
-    function _checkExplicitVersionRegistered(
-        DiamondCutManagerStorage storage _dcms,
-        bytes32 _configurationId,
-        uint256 _version
-    ) private view {
-        if (
-            _version > 0 &&
-            (!_dcms.activeConfigurations[_configurationId] || _version > _dcms.latestVersion[_configurationId])
-        ) {
-            revert ResolverProxyConfigurationNoRegistered(_configurationId, _version);
-        }
-    }
-
-    function _buildTransitionDiffKey(
-        bytes32 _fromConfigId,
-        uint256 _fromVersion,
-        bytes32 _toConfigId,
-        uint256 _toVersion
-    ) private pure returns (bytes32 key_) {
-        key_ = keccak256(abi.encodePacked(_fromConfigId, _fromVersion, _toConfigId, _toVersion));
-    }
-
-    function _buildTransitionDiff(
-        uint256 _totalFacets,
-        uint256 _unchangedFacets
-    ) private pure returns (TransitionDiff memory diff_) {
-        diff_ = TransitionDiff({ totalFacets: _totalFacets, unchangedFacets: _unchangedFacets, isRegistered: true });
-    }
-
-    function _isPreviousVersionRegistered(uint256 _version) private pure returns (bool) {
-        return _version > 0;
     }
 
     function _buildHash(bytes32 _configurationId, uint256 _version) private pure returns (bytes32 hash_) {

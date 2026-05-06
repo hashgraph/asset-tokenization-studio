@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-04T14:40:00.426Z
- * Facets: 107
+ * Generated: 2026-05-06T10:28:35.818Z
+ * Facets: 108
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -4999,6 +4999,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xf0c9129a94f30f1caaceb63e44b9811d0a3edf1d6c23757f346093af5553fed0",
       },
       {
+        name: "TokenOperational",
+        signature: {
+          full: "event TokenOperational(bytes32 indexed configId, uint256 indexed versionId)",
+          canonical: "TokenOperational(bytes32,uint256)",
+        },
+        topic0: "0x4da648ba1ed2267a3160f42d6b9e88418e3227809a723f1e827f9cfbc8e0b7cc",
+      },
+      {
         name: "UpdatedTokenInformation",
         signature: {
           full: "event UpdatedTokenInformation(string indexed newName, string indexed newSymbol, uint8 newDecimals, string newVersion, address indexed newOnchainID)",
@@ -5593,6 +5601,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     events: [
+      {
+        name: "TokenOperational",
+        signature: {
+          full: "event TokenOperational(bytes32 indexed configId, uint256 indexed versionId)",
+          canonical: "TokenOperational(bytes32,uint256)",
+        },
+        topic0: "0x4da648ba1ed2267a3160f42d6b9e88418e3227809a723f1e827f9cfbc8e0b7cc",
+      },
       {
         name: "UpdatedTokenInformation",
         signature: {
@@ -6897,7 +6913,25 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe5d3a872",
       },
     ],
+    events: [
+      {
+        name: "TokenOperational",
+        signature: {
+          full: "event TokenOperational(bytes32 indexed configId, uint256 indexed versionId)",
+          canonical: "TokenOperational(bytes32,uint256)",
+        },
+        topic0: "0x4da648ba1ed2267a3160f42d6b9e88418e3227809a723f1e827f9cfbc8e0b7cc",
+      },
+    ],
     errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
       {
         name: "AccountHasNoRole",
         signature: {
@@ -6905,6 +6939,30 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountHasNoRole(address,bytes32)",
         },
         selector: "0xa1180aad",
+      },
+      {
+        name: "AlreadyPendingReinitialization",
+        signature: {
+          full: "error AlreadyPendingReinitialization(bytes32 configId, uint256 pendingVersion)",
+          canonical: "AlreadyPendingReinitialization(bytes32,uint256)",
+        },
+        selector: "0xebdb8a06",
+      },
+      {
+        name: "StillPending",
+        signature: {
+          full: "error StillPending(bytes32 configId, uint256 version)",
+          canonical: "StillPending(bytes32,uint256)",
+        },
+        selector: "0xbc195f46",
+      },
+      {
+        name: "TransitionDiffNotRegistered",
+        signature: {
+          full: "error TransitionDiffNotRegistered(bytes32 fromConfigId, uint256 fromVersion, bytes32 toConfigId, uint256 toVersion)",
+          canonical: "TransitionDiffNotRegistered(bytes32,uint256,bytes32,uint256)",
+        },
+        selector: "0x99d9955c",
       },
     ],
     factory: (signer) => new DiamondFacet__factory(signer),
@@ -10147,13 +10205,29 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   InitializerFacet: {
     name: "InitializerFacet",
-    description: "InitializerFacet",
+    description: "Diamond facet that exposes initialisation readiness and function-selector registration.",
     resolverKey: {
       name: "_INITIALIZER_RESOLVER_KEY",
       value: "0x65c891d003e7dc436f2c3d0863d599d91867c8695fee29923a476a2be3ec540f",
     },
     inheritance: ["Initializer", "IStaticFunctionSelectors"],
     methods: [
+      {
+        name: "getConfigInitializedCount",
+        signature: {
+          full: "function getConfigInitializedCount(bytes32 _configId, uint256 _versionId) view returns (uint256 count_)",
+          canonical: "getConfigInitializedCount(bytes32,uint256)",
+        },
+        selector: "0x3e890c21",
+      },
+      {
+        name: "getConfigTargetCount",
+        signature: {
+          full: "function getConfigTargetCount(bytes32 _configId, uint256 _versionId) view returns (uint256 count_)",
+          canonical: "getConfigTargetCount(bytes32,uint256)",
+        },
+        selector: "0x56e2d3d2",
+      },
       {
         name: "getFacetLastVersion",
         signature: {
@@ -10171,12 +10245,28 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xab8365aa",
       },
       {
+        name: "getLastOperationalVersion",
+        signature: {
+          full: "function getLastOperationalVersion() view returns (uint256 version_)",
+          canonical: "getLastOperationalVersion()",
+        },
+        selector: "0xca7b0498",
+      },
+      {
         name: "getOperationalStatus",
         signature: {
           full: "function getOperationalStatus(bytes32 _configId, uint256 _versionId) view returns (uint256 status_)",
           canonical: "getOperationalStatus(bytes32,uint256)",
         },
         selector: "0x6da4c898",
+      },
+      {
+        name: "isOperational",
+        signature: {
+          full: "function isOperational(bytes32 _configId, uint256 _versionId) view returns (bool isOperational_)",
+          canonical: "isOperational(bytes32,uint256)",
+        },
+        selector: "0xd23a7bf2",
       },
       {
         name: "setOperationalStatus",
@@ -10187,7 +10277,25 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x720ab28e",
       },
     ],
+    events: [
+      {
+        name: "TokenOperational",
+        signature: {
+          full: "event TokenOperational(bytes32 indexed configId, uint256 indexed versionId)",
+          canonical: "TokenOperational(bytes32,uint256)",
+        },
+        topic0: "0x4da648ba1ed2267a3160f42d6b9e88418e3227809a723f1e827f9cfbc8e0b7cc",
+      },
+    ],
     errors: [
+      {
+        name: "AlreadyPendingReinitialization",
+        signature: {
+          full: "error AlreadyPendingReinitialization(bytes32 configId, uint256 pendingVersion)",
+          canonical: "AlreadyPendingReinitialization(bytes32,uint256)",
+        },
+        selector: "0xebdb8a06",
+      },
       {
         name: "AssetNotOperational",
         signature: {
@@ -10219,6 +10327,22 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "FacetReady(bytes32,uint256)",
         },
         selector: "0xb5a1ee4f",
+      },
+      {
+        name: "StillPending",
+        signature: {
+          full: "error StillPending(bytes32 configId, uint256 version)",
+          canonical: "StillPending(bytes32,uint256)",
+        },
+        selector: "0xbc195f46",
+      },
+      {
+        name: "TransitionDiffNotRegistered",
+        signature: {
+          full: "error TransitionDiffNotRegistered(bytes32 fromConfigId, uint256 fromVersion, bytes32 toConfigId, uint256 toVersion)",
+          canonical: "TransitionDiffNotRegistered(bytes32,uint256,bytes32,uint256)",
+        },
+        selector: "0x99d9955c",
       },
     ],
     factory: (signer) => new InitializerFacet__factory(signer),
@@ -14510,7 +14634,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 107 as const;
+export const TOTAL_FACETS = 108 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -14552,6 +14676,14 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
           canonical: "checkResolverProxyConfigurationRegistered(bytes32,uint256)",
         },
         selector: "0xc595992a",
+      },
+      {
+        name: "computeTransitionDiff",
+        signature: {
+          full: "function computeTransitionDiff(bytes32 _fromConfigId, uint256 _fromVersion, bytes32 _toConfigId, uint256 _toVersion)",
+          canonical: "computeTransitionDiff(bytes32,uint256,bytes32,uint256)",
+        },
+        selector: "0x8021198f",
       },
       {
         name: "createBatchConfiguration",
@@ -14744,6 +14876,14 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
           canonical: "getSelectorsBlacklist(bytes32,uint256,uint256)",
         },
         selector: "0xbf3af9ea",
+      },
+      {
+        name: "getTransitionDiff",
+        signature: {
+          full: "function getTransitionDiff(bytes32 _fromConfigId, uint256 _fromVersion, bytes32 _toConfigId, uint256 _toVersion) view returns (uint256 totalFacets_, uint256 unchangedFacets_, bool isRegistered_)",
+          canonical: "getTransitionDiff(bytes32,uint256,bytes32,uint256)",
+        },
+        selector: "0x1fc90a07",
       },
       {
         name: "getVersionStatus",
@@ -15198,6 +15338,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   InitializerStorageWrapper: {
     name: "InitializerStorageWrapper",
+    description: "Library for managing facet-initialisation readiness in a diamond-structured token.",
     methods: [],
   },
 
@@ -15325,7 +15466,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 42 as const;
+export const TOTAL_STORAGE_WRAPPERS = 43 as const;
 
 /**
  * All role identifiers extracted from contracts.

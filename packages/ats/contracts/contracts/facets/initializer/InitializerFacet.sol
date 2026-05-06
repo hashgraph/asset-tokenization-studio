@@ -8,6 +8,10 @@ import { _INITIALIZER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title InitializerFacet
+ * @author Asset Tokenization Studio Team
+ * @notice Diamond facet that exposes initialisation readiness and function-selector registration.
+ * @dev Inherits Initializer implementation and adds IStaticFunctionSelectors support so the
+ *   Business Logic Resolver can enumerate this facet's selectors and interface ID.
  */
 contract InitializerFacet is Initializer, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
@@ -17,13 +21,17 @@ contract InitializerFacet is Initializer, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 4;
+        uint256 selectorIndex = 8;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);
         unchecked {
             staticFunctionSelectors_[--selectorIndex] = this.setOperationalStatus.selector;
             staticFunctionSelectors_[--selectorIndex] = this.getOperationalStatus.selector;
             staticFunctionSelectors_[--selectorIndex] = this.getFacetVersionStatus.selector;
             staticFunctionSelectors_[--selectorIndex] = this.getFacetLastVersion.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getLastOperationalVersion.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.isOperational.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getConfigInitializedCount.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getConfigTargetCount.selector;
         }
     }
 

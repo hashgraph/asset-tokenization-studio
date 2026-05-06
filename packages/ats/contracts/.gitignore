@@ -26,8 +26,9 @@ build
 node_modules
 .env
 
-# Docs
-docs/
+# Docs (auto-generated NatDoc output — not ADRs)
+docs/html
+docs/markdown
 coverage
 coverage.json
 gas-report.txt
@@ -36,9 +37,9 @@ extracted-methods.txt
 #Hardhat files
 /cache
 artifacts
+contracts/hardhat-dependency-compiler
 
 .deps/
-./docs/*
 ./cache/*
 ./typechain-types/*
 typechain
@@ -73,3 +74,6 @@ deployments/**/.checkpoints/
 .engram/
 
 gasReporterOutput.json
+
+# Auto-generated MCP server context (added automatically)
+.mcp-server-context.md

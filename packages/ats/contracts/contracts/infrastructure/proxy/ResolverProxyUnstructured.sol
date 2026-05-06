@@ -3,9 +3,11 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IResolverProxy } from "./IResolverProxy.sol";
 import { IBusinessLogicResolver } from "../diamond/IBusinessLogicResolver.sol";
+import { IDiamondCutManager } from "../diamond/IDiamondCutManager.sol";
 import { IDiamondLoupe } from "./IDiamondLoupe.sol";
 import { ResolverProxyStorageWrapper, ResolverProxyStorage } from "../../domain/core/ResolverProxyStorageWrapper.sol";
 import { AccessControlStorageWrapper, RoleDataStorage } from "../../domain/core/AccessControlStorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 // Remember to add the loupe functions from DiamondLoupeFacet.sol.sol to the resolverProxy.
 // The loupe functions are required by the EIP2535 ResolverProxys standard
@@ -24,6 +26,26 @@ abstract contract ResolverProxyUnstructured {
         _updateConfigId(ds, _resolverProxyConfigurationId);
         _updateVersion(ds, _version);
         _assignRbacRoles(_rbacs);
+        _prepareReinitializationForNewProxy(_resolver, _resolverProxyConfigurationId, _version);
+    }
+
+    /**
+     * @notice Prepares initialization state for a newly deployed proxy.
+     * @dev Treats fresh deploy as (bytes32(0), 0) → (config, version) to compute K = total facets.
+     *   No transition diff needed; all facets are new.
+     */
+    function _prepareReinitializationForNewProxy(
+        IBusinessLogicResolver _resolver,
+        bytes32 _resolverProxyConfigurationId,
+        uint256 _version
+    ) internal {
+        InitializerStorageWrapper._prepareReinitialization(
+            bytes32(0), // No previous config for fresh proxy
+            0, // No previous version
+            _resolverProxyConfigurationId,
+            _version,
+            IDiamondCutManager(address(_resolver))
+        );
     }
 
     function _updateResolver(ResolverProxyStorage storage _ds, IBusinessLogicResolver _resolver) internal {

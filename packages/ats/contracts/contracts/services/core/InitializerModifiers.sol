@@ -2,48 +2,56 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { ResolverProxyStorageWrapper } from "../../domain/core/ResolverProxyStorageWrapper.sol";
 
 /**
  * @title InitializerModifiers
- * @notice Abstract contract providing initializer-related modifiers
- * @dev Provides modifiers for initializer state validation using _check* pattern
- *      from InitializerStorageWrapper
  * @author Asset Tokenization Studio Team
+ * @notice Abstract contract providing initializer-related modifiers.
+ * @dev All modifiers delegate their check logic to InitializerStorageWrapper to avoid
+ *   bytecode duplication across every function that uses them.  The active config context
+ *   (configId + version) is resolved internally by the wrapper's convenience overloads.
  */
 abstract contract InitializerModifiers {
+    /// @notice Reverts if the current config+version has a reinitialization in progress.
+    /// @dev Distinct from onlyOperational: allows status 0 (never started) but blocks
+    ///   management operations (updateConfig, updateConfigVersion, updateResolver) while
+    ///   facets are mid-initialization.  Error: StillPending.
+    modifier onlyNotPending() {
+        InitializerStorageWrapper.checkNotPending();
+        _;
+    }
+
+    /// @notice Reverts unless the current config+version is fully operational (status == 1).
+    /// @dev Use on all business-logic functions that require the token to be live.
+    ///   Error: AssetNotOperational.
     modifier onlyOperational() {
-        InitializerStorageWrapper.checkOperational(
-            ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
-            ResolverProxyStorageWrapper.getResolverProxyVersion()
-        );
+        InitializerStorageWrapper.checkOperational();
         _;
     }
 
-    // Using the Facet address (immutable variable) retrieves facet id and version from the BLR
-    // Checks facetVersionStatus against reserved value "ready"
+    /// @notice Reverts if the given facet version has already been marked ready.
+    /// @dev The facet version is resolved from the BLR internally by the wrapper.
+    ///   Error: FacetReady.
+    /// @param _facetId Identifier of the facet to check.
     modifier onlyFacetNotReady(bytes32 _facetId) {
-        uint256 versionId = ResolverProxyStorageWrapper
-            .getBusinessLogicResolver()
-            .getFacetVersionByConfigurationIdVersionAndFacetId(
-                ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
-                ResolverProxyStorageWrapper.getResolverProxyVersion(),
-                _facetId
-            );
-        InitializerStorageWrapper.checkFacetNotReady(_facetId, versionId);
+        InitializerStorageWrapper.checkFacetNotReady(_facetId);
         _;
     }
 
-    // Using the Facet address (immutable variable) retrieves facet id from the BLR
-    // Checks facetLastVersion
-    // Makes sure that an upgrade method is only executed if the previous facet version was in a list of accepted ones.
-    // "empty array" means that all previous versions are accepted.
+    /// @notice Reverts unless the facet's last registered version is in the accepted list.
+    /// @dev Used on upgrade initializers to enforce a known upgrade path.
+    ///   Error: FacetPreviousVersionNotAccepted.
+    /// @param _facetId Identifier of the facet to check.
+    /// @param _fromLastVersions Accepted previous versions; pass an empty array to accept any.
     modifier onlyFacetRegistered(bytes32 _facetId, uint256[] calldata _fromLastVersions) {
         InitializerStorageWrapper.checkFacetRegistered(_facetId, _fromLastVersions);
         _;
     }
 
-    // If last version == 0
+    /// @notice Reverts if the facet has already been registered (last version != 0).
+    /// @dev Used on fresh initializers to prevent double-initialization.
+    ///   Error: FacetAlreadyRegistered.
+    /// @param _facetId Identifier of the facet to check.
     modifier onlyFacetNotRegistered(bytes32 _facetId) {
         InitializerStorageWrapper.checkFacetNotRegistered(_facetId);
         _;

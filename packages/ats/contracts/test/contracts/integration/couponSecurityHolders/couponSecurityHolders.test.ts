@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: Apache-2.0
-
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
@@ -30,7 +29,6 @@ describe("CouponSecurityHolders Tests", () => {
   let diamond: ResolverProxy;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
-  let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
 

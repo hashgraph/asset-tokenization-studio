@@ -23,6 +23,8 @@ library ResolverProxyStorageWrapper {
         return resolverProxyStorage().version;
     }
 
+    // TODO: restrict to private — currently used directly by DiamondCut and test harnesses;
+    //       callers should be migrated to the specific getters above before changing visibility.
     function resolverProxyStorage() internal pure returns (ResolverProxyStorage storage ds) {
         bytes32 position = _RESOLVER_PROXY_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
