@@ -2,8 +2,6 @@
 pragma solidity 0.8.22;
 
 // solhint-disable max-line-length
-
-import { IBond } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/bond/IBond.sol";
 import { ICore } from "@hashgraph/asset-tokenization-contracts/contracts/facets/core/ICore.sol";
 import { ICoupon } from "@hashgraph/asset-tokenization-contracts/contracts/facets/coupon/ICoupon.sol";
 import { IEquity } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/equity/IEquity.sol";
@@ -12,6 +10,6 @@ import {
     IAdjustBalances
 } from "@hashgraph/asset-tokenization-contracts/contracts/facets/adjustBalances/IAdjustBalances.sol";
 
-interface IAssetMock is IBond, ICoupon, IEquity, IVoting, ICore, IAdjustBalances {
+interface IAssetMock is ICoupon, IEquity, IVoting, ICore, IAdjustBalances {
     error NotImplemented();
 }

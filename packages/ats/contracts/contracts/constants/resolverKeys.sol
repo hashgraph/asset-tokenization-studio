@@ -159,6 +159,9 @@ bytes32 constant _ERC1410_MANAGEMENT_KPI_LINKED_RATE_RESOLVER_KEY = 0x831449a00c
 // keccak256("security.token.standard.erc1410.management.SustainabilityPerformanceTarget.rate.resolverKey");
 bytes32 constant _ERC1410_MANAGEMENT_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x6768fcc73686ddd306656061b0e415208ded041927d9935de3747583559d0c5e;
 
+// keccak256("security.token.standard.operatorByPartition.resolverKey");
+bytes32 constant _OPERATOR_BY_PARTITION_RESOLVER_KEY = 0x2809aea79e9555a03702a2bc4909c1ec379fa84126c71610671545c2d5e96957;
+
 // keccak256("security.token.standard.operator.resolverKey");
 bytes32 constant _OPERATOR_RESOLVER_KEY = 0x51edd1c99284e90fe906b4688cd46c5a665145ae32ebfd2df614ca0cd610e325;
 
@@ -560,6 +563,9 @@ bytes32 constant _LOCK_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY = 0x7c9ad673591726c
 
 // keccak256('security.token.standard.lockAtSnapshot.resolverKey');
 bytes32 constant _LOCK_AT_SNAPSHOT_RESOLVER_KEY = 0xd0a412f3e7cd9c9475b5482a548616fc5e2ea67832b8fcd66d2e6a7086c503e9;
+
+// keccak256(abi.encodePacked("MaturityByPartition"));
+bytes32 constant _MATURITY_BY_PARTITION_RESOLVER_KEY = 0x2b81c0fae3cdccac1d4a19f22a96fdf66979e7714b26548cd486b8428befb253;
 
 // Layer 2 Resolver Keys
 
