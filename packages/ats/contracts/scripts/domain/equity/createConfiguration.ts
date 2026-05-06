@@ -120,6 +120,7 @@ const EQUITY_FACETS = [
   "DividendFacet",
   "DividendSecurityHoldersFacet",
   "LockFacet",
+  "LockByPartitionFacet",
   "NominalValueFacet",
   "ProtectedPartitionsFacet",
   "ScheduledCrossOrderedTasksFacet",
