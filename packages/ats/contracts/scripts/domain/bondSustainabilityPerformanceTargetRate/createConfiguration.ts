@@ -132,6 +132,9 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "SustainabilityPerformanceTargetRateFacet",
   "KpisSustainabilityPerformanceTargetRateFacet",
 
+  // Maturity By Partition
+  "MaturityByPartitionFacet",
+
   // Jurisdiction-Specific (write facet and read facet are both rate-specific)
   "BondUSASustainabilityPerformanceTargetRateFacet",
   "BondUSAReadSustainabilityPerformanceTargetRateFacet",

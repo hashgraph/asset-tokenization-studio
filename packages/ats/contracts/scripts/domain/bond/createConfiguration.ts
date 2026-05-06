@@ -137,6 +137,9 @@ const BOND_FACETS = [
   "SsiManagementFacet",
   "TransferAndLockFacet",
 
+  // Maturity By Partition
+  "MaturityByPartitionFacet",
+
   // Jurisdiction-Specific
   "BondUSAFacet",
   "BondUSAReadFacet",
