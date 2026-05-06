@@ -13,6 +13,7 @@ import { IVotingTypes } from "@hashgraph/asset-tokenization-contracts/contracts/
 // solhint-disable max-line-length
 import { IDividendTypes } from "@hashgraph/asset-tokenization-contracts/contracts/facets/dividend/IDividendTypes.sol";
 import { IBondTypes } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/bond/IBondTypes.sol";
+import { IPrincipal } from "@hashgraph/asset-tokenization-contracts/contracts/facets/principal/IPrincipal.sol";
 
 // solhint-disable no-unused-vars
 contract AssetMock is IAssetMock {
@@ -59,7 +60,7 @@ contract AssetMock is IAssetMock {
         holders_[1] = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
     }
 
-    function getPrincipalFor(address) external view returns (IBondTypes.PrincipalFor memory principalFor_) {
+    function getPrincipalFor(address) external view returns (IPrincipal.PrincipalFor memory principalFor_) {
         principalFor_.numerator = _numerator;
         principalFor_.denominator = 1;
     }
