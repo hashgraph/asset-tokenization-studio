@@ -3547,25 +3547,6 @@ describe("Clearing Tests", () => {
       });
     });
 
-    describe("operatorTransferByPartition", async () => {
-      it("GIVEN valid parameters WHEN operatorTransferByPartition THEN transaction succeeds and emits Transfer", async () => {
-        await asset.connect(signer_A).authorizeOperatorByPartition(_DEFAULT_PARTITION, signer_B.address);
-
-        const operatorTransferData = {
-          partition: _DEFAULT_PARTITION,
-          from: signer_A.address,
-          to: signer_B.address,
-          value: _AMOUNT,
-          data: "0x",
-          operatorData: "0x",
-        };
-
-        await expect(asset.connect(signer_B).operatorTransferByPartition(operatorTransferData))
-          .to.emit(asset, "Transfer")
-          .withArgs(signer_A.address, signer_B.address, _AMOUNT);
-      });
-    });
-
     describe("protectedTransferFromByPartition", async () => {
       beforeEach(async () => {
         const packedData = ethers.AbiCoder.defaultAbiCoder().encode(

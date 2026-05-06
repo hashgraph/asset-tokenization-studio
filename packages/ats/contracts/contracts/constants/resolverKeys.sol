@@ -159,6 +159,9 @@ bytes32 constant _ERC1410_MANAGEMENT_KPI_LINKED_RATE_RESOLVER_KEY = 0x831449a00c
 // keccak256("security.token.standard.erc1410.management.SustainabilityPerformanceTarget.rate.resolverKey");
 bytes32 constant _ERC1410_MANAGEMENT_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x6768fcc73686ddd306656061b0e415208ded041927d9935de3747583559d0c5e;
 
+// keccak256("security.token.standard.operatorByPartition.resolverKey");
+bytes32 constant _OPERATOR_BY_PARTITION_RESOLVER_KEY = 0x2809aea79e9555a03702a2bc4909c1ec379fa84126c71610671545c2d5e96957;
+
 // keccak256("security.token.standard.operator.resolverKey");
 bytes32 constant _OPERATOR_RESOLVER_KEY = 0x51edd1c99284e90fe906b4688cd46c5a665145ae32ebfd2df614ca0cd610e325;
 

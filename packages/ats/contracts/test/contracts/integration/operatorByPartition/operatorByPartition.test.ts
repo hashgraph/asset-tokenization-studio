@@ -1,0 +1,279 @@
+// SPDX-License-Identifier: Apache-2.0
+
+import { expect } from "chai";
+import { ethers } from "hardhat";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { type IAsset, type ResolverProxy } from "@contract-types";
+import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
+import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
+
+const WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
+const AMOUNT = 1000;
+const EMPTY_VC_ID = EMPTY_STRING;
+
+describe("OperatorByPartitionFacet Tests", () => {
+  let diamond: ResolverProxy;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
+
+  let asset: IAsset;
+
+  async function deployFixture() {
+    const base = await deployEquityTokenFixture();
+    diamond = base.diamond;
+    signer_A = base.deployer;
+    signer_B = base.user1;
+    signer_C = base.user2;
+    signer_D = base.user3;
+
+    asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
+
+    await executeRbac(asset, [
+      { role: ATS_ROLES.ISSUER_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.KYC_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.PAUSER_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.CONTROL_LIST_ROLE, members: [signer_A.address] },
+    ]);
+
+    await asset.addIssuer(signer_A.address);
+    await asset.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+    await asset.grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+    await asset.grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+    await asset.grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+
+    await asset.issueByPartition({
+      partition: DEFAULT_PARTITION,
+      tokenHolder: signer_A.address,
+      value: AMOUNT,
+      data: EMPTY_HEX_BYTES,
+    });
+  }
+
+  beforeEach(async () => {
+    await loadFixture(deployFixture);
+  });
+
+  // ─── authorizeOperatorByPartition ────────────────────────────────────────────
+
+  describe("authorizeOperatorByPartition", () => {
+    it("GIVEN a paused token WHEN authorizeOperatorByPartition THEN reverts with TokenIsPaused", async () => {
+      await asset.pause();
+      await expect(
+        asset.connect(signer_A).authorizeOperatorByPartition(DEFAULT_PARTITION, signer_B.address),
+      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+    });
+
+    it("GIVEN an incompatible partition WHEN authorizeOperatorByPartition THEN reverts with PartitionNotAllowedInSinglePartitionMode", async () => {
+      await expect(asset.connect(signer_A).authorizeOperatorByPartition(WRONG_PARTITION, signer_B.address))
+        .to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode")
+        .withArgs(WRONG_PARTITION);
+    });
+
+    it("GIVEN a blocked operator WHEN authorizeOperatorByPartition THEN reverts with AccountIsBlocked", async () => {
+      await asset.addToControlList(signer_B.address);
+      await expect(
+        asset.connect(signer_A).authorizeOperatorByPartition(DEFAULT_PARTITION, signer_B.address),
+      ).to.be.revertedWithCustomError(asset, "AccountIsBlocked");
+    });
+
+    it("GIVEN valid inputs WHEN authorizeOperatorByPartition THEN emits AuthorizedOperatorByPartition and isOperatorForPartition returns true", async () => {
+      await expect(asset.connect(signer_A).authorizeOperatorByPartition(DEFAULT_PARTITION, signer_B.address))
+        .to.emit(asset, "AuthorizedOperatorByPartition")
+        .withArgs(DEFAULT_PARTITION, signer_B.address, signer_A.address);
+
+      expect(await asset.isOperatorForPartition(DEFAULT_PARTITION, signer_B.address, signer_A.address)).to.equal(true);
+    });
+  });
+
+  // ─── revokeOperatorByPartition ────────────────────────────────────────────────
+
+  describe("revokeOperatorByPartition", () => {
+    beforeEach(async () => {
+      await asset.connect(signer_A).authorizeOperatorByPartition(DEFAULT_PARTITION, signer_B.address);
+    });
+
+    it("GIVEN a paused token WHEN revokeOperatorByPartition THEN reverts with TokenIsPaused", async () => {
+      await asset.pause();
+      await expect(
+        asset.connect(signer_A).revokeOperatorByPartition(DEFAULT_PARTITION, signer_B.address),
+      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+    });
+
+    it("GIVEN an incompatible partition WHEN revokeOperatorByPartition THEN reverts with PartitionNotAllowedInSinglePartitionMode", async () => {
+      await expect(asset.connect(signer_A).revokeOperatorByPartition(WRONG_PARTITION, signer_B.address))
+        .to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode")
+        .withArgs(WRONG_PARTITION);
+    });
+
+    it("GIVEN a blocked operator WHEN revokeOperatorByPartition THEN reverts with AccountIsBlocked", async () => {
+      await asset.addToControlList(signer_B.address);
+      await expect(
+        asset.connect(signer_A).revokeOperatorByPartition(DEFAULT_PARTITION, signer_B.address),
+      ).to.be.revertedWithCustomError(asset, "AccountIsBlocked");
+    });
+
+    it("GIVEN a previously authorised operator WHEN revokeOperatorByPartition THEN emits RevokedOperatorByPartition and isOperatorForPartition returns false", async () => {
+      await expect(asset.connect(signer_A).revokeOperatorByPartition(DEFAULT_PARTITION, signer_B.address))
+        .to.emit(asset, "RevokedOperatorByPartition")
+        .withArgs(DEFAULT_PARTITION, signer_B.address, signer_A.address);
+
+      expect(await asset.isOperatorForPartition(DEFAULT_PARTITION, signer_B.address, signer_A.address)).to.equal(false);
+    });
+  });
+
+  // ─── isOperatorForPartition ───────────────────────────────────────────────────
+
+  describe("isOperatorForPartition", () => {
+    it("GIVEN no approval WHEN isOperatorForPartition THEN returns false", async () => {
+      expect(await asset.isOperatorForPartition(DEFAULT_PARTITION, signer_B.address, signer_A.address)).to.equal(false);
+    });
+
+    it("GIVEN per-partition approval WHEN isOperatorForPartition THEN returns true", async () => {
+      await asset.connect(signer_A).authorizeOperatorByPartition(DEFAULT_PARTITION, signer_B.address);
+      expect(await asset.isOperatorForPartition(DEFAULT_PARTITION, signer_B.address, signer_A.address)).to.equal(true);
+    });
+
+    it("GIVEN revoked per-partition approval WHEN isOperatorForPartition THEN returns false", async () => {
+      await asset.connect(signer_A).authorizeOperatorByPartition(DEFAULT_PARTITION, signer_B.address);
+      await asset.connect(signer_A).revokeOperatorByPartition(DEFAULT_PARTITION, signer_B.address);
+      expect(await asset.isOperatorForPartition(DEFAULT_PARTITION, signer_B.address, signer_A.address)).to.equal(false);
+    });
+  });
+
+  // ─── operatorTransferByPartition ─────────────────────────────────────────────
+
+  describe("operatorTransferByPartition", () => {
+    it("GIVEN to address is zero WHEN operatorTransferByPartition THEN reverts with ZeroAddressNotAllowed", async () => {
+      await asset.connect(signer_A).authorizeOperatorByPartition(DEFAULT_PARTITION, signer_B.address);
+      await expect(
+        asset.connect(signer_B).operatorTransferByPartition({
+          partition: DEFAULT_PARTITION,
+          from: signer_A.address,
+          to: ethers.ZeroAddress,
+          value: AMOUNT,
+          data: EMPTY_HEX_BYTES,
+          operatorData: EMPTY_HEX_BYTES,
+        }),
+      ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
+    });
+
+    it("GIVEN an incompatible partition WHEN operatorTransferByPartition THEN reverts with PartitionNotAllowedInSinglePartitionMode", async () => {
+      await expect(
+        asset.connect(signer_B).operatorTransferByPartition({
+          partition: WRONG_PARTITION,
+          from: signer_A.address,
+          to: signer_C.address,
+          value: AMOUNT,
+          data: EMPTY_HEX_BYTES,
+          operatorData: EMPTY_HEX_BYTES,
+        }),
+      )
+        .to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode")
+        .withArgs(WRONG_PARTITION);
+    });
+
+    it("GIVEN a non-operator caller WHEN operatorTransferByPartition THEN reverts with Unauthorized", async () => {
+      await expect(
+        asset.connect(signer_B).operatorTransferByPartition({
+          partition: DEFAULT_PARTITION,
+          from: signer_A.address,
+          to: signer_C.address,
+          value: AMOUNT,
+          data: EMPTY_HEX_BYTES,
+          operatorData: EMPTY_HEX_BYTES,
+        }),
+      ).to.be.revertedWithCustomError(asset, "Unauthorized");
+    });
+
+    it("GIVEN valid inputs WHEN operatorTransferByPartition THEN emits TransferByPartition and balances update correctly", async () => {
+      await asset.connect(signer_A).authorizeOperatorByPartition(DEFAULT_PARTITION, signer_B.address);
+
+      const initialBalanceA = await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_A.address);
+      const initialBalanceC = await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_C.address);
+
+      await expect(
+        asset.connect(signer_B).operatorTransferByPartition({
+          partition: DEFAULT_PARTITION,
+          from: signer_A.address,
+          to: signer_C.address,
+          value: AMOUNT,
+          data: EMPTY_HEX_BYTES,
+          operatorData: EMPTY_HEX_BYTES,
+        }),
+      )
+        .to.emit(asset, "TransferByPartition")
+        .withArgs(
+          DEFAULT_PARTITION,
+          signer_B.address,
+          signer_A.address,
+          signer_C.address,
+          AMOUNT,
+          EMPTY_HEX_BYTES,
+          EMPTY_HEX_BYTES,
+        );
+
+      expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_A.address)).to.equal(
+        initialBalanceA - BigInt(AMOUNT),
+      );
+      expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_C.address)).to.equal(
+        initialBalanceC + BigInt(AMOUNT),
+      );
+    });
+  });
+
+  // ─── operatorRedeemByPartition ────────────────────────────────────────────────
+
+  describe("operatorRedeemByPartition", () => {
+    it("GIVEN an incompatible partition WHEN operatorRedeemByPartition THEN reverts with PartitionNotAllowedInSinglePartitionMode", async () => {
+      await asset.connect(signer_A).authorizeOperatorByPartition(DEFAULT_PARTITION, signer_B.address);
+      await expect(
+        asset
+          .connect(signer_B)
+          .operatorRedeemByPartition(WRONG_PARTITION, signer_A.address, AMOUNT, EMPTY_HEX_BYTES, EMPTY_HEX_BYTES),
+      )
+        .to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode")
+        .withArgs(WRONG_PARTITION);
+    });
+
+    it("GIVEN a non-operator caller WHEN operatorRedeemByPartition THEN reverts with InsufficientAllowance", async () => {
+      await expect(
+        asset
+          .connect(signer_B)
+          .operatorRedeemByPartition(DEFAULT_PARTITION, signer_A.address, AMOUNT, EMPTY_HEX_BYTES, EMPTY_HEX_BYTES),
+      ).to.be.revertedWithCustomError(asset, "InsufficientAllowance");
+    });
+
+    it("GIVEN insufficient balance WHEN operatorRedeemByPartition THEN reverts", async () => {
+      await asset.connect(signer_A).authorizeOperatorByPartition(DEFAULT_PARTITION, signer_B.address);
+      await expect(
+        asset
+          .connect(signer_B)
+          .operatorRedeemByPartition(DEFAULT_PARTITION, signer_A.address, AMOUNT + 1, EMPTY_HEX_BYTES, EMPTY_HEX_BYTES),
+      ).to.be.reverted;
+    });
+
+    it("GIVEN valid inputs WHEN operatorRedeemByPartition THEN emits RedeemedByPartition and totalSupply decreases", async () => {
+      await asset.connect(signer_A).authorizeOperatorByPartition(DEFAULT_PARTITION, signer_B.address);
+
+      const initialSupply = await asset.totalSupplyByPartition(DEFAULT_PARTITION);
+      const initialBalance = await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_A.address);
+
+      await expect(
+        asset
+          .connect(signer_B)
+          .operatorRedeemByPartition(DEFAULT_PARTITION, signer_A.address, AMOUNT, EMPTY_HEX_BYTES, EMPTY_HEX_BYTES),
+      )
+        .to.emit(asset, "RedeemedByPartition")
+        .withArgs(DEFAULT_PARTITION, signer_B.address, signer_A.address, AMOUNT, EMPTY_HEX_BYTES, EMPTY_HEX_BYTES);
+
+      expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_A.address)).to.equal(
+        initialBalance - BigInt(AMOUNT),
+      );
+      expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.equal(initialSupply - BigInt(AMOUNT));
+    });
+  });
+});
