@@ -11,14 +11,4 @@ interface IERC3643Management is IERC3643Types {
      */
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC3643(address _compliance, address _identityRegistry) external;
-
-    /**
-     * @notice Transfers the status of a lost wallet to a new wallet
-     * @dev Can only be called by the agent
-     */
-    function recoveryAddress(
-        address _lostWallet,
-        address _newWallet,
-        address _investorOnchainID
-    ) external returns (bool);
 }

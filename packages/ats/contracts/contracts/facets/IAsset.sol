@@ -15,6 +15,7 @@ import { IBondRead } from "./layer_2/bond/IBondRead.sol";
 // Layer 1 — ERC1400
 
 // Layer 1 — ERC3643
+import { IRecovery } from "./recovery/IRecovery.sol";
 import { ICorporateActions } from "./corporateActions/ICorporateActions.sol";
 import { IDiamond } from "../infrastructure/proxy/IDiamond.sol";
 
@@ -165,6 +166,7 @@ interface IAsset is
     IERC1410,
     IOperator,
     IERC3643,
+    IRecovery,
     IBurn,
     IScheduledCrossOrderedTasks,
     IBondRead,
