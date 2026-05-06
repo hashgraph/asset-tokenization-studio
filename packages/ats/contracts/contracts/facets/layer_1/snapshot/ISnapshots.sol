@@ -47,20 +47,6 @@ interface ISnapshots {
     function partitionsOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) external view returns (bytes32[] memory);
 
     /**
-     * @notice Returns the list of token holders at the time of a given snapshot
-     */
-    function getTokenHoldersAtSnapshot(
-        uint256 _snapshotID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (address[] memory holders_);
-
-    /**
-     * @notice Returns the total number of token holders at the time of a given snapshot
-     */
-    function getTotalTokenHoldersAtSnapshot(uint256 _snapshotID) external view returns (uint256);
-
-    /**
      * @notice Returns the number of snapshots scheduled to run on this asset.
      */
     function scheduledSnapshotCount() external view returns (uint256);
