@@ -8,9 +8,9 @@ import {
 import { IAccessControl } from "./accessControl/IAccessControl.sol";
 import { IAdjustBalances } from "./adjustBalances/IAdjustBalances.sol";
 import { IAmortization } from "./layer_2/amortization/IAmortization.sol";
-import { IBond } from "./layer_2/bond/IBond.sol";
 import { IBondUSA } from "./layer_3/bondUSA/IBondUSA.sol";
 import { IMaturity } from "./maturity/IMaturity.sol";
+import { IBondRead } from "./layer_2/bond/IBondRead.sol";
 
 // Layer 1 — ERC1400
 
@@ -84,6 +84,7 @@ import { IHoldAtSnapshotByPartition } from "./holdAtSnapshotByPartition/IHoldAtS
 import { IHoldAtSnapshot } from "./holdAtSnapshot/IHoldAtSnapshot.sol";
 import { ILockAtSnapshotByPartition } from "./lockAtSnapshotByPartition/ILockAtSnapshotByPartition.sol";
 import { ILockAtSnapshot } from "./lockAtSnapshot/ILockAtSnapshot.sol";
+import { IMaturityByPartition } from "./maturityByPartition/IMaturityByPartition.sol";
 import { ICouponListing } from "./couponListing/ICouponListing.sol";
 import { ICouponSecurityHolders } from "./couponSecurityHolders/ICouponSecurityHolders.sol";
 
@@ -168,7 +169,7 @@ interface IAsset is
     IERC3643,
     IBurn,
     IScheduledCrossOrderedTasks,
-    IBond,
+    IBondRead,
     IMaturity,
     IEquity,
     ISecurity,
@@ -204,6 +205,7 @@ interface IAsset is
     IHoldAtSnapshot,
     ILockAtSnapshotByPartition,
     ILockAtSnapshot,
+    IMaturityByPartition,
     IFixedRate,
     // Scheduled Tasks
     ICouponListing,

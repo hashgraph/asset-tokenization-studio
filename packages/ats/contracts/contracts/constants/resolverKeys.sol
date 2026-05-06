@@ -564,6 +564,9 @@ bytes32 constant _LOCK_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY = 0x7c9ad673591726c
 // keccak256('security.token.standard.lockAtSnapshot.resolverKey');
 bytes32 constant _LOCK_AT_SNAPSHOT_RESOLVER_KEY = 0xd0a412f3e7cd9c9475b5482a548616fc5e2ea67832b8fcd66d2e6a7086c503e9;
 
+// keccak256(abi.encodePacked("MaturityByPartition"));
+bytes32 constant _MATURITY_BY_PARTITION_RESOLVER_KEY = 0x2b81c0fae3cdccac1d4a19f22a96fdf66979e7714b26548cd486b8428befb253;
+
 // Layer 2 Resolver Keys
 
 // keccak256('security.token.standard.equity.resolverKey');
