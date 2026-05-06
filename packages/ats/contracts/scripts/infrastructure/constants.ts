@@ -153,7 +153,7 @@ export const RETRY_DELAY = 2000;
  * await createEquityConfiguration(blr, facetAddresses, false, false, 20);
  * ```
  */
-export const DEFAULT_BATCH_SIZE = 13;
+export const DEFAULT_BATCH_SIZE = 5;
 
 /**
  * Gas limits for various contract operations.
