@@ -108,7 +108,7 @@ const BOND_FIXED_RATE_FACETS = [
   "ClearingTransferFacet",
   "OperatorClearingByPartitionFacet",
   "HoldFacet",
-  "HoldManagementFacet",
+  "OperatorHoldByPartitionFacet",
   "ControllerHoldByPartitionFacet",
   "ControllerByPartitionFacet",
   "ProtectedHoldByPartitionFacet",
