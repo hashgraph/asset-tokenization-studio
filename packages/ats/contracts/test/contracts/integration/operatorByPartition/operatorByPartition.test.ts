@@ -177,6 +177,7 @@ describe("OperatorByPartitionFacet Tests", () => {
     });
 
     it("GIVEN a non-operator caller WHEN operatorTransferByPartition THEN reverts with Unauthorized", async () => {
+      await asset.connect(signer_A).approve(signer_B.address, AMOUNT);
       await expect(
         asset.connect(signer_B).operatorTransferByPartition({
           partition: DEFAULT_PARTITION,
