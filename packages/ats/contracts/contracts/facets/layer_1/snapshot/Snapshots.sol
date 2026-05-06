@@ -49,13 +49,6 @@ abstract contract Snapshots is ISnapshots, Modifiers {
         return SnapshotsStorageWrapper.totalTokenHoldersAt(_snapshotID);
     }
 
-    function partitionsOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view override returns (bytes32[] memory) {
-        return SnapshotsStorageWrapper.partitionsOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
     /// @inheritdoc ISnapshots
     function scheduledSnapshotCount() external view override returns (uint256) {
         return ScheduledTasksStorageWrapper.getScheduledSnapshotCount();

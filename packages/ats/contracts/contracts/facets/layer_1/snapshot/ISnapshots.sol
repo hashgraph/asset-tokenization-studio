@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { ISnapshotsTypes } from "./ISnapshotsTypes.sol";
 import { ScheduledTask } from "../../layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 
 // Snapshot values have arrays of ids and the value corresponding to that id. These could be an array of a
@@ -28,23 +29,16 @@ struct HolderBalance {
     uint256 balance;
 }
 
-interface ISnapshots {
+interface ISnapshots is ISnapshotsTypes {
     event SnapshotTaken(address indexed operator, uint256 indexed snapshotID);
     event SnapshotTriggered(uint256 snapshotId, bytes metadata);
 
-    error SnapshotIdNull();
-    error SnapshotIdDoesNotExists(uint256 snapshotId);
     /**
      * @notice Takes a snapshot of the current balances and total supplies
      * @dev Taking a snapshot means the next time a user modifies their balance, the current balance will be stored
      *      in a mapping for the current snapshot id. The same applies to total supplies.
      */
     function takeSnapshot() external returns (uint256 snapshotID_);
-
-    /**
-     * @notice Returns the list of partitions held by an account at the time of a given snapshot
-     */
-    function partitionsOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) external view returns (bytes32[] memory);
 
     /**
      * @notice Returns the list of token holders at the time of a given snapshot
