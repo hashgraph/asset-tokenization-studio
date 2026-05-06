@@ -128,6 +128,12 @@ describe("BusinessLogicResolver", () => {
   describe("Business Logic Resolver functionality", () => {
     it("GIVEN an empty registry WHEN getting data THEN responds empty values or BusinessLogicVersionDoesNotExist", async () => {
       expect(await businessLogicResolver.getLatestVersion(BUSINESS_LOGIC_KEYS[0].businessLogicKey)).is.equal(0);
+      expect(
+        await businessLogicResolver.getLatestVersions([
+          BUSINESS_LOGIC_KEYS[0].businessLogicKey,
+          BUSINESS_LOGIC_KEYS[1].businessLogicKey,
+        ]),
+      ).is.deep.equal([0n, 0n]);
       await expect(
         businessLogicResolver.getVersionStatus(BUSINESS_LOGIC_KEYS[0].businessLogicKey, 0),
       ).to.be.revertedWithCustomError(businessLogicResolver, "BusinessLogicVersionDoesNotExist");
@@ -172,6 +178,10 @@ describe("BusinessLogicResolver", () => {
       expect(await businessLogicResolver.registerBusinessLogics(BUSINESS_LOGICS_TO_REGISTER))
         .to.emit(businessLogicResolver, "BusinessLogicsRegistered")
         .withArgs(BUSINESS_LOGICS_TO_REGISTER, LATEST_VERSIONS);
+
+      expect(
+        await businessLogicResolver.getLatestVersions(BUSINESS_LOGICS_TO_REGISTER.map((b) => b.businessLogicKey)),
+      ).is.deep.equal(LATEST_VERSIONS.map((v) => BigInt(v)));
 
       for (let i = 0; i < BUSINESS_LOGICS_TO_REGISTER.length; i++) {
         expect(await businessLogicResolver.getLatestVersion(BUSINESS_LOGICS_TO_REGISTER[i].businessLogicKey)).is.equal(

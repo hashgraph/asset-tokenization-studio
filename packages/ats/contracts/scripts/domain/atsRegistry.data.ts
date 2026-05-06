@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-05T16:20:02.029Z
+ * Generated: 2026-05-06T12:29:10.387Z
  * Facets: 115
  * Infrastructure: 2
  *
@@ -14962,6 +14962,14 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
           canonical: "getLatestVersionByConfiguration(bytes32)",
         },
         selector: "0x5bf316cf",
+      },
+      {
+        name: "getLatestVersions",
+        signature: {
+          full: "function getLatestVersions(bytes32[] _businessLogicKeys) view returns (uint256[] latestVersions_)",
+          canonical: "getLatestVersions(bytes32[])",
+        },
+        selector: "0xb1a793af",
       },
       {
         name: "getRoleCountFor",

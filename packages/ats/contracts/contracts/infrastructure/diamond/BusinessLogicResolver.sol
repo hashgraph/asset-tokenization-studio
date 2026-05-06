@@ -56,6 +56,19 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
         latestVersion_ = _getLatestVersion(_businessLogicKey);
     }
 
+    function getLatestVersions(
+        bytes32[] calldata _businessLogicKeys
+    ) external view override returns (uint256[] memory latestVersions_) {
+        uint256 length = _businessLogicKeys.length;
+        latestVersions_ = new uint256[](length);
+        for (uint256 i; i < length; ) {
+            latestVersions_[i] = _getLatestVersion(_businessLogicKeys[i]);
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
     function resolveLatestBusinessLogic(
         bytes32 _businessLogicKey
     ) external view override returns (address businessLogicAddress_) {

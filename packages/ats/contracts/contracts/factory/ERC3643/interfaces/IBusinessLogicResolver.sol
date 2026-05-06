@@ -93,6 +93,19 @@ interface TRexIBusinessLogicResolver is IDiamondCutManager {
     function getLatestVersion(bytes32 _businessLogicKey) external view returns (uint256 latestVersion_);
 
     /**
+     * @notice Batched variant of `getLatestVersion` that resolves many keys in a single call.
+     * @dev Issued so off-chain consumers can avoid one `eth_call` per key — JSON-RPC relays
+     *      such as Hedera's enforce per-IP rate limits on `eth_call` and reject bursts.
+     *      Returns 0 for keys that have never been registered (same semantics as the scalar
+     *      variant).
+     * @param _businessLogicKeys keys of the business logics to query.
+     * @return latestVersions_ latest version per key, in the same order as `_businessLogicKeys`.
+     */
+    function getLatestVersions(
+        bytes32[] calldata _businessLogicKeys
+    ) external view returns (uint256[] memory latestVersions_);
+
+    /**
      * @notice Returns the business logic address for the latest version
      * @param _businessLogicKey key of the business logic. Business Logic must be active.
      */

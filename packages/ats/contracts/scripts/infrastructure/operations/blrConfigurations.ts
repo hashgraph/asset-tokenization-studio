@@ -395,19 +395,9 @@ export async function createBatchConfiguration(
 
     info(`Resolved ${facetKeys.length} facets with addresses`, {});
 
-    const latestVersions: bigint[] = [];
-    const versions: number[] = [];
-
-    for (let i = 0; i < facetKeys.length; i++) {
-      const latestVersion = await blrContract.getLatestVersion(facetKeys[i].key);
-
-      latestVersions.push(latestVersion);
-      versions.push(Number(latestVersion));
-
-      info(`Retrieved latest version for facet ${facetKeys[i].key} from BLR : ${versions[i]}`);
-    }
-
     const facetIdList = facetKeys.map((f) => f.key);
+    const latestVersions = await blrContract.getLatestVersions(facetIdList);
+    const versions: number[] = latestVersions.map((v) => Number(v));
 
     info("Processing facets in batches", {
       facetCount: facetIdList.length,
