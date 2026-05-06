@@ -88,6 +88,7 @@ import { ICouponListing } from "./couponListing/ICouponListing.sol";
 import { ICouponSecurityHolders } from "./couponSecurityHolders/ICouponSecurityHolders.sol";
 
 import { ILock } from "./layer_1/lock/ILock.sol";
+import { ILockByPartition } from "./lockByPartition/ILockByPartition.sol";
 import { IFreeze } from "./freeze/IFreeze.sol";
 import { IBatchFreeze } from "./batchFreeze/IBatchFreeze.sol";
 import { ISnapshots } from "./layer_1/snapshot/ISnapshots.sol";
@@ -209,6 +210,7 @@ interface IAsset is
     // Scheduled Tasks
     ICouponListing,
     ILock,
+    ILockByPartition,
     IFreeze,
     IBatchFreeze,
     ISnapshots,

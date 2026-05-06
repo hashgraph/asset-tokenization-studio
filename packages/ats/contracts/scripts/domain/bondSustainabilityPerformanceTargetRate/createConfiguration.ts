@@ -117,6 +117,7 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   // Advanced Features
   "AdjustBalancesFacet",
   "LockFacet",
+  "LockByPartitionFacet",
   "MaturityFacet",
   "NominalValueFacet",
   "ProceedRecipientsSustainabilityPerformanceTargetRateFacet", // rate-specific: triggers scheduled tasks
