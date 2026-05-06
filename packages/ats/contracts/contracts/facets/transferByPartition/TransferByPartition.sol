@@ -41,5 +41,8 @@ abstract contract TransferByPartition is ITransferByPartition, Modifiers {
                 address(0),
                 ""
             );
+
+        /// @dev TransferByPartition event should be emitted here, and not in
+        /// in the ERC1410StorageWrapper.transferByPartition function
     }
 }
