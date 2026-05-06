@@ -6,17 +6,6 @@ import { SecurityStorageWrapper } from "../../../domain/asset/SecurityStorageWra
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 
 abstract contract Security is ISecurity {
-    function getSecurityHolders(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (address[] memory holders_) {
-        return ERC1410StorageWrapper.getTokenHolders(_pageIndex, _pageLength);
-    }
-
-    function getTotalSecurityHolders() external view returns (uint256) {
-        return ERC1410StorageWrapper.getTotalTokenHolders();
-    }
-
     function getSecurityRegulationData()
         external
         pure

@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-06T13:58:59.774Z
- * Facets: 123
+ * Generated: 2026-05-06T14:36:42.231Z
+ * Facets: 124
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -129,6 +129,7 @@ import {
   ScheduledCrossOrderedTasksKpiLinkedRateFacet__factory,
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet__factory,
   SecurityHoldersAtSnapshotFacet__factory,
+  SecurityHoldersFacet__factory,
   SnapshotsByPartitionFacet__factory,
   SnapshotsFacet__factory,
   SsiManagementFacet__factory,
@@ -1843,28 +1844,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x4ce02414",
       },
       {
-        name: "getSecurityHolders",
-        signature: {
-          full: "function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
-          canonical: "getSecurityHolders(uint256,uint256)",
-        },
-        selector: "0x81438d2f",
-      },
-      {
         name: "getSecurityRegulationData",
         signature: {
           full: "function getSecurityRegulationData() pure returns (((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
           canonical: "getSecurityRegulationData()",
         },
         selector: "0x8fda5afe",
-      },
-      {
-        name: "getTotalSecurityHolders",
-        signature: {
-          full: "function getTotalSecurityHolders() view returns (uint256)",
-          canonical: "getTotalSecurityHolders()",
-        },
-        selector: "0xbd007c8f",
       },
     ],
     events: [
@@ -1905,28 +1890,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x4ce02414",
       },
       {
-        name: "getSecurityHolders",
-        signature: {
-          full: "function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
-          canonical: "getSecurityHolders(uint256,uint256)",
-        },
-        selector: "0x81438d2f",
-      },
-      {
         name: "getSecurityRegulationData",
         signature: {
           full: "function getSecurityRegulationData() pure returns (((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
           canonical: "getSecurityRegulationData()",
         },
         selector: "0x8fda5afe",
-      },
-      {
-        name: "getTotalSecurityHolders",
-        signature: {
-          full: "function getTotalSecurityHolders() view returns (uint256)",
-          canonical: "getTotalSecurityHolders()",
-        },
-        selector: "0xbd007c8f",
       },
     ],
     events: [
@@ -1967,28 +1936,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x4ce02414",
       },
       {
-        name: "getSecurityHolders",
-        signature: {
-          full: "function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
-          canonical: "getSecurityHolders(uint256,uint256)",
-        },
-        selector: "0x81438d2f",
-      },
-      {
         name: "getSecurityRegulationData",
         signature: {
           full: "function getSecurityRegulationData() pure returns (((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
           canonical: "getSecurityRegulationData()",
         },
         selector: "0x8fda5afe",
-      },
-      {
-        name: "getTotalSecurityHolders",
-        signature: {
-          full: "function getTotalSecurityHolders() view returns (uint256)",
-          canonical: "getTotalSecurityHolders()",
-        },
-        selector: "0xbd007c8f",
       },
     ],
     events: [
@@ -2029,28 +1982,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x4ce02414",
       },
       {
-        name: "getSecurityHolders",
-        signature: {
-          full: "function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
-          canonical: "getSecurityHolders(uint256,uint256)",
-        },
-        selector: "0x81438d2f",
-      },
-      {
         name: "getSecurityRegulationData",
         signature: {
           full: "function getSecurityRegulationData() pure returns (((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
           canonical: "getSecurityRegulationData()",
         },
         selector: "0x8fda5afe",
-      },
-      {
-        name: "getTotalSecurityHolders",
-        signature: {
-          full: "function getTotalSecurityHolders() view returns (uint256)",
-          canonical: "getTotalSecurityHolders()",
-        },
-        selector: "0xbd007c8f",
       },
     ],
     events: [
@@ -6726,28 +6663,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xefcdcad8",
       },
       {
-        name: "getSecurityHolders",
-        signature: {
-          full: "function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
-          canonical: "getSecurityHolders(uint256,uint256)",
-        },
-        selector: "0x81438d2f",
-      },
-      {
         name: "getSecurityRegulationData",
         signature: {
           full: "function getSecurityRegulationData() pure returns (((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
           canonical: "getSecurityRegulationData()",
         },
         selector: "0x8fda5afe",
-      },
-      {
-        name: "getTotalSecurityHolders",
-        signature: {
-          full: "function getTotalSecurityHolders() view returns (uint256)",
-          canonical: "getTotalSecurityHolders()",
-        },
-        selector: "0xbd007c8f",
       },
     ],
     errors: [
@@ -13561,6 +13482,35 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     factory: (signer) => new SecurityHoldersAtSnapshotFacet__factory(signer),
   },
 
+  SecurityHoldersFacet: {
+    name: "SecurityHoldersFacet",
+    description: "Facet for security holder operations",
+    resolverKey: {
+      name: "_SECURITYHOLDERS_RESOLVER_KEY",
+      value: "0x148e284bdf3173e3c2daee5f3ac9c0333c1e11b57edf4c3ed16f3d962e49e55c",
+    },
+    inheritance: ["SecurityHolders", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "getSecurityHolders",
+        signature: {
+          full: "function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders)",
+          canonical: "getSecurityHolders(uint256,uint256)",
+        },
+        selector: "0x81438d2f",
+      },
+      {
+        name: "getTotalSecurityHolders",
+        signature: {
+          full: "function getTotalSecurityHolders() view returns (uint256 count)",
+          canonical: "getTotalSecurityHolders()",
+        },
+        selector: "0xbd007c8f",
+      },
+    ],
+    factory: (signer) => new SecurityHoldersFacet__factory(signer),
+  },
+
   SnapshotsByPartitionFacet: {
     name: "SnapshotsByPartitionFacet",
     resolverKey: {
@@ -14953,7 +14903,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 123 as const;
+export const TOTAL_FACETS = 124 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

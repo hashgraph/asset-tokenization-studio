@@ -638,6 +638,9 @@ bytes32 constant _COUPON_LISTING_RESOLVER_KEY = 0x09830f922c6bb4e736cc4cc426ceec
 // keccak256("security.token.standard.coupon.securityHolders.resolverKey");
 bytes32 constant _COUPON_SECURITY_HOLDERS_RESOLVER_KEY = 0x2dbf6db0e4dddb14cd72f1a882c1520fdbd592db82b5f3d2562ace6c9eb5cc23;
 
+// keccak256("security.token.standard.securityHolders.resolverKey");
+bytes32 constant _SECURITYHOLDERS_RESOLVER_KEY = 0x148e284bdf3173e3c2daee5f3ac9c0333c1e11b57edf4c3ed16f3d962e49e55c;
+
 // keccak256('security.token.standard.scheduled.tasks.resolverKey');
 bytes32 constant _SCHEDULED_TASKS_RESOLVER_KEY = 0xa4934195ab83f1497ce5fc99b68d0f41694716bcfba5f232aa6c8e0d4d504f08;
 

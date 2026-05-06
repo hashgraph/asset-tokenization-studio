@@ -88,6 +88,7 @@ import { ILockAtSnapshot } from "./lockAtSnapshot/ILockAtSnapshot.sol";
 import { IMaturityByPartition } from "./maturityByPartition/IMaturityByPartition.sol";
 import { ICouponListing } from "./couponListing/ICouponListing.sol";
 import { ICouponSecurityHolders } from "./couponSecurityHolders/ICouponSecurityHolders.sol";
+import { ISecurityHolders } from "./securityHolders/ISecurityHolders.sol";
 
 import { ILock } from "./layer_1/lock/ILock.sol";
 import { ILockByPartition } from "./lockByPartition/ILockByPartition.sol";
@@ -262,5 +263,6 @@ interface IAsset is
     IBatchTransfer,
     IMetadata,
     IDeactivate,
-    IOperatorByPartition
+    IOperatorByPartition,
+    ISecurityHolders
 {}
