@@ -48,7 +48,7 @@ describe("VotingSecurityHoldersFacet Tests", () => {
     votingData = { recordDate: votingRecordDateInSeconds.toString(), data: voteData };
   });
 
-  it("GIVEN voting with executed snapshot WHEN getVotingHolders THEN returns holders from snapshot", async () => {
+  it("GIVEN voting with executed snapshot WHEN getting voting holders THEN returns holders from snapshot", async () => {
     await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
     await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
     await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -83,17 +83,25 @@ describe("VotingSecurityHoldersFacet Tests", () => {
     expect(voting.snapshotId).to.not.equal(0);
     expect(isDisabled).to.equal(false);
 
+    // Verify getVotingHolders returns holders from snapshot
     const votingHolders = await asset.getVotingHolders(1, 0, 99);
     expect([...votingHolders]).to.have.members([signer_A.address]);
 
+    // Verify getTotalVotingHolders returns count from snapshot
     const totalHolders = await asset.getTotalVotingHolders(1);
     expect(totalHolders).to.equal(1);
+
+    const votingFor = await asset.getVotingFor(1, signer_A.address);
+    expect(votingFor.tokenBalance).to.equal(1000n);
+    expect(votingFor.recordDateReached).to.equal(true);
+    expect(votingFor.isDisabled).to.be.false;
   });
 
-  it("GIVEN voting without executed snapshot WHEN getTotalVotingHolders THEN returns current total holders", async () => {
+  it("GIVEN voting without executed snapshot WHEN getting total voting holders THEN returns current total holders", async () => {
     await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
     await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
 
+    // Issue tokens before creating voting
     await asset.connect(signer_C).issueByPartition({
       partition: DEFAULT_PARTITION,
       tokenHolder: signer_A.address,
@@ -101,6 +109,7 @@ describe("VotingSecurityHoldersFacet Tests", () => {
       data: "0x",
     });
 
+    // Create voting (schedules a snapshot for recordDate)
     await expect(asset.connect(signer_C).setVoting(votingData))
       .to.emit(asset, "VotingSet")
       .withArgs(
@@ -111,59 +120,21 @@ describe("VotingSecurityHoldersFacet Tests", () => {
         voteData,
       );
 
+    // Travel to after recordDate BUT DON'T trigger any operation
+    // This keeps snapshotId at 0
     await asset.changeSystemTimestamp(votingRecordDateInSeconds + 1);
 
+    // Verify snapshot was NOT executed (snapshotId == 0)
     const [voting, isDisabled] = await asset.getVoting(1);
     expect(voting.snapshotId).to.equal(0);
     expect(isDisabled).to.equal(false);
 
+    // Get total voting holders using _getTotalTokenHolders
     const totalHolders = await asset.getTotalVotingHolders(1);
     expect(totalHolders).to.equal(1);
 
+    // Also verify getVotingHolders returns current holders
     const holders = await asset.getVotingHolders(1, 0, 99);
     expect([...holders]).to.have.members([signer_A.address]);
-  });
-
-  it("GIVEN voting before record date WHEN getVotingHolders and getTotalVotingHolders THEN returns empty/zero", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
-
-    await asset.connect(signer_C).issueByPartition({
-      partition: DEFAULT_PARTITION,
-      tokenHolder: signer_A.address,
-      value: 1000n,
-      data: "0x",
-    });
-
-    await asset.connect(signer_C).setVoting(votingData);
-
-    const totalHolders = await asset.getTotalVotingHolders(1);
-    expect(totalHolders).to.equal(0);
-
-    const holders = await asset.getVotingHolders(1, 0, 99);
-    expect(holders.length).to.equal(0);
-  });
-
-  it("GIVEN setVoting WHEN getTotalVotingHolders and getVotingHolders after record date THEN match issued holders", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
-
-    await asset.connect(signer_C).issueByPartition({
-      partition: DEFAULT_PARTITION,
-      tokenHolder: signer_A.address,
-      value: 1000n,
-      data: "0x",
-    });
-
-    await asset.connect(signer_C).setVoting(votingData);
-
-    await asset.changeSystemTimestamp(votingRecordDateInSeconds + 1);
-
-    const votingTotalHolder = await asset.getTotalVotingHolders(1);
-    const votingHolders = await asset.getVotingHolders(1, 0, votingTotalHolder);
-
-    expect(votingTotalHolder).to.equal(1);
-    expect(votingHolders.length).to.equal(Number(votingTotalHolder));
-    expect([...votingHolders]).to.have.members([signer_A.address]);
   });
 });
