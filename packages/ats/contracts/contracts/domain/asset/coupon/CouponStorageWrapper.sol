@@ -153,10 +153,7 @@ library CouponStorageWrapper {
             couponFor_.recordDateReached = true;
             couponFor_.tokenBalance = (registeredCoupon.snapshotId != 0)
                 ? SnapshotsStorageWrapper.getTotalBalanceOfAtSnapshot(registeredCoupon.snapshotId, account)
-                : ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(
-                    account,
-                    TimeTravelStorageWrapper.getBlockTimestamp()
-                );
+                : ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(account, registeredCoupon.coupon.recordDate);
             couponFor_.decimals = ERC20StorageWrapper.decimalsAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
             couponFor_.nominalValue = NominalValueStorageWrapper.getNominalValue();
         }
