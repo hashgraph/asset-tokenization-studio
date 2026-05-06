@@ -6,6 +6,7 @@ import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ClearingProtectedOps } from "../../domain/orchestrator/ClearingProtectedOps.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title ProtectedClearingByPartition
@@ -44,6 +45,7 @@ abstract contract ProtectedClearingByPartition is IProtectedClearingByPartition,
             _amount,
             _signature
         );
+        _emitProtectedClearedRedeem(_protectedClearingOperation, _amount, clearingId_);
     }
 
     /// @inheritdoc IProtectedClearingByPartition
@@ -75,6 +77,62 @@ abstract contract ProtectedClearingByPartition is IProtectedClearingByPartition,
             _amount,
             _to,
             _signature
+        );
+        _emitProtectedClearedTransfer(_protectedClearingOperation, _amount, _to, clearingId_);
+    }
+
+    /**
+     * @notice Emits `ProtectedClearedRedeemByPartition` for a successful protected clearing redeem.
+     * @dev Extracted to a `private` helper so the external entry point's stack stays within the
+     *      Solidity 16-slot limit; the helper is called exactly once, after the
+     *      `ClearingProtectedOps.protectedClearingRedeemByPartition` call returns.
+     * @param _operation  The protected clearing operation (partition, from, expiration, data, ...).
+     * @param _amount     The cleared amount.
+     * @param _clearingId The identifier assigned to the clearing operation by the library call.
+     */
+    function _emitProtectedClearedRedeem(
+        IClearingTypes.ProtectedClearingOperation calldata _operation,
+        uint256 _amount,
+        uint256 _clearingId
+    ) private {
+        emit ProtectedClearedRedeemByPartition(
+            EvmAccessors.getMsgSender(),
+            _operation.from,
+            _operation.clearingOperation.partition,
+            _clearingId,
+            _amount,
+            _operation.clearingOperation.expirationTimestamp,
+            _operation.clearingOperation.data,
+            ""
+        );
+    }
+
+    /**
+     * @notice Emits `ProtectedClearedTransferByPartition` for a successful protected clearing transfer.
+     * @dev Extracted to a `private` helper so the external entry point's stack stays within the
+     *      Solidity 16-slot limit; the helper is called exactly once, after the
+     *      `ClearingProtectedOps.protectedClearingTransferByPartition` call returns.
+     * @param _operation  The protected clearing operation (partition, from, expiration, data, ...).
+     * @param _amount     The cleared amount.
+     * @param _to         The recipient address for the transfer.
+     * @param _clearingId The identifier assigned to the clearing operation by the library call.
+     */
+    function _emitProtectedClearedTransfer(
+        IClearingTypes.ProtectedClearingOperation calldata _operation,
+        uint256 _amount,
+        address _to,
+        uint256 _clearingId
+    ) private {
+        emit ProtectedClearedTransferByPartition(
+            EvmAccessors.getMsgSender(),
+            _operation.from,
+            _to,
+            _operation.clearingOperation.partition,
+            _clearingId,
+            _amount,
+            _operation.clearingOperation.expirationTimestamp,
+            _operation.clearingOperation.data,
+            ""
         );
     }
 }

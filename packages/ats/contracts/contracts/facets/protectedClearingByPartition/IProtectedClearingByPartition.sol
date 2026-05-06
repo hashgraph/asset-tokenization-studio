@@ -9,12 +9,61 @@ import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
  * @notice Interface for the protected variant of partition-scoped clearing operations
  *         (redeem and transfer), gated by a per-partition role and an off-chain signature
  *         provided by the token holder.
- * @dev Function signatures only; the protected-clearing events
- *      (`ProtectedClearedRedeemByPartition`, `ProtectedClearedTransferByPartition`) are
- *      declared on the shared `IClearingTypes` tier alongside the rest of the clearing
- *      events for consistency with the existing project pattern, and inherited here.
+ * @dev The protected-clearing events (`ProtectedClearedRedeemByPartition`,
+ *      `ProtectedClearedTransferByPartition`) are declared on this writer interface and
+ *      emitted inline from `ProtectedClearingByPartition.protectedClearing{Redeem,Transfer}ByPartition`
+ *      after the `ClearingProtectedOps` library call returns successfully. `is IClearingTypes`
+ *      is retained for the `ProtectedClearingOperation` struct used in method signatures.
  */
 interface IProtectedClearingByPartition is IClearingTypes {
+    /**
+     * @notice Emitted when a protected clearing redeem operation is successfully created
+     *         for a partition.
+     * @param operator The address that initiated the protected clearing operation.
+     * @param tokenHolder The address of the token holder executing the clearing.
+     * @param partition The partition identifier for this clearing operation.
+     * @param clearingId The unique identifier assigned to this clearing operation.
+     * @param amount The amount cleared.
+     * @param expirationDate The expiration timestamp for the clearing operation.
+     * @param data The operation data associated with the clearing.
+     * @param operatorData Additional operator-specific data.
+     */
+    event ProtectedClearedRedeemByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
+    /**
+     * @notice Emitted when a protected clearing transfer operation is successfully
+     *         created for a partition.
+     * @param operator The address that initiated the protected clearing operation.
+     * @param tokenHolder The address of the token holder executing the clearing.
+     * @param to The address to transfer tokens to.
+     * @param partition The partition identifier for this clearing operation.
+     * @param clearingId The unique identifier assigned to this clearing operation.
+     * @param amount The amount cleared.
+     * @param expirationDate The expiration timestamp for the clearing operation.
+     * @param data The operation data associated with the clearing.
+     * @param operatorData Additional operator-specific data.
+     */
+    event ProtectedClearedTransferByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        address indexed to,
+        bytes32 partition,
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
     /**
      * @notice Creates a protected clearing redeem operation for a partition.
      * @dev Caller must hold the partition-specific role returned by
