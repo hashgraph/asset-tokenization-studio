@@ -74,7 +74,7 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "ProtectedByPartitionFacet",
   "ERC1410ReadFacet",
   "OperatorFacet",
-  "ERC1410TokenHolderFacet",
+  "TransferByPartitionFacet",
   "OperatorByPartitionFacet",
   "BurnByPartitionFacet",
   "DocumentationFacet",

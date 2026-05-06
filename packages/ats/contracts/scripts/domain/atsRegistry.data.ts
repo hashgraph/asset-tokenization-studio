@@ -77,7 +77,6 @@ import {
   EIP712Facet__factory,
   ERC1410ManagementFacet__factory,
   ERC1410ReadFacet__factory,
-  ERC1410TokenHolderFacet__factory,
   ERC20PermitFacet__factory,
   ERC20VotesFacet__factory,
   ERC3643ManagementFacet__factory,
@@ -138,6 +137,7 @@ import {
   TransferAndLockFixedRateFacet__factory,
   TransferAndLockKpiLinkedRateFacet__factory,
   TransferAndLockSustainabilityPerformanceTargetRateFacet__factory,
+  TransferByPartitionFacet__factory,
   TransferFacet__factory,
   VotingFacet__factory,
   AccessControlFacetTimeTravel__factory,
@@ -162,7 +162,6 @@ import {
   DiamondFacetTimeTravel__factory,
   ERC1410ManagementFacetTimeTravel__factory,
   ERC1410ReadFacetTimeTravel__factory,
-  ERC1410TokenHolderFacetTimeTravel__factory,
   ERC20PermitFacetTimeTravel__factory,
   ERC20VotesFacetTimeTravel__factory,
   ERC3643ManagementFacetTimeTravel__factory,
@@ -197,6 +196,7 @@ import {
   TransferAndLockFixedRateFacetTimeTravel__factory,
   TransferAndLockKpiLinkedRateFacetTimeTravel__factory,
   TransferAndLockSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
+  TransferByPartitionFacetTimeTravel__factory,
   TransferFacetTimeTravel__factory,
   VotingFacetTimeTravel__factory,
 } from "@contract-types";
@@ -7022,139 +7022,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     factory: (signer) => new ERC1410ReadFacet__factory(signer),
     timeTravelFactory: (signer) => new ERC1410ReadFacetTimeTravel__factory(signer),
-  },
-
-  ERC1410TokenHolderFacet: {
-    name: "ERC1410TokenHolderFacet",
-    resolverKey: {
-      name: "_ERC1410_TOKEN_HOLDER_RESOLVER_KEY",
-      value: "0x0466bf860d23f1ecbc25f364735e0dc3830d236f09182599831730ddd2792caa",
-    },
-    inheritance: ["ERC1410TokenHolder", "IStaticFunctionSelectors"],
-    methods: [
-      {
-        name: "transferByPartition",
-        signature: {
-          full: "function transferByPartition(bytes32 _partition, (address to, uint256 value) _basicTransferInfo, bytes _data) returns (bytes32)",
-          canonical: "transferByPartition(bytes32,(address,uint256),bytes)",
-        },
-        selector: "0x3bc9bcd8",
-      },
-    ],
-    events: [
-      {
-        name: "AuthorizedOperator",
-        signature: {
-          full: "event AuthorizedOperator(address indexed operator, address indexed tokenHolder)",
-          canonical: "AuthorizedOperator(address,address)",
-        },
-        topic0: "0xf4caeb2d6ca8932a215a353d0703c326ec2d81fc68170f320eb2ab49e9df61f9",
-      },
-      {
-        name: "AuthorizedOperatorByPartition",
-        signature: {
-          full: "event AuthorizedOperatorByPartition(bytes32 indexed partition, address indexed operator, address indexed tokenHolder)",
-          canonical: "AuthorizedOperatorByPartition(bytes32,address,address)",
-        },
-        topic0: "0x3646a897c70797ecc134b0adc32f471b07bf1d6f451133b0384badab531e3fd6",
-      },
-      {
-        name: "IssuedByPartition",
-        signature: {
-          full: "event IssuedByPartition(bytes32 indexed partition, address indexed operator, address indexed to, uint256 value, bytes data)",
-          canonical: "IssuedByPartition(bytes32,address,address,uint256,bytes)",
-        },
-        topic0: "0x5af1c8f424b104b6ba4e3c0885f2ed9fef04a9b1ea39cd9ed362432105c0791a",
-      },
-      {
-        name: "RedeemedByPartition",
-        signature: {
-          full: "event RedeemedByPartition(bytes32 indexed partition, address indexed operator, address indexed from, uint256 value, bytes data, bytes operatorData)",
-          canonical: "RedeemedByPartition(bytes32,address,address,uint256,bytes,bytes)",
-        },
-        topic0: "0xa4f62471c9bdf88115b97203943c74c59b655913ee5ee592706d84ef53fb6be2",
-      },
-      {
-        name: "RevokedOperator",
-        signature: {
-          full: "event RevokedOperator(address indexed operator, address indexed tokenHolder)",
-          canonical: "RevokedOperator(address,address)",
-        },
-        topic0: "0x50546e66e5f44d728365dc3908c63bc5cfeeab470722c1677e3073a6ac294aa1",
-      },
-      {
-        name: "RevokedOperatorByPartition",
-        signature: {
-          full: "event RevokedOperatorByPartition(bytes32 indexed partition, address indexed operator, address indexed tokenHolder)",
-          canonical: "RevokedOperatorByPartition(bytes32,address,address)",
-        },
-        topic0: "0x3b287c4f1bab4df949b33bceacef984f544dc5d5479930d00e4ee8c9d8dd96f2",
-      },
-      {
-        name: "TransferByPartition",
-        signature: {
-          full: "event TransferByPartition(bytes32 indexed _fromPartition, address _operator, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)",
-          canonical: "TransferByPartition(bytes32,address,address,address,uint256,bytes,bytes)",
-        },
-        topic0: "0xff4e9a26af4eb73b8bacfaa4abd4fea03d9448e7b912dc5ff4019048875aa2d4",
-      },
-    ],
-    errors: [
-      {
-        name: "AccessControlRequired",
-        signature: {
-          full: "error AccessControlRequired(bytes32 role, address sender)",
-          canonical: "AccessControlRequired(bytes32,address)",
-        },
-        selector: "0x10210dec",
-      },
-      {
-        name: "InvalidPartition",
-        signature: {
-          full: "error InvalidPartition(address account, bytes32 partition)",
-          canonical: "InvalidPartition(address,bytes32)",
-        },
-        selector: "0xbf84f4ec",
-      },
-      {
-        name: "NotAllowedInMultiPartitionMode",
-        signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
-        selector: "0x76d08f88",
-      },
-      {
-        name: "PartitionNotAllowedInSinglePartitionMode",
-        signature: {
-          full: "error PartitionNotAllowedInSinglePartitionMode(bytes32 partition)",
-          canonical: "PartitionNotAllowedInSinglePartitionMode(bytes32)",
-        },
-        selector: "0xb96d9539",
-      },
-      {
-        name: "PartitionsAreProtectedAndNoRole",
-        signature: {
-          full: "error PartitionsAreProtectedAndNoRole(address account, bytes32 role)",
-          canonical: "PartitionsAreProtectedAndNoRole(address,bytes32)",
-        },
-        selector: "0x55347310",
-      },
-      {
-        name: "Unauthorized",
-        signature: {
-          full: "error Unauthorized(address operator, address tokenHolder, bytes32 partition)",
-          canonical: "Unauthorized(address,address,bytes32)",
-        },
-        selector: "0x1e09743f",
-      },
-      {
-        name: "ZeroPartition",
-        signature: { full: "error ZeroPartition()", canonical: "ZeroPartition()" },
-        selector: "0x4a6f30c3",
-      },
-      { name: "ZeroValue", signature: { full: "error ZeroValue()", canonical: "ZeroValue()" }, selector: "0x7c946ed7" },
-    ],
-    factory: (signer) => new ERC1410TokenHolderFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
-    timeTravelFactory: (signer) =>
-      new ERC1410TokenHolderFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   ERC20PermitFacet: {
@@ -14680,6 +14547,139 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     factory: (signer) => new TransferAndLockSustainabilityPerformanceTargetRateFacet__factory(signer),
     timeTravelFactory: (signer) =>
       new TransferAndLockSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
+  },
+
+  TransferByPartitionFacet: {
+    name: "TransferByPartitionFacet",
+    resolverKey: {
+      name: "_TRANSFER_BY_PARTITION_RESOLVER_KEY",
+      value: "0x28988fc13ea6c379b266ce67c0562fddda8c749455e215597605079e6436290a",
+    },
+    inheritance: ["TransferByPartition", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "transferByPartition",
+        signature: {
+          full: "function transferByPartition(bytes32 _partition, (address to, uint256 value) _basicTransferInfo, bytes _data) returns (bytes32)",
+          canonical: "transferByPartition(bytes32,(address,uint256),bytes)",
+        },
+        selector: "0x3bc9bcd8",
+      },
+    ],
+    events: [
+      {
+        name: "AuthorizedOperator",
+        signature: {
+          full: "event AuthorizedOperator(address indexed operator, address indexed tokenHolder)",
+          canonical: "AuthorizedOperator(address,address)",
+        },
+        topic0: "0xf4caeb2d6ca8932a215a353d0703c326ec2d81fc68170f320eb2ab49e9df61f9",
+      },
+      {
+        name: "AuthorizedOperatorByPartition",
+        signature: {
+          full: "event AuthorizedOperatorByPartition(bytes32 indexed partition, address indexed operator, address indexed tokenHolder)",
+          canonical: "AuthorizedOperatorByPartition(bytes32,address,address)",
+        },
+        topic0: "0x3646a897c70797ecc134b0adc32f471b07bf1d6f451133b0384badab531e3fd6",
+      },
+      {
+        name: "IssuedByPartition",
+        signature: {
+          full: "event IssuedByPartition(bytes32 indexed partition, address indexed operator, address indexed to, uint256 value, bytes data)",
+          canonical: "IssuedByPartition(bytes32,address,address,uint256,bytes)",
+        },
+        topic0: "0x5af1c8f424b104b6ba4e3c0885f2ed9fef04a9b1ea39cd9ed362432105c0791a",
+      },
+      {
+        name: "RedeemedByPartition",
+        signature: {
+          full: "event RedeemedByPartition(bytes32 indexed partition, address indexed operator, address indexed from, uint256 value, bytes data, bytes operatorData)",
+          canonical: "RedeemedByPartition(bytes32,address,address,uint256,bytes,bytes)",
+        },
+        topic0: "0xa4f62471c9bdf88115b97203943c74c59b655913ee5ee592706d84ef53fb6be2",
+      },
+      {
+        name: "RevokedOperator",
+        signature: {
+          full: "event RevokedOperator(address indexed operator, address indexed tokenHolder)",
+          canonical: "RevokedOperator(address,address)",
+        },
+        topic0: "0x50546e66e5f44d728365dc3908c63bc5cfeeab470722c1677e3073a6ac294aa1",
+      },
+      {
+        name: "RevokedOperatorByPartition",
+        signature: {
+          full: "event RevokedOperatorByPartition(bytes32 indexed partition, address indexed operator, address indexed tokenHolder)",
+          canonical: "RevokedOperatorByPartition(bytes32,address,address)",
+        },
+        topic0: "0x3b287c4f1bab4df949b33bceacef984f544dc5d5479930d00e4ee8c9d8dd96f2",
+      },
+      {
+        name: "TransferByPartition",
+        signature: {
+          full: "event TransferByPartition(bytes32 indexed _fromPartition, address _operator, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)",
+          canonical: "TransferByPartition(bytes32,address,address,address,uint256,bytes,bytes)",
+        },
+        topic0: "0xff4e9a26af4eb73b8bacfaa4abd4fea03d9448e7b912dc5ff4019048875aa2d4",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "InvalidPartition",
+        signature: {
+          full: "error InvalidPartition(address account, bytes32 partition)",
+          canonical: "InvalidPartition(address,bytes32)",
+        },
+        selector: "0xbf84f4ec",
+      },
+      {
+        name: "NotAllowedInMultiPartitionMode",
+        signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
+        selector: "0x76d08f88",
+      },
+      {
+        name: "PartitionNotAllowedInSinglePartitionMode",
+        signature: {
+          full: "error PartitionNotAllowedInSinglePartitionMode(bytes32 partition)",
+          canonical: "PartitionNotAllowedInSinglePartitionMode(bytes32)",
+        },
+        selector: "0xb96d9539",
+      },
+      {
+        name: "PartitionsAreProtectedAndNoRole",
+        signature: {
+          full: "error PartitionsAreProtectedAndNoRole(address account, bytes32 role)",
+          canonical: "PartitionsAreProtectedAndNoRole(address,bytes32)",
+        },
+        selector: "0x55347310",
+      },
+      {
+        name: "Unauthorized",
+        signature: {
+          full: "error Unauthorized(address operator, address tokenHolder, bytes32 partition)",
+          canonical: "Unauthorized(address,address,bytes32)",
+        },
+        selector: "0x1e09743f",
+      },
+      {
+        name: "ZeroPartition",
+        signature: { full: "error ZeroPartition()", canonical: "ZeroPartition()" },
+        selector: "0x4a6f30c3",
+      },
+      { name: "ZeroValue", signature: { full: "error ZeroValue()", canonical: "ZeroValue()" }, selector: "0x7c946ed7" },
+    ],
+    factory: (signer) => new TransferByPartitionFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new TransferByPartitionFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   TransferFacet: {

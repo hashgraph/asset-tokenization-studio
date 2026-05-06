@@ -82,7 +82,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "ProtectedByPartitionFacet",
   "ERC1410ReadFacet",
   "OperatorFacet",
-  "ERC1410TokenHolderFacet",
+  "TransferByPartitionFacet",
   "OperatorByPartitionFacet",
   "BurnByPartitionFacet",
   "DocumentationFacet",

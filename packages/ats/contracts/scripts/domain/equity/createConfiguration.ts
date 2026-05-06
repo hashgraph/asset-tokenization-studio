@@ -75,7 +75,7 @@ const EQUITY_FACETS = [
   "ProtectedByPartitionFacet",
   "ERC1410ReadFacet",
   "OperatorFacet",
-  "ERC1410TokenHolderFacet",
+  "TransferByPartitionFacet",
   "OperatorByPartitionFacet",
   "BurnByPartitionFacet",
   "DocumentationFacet",
