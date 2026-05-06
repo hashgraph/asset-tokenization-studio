@@ -27,6 +27,7 @@ import { IAllowance } from "./allowance/IAllowance.sol";
 
 // Layer 1 — External lists
 import { IERC1410 } from "./layer_1/ERC1400/ERC1410/IERC1410.sol";
+import { IOperator } from "./operator/IOperator.sol";
 import { ITransfer } from "./transfer/ITransfer.sol";
 
 // Layer 1 — Remaining facets
@@ -91,6 +92,7 @@ import { IBatchFreeze } from "./batchFreeze/IBatchFreeze.sol";
 import { ISnapshots } from "./layer_1/snapshot/ISnapshots.sol";
 import { IFreezeAtSnapshot } from "./freezeAtSnapshot/IFreezeAtSnapshot.sol";
 import { IFreezeAtSnapshotByPartition } from "./freezeAtSnapshotByPartition/IFreezeAtSnapshotByPartition.sol";
+import { IIdentity } from "./identity/IIdentity.sol";
 import { ICoreAtSnapshot } from "./coreAtSnapshot/ICoreAtSnapshot.sol";
 import { IClearingTransfer } from "./layer_1/clearing/IClearingTransfer.sol";
 import { IClearingRedeem } from "./layer_1/clearing/IClearingRedeem.sol";
@@ -159,6 +161,7 @@ interface IAsset is
     ITransfer,
     IERC20Votes,
     IERC1410,
+    IOperator,
     IERC3643,
     IBurn,
     IScheduledCrossOrderedTasks,
@@ -206,6 +209,7 @@ interface IAsset is
     IBatchFreeze,
     ISnapshots,
     IFreezeAtSnapshot,
+    IIdentity,
     IFreezeAtSnapshotByPartition,
     ICoreAtSnapshot,
     // Clearing interfaces

@@ -159,6 +159,9 @@ bytes32 constant _ERC1410_MANAGEMENT_KPI_LINKED_RATE_RESOLVER_KEY = 0x831449a00c
 // keccak256("security.token.standard.erc1410.management.SustainabilityPerformanceTarget.rate.resolverKey");
 bytes32 constant _ERC1410_MANAGEMENT_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x6768fcc73686ddd306656061b0e415208ded041927d9935de3747583559d0c5e;
 
+// keccak256("security.token.standard.operator.resolverKey");
+bytes32 constant _OPERATOR_RESOLVER_KEY = 0x51edd1c99284e90fe906b4688cd46c5a665145ae32ebfd2df614ca0cd610e325;
+
 // keccak256("security.token.standard.controller.resolverKey");
 bytes32 constant _CONTROLLER_RESOLVER_KEY = 0xbcebebda5c664322324b3088c913c7048d0b921b434e745816b26392167cfef6;
 
@@ -329,6 +332,9 @@ bytes32 constant _CONTROL_LIST_MANAGEMENT_RESOLVER_KEY = 0xb28d59e89fa116cebe06d
 
 // keccak256("security.token.standard.kyc.management.resolverKey")
 bytes32 constant _KYC_MANAGEMENT_RESOLVER_KEY = 0x8676785f4d841823214e8ee8c497b3336a210be7559f5571c590249f6203e821;
+
+// keccak256("security.token.standard.identity.resolverKey");
+bytes32 constant _IDENTITY_RESOLVER_KEY = 0x10f18bbac52ee688501dc4b08de190f748b8a00622cb165ccdce1f14beb74dab;
 
 // keccak256("security.token.standard.erc3643.read.resolverKey");
 bytes32 constant _ERC3643_READ_RESOLVER_KEY = 0x7743c4e9ff26ef34c3c482d2c12dabe076035eb44bf1c736722f04c33c20ef6a;
