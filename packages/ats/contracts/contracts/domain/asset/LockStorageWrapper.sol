@@ -5,6 +5,7 @@ import { _LOCK_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { ILock } from "../../facets/layer_1/lock/ILock.sol";
+import { ILockTypes } from "../../facets/layer_1/lock/ILockTypes.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
@@ -177,12 +178,12 @@ library LockStorageWrapper {
             revert ICommonErrors.WrongExpirationTimestamp();
     }
 
-    function requireValidLockId(bytes32 partition, address tokenHolder, uint256 lockId) internal view {
-        if (!isLockIdValid(partition, tokenHolder, lockId)) revert ILock.WrongLockId();
+    function checkValidLockId(bytes32 partition, address tokenHolder, uint256 lockId) internal view {
+        if (!isLockIdValid(partition, tokenHolder, lockId)) revert ILockTypes.WrongLockId();
     }
 
-    function requireLockedExpirationTimestamp(bytes32 partition, address tokenHolder, uint256 lockId) internal view {
-        if (!isLockedExpirationTimestamp(partition, tokenHolder, lockId)) revert ILock.LockExpirationNotReached();
+    function checkLockedExpirationTimestamp(bytes32 partition, address tokenHolder, uint256 lockId) internal view {
+        if (!isLockedExpirationTimestamp(partition, tokenHolder, lockId)) revert ILockTypes.LockExpirationNotReached();
     }
 
     function getLockedAmountForByPartition(bytes32 partition, address tokenHolder) internal view returns (uint256) {

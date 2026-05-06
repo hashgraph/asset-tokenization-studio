@@ -86,7 +86,7 @@ const LOAN_FACETS = [
   "OperatorByPartitionFacet",
   "BurnByPartitionFacet",
   "ERC3643ManagementFacet",
-  "ERC3643ReadFacet",
+  "RecoveryFacet",
   "IdentityFacet",
   "BatchControllerFacet",
   "BatchBurnFacet",
@@ -99,7 +99,7 @@ const LOAN_FACETS = [
 
   // Hold
   "HoldFacet",
-  "HoldManagementFacet",
+  "OperatorHoldByPartitionFacet",
   "ControllerHoldByPartitionFacet",
   "ControllerByPartitionFacet",
   "ProtectedHoldByPartitionFacet",
@@ -108,6 +108,7 @@ const LOAN_FACETS = [
   // Clearing & Settlement
   "ClearingTransferFacet",
   "ClearingRedeemFacet",
+  "OperatorClearingByPartitionFacet",
   "ClearingHoldCreationFacet",
   "ClearingHoldByPartitionFacet",
   "OperatorClearingHoldByPartitionFacet",
@@ -136,6 +137,7 @@ const LOAN_FACETS = [
   "CorporateActionsFacet",
   "TransferAndLockFacet",
   "LockFacet",
+  "LockByPartitionFacet",
   "AdjustBalancesFacet",
   "ProtectedPartitionsFacet",
 ] as const;

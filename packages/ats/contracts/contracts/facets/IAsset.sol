@@ -16,6 +16,7 @@ import { IPrincipal } from "./principal/IPrincipal.sol";
 // Layer 1 — ERC1400
 
 // Layer 1 — ERC3643
+import { IRecovery } from "./recovery/IRecovery.sol";
 import { ICorporateActions } from "./corporateActions/ICorporateActions.sol";
 import { IDiamond } from "../infrastructure/proxy/IDiamond.sol";
 
@@ -44,7 +45,7 @@ import { IExternalPauseManagement } from "./externalPauseManagement/IExternalPau
 import { IFixedRate } from "./layer_2/interestRate/fixedRate/IFixedRate.sol";
 
 // Layer 2
-import { IHold } from "./layer_1/hold/IHold.sol";
+import { IOperatorHoldByPartition } from "./operatorHoldByPartition/IOperatorHoldByPartition.sol";
 import { IHoldByPartition } from "./holdByPartition/IHoldByPartition.sol";
 import { IKyc } from "./layer_1/kyc/IKyc.sol";
 // IKpiLinkedRate and ISustainabilityPerformanceTargetRate are excluded: both define
@@ -89,6 +90,7 @@ import { ICouponListing } from "./couponListing/ICouponListing.sol";
 import { ICouponSecurityHolders } from "./couponSecurityHolders/ICouponSecurityHolders.sol";
 
 import { ILock } from "./layer_1/lock/ILock.sol";
+import { ILockByPartition } from "./lockByPartition/ILockByPartition.sol";
 import { IFreeze } from "./freeze/IFreeze.sol";
 import { IBatchFreeze } from "./batchFreeze/IBatchFreeze.sol";
 import { ISnapshots } from "./layer_1/snapshot/ISnapshots.sol";
@@ -98,6 +100,7 @@ import { IIdentity } from "./identity/IIdentity.sol";
 import { ICoreAtSnapshot } from "./coreAtSnapshot/ICoreAtSnapshot.sol";
 import { IClearingTransfer } from "./layer_1/clearing/IClearingTransfer.sol";
 import { IClearingRedeem } from "./layer_1/clearing/IClearingRedeem.sol";
+import { IOperatorClearingByPartition } from "./operatorClearingByPartition/IOperatorClearingByPartition.sol";
 import { IClearingHoldCreation } from "./layer_1/clearing/IClearingHoldCreation.sol";
 import {
     IOperatorClearingHoldByPartition
@@ -138,7 +141,7 @@ import { IOperatorByPartition } from "./operatorByPartition/IOperatorByPartition
  *      through a single typed object, rather than multiple per-facet instances.
  *
  *      Note: IHold already transitively includes IAccessControl, IERC1410,
- *      IHoldRead, IHoldManagement, and IHoldTokenHolder. IERC3643 already includes its
+ *      IHoldRead, and IHoldTokenHolder. IERC3643 already includes its
  *      sub-interfaces. IERC20Votes includes IERC5805 and IVotes. Solidity C3 linearisation
  *      handles the resulting diamond inheritance without conflicts.
  *
@@ -160,12 +163,13 @@ interface IAsset is
     IKpis,
     ITimeTravel,
     IDiamond,
-    IHold,
+    IOperatorHoldByPartition,
     ITransfer,
     IERC20Votes,
     IERC1410,
     IOperator,
     IERC3643,
+    IRecovery,
     IBurn,
     IScheduledCrossOrderedTasks,
     IBondRead,
@@ -210,6 +214,7 @@ interface IAsset is
     // Scheduled Tasks
     ICouponListing,
     ILock,
+    ILockByPartition,
     IFreeze,
     IBatchFreeze,
     ISnapshots,
@@ -221,6 +226,7 @@ interface IAsset is
     IClearing,
     IClearingTransfer,
     IClearingRedeem,
+    IOperatorClearingByPartition,
     IClearingHoldCreation,
     IOperatorClearingHoldByPartition,
     IClearingByPartition,
