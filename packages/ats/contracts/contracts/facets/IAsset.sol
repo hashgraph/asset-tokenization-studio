@@ -57,6 +57,7 @@ import { INominalValue } from "./layer_2/nominalValue/INominalValue.sol";
 import { IPause } from "./pause/IPause.sol";
 import { ILoansPortfolio } from "./layer_2/loansPortfolio/ILoansPortfolio.sol";
 import { IVoting } from "./layer_2/voting/IVoting.sol";
+import { IVotingSecurityHolders } from "./votingSecurityHolders/IVotingSecurityHolders.sol";
 
 // Layer 3
 import { ISecurity } from "./layer_2/security/ISecurity.sol";
@@ -186,6 +187,7 @@ interface IAsset is
     IAdjustBalances,
     ILoansPortfolio,
     IVoting,
+    IVotingSecurityHolders,
     IBondUSA,
     IEquityUSA,
     ITransferAndLock,

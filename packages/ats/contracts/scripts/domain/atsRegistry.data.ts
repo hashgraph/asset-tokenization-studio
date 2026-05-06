@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-06T11:59:25.400Z
- * Facets: 120
+ * Generated: 2026-05-06T12:14:08.504Z
+ * Facets: 121
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -137,6 +137,7 @@ import {
   TransferAndLockSustainabilityPerformanceTargetRateFacet__factory,
   TransferFacet__factory,
   VotingFacet__factory,
+  VotingSecurityHoldersFacet__factory,
   AccessControlFacetTimeTravel__factory,
   BatchControllerFacetTimeTravel__factory,
   BondUSAFacetTimeTravel__factory,
@@ -14710,14 +14711,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x549bdd6e",
       },
       {
-        name: "getTotalVotingHolders",
-        signature: {
-          full: "function getTotalVotingHolders(uint256 _voteID) view returns (uint256 totalHolders_)",
-          canonical: "getTotalVotingHolders(uint256)",
-        },
-        selector: "0x92c51818",
-      },
-      {
         name: "getVoting",
         signature: {
           full: "function getVoting(uint256 _voteID) view returns (((uint256 recordDate, bytes data) voting, uint256 snapshotId) registeredVoting_, bool isDisabled_)",
@@ -14740,14 +14733,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "getVotingFor(uint256,address)",
         },
         selector: "0x7633eccf",
-      },
-      {
-        name: "getVotingHolders",
-        signature: {
-          full: "function getVotingHolders(uint256 _voteID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
-          canonical: "getVotingHolders(uint256,uint256,uint256)",
-        },
-        selector: "0x009f64ac",
       },
       {
         name: "setVoting",
@@ -14846,12 +14831,57 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     factory: (signer) => new VotingFacet__factory(getLibLinks("clearingReadOps") as any, signer),
     timeTravelFactory: (signer) => new VotingFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
+
+  VotingSecurityHoldersFacet: {
+    name: "VotingSecurityHoldersFacet",
+    description:
+      "Diamond facet that exposes voting security-holder queries via `IVotingSecurityHolders`, registered under `_VOTING_SECURITY_HOLDERS_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_VOTING_SECURITY_HOLDERS_RESOLVER_KEY",
+      value: "0xa8793316b6a7c7511ede839fefe35986fc60ee1b014e99873627ab40febd5924",
+    },
+    inheritance: ["VotingSecurityHolders", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "getTotalVotingHolders",
+        signature: {
+          full: "function getTotalVotingHolders(uint256 _voteID) view returns (uint256 totalHolders_)",
+          canonical: "getTotalVotingHolders(uint256)",
+        },
+        selector: "0x92c51818",
+      },
+      {
+        name: "getVotingHolders",
+        signature: {
+          full: "function getVotingHolders(uint256 _voteID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+          canonical: "getVotingHolders(uint256,uint256,uint256)",
+        },
+        selector: "0x009f64ac",
+      },
+    ],
+    errors: [
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+    ],
+    factory: (signer) => new VotingSecurityHoldersFacet__factory(signer),
+  },
 };
 
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 120 as const;
+export const TOTAL_FACETS = 121 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

@@ -127,6 +127,7 @@ const EQUITY_FACETS = [
   "SsiManagementFacet",
   "TransferAndLockFacet",
   "VotingFacet",
+  "VotingSecurityHoldersFacet",
 
   // Jurisdiction-Specific (1)
   "EquityUSAFacet",
