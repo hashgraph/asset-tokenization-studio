@@ -38,24 +38,6 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Modifiers {
             );
     }
 
-    function authorizeOperator(
-        address _operator
-    ) external override onlyUnpaused onlyCompliant(EvmAccessors.getMsgSender(), _operator, false) {
-        ERC1410StorageWrapper.authorizeOperator(_operator);
-    }
-
-    function revokeOperator(
-        address _operator
-    )
-        external
-        override
-        onlyUnpaused
-        onlyIdentifiedAddresses(EvmAccessors.getMsgSender(), _operator)
-        onlyCompliant(EvmAccessors.getMsgSender(), _operator, false)
-    {
-        ERC1410StorageWrapper.revokeOperator(_operator);
-    }
-
     function authorizeOperatorByPartition(
         bytes32 _partition,
         address _operator

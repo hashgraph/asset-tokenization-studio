@@ -79,6 +79,7 @@ const LOAN_FACETS = [
   "DocumentationFacet",
   "ControllerFacet",
   "ERC1410ReadFacet",
+  "OperatorFacet",
   "ERC1410ManagementFacet",
   "MintByPartitionFacet",
   "ERC1410TokenHolderFacet",
