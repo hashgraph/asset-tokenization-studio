@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-06T09:56:21.611Z
- * Facets: 118
+ * Generated: 2026-05-06T10:44:05.729Z
+ * Facets: 119
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -103,6 +103,7 @@ import {
   LoansPortfolioFacet__factory,
   LockAtSnapshotByPartitionFacet__factory,
   LockAtSnapshotFacet__factory,
+  LockByPartitionFacet__factory,
   LockFacet__factory,
   MaturityByPartitionFacet__factory,
   MaturityFacet__factory,
@@ -10429,8 +10430,186 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     factory: (signer) => new LockAtSnapshotFacet__factory(signer),
   },
 
+  LockByPartitionFacet: {
+    name: "LockByPartitionFacet",
+    description:
+      "Diamond facet exposing partition-aware lock operations and partition-scoped read queries via `ILockByPartition`, registered under `_LOCK_BY_PARTITION_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_LOCK_BY_PARTITION_RESOLVER_KEY",
+      value: "0x9c79f8b10d67860ea033eb8936f04428327ffd8f704f9bb74446bff26c3ddb2a",
+    },
+    inheritance: ["LockByPartition", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "getLockCountForByPartition",
+        signature: {
+          full: "function getLockCountForByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256 lockCount_)",
+          canonical: "getLockCountForByPartition(bytes32,address)",
+        },
+        selector: "0x3b193d92",
+      },
+      {
+        name: "getLockedAmountForByPartition",
+        signature: {
+          full: "function getLockedAmountForByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256 amount_)",
+          canonical: "getLockedAmountForByPartition(bytes32,address)",
+        },
+        selector: "0x6e1c55ba",
+      },
+      {
+        name: "getLockForByPartition",
+        signature: {
+          full: "function getLockForByPartition(bytes32 _partition, address _tokenHolder, uint256 _lockId) view returns (uint256 amount_, uint256 expirationTimestamp_)",
+          canonical: "getLockForByPartition(bytes32,address,uint256)",
+        },
+        selector: "0xa9acfccb",
+      },
+      {
+        name: "getLocksIdForByPartition",
+        signature: {
+          full: "function getLocksIdForByPartition(bytes32 _partition, address _tokenHolder, uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] locksId_)",
+          canonical: "getLocksIdForByPartition(bytes32,address,uint256,uint256)",
+        },
+        selector: "0x3ea8b59d",
+      },
+      {
+        name: "lockByPartition",
+        signature: {
+          full: "function lockByPartition(bytes32 _partition, uint256 _amount, address _tokenHolder, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
+          canonical: "lockByPartition(bytes32,uint256,address,uint256)",
+        },
+        selector: "0x7a87884e",
+      },
+      {
+        name: "releaseByPartition",
+        signature: {
+          full: "function releaseByPartition(bytes32 _partition, uint256 _lockId, address _tokenHolder) returns (bool success_)",
+          canonical: "releaseByPartition(bytes32,uint256,address)",
+        },
+        selector: "0xdc6a3e75",
+      },
+    ],
+    events: [
+      {
+        name: "LockByPartitionReleased",
+        signature: {
+          full: "event LockByPartitionReleased(address indexed operator, address indexed tokenHolder, bytes32 indexed partition, uint256 lockId)",
+          canonical: "LockByPartitionReleased(address,address,bytes32,uint256)",
+        },
+        topic0: "0x6b9cdd97822563ef24ac6b58b361df36a653662e434bb96e40fa50ae5c9de688",
+      },
+      {
+        name: "LockedByPartition",
+        signature: {
+          full: "event LockedByPartition(address indexed operator, address indexed tokenHolder, bytes32 indexed partition, uint256 lockId, uint256 amount, uint256 expirationTimestamp)",
+          canonical: "LockedByPartition(address,address,bytes32,uint256,uint256,uint256)",
+        },
+        topic0: "0x1f36cfc418f72043825aa85b5d279c03191ab83364af0ec5f170d67f1a7ba152",
+      },
+      {
+        name: "Transfer",
+        signature: {
+          full: "event Transfer(address indexed from, address indexed to, uint256 value)",
+          canonical: "Transfer(address,address,uint256)",
+        },
+        topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+      },
+      {
+        name: "TransferByPartition",
+        signature: {
+          full: "event TransferByPartition(bytes32 indexed _fromPartition, address _operator, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)",
+          canonical: "TransferByPartition(bytes32,address,address,address,uint256,bytes,bytes)",
+        },
+        topic0: "0xff4e9a26af4eb73b8bacfaa4abd4fea03d9448e7b912dc5ff4019048875aa2d4",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRole",
+        signature: {
+          full: "error AccountHasNoRole(address account, bytes32 role)",
+          canonical: "AccountHasNoRole(address,bytes32)",
+        },
+        selector: "0xa1180aad",
+      },
+      {
+        name: "InsufficientBalance",
+        signature: {
+          full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
+          canonical: "InsufficientBalance(address,uint256,uint256,bytes32)",
+        },
+        selector: "0x5d6824c4",
+      },
+      {
+        name: "InvalidPartition",
+        signature: {
+          full: "error InvalidPartition(address account, bytes32 partition)",
+          canonical: "InvalidPartition(address,bytes32)",
+        },
+        selector: "0xbf84f4ec",
+      },
+      {
+        name: "LockExpirationNotReached",
+        signature: { full: "error LockExpirationNotReached()", canonical: "LockExpirationNotReached()" },
+        selector: "0xe8232ac2",
+      },
+      {
+        name: "PartitionNotAllowedInSinglePartitionMode",
+        signature: {
+          full: "error PartitionNotAllowedInSinglePartitionMode(bytes32 partition)",
+          canonical: "PartitionNotAllowedInSinglePartitionMode(bytes32)",
+        },
+        selector: "0xb96d9539",
+      },
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+      {
+        name: "WalletRecovered",
+        signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
+        selector: "0xf9f9bcf9",
+      },
+      {
+        name: "WrongExpirationTimestamp",
+        signature: { full: "error WrongExpirationTimestamp()", canonical: "WrongExpirationTimestamp()" },
+        selector: "0xe39f4776",
+      },
+      {
+        name: "WrongLockId",
+        signature: { full: "error WrongLockId()", canonical: "WrongLockId()" },
+        selector: "0x039be1dd",
+      },
+    ],
+    factory: (signer) => new LockByPartitionFacet__factory(signer),
+  },
+
   LockFacet: {
     name: "LockFacet",
+    description:
+      "Diamond facet exposing the default-partition lock surface and the all-partition read queries declared in `ILock`, registered under `_LOCK_RESOLVER_KEY`.",
     resolverKey: {
       name: "_LOCK_RESOLVER_KEY",
       value: "0xf1364345b3db5ebe5808f2d2d2aaecb9cdb4fddacad1534033060ebc886fc1e9",
@@ -10462,28 +10641,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x4f131ba4",
       },
       {
-        name: "getLockCountForByPartition",
-        signature: {
-          full: "function getLockCountForByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256 lockCount_)",
-          canonical: "getLockCountForByPartition(bytes32,address)",
-        },
-        selector: "0x3b193d92",
-      },
-      {
         name: "getLockedAmountFor",
         signature: {
           full: "function getLockedAmountFor(address _tokenHolder) view returns (uint256 amount_)",
           canonical: "getLockedAmountFor(address)",
         },
         selector: "0x36e74467",
-      },
-      {
-        name: "getLockedAmountForByPartition",
-        signature: {
-          full: "function getLockedAmountForByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256 amount_)",
-          canonical: "getLockedAmountForByPartition(bytes32,address)",
-        },
-        selector: "0x6e1c55ba",
       },
       {
         name: "getLockFor",
@@ -10494,28 +10657,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x6f14b024",
       },
       {
-        name: "getLockForByPartition",
-        signature: {
-          full: "function getLockForByPartition(bytes32 _partition, address _tokenHolder, uint256 _lockId) view returns (uint256 amount_, uint256 expirationTimestamp_)",
-          canonical: "getLockForByPartition(bytes32,address,uint256)",
-        },
-        selector: "0xa9acfccb",
-      },
-      {
         name: "getLocksIdFor",
         signature: {
           full: "function getLocksIdFor(address _tokenHolder, uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] locksId_)",
           canonical: "getLocksIdFor(address,uint256,uint256)",
         },
         selector: "0xd2d2b9fc",
-      },
-      {
-        name: "getLocksIdForByPartition",
-        signature: {
-          full: "function getLocksIdForByPartition(bytes32 _partition, address _tokenHolder, uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] locksId_)",
-          canonical: "getLocksIdForByPartition(bytes32,address,uint256,uint256)",
-        },
-        selector: "0x3ea8b59d",
       },
       {
         name: "lock",
@@ -10526,28 +10673,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xcf27cfc4",
       },
       {
-        name: "lockByPartition",
-        signature: {
-          full: "function lockByPartition(bytes32 _partition, uint256 _amount, address _tokenHolder, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
-          canonical: "lockByPartition(bytes32,uint256,address,uint256)",
-        },
-        selector: "0x7a87884e",
-      },
-      {
         name: "release",
         signature: {
           full: "function release(uint256 _lockId, address _tokenHolder) returns (bool success_)",
           canonical: "release(uint256,address)",
         },
         selector: "0x8124fea6",
-      },
-      {
-        name: "releaseByPartition",
-        signature: {
-          full: "function releaseByPartition(bytes32 _partition, uint256 _lockId, address _tokenHolder) returns (bool success_)",
-          canonical: "releaseByPartition(bytes32,uint256,address)",
-        },
-        selector: "0xdc6a3e75",
       },
     ],
     events: [
@@ -14626,7 +14757,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 118 as const;
+export const TOTAL_FACETS = 119 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
