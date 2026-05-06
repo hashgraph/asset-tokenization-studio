@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICouponTypes } from "../../facets/layer_2/coupon/ICouponTypes.sol";
+import { ICouponTypes } from "../../facets/coupon/ICouponTypes.sol";
 import { InterestRateStorageWrapper, KpiLinkedRateDataStorage } from "./InterestRateStorageWrapper.sol";
 import { KpisStorageWrapper } from "./KpisStorageWrapper.sol";
 import { ProceedRecipientsStorageWrapper } from "./ProceedRecipientsStorageWrapper.sol";

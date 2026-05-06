@@ -8,8 +8,9 @@ import {
 import { IAccessControl } from "./accessControl/IAccessControl.sol";
 import { IAdjustBalances } from "./adjustBalances/IAdjustBalances.sol";
 import { IAmortization } from "./layer_2/amortization/IAmortization.sol";
-import { IBond } from "./layer_2/bond/IBond.sol";
 import { IBondUSA } from "./layer_3/bondUSA/IBondUSA.sol";
+import { IMaturity } from "./maturity/IMaturity.sol";
+import { IBondRead } from "./layer_2/bond/IBondRead.sol";
 
 // Layer 1 — ERC1400
 
@@ -26,6 +27,7 @@ import { IAllowance } from "./allowance/IAllowance.sol";
 
 // Layer 1 — External lists
 import { IERC1410 } from "./layer_1/ERC1400/ERC1410/IERC1410.sol";
+import { IOperator } from "./operator/IOperator.sol";
 import { ITransfer } from "./transfer/ITransfer.sol";
 
 // Layer 1 — Remaining facets
@@ -61,7 +63,7 @@ import { ITimeTravel } from "../test/testTimeTravel/ITimeTravel.sol";
 import { IBalanceTracker } from "./balanceTracker/IBalanceTracker.sol";
 import { IBalanceTrackerAdjusted } from "./balanceTrackerAdjusted/IBalanceTrackerAdjusted.sol";
 import { ITransferAndLock } from "./layer_3/transferAndLock/ITransferAndLock.sol";
-import { ICoupon } from "./layer_2/coupon/ICoupon.sol";
+import { ICoupon } from "./coupon/ICoupon.sol";
 import { IDividend } from "./dividend/IDividend.sol";
 import { IDividendSecurityHolders } from "./dividendSecurityHolders/IDividendSecurityHolders.sol";
 import { IKpis } from "./layer_2/kpi/kpiLatest/IKpis.sol";
@@ -79,7 +81,9 @@ import { IClearingAtSnapshot } from "./clearingAtSnapshot/IClearingAtSnapshot.so
 import { IClearingAtSnapshotByPartition } from "./clearingAtSnapshotByPartition/IClearingAtSnapshotByPartition.sol";
 import { IHoldAtSnapshotByPartition } from "./holdAtSnapshotByPartition/IHoldAtSnapshotByPartition.sol";
 import { IHoldAtSnapshot } from "./holdAtSnapshot/IHoldAtSnapshot.sol";
+import { ILockAtSnapshotByPartition } from "./lockAtSnapshotByPartition/ILockAtSnapshotByPartition.sol";
 import { ILockAtSnapshot } from "./lockAtSnapshot/ILockAtSnapshot.sol";
+import { IMaturityByPartition } from "./maturityByPartition/IMaturityByPartition.sol";
 import { ICouponListing } from "./couponListing/ICouponListing.sol";
 import { ICouponSecurityHolders } from "./couponSecurityHolders/ICouponSecurityHolders.sol";
 
@@ -89,6 +93,7 @@ import { IBatchFreeze } from "./batchFreeze/IBatchFreeze.sol";
 import { ISnapshots } from "./layer_1/snapshot/ISnapshots.sol";
 import { IFreezeAtSnapshot } from "./freezeAtSnapshot/IFreezeAtSnapshot.sol";
 import { IFreezeAtSnapshotByPartition } from "./freezeAtSnapshotByPartition/IFreezeAtSnapshotByPartition.sol";
+import { IIdentity } from "./identity/IIdentity.sol";
 import { ICoreAtSnapshot } from "./coreAtSnapshot/ICoreAtSnapshot.sol";
 import { IClearingTransfer } from "./layer_1/clearing/IClearingTransfer.sol";
 import { IClearingRedeem } from "./layer_1/clearing/IClearingRedeem.sol";
@@ -120,6 +125,7 @@ import { IBatchMint } from "./batchMint/IBatchMint.sol";
 import { IBatchTransfer } from "./batchTransfer/IBatchTransfer.sol";
 import { IMetadata } from "./metadata/IMetadata.sol";
 import { IDeactivate } from "./deactivate/IDeactivate.sol";
+import { IOperatorByPartition } from "./operatorByPartition/IOperatorByPartition.sol";
 
 // solhint-disable no-empty-blocks
 /**
@@ -157,10 +163,12 @@ interface IAsset is
     ITransfer,
     IERC20Votes,
     IERC1410,
+    IOperator,
     IERC3643,
     IBurn,
     IScheduledCrossOrderedTasks,
-    IBond,
+    IBondRead,
+    IMaturity,
     IEquity,
     ISecurity,
     ICorporateActions,
@@ -193,7 +201,9 @@ interface IAsset is
     IClearingAtSnapshotByPartition,
     IHoldAtSnapshotByPartition,
     IHoldAtSnapshot,
+    ILockAtSnapshotByPartition,
     ILockAtSnapshot,
+    IMaturityByPartition,
     IFixedRate,
     // Scheduled Tasks
     ICouponListing,
@@ -202,6 +212,7 @@ interface IAsset is
     IBatchFreeze,
     ISnapshots,
     IFreezeAtSnapshot,
+    IIdentity,
     IFreezeAtSnapshotByPartition,
     ICoreAtSnapshot,
     // Clearing interfaces
@@ -236,5 +247,6 @@ interface IAsset is
     IBatchMint,
     IBatchTransfer,
     IMetadata,
-    IDeactivate
+    IDeactivate,
+    IOperatorByPartition
 {}

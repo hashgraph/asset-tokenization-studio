@@ -49,6 +49,7 @@ const BOND_FACETS = [
   "PauseFacet",
   "SnapshotsFacet",
   "HoldAtSnapshotFacet",
+  "LockAtSnapshotByPartitionFacet",
   "FreezeAtSnapshotFacet",
   "FreezeAtSnapshotByPartitionFacet",
   "LockAtSnapshotFacet",
@@ -79,7 +80,9 @@ const BOND_FACETS = [
   "MintByPartitionFacet",
   "ERC1410ManagementFacet",
   "ERC1410ReadFacet",
+  "OperatorFacet",
   "ERC1410TokenHolderFacet",
+  "OperatorByPartitionFacet",
   "BurnByPartitionFacet",
   "DocumentationFacet",
   "ControllerFacet",
@@ -94,6 +97,7 @@ const BOND_FACETS = [
   "BatchTransferFacet",
   "ERC3643ManagementFacet",
   "ERC3643ReadFacet",
+  "IdentityFacet",
   "ComplianceFacet",
   "ComplianceByPartitionFacet",
   "MintFacet",
@@ -124,6 +128,7 @@ const BOND_FACETS = [
   "CouponFacet",
   "CouponSecurityHoldersFacet",
   "LockFacet",
+  "MaturityFacet",
   "NominalValueFacet",
   "ProceedRecipientsFacet",
   "ProtectedPartitionsFacet",
@@ -131,6 +136,9 @@ const BOND_FACETS = [
   "CouponListingFacet",
   "SsiManagementFacet",
   "TransferAndLockFacet",
+
+  // Maturity By Partition
+  "MaturityByPartitionFacet",
 
   // Jurisdiction-Specific
   "BondUSAFacet",

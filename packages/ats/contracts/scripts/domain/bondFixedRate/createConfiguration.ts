@@ -46,6 +46,7 @@ const BOND_FIXED_RATE_FACETS = [
   "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
   "HoldAtSnapshotFacet",
+  "LockAtSnapshotByPartitionFacet",
   "FreezeAtSnapshotFacet",
   "FreezeAtSnapshotByPartitionFacet",
   "LockAtSnapshotFacet",
@@ -74,7 +75,9 @@ const BOND_FIXED_RATE_FACETS = [
   "MintByPartitionFacet",
   "ERC1410ManagementFacet",
   "ERC1410ReadFacet",
+  "OperatorFacet",
   "ERC1410TokenHolderFacet",
+  "OperatorByPartitionFacet",
   "BurnByPartitionFacet",
   "DocumentationFacet",
   "ControllerFacet",
@@ -89,6 +92,7 @@ const BOND_FIXED_RATE_FACETS = [
   "BatchTransferFacet",
   "ERC3643ManagementFacet",
   "ERC3643ReadFacet",
+  "IdentityFacet",
   "ComplianceFacet",
   "ComplianceByPartitionFacet",
   "MintFacet",
@@ -117,6 +121,7 @@ const BOND_FIXED_RATE_FACETS = [
   // Advanced Features
   "AdjustBalancesFacet",
   "LockFacet",
+  "MaturityFacet",
   "NominalValueFacet",
   "ProceedRecipientsFacet",
   "ProtectedPartitionsFacet",
@@ -129,6 +134,9 @@ const BOND_FIXED_RATE_FACETS = [
   // Interest Rate (rate-specific)
   "CouponFixedRateFacet",
   "FixedRateFacet",
+
+  // Maturity By Partition
+  "MaturityByPartitionFacet",
 
   // Jurisdiction-Specific
   "BondUSAFixedRateFacet",

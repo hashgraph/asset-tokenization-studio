@@ -16,31 +16,6 @@ interface IERC1410Management is IERC1410Types {
     function initialize_ERC1410(bool _multiPartition) external;
 
     /**
-     * @notice Transfers the ownership of tokens from a specified partition from one address to another address
-     * @param _operatorTransferData contains all the information about the operator transfer
-     */
-    function operatorTransferByPartition(
-        OperatorTransferData calldata _operatorTransferData
-    ) external returns (bytes32);
-
-    /**
-     * @notice Decreases totalSupply and the corresponding amount of the specified partition of tokenHolder
-     * @dev This function can only be called by the authorised operator.
-     * @param _partition The partition to allocate the decrease in balance.
-     * @param _tokenHolder The token holder whose balance should be decreased
-     * @param _value The amount by which to decrease the balance
-     * @param _data Additional data attached to the burning of tokens
-     * @param _operatorData Additional data attached to the transfer of tokens by the operator
-     */
-    function operatorRedeemByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) external;
-
-    /**
      * @notice Transfers tokens from the token holder to another address by presenting an off-chain signature
      * @dev Can only be called by the protected partitions role
      */

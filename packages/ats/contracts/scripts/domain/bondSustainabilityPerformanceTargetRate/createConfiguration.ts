@@ -54,6 +54,7 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
   "HoldAtSnapshotFacet",
+  "LockAtSnapshotByPartitionFacet",
   "FreezeAtSnapshotFacet",
   "FreezeAtSnapshotByPartitionFacet",
   "LockAtSnapshotFacet",
@@ -69,7 +70,9 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "MintByPartitionFacet",
   "ERC1410ManagementFacet",
   "ERC1410ReadFacet",
+  "OperatorFacet",
   "ERC1410TokenHolderFacet",
+  "OperatorByPartitionFacet",
   "BurnByPartitionFacet",
   "DocumentationFacet",
   "ControllerFacet",
@@ -84,6 +87,7 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "BatchTransferFacet",
   "ERC3643ManagementFacet",
   "ERC3643ReadFacet",
+  "IdentityFacet",
   "ComplianceFacet",
   "ComplianceByPartitionFacet",
   "MintFacet",
@@ -112,6 +116,7 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   // Advanced Features
   "AdjustBalancesFacet",
   "LockFacet",
+  "MaturityFacet",
   "NominalValueFacet",
   "ProceedRecipientsSustainabilityPerformanceTargetRateFacet", // rate-specific: triggers scheduled tasks
   "ProtectedPartitionsFacet",
@@ -126,6 +131,9 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "CouponSustainabilityPerformanceTargetRateFacet",
   "SustainabilityPerformanceTargetRateFacet",
   "KpisSustainabilityPerformanceTargetRateFacet",
+
+  // Maturity By Partition
+  "MaturityByPartitionFacet",
 
   // Jurisdiction-Specific (write facet and read facet are both rate-specific)
   "BondUSASustainabilityPerformanceTargetRateFacet",
