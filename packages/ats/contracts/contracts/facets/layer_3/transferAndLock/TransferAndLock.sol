@@ -11,48 +11,6 @@ import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract TransferAndLock is ITransferAndLock, Modifiers {
-    function transferAndLockByPartition(
-        bytes32 _partition,
-        address _to,
-        uint256 _amount,
-        bytes calldata _data,
-        uint256 _expirationTimestamp
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(LOCKER_ROLE)
-        onlyWithValidExpirationTimestamp(_expirationTimestamp)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyUnProtectedPartitionsOrWildCardRole
-        returns (bool success_, uint256 lockId_)
-    {
-        ERC1410StorageWrapper.transferByPartition(
-            EvmAccessors.getMsgSender(),
-            IERC1410Types.BasicTransferInfo(_to, _amount),
-            _partition,
-            _data,
-            EvmAccessors.getMsgSender(),
-            ""
-        );
-        (success_, lockId_) = LockStorageWrapper.lockByPartition(
-            _partition,
-            _amount,
-            _to,
-            _expirationTimestamp,
-            EvmAccessors.getMsgSender()
-        );
-        emit PartitionTransferredAndLocked(
-            _partition,
-            EvmAccessors.getMsgSender(),
-            _to,
-            _amount,
-            _data,
-            _expirationTimestamp,
-            lockId_
-        );
-    }
-
     function transferAndLock(
         address _to,
         uint256 _amount,

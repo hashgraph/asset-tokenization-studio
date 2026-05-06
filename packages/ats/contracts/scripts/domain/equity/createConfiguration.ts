@@ -128,6 +128,7 @@ const EQUITY_FACETS = [
   "ScheduledCrossOrderedTasksFacet",
   "SsiManagementFacet",
   "TransferAndLockFacet",
+  "TransferAndLockByPartitionFacet",
   "VotingFacet",
 
   // Jurisdiction-Specific (1)

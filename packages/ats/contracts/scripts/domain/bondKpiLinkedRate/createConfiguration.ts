@@ -128,6 +128,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "CouponListingFacet",
   "SsiManagementFacet",
   "TransferAndLockFacet",
+  "TransferAndLockByPartitionFacet",
 
   "CouponSecurityHoldersFacet",
 

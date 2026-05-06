@@ -128,6 +128,7 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "CouponListingFacet",
   "SsiManagementFacet",
   "TransferAndLockFacet",
+  "TransferAndLockByPartitionFacet",
 
   "CouponSecurityHoldersFacet",
 

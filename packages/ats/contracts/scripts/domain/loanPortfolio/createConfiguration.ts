@@ -138,6 +138,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "LockByPartitionFacet",
   "ProtectedPartitionsFacet",
   "TransferAndLockFacet",
+  "TransferAndLockByPartitionFacet",
 ] as const;
 
 export async function createLoansPortfolioConfiguration(

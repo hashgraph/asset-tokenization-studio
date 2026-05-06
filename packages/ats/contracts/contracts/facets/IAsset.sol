@@ -65,6 +65,7 @@ import { ITimeTravel } from "../test/testTimeTravel/ITimeTravel.sol";
 import { IBalanceTracker } from "./balanceTracker/IBalanceTracker.sol";
 import { IBalanceTrackerAdjusted } from "./balanceTrackerAdjusted/IBalanceTrackerAdjusted.sol";
 import { ITransferAndLock } from "./layer_3/transferAndLock/ITransferAndLock.sol";
+import { ITransferAndLockByPartition } from "./transferAndLockByPartition/ITransferAndLockByPartition.sol";
 import { ICoupon } from "./coupon/ICoupon.sol";
 import { IDividend } from "./dividend/IDividend.sol";
 import { IDividendSecurityHolders } from "./dividendSecurityHolders/IDividendSecurityHolders.sol";
@@ -191,6 +192,7 @@ interface IAsset is
     IBondUSA,
     IEquityUSA,
     ITransferAndLock,
+    ITransferAndLockByPartition,
     // Corporate Actions
     ICoupon,
     ICouponSecurityHolders,
