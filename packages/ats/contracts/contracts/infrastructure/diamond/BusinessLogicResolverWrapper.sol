@@ -39,9 +39,10 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
 
         IBusinessLogicResolver.BusinessLogicRegistryData memory _businessLogicsRegistryData;
 
-        latestVersion_ = new uint256[](_businessLogicsRegistryDatas.length);
+        uint256 length = _businessLogicsRegistryDatas.length;
+        latestVersion_ = new uint256[](length);
 
-        for (uint256 index; index < _businessLogicsRegistryDatas.length; index++) {
+        for (uint256 index; index < length; ) {
             _businessLogicsRegistryData = _businessLogicsRegistryDatas[index];
 
             bytes32 actualBLKey = IStaticFunctionSelectors(_businessLogicsRegistryData.businessLogicAddress)
@@ -55,10 +56,10 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
                 );
             }
 
-            businessLogicResolverDataStorage.latestVersionByFacetId[_businessLogicsRegistryData.businessLogicKey]++;
-            latestVersion_[index] = businessLogicResolverDataStorage.latestVersionByFacetId[
+            uint256 newVersion = ++businessLogicResolverDataStorage.latestVersionByFacetId[
                 _businessLogicsRegistryData.businessLogicKey
             ];
+            latestVersion_[index] = newVersion;
 
             if (!businessLogicResolverDataStorage.businessLogicActive[_businessLogicsRegistryData.businessLogicKey]) {
                 businessLogicResolverDataStorage.businessLogicActive[
@@ -75,7 +76,7 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
             versions.push(
                 IBusinessLogicResolver.BusinessLogicVersion({
                     versionData: IBusinessLogicResolver.VersionData({
-                        version: latestVersion_[index],
+                        version: newVersion,
                         status: IBusinessLogicResolver.VersionStatus.ACTIVATED
                     }),
                     businessLogicAddress: _businessLogicsRegistryData.businessLogicAddress
@@ -83,12 +84,16 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
             );
 
             bytes32 facetIdAndVersion = keccak256(
-                abi.encodePacked(_businessLogicsRegistryData.businessLogicKey, latestVersion_[index])
+                abi.encodePacked(_businessLogicsRegistryData.businessLogicKey, newVersion)
             );
 
             businessLogicResolverDataStorage.statusByFacetIdAndVersion[facetIdAndVersion] = IBusinessLogicResolver
                 .VersionStatus
                 .ACTIVATED;
+
+            unchecked {
+                ++index;
+            }
         }
     }
 
@@ -121,15 +126,15 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
     }
 
     function _getVersionStatus(
-        bytes32 _key,
+        bytes32 _businessLogicKey,
         uint256 _version
     ) internal view returns (IBusinessLogicResolver.VersionStatus status_) {
-        bytes32 facetIdAndVersion = keccak256(abi.encodePacked(_key, _version));
+        bytes32 facetIdAndVersion = keccak256(abi.encodePacked(_businessLogicKey, _version));
         status_ = _businessLogicResolverStorage().statusByFacetIdAndVersion[facetIdAndVersion];
     }
 
-    function _getLatestVersion(bytes32 _key) internal view returns (uint256 latestVersion_) {
-        latestVersion_ = _businessLogicResolverStorage().latestVersionByFacetId[_key];
+    function _getLatestVersion(bytes32 _businessLogicKey) internal view returns (uint256 latestVersion_) {
+        latestVersion_ = _businessLogicResolverStorage().latestVersionByFacetId[_businessLogicKey];
     }
 
     function _resolveLatestBusinessLogic(
@@ -161,6 +166,18 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         }
     }
 
+    /**
+     * @notice Resolves the business logic address registered for `_businessLogicKey` at `_version`.
+     * @dev Relies on the invariant maintained by `_registerBusinessLogics`:
+     *      `businessLogics[key].length == latestVersionByFacetId[key]`,
+     *      so version `v` lives at array index `v - 1`. The `validVersion` modifier on the
+     *      external entry points gates `v` to `[1, latestVersionByFacetId[key]]`, keeping
+     *      the array access in bounds.
+     * @param _businessLogicKey key of the business logic to resolve.
+     * @param _version version to resolve. Must satisfy `1 <= _version <= latest`.
+     * @return businessLogic address registered for the given key/version, or `address(0)` if
+     *         the key has been deactivated.
+     */
     function _resolveBusinessLogicByVersion(
         bytes32 _businessLogicKey,
         uint256 _version

@@ -46,8 +46,8 @@ interface TRexIBusinessLogicResolver is IDiamondCutManager {
 
     /// @notice Event emitted when Business Logic(s) are registered (updated or added).
     /// @param businessLogics list of registered Business Logics.
-    /// @param newLatestVersion new latest version = previous latest version + 1.
-    event BusinessLogicsRegistered(BusinessLogicRegistryData[] businessLogics, uint256[] newLatestVersion);
+    /// @param newLatestVersions new latest version per registered key, in the same order as `businessLogics`.
+    event BusinessLogicsRegistered(BusinessLogicRegistryData[] businessLogics, uint256[] newLatestVersions);
 
     error BusinessLogicVersionDoesNotExist(uint256 version);
     error BusinessLogicKeyDuplicated(bytes32 businessLogicKey);

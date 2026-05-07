@@ -256,6 +256,34 @@ describe("BusinessLogicResolver", () => {
       );
     });
 
+    it("GIVEN one facet registered twice and another once THEN status lookups stay scoped per facet", async () => {
+      // FIND-009 reproducer: pre-fix, a single global counter meant facet B's "version 2"
+      // was reported ACTIVATED whenever ANY facet had been registered twice. Post-fix,
+      // each facet has its own counter and B's version 2 must not exist.
+      const [facetA, facetB] = BUSINESS_LOGIC_KEYS;
+
+      await businessLogicResolver.registerBusinessLogics([facetA, facetB]);
+      await businessLogicResolver.registerBusinessLogics([facetA]);
+
+      expect(await businessLogicResolver.getLatestVersion(facetA.businessLogicKey)).is.equal(2);
+      expect(await businessLogicResolver.getLatestVersion(facetB.businessLogicKey)).is.equal(1);
+
+      expect(await businessLogicResolver.getVersionStatus(facetA.businessLogicKey, 2)).to.be.equal(
+        VersionStatus.ACTIVATED,
+      );
+      expect(await businessLogicResolver.getVersionStatus(facetA.businessLogicKey, 1)).to.be.equal(
+        VersionStatus.ACTIVATED,
+      );
+      expect(await businessLogicResolver.getVersionStatus(facetB.businessLogicKey, 1)).to.be.equal(
+        VersionStatus.ACTIVATED,
+      );
+
+      await expect(businessLogicResolver.getVersionStatus(facetB.businessLogicKey, 2)).to.be.revertedWithCustomError(
+        businessLogicResolver,
+        "BusinessLogicVersionDoesNotExist",
+      );
+    });
+
     it("GIVEN a configuration add a selector to the blacklist THEN queries respond with correct values", async () => {
       const blackListedSelectors = ["0x8456cb59"]; // pause() selector
 
