@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-07T08:13:26.416Z
- * Facets: 124
+ * Generated: 2026-05-07T08:28:35.140Z
+ * Facets: 121
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -61,11 +61,8 @@ import {
   CoreFacet__factory,
   CorporateActionsFacet__factory,
   CouponFacet__factory,
-  CouponFixedRateFacet__factory,
-  CouponKpiLinkedRateFacet__factory,
   CouponListingFacet__factory,
   CouponSecurityHoldersFacet__factory,
-  CouponSustainabilityPerformanceTargetRateFacet__factory,
   DeactivateFacet__factory,
   DiamondFacet__factory,
   DividendFacet__factory,
@@ -4453,188 +4450,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_COUPON_RESOLVER_KEY",
       value: "0xa404f705370f56f56364ac9aa1092c1002b2bfcd7020c1bb5ca7489f8061efa7",
     },
-    inheritance: ["CouponFacetBase"],
-    methods: [
-      {
-        name: "cancelCoupon",
-        signature: {
-          full: "function cancelCoupon(uint256 _couponID) returns (bool success_)",
-          canonical: "cancelCoupon(uint256)",
-        },
-        selector: "0x0459fafb",
-      },
-      {
-        name: "getCoupon",
-        signature: {
-          full: "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_, bool isDisabled_)",
-          canonical: "getCoupon(uint256)",
-        },
-        selector: "0x936e3169",
-      },
-      {
-        name: "getCouponAmountFor",
-        signature: {
-          full: "function getCouponAmountFor(uint256 _couponID, address _account) view returns ((uint256 numerator, uint256 denominator, bool recordDateReached) couponAmountFor_)",
-          canonical: "getCouponAmountFor(uint256,address)",
-        },
-        selector: "0x439efc2e",
-      },
-      {
-        name: "getCouponCount",
-        signature: {
-          full: "function getCouponCount() view returns (uint256 couponCount_)",
-          canonical: "getCouponCount()",
-        },
-        selector: "0x468bb240",
-      },
-      {
-        name: "getCouponFor",
-        signature: {
-          full: "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint256 nominalValue, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, (uint256 numerator, uint256 denominator, bool recordDateReached) couponAmount, bool isDisabled) couponFor_)",
-          canonical: "getCouponFor(uint256,address)",
-        },
-        selector: "0xbba7b56d",
-      },
-      {
-        name: "setCoupon",
-        signature: {
-          full: "function setCoupon((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
-          canonical: "setCoupon((uint256,uint256,uint256,uint256,uint256,uint256,uint8,uint8))",
-        },
-        selector: "0xb16fd0cc",
-      },
-    ],
-    events: [
-      {
-        name: "CouponCancelled",
-        signature: {
-          full: "event CouponCancelled(uint256 indexed couponId, address indexed operator)",
-          canonical: "CouponCancelled(uint256,address)",
-        },
-        topic0: "0xf3f7ee3ec63ca38fe59a56a06f6d730ef89a41b7819ca5c04dda2205c4f2a712",
-      },
-      {
-        name: "CouponSet",
-        signature: {
-          full: "event CouponSet(bytes32 indexed corporateActionId, uint256 indexed couponId, address indexed operator, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon)",
-          canonical: "CouponSet(bytes32,uint256,address,(uint256,uint256,uint256,uint256,uint256,uint256,uint8,uint8))",
-        },
-        topic0: "0xbeb7fdc8c5c160b79de3e9c869bf2f6b287cbe29eb05d7623537a427231942ee",
-      },
-    ],
-    errors: [
-      {
-        name: "AccessControlRequired",
-        signature: {
-          full: "error AccessControlRequired(bytes32 role, address sender)",
-          canonical: "AccessControlRequired(bytes32,address)",
-        },
-        selector: "0x10210dec",
-      },
-      {
-        name: "AccountHasNoRole",
-        signature: {
-          full: "error AccountHasNoRole(address account, bytes32 role)",
-          canonical: "AccountHasNoRole(address,bytes32)",
-        },
-        selector: "0xa1180aad",
-      },
-      {
-        name: "CouponAlreadyExecuted",
-        signature: {
-          full: "error CouponAlreadyExecuted(bytes32 corporateActionId, uint256 couponId)",
-          canonical: "CouponAlreadyExecuted(bytes32,uint256)",
-        },
-        selector: "0xae5a5af7",
-      },
-      {
-        name: "CouponCreationFailed",
-        signature: { full: "error CouponCreationFailed()", canonical: "CouponCreationFailed()" },
-        selector: "0x3a11c78b",
-      },
-      {
-        name: "CouponNotFound",
-        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
-        selector: "0x69a80e75",
-      },
-      {
-        name: "InterestRateIsKpiLinked",
-        signature: { full: "error InterestRateIsKpiLinked()", canonical: "InterestRateIsKpiLinked()" },
-        selector: "0x68eba14f",
-      },
-      {
-        name: "InvalidTimestamp",
-        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
-        selector: "0xb7d09497",
-      },
-      {
-        name: "SnapshotIdDoesNotExists",
-        signature: {
-          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
-          canonical: "SnapshotIdDoesNotExists(uint256)",
-        },
-        selector: "0x8e81eb83",
-      },
-      {
-        name: "SnapshotIdNull",
-        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
-        selector: "0xf128004d",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
-      {
-        name: "UnexpectedError",
-        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
-        selector: "0xc9622656",
-      },
-      {
-        name: "WrongDates",
-        signature: {
-          full: "error WrongDates(uint256 firstDate, uint256 secondDate)",
-          canonical: "WrongDates(uint256,uint256)",
-        },
-        selector: "0x1c94559c",
-      },
-      {
-        name: "WrongImpactDataValues",
-        signature: {
-          full: "error WrongImpactDataValues((uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData)",
-          canonical: "WrongImpactDataValues((uint256,uint256,uint256,uint8,uint256))",
-        },
-        selector: "0xa60b6cba",
-      },
-      {
-        name: "WrongIndexForAction",
-        signature: {
-          full: "error WrongIndexForAction(uint256 index, bytes32 actionType)",
-          canonical: "WrongIndexForAction(uint256,bytes32)",
-        },
-        selector: "0xd3924f4e",
-      },
-      {
-        name: "WrongInterestRateValues",
-        signature: {
-          full: "error WrongInterestRateValues((uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate)",
-          canonical: "WrongInterestRateValues((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8))",
-        },
-        selector: "0x570cf0d3",
-      },
-    ],
-    factory: (signer) => new CouponFacet__factory(getLibLinks("clearingReadOps") as any, signer),
-  },
-
-  CouponFixedRateFacet: {
-    name: "CouponFixedRateFacet",
-    description:
-      "Diamond facet variant of the coupon writer that resolves the rate from the configured fixed-rate setting of the bond at scheduling time. Registered under `_COUPON_FIXED_RATE_RESOLVER_KEY`.",
-    resolverKey: {
-      name: "_COUPON_FIXED_RATE_RESOLVER_KEY",
-      value: "0x2e0b1146e97bc72f92441d75c9cfa74185548319741c7f292fe0014252933ae9",
-    },
-    inheritance: ["CouponFacetBase"],
+    inheritance: ["Coupon", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "cancelCoupon",
@@ -4749,185 +4565,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x68eba14f",
       },
       {
-        name: "InvalidTimestamp",
-        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
-        selector: "0xb7d09497",
-      },
-      {
-        name: "SnapshotIdDoesNotExists",
+        name: "InterestRateIsSustainabilityPerformanceTargetRate",
         signature: {
-          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
-          canonical: "SnapshotIdDoesNotExists(uint256)",
+          full: "error InterestRateIsSustainabilityPerformanceTargetRate()",
+          canonical: "InterestRateIsSustainabilityPerformanceTargetRate()",
         },
-        selector: "0x8e81eb83",
-      },
-      {
-        name: "SnapshotIdNull",
-        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
-        selector: "0xf128004d",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
-      {
-        name: "UnexpectedError",
-        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
-        selector: "0xc9622656",
-      },
-      {
-        name: "WrongDates",
-        signature: {
-          full: "error WrongDates(uint256 firstDate, uint256 secondDate)",
-          canonical: "WrongDates(uint256,uint256)",
-        },
-        selector: "0x1c94559c",
-      },
-      {
-        name: "WrongImpactDataValues",
-        signature: {
-          full: "error WrongImpactDataValues((uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData)",
-          canonical: "WrongImpactDataValues((uint256,uint256,uint256,uint8,uint256))",
-        },
-        selector: "0xa60b6cba",
-      },
-      {
-        name: "WrongIndexForAction",
-        signature: {
-          full: "error WrongIndexForAction(uint256 index, bytes32 actionType)",
-          canonical: "WrongIndexForAction(uint256,bytes32)",
-        },
-        selector: "0xd3924f4e",
-      },
-      {
-        name: "WrongInterestRateValues",
-        signature: {
-          full: "error WrongInterestRateValues((uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate)",
-          canonical: "WrongInterestRateValues((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8))",
-        },
-        selector: "0x570cf0d3",
-      },
-    ],
-    factory: (signer) => new CouponFixedRateFacet__factory(getLibLinks("clearingReadOps") as any, signer),
-  },
-
-  CouponKpiLinkedRateFacet: {
-    name: "CouponKpiLinkedRateFacet",
-    description:
-      "Diamond facet variant of the coupon writer for KPI-linked-rate bonds. The rate is left pending at scheduling time and resolved dynamically at execution against the KPI data of the bond. Registered under `_COUPON_KPI_LINKED_RATE_RESOLVER_KEY`.",
-    resolverKey: {
-      name: "_COUPON_KPI_LINKED_RATE_RESOLVER_KEY",
-      value: "0x45f4a1774eac5a47f3cbc755bf5332ca30d8a6bb0330d479c77590dd0d5aab18",
-    },
-    inheritance: ["CouponFacetBase"],
-    methods: [
-      {
-        name: "cancelCoupon",
-        signature: {
-          full: "function cancelCoupon(uint256 _couponID) returns (bool success_)",
-          canonical: "cancelCoupon(uint256)",
-        },
-        selector: "0x0459fafb",
-      },
-      {
-        name: "getCoupon",
-        signature: {
-          full: "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_, bool isDisabled_)",
-          canonical: "getCoupon(uint256)",
-        },
-        selector: "0x936e3169",
-      },
-      {
-        name: "getCouponAmountFor",
-        signature: {
-          full: "function getCouponAmountFor(uint256 _couponID, address _account) view returns ((uint256 numerator, uint256 denominator, bool recordDateReached) couponAmountFor_)",
-          canonical: "getCouponAmountFor(uint256,address)",
-        },
-        selector: "0x439efc2e",
-      },
-      {
-        name: "getCouponCount",
-        signature: {
-          full: "function getCouponCount() view returns (uint256 couponCount_)",
-          canonical: "getCouponCount()",
-        },
-        selector: "0x468bb240",
-      },
-      {
-        name: "getCouponFor",
-        signature: {
-          full: "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint256 nominalValue, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, (uint256 numerator, uint256 denominator, bool recordDateReached) couponAmount, bool isDisabled) couponFor_)",
-          canonical: "getCouponFor(uint256,address)",
-        },
-        selector: "0xbba7b56d",
-      },
-      {
-        name: "setCoupon",
-        signature: {
-          full: "function setCoupon((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
-          canonical: "setCoupon((uint256,uint256,uint256,uint256,uint256,uint256,uint8,uint8))",
-        },
-        selector: "0xb16fd0cc",
-      },
-    ],
-    events: [
-      {
-        name: "CouponCancelled",
-        signature: {
-          full: "event CouponCancelled(uint256 indexed couponId, address indexed operator)",
-          canonical: "CouponCancelled(uint256,address)",
-        },
-        topic0: "0xf3f7ee3ec63ca38fe59a56a06f6d730ef89a41b7819ca5c04dda2205c4f2a712",
-      },
-      {
-        name: "CouponSet",
-        signature: {
-          full: "event CouponSet(bytes32 indexed corporateActionId, uint256 indexed couponId, address indexed operator, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon)",
-          canonical: "CouponSet(bytes32,uint256,address,(uint256,uint256,uint256,uint256,uint256,uint256,uint8,uint8))",
-        },
-        topic0: "0xbeb7fdc8c5c160b79de3e9c869bf2f6b287cbe29eb05d7623537a427231942ee",
-      },
-    ],
-    errors: [
-      {
-        name: "AccessControlRequired",
-        signature: {
-          full: "error AccessControlRequired(bytes32 role, address sender)",
-          canonical: "AccessControlRequired(bytes32,address)",
-        },
-        selector: "0x10210dec",
-      },
-      {
-        name: "AccountHasNoRole",
-        signature: {
-          full: "error AccountHasNoRole(address account, bytes32 role)",
-          canonical: "AccountHasNoRole(address,bytes32)",
-        },
-        selector: "0xa1180aad",
-      },
-      {
-        name: "CouponAlreadyExecuted",
-        signature: {
-          full: "error CouponAlreadyExecuted(bytes32 corporateActionId, uint256 couponId)",
-          canonical: "CouponAlreadyExecuted(bytes32,uint256)",
-        },
-        selector: "0xae5a5af7",
-      },
-      {
-        name: "CouponCreationFailed",
-        signature: { full: "error CouponCreationFailed()", canonical: "CouponCreationFailed()" },
-        selector: "0x3a11c78b",
-      },
-      {
-        name: "CouponNotFound",
-        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
-        selector: "0x69a80e75",
-      },
-      {
-        name: "InterestRateIsKpiLinked",
-        signature: { full: "error InterestRateIsKpiLinked()", canonical: "InterestRateIsKpiLinked()" },
-        selector: "0x68eba14f",
+        selector: "0x4f56f79f",
       },
       {
         name: "InvalidTimestamp",
@@ -4990,7 +4633,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x570cf0d3",
       },
     ],
-    factory: (signer) => new CouponKpiLinkedRateFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    factory: (signer) => new CouponFacet__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   CouponListingFacet: {
@@ -5140,196 +4783,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     factory: (signer) => new CouponSecurityHoldersFacet__factory(getLibLinks("clearingReadOps") as any, signer),
-  },
-
-  CouponSustainabilityPerformanceTargetRateFacet: {
-    name: "CouponSustainabilityPerformanceTargetRateFacet",
-    description:
-      "Diamond facet variant of the coupon writer for Sustainability-Performance-Target (SPT) bonds. The rate is left pending at scheduling time and resolved dynamically at execution against the SPT achievement state of the bond. Registered under `_COUPON_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY`.",
-    resolverKey: {
-      name: "_COUPON_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
-      value: "0x435034f1d262736f434867e5f70c71157492ebd5a90e9e4455b2868f5bda6b6e",
-    },
-    inheritance: ["CouponFacetBase"],
-    methods: [
-      {
-        name: "cancelCoupon",
-        signature: {
-          full: "function cancelCoupon(uint256 _couponID) returns (bool success_)",
-          canonical: "cancelCoupon(uint256)",
-        },
-        selector: "0x0459fafb",
-      },
-      {
-        name: "getCoupon",
-        signature: {
-          full: "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_, bool isDisabled_)",
-          canonical: "getCoupon(uint256)",
-        },
-        selector: "0x936e3169",
-      },
-      {
-        name: "getCouponAmountFor",
-        signature: {
-          full: "function getCouponAmountFor(uint256 _couponID, address _account) view returns ((uint256 numerator, uint256 denominator, bool recordDateReached) couponAmountFor_)",
-          canonical: "getCouponAmountFor(uint256,address)",
-        },
-        selector: "0x439efc2e",
-      },
-      {
-        name: "getCouponCount",
-        signature: {
-          full: "function getCouponCount() view returns (uint256 couponCount_)",
-          canonical: "getCouponCount()",
-        },
-        selector: "0x468bb240",
-      },
-      {
-        name: "getCouponFor",
-        signature: {
-          full: "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint256 nominalValue, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, (uint256 numerator, uint256 denominator, bool recordDateReached) couponAmount, bool isDisabled) couponFor_)",
-          canonical: "getCouponFor(uint256,address)",
-        },
-        selector: "0xbba7b56d",
-      },
-      {
-        name: "setCoupon",
-        signature: {
-          full: "function setCoupon((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
-          canonical: "setCoupon((uint256,uint256,uint256,uint256,uint256,uint256,uint8,uint8))",
-        },
-        selector: "0xb16fd0cc",
-      },
-    ],
-    events: [
-      {
-        name: "CouponCancelled",
-        signature: {
-          full: "event CouponCancelled(uint256 indexed couponId, address indexed operator)",
-          canonical: "CouponCancelled(uint256,address)",
-        },
-        topic0: "0xf3f7ee3ec63ca38fe59a56a06f6d730ef89a41b7819ca5c04dda2205c4f2a712",
-      },
-      {
-        name: "CouponSet",
-        signature: {
-          full: "event CouponSet(bytes32 indexed corporateActionId, uint256 indexed couponId, address indexed operator, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon)",
-          canonical: "CouponSet(bytes32,uint256,address,(uint256,uint256,uint256,uint256,uint256,uint256,uint8,uint8))",
-        },
-        topic0: "0xbeb7fdc8c5c160b79de3e9c869bf2f6b287cbe29eb05d7623537a427231942ee",
-      },
-    ],
-    errors: [
-      {
-        name: "AccessControlRequired",
-        signature: {
-          full: "error AccessControlRequired(bytes32 role, address sender)",
-          canonical: "AccessControlRequired(bytes32,address)",
-        },
-        selector: "0x10210dec",
-      },
-      {
-        name: "AccountHasNoRole",
-        signature: {
-          full: "error AccountHasNoRole(address account, bytes32 role)",
-          canonical: "AccountHasNoRole(address,bytes32)",
-        },
-        selector: "0xa1180aad",
-      },
-      {
-        name: "CouponAlreadyExecuted",
-        signature: {
-          full: "error CouponAlreadyExecuted(bytes32 corporateActionId, uint256 couponId)",
-          canonical: "CouponAlreadyExecuted(bytes32,uint256)",
-        },
-        selector: "0xae5a5af7",
-      },
-      {
-        name: "CouponCreationFailed",
-        signature: { full: "error CouponCreationFailed()", canonical: "CouponCreationFailed()" },
-        selector: "0x3a11c78b",
-      },
-      {
-        name: "CouponNotFound",
-        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
-        selector: "0x69a80e75",
-      },
-      {
-        name: "InterestRateIsKpiLinked",
-        signature: { full: "error InterestRateIsKpiLinked()", canonical: "InterestRateIsKpiLinked()" },
-        selector: "0x68eba14f",
-      },
-      {
-        name: "InterestRateIsSustainabilityPerformanceTargetRate",
-        signature: {
-          full: "error InterestRateIsSustainabilityPerformanceTargetRate()",
-          canonical: "InterestRateIsSustainabilityPerformanceTargetRate()",
-        },
-        selector: "0x4f56f79f",
-      },
-      {
-        name: "InvalidTimestamp",
-        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
-        selector: "0xb7d09497",
-      },
-      {
-        name: "SnapshotIdDoesNotExists",
-        signature: {
-          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
-          canonical: "SnapshotIdDoesNotExists(uint256)",
-        },
-        selector: "0x8e81eb83",
-      },
-      {
-        name: "SnapshotIdNull",
-        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
-        selector: "0xf128004d",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
-      {
-        name: "UnexpectedError",
-        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
-        selector: "0xc9622656",
-      },
-      {
-        name: "WrongDates",
-        signature: {
-          full: "error WrongDates(uint256 firstDate, uint256 secondDate)",
-          canonical: "WrongDates(uint256,uint256)",
-        },
-        selector: "0x1c94559c",
-      },
-      {
-        name: "WrongImpactDataValues",
-        signature: {
-          full: "error WrongImpactDataValues((uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData)",
-          canonical: "WrongImpactDataValues((uint256,uint256,uint256,uint8,uint256))",
-        },
-        selector: "0xa60b6cba",
-      },
-      {
-        name: "WrongIndexForAction",
-        signature: {
-          full: "error WrongIndexForAction(uint256 index, bytes32 actionType)",
-          canonical: "WrongIndexForAction(uint256,bytes32)",
-        },
-        selector: "0xd3924f4e",
-      },
-      {
-        name: "WrongInterestRateValues",
-        signature: {
-          full: "error WrongInterestRateValues((uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate)",
-          canonical: "WrongInterestRateValues((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8))",
-        },
-        selector: "0x570cf0d3",
-      },
-    ],
-    factory: (signer) =>
-      new CouponSustainabilityPerformanceTargetRateFacet__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   DeactivateFacet: {
@@ -14606,7 +14059,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 124 as const;
+export const TOTAL_FACETS = 121 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
