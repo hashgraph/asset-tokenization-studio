@@ -161,14 +161,14 @@ describe("OperatorClearingByPartition Tests", () => {
       });
 
       describe("Paused", () => {
-        it("GIVEN a paused token WHEN operatorClearingTransferByPartition THEN transaction fails with TokenIsPaused", async () => {
+        it("GIVEN a paused token WHEN operatorClearingTransferByPartition THEN transaction fails with IsPaused", async () => {
           await asset.connect(signer_D).pause();
 
           await expect(
             asset
               .connect(signer_A)
               .operatorClearingTransferByPartition(clearingOperationFrom, _AMOUNT, signer_A.address),
-          ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+          ).to.be.revertedWithCustomError(asset, "IsPaused");
         });
       });
 
@@ -237,12 +237,12 @@ describe("OperatorClearingByPartition Tests", () => {
       });
 
       describe("Paused", () => {
-        it("GIVEN a paused token WHEN operatorClearingRedeemByPartition THEN transaction fails with TokenIsPaused", async () => {
+        it("GIVEN a paused token WHEN operatorClearingRedeemByPartition THEN transaction fails with IsPaused", async () => {
           await asset.connect(signer_D).pause();
 
           await expect(
             asset.connect(signer_A).operatorClearingRedeemByPartition(clearingOperationFrom, _AMOUNT),
-          ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+          ).to.be.revertedWithCustomError(asset, "IsPaused");
         });
       });
 

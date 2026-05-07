@@ -50,23 +50,23 @@ describe("SSI Tests", () => {
       await asset.connect(signer_A).pause();
     });
 
-    it("GIVEN a paused Token WHEN setRevocationRegistryAddress THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused Token WHEN setRevocationRegistryAddress THEN transaction fails with IsPaused", async () => {
       await expect(
         asset.connect(signer_C).setRevocationRegistryAddress(revocationList.target),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
-    it("GIVEN a paused Token WHEN addIssuer THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused Token WHEN addIssuer THEN transaction fails with IsPaused", async () => {
       await expect(asset.connect(signer_C).addIssuer(signer_B.address)).to.be.revertedWithCustomError(
         asset,
-        "TokenIsPaused",
+        "IsPaused",
       );
     });
 
-    it("GIVEN a paused Token WHEN removeIssuer THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused Token WHEN removeIssuer THEN transaction fails with IsPaused", async () => {
       await expect(asset.connect(signer_C).removeIssuer(signer_B.address)).to.be.revertedWithCustomError(
         asset,
-        "TokenIsPaused",
+        "IsPaused",
       );
     });
   });

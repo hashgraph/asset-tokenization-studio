@@ -61,24 +61,24 @@ describe("Documentation Tests", () => {
     );
   });
 
-  it("GIVEN a paused Token WHEN setDocument THEN transaction fails with TokenIsPaused", async () => {
+  it("GIVEN a paused Token WHEN setDocument THEN transaction fails with IsPaused", async () => {
     // Granting Role to account C and Pause
     await grantRoleAndPauseToken(asset, ATS_ROLES.DOCUMENTER_ROLE, signer_A, signer_B, signer_C.address);
 
     // add document fails
     await expect(
       asset.connect(signer_C).setDocument(documentName_1, documentURI_1, documentHASH_1),
-    ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+    ).to.be.revertedWithCustomError(asset, "IsPaused");
   });
 
-  it("GIVEN a paused Token WHEN removeDocument THEN transaction fails with TokenIsPaused", async () => {
+  it("GIVEN a paused Token WHEN removeDocument THEN transaction fails with IsPaused", async () => {
     // Granting Role to account C and Pause
     await grantRoleAndPauseToken(asset, ATS_ROLES.DOCUMENTER_ROLE, signer_A, signer_B, signer_C.address);
 
     // remove document
     await expect(asset.connect(signer_C).removeDocument(documentName_1)).to.be.revertedWithCustomError(
       asset,
-      "TokenIsPaused",
+      "IsPaused",
     );
   });
 

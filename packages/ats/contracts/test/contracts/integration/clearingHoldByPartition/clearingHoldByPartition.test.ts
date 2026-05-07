@@ -180,11 +180,11 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
       });
 
       describe("onlyUnpaused modifier", () => {
-        it("GIVEN a paused Token WHEN clearingCreateHoldByPartition THEN transaction fails with TokenIsPaused", async () => {
+        it("GIVEN a paused Token WHEN clearingCreateHoldByPartition THEN transaction fails with IsPaused", async () => {
           await asset.connect(signer_D).pause();
           await expect(
             asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold),
-          ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+          ).to.be.revertedWithCustomError(asset, "IsPaused");
         });
       });
 
@@ -306,11 +306,11 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
       });
 
       describe("onlyUnpaused modifier", () => {
-        it("GIVEN a paused Token WHEN clearingCreateHoldFromByPartition THEN transaction fails with TokenIsPaused", async () => {
+        it("GIVEN a paused Token WHEN clearingCreateHoldFromByPartition THEN transaction fails with IsPaused", async () => {
           await asset.connect(signer_D).pause();
           await expect(
             asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold),
-          ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+          ).to.be.revertedWithCustomError(asset, "IsPaused");
         });
       });
 

@@ -197,13 +197,10 @@ describe("Dividends", () => {
     );
   });
 
-  it("GIVEN a paused Token WHEN setDividend THEN transaction fails with TokenIsPaused", async () => {
+  it("GIVEN a paused Token WHEN setDividend THEN transaction fails with IsPaused", async () => {
     await grantRoleAndPauseToken(asset, ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
 
-    await expect(asset.connect(signer_C).setDividend(dividendData)).to.be.revertedWithCustomError(
-      asset,
-      "TokenIsPaused",
-    );
+    await expect(asset.connect(signer_C).setDividend(dividendData)).to.be.revertedWithCustomError(asset, "IsPaused");
   });
 
   it("GIVEN an account with corporateActions role WHEN setDividend with wrong dates THEN transaction fails", async () => {
@@ -510,12 +507,12 @@ describe("Dividends", () => {
       await expect(asset.connect(signer_C).cancelDividend(1)).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
-    it("GIVEN a paused Token WHEN cancelDividend THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused Token WHEN cancelDividend THEN transaction fails with IsPaused", async () => {
       await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_B.address);
       await asset.connect(signer_B).setDividend(dividendData);
       await asset.connect(signer_B).pause();
 
-      await expect(asset.connect(signer_B).cancelDividend(1)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      await expect(asset.connect(signer_B).cancelDividend(1)).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN a dividend already executed WHEN cancelDividend THEN transaction fails with DividendAlreadyExecuted", async () => {

@@ -137,7 +137,7 @@ describe("BatchBurn Tests", () => {
       );
     });
 
-    it("GIVEN a paused token WHEN batchBurn THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN batchBurn THEN transaction fails with IsPaused", async () => {
       await asset.pause();
 
       const userAddresses = [signer_D.address];
@@ -145,7 +145,7 @@ describe("BatchBurn Tests", () => {
 
       await expect(asset.connect(signer_A).batchBurn(userAddresses, amounts)).to.be.revertedWithCustomError(
         asset,
-        "TokenIsPaused",
+        "IsPaused",
       );
     });
   });

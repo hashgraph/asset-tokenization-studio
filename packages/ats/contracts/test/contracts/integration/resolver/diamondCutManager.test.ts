@@ -85,7 +85,7 @@ describe("DiamondCutManager", () => {
   });
 
   afterEach(async () => {
-    const isPaused = await pause.isPaused();
+    const isPaused = await pause.paused();
     if (isPaused) {
       await pause.connect(signer_B).unpause();
     }
@@ -409,7 +409,7 @@ describe("DiamondCutManager", () => {
     ).to.be.revertedWithCustomError(diamondCutManager, "AccountHasNoRole");
   });
 
-  it("GIVEN a paused resolver WHEN adding a new configuration THEN fails with TokenIsPaused", async () => {
+  it("GIVEN a paused resolver WHEN adding a new configuration THEN fails with IsPaused", async () => {
     await pause.connect(signer_B).pause();
 
     const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [];
@@ -422,7 +422,7 @@ describe("DiamondCutManager", () => {
 
     await expect(
       diamondCutManager.connect(signer_A).createConfiguration(TEST_CONFIG_IDS.PAUSE_TEST, facetConfigurations),
-    ).to.be.revertedWithCustomError(diamondCutManager, "TokenIsPaused");
+    ).to.be.revertedWithCustomError(diamondCutManager, "IsPaused");
 
     await pause.connect(signer_B).unpause();
   });
@@ -532,7 +532,7 @@ describe("DiamondCutManager", () => {
     ).to.be.revertedWithCustomError(diamondCutManager, "AccountHasNoRole");
   });
 
-  it("GIVEN a paused resolver WHEN adding a new configuration with createBatchConfiguration THEN fails with TokenIsPaused", async () => {
+  it("GIVEN a paused resolver WHEN adding a new configuration with createBatchConfiguration THEN fails with IsPaused", async () => {
     await pause.connect(signer_B).pause();
 
     const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [];
@@ -547,7 +547,7 @@ describe("DiamondCutManager", () => {
       diamondCutManager
         .connect(signer_A)
         .createBatchConfiguration(TEST_CONFIG_IDS.PAUSE_BATCH_TEST, facetConfigurations, false),
-    ).to.be.revertedWithCustomError(diamondCutManager, "TokenIsPaused");
+    ).to.be.revertedWithCustomError(diamondCutManager, "IsPaused");
 
     await pause.connect(signer_B).unpause();
   });
@@ -651,7 +651,7 @@ describe("DiamondCutManager", () => {
     ).to.be.revertedWithCustomError(diamondCutManager, "AccountHasNoRole");
   });
 
-  it("GIVEN a paused resolver WHEN canceling a batch configuration THEN fails with TokenIsPaused", async () => {
+  it("GIVEN a paused resolver WHEN canceling a batch configuration THEN fails with IsPaused", async () => {
     const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000012";
 
     const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [
@@ -667,7 +667,7 @@ describe("DiamondCutManager", () => {
 
     await expect(
       diamondCutManager.connect(signer_A).cancelBatchConfiguration(testConfigId),
-    ).to.be.revertedWithCustomError(diamondCutManager, "TokenIsPaused");
+    ).to.be.revertedWithCustomError(diamondCutManager, "IsPaused");
   });
 
   it("GIVEN a resolver WHEN canceling a batch configuration with configId at 0 THEN fails with DefaultValueForConfigurationIdNotPermitted", async () => {

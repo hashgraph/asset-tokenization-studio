@@ -92,11 +92,11 @@ describe("BusinessLogicResolver", () => {
       await pause.connect(signer_B).pause();
     });
 
-    it("GIVEN a paused Token WHEN registrying logics THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused Token WHEN registrying logics THEN transaction fails with IsPaused", async () => {
       // transfer with data fails
       await expect(
         businessLogicResolver.registerBusinessLogics(BUSINESS_LOGIC_KEYS.slice(0, 2)),
-      ).to.be.revertedWithCustomError(businessLogicResolver, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(businessLogicResolver, "IsPaused");
     });
   });
 

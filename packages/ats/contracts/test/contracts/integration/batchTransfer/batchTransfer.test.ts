@@ -158,7 +158,7 @@ describe("BatchTransfer Tests", () => {
         );
       });
 
-      it("GIVEN a paused token WHEN batchTransfer THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused token WHEN batchTransfer THEN transaction fails with IsPaused", async () => {
         await asset.pause();
 
         const toList = [signer_F.address];
@@ -166,7 +166,7 @@ describe("BatchTransfer Tests", () => {
 
         await expect(asset.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
           asset,
-          "TokenIsPaused",
+          "IsPaused",
         );
       });
 

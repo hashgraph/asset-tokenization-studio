@@ -106,11 +106,11 @@ describe("Transfer and lock Tests", () => {
         await asset.connect(signer_D).pause();
       });
 
-      it("GIVEN a paused Token WHEN transferAndLock THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN transferAndLock THEN transaction fails with IsPaused", async () => {
         // transfer from with data fails
         await expect(
           asset.connect(signer_C).transferAndLock(signer_B.address, _AMOUNT, "0x", currentTimestamp),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
     });
 

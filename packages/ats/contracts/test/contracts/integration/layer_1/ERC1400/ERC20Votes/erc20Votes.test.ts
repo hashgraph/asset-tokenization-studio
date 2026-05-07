@@ -136,12 +136,12 @@ describe("ERC20Votes Tests", () => {
       });
     });
 
-    it("GIVEN a paused token WHEN delegate THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN delegate THEN transaction fails with IsPaused", async () => {
       // Pause the token
       await asset.pause();
 
       // Try to delegate while paused
-      await expect(asset.delegate(signer_B.address)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      await expect(asset.delegate(signer_B.address)).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN tokens issued WHEN delegate THEN delegate is set correctly", async () => {

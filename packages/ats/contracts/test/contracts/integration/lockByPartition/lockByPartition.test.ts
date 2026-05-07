@@ -127,16 +127,16 @@ describe("LockByPartition Tests", () => {
         await asset.connect(signer_D).pause();
       });
 
-      it("GIVEN a paused Token WHEN lockByPartition THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN lockByPartition THEN transaction fails with IsPaused", async () => {
         await expect(
           asset.connect(signer_C).lockByPartition(_NON_DEFAULT_PARTITION, _AMOUNT, signer_A.address, currentTimestamp),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
-      it("GIVEN a paused Token WHEN releaseByPartition THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN releaseByPartition THEN transaction fails with IsPaused", async () => {
         await expect(
           asset.connect(signer_C).releaseByPartition(_NON_DEFAULT_PARTITION, 1, signer_A.address),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
     });
 

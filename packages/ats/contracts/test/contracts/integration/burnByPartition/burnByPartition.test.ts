@@ -91,12 +91,12 @@ describe("BurnByPartitionFacet Tests", () => {
         .withArgs(WRONG_PARTITION);
     });
 
-    it("GIVEN a paused token WHEN redeemByPartition THEN reverts with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN redeemByPartition THEN reverts with IsPaused", async () => {
       await asset.connect(signer_C).pause();
 
       await expect(
         asset.connect(signer_E).redeemByPartition(DEFAULT_PARTITION, AMOUNT, EMPTY_HEX_BYTES),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN insufficient balance WHEN redeemByPartition THEN reverts", async () => {

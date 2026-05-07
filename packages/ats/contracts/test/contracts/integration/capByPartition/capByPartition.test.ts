@@ -71,11 +71,11 @@ describe("CapByPartition Tests", () => {
       await asset.connect(signer_B).pause();
     });
 
-    it("GIVEN a paused Token WHEN setMaxSupplyByPartition THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused Token WHEN setMaxSupplyByPartition THEN transaction fails with IsPaused", async () => {
       // transfer from with data fails
       await expect(
         asset.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupplyByPartition),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
   });
 

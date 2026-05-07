@@ -131,11 +131,11 @@ describe("ERC3643 Tests", () => {
       await loadFixture(deploySecurityFixtureSinglePartition);
     });
 
-    it("GIVEN a paused token WHEN attempting to update name or symbol THEN transactions revert with TokenIsPaused error", async () => {
+    it("GIVEN a paused token WHEN attempting to update name or symbol THEN transactions revert with IsPaused error", async () => {
       await asset.connect(signer_B).pause();
 
-      await expect(asset.setName(newName)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
-      await expect(asset.setName(newSymbol)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      await expect(asset.setName(newName)).to.be.revertedWithCustomError(asset, "IsPaused");
+      await expect(asset.setName(newSymbol)).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN an initialized token WHEN retrieving the version THEN returns the right version", async () => {
@@ -1028,7 +1028,7 @@ describe("ERC3643 Tests", () => {
           );
         });
 
-        it("GIVEN a paused token WHEN batchForcedTransfer THEN transaction fails with TokenIsPaused", async () => {
+        it("GIVEN a paused token WHEN batchForcedTransfer THEN transaction fails with IsPaused", async () => {
           await asset.pause();
 
           const fromList = [signer_F.address];
@@ -1037,7 +1037,7 @@ describe("ERC3643 Tests", () => {
 
           await expect(
             asset.connect(signer_A).batchForcedTransfer(fromList, toList, amounts),
-          ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+          ).to.be.revertedWithCustomError(asset, "IsPaused");
         });
       });
     });
@@ -1080,30 +1080,24 @@ describe("ERC3643 Tests", () => {
       beforeEach(async () => {
         await asset.pause();
       });
-      it("GIVEN a paused token WHEN freezePartialTokens THEN transactions revert with TokenIsPaused error", async () => {
-        await expect(asset.freezePartialTokens(signer_A.address, 10)).to.be.revertedWithCustomError(
-          asset,
-          "TokenIsPaused",
-        );
+      it("GIVEN a paused token WHEN freezePartialTokens THEN transactions revert with IsPaused error", async () => {
+        await expect(asset.freezePartialTokens(signer_A.address, 10)).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
-      it("GIVEN a paused token WHEN unfreezePartialTokens THEN transactions revert with TokenIsPaused error", async () => {
+      it("GIVEN a paused token WHEN unfreezePartialTokens THEN transactions revert with IsPaused error", async () => {
         await expect(asset.unfreezePartialTokens(signer_A.address, 10)).to.be.revertedWithCustomError(
           asset,
-          "TokenIsPaused",
+          "IsPaused",
         );
       });
 
-      it("GIVEN a paused token WHEN setAddressFrozen THEN transactions revert with TokenIsPaused error", async () => {
-        await expect(asset.setAddressFrozen(signer_A.address, true)).to.be.revertedWithCustomError(
-          asset,
-          "TokenIsPaused",
-        );
+      it("GIVEN a paused token WHEN setAddressFrozen THEN transactions revert with IsPaused error", async () => {
+        await expect(asset.setAddressFrozen(signer_A.address, true)).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
-      it("GIVEN a paused token WHEN attempting to update name or symbol THEN transactions revert with TokenIsPaused error", async () => {
-        await expect(asset.setName(newName)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
-        await expect(asset.setSymbol(newSymbol)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      it("GIVEN a paused token WHEN attempting to update name or symbol THEN transactions revert with IsPaused error", async () => {
+        await expect(asset.setName(newName)).to.be.revertedWithCustomError(asset, "IsPaused");
+        await expect(asset.setSymbol(newSymbol)).to.be.revertedWithCustomError(asset, "IsPaused");
       });
     });
     describe("Adjust balances", () => {

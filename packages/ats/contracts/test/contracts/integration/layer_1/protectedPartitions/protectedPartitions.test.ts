@@ -370,9 +370,9 @@ describe("ProtectedPartitions Tests", () => {
 
       await asset.connect(signer_B).pause();
 
-      await expect(asset.connect(signer_B).protectPartitions()).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      await expect(asset.connect(signer_B).protectPartitions()).to.be.revertedWithCustomError(asset, "IsPaused");
 
-      await expect(asset.connect(signer_B).unprotectPartitions()).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      await expect(asset.connect(signer_B).unprotectPartitions()).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN a account without the protected partition role WHEN protecting or unprotecting partitions THEN transaction fails with AccountHasNoRole", async () => {

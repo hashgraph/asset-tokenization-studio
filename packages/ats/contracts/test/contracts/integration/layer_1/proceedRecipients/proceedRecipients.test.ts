@@ -61,14 +61,14 @@ describe("Proceed Recipients Tests", () => {
       ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
-    it("GIVEN an unlisted proceed recipient WHEN user adds if token is paused THEN it reverts with TokenIsPaused", async () => {
+    it("GIVEN an unlisted proceed recipient WHEN user adds if token is paused THEN it reverts with IsPaused", async () => {
       await asset.pause({ gasLimit: GAS_LIMIT.default });
 
       await expect(
         asset.addProceedRecipient(PROCEED_RECIPIENT_1, PROCEED_RECIPIENT_1_DATA, {
           gasLimit: GAS_LIMIT.default,
         }),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN a listed proceed recipient WHEN adding it again THEN it reverts with ProceedRecipientAlreadyExists", async () => {
@@ -118,13 +118,13 @@ describe("Proceed Recipients Tests", () => {
       ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
-    it("GIVEN an listed proceed recipient WHEN user removes it if token is paused THEN it reverts with TokenIsPaused", async () => {
+    it("GIVEN an listed proceed recipient WHEN user removes it if token is paused THEN it reverts with IsPaused", async () => {
       await asset.pause({ gasLimit: GAS_LIMIT.default });
       await expect(
         asset.removeProceedRecipient(PROCEED_RECIPIENT_2, {
           gasLimit: GAS_LIMIT.default,
         }),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN a unlisted proceed recipient WHEN removing it again THEN it reverts with ProceedRecipientNotFound", async () => {
@@ -169,13 +169,13 @@ describe("Proceed Recipients Tests", () => {
       ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
-    it("GIVEN an listed proceed recipient WHEN user updates its data if token is paused THEN it reverts with TokenIsPaused", async () => {
+    it("GIVEN an listed proceed recipient WHEN user updates its data if token is paused THEN it reverts with IsPaused", async () => {
       await asset.pause({ gasLimit: GAS_LIMIT.default });
       await expect(
         asset.updateProceedRecipientData(PROCEED_RECIPIENT_2, PROCEED_RECIPIENT_1_DATA, {
           gasLimit: GAS_LIMIT.default,
         }),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN a unlisted proceed recipient WHEN updating its data THEN it reverts with ProceedRecipientNotFound", async () => {

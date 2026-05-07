@@ -247,15 +247,12 @@ describe("Equity Tests", () => {
       );
     });
 
-    it("GIVEN a paused Token WHEN setDividend THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused Token WHEN setDividend THEN transaction fails with IsPaused", async () => {
       // Granting Role to account C and Pause
       await grantRoleAndPauseToken(asset, ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
 
       // set dividend fails
-      await expect(asset.connect(signer_C).setDividend(dividendData)).to.be.revertedWithCustomError(
-        asset,
-        "TokenIsPaused",
-      );
+      await expect(asset.connect(signer_C).setDividend(dividendData)).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN an account with corporateActions role WHEN setDividend with wrong dates THEN transaction fails", async () => {
@@ -564,12 +561,12 @@ describe("Equity Tests", () => {
         );
       });
 
-      it("GIVEN a paused Token WHEN cancelDividend THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN cancelDividend THEN transaction fails with IsPaused", async () => {
         await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_B.address);
         await asset.connect(signer_B).setDividend(dividendData);
         await asset.connect(signer_B).pause();
 
-        await expect(asset.connect(signer_B).cancelDividend(1)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        await expect(asset.connect(signer_B).cancelDividend(1)).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
       it("GIVEN a dividend already executed WHEN cancelDividend THEN transaction fails with DividendAlreadyExecuted", async () => {
@@ -680,12 +677,12 @@ describe("Equity Tests", () => {
       );
     });
 
-    it("GIVEN a paused Token WHEN setVoting THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused Token WHEN setVoting THEN transaction fails with IsPaused", async () => {
       // Granting Role to account C and Pause
       await grantRoleAndPauseToken(asset, ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
 
       // set voting fails
-      await expect(asset.connect(signer_C).setVoting(votingData)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      await expect(asset.connect(signer_C).setVoting(votingData)).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN an account with corporateActions role WHEN setVoting with invalid timestamp THEN transaction fails with WrongTimestamp", async () => {
@@ -750,12 +747,12 @@ describe("Equity Tests", () => {
       );
     });
 
-    it("GIVEN a paused Token WHEN setVoting THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused Token WHEN setVoting THEN transaction fails with IsPaused", async () => {
       // Granting Role to account C and Pause
       await grantRoleAndPauseToken(asset, ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
 
       // set dividend fails
-      await expect(asset.connect(signer_C).setVoting(votingData)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      await expect(asset.connect(signer_C).setVoting(votingData)).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN a duplicate voting WHEN setVoting THEN transaction fails with VotingRightsCreationFailed", async () => {
@@ -856,12 +853,12 @@ describe("Equity Tests", () => {
         await expect(asset.connect(signer_C).cancelVoting(1)).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
       });
 
-      it("GIVEN a paused Token WHEN cancelVoting THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN cancelVoting THEN transaction fails with IsPaused", async () => {
         await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_B.address);
         await asset.connect(signer_B).setVoting(votingData);
         await asset.connect(signer_B).pause();
 
-        await expect(asset.connect(signer_B).cancelVoting(1)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        await expect(asset.connect(signer_B).cancelVoting(1)).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
       it("GIVEN a voting already recorded WHEN cancelVoting THEN transaction fails with VotingAlreadyRecorded", async () => {

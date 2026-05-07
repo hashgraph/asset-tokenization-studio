@@ -77,12 +77,12 @@ describe("AdjustBalancesFacet Tests", () => {
       ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
-    it("GIVEN a paused Token WHEN setScheduledBalanceAdjustment THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused Token WHEN setScheduledBalanceAdjustment THEN transaction fails with IsPaused", async () => {
       await grantRoleAndPauseToken(asset, ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
 
       await expect(
         asset.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN an account with corporateActions role WHEN setScheduledBalanceAdjustment with invalid timestamp THEN transaction fails with WrongTimestamp", async () => {
@@ -191,14 +191,14 @@ describe("AdjustBalancesFacet Tests", () => {
         );
       });
 
-      it("GIVEN a paused Token WHEN cancelScheduledBalanceAdjustment THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN cancelScheduledBalanceAdjustment THEN transaction fails with IsPaused", async () => {
         await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_B.address);
         await asset.connect(signer_B).setScheduledBalanceAdjustment(balanceAdjustmentData);
         await asset.connect(signer_B).pause();
 
         await expect(asset.connect(signer_B).cancelScheduledBalanceAdjustment(1)).to.be.revertedWithCustomError(
           asset,
-          "TokenIsPaused",
+          "IsPaused",
         );
       });
 
@@ -393,12 +393,12 @@ describe("AdjustBalancesFacet Tests", () => {
       );
     });
 
-    it("GIVEN a paused Token WHEN adjustBalances THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused Token WHEN adjustBalances THEN transaction fails with IsPaused", async () => {
       await grantRoleAndPauseToken(asset, ATS_ROLES.ADJUSTMENT_BALANCE_ROLE, signer_A, signer_B, signer_C.address);
 
       await expect(asset.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals)).to.be.revertedWithCustomError(
         asset,
-        "TokenIsPaused",
+        "IsPaused",
       );
     });
 
@@ -491,12 +491,12 @@ describe("AdjustBalancesFacet Tests", () => {
   });
 
   describe("triggerAndSyncAll", () => {
-    it("GIVEN a paused token WHEN triggerAndSyncAll THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN triggerAndSyncAll THEN transaction fails with IsPaused", async () => {
       await asset.connect(signer_B).pause();
 
       await expect(
         asset.connect(signer_A).triggerAndSyncAll(DEFAULT_PARTITION, signer_A.address, ethers.ZeroAddress),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN an unpaused token with elapsed pending adjustment WHEN triggerAndSyncAll THEN pending adjustment is applied", async () => {
