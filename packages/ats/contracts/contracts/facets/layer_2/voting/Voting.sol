@@ -81,24 +81,4 @@ abstract contract Voting is IVoting, Modifiers {
     function getVotingCount() external view override returns (uint256 votingCount_) {
         return VotingStorageWrapper.getVotingCount();
     }
-
-    /// @notice Retrieves the list of token holders for a given voting with pagination
-    /// @param _voteID The ID of the voting
-    /// @param _pageIndex The page index for pagination
-    /// @param _pageLength The page length for pagination
-    /// @return holders_ The paginated list of token holder addresses
-    function getVotingHolders(
-        uint256 _voteID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view override returns (address[] memory holders_) {
-        return VotingStorageWrapper.getVotingHolders(_voteID, _pageIndex, _pageLength);
-    }
-
-    /// @notice Retrieves the total number of token holders for a given voting
-    /// @param _voteID The ID of the voting
-    /// @return totalHolders_ The total number of token holders at the voting record date
-    function getTotalVotingHolders(uint256 _voteID) external view override returns (uint256 totalHolders_) {
-        return VotingStorageWrapper.getTotalVotingHolders(_voteID);
-    }
 }

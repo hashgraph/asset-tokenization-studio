@@ -16,15 +16,15 @@ contract VotingFacet is Voting, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        staticFunctionSelectors_ = new bytes4[](7);
-        uint256 selectorIndex;
-        staticFunctionSelectors_[selectorIndex++] = this.setVoting.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.cancelVoting.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getVoting.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getVotingFor.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getVotingCount.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getVotingHolders.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getTotalVotingHolders.selector;
+        uint256 selectorIndex = 5;
+        staticFunctionSelectors_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this.getVotingCount.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getVotingFor.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getVoting.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.cancelVoting.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.setVoting.selector;
+        }
     }
 
     /// @inheritdoc IStaticFunctionSelectors
