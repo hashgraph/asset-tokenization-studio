@@ -302,41 +302,35 @@ describe("HoldByPartition Tests", () => {
       });
 
       // Create
-      it("GIVEN a paused Token WHEN createHoldByPartition THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN createHoldByPartition THEN transaction fails with IsPaused", async () => {
         await expect(asset.createHoldByPartition(_DEFAULT_PARTITION, hold)).to.be.revertedWithCustomError(
           asset,
-          "TokenIsPaused",
+          "IsPaused",
         );
       });
 
-      it("GIVEN a paused Token WHEN createHoldFromByPartition THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN createHoldFromByPartition THEN transaction fails with IsPaused", async () => {
         await expect(
           asset.createHoldFromByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
       // Execute
-      it("GIVEN a paused Token WHEN executeHoldByPartition THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN executeHoldByPartition THEN transaction fails with IsPaused", async () => {
         await expect(asset.executeHoldByPartition(holdIdentifier, signer_C.address, 1)).to.be.revertedWithCustomError(
           asset,
-          "TokenIsPaused",
+          "IsPaused",
         );
       });
 
       // Release
-      it("GIVEN a paused Token WHEN releaseHoldByPartition THEN transaction fails with TokenIsPaused", async () => {
-        await expect(asset.releaseHoldByPartition(holdIdentifier, 1)).to.be.revertedWithCustomError(
-          asset,
-          "TokenIsPaused",
-        );
+      it("GIVEN a paused Token WHEN releaseHoldByPartition THEN transaction fails with IsPaused", async () => {
+        await expect(asset.releaseHoldByPartition(holdIdentifier, 1)).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
       // Reclaim
-      it("GIVEN a paused Token WHEN reclaimHoldByPartition THEN transaction fails with TokenIsPaused", async () => {
-        await expect(asset.reclaimHoldByPartition(holdIdentifier)).to.be.revertedWithCustomError(
-          asset,
-          "TokenIsPaused",
-        );
+      it("GIVEN a paused Token WHEN reclaimHoldByPartition THEN transaction fails with IsPaused", async () => {
+        await expect(asset.reclaimHoldByPartition(holdIdentifier)).to.be.revertedWithCustomError(asset, "IsPaused");
       });
     });
 

@@ -33,7 +33,7 @@ describe("Deactivate Tests", () => {
     await expect(asset.connect(unknownSigner).deactivate()).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
   });
 
-  it("GIVEN a paused Token WHEN deactivate THEN transaction fails with TokenIsPaused", async () => {
+  it("GIVEN a paused Token WHEN deactivate THEN transaction fails with IsPaused", async () => {
     // Grant DEACTIVATE_ROLE to unknownSigner and pause the token using deployer's PAUSER_ROLE
     await asset.connect(deployer).grantRole(ATS_ROLES.PAUSER_ROLE, deployer.address);
     await grantRoleAndPauseToken(
@@ -45,7 +45,7 @@ describe("Deactivate Tests", () => {
     );
 
     // deactivate fails because token is paused
-    await expect(asset.connect(unknownSigner).deactivate()).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+    await expect(asset.connect(unknownSigner).deactivate()).to.be.revertedWithCustomError(asset, "IsPaused");
   });
 
   it("GIVEN an account with deactivate role WHEN deactivate THEN transaction succeeds and isDeactivated returns true", async () => {

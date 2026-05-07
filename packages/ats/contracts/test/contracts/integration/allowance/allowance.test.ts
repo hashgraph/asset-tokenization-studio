@@ -111,12 +111,9 @@ describe("Allowance Facet Tests", () => {
         expect(await asset.allowance(signer_C.address, signer_D.address)).to.equal(amount / 2);
       });
 
-      it("GIVEN a paused token WHEN approve THEN reverts with TokenIsPaused", async () => {
+      it("GIVEN a paused token WHEN approve THEN reverts with IsPaused", async () => {
         await asset.connect(signer_B).pause();
-        await expect(assetSignerC.approve(signer_D.address, amount)).to.be.revertedWithCustomError(
-          asset,
-          "TokenIsPaused",
-        );
+        await expect(assetSignerC.approve(signer_D.address, amount)).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
       it("GIVEN a blacklisted caller WHEN approve THEN reverts with AccountIsBlocked", async () => {
@@ -152,11 +149,11 @@ describe("Allowance Facet Tests", () => {
         expect(await asset.allowance(signer_C.address, signer_D.address)).to.equal(amount / 2);
       });
 
-      it("GIVEN a paused token WHEN increaseAllowance THEN reverts with TokenIsPaused", async () => {
+      it("GIVEN a paused token WHEN increaseAllowance THEN reverts with IsPaused", async () => {
         await asset.connect(signer_B).pause();
         await expect(assetSignerC.increaseAllowance(signer_D.address, amount)).to.be.revertedWithCustomError(
           asset,
-          "TokenIsPaused",
+          "IsPaused",
         );
       });
 
@@ -219,11 +216,11 @@ describe("Allowance Facet Tests", () => {
         expect(await asset.allowance(signer_C.address, signer_D.address)).to.equal(amount / 2);
       });
 
-      it("GIVEN a paused token WHEN decreaseAllowance THEN reverts with TokenIsPaused", async () => {
+      it("GIVEN a paused token WHEN decreaseAllowance THEN reverts with IsPaused", async () => {
         await asset.connect(signer_B).pause();
         await expect(assetSignerC.decreaseAllowance(signer_D.address, amount)).to.be.revertedWithCustomError(
           asset,
-          "TokenIsPaused",
+          "IsPaused",
         );
       });
 

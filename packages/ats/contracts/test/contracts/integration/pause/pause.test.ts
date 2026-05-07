@@ -53,7 +53,7 @@ describe("Pause Tests", () => {
     await expect(asset.connect(unknownSigner).unpause()).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
   });
 
-  it("GIVEN a paused Token WHEN pause THEN transaction fails with TokenIsPaused", async () => {
+  it("GIVEN a paused Token WHEN pause THEN transaction fails with IsPaused", async () => {
     // Granting Role and Pause
     await grantRoleAndPauseToken(
       asset,
@@ -64,14 +64,14 @@ describe("Pause Tests", () => {
     );
 
     // pause fails
-    await expect(asset.connect(unknownSigner).pause()).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+    await expect(asset.connect(unknownSigner).pause()).to.be.revertedWithCustomError(asset, "IsPaused");
   });
 
-  it("GIVEN an unpause Token WHEN unpause THEN transaction fails with TokenIsUnpaused", async () => {
+  it("GIVEN an unpause Token WHEN unpause THEN transaction fails with IsUnpaused", async () => {
     await asset.connect(deployer).grantRole(ATS_ROLES.PAUSER_ROLE, await unknownSigner.getAddress());
 
     // unpause fails
-    await expect(asset.connect(unknownSigner).unpause()).to.be.revertedWithCustomError(asset, "TokenIsUnpaused");
+    await expect(asset.connect(unknownSigner).unpause()).to.be.revertedWithCustomError(asset, "IsUnpaused");
   });
 
   it("GIVEN an account with pause role WHEN pause and unpause THEN transaction succeeds", async () => {
@@ -80,18 +80,24 @@ describe("Pause Tests", () => {
 
     // PAUSE
     await expect(asset.connect(unknownSigner).pause())
-      .to.emit(asset, "TokenPaused")
+      .to.emit(asset, "Paused")
       .withArgs(await unknownSigner.getAddress());
 
     let paused = await asset.isPaused();
     expect(paused).to.be.equal(true);
 
+    paused = await asset.paused();
+    expect(paused).to.be.equal(true);
+
     // UNPAUSE
     await expect(asset.connect(unknownSigner).unpause())
-      .to.emit(asset, "TokenUnpaused")
+      .to.emit(asset, "Unpaused")
       .withArgs(await unknownSigner.getAddress());
 
     paused = await asset.isPaused();
+    expect(paused).to.be.equal(false);
+
+    paused = await asset.paused();
     expect(paused).to.be.equal(false);
   });
 

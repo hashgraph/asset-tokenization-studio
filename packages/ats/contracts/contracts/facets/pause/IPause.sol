@@ -19,30 +19,30 @@ interface IPause {
      * @notice Emitted when the token's internal pause flag is set to `true`.
      * @param operator Address of the caller who triggered the pause.
      */
-    event TokenPaused(address indexed operator);
+    event Paused(address indexed operator);
 
     /**
      * @notice Emitted when the token's internal pause flag is cleared to `false`.
      * @param operator Address of the caller who triggered the unpause.
      */
-    event TokenUnpaused(address indexed operator);
+    event Unpaused(address indexed operator);
 
     /**
      * @notice Thrown when an operation that requires the token to be unpaused is attempted while
      *         the token is paused (own flag or any external pause contract).
      */
-    error TokenIsPaused();
+    error IsPaused();
 
     /**
      * @notice Thrown when `unpause` is called while the token's internal pause flag is already
      *         cleared.
      */
-    error TokenIsUnpaused();
+    error IsUnpaused();
 
     /**
      * @notice Sets the token's internal pause flag, blocking all guarded operations.
      * @dev Requires `PAUSER_ROLE` and the token to be currently unpaused. Reverts with
-     *      `TokenIsPaused` if the token is already paused. Emits `TokenPaused`.
+     *      `IsPaused` if the token is already paused. Emits `Paused`.
      * @return success_ True if the token was successfully paused.
      */
     function pause() external returns (bool success_);
@@ -50,7 +50,7 @@ interface IPause {
     /**
      * @notice Clears the token's internal pause flag, restoring guarded operations.
      * @dev Requires `PAUSER_ROLE` and the token's internal flag to be set. Reverts with
-     *      `TokenIsUnpaused` if the internal flag is already cleared. Emits `TokenUnpaused`.
+     *      `IsUnpaused` if the internal flag is already cleared. Emits `Unpaused`.
      *      Note: if any external pause contract remains paused, `isPaused` will still return
      *      `true` after this call.
      * @return success_ True if the internal pause flag was successfully cleared.
@@ -64,4 +64,13 @@ interface IPause {
      * @return True if the token is paused by any source, false otherwise.
      */
     function isPaused() external view returns (bool);
+
+    /**
+     * @notice Checks whether the token is currently paused.
+     * @dev Returns `true` if the token's own pause flag is set, or if any registered external
+     *      pause contract returns `true` from its `isPaused()` call (OR semantics).
+     *      created to be compatible with ERC3643
+     * @return True if the token is paused by any source, false otherwise.
+     */
+    function paused() external view returns (bool);
 }

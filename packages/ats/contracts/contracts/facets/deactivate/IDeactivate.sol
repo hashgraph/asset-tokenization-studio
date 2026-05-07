@@ -24,7 +24,7 @@ interface IDeactivate {
     /**
      * @notice Sets the token's deactivation flag, retiring the token irreversibly.
      * @dev Requires `DEACTIVATE_ROLE`, the token to be currently unpaused, and the token to be
-     *      currently activated. Reverts with `AccountHasNoRole`, `TokenIsPaused`, or
+     *      currently activated. Reverts with `AccountHasNoRole`, `IsPaused`, or
      *      `Deactivated` respectively when those preconditions fail. The state change is
      *      one-way and cannot be undone.
      */

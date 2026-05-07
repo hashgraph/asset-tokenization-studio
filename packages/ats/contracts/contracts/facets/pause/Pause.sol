@@ -20,19 +20,24 @@ abstract contract Pause is IPause, Modifiers {
     /// @inheritdoc IPause
     function pause() external override onlyUnpaused onlyRole(PAUSER_ROLE) returns (bool success_) {
         PauseStorageWrapper.setPause(true);
-        emit IPause.TokenPaused(EvmAccessors.getMsgSender());
+        emit IPause.Paused(EvmAccessors.getMsgSender());
         success_ = true;
     }
 
     /// @inheritdoc IPause
     function unpause() external override onlyRole(PAUSER_ROLE) onlyPaused returns (bool success_) {
         PauseStorageWrapper.setPause(false);
-        emit IPause.TokenUnpaused(EvmAccessors.getMsgSender());
+        emit IPause.Unpaused(EvmAccessors.getMsgSender());
         success_ = true;
     }
 
     /// @inheritdoc IPause
     function isPaused() external view override returns (bool) {
+        return PauseStorageWrapper.isPaused();
+    }
+
+    /// @inheritdoc IPause
+    function paused() external view override returns (bool) {
         return PauseStorageWrapper.isPaused();
     }
 }

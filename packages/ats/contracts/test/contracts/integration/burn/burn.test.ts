@@ -159,9 +159,9 @@ describe("Burn Tests", () => {
         expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.be.equal(AMOUNT / 2);
       });
 
-      it("GIVEN a paused token WHEN attempting to burn TokenIsPaused error", async () => {
+      it("GIVEN a paused token WHEN attempting to burn IsPaused error", async () => {
         await asset.connect(signer_B).pause();
-        await expect(asset.burn(signer_A.address, AMOUNT)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        await expect(asset.burn(signer_A.address, AMOUNT)).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
       it("GIVEN an account without CONTROLLER_ROLE or AGENT_ROLE WHEN burn THEN transaction fails with AccountHasNoRole", async () => {
@@ -196,13 +196,10 @@ describe("Burn Tests", () => {
         expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.be.equal(AMOUNT / 2);
       });
 
-      it("GIVEN a paused Token WHEN redeem THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN redeem THEN transaction fails with IsPaused", async () => {
         await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
         await asset.connect(signer_B).pause();
-        await expect(asset.connect(signer_E).redeem(AMOUNT, DATA)).to.be.revertedWithCustomError(
-          asset,
-          "TokenIsPaused",
-        );
+        await expect(asset.connect(signer_E).redeem(AMOUNT, DATA)).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
       it("GIVEN blocked account WHEN redeem THEN transaction fails with AccountIsBlocked", async () => {
@@ -257,12 +254,12 @@ describe("Burn Tests", () => {
         expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.be.equal(AMOUNT / 2);
       });
 
-      it("GIVEN a paused Token WHEN redeemFrom THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN redeemFrom THEN transaction fails with IsPaused", async () => {
         await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
         await asset.connect(signer_B).pause();
         await expect(
           asset.connect(signer_D).redeemFrom(signer_E.address, AMOUNT / 2, DATA),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
       it("GIVEN blocked accounts WHEN redeemFrom THEN transaction fails with AccountIsBlocked", async () => {

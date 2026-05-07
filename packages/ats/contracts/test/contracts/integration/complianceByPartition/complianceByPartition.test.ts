@@ -77,14 +77,14 @@ describe("ComplianceByPartition Tests", () => {
   });
 
   describe("canTransferByPartition", () => {
-    it("GIVEN a paused token WHEN canTransferByPartition THEN returns PAUSED with TokenIsPaused selector", async () => {
+    it("GIVEN a paused token WHEN canTransferByPartition THEN returns PAUSED with IsPaused selector", async () => {
       await asset.connect(signer_B).pause();
 
       expect(
         await asset
           .connect(signer_C)
           .canTransferByPartition(signer_C.address, signer_D.address, _PARTITION_ID_1, AMOUNT, DATA, OPERATOR_DATA),
-      ).to.be.deep.equal([false, EIP1066_CODES.PAUSED, getSelector(asset, "TokenIsPaused")]);
+      ).to.be.deep.equal([false, EIP1066_CODES.PAUSED, getSelector(asset, "IsPaused")]);
     });
 
     it("GIVEN clearing is active WHEN canTransferByPartition THEN returns UNAVAILABLE with ClearingIsActivated selector", async () => {
@@ -222,14 +222,14 @@ describe("ComplianceByPartition Tests", () => {
   });
 
   describe("canRedeemByPartition", () => {
-    it("GIVEN a paused token WHEN canRedeemByPartition THEN returns PAUSED with TokenIsPaused selector", async () => {
+    it("GIVEN a paused token WHEN canRedeemByPartition THEN returns PAUSED with IsPaused selector", async () => {
       await asset.connect(signer_B).pause();
 
       expect(
         await asset
           .connect(signer_C)
           .canRedeemByPartition(signer_C.address, _PARTITION_ID_1, AMOUNT, DATA, OPERATOR_DATA),
-      ).to.be.deep.equal([false, EIP1066_CODES.PAUSED, getSelector(asset, "TokenIsPaused")]);
+      ).to.be.deep.equal([false, EIP1066_CODES.PAUSED, getSelector(asset, "IsPaused")]);
     });
 
     it("GIVEN clearing is active WHEN canRedeemByPartition THEN returns UNAVAILABLE with ClearingIsActivated selector", async () => {

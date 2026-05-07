@@ -287,26 +287,26 @@ describe("ExternalControlList Management Tests", () => {
   });
 
   describe("Pause Tests", () => {
-    it("GIVEN a paused token WHEN addExternalControlList THEN it reverts with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN addExternalControlList THEN it reverts with IsPaused", async () => {
       await asset.connect(signer_A).pause();
       const newControlList = externalWhitelistMock2.target as string;
       await expect(
         asset.connect(signer_A).addExternalControlList(newControlList, {
           gasLimit: GAS_LIMIT.default,
         }),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
-    it("GIVEN a paused token WHEN removeExternalControlList THEN it reverts with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN removeExternalControlList THEN it reverts with IsPaused", async () => {
       await asset.connect(signer_A).pause();
       await expect(
         asset.connect(signer_A).removeExternalControlList(externalWhitelistMock1.target as string, {
           gasLimit: GAS_LIMIT.default,
         }),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
-    it("GIVEN a paused token WHEN updateExternalControlLists THEN it reverts with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN updateExternalControlLists THEN it reverts with IsPaused", async () => {
       await asset.connect(signer_A).pause();
       const controlLists = [externalWhitelistMock1.target as string];
       const actives = [false];
@@ -314,7 +314,7 @@ describe("ExternalControlList Management Tests", () => {
         asset.connect(signer_A).updateExternalControlLists(controlLists, actives, {
           gasLimit: GAS_LIMIT.high,
         }),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
   });
 

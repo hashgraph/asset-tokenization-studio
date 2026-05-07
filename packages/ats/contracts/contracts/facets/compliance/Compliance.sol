@@ -45,7 +45,7 @@ abstract contract Compliance is IComplianceFacet, Modifiers {
         bytes memory _data
     ) external view override onlyWithoutMultiPartition returns (bool, bytes1, bytes32) {
         if (PauseStorageWrapper.isPaused()) {
-            return (false, Eip1066.PAUSED, IPause.TokenIsPaused.selector);
+            return (false, Eip1066.PAUSED, IPause.IsPaused.selector);
         }
         (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToTransferFromByPartition(
             EvmAccessors.getMsgSender(),
@@ -75,7 +75,7 @@ abstract contract Compliance is IComplianceFacet, Modifiers {
         bytes memory _data
     ) external view override onlyWithoutMultiPartition returns (bool, bytes1, bytes32) {
         if (PauseStorageWrapper.isPaused()) {
-            return (false, Eip1066.PAUSED, IPause.TokenIsPaused.selector);
+            return (false, Eip1066.PAUSED, IPause.IsPaused.selector);
         }
         (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToTransferFromByPartition(
             _from,

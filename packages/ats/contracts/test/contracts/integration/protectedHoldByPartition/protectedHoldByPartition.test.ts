@@ -516,7 +516,7 @@ describe("ProtectedHoldByPartition Tests", () => {
   });
 
   describe("Token State Checks", () => {
-    it("GIVEN a paused token WHEN protectedCreateHoldByPartition THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN protectedCreateHoldByPartition THEN transaction fails with IsPaused", async () => {
       const expirationTimestamp = MAX_UINT256;
       const hold: HoldData = {
         amount: 1,
@@ -536,7 +536,7 @@ describe("ProtectedHoldByPartition Tests", () => {
 
       await expect(
         asset.protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN a token in clearing mode WHEN protectedCreateHoldByPartition THEN transaction fails with ClearingIsActivated", async () => {

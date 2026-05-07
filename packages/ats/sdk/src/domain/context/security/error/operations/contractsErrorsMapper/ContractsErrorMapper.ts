@@ -36,7 +36,7 @@ export class ContractsErrorMapper {
   private static readonly SELECTORS = {
     zeroAddressNotAllowed: this.createSelector("ZeroAddressNotAllowed()"),
     accountIsBlocked: this.createSelector("AccountIsBlocked(address)"),
-    tokenIsPaused: this.createSelector("TokenIsPaused()"),
+    tokenIsPaused: this.createSelector("IsPaused()"),
     clearingIsActivated: this.createSelector("ClearingIsActivated()"),
     complianceNotAllowed: this.createSelector("ComplianceNotAllowed()"),
     invalidKycStatus: this.createSelector("InvalidKycStatus()"),

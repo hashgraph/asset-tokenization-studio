@@ -129,14 +129,14 @@ describe("BatchMint Tests", () => {
         );
       });
 
-      it("GIVEN a paused token WHEN batchMint THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused token WHEN batchMint THEN transaction fails with IsPaused", async () => {
         await asset.pause();
 
         const mintAmount = AMOUNT / 2;
         const toList = [signer_D.address];
         const amounts = [mintAmount];
 
-        await expect(asset.batchMint(toList, amounts)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        await expect(asset.batchMint(toList, amounts)).to.be.revertedWithCustomError(asset, "IsPaused");
       });
     });
   });

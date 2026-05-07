@@ -93,10 +93,10 @@ describe("Identity Tests", () => {
       );
     });
 
-    it("GIVEN a paused token WHEN setOnchainID THEN transactions revert with TokenIsPaused error", async () => {
+    it("GIVEN a paused token WHEN setOnchainID THEN transactions revert with IsPaused error", async () => {
       await asset.connect(signer_B).pause();
 
-      await expect(asset.setOnchainID(onchainId)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      await expect(asset.setOnchainID(onchainId)).to.be.revertedWithCustomError(asset, "IsPaused");
     });
   });
 
@@ -119,12 +119,12 @@ describe("Identity Tests", () => {
       ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
-    it("GIVEN a paused token WHEN setIdentityRegistry THEN transactions revert with TokenIsPaused error", async () => {
+    it("GIVEN a paused token WHEN setIdentityRegistry THEN transactions revert with IsPaused error", async () => {
       await asset.connect(signer_B).pause();
 
       await expect(asset.setIdentityRegistry(identityRegistryMock.target as string)).to.be.revertedWithCustomError(
         asset,
-        "TokenIsPaused",
+        "IsPaused",
       );
     });
   });
