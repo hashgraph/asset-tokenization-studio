@@ -22,25 +22,11 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
  *      diamond alongside other facets sharing the {Modifiers} base.
  */
 abstract contract Snapshots is ISnapshots, Modifiers {
-    /**
-     * @inheritdoc ISnapshots
-     * @dev Gated by `onlyUnpaused` and `onlyRole(SNAPSHOT_ROLE)`. Before assigning a new snapshot
-     *      identifier, any cross-ordered scheduled tasks due at the current block are flushed via
-     *      {ScheduledTasksStorageWrapper.triggerScheduledCrossOrderedTasks} so that their effects
-     *      are reflected in the captured state. Emits {SnapshotTaken} with the resolved sender
-     *      (meta-transaction-aware via {EvmAccessors.getMsgSender}) and the new identifier.
-     */
+    /// @inheritdoc ISnapshots
     function takeSnapshot() external override onlyUnpaused onlyRole(SNAPSHOT_ROLE) returns (uint256 snapshotID_) {
         ScheduledTasksStorageWrapper.triggerScheduledCrossOrderedTasks(0);
         snapshotID_ = SnapshotsStorageWrapper.takeSnapshot();
         emit SnapshotTaken(EvmAccessors.getMsgSender(), snapshotID_);
-    }
-
-    function partitionsOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view override returns (bytes32[] memory) {
-        return SnapshotsStorageWrapper.partitionsOfAtSnapshot(_snapshotID, _tokenHolder);
     }
 
     /// @inheritdoc ISnapshots

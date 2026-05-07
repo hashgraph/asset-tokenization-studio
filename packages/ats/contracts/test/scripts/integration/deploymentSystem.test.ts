@@ -341,7 +341,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
       const blr = BusinessLogicResolver__factory.connect(result.blrAddress, deployer);
 
       // Should not revert when calling initialized functions
-      const version = await blr.getLatestVersion();
+      const version = await blr.getLatestVersion(atsRegistry.getFacetDefinition("PauseFacet")!.resolverKey!.value);
       expect(version).to.equal(BLR_VERSIONS.INITIAL);
     });
 

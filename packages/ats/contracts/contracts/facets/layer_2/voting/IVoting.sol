@@ -61,20 +61,4 @@ interface IVoting is IVotingTypes {
     /// @notice Retrieves the total number of votings
     /// @return votingCount_ The total count of votings
     function getVotingCount() external view returns (uint256 votingCount_);
-
-    /// @notice Retrieves the list of token holders for a given voting with pagination
-    /// @param _voteID The ID of the voting
-    /// @param _pageIndex The page index for pagination
-    /// @param _pageLength The page length for pagination
-    /// @return holders_ The paginated list of token holder addresses
-    function getVotingHolders(
-        uint256 _voteID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (address[] memory holders_);
-
-    /// @notice Retrieves the total number of token holders for a given voting
-    /// @param _voteID The ID of the voting
-    /// @return totalHolders_ The total number of token holders at the voting record date
-    function getTotalVotingHolders(uint256 _voteID) external view returns (uint256 totalHolders_);
 }

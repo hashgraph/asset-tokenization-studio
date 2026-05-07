@@ -31,7 +31,7 @@ abstract contract CapModifiers {
      * @param _timestamp The timestamp at which the max supply cap is evaluated.
      */
     modifier onlyWithinMaxSupply(uint256 _value, uint256 _timestamp) {
-        CapStorageWrapper.requireWithinMaxSupply(_value, _timestamp);
+        CapStorageWrapper.checkMaxSupply(_value, _timestamp);
         _;
     }
 
@@ -48,7 +48,7 @@ abstract contract CapModifiers {
      * @param _timestamp The timestamp at which to evaluate the cap
      */
     modifier onlyWithinMaxSupplyByPartition(bytes32 _partition, uint256 _amount, uint256 _timestamp) {
-        CapStorageWrapper.requireWithinMaxSupplyByPartition(_partition, _amount, _timestamp);
+        CapStorageWrapper.checkMaxSupplyByPartition(_partition, _amount, _timestamp);
         _;
     }
 

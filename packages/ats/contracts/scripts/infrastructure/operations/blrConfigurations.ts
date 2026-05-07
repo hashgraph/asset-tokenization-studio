@@ -395,14 +395,9 @@ export async function createBatchConfiguration(
 
     info(`Resolved ${facetKeys.length} facets with addresses`, {});
 
-    const latestVersion = await blrContract.getLatestVersion();
-    const version = Number(latestVersion);
-
-    info("Retrieved latest version from BLR", { version });
-
     const facetIdList = facetKeys.map((f) => f.key);
-    // All facets registered in a batch get the same version from registerBusinessLogics
-    const facetVersionList = new Array(facetKeys.length).fill(version);
+    const latestVersions = await blrContract.getLatestVersions(facetIdList);
+    const versions: number[] = latestVersions.map((v) => Number(v));
 
     info("Processing facets in batches", {
       facetCount: facetIdList.length,
@@ -413,7 +408,7 @@ export async function createBatchConfiguration(
     await processFacetLists(
       configurationId,
       facetIdList,
-      facetVersionList,
+      versions,
       blrContract,
       partialBatchDeploy,
       batchSize,

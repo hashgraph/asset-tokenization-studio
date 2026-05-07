@@ -52,6 +52,10 @@ library AdjustBalancesStorageWrapper {
         adjustBalancesStorage().labafUserPartition[_tokenHolder].push(_labaf);
     }
 
+    function popLabafUserPartition(address _tokenHolder) internal {
+        adjustBalancesStorage().labafUserPartition[_tokenHolder].pop();
+    }
+
     function updateLabafByTokenHolderAndPartitionIndex(
         uint256 labaf,
         address tokenHolder,

@@ -18,10 +18,15 @@ import {
   getDltTimestamp,
   grantRoleAndPauseToken,
   deployBondTokenFixture,
+  deployBondFixedRateTokenFixture,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-imports
   deployBondKpiLinkedRateTokenFixture,
   executeRbac,
   MAX_UINT256,
+  EVENT_NAMES,
+  TEST_COUPON,
+  TEST_BOND_FIXED_RATE,
+  expectExactlyOneEvent,
 } from "@test";
 
 const numberOfUnits = 1000;
@@ -268,8 +273,9 @@ describe("Coupon Tests", () => {
   it("GIVEN an account with corporateActions role WHEN setCoupon THEN transaction succeeds", async () => {
     await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
 
-    await expect(asset.connect(signer_C).setCoupon(couponData))
-      .to.emit(asset, "CouponSet")
+    const tx = await asset.connect(signer_C).setCoupon(couponData);
+    await expect(tx)
+      .to.emit(asset, EVENT_NAMES.COUPON_SET)
       .withArgs("0x0000000000000000000000000000000000000000000000000000000000000001", 1, signer_C.address, [
         couponRecordDateInSeconds,
         couponExecutionDateInSeconds,
@@ -280,6 +286,8 @@ describe("Coupon Tests", () => {
         couponRateDecimals,
         couponRateStatus,
       ]);
+    const receipt = await tx.wait();
+    expectExactlyOneEvent(receipt!, asset, EVENT_NAMES.COUPON_SET);
 
     const listCount = await asset.getCouponCount();
     const [coupon, isDisabled] = await asset.getCoupon(1);
@@ -607,9 +615,10 @@ describe("Coupon Tests", () => {
 
     await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
 
-    await expect(asset.connect(signer_C).cancelCoupon(1))
-      .to.emit(asset, "CouponCancelled")
-      .withArgs(1, signer_C.address);
+    const tx = await asset.connect(signer_C).cancelCoupon(1);
+    await expect(tx).to.emit(asset, EVENT_NAMES.COUPON_CANCELLED).withArgs(1, signer_C.address);
+    const receipt = await tx.wait();
+    expectExactlyOneEvent(receipt!, asset, EVENT_NAMES.COUPON_CANCELLED);
   });
 
   it("GIVEN an account without corporateActions role WHEN cancelCoupon THEN transaction fails with AccountHasNoRole", async () => {
@@ -790,5 +799,75 @@ describe("Coupon Tests", () => {
       asset,
       "WrongTimestamp",
     );
+  });
+});
+
+describe("Coupon Fixed-Rate Variant Tests", () => {
+  let diamond: ResolverProxy;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
+  let asset: IAsset;
+
+  async function deployFixedRateFixture() {
+    const base = await deployBondFixedRateTokenFixture({
+      bondDataParams: {
+        securityData: { isMultiPartition: false },
+        bondDetails: { startingDate, maturityDate },
+      },
+      fixedRateParams: { rate: TEST_BOND_FIXED_RATE.RATE, rateDecimals: TEST_BOND_FIXED_RATE.RATE_DECIMALS },
+    });
+    diamond = base.diamond;
+    signer_A = base.deployer;
+    signer_B = base.user1;
+    signer_C = base.user2;
+
+    asset = await ethers.getContractAt("IAsset", diamond.target);
+    await executeRbac(asset, [
+      { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
+    ]);
+    await asset.connect(signer_A).addIssuer(signer_A.address);
+    await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+  }
+
+  beforeEach(async () => {
+    const currentTimestamp = await getDltTimestamp();
+    couponRecordDateInSeconds = currentTimestamp + TEST_COUPON.TIMING.RECORD_OFFSET_S;
+    couponExecutionDateInSeconds = currentTimestamp + TEST_COUPON.TIMING.EXECUTION_OFFSET_S;
+    couponFixingDateInSeconds = currentTimestamp + TEST_COUPON.TIMING.EXECUTION_OFFSET_S;
+    couponEndDateInSeconds = couponFixingDateInSeconds - 1;
+    couponStartDateInSeconds = couponEndDateInSeconds - couponPeriod;
+    await loadFixture(deployFixedRateFixture);
+  });
+
+  it("GIVEN a fixed-rate bond WHEN setCoupon with PENDING rate THEN CouponSet emits with the resolved configured rate", async () => {
+    const pendingCoupon = {
+      recordDate: couponRecordDateInSeconds.toString(),
+      executionDate: couponExecutionDateInSeconds.toString(),
+      rate: 0,
+      rateDecimals: 0,
+      startDate: couponStartDateInSeconds.toString(),
+      endDate: couponEndDateInSeconds.toString(),
+      fixingDate: couponFixingDateInSeconds.toString(),
+      rateStatus: TEST_COUPON.RATE_STATUS.PENDING,
+    };
+
+    const tx = await asset.connect(signer_C).setCoupon(pendingCoupon);
+    await expect(tx)
+      .to.emit(asset, EVENT_NAMES.COUPON_SET)
+      .withArgs(TEST_COUPON.FIRST_CORPORATE_ACTION_ID, TEST_COUPON.FIRST_ID, signer_C.address, [
+        couponRecordDateInSeconds,
+        couponExecutionDateInSeconds,
+        couponStartDateInSeconds,
+        couponEndDateInSeconds,
+        couponFixingDateInSeconds,
+        TEST_BOND_FIXED_RATE.RATE,
+        TEST_BOND_FIXED_RATE.RATE_DECIMALS,
+        TEST_COUPON.RATE_STATUS.SET,
+      ]);
+    const receipt = await tx.wait();
+    expectExactlyOneEvent(receipt!, asset, EVENT_NAMES.COUPON_SET);
   });
 });

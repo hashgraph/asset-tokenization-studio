@@ -25,7 +25,7 @@ async function addMigrationFacetToDiamond(base: Awaited<ReturnType<typeof deploy
     },
   ]);
 
-  const latestBLRVersion = Number(await blr.getLatestVersion());
+  const latestBLRVersion = Number(await blr.getLatestVersion(migrationResolverKey));
 
   const asset = await ethers.getContractAt("IAsset", baseDiamond.target);
   const existingFacetIds = await asset.getFacetIds();
