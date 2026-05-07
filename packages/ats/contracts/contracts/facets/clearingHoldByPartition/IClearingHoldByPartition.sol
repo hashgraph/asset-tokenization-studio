@@ -10,7 +10,7 @@ import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
  * @notice Interface for the unprotected clearing hold creation operations scoped to a partition.
  * @dev Extends IClearingTypes. Covers the self-initiated and third-party-authorized clearing hold
  *      creation paths plus the corresponding read query. The protected variant
- *      (protectedClearingCreateHoldByPartition) is declared in IClearingHoldCreation.
+ *      (protectedClearingCreateHoldByPartition) is declared in IProtectedClearingHoldByPartition.
  */
 interface IClearingHoldByPartition is IClearingTypes {
     /**

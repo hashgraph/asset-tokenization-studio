@@ -45,6 +45,7 @@ const BOND_FIXED_RATE_FACETS = [
   "BalanceTrackerFacet",
   "BalanceTrackerAdjustedFacet",
   "SnapshotsFacet",
+  "SnapshotsByPartitionFacet",
   "SecurityHoldersAtSnapshotFacet",
   "HoldAtSnapshotFacet",
   "LockAtSnapshotByPartitionFacet",
@@ -76,9 +77,9 @@ const BOND_FIXED_RATE_FACETS = [
   "MintByPartitionFacet",
   "ERC1410ManagementFacet",
   "ProtectedByPartitionFacet",
-  "ERC1410ReadFacet",
   "OperatorFacet",
-  "ERC1410TokenHolderFacet",
+  "TransferByPartitionFacet",
+  "PartitionsFacet",
   "OperatorByPartitionFacet",
   "BurnByPartitionFacet",
   "DocumentationFacet",
@@ -102,13 +103,12 @@ const BOND_FIXED_RATE_FACETS = [
 
   // Clearing & Settlement
   "ClearingByPartitionFacet",
-  "ClearingHoldCreationFacet",
+  "ProtectedClearingHoldByPartitionFacet",
   "ClearingHoldByPartitionFacet",
   "OperatorClearingHoldByPartitionFacet",
   "ClearingFacet",
-  "ClearingRedeemFacet",
-  "ClearingTransferFacet",
   "OperatorClearingByPartitionFacet",
+  "ProtectedClearingByPartitionFacet",
   "HoldFacet",
   "OperatorHoldByPartitionFacet",
   "ControllerHoldByPartitionFacet",
@@ -130,13 +130,14 @@ const BOND_FIXED_RATE_FACETS = [
   "ProceedRecipientsFacet",
   "ProtectedPartitionsFacet",
   "ScheduledCrossOrderedTasksFacet",
+  "SecurityHoldersFacet",
   "CouponListingFacet",
   "SsiManagementFacet",
 
   "CouponSecurityHoldersFacet",
 
   // Interest Rate (rate-specific)
-  "CouponFixedRateFacet",
+  "CouponFacet",
   "FixedRateFacet",
 
   // Maturity By Partition

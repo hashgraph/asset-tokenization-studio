@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { ResolverProxy, type IAsset, CouponFixedRateFacet } from "@contract-types";
+import { ResolverProxy, type IAsset } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES, TIME_PERIODS_S } from "@scripts";
 import { SecurityType } from "@scripts/domain";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -33,7 +33,6 @@ describe("Bond Fixed Rate Tests", () => {
   let signer_A: HardhatEthersSigner;
 
   let asset: IAsset;
-  let couponFixedRateFacet: CouponFixedRateFacet;
 
   async function deploySecurityFixture() {
     const base = await deployBondFixedRateTokenFixture();
@@ -48,8 +47,6 @@ describe("Bond Fixed Rate Tests", () => {
         members: [signer_A.address],
       },
     ]);
-
-    couponFixedRateFacet = await ethers.getContractAt("CouponFixedRateFacet", diamond.target, signer_A);
   }
 
   beforeEach(async () => {
@@ -79,35 +76,26 @@ describe("Bond Fixed Rate Tests", () => {
   it("GIVEN a fixed rate bond WHEN setting a coupon with non pending status THEN transaction fails with InterestRateIsFixed", async () => {
     couponData.rateStatus = 1;
 
-    await expect(couponFixedRateFacet.setCoupon(couponData)).to.be.revertedWithCustomError(
-      asset,
-      "InterestRateIsFixed",
-    );
+    await expect(asset.setCoupon(couponData)).to.be.revertedWithCustomError(asset, "InterestRateIsFixed");
   });
 
   it("GIVEN a fixed rate bond WHEN setting a coupon with rate non 0 THEN transaction fails with InterestRateIsFixed", async () => {
     couponData.rate = 1;
 
-    await expect(couponFixedRateFacet.setCoupon(couponData)).to.be.revertedWithCustomError(
-      asset,
-      "InterestRateIsFixed",
-    );
+    await expect(asset.setCoupon(couponData)).to.be.revertedWithCustomError(asset, "InterestRateIsFixed");
   });
 
   it("GIVEN a fixed rate bond WHEN setting a coupon with rate decimals non 0 THEN transaction fails with InterestRateIsFixed", async () => {
     couponData.rateDecimals = 1;
 
-    await expect(couponFixedRateFacet.setCoupon(couponData)).to.be.revertedWithCustomError(
-      asset,
-      "InterestRateIsFixed",
-    );
+    await expect(asset.setCoupon(couponData)).to.be.revertedWithCustomError(asset, "InterestRateIsFixed");
   });
 
   it("GIVEN a fixed rate bond WHEN setting a coupon with pending status THEN transaction success", async () => {
     const fixedRate = await asset.getRate();
 
-    await expect(couponFixedRateFacet.connect(signer_A).setCoupon(couponData))
-      .to.emit(couponFixedRateFacet, "CouponSet")
+    await expect(asset.connect(signer_A).setCoupon(couponData))
+      .to.emit(asset, "CouponSet")
       .withArgs("0x0000000000000000000000000000000000000000000000000000000000000001", 1, signer_A.address, [
         couponRecordDateInSeconds,
         couponExecutionDateInSeconds,
@@ -119,10 +107,10 @@ describe("Bond Fixed Rate Tests", () => {
         1,
       ]);
 
-    const couponCount = await couponFixedRateFacet.getCouponCount();
+    const couponCount = await asset.getCouponCount();
     expect(couponCount).to.equal(1);
 
-    const registeredCoupon = (await couponFixedRateFacet.getCoupon(1)).registeredCoupon_;
+    const registeredCoupon = (await asset.getCoupon(1)).registeredCoupon_;
     expect(registeredCoupon.coupon.recordDate).to.equal(couponRecordDateInSeconds);
     expect(registeredCoupon.coupon.executionDate).to.equal(couponExecutionDateInSeconds);
     expect(registeredCoupon.coupon.startDate).to.equal(couponStartDateInSeconds);

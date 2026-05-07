@@ -78,12 +78,12 @@ const LOAN_FACETS = [
   "ERC20VotesFacet",
   "DocumentationFacet",
   "ControllerFacet",
-  "ERC1410ReadFacet",
   "OperatorFacet",
   "ERC1410ManagementFacet",
   "ProtectedByPartitionFacet",
   "MintByPartitionFacet",
-  "ERC1410TokenHolderFacet",
+  "TransferByPartitionFacet",
+  "PartitionsFacet",
   "OperatorByPartitionFacet",
   "BurnByPartitionFacet",
   "ERC3643ManagementFacet",
@@ -107,10 +107,9 @@ const LOAN_FACETS = [
   "HoldByPartitionFacet",
 
   // Clearing & Settlement
-  "ClearingTransferFacet",
-  "ClearingRedeemFacet",
   "OperatorClearingByPartitionFacet",
-  "ClearingHoldCreationFacet",
+  "ProtectedClearingByPartitionFacet",
+  "ProtectedClearingHoldByPartitionFacet",
   "ClearingHoldByPartitionFacet",
   "OperatorClearingHoldByPartitionFacet",
   "ClearingFacet",
@@ -129,6 +128,7 @@ const LOAN_FACETS = [
 
   // Advanced Features
   "SnapshotsFacet",
+  "SnapshotsByPartitionFacet",
   "SecurityHoldersAtSnapshotFacet",
   "HoldAtSnapshotFacet",
   "LockAtSnapshotByPartitionFacet",
@@ -137,6 +137,7 @@ const LOAN_FACETS = [
   "LockAtSnapshotFacet",
   "CoreAtSnapshotFacet",
   "CorporateActionsFacet",
+  "SecurityHoldersFacet",
   "TransferAndLockFacet",
   "LockFacet",
   "LockByPartitionFacet",

@@ -11,8 +11,7 @@ import { _COMPLIANCE_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverK
  * @author Asset Tokenization Studio Team
  * @notice Diamond facet that exposes partition-aware transfer-eligibility and redemption checks
  *         via `IComplianceByPartition`, registered under `_COMPLIANCE_BY_PARTITION_RESOLVER_KEY`.
- * @dev Consolidates `canTransferByPartition` and `canRedeemByPartition` previously hosted in
- *      `ERC1410ReadFacet`. Exposes 2 selectors: `canTransferByPartition`, `canRedeemByPartition`.
+ * @dev Exposes 2 selectors: `canTransferByPartition`, `canRedeemByPartition`.
  */
 contract ComplianceByPartitionFacet is ComplianceByPartition, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
