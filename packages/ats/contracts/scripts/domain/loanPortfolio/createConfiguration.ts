@@ -138,6 +138,7 @@ const LOANS_PORTFOLIO_FACETS = [
   "LockFacet",
   "LockByPartitionFacet",
   "ProtectedPartitionsFacet",
+  "SecurityHoldersFacet",
   "TransferAndLockFacet",
 ] as const;
 
