@@ -28,7 +28,8 @@ import { ICoreAdjusted } from "./coreAdjusted/ICoreAdjusted.sol";
 import { IAllowance } from "./allowance/IAllowance.sol";
 
 // Layer 1 — External lists
-import { IERC1410 } from "./layer_1/ERC1400/ERC1410/IERC1410.sol";
+import { IERC1410Management } from "./layer_1/ERC1400/ERC1410/IERC1410Management.sol";
+import { ITransferByPartition } from "./transferByPartition/ITransferByPartition.sol";
 
 import { IOperator } from "./operator/IOperator.sol";
 import { ITransfer } from "./transfer/ITransfer.sol";
@@ -102,6 +103,7 @@ import { ISecurityHoldersAtSnapshot } from "./securityHoldersAtSnapshot/ISecurit
 import { IFreezeAtSnapshot } from "./freezeAtSnapshot/IFreezeAtSnapshot.sol";
 import { IFreezeAtSnapshotByPartition } from "./freezeAtSnapshotByPartition/IFreezeAtSnapshotByPartition.sol";
 import { IIdentity } from "./identity/IIdentity.sol";
+import { IPartitions } from "./partitions/IPartitions.sol";
 import { ICoreAtSnapshot } from "./coreAtSnapshot/ICoreAtSnapshot.sol";
 import { IOperatorClearingByPartition } from "./operatorClearingByPartition/IOperatorClearingByPartition.sol";
 import {
@@ -147,7 +149,7 @@ import { IOperatorByPartition } from "./operatorByPartition/IOperatorByPartition
  * @dev Intended for use in tests and external tooling to interact with all Diamond methods
  *      through a single typed object, rather than multiple per-facet instances.
  *
- *      Note: IHold already transitively includes IAccessControl, IERC1410,
+ *      Note: IHold already transitively includes IAccessControl, IERC1410Management,
  *      IHoldRead, and IHoldTokenHolder. IERC3643 already includes its
  *      sub-interfaces. IERC20Votes includes IERC5805 and IVotes. Solidity C3 linearisation
  *      handles the resulting diamond inheritance without conflicts.
@@ -173,7 +175,8 @@ interface IAsset is
     IOperatorHoldByPartition,
     ITransfer,
     IERC20Votes,
-    IERC1410,
+    IERC1410Management,
+    ITransferByPartition,
     IOperator,
     IERC3643,
     IRecovery,
@@ -230,6 +233,7 @@ interface IAsset is
     ISecurityHoldersAtSnapshot,
     IFreezeAtSnapshot,
     IIdentity,
+    IPartitions,
     IFreezeAtSnapshotByPartition,
     ICoreAtSnapshot,
     // Clearing interfaces
