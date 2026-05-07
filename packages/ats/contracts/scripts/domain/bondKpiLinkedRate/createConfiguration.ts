@@ -72,7 +72,6 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "MintByPartitionFacet",
   "ERC1410ManagementFacet",
   "ProtectedByPartitionFacet",
-  "ERC1410ReadFacet",
   "OperatorFacet",
   "TransferByPartitionFacet",
   "PartitionsFacet",
