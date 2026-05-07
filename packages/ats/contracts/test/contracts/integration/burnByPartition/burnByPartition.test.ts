@@ -13,6 +13,8 @@ const MAX_SUPPLY = 10000000;
 const EMPTY_VC_ID = EMPTY_STRING;
 const WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
 const CUSTOM_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
+const CUSTOM_PARTITION_2 = "0x0000000000000000000000000000000000000000000000000000000000004321";
+const CUSTOM_PARTITION_3 = "0x0000000000000000000000000000000000000000000000000000000000054321";
 
 // Compute partition-specific role for protected redemptions
 const PARTITION_SPECIFIC_ROLE = ethers.keccak256(
@@ -235,6 +237,67 @@ describe("BurnByPartitionFacet Tests", () => {
 
       expect(await asset.balanceOfByPartition(CUSTOM_PARTITION, signer_E.address)).to.equal(0);
       expect(await asset.totalSupplyByPartition(CUSTOM_PARTITION)).to.equal(0);
+    });
+
+    it("GIVEN multi-partition mode WHEN redeemByPartition from non-default partition THEN succeeds and labafs updated correctly", async () => {
+      const ABAF_1 = 2;
+      const ABAF_2 = 3;
+      const ABAF_3 = 4;
+
+      const tokenHolder = signer_E.address;
+
+      await asset.grantRole(ATS_ROLES.ADJUSTMENT_BALANCE_ROLE, signer_A.address);
+
+      await asset.issueByPartition({
+        partition: CUSTOM_PARTITION,
+        tokenHolder: tokenHolder,
+        value: AMOUNT,
+        data: EMPTY_HEX_BYTES,
+      });
+
+      await asset.adjustBalances(ABAF_1, 0);
+
+      await asset.issueByPartition({
+        partition: CUSTOM_PARTITION_2,
+        tokenHolder: tokenHolder,
+        value: AMOUNT,
+        data: EMPTY_HEX_BYTES,
+      });
+
+      await asset.adjustBalances(ABAF_2, 0);
+
+      await asset.issueByPartition({
+        partition: CUSTOM_PARTITION_3,
+        tokenHolder: tokenHolder,
+        value: AMOUNT,
+        data: EMPTY_HEX_BYTES,
+      });
+
+      await asset.adjustBalances(ABAF_3, 0);
+
+      const totalBalanceByPartition_1 = await asset.getTotalBalanceForByPartition(CUSTOM_PARTITION, tokenHolder);
+      const totalBalanceByPartition_2 = await asset.getTotalBalanceForByPartition(CUSTOM_PARTITION_2, tokenHolder);
+      const totalBalanceByPartition_3 = await asset.getTotalBalanceForByPartition(CUSTOM_PARTITION_3, tokenHolder);
+      const ListOfPartitions_Before = await asset.partitionsOf(tokenHolder);
+
+      await asset.connect(signer_E).redeemByPartition(CUSTOM_PARTITION_2, totalBalanceByPartition_2, EMPTY_HEX_BYTES);
+
+      const totalBalanceByPartition_1_after = await asset.getTotalBalanceForByPartition(CUSTOM_PARTITION, tokenHolder);
+      const totalBalanceByPartition_2_after = await asset.getTotalBalanceForByPartition(
+        CUSTOM_PARTITION_2,
+        tokenHolder,
+      );
+      const totalBalanceByPartition_3_after = await asset.getTotalBalanceForByPartition(
+        CUSTOM_PARTITION_3,
+        tokenHolder,
+      );
+      const ListOfPartitions_After = await asset.partitionsOf(tokenHolder);
+
+      expect(totalBalanceByPartition_1_after).to.equal(totalBalanceByPartition_1);
+      expect(totalBalanceByPartition_2_after).to.equal(0);
+      expect(totalBalanceByPartition_3_after).to.equal(totalBalanceByPartition_3);
+      expect(ListOfPartitions_Before).to.deep.equal([CUSTOM_PARTITION, CUSTOM_PARTITION_2, CUSTOM_PARTITION_3]);
+      expect(ListOfPartitions_After).to.deep.equal([CUSTOM_PARTITION, CUSTOM_PARTITION_3]);
     });
 
     describe("bug Transfer", () => {
