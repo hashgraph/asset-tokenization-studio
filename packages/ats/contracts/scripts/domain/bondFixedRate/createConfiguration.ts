@@ -137,7 +137,7 @@ const BOND_FIXED_RATE_FACETS = [
   "CouponSecurityHoldersFacet",
 
   // Interest Rate (rate-specific)
-  "CouponFixedRateFacet",
+  "CouponFacet",
   "FixedRateFacet",
 
   // Maturity By Partition

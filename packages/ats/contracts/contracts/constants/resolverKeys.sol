@@ -614,15 +614,6 @@ bytes32 constant _SCHEDULED_COUPON_LISTING_SUSTAINABILITY_PERFORMANCE_TARGET_RAT
 // keccak256('security.token.standard.coupon.variable.rate.resolverKey');
 bytes32 constant _COUPON_RESOLVER_KEY = 0xa404f705370f56f56364ac9aa1092c1002b2bfcd7020c1bb5ca7489f8061efa7;
 
-// keccak256('security.token.standard.coupon.fixed.rate.resolverKey');
-bytes32 constant _COUPON_FIXED_RATE_RESOLVER_KEY = 0x2e0b1146e97bc72f92441d75c9cfa74185548319741c7f292fe0014252933ae9;
-
-// keccak256('security.token.standard.coupon.kpilinked.rate.resolverKey');
-bytes32 constant _COUPON_KPI_LINKED_RATE_RESOLVER_KEY = 0x45f4a1774eac5a47f3cbc755bf5332ca30d8a6bb0330d479c77590dd0d5aab18;
-
-// keccak256('security.token.standard.coupon.SustainabilityPerformanceTarget.rate.resolverKey');
-bytes32 constant _COUPON_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x435034f1d262736f434867e5f70c71157492ebd5a90e9e4455b2868f5bda6b6e;
-
 // keccak256("security.token.standard.couponListing.resolverKey");
 bytes32 constant _COUPON_LISTING_RESOLVER_KEY = 0x09830f922c6bb4e736cc4cc426ceec0888c8b95b2cc21b67f16dab889ad4c47e;
 
