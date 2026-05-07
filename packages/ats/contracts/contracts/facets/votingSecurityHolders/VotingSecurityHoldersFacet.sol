@@ -25,12 +25,9 @@ contract VotingSecurityHoldersFacet is VotingSecurityHolders, IStaticFunctionSel
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 2;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.getTotalVotingHolders.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getVotingHolders.selector;
-        }
+        staticFunctionSelectors_ = new bytes4[](2);
+        staticFunctionSelectors_[0] = this.getVotingHolders.selector;
+        staticFunctionSelectors_[1] = this.getTotalVotingHolders.selector;
     }
 
     /// @inheritdoc IStaticFunctionSelectors
