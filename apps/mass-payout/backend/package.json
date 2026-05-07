@@ -27,7 +27,7 @@
     "clean:deps": "rimraf node_modules"
   },
   "dependencies": {
-    "@faker-js/faker": "9.8.0",
+    "@faker-js/faker": "10.4.0",
     "@hashgraph/asset-tokenization-sdk": "*",
     "@hiero-ledger/sdk": "2.79.0",
     "@nestjs/cli": "10.3.2",
