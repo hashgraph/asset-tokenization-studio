@@ -54,6 +54,7 @@ import { IKyc } from "./layer_1/kyc/IKyc.sol";
 // directly when testing KPI-linked or SPTR interest rate facets.
 import { ILoan } from "./layer_2/loan/ILoan.sol";
 import { INominalValue } from "./layer_2/nominalValue/INominalValue.sol";
+import { INominalValueAtSnapshot } from "./nominalValueAtSnapshot/INominalValueAtSnapshot.sol";
 import { IPause } from "./pause/IPause.sol";
 import { ILoansPortfolio } from "./layer_2/loansPortfolio/ILoansPortfolio.sol";
 import { IVoting } from "./layer_2/voting/IVoting.sol";
@@ -183,6 +184,7 @@ interface IAsset is
     IProtectedPartitions,
     IProceedRecipients,
     INominalValue,
+    INominalValueAtSnapshot,
     IAmortization,
     ILoan,
     IAdjustBalances,

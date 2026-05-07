@@ -134,6 +134,7 @@ const BOND_FACETS = [
   "LockByPartitionFacet",
   "MaturityFacet",
   "NominalValueFacet",
+  "NominalValueAtSnapshotFacet",
   "ProceedRecipientsFacet",
   "ProtectedPartitionsFacet",
   "ScheduledCrossOrderedTasksFacet",

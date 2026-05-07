@@ -127,6 +127,7 @@ const BOND_FIXED_RATE_FACETS = [
   "LockByPartitionFacet",
   "MaturityFacet",
   "NominalValueFacet",
+  "NominalValueAtSnapshotFacet",
   "ProceedRecipientsFacet",
   "ProtectedPartitionsFacet",
   "ScheduledCrossOrderedTasksFacet",
