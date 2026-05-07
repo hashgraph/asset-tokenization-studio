@@ -694,9 +694,18 @@ library ERC1410StorageWrapper {
         uint256 lastIndex = erc1410Storage.partitions[holder].length - 1;
         if (index != lastIndex) {
             erc1410Storage.partitions[holder][index] = erc1410Storage.partitions[holder][lastIndex];
+            unchecked {
+                AdjustBalancesStorageWrapper.updateLabafByTokenHolderAndPartitionIndex(
+                    AdjustBalancesStorageWrapper.getLabafByUserAndPartitionIndex(lastIndex + 1, holder),
+                    holder,
+                    index + 1
+                );
+            }
+
             erc1410Storage.partitionToIndex[holder][erc1410Storage.partitions[holder][index].partition] = index + 1;
         }
         delete erc1410Storage.partitionToIndex[holder][partition];
         erc1410Storage.partitions[holder].pop();
+        AdjustBalancesStorageWrapper.popLabafUserPartition(holder);
     }
 }

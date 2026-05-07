@@ -712,6 +712,9 @@ bytes32 constant _TRANSFER_AND_LOCK_KPI_LINKED_RATE_RESOLVER_KEY = 0x3e5f7a9b1c2
 // keccak256("security.token.standard.transferandlock.SustainabilityPerformanceTarget.rate.resolverKey");
 bytes32 constant _TRANSFER_AND_LOCK_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x9d1e3f5a7b9c0d2e4f6a8b0c1d3e5f7a9b0c2d4e6f8a9b1c3d5e7f9a0b2c4d6e;
 
+// keccak256('security.token.standard.transferAndLockByPartition.resolverKey')
+bytes32 constant _TRANSFER_AND_LOCK_BY_PARTITION_RESOLVER_KEY = 0x651cc28fb504945850c0fe8948386581fccc7ac2967e4e6eb36e172956a942a8;
+
 // keccak256("security.token.standard.metadata.resolverKey");
 bytes32 constant _METADATA_RESOLVER_KEY = 0x4c3bd2753f7bc002cfee0180298759848c0f294a3bdb6c27eb76ea165a47b29d;
 

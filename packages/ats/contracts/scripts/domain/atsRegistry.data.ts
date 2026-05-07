@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-07T09:49:06.280Z
+ * Generated: 2026-05-07T09:51:31.760Z
  * Facets: 121
  * Infrastructure: 2
  *
@@ -130,6 +130,7 @@ import {
   SsiManagementFacet__factory,
   SustainabilityPerformanceTargetRateFacet__factory,
   TimeTravelFacet__factory,
+  TransferAndLockByPartitionFacet__factory,
   TransferAndLockFacet__factory,
   TransferAndLockFixedRateFacet__factory,
   TransferAndLockKpiLinkedRateFacet__factory,
@@ -137,7 +138,6 @@ import {
   TransferByPartitionFacet__factory,
   TransferFacet__factory,
   VotingFacet__factory,
-  VotingSecurityHoldersFacet__factory,
   AccessControlFacetTimeTravel__factory,
   BatchControllerFacetTimeTravel__factory,
   BondUSAFacetTimeTravel__factory,
@@ -12857,22 +12857,16 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     factory: (signer) => new TimeTravelFacet__factory(signer),
   },
 
-  TransferAndLockFacet: {
-    name: "TransferAndLockFacet",
+  TransferAndLockByPartitionFacet: {
+    name: "TransferAndLockByPartitionFacet",
+    description:
+      "Diamond facet that exposes the partition-aware transfer-and-lock operation via `ITransferAndLockByPartition`, registered under `_TRANSFER_AND_LOCK_BY_PARTITION_RESOLVER_KEY`.",
     resolverKey: {
-      name: "_TRANSFER_AND_LOCK_RESOLVER_KEY",
-      value: "0xd9b300e6bf7a143b8fd8cf1d4ab050e691c862bf0f57a7d49cc08c60efe68d08",
+      name: "_TRANSFER_AND_LOCK_BY_PARTITION_RESOLVER_KEY",
+      value: "0x651cc28fb504945850c0fe8948386581fccc7ac2967e4e6eb36e172956a942a8",
     },
-    inheritance: ["TransferAndLockFacetBase"],
+    inheritance: ["TransferAndLockByPartition", "IStaticFunctionSelectors"],
     methods: [
-      {
-        name: "transferAndLock",
-        signature: {
-          full: "function transferAndLock(address _to, uint256 _amount, bytes _data, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
-          canonical: "transferAndLock(address,uint256,bytes,uint256)",
-        },
-        selector: "0x0e92b90b",
-      },
       {
         name: "transferAndLockByPartition",
         signature: {
@@ -12958,17 +12952,149 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbf84f4ec",
       },
       {
-        name: "NotAllowedInMultiPartitionMode",
-        signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
-        selector: "0x76d08f88",
-      },
-      {
         name: "PartitionNotAllowedInSinglePartitionMode",
         signature: {
           full: "error PartitionNotAllowedInSinglePartitionMode(bytes32 partition)",
           canonical: "PartitionNotAllowedInSinglePartitionMode(bytes32)",
         },
         selector: "0xb96d9539",
+      },
+      {
+        name: "PartitionsAreProtectedAndNoRole",
+        signature: {
+          full: "error PartitionsAreProtectedAndNoRole(address account, bytes32 role)",
+          canonical: "PartitionsAreProtectedAndNoRole(address,bytes32)",
+        },
+        selector: "0x55347310",
+      },
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+      {
+        name: "TokenIsPaused",
+        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
+        selector: "0x649815a5",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
+      },
+      {
+        name: "WrongExpirationTimestamp",
+        signature: { full: "error WrongExpirationTimestamp()", canonical: "WrongExpirationTimestamp()" },
+        selector: "0xe39f4776",
+      },
+    ],
+    factory: (signer) => new TransferAndLockByPartitionFacet__factory(signer),
+  },
+
+  TransferAndLockFacet: {
+    name: "TransferAndLockFacet",
+    resolverKey: {
+      name: "_TRANSFER_AND_LOCK_RESOLVER_KEY",
+      value: "0xd9b300e6bf7a143b8fd8cf1d4ab050e691c862bf0f57a7d49cc08c60efe68d08",
+    },
+    inheritance: ["TransferAndLockFacetBase"],
+    methods: [
+      {
+        name: "transferAndLock",
+        signature: {
+          full: "function transferAndLock(address _to, uint256 _amount, bytes _data, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
+          canonical: "transferAndLock(address,uint256,bytes,uint256)",
+        },
+        selector: "0x0e92b90b",
+      },
+    ],
+    events: [
+      {
+        name: "DelegateVotesChanged",
+        signature: {
+          full: "event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance)",
+          canonical: "DelegateVotesChanged(address,uint256,uint256)",
+        },
+        topic0: "0xdec2bacdd2f05b59de34da9b523dff8be42e5e38e818c82fdb0bae774387a724",
+      },
+      {
+        name: "PartitionTransferredAndLocked",
+        signature: {
+          full: "event PartitionTransferredAndLocked(bytes32 indexed partition, address indexed from, address to, uint256 value, bytes data, uint256 expirationTimestamp, uint256 lockId)",
+          canonical: "PartitionTransferredAndLocked(bytes32,address,address,uint256,bytes,uint256,uint256)",
+        },
+        topic0: "0xc2b09c570c5d1b74fb7cc5594554d1aa9fe25ad5b037856dfd980f3bbe17dda9",
+      },
+      {
+        name: "Transfer",
+        signature: {
+          full: "event Transfer(address indexed from, address indexed to, uint256 value)",
+          canonical: "Transfer(address,address,uint256)",
+        },
+        topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+      },
+      {
+        name: "TransferByPartition",
+        signature: {
+          full: "event TransferByPartition(bytes32 indexed _fromPartition, address _operator, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)",
+          canonical: "TransferByPartition(bytes32,address,address,address,uint256,bytes,bytes)",
+        },
+        topic0: "0xff4e9a26af4eb73b8bacfaa4abd4fea03d9448e7b912dc5ff4019048875aa2d4",
+      },
+    ],
+    errors: [
+      {
+        name: "AbafChangeForBlockForbidden",
+        signature: {
+          full: "error AbafChangeForBlockForbidden(uint256 blockNumber)",
+          canonical: "AbafChangeForBlockForbidden(uint256)",
+        },
+        selector: "0x5a2afdff",
+      },
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRole",
+        signature: {
+          full: "error AccountHasNoRole(address account, bytes32 role)",
+          canonical: "AccountHasNoRole(address,bytes32)",
+        },
+        selector: "0xa1180aad",
+      },
+      {
+        name: "InsufficientBalance",
+        signature: {
+          full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
+          canonical: "InsufficientBalance(address,uint256,uint256,bytes32)",
+        },
+        selector: "0x5d6824c4",
+      },
+      {
+        name: "InvalidPartition",
+        signature: {
+          full: "error InvalidPartition(address account, bytes32 partition)",
+          canonical: "InvalidPartition(address,bytes32)",
+        },
+        selector: "0xbf84f4ec",
+      },
+      {
+        name: "NotAllowedInMultiPartitionMode",
+        signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
+        selector: "0x76d08f88",
       },
       {
         name: "PartitionsAreProtectedAndNoRole",
@@ -13027,14 +13153,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x0e92b90b",
       },
-      {
-        name: "transferAndLockByPartition",
-        signature: {
-          full: "function transferAndLockByPartition(bytes32 _partition, address _to, uint256 _amount, bytes _data, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
-          canonical: "transferAndLockByPartition(bytes32,address,uint256,bytes,uint256)",
-        },
-        selector: "0x3bd407b9",
-      },
     ],
     events: [
       {
@@ -13115,14 +13233,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
         selector: "0x76d08f88",
-      },
-      {
-        name: "PartitionNotAllowedInSinglePartitionMode",
-        signature: {
-          full: "error PartitionNotAllowedInSinglePartitionMode(bytes32 partition)",
-          canonical: "PartitionNotAllowedInSinglePartitionMode(bytes32)",
-        },
-        selector: "0xb96d9539",
       },
       {
         name: "PartitionsAreProtectedAndNoRole",
@@ -13181,14 +13291,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x0e92b90b",
       },
-      {
-        name: "transferAndLockByPartition",
-        signature: {
-          full: "function transferAndLockByPartition(bytes32 _partition, address _to, uint256 _amount, bytes _data, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
-          canonical: "transferAndLockByPartition(bytes32,address,uint256,bytes,uint256)",
-        },
-        selector: "0x3bd407b9",
-      },
     ],
     events: [
       {
@@ -13269,14 +13371,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
         selector: "0x76d08f88",
-      },
-      {
-        name: "PartitionNotAllowedInSinglePartitionMode",
-        signature: {
-          full: "error PartitionNotAllowedInSinglePartitionMode(bytes32 partition)",
-          canonical: "PartitionNotAllowedInSinglePartitionMode(bytes32)",
-        },
-        selector: "0xb96d9539",
       },
       {
         name: "PartitionsAreProtectedAndNoRole",
@@ -13335,14 +13429,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x0e92b90b",
       },
-      {
-        name: "transferAndLockByPartition",
-        signature: {
-          full: "function transferAndLockByPartition(bytes32 _partition, address _to, uint256 _amount, bytes _data, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
-          canonical: "transferAndLockByPartition(bytes32,address,uint256,bytes,uint256)",
-        },
-        selector: "0x3bd407b9",
-      },
     ],
     events: [
       {
@@ -13423,14 +13509,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
         selector: "0x76d08f88",
-      },
-      {
-        name: "PartitionNotAllowedInSinglePartitionMode",
-        signature: {
-          full: "error PartitionNotAllowedInSinglePartitionMode(bytes32 partition)",
-          canonical: "PartitionNotAllowedInSinglePartitionMode(bytes32)",
-        },
-        selector: "0xb96d9539",
       },
       {
         name: "PartitionsAreProtectedAndNoRole",
@@ -13737,6 +13815,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x549bdd6e",
       },
       {
+        name: "getTotalVotingHolders",
+        signature: {
+          full: "function getTotalVotingHolders(uint256 _voteID) view returns (uint256 totalHolders_)",
+          canonical: "getTotalVotingHolders(uint256)",
+        },
+        selector: "0x92c51818",
+      },
+      {
         name: "getVoting",
         signature: {
           full: "function getVoting(uint256 _voteID) view returns (((uint256 recordDate, bytes data) voting, uint256 snapshotId) registeredVoting_, bool isDisabled_)",
@@ -13759,6 +13845,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "getVotingFor(uint256,address)",
         },
         selector: "0x7633eccf",
+      },
+      {
+        name: "getVotingHolders",
+        signature: {
+          full: "function getVotingHolders(uint256 _voteID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+          canonical: "getVotingHolders(uint256,uint256,uint256)",
+        },
+        selector: "0x009f64ac",
       },
       {
         name: "setVoting",
@@ -13856,51 +13950,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     factory: (signer) => new VotingFacet__factory(getLibLinks("clearingReadOps") as any, signer),
     timeTravelFactory: (signer) => new VotingFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
-  },
-
-  VotingSecurityHoldersFacet: {
-    name: "VotingSecurityHoldersFacet",
-    description:
-      "Diamond facet that exposes voting security-holder queries via `IVotingSecurityHolders`, registered under `_VOTING_SECURITY_HOLDERS_RESOLVER_KEY`.",
-    resolverKey: {
-      name: "_VOTING_SECURITY_HOLDERS_RESOLVER_KEY",
-      value: "0xa8793316b6a7c7511ede839fefe35986fc60ee1b014e99873627ab40febd5924",
-    },
-    inheritance: ["VotingSecurityHolders", "IStaticFunctionSelectors"],
-    methods: [
-      {
-        name: "getTotalVotingHolders",
-        signature: {
-          full: "function getTotalVotingHolders(uint256 _voteID) view returns (uint256 totalHolders_)",
-          canonical: "getTotalVotingHolders(uint256)",
-        },
-        selector: "0x92c51818",
-      },
-      {
-        name: "getVotingHolders",
-        signature: {
-          full: "function getVotingHolders(uint256 _voteID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
-          canonical: "getVotingHolders(uint256,uint256,uint256)",
-        },
-        selector: "0x009f64ac",
-      },
-    ],
-    errors: [
-      {
-        name: "SnapshotIdDoesNotExists",
-        signature: {
-          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
-          canonical: "SnapshotIdDoesNotExists(uint256)",
-        },
-        selector: "0x8e81eb83",
-      },
-      {
-        name: "SnapshotIdNull",
-        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
-        selector: "0xf128004d",
-      },
-    ],
-    factory: (signer) => new VotingSecurityHoldersFacet__factory(signer),
   },
 };
 
@@ -14073,10 +14122,10 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
       {
         name: "getLatestVersion",
         signature: {
-          full: "function getLatestVersion() view returns (uint256 latestVersion_)",
-          canonical: "getLatestVersion()",
+          full: "function getLatestVersion(bytes32 _businessLogicKey) view returns (uint256 latestVersion_)",
+          canonical: "getLatestVersion(bytes32)",
         },
-        selector: "0x0e6d1de9",
+        selector: "0xdd3b014c",
       },
       {
         name: "getLatestVersionByConfiguration",
@@ -14085,6 +14134,14 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
           canonical: "getLatestVersionByConfiguration(bytes32)",
         },
         selector: "0x5bf316cf",
+      },
+      {
+        name: "getLatestVersions",
+        signature: {
+          full: "function getLatestVersions(bytes32[] _businessLogicKeys) view returns (uint256[] latestVersions_)",
+          canonical: "getLatestVersions(bytes32[])",
+        },
+        selector: "0xb1a793af",
       },
       {
         name: "getRoleCountFor",
@@ -14129,10 +14186,10 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
       {
         name: "getVersionStatus",
         signature: {
-          full: "function getVersionStatus(uint256 _version) view returns (uint8 status_)",
-          canonical: "getVersionStatus(uint256)",
+          full: "function getVersionStatus(bytes32 _businessLogicKey, uint256 _version) view returns (uint8 status_)",
+          canonical: "getVersionStatus(bytes32,uint256)",
         },
-        selector: "0x65b24dfc",
+        selector: "0xd9e4725a",
       },
       {
         name: "grantRole",

@@ -9,6 +9,7 @@ import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
 
 const AMOUNT = 1000;
+const DATA = "0x1234";
 const MAX_SUPPLY = 10000000;
 const EMPTY_VC_ID = EMPTY_STRING;
 const WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
@@ -296,6 +297,40 @@ describe("MintByPartitionFacet Tests", () => {
           data: EMPTY_HEX_BYTES,
         }),
       ).to.be.revertedWithCustomError(asset, "MaxSupplyReachedForPartition");
+    });
+
+    it("GIVEN an issuer WHEN issueByPartition with max supply after balance adjustment THEN succeeds", async () => {
+      const balanceAdjustmentData = {
+        executionDate: 5000n,
+        factor: 3,
+        decimals: 0,
+      };
+
+      await asset.changeSystemTimestamp(100n);
+      await asset.grantRole(ATS_ROLES.CAP_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+
+      await asset.setMaxSupplyByPartition(CUSTOM_PARTITION, AMOUNT);
+      await asset.issueByPartition({
+        partition: CUSTOM_PARTITION,
+        tokenHolder: signer_E.address,
+        value: AMOUNT,
+        data: DATA,
+      });
+      await asset.setScheduledBalanceAdjustment(balanceAdjustmentData);
+
+      await asset.changeSystemTimestamp(balanceAdjustmentData.executionDate + 1n);
+
+      await expect(
+        asset.issueByPartition({
+          partition: CUSTOM_PARTITION,
+          tokenHolder: signer_E.address,
+          value: AMOUNT,
+          data: DATA,
+        }),
+      )
+        .to.be.revertedWithCustomError(asset, "MaxSupplyReachedForPartition")
+        .withArgs(CUSTOM_PARTITION, balanceAdjustmentData.factor * AMOUNT);
     });
   });
 });

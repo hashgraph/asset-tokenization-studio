@@ -129,6 +129,7 @@ const EQUITY_FACETS = [
   "SecurityHoldersFacet",
   "SsiManagementFacet",
   "TransferAndLockFacet",
+  "TransferAndLockByPartitionFacet",
   "VotingFacet",
   "VotingSecurityHoldersFacet",
 

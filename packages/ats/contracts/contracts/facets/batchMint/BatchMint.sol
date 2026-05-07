@@ -38,7 +38,7 @@ abstract contract BatchMint is IBatchMint, Modifiers {
         for (uint256 i; i < length; ) {
             ERC1594StorageWrapper.checkIdentity(address(0), _toList[i]);
             ERC1594StorageWrapper.checkCompliance(address(0), _toList[i], false);
-            CapStorageWrapper.requireWithinMaxSupply(_amounts[i], TimeTravelStorageWrapper.getBlockTimestamp());
+            CapStorageWrapper.checkMaxSupply(_amounts[i], TimeTravelStorageWrapper.getBlockTimestamp());
             unchecked {
                 ++i;
             }
