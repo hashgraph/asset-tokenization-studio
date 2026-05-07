@@ -106,6 +106,16 @@ describe("BatchMint Tests", () => {
         });
       });
 
+      it("GIVEN individual amounts each below maxSupply but cumulative total exceeds it WHEN batchMint THEN transaction fails with MaxSupplyReached", async () => {
+        // Each amount is below MAX_SUPPLY individually, so the old per-item check would pass.
+        // The cumulative total (MAX_SUPPLY / 2 + 1) * 2 > MAX_SUPPLY, so the fix must catch it.
+        const amountPerRecipient = MAX_SUPPLY / 2 + 1;
+        const toList = [signer_D.address, signer_E.address];
+        const amounts = [amountPerRecipient, amountPerRecipient];
+
+        await expect(asset.batchMint(toList, amounts)).to.be.revertedWithCustomError(asset, "MaxSupplyReached");
+      });
+
       it("GIVEN an account without issuer role WHEN batchMint THEN transaction fails with AccountHasNoRole", async () => {
         const mintAmount = AMOUNT / 2;
         const toList = [signer_D.address, signer_E.address];
