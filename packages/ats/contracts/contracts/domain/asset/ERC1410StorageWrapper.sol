@@ -389,6 +389,7 @@ library ERC1410StorageWrapper {
     }
 
     function beforeTokenTransfer(bytes32 partition, address from, address to, uint256 amount) internal {
+        if (from == to) return;
         triggerAndSyncAll(partition, from, to);
 
         bool addTo;
