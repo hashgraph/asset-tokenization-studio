@@ -35,10 +35,7 @@ contract VotingSecurityHoldersFacet is VotingSecurityHolders, IStaticFunctionSel
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        uint256 selectorIndex = 1;
-        staticInterfaceIds_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticInterfaceIds_[--selectorIndex] = type(IVotingSecurityHolders).interfaceId;
-        }
+        staticInterfaceIds_ = new bytes4[](1);
+        staticInterfaceIds_[0] = type(IVotingSecurityHolders).interfaceId;
     }
 }
