@@ -694,11 +694,13 @@ library ERC1410StorageWrapper {
         uint256 lastIndex = erc1410Storage.partitions[holder].length - 1;
         if (index != lastIndex) {
             erc1410Storage.partitions[holder][index] = erc1410Storage.partitions[holder][lastIndex];
-            AdjustBalancesStorageWrapper.updateLabafByTokenHolderAndPartitionIndex(
-                AdjustBalancesStorageWrapper.getLabafByUserAndPartitionIndex(lastIndex + 1, holder),
-                holder,
-                index + 1
-            );
+            unchecked {
+                AdjustBalancesStorageWrapper.updateLabafByTokenHolderAndPartitionIndex(
+                    AdjustBalancesStorageWrapper.getLabafByUserAndPartitionIndex(lastIndex + 1, holder),
+                    holder,
+                    index + 1
+                );
+            }
 
             erc1410Storage.partitionToIndex[holder][erc1410Storage.partitions[holder][index].partition] = index + 1;
         }
