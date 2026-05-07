@@ -32,11 +32,6 @@ abstract contract Pause is IPause, Modifiers {
     }
 
     /// @inheritdoc IPause
-    function isPaused() external view override returns (bool) {
-        return PauseStorageWrapper.isPaused();
-    }
-
-    /// @inheritdoc IPause
     function paused() external view override returns (bool) {
         return PauseStorageWrapper.isPaused();
     }

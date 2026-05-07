@@ -61,14 +61,6 @@ interface IPause {
      * @notice Checks whether the token is currently paused.
      * @dev Returns `true` if the token's own pause flag is set, or if any registered external
      *      pause contract returns `true` from its `isPaused()` call (OR semantics).
-     * @return True if the token is paused by any source, false otherwise.
-     */
-    function isPaused() external view returns (bool);
-
-    /**
-     * @notice Checks whether the token is currently paused.
-     * @dev Returns `true` if the token's own pause flag is set, or if any registered external
-     *      pause contract returns `true` from its `isPaused()` call (OR semantics).
      *      created to be compatible with ERC3643
      * @return True if the token is paused by any source, false otherwise.
      */

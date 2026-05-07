@@ -85,7 +85,7 @@ describe("DiamondCutManager", () => {
   });
 
   afterEach(async () => {
-    const isPaused = await pause.isPaused();
+    const isPaused = await pause.paused();
     if (isPaused) {
       await pause.connect(signer_B).unpause();
     }

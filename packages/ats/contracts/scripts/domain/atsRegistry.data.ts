@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-07T13:39:00.543Z
+ * Generated: 2026-05-07T13:43:18.807Z
  * Facets: 122
  * Infrastructure: 2
  *
@@ -10173,11 +10173,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["Pause", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "isPaused",
-        signature: { full: "function isPaused() view returns (bool)", canonical: "isPaused()" },
-        selector: "0xb187bd26",
-      },
-      {
         name: "pause",
         signature: { full: "function pause() returns (bool success_)", canonical: "pause()" },
         selector: "0x8456cb59",
@@ -13953,11 +13948,6 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
           canonical: "initialize_BusinessLogicResolver()",
         },
         selector: "0xb86ffa1a",
-      },
-      {
-        name: "isPaused",
-        signature: { full: "function isPaused() view returns (bool)", canonical: "isPaused()" },
-        selector: "0xb187bd26",
       },
       {
         name: "isResolverProxyConfigurationRegistered",

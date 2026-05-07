@@ -83,10 +83,7 @@ describe("Pause Tests", () => {
       .to.emit(asset, "Paused")
       .withArgs(await unknownSigner.getAddress());
 
-    let paused = await asset.isPaused();
-    expect(paused).to.be.equal(true);
-
-    paused = await asset.paused();
+    let paused = await asset.paused();
     expect(paused).to.be.equal(true);
 
     // UNPAUSE
@@ -94,28 +91,25 @@ describe("Pause Tests", () => {
       .to.emit(asset, "Unpaused")
       .withArgs(await unknownSigner.getAddress());
 
-    paused = await asset.isPaused();
-    expect(paused).to.be.equal(false);
-
     paused = await asset.paused();
     expect(paused).to.be.equal(false);
   });
 
   it("GIVEN an external pause WHEN isPaused THEN it reflects the external pause state", async () => {
     // Initially unpaused
-    let isPaused = await asset.isPaused();
+    let isPaused = await asset.paused();
     expect(isPaused).to.be.false;
 
     // Set external pause to true
     await externalPauseMock.setPaused(true);
-    isPaused = await asset.isPaused();
+    isPaused = await asset.paused();
     expect(isPaused).to.be.true;
 
     // Set external pause to false
     await externalPauseMock.setPaused(false, {
       gasLimit: GAS_LIMIT.default,
     });
-    isPaused = await asset.isPaused();
+    isPaused = await asset.paused();
     expect(isPaused).to.be.false;
   });
 
@@ -124,7 +118,7 @@ describe("Pause Tests", () => {
     await asset.pause();
 
     // Check isPaused
-    const isPaused = await asset.isPaused();
+    const isPaused = await asset.paused();
     expect(isPaused).to.be.true;
   });
 
@@ -135,14 +129,14 @@ describe("Pause Tests", () => {
 
     // Set external pause to true
     await externalPauseMock.setPaused(true);
-    let isPaused = await asset.isPaused();
+    let isPaused = await asset.paused();
     expect(isPaused).to.be.true;
 
     // Set external pause to false
     await externalPauseMock.setPaused(false, {
       gasLimit: GAS_LIMIT.default,
     });
-    isPaused = await asset.isPaused();
+    isPaused = await asset.paused();
     expect(isPaused).to.be.false;
   });
 });
