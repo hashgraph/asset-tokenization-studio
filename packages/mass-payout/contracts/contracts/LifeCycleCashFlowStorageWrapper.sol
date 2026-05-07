@@ -25,12 +25,15 @@ import {
     ICouponSecurityHolders
 } from "@hashgraph/asset-tokenization-contracts/contracts/facets/couponSecurityHolders/ICouponSecurityHolders.sol";
 import { IBondRead } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/bond/IBondRead.sol";
+import { IPrincipal } from "@hashgraph/asset-tokenization-contracts/contracts/facets/principal/IPrincipal.sol";
 import { IEquity } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/equity/IEquity.sol";
 import { IDividend } from "@hashgraph/asset-tokenization-contracts/contracts/facets/dividend/IDividend.sol";
 import {
     IDividendSecurityHolders
 } from "@hashgraph/asset-tokenization-contracts/contracts/facets/dividendSecurityHolders/IDividendSecurityHolders.sol";
-import { ISecurity } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/security/ISecurity.sol";
+import {
+    ISecurityHolders
+} from "@hashgraph/asset-tokenization-contracts/contracts/facets/securityHolders/ISecurityHolders.sol";
 import { _PERCENTAGE_DECIMALS_SIZE } from "./constants/values.sol";
 import { _LIFECYCLE_CASH_FLOW_STORAGE_POSITION } from "./constants/storagePositions.sol";
 
@@ -132,7 +135,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal returns (address[] memory failed_, address[] memory succeeded_, uint256[] memory paidAmount_, bool) {
-        address[] memory holders = ISecurity(_bond).getSecurityHolders(_pageIndex, _pageLength);
+        address[] memory holders = ISecurityHolders(_bond).getSecurityHolders(_pageIndex, _pageLength);
 
         if (holders.length == 0) return (failed_, succeeded_, paidAmount_, false);
         (failed_, succeeded_, paidAmount_) = _executeBondCashOutByAddresses(_bond, holders);
@@ -864,7 +867,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         address _holder,
         uint8 _paymentTokenDecimals
     ) private view returns (uint256) {
-        IBondRead.PrincipalFor memory principalFor = IBondRead(_asset).getPrincipalFor(_holder);
+        IPrincipal.PrincipalFor memory principalFor = IPrincipal(_asset).getPrincipalFor(_holder);
         return (principalFor.numerator * 10 ** _paymentTokenDecimals) / principalFor.denominator;
     }
 

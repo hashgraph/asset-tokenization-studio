@@ -9,11 +9,9 @@ import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticF
 
 abstract contract BondUSAReadFacetBase is BondRead, IStaticFunctionSelectors, Security {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 4;
+        uint256 selectorIndex = 2;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);
         unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.getTotalSecurityHolders.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getSecurityHolders.selector;
             staticFunctionSelectors_[--selectorIndex] = this.getSecurityRegulationData.selector;
             staticFunctionSelectors_[--selectorIndex] = this.getBondDetails.selector;
         }

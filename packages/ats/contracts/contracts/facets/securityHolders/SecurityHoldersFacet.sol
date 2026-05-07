@@ -1,0 +1,34 @@
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
+
+import { SecurityHolders } from "./SecurityHolders.sol";
+import { ISecurityHolders } from "./ISecurityHolders.sol";
+import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { _SECURITYHOLDERS_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
+
+/**
+ * @title SecurityHoldersFacet
+ * @notice Facet for security holder operations
+ * @dev Registers function selectors for Diamond routing
+ */
+contract SecurityHoldersFacet is SecurityHolders, IStaticFunctionSelectors {
+    /// @inheritdoc IStaticFunctionSelectors
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
+        staticResolverKey_ = _SECURITYHOLDERS_RESOLVER_KEY;
+    }
+
+    /// @inheritdoc IStaticFunctionSelectors
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](2);
+        staticFunctionSelectors_[selectorIndex++] = this.getSecurityHolders.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getTotalSecurityHolders.selector;
+    }
+
+    /// @inheritdoc IStaticFunctionSelectors
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(ISecurityHolders).interfaceId;
+    }
+}

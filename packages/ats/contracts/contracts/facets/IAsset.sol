@@ -29,6 +29,7 @@ import { IAllowance } from "./allowance/IAllowance.sol";
 
 // Layer 1 — External lists
 import { IERC1410 } from "./layer_1/ERC1400/ERC1410/IERC1410.sol";
+
 import { IOperator } from "./operator/IOperator.sol";
 import { ITransfer } from "./transfer/ITransfer.sol";
 
@@ -89,21 +90,23 @@ import { ILockAtSnapshot } from "./lockAtSnapshot/ILockAtSnapshot.sol";
 import { IMaturityByPartition } from "./maturityByPartition/IMaturityByPartition.sol";
 import { ICouponListing } from "./couponListing/ICouponListing.sol";
 import { ICouponSecurityHolders } from "./couponSecurityHolders/ICouponSecurityHolders.sol";
+import { ISecurityHolders } from "./securityHolders/ISecurityHolders.sol";
 
 import { ILock } from "./layer_1/lock/ILock.sol";
 import { ILockByPartition } from "./lockByPartition/ILockByPartition.sol";
 import { IFreeze } from "./freeze/IFreeze.sol";
 import { IBatchFreeze } from "./batchFreeze/IBatchFreeze.sol";
 import { ISnapshots } from "./layer_1/snapshot/ISnapshots.sol";
+import { ISnapshotsByPartition } from "./snapshotsByPartition/ISnapshotsByPartition.sol";
 import { ISecurityHoldersAtSnapshot } from "./securityHoldersAtSnapshot/ISecurityHoldersAtSnapshot.sol";
 import { IFreezeAtSnapshot } from "./freezeAtSnapshot/IFreezeAtSnapshot.sol";
 import { IFreezeAtSnapshotByPartition } from "./freezeAtSnapshotByPartition/IFreezeAtSnapshotByPartition.sol";
 import { IIdentity } from "./identity/IIdentity.sol";
 import { ICoreAtSnapshot } from "./coreAtSnapshot/ICoreAtSnapshot.sol";
-import { IClearingTransfer } from "./layer_1/clearing/IClearingTransfer.sol";
-import { IClearingRedeem } from "./layer_1/clearing/IClearingRedeem.sol";
 import { IOperatorClearingByPartition } from "./operatorClearingByPartition/IOperatorClearingByPartition.sol";
-import { IClearingHoldCreation } from "./layer_1/clearing/IClearingHoldCreation.sol";
+import {
+    IProtectedClearingHoldByPartition
+} from "./protectedClearingHoldByPartition/IProtectedClearingHoldByPartition.sol";
 import {
     IOperatorClearingHoldByPartition
 } from "./layer_1/clearing/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol";
@@ -115,6 +118,7 @@ import { IMintByPartition } from "./mintByPartition/IMintByPartition.sol";
 import { IBurnByPartition } from "./burnByPartition/IBurnByPartition.sol";
 import { IClearingByPartition } from "./clearingByPartition/IClearingByPartition.sol";
 import { IClearingHoldByPartition } from "./clearingHoldByPartition/IClearingHoldByPartition.sol";
+import { IProtectedClearingByPartition } from "./protectedClearingByPartition/IProtectedClearingByPartition.sol";
 import { IHoldFacet } from "./hold/IHoldFacet.sol";
 import { IBatchController } from "./batchController/IBatchController.sol";
 import { IBurn } from "./burn/IBurn.sol";
@@ -222,6 +226,7 @@ interface IAsset is
     IFreeze,
     IBatchFreeze,
     ISnapshots,
+    ISnapshotsByPartition,
     ISecurityHoldersAtSnapshot,
     IFreezeAtSnapshot,
     IIdentity,
@@ -229,13 +234,12 @@ interface IAsset is
     ICoreAtSnapshot,
     // Clearing interfaces
     IClearing,
-    IClearingTransfer,
-    IClearingRedeem,
     IOperatorClearingByPartition,
-    IClearingHoldCreation,
+    IProtectedClearingHoldByPartition,
     IOperatorClearingHoldByPartition,
     IClearingByPartition,
     IClearingHoldByPartition,
+    IProtectedClearingByPartition,
     // Additional ERC
     IComplianceFacet,
     IComplianceByPartition,
@@ -262,5 +266,6 @@ interface IAsset is
     IBatchTransfer,
     IMetadata,
     IDeactivate,
-    IOperatorByPartition
+    IOperatorByPartition,
+    ISecurityHolders
 {}
