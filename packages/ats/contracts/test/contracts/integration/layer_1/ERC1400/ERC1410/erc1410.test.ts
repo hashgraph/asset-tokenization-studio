@@ -3535,18 +3535,6 @@ describe("Clearing Tests", () => {
       await asset.connect(signer_A).deactivateClearing();
     });
 
-    describe("bug Transfer", async () => {
-      it("GIVEN valid parameters WHEN transferByPartition THEN transaction succeeds and emits Transfer", async () => {
-        await expect(
-          asset
-            .connect(signer_A)
-            .transferByPartition(_DEFAULT_PARTITION, { to: signer_C.address, value: _AMOUNT }, "0x"),
-        )
-          .to.emit(asset, "Transfer")
-          .withArgs(signer_A.address, signer_C.address, _AMOUNT);
-      });
-    });
-
     describe("protectedTransferFromByPartition", async () => {
       beforeEach(async () => {
         const packedData = ethers.AbiCoder.defaultAbiCoder().encode(

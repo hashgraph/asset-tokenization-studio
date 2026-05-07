@@ -3,10 +3,17 @@
 import { expect } from "chai";
 import { ethers, network } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
+import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { type ResolverProxy, type IAsset, ComplianceMock } from "@contract-types";
 import { DEFAULT_PARTITION, ZERO, EMPTY_STRING, ADDRESS_ZERO, ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployAtsInfrastructureFixture, deployEquityTokenFixture, MAX_UINT256 } from "@test";
+import {
+  deployAtsInfrastructureFixture,
+  deployEquityTokenFixture,
+  EVENT_NAMES,
+  MAX_UINT256,
+  expectExactlyOneEvent,
+} from "@test";
 import { executeRbac } from "@test";
 
 const amount = 1;
@@ -554,13 +561,22 @@ describe("ProtectedPartitions Tests", () => {
           data: "0x",
         });
 
-        await asset
+        const tx = asset
           .connect(signer_B)
           .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
             deadline: deadline,
             nonce: 1,
             signature: signature,
           });
+        await expect(tx)
+          .to.emit(asset, EVENT_NAMES.PROTECTED_TRANSFERRED_BY_PARTITION)
+          .withArgs(signer_B.address, signer_A.address, signer_B.address, amount, DEFAULT_PARTITION, [
+            deadline,
+            1,
+            signature,
+          ]);
+        const receipt = await (await tx).wait();
+        expectExactlyOneEvent(receipt!, asset, EVENT_NAMES.PROTECTED_TRANSFERRED_BY_PARTITION);
       });
     });
 
@@ -763,9 +779,24 @@ describe("ProtectedPartitions Tests", () => {
           value: amount,
           data: "0x",
         });
-        await asset
+        const tx = asset
           .connect(signer_B)
           .protectedClearingTransferByPartition(protectedClearingOperation, amount, signer_C.address, signature);
+        await expect(tx)
+          .to.emit(asset, EVENT_NAMES.PROTECTED_CLEARED_TRANSFER_BY_PARTITION)
+          .withArgs(
+            signer_B.address,
+            protectedClearingOperation.from,
+            signer_C.address,
+            protectedClearingOperation.clearingOperation.partition,
+            anyValue,
+            amount,
+            protectedClearingOperation.clearingOperation.expirationTimestamp,
+            protectedClearingOperation.clearingOperation.data,
+            "0x",
+          );
+        const receipt = await (await tx).wait();
+        expectExactlyOneEvent(receipt!, asset, EVENT_NAMES.PROTECTED_CLEARED_TRANSFER_BY_PARTITION);
         // HOLDS
         protectedClearingOperation.nonce = 2;
         const messageHold = {
@@ -780,9 +811,21 @@ describe("ProtectedPartitions Tests", () => {
           value: amount,
           data: "0x",
         });
-        await asset
+        const txHold = asset
           .connect(signer_B)
           .protectedClearingCreateHoldByPartition(protectedClearingOperation, hold, signatureHold);
+        await expect(txHold).to.emit(asset, EVENT_NAMES.PROTECTED_CLEARED_HOLD_BY_PARTITION).withArgs(
+          signer_B.address, // operator
+          protectedClearingOperation.from, // tokenHolder
+          protectedClearingOperation.clearingOperation.partition, // partition
+          anyValue, // clearingId (runtime)
+          [hold.amount, hold.expirationTimestamp, hold.escrow, hold.to, hold.data], // hold tuple
+          protectedClearingOperation.clearingOperation.expirationTimestamp, // expirationDate
+          protectedClearingOperation.clearingOperation.data, // data
+          "0x", // operatorData
+        );
+        const receiptHold = await (await txHold).wait();
+        expectExactlyOneEvent(receiptHold!, asset, EVENT_NAMES.PROTECTED_CLEARED_HOLD_BY_PARTITION);
         // REDEEMS
         protectedClearingOperation.nonce = 3;
         const messageRedeem = {
@@ -797,9 +840,23 @@ describe("ProtectedPartitions Tests", () => {
           value: amount,
           data: "0x",
         });
-        await asset
+        const txRedeem = asset
           .connect(signer_B)
           .protectedClearingRedeemByPartition(protectedClearingOperation, amount, signatureRedeem);
+        await expect(txRedeem)
+          .to.emit(asset, EVENT_NAMES.PROTECTED_CLEARED_REDEEM_BY_PARTITION)
+          .withArgs(
+            signer_B.address,
+            protectedClearingOperation.from,
+            protectedClearingOperation.clearingOperation.partition,
+            anyValue,
+            amount,
+            protectedClearingOperation.clearingOperation.expirationTimestamp,
+            protectedClearingOperation.clearingOperation.data,
+            "0x",
+          );
+        const receiptRedeem = await (await txRedeem).wait();
+        expectExactlyOneEvent(receiptRedeem!, asset, EVENT_NAMES.PROTECTED_CLEARED_REDEEM_BY_PARTITION);
       });
     });
 
@@ -820,9 +877,24 @@ describe("ProtectedPartitions Tests", () => {
           value: amount,
           data: "0x",
         });
-        await asset
+        const tx = asset
           .connect(signer_B)
           .protectedClearingTransferByPartition(protectedClearingOperation, amount, signer_C.address, signature);
+        await expect(tx)
+          .to.emit(asset, EVENT_NAMES.PROTECTED_CLEARED_TRANSFER_BY_PARTITION)
+          .withArgs(
+            signer_B.address,
+            protectedClearingOperation.from,
+            signer_C.address,
+            protectedClearingOperation.clearingOperation.partition,
+            anyValue,
+            amount,
+            protectedClearingOperation.clearingOperation.expirationTimestamp,
+            protectedClearingOperation.clearingOperation.data,
+            "0x",
+          );
+        const receipt = await (await tx).wait();
+        expectExactlyOneEvent(receipt!, asset, EVENT_NAMES.PROTECTED_CLEARED_TRANSFER_BY_PARTITION);
         const clearingIdentifier = {
           partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
@@ -854,13 +926,22 @@ describe("ProtectedPartitions Tests", () => {
           data: "0x",
         });
 
-        await asset
+        const tx = asset
           .connect(signer_B)
           .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
             deadline: deadline,
             nonce: 1,
             signature: signature,
           });
+        await expect(tx)
+          .to.emit(asset, EVENT_NAMES.PROTECTED_TRANSFERRED_BY_PARTITION)
+          .withArgs(signer_B.address, signer_A.address, signer_B.address, amount, DEFAULT_PARTITION, [
+            deadline,
+            1,
+            signature,
+          ]);
+        const receipt = await (await tx).wait();
+        expectExactlyOneEvent(receipt!, asset, EVENT_NAMES.PROTECTED_TRANSFERRED_BY_PARTITION);
         expect(await complianceMock.transferredHit()).to.equal(1);
       });
     });

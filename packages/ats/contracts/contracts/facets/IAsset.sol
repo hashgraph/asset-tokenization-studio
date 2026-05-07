@@ -28,7 +28,9 @@ import { ICoreAdjusted } from "./coreAdjusted/ICoreAdjusted.sol";
 import { IAllowance } from "./allowance/IAllowance.sol";
 
 // Layer 1 — External lists
-import { IERC1410 } from "./layer_1/ERC1400/ERC1410/IERC1410.sol";
+import { IERC1410Management } from "./layer_1/ERC1400/ERC1410/IERC1410Management.sol";
+import { ITransferByPartition } from "./transferByPartition/ITransferByPartition.sol";
+
 import { IOperator } from "./operator/IOperator.sol";
 import { ITransfer } from "./transfer/ITransfer.sol";
 
@@ -89,20 +91,24 @@ import { ILockAtSnapshot } from "./lockAtSnapshot/ILockAtSnapshot.sol";
 import { IMaturityByPartition } from "./maturityByPartition/IMaturityByPartition.sol";
 import { ICouponListing } from "./couponListing/ICouponListing.sol";
 import { ICouponSecurityHolders } from "./couponSecurityHolders/ICouponSecurityHolders.sol";
+import { ISecurityHolders } from "./securityHolders/ISecurityHolders.sol";
 
 import { ILock } from "./layer_1/lock/ILock.sol";
 import { ILockByPartition } from "./lockByPartition/ILockByPartition.sol";
 import { IFreeze } from "./freeze/IFreeze.sol";
 import { IBatchFreeze } from "./batchFreeze/IBatchFreeze.sol";
 import { ISnapshots } from "./layer_1/snapshot/ISnapshots.sol";
+import { ISnapshotsByPartition } from "./snapshotsByPartition/ISnapshotsByPartition.sol";
+import { ISecurityHoldersAtSnapshot } from "./securityHoldersAtSnapshot/ISecurityHoldersAtSnapshot.sol";
 import { IFreezeAtSnapshot } from "./freezeAtSnapshot/IFreezeAtSnapshot.sol";
 import { IFreezeAtSnapshotByPartition } from "./freezeAtSnapshotByPartition/IFreezeAtSnapshotByPartition.sol";
 import { IIdentity } from "./identity/IIdentity.sol";
+import { IPartitions } from "./partitions/IPartitions.sol";
 import { ICoreAtSnapshot } from "./coreAtSnapshot/ICoreAtSnapshot.sol";
-import { IClearingTransfer } from "./layer_1/clearing/IClearingTransfer.sol";
-import { IClearingRedeem } from "./layer_1/clearing/IClearingRedeem.sol";
 import { IOperatorClearingByPartition } from "./operatorClearingByPartition/IOperatorClearingByPartition.sol";
-import { IClearingHoldCreation } from "./layer_1/clearing/IClearingHoldCreation.sol";
+import {
+    IProtectedClearingHoldByPartition
+} from "./protectedClearingHoldByPartition/IProtectedClearingHoldByPartition.sol";
 import {
     IOperatorClearingHoldByPartition
 } from "./layer_1/clearing/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol";
@@ -114,6 +120,7 @@ import { IMintByPartition } from "./mintByPartition/IMintByPartition.sol";
 import { IBurnByPartition } from "./burnByPartition/IBurnByPartition.sol";
 import { IClearingByPartition } from "./clearingByPartition/IClearingByPartition.sol";
 import { IClearingHoldByPartition } from "./clearingHoldByPartition/IClearingHoldByPartition.sol";
+import { IProtectedClearingByPartition } from "./protectedClearingByPartition/IProtectedClearingByPartition.sol";
 import { IHoldFacet } from "./hold/IHoldFacet.sol";
 import { IBatchController } from "./batchController/IBatchController.sol";
 import { IBurn } from "./burn/IBurn.sol";
@@ -121,6 +128,7 @@ import { IDocumentation } from "./documentation/IDocumentation.sol";
 import { IController } from "./controller/IController.sol";
 import { IControllerHoldByPartition } from "./controllerHoldByPartition/IControllerHoldByPartition.sol";
 import { IControllerByPartition } from "./controllerByPartition/IControllerByPartition.sol";
+import { IProtectedByPartition } from "./protectedByPartition/IProtectedByPartition.sol";
 import { IProtectedHoldByPartition } from "./protectedHoldByPartition/IProtectedHoldByPartition.sol";
 import { IERC20Permit } from "./layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
 import { IEIP712 } from "./eip712/IEIP712.sol";
@@ -141,7 +149,7 @@ import { IOperatorByPartition } from "./operatorByPartition/IOperatorByPartition
  * @dev Intended for use in tests and external tooling to interact with all Diamond methods
  *      through a single typed object, rather than multiple per-facet instances.
  *
- *      Note: IHold already transitively includes IAccessControl, IERC1410,
+ *      Note: IHold already transitively includes IAccessControl, IERC1410Management,
  *      IHoldRead, and IHoldTokenHolder. IERC3643 already includes its
  *      sub-interfaces. IERC20Votes includes IERC5805 and IVotes. Solidity C3 linearisation
  *      handles the resulting diamond inheritance without conflicts.
@@ -167,7 +175,8 @@ interface IAsset is
     IOperatorHoldByPartition,
     ITransfer,
     IERC20Votes,
-    IERC1410,
+    IERC1410Management,
+    ITransferByPartition,
     IOperator,
     IERC3643,
     IRecovery,
@@ -220,19 +229,21 @@ interface IAsset is
     IFreeze,
     IBatchFreeze,
     ISnapshots,
+    ISnapshotsByPartition,
+    ISecurityHoldersAtSnapshot,
     IFreezeAtSnapshot,
     IIdentity,
+    IPartitions,
     IFreezeAtSnapshotByPartition,
     ICoreAtSnapshot,
     // Clearing interfaces
     IClearing,
-    IClearingTransfer,
-    IClearingRedeem,
     IOperatorClearingByPartition,
-    IClearingHoldCreation,
+    IProtectedClearingHoldByPartition,
     IOperatorClearingHoldByPartition,
     IClearingByPartition,
     IClearingHoldByPartition,
+    IProtectedClearingByPartition,
     // Additional ERC
     IComplianceFacet,
     IComplianceByPartition,
@@ -246,6 +257,7 @@ interface IAsset is
     IController,
     IControllerHoldByPartition,
     IControllerByPartition,
+    IProtectedByPartition,
     IProtectedHoldByPartition,
     IERC20Permit,
     IEIP712,
@@ -258,5 +270,6 @@ interface IAsset is
     IBatchTransfer,
     IMetadata,
     IDeactivate,
-    IOperatorByPartition
+    IOperatorByPartition,
+    ISecurityHolders
 {}

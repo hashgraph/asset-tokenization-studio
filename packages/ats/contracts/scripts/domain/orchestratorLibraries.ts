@@ -106,9 +106,9 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   ERC20ReadFacet: ["tokenCoreOps"],
   ERC20VotesFacet: ["clearingReadOps"],
   ERC1410ManagementFacet: ["tokenCoreOps"],
+  ProtectedByPartitionFacet: ["tokenCoreOps"],
   ControllerByPartitionFacet: ["tokenCoreOps"],
-  ERC1410TokenHolderFacet: ["tokenCoreOps"],
-  ERC1410ReadFacet: ["tokenCoreOps"],
+  TransferByPartitionFacet: ["tokenCoreOps"],
   ERC1410IssuerFacet: ["tokenCoreOps"],
   MintByPartitionFacet: ["tokenCoreOps"],
   BurnByPartitionFacet: ["tokenCoreOps"],
@@ -125,13 +125,12 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   HoldFacet: ["holdOps"],
   HoldByPartitionFacet: ["holdOps"],
   // ClearingOps dependencies - clearing transfer operations
-  ClearingTransferFacet: ["clearingOps", "clearingProtectedOps"],
-  ClearingRedeemFacet: ["clearingOps", "clearingProtectedOps"],
-  ClearingHoldCreationFacet: ["clearingProtectedOps"],
+  ProtectedClearingHoldByPartitionFacet: ["clearingProtectedOps"],
   ClearingHoldByPartitionFacet: ["clearingOps", "clearingReadOps"],
   OperatorClearingHoldByPartitionFacet: ["clearingOps"],
   ClearingByPartitionFacet: ["clearingOps", "clearingReadOps"],
   ClearingFacet: ["clearingReadOps"],
+  ProtectedClearingByPartitionFacet: ["clearingProtectedOps"],
   // BalanceTrackerFacet + BalanceTrackerByPartitionFacet depend on SnapshotsStorageWrapper which uses ClearingReadOps
   CoreAtSnapshotFacet: ["clearingReadOps"],
   BalanceTrackerFacet: ["clearingReadOps"],
@@ -151,9 +150,6 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   // Layer 2 facet families — coupon/dividend/voting/amortization reach ClearingReadOps
   AmortizationFacet: ["clearingReadOps"],
   CouponFacet: ["clearingReadOps"],
-  CouponFixedRateFacet: ["clearingReadOps"],
-  CouponKpiLinkedRateFacet: ["clearingReadOps"],
-  CouponSustainabilityPerformanceTargetRateFacet: ["clearingReadOps"],
   DividendFacet: ["clearingReadOps"],
   VotingFacet: ["clearingReadOps"],
 };

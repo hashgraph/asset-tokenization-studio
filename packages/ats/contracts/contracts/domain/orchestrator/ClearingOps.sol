@@ -688,13 +688,15 @@ library ClearingOps {
     }
 
     /**
-     * @notice Emits a cleared transfer event appropriate to the third party
-     * type
-     * @dev Dispatches to one of four event variants:
-     * ClearedTransferByPartition (NULL),
-     * ClearedTransferFromByPartition (AUTHORISED),
-     * ClearedOperatorTransferByPartition (OPERATOR),
-     * ProtectedClearedTransferByPartition (PROTECTED).
+     * @notice Emits a cleared transfer event appropriate to the third party type.
+     * @dev Dispatches to one of three event variants:
+     *      `ClearedTransferByPartition` (NULL),
+     *      `ClearedTransferFromByPartition` (AUTHORISED),
+     *      `ClearedOperatorTransferByPartition` (OPERATOR).
+     *      Emits nothing when `_thirdPartyType == PROTECTED` — the protected variant's event
+     *      (`ProtectedClearedTransferByPartition`) is owned and emitted by the writer
+     *      (`ProtectedClearingByPartitionFacet.protectedClearingTransferByPartition`),
+     *      keeping a single emit per external call (per the project event-emission rule).
      * @param _from Token holder
      * @param _to Intended recipient
      * @param _partition Partition
@@ -758,27 +760,18 @@ library ClearingOps {
             );
             return;
         }
-        emit IClearingTypes.ProtectedClearedTransferByPartition(
-            EvmAccessors.getMsgSender(),
-            _from,
-            _to,
-            _partition,
-            _clearingId,
-            _amount,
-            _expirationTimestamp,
-            _data,
-            _operatorData
-        );
     }
 
     /**
-     * @notice Emits a cleared redeem event appropriate to the third party
-     * type
-     * @dev Dispatches to one of four event variants:
-     * ClearedRedeemByPartition (NULL),
-     * ClearedRedeemFromByPartition (AUTHORISED),
-     * ClearedOperatorRedeemByPartition (OPERATOR),
-     * ProtectedClearedRedeemByPartition (PROTECTED).
+     * @notice Emits a cleared redeem event appropriate to the third party type.
+     * @dev Dispatches to one of three event variants:
+     *      `ClearedRedeemByPartition` (NULL),
+     *      `ClearedRedeemFromByPartition` (AUTHORISED),
+     *      `ClearedOperatorRedeemByPartition` (OPERATOR).
+     *      Emits nothing when `_thirdPartyType == PROTECTED` — the protected variant's event
+     *      (`ProtectedClearedRedeemByPartition`) is owned and emitted by the writer
+     *      (`ProtectedClearingByPartitionFacet.protectedClearingRedeemByPartition`),
+     *      keeping a single emit per external call (per the project event-emission rule).
      * @param _from Token holder
      * @param _partition Partition
      * @param _clearingId Clearing ID
@@ -837,25 +830,18 @@ library ClearingOps {
             );
             return;
         }
-        emit IClearingTypes.ProtectedClearedRedeemByPartition(
-            EvmAccessors.getMsgSender(),
-            _from,
-            _partition,
-            _clearingId,
-            _amount,
-            _expirationTimestamp,
-            _data,
-            _operatorData
-        );
     }
 
     /**
-     * @notice Emits a cleared hold event appropriate to the third party type
-     * @dev Dispatches to one of four event variants:
-     * ClearedHoldByPartition (NULL),
-     * ClearedHoldFromByPartition (AUTHORISED),
-     * ClearedOperatorHoldByPartition (OPERATOR),
-     * ProtectedClearedHoldByPartition (PROTECTED).
+     * @notice Emits a cleared hold event appropriate to the third party type.
+     * @dev Dispatches to one of three event variants:
+     *      `ClearedHoldByPartition` (NULL),
+     *      `ClearedHoldFromByPartition` (AUTHORISED),
+     *      `ClearedOperatorHoldByPartition` (OPERATOR).
+     *      Emits nothing when `_thirdPartyType == PROTECTED` — the protected variant's event
+     *      (`ProtectedClearedHoldByPartition`) is owned and emitted by the writer
+     *      (`ProtectedClearingHoldByPartitionFacet.protectedClearingCreateHoldByPartition`),
+     *      keeping a single emit per external call (per the project event-emission rule).
      * @param _from Token holder
      * @param _partition Partition
      * @param _clearingId Clearing ID
@@ -914,16 +900,6 @@ library ClearingOps {
             );
             return;
         }
-        emit IClearingTypes.ProtectedClearedHoldByPartition(
-            EvmAccessors.getMsgSender(),
-            _from,
-            _partition,
-            _clearingId,
-            _hold,
-            _expirationTimestamp,
-            _data,
-            _operatorData
-        );
     }
 
     // ============================================================================

@@ -5,7 +5,7 @@ import { ethers, network } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type IAsset, type ResolverProxy } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
+import { deployEquityTokenFixture, EVENT_NAMES, executeRbac, MAX_UINT256, expectExactlyOneEvent } from "@test";
 import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
 
 const AMOUNT = 1000;
@@ -155,13 +155,21 @@ describe("BurnByPartitionFacet Tests", () => {
         const signature = await signer_E.signTypedData(domain, redeemType, message);
         protectionData.signature = signature;
 
-        await expect(
-          asset
-            .connect(signer_E)
-            .protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_E.address, AMOUNT, protectionData),
-        )
+        const protectedRedeemTx = asset
+          .connect(signer_E)
+          .protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_E.address, AMOUNT, protectionData);
+        await expect(protectedRedeemTx)
           .to.emit(asset, "Transfer")
           .withArgs(signer_E.address, ethers.ZeroAddress, AMOUNT);
+        await expect(protectedRedeemTx)
+          .to.emit(asset, EVENT_NAMES.PROTECTED_REDEEMED_BY_PARTITION)
+          .withArgs(signer_E.address, signer_E.address, AMOUNT, DEFAULT_PARTITION, [
+            protectionData.deadline,
+            protectionData.nonce,
+            protectionData.signature,
+          ]);
+        const receipt = await (await protectedRedeemTx).wait();
+        expectExactlyOneEvent(receipt!, asset, EVENT_NAMES.PROTECTED_REDEEMED_BY_PARTITION);
       });
     });
   });
