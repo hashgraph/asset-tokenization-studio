@@ -79,6 +79,8 @@ describe("MintFacet Tests", () => {
       await executeRbac(asset, [
         { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
         { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.CAP_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.CORPORATE_ACTION_ROLE, members: [signer_A.address] },
       ]);
 
       await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
@@ -102,6 +104,26 @@ describe("MintFacet Tests", () => {
       expect(await asset.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
       expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.be.equal(AMOUNT / 2);
       expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.be.equal(AMOUNT / 2);
+    });
+
+    it("GIVEN an issuer WHEN issue with max supply after balance adjustment THEN succeeds", async () => {
+      const balanceAdjustmentData = {
+        executionDate: 5000n,
+        factor: 3,
+        decimals: 0,
+      };
+
+      await asset.changeSystemTimestamp(100n);
+
+      await asset.setMaxSupply(AMOUNT);
+      await asset.issue(signer_E.address, AMOUNT, DATA);
+      await asset.setScheduledBalanceAdjustment(balanceAdjustmentData);
+
+      await asset.changeSystemTimestamp(balanceAdjustmentData.executionDate + 1n);
+
+      await expect(asset.issue(signer_E.address, 1, DATA))
+        .to.be.revertedWithCustomError(asset, "MaxSupplyReached")
+        .withArgs(balanceAdjustmentData.factor * AMOUNT);
     });
 
     it("GIVEN an issuer WHEN mint THEN emits Issued with empty data and updates balances", async () => {
