@@ -43,7 +43,7 @@
     "class-transformer": "0.5.1",
     "class-validator": "0.14.2",
     "ethers": "6.16.0",
-    "joi": "17.12.2",
+    "joi": "18.2.1",
     "pg": "8.16.0",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8",
