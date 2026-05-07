@@ -12,10 +12,15 @@ import { CorporateActionsStorageWrapper } from "../../core/CorporateActionsStora
 import { ERC1410StorageWrapper } from "../ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../core/ERC3643StorageWrapper.sol";
-import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 import { ICoupon } from "../../../facets/coupon/ICoupon.sol";
 import { ICouponTypes } from "../../../facets/coupon/ICouponTypes.sol";
+import { IFixedRate } from "../../../facets/layer_2/interestRate/fixedRate/IFixedRate.sol";
 import { InterestRateStorageWrapper } from "../InterestRateStorageWrapper.sol";
+/* solhint-disable max-line-length */
+import {
+    ISustainabilityPerformanceTargetRateTypes
+} from "../../../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRateTypes.sol";
+/* solhint-enable max-line-length */
 import { KpiLinkedRateLib } from "../KpiLinkedRateLib.sol";
 import { NominalValueStorageWrapper } from "../nominalValue/NominalValueStorageWrapper.sol";
 import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
@@ -34,19 +39,42 @@ library CouponStorageWrapper {
         uint256[] couponsOrderedListByIds;
     }
 
+    /**
+     * @notice Persists a new coupon corporate action and schedules its snapshot/listing
+     *         tasks. Variant invariants and rate stamping are delegated to
+     *         `_validateAndResolveRate`, which mirrors the deferred dispatch performed by
+     *         `getCoupon` on the read path.
+     * @dev Does NOT emit `ICoupon.CouponSet` — the writer abstract emits it inline after
+     *      this call returns, per the project event-emission rule.
+     * @param newCoupon Coupon parameters captured at scheduling time.
+     * @return corporateActionId_ Identifier of the underlying corporate action.
+     * @return couponID_ One-indexed identifier assigned to the new coupon.
+     * @return resolved_ The persisted coupon after variant-specific rate stamping (input
+     *         struct unchanged for the standard / KPI / SPT variants; `rate`,
+     *         `rateDecimals`, `rateStatus` overwritten for the fixed-rate variant).
+     */
     function setCoupon(
         ICouponTypes.Coupon memory newCoupon
-    ) internal returns (bytes32 corporateActionId_, uint256 couponID_) {
+    ) internal returns (bytes32 corporateActionId_, uint256 couponID_, ICouponTypes.Coupon memory resolved_) {
+        newCoupon = _validateAndResolveRate(newCoupon);
+
         (corporateActionId_, couponID_) = CorporateActionsStorageWrapper.addCorporateAction(
             COUPON_CORPORATE_ACTION_TYPE,
             abi.encode(newCoupon)
         );
 
         initCoupon(corporateActionId_, newCoupon);
-
-        emit ICoupon.CouponSet(corporateActionId_, couponID_, EvmAccessors.getMsgSender(), newCoupon);
+        resolved_ = newCoupon;
     }
 
+    /**
+     * @notice Cancels a previously scheduled coupon before its execution date is reached.
+     * @dev Reverts with `ICoupon.CouponAlreadyExecuted` if the execution date has passed.
+     *      Does NOT emit `ICoupon.CouponCancelled` — the writer abstract emits it inline
+     *      after this call returns, per the project event-emission rule.
+     * @param couponId One-indexed identifier of the coupon to cancel.
+     * @return success_ True once the cancellation has been recorded.
+     */
     function cancelCoupon(uint256 couponId) internal returns (bool success_) {
         ICouponTypes.RegisteredCoupon memory registeredCoupon;
         bytes32 corporateActionId;
@@ -59,7 +87,6 @@ library CouponStorageWrapper {
         }
         CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
         success_ = true;
-        emit ICoupon.CouponCancelled(couponId, EvmAccessors.getMsgSender());
     }
 
     function initCoupon(bytes32 actionId, ICouponTypes.Coupon memory newCoupon) internal {
@@ -277,6 +304,39 @@ library CouponStorageWrapper {
         return previousCouponId;
     }
 
+    /**
+     * @notice Validates the coupon's rate triplet against the bond's rate variant and,
+     *         for fixed-rate bonds, stamps the configured rate before persistence.
+     * @dev Variant dispatch (write-path mirror of `getCoupon`'s read-path dispatch via
+     *      `InterestRateStorageWrapper.is<Variant>Initialized()`):
+     *      - **Fixed-rate** bonds: reject any user-supplied rate, then stamp the configured
+     *        rate from `InterestRateStorageWrapper.getRate()` and `rateStatus = SET`.
+     *      - **KPI-linked-rate** bonds: reject any user-supplied rate; the rate stays
+     *        `PENDING` and is resolved at read time.
+     *      - **SPT-rate** bonds: same shape as KPI-linked.
+     *      - **Standard** bonds (no rate variant initialised): pass the user-supplied rate
+     *        through unchanged.
+     * @param newCoupon User-supplied coupon parameters.
+     * @return resolved_ The same coupon, potentially with `rate`, `rateDecimals` and
+     *         `rateStatus` overwritten for the fixed-rate variant.
+     */
+    function _validateAndResolveRate(
+        ICouponTypes.Coupon memory newCoupon
+    ) private view returns (ICouponTypes.Coupon memory resolved_) {
+        if (InterestRateStorageWrapper.isFixedRateInitialized()) {
+            if (!_isPendingRate(newCoupon)) revert IFixedRate.InterestRateIsFixed();
+            (newCoupon.rate, newCoupon.rateDecimals) = InterestRateStorageWrapper.getRate();
+            newCoupon.rateStatus = ICouponTypes.RateCalculationStatus.SET;
+        } else if (InterestRateStorageWrapper.isKpiLinkedRateInitialized()) {
+            if (!_isPendingRate(newCoupon)) revert ICoupon.InterestRateIsKpiLinked();
+        } else if (InterestRateStorageWrapper.isSustainabilityPerformanceTargetRateInitialized()) {
+            if (!_isPendingRate(newCoupon)) {
+                revert ISustainabilityPerformanceTargetRateTypes.InterestRateIsSustainabilityPerformanceTargetRate();
+            }
+        }
+        resolved_ = newCoupon;
+    }
+
     function _calculateCouponAmount(
         ICouponTypes.Coupon memory coupon,
         uint256 tokenBalance,
@@ -292,6 +352,21 @@ library CouponStorageWrapper {
         couponAmountFor_.recordDateReached = true;
         couponAmountFor_.numerator = tokenBalance * nominalValue * coupon.rate * period;
         couponAmountFor_.denominator = 10 ** (decimals + nominalValueDecimals + coupon.rateDecimals) * 365 days;
+    }
+
+    /**
+     * @notice Tells whether a user-supplied coupon has its rate triplet in the
+     *         pending shape (`rateStatus = PENDING`, `rate = 0`, `rateDecimals = 0`).
+     * @dev Variant invariants reject any non-pending rate triplet so the user cannot
+     *      pre-stamp a rate for variants where the rate is owned by the protocol.
+     * @param newCoupon Coupon parameters captured at scheduling time.
+     * @return ok_ True iff the rate triplet is pending.
+     */
+    function _isPendingRate(ICouponTypes.Coupon memory newCoupon) private pure returns (bool ok_) {
+        ok_ =
+            newCoupon.rateStatus == ICouponTypes.RateCalculationStatus.PENDING &&
+            newCoupon.rate == 0 &&
+            newCoupon.rateDecimals == 0;
     }
 
     // solhint-disable-next-line func-name-mixedcase

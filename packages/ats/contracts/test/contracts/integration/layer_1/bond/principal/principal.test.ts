@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type ResolverProxy, type IAsset } from "@contract-types";
 import { DEFAULT_PARTITION, ATS_ROLES, ZERO, EMPTY_STRING } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployBondTokenFixture, getBondDetails, getDltTimestamp } from "@test";
+import { deployBondTokenFixture, getDltTimestamp } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
 import { TIME_PERIODS_S } from "@scripts";
 

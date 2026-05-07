@@ -3,7 +3,6 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC1410Types } from "./IERC1410Types.sol";
 import { IERC1410Management } from "./IERC1410Management.sol";
-import { IERC1410TokenHolder } from "./IERC1410TokenHolder.sol";
 
 /**
  * @title IERC1410
@@ -20,4 +19,4 @@ import { IERC1410TokenHolder } from "./IERC1410TokenHolder.sol";
  *      every aggregated selector breaks the diamond's per-facet selector ownership.
  */
 // solhint-disable no-empty-blocks
-interface IERC1410 is IERC1410Types, IERC1410Management, IERC1410TokenHolder {}
+interface IERC1410 is IERC1410Types, IERC1410Management {}

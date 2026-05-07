@@ -12,6 +12,7 @@ import {
     ListOfPartitions,
     HolderBalance
 } from "../../facets/layer_1/snapshot/ISnapshots.sol";
+import { ISnapshotsTypes } from "../../facets/layer_1/snapshot/ISnapshotsTypes.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
@@ -553,10 +554,10 @@ library SnapshotsStorageWrapper {
 
     function indexFor(uint256 snapshotId, uint256[] storage ids) internal view returns (bool, uint256) {
         if (snapshotId == 0) {
-            revert ISnapshots.SnapshotIdNull();
+            revert ISnapshotsTypes.SnapshotIdNull();
         }
         if (snapshotId > getCurrentSnapshotId()) {
-            revert ISnapshots.SnapshotIdDoesNotExists(snapshotId);
+            revert ISnapshotsTypes.SnapshotIdDoesNotExists(snapshotId);
         }
 
         uint256 index = ids.findUpperBound(snapshotId);
