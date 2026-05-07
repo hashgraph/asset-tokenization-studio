@@ -141,6 +141,7 @@ const BOND_FACETS = [
   "CouponListingFacet",
   "SsiManagementFacet",
   "TransferAndLockFacet",
+  "TransferAndLockByPartitionFacet",
 
   // Maturity By Partition
   "MaturityByPartitionFacet",
