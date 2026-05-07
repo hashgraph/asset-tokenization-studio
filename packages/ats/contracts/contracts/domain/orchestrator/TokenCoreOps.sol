@@ -152,8 +152,8 @@ library TokenCoreOps {
         ERC1594StorageWrapper.checkIdentity(_from, _to);
     }
 
-    function checkCompliance(address _from, address _to, bool _checkSender) public view {
-        ERC1594StorageWrapper.checkCompliance(_from, _to, _checkSender);
+    function checkCompliance(address _from, address _to, uint256 amount, bool _checkSender) public view {
+        ERC1594StorageWrapper.checkCompliance(_from, _to, amount, _checkSender);
     }
 
     // Internal functions (inlined into calling StorageWrappers)

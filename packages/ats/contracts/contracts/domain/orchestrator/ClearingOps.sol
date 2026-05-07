@@ -425,7 +425,7 @@ library ClearingOps {
 
         // Verify identity and compliance for transfers to different addresses
         TokenCoreOps.checkIdentity(_id.tokenHolder, transferData.destination);
-        TokenCoreOps.checkCompliance(_id.tokenHolder, transferData.destination, false);
+        TokenCoreOps.checkCompliance(_id.tokenHolder, transferData.destination, transferData.amount, false);
 
         // Notify compliance module (same pattern as HoldStorageWrapper and ERC1410StorageWrapper)
         if (_id.partition == _DEFAULT_PARTITION && ERC3643StorageWrapper.erc3643Storage().compliance != address(0)) {
@@ -466,7 +466,7 @@ library ClearingOps {
 
         // Approve: _verify identity/compliance (tokens are burned, no transfer back)
         TokenCoreOps.checkIdentity(_id.tokenHolder, address(0));
-        TokenCoreOps.checkCompliance(_id.tokenHolder, address(0), false);
+        TokenCoreOps.checkCompliance(_id.tokenHolder, address(0), 0, false);
     }
 
     /**

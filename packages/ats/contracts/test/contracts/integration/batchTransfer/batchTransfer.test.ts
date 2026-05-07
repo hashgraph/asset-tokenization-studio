@@ -80,6 +80,10 @@ describe("BatchTransfer Tests", () => {
         role: ATS_ROLES.PROTECTED_PARTITIONS_ROLE,
         members: [signer_A.address],
       },
+      {
+        role: ATS_ROLES.CONTROL_LIST_ROLE,
+        members: [signer_A.address],
+      },
     ]);
 
     await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
@@ -216,6 +220,58 @@ describe("BatchTransfer Tests", () => {
           asset,
           "ComplianceNotAllowed",
         );
+      });
+
+      describe("ControlList", () => {
+        it("GIVEN a blacklisted sender WHEN batchTransfer THEN transaction fails with AccountIsBlocked", async () => {
+          await asset.addToControlList(signer_E.address);
+
+          const toList = [signer_F.address];
+          const amounts = [transferAmount];
+
+          await expect(asset.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
+            asset,
+            "AccountIsBlocked",
+          );
+        });
+
+        it("GIVEN a blacklisted destination WHEN batchTransfer THEN transaction fails with AccountIsBlocked", async () => {
+          await asset.addToControlList(signer_F.address);
+
+          const toList = [signer_D.address, signer_F.address];
+          const amounts = [transferAmount, transferAmount];
+
+          await expect(asset.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
+            asset,
+            "AccountIsBlocked",
+          );
+        });
+      });
+
+      describe("Recovery", () => {
+        it("GIVEN a recovered sender WHEN batchTransfer THEN transaction fails with WalletRecovered", async () => {
+          await asset.recoveryAddress(signer_E.address, signer_D.address, ethers.ZeroAddress);
+
+          const toList = [signer_F.address];
+          const amounts = [transferAmount];
+
+          await expect(asset.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
+            asset,
+            "WalletRecovered",
+          );
+        });
+
+        it("GIVEN a recovered destination WHEN batchTransfer THEN transaction fails with WalletRecovered", async () => {
+          await asset.recoveryAddress(signer_F.address, signer_D.address, ethers.ZeroAddress);
+
+          const toList = [signer_F.address];
+          const amounts = [transferAmount];
+
+          await expect(asset.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
+            asset,
+            "WalletRecovered",
+          );
+        });
       });
     });
   });

@@ -30,12 +30,13 @@ abstract contract BatchTransfer is IBatchTransfer, Modifiers {
         onlyUnProtectedPartitionsOrWildCardRole
         onlyClearingDisabled
         onlyIdentifiedAddresses(EvmAccessors.getMsgSender(), address(0))
-        onlyCompliant(EvmAccessors.getMsgSender(), address(0), false)
+        onlyAccountCompliant(EvmAccessors.getMsgSender())
     {
         uint256 length = _toList.length;
         for (uint256 i; i < length; ) {
             ERC1594StorageWrapper.checkIdentity(address(0), _toList[i]);
-            ERC1594StorageWrapper.checkCompliance(address(0), _toList[i], false);
+            ERC1594StorageWrapper.checkAccountCompliance(_toList[i]);
+            ERC1594StorageWrapper.checkTransferCompliance(EvmAccessors.getMsgSender(), _toList[i], _amounts[i]);
             unchecked {
                 ++i;
             }
