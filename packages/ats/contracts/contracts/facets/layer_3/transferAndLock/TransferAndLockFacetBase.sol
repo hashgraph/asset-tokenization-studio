@@ -7,18 +7,12 @@ import { TransferAndLock } from "./TransferAndLock.sol";
 
 abstract contract TransferAndLockFacetBase is TransferAndLock, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 1;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.transferAndLock.selector;
-        }
+        staticFunctionSelectors_ = new bytes4[](1);
+        staticFunctionSelectors_[0] = this.transferAndLock.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        uint256 selectorIndex = 1;
-        staticInterfaceIds_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticInterfaceIds_[--selectorIndex] = type(ITransferAndLock).interfaceId;
-        }
+        staticInterfaceIds_ = new bytes4[](1);
+        staticInterfaceIds_[0] = type(ITransferAndLock).interfaceId;
     }
 }

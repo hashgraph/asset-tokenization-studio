@@ -24,19 +24,13 @@ contract TransferAndLockByPartitionFacet is TransferAndLockByPartition, IStaticF
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 1;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.transferAndLockByPartition.selector;
-        }
+        staticFunctionSelectors_ = new bytes4[](1);
+        staticFunctionSelectors_[0] = this.transferAndLockByPartition.selector;
     }
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        uint256 selectorIndex = 1;
-        staticInterfaceIds_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticInterfaceIds_[--selectorIndex] = type(ITransferAndLockByPartition).interfaceId;
-        }
+        staticInterfaceIds_ = new bytes4[](1);
+        staticInterfaceIds_[0] = type(ITransferAndLockByPartition).interfaceId;
     }
 }

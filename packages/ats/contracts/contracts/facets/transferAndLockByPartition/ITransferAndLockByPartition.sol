@@ -1,19 +1,35 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ITransferAndLockTypes } from "./ITransferAndLockTypes.sol";
-
 /**
  * @title  ITransferAndLockByPartition
  * @notice Interface for the partition-aware combined transfer-and-lock operation.
  * @dev    Exposes `transferAndLockByPartition`, which atomically transfers tokens
  *         from the caller's balance on a specified partition to a recipient and
  *         records a timed lock on the recipient's resulting balance.
- *         Inherits `ITransferAndLockTypes` for the shared
- *         `PartitionTransferredAndLocked` event.
  * @author Asset Tokenization Studio Team
  */
-interface ITransferAndLockByPartition is ITransferAndLockTypes {
+interface ITransferAndLockByPartition {
+    /**
+     * @notice Emitted when tokens are transferred to a recipient on a partition and
+     *         locked until a future timestamp.
+     * @param partition           The partition on which the transfer and lock occurred.
+     * @param from                The address from which tokens were transferred.
+     * @param to                  The address to which tokens were transferred and locked.
+     * @param value               The amount of tokens transferred and locked.
+     * @param data                Additional data provided by the caller.
+     * @param expirationTimestamp Unix timestamp at which the lock expires.
+     * @param lockId              Identifier assigned to the resulting lock.
+     */
+    event PartitionTransferredAndLocked(
+        bytes32 indexed partition,
+        address indexed from,
+        address to,
+        uint256 value,
+        bytes data,
+        uint256 expirationTimestamp,
+        uint256 lockId
+    );
     /**
      * @notice Transfers `_amount` tokens from the caller's `_partition` balance to
      *         `_to` and locks them until `_expirationTimestamp`.
