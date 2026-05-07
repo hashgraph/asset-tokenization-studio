@@ -58,13 +58,13 @@ library CapStorageWrapper {
             : cs.maxSupplyByPartition[partition] * factor;
     }
 
-    function requireWithinMaxSupply(uint256 _amount, uint256 _timestamp) internal view {
+    function checkMaxSupply(uint256 _amount, uint256 _timestamp) internal view {
         uint256 maxSupply = getMaxSupplyAdjustedAt(_timestamp);
         uint256 totalSupply = AdjustBalancesStorageWrapper.totalSupplyAdjustedAt(_timestamp);
         if (!isCorrectMaxSupply(totalSupply + _amount, maxSupply)) revert ICap.MaxSupplyReached(maxSupply);
     }
 
-    function requireWithinMaxSupplyByPartition(bytes32 _partition, uint256 _amount, uint256 _timestamp) internal view {
+    function checkMaxSupplyByPartition(bytes32 _partition, uint256 _amount, uint256 _timestamp) internal view {
         uint256 maxSupplyForPartition = getMaxSupplyByPartitionAdjustedAt(_partition, _timestamp);
         uint256 totalSupplyForPartition = AdjustBalancesStorageWrapper.totalSupplyByPartitionAdjustedAt(
             _partition,
