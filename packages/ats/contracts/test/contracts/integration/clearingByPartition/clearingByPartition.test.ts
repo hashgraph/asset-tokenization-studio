@@ -858,8 +858,10 @@ describe("ClearingByPartitionFacet Tests", () => {
       expect(await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(0);
     });
 
-    it("GIVEN a pending redeem clearing WHEN approveClearingOperationByPartition THEN balance stays reduced and clearedAmount zeroed", async () => {
+    it("GIVEN a pending redeem clearing WHEN approveClearingOperationByPartition THEN totalSupply drops, clearedAmount zeroed and RedeemedByPartition emitted", async () => {
       const balanceBefore = await asset.balanceOf(signer_A.address);
+      const totalSupplyBefore = await asset.totalSupply();
+      const partitionSupplyBefore = await asset.totalSupplyByPartition(_DEFAULT_PARTITION);
       const clearingOperation = {
         partition: _DEFAULT_PARTITION,
         expirationTimestamp: EXPIRATION_TIMESTAMP,
@@ -869,6 +871,9 @@ describe("ClearingByPartitionFacet Tests", () => {
 
       expect(await asset.balanceOf(signer_A.address)).to.equal(balanceBefore - BigInt(_AMOUNT));
       expect(await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(_AMOUNT);
+      // totalSupply must remain unchanged while the redeem is only cleared (pre-approve)
+      expect(await asset.totalSupply()).to.equal(totalSupplyBefore);
+      expect(await asset.totalSupplyByPartition(_DEFAULT_PARTITION)).to.equal(partitionSupplyBefore);
 
       const identifier = {
         clearingOperationType: ClearingOperationType.Redeem,
@@ -879,10 +884,14 @@ describe("ClearingByPartitionFacet Tests", () => {
 
       await expect(asset.connect(signer_A).approveClearingOperationByPartition(identifier))
         .to.emit(asset, "ClearingOperationApproved")
-        .withArgs(signer_A.address, signer_A.address, _DEFAULT_PARTITION, 1, ClearingOperationType.Redeem, "0x");
+        .withArgs(signer_A.address, signer_A.address, _DEFAULT_PARTITION, 1, ClearingOperationType.Redeem, "0x")
+        .to.emit(asset, "RedeemedByPartition")
+        .withArgs(_DEFAULT_PARTITION, signer_A.address, signer_A.address, _AMOUNT, EMPTY_HEX_BYTES, EMPTY_HEX_BYTES);
 
       expect(await asset.balanceOf(signer_A.address)).to.equal(balanceBefore - BigInt(_AMOUNT));
       expect(await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(0);
+      expect(await asset.totalSupply()).to.equal(totalSupplyBefore - BigInt(_AMOUNT));
+      expect(await asset.totalSupplyByPartition(_DEFAULT_PARTITION)).to.equal(partitionSupplyBefore - BigInt(_AMOUNT));
     });
 
     it("GIVEN a paused token WHEN approveClearingOperationByPartition THEN reverts with TokenIsPaused", async () => {

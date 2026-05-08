@@ -444,11 +444,11 @@ library ClearingOps {
     /**
      * @notice Executes a clearing redeem operation (approve, cancel, or reclaim)
      * @dev On cancel/reclaim: moves the cleared amount back to the token
-     * holder. On approve: checks identity and compliance for burn
-     * (destination address(0)) but does not actually burn; the balance
-     * was already reduced at creation time and the tokens are effectively
-     * burned when the clearing is approved. No additional token transfer
-     * occurs.
+     * holder. On approve: verifies identity/compliance and finalises the
+     * burn. The holder balance and partition balance were already reduced
+     * at creation time, so this path snapshots and reduces totalSupply,
+     * notifies the compliance module on the default partition, and emits
+     * `RedeemedByPartition`.
      * @param _id Clearing operation identifier
      * @param _actionType Approve, Cancel, or Reclaim
      */
@@ -456,17 +456,45 @@ library ClearingOps {
         IClearingTypes.ClearingOperationIdentifier calldata _id,
         IClearingTypes.ClearingActionType _actionType
     ) internal {
+        IClearingTypes.ClearingRedeemData memory redeemData = ClearingStorageWrapper.getClearingRedeemForByPartition(
+            _id.partition,
+            _id.tokenHolder,
+            _id.clearingId
+        );
+
         // Cancel/Reclaim: restore ABAF-adjusted amount to holder
         if (_actionType != IClearingTypes.ClearingActionType.Approve) {
-            IClearingTypes.ClearingRedeemData memory redeemData = ClearingStorageWrapper
-                .getClearingRedeemForByPartition(_id.partition, _id.tokenHolder, _id.clearingId);
             transferClearingBalance(_id.partition, _id.tokenHolder, redeemData.amount);
             return;
         }
 
-        // Approve: _verify identity/compliance (tokens are burned, no transfer back)
+        // Approve: verify identity/compliance for the burn destination address(0)
         TokenCoreOps.checkIdentity(_id.tokenHolder, address(0));
         TokenCoreOps.checkCompliance(_id.tokenHolder, address(0), false);
+
+        // Snapshot totalSupply before the burn so historical queries see pre-burn state
+        SnapshotsStorageWrapper.updateTotalSupplySnapshot(_id.partition);
+
+        // Finalise the burn: holder balance and partition balance were debited at
+        // creation, so only the partition supply and ERC-20 totalSupply remain to drop
+        ERC1410StorageWrapper.reduceTotalSupplyByPartition(_id.partition, redeemData.amount);
+
+        // Notify compliance module on the default partition (mirrors redeemByPartition)
+        if (_id.partition == _DEFAULT_PARTITION && ERC3643StorageWrapper.erc3643Storage().compliance != address(0)) {
+            (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
+                abi.encodeWithSelector(ICompliance.destroyed.selector, _id.tokenHolder, redeemData.amount),
+                IERC3643Types.ComplianceCallFailed.selector
+            );
+        }
+
+        emit IERC1410Types.RedeemedByPartition(
+            _id.partition,
+            EvmAccessors.getMsgSender(),
+            _id.tokenHolder,
+            redeemData.amount,
+            redeemData.data,
+            redeemData.operatorData
+        );
     }
 
     /**
