@@ -740,12 +740,8 @@ describe("HoldByPartition Tests", () => {
         expect(balance_after).to.equal(balance_before + BigInt(_AMOUNT));
       });
 
-      it.only("GIVEN hold WHEN executeHoldByPartition THEN security token holder list and snapshots succeeds", async () => {
+      it("GIVEN hold WHEN executeHoldByPartition THEN security token holder list and snapshots succeeds", async () => {
         const balance_before = await asset.balanceOf(signer_A.address);
-        console.log("balance_before", balance_before.toString());
-
-        const balance_beforeC = await asset.balanceOf(signer_C.address);
-        console.log("balance_beforeC", balance_beforeC.toString());
 
         const hold = {
           amount: balance_before,
@@ -757,31 +753,21 @@ describe("HoldByPartition Tests", () => {
 
         await asset.connect(signer_A).createHoldByPartition(_DEFAULT_PARTITION, hold);
 
+        const totalSecurityHoldersBefore = await asset.getTotalSecurityHolders();
+        const securityHoldersBefore = await asset.getSecurityHolders(0, totalSecurityHoldersBefore);
+
         await expect(asset.connect(signer_B).executeHoldByPartition(holdIdentifier, signer_C.address, balance_before))
           .to.emit(asset, "HoldByPartitionExecuted")
           .withArgs(signer_A.address, _DEFAULT_PARTITION, 1, _AMOUNT, signer_C.address)
           .to.emit(asset, "Transfer")
           .withArgs(ethers.ZeroAddress, signer_C.address, _AMOUNT);
 
-        await checkCreatedHold_expected(
-          0,
-          0,
-          0,
-          0,
-          EMPTY_STRING,
-          EMPTY_HEX_BYTES,
-          EMPTY_HEX_BYTES,
-          EMPTY_STRING,
-          EMPTY_STRING,
-          0,
-          0,
-          ThirdPartyType.NULL,
-          ADDRESS_ZERO,
-        );
+        const totalSecurityHoldersAfter = await asset.getTotalSecurityHolders();
+        const securityHoldersAfter = await asset.getSecurityHolders(0, totalSecurityHoldersAfter);
 
-        const balance_after = await asset.balanceOf(signer_C.address);
-
-        expect(balance_after).to.equal(balance_before + BigInt(_AMOUNT));
+        expect(totalSecurityHoldersAfter).to.equal(totalSecurityHoldersBefore);
+        expect(securityHoldersBefore).to.deep.equal([signer_A.address]);
+        expect(securityHoldersAfter).to.deep.equal([signer_C.address]);
       });
     });
 

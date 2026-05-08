@@ -830,7 +830,7 @@ describe("ClearingByPartitionFacet Tests", () => {
   // ─── approveClearingOperationByPartition ──────────────────────────────────
 
   describe("approveClearingOperationByPartition", () => {
-    it.only("GIVEN a pending transfer clearing WHEN approveClearingOperationByPartition THEN balances updated and clearedAmount zeroed", async () => {
+    it("GIVEN a pending transfer clearing WHEN approveClearingOperationByPartition THEN balances updated and clearedAmount zeroed", async () => {
       const balanceA_before = await asset.balanceOf(signer_A.address);
       const clearingOperation = {
         partition: _DEFAULT_PARTITION,
@@ -841,9 +841,7 @@ describe("ClearingByPartitionFacet Tests", () => {
       const totalSecurityHoldersBefore = await asset.getTotalSecurityHolders();
       const securityHoldersBefore = await asset.getSecurityHolders(0, totalSecurityHoldersBefore);
 
-      await asset.grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_A.address);
       await asset.connect(signer_A).clearingTransferByPartition(clearingOperation, balanceA_before, signer_B.address);
-      await asset.connect(signer_A).takeSnapshot();
 
       const identifier = {
         clearingOperationType: ClearingOperationType.Transfer,
@@ -869,7 +867,7 @@ describe("ClearingByPartitionFacet Tests", () => {
       expect(securityHoldersAfter).to.deep.equal([signer_B.address]);
     });
 
-    it.only("GIVEN a pending redeem clearing WHEN approveClearingOperationByPartition THEN balance stays reduced and clearedAmount zeroed", async () => {
+    it("GIVEN a pending redeem clearing WHEN approveClearingOperationByPartition THEN balance stays reduced and clearedAmount zeroed", async () => {
       const balanceBefore = await asset.balanceOf(signer_A.address);
       const clearingOperation = {
         partition: _DEFAULT_PARTITION,
@@ -880,9 +878,7 @@ describe("ClearingByPartitionFacet Tests", () => {
       const totalSecurityHoldersBefore = await asset.getTotalSecurityHolders();
       const securityHoldersBefore = await asset.getSecurityHolders(0, totalSecurityHoldersBefore);
 
-      await asset.grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_A.address);
       await asset.connect(signer_A).clearingRedeemByPartition(clearingOperation, balanceBefore);
-      await asset.connect(signer_A).takeSnapshot();
 
       expect(await asset.balanceOf(signer_A.address)).to.equal(0);
       expect(await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(balanceBefore);

@@ -242,28 +242,43 @@ export async function deployOrchestratorLibraries(signer: Signer): Promise<Orche
 
   info("   Deploying orchestrator libraries...");
 
-  // Phase 1: Deploy libraries with no dependencies sequentially.
-  // Parallel deployment via Promise.all causes nonce collisions on the Hiero Solo
-  // JSON-RPC relay: all three deploy() calls fetch eth_getTransactionCount before
-  // any transaction lands, so they all receive the same nonce and two of them stall
-  // indefinitely waiting for a receipt that never arrives.
-  const tokenCoreOps = await (await new TokenCoreOps__factory(signer).deploy()).waitForDeployment();
-  const tokenCoreOpsAddr = await tokenCoreOps.getAddress();
-  info(`   ✓ TokenCoreOps deployed at ${tokenCoreOpsAddr}`);
+  // Deploy sequentially. Parallel deployment via Promise.all causes nonce collisions
+  // on the Hiero Solo JSON-RPC relay: concurrent deploy() calls fetch
+  // eth_getTransactionCount before any transaction lands, so they all receive the
+  // same nonce and stall indefinitely waiting for a receipt that never arrives.
 
-  const holdOps = await (await new HoldOps__factory(signer).deploy()).waitForDeployment();
-  const holdOpsAddr = await holdOps.getAddress();
-  info(`   ✓ HoldOps deployed at ${holdOpsAddr}`);
-
+  // Phase 1: ClearingReadOps has no library dependencies.
   const clearingReadOps = await (await new ClearingReadOps__factory(signer).deploy()).waitForDeployment();
   const clearingReadOpsAddr = await clearingReadOps.getAddress();
   info(`   ✓ ClearingReadOps deployed at ${clearingReadOpsAddr}`);
 
-  // Phase 2: Deploy ClearingOps (depends on TokenCoreOps and HoldOps)
+  // Phase 2: TokenCoreOps and HoldOps both depend on ClearingReadOps.
+  const tokenCoreOps = await new TokenCoreOps__factory(
+    {
+      [LIBRARY_KEYS.clearingReadOps]: clearingReadOpsAddr,
+    } as any,
+    signer,
+  ).deploy();
+  await tokenCoreOps.waitForDeployment();
+  const tokenCoreOpsAddr = await tokenCoreOps.getAddress();
+  info(`   ✓ TokenCoreOps deployed at ${tokenCoreOpsAddr}`);
+
+  const holdOps = await new HoldOps__factory(
+    {
+      [LIBRARY_KEYS.clearingReadOps]: clearingReadOpsAddr,
+    } as any,
+    signer,
+  ).deploy();
+  await holdOps.waitForDeployment();
+  const holdOpsAddr = await holdOps.getAddress();
+  info(`   ✓ HoldOps deployed at ${holdOpsAddr}`);
+
+  // Phase 3: ClearingOps depends on TokenCoreOps, HoldOps and ClearingReadOps.
   const clearingOps = await new ClearingOps__factory(
     {
       [LIBRARY_KEYS.tokenCoreOps]: tokenCoreOpsAddr,
       [LIBRARY_KEYS.holdOps]: holdOpsAddr,
+      [LIBRARY_KEYS.clearingReadOps]: clearingReadOpsAddr,
     } as any,
     signer,
   ).deploy();
