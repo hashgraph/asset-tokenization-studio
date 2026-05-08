@@ -62,7 +62,10 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
         onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
         onlyWithValidClearingId(_clearingOperationIdentifier)
         onlyValidExpirationTimestampForClearing(_clearingOperationIdentifier, false)
-        returns (bool success_)
+        returns (
+            //TODO: add onlyIdentifiedAddresses(_clearingOperationIdentifier.tokenHolder, address(0)) if needed
+            bool success_
+        )
     {
         success_ = ClearingOps.cancelClearingOperationByPartition(_clearingOperationIdentifier);
         emit ClearingOperationCanceled(

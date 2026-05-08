@@ -113,7 +113,19 @@ describe("ClearingByPartitionFacet Tests", () => {
           EXPIRATION_TIMESTAMP,
           EMPTY_HEX_BYTES,
           EMPTY_HEX_BYTES,
-        );
+        )
+        .to.emit(asset, "TransferByPartition")
+        .withArgs(
+          _DEFAULT_PARTITION,
+          signer_A.address,
+          signer_A.address,
+          ethers.ZeroAddress,
+          _AMOUNT,
+          EMPTY_HEX_BYTES,
+          EMPTY_HEX_BYTES,
+        )
+        .to.emit(asset, "Transfer")
+        .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
 
       expect(await asset.balanceOf(signer_A.address)).to.equal(balanceBefore - BigInt(_AMOUNT));
       expect(await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(_AMOUNT);
@@ -858,7 +870,7 @@ describe("ClearingByPartitionFacet Tests", () => {
       expect(await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(0);
     });
 
-    it("GIVEN a pending redeem clearing WHEN approveClearingOperationByPartition THEN totalSupply drops, clearedAmount zeroed and RedeemedByPartition emitted", async () => {
+    it("GIVEN a pending redeem clearing WHEN approveClearingOperationByPartition THEN totalSupply drops, clearedAmount zero and RedeemedByPartition emitted", async () => {
       const balanceBefore = await asset.balanceOf(signer_A.address);
       const totalSupplyBefore = await asset.totalSupply();
       const partitionSupplyBefore = await asset.totalSupplyByPartition(_DEFAULT_PARTITION);
@@ -882,6 +894,8 @@ describe("ClearingByPartitionFacet Tests", () => {
         clearingId: 1,
       };
 
+      // Approve only decrements totalSupply; balances do not move, so no ERC-20 Transfer
+      // event is expected here (it was emitted at creation, asserted in the redeem creation test).
       await expect(asset.connect(signer_A).approveClearingOperationByPartition(identifier))
         .to.emit(asset, "ClearingOperationApproved")
         .withArgs(signer_A.address, signer_A.address, _DEFAULT_PARTITION, 1, ClearingOperationType.Redeem, "0x")

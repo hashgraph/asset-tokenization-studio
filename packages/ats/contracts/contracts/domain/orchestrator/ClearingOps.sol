@@ -119,7 +119,10 @@ library ClearingOps {
     /**
      * @notice Creates a clearing operation for a deferred redeem
      * @dev Reduces the holder's available balance by `_amount`, records the
-     * cleared amount, and stores the redeem metadata. Emits a third-party-
+     * cleared amount, and stores the redeem metadata. Mirrors the canonical
+     * `redeemByPartition` balance-movement events: emits the ERC-20 `Transfer`
+     * (via `performTransfer`) and the ERC-1410 burn-side `TransferByPartition`,
+     * keeping observers in sync with the holder's debit. Emits a third-party-
      * type-specific cleared redeem event. Reverts if the holder does not
      * have sufficient balance. Preconditions: `_from` must hold at least
      * `_amount` tokens in the partition. Postconditions: balance reduced,
@@ -162,6 +165,18 @@ library ClearingOps {
         ClearingStorageWrapper.increaseClearedAmounts(_from, partition, _amount);
 
         ERC20StorageWrapper.performTransfer(_from, address(0), _amount);
+
+        // Mirror redeemByPartition: emit the burn-side TransferByPartition so
+        // observers tracking ERC-1410 burns through this event see the debit
+        emit IERC1410Types.TransferByPartition(
+            partition,
+            EvmAccessors.getMsgSender(),
+            _from,
+            address(0),
+            _amount,
+            _clearingOperation.data,
+            _operatorData
+        );
 
         ClearingStorageWrapper.setClearingRedeemData(
             _from,
@@ -447,8 +462,9 @@ library ClearingOps {
      * holder. On approve: verifies identity/compliance and finalises the
      * burn. The holder balance and partition balance were already reduced
      * at creation time, so this path snapshots and reduces totalSupply,
-     * notifies the compliance module on the default partition, and emits
-     * `RedeemedByPartition`.
+     * notifies the compliance module on the default partition, runs the
+     * `afterTokenTransfer` hook so ERC-20 Votes' totalSupply checkpoints and
+     * the holder's voting power track the burn, and emits `RedeemedByPartition`.
      * @param _id Clearing operation identifier
      * @param _actionType Approve, Cancel, or Reclaim
      */
@@ -486,6 +502,10 @@ library ClearingOps {
                 IERC3643Types.ComplianceCallFailed.selector
             );
         }
+
+        // Mirror redeemByPartition: keep ERC-20 Votes' totalSupply checkpoints and the
+        // holder's delegated voting power aligned with the now-finalised burn
+        ERC1410StorageWrapper.afterTokenTransfer(_id.partition, _id.tokenHolder, address(0), redeemData.amount);
 
         emit IERC1410Types.RedeemedByPartition(
             _id.partition,
