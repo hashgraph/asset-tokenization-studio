@@ -200,17 +200,11 @@ export async function processFacetLists(
     const batchVersions = facetVersionList.slice(i, i + chunkSize);
     const batch = createBatchFacetConfigurations(batchIds, batchVersions);
 
-    const isLastBatch = partialBatchDeploy ? false : i + chunkSize >= facetIdList.length;
+    // Always mark the last batch of THIS configuration as final
+    // partialBatchDeploy only indicates if more configurations follow after this one
+    const isLastBatch = i + chunkSize >= facetIdList.length;
 
-    await sendBatchConfiguration(
-      configId,
-      batch,
-      isLastBatch,
-      blrContract,
-      partialBatchDeploy,
-      gasLimit,
-      confirmations,
-    );
+    await sendBatchConfiguration(configId, batch, isLastBatch, blrContract, gasLimit, confirmations);
   }
 }
 
@@ -225,7 +219,6 @@ export async function processFacetLists(
  * @param configurations - Array of batch facet configurations for this batch
  * @param isFinalBatch - Whether this is the final batch in the sequence
  * @param blrContract - BusinessLogicResolver contract instance
- * @param partialBatchDeploy - If true, forces isFinalBatch to false
  * @param gasLimit - Optional gas limit override
  * @param confirmations - Number of confirmations to wait for (default: 0 for test environments)
  * @returns Promise that resolves when the transaction is confirmed
@@ -241,7 +234,6 @@ export async function processFacetLists(
  *   batch,
  *   true, // is final batch
  *   blrContract, // contract instance
- *   false, // not partial deploy
  *   5000000, // gas limit
  *   0 // confirmations for testing
  * )
@@ -252,17 +244,14 @@ export async function sendBatchConfiguration(
   configurations: BatchFacetConfiguration[],
   isFinalBatch: boolean,
   blrContract: BusinessLogicResolver,
-  partialBatchDeploy: boolean,
   gasLimit?: number,
   confirmations: number = 0,
 ): Promise<void> {
-  // If this is a partial batch deploy, never mark as final batch
-  const finalBatch = partialBatchDeploy ? false : isFinalBatch;
+  const finalBatch = isFinalBatch;
 
   info(`Sending batch configuration for config ${configId}`);
   info(`  Configurations: ${configurations.length}`);
   info(`  Is final batch: ${finalBatch}`);
-  info(`  Partial batch deploy: ${partialBatchDeploy}`);
   info(`  Confirmations to wait: ${confirmations}`);
 
   try {

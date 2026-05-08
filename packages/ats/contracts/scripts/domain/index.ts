@@ -39,6 +39,7 @@ export * from "./atsRegistry";
 // Factory deployment and types
 export * from "./factory/deploy";
 export * from "./factory/types";
+export * from "./factory/createConfiguration";
 
 // Token deployment from factory
 export * from "./factory/deployEquityToken";

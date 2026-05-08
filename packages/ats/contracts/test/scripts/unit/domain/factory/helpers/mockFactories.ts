@@ -460,20 +460,11 @@ export function createDeployBondParams(
 export function createMockDeployFactoryResult(overrides?: {
   factoryAddress?: string;
   implementationAddress?: string;
-  proxyAdminAddress?: string;
-  initialized?: boolean;
   success?: boolean;
 }) {
   return {
     success: overrides?.success ?? true,
-    proxyResult: {
-      proxyAddress: overrides?.factoryAddress ?? TEST_ADDRESSES.VALID_0,
-      implementationAddress: overrides?.implementationAddress ?? TEST_ADDRESSES.VALID_1,
-      proxyAdminAddress: overrides?.proxyAdminAddress ?? TEST_ADDRESSES.VALID_2,
-    },
     factoryAddress: overrides?.factoryAddress ?? TEST_ADDRESSES.VALID_0,
     implementationAddress: overrides?.implementationAddress ?? TEST_ADDRESSES.VALID_1,
-    proxyAdminAddress: overrides?.proxyAdminAddress ?? TEST_ADDRESSES.VALID_2,
-    initialized: overrides?.initialized ?? false,
   };
 }

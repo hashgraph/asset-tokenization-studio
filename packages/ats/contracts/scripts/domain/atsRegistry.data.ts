@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-11T10:06:55.686Z
- * Facets: 122
+ * Generated: 2026-05-11T13:27:01.689Z
+ * Facets: 123
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -77,6 +77,7 @@ import {
   ExternalControlListManagementFacet__factory,
   ExternalKycListManagementFacet__factory,
   ExternalPauseManagementFacet__factory,
+  FactoryFacet__factory,
   FixedRateFacet__factory,
   FreezeAtSnapshotByPartitionFacet__factory,
   FreezeAtSnapshotFacet__factory,
@@ -6277,6 +6278,195 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     factory: (signer) => new ExternalPauseManagementFacet__factory(signer),
     timeTravelFactory: (signer) => new ExternalPauseManagementFacetTimeTravel__factory(signer),
+  },
+
+  FactoryFacet: {
+    name: "FactoryFacet",
+    description:
+      "Diamond facet that exposes all Factory selectors under a single `_FACTORY_RESOLVER_KEY` for use as a ResolverProxy facet.",
+    resolverKey: {
+      name: "_FACTORY_RESOLVER_KEY",
+      value: "0xa5472d34be801f744a73bce4e1851e67767286307e3203726a3261b280a667b3",
+    },
+    inheritance: ["Factory", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "deployBond",
+        signature: {
+          full: "function deployBond(((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) _bondData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) _factoryRegulationData) returns (address bondAddress_)",
+          canonical:
+            "deployBond(((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bytes3,uint256,uint8,uint256,uint256),address[],bytes[]),(uint8,uint8,(bool,string,string)))",
+        },
+        selector: "0x5133f0e0",
+      },
+      {
+        name: "deployBondFixedRate",
+        signature: {
+          full: "function deployBondFixedRate((((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, (uint256 rate, uint8 rateDecimals) fixedRateData) _bondFixedRateData) returns (address bondAddress_)",
+          canonical:
+            "deployBondFixedRate((((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bytes3,uint256,uint8,uint256,uint256),address[],bytes[]),(uint8,uint8,(bool,string,string)),(uint256,uint8)))",
+        },
+        selector: "0x7c55cfdc",
+      },
+      {
+        name: "deployBondKpiLinkedRate",
+        signature: {
+          full: "function deployBondKpiLinkedRate((((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, (uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate, (uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData) _bondKpiLinkedRateData) returns (address bondAddress_)",
+          canonical:
+            "deployBondKpiLinkedRate((((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bytes3,uint256,uint8,uint256,uint256),address[],bytes[]),(uint8,uint8,(bool,string,string)),(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8),(uint256,uint256,uint256,uint8,uint256)))",
+        },
+        selector: "0x06e6effc",
+      },
+      {
+        name: "deployBondSustainabilityPerformanceTargetRate",
+        signature: {
+          full: "function deployBondSustainabilityPerformanceTargetRate((((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, (uint256 baseRate, uint256 startPeriod, uint256 startRate, uint8 rateDecimals) interestRate, (uint256 baseLine, uint8 baseLineMode, uint256 deltaRate, uint8 impactDataMode)[] impactData, address[] projects) _bondSustainabilityPerformanceTargetRateData) returns (address bondAddress_)",
+          canonical:
+            "deployBondSustainabilityPerformanceTargetRate((((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bytes3,uint256,uint8,uint256,uint256),address[],bytes[]),(uint8,uint8,(bool,string,string)),(uint256,uint256,uint256,uint8),(uint256,uint8,uint256,uint8)[],address[]))",
+        },
+        selector: "0x5bdc1ceb",
+      },
+      {
+        name: "deployEquity",
+        signature: {
+          full: "function deployEquity(((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) equityDetails) _equityData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) _factoryRegulationData) returns (address equityAddress_)",
+          canonical:
+            "deployEquity(((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bool,bool,bool,bool,bool,bool,bool,uint8,bytes3,uint256,uint8)),(uint8,uint8,(bool,string,string)))",
+        },
+        selector: "0xfb3c59d8",
+      },
+      {
+        name: "deployProxy",
+        signature: {
+          full: "function deployProxy(address _resolver, bytes32 _configKey, uint256 _version, (bytes32 role, address[] members)[] _rbacs) returns (address proxyAddress_)",
+          canonical: "deployProxy(address,bytes32,uint256,(bytes32,address[])[])",
+        },
+        selector: "0x8d0672db",
+      },
+      {
+        name: "getAppliedRegulationData",
+        signature: {
+          full: "function getAppliedRegulationData(uint8 _regulationType, uint8 _regulationSubType) pure returns ((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData_)",
+          canonical: "getAppliedRegulationData(uint8,uint8)",
+        },
+        selector: "0x7b5208d0",
+      },
+    ],
+    events: [
+      {
+        name: "BondDeployed",
+        signature: {
+          full: "event BondDeployed(address indexed deployer, address bondAddress, ((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) regulationData)",
+          canonical:
+            "BondDeployed(address,address,((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bytes3,uint256,uint8,uint256,uint256),address[],bytes[]),(uint8,uint8,(bool,string,string)))",
+        },
+        topic0: "0x01d3e27a30d468a96e49f71ff84af896733789c198ff030dae07d2d9ae9e9f17",
+      },
+      {
+        name: "BondFixedRateDeployed",
+        signature: {
+          full: "event BondFixedRateDeployed(address indexed deployer, address bondAddress, (((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, (uint256 rate, uint8 rateDecimals) fixedRateData) bondFixedRateData)",
+          canonical:
+            "BondFixedRateDeployed(address,address,(((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bytes3,uint256,uint8,uint256,uint256),address[],bytes[]),(uint8,uint8,(bool,string,string)),(uint256,uint8)))",
+        },
+        topic0: "0x7760a5a38dddb73a76a698ab856ee89aa872213a7df0adfbca3c176f2cb74b23",
+      },
+      {
+        name: "BondKpiLinkedRateDeployed",
+        signature: {
+          full: "event BondKpiLinkedRateDeployed(address indexed deployer, address bondAddress, (((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, (uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate, (uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData) bondKpiLinkedRateData)",
+          canonical:
+            "BondKpiLinkedRateDeployed(address,address,(((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bytes3,uint256,uint8,uint256,uint256),address[],bytes[]),(uint8,uint8,(bool,string,string)),(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8),(uint256,uint256,uint256,uint8,uint256)))",
+        },
+        topic0: "0x45915a0104ea5671b1651c88183b8d6175450f67c9ad1462ed080594e0b10ec6",
+      },
+      {
+        name: "BondSustainabilityPerformanceTargetRateDeployed",
+        signature: {
+          full: "event BondSustainabilityPerformanceTargetRateDeployed(address indexed deployer, address bondAddress, (((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, (uint256 baseRate, uint256 startPeriod, uint256 startRate, uint8 rateDecimals) interestRate, (uint256 baseLine, uint8 baseLineMode, uint256 deltaRate, uint8 impactDataMode)[] impactData, address[] projects) bondSustainabilityPerformanceTargetRateData)",
+          canonical:
+            "BondSustainabilityPerformanceTargetRateDeployed(address,address,(((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bytes3,uint256,uint8,uint256,uint256),address[],bytes[]),(uint8,uint8,(bool,string,string)),(uint256,uint256,uint256,uint8),(uint256,uint8,uint256,uint8)[],address[]))",
+        },
+        topic0: "0x7b0542f2e963c32efb54f91877cf0e1b675a89541e6dacf56cc26990d1534cda",
+      },
+      {
+        name: "EquityDeployed",
+        signature: {
+          full: "event EquityDeployed(address indexed deployer, address equityAddress, ((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) equityDetails) equityData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) regulationData)",
+          canonical:
+            "EquityDeployed(address,address,((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bool,bool,bool,bool,bool,bool,bool,uint8,bytes3,uint256,uint8)),(uint8,uint8,(bool,string,string)))",
+        },
+        topic0: "0x59f510d04f090e1185bc91d7647b595294572073ef9f4754e7604b2a8af1e5f2",
+      },
+      {
+        name: "ProxyDeployed",
+        signature: {
+          full: "event ProxyDeployed(address indexed proxyAddress, address resolver, bytes32 configKey, uint256 version, (bytes32 role, address[] members)[] rbac)",
+          canonical: "ProxyDeployed(address,address,bytes32,uint256,(bytes32,address[])[])",
+        },
+        topic0: "0x03b5b4bc23cb6eb6351f669151e62cc3d9c419885402adf41cb4c17fa9031966",
+      },
+    ],
+    errors: [
+      {
+        name: "EmptyResolver",
+        signature: { full: "error EmptyResolver(address resolver)", canonical: "EmptyResolver(address)" },
+        selector: "0x840a2011",
+      },
+      {
+        name: "NoInitialAdmins",
+        signature: { full: "error NoInitialAdmins()", canonical: "NoInitialAdmins()" },
+        selector: "0x0b845f7f",
+      },
+      {
+        name: "RegulationTypeAndSubTypeForbidden",
+        signature: {
+          full: "error RegulationTypeAndSubTypeForbidden(uint8 regulationType, uint8 regulationSubType)",
+          canonical: "RegulationTypeAndSubTypeForbidden(uint8,uint8)",
+        },
+        selector: "0xfcaaa691",
+      },
+      {
+        name: "WrongDates",
+        signature: {
+          full: "error WrongDates(uint256 firstDate, uint256 secondDate)",
+          canonical: "WrongDates(uint256,uint256)",
+        },
+        selector: "0x1c94559c",
+      },
+      {
+        name: "WrongImpactDataValues",
+        signature: {
+          full: "error WrongImpactDataValues((uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData)",
+          canonical: "WrongImpactDataValues((uint256,uint256,uint256,uint8,uint256))",
+        },
+        selector: "0xa60b6cba",
+      },
+      {
+        name: "WrongInterestRateValues",
+        signature: {
+          full: "error WrongInterestRateValues((uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate)",
+          canonical: "WrongInterestRateValues((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8))",
+        },
+        selector: "0x570cf0d3",
+      },
+      {
+        name: "WrongISIN",
+        signature: { full: "error WrongISIN(string isin)", canonical: "WrongISIN(string)" },
+        selector: "0xdf749cc5",
+      },
+      {
+        name: "WrongISINChecksum",
+        signature: { full: "error WrongISINChecksum(string isin)", canonical: "WrongISINChecksum(string)" },
+        selector: "0x342c92db",
+      },
+      {
+        name: "WrongTimestamp",
+        signature: { full: "error WrongTimestamp(uint256 timeStamp)", canonical: "WrongTimestamp(uint256)" },
+        selector: "0xdcf61246",
+      },
+    ],
+    factory: (signer) => new FactoryFacet__factory(signer),
   },
 
   FixedRateFacet: {
@@ -13795,7 +13985,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 122 as const;
+export const TOTAL_FACETS = 123 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

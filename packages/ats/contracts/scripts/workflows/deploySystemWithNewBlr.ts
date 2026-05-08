@@ -55,6 +55,7 @@ import {
   createBondSustainabilityPerformanceTargetRateConfiguration,
   createLoanConfiguration,
   createLoansPortfolioConfiguration,
+  createFactoryConfiguration,
   deployOrchestratorLibraries,
   hasOrchestratorLibraryAddresses,
   getFacetDefinition,
@@ -881,41 +882,79 @@ export async function deploySystemWithNewBlr(
       throw new Error(createTestFailureMessage("step", "loansPortfolio"));
     }
 
-    let factoryResult: Awaited<ReturnType<typeof deployFactory>>;
+    // Step 11: Create Factory configuration (MUST precede FactoryProxy construction)
+    let factoryConfig: Awaited<ReturnType<typeof createFactoryConfiguration>>;
 
-    if (checkpoint.steps.factory && checkpoint.currentStep >= 11) {
-      info(`\n✓ Step 12/${totalSteps}: Factory already deployed (resuming)`);
-      // Reconstruct DeployFactoryResult from checkpoint (with placeholder proxyResult)
-      const proxyAdminAddr = checkpoint.steps.proxyAdmin?.address || (proxyAdmin.target as string);
+    if (checkpoint.steps.configurations?.factory && checkpoint.currentStep >= 11) {
+      info(`\n✓ Step 12/${totalSteps}: Factory configuration already created (resuming)`);
+      const factoryConfigData = checkpoint.steps.configurations.factory;
+      info(`✅ Factory Config ID: ${factoryConfigData.configId}`);
+      info(`✅ Factory Version: ${factoryConfigData.version}`);
+      info(`✅ Factory Facets: ${factoryConfigData.facetCount}`);
+      factoryConfig = toConfigurationData(factoryConfigData);
+    } else {
+      info(`\n🏭 Step 12/${totalSteps}: Creating Factory configuration...`);
+      factoryConfig = await createFactoryConfiguration(
+        blrContract,
+        facetAddresses,
+        useTimeTravel,
+        partialBatchDeploy,
+        batchSize,
+        confirmations,
+      );
+
+      if (!factoryConfig.success) {
+        throw new Error(`Factory config creation failed: ${factoryConfig.error} - ${factoryConfig.message}`);
+      }
+
+      info(`✅ Factory Config ID: ${factoryConfig.data.configurationId}`);
+      info(`✅ Factory Version: ${factoryConfig.data.version}`);
+      info(`✅ Factory Facets: ${factoryConfig.data.facetKeys.length}`);
+      info(`Registered FactoryConfig v${factoryConfig.data.version} before constructing FactoryProxy`);
+
+      if (!checkpoint.steps.configurations) {
+        checkpoint.steps.configurations = {};
+      }
+      checkpoint.steps.configurations.factory = {
+        configId: factoryConfig.data.configurationId,
+        version: factoryConfig.data.version,
+        facetCount: factoryConfig.data.facetKeys.length,
+        txHash: "",
+      };
+      checkpoint.currentStep = 11;
+      await checkpointManager.saveCheckpoint(checkpoint);
+    }
+
+    if (shouldFailAtStep("factoryConfig")) {
+      throw new Error(createTestFailureMessage("step", "factoryConfig"));
+    }
+
+    // Step 12: Deploy Factory as ResolverProxy
+    let factoryResult: Awaited<ReturnType<typeof deployFactory>>;
+    const factoryFacetAddress = facetAddresses["FactoryFacet"];
+    const factoryVersion = factoryConfig && isSuccess(factoryConfig) ? factoryConfig.data.version : 1;
+
+    if (checkpoint.steps.factory && checkpoint.currentStep >= 12) {
+      info(`\n✓ Step 13/${totalSteps}: Factory already deployed (resuming)`);
       factoryResult = {
         success: true,
-        proxyResult: {
-          implementation: { address: checkpoint.steps.factory.implementation } as any,
-          implementationAddress: checkpoint.steps.factory.implementation,
-          proxy: { address: checkpoint.steps.factory.proxy } as any,
-          proxyAddress: checkpoint.steps.factory.proxy,
-          proxyAdmin: { address: proxyAdminAddr } as any,
-          proxyAdminAddress: proxyAdminAddr,
-          receipts: {},
-        },
         factoryAddress: checkpoint.steps.factory.proxy,
         implementationAddress: checkpoint.steps.factory.implementation,
-        proxyAdminAddress: proxyAdminAddr,
-        initialized: true, // Assume initialized if checkpoint exists
       };
       info(`✅ Factory Implementation: ${checkpoint.steps.factory.implementation}`);
       info(`✅ Factory Proxy: ${checkpoint.steps.factory.proxy}`);
     } else {
-      info(`\n🏭 Step 12/${totalSteps}: Deploying Factory...`);
+      info(`\n🏭 Step 13/${totalSteps}: Deploying Factory (ResolverProxy)...`);
       factoryResult = await deployFactory(signer, {
-        existingProxyAdmin: proxyAdmin,
+        blrAddress: blrResult.blrAddress,
+        factoryVersion,
+        factoryFacetAddress,
       });
 
       if (!factoryResult.success) {
         throw new Error(`Factory deployment failed: ${factoryResult.error}`);
       }
 
-      // Factory gas is tracked in proxyResult receipts
       info(`✅ Factory Implementation: ${factoryResult.implementationAddress}`);
       info(`✅ Factory Proxy: ${factoryResult.factoryAddress}`);
 
@@ -924,10 +963,10 @@ export async function deploySystemWithNewBlr(
         address: factoryResult.factoryAddress,
         implementation: factoryResult.implementationAddress,
         proxy: factoryResult.factoryAddress,
-        txHash: "", // deployFactory doesn't return tx hash currently
+        txHash: "",
         deployedAt: new Date().toISOString(),
       };
-      checkpoint.currentStep = 11;
+      checkpoint.currentStep = 12;
       await checkpointManager.saveCheckpoint(checkpoint);
     }
 
@@ -1073,7 +1112,7 @@ export async function deploySystemWithNewBlr(
       summary: {
         totalContracts: 3, // ProxyAdmin, BLR, Factory
         totalFacets: facetsResult.deployed.size,
-        totalConfigurations: 5, // Equity + Bond + BondFixedRate + BondKpiLinkedRate + BondSustainabilityPerformanceTargetRate
+        totalConfigurations: 8, // Equity + Bond + BondFixedRate + BondKpiLinkedRate + BondSustainabilityPerformanceTargetRate + Loan + LoansPortfolio + Factory
         deploymentTime: Date.now() - startTime,
         gasUsed: totalGasUsed.toString(),
         success: true,
@@ -1123,6 +1162,12 @@ export async function deploySystemWithNewBlr(
           if (!isSuccess(loansPortfolioConfig)) return [];
           const loansPortfolioKeys = new Set(loansPortfolioConfig.data.facetKeys.map((f) => f.key));
           return output.facets.filter((facet) => loansPortfolioKeys.has(facet.key));
+        },
+        getFactoryFacets() {
+          // Use type guard to safely access .data property
+          if (!isSuccess(factoryConfig)) return [];
+          const factoryKeys = new Set(factoryConfig.data.facetKeys.map((f) => f.key));
+          return output.facets.filter((facet) => factoryKeys.has(facet.key));
         },
       },
     };

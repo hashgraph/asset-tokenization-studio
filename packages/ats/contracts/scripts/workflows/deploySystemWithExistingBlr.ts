@@ -38,6 +38,7 @@ import {
   toConfigurationData,
   convertCheckpointFacets,
   resolveCheckpointForResume,
+  isSuccess,
 } from "@scripts/infrastructure";
 import {
   atsRegistry,
@@ -47,6 +48,7 @@ import {
   createBondFixedRateConfiguration,
   createBondKpiLinkedRateConfiguration,
   createBondSustainabilityPerformanceTargetRateConfiguration,
+  createFactoryConfiguration,
   deployOrchestratorLibraries,
   hasOrchestratorLibraryAddresses,
 } from "@scripts/domain";
@@ -852,46 +854,84 @@ export async function deploySystemWithExistingBlr(
       );
     }
 
-    // Step 5: Deploy Factory (optional - controlled by deployFactory flag)
+    // Step 5a: Create Factory configuration (MUST precede FactoryProxy construction)
+    let factoryConfig: Awaited<ReturnType<typeof createFactoryConfiguration>> | undefined;
+
+    if (shouldDeployFactory) {
+      const blrContractForFactory = BusinessLogicResolver__factory.connect(blrAddress, signer);
+
+      if (checkpoint.steps.configurations?.factory && checkpoint.currentStep >= 8) {
+        info(`\n✓ Step 9/${totalSteps}: Factory configuration already created (resuming)`);
+        const factoryConfigData = checkpoint.steps.configurations.factory;
+        info(`✅ Factory Config ID: ${factoryConfigData.configId}`);
+        info(`✅ Factory Version: ${factoryConfigData.version}`);
+        factoryConfig = toConfigurationData(checkpoint.steps.configurations.factory);
+      } else {
+        info(`\n🏭 Step 9/${totalSteps}: Creating Factory configuration...`);
+        factoryConfig = await createFactoryConfiguration(
+          blrContractForFactory,
+          facetAddresses,
+          useTimeTravel,
+          false,
+          batchSize,
+          confirmations,
+        );
+
+        if (!factoryConfig.success) {
+          throw new Error(`Factory config creation failed: ${factoryConfig.error} - ${factoryConfig.message}`);
+        }
+
+        info(`✅ Factory Config ID: ${factoryConfig.data.configurationId}`);
+        info(`✅ Factory Version: ${factoryConfig.data.version}`);
+        info(`Registered FactoryConfig v${factoryConfig.data.version} before constructing FactoryProxy`);
+
+        if (!checkpoint.steps.configurations) {
+          checkpoint.steps.configurations = {};
+        }
+        checkpoint.steps.configurations.factory = {
+          configId: factoryConfig.data.configurationId,
+          version: factoryConfig.data.version,
+          facetCount: factoryConfig.data.facetKeys.length,
+          txHash: "",
+        };
+        checkpoint.currentStep = 8;
+        await checkpointManager.saveCheckpoint(checkpoint);
+      }
+    }
+
+    // Step 5b: Deploy Factory (optional - controlled by deployFactory flag)
     let factoryResult: Awaited<ReturnType<typeof deployFactory>> | undefined;
 
     if (shouldDeployFactory) {
-      if (checkpoint.steps.factory && checkpoint.currentStep >= 8) {
-        info(`\n✓ Step 9/${totalSteps}: Factory already deployed (resuming)`);
-        // Reconstruct DeployFactoryResult from checkpoint (with placeholder proxyResult)
-        const proxyAdminAddr = checkpoint.steps.proxyAdmin?.address || (proxyAdmin.target as string);
+      const factoryFacetAddress = facetAddresses["FactoryFacet"];
+      if (!factoryFacetAddress) {
+        throw new Error("deploySystemWithExistingBlr: factoryFacetAddress is required");
+      }
+      const factoryVersion = factoryConfig && isSuccess(factoryConfig) ? factoryConfig.data.version : 1;
+
+      if (checkpoint.steps.factory && checkpoint.currentStep >= 9) {
+        info(`\n✓ Step 10/${totalSteps}: Factory already deployed (resuming)`);
         factoryResult = {
           success: true,
-          proxyResult: {
-            implementation: { address: checkpoint.steps.factory.implementation } as any,
-            implementationAddress: checkpoint.steps.factory.implementation,
-            proxy: { address: checkpoint.steps.factory.proxy } as any,
-            proxyAddress: checkpoint.steps.factory.proxy,
-            proxyAdmin: { address: proxyAdminAddr } as any,
-            proxyAdminAddress: proxyAdminAddr,
-            receipts: {},
-          },
           factoryAddress: checkpoint.steps.factory.proxy,
           implementationAddress: checkpoint.steps.factory.implementation,
-          proxyAdminAddress: proxyAdminAddr,
-          initialized: true, // Assume initialized if checkpoint exists
         };
         info(`✅ Factory Implementation: ${checkpoint.steps.factory.implementation}`);
         info(`✅ Factory Proxy: ${checkpoint.steps.factory.proxy}`);
       } else {
-        info(`\n🏭 Step 9/${totalSteps}: Deploying Factory...`);
+        info(`\n🏭 Step 10/${totalSteps}: Deploying Factory (ResolverProxy)...`);
         factoryResult = await deployFactory(signer, {
-          existingProxyAdmin: proxyAdmin,
+          blrAddress,
+          factoryVersion,
+          factoryFacetAddress,
         });
 
         if (!factoryResult.success) {
           throw new Error(`Factory deployment failed: ${factoryResult.error}`);
         }
 
-        if (factoryResult) {
-          info(`✅ Factory Implementation: ${factoryResult.implementationAddress}`);
-          info(`✅ Factory Proxy: ${factoryResult.factoryAddress}`);
-        }
+        info(`✅ Factory Implementation: ${factoryResult.implementationAddress}`);
+        info(`✅ Factory Proxy: ${factoryResult.factoryAddress}`);
 
         // Save checkpoint
         checkpoint.steps.factory = {
@@ -901,12 +941,12 @@ export async function deploySystemWithExistingBlr(
           txHash: "",
           deployedAt: new Date().toISOString(),
         };
-        checkpoint.currentStep = 8;
+        checkpoint.currentStep = 9;
         await checkpointManager.saveCheckpoint(checkpoint);
       }
     } else {
-      info(`\n🏭 Step 9/${totalSteps}: Skipping Factory deployment...`);
-      skippedSteps.push("Factory deployment");
+      info(`\n🏭 Step 9-10/${totalSteps}: Skipping Factory configuration and deployment...`);
+      skippedSteps.push("Factory configuration", "Factory deployment");
     }
 
     const endTime = Date.now();

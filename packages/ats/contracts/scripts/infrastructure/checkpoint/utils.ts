@@ -31,6 +31,7 @@ const WORKFLOW_STEPS: Record<string, readonly string[]> = {
     "Bond SPT Rate Configuration",
     "Loan Configuration",
     "Loans Portfolio Configuration",
+    "Factory Configuration",
     "Factory",
   ] as const,
   existingBlr: [
@@ -44,6 +45,7 @@ const WORKFLOW_STEPS: Record<string, readonly string[]> = {
     "Bond SPT Rate Configuration",
     "Loan Configuration",
     "Loans Portfolio Configuration",
+    "Factory Configuration",
     "Factory",
   ] as const,
   upgradeConfigurations: [
@@ -214,6 +216,7 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
       getBondSustainabilityPerformanceTargetRateFacets: () => [],
       getLoanFacets: () => [],
       getLoansPortfolioFacets: () => [],
+      getFactoryFacets: () => [],
     },
   };
 }

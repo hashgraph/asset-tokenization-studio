@@ -780,6 +780,7 @@ export interface DeploymentOutputType {
     getBondSustainabilityPerformanceTargetRateFacets(): FacetMetadata[];
     getLoanFacets(): FacetMetadata[];
     getLoansPortfolioFacets(): FacetMetadata[];
+    getFactoryFacets(): FacetMetadata[];
   };
 }
 
