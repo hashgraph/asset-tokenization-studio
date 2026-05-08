@@ -111,6 +111,8 @@ library HoldStorageWrapper {
     ) internal returns (bool success_, bytes32 partition_) {
         beforeExecuteHold(_holdIdentifier, _to);
 
+        ERC1410StorageWrapper.updateSecurityHolder(_holdIdentifier.tokenHolder, _to, _amount);
+
         success_ = operateHoldByPartition(_holdIdentifier, _to, _amount, IHoldTypes.OperationType.Execute);
         partition_ = _holdIdentifier.partition;
 

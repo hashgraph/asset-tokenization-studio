@@ -417,6 +417,8 @@ library ClearingOps {
             return;
         }
 
+        ERC1410StorageWrapper.updateSecurityHolder(_id.tokenHolder, transferData.destination, transferData.amount);
+
         // Approve: transfer to original destination
         transferClearingBalance(_id.partition, transferData.destination, transferData.amount);
 
@@ -456,13 +458,19 @@ library ClearingOps {
         IClearingTypes.ClearingOperationIdentifier calldata _id,
         IClearingTypes.ClearingActionType _actionType
     ) internal {
+        IClearingTypes.ClearingRedeemData memory redeemData = ClearingStorageWrapper.getClearingRedeemForByPartition(
+            _id.partition,
+            _id.tokenHolder,
+            _id.clearingId
+        );
+
         // Cancel/Reclaim: restore ABAF-adjusted amount to holder
         if (_actionType != IClearingTypes.ClearingActionType.Approve) {
-            IClearingTypes.ClearingRedeemData memory redeemData = ClearingStorageWrapper
-                .getClearingRedeemForByPartition(_id.partition, _id.tokenHolder, _id.clearingId);
             transferClearingBalance(_id.partition, _id.tokenHolder, redeemData.amount);
             return;
         }
+
+        ERC1410StorageWrapper.updateSecurityHolder(_id.tokenHolder, address(0), redeemData.amount);
 
         // Approve: _verify identity/compliance (tokens are burned, no transfer back)
         TokenCoreOps.checkIdentity(_id.tokenHolder, address(0));
