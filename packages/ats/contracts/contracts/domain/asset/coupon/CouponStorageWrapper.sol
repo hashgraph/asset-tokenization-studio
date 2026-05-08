@@ -298,10 +298,9 @@ library CouponStorageWrapper {
         for (uint256 index = 0; index < orderedListLength; index++) {
             previousCouponId = getCouponFromOrderedListAt(index);
             uint256 couponId = getCouponFromOrderedListAt(index + 1);
-            if (couponId == couponID) break;
+            if (couponId == couponID) return previousCouponId;
         }
-
-        return previousCouponId;
+        return 0;
     }
 
     /**
