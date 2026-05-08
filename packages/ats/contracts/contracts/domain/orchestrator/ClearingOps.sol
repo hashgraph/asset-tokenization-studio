@@ -7,6 +7,7 @@ import { TokenCoreOps } from "./TokenCoreOps.sol";
 import { ERC1410StorageWrapper } from "../asset/ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../asset/ERC20StorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
+import { HoldStorageWrapper } from "../asset/HoldStorageWrapper.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
@@ -500,13 +501,26 @@ library ClearingOps {
                 data: holdData.holdData
             });
 
-            (, uint256 holdId) = HoldOps.createHoldByPartition(
+            (bool success, uint256 holdId) = HoldOps.createHoldByPartition(
                 _id.partition,
                 _id.tokenHolder,
                 hold,
                 holdData.operatorData,
                 holdData.operatorType
             );
+
+            assert(success);
+
+            if (holdData.operatorType == ThirdPartyType.AUTHORIZED) {
+                address thirdPartyAddress = ClearingStorageWrapper.getClearingThirdParty(
+                    _id.partition,
+                    _id.tokenHolder,
+                    IClearingTypes.ClearingOperationType.HoldCreation,
+                    _id.clearingId
+                );
+                HoldStorageWrapper.setThirdPartyForHold(thirdPartyAddress, _id.partition, _id.tokenHolder, holdId);
+            }
+
             operationData_ = abi.encode(holdId);
         }
     }
