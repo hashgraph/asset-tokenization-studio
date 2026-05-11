@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-07T13:43:18.807Z
+ * Generated: 2026-05-11T09:54:55.025Z
  * Facets: 122
  * Infrastructure: 2
  *
@@ -675,11 +675,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
         selector: "0xc9622656",
-      },
-      {
-        name: "WalletRecovered",
-        signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
-        selector: "0xf9f9bcf9",
       },
       {
         name: "ZeroOwnerAddress",
@@ -5444,11 +5439,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x10210dec",
       },
       {
-        name: "AccountIsBlocked",
-        signature: { full: "error AccountIsBlocked(address account)", canonical: "AccountIsBlocked(address)" },
-        selector: "0x796c1f0d",
-      },
-      {
         name: "ERC2612ExpiredSignature",
         signature: {
           full: "error ERC2612ExpiredSignature(uint256 deadline)",
@@ -5479,11 +5469,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
         selector: "0xc9622656",
-      },
-      {
-        name: "WalletRecovered",
-        signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
-        selector: "0xf9f9bcf9",
       },
       {
         name: "ZeroAddressNotAllowed",

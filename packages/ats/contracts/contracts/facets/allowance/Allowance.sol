@@ -28,8 +28,6 @@ abstract contract Allowance is IAllowance, Modifiers {
         external
         override
         onlyUnpaused
-        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
-        onlyUnrecoveredAddress(spender)
         onlyWithoutMultiPartition
         onlyCompliant(EvmAccessors.getMsgSender(), spender, false)
         returns (bool)
