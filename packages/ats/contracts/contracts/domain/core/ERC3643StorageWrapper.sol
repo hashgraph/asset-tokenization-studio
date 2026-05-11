@@ -160,6 +160,7 @@ library ERC3643StorageWrapper {
 
         _transferFrozenBalanceOnly(_partition, _account, _amount);
         ERC20StorageWrapper.performTransfer(address(0), _account, _amount);
+        ERC1410StorageWrapper.afterTokenTransfer(_partition, _account, _account, _amount);
     }
 
     function updateTotalFreeze(bytes32 _partition, address _tokenHolder) internal returns (uint256 abaf_) {

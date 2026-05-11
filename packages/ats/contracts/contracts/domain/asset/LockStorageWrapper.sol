@@ -70,6 +70,8 @@ library LockStorageWrapper {
 
         _emitReleaseEvents(partition, operator, tokenHolder, lockAmount);
 
+        ERC1410StorageWrapper.afterTokenTransfer(partition, tokenHolder, tokenHolder, lockAmount);
+
         return true;
     }
 
