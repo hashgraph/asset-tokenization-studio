@@ -204,6 +204,8 @@ library HoldStorageWrapper {
         _notifyTransferComplianceIfNeeded(_holdIdentifier, _to, _amount);
 
         _emitHoldTransfer(_holdIdentifier, _to, _amount);
+
+        ERC1410StorageWrapper.afterTokenTransfer(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _to, _amount);
     }
 
     function decreaseHeldAmount(
