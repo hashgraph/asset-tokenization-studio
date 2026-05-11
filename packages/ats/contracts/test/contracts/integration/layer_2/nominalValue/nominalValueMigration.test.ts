@@ -355,7 +355,6 @@ describe("NominalValue Migration Tests", () => {
   describe("Snapshots Nominal Value", () => {
     let diamond: ResolverProxy;
     let signer_A: HardhatEthersSigner;
-    let signer_B: HardhatEthersSigner;
 
     let asset: IAsset;
 
@@ -364,7 +363,6 @@ describe("NominalValue Migration Tests", () => {
 
       diamond = base.diamond;
       signer_A = base.deployer;
-      signer_B = base.user1;
 
       asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
     }
