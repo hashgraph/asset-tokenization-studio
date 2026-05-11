@@ -214,6 +214,7 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
       getBondSustainabilityPerformanceTargetRateFacets: () => [],
       getLoanFacets: () => [],
       getLoansPortfolioFacets: () => [],
+      getFactoryFacets: () => [],
     },
   };
 }

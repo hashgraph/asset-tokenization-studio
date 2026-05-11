@@ -720,3 +720,6 @@ bytes32 constant _METADATA_RESOLVER_KEY = 0x4c3bd2753f7bc002cfee0180298759848c0f
 
 // keccak256("security.token.standard.deactivate.resolverKey");
 bytes32 constant _DEACTIVATE_RESOLVER_KEY = 0x28edc8979475f616e9ee33c89ffa66022cb1bd6d3c555cbb4c4acaefa3974f96;
+
+// keccak256("security.token.standard.factory.resolverKey");
+bytes32 constant _FACTORY_RESOLVER_KEY = 0xa5472d34be801f744a73bce4e1851e67767286307e3203726a3261b280a667b3;

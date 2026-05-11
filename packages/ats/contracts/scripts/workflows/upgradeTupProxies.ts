@@ -3,7 +3,7 @@
 /**
  * Upgrade TransparentUpgradeableProxy implementations workflow.
  *
- * Upgrades existing TUP contracts (BLR and/or Factory) to new implementations by:
+ * Upgrades BLR (Business Logic Resolver) TUP to new implementations by:
  * 1. Validating ProxyAdmin address and permissions
  * 2. Deploying new implementations OR using provided addresses (two patterns)
  * 3. Verifying current vs target implementations
@@ -15,7 +15,8 @@
  * This workflow upgrades **TransparentUpgradeableProxy (TUP)** infrastructure contracts.
  * TUP uses EIP-1967 pattern with ProxyAdmin for centralized upgrade management.
  *
- * Different from ResolverProxy tokens (Diamond pattern), which use different upgrade mechanisms.
+ * Factory is a ResolverProxy (Diamond pattern), not a TUP. Factory upgrades use different
+ * mechanisms and are not handled by this workflow.
  * See CLAUDE.md for detailed proxy pattern comparison.
  *
  * ## Two Patterns
@@ -113,7 +114,7 @@ import {
   validateAddress,
   saveDeploymentOutput,
 } from "@scripts/infrastructure";
-import { ProxyAdmin__factory, BusinessLogicResolver__factory, Factory__factory } from "@contract-types";
+import { ProxyAdmin__factory, BusinessLogicResolver__factory } from "@contract-types";
 
 // ============================================================================
 // Constants
@@ -144,13 +145,9 @@ const OptionalEthAddressSchema = z
 const UpgradeTupProxiesOptionsSchema = z.object({
   proxyAdminAddress: EthAddressSchema,
   blrProxyAddress: OptionalEthAddressSchema,
-  factoryProxyAddress: OptionalEthAddressSchema,
   deployNewBlrImpl: z.boolean().optional(),
-  deployNewFactoryImpl: z.boolean().optional(),
   blrImplementationAddress: OptionalEthAddressSchema,
-  factoryImplementationAddress: OptionalEthAddressSchema,
   blrInitData: z.string().optional(),
-  factoryInitData: z.string().optional(),
   confirmations: z.number().int().nonnegative().optional(),
   enableRetry: z.boolean().optional(),
   verifyDeployment: z.boolean().optional(),
@@ -170,13 +167,9 @@ const UpgradeTupProxiesOptionsSchema = z.object({
 export interface UpgradeTupProxiesOptions extends ResumeOptions {
   proxyAdminAddress: string;
   blrProxyAddress?: string;
-  factoryProxyAddress?: string;
   deployNewBlrImpl?: boolean;
-  deployNewFactoryImpl?: boolean;
   blrImplementationAddress?: string;
-  factoryImplementationAddress?: string;
   blrInitData?: string;
-  factoryInitData?: string;
   confirmations?: number;
   enableRetry?: boolean;
   verifyDeployment?: boolean;
@@ -225,24 +218,13 @@ async function validateAndInitialize(
 
   validateAddress(options.proxyAdminAddress, "ProxyAdmin address");
 
-  if (!options.blrProxyAddress && !options.factoryProxyAddress) {
-    throw new Error("At least one proxy address (BLR or Factory) is required");
+  if (!options.blrProxyAddress) {
+    throw new Error("BLR proxy address is required");
   }
 
-  if (options.blrProxyAddress) {
-    validateAddress(options.blrProxyAddress, "BLR proxy address");
-    if (!options.deployNewBlrImpl && !options.blrImplementationAddress) {
-      throw new Error("BLR proxy specified but neither deployNewBlrImpl=true nor blrImplementationAddress provided");
-    }
-  }
-
-  if (options.factoryProxyAddress) {
-    validateAddress(options.factoryProxyAddress, "Factory proxy address");
-    if (!options.deployNewFactoryImpl && !options.factoryImplementationAddress) {
-      throw new Error(
-        "Factory proxy specified but neither deployNewFactoryImpl=true nor factoryImplementationAddress provided",
-      );
-    }
+  validateAddress(options.blrProxyAddress, "BLR proxy address");
+  if (!options.deployNewBlrImpl && !options.blrImplementationAddress) {
+    throw new Error("BLR proxy specified but neither deployNewBlrImpl=true nor blrImplementationAddress provided");
   }
 
   const proxyAdminContract = ProxyAdmin__factory.connect(options.proxyAdminAddress, signer);
@@ -306,35 +288,9 @@ async function deployImplementationsPhase(ctx: UpgradePhaseContext): Promise<voi
       success(`✓ BLR implementation deployed: ${result.address}`);
     }
 
-    if (ctx.options.deployNewFactoryImpl && ctx.options.factoryProxyAddress) {
-      info("Deploying new Factory implementation...");
-
-      const factoryFactory = new Factory__factory(ctx.signer);
-      const result = await deployContract(factoryFactory, { args: [] });
-
-      if (!result.success || !result.address || !result.transactionHash) {
-        throw new Error(`Factory implementation deployment failed: ${result.error || "Unknown error"}`);
-      }
-
-      const deployedFactory: DeployedContract = {
-        address: result.address,
-        transactionHash: result.transactionHash,
-        gasUsed: result.gasUsed,
-      };
-
-      ctx.deployedImplementations.set("factory", deployedFactory);
-      ctx.totalGasUsed += result.gasUsed || 0;
-      success(`✓ Factory implementation deployed: ${result.address}`);
-    }
-
     if (ctx.options.blrImplementationAddress && !ctx.options.deployNewBlrImpl) {
       validateAddress(ctx.options.blrImplementationAddress, "BLR implementation address");
       info(`✓ Using provided BLR implementation: ${ctx.options.blrImplementationAddress}`);
-    }
-
-    if (ctx.options.factoryImplementationAddress && !ctx.options.deployNewFactoryImpl) {
-      validateAddress(ctx.options.factoryImplementationAddress, "Factory implementation address");
-      info(`✓ Using provided Factory implementation: ${ctx.options.factoryImplementationAddress}`);
     }
 
     await checkpointManager.saveCheckpoint(checkpoint);
@@ -379,23 +335,6 @@ async function verifyImplementationsPhase(ctx: UpgradePhaseContext): Promise<voi
       }
     }
 
-    if (ctx.options.factoryProxyAddress) {
-      const factoryCurrentImpl = await getProxyImplementation(provider, ctx.options.factoryProxyAddress);
-      const factoryTargetImpl =
-        ctx.deployedImplementations.get("factory")?.address || ctx.options.factoryImplementationAddress;
-
-      if (!factoryTargetImpl) {
-        throw new Error("Factory target implementation not found");
-      }
-
-      if (factoryCurrentImpl.toLowerCase() === factoryTargetImpl.toLowerCase()) {
-        warn(`⚠ Factory proxy already at target implementation: ${factoryTargetImpl}`);
-      } else {
-        info(`Factory current: ${factoryCurrentImpl}`);
-        info(`Factory target:  ${factoryTargetImpl}`);
-      }
-    }
-
     await checkpointManager.saveCheckpoint(checkpoint);
     success("Phase 2 complete");
   } catch (err) {
@@ -430,21 +369,6 @@ async function upgradeProxiesPhase(ctx: UpgradePhaseContext): Promise<void> {
         proxyAddress: ctx.options.blrProxyAddress,
         implementationAddress: blrImpl,
         initData: ctx.options.blrInitData,
-      });
-    }
-
-    if (ctx.options.factoryProxyAddress) {
-      const factoryImpl =
-        ctx.deployedImplementations.get("factory")?.address || ctx.options.factoryImplementationAddress;
-      if (!factoryImpl) {
-        throw new Error("Factory implementation address not found");
-      }
-
-      implementations.push({
-        name: "factory",
-        proxyAddress: ctx.options.factoryProxyAddress,
-        implementationAddress: factoryImpl,
-        initData: ctx.options.factoryInitData,
       });
     }
 
@@ -546,18 +470,18 @@ async function verifyUpgradesPhase(ctx: UpgradePhaseContext): Promise<void> {
 // Main Export Function
 
 /**
- * Upgrade TransparentUpgradeableProxy implementations.
+ * Upgrade TransparentUpgradeableProxy implementations for BLR.
  *
- * Orchestrates a complete upgrade workflow for TUP infrastructure contracts:
+ * Orchestrates a complete upgrade workflow for BLR TUP infrastructure contract:
  * 1. Validates all required addresses and configurations
  * 2. Deploys new implementations (if requested)
  * 3. Verifies implementations are bytecode-correct
- * 4. Upgrades proxies via ProxyAdmin
- * 5. Verifies proxies now point to new implementations
+ * 4. Upgrades BLR proxy via ProxyAdmin
+ * 5. Verifies proxy now points to new implementation
  *
  * ## Pattern A: Deploy and Upgrade
  *
- * Deploy new implementations and upgrade proxies:
+ * Deploy new implementation and upgrade BLR proxy:
  *
  * ```typescript
  * const result = await upgradeTupProxies(signer, 'hedera-testnet', {
@@ -587,21 +511,6 @@ async function verifyUpgradesPhase(ctx: UpgradePhaseContext): Promise<void> {
  * });
  * ```
  *
- * ## Upgrade Both BLR and Factory
- *
- * Upgrade both infrastructure proxies simultaneously:
- *
- * ```typescript
- * const result = await upgradeTupProxies(signer, 'hedera-testnet', {
- *   proxyAdminAddress: '0x1234...',
- *   blrProxyAddress: '0x5678...',
- *   factoryProxyAddress: '0xefgh...',
- *   deployNewBlrImpl: true,
- *   deployNewFactoryImpl: true,
- *   saveOutput: true,
- * });
- * ```
- *
  * ## Resumable Upgrades
  *
  * If upgrade fails, re-run the same command to resume:
@@ -624,13 +533,9 @@ async function verifyUpgradesPhase(ctx: UpgradePhaseContext): Promise<void> {
  * @param options - Upgrade configuration options
  * @param options.proxyAdminAddress - ProxyAdmin contract address (required)
  * @param options.blrProxyAddress - BLR proxy address to upgrade (optional)
- * @param options.factoryProxyAddress - Factory proxy address to upgrade (optional)
  * @param options.deployNewBlrImpl - Deploy new BLR implementation (optional, default: false)
- * @param options.deployNewFactoryImpl - Deploy new Factory implementation (optional, default: false)
  * @param options.blrImplementationAddress - Existing BLR implementation address (optional)
- * @param options.factoryImplementationAddress - Existing Factory implementation address (optional)
  * @param options.blrInitData - Initialization data for BLR upgrade (optional)
- * @param options.factoryInitData - Initialization data for Factory upgrade (optional)
  * @param options.confirmations - Block confirmations to wait (optional, default: 2)
  * @param options.enableRetry - Enable automatic retry with backoff (optional, default: true)
  * @param options.verifyDeployment - Verify bytecode after deployment (optional, default: true)
@@ -696,17 +601,12 @@ export async function upgradeTupProxies(
   const { saveOutput = true, outputPath, deleteOnSuccess = false } = validatedOptions;
   const deployer = await signer.getAddress();
 
-  section("TUP Proxy Upgrade");
+  section("BLR TUP Proxy Upgrade");
   info("═".repeat(60));
   info(`📡 Network: ${network}`);
   info(`👤 Deployer: ${deployer}`);
   info(`🔷 ProxyAdmin: ${validatedOptions.proxyAdminAddress}`);
-  if (validatedOptions.blrProxyAddress) {
-    info(`🔗 BLR Proxy: ${validatedOptions.blrProxyAddress}`);
-  }
-  if (validatedOptions.factoryProxyAddress) {
-    info(`🔗 Factory Proxy: ${validatedOptions.factoryProxyAddress}`);
-  }
+  info(`🔗 BLR Proxy: ${validatedOptions.blrProxyAddress}`);
   info("═".repeat(60));
 
   let ctx: UpgradePhaseContext | undefined;
@@ -744,21 +644,11 @@ export async function upgradeTupProxies(
       if (blrDeployed) {
         output.implementations.blr = blrDeployed;
       }
-
-      const factoryDeployed = ctx.deployedImplementations.get("factory");
-      if (factoryDeployed) {
-        output.implementations.factory = factoryDeployed;
-      }
     }
 
     const blrUpgradeResult = ctx.upgradeResults.get(validatedOptions.blrProxyAddress || "");
     if (blrUpgradeResult) {
       output.blrUpgrade = blrUpgradeResult;
-    }
-
-    const factoryUpgradeResult = ctx.upgradeResults.get(validatedOptions.factoryProxyAddress || "");
-    if (factoryUpgradeResult) {
-      output.factoryUpgrade = factoryUpgradeResult;
     }
 
     await ctx.checkpointManager.saveCheckpoint(ctx.checkpoint);

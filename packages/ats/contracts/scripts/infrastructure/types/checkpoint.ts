@@ -210,6 +210,8 @@ export interface DeploymentCheckpoint {
       loan?: ConfigurationResult;
       /** Loans Portfolio configuration */
       loansPortfolio?: ConfigurationResult;
+      /** Factory configuration */
+      factory?: ConfigurationResult;
     };
 
     /** Factory deployment (step 6) */
