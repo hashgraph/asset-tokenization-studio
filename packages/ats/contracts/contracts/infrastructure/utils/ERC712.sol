@@ -207,7 +207,9 @@ function _isDeadlineValid(uint256 _deadline, uint256 _blockTimestamp) pure retur
 }
 
 function _isNonceValid(uint256 _nonce, uint256 _currentNonce) pure returns (bool) {
-    return _currentNonce < _nonce;
+    unchecked {
+        return _nonce == _currentNonce + 1;
+    }
 }
 
 function _recoverSigner(bytes32 _prefixedHash, bytes memory _signature) pure returns (address) {

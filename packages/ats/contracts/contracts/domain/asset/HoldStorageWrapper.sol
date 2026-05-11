@@ -88,7 +88,7 @@ library HoldStorageWrapper {
             ERC20StorageWrapper.getName()
         );
 
-        NonceStorageWrapper.setNonceFor(_protectedHold.nonce, _from);
+        NonceStorageWrapper.setNonceFor(_from);
 
         return createHoldByPartition(_partition, _from, _protectedHold.hold, "", ThirdPartyType.PROTECTED);
     }
@@ -101,7 +101,16 @@ library HoldStorageWrapper {
     ) internal {
         address thirdPartyAddress = EvmAccessors.getMsgSender();
         ERC20StorageWrapper.decreaseAllowedBalance(_from, thirdPartyAddress, _amount);
-        holdStorage().holdThirdPartyByAccountPartitionAndId[_from][_partition][_holdId] = thirdPartyAddress;
+        setThirdPartyForHold(thirdPartyAddress, _partition, _from, _holdId);
+    }
+
+    function setThirdPartyForHold(
+        address _thirdPartyAddress,
+        bytes32 _partition,
+        address _from,
+        uint256 _holdId
+    ) internal {
+        holdStorage().holdThirdPartyByAccountPartitionAndId[_from][_partition][_holdId] = _thirdPartyAddress;
     }
 
     function executeHoldByPartition(
