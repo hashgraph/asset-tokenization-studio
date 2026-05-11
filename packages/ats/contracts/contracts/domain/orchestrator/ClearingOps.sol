@@ -416,12 +416,12 @@ library ClearingOps {
 
         // Cancel/Reclaim: transfer back to holder, no compliance checks
         if (_actionType != IClearingTypes.ClearingActionType.Approve) {
-            transferClearingBalance(_id.partition, _id.tokenHolder, transferData.amount);
+            transferClearingBalance(_id.partition, _id.tokenHolder, _id.tokenHolder, transferData.amount);
             return;
         }
 
         // Approve: transfer to original destination
-        transferClearingBalance(_id.partition, transferData.destination, transferData.amount);
+        transferClearingBalance(_id.partition, _id.tokenHolder, transferData.destination, transferData.amount);
 
         // No identity/compliance check needed when holder is the destination
         if (_id.tokenHolder == transferData.destination) return;
@@ -463,7 +463,7 @@ library ClearingOps {
         if (_actionType != IClearingTypes.ClearingActionType.Approve) {
             IClearingTypes.ClearingRedeemData memory redeemData = ClearingStorageWrapper
                 .getClearingRedeemForByPartition(_id.partition, _id.tokenHolder, _id.clearingId);
-            transferClearingBalance(_id.partition, _id.tokenHolder, redeemData.amount);
+            transferClearingBalance(_id.partition, _id.tokenHolder, _id.tokenHolder, redeemData.amount);
             return;
         }
 
@@ -491,7 +491,7 @@ library ClearingOps {
             .getClearingHoldCreationForByPartition(_id.partition, _id.tokenHolder, _id.clearingId);
 
         // Always restore ABAF-adjusted amount to holder
-        transferClearingBalance(_id.partition, _id.tokenHolder, holdData.amount);
+        transferClearingBalance(_id.partition, _id.tokenHolder, _id.tokenHolder, holdData.amount);
 
         // Approve: create hold and return holdId
         if (_actionType == IClearingTypes.ClearingActionType.Approve) {
@@ -539,12 +539,13 @@ library ClearingOps {
      * increased; otherwise, the partition is added to the destination.
      * Emits TransferByPartition and Transfer events.
      * @param _partition Partition identifier
+     * @param _from Original token holder whose cleared balance is being moved
      * @param _to Destination address receiving the cleared balance
      * @param _amount Amount to transfer
      */
-    function transferClearingBalance(bytes32 _partition, address _to, uint256 _amount) internal {
+    function transferClearingBalance(bytes32 _partition, address _from, address _to, uint256 _amount) internal {
         // Delegate to internal helper with direct StorageWrapper access
-        transferClearingBalanceInternal(_partition, _to, _amount);
+        transferClearingBalanceInternal(_partition, _from, _to, _amount);
     }
 
     /**
@@ -555,24 +556,16 @@ library ClearingOps {
      * balance; otherwise, adds the partition to the receiver's portfolio.
      * Emits TransferByPartition and Transfer events in both cases.
      * @param _partition Partition identifier
+     * @param _from Original token holder whose cleared balance is being moved
      * @param _to Destination address
      * @param _amount Amount to transfer
      */
-    function transferClearingBalanceInternal(bytes32 _partition, address _to, uint256 _amount) internal {
+    function transferClearingBalanceInternal(bytes32 _partition, address _from, address _to, uint256 _amount) internal {
         if (ERC1410StorageWrapper.validPartitionForReceiver(_partition, _to)) {
             ERC1410StorageWrapper.increasePartitionOnly(_to, _amount, _partition);
-            emit IERC1410Types.TransferByPartition(
-                _partition,
-                EvmAccessors.getMsgSender(),
-                address(0),
-                _to,
-                _amount,
-                "",
-                ""
-            );
-            return ERC20StorageWrapper.performTransfer(address(0), _to, _amount);
+        } else {
+            ERC1410StorageWrapper.addPartitionToOnly(_amount, _to, _partition);
         }
-        ERC1410StorageWrapper.addPartitionToOnly(_amount, _to, _partition);
         emit IERC1410Types.TransferByPartition(
             _partition,
             EvmAccessors.getMsgSender(),
@@ -583,6 +576,7 @@ library ClearingOps {
             ""
         );
         ERC20StorageWrapper.performTransfer(address(0), _to, _amount);
+        ERC1410StorageWrapper.afterTokenTransfer(_partition, _from, _to, _amount);
     }
 
     /**
