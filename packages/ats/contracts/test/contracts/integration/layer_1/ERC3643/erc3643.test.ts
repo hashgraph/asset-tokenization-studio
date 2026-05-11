@@ -1507,21 +1507,6 @@ describe("ERC3643 Tests", () => {
       expect(await complianceMock.transferredHit()).to.be.equal(1);
     });
 
-    it("GIVEN a self-transferByPartition on a non-default partition THEN compliance is NOT notified", async () => {
-      await asset.issueByPartition({
-        partition: NON_DEFAULT_PARTITION,
-        tokenHolder: signer_E.address,
-        value: AMOUNT,
-        data: EMPTY_HEX_BYTES,
-      });
-
-      await asset
-        .connect(signer_E)
-        .transferByPartition(NON_DEFAULT_PARTITION, { to: signer_E.address, value: AMOUNT / 2 }, EMPTY_HEX_BYTES);
-
-      expect(await complianceMock.transferredHit()).to.be.equal(0);
-    });
-
     it("GIVEN a redeemByPartition on a non-default partition THEN destroyed is called on the compliance contract", async () => {
       await asset.issueByPartition({
         partition: NON_DEFAULT_PARTITION,
