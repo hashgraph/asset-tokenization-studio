@@ -5,7 +5,11 @@ import { INominalValueAtSnapshot } from "./INominalValueAtSnapshot.sol";
 import { SnapshotsStorageWrapper } from "../../domain/asset/SnapshotsStorageWrapper.sol";
 
 /**
- * @title NominalValueAtSnapshot
+ * @title  NominalValueAtSnapshot
+ * @author Asset Tokenization Studio Team
+ * @notice Abstract implementation of `INominalValueAtSnapshot`.
+ * @dev    Delegates all storage reads to `SnapshotsStorageWrapper`. Intended to be
+ *         inherited solely by `NominalValueAtSnapshotFacet`.
  */
 abstract contract NominalValueAtSnapshot is INominalValueAtSnapshot {
     /// @inheritdoc INominalValueAtSnapshot
@@ -13,6 +17,7 @@ abstract contract NominalValueAtSnapshot is INominalValueAtSnapshot {
         nominalValue_ = SnapshotsStorageWrapper.nominalValueAtSnapshot(_snapshotID);
     }
 
+    /// @inheritdoc INominalValueAtSnapshot
     function nominalValueDecimalsAtSnapshot(
         uint256 _snapshotID
     ) external view override returns (uint8 nominalValueDecimals_) {
