@@ -122,7 +122,10 @@ library ClearingOps {
     /**
      * @notice Creates a clearing operation for a deferred redeem
      * @dev Reduces the holder's available balance by `_amount`, records the
-     * cleared amount, and stores the redeem metadata. Emits a third-party-
+     * cleared amount, and stores the redeem metadata. Mirrors the canonical
+     * `redeemByPartition` balance-movement events: emits the ERC-20 `Transfer`
+     * (via `performTransfer`) and the ERC-1410 burn-side `TransferByPartition`,
+     * keeping observers in sync with the holder's debit. Emits a third-party-
      * type-specific cleared redeem event. Reverts if the holder does not
      * have sufficient balance. Preconditions: `_from` must hold at least
      * `_amount` tokens in the partition. Postconditions: balance reduced,
@@ -165,6 +168,18 @@ library ClearingOps {
         ClearingStorageWrapper.increaseClearedAmounts(_from, partition, _amount);
 
         ERC20StorageWrapper.performTransfer(_from, address(0), _amount);
+
+        // Mirror redeemByPartition: emit the burn-side TransferByPartition so
+        // observers tracking ERC-1410 burns through this event see the debit
+        emit IERC1410Types.TransferByPartition(
+            partition,
+            EvmAccessors.getMsgSender(),
+            _from,
+            address(0),
+            _amount,
+            _clearingOperation.data,
+            _operatorData
+        );
 
         ClearingStorageWrapper.setClearingRedeemData(
             _from,
@@ -447,11 +462,12 @@ library ClearingOps {
     /**
      * @notice Executes a clearing redeem operation (approve, cancel, or reclaim)
      * @dev On cancel/reclaim: moves the cleared amount back to the token
-     * holder. On approve: checks identity and compliance for burn
-     * (destination address(0)) but does not actually burn; the balance
-     * was already reduced at creation time and the tokens are effectively
-     * burned when the clearing is approved. No additional token transfer
-     * occurs.
+     * holder. On approve: verifies identity/compliance and finalises the
+     * burn. The holder balance and partition balance were already reduced
+     * at creation time, so this path snapshots and reduces totalSupply,
+     * notifies the compliance module on the default partition, runs the
+     * `afterTokenTransfer` hook so ERC-20 Votes' totalSupply checkpoints and
+     * the holder's voting power track the burn, and emits `RedeemedByPartition`.
      * @param _id Clearing operation identifier
      * @param _actionType Approve, Cancel, or Reclaim
      */
@@ -459,17 +475,49 @@ library ClearingOps {
         IClearingTypes.ClearingOperationIdentifier calldata _id,
         IClearingTypes.ClearingActionType _actionType
     ) internal {
+        IClearingTypes.ClearingRedeemData memory redeemData = ClearingStorageWrapper.getClearingRedeemForByPartition(
+            _id.partition,
+            _id.tokenHolder,
+            _id.clearingId
+        );
+
         // Cancel/Reclaim: restore ABAF-adjusted amount to holder
         if (_actionType != IClearingTypes.ClearingActionType.Approve) {
-            IClearingTypes.ClearingRedeemData memory redeemData = ClearingStorageWrapper
-                .getClearingRedeemForByPartition(_id.partition, _id.tokenHolder, _id.clearingId);
             transferClearingBalance(_id.partition, _id.tokenHolder, redeemData.amount);
             return;
         }
 
-        // Approve: _verify identity/compliance (tokens are burned, no transfer back)
+        // Approve: verify identity/compliance for the burn destination address(0)
         TokenCoreOps.checkIdentity(_id.tokenHolder, address(0));
         TokenCoreOps.checkCompliance(_id.tokenHolder, address(0), false);
+
+        // Snapshot totalSupply before the burn so historical queries see pre-burn state
+        SnapshotsStorageWrapper.updateTotalSupplySnapshot(_id.partition);
+
+        // Finalise the burn: holder balance and partition balance were debited at
+        // creation, so only the partition supply and ERC-20 totalSupply remain to drop
+        ERC1410StorageWrapper.reduceTotalSupplyByPartition(_id.partition, redeemData.amount);
+
+        // Notify compliance module on the default partition (mirrors redeemByPartition)
+        if (_id.partition == _DEFAULT_PARTITION && ERC3643StorageWrapper.erc3643Storage().compliance != address(0)) {
+            (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
+                abi.encodeWithSelector(ICompliance.destroyed.selector, _id.tokenHolder, redeemData.amount),
+                IERC3643Types.ComplianceCallFailed.selector
+            );
+        }
+
+        // Mirror redeemByPartition: keep ERC-20 Votes' totalSupply checkpoints and the
+        // holder's delegated voting power aligned with the now-finalised burn
+        ERC1410StorageWrapper.afterTokenTransfer(_id.partition, _id.tokenHolder, address(0), redeemData.amount);
+
+        emit IERC1410Types.RedeemedByPartition(
+            _id.partition,
+            EvmAccessors.getMsgSender(),
+            _id.tokenHolder,
+            redeemData.amount,
+            redeemData.data,
+            redeemData.operatorData
+        );
     }
 
     /**
