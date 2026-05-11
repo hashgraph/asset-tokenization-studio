@@ -80,8 +80,9 @@ library SecurityDeploymentLib {
 
         newRbacs[length] = IResolverProxy.Rbac({ role: TREX_OWNER_ROLE, members: membersArr });
 
-        membersArr = new address[](1);
+        membersArr = new address[](2);
         membersArr[0] = address(this);
+        membersArr[1] = _tRexOwner;
 
         newRbacs[length + 1] = IResolverProxy.Rbac({ role: DEFAULT_ADMIN_ROLE, members: membersArr });
 
