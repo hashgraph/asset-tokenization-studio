@@ -29,7 +29,6 @@ describe("deployFactory (ResolverProxy)", () => {
         await deployFactory(mockSigner, {
           blrAddress: "",
           factoryVersion: MOCK_FACTORY_VERSION,
-          factoryFacetAddress: MOCK_FACTORY_FACET_ADDRESS,
         });
         expect.fail("Should have thrown");
       } catch (err: any) {
@@ -44,26 +43,10 @@ describe("deployFactory (ResolverProxy)", () => {
         await deployFactory(mockSigner, {
           blrAddress: MOCK_BLR_ADDRESS,
           factoryVersion: 0,
-          factoryFacetAddress: MOCK_FACTORY_FACET_ADDRESS,
         });
         expect.fail("Should have thrown");
       } catch (err: any) {
         expect(err.message).to.include("factoryVersion");
-      }
-    });
-
-    it("should throw if factoryFacetAddress is missing", async () => {
-      const mockSigner = {} as any;
-
-      try {
-        await deployFactory(mockSigner, {
-          blrAddress: MOCK_BLR_ADDRESS,
-          factoryVersion: MOCK_FACTORY_VERSION,
-          factoryFacetAddress: "",
-        });
-        expect.fail("Should have thrown");
-      } catch (err: any) {
-        expect(err.message).to.include("factoryFacetAddress");
       }
     });
   });

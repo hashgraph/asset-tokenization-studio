@@ -27,9 +27,6 @@ export interface DeployFactoryOptions {
 
   /** Factory config version returned by createFactoryConfiguration() (required) */
   factoryVersion: number;
-
-  /** FactoryFacet implementation address from the deployed facets map (required) */
-  factoryFacetAddress: string;
 }
 
 /**
@@ -42,10 +39,6 @@ export interface DeployFactoryResult {
   /** Factory proxy address (ResolverProxy instance) */
   factoryAddress: string;
 
-  /** Factory implementation address (FactoryFacet deployed address) */
-  implementationAddress: string;
-
-  /** Error message (only if success=false) */
   error?: string;
 }
 
@@ -77,7 +70,7 @@ export interface DeployFactoryResult {
  * ```
  */
 export async function deployFactory(signer: Signer, options: DeployFactoryOptions): Promise<DeployFactoryResult> {
-  const { blrAddress, factoryVersion, factoryFacetAddress } = options;
+  const { blrAddress, factoryVersion } = options;
 
   if (!blrAddress) {
     throw new Error("deployFactory: blrAddress is required");
@@ -85,10 +78,6 @@ export async function deployFactory(signer: Signer, options: DeployFactoryOption
   if (!factoryVersion) {
     throw new Error("deployFactory: factoryVersion is required");
   }
-  if (!factoryFacetAddress) {
-    throw new Error("deployFactory: factoryFacetAddress is required");
-  }
-
   section("Deploying Factory (ResolverProxy)");
 
   try {
@@ -111,14 +100,12 @@ export async function deployFactory(signer: Signer, options: DeployFactoryOption
 
     success("Factory deployment complete");
     info(`  Factory Proxy:    ${factoryAddress}`);
-    info(`  Implementation:   ${factoryFacetAddress}`);
     info(`  Config ID:        ${FACTORY_CONFIG_ID}`);
     info(`  Version:          ${factoryVersion}`);
 
     return {
       success: true,
       factoryAddress,
-      implementationAddress: factoryFacetAddress,
     };
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err);

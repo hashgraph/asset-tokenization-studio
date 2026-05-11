@@ -914,7 +914,6 @@ export async function deploySystemWithExistingBlr(
         factoryResult = {
           success: true,
           factoryAddress: checkpoint.steps.factory.proxy,
-          implementationAddress: checkpoint.steps.factory.implementation,
         };
         info(`✅ Factory Implementation: ${checkpoint.steps.factory.implementation}`);
         info(`✅ Factory Proxy: ${checkpoint.steps.factory.proxy}`);
@@ -923,21 +922,20 @@ export async function deploySystemWithExistingBlr(
         factoryResult = await deployFactory(signer, {
           blrAddress,
           factoryVersion,
-          factoryFacetAddress,
         });
 
         if (!factoryResult.success) {
           throw new Error(`Factory deployment failed: ${factoryResult.error}`);
         }
 
-        info(`✅ Factory Implementation: ${factoryResult.implementationAddress}`);
+        info(`✅ Factory Implementation: ${facetAddresses["FactoryFacet"]}`);
         info(`✅ Factory Proxy: ${factoryResult.factoryAddress}`);
 
         // Save checkpoint
         checkpoint.steps.factory = {
           address: factoryResult.factoryAddress,
-          implementation: factoryResult.implementationAddress,
           proxy: factoryResult.factoryAddress,
+          implementation: facetAddresses["FactoryFacet"],
           txHash: "",
           deployedAt: new Date().toISOString(),
         };
@@ -977,8 +975,8 @@ export async function deploySystemWithExistingBlr(
         },
         factory: factoryResult
           ? {
-              implementation: factoryResult.implementationAddress,
-              implementationContractId: await getContractId(factoryResult.implementationAddress),
+              implementation: facetAddresses["FactoryFacet"] || "Unknown (FactoryFacet address not found)",
+              implementationContractId: await getContractId(facetAddresses["FactoryFacet"]),
               proxy: factoryResult.factoryAddress,
               proxyContractId: await getContractId(factoryResult.factoryAddress),
             }

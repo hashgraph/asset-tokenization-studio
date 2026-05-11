@@ -372,11 +372,14 @@ export async function createBatchConfiguration(
     });
 
     // Use provided facet data directly (resolver keys already included)
-    const facetKeys = facets.map((facet) => ({
-      facetName: facet.facetName,
-      key: facet.resolverKey,
-      address: facet.address,
-    }));
+    const facetKeys = facets.map((facet) => {
+      //TODO: add check values are not undefined
+      return {
+        facetName: facet.facetName,
+        key: facet.resolverKey,
+        address: facet.address,
+      };
+    });
 
     if (facetKeys.length === 0) {
       return err("FACET_NOT_FOUND", "No valid facets found in provided addresses");

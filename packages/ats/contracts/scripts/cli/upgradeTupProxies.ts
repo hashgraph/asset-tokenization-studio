@@ -47,7 +47,6 @@ async function main() {
     "Factory implementation",
   );
   const blrInitData = process.env.BLR_INIT_DATA;
-  const factoryInitData = process.env.FACTORY_INIT_DATA;
 
   info(`🔄 Starting TUP Proxy Upgrade`);
   info("---");
@@ -69,13 +68,9 @@ async function main() {
     const result = await upgradeTupProxies(signer, network, {
       proxyAdminAddress,
       blrProxyAddress,
-      factoryProxyAddress,
       deployNewBlrImpl,
-      deployNewFactoryImpl,
       blrImplementationAddress,
-      factoryImplementationAddress,
       blrInitData,
-      factoryInitData,
     });
 
     success(`✅ Upgrade completed successfully!`);
