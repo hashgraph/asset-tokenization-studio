@@ -169,3 +169,6 @@ bytes4 constant KPI_BOND_REDEEM_BALANCE = 0x00000009;
 
 /// @dev ID for KpiLinkedRateLib._getPreviousCouponRate()
 bytes4 constant KPI_LINKED_RATE_COUPON = 0x0000000A;
+
+/// @dev ID for ClearingOps.clearingHoldCreationExecution()
+bytes4 constant CLEARING_HOLD_CREATION = 0x0000000B;
