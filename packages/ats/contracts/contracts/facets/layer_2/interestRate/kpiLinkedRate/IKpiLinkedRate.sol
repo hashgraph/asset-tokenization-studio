@@ -9,12 +9,11 @@ interface IKpiLinkedRate is IKpiLinkedRateErrors {
 
     error InterestRateIsKpiLinked();
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_KpiLinkedRate(InterestRate calldata _interestRate, ImpactData calldata _impactData) external;
+    function initializeKpiLinkedRate(InterestRate calldata _interestRate, ImpactData calldata _impactData) external;
 
-    function setInterestRate(InterestRate calldata _newInterestRate) external;
-    function setImpactData(ImpactData calldata _newImpactData) external;
+    function setKpiLinkedRateInterestRate(InterestRate calldata _newInterestRate) external;
+    function setKpiLinkedRateImpactData(ImpactData calldata _newImpactData) external;
 
-    function getInterestRate() external view returns (InterestRate memory interestRate_);
-    function getImpactData() external view returns (ImpactData memory impactData_);
+    function getKpiLinkedRateInterestRate() external view returns (InterestRate memory interestRate_);
+    function getKpiLinkedRateImpactData() external view returns (ImpactData memory impactData_);
 }

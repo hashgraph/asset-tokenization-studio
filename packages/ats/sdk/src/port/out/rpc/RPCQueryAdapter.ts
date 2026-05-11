@@ -1544,7 +1544,7 @@ export class RPCQueryAdapter {
     address: EvmAddress,
   ): Promise<[bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint]> {
     LogService.logTrace(`Getting interest rate for security: ${address.toString()}`);
-    const result = await this.connect(KpiLinkedRate__factory, address.toString()).getInterestRate();
+    const result = await this.connect(KpiLinkedRate__factory, address.toString()).getKpiLinkedRateInterestRate();
     return [
       result.maxRate,
       result.baseRate,
@@ -1576,7 +1576,7 @@ export class RPCQueryAdapter {
 
   async getImpactData(address: EvmAddress): Promise<[bigint, bigint, bigint, number, bigint]> {
     LogService.logTrace(`Getting impact data for the security: ${address.toString()}`);
-    const result = await this.connect(KpiLinkedRate__factory, address.toString()).getImpactData();
+    const result = await this.connect(KpiLinkedRate__factory, address.toString()).getKpiLinkedRateImpactData();
     return [
       result.maxDeviationCap,
       result.baseLine,

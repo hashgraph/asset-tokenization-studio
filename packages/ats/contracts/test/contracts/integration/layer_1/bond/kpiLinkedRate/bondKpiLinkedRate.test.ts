@@ -128,8 +128,8 @@ describe("Bond KpiLinked Rate Tests", () => {
       adjustmentPrecision: 2,
     };
 
-    await kpiLinkedRateFacet.connect(signer_A).setInterestRate(newInterestRate);
-    await kpiLinkedRateFacet.connect(signer_A).setImpactData(newImpactData);
+    await kpiLinkedRateFacet.connect(signer_A).setKpiLinkedRateInterestRate(newInterestRate);
+    await kpiLinkedRateFacet.connect(signer_A).setKpiLinkedRateImpactData(newImpactData);
   }
 
   async function checkCouponPostValues(
@@ -333,7 +333,7 @@ describe("Bond KpiLinked Rate Tests", () => {
       newInterestRate.missedPenalty = previousCouponRate;
       newInterestRate.rateDecimals = previousCouponRateDecimals + 1;
 
-      await kpiLinkedRateFacet.connect(signer_A).setInterestRate(newInterestRate);
+      await kpiLinkedRateFacet.connect(signer_A).setKpiLinkedRateInterestRate(newInterestRate);
 
       updateCouponDates();
 
@@ -356,7 +356,7 @@ describe("Bond KpiLinked Rate Tests", () => {
       newInterestRate.missedPenalty = previousCouponRate_2;
       newInterestRate.rateDecimals = previousCouponRateDecimals_2 - 1;
 
-      await kpiLinkedRateFacet.connect(signer_A).setInterestRate(newInterestRate);
+      await kpiLinkedRateFacet.connect(signer_A).setKpiLinkedRateInterestRate(newInterestRate);
 
       updateCouponDates();
 
@@ -378,7 +378,7 @@ describe("Bond KpiLinked Rate Tests", () => {
     it("GIVEN a kpiLinked rate bond WHEN no report is found but missing penalty is too high THEN transaction success and rate is max rate", async () => {
       await setKpiConfiguration(-10);
       newInterestRate.missedPenalty = newInterestRate.maxRate + 100;
-      await kpiLinkedRateFacet.connect(signer_A).setInterestRate(newInterestRate);
+      await kpiLinkedRateFacet.connect(signer_A).setKpiLinkedRateInterestRate(newInterestRate);
 
       // Test missed penalty when there is a single coupon
       await asset.connect(signer_A).setCoupon(couponData);

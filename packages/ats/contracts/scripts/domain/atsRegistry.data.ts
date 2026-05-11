@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-12T11:02:01.532Z
+ * Generated: 2026-05-12T11:33:01.323Z
  * Facets: 124
  * Infrastructure: 2
  *
@@ -7590,45 +7590,45 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["KpiLinkedRate", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "getImpactData",
+        name: "getKpiLinkedRateImpactData",
         signature: {
-          full: "function getImpactData() view returns ((uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData_)",
-          canonical: "getImpactData()",
+          full: "function getKpiLinkedRateImpactData() view returns ((uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData_)",
+          canonical: "getKpiLinkedRateImpactData()",
         },
-        selector: "0x24bffca8",
+        selector: "0x8e0ae3e7",
       },
       {
-        name: "getInterestRate",
+        name: "getKpiLinkedRateInterestRate",
         signature: {
-          full: "function getInterestRate() view returns ((uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate_)",
-          canonical: "getInterestRate()",
+          full: "function getKpiLinkedRateInterestRate() view returns ((uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate_)",
+          canonical: "getKpiLinkedRateInterestRate()",
         },
-        selector: "0x5257b566",
+        selector: "0x11cce521",
       },
       {
-        name: "initialize_KpiLinkedRate",
+        name: "initializeKpiLinkedRate",
         signature: {
-          full: "function initialize_KpiLinkedRate((uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) _interestRate, (uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) _impactData)",
+          full: "function initializeKpiLinkedRate((uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) _interestRate, (uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) _impactData)",
           canonical:
-            "initialize_KpiLinkedRate((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8),(uint256,uint256,uint256,uint8,uint256))",
+            "initializeKpiLinkedRate((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8),(uint256,uint256,uint256,uint8,uint256))",
         },
-        selector: "0x0b7c89d7",
+        selector: "0x4d1b66be",
       },
       {
-        name: "setImpactData",
+        name: "setKpiLinkedRateImpactData",
         signature: {
-          full: "function setImpactData((uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) _newImpactData)",
-          canonical: "setImpactData((uint256,uint256,uint256,uint8,uint256))",
+          full: "function setKpiLinkedRateImpactData((uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) _newImpactData)",
+          canonical: "setKpiLinkedRateImpactData((uint256,uint256,uint256,uint8,uint256))",
         },
-        selector: "0x9ce6e100",
+        selector: "0x5c993888",
       },
       {
-        name: "setInterestRate",
+        name: "setKpiLinkedRateInterestRate",
         signature: {
-          full: "function setInterestRate((uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) _newInterestRate)",
-          canonical: "setInterestRate((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8))",
+          full: "function setKpiLinkedRateInterestRate((uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) _newInterestRate)",
+          canonical: "setKpiLinkedRateInterestRate((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8))",
         },
-        selector: "0x9a833a5b",
+        selector: "0x6b4bbb7a",
       },
     ],
     events: [

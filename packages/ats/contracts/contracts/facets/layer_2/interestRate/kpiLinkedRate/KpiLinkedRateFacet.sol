@@ -11,18 +11,22 @@ contract KpiLinkedRateFacet is KpiLinkedRate, IStaticFunctionSelectors {
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
-        staticFunctionSelectors_[selectorIndex++] = this.initialize_KpiLinkedRate.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.setInterestRate.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.setImpactData.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getInterestRate.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getImpactData.selector;
+        uint256 selectorIndex = 5;
+        staticFunctionSelectors_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this.initializeKpiLinkedRate.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.setKpiLinkedRateInterestRate.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.setKpiLinkedRateImpactData.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getKpiLinkedRateInterestRate.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getKpiLinkedRateImpactData.selector;
+        }
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IKpiLinkedRate).interfaceId;
+        uint256 selectorIndex = 1;
+        staticInterfaceIds_ = new bytes4[](selectorIndex);
+        unchecked {
+            staticInterfaceIds_[--selectorIndex] = type(IKpiLinkedRate).interfaceId;
+        }
     }
 }

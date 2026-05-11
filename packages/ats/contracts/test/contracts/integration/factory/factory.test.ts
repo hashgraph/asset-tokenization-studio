@@ -1289,12 +1289,12 @@ describe("Factory Tests", () => {
 
       // Verify KPI linked rate was set
       const kpiLinkedRateFacet = await ethers.getContractAt("KpiLinkedRate", bondAddress);
-      const interestRate = await kpiLinkedRateFacet.getInterestRate();
+      const interestRate = await kpiLinkedRateFacet.getKpiLinkedRateInterestRate();
       expect(interestRate.maxRate).to.equal(bondKpiLinkedRateData.interestRate.maxRate);
       expect(interestRate.baseRate).to.equal(bondKpiLinkedRateData.interestRate.baseRate);
       expect(interestRate.minRate).to.equal(bondKpiLinkedRateData.interestRate.minRate);
 
-      const impactData = await kpiLinkedRateFacet.getImpactData();
+      const impactData = await kpiLinkedRateFacet.getKpiLinkedRateImpactData();
       expect(impactData.maxDeviationCap).to.equal(bondKpiLinkedRateData.impactData.maxDeviationCap);
       expect(impactData.baseLine).to.equal(bondKpiLinkedRateData.impactData.baseLine);
       expect(impactData.maxDeviationFloor).to.equal(bondKpiLinkedRateData.impactData.maxDeviationFloor);

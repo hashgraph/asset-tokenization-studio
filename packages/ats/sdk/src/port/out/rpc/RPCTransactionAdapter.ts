@@ -2630,7 +2630,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Setting Interest Rate for security ${security.toString()}`);
     return this.executeTransaction(
       KpiLinkedRate__factory.connect(security.toString(), this.getSignerOrProvider()),
-      "setInterestRate",
+      "setKpiLinkedRateInterestRate",
       [
         {
           maxRate: maxRate.toBigInt(),
@@ -2659,7 +2659,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Setting Impact Data for security ${security.toString()}`);
     return this.executeTransaction(
       KpiLinkedRate__factory.connect(security.toString(), this.getSignerOrProvider()),
-      "setImpactData",
+      "setKpiLinkedRateImpactData",
       [
         {
           maxDeviationCap: maxDeviationCap.toBigInt(),
