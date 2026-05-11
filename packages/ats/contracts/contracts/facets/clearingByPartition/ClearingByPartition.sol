@@ -28,7 +28,6 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
         override
         onlyUnpaused
         onlyRole(CLEARING_VALIDATOR_ROLE)
-        onlyClearingActivated
         onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
         onlyWithValidClearingId(_clearingOperationIdentifier)
         onlyValidExpirationTimestampForClearing(_clearingOperationIdentifier, false)
@@ -58,7 +57,6 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
         override
         onlyUnpaused
         onlyRole(CLEARING_VALIDATOR_ROLE)
-        onlyClearingActivated
         onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
         onlyWithValidClearingId(_clearingOperationIdentifier)
         onlyValidExpirationTimestampForClearing(_clearingOperationIdentifier, false)
@@ -86,7 +84,6 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
         onlyWithValidClearingId(_clearingOperationIdentifier)
-        onlyClearingActivated
         onlyValidExpirationTimestampForClearing(_clearingOperationIdentifier, true)
         onlyIdentifiedAddresses(_clearingOperationIdentifier.tokenHolder, address(0))
         returns (bool success_)

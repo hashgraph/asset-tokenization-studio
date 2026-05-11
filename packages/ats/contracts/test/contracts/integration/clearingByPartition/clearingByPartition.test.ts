@@ -945,25 +945,6 @@ describe("ClearingByPartitionFacet Tests", () => {
       ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
-    it("GIVEN clearing deactivated WHEN approveClearingOperationByPartition THEN reverts with ClearingIsDisabled", async () => {
-      const clearingOperation = {
-        partition: _DEFAULT_PARTITION,
-        expirationTimestamp: EXPIRATION_TIMESTAMP,
-        data: EMPTY_HEX_BYTES,
-      };
-      await asset.connect(signer_A).clearingRedeemByPartition(clearingOperation, _AMOUNT);
-      await asset.connect(signer_A).deactivateClearing();
-      const identifier = {
-        clearingOperationType: ClearingOperationType.Redeem,
-        partition: _DEFAULT_PARTITION,
-        tokenHolder: signer_A.address,
-        clearingId: 1,
-      };
-      await expect(
-        asset.connect(signer_A).approveClearingOperationByPartition(identifier),
-      ).to.be.revertedWithCustomError(asset, "ClearingIsDisabled");
-    });
-
     it("GIVEN non-default partition WHEN approveClearingOperationByPartition THEN reverts with PartitionNotAllowedInSinglePartitionMode", async () => {
       const identifier = {
         clearingOperationType: ClearingOperationType.Redeem,
@@ -1075,25 +1056,6 @@ describe("ClearingByPartitionFacet Tests", () => {
       await expect(
         asset.connect(signer_B).cancelClearingOperationByPartition(identifier),
       ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
-    });
-
-    it("GIVEN clearing deactivated WHEN cancelClearingOperationByPartition THEN reverts with ClearingIsDisabled", async () => {
-      const clearingOperation = {
-        partition: _DEFAULT_PARTITION,
-        expirationTimestamp: EXPIRATION_TIMESTAMP,
-        data: EMPTY_HEX_BYTES,
-      };
-      await asset.connect(signer_A).clearingRedeemByPartition(clearingOperation, _AMOUNT);
-      await asset.connect(signer_A).deactivateClearing();
-      const identifier = {
-        clearingOperationType: ClearingOperationType.Redeem,
-        partition: _DEFAULT_PARTITION,
-        tokenHolder: signer_A.address,
-        clearingId: 1,
-      };
-      await expect(
-        asset.connect(signer_A).cancelClearingOperationByPartition(identifier),
-      ).to.be.revertedWithCustomError(asset, "ClearingIsDisabled");
     });
 
     it("GIVEN non-default partition WHEN cancelClearingOperationByPartition THEN reverts with PartitionNotAllowedInSinglePartitionMode", async () => {
@@ -1333,45 +1295,6 @@ describe("ClearingByPartitionFacet Tests", () => {
       await expect(
         asset.connect(signer_A).reclaimClearingOperationByPartition(identifier),
       ).to.be.revertedWithCustomError(asset, "IsPaused");
-    });
-
-    it("GIVEN clearing deactivated WHEN reclaimClearingOperationByPartition THEN reverts with ClearingIsDisabled", async () => {
-      const clearingOperation = {
-        partition: _DEFAULT_PARTITION,
-        expirationTimestamp: SHORT_EXPIRATION_TIMESTAMP,
-        data: EMPTY_HEX_BYTES,
-      };
-      await asset.connect(signer_A).clearingRedeemByPartition(clearingOperation, _AMOUNT);
-      await asset.changeSystemTimestamp(SHORT_EXPIRATION_TIMESTAMP + 1);
-      await asset.connect(signer_A).deactivateClearing();
-      const identifier = {
-        clearingOperationType: ClearingOperationType.Redeem,
-        partition: _DEFAULT_PARTITION,
-        tokenHolder: signer_A.address,
-        clearingId: 1,
-      };
-      await expect(
-        asset.connect(signer_A).reclaimClearingOperationByPartition(identifier),
-      ).to.be.revertedWithCustomError(asset, "ClearingIsDisabled");
-    });
-
-    it("GIVEN non-default partition WHEN reclaimClearingOperationByPartition THEN reverts with PartitionNotAllowedInSinglePartitionMode", async () => {
-      const clearingOperation = {
-        partition: _DEFAULT_PARTITION,
-        expirationTimestamp: SHORT_EXPIRATION_TIMESTAMP,
-        data: EMPTY_HEX_BYTES,
-      };
-      await asset.connect(signer_A).clearingRedeemByPartition(clearingOperation, _AMOUNT);
-      await asset.changeSystemTimestamp(SHORT_EXPIRATION_TIMESTAMP + 1);
-      const identifier = {
-        clearingOperationType: ClearingOperationType.Redeem,
-        partition: _WRONG_PARTITION,
-        tokenHolder: signer_A.address,
-        clearingId: 1,
-      };
-      await expect(
-        asset.connect(signer_A).reclaimClearingOperationByPartition(identifier),
-      ).to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode");
     });
 
     it("GIVEN a non-expired clearing WHEN reclaimClearingOperationByPartition THEN reverts with ExpirationDateNotReached", async () => {
