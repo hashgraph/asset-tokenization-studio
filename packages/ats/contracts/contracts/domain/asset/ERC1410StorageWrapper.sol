@@ -418,18 +418,17 @@ library ERC1410StorageWrapper {
         bool removeFrom;
 
         if (from != address(0)) {
-            uint256 balanceFrom = ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(
-                from,
-                TimeTravelStorageWrapper.getBlockTimestamp()
-            );
-            removeFrom = balanceFrom == amount;
+            removeFrom =
+                ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(
+                    from,
+                    TimeTravelStorageWrapper.getBlockTimestamp()
+                ) ==
+                amount;
         }
         if (to != address(0)) {
-            uint256 balanceTo = ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(
-                to,
-                TimeTravelStorageWrapper.getBlockTimestamp()
-            );
-            addTo = balanceTo == 0;
+            addTo =
+                ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(to, TimeTravelStorageWrapper.getBlockTimestamp()) ==
+                0;
         }
 
         if (!(addTo || removeFrom)) return;
