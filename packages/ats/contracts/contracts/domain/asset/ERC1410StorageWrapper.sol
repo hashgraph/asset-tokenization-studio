@@ -405,11 +405,11 @@ library ERC1410StorageWrapper {
             // burn | redeem
             SnapshotsStorageWrapper.updateAccountSnapshot(from, partition);
             SnapshotsStorageWrapper.updateTotalSupplySnapshot(partition);
-            if (
-                amount > 0 &&
-                AdjustBalancesStorageWrapper.balanceOfAdjustedAt(from, TimeTravelStorageWrapper.getBlockTimestamp()) ==
-                amount
-            ) removeFrom = true;
+            uint256 totalFrom = ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(
+                from,
+                TimeTravelStorageWrapper.getBlockTimestamp()
+            );
+            if (amount > 0 && totalFrom == amount) removeFrom = true;
         }
         // transfer
         else {
@@ -417,11 +417,11 @@ library ERC1410StorageWrapper {
             SnapshotsStorageWrapper.updateAccountSnapshot(to, partition);
             // balanceOf instead of balanceOfAdjusted because we are comparing it to 0
             if (amount > 0 && ERC20StorageWrapper.balanceOf(to) == 0) addTo = true;
-            if (
-                amount > 0 &&
-                AdjustBalancesStorageWrapper.balanceOfAdjustedAt(from, TimeTravelStorageWrapper.getBlockTimestamp()) ==
-                amount
-            ) removeFrom = true;
+            uint256 totalFrom = ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(
+                from,
+                TimeTravelStorageWrapper.getBlockTimestamp()
+            );
+            if (amount > 0 && totalFrom == amount) removeFrom = true;
         }
 
         if (!(addTo || removeFrom)) return;
