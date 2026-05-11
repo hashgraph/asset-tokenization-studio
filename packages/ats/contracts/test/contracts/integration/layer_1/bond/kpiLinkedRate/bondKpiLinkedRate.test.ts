@@ -388,6 +388,33 @@ describe("Bond KpiLinked Rate Tests", () => {
       await checkCouponPostValues(newInterestRate.maxRate, newInterestRate.rateDecimals, amount, 1, signer_A.address);
     });
 
+    it("GIVEN a cancelled coupon not in the ordered list WHEN getCoupon THEN rate treats it as having no previous coupon", async () => {
+      await setKpiConfiguration(-10);
+
+      // Coupon 1 — will be in the ordered list
+      await asset.connect(signer_A).setCoupon(couponData);
+
+      // Coupon 2 — will be cancelled and therefore absent from the ordered list
+      updateCouponDates();
+      await asset.connect(signer_A).setCoupon(couponData);
+
+      // Coupon 3 — will be in the ordered list; coupon 2 becomes the gap between 1 and 3
+      updateCouponDates();
+      await asset.connect(signer_A).setCoupon(couponData);
+
+      await asset.connect(signer_A).cancelCoupon(2);
+
+      // Advance past all record dates and build ordered list [1, 3]
+      await asset.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
+      await asset.connect(signer_A).triggerScheduledCrossOrderedTasks(100);
+
+      // getCoupon(2) triggers a view-time rate calculation for the cancelled coupon.
+      // getPreviousCouponInOrderedList(2) on list [1, 3] must return 0 (not found),
+      // so the rate equals 0 + missedPenalty rather than coupon1.rate + missedPenalty.
+      const coupon2 = (await asset.getCoupon(2)).registeredCoupon_;
+      expect(coupon2.coupon.rate).to.equal(newInterestRate.missedPenalty);
+    });
+
     it("GIVEN a kpiLinked rate bond WHEN impact data is above baseline THEN transaction success and rate is calculated", async () => {
       await setKpiConfiguration(-10);
 

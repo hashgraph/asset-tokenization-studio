@@ -292,16 +292,21 @@ library CouponStorageWrapper {
 
         if (getCouponFromOrderedListAt(0) == couponID) return (0);
 
-        orderedListLength--;
-        uint256 previousCouponId = 0;
-
-        for (uint256 index = 0; index < orderedListLength; index++) {
-            previousCouponId = getCouponFromOrderedListAt(index);
-            uint256 couponId = getCouponFromOrderedListAt(index + 1);
-            if (couponId == couponID) break;
+        unchecked {
+            orderedListLength--;
         }
+        uint256 previousCouponId;
 
-        return previousCouponId;
+        for (uint256 i; i < orderedListLength; ) {
+            previousCouponId = getCouponFromOrderedListAt(i);
+            uint256 couponId = getCouponFromOrderedListAt(i + 1);
+            if (couponId == couponID) return previousCouponId;
+
+            unchecked {
+                ++i;
+            }
+        }
+        return 0;
     }
 
     /**
