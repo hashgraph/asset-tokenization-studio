@@ -146,10 +146,11 @@ contract Factory is IFactory {
             _factoryRegulationData.additionalSecurityData
         );
 
-        _tryInitialize_NominalValue(
+        _tryInitializeNominalValue(
             equityAddress_,
             _equityData.equityDetails.nominalValue,
-            _equityData.equityDetails.nominalValueDecimals
+            _equityData.equityDetails.nominalValueDecimals,
+            _equityData.equityDetails.currency
         );
 
         emit EquityDeployed(EvmAccessors.getMsgSender(), equityAddress_, _equityData, _factoryRegulationData);
@@ -274,10 +275,11 @@ contract Factory is IFactory {
         // Initialize proceed recipients (ProceedRecipientsFacet may not be present)
         _tryInitialize_ProceedRecipients(bondAddress_, _bondData.proceedRecipients, _bondData.proceedRecipientsData);
 
-        _tryInitialize_NominalValue(
+        _tryInitializeNominalValue(
             bondAddress_,
             _bondData.bondDetails.nominalValue,
-            _bondData.bondDetails.nominalValueDecimals
+            _bondData.bondDetails.nominalValueDecimals,
+            _bondData.bondDetails.currency
         );
     }
 
@@ -498,12 +500,19 @@ contract Factory is IFactory {
         }
     }
 
-    function _tryInitialize_NominalValue(
+    function _tryInitializeNominalValue(
         address securityAddress_,
         uint256 nominalValue,
-        uint8 nominalValueDecimals
+        uint8 nominalValueDecimals,
+        bytes3 nominalValueCurrency
     ) private {
-        try INominalValue(securityAddress_).initialize_NominalValue(nominalValue, nominalValueDecimals) {
+        try
+            INominalValue(securityAddress_).initializeNominalValue(
+                nominalValue,
+                nominalValueDecimals,
+                nominalValueCurrency
+            )
+        {
             // success
         } catch {
             // facet not present - skip initialization

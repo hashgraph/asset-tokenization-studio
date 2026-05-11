@@ -5,8 +5,8 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset, type NominalValueMigrationFacetTest } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { BOND_CONFIG_ID, EQUITY_CONFIG_ID, ATS_ROLES } from "@scripts";
-import { deployBondTokenFixture, deployEquityTokenFixture } from "@test";
+import { ATS_ROLES, BOND_CONFIG_ID, CURRENCIES, EQUITY_CONFIG_ID } from "@scripts";
+import { deployBondTokenFixture, deployEquityTokenFixture, EVENT_NAMES, TEST_NOMINAL_VALUES } from "@test";
 
 async function addMigrationFacetToDiamond(base: Awaited<ReturnType<typeof deployBondTokenFixture>>, configId: string) {
   const { blr, deployer, diamond: baseDiamond } = base;
@@ -81,7 +81,7 @@ describe("NominalValue Migration Tests", () => {
     it("GIVEN a bond with initialized nominalValue WHEN legacy bond storage is checked THEN deprecated fields are cleared", async () => {
       const [legacyValue, legacyDecimals] = await migrationFacet.getLegacyBondNominalValue();
 
-      // After initialize_NominalValue (called by factory), deprecated fields should be cleared
+      // After initializeNominalValue (called by factory), deprecated fields should be cleared
       expect(legacyValue).to.equal(0);
       expect(legacyDecimals).to.equal(0);
     });
@@ -158,7 +158,7 @@ describe("NominalValue Migration Tests", () => {
     it("GIVEN an equity with initialized nominalValue WHEN legacy equity storage is checked THEN deprecated fields are cleared", async () => {
       const [legacyValue, legacyDecimals] = await migrationFacet.getLegacyEquityNominalValue();
 
-      // After initialize_NominalValue (called by factory), deprecated fields should be cleared
+      // After initializeNominalValue (called by factory), deprecated fields should be cleared
       expect(legacyValue).to.equal(0);
       expect(legacyDecimals).to.equal(0);
     });
@@ -274,30 +274,46 @@ describe("NominalValue Migration Tests", () => {
       await loadFixture(deployBondWithMigrationFacet);
     });
 
-    it("GIVEN an already initialized nominalValue WHEN initialize_NominalValue is called THEN reverts with AlreadyInitialized", async () => {
-      await expect(asset.initialize_NominalValue(200, 4)).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+    it("GIVEN an already initialized nominalValue WHEN initializeNominalValue is called THEN reverts with AlreadyInitialized", async () => {
+      await expect(
+        asset.initializeNominalValue(200, 4, TEST_NOMINAL_VALUES.CURRENCY_ZERO),
+      ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
     });
 
-    it("GIVEN an uninitialized nominalValue WHEN setNominalValue is called THEN it initializes and sets value", async () => {
+    it("GIVEN an uninitialized nominalValue WHEN setNominalValue is called THEN it initializes and sets value with no currency", async () => {
       // Reset initialized flag to simulate a legacy token
       await migrationFacet.resetNominalValueInitialized();
 
-      // setNominalValue should trigger _initialize_NominalValue internally
+      // setNominalValue should trigger initializeNominalValue internally with bytes3(0) currency
       await asset.connect(signer_A).setNominalValue(600, 5);
 
       expect(await asset.getNominalValue()).to.equal(600);
       expect(await asset.getNominalValueDecimals()).to.equal(5);
+      expect(await asset.getNominalValueCurrency()).to.equal(TEST_NOMINAL_VALUES.CURRENCY_ZERO);
+    });
+
+    it("GIVEN an uninitialized nominalValue WHEN initializeNominalValue is called THEN emits NominalValueInitialized with all 3 args", async () => {
+      // Reset initialized flag so initializeNominalValue can run again
+      await migrationFacet.resetNominalValueInitialized();
+
+      await expect(asset.connect(signer_A).initializeNominalValue(1234, 5, CURRENCIES.EUR))
+        .to.emit(asset, EVENT_NAMES.NOMINAL_VALUE_INITIALIZED)
+        .withArgs(signer_A.address, 1234, 5, CURRENCIES.EUR);
+
+      expect(await asset.getNominalValue()).to.equal(1234);
+      expect(await asset.getNominalValueDecimals()).to.equal(5);
+      expect(await asset.getNominalValueCurrency()).to.equal(CURRENCIES.EUR);
     });
   });
 
   describe("NominalValueFacet Static Selectors", () => {
-    it("GIVEN the NominalValueFacet WHEN getStaticFunctionSelectors is called THEN returns 4 selectors", async () => {
+    it("GIVEN the NominalValueFacet WHEN getStaticFunctionSelectors is called THEN returns 6 selectors", async () => {
       const factory = await ethers.getContractFactory("NominalValueFacet");
       const facet = await factory.deploy();
       await facet.waitForDeployment();
 
       const selectors = await facet.getStaticFunctionSelectors();
-      expect(selectors.length).to.equal(4);
+      expect(selectors.length).to.equal(6);
     });
 
     it("GIVEN the NominalValueFacet WHEN getStaticInterfaceIds is called THEN returns 1 interface id", async () => {
@@ -349,6 +365,57 @@ describe("NominalValue Migration Tests", () => {
 
     it("GIVEN a user without _NOMINAL_VALUE_ROLE WHEN setNominalValue THEN reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_B).setNominalValue(500, 4)).to.be.rejectedWith("AccountHasNoRole");
+    });
+
+    it("GIVEN a user with _NOMINAL_VALUE_ROLE WHEN setNominalValueCurrency THEN succeeds", async () => {
+      await asset.connect(signer_A).setNominalValueCurrency(CURRENCIES.EUR);
+
+      expect(await asset.getNominalValueCurrency()).to.equal(CURRENCIES.EUR);
+    });
+
+    it("GIVEN a user without _NOMINAL_VALUE_ROLE WHEN setNominalValueCurrency THEN reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_B).setNominalValueCurrency(CURRENCIES.EUR)).to.be.rejectedWith(
+        "AccountHasNoRole",
+      );
+    });
+  });
+
+  describe("NominalValue Currency", () => {
+    let diamond: ResolverProxy;
+    let signer_A: HardhatEthersSigner;
+
+    let asset: IAsset;
+
+    async function deployBondFixture() {
+      const base = await deployBondTokenFixture();
+
+      diamond = base.diamond;
+      signer_A = base.deployer;
+
+      asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
+    }
+
+    beforeEach(async () => {
+      await loadFixture(deployBondFixture);
+    });
+
+    it("GIVEN a freshly-deployed bond WHEN getNominalValueCurrency THEN returns the currency forwarded by the factory", async () => {
+      // Factory wires bondDetails.currency through _tryInitializeNominalValue; default fixture uses USD.
+      expect(await asset.getNominalValueCurrency()).to.equal(CURRENCIES.USD);
+    });
+
+    it("GIVEN a bond WHEN setNominalValueCurrency is called THEN it overwrites the stored currency and emits NominalValueCurrencySet", async () => {
+      await expect(asset.connect(signer_A).setNominalValueCurrency(CURRENCIES.GBP))
+        .to.emit(asset, EVENT_NAMES.NOMINAL_VALUE_CURRENCY_SET)
+        .withArgs(signer_A.address, CURRENCIES.GBP);
+
+      expect(await asset.getNominalValueCurrency()).to.equal(CURRENCIES.GBP);
+    });
+
+    it("GIVEN a freshly-deployed bond WHEN setNominalValue is called THEN currency is preserved", async () => {
+      await asset.connect(signer_A).setNominalValue(999, 6);
+
+      expect(await asset.getNominalValueCurrency()).to.equal(CURRENCIES.USD);
     });
   });
 

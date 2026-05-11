@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-12T10:44:55.115Z
+ * Generated: 2026-05-12T11:02:01.532Z
  * Facets: 124
  * Infrastructure: 2
  *
@@ -9479,6 +9479,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   NominalValueFacet: {
     name: "NominalValueFacet",
+    description: "Diamond facet that exposes the nominal value capability (`INominalValue`) on a token.",
     resolverKey: {
       name: "_NOMINAL_VALUE_RESOLVER_KEY",
       value: "0x48903d4da8b1f0a5e9a9874be74ec5d2f8043d4d5b65cc093173c3dae103df8f",
@@ -9491,6 +9492,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbd4ff0a9",
       },
       {
+        name: "getNominalValueCurrency",
+        signature: {
+          full: "function getNominalValueCurrency() view returns (bytes3)",
+          canonical: "getNominalValueCurrency()",
+        },
+        selector: "0x416b5554",
+      },
+      {
         name: "getNominalValueDecimals",
         signature: {
           full: "function getNominalValueDecimals() view returns (uint8)",
@@ -9499,12 +9508,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x27e4bb51",
       },
       {
-        name: "initialize_NominalValue",
+        name: "initializeNominalValue",
         signature: {
-          full: "function initialize_NominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals)",
-          canonical: "initialize_NominalValue(uint256,uint8)",
+          full: "function initializeNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals, bytes3 _nominalValueCurrency)",
+          canonical: "initializeNominalValue(uint256,uint8,bytes3)",
         },
-        selector: "0x0c0e65af",
+        selector: "0x1bc79e1d",
       },
       {
         name: "setNominalValue",
@@ -9514,8 +9523,32 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x40ba1a0d",
       },
+      {
+        name: "setNominalValueCurrency",
+        signature: {
+          full: "function setNominalValueCurrency(bytes3 _nominalValueCurrency)",
+          canonical: "setNominalValueCurrency(bytes3)",
+        },
+        selector: "0x1c941c77",
+      },
     ],
     events: [
+      {
+        name: "NominalValueCurrencySet",
+        signature: {
+          full: "event NominalValueCurrencySet(address indexed operator, bytes3 nominalValueCurrency)",
+          canonical: "NominalValueCurrencySet(address,bytes3)",
+        },
+        topic0: "0x121154ad7f7eb7b91da8448a24fd91b473ce28adcb1c5127257918f37b4a3508",
+      },
+      {
+        name: "NominalValueInitialized",
+        signature: {
+          full: "event NominalValueInitialized(address indexed operator, uint256 nominalValue, uint8 nominalValueDecimals, bytes3 nominalValueCurrency)",
+          canonical: "NominalValueInitialized(address,uint256,uint8,bytes3)",
+        },
+        topic0: "0x9a822fe5a63dc100e6c6c4e0c1bfcc813c9343a12c7adbaf651b92b91fbcf2db",
+      },
       {
         name: "NominalValueSet",
         signature: {

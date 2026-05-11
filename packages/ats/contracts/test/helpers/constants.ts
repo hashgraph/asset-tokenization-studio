@@ -249,6 +249,21 @@ export const TEST_CONTRACT_IDS = {
 // ============================================================================
 
 /**
+ * Common empty (all-zero) bytes values, parameterised by width.
+ *
+ * ethers v6 ships only `ZeroAddress` (20 bytes) and `ZeroHash` (32 bytes); this
+ * registry covers the widths the contracts use that ethers doesn't expose, so
+ * tests and fixtures can avoid raw hex literals.
+ *
+ * Add new widths here when a test or fixture needs them — keep them generic
+ * (no domain wording) so unrelated tests can reuse them.
+ */
+export const EMPTY_BYTES = {
+  /** bytes3(0) — used by ISO 4217 currency-like fields. */
+  BYTES3: "0x000000",
+} as const;
+
+/**
  * Valid and invalid bytes32 values for validation tests.
  */
 export const TEST_BYTES32 = {
@@ -960,6 +975,9 @@ export const TEST_NOMINAL_VALUES = {
 
   /** Max supply for tokens */
   MAX_SUPPLY: "1000000000000000000000000",
+
+  /** bytes3(0) — represents "no currency set" for nominalValueCurrency. Alias of `EMPTY_BYTES.BYTES3`. */
+  CURRENCY_ZERO: EMPTY_BYTES.BYTES3,
 } as const;
 
 // ============================================================================
@@ -1285,4 +1303,10 @@ export const EVENT_NAMES = {
   PROTECTED_CLEARED_TRANSFER_BY_PARTITION: "ProtectedClearedTransferByPartition",
   /** Emitted by `ProtectedClearingHoldByPartitionFacet.protectedClearingCreateHoldByPartition`. */
   PROTECTED_CLEARED_HOLD_BY_PARTITION: "ProtectedClearedHoldByPartition",
+  /** Emitted by `NominalValue.initializeNominalValue`. */
+  NOMINAL_VALUE_INITIALIZED: "NominalValueInitialized",
+  /** Emitted by `NominalValue.setNominalValue` (and by the bootstrap path inside `setNominalValue` for legacy tokens). */
+  NOMINAL_VALUE_SET: "NominalValueSet",
+  /** Emitted by `NominalValue.setNominalValueCurrency`. */
+  NOMINAL_VALUE_CURRENCY_SET: "NominalValueCurrencySet",
 } as const;
