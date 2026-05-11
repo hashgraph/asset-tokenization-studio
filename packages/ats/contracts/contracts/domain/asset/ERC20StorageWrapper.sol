@@ -124,6 +124,7 @@ library ERC20StorageWrapper {
         }
 
         erc20Storage().allowed[owner][spender] = value;
+        AdjustBalancesStorageWrapper.updateAllowanceLabaf(owner, spender, AdjustBalancesStorageWrapper.getAbaf());
         emit IAllowanceTypes.Approval(owner, spender, value);
         return true;
     }
