@@ -14,6 +14,7 @@ import {
   CANCEL_VOTING_EVENT,
   EVM_ZERO_ADDRESS,
   GAS,
+  NOMINAL_VALUE_CURRENCY_SET_EVENT,
   NOMINAL_VALUE_SET_EVENT,
   RELEASE_AMORTIZATION_HOLD_EVENT,
   SET_AMORTIZATION_EVENT,
@@ -2716,6 +2717,21 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       [nominalValue, nominalValueDecimals],
       GAS.SET_NOMINAL_VALUE,
       NOMINAL_VALUE_SET_EVENT,
+    );
+  }
+
+  async setNominalValueCurrency(
+    security: EvmAddress,
+    nominalValueCurrency: string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Setting nominal value currency for security: ${security.toString()}`);
+
+    return this.executeTransaction(
+      IAsset__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "setNominalValueCurrency",
+      [nominalValueCurrency],
+      GAS.SET_NOMINAL_VALUE_CURRENCY,
+      NOMINAL_VALUE_CURRENCY_SET_EVENT,
     );
   }
 

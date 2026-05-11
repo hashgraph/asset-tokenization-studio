@@ -1620,6 +1620,12 @@ export class RPCQueryAdapter {
     return Number(result);
   }
 
+  async getNominalValueCurrency(address: EvmAddress): Promise<string> {
+    LogService.logTrace(`Getting nominal value currency for security: ${address.toString()}`);
+    const result = await this.connect(IAsset__factory, address.toString()).getNominalValueCurrency();
+    return result;
+  }
+
   async getAmortization(address: EvmAddress, amortizationId: number): Promise<RegisteredAmortization> {
     LogService.logTrace(`Getting amortization: ${amortizationId}`);
 
