@@ -87,7 +87,7 @@ describe("MintByPartitionFacet Tests", () => {
         .withArgs(signer_B.address, [ATS_ROLES.ISSUER_ROLE, ATS_ROLES.AGENT_ROLE]);
     });
 
-    it("GIVEN a paused token WHEN issueByPartition THEN reverts with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN issueByPartition THEN reverts with IsPaused", async () => {
       await asset.connect(signer_C).pause();
 
       await expect(
@@ -97,7 +97,7 @@ describe("MintByPartitionFacet Tests", () => {
           value: AMOUNT,
           data: EMPTY_HEX_BYTES,
         }),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN single-partition mode WHEN issueByPartition with wrong partition THEN reverts with PartitionNotAllowedInSinglePartitionMode", async () => {

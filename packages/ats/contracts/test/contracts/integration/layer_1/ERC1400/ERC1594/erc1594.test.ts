@@ -168,25 +168,22 @@ describe("ERC1594 Tests", () => {
         await asset.connect(signer_B).pause();
       });
 
-      it("GIVEN a paused Token WHEN issue THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN issue THEN transaction fails with IsPaused", async () => {
         // issue fails
         await expect(asset.connect(signer_C).issue(signer_E.address, AMOUNT, DATA)).to.be.revertedWithCustomError(
           asset,
-          "TokenIsPaused",
+          "IsPaused",
         );
       });
 
-      it("GIVEN a paused Token WHEN redeem THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN redeem THEN transaction fails with IsPaused", async () => {
         // transfer with data fails
-        await expect(asset.connect(signer_C).redeem(AMOUNT, DATA)).to.be.revertedWithCustomError(
-          asset,
-          "TokenIsPaused",
-        );
+        await expect(asset.connect(signer_C).redeem(AMOUNT, DATA)).to.be.revertedWithCustomError(asset, "IsPaused");
 
         // transfer from with data fails
         await expect(asset.connect(signer_C).redeemFrom(signer_E.address, AMOUNT, DATA)).to.be.revertedWithCustomError(
           asset,
-          "TokenIsPaused",
+          "IsPaused",
         );
       });
     });

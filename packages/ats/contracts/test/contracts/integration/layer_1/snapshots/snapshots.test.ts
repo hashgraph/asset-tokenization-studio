@@ -95,11 +95,11 @@ describe("Snapshots Tests", () => {
     await expect(asset.connect(signer_C).takeSnapshot()).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
   });
 
-  it("GIVEN a paused Token WHEN takeSnapshot THEN transaction fails with TokenIsPaused", async () => {
+  it("GIVEN a paused Token WHEN takeSnapshot THEN transaction fails with IsPaused", async () => {
     // Granting Role to account C and Pause
     await grantRoleAndPauseToken(asset, ATS_ROLES.SNAPSHOT_ROLE, signer_A, signer_B, signer_C.address);
 
-    await expect(asset.connect(signer_C).takeSnapshot()).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+    await expect(asset.connect(signer_C).takeSnapshot()).to.be.revertedWithCustomError(asset, "IsPaused");
   });
 
   it("GIVEN no snapshot WHEN reading snapshot values THEN transaction fails", async () => {

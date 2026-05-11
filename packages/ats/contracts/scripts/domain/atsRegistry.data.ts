@@ -12,6 +12,8 @@
  *
  * Generated: 2026-05-07T12:20:10.618Z
  * Facets: 123
+ * Generated: 2026-05-07T13:43:18.807Z
+ * Facets: 122
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -376,6 +378,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xf50c17aa",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "RolesAndActivesLengthMismatch",
         signature: {
@@ -391,11 +394,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "RolesNotApplied(bytes32[],bool[],address)",
         },
         selector: "0xaa4b6234",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
     ],
     factory: (signer) => new AccessControlFacet__factory(signer),
@@ -556,11 +554,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
         selector: "0xb7d09497",
       },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
@@ -669,6 +663,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xf180d8f9",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
@@ -678,11 +673,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SpenderWithZeroAddress",
         signature: { full: "error SpenderWithZeroAddress()", canonical: "SpenderWithZeroAddress()" },
         selector: "0x80e32d8f",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "UnexpectedError",
@@ -989,6 +979,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
         selector: "0xb7d09497",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
@@ -1006,11 +997,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "UnexpectedError",
@@ -1281,6 +1267,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error InputAmountsArrayLengthMismatch()", canonical: "InputAmountsArrayLengthMismatch()" },
         selector: "0x64f13710",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
@@ -1290,11 +1277,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "TokenIsNotControllable",
         signature: { full: "error TokenIsNotControllable()", canonical: "TokenIsNotControllable()" },
         selector: "0xf4b7b072",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
     ],
     factory: (signer) => new BatchBurnFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
@@ -1350,6 +1332,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error InputAmountsArrayLengthMismatch()", canonical: "InputAmountsArrayLengthMismatch()" },
         selector: "0x64f13710",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
@@ -1359,11 +1342,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "TokenIsNotControllable",
         signature: { full: "error TokenIsNotControllable()", canonical: "TokenIsNotControllable()" },
         selector: "0xf4b7b072",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
     ],
     factory: (signer) => new BatchControllerFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
@@ -1499,6 +1477,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xbf84f4ec",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
@@ -1516,11 +1495,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "WalletRecovered",
@@ -1587,6 +1561,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error InputAmountsArrayLengthMismatch()", canonical: "InputAmountsArrayLengthMismatch()" },
         selector: "0x64f13710",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "MaxSupplyReached",
         signature: { full: "error MaxSupplyReached(uint256 maxSupply)", canonical: "MaxSupplyReached(uint256)" },
@@ -1596,11 +1571,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
         selector: "0x76d08f88",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
     ],
     factory: (signer) => new BatchMintFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
@@ -1644,6 +1614,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error InputAmountsArrayLengthMismatch()", canonical: "InputAmountsArrayLengthMismatch()" },
         selector: "0x64f13710",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
@@ -1656,11 +1627,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "PartitionsAreProtectedAndNoRole(address,bytes32)",
         },
         selector: "0x55347310",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
     ],
     factory: (signer) => new BatchTransferFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
@@ -2170,6 +2136,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x90e55392",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
@@ -2195,11 +2162,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "TokenIsNotControllable",
         signature: { full: "error TokenIsNotControllable()", canonical: "TokenIsNotControllable()" },
         selector: "0xf4b7b072",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "WalletRecovered",
@@ -2264,6 +2226,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xa1180aad",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NewMaxSupplyByPartitionTooHigh",
         signature: {
@@ -2279,11 +2242,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "NewMaxSupplyForPartitionTooLow(bytes32,uint256,uint256)",
         },
         selector: "0x820c68a8",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
     ],
     factory: (signer) => new CapByPartitionFacet__factory(signer),
@@ -2361,6 +2319,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "MaxSupplyReached",
         signature: { full: "error MaxSupplyReached(uint256 maxSupply)", canonical: "MaxSupplyReached(uint256)" },
@@ -2402,11 +2361,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "NewMaxSupplyTooLow(uint256,uint256)",
         },
         selector: "0x98c2b03b",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
     ],
     factory: (signer) => new CapFacet__factory(signer),
@@ -2741,6 +2695,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error ExpirationDateReached()", canonical: "ExpirationDateReached()" },
         selector: "0x5ea0e3b0",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "PartitionNotAllowedInSinglePartitionMode",
         signature: {
@@ -2756,11 +2711,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "PartitionsAreProtectedAndNoRole(address,bytes32)",
         },
         selector: "0x55347310",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "WalletRecovered",
@@ -2988,11 +2938,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error ExpirationDateReached()", canonical: "ExpirationDateReached()" },
         selector: "0x5ea0e3b0",
       },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "WrongClearingId",
         signature: { full: "error WrongClearingId()", canonical: "WrongClearingId()" },
@@ -3176,6 +3122,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error ExpirationDateReached()", canonical: "ExpirationDateReached()" },
         selector: "0x5ea0e3b0",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "PartitionNotAllowedInSinglePartitionMode",
         signature: {
@@ -3191,11 +3138,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "PartitionsAreProtectedAndNoRole(address,bytes32)",
         },
         selector: "0x55347310",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "WalletRecovered",
@@ -3312,15 +3254,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xa1180aad",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
         selector: "0x76d08f88",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
     ],
     factory: (signer) => new ComplianceFacet__factory(signer),
@@ -3437,6 +3375,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xbf84f4ec",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
@@ -3454,11 +3393,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "TokenIsNotControllable",
         signature: { full: "error TokenIsNotControllable()", canonical: "TokenIsNotControllable()" },
         selector: "0xf4b7b072",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "Unauthorized",
@@ -3699,6 +3633,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xefafde54",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
@@ -3708,11 +3643,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "TokenIsNotControllable",
         signature: { full: "error TokenIsNotControllable()", canonical: "TokenIsNotControllable()" },
         selector: "0xf4b7b072",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "WalletRecovered",
@@ -3893,6 +3823,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error IsNotEscrow()", canonical: "IsNotEscrow()" },
         selector: "0xf86f2a37",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "PartitionNotAllowedInSinglePartitionMode",
         signature: {
@@ -3918,11 +3849,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "TokenIsNotControllable",
         signature: { full: "error TokenIsNotControllable()", canonical: "TokenIsNotControllable()" },
         selector: "0xf4b7b072",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "WrongExpirationTimestamp",
@@ -4048,15 +3974,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "ListedAccount",
         signature: { full: "error ListedAccount(address account)", canonical: "ListedAccount(address)" },
         selector: "0x1a4a04ba",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "UnlistedAccount",
@@ -4216,11 +4138,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
       },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
     ],
     factory: (signer) => new CoreFacet__factory(signer),
   },
@@ -4904,6 +4822,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
         selector: "0xb7d09497",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "SnapshotIdDoesNotExists",
         signature: {
@@ -4916,11 +4835,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "UnexpectedError",
@@ -5345,11 +5259,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error Deactivated()", canonical: "Deactivated()" },
         selector: "0x1142a68c",
       },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
     ],
     factory: (signer) => new DeactivateFacet__factory(signer),
   },
@@ -5630,6 +5540,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
         selector: "0xb7d09497",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "SnapshotIdDoesNotExists",
         signature: {
@@ -5642,11 +5553,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "UnexpectedError",
@@ -5814,11 +5720,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "EmptyHASH", signature: { full: "error EmptyHASH()", canonical: "EmptyHASH()" }, selector: "0x402e72be" },
       { name: "EmptyName", signature: { full: "error EmptyName()", canonical: "EmptyName()" }, selector: "0x2ef13105" },
       { name: "EmptyURI", signature: { full: "error EmptyURI()", canonical: "EmptyURI()" }, selector: "0xd07b00d6" },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
     ],
     factory: (signer) => new DocumentationFacet__factory(signer),
   },
@@ -6081,6 +5983,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x4b800e46",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
@@ -6090,11 +5993,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SpenderWithZeroAddress",
         signature: { full: "error SpenderWithZeroAddress()", canonical: "SpenderWithZeroAddress()" },
         selector: "0x80e32d8f",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "UnexpectedError",
@@ -6275,11 +6173,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x7f07449b",
       },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
@@ -6547,15 +6441,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xbd29da3f",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "ListedControlList",
         signature: { full: "error ListedControlList(address controlList)", canonical: "ListedControlList(address)" },
         selector: "0x67a1e319",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "UnlistedControlList",
@@ -6714,15 +6604,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x8a85ec02",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "ListedKycList",
         signature: { full: "error ListedKycList(address kycList)", canonical: "ListedKycList(address)" },
         selector: "0x91c6b79d",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "UnlistedKycList",
@@ -6870,15 +6756,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x2d931b36",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "ListedPause",
         signature: { full: "error ListedPause(address pause)", canonical: "ListedPause(address)" },
         selector: "0x267b9ec9",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "UnlistedPause",
@@ -6962,11 +6844,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error InterestRateIsFixed()", canonical: "InterestRateIsFixed()" },
         selector: "0x849d4eb8",
       },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
     ],
     factory: (signer) => new FixedRateFacet__factory(signer),
     timeTravelFactory: (signer) => new FixedRateFacetTimeTravel__factory(signer),
@@ -7180,6 +7058,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xbf84f4ec",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
@@ -7197,11 +7076,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "WalletRecovered",
@@ -7543,6 +7417,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error IsNotEscrow()", canonical: "IsNotEscrow()" },
         selector: "0xf86f2a37",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "PartitionNotAllowedInSinglePartitionMode",
         signature: {
@@ -7571,11 +7446,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "WalletRecovered",
@@ -7840,11 +7710,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xa1180aad",
       },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
     ],
     factory: (signer) => new IdentityFacet__factory(signer),
   },
@@ -8075,11 +7941,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error InterestRateIsKpiLinked()", canonical: "InterestRateIsKpiLinked()" },
         selector: "0x68eba14f",
       },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "WrongImpactDataValues",
         signature: {
@@ -8187,15 +8049,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x8914d40b",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "KpiDataAlreadyExists",
         signature: { full: "error KpiDataAlreadyExists(uint256 date)", canonical: "KpiDataAlreadyExists(uint256)" },
         selector: "0x74efd82c",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "UnexpectedError",
@@ -8293,15 +8151,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x8914d40b",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "KpiDataAlreadyExists",
         signature: { full: "error KpiDataAlreadyExists(uint256 date)", canonical: "KpiDataAlreadyExists(uint256)" },
         selector: "0x74efd82c",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "UnexpectedError",
@@ -8470,15 +8324,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error InvalidZeroAddress()", canonical: "InvalidZeroAddress()" },
         selector: "0xf6b2911f",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "KycIsNotGranted",
         signature: { full: "error KycIsNotGranted()", canonical: "KycIsNotGranted()" },
         selector: "0xd5209e15",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "ZeroAddressNotAllowed",
@@ -8564,11 +8414,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
         selector: "0xb7d09497",
       },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "WrongDates",
         signature: {
@@ -8836,11 +8682,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xfc6c68ca",
       },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "ZeroAddressNotAllowed",
         signature: { full: "error ZeroAddressNotAllowed()", canonical: "ZeroAddressNotAllowed()" },
@@ -9052,6 +8894,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xbf84f4ec",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "LockExpirationNotReached",
         signature: { full: "error LockExpirationNotReached()", canonical: "LockExpirationNotReached()" },
@@ -9077,11 +8920,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "WalletRecovered",
@@ -9252,6 +9090,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xbf84f4ec",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "LockExpirationNotReached",
         signature: { full: "error LockExpirationNotReached()", canonical: "LockExpirationNotReached()" },
@@ -9282,11 +9121,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "WalletRecovered",
@@ -9422,6 +9256,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xbf84f4ec",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "PartitionNotAllowedInSinglePartitionMode",
         signature: {
@@ -9442,11 +9277,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "UnexpectedError",
@@ -9597,6 +9427,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xbf84f4ec",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "SnapshotIdDoesNotExists",
         signature: {
@@ -9609,11 +9440,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "UnexpectedError",
@@ -9678,11 +9504,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xa1180aad",
       },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
     ],
     factory: (signer) => new MetadataFacet__factory(signer),
   },
@@ -9723,6 +9545,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x90e55392",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "MaxSupplyReached",
         signature: { full: "error MaxSupplyReached(uint256 maxSupply)", canonical: "MaxSupplyReached(uint256)" },
@@ -9743,11 +9566,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "PartitionNotAllowedInSinglePartitionMode(bytes32)",
         },
         selector: "0xb96d9539",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "WalletRecovered",
@@ -9823,6 +9641,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "MaxSupplyReached",
         signature: { full: "error MaxSupplyReached(uint256 maxSupply)", canonical: "MaxSupplyReached(uint256)" },
@@ -9833,13 +9652,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
         selector: "0x76d08f88",
       },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
     ],
-    factory: (signer) => new MintFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    factory: (signer) => new NominalValueAtSnapshotFacet__factory(signer),
   },
 
   NominalValueAtSnapshotFacet: {
@@ -10105,6 +9919,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xbf84f4ec",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
@@ -10125,11 +9940,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "PartitionsAreProtectedAndNoRole(address,bytes32)",
         },
         selector: "0x55347310",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "Unauthorized",
@@ -10319,6 +10129,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error ExpirationDateReached()", canonical: "ExpirationDateReached()" },
         selector: "0x5ea0e3b0",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "PartitionNotAllowedInSinglePartitionMode",
         signature: {
@@ -10334,11 +10145,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "PartitionsAreProtectedAndNoRole(address,bytes32)",
         },
         selector: "0x55347310",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "Unauthorized",
@@ -10539,6 +10345,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error ExpirationDateReached()", canonical: "ExpirationDateReached()" },
         selector: "0x5ea0e3b0",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "PartitionNotAllowedInSinglePartitionMode",
         signature: {
@@ -10554,11 +10361,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "PartitionsAreProtectedAndNoRole(address,bytes32)",
         },
         selector: "0x55347310",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "Unauthorized",
@@ -10663,11 +10465,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x10210dec",
       },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
     ],
     factory: (signer) => new OperatorFacet__factory(signer),
   },
@@ -10838,6 +10636,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error IsNotEscrow()", canonical: "IsNotEscrow()" },
         selector: "0xf86f2a37",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "PartitionNotAllowedInSinglePartitionMode",
         signature: {
@@ -10866,11 +10665,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "Unauthorized",
@@ -10942,14 +10736,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["Pause", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "isPaused",
-        signature: { full: "function isPaused() view returns (bool)", canonical: "isPaused()" },
-        selector: "0xb187bd26",
-      },
-      {
         name: "pause",
         signature: { full: "function pause() returns (bool success_)", canonical: "pause()" },
         selector: "0x8456cb59",
+      },
+      {
+        name: "paused",
+        signature: { full: "function paused() view returns (bool)", canonical: "paused()" },
+        selector: "0x5c975abb",
       },
       {
         name: "unpause",
@@ -10959,14 +10753,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
-        name: "TokenPaused",
-        signature: { full: "event TokenPaused(address indexed operator)", canonical: "TokenPaused(address)" },
-        topic0: "0xf017c0de579727a3cd3ee18077ee8b4c43bf21892985952d1d5a0d52f983502d",
+        name: "Paused",
+        signature: { full: "event Paused(address indexed operator)", canonical: "Paused(address)" },
+        topic0: "0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258",
       },
       {
-        name: "TokenUnpaused",
-        signature: { full: "event TokenUnpaused(address indexed operator)", canonical: "TokenUnpaused(address)" },
-        topic0: "0xf38578ed892ce2ce655ca8ae03c73464ad74915a1331a9b4085e637534daeedf",
+        name: "Unpaused",
+        signature: { full: "event Unpaused(address indexed operator)", canonical: "Unpaused(address)" },
+        topic0: "0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa",
       },
     ],
     errors: [
@@ -10986,15 +10780,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xa1180aad",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
-      {
-        name: "TokenIsUnpaused",
-        signature: { full: "error TokenIsUnpaused()", canonical: "TokenIsUnpaused()" },
-        selector: "0x72058d69",
+        name: "IsUnpaused",
+        signature: { full: "error IsUnpaused()", canonical: "IsUnpaused()" },
+        selector: "0xff1e9666",
       },
     ],
     factory: (signer) => new PauseFacet__factory(signer),
@@ -11144,6 +10934,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "ProceedRecipientAlreadyExists",
         signature: {
@@ -11159,11 +10950,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "ProceedRecipientNotFound(address)",
         },
         selector: "0x664dc89c",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "ZeroAddressNotAllowed",
@@ -11296,6 +11082,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "ProceedRecipientAlreadyExists",
         signature: {
@@ -11311,11 +11098,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "ProceedRecipientNotFound(address)",
         },
         selector: "0x664dc89c",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "ZeroAddressNotAllowed",
@@ -11448,6 +11230,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "ProceedRecipientAlreadyExists",
         signature: {
@@ -11463,11 +11246,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "ProceedRecipientNotFound(address)",
         },
         selector: "0x664dc89c",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "ZeroAddressNotAllowed",
@@ -11542,15 +11320,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xa1180aad",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "PartitionsAreUnProtected",
         signature: { full: "error PartitionsAreUnProtected()", canonical: "PartitionsAreUnProtected()" },
         selector: "0x05681565",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
     ],
     factory: (signer) => new ProtectedByPartitionFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
@@ -11749,15 +11523,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error ExpirationDateReached()", canonical: "ExpirationDateReached()" },
         selector: "0x5ea0e3b0",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "PartitionsAreUnProtected",
         signature: { full: "error PartitionsAreUnProtected()", canonical: "PartitionsAreUnProtected()" },
         selector: "0x05681565",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "WalletRecovered",
@@ -11960,15 +11730,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error ExpirationDateReached()", canonical: "ExpirationDateReached()" },
         selector: "0x5ea0e3b0",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "PartitionsAreUnProtected",
         signature: { full: "error PartitionsAreUnProtected()", canonical: "PartitionsAreUnProtected()" },
         selector: "0x05681565",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "WalletRecovered",
@@ -12175,6 +11941,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error IsNotEscrow()", canonical: "IsNotEscrow()" },
         selector: "0xf86f2a37",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "PartitionsAreUnProtected",
         signature: { full: "error PartitionsAreUnProtected()", canonical: "PartitionsAreUnProtected()" },
@@ -12192,11 +11959,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "WalletRecovered",
@@ -12342,6 +12104,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "PartitionsAreProtected",
         signature: { full: "error PartitionsAreProtected()", canonical: "PartitionsAreProtected()" },
@@ -12359,11 +12122,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "PartitionsAreUnProtected",
         signature: { full: "error PartitionsAreUnProtected()", canonical: "PartitionsAreUnProtected()" },
         selector: "0x05681565",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
     ],
     factory: (signer) => new ProtectedPartitionsFacet__factory(signer),
@@ -12650,11 +12408,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
         selector: "0x69a80e75",
       },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
@@ -12738,11 +12492,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
         selector: "0x69a80e75",
       },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
@@ -12825,11 +12575,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
         selector: "0x69a80e75",
       },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
-      },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
@@ -13031,6 +12777,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
         selector: "0x69a80e75",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "SnapshotIdDoesNotExists",
         signature: {
@@ -13043,11 +12790,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "UnexpectedError",
@@ -13171,15 +12913,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error AccountIsNotIssuer(address issuer)", canonical: "AccountIsNotIssuer(address)" },
         selector: "0xcd324f53",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "ListedIssuer",
         signature: { full: "error ListedIssuer(address issuer)", canonical: "ListedIssuer(address)" },
         selector: "0xcb2beece",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "UnlistedIssuer",
@@ -13289,6 +13027,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x4f56f79f",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NotExistingProject",
         signature: { full: "error NotExistingProject(address project)", canonical: "NotExistingProject(address)" },
@@ -13301,11 +13040,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "ProvidedListsLengthMismatch(uint256,uint256)",
         },
         selector: "0x4470462b",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
     ],
     factory: (signer) => new SustainabilityPerformanceTargetRateFacet__factory(signer),
@@ -13513,6 +13247,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xbf84f4ec",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "PartitionNotAllowedInSinglePartitionMode",
         signature: {
@@ -13541,11 +13276,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "UnexpectedError",
@@ -13653,6 +13383,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xbf84f4ec",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
@@ -13678,11 +13409,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "UnexpectedError",
@@ -13791,6 +13517,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xbf84f4ec",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
@@ -13816,11 +13543,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "UnexpectedError",
@@ -13929,6 +13651,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xbf84f4ec",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
@@ -13954,11 +13677,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "UnexpectedError",
@@ -14067,6 +13785,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xbf84f4ec",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
@@ -14092,11 +13811,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "UnexpectedError",
@@ -14332,6 +14046,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x5d6824c4",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
@@ -14344,11 +14059,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "PartitionsAreProtectedAndNoRole(address,bytes32)",
         },
         selector: "0x55347310",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "WalletRecovered",
@@ -14449,6 +14159,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
         selector: "0xb7d09497",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "SnapshotIdDoesNotExists",
         signature: {
@@ -14461,11 +14172,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
-      },
-      {
-        name: "TokenIsPaused",
-        signature: { full: "error TokenIsPaused()", canonical: "TokenIsPaused()" },
-        selector: "0x649815a5",
       },
       {
         name: "UnexpectedError",
@@ -14807,11 +14513,6 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
         selector: "0xb86ffa1a",
       },
       {
-        name: "isPaused",
-        signature: { full: "function isPaused() view returns (bool)", canonical: "isPaused()" },
-        selector: "0xb187bd26",
-      },
-      {
         name: "isResolverProxyConfigurationRegistered",
         signature: {
           full: "function isResolverProxyConfigurationRegistered(bytes32 _configurationId, uint256 _version) view returns (bool isRegistered_)",
@@ -14823,6 +14524,11 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
         name: "pause",
         signature: { full: "function pause() returns (bool success_)", canonical: "pause()" },
         selector: "0x8456cb59",
+      },
+      {
+        name: "paused",
+        signature: { full: "function paused() view returns (bool)", canonical: "paused()" },
+        selector: "0x5c975abb",
       },
       {
         name: "registerBusinessLogics",

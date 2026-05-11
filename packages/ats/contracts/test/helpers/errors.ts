@@ -36,8 +36,8 @@ export function getCommonErrorSelector(errorSignature: string, asBytes4: boolean
 }
 
 export const ERROR_SELECTOR_MAP: Record<string, string> = {
-  "0x649815a5": "TokenIsPaused",
-  "0x72058d69": "TokenIsUnpaused",
+  "0x649815a5": "IsPaused",
+  "0x72058d69": "IsUnpaused",
   "0x796c1f0d": "AccountIsBlocked",
   "0x8579befe": "ZeroAddressNotAllowed",
   "0x0fc23480": "WrongDates",
@@ -57,8 +57,8 @@ export const ERROR_SELECTOR_MAP: Record<string, string> = {
 };
 
 export const KNOWN_ERRORS: Record<string, string> = {
-  TokenIsPaused: "0x649815a5",
-  TokenIsUnpaused: "0x72058d69",
+  IsPaused: "0x649815a5",
+  IsUnpaused: "0x72058d69",
   AccountIsBlocked: "0x796c1f0d",
   ZeroAddressNotAllowed: "0x8579befe",
   WrongDates: "0x0fc23480",

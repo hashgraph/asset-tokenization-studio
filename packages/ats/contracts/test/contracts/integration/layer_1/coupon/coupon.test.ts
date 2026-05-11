@@ -163,11 +163,11 @@ describe("Coupon Tests", () => {
     );
   });
 
-  it("GIVEN a paused Token WHEN setCoupon THEN transaction fails with TokenIsPaused", async () => {
+  it("GIVEN a paused Token WHEN setCoupon THEN transaction fails with IsPaused", async () => {
     // Granting Role to account C and Pause
     await grantRoleAndPauseToken(asset, ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
 
-    await expect(asset.connect(signer_C).setCoupon(couponData)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+    await expect(asset.connect(signer_C).setCoupon(couponData)).to.be.revertedWithCustomError(asset, "IsPaused");
   });
 
   it("GIVEN an account with corporateActions role WHEN setCoupon with wrong dates THEN transaction fails", async () => {
@@ -629,14 +629,14 @@ describe("Coupon Tests", () => {
     await expect(asset.connect(signer_D).cancelCoupon(1)).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
   });
 
-  it("GIVEN a paused Token WHEN cancelCoupon THEN transaction fails with TokenIsPaused", async () => {
+  it("GIVEN a paused Token WHEN cancelCoupon THEN transaction fails with IsPaused", async () => {
     await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C);
 
     await asset.connect(signer_C).setCoupon(couponData);
 
     await asset.connect(signer_B).pause();
 
-    await expect(asset.connect(signer_C).cancelCoupon(1)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+    await expect(asset.connect(signer_C).cancelCoupon(1)).to.be.revertedWithCustomError(asset, "IsPaused");
   });
 
   it("GIVEN no existing coupon WHEN cancelCoupon with invalid ID THEN transaction fails", async () => {

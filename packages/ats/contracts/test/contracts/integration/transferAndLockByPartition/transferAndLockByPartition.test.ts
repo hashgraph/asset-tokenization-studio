@@ -102,14 +102,14 @@ describe("TransferAndLockByPartition Tests", () => {
     });
 
     describe("transferAndLockByPartition", () => {
-      it("GIVEN a paused Token WHEN transferAndLockByPartition THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN transferAndLockByPartition THEN transaction fails with IsPaused", async () => {
         await asset.connect(signer_D).pause();
 
         await expect(
           asset
             .connect(signer_C)
             .transferAndLockByPartition(_NON_DEFAULT_PARTITION, signer_B.address, _AMOUNT, "0x", currentTimestamp),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
       it("GIVEN an account without LOCKER role WHEN transferAndLockByPartition THEN transaction fails with AccountHasNoRole", async () => {

@@ -316,4 +316,44 @@ describe("SecurityHoldersFacet Tests", () => {
       expect(uniqueHolders.size).to.equal(allHolders.length);
     });
   });
+
+  describe("self-transfer holder registry integrity", () => {
+    it("GIVEN a holder with full balance WHEN self-transfer of full balance THEN holder remains in registry", async () => {
+      const tokenAmount = 1000n;
+
+      await asset.connect(signer_A).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_B.address,
+        value: tokenAmount,
+        data: "0x",
+      });
+
+      expect(await asset.getTotalSecurityHolders()).to.equal(1);
+
+      await asset.connect(signer_B).transfer(signer_B.address, tokenAmount);
+
+      expect(await asset.getTotalSecurityHolders()).to.equal(1);
+      const holders = await asset.getSecurityHolders(0, 10);
+      expect(holders).to.include(signer_B.address);
+      expect(await asset.balanceOf(signer_B.address)).to.equal(tokenAmount);
+    });
+
+    it("GIVEN a holder with full balance WHEN partial self-transfer THEN holder remains in registry", async () => {
+      const tokenAmount = 1000n;
+
+      await asset.connect(signer_A).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_B.address,
+        value: tokenAmount,
+        data: "0x",
+      });
+
+      await asset.connect(signer_B).transfer(signer_B.address, tokenAmount / 2n);
+
+      expect(await asset.getTotalSecurityHolders()).to.equal(1);
+      const holders = await asset.getSecurityHolders(0, 10);
+      expect(holders).to.include(signer_B.address);
+      expect(await asset.balanceOf(signer_B.address)).to.equal(tokenAmount);
+    });
+  });
 });

@@ -100,7 +100,7 @@ describe("ControllerByPartition Tests", () => {
         await asset.connect(signer_D).pause();
       });
 
-      it("GIVEN a paused token WHEN controllerTransferByPartition THEN revert TokenIsPaused", async () => {
+      it("GIVEN a paused token WHEN controllerTransferByPartition THEN revert IsPaused", async () => {
         await expect(
           asset
             .connect(signer_C)
@@ -112,15 +112,15 @@ describe("ControllerByPartition Tests", () => {
               _DATA,
               _OPERATOR_DATA,
             ),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
-      it("GIVEN a paused token WHEN controllerRedeemByPartition THEN revert TokenIsPaused", async () => {
+      it("GIVEN a paused token WHEN controllerRedeemByPartition THEN revert IsPaused", async () => {
         await expect(
           asset
             .connect(signer_C)
             .controllerRedeemByPartition(DEFAULT_PARTITION, signer_A.address, _AMOUNT, _DATA, _OPERATOR_DATA),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
     });
 

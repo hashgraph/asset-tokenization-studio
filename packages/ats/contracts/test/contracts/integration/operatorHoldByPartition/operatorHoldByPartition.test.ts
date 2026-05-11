@@ -204,11 +204,11 @@ describe("operatorCreateHoldByPartition", () => {
   });
 
   // --- modifier: onlyUnpaused ---
-  it("GIVEN a paused token WHEN operatorCreateHoldByPartition THEN reverts with TokenIsPaused", async () => {
+  it("GIVEN a paused token WHEN operatorCreateHoldByPartition THEN reverts with IsPaused", async () => {
     await asset.connect(signer_D).pause();
     await expect(
       asset.operatorCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
-    ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+    ).to.be.revertedWithCustomError(asset, "IsPaused");
   });
 
   // --- modifier: onlyClearingDisabled ---

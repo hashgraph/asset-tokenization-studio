@@ -349,7 +349,7 @@ library ERC1410StorageWrapper {
             ERC20StorageWrapper.getName()
         );
 
-        NonceStorageWrapper.setNonceFor(protectionData.nonce, from);
+        NonceStorageWrapper.setNonceFor(from);
 
         return
             transferByPartition(
@@ -383,12 +383,13 @@ library ERC1410StorageWrapper {
             protectionData,
             ERC20StorageWrapper.getName()
         );
-        NonceStorageWrapper.setNonceFor(protectionData.nonce, from);
+        NonceStorageWrapper.setNonceFor(from);
 
         redeemByPartition(partition, from, EvmAccessors.getMsgSender(), amount, "", "");
     }
 
     function beforeTokenTransfer(bytes32 partition, address from, address to, uint256 amount) internal {
+        if (from == to) return;
         triggerAndSyncAll(partition, from, to);
 
         bool addTo;

@@ -88,7 +88,7 @@ library HoldStorageWrapper {
             ERC20StorageWrapper.getName()
         );
 
-        NonceStorageWrapper.setNonceFor(_protectedHold.nonce, _from);
+        NonceStorageWrapper.setNonceFor(_from);
 
         return createHoldByPartition(_partition, _from, _protectedHold.hold, "", ThirdPartyType.PROTECTED);
     }

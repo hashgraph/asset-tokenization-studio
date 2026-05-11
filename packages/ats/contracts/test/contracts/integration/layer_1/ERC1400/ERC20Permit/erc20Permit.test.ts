@@ -33,7 +33,7 @@ describe("ERC20Permit Tests", () => {
 
   describe("Single Partition", () => {
     describe("permit", () => {
-      it("GIVEN a paused token WHEN permit is called THEN the transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused token WHEN permit is called THEN the transaction fails with IsPaused", async () => {
         await asset.pause();
 
         const expiry = (await getDltTimestamp()) + 3600;
@@ -48,7 +48,7 @@ describe("ERC20Permit Tests", () => {
             "0x0000000000000000000000000000000000000000000000000000000000000000",
             "0x0000000000000000000000000000000000000000000000000000000000000000",
           ),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
       it("GIVEN an owner address of zero WHEN permit is called THEN the transaction fails with ZeroAddressNotAllowed", async () => {

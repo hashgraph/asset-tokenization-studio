@@ -87,41 +87,41 @@ describe("Access Control Tests", () => {
       .withArgs(3, 6);
   });
 
-  it("GIVEN a paused Token WHEN grantRole THEN transaction fails with TokenIsPaused", async () => {
+  it("GIVEN a paused Token WHEN grantRole THEN transaction fails with IsPaused", async () => {
     await asset.connect(signer_B).pause();
 
     await expect(
       asset.connect(deployer).grantRole(ATS_ROLES.PAUSER_ROLE, unknownSigner.address),
-    ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+    ).to.be.revertedWithCustomError(asset, "IsPaused");
   });
 
-  it("GIVEN a paused Token WHEN revokeRole THEN transaction fails with TokenIsPaused", async () => {
+  it("GIVEN a paused Token WHEN revokeRole THEN transaction fails with IsPaused", async () => {
     await asset.connect(signer_B).pause();
 
     await expect(
       asset.connect(deployer).revokeRole(ATS_ROLES.PAUSER_ROLE, unknownSigner.address),
-    ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+    ).to.be.revertedWithCustomError(asset, "IsPaused");
   });
 
-  it("GIVEN a paused Token WHEN renounce THEN transaction fails with TokenIsPaused", async () => {
+  it("GIVEN a paused Token WHEN renounce THEN transaction fails with IsPaused", async () => {
     // Pausing the token
     await asset.connect(signer_B).pause();
 
     // revoke role fails
     await expect(asset.connect(deployer).renounceRole(ATS_ROLES.PAUSER_ROLE)).to.be.revertedWithCustomError(
       asset,
-      "TokenIsPaused",
+      "IsPaused",
     );
   });
 
-  it("GIVEN an paused Token WHEN applyRoles THEN transaction fails with TokenIsPaused", async () => {
+  it("GIVEN an paused Token WHEN applyRoles THEN transaction fails with IsPaused", async () => {
     // Pausing the token
     await asset.connect(signer_B).pause();
 
     // revoke role fails
     await expect(
       asset.connect(signer_B).applyRoles([ATS_ROLES.DEFAULT_ADMIN_ROLE], [true], unknownSigner.address),
-    ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+    ).to.be.revertedWithCustomError(asset, "IsPaused");
   });
 
   it("GIVEN an account with administrative role WHEN grantRole THEN transaction succeeds", async () => {
