@@ -219,7 +219,7 @@ library ERC1410StorageWrapper {
             operatorData
         );
 
-        if (from != basicTransferInfo.to && partition == _DEFAULT_PARTITION) {
+        if (from != basicTransferInfo.to) {
             (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
                 abi.encodeWithSelector(
                     ICompliance.transferred.selector,
@@ -265,12 +265,10 @@ library ERC1410StorageWrapper {
 
         increaseTotalSupplyByPartition(issueData.partition, issueData.value);
 
-        if (issueData.partition == _DEFAULT_PARTITION) {
-            ERC3643StorageWrapper.erc3643Storage().compliance.functionCall(
-                abi.encodeWithSelector(ICompliance.created.selector, issueData.tokenHolder, issueData.value),
-                IERC3643Types.ComplianceCallFailed.selector
-            );
-        }
+        ERC3643StorageWrapper.erc3643Storage().compliance.functionCall(
+            abi.encodeWithSelector(ICompliance.created.selector, issueData.tokenHolder, issueData.value),
+            IERC3643Types.ComplianceCallFailed.selector
+        );
 
         afterTokenTransfer(issueData.partition, address(0), issueData.tokenHolder, issueData.value);
 
@@ -313,12 +311,10 @@ library ERC1410StorageWrapper {
 
         reduceTotalSupplyByPartition(partition, value);
 
-        if (partition == _DEFAULT_PARTITION) {
-            ERC3643StorageWrapper.erc3643Storage().compliance.functionCall(
-                abi.encodeWithSelector(ICompliance.destroyed.selector, from, value),
-                IERC3643Types.ComplianceCallFailed.selector
-            );
-        }
+        ERC3643StorageWrapper.erc3643Storage().compliance.functionCall(
+            abi.encodeWithSelector(ICompliance.destroyed.selector, from, value),
+            IERC3643Types.ComplianceCallFailed.selector
+        );
 
         afterTokenTransfer(partition, from, address(0), value);
 

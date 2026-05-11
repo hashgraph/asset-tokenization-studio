@@ -21,7 +21,6 @@ import { ThirdPartyType } from "../asset/types/ThirdPartyType.sol";
 import { HoldOps } from "./HoldOps.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 import { CLEARING_HOLD_CREATION } from "../../constants/values.sol";
 
@@ -445,18 +444,16 @@ library ClearingOps {
         TokenCoreOps.checkIdentity(_id.tokenHolder, transferData.destination);
         TokenCoreOps.checkCompliance(_id.tokenHolder, transferData.destination, false);
 
-        // Notify compliance module (same pattern as HoldStorageWrapper and ERC1410StorageWrapper)
-        if (_id.partition == _DEFAULT_PARTITION && ERC3643StorageWrapper.erc3643Storage().compliance != address(0)) {
-            (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
-                abi.encodeWithSelector(
-                    ICompliance.transferred.selector,
-                    _id.tokenHolder,
-                    transferData.destination,
-                    transferData.amount
-                ),
-                IERC3643Types.ComplianceCallFailed.selector
-            );
-        }
+        // Notify compliance module for every partition; zero-target short-circuits in LowLevelCall.
+        (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
+            abi.encodeWithSelector(
+                ICompliance.transferred.selector,
+                _id.tokenHolder,
+                transferData.destination,
+                transferData.amount
+            ),
+            IERC3643Types.ComplianceCallFailed.selector
+        );
     }
 
     /**
@@ -498,13 +495,11 @@ library ClearingOps {
         // creation, so only the partition supply and ERC-20 totalSupply remain to drop
         ERC1410StorageWrapper.reduceTotalSupplyByPartition(_id.partition, redeemData.amount);
 
-        // Notify compliance module on the default partition (mirrors redeemByPartition)
-        if (_id.partition == _DEFAULT_PARTITION && ERC3643StorageWrapper.erc3643Storage().compliance != address(0)) {
-            (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
-                abi.encodeWithSelector(ICompliance.destroyed.selector, _id.tokenHolder, redeemData.amount),
-                IERC3643Types.ComplianceCallFailed.selector
-            );
-        }
+        // Notify compliance module for every partition; zero-target short-circuits in LowLevelCall.
+        (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
+            abi.encodeWithSelector(ICompliance.destroyed.selector, _id.tokenHolder, redeemData.amount),
+            IERC3643Types.ComplianceCallFailed.selector
+        );
 
         // Mirror redeemByPartition: keep ERC-20 Votes' totalSupply checkpoints and the
         // holder's delegated voting power aligned with the now-finalised burn
