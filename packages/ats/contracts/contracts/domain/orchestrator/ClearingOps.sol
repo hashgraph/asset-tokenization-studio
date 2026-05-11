@@ -22,6 +22,8 @@ import { HoldOps } from "./HoldOps.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
+import { CLEARING_HOLD_CREATION } from "../../constants/values.sol";
 
 /**
  * @title ClearingOps - Orchestrator for clearing state-changing operations
@@ -509,7 +511,7 @@ library ClearingOps {
                 holdData.operatorType
             );
 
-            assert(success);
+            _checkUnexpectedError(!success, CLEARING_HOLD_CREATION);
 
             if (holdData.operatorType == ThirdPartyType.AUTHORIZED) {
                 address thirdPartyAddress = ClearingStorageWrapper.getClearingThirdParty(
