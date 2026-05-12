@@ -2,21 +2,36 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IKpiLinkedRate } from "./IKpiLinkedRate.sol";
-import { INTEREST_RATE_MANAGER_ROLE } from "../../../../constants/roles.sol";
+import { INTEREST_RATE_MANAGER_ROLE, DEFAULT_ADMIN_ROLE } from "../../../../constants/roles.sol";
 import { InterestRateStorageWrapper } from "../../../../domain/asset/InterestRateStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../../../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../../../domain/core/InitializerStorageWrapper.sol";
+import { _KPI_LINKED_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
 contract KpiLinkedRate is IKpiLinkedRate, Modifiers {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_KpiLinkedRate(
+    function initializeKpiLinkedRate(
         InterestRate calldata _interestRate,
         ImpactData calldata _impactData
-    ) external override onlyNotKpiLinkedRateInitialized {
+    ) external override onlyFacetNotRegistered(_KPI_LINKED_RATE_RESOLVER_KEY) onlyRole(DEFAULT_ADMIN_ROLE) {
         InterestRateStorageWrapper.setInterestRate(_interestRate);
         InterestRateStorageWrapper.setImpactData(_impactData);
         InterestRateStorageWrapper.kpiLinkedRateStorage().initialized = true;
+        InitializerStorageWrapper.setFacetToReady(_KPI_LINKED_RATE_RESOLVER_KEY);
+    }
+
+    /// @inheritdoc IKpiLinkedRate
+    function reinitializeKpiLinkedRate(
+        uint256[] calldata fromVersions
+    )
+        external
+        override
+        onlyFacetRegistered(_KPI_LINKED_RATE_RESOLVER_KEY, fromVersions)
+        onlyFacetNotReady(_KPI_LINKED_RATE_RESOLVER_KEY)
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        InitializerStorageWrapper.setFacetToReady(_KPI_LINKED_RATE_RESOLVER_KEY);
     }
 
     function setInterestRate(

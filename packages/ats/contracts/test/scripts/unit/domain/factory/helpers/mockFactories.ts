@@ -343,12 +343,15 @@ export function createMockFactory(receiptEvent: string, diamondAddress: string) 
   };
 
   const mockSigner = createMockSigner();
+  const factoryAddress = TEST_ADDRESSES.VALID_0;
+
   return {
     deployEquity: sinon.stub().resolves(mockTx),
     deployBond: sinon.stub().resolves(mockTx),
     deployBondFixedRate: sinon.stub().resolves(mockTx),
     deployBondKpiLinkedRate: sinon.stub().resolves(mockTx),
     deployBondSustainabilityPerformanceTargetRate: sinon.stub().resolves(mockTx),
+    getAddress: sinon.stub().resolves(factoryAddress),
     signer: mockSigner,
     runner: mockSigner,
   };
@@ -376,12 +379,15 @@ export function createMockFactoryWithNoArgs(eventName: string) {
   };
 
   const mockSigner = createMockSigner();
+  const factoryAddress = TEST_ADDRESSES.VALID_0;
+
   return {
     deployEquity: sinon.stub().resolves(mockTx),
     deployBond: sinon.stub().resolves(mockTx),
     deployBondFixedRate: sinon.stub().resolves(mockTx),
     deployBondKpiLinkedRate: sinon.stub().resolves(mockTx),
     deployBondSustainabilityPerformanceTargetRate: sinon.stub().resolves(mockTx),
+    getAddress: sinon.stub().resolves(factoryAddress),
     signer: mockSigner,
     runner: mockSigner,
   };

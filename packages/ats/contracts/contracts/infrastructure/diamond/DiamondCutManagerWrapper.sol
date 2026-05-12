@@ -9,32 +9,54 @@ import { IDiamondLoupe } from "../proxy/IDiamondLoupe.sol";
 import { BusinessLogicResolverWrapper } from "./BusinessLogicResolverWrapper.sol";
 import { _DIAMOND_CUT_MANAGER_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 
+/**
+ * @title DiamondCutManagerWrapper
+ * @author Asset Tokenization Studio Team
+ * @notice Storage and implementation layer for IDiamondCutManager.
+ * @dev Houses all internal/private logic for managing diamond facet configurations,
+ *   batch creation, facet registration, selector and interface ID management.
+ *   Uses diamond storage at a fixed slot to avoid layout collisions.
+ *   External access control and event emission is handled by DiamondCutManager.
+ */
 abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicResolverWrapper {
+    /// @notice Core storage layout for configuration, facet, selector and interface data.
+    /// @dev All mappings use composite keccak256 hashes as keys for collision-free lookups.
     struct DiamondCutManagerStorage {
+        /// @notice Ordered list of registered configuration identifiers.
         bytes32[] configurations;
+        /// @notice Whether a configuration ID has been activated.
         mapping(bytes32 => bool) activeConfigurations;
+        /// @notice Latest version number per configuration.
         mapping(bytes32 => uint256) latestVersion;
+        /// @notice In-progress batch version per configuration.
         mapping(bytes32 => uint256) batchVersion;
-        // keccak256(configurationId, version)
+        /// @notice List of facet IDs per configuration+version (keyed by keccak256(configId, version)).
         mapping(bytes32 => bytes32[]) facetIds;
-        // keccak256(configurationId, version)
+        /// @notice Corresponding facet versions per configuration+version.
         mapping(bytes32 => uint256[]) facetVersions;
-        //keccak256(configurationId, version, facetId)
+        /// @notice Position of a facet within the facetIds array (keyed by keccak256(configId, version, facetId)).
         mapping(bytes32 => uint256) facetIdPosition;
-        // keccak256(configurationId, version, selector)
+        /// @notice Facet address for a selector (keyed by keccak256(configId, version, selector)).
         mapping(bytes32 => address) facetAddress;
-        // keccak256(configurationId, version, facetId)
+        /// @notice Facet implementation address per facet (keyed by keccak256(configId, version, facetId)).
         mapping(bytes32 => address) addr;
-        // keccak256(configurationId, version, facetId)
+        /// @notice Stored selectors per facet (keyed by keccak256(configId, version, facetId)).
         mapping(bytes32 => bytes4[]) selectors;
-        // keccak256(configurationId, version, selector)
+        /// @notice Maps a selector to its owning facet ID (keyed by keccak256(configId, version, selector)).
         mapping(bytes32 => bytes32) selectorToFacetId;
-        // keccak256(configurationId, version, facetId)
+        /// @notice Stored interface IDs per facet (keyed by keccak256(configId, version, facetId)).
         mapping(bytes32 => bytes4[]) interfaceIds;
-        // keccak256(configurationId, version, interfaceId)
+        /// @notice Whether an interface ID is supported (keyed by keccak256(configId, version, interfaceId)).
         mapping(bytes32 => bool) supportsInterface;
     }
 
+    /**
+     * @notice Creates a new configuration with the given facets and immediately activates it.
+     * @dev Convenience that combines batch start, facet registration, and activation.
+     * @param _configurationId Unique configuration identifier.
+     * @param _facetConfigurations List of facet IDs and their target versions.
+     * @return latestVersion_ The version assigned to the new configuration.
+     */
     function _createConfiguration(
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations
@@ -46,6 +68,15 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         _activateConfiguration(_configurationId, true);
     }
 
+    /**
+     * @notice Appends facets to an in-progress batch configuration.
+     * @dev Multiple calls with the same _configurationId accumulate facets until
+     *   _isLastBatch is true.  No-op on the data layer when not finalised.
+     * @param _configurationId Unique configuration identifier.
+     * @param _facetConfigurations Partial list of facets for this batch.
+     * @param _isLastBatch True to finalise and activate after this batch.
+     * @return latestVersion_ The version assigned (final once activated).
+     */
     function _createBatchConfiguration(
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations,
@@ -58,6 +89,14 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         _activateConfiguration(_configurationId, _isLastBatch);
     }
 
+    /**
+     * @notice Activates a configuration by pushing it to the active list and setting its
+     *   latest version.
+     * @dev No-op when _isLastBatch is false (configuration remains in batch state).
+     *   Once activated the batch version slot is deleted.
+     * @param _configurationId Configuration identifier.
+     * @param _isLastBatch When true, finalises the configuration.
+     */
     function _activateConfiguration(bytes32 _configurationId, bool _isLastBatch) internal {
         if (!_isLastBatch) return;
         DiamondCutManagerStorage storage _dcms = _diamondCutManagerStorage();
@@ -69,6 +108,12 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         delete _dcms.batchVersion[_configurationId];
     }
 
+    /**
+     * @notice Initialises a new batch version for a configuration.
+     * @dev Increments the latest version by one and stores it as the batch version.
+     * @param _configurationId Configuration identifier.
+     * @return batchVersion_ The newly allocated batch version number.
+     */
     function _startBatchConfiguration(bytes32 _configurationId) internal returns (uint256 batchVersion_) {
         DiamondCutManagerStorage storage _dcms = _diamondCutManagerStorage();
 
@@ -78,6 +123,15 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         batchVersion_ = _getBatchConfigurationVersion(_configurationId);
     }
 
+    /**
+     * @notice Registers a list of facets into an in-progress batch configuration.
+     * @dev Resolves each facet's implementation address, checks for duplicates, and
+     *   registers selectors and interface IDs.  Reverts on unregistered facet IDs
+     *   or duplicate facet entries.
+     * @param _configurationId Configuration identifier.
+     * @param _facetConfigurations Facets to register (ID + version pairs).
+     * @param _version Target batch version.
+     */
     function _addFacetsToBatchConfiguration(
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations,
@@ -128,6 +182,12 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         }
     }
 
+    /**
+     * @notice Cancels an in-progress batch configuration, cleaning all stored facet data.
+     * @dev Iterates over registered facets, deletes addresses, selectors and interface
+     *   IDs, then removes the batch version.
+     * @param _configurationId Configuration identifier to cancel.
+     */
     function _cancelBatchConfiguration(bytes32 _configurationId) internal {
         DiamondCutManagerStorage storage dcms = _diamondCutManagerStorage();
         uint256 batchVersion = _getBatchConfigurationVersion(_configurationId);
@@ -151,14 +211,32 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         delete dcms.batchVersion[_configurationId];
     }
 
+    /**
+     * @notice Returns true when a configuration has an in-progress batch version.
+     * @param _configurationId Configuration identifier.
+     * @return True when batchVersion is non-zero.
+     */
     function _isOngoingConfiguration(bytes32 _configurationId) internal view returns (bool) {
         return _getBatchConfigurationVersion(_configurationId) != 0;
     }
 
+    /**
+     * @notice Returns the in-progress batch version for a configuration.
+     * @param _configurationId Configuration identifier.
+     * @return batchVersion_ Current batch version; 0 if none is in progress.
+     */
     function _getBatchConfigurationVersion(bytes32 _configurationId) internal view returns (uint256 batchVersion_) {
         batchVersion_ = _diamondCutManagerStorage().batchVersion[_configurationId];
     }
 
+    /**
+     * @notice Resolves the facet address for a selector within a config+version.
+     * @param _dcms Storage pointer for DiamondCutManagerStorage.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query; 0 resolves to latest.
+     * @param _selector Function selector to look up.
+     * @return facetAddress_ Address of the owning facet, or address(0).
+     */
     function _resolveResolverProxyCall(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -170,6 +248,14 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         ];
     }
 
+    /**
+     * @notice Resolves whether an interface ID is supported in a config+version.
+     * @param _dcms Storage pointer for DiamondCutManagerStorage.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query; 0 resolves to latest.
+     * @param _interfaceId Interface ID to test.
+     * @return exists_ True when the interface is registered.
+     */
     function _resolveSupportsInterface(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -181,6 +267,13 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         ];
     }
 
+    /**
+     * @notice Returns true when a config+version pair is registered.
+     * @param _dcms Storage pointer for DiamondCutManagerStorage.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to check.
+     * @return isRegistered_ True when the configuration is active and version <= latest.
+     */
     function _isResolverProxyConfigurationRegistered(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -189,6 +282,13 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         return !_isResolverProxyConfigurationNotRegistered(_dcms, _configurationId, _version);
     }
 
+    /**
+     * @notice Returns true when a config+version pair is NOT registered.
+     * @param _dcms Storage pointer for DiamondCutManagerStorage.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to check.
+     * @return isRegistered_ True when the config is inactive or version exceeds latest.
+     */
     function _isResolverProxyConfigurationNotRegistered(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -197,6 +297,12 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         return !_dcms.activeConfigurations[_configurationId] || _version > _dcms.latestVersion[_configurationId];
     }
 
+    /**
+     * @notice Reverts when a config+version pair is not registered.
+     * @param _dcms Storage pointer for DiamondCutManagerStorage.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to check.
+     */
     function _checkResolverProxyConfigurationRegistered(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -207,6 +313,13 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         }
     }
 
+    /**
+     * @notice Returns a paginated slice of configuration identifiers.
+     * @param _dcms Storage pointer for DiamondCutManagerStorage.
+     * @param _pageIndex Page index (0-based).
+     * @param _pageLength Entries per page.
+     * @return configurationIds_ Paginated array.
+     */
     function _getConfigurations(
         DiamondCutManagerStorage storage _dcms,
         uint256 _pageIndex,
@@ -215,6 +328,13 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         configurationIds_ = _buildPaginated(_dcms.configurations, _pageIndex, _pageLength);
     }
 
+    /**
+     * @notice Returns the number of facets in a config+version.
+     * @param _dcms Storage pointer for DiamondCutManagerStorage.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query; 0 resolves to latest.
+     * @return facetsLength_ Total facet count.
+     */
     function _getFacetsLengthByConfigurationIdAndVersion(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -225,6 +345,15 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
             .length;
     }
 
+    /**
+     * @notice Returns a paginated list of facet metadata for a config+version.
+     * @param _dcms Storage pointer for DiamondCutManagerStorage.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query; 0 resolves to latest.
+     * @param _pageIndex Page index (0-based).
+     * @param _pageLength Entries per page.
+     * @return facets_ Array of Facet metadata.
+     */
     function _getFacetsByConfigurationIdAndVersion(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -253,6 +382,14 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         }
     }
 
+    /**
+     * @notice Returns the number of selectors a facet contributes in a config+version.
+     * @param _dcms Storage pointer for DiamondCutManagerStorage.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query; 0 resolves to latest.
+     * @param _facetId Facet identifier.
+     * @return facetSelectorsLength_ Selector count.
+     */
     function _getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -264,6 +401,16 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
             .length;
     }
 
+    /**
+     * @notice Returns the selectors a facet contributes in a config+version (paginated).
+     * @param _dcms Storage pointer for DiamondCutManagerStorage.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query; 0 resolves to latest.
+     * @param _facetId Facet identifier.
+     * @param _pageIndex Page index (0-based).
+     * @param _pageLength Entries per page.
+     * @return facetSelectors_ Array of function selectors.
+     */
     function _getFacetSelectorsByConfigurationIdVersionAndFacetId(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -279,6 +426,15 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         );
     }
 
+    /**
+     * @notice Returns a paginated list of facet identifiers for a config+version.
+     * @param _dcms Storage pointer for DiamondCutManagerStorage.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query; 0 resolves to latest.
+     * @param _pageIndex Page index (0-based).
+     * @param _pageLength Entries per page.
+     * @return facetIds_ Array of facet identifiers.
+     */
     function _getFacetIdsByConfigurationIdAndVersion(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -293,6 +449,15 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         );
     }
 
+    /**
+     * @notice Returns a slice of FacetConfiguration (ID + version) for a config+version.
+     * @param _dcms Storage pointer for DiamondCutManagerStorage.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query; 0 resolves to latest.
+     * @param _start Start index (inclusive).
+     * @param _end End index (exclusive).
+     * @return facetConfigurations_ Array of facet ID + version pairs.
+     */
     function _getFacetConfigurationsByConfigurationIdAndVersion(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -306,8 +471,11 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
 
         facetConfigurations_ = new FacetConfiguration[](size);
 
-        for (uint256 index = 0; index < size; ) {
-            uint256 realIndex = _start + index;
+        for (uint256 index; index < size; ) {
+            uint256 realIndex;
+            unchecked {
+                realIndex = _start + index;
+            }
             facetConfigurations_[index] = FacetConfiguration({
                 id: _dcms.facetIds[configVersionHash][realIndex],
                 version: _dcms.facetVersions[configVersionHash][realIndex]
@@ -318,6 +486,15 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         }
     }
 
+    /**
+     * @notice Returns the facet implementation addresses for a config+version (paginated).
+     * @param _dcms Storage pointer for DiamondCutManagerStorage.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query; 0 resolves to latest.
+     * @param _pageIndex Page index (0-based).
+     * @param _pageLength Entries per page.
+     * @return facetAddresses_ Array of facet contract addresses.
+     */
     function _getFacetAddressesByConfigurationIdAndVersion(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -342,6 +519,14 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         }
     }
 
+    /**
+     * @notice Resolves the facet identifier that owns a selector in a config+version.
+     * @param _dcms Storage pointer for DiamondCutManagerStorage.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query; 0 resolves to latest.
+     * @param _selector Function selector to look up.
+     * @return facetId_ Identifier of the owning facet.
+     */
     function _getFacetIdByConfigurationIdVersionAndSelector(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -353,6 +538,14 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         ];
     }
 
+    /**
+     * @notice Returns full facet metadata for a specific facet in a config+version.
+     * @param _dcms Storage pointer for DiamondCutManagerStorage.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query; 0 resolves to latest.
+     * @param _facetId Facet identifier.
+     * @return facet_ Facet metadata including address, selectors, and interface IDs.
+     */
     function _getFacetByConfigurationIdVersionAndFacetId(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -372,6 +565,14 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         });
     }
 
+    /**
+     * @notice Returns the facet implementation address for a config+version+facet.
+     * @param _dcms Storage pointer for DiamondCutManagerStorage.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query; 0 resolves to latest.
+     * @param _facetId Facet identifier.
+     * @return facetAddress_ Facet contract address.
+     */
     function _getFacetAddressByConfigurationIdVersionAndFacetId(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -383,6 +584,15 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         ];
     }
 
+    /**
+     * @notice Returns the implementation version of a facet in a config+version.
+     * @dev Reads from the facetVersions array using the position stored during registration.
+     * @param _dcms Storage pointer for DiamondCutManagerStorage.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query.
+     * @param _facetId Facet identifier.
+     * @return facetVersion_ Facet implementation version number.
+     */
     function _getFacetVersionByConfigurationIdVersionAndFacetId(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -394,10 +604,16 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         if (pos == 0) {
             revert FacetIdNotRegistered(_configurationId, _facetId);
         }
-
-        facetVersion_ = _dcms.facetVersions[_buildHash(_configurationId, _version)][pos - 1];
+        unchecked {
+            facetVersion_ = _dcms.facetVersions[_buildHash(_configurationId, _version)][pos - 1];
+        }
     }
 
+    /**
+     * @notice Diamond storage accessor for DiamondCutManagerStorage.
+     * @dev Pins the struct to a fixed slot to avoid layout collisions across contracts.
+     * @return ds Storage pointer to DiamondCutManagerStorage.
+     */
     function _diamondCutManagerStorage() internal pure returns (DiamondCutManagerStorage storage ds) {
         bytes32 position = _DIAMOND_CUT_MANAGER_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
@@ -406,6 +622,15 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         }
     }
 
+    /**
+     * @notice Cleans all selector data for a facet in a cancelled batch.
+     * @dev Iterates over stored selectors, deleting facetAddress and selectorToFacetId
+     *   entries, then removes the selectors array.
+     * @param _dcms Storage pointer for DiamondCutManagerStorage.
+     * @param _configurationId Configuration identifier.
+     * @param _batchVersion Batch version being cancelled.
+     * @param _configVersionFacetHash Composite hash for the facet context.
+     */
     function _cleanSelectors(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -425,6 +650,15 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         delete _dcms.selectors[_configVersionFacetHash];
     }
 
+    /**
+     * @notice Cleans all interface ID data for a facet in a cancelled batch.
+     * @dev Iterates over stored interface IDs, deleting supportsInterface entries,
+     *   then removes the interfaceIds array.
+     * @param _dcms Storage pointer for DiamondCutManagerStorage.
+     * @param _configurationId Configuration identifier.
+     * @param _batchVersion Batch version being cancelled.
+     * @param _configVersionFacetHash Composite hash for the facet context.
+     */
     function _cleanInterfacesIds(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -442,6 +676,17 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         delete _dcms.interfaceIds[_configVersionFacetHash];
     }
 
+    /**
+     * @notice Registers selectors for a facet into a configuration version.
+     * @dev Validates selectors against the blacklist and checks for duplicate
+     *   registrations.  Stores the facet address and selector-to-facet mapping.
+     * @param _dcms Storage pointer for DiamondCutManagerStorage.
+     * @param _configurationId Configuration identifier.
+     * @param _version Target version.
+     * @param _facetId Facet identifier.
+     * @param _static IStaticFunctionSelectors interface for the facet.
+     * @param _configVersionFacetHash Composite hash for the facet context.
+     */
     function _registerSelectors(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -470,6 +715,14 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         }
     }
 
+    /**
+     * @notice Registers interface IDs for a facet into a configuration version.
+     * @param _dcms Storage pointer for DiamondCutManagerStorage.
+     * @param _configurationId Configuration identifier.
+     * @param _version Target version.
+     * @param _static IStaticFunctionSelectors interface for the facet.
+     * @param _configVersionFacetHash Composite hash for the facet context.
+     */
     function _registerInterfaceIds(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -489,6 +742,13 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         }
     }
 
+    /**
+     * @notice Resolves a version value, defaulting to the latest when 0 is passed.
+     * @param _dcms Storage pointer for DiamondCutManagerStorage.
+     * @param _configurationId Configuration identifier.
+     * @param _version Requested version; 0 means latest.
+     * @return version_ Resolved version number.
+     */
     function _resolveVersion(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -497,6 +757,11 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         version_ = _version > 0 ? _version : _dcms.latestVersion[_configurationId];
     }
 
+    /**
+     * @notice Reverts if any of the given selectors is blacklisted for the configuration.
+     * @param _configurationId Configuration identifier.
+     * @param _selectors Array of selectors to validate.
+     */
     function _checkSelectorsBlacklist(bytes32 _configurationId, bytes4[] memory _selectors) private view {
         EnumerableSetBytes4.Bytes4Set storage selectorBlacklist = _businessLogicResolverStorage().selectorBlacklist[
             _configurationId
@@ -514,10 +779,23 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         }
     }
 
+    /**
+     * @notice Builds a composite hash for a configuration+version pair.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version number.
+     * @return hash_ keccak256(abi.encodePacked(configId, version)).
+     */
     function _buildHash(bytes32 _configurationId, uint256 _version) private pure returns (bytes32 hash_) {
         hash_ = keccak256(abi.encodePacked(_configurationId, _version));
     }
 
+    /**
+     * @notice Builds a composite hash for a configuration+version+facet triplet.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version number.
+     * @param _facetId Facet identifier.
+     * @return hash_ keccak256(abi.encodePacked(configId, version, facetId)).
+     */
     function _buildHash(
         bytes32 _configurationId,
         uint256 _version,
@@ -526,6 +804,13 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         hash_ = keccak256(abi.encodePacked(_configurationId, _version, _facetId));
     }
 
+    /**
+     * @notice Builds a composite hash for a configuration+version+selector triplet.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version number.
+     * @param _selector Function selector (bytes4).
+     * @return hash_ keccak256(abi.encodePacked(configId, version, selector)).
+     */
     function _buildHashSelector(
         bytes32 _configurationId,
         uint256 _version,
@@ -534,6 +819,13 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         hash_ = keccak256(abi.encodePacked(_configurationId, _version, _selector));
     }
 
+    /**
+     * @notice Builds a paginated slice from a bytes32[] source.
+     * @param _source Full source array.
+     * @param _pageIndex Page index (0-based).
+     * @param _pageLength Entries per page.
+     * @return page_ Paginated sub-array.
+     */
     function _buildPaginated(
         bytes32[] memory _source,
         uint256 _pageIndex,
@@ -551,6 +843,13 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         }
     }
 
+    /**
+     * @notice Builds a paginated slice from a bytes4[] source.
+     * @param _source Full source array.
+     * @param _pageIndex Page index (0-based).
+     * @param _pageLength Entries per page.
+     * @return page_ Paginated sub-array.
+     */
     function _buildPaginated(
         bytes4[] memory _source,
         uint256 _pageIndex,

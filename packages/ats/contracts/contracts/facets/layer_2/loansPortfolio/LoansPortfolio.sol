@@ -2,10 +2,12 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ILoansPortfolio } from "./ILoansPortfolio.sol";
-import { LOANS_PORTFOLIO_MANAGER_ROLE } from "../../../constants/roles.sol";
+import { LOANS_PORTFOLIO_MANAGER_ROLE, DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
 import { RegulationData, AdditionalSecurityData } from "../../../constants/regulation.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { LoansPortfolioStorageWrapper } from "../../../domain/asset/loansPortfolio/LoansPortfolioStorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
+import { _LOANS_PORTFOLIO_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import { SecurityStorageWrapper } from "../../../domain/asset/SecurityStorageWrapper.sol";
 
 abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
@@ -13,9 +15,23 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         ILoansPortfolio.LoansPortfolioDetailsData calldata _loansPortfolioData,
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
-    ) external onlyUninitialized(LoansPortfolioStorageWrapper.isLoansPortfolioInitialized()) {
+    ) external onlyFacetNotRegistered(_LOANS_PORTFOLIO_RESOLVER_KEY) onlyRole(DEFAULT_ADMIN_ROLE) {
         LoansPortfolioStorageWrapper.initializeLoansPortfolio(_loansPortfolioData);
         SecurityStorageWrapper.initializeSecurity(_regulationData, _additionalSecurityData);
+        InitializerStorageWrapper.setFacetToReady(_LOANS_PORTFOLIO_RESOLVER_KEY);
+    }
+
+    /// @inheritdoc ILoansPortfolio
+    function reinitializeLoansPortfolio(
+        uint256[] calldata fromVersions
+    )
+        external
+        override
+        onlyFacetRegistered(_LOANS_PORTFOLIO_RESOLVER_KEY, fromVersions)
+        onlyFacetNotReady(_LOANS_PORTFOLIO_RESOLVER_KEY)
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        InitializerStorageWrapper.setFacetToReady(_LOANS_PORTFOLIO_RESOLVER_KEY);
     }
 
     function addHoldingsAsset(

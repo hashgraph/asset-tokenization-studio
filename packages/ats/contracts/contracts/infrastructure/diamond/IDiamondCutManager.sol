@@ -4,35 +4,38 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IDiamondLoupe } from "../proxy/IDiamondLoupe.sol";
 
 /**
- * @title Resolver Proxy Manager
- * @notice This contract is used to manage configurations of resolverProxy's.
- *		 Each resolverProxy must have a resolverProxy configuration id. It could ask to the ResolverProxyCutManger by:
- *      * Maintain the list of business logic that forms part of a resolverProxy configuration.
- *      * Maintain and resolve the list of function selectors by each configuration knowing its business logic address.
- *      * Maintain and resolve the list of interface ids by each configuration.
- *      By each configurationId:
- *      * latestVersion: number of versions registered.
- *      * Version: Each version registered contains
- *        * Version number.
- *        * A list of facets
- *          * facetId
- *          * list of selectors
- *          * list of interfaceIds
+ * @title IDiamondCutManager
+ * @author Asset Tokenization Studio Team
+ * @notice Interface for managing diamond facet configurations and resolving selectors.
+ * @dev Maintains a versioned registry of facet configurations per configuration ID.
+ *   Each configuration stores facet IDs with their associated selectors and
+ *   interface IDs, enabling the ResolverProxy to route function calls to the
+ *   correct facet implementation.
  */
 interface IDiamondCutManager {
+    /// @notice Facet identity within a configuration version.
+    /// @param id Unique facet identifier.
+    /// @param version Facet implementation version.
     struct FacetConfiguration {
         bytes32 id;
         uint256 version;
     }
 
-    /// @notice emited when createConfiguration is executed
+    /// @notice Emitted when a new configuration is created in a single transaction.
+    /// @param configurationId Identifier for the created configuration.
+    /// @param facetConfigurations List of facets and their versions.
+    /// @param version Configuration version number.
     event DiamondConfigurationCreated(
         bytes32 configurationId,
         FacetConfiguration[] facetConfigurations,
         uint256 version
     );
 
-    /// @notice emited when createBatchConfiguration is executed
+    /// @notice Emitted when a batch configuration creation progresses.
+    /// @param configurationId Identifier for the batched configuration.
+    /// @param facetConfigurations Partial list of facets in this batch.
+    /// @param _isLastBatch True when this is the final batch for the configuration.
+    /// @param version Configuration version number.
     event DiamondBatchConfigurationCreated(
         bytes32 configurationId,
         FacetConfiguration[] facetConfigurations,
@@ -40,41 +43,52 @@ interface IDiamondCutManager {
         uint256 version
     );
 
-    /// @notice emited when cancelBatchConfiguration is executed
+    /// @notice Emitted when a batch configuration creation is cancelled.
+    /// @param configurationId Identifier of the cancelled configuration.
     event DiamondBatchConfigurationCanceled(bytes32 configurationId);
 
-    // @notice Not able to use bytes32(0) with configurationId
+    /// @notice Thrown when bytes32(0) is used as a configuration identifier.
     error DefaultValueForConfigurationIdNotPermitted();
 
-    /// @notice Not able to use a facetId unregistered
+    /// @notice Thrown when a facet identifier is not found in the registry.
+    /// @param configurationId Configuration being queried.
+    /// @param facetId Facet identifier that is not registered.
     error FacetIdNotRegistered(bytes32 configurationId, bytes32 facetId);
 
-    /// @notice Not able to duplicate facetId in list
+    /// @notice Thrown when the same facet appears twice in a configuration list.
+    /// @param facetId Duplicated facet identifier.
     error DuplicatedFacetInConfiguration(bytes32 facetId);
 
-    /// @notice error that occurs when try to create a configuration and the configuration key doesn't exists
+    /// @notice Thrown when querying a configuration that has not been registered.
+    /// @param resolverProxyConfigurationId Configuration identifier queried.
+    /// @param version Version that does not exist.
     error ResolverProxyConfigurationNoRegistered(bytes32 resolverProxyConfigurationId, uint256 version);
 
-    /// @notice error that occurs when try to add a selector and the selector is blacklisted
+    /// @notice Thrown when a blacklisted selector is added to a configuration.
+    /// @param selector The blacklisted function selector.
     error SelectorBlacklisted(bytes4 selector);
 
-    /// @notice error that occurs when try to add a selector and the selector is already registered
+    /// @notice Thrown when a selector is already registered for a facet in the configuration.
+    /// @param configurationId Configuration where the collision occurred.
+    /// @param version Configuration version.
+    /// @param facetId Facet that already owns the selector.
+    /// @param selector The duplicate selector.
     error SelectorAlreadyRegistered(bytes32 configurationId, uint256 version, bytes32 facetId, bytes4 selector);
 
     /**
-     * @notice Create a new configuration to the latest version of all facets.
-     * @param _configurationId unused identifier to the configuration.
-     * @param _facetConfigurations.id list of business logics to be registered.
-     * @param _facetConfigurations.version list of versions of each _facetIds.
+     * @notice Creates a new configuration with the given facets at their latest versions.
+     * @param _configurationId Unique identifier for the configuration (must not be bytes32(0)).
+     * @param _facetConfigurations List of facet IDs and their target versions.
      */
     function createConfiguration(bytes32 _configurationId, FacetConfiguration[] calldata _facetConfigurations) external;
 
     /**
-     * @notice Create a new batch configuration to the latest version of all facets.
-     * @param _configurationId unused identifier to the configuration.
-     * @param _facetConfigurations.id list of business logics to be registered.
-     * @param _facetConfigurations.version list of versions of each _facetIds.
-     * @param _isLastBatch boolean to indicate if is the last batch iteration.
+     * @notice Creates a configuration incrementally across multiple transactions.
+     * @dev Useful when a single transaction would exceed gas limits.  Call repeatedly
+     *   with partial facet lists, then signal completion via _isLastBatch.
+     * @param _configurationId Unique identifier for the configuration.
+     * @param _facetConfigurations Partial list of facets for this batch.
+     * @param _isLastBatch True to finalise the configuration after this batch.
      */
     function createBatchConfiguration(
         bytes32 _configurationId,
@@ -83,25 +97,26 @@ interface IDiamondCutManager {
     ) external;
 
     /**
-     * @notice Cancel a current batch configuration.
-     * @param _configurationId unused identifier to the configuration.
+     * @notice Cancels an in-progress batch configuration.
+     * @dev Discards all facet data accumulated across prior batches for this ID.
+     * @param _configurationId Identifier of the batch configuration to cancel.
      */
     function cancelBatchConfiguration(bytes32 _configurationId) external;
 
     /**
-     * @notice check if a resolverProxy is registered. If not revert.
-     * @param _configurationId the configuration key to be checked.
-     * @param _version configured version in the resolverProxy.
+     * @notice Reverts if the given config+version pair has not been registered.
+     * @param _configurationId Configuration identifier to check.
+     * @param _version Version to check.
      */
     function checkResolverProxyConfigurationRegistered(bytes32 _configurationId, uint256 _version) external;
 
     /**
-     * @notice Resolve the facet address knowing configuration, version and selector.
-     * @param _configurationId configured key in the resolverProxy.
-     * @param _version configured version in the resolverProxy. if is 0, ask for latest version.
-     * @param _selector received in the call/tx to be resolver.
-     * @return facetAddress_ with the resolver address of the facet.
-     *       If facet address cant been resolved, returns address(0).
+     * @notice Resolves the facet address for a selector within a config+version.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query; 0 resolves the latest version.
+     * @param _selector Function selector to look up.
+     * @return facetAddress_ Address of the facet handling the selector, or
+     *   address(0) when not found.
      */
     function resolveResolverProxyCall(
         bytes32 _configurationId,
@@ -110,11 +125,11 @@ interface IDiamondCutManager {
     ) external view returns (address facetAddress_);
 
     /**
-     * @notice Resolve if an interfaceId is present in the resolverProxy configured version.
-     * @param _configurationId configured key in the resolverProxy.
-     * @param _version configured version in the resolverProxy. if is 0, ask for latest version.
-     * @param _interfaceId received to be tested.
-     * @return exists_ a true if the interfaceId is part of the resolverProxy configuration.
+     * @notice Resolves whether an interface ID is supported in a config+version.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query; 0 resolves the latest version.
+     * @param _interfaceId Interface ID to test.
+     * @return exists_ True when the interface is part of the configuration.
      */
     function resolveSupportsInterface(
         bytes32 _configurationId,
@@ -123,9 +138,10 @@ interface IDiamondCutManager {
     ) external view returns (bool exists_);
 
     /**
-     * @notice if a resolverProxy is registered.
-     * @param _configurationId the configuration key to be checked.
-     * @param _version configured version in the resolverProxy.
+     * @notice Checks whether a config+version pair is registered.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to check.
+     * @return True when the pair exists in the registry.
      */
     function isResolverProxyConfigurationRegistered(
         bytes32 _configurationId,
@@ -133,16 +149,16 @@ interface IDiamondCutManager {
     ) external view returns (bool);
 
     /**
-     * @notice Returns the length of configuration keys
-     * @return configurationsLength_
+     * @notice Returns the total number of registered configurations.
+     * @return configurationsLength_ Total count.
      */
     function getConfigurationsLength() external view returns (uint256 configurationsLength_);
 
     /**
-     * @notice Returns a list of configuration keys
-     * @param _pageIndex members to skip : _pageIndex * _pageLength
-     * @param _pageLength number of members to return
-     * @return configurationIds_ list of business logic keys
+     * @notice Returns a paginated list of registered configuration identifiers.
+     * @param _pageIndex Page index (0-based).
+     * @param _pageLength Number of entries per page.
+     * @return configurationIds_ List of configuration identifiers.
      */
     function getConfigurations(
         uint256 _pageIndex,
@@ -150,17 +166,31 @@ interface IDiamondCutManager {
     ) external view returns (bytes32[] memory configurationIds_);
 
     /**
-     * @notice Returns the latest version registered of a resolverProxy configuration.
-     * @param _configurationId key to be obtained.
-     * @return latestVersion_ latest version registered of a resolverProxy configuration.
+     * @notice Returns the highest version number registered for a configuration.
+     * @param _configurationId Configuration identifier.
+     * @return latestVersion_ Latest version; 0 if the configuration has no versions.
      */
     function getLatestVersionByConfiguration(bytes32 _configurationId) external view returns (uint256 latestVersion_);
 
+    /**
+     * @notice Returns the number of facets in a config+version.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query.
+     * @return facetsLength_ Total facet count.
+     */
     function getFacetsLengthByConfigurationIdAndVersion(
         bytes32 _configurationId,
         uint256 _version
     ) external view returns (uint256 facetsLength_);
 
+    /**
+     * @notice Returns a paginated list of facet metadata for a config+version.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query.
+     * @param _pageIndex Page index (0-based).
+     * @param _pageLength Number of entries per page.
+     * @return facets_ List of facet metadata (address, selectors, interface IDs).
+     */
     function getFacetsByConfigurationIdAndVersion(
         bytes32 _configurationId,
         uint256 _version,
@@ -168,12 +198,28 @@ interface IDiamondCutManager {
         uint256 _pageLength
     ) external view returns (IDiamondLoupe.Facet[] memory facets_);
 
+    /**
+     * @notice Returns the number of selectors a facet contributes in a config+version.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query.
+     * @param _facetId Facet identifier.
+     * @return facetSelectorsLength_ Selector count.
+     */
     function getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(
         bytes32 _configurationId,
         uint256 _version,
         bytes32 _facetId
     ) external view returns (uint256 facetSelectorsLength_);
 
+    /**
+     * @notice Returns the selectors a facet contributes in a config+version.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query.
+     * @param _facetId Facet identifier.
+     * @param _pageIndex Page index (0-based).
+     * @param _pageLength Number of entries per page.
+     * @return facetSelectors_ List of function selectors.
+     */
     function getFacetSelectorsByConfigurationIdVersionAndFacetId(
         bytes32 _configurationId,
         uint256 _version,
@@ -183,12 +229,12 @@ interface IDiamondCutManager {
     ) external view returns (bytes4[] memory facetSelectors_);
 
     /**
-     * @notice Returns the list of facet keys.
-     * @param _configurationId key to filter the facets.
-     * @param _version the version to filter the facets.
-     * @param _pageIndex members to skip : _pageIndex * _pageLength
-     * @param _pageLength number of members to return
-     * @return facetIds_ List of the facet key by key and version
+     * @notice Returns a paginated list of facet identifiers for a config+version.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query.
+     * @param _pageIndex Page index (0-based).
+     * @param _pageLength Number of entries per page.
+     * @return facetIds_ List of facet identifiers.
      */
     function getFacetIdsByConfigurationIdAndVersion(
         bytes32 _configurationId,
@@ -197,6 +243,14 @@ interface IDiamondCutManager {
         uint256 _pageLength
     ) external view returns (bytes32[] memory facetIds_);
 
+    /**
+     * @notice Returns a slice of facet configurations for a config+version.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query.
+     * @param _start Start index (inclusive).
+     * @param _end End index (exclusive).
+     * @return facetConfigurations_ Array of facet ID + version pairs.
+     */
     function getFacetConfigurationsByConfigurationIdAndVersion(
         bytes32 _configurationId,
         uint256 _version,
@@ -205,12 +259,12 @@ interface IDiamondCutManager {
     ) external view returns (FacetConfiguration[] memory facetConfigurations_);
 
     /**
-     * @notice Returns the facet addresses con configuration
-     * @param _configurationId key to filter the facets.
-     * @param _version the version to filter the facets.
-     * @param _pageIndex members to skip : _pageIndex * _pageLength
-     * @param _pageLength number of members to return
-     * @return facetAddresses_ List of the facet addresses
+     * @notice Returns the facet addresses for a config+version.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query.
+     * @param _pageIndex Page index (0-based).
+     * @param _pageLength Number of entries per page.
+     * @return facetAddresses_ List of facet contract addresses.
      */
     function getFacetAddressesByConfigurationIdAndVersion(
         bytes32 _configurationId,
@@ -219,6 +273,13 @@ interface IDiamondCutManager {
         uint256 _pageLength
     ) external view returns (address[] memory facetAddresses_);
 
+    /**
+     * @notice Resolves the facet identifier that owns a selector in a config+version.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query.
+     * @param _selector Function selector to look up.
+     * @return facetId_ Facet identifier owning the selector.
+     */
     function getFacetIdByConfigurationIdVersionAndSelector(
         bytes32 _configurationId,
         uint256 _version,
@@ -226,11 +287,11 @@ interface IDiamondCutManager {
     ) external view returns (bytes32 facetId_);
 
     /**
-     * @notice Returns the facet information.
-     * @param _configurationId key to filter the facets.
-     * @param _version the version to filter the facets.
-     * @param _facetId the business logic key
-     * @return facet_ the facet information
+     * @notice Returns full facet metadata for a specific facet in a config+version.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query.
+     * @param _facetId Facet identifier.
+     * @return facet_ Facet metadata including address, selectors, and interface IDs.
      */
     function getFacetByConfigurationIdVersionAndFacetId(
         bytes32 _configurationId,
@@ -239,11 +300,11 @@ interface IDiamondCutManager {
     ) external view returns (IDiamondLoupe.Facet memory facet_);
 
     /**
-     * @notice Returns the facet address.
-     * @param _configurationId key to filter the facets.
-     * @param _version the version to filter the facets.
-     * @param _facetId the business logic key
-     * @return facetAddress_ the facet information
+     * @notice Returns the facet implementation address for a config+version+facet.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query.
+     * @param _facetId Facet identifier.
+     * @return facetAddress_ Facet contract address.
      */
     function getFacetAddressByConfigurationIdVersionAndFacetId(
         bytes32 _configurationId,
@@ -251,6 +312,13 @@ interface IDiamondCutManager {
         bytes32 _facetId
     ) external view returns (address facetAddress_);
 
+    /**
+     * @notice Returns the implementation version of a facet in a config+version.
+     * @param _configurationId Configuration identifier.
+     * @param _version Version to query.
+     * @param _facetId Facet identifier.
+     * @return facetVersion_ Facet implementation version number.
+     */
     function getFacetVersionByConfigurationIdVersionAndFacetId(
         bytes32 _configurationId,
         uint256 _version,

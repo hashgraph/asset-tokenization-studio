@@ -48,6 +48,7 @@ import {
   ProceedRecipientsFacet__factory,
   TimeTravelFacet__factory,
   Loan__factory,
+  MockInitializableFacet__factory,
 } from "@contract-types";
 import { decodeEvent } from "@scripts/infrastructure";
 import { DeepPartial, TIME_PERIODS_S } from "@scripts";
@@ -281,7 +282,7 @@ export async function deployLoanTokenFixture({
   const loanFacet = Loan__factory.connect(proxyAddress, deployer);
 
   await controlListFacet.initializeControlList(securityData.isWhiteList);
-  await erc1410ManagementFacet.initialize_ERC1410(securityData.isMultiPartition);
+  await erc1410ManagementFacet.initializeERC1410(securityData.isMultiPartition);
   await controllerFacet.initializeController(securityData.isControllable);
   await coreFacet.initializeCore({
     info: {
@@ -292,22 +293,22 @@ export async function deployLoanTokenFixture({
     },
     securityType: 1, // SecurityType.Equity (reuse for loan)
   });
-  await mintFacet.initialize_ERC1594();
+  await mintFacet.initializeERC1594();
   await capFacet.initializeCap(securityData.maxSupply, []);
-  await protectedPartitionsFacet.initialize_ProtectedPartitions(securityData.arePartitionsProtected);
+  await protectedPartitionsFacet.initializeProtectedPartitions(securityData.arePartitionsProtected);
   await clearingFacet.initializeClearing(securityData.clearingActive);
   await externalPauseManagementFacet.initializeExternalPauses([]);
   await externalControlListManagementFacet.initializeExternalControlLists([]);
   await kycFacet.initializeInternalKyc(securityData.internalKycActivated);
   await externalKycListManagementFacet.initializeExternalKycLists([]);
-  await erc20VotesFacet.initialize_ERC20Votes(securityData.erc20VotesActivated);
-  await erc3643ManagementFacet.initialize_ERC3643(ZeroAddress, ZeroAddress);
-  await nominalValueFacet.initialize_NominalValue(
+  await erc20VotesFacet.initializeERC20Votes(securityData.erc20VotesActivated);
+  await erc3643ManagementFacet.initializeERC3643(ZeroAddress, ZeroAddress);
+  await nominalValueFacet.initializeNominalValue(
     loanParams?.nominalValue ?? DEFAULT_LOAN_PARAMS.nominalValue,
     loanParams?.nominalValueDecimals ?? DEFAULT_LOAN_PARAMS.nominalValueDecimals,
   );
 
-  await loanFacet.initialize_Loan(
+  await loanFacet.initializeLoan(
     loanDetails,
     buildRegulationData(regulationData.regulationType, regulationData.regulationSubType),
     {
@@ -316,6 +317,10 @@ export async function deployLoanTokenFixture({
       info: regulationData.additionalSecurityData.info,
     },
   );
+
+  const mockInitializableFacet = MockInitializableFacet__factory.connect(proxyAddress, deployer);
+  await mockInitializableFacet.initializeMockFacet(Object.values(infrastructure.loanFacetKeys));
+  await mockInitializableFacet.setOperationalStatus();
 
   return {
     ...infrastructure,

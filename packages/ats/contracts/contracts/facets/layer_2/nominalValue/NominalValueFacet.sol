@@ -16,7 +16,7 @@ contract NominalValueFacet is NominalValue, IStaticFunctionSelectors {
         uint256 selectorIndex;
         staticFunctionSelectors_[selectorIndex++] = this.getNominalValue.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getNominalValueDecimals.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.initialize_NominalValue.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.initializeNominalValue.selector;
         staticFunctionSelectors_[selectorIndex++] = this.setNominalValue.selector;
     }
 

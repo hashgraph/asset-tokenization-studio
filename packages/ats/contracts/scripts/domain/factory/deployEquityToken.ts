@@ -61,7 +61,6 @@ export async function deployEquityFromFactory(
 ): Promise<ResolverProxy> {
   const { adminAccount, factory, equityDetails: equityDetailsParams, securityData: securityDataParams } = params;
 
-  // Build RBAC array with admin
   const rbacs: Rbac[] = [
     {
       role: ATS_ROLES.DEFAULT_ADMIN_ROLE,

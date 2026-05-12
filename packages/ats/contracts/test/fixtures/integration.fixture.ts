@@ -63,7 +63,7 @@ export async function deployBlrFixture() {
 
   // Get contract instance and initialize
   const blr = BusinessLogicResolver__factory.connect(blrResult.proxyAddress, deployer) as BusinessLogicResolver;
-  await blr.initialize_BusinessLogicResolver();
+  await blr.initializeBusinessLogicResolver();
 
   return {
     deployer,

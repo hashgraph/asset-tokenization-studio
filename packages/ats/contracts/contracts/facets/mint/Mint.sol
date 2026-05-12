@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { AGENT_ROLE, ISSUER_ROLE, _buildRoles } from "../../constants/roles.sol";
+import { AGENT_ROLE, ISSUER_ROLE, DEFAULT_ADMIN_ROLE, _buildRoles } from "../../constants/roles.sol";
 import { IMint } from "./IMint.sol";
 import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _MINT_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
@@ -20,9 +22,27 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 abstract contract Mint is IMint, Modifiers {
     /// @inheritdoc IMint
     /// @dev Reverts via `onlyNotERC1594Initialized` if the facet is already initialised.
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1594() external override onlyNotERC1594Initialized {
+    function initializeERC1594()
+        external
+        override
+        onlyFacetNotRegistered(_MINT_RESOLVER_KEY)
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         ERC1594StorageWrapper.initialize();
+        InitializerStorageWrapper.setFacetToReady(_MINT_RESOLVER_KEY);
+    }
+
+    /// @inheritdoc IMint
+    function reinitializeMint(
+        uint256[] calldata fromVersions
+    )
+        external
+        override
+        onlyFacetRegistered(_MINT_RESOLVER_KEY, fromVersions)
+        onlyFacetNotReady(_MINT_RESOLVER_KEY)
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        InitializerStorageWrapper.setFacetToReady(_MINT_RESOLVER_KEY);
     }
 
     /// @inheritdoc IMint

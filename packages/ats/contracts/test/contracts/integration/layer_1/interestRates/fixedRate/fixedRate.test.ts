@@ -42,10 +42,24 @@ describe("Fixed Rate Tests", () => {
     await loadFixture(deploySecurityFixtureMultiPartition);
   });
 
-  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
+  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with FacetAlreadyRegistered", async () => {
     await expect(
-      asset.connect(signer_A).initialize_FixedRate({ rate: 1, rateDecimals: 0 }),
-    ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+      asset.connect(signer_A).initializeFixedRate({ rate: 1, rateDecimals: 0 }),
+    ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+  });
+
+  describe("Reinitialize", () => {
+    it("GIVEN a new version WHEN reinitializeFixedRate THEN transaction fails if not registered", async () => {
+      // 1. Get current version
+
+      // 2. Reinitialize
+      // If we pass [version], it should fail with FacetReady because version 1 is already ready.
+      // But if we pass [99], it should fail with FacetPreviousVersionNotAccepted because the last registered version is 1.
+      await expect(asset.connect(signer_A).reinitializeFixedRate([99])).to.be.revertedWithCustomError(
+        asset,
+        "FacetPreviousVersionNotAccepted",
+      );
+    });
   });
 
   describe("Paused", () => {

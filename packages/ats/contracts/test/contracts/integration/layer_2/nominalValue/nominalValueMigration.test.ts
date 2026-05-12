@@ -81,7 +81,7 @@ describe("NominalValue Migration Tests", () => {
     it("GIVEN a bond with initialized nominalValue WHEN legacy bond storage is checked THEN deprecated fields are cleared", async () => {
       const [legacyValue, legacyDecimals] = await migrationFacet.getLegacyBondNominalValue();
 
-      // After initialize_NominalValue (called by factory), deprecated fields should be cleared
+      // After initializeNominalValue (called by factory), deprecated fields should be cleared
       expect(legacyValue).to.equal(0);
       expect(legacyDecimals).to.equal(0);
     });
@@ -158,7 +158,7 @@ describe("NominalValue Migration Tests", () => {
     it("GIVEN an equity with initialized nominalValue WHEN legacy equity storage is checked THEN deprecated fields are cleared", async () => {
       const [legacyValue, legacyDecimals] = await migrationFacet.getLegacyEquityNominalValue();
 
-      // After initialize_NominalValue (called by factory), deprecated fields should be cleared
+      // After initializeNominalValue (called by factory), deprecated fields should be cleared
       expect(legacyValue).to.equal(0);
       expect(legacyDecimals).to.equal(0);
     });
@@ -274,15 +274,15 @@ describe("NominalValue Migration Tests", () => {
       await loadFixture(deployBondWithMigrationFacet);
     });
 
-    it("GIVEN an already initialized nominalValue WHEN initialize_NominalValue is called THEN reverts with AlreadyInitialized", async () => {
-      await expect(asset.initialize_NominalValue(200, 4)).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+    it("GIVEN an already initialized nominalValue WHEN initializeNominalValue is called THEN reverts with FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeNominalValue(200, 4)).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
     });
 
     it("GIVEN an uninitialized nominalValue WHEN setNominalValue is called THEN it initializes and sets value", async () => {
       // Reset initialized flag to simulate a legacy token
       await migrationFacet.resetNominalValueInitialized();
 
-      // setNominalValue should trigger _initialize_NominalValue internally
+      // setNominalValue should trigger _initializeNominalValue internally
       await asset.connect(signer_A).setNominalValue(600, 5);
 
       expect(await asset.getNominalValue()).to.equal(600);

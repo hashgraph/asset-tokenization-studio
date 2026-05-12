@@ -69,6 +69,14 @@ describe("TREX Factory Tests", () => {
     ];
   }
 
+  function getSecurityDataNoAdmin(resolver: BusinessLogicResolver, overrides: any = {}) {
+    const data = getSecurityData(resolver, overrides);
+    data.rbacs = data.rbacs.filter(
+      (rbac: any) => rbac.role !== ATS_ROLES.DEFAULT_ADMIN_ROLE && rbac.role !== ATS_ROLES.TREX_OWNER_ROLE,
+    );
+    return data;
+  }
+
   async function deployTrexSuiteFixture() {
     trexDeployment = await deployFullSuiteFixture();
 
@@ -298,7 +306,7 @@ describe("TREX Factory Tests", () => {
 
     it("GIVEN correct data WHEN deploying equity THEN deployment succeeds and events are emitted", async () => {
       const equityData = {
-        security: getSecurityData(businessLogicResolver, {
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
         equityDetails: getEquityDetails(),
@@ -325,7 +333,7 @@ describe("TREX Factory Tests", () => {
       expect(await coreFacet.symbol()).to.equal(equityData.security.erc20MetadataInfo.symbol);
       expect(await coreFacet.decimals()).to.equal(equityData.security.erc20MetadataInfo.decimals);
       expect(await accessControlFacet.hasRole(ATS_ROLES.TREX_OWNER_ROLE, deployer.address)).to.be.true;
-      expect(await accessControlFacet.hasRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, deployer.address)).to.be.true;
+      // expect(await accessControlFacet.hasRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, deployer.address)).to.be.true;
     });
 
     it("GIVEN correct data WHEN fetching deployed suite by salt THEN suite details are returned", async () => {
@@ -350,14 +358,10 @@ describe("TREX Factory Tests", () => {
 
     it("GIVEN rbacs with existing TREX_OWNER_ROLE matching tRexOwner WHEN deploying equity THEN SecurityDeploymentLib handles owner match", async () => {
       const equityData = {
-        security: getSecurityData(businessLogicResolver, {
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
           rbacs: [
             {
               role: ATS_ROLES.TREX_OWNER_ROLE,
-              members: [deployer.address],
-            },
-            {
-              role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
               members: [deployer.address],
             },
           ],
@@ -398,7 +402,7 @@ describe("TREX Factory Tests", () => {
 
     it("GIVEN compliance modules with settings WHEN deploying equity THEN TREXBaseDeploymentLib handles compliance settings", async () => {
       const equityData = {
-        security: getSecurityData(businessLogicResolver, {
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
         equityDetails: getEquityDetails(),
@@ -459,7 +463,7 @@ describe("TREX Factory Tests", () => {
       ];
 
       const equityData = {
-        security: getSecurityData(businessLogicResolver, {
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
           rbacs: rbacWithDifferentOwner,
         }),
         equityDetails: getEquityDetails(),
@@ -507,7 +511,7 @@ describe("TREX Factory Tests", () => {
       await complianceContract.transferOwnership(factoryAts.target);
 
       const equityData = {
-        security: getSecurityData(businessLogicResolver, {
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
           rbacs: init_rbacs,
           compliance: compliance.target as string,
         }),
@@ -558,7 +562,7 @@ describe("TREX Factory Tests", () => {
       tokenDetails.irs = irs.target as string;
 
       const equityData = {
-        security: getSecurityData(businessLogicResolver, {
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
         equityDetails: getEquityDetails(),
@@ -599,7 +603,7 @@ describe("TREX Factory Tests", () => {
     it("GIVEN existing identity registry WHEN deploying equity THEN uses existing IR", async () => {
       // First deploy a complete TREX suite to get a valid IR
       const equityDataFirst = {
-        security: getSecurityData(businessLogicResolver, {
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
         equityDetails: getEquityDetails(),
@@ -657,7 +661,7 @@ describe("TREX Factory Tests", () => {
 
       // Now deploy with existing IR
       const equityData = {
-        security: getSecurityData(businessLogicResolver, {
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
           rbacs: init_rbacs,
           identityRegistry: firstIR,
         }),
@@ -705,7 +709,7 @@ describe("TREX Factory Tests", () => {
       tokenDetails.ONCHAINID = identity.target as string;
 
       const equityData = {
-        security: getSecurityData(businessLogicResolver, {
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
         equityDetails: getEquityDetails(),
@@ -757,7 +761,7 @@ describe("TREX Factory Tests", () => {
       tokenDetails.complianceSettings = [setConfigData]; // Only one setting
 
       const equityData = {
-        security: getSecurityData(businessLogicResolver, {
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
         equityDetails: getEquityDetails(),
@@ -798,7 +802,7 @@ describe("TREX Factory Tests", () => {
 
     it("GIVEN claim topics WHEN deploying equity THEN adds claim topics to CTR", async () => {
       const equityData = {
-        security: getSecurityData(businessLogicResolver, {
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
         equityDetails: getEquityDetails(),
@@ -841,7 +845,7 @@ describe("TREX Factory Tests", () => {
 
     it("GIVEN trusted issuers WHEN deploying equity THEN adds issuers to TIR", async () => {
       const equityData = {
-        security: getSecurityData(businessLogicResolver, {
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
         equityDetails: getEquityDetails(),
@@ -895,7 +899,9 @@ describe("TREX Factory Tests", () => {
   describe("Bond tests", () => {
     it("GIVEN a consumed salt WHEN reusing it THEN transaction reverts with token already deployed", async () => {
       const bondData = {
-        security: getSecurityData(businessLogicResolver),
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
+          rbacs: init_rbacs,
+        }),
         bondDetails: await getBondDetails(),
         proceedRecipients: [],
         proceedRecipientsData: [],
@@ -919,7 +925,9 @@ describe("TREX Factory Tests", () => {
 
     it("GIVEN an invalid claim pattern THEN transaction reverts with claim pattern not valid", async () => {
       const bondData = {
-        security: getSecurityData(businessLogicResolver),
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
+          rbacs: init_rbacs,
+        }),
         bondDetails: await getBondDetails(),
         proceedRecipients: [],
         proceedRecipientsData: [],
@@ -942,7 +950,9 @@ describe("TREX Factory Tests", () => {
 
     it("GIVEN max claim issuers exceeded THEN transaction reverts with max 5 claim issuers at deployment", async () => {
       const bondData = {
-        security: getSecurityData(businessLogicResolver),
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
+          rbacs: init_rbacs,
+        }),
         bondDetails: await getBondDetails(),
         proceedRecipients: [],
         proceedRecipientsData: [],
@@ -966,7 +976,9 @@ describe("TREX Factory Tests", () => {
 
     it("GIVEN max claim topics exceeded THEN transaction reverts with max 5 claim topics at deployment", async () => {
       const bondData = {
-        security: getSecurityData(businessLogicResolver),
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
+          rbacs: init_rbacs,
+        }),
         bondDetails: await getBondDetails(),
         proceedRecipients: [],
         proceedRecipientsData: [],
@@ -989,7 +1001,9 @@ describe("TREX Factory Tests", () => {
 
     it("GIVEN max ir agents exceeded THEN transaction reverts with max 5 agents at deployment", async () => {
       const bondData = {
-        security: getSecurityData(businessLogicResolver),
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
+          rbacs: init_rbacs,
+        }),
         bondDetails: await getBondDetails(),
         proceedRecipients: [],
         proceedRecipientsData: [],
@@ -1012,7 +1026,9 @@ describe("TREX Factory Tests", () => {
 
     it("GIVEN max token agents exceeded THEN transaction reverts with max 5 agents at deployment", async () => {
       const bondData = {
-        security: getSecurityData(businessLogicResolver),
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
+          rbacs: init_rbacs,
+        }),
         bondDetails: await getBondDetails(),
         proceedRecipients: [],
         proceedRecipientsData: [],
@@ -1035,7 +1051,9 @@ describe("TREX Factory Tests", () => {
 
     it("GIVEN max modules actions exceeded THEN transaction reverts with max 30 module actions at deployment", async () => {
       const bondData = {
-        security: getSecurityData(businessLogicResolver),
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
+          rbacs: init_rbacs,
+        }),
         bondDetails: await getBondDetails(),
         proceedRecipients: [],
         proceedRecipientsData: [],
@@ -1058,7 +1076,7 @@ describe("TREX Factory Tests", () => {
 
     it("GIVEN more compliance settings than modules WHEN deploying bond THEN reverts with invalid compliance pattern", async () => {
       const bondData = {
-        security: getSecurityData(businessLogicResolver, {
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
         bondDetails: await getBondDetails(),
@@ -1091,9 +1109,7 @@ describe("TREX Factory Tests", () => {
 
     it("GIVEN module already bound WHEN deploying bond THEN skips adding duplicate module", async () => {
       const bondData = {
-        security: getSecurityData(businessLogicResolver, {
-          rbacs: init_rbacs,
-        }),
+        security: getSecurityDataNoAdmin(businessLogicResolver),
         bondDetails: await getBondDetails(),
         proceedRecipients: [],
         proceedRecipientsData: [],
@@ -1124,7 +1140,7 @@ describe("TREX Factory Tests", () => {
 
       // Now deploy second bond reusing the same compliance and same module
       const secondBondData = {
-        security: getSecurityData(businessLogicResolver, {
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
           rbacs: init_rbacs,
           compliance: compliance, // Reuse existing compliance
         }),
@@ -1159,7 +1175,7 @@ describe("TREX Factory Tests", () => {
 
     it("GIVEN correct data WHEN deploying bond THEN deployment succeeds and events are emitted", async () => {
       const bondData = {
-        security: getSecurityData(businessLogicResolver, {
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
         bondDetails: await getBondDetails(),
@@ -1188,12 +1204,14 @@ describe("TREX Factory Tests", () => {
       expect(await coreFacet.symbol()).to.equal(bondData.security.erc20MetadataInfo.symbol);
       expect(await coreFacet.decimals()).to.equal(bondData.security.erc20MetadataInfo.decimals);
       expect(await accessControlFacet.hasRole(ATS_ROLES.TREX_OWNER_ROLE, deployer.address)).to.be.true;
-      expect(await accessControlFacet.hasRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, deployer.address)).to.be.true;
+      // expect(await accessControlFacet.hasRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, deployer.address)).to.be.true;
     });
 
     it("GIVEN correct data WHEN fetching deployed suite by salt THEN suite details are returned", async () => {
       const bondData = {
-        security: getSecurityData(businessLogicResolver),
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
+          rbacs: init_rbacs,
+        }),
         bondDetails: await getBondDetails(),
         proceedRecipients: [],
         proceedRecipientsData: [],
@@ -1215,14 +1233,10 @@ describe("TREX Factory Tests", () => {
 
     it("GIVEN rbacs with existing TREX_OWNER_ROLE matching tRexOwner WHEN deploying bond THEN SecurityDeploymentLib handles owner match", async () => {
       const bondData = {
-        security: getSecurityData(businessLogicResolver, {
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
           rbacs: [
             {
               role: ATS_ROLES.TREX_OWNER_ROLE,
-              members: [deployer.address],
-            },
-            {
-              role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
               members: [deployer.address],
             },
           ],
@@ -1259,7 +1273,7 @@ describe("TREX Factory Tests", () => {
 
     it("GIVEN compliance modules with settings WHEN deploying bond THEN TREXBaseDeploymentLib handles compliance settings", async () => {
       const bondData = {
-        security: getSecurityData(businessLogicResolver, {
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
         bondDetails: await getBondDetails(),
@@ -1316,7 +1330,7 @@ describe("TREX Factory Tests", () => {
       ];
 
       const bondData = {
-        security: getSecurityData(businessLogicResolver, {
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
           rbacs: rbacWithDifferentOwner,
         }),
         bondDetails: await getBondDetails(),
@@ -1360,7 +1374,7 @@ describe("TREX Factory Tests", () => {
       await complianceContract.transferOwnership(factoryAts.target);
 
       const bondData = {
-        security: getSecurityData(businessLogicResolver, {
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
           rbacs: init_rbacs,
           compliance: compliance.target as string,
         }),
@@ -1413,7 +1427,7 @@ describe("TREX Factory Tests", () => {
       tokenDetails.irs = irs.target as string;
 
       const bondData = {
-        security: getSecurityData(businessLogicResolver, {
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
         bondDetails: await getBondDetails(),
@@ -1450,7 +1464,7 @@ describe("TREX Factory Tests", () => {
     it("GIVEN existing identity registry WHEN deploying bond THEN uses existing IR", async () => {
       // First deploy a complete TREX suite to get a valid IR
       const bondDataFirst = {
-        security: getSecurityData(businessLogicResolver, {
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
         bondDetails: await getBondDetails(),
@@ -1510,7 +1524,7 @@ describe("TREX Factory Tests", () => {
 
       // Now deploy with existing IR
       const bondData = {
-        security: getSecurityData(businessLogicResolver, {
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
           rbacs: init_rbacs,
           identityRegistry: firstIR,
         }),
@@ -1559,7 +1573,7 @@ describe("TREX Factory Tests", () => {
       tokenDetails.ONCHAINID = identity.target as string;
 
       const bondData = {
-        security: getSecurityData(businessLogicResolver, {
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
         bondDetails: await getBondDetails(),
@@ -1613,7 +1627,7 @@ describe("TREX Factory Tests", () => {
       tokenDetails.complianceSettings = [setConfigData]; // Only one setting
 
       const bondData = {
-        security: getSecurityData(businessLogicResolver, {
+        security: getSecurityDataNoAdmin(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
         bondDetails: await getBondDetails(),

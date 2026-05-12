@@ -76,7 +76,7 @@ describe("LoansPortfolio Token Tests", () => {
     await loadFixture(deployLoansPortfolioFixture);
   });
 
-  describe("_initialize_LoansPortfolio", () => {
+  describe("_initializeLoansPortfolio", () => {
     it("GIVEN a deployed portfolio WHEN initializing THEN state is set correctly", async () => {
       const data = await asset.getLoansPortfolioData();
 
@@ -84,7 +84,7 @@ describe("LoansPortfolio Token Tests", () => {
       expect(data.distributionPolicy).to.equal(DEFAULT_LOANS_PORTFOLIO_PARAMS.distributionPolicy);
     });
 
-    it("GIVEN an already initialized portfolio WHEN initializing again THEN reverts with AlreadyInitialized", async () => {
+    it("GIVEN an already initialized portfolio WHEN initializing again THEN reverts with FacetAlreadyRegistered", async () => {
       const regulationData = getRegulationData();
 
       await expect(
@@ -100,7 +100,7 @@ describe("LoansPortfolio Token Tests", () => {
             info: regulationData.additionalSecurityData.info,
           },
         ),
-      ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+      ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
     });
   });
 

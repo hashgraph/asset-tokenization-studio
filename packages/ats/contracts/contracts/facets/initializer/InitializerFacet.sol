@@ -8,6 +8,12 @@ import { _INITIALIZER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title InitializerFacet
+ * @author Asset Tokenization Studio Team
+ * @notice Diamond facet exposing the initialisation lifecycle via static function selectors
+ *   for the five core IInitializer functions.
+ * @dev Registers the resolver key and function selectors required by the diamond's
+ *   static-selector routing.  `initializeFacet(bytes32)` was removed from this facet in
+ *   Phase 1 — stateless facets are auto-approved by `setOperationalStatus` (D1-A).
  */
 contract InitializerFacet is Initializer, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
@@ -17,9 +23,10 @@ contract InitializerFacet is Initializer, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 4;
+        uint256 selectorIndex = 5;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);
         unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this.initializeInitializer.selector;
             staticFunctionSelectors_[--selectorIndex] = this.setOperationalStatus.selector;
             staticFunctionSelectors_[--selectorIndex] = this.getOperationalStatus.selector;
             staticFunctionSelectors_[--selectorIndex] = this.getFacetVersionStatus.selector;

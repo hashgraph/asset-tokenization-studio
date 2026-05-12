@@ -29,6 +29,19 @@ abstract contract Controller is IController, Modifiers {
     }
 
     /// @inheritdoc IController
+    function reinitializeController(
+        uint256[] calldata fromVersions
+    )
+        external
+        override
+        onlyFacetRegistered(_CONTROLLER_RESOLVER_KEY, fromVersions)
+        onlyFacetNotReady(_CONTROLLER_RESOLVER_KEY)
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        InitializerStorageWrapper.setFacetToReady(_CONTROLLER_RESOLVER_KEY);
+    }
+
+    /// @inheritdoc IController
     function controllerTransfer(
         address _from,
         address _to,

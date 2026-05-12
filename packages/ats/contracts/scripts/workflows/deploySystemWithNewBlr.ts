@@ -58,10 +58,12 @@ import {
   deployOrchestratorLibraries,
   hasOrchestratorLibraryAddresses,
   getFacetDefinition,
+  INITIALIZER_FACET_NAME,
 } from "@scripts/domain";
 import {
   BusinessLogicResolver__factory,
   IStaticFunctionSelectors__factory,
+  MockInitializableFacet__factory,
   ProxyAdmin__factory,
 } from "@contract-types";
 import { shouldFailAtStep, createTestFailureMessage } from "../infrastructure/testing/failureInjection";
@@ -356,8 +358,18 @@ export async function deploySystemWithNewBlr(
       // Create factories from registry
       // When useTimeTravel=true, deploy TimeTravel variant facets instead of production ones
       // Skip facets without factories (abstract contracts like LockFacet)
+      // When MockInitializableFacet is the configured initializer (T1.1 transition),
+      // replace InitializerFacet with the mock so test proxies expose initializeMockFacet.
+      const useMockInitializer = useTimeTravel && INITIALIZER_FACET_NAME !== "InitializerFacet";
+
       const facetFactories: Record<string, ContractFactory> = {};
       for (const facet of allFacets) {
+        // In mock-initializer mode, skip InitializerFacet — MockInitializableFacet takes its slot.
+        if (useMockInitializer && facet.name === "InitializerFacet") {
+          info(`   Skipping InitializerFacet (${INITIALIZER_FACET_NAME} takes its slot)`);
+          continue;
+        }
+
         // Select factory: TimeTravel variant when available and enabled, else production
         const selectedFactory = useTimeTravel && facet.timeTravelFactory ? facet.timeTravelFactory : facet.factory;
 
@@ -377,6 +389,10 @@ export async function deploySystemWithNewBlr(
         }
 
         facetFactories[contractName] = factory;
+      }
+
+      if (useMockInitializer && !checkpoint.steps.facets?.has(INITIALIZER_FACET_NAME)) {
+        facetFactories[INITIALIZER_FACET_NAME] = new MockInitializableFacet__factory(signer) as ContractFactory;
       }
 
       // Deploy remaining facets
@@ -470,7 +486,9 @@ export async function deploySystemWithNewBlr(
 
         // Strip "TimeTravel" suffix to get canonical name
         const baseName = facetName.replace(/TimeTravel$/, "");
-        const facetDef = getFacetDefinition(baseName);
+        // MockInitializableFacet is the test-mode variant of InitializerFacet — same resolver key
+        const lookupName = baseName === INITIALIZER_FACET_NAME ? "InitializerFacet" : baseName;
+        const facetDef = getFacetDefinition(lookupName);
 
         if (!facetDef?.resolverKey?.value) {
           throw new Error(`Facet ${baseName} not found in registry or missing resolver key`);

@@ -36,8 +36,8 @@ describe("Control List Tests", () => {
     await loadFixture(deployEquityWithControlListFixture);
   });
 
-  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-    await expect(asset.initializeControlList(true)).to.be.rejectedWith("AlreadyInitialized");
+  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with FacetAlreadyRegistered", async () => {
+    await expect(asset.initializeControlList(true)).to.be.rejectedWith("FacetAlreadyRegistered");
   });
 
   it("GIVEN an account without controlList role WHEN addToControlList THEN transaction fails with AccountHasNoRole", async () => {

@@ -40,8 +40,8 @@ describe("MintFacet Tests", () => {
       await loadFixture(deployMultiPartitionFixture);
     });
 
-    it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-      await expect(asset.initialize_ERC1594()).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+    it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeERC1594()).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
     });
 
     it("GIVEN multi-partition mode WHEN issue THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {

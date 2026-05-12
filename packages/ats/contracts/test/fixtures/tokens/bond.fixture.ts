@@ -8,6 +8,7 @@ import {
   KycFacet__factory,
   ControlListFacet__factory,
   IAsset__factory,
+  MockInitializableFacet__factory,
 } from "@contract-types";
 import { DeployBondFromFactoryParams, deployBondFromFactory } from "@scripts/domain";
 import { BondDetailsDataParams, FactoryRegulationDataParams } from "@scripts/domain";
@@ -105,6 +106,10 @@ export async function deployBondTokenFixture({
   const asset = IAsset__factory.connect(diamond.target as string, deployer);
 
   await accessControlFacet.grantRole(ATS_ROLES.NOMINAL_VALUE_ROLE, deployer.address);
+
+  const mockInitializableFacet = MockInitializableFacet__factory.connect(diamond.target as string, deployer);
+  await mockInitializableFacet.initializeMockFacet(Object.values(infrastructure.bondFacetKeys));
+  await mockInitializableFacet.setOperationalStatus();
 
   return {
     ...infrastructure,

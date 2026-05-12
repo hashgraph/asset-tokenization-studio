@@ -83,7 +83,7 @@ export async function deployBondKpiLinkedRateFromFactory(
     proceedRecipientsData,
   } = bondDataParams;
 
-  // Build RBAC array with admin
+  // Build RBAC array with admin and factory (temporary admin for initialization)
   const rbacs: Rbac[] = [
     {
       role: ATS_ROLES.DEFAULT_ADMIN_ROLE,

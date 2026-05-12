@@ -6,19 +6,43 @@ import { ISustainabilityPerformanceTargetRateTypes } from "./ISustainabilityPerf
 interface ISustainabilityPerformanceTargetRate is ISustainabilityPerformanceTargetRateTypes {
     // Structs, enums and errors are inherited from ISustainabilityPerformanceTargetRateErrors
 
-    event InterestRateUpdated(address indexed operator, InterestRate newInterestRate);
-    event ImpactDataUpdated(address indexed operator, ImpactData[] newImpactData, address[] projects);
+    event InterestRateUpdated(
+        address indexed operator,
+        ISustainabilityPerformanceTargetRateTypes.InterestRate newInterestRate
+    );
+    event ImpactDataUpdated(
+        address indexed operator,
+        ISustainabilityPerformanceTargetRateTypes.ImpactData[] newImpactData,
+        address[] projects
+    );
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_SustainabilityPerformanceTargetRate(
-        InterestRate calldata _interestRate,
-        ImpactData[] calldata _impactData,
+    function initializeSustainabilityPerformanceTargetRate(
+        ISustainabilityPerformanceTargetRateTypes.InterestRate calldata _interestRate,
+        ISustainabilityPerformanceTargetRateTypes.ImpactData[] calldata _impactData,
         address[] calldata _projects
     ) external;
 
-    function setInterestRate(InterestRate calldata _newInterestRate) external;
-    function setImpactData(ImpactData[] calldata _newImpactData, address[] calldata projects) external;
+    /**
+     * @notice Marks the SustainabilityPerformanceTargetRate facet as ready following a Diamond upgrade.
+     * @dev Called during upgrade re-initialisation. No storage migration is performed;
+     *      existing state carries over unchanged. Reverts if the facet was not previously
+     *      registered at one of the accepted config versions, or is already marked ready at
+     *      the current config version.
+     * @param fromVersions Accepted previous config versions for this upgrade path.
+     */
+    function reinitializeSustainabilityPerformanceTargetRate(uint256[] calldata fromVersions) external;
 
-    function getInterestRate() external view returns (InterestRate memory interestRate_);
-    function getImpactDataFor(address _project) external view returns (ImpactData memory impactData_);
+    function setInterestRate(ISustainabilityPerformanceTargetRateTypes.InterestRate calldata _newInterestRate) external;
+    function setImpactData(
+        ISustainabilityPerformanceTargetRateTypes.ImpactData[] calldata _newImpactData,
+        address[] calldata projects
+    ) external;
+
+    function getInterestRate()
+        external
+        view
+        returns (ISustainabilityPerformanceTargetRateTypes.InterestRate memory interestRate_);
+    function getImpactDataFor(
+        address _project
+    ) external view returns (ISustainabilityPerformanceTargetRateTypes.ImpactData memory impactData_);
 }

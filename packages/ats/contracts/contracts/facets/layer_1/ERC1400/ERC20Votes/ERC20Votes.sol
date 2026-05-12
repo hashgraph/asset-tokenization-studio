@@ -5,11 +5,29 @@ import { IERC20Votes } from "./IERC20Votes.sol";
 import { Checkpoints } from "../../../../infrastructure/utils/Checkpoints.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
 import { ERC20VotesStorageWrapper } from "../../../../domain/asset/ERC20VotesStorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../../../domain/core/InitializerStorageWrapper.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../../../constants/roles.sol";
+import { _ERC20VOTES_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 
 abstract contract ERC20Votes is IERC20Votes, Modifiers {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC20Votes(bool _activated) external override onlyNotERC20VotesInitialized {
+    function initializeERC20Votes(
+        bool _activated
+    ) external override onlyFacetNotRegistered(_ERC20VOTES_RESOLVER_KEY) onlyRole(DEFAULT_ADMIN_ROLE) {
         ERC20VotesStorageWrapper.initialize_ERC20Votes(_activated);
+        InitializerStorageWrapper.setFacetToReady(_ERC20VOTES_RESOLVER_KEY);
+    }
+
+    /// @inheritdoc IERC20Votes
+    function reinitializeERC20Votes(
+        uint256[] calldata fromVersions
+    )
+        external
+        override
+        onlyFacetRegistered(_ERC20VOTES_RESOLVER_KEY, fromVersions)
+        onlyFacetNotReady(_ERC20VOTES_RESOLVER_KEY)
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        InitializerStorageWrapper.setFacetToReady(_ERC20VOTES_RESOLVER_KEY);
     }
 
     function delegate(address _delegatee) external override onlyUnpaused {

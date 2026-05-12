@@ -27,6 +27,19 @@ abstract contract Core is ICore, Modifiers {
     }
 
     /// @inheritdoc ICore
+    function reinitializeCore(
+        uint256[] calldata fromVersions
+    )
+        external
+        override
+        onlyFacetRegistered(_CORE_RESOLVER_KEY, fromVersions)
+        onlyFacetNotReady(_CORE_RESOLVER_KEY)
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        InitializerStorageWrapper.setFacetToReady(_CORE_RESOLVER_KEY);
+    }
+
+    /// @inheritdoc ICore
     function setName(string calldata _name) external override onlyUnpaused onlyRole(TREX_OWNER_ROLE) onlyOperational {
         ERC3643StorageWrapper.setName(_name);
     }

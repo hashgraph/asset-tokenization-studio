@@ -399,8 +399,8 @@ describe("ExternalPause Tests", () => {
   });
 
   describe("Initialize Tests", () => {
-    it("GIVEN already initialized WHEN initializeExternalPauses is called again THEN it reverts with AlreadyInitialized", async () => {
-      await expect(asset.initializeExternalPauses([])).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+    it("GIVEN already initialized WHEN initializeExternalPauses is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeExternalPauses([])).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
     });
   });
 });

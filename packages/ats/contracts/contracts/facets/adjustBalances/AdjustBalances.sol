@@ -6,7 +6,6 @@ import { ADJUSTMENT_BALANCE_ROLE, CORPORATE_ACTION_ROLE } from "../../constants/
 import { BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE } from "../../constants/values.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { AdjustBalancesStorageWrapper } from "../../domain/asset/AdjustBalancesStorageWrapper.sol";
-import { CorporateActionsStorageWrapper } from "../../domain/core/CorporateActionsStorageWrapper.sol";
 import { EquityStorageWrapper } from "../../domain/asset/EquityStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";

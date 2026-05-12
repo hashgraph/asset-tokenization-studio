@@ -41,6 +41,16 @@ interface TRexICore {
     function initializeCore(ERC20Metadata calldata metadata) external;
 
     /**
+     * @notice Marks the Core facet as ready following a Diamond upgrade.
+     * @dev Called during upgrade re-initialisation. No storage migration is performed;
+     *      existing state carries over unchanged. Reverts if the facet was not previously
+     *      registered at one of the accepted config versions, or is already marked ready at
+     *      the current config version.
+     * @param fromVersions Accepted previous config versions for this upgrade path.
+     */
+    function reinitializeCore(uint256[] calldata fromVersions) external;
+
+    /**
      * @notice Updates the token name. Restricted to the TREX owner role.
      */
     function setName(string calldata _name) external;

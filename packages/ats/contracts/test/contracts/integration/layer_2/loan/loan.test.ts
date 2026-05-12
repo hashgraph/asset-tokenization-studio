@@ -174,7 +174,7 @@ describe("Loan Tests", () => {
     });
   });
 
-  describe("initialize_Loan validations", () => {
+  describe("initializeLoan validations", () => {
     const regulationData = {
       regulationType: 1,
       regulationSubType: 2,
@@ -191,11 +191,11 @@ describe("Loan Tests", () => {
       info: "Info",
       country: "US",
     };
-    it("GIVEN an initialized loan WHEN trying to initialize again THEN transaction fails with AlreadyInitialized", async () => {
+    it("GIVEN an initialized loan WHEN trying to initialize again THEN transaction fails with FacetAlreadyRegistered", async () => {
       const loanDetails = await getLoanDetails();
       await expect(
-        asset.connect(signer_A).initialize_Loan(loanDetails, regulationData, additionalSecurityData),
-      ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+        asset.connect(signer_A).initializeLoan(loanDetails, regulationData, additionalSecurityData),
+      ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
     });
 
     it("GIVEN startingDate is 0 WHEN deploying loan THEN transaction fails with WrongTimestamp", async () => {

@@ -12,8 +12,9 @@ contract KpiLinkedRateFacet is KpiLinkedRate, IStaticFunctionSelectors {
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
-        staticFunctionSelectors_[selectorIndex++] = this.initialize_KpiLinkedRate.selector;
+        staticFunctionSelectors_ = new bytes4[](6);
+        staticFunctionSelectors_[selectorIndex++] = this.initializeKpiLinkedRate.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.reinitializeKpiLinkedRate.selector;
         staticFunctionSelectors_[selectorIndex++] = this.setInterestRate.selector;
         staticFunctionSelectors_[selectorIndex++] = this.setImpactData.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getInterestRate.selector;

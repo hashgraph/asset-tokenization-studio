@@ -52,13 +52,13 @@ describe("Core Facet Tests", () => {
   });
 
   describe("initializeCore", () => {
-    it("GIVEN an initialized token WHEN initializeCore is called again THEN reverts with AlreadyInitialized", async () => {
+    it("GIVEN an initialized token WHEN initializeCore is called again THEN reverts with FacetAlreadyRegistered", async () => {
       await expect(
         asset.initializeCore({
           info: { name: "X", symbol: "Y", isin: "ES1234567890", decimals: 6 },
           securityType: SecurityType.BOND_VARIABLE_RATE,
         }),
-      ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+      ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
     });
   });
 

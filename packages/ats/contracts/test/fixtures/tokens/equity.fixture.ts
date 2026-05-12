@@ -23,6 +23,7 @@ import {
   KycFacet__factory,
   ControlListFacet__factory,
   IAsset__factory,
+  MockInitializableFacet__factory,
 } from "@contract-types";
 import { DividendRight, EquityDetailsDataParams, FactoryRegulationDataParams } from "@scripts/domain";
 import { getRegulationData, getSecurityData } from "./common.fixture";
@@ -108,6 +109,10 @@ export async function deployEquityTokenFixture({
   const asset = IAsset__factory.connect(diamond.target as string, deployer);
 
   await accessControlFacet.grantRole(ATS_ROLES.NOMINAL_VALUE_ROLE, deployer.address);
+
+  const mockInitializableFacet = MockInitializableFacet__factory.connect(diamond.target as string, deployer);
+  await mockInitializableFacet.initializeMockFacet(Object.values(infrastructure.equityFacetKeys));
+  await mockInitializableFacet.setOperationalStatus();
 
   return {
     ...infrastructure,

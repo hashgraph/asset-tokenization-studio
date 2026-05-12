@@ -56,6 +56,16 @@ interface IController is IERC3643Types {
     function initializeController(bool _isControllable) external;
 
     /**
+     * @notice Marks the Controller facet as ready following a Diamond upgrade.
+     * @dev Called during upgrade re-initialisation. No storage migration is performed;
+     *      existing state carries over unchanged. Reverts if the facet was not previously
+     *      registered at one of the accepted config versions, or is already marked ready at
+     *      the current config version.
+     * @param fromVersions Accepted previous config versions for this upgrade path.
+     */
+    function reinitializeController(uint256[] calldata fromVersions) external;
+
+    /**
      * @notice This function allows an authorised address to transfer tokens between any two token holders.
      * @dev This function can only be executed by the `controller` or `agent` address.
      * @param _from Address The address which you want to send tokens from

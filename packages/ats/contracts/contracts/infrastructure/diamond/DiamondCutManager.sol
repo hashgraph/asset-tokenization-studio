@@ -5,14 +5,27 @@ import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { Pause } from "../../facets/pause/Pause.sol";
 import { AccessControl } from "../../facets/accessControl/AccessControl.sol";
 import { DiamondCutManagerWrapper } from "./DiamondCutManagerWrapper.sol";
+import { IDiamondCutManager } from "./IDiamondCutManager.sol";
 import { IDiamondLoupe } from "../proxy/IDiamondLoupe.sol";
 
+/**
+ * @title DiamondCutManager
+ * @author Asset Tokenization Studio Team
+ * @notice Abstract contract implementing the IDiamondCutManager interface with access control
+ *   and pause protection.
+ * @dev All configuration management functions require DEFAULT_ADMIN_ROLE and the contract
+ *   must be unpaused.  Delegates storage reads and writes to DiamondCutManagerWrapper,
+ *   keeping this contract focused on access control and event emission.
+ */
 abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWrapper {
+    /// @notice Reverts when bytes32(0) is used as a configuration identifier.
+    /// @param _configurationId Configuration identifier to validate.
     modifier validateConfigurationId(bytes32 _configurationId) {
         _checkConfigurationId(_configurationId);
         _;
     }
 
+    /// @inheritdoc IDiamondCutManager
     function createConfiguration(
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations
@@ -24,6 +37,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         );
     }
 
+    /// @inheritdoc IDiamondCutManager
     function createBatchConfiguration(
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations,
@@ -37,6 +51,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         );
     }
 
+    /// @inheritdoc IDiamondCutManager
     function cancelBatchConfiguration(
         bytes32 _configurationId
     ) external override validateConfigurationId(_configurationId) onlyRole(DEFAULT_ADMIN_ROLE) onlyUnpaused {
@@ -44,6 +59,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         emit DiamondBatchConfigurationCanceled(_configurationId);
     }
 
+    /// @inheritdoc IDiamondCutManager
     function resolveResolverProxyCall(
         bytes32 _configurationId,
         uint256 _version,
@@ -52,6 +68,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         facetAddress_ = _resolveResolverProxyCall(_diamondCutManagerStorage(), _configurationId, _version, _selector);
     }
 
+    /// @inheritdoc IDiamondCutManager
     function resolveSupportsInterface(
         bytes32 _configurationId,
         uint256 _version,
@@ -60,6 +77,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         exists_ = _resolveSupportsInterface(_diamondCutManagerStorage(), _configurationId, _version, _interfaceId);
     }
 
+    /// @inheritdoc IDiamondCutManager
     function isResolverProxyConfigurationRegistered(
         bytes32 _configurationId,
         uint256 _version
@@ -71,6 +89,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         );
     }
 
+    /// @inheritdoc IDiamondCutManager
     function checkResolverProxyConfigurationRegistered(
         bytes32 _configurationId,
         uint256 _version
@@ -78,10 +97,12 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         _checkResolverProxyConfigurationRegistered(_diamondCutManagerStorage(), _configurationId, _version);
     }
 
+    /// @inheritdoc IDiamondCutManager
     function getConfigurationsLength() external view override returns (uint256 configurationsLength_) {
         configurationsLength_ = _diamondCutManagerStorage().configurations.length;
     }
 
+    /// @inheritdoc IDiamondCutManager
     function getConfigurations(
         uint256 _pageIndex,
         uint256 _pageLength
@@ -89,12 +110,14 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         configurationIds_ = _getConfigurations(_diamondCutManagerStorage(), _pageIndex, _pageLength);
     }
 
+    /// @inheritdoc IDiamondCutManager
     function getLatestVersionByConfiguration(
         bytes32 _configurationId
     ) external view override returns (uint256 latestVersion_) {
         latestVersion_ = _diamondCutManagerStorage().latestVersion[_configurationId];
     }
 
+    /// @inheritdoc IDiamondCutManager
     function getFacetsLengthByConfigurationIdAndVersion(
         bytes32 _configurationId,
         uint256 _version
@@ -106,6 +129,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         );
     }
 
+    /// @inheritdoc IDiamondCutManager
     function getFacetsByConfigurationIdAndVersion(
         bytes32 _configurationId,
         uint256 _version,
@@ -121,6 +145,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         );
     }
 
+    /// @inheritdoc IDiamondCutManager
     function getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(
         bytes32 _configurationId,
         uint256 _version,
@@ -134,6 +159,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         );
     }
 
+    /// @inheritdoc IDiamondCutManager
     function getFacetSelectorsByConfigurationIdVersionAndFacetId(
         bytes32 _configurationId,
         uint256 _version,
@@ -151,6 +177,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         );
     }
 
+    /// @inheritdoc IDiamondCutManager
     function getFacetIdsByConfigurationIdAndVersion(
         bytes32 _configurationId,
         uint256 _version,
@@ -166,6 +193,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         );
     }
 
+    /// @inheritdoc IDiamondCutManager
     function getFacetConfigurationsByConfigurationIdAndVersion(
         bytes32 _configurationId,
         uint256 _version,
@@ -181,6 +209,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         );
     }
 
+    /// @inheritdoc IDiamondCutManager
     function getFacetAddressesByConfigurationIdAndVersion(
         bytes32 _configurationId,
         uint256 _version,
@@ -196,6 +225,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         );
     }
 
+    /// @inheritdoc IDiamondCutManager
     function getFacetIdByConfigurationIdVersionAndSelector(
         bytes32 _configurationId,
         uint256 _version,
@@ -209,6 +239,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         );
     }
 
+    /// @inheritdoc IDiamondCutManager
     function getFacetByConfigurationIdVersionAndFacetId(
         bytes32 _configurationId,
         uint256 _version,
@@ -222,6 +253,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         );
     }
 
+    /// @inheritdoc IDiamondCutManager
     function getFacetAddressByConfigurationIdVersionAndFacetId(
         bytes32 _configurationId,
         uint256 _version,
@@ -235,6 +267,7 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         );
     }
 
+    /// @inheritdoc IDiamondCutManager
     function getFacetVersionByConfigurationIdVersionAndFacetId(
         bytes32 _configurationId,
         uint256 _version,
@@ -248,6 +281,9 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         );
     }
 
+    /// @notice Reverts when the configuration identifier is bytes32(0).
+    /// @dev bytes32(0) is reserved and must not be used as a configuration key.
+    /// @param _configurationId Configuration identifier to validate.
     function _checkConfigurationId(bytes32 _configurationId) private pure {
         if (uint256(_configurationId) == 0) {
             revert DefaultValueForConfigurationIdNotPermitted();

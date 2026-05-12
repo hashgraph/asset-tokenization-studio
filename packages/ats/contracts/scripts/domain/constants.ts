@@ -352,3 +352,14 @@ export const CURRENCIES = {
 } as const;
 
 export const FACET_REGISTRATION_BATCH_SIZE = 20;
+
+/**
+ * Facet name used for the initializer facet in configurations.
+ *
+ * Switch to "InitializerFacet" when T1.1 is complete (all facets have initialize*()).
+ * Until then, the Mock variant is required because tests need initializeMockFacet()
+ * to bulk-mark facets that lack their own initialize*().
+ *
+ * @see CHANGES_ANALYSIS.md for migration plan
+ */
+export const INITIALIZER_FACET_NAME = "MockInitializableFacet";

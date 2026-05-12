@@ -7,6 +7,8 @@ import { TRexIAccessControl } from "../../interfaces/IRexIAccessControl.sol";
 import "@onchain-id/solidity/contracts/factory/IIdFactory.sol";
 import { TREXFactoryAts } from "../../TREXFactory.sol";
 import { TREX_OWNER_ROLE, DEFAULT_ADMIN_ROLE } from "../../interfaces/roles.sol";
+import { IInitializer } from "../../../../facets/initializer/IInitializer.sol";
+import { IResolverProxy } from "../../../../infrastructure/proxy/IResolverProxy.sol";
 
 // solhint-disable custom-errors
 library TREXBaseDeploymentLib {
@@ -90,6 +92,7 @@ library TREXBaseDeploymentLib {
         for (uint256 i = 0; i < (_claimDetails.issuers).length; i++) {
             tir.addTrustedIssuer(IClaimIssuer((_claimDetails).issuers[i]), _claimDetails.issuerClaims[i]);
         }
+        IInitializer(address(_token)).setOperationalStatus();
         AgentRole(_identityRegistry).addAgent(address(_token));
         for (uint256 i = 0; i < (_tokenDetails.irAgents).length; i++) {
             AgentRole(_identityRegistry).addAgent(_tokenDetails.irAgents[i]);
@@ -109,6 +112,7 @@ library TREXBaseDeploymentLib {
         // Equivalent to transfer ownership of the token to the new owner
         TRexIAccessControl(address(_token)).renounceRole(TREX_OWNER_ROLE);
         TRexIAccessControl(address(_token)).renounceRole(DEFAULT_ADMIN_ROLE);
+
         (Ownable(_identityRegistry)).transferOwnership(_tokenDetails.owner);
         (Ownable(address(tir))).transferOwnership(_tokenDetails.owner);
         (Ownable(address(ctr))).transferOwnership(_tokenDetails.owner);

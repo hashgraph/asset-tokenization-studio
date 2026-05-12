@@ -67,6 +67,16 @@ interface IExternalKycListManagement {
     function initializeExternalKycLists(address[] calldata _kycLists) external;
 
     /**
+     * @notice Marks the ExternalKycListManagement facet as ready following a Diamond upgrade.
+     * @dev Called during upgrade re-initialisation. No storage migration is performed;
+     *      existing state carries over unchanged. Reverts if the facet was not previously
+     *      registered at one of the accepted config versions, or is already marked ready at
+     *      the current config version.
+     * @param fromVersions Accepted previous config versions for this upgrade path.
+     */
+    function reinitializeExternalKycLists(uint256[] calldata fromVersions) external;
+
+    /**
      * @notice Adds or removes multiple external KYC list contracts in a single transaction.
      * @dev Requires `KYC_MANAGER_ROLE` and the token to be unpaused. Both arrays must have the
      *      same length and contain no duplicate addresses, validated by

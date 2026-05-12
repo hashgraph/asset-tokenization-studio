@@ -9,6 +9,15 @@ interface IERC3643Management is IERC3643Types {
      *
      * Sets the compliance contract address
      */
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC3643(address _compliance, address _identityRegistry) external;
+    function initializeERC3643(address _compliance, address _identityRegistry) external;
+
+    /**
+     * @notice Marks the ERC3643Management facet as ready following a Diamond upgrade.
+     * @dev Called during upgrade re-initialisation. No storage migration is performed;
+     *      existing state carries over unchanged. Reverts if the facet was not previously
+     *      registered at one of the accepted config versions, or is already marked ready at
+     *      the current config version.
+     * @param fromVersions Accepted previous config versions for this upgrade path.
+     */
+    function reinitializeERC3643(uint256[] calldata fromVersions) external;
 }

@@ -4,7 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IClearingHoldByPartition } from "./IClearingHoldByPartition.sol";
 import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
-import { ProtectedPartitionsStorageWrapper } from "../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ClearingOps } from "../../domain/orchestrator/ClearingOps.sol";
 import { ClearingReadOps } from "../../domain/orchestrator/ClearingReadOps.sol";
 import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";

@@ -12,7 +12,7 @@ import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { IProtectedPartitions } from "../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 
-/// @title TokenCoreOps - Orchestrator for core token operations
+/// @title TokenCoreOps - ALl operations with balance adjustment for token operations
 /// @notice Deployed once as a separate contract. Facets call via DELEGATECALL.
 /// @dev Contains balance operations for ClearingOps to avoid inlining.
 library TokenCoreOps {
@@ -157,7 +157,6 @@ library TokenCoreOps {
     }
 
     // Internal functions (inlined into calling StorageWrappers)
-
     function getTotalBalanceForAdjustedAt(
         address _tokenHolder,
         uint256 _timestamp

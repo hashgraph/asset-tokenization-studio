@@ -1,18 +1,36 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { KYC_ROLE, INTERNAL_KYC_MANAGER_ROLE } from "../../../constants/roles.sol";
+import { KYC_ROLE, INTERNAL_KYC_MANAGER_ROLE, DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
 import { IKyc } from "./IKyc.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { KycStorageWrapper } from "../../../domain/core/KycStorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
+import { _KYC_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract Kyc is IKyc, Modifiers {
-    function initializeInternalKyc(bool _internalKycActivated) external {
+    function initializeInternalKyc(
+        bool _internalKycActivated
+    ) external onlyFacetNotRegistered(_KYC_RESOLVER_KEY) onlyRole(DEFAULT_ADMIN_ROLE) {
         _checkNotInitialized(KycStorageWrapper.isKycInitialized());
         KycStorageWrapper.initializeInternalKyc(_internalKycActivated);
+        InitializerStorageWrapper.setFacetToReady(_KYC_RESOLVER_KEY);
+    }
+
+    /// @inheritdoc IKyc
+    function reinitializeInternalKyc(
+        uint256[] calldata fromVersions
+    )
+        external
+        override
+        onlyFacetRegistered(_KYC_RESOLVER_KEY, fromVersions)
+        onlyFacetNotReady(_KYC_RESOLVER_KEY)
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        InitializerStorageWrapper.setFacetToReady(_KYC_RESOLVER_KEY);
     }
 
     function activateInternalKyc() external onlyUnpaused onlyRole(INTERNAL_KYC_MANAGER_ROLE) returns (bool success_) {

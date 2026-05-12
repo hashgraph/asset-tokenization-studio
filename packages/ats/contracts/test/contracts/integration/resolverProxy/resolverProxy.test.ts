@@ -53,7 +53,7 @@ describe("ResolverProxy Tests", () => {
 
     const newResolver = deployedResolver.connect(signer_A) as BusinessLogicResolver;
 
-    await newResolver.initialize_BusinessLogicResolver();
+    await newResolver.initializeBusinessLogicResolver();
 
     return newResolver;
   }

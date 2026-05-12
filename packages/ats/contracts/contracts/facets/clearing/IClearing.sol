@@ -22,6 +22,16 @@ interface IClearing is IClearingTypes {
     function initializeClearing(bool _activateClearing) external;
 
     /**
+     * @notice Marks the Clearing facet as ready following a Diamond upgrade.
+     * @dev Called during upgrade re-initialisation. No storage migration is performed;
+     *      existing state carries over unchanged. Reverts if the facet was not previously
+     *      registered at one of the accepted config versions, or is already marked ready at
+     *      the current config version.
+     * @param fromVersions Accepted previous config versions for this upgrade path.
+     */
+    function reinitializeClearing(uint256[] calldata fromVersions) external;
+
+    /**
      * @notice Activates the clearing functionality
      * @return success_ True when the activation completes successfully
      */

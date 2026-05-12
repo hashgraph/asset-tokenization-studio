@@ -65,9 +65,9 @@ describe("Sustainability Performance Target Rate Tests", () => {
     await loadFixture(deploySecurityFixtureMultiPartition);
   });
 
-  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
+  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with FacetAlreadyRegistered", async () => {
     await expect(
-      sustainabilityPerformanceTargetRateFacet.initialize_SustainabilityPerformanceTargetRate(
+      sustainabilityPerformanceTargetRateFacet.initializeSustainabilityPerformanceTargetRate(
         {
           baseRate: 50,
           startPeriod: 1000,
@@ -84,7 +84,18 @@ describe("Sustainability Performance Target Rate Tests", () => {
         ],
         [project1],
       ),
-    ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+    ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+  });
+
+  describe("Reinitialize", () => {
+    it("GIVEN a new version WHEN reinitializeSustainabilityPerformanceTargetRate THEN transaction fails if not registered", async () => {
+      // 1. Reinitialize with invalid previous version should fail with FacetPreviousVersionNotAccepted
+      await expect(
+        sustainabilityPerformanceTargetRateFacet
+          .connect(signer_A)
+          .reinitializeSustainabilityPerformanceTargetRate([99]),
+      ).to.be.revertedWithCustomError(asset, "FacetPreviousVersionNotAccepted");
+    });
   });
 
   it("GIVEN mismatched array lengths WHEN initializing THEN transaction fails with ProvidedListsLengthMismatch", async () => {
@@ -129,7 +140,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
 
     // Try to initialize with mismatched arrays (2 impact data, 1 project)
     await expect(
-      uninitializedFacet.initialize_SustainabilityPerformanceTargetRate(
+      uninitializedFacet.initializeSustainabilityPerformanceTargetRate(
         {
           baseRate: 50,
           startPeriod: 1000,
