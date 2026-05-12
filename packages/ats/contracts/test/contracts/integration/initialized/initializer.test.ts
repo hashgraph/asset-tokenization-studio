@@ -50,6 +50,7 @@ describe("Initializer — InitializeMock domain", () => {
   let factory: IFactory;
   let blrAddress: string;
   let deployer: HardhatEthersSigner;
+  let unknownSigner: HardhatEthersSigner;
 
   // TEST-ONLY: facet handles bound to the freshly-deployed ResolverProxy.
   let mockFacet1: MockFacet1;
@@ -63,6 +64,7 @@ describe("Initializer — InitializeMock domain", () => {
     factory = base.factory;
     blrAddress = base.deployment.infrastructure.blr.proxy;
     deployer = base.deployer;
+    unknownSigner = base.unknownSigner;
   };
 
   // TEST-ONLY: shape used by `expectFacetStates` — operational status of the
@@ -138,6 +140,22 @@ describe("Initializer — InitializeMock domain", () => {
   describe("Mock asset at version 1", () => {
     beforeEach(async () => {
       await deployMockAsset(1);
+    });
+
+    it("GIVEN a freshly-deployed asset WHEN non admin updateMaxInitializerFacetIndex THEN reverts with AccountHasNoRole", async () => {
+      await expect(
+        initializerFacet.connect(unknownSigner).updateMaxInitializerFacetIndex(5),
+      ).to.be.revertedWithCustomError(initializerFacet, "AccountHasNoRole");
+    });
+
+    it("GIVEN a freshly-deployed asset WHEN admin updateMaxInitializerFacetIndex THEN succeeds", async () => {
+      const maxInitializerFacetIndex = 3;
+
+      expect(await initializerFacet.getMaxInitializerFacetIndex()).to.equal(0);
+
+      await expect(initializerFacet.updateMaxInitializerFacetIndex(maxInitializerFacetIndex))
+        .to.emit(initializerFacet, "MaxInitializerFacetIndexUpdated")
+        .withArgs(await deployer.getAddress(), maxInitializerFacetIndex);
     });
 
     it("GIVEN a freshly-deployed asset WHEN calling mockFacet1Method THEN reverts with AssetNotOperational AND every facet + operational status reads as 0", async () => {
@@ -260,7 +278,9 @@ describe("Initializer — InitializeMock domain", () => {
       await expect(mockDiamondCut.initializeDiamondCut()).to.not.be.reverted;
       await expect(initializerFacet.initializeInitializer(maxInitializerFacetIndex)).to.not.be.reverted;
 
-      await expect(initializerFacet.setOperationalStatus()).to.not.be.reverted;
+      await expect(initializerFacet.setOperationalStatus())
+        .to.emit(initializerFacet, "OperationalStatusPartialSet")
+        .withArgs(await deployer.getAddress(), INITIALIZE_MOCK_CONFIG_ID, 1, 3);
 
       expect(await initializerFacet.getMaxInitializerFacetIndex()).to.equal(maxInitializerFacetIndex);
 
@@ -282,7 +302,7 @@ describe("Initializer — InitializeMock domain", () => {
 
     it("GIVEN all initializers called once successfully AND setOperationalStatus called twice WHEN calling mockFacet1Method THEN succeeds", async () => {
       // TEST-ONLY: same max-initializer index as the previous test for consistency.
-      const maxInitializerFacetIndex = 3;
+      const maxInitializerFacetIndex = 4;
 
       await expect(mockFacet1.initializeMockFacet1()).to.not.be.reverted;
       await expect(mockFacet2.initializeMockFacet2()).to.not.be.reverted;
@@ -290,8 +310,12 @@ describe("Initializer — InitializeMock domain", () => {
       await expect(mockDiamondCut.initializeDiamondCut()).to.not.be.reverted;
       await expect(initializerFacet.initializeInitializer(maxInitializerFacetIndex)).to.not.be.reverted;
 
-      await expect(initializerFacet.setOperationalStatus()).to.not.be.reverted;
-      await expect(initializerFacet.setOperationalStatus()).to.not.be.reverted;
+      await expect(initializerFacet.setOperationalStatus())
+        .to.emit(initializerFacet, "OperationalStatusPartialSet")
+        .withArgs(await deployer.getAddress(), INITIALIZE_MOCK_CONFIG_ID, 1, 4);
+      await expect(initializerFacet.setOperationalStatus())
+        .to.emit(initializerFacet, "OperationalStatusSet")
+        .withArgs(await deployer.getAddress(), INITIALIZE_MOCK_CONFIG_ID, 1);
 
       let response = await mockFacet1.mockFacet1Method();
       expect(response).to.equal("MockFacet1 method called");
@@ -446,7 +470,9 @@ describe("Initializer — InitializeMock domain", () => {
       await expect(mockDiamondCut.initializeDiamondCut()).to.not.be.reverted;
       await expect(initializerFacet.initializeInitializer(maxInitializerFacetIndex)).to.not.be.reverted;
 
-      await expect(initializerFacet.setOperationalStatus()).to.not.be.reverted;
+      await expect(initializerFacet.setOperationalStatus())
+        .to.emit(initializerFacet, "OperationalStatusSet")
+        .withArgs(await deployer.getAddress(), INITIALIZE_MOCK_CONFIG_ID, 2);
 
       await expectFacetStates({
         configVersion: 2,
