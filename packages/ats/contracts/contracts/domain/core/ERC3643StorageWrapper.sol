@@ -5,6 +5,7 @@ import { _ERC3643_STORAGE_POSITION } from "../../constants/storagePositions.sol"
 import { AGENT_ROLE } from "../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
+import { IFreeze } from "../../facets/freeze/IFreeze.sol";
 import { IAccessControl } from "../../facets/accessControl/IAccessControl.sol";
 import { IIdentityRegistry } from "../../facets/layer_1/ERC3643/IIdentityRegistry.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
@@ -135,6 +136,8 @@ library ERC3643StorageWrapper {
     }
 
     function freezeTokensByPartition(bytes32 _partition, address _account, uint256 _amount) internal {
+        if (_amount == 0) revert IFreeze.InvalidFreezeAmount();
+
         ERC1410StorageWrapper.triggerAndSyncAll(_partition, _account, address(0));
         updateTotalFreeze(_partition, _account);
         SnapshotsStorageWrapper.updateAccountSnapshot(_account, _partition);

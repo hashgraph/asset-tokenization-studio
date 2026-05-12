@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-11T13:27:01.689Z
+ * Generated: 2026-05-12T08:27:08.486Z
  * Facets: 123
  * Infrastructure: 2
  *
@@ -965,6 +965,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x57fbc6f7",
       },
       {
+        name: "InvalidHoldAmount",
+        signature: { full: "error InvalidHoldAmount()", canonical: "InvalidHoldAmount()" },
+        selector: "0x352b484a",
+      },
+      {
         name: "InvalidPartition",
         signature: {
           full: "error InvalidPartition(address account, bytes32 partition)",
@@ -1482,6 +1487,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "InsufficientFrozenBalance(address,uint256,uint256,bytes32)",
         },
         selector: "0xefafde54",
+      },
+      {
+        name: "InvalidFreezeAmount",
+        signature: { full: "error InvalidFreezeAmount()", canonical: "InvalidFreezeAmount()" },
+        selector: "0xc5083c69",
       },
       {
         name: "InvalidPartition",
@@ -3828,6 +3838,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "InvalidDestinationAddress(address,address)",
         },
         selector: "0xdb0a3012",
+      },
+      {
+        name: "InvalidHoldAmount",
+        signature: { full: "error InvalidHoldAmount()", canonical: "InvalidHoldAmount()" },
+        selector: "0x352b484a",
       },
       {
         name: "InvalidPartition",
@@ -6759,6 +6774,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xefafde54",
       },
       {
+        name: "InvalidFreezeAmount",
+        signature: { full: "error InvalidFreezeAmount()", canonical: "InvalidFreezeAmount()" },
+        selector: "0xc5083c69",
+      },
+      {
         name: "InvalidPartition",
         signature: {
           full: "error InvalidPartition(address account, bytes32 partition)",
@@ -7134,6 +7154,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xdb0a3012",
       },
       {
+        name: "InvalidHoldAmount",
+        signature: { full: "error InvalidHoldAmount()", canonical: "InvalidHoldAmount()" },
+        selector: "0x352b484a",
+      },
+      {
         name: "InvalidPartition",
         signature: {
           full: "error InvalidPartition(address account, bytes32 partition)",
@@ -7327,6 +7352,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "InvalidDestinationAddress(address,address)",
         },
         selector: "0xdb0a3012",
+      },
+      {
+        name: "InvalidHoldAmount",
+        signature: { full: "error InvalidHoldAmount()", canonical: "InvalidHoldAmount()" },
+        selector: "0x352b484a",
       },
       {
         name: "IsNotEscrow",
@@ -7566,6 +7596,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "InvalidDestinationAddress(address,address)",
         },
         selector: "0xdb0a3012",
+      },
+      {
+        name: "InvalidHoldAmount",
+        signature: { full: "error InvalidHoldAmount()", canonical: "InvalidHoldAmount()" },
+        selector: "0x352b484a",
       },
       {
         name: "IsNotEscrow",
@@ -8637,6 +8672,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5d6824c4",
       },
       {
+        name: "InvalidLockAmount",
+        signature: { full: "error InvalidLockAmount()", canonical: "InvalidLockAmount()" },
+        selector: "0x409fef33",
+      },
+      {
         name: "InvalidPartition",
         signature: {
           full: "error InvalidPartition(address account, bytes32 partition)",
@@ -8852,6 +8892,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "InsufficientBalance(address,uint256,uint256,bytes32)",
         },
         selector: "0x5d6824c4",
+      },
+      {
+        name: "InvalidLockAmount",
+        signature: { full: "error InvalidLockAmount()", canonical: "InvalidLockAmount()" },
+        selector: "0x409fef33",
       },
       {
         name: "InvalidPartition",
@@ -10356,6 +10401,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xdb0a3012",
       },
       {
+        name: "InvalidHoldAmount",
+        signature: { full: "error InvalidHoldAmount()", canonical: "InvalidHoldAmount()" },
+        selector: "0x352b484a",
+      },
+      {
         name: "InvalidPartition",
         signature: {
           full: "error InvalidPartition(address account, bytes32 partition)",
@@ -11661,6 +11711,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xdb0a3012",
       },
       {
+        name: "InvalidHoldAmount",
+        signature: { full: "error InvalidHoldAmount()", canonical: "InvalidHoldAmount()" },
+        selector: "0x352b484a",
+      },
+      {
         name: "InvalidPartition",
         signature: {
           full: "error InvalidPartition(address account, bytes32 partition)",
@@ -12025,6 +12080,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "InsufficientFrozenBalance(address,uint256,uint256,bytes32)",
         },
         selector: "0xefafde54",
+      },
+      {
+        name: "InvalidFreezeAmount",
+        signature: { full: "error InvalidFreezeAmount()", canonical: "InvalidFreezeAmount()" },
+        selector: "0xc5083c69",
       },
       {
         name: "InvalidPartition",
@@ -12972,6 +13032,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5d6824c4",
       },
       {
+        name: "InvalidLockAmount",
+        signature: { full: "error InvalidLockAmount()", canonical: "InvalidLockAmount()" },
+        selector: "0x409fef33",
+      },
+      {
         name: "InvalidPartition",
         signature: {
           full: "error InvalidPartition(address account, bytes32 partition)",
@@ -13108,6 +13173,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5d6824c4",
       },
       {
+        name: "InvalidLockAmount",
+        signature: { full: "error InvalidLockAmount()", canonical: "InvalidLockAmount()" },
+        selector: "0x409fef33",
+      },
+      {
         name: "InvalidPartition",
         signature: {
           full: "error InvalidPartition(address account, bytes32 partition)",
@@ -13240,6 +13310,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "InsufficientBalance(address,uint256,uint256,bytes32)",
         },
         selector: "0x5d6824c4",
+      },
+      {
+        name: "InvalidLockAmount",
+        signature: { full: "error InvalidLockAmount()", canonical: "InvalidLockAmount()" },
+        selector: "0x409fef33",
       },
       {
         name: "InvalidPartition",
@@ -13376,6 +13451,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5d6824c4",
       },
       {
+        name: "InvalidLockAmount",
+        signature: { full: "error InvalidLockAmount()", canonical: "InvalidLockAmount()" },
+        selector: "0x409fef33",
+      },
+      {
         name: "InvalidPartition",
         signature: {
           full: "error InvalidPartition(address account, bytes32 partition)",
@@ -13508,6 +13588,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "InsufficientBalance(address,uint256,uint256,bytes32)",
         },
         selector: "0x5d6824c4",
+      },
+      {
+        name: "InvalidLockAmount",
+        signature: { full: "error InvalidLockAmount()", canonical: "InvalidLockAmount()" },
+        selector: "0x409fef33",
       },
       {
         name: "InvalidPartition",

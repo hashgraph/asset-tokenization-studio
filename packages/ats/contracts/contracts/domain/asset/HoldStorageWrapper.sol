@@ -52,6 +52,8 @@ library HoldStorageWrapper {
         bytes memory _operatorData,
         ThirdPartyType _thirdPartyType
     ) internal returns (bool success_, uint256 holdId_) {
+        checkNonZeroHoldAmount(_hold.amount);
+
         _prepareHoldCreation(_partition, _from);
 
         uint256 abaf = updateTotalHold(_partition, _from);
@@ -508,6 +510,15 @@ library HoldStorageWrapper {
 
     function isEscrow(IHoldTypes.Hold memory _hold, address _escrow) internal pure returns (bool) {
         return _escrow == _hold.escrow;
+    }
+
+    /**
+     * @notice Reverts with `InvalidHoldAmount` when `_amount` is zero.
+     * @dev Called at the start of `createHoldByPartition` and reused by `ClearingOps`
+     *      for clearing-hold creation, keeping the guard in a single place.
+     */
+    function checkNonZeroHoldAmount(uint256 _amount) internal pure {
+        if (_amount == 0) revert IHoldTypes.InvalidHoldAmount();
     }
 
     function checkHoldAmount(uint256 _amount, IHoldTypes.HoldData memory holdData) internal pure {

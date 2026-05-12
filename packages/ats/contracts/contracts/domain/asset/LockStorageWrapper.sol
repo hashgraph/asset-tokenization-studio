@@ -40,6 +40,8 @@ library LockStorageWrapper {
         uint256 expirationTimestamp,
         address operator
     ) internal returns (bool success_, uint256 lockId_) {
+        if (amount == 0) revert ILockTypes.InvalidLockAmount();
+
         _prepareLock(partition, tokenHolder);
 
         uint256 abaf = updateTotalLock(partition, tokenHolder);
