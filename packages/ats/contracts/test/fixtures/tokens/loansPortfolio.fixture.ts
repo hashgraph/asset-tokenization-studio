@@ -48,7 +48,7 @@ import {
 
 import { decodeEvent } from "@scripts/infrastructure";
 import { DeepPartial } from "@scripts";
-import { getRegulationData, getSecurityData } from "@test";
+import { getRegulationData, getSecurityData, TEST_NOMINAL_VALUES } from "@test";
 
 type LoansPortfolioDefaultParamsType = ILoansPortfolio.LoansPortfolioDetailsDataStruct & {
   nominalValue: bigint;
@@ -175,9 +175,11 @@ export async function deployLoansPortfolioTokenFixture({
   await externalKycListManagementFacet.initializeExternalKycLists([]);
   await erc20VotesFacet.initialize_ERC20Votes(false);
   await erc3643ManagementFacet.initialize_ERC3643(ZeroAddress, ZeroAddress);
-  await nominalValueFacet.initialize_NominalValue(
+  // Loan portfolios don't carry a per-token currency; pass bytes3(0).
+  await nominalValueFacet.initializeNominalValue(
     loanPortfolioDetails.nominalValue,
     loanPortfolioDetails.nominalValueDecimals,
+    TEST_NOMINAL_VALUES.CURRENCY_ZERO,
   );
   await loanPortfolioFacet.initializeLoansPortfolio(
     {

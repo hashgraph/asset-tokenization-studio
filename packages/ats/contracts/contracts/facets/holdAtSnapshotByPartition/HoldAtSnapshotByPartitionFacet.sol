@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IHoldAtSnapshotByPartition } from "./IHoldAtSnapshotByPartition.sol";
 import { HoldAtSnapshotByPartition } from "./HoldAtSnapshotByPartition.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { _HOLD_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -23,20 +24,12 @@ contract HoldAtSnapshotByPartitionFacet is HoldAtSnapshotByPartition, IStaticFun
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 1;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.heldBalanceOfAtSnapshotByPartition.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(this.heldBalanceOfAtSnapshotByPartition.selector);
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        uint256 selectorIndex = 1;
-        staticInterfaceIds_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticInterfaceIds_[--selectorIndex] = type(IHoldAtSnapshotByPartition).interfaceId;
-        }
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IHoldAtSnapshotByPartition).interfaceId);
     }
 }

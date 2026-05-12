@@ -6,6 +6,7 @@ import { Security } from "../../layer_2/security/Security.sol";
 import { IBondRead } from "../../layer_2/bond/IBondRead.sol";
 import { ISecurity } from "../../layer_2/security/ISecurity.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../../infrastructure/proxy/Bytes4Builder.sol";
 
 /**
  * @title BondUSAReadFacetBase
@@ -28,22 +29,15 @@ abstract contract BondUSAReadFacetBase is BondRead, IStaticFunctionSelectors, Se
     ///      block; the resulting array reads in declaration order (`getBondDetails`,
     ///      `getSecurityRegulationData`, `getSecurityHolders`, `getTotalSecurityHolders`).
     ///      All four concrete USA-bond read facets share this selector set.
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 2;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.getSecurityRegulationData.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getBondDetails.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(this.getBondDetails.selector, this.getSecurityRegulationData.selector);
     }
 
     /// @inheritdoc IStaticFunctionSelectors
     /// @dev Advertises both `IBondRead` (bond-specific reads) and `ISecurity` (USA
     ///      Reg-S/Reg-D holder bookkeeping) so EIP-165 probes for either interface succeed
     ///      against the diamond.
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](2);
-        staticInterfaceIds_[0] = type(IBondRead).interfaceId;
-        staticInterfaceIds_[1] = type(ISecurity).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IBondRead).interfaceId);
     }
 }

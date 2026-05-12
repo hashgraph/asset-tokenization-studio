@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IEquityUSA } from "./IEquityUSA.sol";
 import { _EQUITY_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../../infrastructure/proxy/Bytes4Builder.sol";
 import { IEquity } from "../../layer_2/equity/IEquity.sol";
 import { ISecurity } from "../../layer_2/security/ISecurity.sol";
 import { EquityUSA } from "./EquityUSA.sol";
@@ -13,19 +14,16 @@ contract EquityUSAFacet is EquityUSA, IStaticFunctionSelectors {
         staticResolverKey_ = _EQUITY_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](3);
-        staticFunctionSelectors_[selectorIndex++] = this._initialize_equityUSA.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getEquityDetails.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getSecurityRegulationData.selector;
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this._initialize_equityUSA.selector,
+                this.getEquityDetails.selector,
+                this.getSecurityRegulationData.selector
+            );
     }
 
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](3);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IEquity).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(ISecurity).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(IEquityUSA).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IEquity).interfaceId);
     }
 }

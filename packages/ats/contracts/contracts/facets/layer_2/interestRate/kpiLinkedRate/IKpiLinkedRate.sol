@@ -7,14 +7,11 @@ interface IKpiLinkedRate is IKpiLinkedRateErrors {
     event InterestRateUpdated(address indexed operator, InterestRate newInterestRate);
     event ImpactDataUpdated(address indexed operator, ImpactData newImpactData);
 
-    error InterestRateIsKpiLinked();
+    function initializeKpiLinkedRate(InterestRate calldata _interestRate, ImpactData calldata _impactData) external;
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_KpiLinkedRate(InterestRate calldata _interestRate, ImpactData calldata _impactData) external;
+    function setKpiLinkedRateInterestRate(InterestRate calldata _newInterestRate) external;
+    function setKpiLinkedRateImpactData(ImpactData calldata _newImpactData) external;
 
-    function setInterestRate(InterestRate calldata _newInterestRate) external;
-    function setImpactData(ImpactData calldata _newImpactData) external;
-
-    function getInterestRate() external view returns (InterestRate memory interestRate_);
-    function getImpactData() external view returns (ImpactData memory impactData_);
+    function getKpiLinkedRateInterestRate() external view returns (InterestRate memory interestRate_);
+    function getKpiLinkedRateImpactData() external view returns (ImpactData memory impactData_);
 }

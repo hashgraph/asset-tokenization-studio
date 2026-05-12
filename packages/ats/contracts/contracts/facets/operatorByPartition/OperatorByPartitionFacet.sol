@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IOperatorByPartition } from "./IOperatorByPartition.sol";
 import { OperatorByPartition } from "./OperatorByPartition.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { _OPERATOR_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -25,24 +26,19 @@ contract OperatorByPartitionFacet is OperatorByPartition, IStaticFunctionSelecto
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 5;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.operatorRedeemByPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.operatorTransferByPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.isOperatorForPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.revokeOperatorByPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.authorizeOperatorByPartition.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.authorizeOperatorByPartition.selector,
+                this.revokeOperatorByPartition.selector,
+                this.isOperatorForPartition.selector,
+                this.operatorTransferByPartition.selector,
+                this.operatorRedeemByPartition.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        uint256 selectorIndex = 1;
-        staticInterfaceIds_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticInterfaceIds_[--selectorIndex] = type(IOperatorByPartition).interfaceId;
-        }
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IOperatorByPartition).interfaceId);
     }
 }

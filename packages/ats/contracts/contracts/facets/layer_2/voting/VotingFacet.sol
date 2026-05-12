@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { Voting } from "./Voting.sol";
 import { IVoting } from "./IVoting.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../../infrastructure/proxy/Bytes4Builder.sol";
 import { _VOTING_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
 /// @title VotingFacet
@@ -15,21 +16,19 @@ contract VotingFacet is Voting, IStaticFunctionSelectors {
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 5;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.getVotingCount.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getVotingFor.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getVoting.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.cancelVoting.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.setVoting.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.setVoting.selector,
+                this.cancelVoting.selector,
+                this.getVoting.selector,
+                this.getVotingFor.selector,
+                this.getVotingCount.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(IVoting).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IVoting).interfaceId);
     }
 }

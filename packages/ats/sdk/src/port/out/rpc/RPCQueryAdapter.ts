@@ -29,7 +29,6 @@ import {
   MockedExternalPause__factory,
   MockedWhitelist__factory,
   TREXFactoryAts__factory,
-  KpiLinkedRate__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { ScheduledSnapshot } from "@domain/context/security/ScheduledSnapshot";
 import { VotingRights } from "@domain/context/equity/VotingRights";
@@ -1544,7 +1543,7 @@ export class RPCQueryAdapter {
     address: EvmAddress,
   ): Promise<[bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint]> {
     LogService.logTrace(`Getting interest rate for security: ${address.toString()}`);
-    const result = await this.connect(KpiLinkedRate__factory, address.toString()).getInterestRate();
+    const result = await this.connect(IAsset__factory, address.toString()).getKpiLinkedRateInterestRate();
     return [
       result.maxRate,
       result.baseRate,
@@ -1576,7 +1575,7 @@ export class RPCQueryAdapter {
 
   async getImpactData(address: EvmAddress): Promise<[bigint, bigint, bigint, number, bigint]> {
     LogService.logTrace(`Getting impact data for the security: ${address.toString()}`);
-    const result = await this.connect(KpiLinkedRate__factory, address.toString()).getImpactData();
+    const result = await this.connect(IAsset__factory, address.toString()).getKpiLinkedRateImpactData();
     return [
       result.maxDeviationCap,
       result.baseLine,
@@ -1618,6 +1617,12 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting nominal value decimals for security: ${address.toString()}`);
     const result = await this.connect(IAsset__factory, address.toString()).getNominalValueDecimals();
     return Number(result);
+  }
+
+  async getNominalValueCurrency(address: EvmAddress): Promise<string> {
+    LogService.logTrace(`Getting nominal value currency for security: ${address.toString()}`);
+    const result = await this.connect(IAsset__factory, address.toString()).getNominalValueCurrency();
+    return result;
   }
 
   async getAmortization(address: EvmAddress, amortizationId: number): Promise<RegisteredAmortization> {

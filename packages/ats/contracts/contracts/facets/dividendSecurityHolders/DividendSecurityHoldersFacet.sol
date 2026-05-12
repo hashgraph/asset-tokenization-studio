@@ -5,6 +5,7 @@ import { DividendSecurityHolders } from "./DividendSecurityHolders.sol";
 import { IDividendSecurityHolders } from "./IDividendSecurityHolders.sol";
 import { _DIVIDEND_SECURITY_HOLDERS_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 
 /**
  * @title DividendSecurityHoldersFacet
@@ -23,21 +24,12 @@ contract DividendSecurityHoldersFacet is DividendSecurityHolders, IStaticFunctio
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    /// @dev Selectors are written in reverse via `--selectorIndex` inside an `unchecked` block;
-    ///      the resulting array reads in declaration order (`getDividendHolders` first, then
-    ///      `getTotalDividendHolders`).
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 2;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.getTotalDividendHolders.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getDividendHolders.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(this.getDividendHolders.selector, this.getTotalDividendHolders.selector);
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(IDividendSecurityHolders).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IDividendSecurityHolders).interfaceId);
     }
 }

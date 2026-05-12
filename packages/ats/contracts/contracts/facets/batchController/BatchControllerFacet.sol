@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IBatchController } from "./IBatchController.sol";
 import { BatchController } from "./BatchController.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { _BATCH_CONTROLLER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -19,20 +20,12 @@ contract BatchControllerFacet is BatchController, IStaticFunctionSelectors {
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 1;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.batchForcedTransfer.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(this.batchForcedTransfer.selector);
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        uint256 selectorIndex = 1;
-        staticInterfaceIds_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticInterfaceIds_[--selectorIndex] = type(IBatchController).interfaceId;
-        }
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IBatchController).interfaceId);
     }
 }

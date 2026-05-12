@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IProceedRecipients } from "./IProceedRecipients.sol";
 import { ProceedRecipients } from "./ProceedRecipients.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../../infrastructure/proxy/Bytes4Builder.sol";
 import {
     _PROCEED_RECIPIENTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY
 } from "../../../constants/resolverKeys.sol";
@@ -30,22 +31,21 @@ contract ProceedRecipientsSustainabilityPerformanceTargetRateFacet is ProceedRec
         staticResolverKey_ = _PROCEED_RECIPIENTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](8);
-        staticFunctionSelectors_[selectorIndex++] = this.initialize_ProceedRecipients.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.addProceedRecipient.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.removeProceedRecipient.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.updateProceedRecipientData.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.isProceedRecipient.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getProceedRecipientData.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getProceedRecipientsCount.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getProceedRecipients.selector;
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.initialize_ProceedRecipients.selector,
+                this.addProceedRecipient.selector,
+                this.removeProceedRecipient.selector,
+                this.updateProceedRecipientData.selector,
+                this.isProceedRecipient.selector,
+                this.getProceedRecipientData.selector,
+                this.getProceedRecipientsCount.selector,
+                this.getProceedRecipients.selector
+            );
     }
 
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IProceedRecipients).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IProceedRecipients).interfaceId);
     }
 }
