@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { INominalValueAtSnapshot } from "./INominalValueAtSnapshot.sol";
 import { NominalValueAtSnapshot } from "./NominalValueAtSnapshot.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { _NOMINAL_VALUE_AT_SNAPSHOT_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -16,15 +17,12 @@ contract NominalValueAtSnapshotFacet is NominalValueAtSnapshot, IStaticFunctionS
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        staticFunctionSelectors_ = new bytes4[](2);
-        staticFunctionSelectors_[0] = this.nominalValueAtSnapshot.selector;
-        staticFunctionSelectors_[1] = this.nominalValueDecimalsAtSnapshot.selector;
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(this.nominalValueAtSnapshot.selector, this.nominalValueDecimalsAtSnapshot.selector);
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(INominalValueAtSnapshot).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(INominalValueAtSnapshot).interfaceId);
     }
 }

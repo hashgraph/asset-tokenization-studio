@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IKpiLinkedRate } from "./IKpiLinkedRate.sol";
 import { _KPI_LINKED_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../../../infrastructure/proxy/Bytes4Builder.sol";
 import { KpiLinkedRate } from "./KpiLinkedRate.sol";
 
 contract KpiLinkedRateFacet is KpiLinkedRate, IStaticFunctionSelectors {
@@ -10,19 +11,18 @@ contract KpiLinkedRateFacet is KpiLinkedRate, IStaticFunctionSelectors {
         staticResolverKey_ = _KPI_LINKED_RATE_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
-        staticFunctionSelectors_[selectorIndex++] = this.initialize_KpiLinkedRate.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.setInterestRate.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.setImpactData.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getInterestRate.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getImpactData.selector;
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.initialize_KpiLinkedRate.selector,
+                this.setInterestRate.selector,
+                this.setImpactData.selector,
+                this.getInterestRate.selector,
+                this.getImpactData.selector
+            );
     }
 
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IKpiLinkedRate).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IKpiLinkedRate).interfaceId);
     }
 }

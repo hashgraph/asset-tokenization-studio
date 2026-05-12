@@ -5,6 +5,7 @@ import { Coupon } from "./Coupon.sol";
 import { ICoupon } from "./ICoupon.sol";
 import { _COUPON_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 
 /**
  * @title CouponFacet
@@ -28,25 +29,20 @@ contract CouponFacet is Coupon, IStaticFunctionSelectors {
     ///      block; the resulting array reads in declaration order (`setCoupon`,
     ///      `cancelCoupon`, `getCoupon`, `getCouponFor`, `getCouponAmountFor`,
     ///      `getCouponCount`).
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 6;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.getCouponCount.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getCouponAmountFor.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getCouponFor.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getCoupon.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.cancelCoupon.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.setCoupon.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.setCoupon.selector,
+                this.cancelCoupon.selector,
+                this.getCoupon.selector,
+                this.getCouponFor.selector,
+                this.getCouponAmountFor.selector,
+                this.getCouponCount.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        uint256 selectorsIndex = 1;
-        staticInterfaceIds_ = new bytes4[](selectorsIndex);
-        unchecked {
-            staticInterfaceIds_[--selectorsIndex] = type(ICoupon).interfaceId;
-        }
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(ICoupon).interfaceId);
     }
 }

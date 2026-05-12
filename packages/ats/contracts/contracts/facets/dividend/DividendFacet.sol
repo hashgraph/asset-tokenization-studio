@@ -5,6 +5,7 @@ import { Dividend } from "./Dividend.sol";
 import { IDividend } from "./IDividend.sol";
 import { _DIVIDEND_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 
 /**
  * @title DividendFacet
@@ -25,25 +26,20 @@ contract DividendFacet is Dividend, IStaticFunctionSelectors {
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    /// @dev Selectors are written in reverse via `--selectorIndex` inside an `unchecked` block;
-    ///      the resulting array reads in declaration order (`setDividend`, `cancelDividend`,
-    ///      `getDividend`, `getDividendFor`, `getDividendAmountFor`, `getDividendsCount`).
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 6;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.getDividendsCount.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getDividendAmountFor.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getDividendFor.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getDividend.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.cancelDividend.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.setDividend.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.setDividend.selector,
+                this.cancelDividend.selector,
+                this.getDividend.selector,
+                this.getDividendFor.selector,
+                this.getDividendAmountFor.selector,
+                this.getDividendsCount.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(IDividend).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IDividend).interfaceId);
     }
 }

@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ISsiManagement } from "./ISsiManagement.sol";
 import { SsiManagement } from "./SsiManagement.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { _SSI_MANAGEMENT_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -22,22 +23,21 @@ contract SsiManagementFacet is SsiManagement, IStaticFunctionSelectors {
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](7);
-        staticFunctionSelectors_[selectorIndex++] = this.setRevocationRegistryAddress.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.addIssuer.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.removeIssuer.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.isIssuer.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getRevocationRegistryAddress.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getIssuerListCount.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getIssuerListMembers.selector;
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.setRevocationRegistryAddress.selector,
+                this.addIssuer.selector,
+                this.removeIssuer.selector,
+                this.isIssuer.selector,
+                this.getRevocationRegistryAddress.selector,
+                this.getIssuerListCount.selector,
+                this.getIssuerListMembers.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ISsiManagement).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(ISsiManagement).interfaceId);
     }
 }

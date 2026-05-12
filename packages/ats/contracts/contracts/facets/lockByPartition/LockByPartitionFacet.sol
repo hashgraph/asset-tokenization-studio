@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ILockByPartition } from "./ILockByPartition.sol";
 import { LockByPartition } from "./LockByPartition.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { _LOCK_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -24,22 +25,20 @@ contract LockByPartitionFacet is LockByPartition, IStaticFunctionSelectors {
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 6;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.getLockForByPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getLocksIdForByPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getLockCountForByPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getLockedAmountForByPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.releaseByPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.lockByPartition.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.lockByPartition.selector,
+                this.releaseByPartition.selector,
+                this.getLockedAmountForByPartition.selector,
+                this.getLockCountForByPartition.selector,
+                this.getLocksIdForByPartition.selector,
+                this.getLockForByPartition.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(ILockByPartition).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(ILockByPartition).interfaceId);
     }
 }
