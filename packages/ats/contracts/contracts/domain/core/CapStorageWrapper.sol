@@ -85,7 +85,7 @@ library CapStorageWrapper {
         }
     }
 
-    function requireValidNewMaxSupplyByPartition(
+    function checkValidNewMaxSupplyByPartition(
         bytes32 _partition,
         uint256 _newMaxSupply,
         uint256 _timestamp
