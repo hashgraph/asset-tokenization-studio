@@ -219,7 +219,7 @@ describe("Kpi Linked Rate Tests", () => {
 
     it("GIVEN Max deviation floor equal to Base Line WHEN setImpactData THEN transaction fails with WrongImpactDataValues", async () => {
       await expect(
-        kpiLinkedRateFacet.connect(signer_A).setImpactData({
+        asset.connect(signer_A).setKpiLinkedRateImpactData({
           maxDeviationCap: 1000,
           baseLine: 700,
           maxDeviationFloor: 700,
@@ -244,7 +244,7 @@ describe("Kpi Linked Rate Tests", () => {
 
     it("GIVEN Base Line equal to Max Deviation Cap WHEN setImpactData THEN transaction fails with WrongImpactDataValues", async () => {
       await expect(
-        kpiLinkedRateFacet.connect(signer_A).setImpactData({
+        asset.connect(signer_A).setKpiLinkedRateImpactData({
           maxDeviationCap: 1000,
           baseLine: 1000,
           maxDeviationFloor: 800,

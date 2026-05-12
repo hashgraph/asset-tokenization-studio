@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-12T11:44:06.758Z
+ * Generated: 2026-05-12T13:51:45.587Z
  * Facets: 124
  * Infrastructure: 2
  *
@@ -2248,12 +2248,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
-        name: "NewMaxSupplyByPartitionTooHigh",
-        signature: {
-          full: "error NewMaxSupplyByPartitionTooHigh(bytes32 partition, uint256 newMaxSupplyByPartition, uint256 maxSupply)",
-          canonical: "NewMaxSupplyByPartitionTooHigh(bytes32,uint256,uint256)",
-        },
-        selector: "0x21aa64a7",
+        name: "NewMaxSupplyCannotBeZero",
+        signature: { full: "error NewMaxSupplyCannotBeZero()", canonical: "NewMaxSupplyCannotBeZero()" },
+        selector: "0x76f138fb",
       },
       {
         name: "NewMaxSupplyForPartitionTooLow",
@@ -2352,14 +2349,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "MaxSupplyReachedForPartition(bytes32,uint256)",
         },
         selector: "0x57c004a9",
-      },
-      {
-        name: "NewMaxSupplyByPartitionTooHigh",
-        signature: {
-          full: "error NewMaxSupplyByPartitionTooHigh(bytes32 partition, uint256 newMaxSupplyByPartition, uint256 maxSupply)",
-          canonical: "NewMaxSupplyByPartitionTooHigh(bytes32,uint256,uint256)",
-        },
-        selector: "0x21aa64a7",
       },
       {
         name: "NewMaxSupplyCannotBeZero",
