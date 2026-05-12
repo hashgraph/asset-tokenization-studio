@@ -25,7 +25,7 @@ const _AMOUNT = 1000;
 const _DATA = "0x1234";
 const maxSupply_Original = 1000000 * _AMOUNT;
 const maxSupply_Partition_1_Original = 50000 * _AMOUNT;
-const maxSupply_Partition_2_Original = 0;
+
 const ONE_SECOND = 1;
 const EMPTY_VC_ID = EMPTY_STRING;
 const balanceOf_A_Original = [10 * _AMOUNT, 100 * _AMOUNT];
@@ -933,7 +933,6 @@ describe("HoldByPartition Tests", () => {
 
         await asset.connect(signer_A).setMaxSupply(maxSupply_Original);
         await asset.connect(signer_A).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply_Partition_1_Original);
-        await asset.connect(signer_A).setMaxSupplyByPartition(_PARTITION_ID_2, maxSupply_Partition_2_Original);
 
         await asset.connect(signer_A).issueByPartition({
           partition: _PARTITION_ID_1,
