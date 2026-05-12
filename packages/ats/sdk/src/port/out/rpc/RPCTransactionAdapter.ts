@@ -61,7 +61,6 @@ import TransactionResponse from "@domain/context/transaction/TransactionResponse
 import { SecurityDataBuilder } from "@domain/context/util/SecurityDataBuilder";
 import {
   IAsset__factory,
-  KpiLinkedRate__factory,
   Factory__factory,
   MockedBlacklist__factory,
   MockedExternalKycList__factory,
@@ -2629,7 +2628,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Setting Interest Rate for security ${security.toString()}`);
     return this.executeTransaction(
-      KpiLinkedRate__factory.connect(security.toString(), this.getSignerOrProvider()),
+      IAsset__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setKpiLinkedRateInterestRate",
       [
         {
@@ -2658,7 +2657,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Setting Impact Data for security ${security.toString()}`);
     return this.executeTransaction(
-      KpiLinkedRate__factory.connect(security.toString(), this.getSignerOrProvider()),
+      IAsset__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setKpiLinkedRateImpactData",
       [
         {

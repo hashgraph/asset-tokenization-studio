@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset, KpiLinkedRate } from "@contract-types";
+import { type ResolverProxy, type IAsset } from "@contract-types";
 import { ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { DEFAULT_BOND_KPI_LINKED_RATE_PARAMS, deployBondKpiLinkedRateTokenFixture } from "@test";
@@ -15,7 +15,6 @@ describe("Kpi Linked Rate Tests", () => {
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
 
-  let kpiLinkedRateFacet: KpiLinkedRate;
   let asset: IAsset;
 
   async function deploySecurityFixtureMultiPartition() {
@@ -36,8 +35,6 @@ describe("Kpi Linked Rate Tests", () => {
         members: [signer_A.address],
       },
     ]);
-
-    kpiLinkedRateFacet = await ethers.getContractAt("KpiLinkedRate", diamond.target, signer_A);
   }
 
   beforeEach(async () => {
@@ -46,7 +43,7 @@ describe("Kpi Linked Rate Tests", () => {
 
   it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
     await expect(
-      kpiLinkedRateFacet.initializeKpiLinkedRate(
+      asset.initializeKpiLinkedRate(
         {
           maxRate: 3,
           baseRate: 2,
@@ -77,7 +74,7 @@ describe("Kpi Linked Rate Tests", () => {
     it("GIVEN a paused Token WHEN setInterestRate THEN transaction fails with IsPaused", async () => {
       // transfer with data fails
       await expect(
-        kpiLinkedRateFacet.connect(signer_A).setKpiLinkedRateInterestRate({
+        asset.connect(signer_A).setKpiLinkedRateInterestRate({
           maxRate: 3,
           baseRate: 2,
           minRate: 1,
@@ -93,7 +90,7 @@ describe("Kpi Linked Rate Tests", () => {
     it("GIVEN a paused Token WHEN setImpactData THEN transaction fails with IsPaused", async () => {
       // transfer with data fails
       await expect(
-        kpiLinkedRateFacet.connect(signer_A).setKpiLinkedRateImpactData({
+        asset.connect(signer_A).setKpiLinkedRateImpactData({
           maxDeviationCap: 1000,
           baseLine: 700,
           maxDeviationFloor: 300,
@@ -108,7 +105,7 @@ describe("Kpi Linked Rate Tests", () => {
     it("GIVEN an account without interest rate manager role WHEN setInterestRate THEN transaction fails with AccountHasNoRole", async () => {
       // add to list fails
       await expect(
-        kpiLinkedRateFacet.connect(signer_C).setKpiLinkedRateInterestRate({
+        asset.connect(signer_C).setKpiLinkedRateInterestRate({
           maxRate: 3,
           baseRate: 2,
           minRate: 1,
@@ -124,7 +121,7 @@ describe("Kpi Linked Rate Tests", () => {
     it("GIVEN an account without interest rate manager role WHEN setImpactData THEN transaction fails with AccountHasNoRole", async () => {
       // add to list fails
       await expect(
-        kpiLinkedRateFacet.connect(signer_C).setKpiLinkedRateImpactData({
+        asset.connect(signer_C).setKpiLinkedRateImpactData({
           maxDeviationCap: 1000,
           baseLine: 700,
           maxDeviationFloor: 300,
@@ -139,7 +136,7 @@ describe("Kpi Linked Rate Tests", () => {
     it("GIVEN Min Rate larger than Base Rate WHEN setInterestRate THEN transaction fails with WrongInterestRateValues", async () => {
       // add to list fails
       await expect(
-        kpiLinkedRateFacet.connect(signer_A).setKpiLinkedRateInterestRate({
+        asset.connect(signer_A).setKpiLinkedRateInterestRate({
           maxRate: 4,
           baseRate: 2,
           minRate: 3,
@@ -155,7 +152,7 @@ describe("Kpi Linked Rate Tests", () => {
     it("GIVEN Base Rate larger than Max Rate WHEN setInterestRate THEN transaction fails with WrongInterestRateValues", async () => {
       // add to list fails
       await expect(
-        kpiLinkedRateFacet.connect(signer_A).setKpiLinkedRateInterestRate({
+        asset.connect(signer_A).setKpiLinkedRateInterestRate({
           maxRate: 4,
           baseRate: 5,
           minRate: 3,
@@ -180,8 +177,8 @@ describe("Kpi Linked Rate Tests", () => {
         rateDecimals: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.rateDecimals + 1,
       };
 
-      await expect(kpiLinkedRateFacet.connect(signer_A).setKpiLinkedRateInterestRate(newInterestRate))
-        .to.emit(kpiLinkedRateFacet, "InterestRateUpdated")
+      await expect(asset.connect(signer_A).setKpiLinkedRateInterestRate(newInterestRate))
+        .to.emit(asset, "InterestRateUpdated")
         .withArgs(signer_A.address, [
           newInterestRate.maxRate,
           newInterestRate.baseRate,
@@ -193,7 +190,7 @@ describe("Kpi Linked Rate Tests", () => {
           newInterestRate.rateDecimals,
         ]);
 
-      const interestRate = await kpiLinkedRateFacet.getKpiLinkedRateInterestRate();
+      const interestRate = await asset.getKpiLinkedRateInterestRate();
 
       expect(interestRate.maxRate).to.equal(newInterestRate.maxRate);
       expect(interestRate.baseRate).to.equal(newInterestRate.baseRate);
@@ -210,7 +207,7 @@ describe("Kpi Linked Rate Tests", () => {
     it("GIVEN Max deviation floor larger than Base Line WHEN setImpactData THEN transaction fails with WrongImpactDataValues", async () => {
       // add to list fails
       await expect(
-        kpiLinkedRateFacet.connect(signer_A).setKpiLinkedRateImpactData({
+        asset.connect(signer_A).setKpiLinkedRateImpactData({
           maxDeviationCap: 1000,
           baseLine: 700,
           maxDeviationFloor: 800,
@@ -223,7 +220,7 @@ describe("Kpi Linked Rate Tests", () => {
     it("GIVEN Base Line larger than Max Deviation Cap WHEN setImpactData THEN transaction fails with WrongImpactDataValues", async () => {
       // add to list fails
       await expect(
-        kpiLinkedRateFacet.connect(signer_A).setKpiLinkedRateImpactData({
+        asset.connect(signer_A).setKpiLinkedRateImpactData({
           maxDeviationCap: 1000,
           baseLine: 7000,
           maxDeviationFloor: 800,
@@ -242,8 +239,8 @@ describe("Kpi Linked Rate Tests", () => {
         adjustmentPrecision: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.adjustmentPrecision + 1,
       };
 
-      await expect(kpiLinkedRateFacet.connect(signer_A).setKpiLinkedRateImpactData(newImpactData))
-        .to.emit(kpiLinkedRateFacet, "ImpactDataUpdated")
+      await expect(asset.connect(signer_A).setKpiLinkedRateImpactData(newImpactData))
+        .to.emit(asset, "ImpactDataUpdated")
         .withArgs(signer_A.address, [
           newImpactData.maxDeviationCap,
           newImpactData.baseLine,
@@ -252,7 +249,7 @@ describe("Kpi Linked Rate Tests", () => {
           newImpactData.adjustmentPrecision,
         ]);
 
-      const impactData = await kpiLinkedRateFacet.getKpiLinkedRateImpactData();
+      const impactData = await asset.getKpiLinkedRateImpactData();
 
       expect(impactData.maxDeviationCap).to.equal(newImpactData.maxDeviationCap);
       expect(impactData.baseLine).to.equal(newImpactData.baseLine);

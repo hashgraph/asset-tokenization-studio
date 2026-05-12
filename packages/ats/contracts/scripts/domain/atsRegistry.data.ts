@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-12T11:33:01.323Z
+ * Generated: 2026-05-12T11:44:06.758Z
  * Facets: 124
  * Infrastructure: 2
  *
@@ -7583,6 +7583,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   KpiLinkedRateFacet: {
     name: "KpiLinkedRateFacet",
+    description: "Diamond facet that exposes the KPI-linked interest rate capability (`IKpiLinkedRate`) on a token.",
     resolverKey: {
       name: "_KPI_LINKED_RATE_RESOLVER_KEY",
       value: "0x92999bd0329d03e46274ce7743ebe0060df95286df4fa7b354937b7d21757d22",
@@ -7670,11 +7671,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
-      },
-      {
-        name: "InterestRateIsKpiLinked",
-        signature: { full: "error InterestRateIsKpiLinked()", canonical: "InterestRateIsKpiLinked()" },
-        selector: "0x68eba14f",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
