@@ -512,11 +512,6 @@ library HoldStorageWrapper {
         return _escrow == _hold.escrow;
     }
 
-    /**
-     * @notice Reverts with `InvalidHoldAmount` when `_amount` is zero.
-     * @dev Called at the start of `createHoldByPartition` and reused by `ClearingOps`
-     *      for clearing-hold creation, keeping the guard in a single place.
-     */
     function checkNonZeroHoldAmount(uint256 _amount) internal pure {
         if (_amount == 0) revert IHoldTypes.InvalidHoldAmount();
     }
