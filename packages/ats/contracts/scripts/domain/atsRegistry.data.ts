@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-12T10:08:29.647Z
+ * Generated: 2026-05-12T10:44:55.115Z
  * Facets: 124
  * Infrastructure: 2
  *
@@ -9071,7 +9071,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x8579befe",
       },
     ],
-    factory: (signer) => new MaturityByPartitionFacet__factory(signer),
+    factory: (signer) => new MaturityByPartitionFacet__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   MaturityFacet: {
@@ -9234,7 +9234,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x8579befe",
       },
     ],
-    factory: (signer) => new MaturityFacet__factory(signer),
+    factory: (signer) => new MaturityFacet__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   MetadataFacet: {
@@ -12108,8 +12108,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf9f9bcf9",
       },
     ],
-    factory: (signer) => new RecoveryFacet__factory(signer),
-    timeTravelFactory: (signer) => new RecoveryFacetTimeTravel__factory(signer),
+    factory: (signer) => new RecoveryFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) => new RecoveryFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   ScheduledCrossOrderedTasksFacet: {
@@ -13065,7 +13065,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe39f4776",
       },
     ],
-    factory: (signer) => new TransferAndLockByPartitionFacet__factory(signer),
+    factory: (signer) => new TransferAndLockByPartitionFacet__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   TransferAndLockFacet: {
@@ -13198,8 +13198,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe39f4776",
       },
     ],
-    factory: (signer) => new TransferAndLockFacet__factory(signer),
-    timeTravelFactory: (signer) => new TransferAndLockFacetTimeTravel__factory(signer),
+    factory: (signer) => new TransferAndLockFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new TransferAndLockFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   TransferAndLockFixedRateFacet: {
@@ -13332,8 +13333,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe39f4776",
       },
     ],
-    factory: (signer) => new TransferAndLockFixedRateFacet__factory(signer),
-    timeTravelFactory: (signer) => new TransferAndLockFixedRateFacetTimeTravel__factory(signer),
+    factory: (signer) => new TransferAndLockFixedRateFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new TransferAndLockFixedRateFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   TransferAndLockKpiLinkedRateFacet: {
@@ -13466,8 +13468,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe39f4776",
       },
     ],
-    factory: (signer) => new TransferAndLockKpiLinkedRateFacet__factory(signer),
-    timeTravelFactory: (signer) => new TransferAndLockKpiLinkedRateFacetTimeTravel__factory(signer),
+    factory: (signer) => new TransferAndLockKpiLinkedRateFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new TransferAndLockKpiLinkedRateFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   TransferAndLockSustainabilityPerformanceTargetRateFacet: {
@@ -13600,9 +13603,16 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe39f4776",
       },
     ],
-    factory: (signer) => new TransferAndLockSustainabilityPerformanceTargetRateFacet__factory(signer),
+    factory: (signer) =>
+      new TransferAndLockSustainabilityPerformanceTargetRateFacet__factory(
+        getLibLinks("clearingReadOps") as any,
+        signer,
+      ),
     timeTravelFactory: (signer) =>
-      new TransferAndLockSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
+      new TransferAndLockSustainabilityPerformanceTargetRateFacetTimeTravel__factory(
+        getLibLinks("clearingReadOps") as any,
+        signer,
+      ),
   },
 
   TransferByPartitionFacet: {

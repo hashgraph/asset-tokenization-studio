@@ -407,7 +407,10 @@ library ERC1410StorageWrapper {
             SnapshotsStorageWrapper.updateTotalSupplySnapshot(partition);
             if (
                 amount > 0 &&
-                AdjustBalancesStorageWrapper.balanceOfAdjustedAt(from, TimeTravelStorageWrapper.getBlockTimestamp()) ==
+                ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(
+                    from,
+                    TimeTravelStorageWrapper.getBlockTimestamp()
+                ) ==
                 amount
             ) removeFrom = true;
         }
@@ -419,7 +422,10 @@ library ERC1410StorageWrapper {
             if (amount > 0 && ERC20StorageWrapper.balanceOf(to) == 0) addTo = true;
             if (
                 amount > 0 &&
-                AdjustBalancesStorageWrapper.balanceOfAdjustedAt(from, TimeTravelStorageWrapper.getBlockTimestamp()) ==
+                ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(
+                    from,
+                    TimeTravelStorageWrapper.getBlockTimestamp()
+                ) ==
                 amount
             ) removeFrom = true;
         }

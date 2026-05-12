@@ -222,8 +222,10 @@ export function toTypeChainLibraryAddresses(addresses?: OrchestratorLibraryAddre
  * Deploy all orchestrator libraries in correct dependency order.
  *
  * Deployment order:
- * 1. TokenCoreOps, HoldOps, ClearingReadOps (no dependencies)
- * 2. ClearingOps (depends on TokenCoreOps)
+ * 1. ClearingReadOps, HoldOps (no dependencies)
+ * 2. TokenCoreOps (depends on ClearingReadOps)
+ * 3. ClearingOps (depends on TokenCoreOps and HoldOps)
+ * 4. ClearingProtectedOps (depends on ClearingOps)
  *
  * After deployment, automatically calls `setOrchestratorLibraryAddresses()`.
  *
@@ -242,24 +244,26 @@ export async function deployOrchestratorLibraries(signer: Signer): Promise<Orche
 
   info("   Deploying orchestrator libraries...");
 
-  // Phase 1: Deploy libraries with no dependencies sequentially.
+  // Phase 1: Deploy ClearingReadOps and HoldOps (no dependencies).
   // Parallel deployment via Promise.all causes nonce collisions on the Hiero Solo
-  // JSON-RPC relay: all three deploy() calls fetch eth_getTransactionCount before
-  // any transaction lands, so they all receive the same nonce and two of them stall
-  // indefinitely waiting for a receipt that never arrives.
-  const tokenCoreOps = await (await new TokenCoreOps__factory(signer).deploy()).waitForDeployment();
-  const tokenCoreOpsAddr = await tokenCoreOps.getAddress();
-  info(`   ✓ TokenCoreOps deployed at ${tokenCoreOpsAddr}`);
+  // JSON-RPC relay, so we deploy sequentially.
+  const clearingReadOps = await (await new ClearingReadOps__factory(signer).deploy()).waitForDeployment();
+  const clearingReadOpsAddr = await clearingReadOps.getAddress();
+  info(`   ✓ ClearingReadOps deployed at ${clearingReadOpsAddr}`);
 
   const holdOps = await (await new HoldOps__factory(signer).deploy()).waitForDeployment();
   const holdOpsAddr = await holdOps.getAddress();
   info(`   ✓ HoldOps deployed at ${holdOpsAddr}`);
 
-  const clearingReadOps = await (await new ClearingReadOps__factory(signer).deploy()).waitForDeployment();
-  const clearingReadOpsAddr = await clearingReadOps.getAddress();
-  info(`   ✓ ClearingReadOps deployed at ${clearingReadOpsAddr}`);
+  // Phase 2: Deploy TokenCoreOps (depends on ClearingReadOps — getTotalBalanceForAdjustedAt
+  // calls ClearingReadOps.getClearedAmountForAdjustedAt via DELEGATECALL).
+  const tokenCoreOps = await (
+    await new TokenCoreOps__factory({ [LIBRARY_KEYS.clearingReadOps]: clearingReadOpsAddr } as any, signer).deploy()
+  ).waitForDeployment();
+  const tokenCoreOpsAddr = await tokenCoreOps.getAddress();
+  info(`   ✓ TokenCoreOps deployed at ${tokenCoreOpsAddr}`);
 
-  // Phase 2: Deploy ClearingOps (depends on TokenCoreOps and HoldOps)
+  // Phase 3: Deploy ClearingOps (depends on TokenCoreOps and HoldOps)
   const clearingOps = await new ClearingOps__factory(
     {
       [LIBRARY_KEYS.tokenCoreOps]: tokenCoreOpsAddr,
@@ -272,7 +276,7 @@ export async function deployOrchestratorLibraries(signer: Signer): Promise<Orche
   const clearingOpsAddr = await clearingOps.getAddress();
   info(`   ✓ ClearingOps deployed at ${clearingOpsAddr}`);
 
-  // Phase 3: Deploy ClearingProtectedOps (depends on ClearingOps via internal calls)
+  // Phase 4: Deploy ClearingProtectedOps (depends on ClearingOps via internal calls)
   const clearingProtectedOps = await new ClearingProtectedOps__factory(
     {
       [LIBRARY_KEYS.clearingOps]: clearingOpsAddr,
