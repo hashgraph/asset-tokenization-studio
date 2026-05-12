@@ -58,6 +58,12 @@ import {
   deployOrchestratorLibraries,
   hasOrchestratorLibraryAddresses,
   getFacetDefinition,
+  // TEST-ONLY: InitializeMock domain — pulled in unconditionally; only used
+  // when `useTimeTravel` is enabled (see "InitializeMock Configurations" step).
+  createInitializeMockConfiguration,
+  getAllMockFacets,
+  getMockFacetDefinition,
+  INITIALIZE_MOCK_CONFIG_ID,
 } from "@scripts/domain";
 import {
   BusinessLogicResolver__factory,
@@ -379,6 +385,23 @@ export async function deploySystemWithNewBlr(
         facetFactories[contractName] = factory;
       }
 
+      // TEST-ONLY: when `useTimeTravel` is enabled, also queue MockFacet1/2/3 for
+      // deployment. They live outside the auto-generated atsRegistry (see
+      // `scripts/domain/initializeMock/mockFacetsRegistry.ts`) so we add them here
+      // alongside the production facets.
+      if (useTimeTravel) {
+        for (const mockFacet of getAllMockFacets()) {
+          if (!mockFacet.factory) continue;
+          const factory = mockFacet.factory(signer) as ContractFactory;
+          const contractName = factory.constructor.name.replace("__factory", "");
+          if (checkpoint.steps.facets.has(contractName)) {
+            info(`   ✓ ${contractName} already deployed (skipping)`);
+            continue;
+          }
+          facetFactories[contractName] = factory;
+        }
+      }
+
       // Deploy remaining facets
       if (Object.keys(facetFactories).length > 0) {
         info(`   Deploying ${Object.keys(facetFactories).length} remaining facets...`);
@@ -470,7 +493,10 @@ export async function deploySystemWithNewBlr(
 
         // Strip "TimeTravel" suffix to get canonical name
         const baseName = facetName.replace(/TimeTravel$/, "");
-        const facetDef = getFacetDefinition(baseName);
+        // TEST-ONLY: fall back to the mock registry so the three MockFacets
+        // (deployed only under `useTimeTravel`) can be registered alongside
+        // production facets.
+        const facetDef = getFacetDefinition(baseName) ?? getMockFacetDefinition(baseName);
 
         if (!facetDef?.resolverKey?.value) {
           throw new Error(`Facet ${baseName} not found in registry or missing resolver key`);
@@ -881,10 +907,78 @@ export async function deploySystemWithNewBlr(
       throw new Error(createTestFailureMessage("step", "loansPortfolio"));
     }
 
+    // ====================================================================
+    // TEST-ONLY: Step 12 — InitializeMock Configurations.
+    // Calls `createInitializeMockConfiguration` four times in a row against
+    // the same configId so the BLR mints four versions (v1..v4) of an
+    // otherwise-identical 4-facet configuration. Only executed under
+    // `useTimeTravel`; skipped (but the step slot is still advanced) otherwise
+    // so Factory's step index stays stable across runs.
+    // ====================================================================
+    let initializeMockVersions: number[] = [];
+
+    if (checkpoint.steps.configurations?.initializeMock && checkpoint.currentStep >= 11) {
+      info(`\n✓ Step 12/${totalSteps}: InitializeMock configurations already created (resuming)`);
+      const data = checkpoint.steps.configurations.initializeMock;
+      initializeMockVersions = data.versions;
+      info(`✅ InitializeMock Config ID: ${data.configId}`);
+      info(`✅ InitializeMock Versions: [${data.versions.join(", ")}]`);
+      info(`✅ InitializeMock Facets: ${data.facetCount}`);
+    } else if (useTimeTravel) {
+      info(`\n🧪 Step 12/${totalSteps}: Creating InitializeMock configurations (4 versions)...`);
+
+      // TEST-ONLY: four identical calls; each one bumps the configId version.
+      const INITIALIZE_MOCK_RUNS = 4;
+      let lastFacetCount = 0;
+      for (let i = 1; i <= INITIALIZE_MOCK_RUNS; i++) {
+        const result = await createInitializeMockConfiguration(
+          blrContract,
+          facetAddresses,
+          partialBatchDeploy,
+          batchSize,
+          confirmations,
+        );
+
+        if (!result.success) {
+          throw new Error(`InitializeMock config (run ${i}) failed: ${result.error} - ${result.message}`);
+        }
+
+        initializeMockVersions.push(result.data.version);
+        lastFacetCount = result.data.facetKeys.length;
+        info(`   ✅ Run ${i}/${INITIALIZE_MOCK_RUNS} → version ${result.data.version}`);
+      }
+
+      info(`✅ InitializeMock Config ID: ${INITIALIZE_MOCK_CONFIG_ID}`);
+      info(`✅ InitializeMock Versions: [${initializeMockVersions.join(", ")}]`);
+      info(`✅ InitializeMock Facets: ${lastFacetCount}`);
+
+      if (!checkpoint.steps.configurations) {
+        checkpoint.steps.configurations = {};
+      }
+      checkpoint.steps.configurations.initializeMock = {
+        configId: INITIALIZE_MOCK_CONFIG_ID,
+        facetCount: lastFacetCount,
+        versions: initializeMockVersions,
+      };
+      checkpoint.currentStep = 11;
+      await checkpointManager.saveCheckpoint(checkpoint);
+    } else {
+      // TEST-ONLY: still advance currentStep so Factory's index stays stable
+      // when running without `useTimeTravel`.
+      info(`\n⏭️  Step 12/${totalSteps}: InitializeMock skipped (useTimeTravel disabled)`);
+      checkpoint.currentStep = 11;
+      await checkpointManager.saveCheckpoint(checkpoint);
+    }
+
+    // TEST-ONLY: failure injection hook for checkpoint testing of the mock step.
+    if (shouldFailAtStep("initializeMock")) {
+      throw new Error(createTestFailureMessage("step", "initializeMock"));
+    }
+
     let factoryResult: Awaited<ReturnType<typeof deployFactory>>;
 
-    if (checkpoint.steps.factory && checkpoint.currentStep >= 11) {
-      info(`\n✓ Step 12/${totalSteps}: Factory already deployed (resuming)`);
+    if (checkpoint.steps.factory && checkpoint.currentStep >= 12) {
+      info(`\n✓ Step 13/${totalSteps}: Factory already deployed (resuming)`);
       // Reconstruct DeployFactoryResult from checkpoint (with placeholder proxyResult)
       const proxyAdminAddr = checkpoint.steps.proxyAdmin?.address || (proxyAdmin.target as string);
       factoryResult = {
@@ -906,7 +1000,7 @@ export async function deploySystemWithNewBlr(
       info(`✅ Factory Implementation: ${checkpoint.steps.factory.implementation}`);
       info(`✅ Factory Proxy: ${checkpoint.steps.factory.proxy}`);
     } else {
-      info(`\n🏭 Step 12/${totalSteps}: Deploying Factory...`);
+      info(`\n🏭 Step 13/${totalSteps}: Deploying Factory...`);
       factoryResult = await deployFactory(signer, {
         existingProxyAdmin: proxyAdmin,
       });
@@ -927,7 +1021,7 @@ export async function deploySystemWithNewBlr(
         txHash: "", // deployFactory doesn't return tx hash currently
         deployedAt: new Date().toISOString(),
       };
-      checkpoint.currentStep = 11;
+      checkpoint.currentStep = 12;
       await checkpointManager.saveCheckpoint(checkpoint);
     }
 

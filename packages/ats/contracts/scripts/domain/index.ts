@@ -70,3 +70,7 @@ export * from "./loan/createConfiguration";
 // Loans Portfolio configuration
 export * from "./loanPortfolio/createConfiguration";
 export * from "./loanPortfolio/types";
+
+// TEST-ONLY: InitializeMock domain — stub configuration used by initializer-versioning tests.
+export * from "./initializeMock/createConfiguration";
+export * from "./initializeMock/mockFacetsRegistry";

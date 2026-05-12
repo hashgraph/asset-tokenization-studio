@@ -73,6 +73,16 @@ export const LOAN_CONFIG_ID = "0x00000000000000000000000000000000000000000000000
  */
 export const LOANS_PORTFOLIO_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000007";
 
+// TEST-ONLY: configuration ID for the InitializeMock domain used by initializer-versioning tests.
+/**
+ * Initialize Mock configuration ID (TEST-ONLY).
+ *
+ * bytes32(uint256(8)) = 0x00...08
+ * Used by BusinessLogicResolver to identify the mock initializer-test facet configuration.
+ * Only registered when `useTimeTravel` is enabled in `deploySystemWithNewBlr`.
+ */
+export const INITIALIZE_MOCK_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000008";
+
 // ============================================================================
 // ATS-Specific Contract Names
 // ============================================================================

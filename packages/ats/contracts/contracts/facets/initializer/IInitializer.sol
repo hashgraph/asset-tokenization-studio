@@ -21,4 +21,5 @@ interface IInitializer {
     function getOperationalStatus(bytes32 _configId, uint256 _versionId) external view returns (uint256 status_);
     function getFacetVersionStatus(bytes32 _facetId, uint256 _versionId) external view returns (uint256 status_);
     function getFacetLastVersion(bytes32 _facetId) external view returns (uint256 lastVersion_);
+    function getMaxInitializerFacetIndex() external view returns (uint256 maxInitializerFacetIndex_);
 }
