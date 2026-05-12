@@ -362,4 +362,19 @@ export class SecurityMetadataOperations {
       GAS.SET_NOMINAL_VALUE,
     );
   }
+
+  async setNominalValueCurrency(
+    security: EvmAddress,
+    nominalValueCurrency: string,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Setting nominal value currency for security: ${security.toString()}`);
+    return this.executor.executeContractCall(
+      securityId.toString(),
+      IAsset__factory.createInterface(),
+      "setNominalValueCurrency",
+      [nominalValueCurrency],
+      GAS.SET_NOMINAL_VALUE_CURRENCY,
+    );
+  }
 }

@@ -91,7 +91,8 @@ task("erc3643-clone-interfaces", async (_, hre) => {
     { original: "ICore", removeImports: false },
     // Coupon Interest Rates interfaces
     { original: "IFixedRate" },
-    { original: "IKpiLinkedRate" },
+    { original: "IKpiLinkedRateErrors" },
+    { original: "IKpiLinkedRate", removeImports: false, removeHierarchy: false },
     {
       original: "ICouponListing",
       removeImports: false,

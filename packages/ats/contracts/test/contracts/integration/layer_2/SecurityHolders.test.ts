@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset } from "@contract-types";
-import { DEFAULT_PARTITION, ATS_ROLES, ZERO } from "@scripts";
+import { DEFAULT_PARTITION, ATS_ROLES, ZERO, EMPTY_HEX_BYTES } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
@@ -354,6 +354,59 @@ describe("SecurityHoldersFacet Tests", () => {
       const holders = await asset.getSecurityHolders(0, 10);
       expect(holders).to.include(signer_B.address);
       expect(await asset.balanceOf(signer_B.address)).to.equal(tokenAmount);
+    });
+  });
+
+  describe("holder registry integrity with encumbered tokens (FIND-120)", () => {
+    beforeEach(async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.LOCKER_ROLE, signer_A.address);
+    });
+
+    it("GIVEN a holder with locked tokens WHEN burning all free tokens via redeemByPartition THEN holder remains in registry", async () => {
+      const totalAmount = 1000n;
+      const lockedAmount = 900n;
+      const freeAmount = totalAmount - lockedAmount;
+
+      await asset.connect(signer_A).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_B.address,
+        value: totalAmount,
+        data: "0x",
+      });
+
+      await asset.connect(signer_A).lock(lockedAmount, signer_B.address, MAX_UINT256);
+
+      expect(await asset.getTotalSecurityHolders()).to.equal(1);
+
+      await asset.connect(signer_B).redeemByPartition(DEFAULT_PARTITION, freeAmount, EMPTY_HEX_BYTES);
+
+      expect(await asset.getTotalSecurityHolders()).to.equal(1);
+      const holders = await asset.getSecurityHolders(0, 10);
+      expect(holders).to.include(signer_B.address);
+    });
+
+    it("GIVEN a holder with locked tokens WHEN transferring all free tokens THEN holder remains in registry", async () => {
+      const totalAmount = 1000n;
+      const lockedAmount = 900n;
+      const freeAmount = totalAmount - lockedAmount;
+
+      await asset.connect(signer_A).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_B.address,
+        value: totalAmount,
+        data: "0x",
+      });
+
+      await asset.connect(signer_A).lock(lockedAmount, signer_B.address, MAX_UINT256);
+
+      expect(await asset.getTotalSecurityHolders()).to.equal(1);
+
+      await asset.connect(signer_B).transfer(signer_C.address, freeAmount);
+
+      expect(await asset.getTotalSecurityHolders()).to.equal(2);
+      const holders = await asset.getSecurityHolders(0, 10);
+      expect(holders).to.include(signer_B.address);
+      expect(holders).to.include(signer_C.address);
     });
   });
 });

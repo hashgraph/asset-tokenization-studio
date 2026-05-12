@@ -178,14 +178,25 @@ library CouponStorageWrapper {
 
         if (registeredCoupon.coupon.recordDate < TimeTravelStorageWrapper.getBlockTimestamp() && !isDisabled) {
             couponFor_.recordDateReached = true;
-            couponFor_.tokenBalance = (registeredCoupon.snapshotId != 0)
-                ? SnapshotsStorageWrapper.getTotalBalanceOfAtSnapshot(registeredCoupon.snapshotId, account)
-                : ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(
-                    account,
-                    TimeTravelStorageWrapper.getBlockTimestamp()
+            if (registeredCoupon.snapshotId != 0) {
+                couponFor_.tokenBalance = SnapshotsStorageWrapper.getTotalBalanceOfAtSnapshot(
+                    registeredCoupon.snapshotId,
+                    account
                 );
-            couponFor_.decimals = ERC20StorageWrapper.decimalsAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
-            couponFor_.nominalValue = NominalValueStorageWrapper.getNominalValue();
+                couponFor_.decimals = SnapshotsStorageWrapper.decimalsAtSnapshot(registeredCoupon.snapshotId);
+                couponFor_.nominalValue = SnapshotsStorageWrapper.nominalValueAtSnapshot(registeredCoupon.snapshotId);
+                couponFor_.nominalValueDecimals = SnapshotsStorageWrapper.nominalValueDecimalsAtSnapshot(
+                    registeredCoupon.snapshotId
+                );
+            } else {
+                couponFor_.tokenBalance = ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(
+                    account,
+                    registeredCoupon.coupon.recordDate
+                );
+                couponFor_.decimals = ERC20StorageWrapper.decimalsAdjustedAt(registeredCoupon.coupon.recordDate);
+                couponFor_.nominalValue = NominalValueStorageWrapper.getNominalValue();
+                couponFor_.nominalValueDecimals = NominalValueStorageWrapper.getNominalValueDecimals();
+            }
         }
 
         couponFor_.couponAmount = _calculateCouponAmount(

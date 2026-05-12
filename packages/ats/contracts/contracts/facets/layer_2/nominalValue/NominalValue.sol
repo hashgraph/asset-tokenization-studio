@@ -4,39 +4,72 @@ pragma solidity >=0.8.0 <0.9.0;
 import { INominalValue } from "./INominalValue.sol";
 import { NOMINAL_VALUE_ROLE } from "../../../constants/roles.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
-import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";
 import { NominalValueStorageWrapper } from "../../../domain/asset/nominalValue/NominalValueStorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
+/**
+ * @title NominalValue
+ * @author Asset Tokenization Studio Team
+ * @notice Writer abstract for the nominal value capability; sole emit site for the events
+ *         declared on `INominalValue`.
+ * @dev Concrete facet `NominalValueFacet` registers the external selectors. Storage operations
+ *      delegate to `NominalValueStorageWrapper`, which holds the dedicated slot and the legacy
+ *      bond/equity aggregation logic.
+ */
 abstract contract NominalValue is INominalValue, Modifiers {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_NominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) external override {
-        _checkNotInitialized(NominalValueStorageWrapper.isNominalValueInitialized());
-        NominalValueStorageWrapper.initializeNominalValue(_nominalValue, _nominalValueDecimals);
-        emit NominalValueSet(EvmAccessors.getMsgSender(), _nominalValue, _nominalValueDecimals);
+    /// @inheritdoc INominalValue
+    function initializeNominalValue(
+        uint256 _nominalValue,
+        uint8 _nominalValueDecimals,
+        bytes3 _nominalValueCurrency
+    ) external override onlyNotNominalValueInitialized {
+        NominalValueStorageWrapper.initializeNominalValue(_nominalValue, _nominalValueDecimals, _nominalValueCurrency);
+        emit NominalValueInitialized(
+            EvmAccessors.getMsgSender(),
+            _nominalValue,
+            _nominalValueDecimals,
+            _nominalValueCurrency
+        );
     }
 
-    /// @dev Sets the nominal value. Migration of deprecated bond/equity fields
-    /// is handled internally by setNominalValue.
-    /// MIGRATION: Once all legacy tokens have been migrated, remove the
-    /// isNominalValueInitialized check, leaving only:
-    ///   setNominalValue(_nominalValue, _nominalValueDecimals);
+    /**
+     * @inheritdoc INominalValue
+     * @dev Legacy-bootstrap branch: when called on a token deployed before this facet existed,
+     *      the dedicated storage is uninitialised; this method auto-initialises it with
+     *      `bytes3(0)` as currency so subsequent reads work, then proceeds with the migration +
+     *      value/decimals write. MIGRATION: once all legacy tokens have been migrated, drop the
+     *      `isNominalValueInitialized` guard and leave only the
+     *      `setNominalValue(_nominalValue, _nominalValueDecimals)` call.
+     */
     function setNominalValue(
         uint256 _nominalValue,
         uint8 _nominalValueDecimals
     ) external override onlyRole(NOMINAL_VALUE_ROLE) {
         if (!NominalValueStorageWrapper.isNominalValueInitialized()) {
-            NominalValueStorageWrapper.initializeNominalValue(_nominalValue, _nominalValueDecimals);
+            NominalValueStorageWrapper.initializeNominalValue(_nominalValue, _nominalValueDecimals, bytes3(0));
         }
         NominalValueStorageWrapper.setNominalValue(_nominalValue, _nominalValueDecimals);
         emit NominalValueSet(EvmAccessors.getMsgSender(), _nominalValue, _nominalValueDecimals);
     }
 
+    /// @inheritdoc INominalValue
+    function setNominalValueCurrency(bytes3 _nominalValueCurrency) external override onlyRole(NOMINAL_VALUE_ROLE) {
+        NominalValueStorageWrapper.setNominalValueCurrency(_nominalValueCurrency);
+        emit NominalValueCurrencySet(EvmAccessors.getMsgSender(), _nominalValueCurrency);
+    }
+
+    /// @inheritdoc INominalValue
     function getNominalValue() external view override returns (uint256) {
         return NominalValueStorageWrapper.getNominalValue();
     }
 
+    /// @inheritdoc INominalValue
     function getNominalValueDecimals() external view override returns (uint8) {
         return NominalValueStorageWrapper.getNominalValueDecimals();
+    }
+
+    /// @inheritdoc INominalValue
+    function getNominalValueCurrency() external view override returns (bytes3) {
+        return NominalValueStorageWrapper.getNominalValueCurrency();
     }
 }

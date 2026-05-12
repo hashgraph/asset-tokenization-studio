@@ -146,10 +146,11 @@ contract Factory is IFactory {
             _factoryRegulationData.additionalSecurityData
         );
 
-        _tryInitialize_NominalValue(
+        _tryInitializeNominalValue(
             equityAddress_,
             _equityData.equityDetails.nominalValue,
-            _equityData.equityDetails.nominalValueDecimals
+            _equityData.equityDetails.nominalValueDecimals,
+            _equityData.equityDetails.currency
         );
 
         emit EquityDeployed(EvmAccessors.getMsgSender(), equityAddress_, _equityData, _factoryRegulationData);
@@ -274,10 +275,11 @@ contract Factory is IFactory {
         // Initialize proceed recipients (ProceedRecipientsFacet may not be present)
         _tryInitialize_ProceedRecipients(bondAddress_, _bondData.proceedRecipients, _bondData.proceedRecipientsData);
 
-        _tryInitialize_NominalValue(
+        _tryInitializeNominalValue(
             bondAddress_,
             _bondData.bondDetails.nominalValue,
-            _bondData.bondDetails.nominalValueDecimals
+            _bondData.bondDetails.nominalValueDecimals,
+            _bondData.bondDetails.currency
         );
     }
 
@@ -285,7 +287,7 @@ contract Factory is IFactory {
         bondAddress_ = _deployBond(_data.bondData, _data.factoryRegulationData, SecurityType.BondKpiLinkedRate);
 
         // Initialize KPI linked rate (KpiLinkedRateFacet may not be present)
-        _tryInitialize_KpiLinkedRate(bondAddress_, _data.interestRate, _data.impactData);
+        _tryInitializeKpiLinkedRate(bondAddress_, _data.interestRate, _data.impactData);
     }
 
     function _deployBondSustainabilityPerformanceTargetRate(
@@ -448,12 +450,12 @@ contract Factory is IFactory {
         }
     }
 
-    function _tryInitialize_KpiLinkedRate(
+    function _tryInitializeKpiLinkedRate(
         address securityAddress_,
         IKpiLinkedRate.InterestRate calldata interestRate,
         IKpiLinkedRate.ImpactData calldata impactData
     ) private {
-        try IKpiLinkedRate(securityAddress_).initialize_KpiLinkedRate(interestRate, impactData) {
+        try IKpiLinkedRate(securityAddress_).initializeKpiLinkedRate(interestRate, impactData) {
             // success
         } catch {
             // facet not present - skip initialization
@@ -498,12 +500,19 @@ contract Factory is IFactory {
         }
     }
 
-    function _tryInitialize_NominalValue(
+    function _tryInitializeNominalValue(
         address securityAddress_,
         uint256 nominalValue,
-        uint8 nominalValueDecimals
+        uint8 nominalValueDecimals,
+        bytes3 nominalValueCurrency
     ) private {
-        try INominalValue(securityAddress_).initialize_NominalValue(nominalValue, nominalValueDecimals) {
+        try
+            INominalValue(securityAddress_).initializeNominalValue(
+                nominalValue,
+                nominalValueDecimals,
+                nominalValueCurrency
+            )
+        {
             // success
         } catch {
             // facet not present - skip initialization
