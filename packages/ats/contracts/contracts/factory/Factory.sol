@@ -287,7 +287,7 @@ contract Factory is IFactory {
         bondAddress_ = _deployBond(_data.bondData, _data.factoryRegulationData, SecurityType.BondKpiLinkedRate);
 
         // Initialize KPI linked rate (KpiLinkedRateFacet may not be present)
-        _tryInitialize_KpiLinkedRate(bondAddress_, _data.interestRate, _data.impactData);
+        _tryInitializeKpiLinkedRate(bondAddress_, _data.interestRate, _data.impactData);
     }
 
     function _deployBondSustainabilityPerformanceTargetRate(
@@ -450,12 +450,12 @@ contract Factory is IFactory {
         }
     }
 
-    function _tryInitialize_KpiLinkedRate(
+    function _tryInitializeKpiLinkedRate(
         address securityAddress_,
         IKpiLinkedRate.InterestRate calldata interestRate,
         IKpiLinkedRate.ImpactData calldata impactData
     ) private {
-        try IKpiLinkedRate(securityAddress_).initialize_KpiLinkedRate(interestRate, impactData) {
+        try IKpiLinkedRate(securityAddress_).initializeKpiLinkedRate(interestRate, impactData) {
             // success
         } catch {
             // facet not present - skip initialization

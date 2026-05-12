@@ -9,8 +9,7 @@ import { Modifiers } from "../../../../services/Modifiers.sol";
 import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
 contract KpiLinkedRate is IKpiLinkedRate, Modifiers {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_KpiLinkedRate(
+    function initializeKpiLinkedRate(
         InterestRate calldata _interestRate,
         ImpactData calldata _impactData
     ) external override onlyNotKpiLinkedRateInitialized {
@@ -19,7 +18,7 @@ contract KpiLinkedRate is IKpiLinkedRate, Modifiers {
         InterestRateStorageWrapper.kpiLinkedRateStorage().initialized = true;
     }
 
-    function setInterestRate(
+    function setKpiLinkedRateInterestRate(
         InterestRate calldata _newInterestRate
     ) external onlyUnpaused onlyRole(INTEREST_RATE_MANAGER_ROLE) onlyValidInterestRate(_newInterestRate) {
         ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();
@@ -27,7 +26,7 @@ contract KpiLinkedRate is IKpiLinkedRate, Modifiers {
         emit InterestRateUpdated(EvmAccessors.getMsgSender(), _newInterestRate);
     }
 
-    function setImpactData(
+    function setKpiLinkedRateImpactData(
         ImpactData calldata _newImpactData
     ) external onlyUnpaused onlyRole(INTEREST_RATE_MANAGER_ROLE) onlyValidImpactData(_newImpactData) {
         ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();
@@ -35,11 +34,11 @@ contract KpiLinkedRate is IKpiLinkedRate, Modifiers {
         emit ImpactDataUpdated(EvmAccessors.getMsgSender(), _newImpactData);
     }
 
-    function getInterestRate() external view returns (InterestRate memory interestRate_) {
+    function getKpiLinkedRateInterestRate() external view returns (InterestRate memory interestRate_) {
         interestRate_ = InterestRateStorageWrapper.getInterestRate();
     }
 
-    function getImpactData() external view returns (ImpactData memory impactData_) {
+    function getKpiLinkedRateImpactData() external view returns (ImpactData memory impactData_) {
         impactData_ = InterestRateStorageWrapper.getImpactData();
     }
 }
