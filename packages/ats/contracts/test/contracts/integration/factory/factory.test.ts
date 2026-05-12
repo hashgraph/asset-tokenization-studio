@@ -267,10 +267,10 @@ describe("Factory Tests", () => {
     });
 
     describe("checkAdmins modifier", () => {
-      it("GIVEN rbacs with empty members array for any role WHEN deploying equity THEN reverts with EmptyMembers", async () => {
+      it("GIVEN rbacs with empty members array for admin role WHEN deploying equity THEN reverts with NoInitialAdmins", async () => {
         const emptyAdminRbacs: Rbac[] = [
           {
-            role: ATS_ROLES.ISSUER_ROLE,
+            role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
             members: [],
           },
         ];
@@ -286,12 +286,13 @@ describe("Factory Tests", () => {
           version: 1,
         };
 
-        await expect(factory.deployEquity(equityData, getRegulationData()))
-          .to.be.revertedWithCustomError(factory, "EmptyMembers")
-          .withArgs(ATS_ROLES.ISSUER_ROLE);
+        await expect(factory.deployEquity(equityData, getRegulationData())).to.be.revertedWithCustomError(
+          factory,
+          "NoInitialAdmins",
+        );
       });
 
-      it("GIVEN rbacs with only zero address as admin WHEN deploying bond THEN reverts with ZeroAddressNotAllowed", async () => {
+      it("GIVEN rbacs with only zero address as admin WHEN deploying bond THEN reverts with NoInitialAdmins", async () => {
         const zeroAddressAdminRbacs: Rbac[] = [
           {
             role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
@@ -314,84 +315,7 @@ describe("Factory Tests", () => {
 
         await expect(factory.deployBond(bondData, getRegulationData())).to.be.revertedWithCustomError(
           factory,
-          "ZeroAddressNotAllowed",
-        );
-      });
-
-      it("GIVEN rbacs with members array, but duplicated member WHEN deploying equity THEN reverts with DuplicatedMember", async () => {
-        const emptyAdminRbacs: Rbac[] = [
-          {
-            role: ATS_ROLES.ISSUER_ROLE,
-            members: [signer_A.address, signer_A.address],
-          },
-        ];
-
-        const equityData = {
-          security: getSecurityData(businessLogicResolver, {
-            rbacs: emptyAdminRbacs,
-          }),
-          equityDetails: getEquityDetails(),
-        };
-        equityData.security.resolverProxyConfiguration = {
-          key: EQUITY_CONFIG_ID,
-          version: 1,
-        };
-
-        await expect(factory.deployEquity(equityData, getRegulationData()))
-          .to.be.revertedWithCustomError(factory, "DuplicatedMember")
-          .withArgs(ATS_ROLES.ISSUER_ROLE, signer_A.address);
-      });
-
-      it("GIVEN rbacs with members array, but duplicated role WHEN deploying equity THEN reverts with DuplicatedRole", async () => {
-        const emptyAdminRbacs: Rbac[] = [
-          {
-            role: ATS_ROLES.ISSUER_ROLE,
-            members: [signer_A.address],
-          },
-          {
-            role: ATS_ROLES.ISSUER_ROLE,
-            members: [signer_B.address],
-          },
-        ];
-
-        const equityData = {
-          security: getSecurityData(businessLogicResolver, {
-            rbacs: emptyAdminRbacs,
-          }),
-          equityDetails: getEquityDetails(),
-        };
-        equityData.security.resolverProxyConfiguration = {
-          key: EQUITY_CONFIG_ID,
-          version: 1,
-        };
-
-        await expect(factory.deployEquity(equityData, getRegulationData()))
-          .to.be.revertedWithCustomError(factory, "DuplicatedRole")
-          .withArgs(ATS_ROLES.ISSUER_ROLE);
-      });
-
-      it("GIVEN rbacs with factory as admin role WHEN deploying equity THEN reverts with FactoryCannotBeAdmin", async () => {
-        const emptyAdminRbacs: Rbac[] = [
-          {
-            role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
-            members: [await factory.getAddress()],
-          },
-        ];
-
-        const equityData = {
-          security: getSecurityData(businessLogicResolver, {
-            rbacs: emptyAdminRbacs,
-          }),
-          equityDetails: getEquityDetails(),
-        };
-        equityData.security.resolverProxyConfiguration = {
-          key: EQUITY_CONFIG_ID,
-          version: 1,
-        };
-
-        await expect(factory.deployEquity(equityData, getRegulationData())).to.be.revertedWithCustomError(
-          factory,
-          "FactoryCannotBeAdmin",
+          "NoInitialAdmins",
         );
       });
 
@@ -420,35 +344,11 @@ describe("Factory Tests", () => {
         );
       });
 
-      it("GIVEN msg.sender not in DEFAULT_ADMIN_ROLE rbacs WHEN deploying equity THEN reverts SenderNotAdmin", async () => {
-        const senderNotAdminRbacs: Rbac[] = [
-          {
-            role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
-            members: [signer_B.address],
-          },
-        ];
-
-        const equityData = {
-          security: getSecurityData(businessLogicResolver, {
-            rbacs: senderNotAdminRbacs,
-          }),
-          equityDetails: getEquityDetails(),
-        };
-        equityData.security.resolverProxyConfiguration = {
-          key: EQUITY_CONFIG_ID,
-          version: 1,
-        };
-
-        await expect(factory.deployEquity(equityData, getRegulationData()))
-          .to.be.revertedWithCustomError(factory, "SenderNotAdmin")
-          .withArgs(signer_A.address);
-      });
-
       it("GIVEN rbacs with admin role having valid address after zero address WHEN deploying equity THEN passes validation", async () => {
         const mixedAdminRbacs: Rbac[] = [
           {
             role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
-            members: [signer_B.address, signer_A.address],
+            members: [ADDRESS_ZERO, signer_A.address],
           },
         ];
 
@@ -474,7 +374,7 @@ describe("Factory Tests", () => {
           },
           {
             role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
-            members: [signer_A.address, signer_B.address],
+            members: [signer_B.address],
           },
         ];
 
@@ -1966,7 +1866,7 @@ describe("Factory Tests", () => {
 
       await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.revertedWithCustomError(
         factory,
-        "EmptyMembers",
+        "NoInitialAdmins",
       );
     });
 
@@ -1993,7 +1893,7 @@ describe("Factory Tests", () => {
 
       await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.revertedWithCustomError(
         factory,
-        "ZeroAddressNotAllowed",
+        "NoInitialAdmins",
       );
     });
 
@@ -2028,11 +1928,11 @@ describe("Factory Tests", () => {
       );
     });
 
-    it("GIVEN rbacs with admin role having other address followed by valid address WHEN deploying equity THEN transaction succeeds", async () => {
+    it("GIVEN rbacs with admin role having zero address followed by valid address WHEN deploying equity THEN transaction succeeds", async () => {
       const mixedAdminRbacs: Rbac[] = [
         {
           role: ATS_ROLES.DEFAULT_ADMIN_ROLE,
-          members: [signer_B.address, signer_A.address], // Zero address first, then valid address
+          members: [ADDRESS_ZERO, signer_A.address], // Zero address first, then valid address
         },
       ];
 

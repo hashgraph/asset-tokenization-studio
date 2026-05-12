@@ -5,6 +5,7 @@ import { ArraysUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/Arr
 import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import { _SNAPSHOT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import {
+    ISnapshots,
     Snapshots,
     SnapshotsAddress,
     PartitionSnapshots,

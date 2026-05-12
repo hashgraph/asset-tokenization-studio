@@ -266,7 +266,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
 
       // Initialize BLR
       const blr = BusinessLogicResolver__factory.connect(blrResult.proxyAddress, deployer);
-      await blr.initializeBusinessLogicResolver();
+      await blr.initialize_BusinessLogicResolver();
 
       // Deploy facets
       const facet1Factory = new AccessControlFacet__factory(deployer);
@@ -306,7 +306,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
 
       // Initialize BLR
       const blr = BusinessLogicResolver__factory.connect(blrResult.proxyAddress, deployer);
-      await blr.initializeBusinessLogicResolver();
+      await blr.initialize_BusinessLogicResolver();
 
       const facetFactory = new PauseFacet__factory(deployer);
       const facetResult = await deployContract(facetFactory, {});
@@ -442,7 +442,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
 
       // Initialize BLR
       const blr = BusinessLogicResolver__factory.connect(blrResult.proxyAddress, deployer);
-      await blr.initializeBusinessLogicResolver();
+      await blr.initialize_BusinessLogicResolver();
 
       // Step 4: Register facets in BLR
       const facetsWithKeys = facets.map(({ name }) => ({
@@ -487,7 +487,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
       });
 
       const blr = BusinessLogicResolver__factory.connect(blrResult.proxyAddress, deployer);
-      await blr.initializeBusinessLogicResolver();
+      await blr.initialize_BusinessLogicResolver();
 
       const facetsWithKeys = facets.map(({ name }) => ({
         name,
@@ -527,7 +527,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
 
       // Initialize BLR
       const blr = BusinessLogicResolver__factory.connect(blrResult.proxyAddress, deployer);
-      await blr.initializeBusinessLogicResolver();
+      await blr.initialize_BusinessLogicResolver();
 
       // Register TimeTravel facets (using base names as keys)
       const facetsWithKeys = facets.map(({ name }) => ({
@@ -559,7 +559,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
 
       // Initialize BLR
       const blr = BusinessLogicResolver__factory.connect(blrResult.proxyAddress, deployer);
-      await blr.initializeBusinessLogicResolver();
+      await blr.initialize_BusinessLogicResolver();
 
       const registerResult = await registerFacets(blr, {
         facets: [],

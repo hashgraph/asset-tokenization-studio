@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
+import { ERC1644StorageWrapper } from "../../domain/asset/ERC1644StorageWrapper.sol";
 import { _checkNotInitialized } from "../InitializationErrors.sol";
 
 /**

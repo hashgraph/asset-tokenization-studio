@@ -43,12 +43,12 @@ describe("Proceed Recipients Tests", () => {
   });
 
   describe("Initialization Tests", () => {
-    it("GIVEN a token WHEN initializing the proceed recipient again THEN it reverts with FacetAlreadyRegistered", async () => {
+    it("GIVEN a token WHEN initializing the proceed recipient again THEN it reverts with AlreadyInitialized", async () => {
       await expect(
-        asset.initializeProceedRecipients([PROCEED_RECIPIENT_1], [PROCEED_RECIPIENT_1_DATA], {
+        asset.initialize_ProceedRecipients([PROCEED_RECIPIENT_1], [PROCEED_RECIPIENT_1_DATA], {
           gasLimit: GAS_LIMIT.default,
         }),
-      ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+      ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
     });
   });
 

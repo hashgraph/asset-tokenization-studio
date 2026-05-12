@@ -160,7 +160,7 @@ describe("Multi-Registry Support - Integration Tests", () => {
 
     // Initialize BLR
     const blrContract = BusinessLogicResolver__factory.connect(blrResult.proxyAddress, deployer);
-    await blrContract.initializeBusinessLogicResolver();
+    await blrContract.initialize_BusinessLogicResolver();
   });
 
   describe("combineRegistries - No Conflicts", () => {

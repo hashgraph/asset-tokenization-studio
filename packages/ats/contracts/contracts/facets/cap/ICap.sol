@@ -103,16 +103,6 @@ interface ICap {
     function initializeCap(uint256 maxSupply, PartitionCap[] calldata partitionCap) external;
 
     /**
-     * @notice Marks the Cap facet as ready following a Diamond upgrade.
-     * @dev Called during upgrade re-initialisation. No storage migration is performed;
-     *      existing state carries over unchanged. Reverts if the facet was not previously
-     *      registered at one of the accepted config versions, or is already marked ready at
-     *      the current config version.
-     * @param fromVersions Accepted previous config versions for this upgrade path.
-     */
-    function reinitializeCap(uint256[] calldata fromVersions) external;
-
-    /**
      * @notice Updates the global maximum supply of the token.
      * @dev Requires `CAP_ROLE` and the token to be unpaused. The new cap must be non-zero and
      *      at least equal to the current adjusted total supply. Emits `MaxSupplySet`.

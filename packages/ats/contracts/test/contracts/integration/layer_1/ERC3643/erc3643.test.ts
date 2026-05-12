@@ -150,10 +150,10 @@ describe("ERC3643 Tests", () => {
     });
 
     describe("initialize", () => {
-      it("GIVEN an already initialized token WHEN attempting to initialize again THEN transaction fails with FacetAlreadyRegistered", async () => {
+      it("GIVEN an already initialized token WHEN attempting to initialize again THEN transaction fails with AlreadyInitialized", async () => {
         await expect(
-          asset.initializeERC3643(complianceMock.target as string, identityRegistryMock.target as string),
-        ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+          asset.initialize_ERC3643(complianceMock.target as string, identityRegistryMock.target as string),
+        ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
       });
     });
 

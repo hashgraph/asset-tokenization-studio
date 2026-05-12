@@ -159,7 +159,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
         verifyDeployment: false,
       });
       const newBlr = BusinessLogicResolver__factory.connect(newBlrResult.proxyAddress, deployer);
-      await newBlr.initializeBusinessLogicResolver();
+      await newBlr.initialize_BusinessLogicResolver();
 
       // Register facets in new BLR
       const facetNames = Object.keys(facetAddresses);

@@ -171,7 +171,7 @@ export const GAS_LIMIT = {
   max: 15_000_000,
   default: 3_000_000,
   low: 1_000_000,
-  high: 15_000_000,
+  high: 10_000_000,
   /** 2000 Gwei — must be set alongside gasLimit to skip eth_estimateGas on Hedera */
   gasPrice: 2_000_000_000_000n,
   initialize: {

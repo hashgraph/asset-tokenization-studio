@@ -116,7 +116,7 @@ export async function deployBlr(signer: Signer, options: DeployBlrOptions = {}):
       try {
         const blr = BusinessLogicResolver__factory.connect(blrAddress, signer);
 
-        const initTx = await blr.initializeBusinessLogicResolver({
+        const initTx = await blr.initialize_BusinessLogicResolver({
           gasLimit: GAS_LIMIT.initialize.businessLogicResolver,
           ...hederaGasOverrides(),
         });

@@ -358,12 +358,9 @@ describe("ProtectedPartitions Tests", () => {
     };
   });
 
-  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with FacetAlreadyRegistered", async () => {
+  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
     await setProtected();
-    await expect(asset.initializeProtectedPartitions(true)).to.be.revertedWithCustomError(
-      asset,
-      "FacetAlreadyRegistered",
-    );
+    await expect(asset.initialize_ProtectedPartitions(true)).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
   });
 
   describe("Generic set Partition Status Tests", () => {

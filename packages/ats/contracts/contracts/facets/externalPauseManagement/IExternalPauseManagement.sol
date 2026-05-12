@@ -65,16 +65,6 @@ interface IExternalPauseManagement {
     function initializeExternalPauses(address[] calldata _pauses) external;
 
     /**
-     * @notice Marks the ExternalPauseManagement facet as ready following a Diamond upgrade.
-     * @dev Called during upgrade re-initialisation. No storage migration is performed;
-     *      existing state carries over unchanged. Reverts if the facet was not previously
-     *      registered at one of the accepted config versions, or is already marked ready at
-     *      the current config version.
-     * @param fromVersions Accepted previous config versions for this upgrade path.
-     */
-    function reinitializeExternalPauses(uint256[] calldata fromVersions) external;
-
-    /**
      * @notice Adds or removes multiple external pause contracts in a single transaction.
      * @dev Requires `PAUSE_MANAGER_ROLE` and the token to be unpaused. Both arrays must have the
      *      same length and contain no duplicate addresses, validated by

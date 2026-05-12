@@ -10,6 +10,7 @@ import {
     ExternalListDataStorage
 } from "./ExternalListManagementStorageWrapper.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 struct PauseDataStorage {
     bool paused;

@@ -319,11 +319,11 @@ describe("ExternalControlList Management Tests", () => {
   });
 
   describe("Initialize Tests", () => {
-    it("GIVEN an already initialized contract WHEN initializeExternalControlLists is called again THEN it reverts with ContractFacetAlreadyRegistered", async () => {
+    it("GIVEN an already initialized contract WHEN initializeExternalControlLists is called again THEN it reverts with ContractAlreadyInitialized", async () => {
       const newControlLists = [externalWhitelistMock2.target as string];
       await expect(
         asset.connect(signer_A).initializeExternalControlLists(newControlLists),
-      ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+      ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
     });
   });
 

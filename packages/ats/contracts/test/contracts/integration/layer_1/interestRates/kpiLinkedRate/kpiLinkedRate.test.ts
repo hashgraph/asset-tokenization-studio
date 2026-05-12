@@ -44,9 +44,9 @@ describe("Kpi Linked Rate Tests", () => {
     await loadFixture(deploySecurityFixtureMultiPartition);
   });
 
-  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with FacetAlreadyRegistered", async () => {
+  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
     await expect(
-      kpiLinkedRateFacet.initializeKpiLinkedRate(
+      kpiLinkedRateFacet.initialize_KpiLinkedRate(
         {
           maxRate: 3,
           baseRate: 2,
@@ -65,7 +65,7 @@ describe("Kpi Linked Rate Tests", () => {
           adjustmentPrecision: 3,
         },
       ),
-    ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
   });
 
   describe("Paused", () => {

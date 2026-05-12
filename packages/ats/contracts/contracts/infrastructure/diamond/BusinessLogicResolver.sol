@@ -10,7 +10,8 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     error Unimplemented();
 
-    function initializeBusinessLogicResolver()
+    // solhint-disable-next-line func-name-mixedcase
+    function initialize_BusinessLogicResolver()
         external
         override
         onlyUninitialized(_businessLogicResolverStorage().initialized)

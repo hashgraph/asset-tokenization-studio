@@ -2,24 +2,22 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ISustainabilityPerformanceTargetRate } from "./ISustainabilityPerformanceTargetRate.sol";
-import { INTEREST_RATE_MANAGER_ROLE, DEFAULT_ADMIN_ROLE } from "../../../../constants/roles.sol";
+import { INTEREST_RATE_MANAGER_ROLE } from "../../../../constants/roles.sol";
 import { InterestRateStorageWrapper } from "../../../../domain/asset/InterestRateStorageWrapper.sol";
 import { ProceedRecipientsStorageWrapper } from "../../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
-import { InitializerStorageWrapper } from "../../../../domain/core/InitializerStorageWrapper.sol";
-import { _SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
 contract SustainabilityPerformanceTargetRate is ISustainabilityPerformanceTargetRate, Modifiers {
-    function initializeSustainabilityPerformanceTargetRate(
+    // solhint-disable-next-line func-name-mixedcase
+    function initialize_SustainabilityPerformanceTargetRate(
         InterestRate calldata _interestRate,
         ImpactData[] calldata _impactData,
         address[] calldata _projects
     )
         external
         override
-        onlyFacetNotRegistered(_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY)
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyNotSustainabilityPerformanceTargetRateInitialized
         onlyValidEqualLength(_impactData.length, _projects.length)
     {
         InterestRateStorageWrapper.initializeSustainabilityPerformanceTargetRate(
@@ -28,20 +26,6 @@ contract SustainabilityPerformanceTargetRate is ISustainabilityPerformanceTarget
             _projects,
             ProceedRecipientsStorageWrapper.isProceedRecipient
         );
-        InitializerStorageWrapper.setFacetToReady(_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY);
-    }
-
-    /// @inheritdoc ISustainabilityPerformanceTargetRate
-    function reinitializeSustainabilityPerformanceTargetRate(
-        uint256[] calldata fromVersions
-    )
-        external
-        override
-        onlyFacetRegistered(_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY, fromVersions)
-        onlyFacetNotReady(_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY)
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
-        InitializerStorageWrapper.setFacetToReady(_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY);
     }
 
     function setInterestRate(

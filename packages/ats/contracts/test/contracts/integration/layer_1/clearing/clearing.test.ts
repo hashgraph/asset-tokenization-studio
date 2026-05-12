@@ -3067,8 +3067,8 @@ describe("Clearing Tests", () => {
     });
 
     describe("onlyUninitialized modifier", () => {
-      it("GIVEN clearing already initialized WHEN calling initializeClearing THEN transaction fails with FacetAlreadyRegistered", async () => {
-        await expect(asset.initializeClearing(true)).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+      it("GIVEN clearing already initialized WHEN calling initializeClearing THEN transaction fails with AlreadyInitialized", async () => {
+        await expect(asset.initializeClearing(true)).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
       });
     });
 

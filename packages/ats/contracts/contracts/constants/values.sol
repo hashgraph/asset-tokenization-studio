@@ -170,8 +170,4 @@ bytes4 constant KPI_BOND_REDEEM_BALANCE = 0x00000009;
 /// @dev ID for KpiLinkedRateLib._getPreviousCouponRate()
 bytes4 constant KPI_LINKED_RATE_COUPON = 0x0000000A;
 
-/// @dev Max facets that can be fetched in a single BLR paginated query.
-/// @dev Pagination.getSize clamps to the actual count if fewer than 1024 exist.
-uint256 constant MAX_FACETS_PER_CONFIG = 1024;
-
-uint256 constant MAX_INITIALIZER_FACET_INDEX = 50;
+uint256 constant MAX_INITIALIZER_FACET_INDEX = 10;

@@ -9,6 +9,14 @@ import { DefaultValueValidation } from "../../../infrastructure/utils/DefaultVal
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
+    // solhint-disable-next-line func-name-mixedcase
+    function initialize_ProceedRecipients(
+        address[] calldata _proceedRecipients,
+        bytes[] calldata _data
+    ) external override onlyNotProceedRecipientsInitialized {
+        ProceedRecipientsStorageWrapper.initialize_ProceedRecipients(_proceedRecipients, _data);
+    }
+
     function addProceedRecipient(
         address _proceedRecipient,
         bytes calldata _data

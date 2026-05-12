@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _METADATA_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { IMetadata } from "../../facets/metadata/IMetadata.sol";
 
 /**
  * @notice Diamond storage layout for the metadata domain.

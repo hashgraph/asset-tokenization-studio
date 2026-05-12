@@ -3,10 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearing } from "./IClearing.sol";
 import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
-import { CLEARING_ROLE, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { CLEARING_ROLE } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
-import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { _CLEARING_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 import { ClearingStorageWrapper } from "../../domain/asset/ClearingStorageWrapper.sol";
 import { ClearingReadOps } from "../../domain/orchestrator/ClearingReadOps.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
@@ -24,24 +22,8 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract Clearing is IClearing, Modifiers {
     /// @inheritdoc IClearing
-    function initializeClearing(
-        bool _activateClearing
-    ) external override onlyFacetNotRegistered(_CLEARING_RESOLVER_KEY) onlyRole(DEFAULT_ADMIN_ROLE) {
+    function initializeClearing(bool _activateClearing) external override onlyNotClearingInitialized {
         ClearingStorageWrapper.initializeClearing(_activateClearing);
-        InitializerStorageWrapper.setFacetToReady(_CLEARING_RESOLVER_KEY);
-    }
-
-    /// @inheritdoc IClearing
-    function reinitializeClearing(
-        uint256[] calldata fromVersions
-    )
-        external
-        override
-        onlyFacetRegistered(_CLEARING_RESOLVER_KEY, fromVersions)
-        onlyFacetNotReady(_CLEARING_RESOLVER_KEY)
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
-        InitializerStorageWrapper.setFacetToReady(_CLEARING_RESOLVER_KEY);
     }
 
     /// @inheritdoc IClearing

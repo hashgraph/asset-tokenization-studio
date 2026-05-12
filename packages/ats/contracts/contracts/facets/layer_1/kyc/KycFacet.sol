@@ -13,9 +13,8 @@ contract KycFacet is Kyc, IStaticFunctionSelectors {
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](11);
+        staticFunctionSelectors_ = new bytes4[](10);
         staticFunctionSelectors_[selectorIndex++] = this.initializeInternalKyc.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.reinitializeInternalKyc.selector;
         staticFunctionSelectors_[selectorIndex++] = this.activateInternalKyc.selector;
         staticFunctionSelectors_[selectorIndex++] = this.deactivateInternalKyc.selector;
         staticFunctionSelectors_[selectorIndex++] = this.grantKyc.selector;

@@ -29,17 +29,8 @@ interface IERC20Votes is IERC5805 {
     /// @param currentClock The current clock value
     error FutureLookup(uint256 timepoint, uint256 currentClock);
 
-    function initializeERC20Votes(bool _activated) external;
-
-    /**
-     * @notice Marks the ERC20Votes facet as ready following a Diamond upgrade.
-     * @dev Called during upgrade re-initialisation. No storage migration is performed;
-     *      existing state carries over unchanged. Reverts if the facet was not previously
-     *      registered at one of the accepted config versions, or is already marked ready at
-     *      the current config version.
-     * @param fromVersions Accepted previous config versions for this upgrade path.
-     */
-    function reinitializeERC20Votes(uint256[] calldata fromVersions) external;
+    // solhint-disable-next-line func-name-mixedcase
+    function initialize_ERC20Votes(bool _activated) external;
 
     function isActivated() external view returns (bool);
 

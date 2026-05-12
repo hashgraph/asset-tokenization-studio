@@ -20,7 +20,7 @@ import {
   DEFAULT_BATCH_SIZE,
 } from "@scripts/infrastructure";
 import { BusinessLogicResolver } from "@contract-types";
-import { LOAN_CONFIG_ID, INITIALIZER_FACET_NAME } from "../constants";
+import { LOAN_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
 
 /**
@@ -202,20 +202,13 @@ export async function createLoanConfiguration(
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
   // Build facet data with resolver keys from registry
   const baseFacets = useTimeTravel ? [...LOAN_FACETS, "TimeTravelFacet"] : LOAN_FACETS;
-  const facetNames = [
-    ...(useTimeTravel
-      ? baseFacets.map((name) =>
-          name === "TimeTravelFacet" || name.endsWith("TimeTravel") ? name : `${name}TimeTravel`,
-        )
-      : baseFacets),
-    INITIALIZER_FACET_NAME,
-  ];
+  const facetNames = useTimeTravel
+    ? baseFacets.map((name) => (name === "TimeTravelFacet" || name.endsWith("TimeTravel") ? name : `${name}TimeTravel`))
+    : baseFacets;
 
   const facets = facetNames.map((name) => {
     const baseName = name.replace(/TimeTravel$/, "");
-    // MockInitializableFacet is the test-mode variant of InitializerFacet — same resolver key
-    const lookupName = baseName === INITIALIZER_FACET_NAME ? "InitializerFacet" : baseName;
-    const facetDef = atsRegistry.getFacetDefinition(lookupName);
+    const facetDef = atsRegistry.getFacetDefinition(baseName);
     if (!facetDef?.resolverKey?.value) {
       throw new Error(`No resolver key found for facet: ${baseName}`);
     }

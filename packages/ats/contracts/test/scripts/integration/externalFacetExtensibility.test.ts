@@ -66,7 +66,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
 
     // Initialize BLR
     blrContract = BusinessLogicResolver__factory.connect(blrResult.proxyAddress, deployer);
-    await blrContract.initializeBusinessLogicResolver();
+    await blrContract.initialize_BusinessLogicResolver();
   });
 
   describe("External Facet Registration", () => {

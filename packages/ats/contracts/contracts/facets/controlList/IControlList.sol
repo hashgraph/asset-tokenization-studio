@@ -54,16 +54,6 @@ interface IControlList {
     function initializeControlList(bool _isWhiteList) external;
 
     /**
-     * @notice Marks the ControlList facet as ready following a Diamond upgrade.
-     * @dev Called during upgrade re-initialisation. No storage migration is performed;
-     *      existing state carries over unchanged. Reverts if the facet was not previously
-     *      registered at one of the accepted config versions, or is already marked ready at
-     *      the current config version.
-     * @param fromVersions Accepted previous config versions for this upgrade path.
-     */
-    function reinitializeControlList(uint256[] calldata fromVersions) external;
-
-    /**
      * @notice Adds an address to the control list.
      * @dev Requires `CONTROL_LIST_ROLE` and the token to be unpaused. Reverts with
      *      `ListedAccount` if the address is already present. Emits `AddedToControlList`.

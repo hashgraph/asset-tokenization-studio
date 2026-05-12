@@ -64,8 +64,8 @@ describe("Controller Tests", () => {
       await loadFixture(deploySecurityFixtureSinglePartition);
     });
 
-    it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with FacetAlreadyRegistered", async () => {
-      await expect(asset.initializeController(false)).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
+      await expect(asset.initializeController(false)).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
     });
 
     describe("Paused", () => {

@@ -20,7 +20,7 @@ contract LoanFacet is Loan, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](3);
-        staticFunctionSelectors_[selectorIndex++] = this.initializeLoan.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.initialize_Loan.selector;
         staticFunctionSelectors_[selectorIndex++] = this.setLoanDetails.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getLoanDetails.selector;
     }

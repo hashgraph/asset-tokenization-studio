@@ -24,9 +24,8 @@ contract CapFacet is Cap, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](4);
+        staticFunctionSelectors_ = new bytes4[](3);
         staticFunctionSelectors_[selectorIndex++] = this.initializeCap.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.reinitializeCap.selector;
         staticFunctionSelectors_[selectorIndex++] = this.setMaxSupply.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getMaxSupply.selector;
     }

@@ -79,7 +79,7 @@ export async function deployBondSustainabilityPerformanceTargetRateFromFactory(
     proceedRecipientsData,
   } = bondDataParams;
 
-  // Build RBAC array with admin and factory (temporary admin for initialization)
+  // Build RBAC array with admin
   const rbacs: Rbac[] = [
     {
       role: ATS_ROLES.DEFAULT_ADMIN_ROLE,

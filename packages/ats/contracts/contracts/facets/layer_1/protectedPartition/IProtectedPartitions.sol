@@ -34,17 +34,8 @@ interface IProtectedPartitions {
     error PartitionsAreUnProtected();
     error PartitionsAreProtected();
 
-    function initializeProtectedPartitions(bool _arePartitionsProtected) external returns (bool success_);
-
-    /**
-     * @notice Marks the ProtectedPartitions facet as ready following a Diamond upgrade.
-     * @dev Called during upgrade re-initialisation. No storage migration is performed;
-     *      existing state carries over unchanged. Reverts if the facet was not previously
-     *      registered at one of the accepted config versions, or is already marked ready at
-     *      the current config version.
-     * @param fromVersions Accepted previous config versions for this upgrade path.
-     */
-    function reinitializeProtectedPartitions(uint256[] calldata fromVersions) external;
+    // solhint-disable-next-line func-name-mixedcase
+    function initialize_ProtectedPartitions(bool _arePartitionsProtected) external returns (bool success_);
 
     /**
      * @notice Activates the protected partitions mode

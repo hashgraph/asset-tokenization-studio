@@ -87,8 +87,8 @@ describe("Cap Tests", () => {
     ).to.be.revertedWithCustomError(asset, "NewMaxSupplyCannotBeZero");
   });
 
-  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with FacetAlreadyRegistered", async () => {
-    await expect(asset.initializeCap(5, [])).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
+    await expect(asset.initializeCap(5, [])).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
   });
 
   describe("Paused", () => {

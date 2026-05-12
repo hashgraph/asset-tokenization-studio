@@ -26,7 +26,6 @@ import {
     _checkRegulationTypeAndSubType,
     AdditionalSecurityData
 } from "../constants/regulation.sol";
-import { ZERO_ADDRESS } from "../constants/values.sol";
 import { IEquityUSA } from "../facets/layer_3/equityUSA/IEquityUSA.sol";
 import { IBondUSA } from "../facets/layer_3/bondUSA/IBondUSA.sol";
 import { IBondRead } from "../facets/layer_2/bond/IBondRead.sol";
@@ -41,8 +40,6 @@ import {
 import { IExternalKycListManagement } from "../facets/externalKycListManagement/IExternalKycListManagement.sol";
 import { IKyc } from "../facets/layer_1/kyc/IKyc.sol";
 import { IERC3643 } from "../facets/layer_1/ERC3643/IERC3643.sol";
-import { IInitializer } from "../facets/initializer/IInitializer.sol";
-import { IAccessControl } from "../facets/accessControl/IAccessControl.sol";
 import { _validateISIN } from "./isinValidator.sol";
 import { IFixedRate } from "../facets/layer_2/interestRate/fixedRate/IFixedRate.sol";
 import { IKpiLinkedRate } from "../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
@@ -53,12 +50,13 @@ import {
 } from "../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 import { EvmAccessors } from "../infrastructure/utils/EvmAccessors.sol";
 import { DatesValidation } from "../infrastructure/utils/DatesValidation.sol";
-import { DefaultValueValidation } from "../infrastructure/utils/DefaultValueValidation.sol";
 /* solhint-enable max-line-length */
 
 contract Factory is IFactory {
     modifier checkResolver(IBusinessLogicResolver resolver) {
-        _checkEmptyResolver(resolver);
+        if (address(resolver) == address(0)) {
+            revert EmptyResolver(resolver);
+        }
         _;
     }
 
@@ -68,7 +66,32 @@ contract Factory is IFactory {
     }
 
     modifier checkAdmins(IResolverProxy.Rbac[] calldata rbacs) {
-        _checkAdmins(rbacs);
+        bool adminFound;
+
+        // Looking for admin role within initialization rbacas in order to add the factory
+        for (uint256 rbacsIndex = 0; rbacsIndex < rbacs.length; rbacsIndex++) {
+            if (rbacs[rbacsIndex].role == DEFAULT_ADMIN_ROLE) {
+                if (rbacs[rbacsIndex].members.length > 0) {
+                    for (
+                        uint256 adminMemberIndex = 0;
+                        adminMemberIndex < rbacs[rbacsIndex].members.length;
+                        adminMemberIndex++
+                    ) {
+                        if (rbacs[rbacsIndex].members[adminMemberIndex] != address(0)) {
+                            adminFound = true;
+                            break;
+                        }
+                    }
+                    if (adminFound) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!adminFound) {
+            revert NoInitialAdmins();
+        }
         _;
     }
 
@@ -129,8 +152,6 @@ contract Factory is IFactory {
             _equityData.equityDetails.nominalValueDecimals
         );
 
-        _finalizeDeployment(equityAddress_);
-
         emit EquityDeployed(EvmAccessors.getMsgSender(), equityAddress_, _equityData, _factoryRegulationData);
     }
 
@@ -147,8 +168,6 @@ contract Factory is IFactory {
         returns (address bondAddress_)
     {
         bondAddress_ = _deployBond(_bondData, _factoryRegulationData, SecurityType.BondVariableRate);
-
-        _finalizeDeployment(bondAddress_);
 
         emit BondDeployed(EvmAccessors.getMsgSender(), bondAddress_, _bondData, _factoryRegulationData);
     }
@@ -178,8 +197,6 @@ contract Factory is IFactory {
 
         // Initialize fixed rate (FixedRateFacet may not be present)
         _tryInitialize_FixedRate(bondAddress_, _bondFixedRateData.fixedRateData);
-
-        _finalizeDeployment(bondAddress_);
 
         emit BondFixedRateDeployed(EvmAccessors.getMsgSender(), bondAddress_, _bondFixedRateData);
     }
@@ -269,8 +286,6 @@ contract Factory is IFactory {
 
         // Initialize KPI linked rate (KpiLinkedRateFacet may not be present)
         _tryInitialize_KpiLinkedRate(bondAddress_, _data.interestRate, _data.impactData);
-
-        _finalizeDeployment(bondAddress_);
     }
 
     function _deployBondSustainabilityPerformanceTargetRate(
@@ -286,8 +301,6 @@ contract Factory is IFactory {
             _data.impactData,
             _data.projects
         );
-
-        _finalizeDeployment(bondAddress_);
     }
 
     function _deploySecurity(
@@ -298,13 +311,10 @@ contract Factory is IFactory {
             _securityData.resolver,
             _securityData.resolverProxyConfiguration.key,
             _securityData.resolverProxyConfiguration.version,
-            _buildFinalFactory(_securityData.rbacs)
+            _securityData.rbacs
         );
 
         securityAddress_ = address(equity);
-
-        // Initialise the Initializer facet itself (stateful, must be first).
-        IInitializer(securityAddress_).initializeInitializer();
 
         // configure Control List
         IControlList(securityAddress_).initializeControlList(_securityData.isWhiteList);
@@ -329,7 +339,7 @@ contract Factory is IFactory {
         ICap(securityAddress_).initializeCap(_securityData.maxSupply, new ICap.PartitionCap[](0));
 
         // configure protected partitions (should be present)
-        IProtectedPartitions(securityAddress_).initializeProtectedPartitions(_securityData.arePartitionsProtected);
+        IProtectedPartitions(securityAddress_).initialize_ProtectedPartitions(_securityData.arePartitionsProtected);
 
         // configure clearing (ClearingFacet may not be present)
         _tryInitializeClearing(securityAddress_, _securityData.clearingActive);
@@ -352,23 +362,11 @@ contract Factory is IFactory {
         _tryInitialize_ERC20Votes(securityAddress_, _securityData.erc20VotesActivated);
 
         // configure ERC3643 (should be present)
-        IERC3643(securityAddress_).initializeERC3643(_securityData.compliance, _securityData.identityRegistry);
-    }
-
-    /**
-     * @dev Verifies all facets ready and revokes the factory's temporary admin role.
-     *   Reverts with AssetNotOperational if any facet has not marked itself ready.
-     *   Unreachable in the initial deploy (facetLastVersion == 0 triggers D1-A auto-approve).
-     *   Becomes live during upgrade re-initialisation when a facet was registered but not reinitialised.
-     * @param securityAddress_ The deployed proxy address.
-     */
-    function _finalizeDeployment(address securityAddress_) private {
-        IInitializer(securityAddress_).setOperationalStatus();
-        IAccessControl(securityAddress_).revokeRole(DEFAULT_ADMIN_ROLE, address(this));
+        IERC3643(securityAddress_).initialize_ERC3643(_securityData.compliance, _securityData.identityRegistry);
     }
 
     function _tryInitialize_ERC1410(address securityAddress_, bool isMultiPartition) private {
-        try IERC1410(securityAddress_).initializeERC1410(isMultiPartition) {
+        try IERC1410(securityAddress_).initialize_ERC1410(isMultiPartition) {
             // success
         } catch {
             // facet not present - skip initialization
@@ -384,7 +382,7 @@ contract Factory is IFactory {
     }
 
     function _tryInitialize_ERC1594(address securityAddress_) private {
-        try IMint(securityAddress_).initializeERC1594() {
+        try IMint(securityAddress_).initialize_ERC1594() {
             // success
         } catch {
             // facet not present - skip initialization
@@ -400,7 +398,7 @@ contract Factory is IFactory {
     }
 
     function _tryInitialize_ERC20Votes(address securityAddress_, bool erc20VotesActivated) private {
-        try IERC20Votes(securityAddress_).initializeERC20Votes(erc20VotesActivated) {
+        try IERC20Votes(securityAddress_).initialize_ERC20Votes(erc20VotesActivated) {
             // success
         } catch {
             // facet not present - skip initialization
@@ -443,7 +441,7 @@ contract Factory is IFactory {
         address securityAddress_,
         IFixedRate.FixedRateData calldata fixedRateData
     ) private {
-        try IFixedRate(securityAddress_).initializeFixedRate(fixedRateData) {
+        try IFixedRate(securityAddress_).initialize_FixedRate(fixedRateData) {
             // success
         } catch {
             // facet not present - skip initialization
@@ -455,7 +453,7 @@ contract Factory is IFactory {
         IKpiLinkedRate.InterestRate calldata interestRate,
         IKpiLinkedRate.ImpactData calldata impactData
     ) private {
-        try IKpiLinkedRate(securityAddress_).initializeKpiLinkedRate(interestRate, impactData) {
+        try IKpiLinkedRate(securityAddress_).initialize_KpiLinkedRate(interestRate, impactData) {
             // success
         } catch {
             // facet not present - skip initialization
@@ -469,7 +467,7 @@ contract Factory is IFactory {
         address[] calldata projects
     ) private {
         try
-            ISustainabilityPerformanceTargetRate(securityAddress_).initializeSustainabilityPerformanceTargetRate(
+            ISustainabilityPerformanceTargetRate(securityAddress_).initialize_SustainabilityPerformanceTargetRate(
                 interestRate,
                 impactData,
                 projects
@@ -493,7 +491,7 @@ contract Factory is IFactory {
         address[] calldata proceedRecipients,
         bytes[] calldata data
     ) private {
-        try IProceedRecipients(securityAddress_).initializeProceedRecipients(proceedRecipients, data) {
+        try IProceedRecipients(securityAddress_).initialize_ProceedRecipients(proceedRecipients, data) {
             // success
         } catch {
             // facet not present - skip initialization
@@ -505,7 +503,7 @@ contract Factory is IFactory {
         uint256 nominalValue,
         uint8 nominalValueDecimals
     ) private {
-        try INominalValue(securityAddress_).initializeNominalValue(nominalValue, nominalValueDecimals) {
+        try INominalValue(securityAddress_).initialize_NominalValue(nominalValue, nominalValueDecimals) {
             // success
         } catch {
             // facet not present - skip initialization
@@ -522,114 +520,5 @@ contract Factory is IFactory {
     function _checkBondDates(uint256 startingDate, uint256 maturityDate) private view {
         DatesValidation.checkDates(startingDate, maturityDate);
         ScheduledTasksStorageWrapper.requireValidTimestamp(maturityDate);
-    }
-
-    function _checkAdmins(IResolverProxy.Rbac[] calldata rbacs) private view {
-        _checkDuplicatedRolesAndMembers(rbacs);
-        uint256 index = _findAdminRoleIndex(rbacs);
-        address sender = EvmAccessors.getMsgSender();
-        address factoryAddress = address(this);
-        bool senderFound;
-        uint256 length = rbacs[index].members.length;
-
-        for (uint256 j; j < length; ) {
-            address member = rbacs[index].members[j];
-            if (member == factoryAddress) revert IFactory.FactoryCannotBeAdmin();
-            senderFound = senderFound || member == sender;
-            if (senderFound && j > 0) return;
-            unchecked {
-                ++j;
-            }
-        }
-
-        if (!senderFound) revert SenderNotAdmin(sender);
-    }
-
-    function _checkDuplicatedRolesAndMembers(IResolverProxy.Rbac[] calldata rbacs) private view {
-        bytes32 currentRole;
-        uint256 length = rbacs.length;
-        for (uint256 i; i < length; ) {
-            currentRole = rbacs[i].role;
-            _checkRbacMembers(currentRole, rbacs[i].members);
-            unchecked {
-                ++i;
-            }
-            for (uint256 j = i; j < length; ) {
-                if (currentRole == rbacs[j].role) revert IFactory.DuplicatedRole(currentRole);
-                unchecked {
-                    ++j;
-                }
-            }
-        }
-    }
-
-    function _checkRbacMembers(bytes32 role, address[] calldata members) private view {
-        address currentMember;
-        uint256 length = members.length;
-        if (length == 0) revert IFactory.EmptyMembers(role);
-        for (uint256 i; i < length; ) {
-            currentMember = members[i];
-            DefaultValueValidation.checkZeroAddress(currentMember);
-            unchecked {
-                ++i;
-            }
-            for (uint256 j = i; j < length; ) {
-                if (currentMember == members[j]) revert IFactory.DuplicatedMember(role, currentMember);
-                unchecked {
-                    ++j;
-                }
-            }
-        }
-    }
-
-    function _buildFinalFactory(
-        IResolverProxy.Rbac[] calldata original
-    ) private view returns (IResolverProxy.Rbac[] memory rbacs) {
-        uint256 length = original.length;
-        rbacs = new IResolverProxy.Rbac[](length);
-        for (uint256 i; i < length; ) {
-            rbacs[i] = _buildRbacWithFactory(original[i]);
-            unchecked {
-                ++i;
-            }
-        }
-    }
-
-    function _buildRbacWithFactory(
-        IResolverProxy.Rbac calldata original
-    ) private view returns (IResolverProxy.Rbac memory rbac) {
-        if (original.role != DEFAULT_ADMIN_ROLE) return original;
-        rbac = IResolverProxy.Rbac({ role: original.role, members: _addFactoryToMembers(original.members) });
-    }
-
-    function _addFactoryToMembers(address[] memory members) private view returns (address[] memory membersWithFactory) {
-        uint256 membersLength = members.length;
-        unchecked {
-            membersWithFactory = new address[](membersLength + 1);
-        }
-        for (uint256 i; i < membersLength; ) {
-            membersWithFactory[i] = members[i];
-            unchecked {
-                ++i;
-            }
-        }
-        membersWithFactory[membersLength] = address(this);
-    }
-
-    function _checkEmptyResolver(IBusinessLogicResolver resolver) private pure {
-        if (address(resolver) == ZERO_ADDRESS) {
-            revert EmptyResolver(resolver);
-        }
-    }
-
-    function _findAdminRoleIndex(IResolverProxy.Rbac[] calldata rbacs) private pure returns (uint256 index) {
-        uint256 length = rbacs.length;
-        for (; index < length; ) {
-            if (rbacs[index].role == DEFAULT_ADMIN_ROLE) return index;
-            unchecked {
-                ++index;
-            }
-        }
-        revert NoInitialAdmins();
     }
 }

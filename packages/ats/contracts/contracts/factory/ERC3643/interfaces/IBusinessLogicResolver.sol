@@ -55,7 +55,7 @@ interface TRexIBusinessLogicResolver is IDiamondCutManager {
     error ZeroKeyNotValidForBusinessLogic();
 
     // solhint-disable-next-line func-name-mixedcase
-    function initializeBusinessLogicResolver() external returns (bool success_);
+    function initialize_BusinessLogicResolver() external returns (bool success_);
 
     /**
      * @notice Update existing business logics addresses or add new business logics to the register.

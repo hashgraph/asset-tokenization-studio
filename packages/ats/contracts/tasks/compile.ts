@@ -67,7 +67,7 @@ task("erc3643-clone-interfaces", async (_, hre) => {
   }
   const targetDir = hre.config.paths.sources + "/factory/ERC3643/interfaces";
   const interfacesToClone: DataSustitution[] = [
-    { original: "IAccessControl", removeHierarchy: true },
+    { original: "IAccessControl" },
     { original: "IBondTypes" },
     { original: "IBondRead", removeImports: false, removeHierarchy: false },
     {
@@ -84,15 +84,14 @@ task("erc3643-clone-interfaces", async (_, hre) => {
       removeImports: false,
       removeHierarchy: false,
     },
-    { original: "IEquity", removeHierarchy: true },
+    { original: "IEquity" },
     { original: "IFactory", removeImports: false },
-    { original: "IResolverProxy", removeHierarchy: true },
-    { original: "IStaticFunctionSelectors", removeHierarchy: true },
+    { original: "IResolverProxy" },
+    { original: "IStaticFunctionSelectors" },
     { original: "ICore", removeImports: false },
     // Coupon Interest Rates interfaces
-    { original: "IFixedRate", removeHierarchy: true },
-    { original: "IKpiLinkedRate", removeImports: false, removeHierarchy: false },
-    { original: "IKpiLinkedRateErrors" },
+    { original: "IFixedRate" },
+    { original: "IKpiLinkedRate" },
     {
       original: "ICouponListing",
       removeImports: false,
@@ -103,7 +102,7 @@ task("erc3643-clone-interfaces", async (_, hre) => {
     original: i.original,
     removeImports: i.removeImports ?? true,
     changePragma: i.changePragma ?? true,
-    removeHierarchy: i.removeHierarchy ?? false,
+    removeHierarchy: i.removeHierarchy ?? true,
   }));
 
   const constants = [
@@ -144,7 +143,6 @@ task("erc3643-clone-interfaces", async (_, hre) => {
   await Promise.all(
     normalized.map(async (i) => {
       const originalArtifact = await hre.artifacts.readArtifact(i.original);
-      const targetPath = `${targetDir}/${originalArtifact.contractName}.sol`;
       let erc3643Artifact: Artifact | undefined;
       try {
         const parts = i.original.split(":");
@@ -154,9 +152,7 @@ task("erc3643-clone-interfaces", async (_, hre) => {
       }
 
       const shouldGenerate =
-        !erc3643Artifact ||
-        !fs.existsSync(targetPath) ||
-        JSON.stringify(originalArtifact.abi) !== JSON.stringify(erc3643Artifact.abi);
+        !erc3643Artifact || JSON.stringify(originalArtifact.abi) !== JSON.stringify(erc3643Artifact.abi);
 
       if (!shouldGenerate) {
         console.log(`Did not generate ${i.original} because an up-to-date version already exists`);
@@ -181,6 +177,7 @@ task("erc3643-clone-interfaces", async (_, hre) => {
         i.removeHierarchy ? `$1 TRex${originalArtifact.contractName}` : `$1 TRex${originalArtifact.contractName}$2`,
       );
 
+      const targetPath = `${targetDir}/${originalArtifact.contractName}.sol`;
       const header = autoGenHeader(originalArtifact.sourceName);
       fs.writeFileSync(targetPath, injectHeader(source, header), "utf8");
       console.log(`Generated: ${targetPath}`);

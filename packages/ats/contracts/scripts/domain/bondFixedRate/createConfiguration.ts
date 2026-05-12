@@ -19,7 +19,7 @@ import {
   OperationResult,
   DEFAULT_BATCH_SIZE,
 } from "@scripts/infrastructure";
-import { BOND_FIXED_RATE_CONFIG_ID, INITIALIZER_FACET_NAME, atsRegistry } from "@scripts/domain";
+import { BOND_FIXED_RATE_CONFIG_ID, atsRegistry } from "@scripts/domain";
 import { BusinessLogicResolver } from "@contract-types";
 
 /**
@@ -208,17 +208,15 @@ export async function createBondFixedRateConfiguration(
   // When useTimeTravel=true, ALL facets get TimeTravel suffix (universal mapping)
   // plus TimeTravelFacet controller. No filtering needed — simplifies deployment logic.
   const facetNames = useTimeTravel
-    ? [...BOND_FIXED_RATE_FACETS.map((name) => `${name}TimeTravel`), "TimeTravelFacet", INITIALIZER_FACET_NAME]
-    : [...BOND_FIXED_RATE_FACETS, INITIALIZER_FACET_NAME];
+    ? [...BOND_FIXED_RATE_FACETS.map((name) => `${name}TimeTravel`), "TimeTravelFacet"]
+    : [...BOND_FIXED_RATE_FACETS];
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {
     // Strip "TimeTravel" suffix to get base name for registry lookup
     const baseName = name.replace(/TimeTravel$/, "");
-    // MockInitializableFacet is the test-mode variant of InitializerFacet — same resolver key
-    const lookupName = baseName === INITIALIZER_FACET_NAME ? "InitializerFacet" : baseName;
 
-    const facetDef = atsRegistry.getFacetDefinition(lookupName);
+    const facetDef = atsRegistry.getFacetDefinition(baseName);
     if (!facetDef?.resolverKey?.value) {
       throw new Error(`No resolver key found for facet: ${baseName}`);
     }

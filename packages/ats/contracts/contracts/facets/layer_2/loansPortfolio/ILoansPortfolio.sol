@@ -54,16 +54,6 @@ interface ILoansPortfolio is ILoansPortfolioStorageWrapper {
         AdditionalSecurityData calldata _additionalSecurityData
     ) external;
 
-    /**
-     * @notice Marks the LoansPortfolio facet as ready following a Diamond upgrade.
-     * @dev Called during upgrade re-initialisation. No storage migration is performed;
-     *      existing state carries over unchanged. Reverts if the facet was not previously
-     *      registered at one of the accepted config versions, or is already marked ready at
-     *      the current config version.
-     * @param fromVersions Accepted previous config versions for this upgrade path.
-     */
-    function reinitializeLoansPortfolio(uint256[] calldata fromVersions) external;
-
     function addHoldingsAsset(HoldingsAsset memory _holdingsAsset) external returns (bool success_);
 
     function removeHoldingsAsset(HoldingsAsset memory _holdingsAsset) external returns (bool success_);

@@ -84,8 +84,8 @@ describe("ERC20Votes Tests", () => {
   });
 
   describe("Initialization", () => {
-    it("GIVEN a initialized ERC20Votes WHEN initialize again THEN transaction fails with FacetAlreadyRegistered", async () => {
-      await expect(asset.initializeERC20Votes(true)).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    it("GIVEN a initialized ERC20Votes WHEN initialize again THEN transaction fails with AlreadyInitialized", async () => {
+      await expect(asset.initialize_ERC20Votes(true)).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
     });
 
     it("GIVEN ERC20Votes activated WHEN calling isActivated THEN returns true", async () => {

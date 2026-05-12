@@ -21,14 +21,13 @@ contract MintFacet is Mint, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 5;
+        uint256 selectorIndex = 4;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);
         unchecked {
             staticFunctionSelectors_[--selectorIndex] = this.mint.selector;
             staticFunctionSelectors_[--selectorIndex] = this.issue.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.reinitializeMint.selector;
             staticFunctionSelectors_[--selectorIndex] = this.isIssuable.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.initializeERC1594.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.initialize_ERC1594.selector;
         }
     }
 

@@ -98,21 +98,12 @@ interface ILoan {
 
     event LoanDetailsSet(LoanDetailsData loanDetails);
 
-    function initializeLoan(
+    // solhint-disable-next-line func-name-mixedcase
+    function initialize_Loan(
         LoanDetailsData calldata _loanDetailsData,
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
     ) external;
-
-    /**
-     * @notice Marks the Loan facet as ready following a Diamond upgrade.
-     * @dev Called during upgrade re-initialisation. No storage migration is performed;
-     *      existing state carries over unchanged. Reverts if the facet was not previously
-     *      registered at one of the accepted config versions, or is already marked ready at
-     *      the current config version.
-     * @param fromVersions Accepted previous config versions for this upgrade path.
-     */
-    function reinitializeLoan(uint256[] calldata fromVersions) external;
 
     /**
      * @dev Set the loan details
