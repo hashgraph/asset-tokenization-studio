@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset, type NominalValueMigrationFacetTest } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { BOND_CONFIG_ID, EQUITY_CONFIG_ID } from "@scripts";
+import { BOND_CONFIG_ID, EQUITY_CONFIG_ID, ATS_ROLES } from "@scripts";
 import { deployBondTokenFixture, deployEquityTokenFixture } from "@test";
 
 async function addMigrationFacetToDiamond(base: Awaited<ReturnType<typeof deployBondTokenFixture>>, configId: string) {
@@ -349,6 +349,49 @@ describe("NominalValue Migration Tests", () => {
 
     it("GIVEN a user without _NOMINAL_VALUE_ROLE WHEN setNominalValue THEN reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_B).setNominalValue(500, 4)).to.be.rejectedWith("AccountHasNoRole");
+    });
+  });
+
+  describe("Snapshots Nominal Value", () => {
+    let diamond: ResolverProxy;
+    let signer_A: HardhatEthersSigner;
+
+    let asset: IAsset;
+
+    async function deployBondFixture() {
+      const base = await deployBondTokenFixture();
+
+      diamond = base.diamond;
+      signer_A = base.deployer;
+
+      asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
+    }
+
+    beforeEach(async () => {
+      await loadFixture(deployBondFixture);
+    });
+
+    it("GIVEN nominal value WHEN taking a snapshot THEN nominal value get's snapshotted", async () => {
+      const NominalValueBefore = 500;
+      const NominalValueDecimalsBefore = 4;
+      const NominalValueAfter = 300;
+      const NominalValueDecimalsAfter = 1;
+
+      await asset.grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_A.address);
+
+      await asset.connect(signer_A).setNominalValue(NominalValueBefore, NominalValueDecimalsBefore);
+
+      await asset.connect(signer_A).takeSnapshot();
+
+      await asset.connect(signer_A).setNominalValue(NominalValueAfter, NominalValueDecimalsAfter);
+
+      const nominalValueAtSnapshot = await asset.nominalValueAtSnapshot(1);
+      const nominalValueDecimalsAtSnapshot = await asset.nominalValueDecimalsAtSnapshot(1);
+
+      expect(await asset.getNominalValue()).to.equal(NominalValueAfter);
+      expect(await asset.getNominalValueDecimals()).to.equal(NominalValueDecimalsAfter);
+      expect(nominalValueAtSnapshot).to.equal(NominalValueBefore);
+      expect(nominalValueDecimalsAtSnapshot).to.equal(NominalValueDecimalsBefore);
     });
   });
 });

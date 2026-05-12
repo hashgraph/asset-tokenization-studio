@@ -4,6 +4,8 @@ pragma solidity >=0.8.0 <0.9.0;
 import { BondStorageWrapper } from "../BondStorageWrapper.sol";
 import { EquityStorageWrapper } from "../EquityStorageWrapper.sol";
 import { _NOMINAL_VALUE_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
+import { SnapshotsStorageWrapper } from "../SnapshotsStorageWrapper.sol";
+import { ScheduledTasksStorageWrapper } from "../ScheduledTasksStorageWrapper.sol";
 
 /**
  * @title NominalValueStorageWrapper - Nominal Value Storage Wrapper
@@ -51,6 +53,11 @@ library NominalValueStorageWrapper {
     function setNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) internal {
         migrateBondNominalValue();
         migrateEquityNominalValue();
+
+        ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();
+
+        SnapshotsStorageWrapper.updateNominalValueSnapshot();
+        SnapshotsStorageWrapper.updateNominalValueDecimalsSnapshot();
 
         NominalValueDataStorage storage nvData_ = _nominalValueStorage();
         nvData_.nominalValue = _nominalValue;

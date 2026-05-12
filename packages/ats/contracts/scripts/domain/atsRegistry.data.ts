@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-11T13:27:01.689Z
- * Facets: 123
+ * Generated: 2026-05-12T10:08:29.647Z
+ * Facets: 124
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -102,6 +102,7 @@ import {
   MetadataFacet__factory,
   MintByPartitionFacet__factory,
   MintFacet__factory,
+  NominalValueAtSnapshotFacet__factory,
   NominalValueFacet__factory,
   NoncesFacet__factory,
   OperatorByPartitionFacet__factory,
@@ -4425,7 +4426,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCouponFor",
         signature: {
-          full: "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint256 nominalValue, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, (uint256 numerator, uint256 denominator, bool recordDateReached) couponAmount, bool isDisabled) couponFor_)",
+          full: "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, uint256 nominalValue, uint256 nominalValueDecimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, (uint256 numerator, uint256 denominator, bool recordDateReached) couponAmount, bool isDisabled) couponFor_)",
           canonical: "getCouponFor(uint256,address)",
         },
         selector: "0xbba7b56d",
@@ -4645,7 +4646,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCouponsFor",
         signature: {
-          full: "function getCouponsFor(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 tokenBalance, uint256 nominalValue, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, (uint256 numerator, uint256 denominator, bool recordDateReached) couponAmount, bool isDisabled)[] couponFor_, address[] holders_)",
+          full: "function getCouponsFor(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 tokenBalance, uint8 decimals, uint256 nominalValue, uint256 nominalValueDecimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, (uint256 numerator, uint256 denominator, bool recordDateReached) couponAmount, bool isDisabled)[] couponFor_, address[] holders_)",
           canonical: "getCouponsFor(uint256,uint256,uint256)",
         },
         selector: "0x7327ad90",
@@ -9432,6 +9433,50 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     factory: (signer) => new MintFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
+  NominalValueAtSnapshotFacet: {
+    name: "NominalValueAtSnapshotFacet",
+    description: "NominalValueAtSnapshotFacet",
+    resolverKey: {
+      name: "_NOMINAL_VALUE_AT_SNAPSHOT_RESOLVER_KEY",
+      value: "0xa9eb978fb9b2f23119fbe6dc3a3f6010398d58b37b5221961eaa584486c8c6fb",
+    },
+    inheritance: ["NominalValueAtSnapshot", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "nominalValueAtSnapshot",
+        signature: {
+          full: "function nominalValueAtSnapshot(uint256 _snapshotID) view returns (uint256 nominalValue_)",
+          canonical: "nominalValueAtSnapshot(uint256)",
+        },
+        selector: "0x526ce5ee",
+      },
+      {
+        name: "nominalValueDecimalsAtSnapshot",
+        signature: {
+          full: "function nominalValueDecimalsAtSnapshot(uint256 _snapshotID) view returns (uint8 nominalValueDecimals_)",
+          canonical: "nominalValueDecimalsAtSnapshot(uint256)",
+        },
+        selector: "0x1fed7107",
+      },
+    ],
+    errors: [
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+    ],
+    factory: (signer) => new NominalValueAtSnapshotFacet__factory(signer),
+  },
+
   NominalValueFacet: {
     name: "NominalValueFacet",
     resolverKey: {
@@ -13985,7 +14030,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 123 as const;
+export const TOTAL_FACETS = 124 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
