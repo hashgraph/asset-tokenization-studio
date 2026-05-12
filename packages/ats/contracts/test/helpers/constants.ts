@@ -1206,12 +1206,56 @@ export const TEST_OPTIONS = {
 } as const;
 
 // ============================================================================
+// Coupon Domain
+// ============================================================================
+
+/**
+ * Coupon-domain test constants.
+ *
+ * Mirror the on-chain `ICouponTypes.RateCalculationStatus` enum and the
+ * deterministic ids returned by `CouponStorageWrapper` so individual test files
+ * never hand-craft these values.
+ */
+export const TEST_COUPON = {
+  /** Mirrors `ICouponTypes.RateCalculationStatus` ordinals. */
+  RATE_STATUS: { PENDING: 0, SET: 1 },
+  /** One-indexed identifier of the first coupon scheduled in a fresh deployment. */
+  FIRST_ID: 1,
+  /** Deterministic `corporateActionId` of the first coupon corporate action in a fresh deployment. */
+  FIRST_CORPORATE_ACTION_ID: "0x0000000000000000000000000000000000000000000000000000000000000001",
+  /**
+   * Seconds offsets (relative to a base timestamp) used by tests to schedule
+   * a coupon comfortably in the future. Values must satisfy
+   * `RECORD_OFFSET_S < EXECUTION_OFFSET_S` and leave enough headroom for the
+   * test to advance the clock between the two without exhausting them.
+   */
+  TIMING: {
+    /** Seconds added to the base timestamp to obtain `recordDate`. */
+    RECORD_OFFSET_S: 400,
+    /** Seconds added to the base timestamp to obtain `executionDate` (and `fixingDate`). */
+    EXECUTION_OFFSET_S: 1200,
+  },
+} as const;
+
+/**
+ * Default fixed-rate bond fixture parameters mirrored as test-side expectations.
+ *
+ * Kept in sync with `DEFAULT_BOND_FIXED_RATE_PARAMS` in `test/fixtures/tokens/bondFixedRate.fixture.ts`.
+ * Tests using `deployBondFixedRateTokenFixture` with default `fixedRateParams` should
+ * assert against these values.
+ */
+export const TEST_BOND_FIXED_RATE = {
+  RATE: 50,
+  RATE_DECIMALS: 1,
+} as const;
+
+// ============================================================================
 // Event Names
 // ============================================================================
 
 /**
- * Event names emitted by ATS contract facets, used by the chai `to.emit(...)` matcher
- * and by topic-hash filters in tests.
+ * Event names emitted by ATS contract facets, used by the chai `to.emit(...)` matcher,
+ * the `expectExactlyOneEvent` helper, and topic-hash filters in tests.
  *
  * Centralising event-name strings here:
  * - keeps test files free of magic strings (per the project's no-magic-strings rule);
@@ -1224,6 +1268,13 @@ export const TEST_OPTIONS = {
  * back to the source.
  */
 export const EVENT_NAMES = {
+  /**
+   * Emitted by `Coupon.setCoupon` (covers every bond rate variant — the unified
+   * writer dispatches in `CouponStorageWrapper`).
+   */
+  COUPON_SET: "CouponSet",
+  /** Emitted by `Coupon.cancelCoupon`. */
+  COUPON_CANCELLED: "CouponCancelled",
   /** Emitted by `ProtectedByPartitionFacet.protectedTransferFromByPartition`. */
   PROTECTED_TRANSFERRED_BY_PARTITION: "ProtectedTransferredByPartition",
   /** Emitted by `ProtectedByPartitionFacet.protectedRedeemFromByPartition`. */

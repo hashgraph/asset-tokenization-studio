@@ -60,11 +60,11 @@ describe("OperatorByPartitionFacet Tests", () => {
   // ─── authorizeOperatorByPartition ────────────────────────────────────────────
 
   describe("authorizeOperatorByPartition", () => {
-    it("GIVEN a paused token WHEN authorizeOperatorByPartition THEN reverts with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN authorizeOperatorByPartition THEN reverts with IsPaused", async () => {
       await asset.pause();
       await expect(
         asset.connect(signer_A).authorizeOperatorByPartition(DEFAULT_PARTITION, signer_B.address),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN an incompatible partition WHEN authorizeOperatorByPartition THEN reverts with PartitionNotAllowedInSinglePartitionMode", async () => {
@@ -96,11 +96,11 @@ describe("OperatorByPartitionFacet Tests", () => {
       await asset.connect(signer_A).authorizeOperatorByPartition(DEFAULT_PARTITION, signer_B.address);
     });
 
-    it("GIVEN a paused token WHEN revokeOperatorByPartition THEN reverts with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN revokeOperatorByPartition THEN reverts with IsPaused", async () => {
       await asset.pause();
       await expect(
         asset.connect(signer_A).revokeOperatorByPartition(DEFAULT_PARTITION, signer_B.address),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN an incompatible partition WHEN revokeOperatorByPartition THEN reverts with PartitionNotAllowedInSinglePartitionMode", async () => {

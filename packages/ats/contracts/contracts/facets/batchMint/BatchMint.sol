@@ -34,15 +34,17 @@ abstract contract BatchMint is IBatchMint, Modifiers {
         onlyWithoutMultiPartition
         onlyAnyRole(_buildRoles(ISSUER_ROLE, AGENT_ROLE))
     {
+        uint256 totalAmount;
         uint256 length = _toList.length;
         for (uint256 i; i < length; ) {
             ERC1594StorageWrapper.checkIdentity(address(0), _toList[i]);
             ERC1594StorageWrapper.checkCompliance(address(0), _toList[i], false);
-            CapStorageWrapper.requireWithinMaxSupply(_amounts[i], TimeTravelStorageWrapper.getBlockTimestamp());
+            totalAmount += _amounts[i];
             unchecked {
                 ++i;
             }
         }
+        CapStorageWrapper.checkMaxSupply(totalAmount, TimeTravelStorageWrapper.getBlockTimestamp());
         address sender = EvmAccessors.getMsgSender();
         for (uint256 i; i < length; ) {
             TokenCoreOps.issue(_toList[i], _amounts[i]);

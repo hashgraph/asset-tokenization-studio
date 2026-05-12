@@ -108,6 +108,11 @@ library InitializerStorageWrapper {
         setFacetLastVersionTo(_facetId, versionId);
     }
 
+    function setFacetToCustomStatus(bytes32 _facetId, uint256 _status) internal {
+        uint256 versionId = currentFacetVersion(_facetId);
+        setFacetStatusForVersion(_facetId, versionId, _status);
+    }
+
     function setFacetStatusForVersion(bytes32 _facetId, uint256 _versionId, uint256 _status) internal {
         initializerStorage().facetVersionStatus[_facetId][_versionId] = _status;
     }

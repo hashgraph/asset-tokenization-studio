@@ -151,7 +151,7 @@ describe("BatchController Tests", () => {
         );
       });
 
-      it("GIVEN a paused token WHEN batchForcedTransfer THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused token WHEN batchForcedTransfer THEN transaction fails with IsPaused", async () => {
         await asset.pause();
 
         const fromList = [signer_F.address];
@@ -160,7 +160,7 @@ describe("BatchController Tests", () => {
 
         await expect(
           asset.connect(signer_A).batchForcedTransfer(fromList, toList, amounts),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
     });
   });

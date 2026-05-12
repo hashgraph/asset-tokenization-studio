@@ -3,6 +3,7 @@
 import { expect } from "chai";
 import { ethers, network } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
+import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { type ResolverProxy, type IAsset, ComplianceMock } from "@contract-types";
 import { DEFAULT_PARTITION, ZERO, EMPTY_STRING, ADDRESS_ZERO, ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -369,9 +370,9 @@ describe("ProtectedPartitions Tests", () => {
 
       await asset.connect(signer_B).pause();
 
-      await expect(asset.connect(signer_B).protectPartitions()).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      await expect(asset.connect(signer_B).protectPartitions()).to.be.revertedWithCustomError(asset, "IsPaused");
 
-      await expect(asset.connect(signer_B).unprotectPartitions()).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      await expect(asset.connect(signer_B).unprotectPartitions()).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN a account without the protected partition role WHEN protecting or unprotecting partitions THEN transaction fails with AccountHasNoRole", async () => {
@@ -528,6 +529,67 @@ describe("ProtectedPartitions Tests", () => {
         await grant_WILD_CARD_ROLE_and_issue_tokens(signer_B.address, signer_B.address, amount, DEFAULT_PARTITION);
 
         await asset.connect(signer_B).transferAndLock(signer_C.address, amount, "0x1234", MAX_UINT256);
+      });
+
+      it("GIVEN a signed protected transfer with nonce > currentNonce+1 WHEN executed THEN reverts with WrongNonce (FIND-073)", async () => {
+        const deadline = MAX_UINT256;
+        const NONCE_GAP = 1000;
+        const signature = await signer_A.signTypedData(domain, transferType, {
+          _partition: DEFAULT_PARTITION,
+          _from: signer_A.address,
+          _to: signer_B.address,
+          _amount: amount,
+          _deadline: deadline,
+          _nonce: NONCE_GAP,
+        });
+        await asset.connect(signer_B).issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: amount,
+          data: "0x",
+        });
+        await expect(
+          asset
+            .connect(signer_B)
+            .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
+              deadline,
+              nonce: NONCE_GAP,
+              signature,
+            }),
+        ).to.be.revertedWithCustomError(asset, "WrongNonce");
+      });
+
+      it("GIVEN three pre-signed transfers with consecutive nonces WHEN executed in order THEN all succeed and nonce is 3 (FIND-073)", async () => {
+        const deadline = MAX_UINT256;
+        const signatures: string[] = [];
+        for (let n = 1; n <= 3; n++) {
+          signatures.push(
+            await signer_A.signTypedData(domain, transferType, {
+              _partition: DEFAULT_PARTITION,
+              _from: signer_A.address,
+              _to: signer_B.address,
+              _amount: amount,
+              _deadline: deadline,
+              _nonce: n,
+            }),
+          );
+        }
+        await asset.connect(signer_B).issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: 3 * amount,
+          data: "0x",
+        });
+        for (let n = 1; n <= 3; n++) {
+          await asset
+            .connect(signer_B)
+            .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
+              deadline,
+              nonce: n,
+              signature: signatures[n - 1],
+            });
+        }
+        expect(await asset.nonces(signer_A.address)).to.equal(3);
       });
 
       it("GIVEN a correct signature WHEN performing a protected transfer THEN transaction succeeds", async () => {
@@ -744,6 +806,47 @@ describe("ProtectedPartitions Tests", () => {
         ).to.be.revertedWithCustomError(asset, "WrongSignature");
       });
 
+      it("GIVEN signed protected clearing ops with nonce > currentNonce+1 WHEN executed THEN revert with WrongNonce (FIND-073)", async () => {
+        const NONCE_GAP = 1000;
+        protectedClearingOperation.nonce = NONCE_GAP;
+
+        const signatureTransfer = await signer_A.signTypedData(domain, clearingTransferType, {
+          _protectedClearingOperation: protectedClearingOperation,
+          _amount: amount,
+          _to: signer_C.address,
+        });
+        await expect(
+          asset
+            .connect(signer_B)
+            .protectedClearingTransferByPartition(
+              protectedClearingOperation,
+              amount,
+              signer_C.address,
+              signatureTransfer,
+            ),
+        ).to.be.revertedWithCustomError(asset, "WrongNonce");
+
+        const signatureHold = await signer_A.signTypedData(domain, clearingCreateHoldType, {
+          _protectedClearingOperation: protectedClearingOperation,
+          _hold: hold,
+        });
+        await expect(
+          asset
+            .connect(signer_B)
+            .protectedClearingCreateHoldByPartition(protectedClearingOperation, hold, signatureHold),
+        ).to.be.revertedWithCustomError(asset, "WrongNonce");
+
+        const signatureRedeem = await signer_A.signTypedData(domain, clearingRedeemType, {
+          _protectedClearingOperation: protectedClearingOperation,
+          _amount: amount,
+        });
+        await expect(
+          asset
+            .connect(signer_B)
+            .protectedClearingRedeemByPartition(protectedClearingOperation, amount, signatureRedeem),
+        ).to.be.revertedWithCustomError(asset, "WrongNonce");
+      });
+
       it("GIVEN a wrong nonce WHEN performing a protected clearing THEN transaction fails with WrongNonce", async () => {
         protectedClearingOperation.nonce = 0;
 
@@ -778,9 +881,24 @@ describe("ProtectedPartitions Tests", () => {
           value: amount,
           data: "0x",
         });
-        await asset
+        const tx = asset
           .connect(signer_B)
           .protectedClearingTransferByPartition(protectedClearingOperation, amount, signer_C.address, signature);
+        await expect(tx)
+          .to.emit(asset, EVENT_NAMES.PROTECTED_CLEARED_TRANSFER_BY_PARTITION)
+          .withArgs(
+            signer_B.address,
+            protectedClearingOperation.from,
+            signer_C.address,
+            protectedClearingOperation.clearingOperation.partition,
+            anyValue,
+            amount,
+            protectedClearingOperation.clearingOperation.expirationTimestamp,
+            protectedClearingOperation.clearingOperation.data,
+            "0x",
+          );
+        const receipt = await (await tx).wait();
+        expectExactlyOneEvent(receipt!, asset, EVENT_NAMES.PROTECTED_CLEARED_TRANSFER_BY_PARTITION);
         // HOLDS
         protectedClearingOperation.nonce = 2;
         const messageHold = {
@@ -795,9 +913,21 @@ describe("ProtectedPartitions Tests", () => {
           value: amount,
           data: "0x",
         });
-        await asset
+        const txHold = asset
           .connect(signer_B)
           .protectedClearingCreateHoldByPartition(protectedClearingOperation, hold, signatureHold);
+        await expect(txHold).to.emit(asset, EVENT_NAMES.PROTECTED_CLEARED_HOLD_BY_PARTITION).withArgs(
+          signer_B.address, // operator
+          protectedClearingOperation.from, // tokenHolder
+          protectedClearingOperation.clearingOperation.partition, // partition
+          anyValue, // clearingId (runtime)
+          [hold.amount, hold.expirationTimestamp, hold.escrow, hold.to, hold.data], // hold tuple
+          protectedClearingOperation.clearingOperation.expirationTimestamp, // expirationDate
+          protectedClearingOperation.clearingOperation.data, // data
+          "0x", // operatorData
+        );
+        const receiptHold = await (await txHold).wait();
+        expectExactlyOneEvent(receiptHold!, asset, EVENT_NAMES.PROTECTED_CLEARED_HOLD_BY_PARTITION);
         // REDEEMS
         protectedClearingOperation.nonce = 3;
         const messageRedeem = {
@@ -812,9 +942,23 @@ describe("ProtectedPartitions Tests", () => {
           value: amount,
           data: "0x",
         });
-        await asset
+        const txRedeem = asset
           .connect(signer_B)
           .protectedClearingRedeemByPartition(protectedClearingOperation, amount, signatureRedeem);
+        await expect(txRedeem)
+          .to.emit(asset, EVENT_NAMES.PROTECTED_CLEARED_REDEEM_BY_PARTITION)
+          .withArgs(
+            signer_B.address,
+            protectedClearingOperation.from,
+            protectedClearingOperation.clearingOperation.partition,
+            anyValue,
+            amount,
+            protectedClearingOperation.clearingOperation.expirationTimestamp,
+            protectedClearingOperation.clearingOperation.data,
+            "0x",
+          );
+        const receiptRedeem = await (await txRedeem).wait();
+        expectExactlyOneEvent(receiptRedeem!, asset, EVENT_NAMES.PROTECTED_CLEARED_REDEEM_BY_PARTITION);
       });
     });
 
@@ -835,9 +979,24 @@ describe("ProtectedPartitions Tests", () => {
           value: amount,
           data: "0x",
         });
-        await asset
+        const tx = asset
           .connect(signer_B)
           .protectedClearingTransferByPartition(protectedClearingOperation, amount, signer_C.address, signature);
+        await expect(tx)
+          .to.emit(asset, EVENT_NAMES.PROTECTED_CLEARED_TRANSFER_BY_PARTITION)
+          .withArgs(
+            signer_B.address,
+            protectedClearingOperation.from,
+            signer_C.address,
+            protectedClearingOperation.clearingOperation.partition,
+            anyValue,
+            amount,
+            protectedClearingOperation.clearingOperation.expirationTimestamp,
+            protectedClearingOperation.clearingOperation.data,
+            "0x",
+          );
+        const receipt = await (await tx).wait();
+        expectExactlyOneEvent(receipt!, asset, EVENT_NAMES.PROTECTED_CLEARED_TRANSFER_BY_PARTITION);
         const clearingIdentifier = {
           partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,

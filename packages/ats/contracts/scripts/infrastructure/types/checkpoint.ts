@@ -210,6 +210,8 @@ export interface DeploymentCheckpoint {
       loan?: ConfigurationResult;
       /** Loans Portfolio configuration */
       loansPortfolio?: ConfigurationResult;
+      /** Factory configuration */
+      factory?: ConfigurationResult;
       // TEST-ONLY: InitializeMock configuration (gated by `useTimeTravel`).
       // Records every version minted for the same configId in a single
       // workflow step — the workflow calls `createInitializeMockConfiguration`

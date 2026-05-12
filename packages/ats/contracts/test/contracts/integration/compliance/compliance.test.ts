@@ -143,12 +143,12 @@ describe("Compliance Tests", () => {
         expect(await asset.connect(signer_C).canTransfer(signer_D.address, AMOUNT, DATA)).to.be.deep.equal([
           false,
           EIP1066_CODES.PAUSED,
-          getSelector(asset, "TokenIsPaused"),
+          getSelector(asset, "IsPaused"),
         ]);
 
         expect(
           await asset.connect(signer_C).canTransferFrom(signer_E.address, signer_D.address, AMOUNT, DATA),
-        ).to.be.deep.equal([false, EIP1066_CODES.PAUSED, getSelector(asset, "TokenIsPaused")]);
+        ).to.be.deep.equal([false, EIP1066_CODES.PAUSED, getSelector(asset, "IsPaused")]);
       });
     });
 
@@ -360,11 +360,11 @@ describe("Compliance Tests", () => {
       ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
-    it("GIVEN a paused token WHEN setCompliance THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN setCompliance THEN transaction fails with IsPaused", async () => {
       await asset.connect(signer_B).pause();
       await expect(asset.setCompliance(complianceMock.target as string)).to.be.revertedWithCustomError(
         asset,
-        "TokenIsPaused",
+        "IsPaused",
       );
     });
   });

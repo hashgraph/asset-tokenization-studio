@@ -28,7 +28,7 @@ abstract contract ComplianceByPartition is IComplianceByPartition {
         bytes calldata _operatorData
     ) external view override returns (bool, bytes1, bytes32) {
         if (PauseStorageWrapper.isPaused()) {
-            return (false, Eip1066.PAUSED, IPause.TokenIsPaused.selector);
+            return (false, Eip1066.PAUSED, IPause.IsPaused.selector);
         }
         (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToTransferFromByPartition(
             _from,
@@ -50,7 +50,7 @@ abstract contract ComplianceByPartition is IComplianceByPartition {
         bytes calldata _operatorData
     ) external view override returns (bool, bytes1, bytes32) {
         if (PauseStorageWrapper.isPaused()) {
-            return (false, Eip1066.PAUSED, IPause.TokenIsPaused.selector);
+            return (false, Eip1066.PAUSED, IPause.IsPaused.selector);
         }
         (bool status, bytes1 code, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToRedeemFromByPartition(
             _from,

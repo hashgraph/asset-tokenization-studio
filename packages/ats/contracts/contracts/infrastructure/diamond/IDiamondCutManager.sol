@@ -41,7 +41,7 @@ interface IDiamondCutManager {
     );
 
     /// @notice emited when cancelBatchConfiguration is executed
-    event DiamondBatchConfigurationCanceled(bytes32 configurationId);
+    event DiamondBatchConfigurationCanceled(bytes32 indexed configurationId, uint256 version);
 
     // @notice Not able to use bytes32(0) with configurationId
     error DefaultValueForConfigurationIdNotPermitted();

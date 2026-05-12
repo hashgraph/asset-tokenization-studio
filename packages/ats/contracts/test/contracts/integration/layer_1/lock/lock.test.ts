@@ -117,16 +117,16 @@ describe("Lock Tests", () => {
         await asset.connect(signer_D).pause();
       });
 
-      it("GIVEN a paused Token WHEN lock THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN lock THEN transaction fails with IsPaused", async () => {
         await expect(
           asset.connect(signer_C).lock(_AMOUNT, signer_A.address, currentTimestamp),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
-      it("GIVEN a paused Token WHEN release THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN release THEN transaction fails with IsPaused", async () => {
         await expect(asset.connect(signer_C).release(1, signer_A.address)).to.be.revertedWithCustomError(
           asset,
-          "TokenIsPaused",
+          "IsPaused",
         );
       });
     });

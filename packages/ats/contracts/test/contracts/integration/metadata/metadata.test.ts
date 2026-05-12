@@ -62,10 +62,10 @@ describe("Metadata Tests", () => {
       await asset.connect(signer_B).pause();
     });
 
-    it("GIVEN a paused Token WHEN setMetadata THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused Token WHEN setMetadata THEN transaction fails with IsPaused", async () => {
       await expect(asset.connect(signer_A).setMetadata(KEY_A, [PAYLOAD_1])).to.be.revertedWithCustomError(
         asset,
-        "TokenIsPaused",
+        "IsPaused",
       );
     });
   });

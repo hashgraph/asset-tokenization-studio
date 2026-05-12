@@ -35,6 +35,12 @@ interface Hold {
   data: string;
 }
 
+enum ClearingOperationType {
+  Transfer,
+  Redeem,
+  HoldCreation,
+}
+
 let clearingOperation: ClearingOperation;
 let clearingOperationFrom: ClearingOperationFrom;
 let hold: Hold;
@@ -180,11 +186,11 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
       });
 
       describe("onlyUnpaused modifier", () => {
-        it("GIVEN a paused Token WHEN clearingCreateHoldByPartition THEN transaction fails with TokenIsPaused", async () => {
+        it("GIVEN a paused Token WHEN clearingCreateHoldByPartition THEN transaction fails with IsPaused", async () => {
           await asset.connect(signer_D).pause();
           await expect(
             asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold),
-          ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+          ).to.be.revertedWithCustomError(asset, "IsPaused");
         });
       });
 
@@ -305,12 +311,45 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
         expect(clearing.holdTo).to.equal(hold.to);
       });
 
+      it("GIVEN an approved third party that clearingCreateHoldFromByPartition WHEN approving it THEN Hold is properly created with allowancesubstracted from original thrid party", async () => {
+        await asset.connect(signer_A).increaseAllowance(signer_D.address, _AMOUNT);
+        const allowanceBeforeAll = await asset.allowance(signer_A.address, signer_D.address);
+
+        await asset.connect(signer_D).clearingCreateHoldFromByPartition(clearingOperationFrom, hold);
+        const allowanceAfterClearingCreation = await asset.allowance(signer_A.address, signer_D.address);
+
+        const identifier = {
+          clearingOperationType: ClearingOperationType.HoldCreation,
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          clearingId: 1,
+        };
+
+        await asset.grantRole(ATS_ROLES.CLEARING_VALIDATOR_ROLE, signer_E.address);
+        await asset.connect(signer_E).approveClearingOperationByPartition(identifier);
+        const allowanceAfterClearingApproval = await asset.allowance(signer_A.address, signer_D.address);
+
+        const holdIdentifier = {
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          holdId: 1,
+        };
+
+        await asset.connect(signer_B).releaseHoldByPartition(holdIdentifier, _AMOUNT);
+        const allowanceAfterHoldReleased = await asset.allowance(signer_A.address, signer_D.address);
+
+        expect(allowanceBeforeAll).to.equal(BigInt(_AMOUNT));
+        expect(allowanceAfterClearingCreation).to.equal(0);
+        expect(allowanceAfterClearingApproval).to.equal(0);
+        expect(allowanceAfterHoldReleased).to.equal(BigInt(_AMOUNT));
+      });
+
       describe("onlyUnpaused modifier", () => {
-        it("GIVEN a paused Token WHEN clearingCreateHoldFromByPartition THEN transaction fails with TokenIsPaused", async () => {
+        it("GIVEN a paused Token WHEN clearingCreateHoldFromByPartition THEN transaction fails with IsPaused", async () => {
           await asset.connect(signer_D).pause();
           await expect(
             asset.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold),
-          ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+          ).to.be.revertedWithCustomError(asset, "IsPaused");
         });
       });
 

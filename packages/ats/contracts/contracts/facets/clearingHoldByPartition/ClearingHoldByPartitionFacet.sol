@@ -12,7 +12,7 @@ import { _CLEARING_HOLDBYPARTITION_RESOLVER_KEY } from "../../constants/resolver
  * @notice Facet exposing the unprotected clearing hold creation operations by partition.
  * @dev Registers `clearingCreateHoldByPartition`, `clearingCreateHoldFromByPartition`, and
  *      `getClearingCreateHoldForByPartition` into the diamond. The protected variant
- *      (`protectedClearingCreateHoldByPartition`) is handled by `ClearingHoldCreationFacet`.
+ *      (`protectedClearingCreateHoldByPartition`) is handled by `ProtectedClearingHoldByPartitionFacet`.
  */
 contract ClearingHoldByPartitionFacet is ClearingHoldByPartition, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors

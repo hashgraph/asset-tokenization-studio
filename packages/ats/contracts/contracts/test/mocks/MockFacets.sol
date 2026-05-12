@@ -27,8 +27,8 @@ interface IMockFacet2 {
 }
 
 interface IMockFacet3 {
-    function initializeMockFacet3() external;
-    function upgradeMockFacet3() external;
+    function initializeMockFacet3(uint256 statusStep) external;
+    function upgradeMockFacet3(uint256 statusStep) external;
     function mockFacet3Method() external view returns (string memory);
 }
 
@@ -103,12 +103,20 @@ contract MockFacet2 is IMockFacet2, Modifiers, IStaticFunctionSelectors {
 }
 
 contract MockFacet3 is IMockFacet3, Modifiers, IStaticFunctionSelectors {
-    function initializeMockFacet3() external override onlyFacetNotRegistered(_MOCK_FACET_3_RESOLVER_KEY) {
-        InitializerStorageWrapper.setFacetToReady(_MOCK_FACET_3_RESOLVER_KEY);
+    function initializeMockFacet3(
+        uint256 statusStep
+    ) external override onlyFacetNotRegistered(_MOCK_FACET_3_RESOLVER_KEY) {
+        if (statusStep == 0) {
+            InitializerStorageWrapper.setFacetToReady(_MOCK_FACET_3_RESOLVER_KEY);
+        } else InitializerStorageWrapper.setFacetToCustomStatus(_MOCK_FACET_3_RESOLVER_KEY, statusStep + 1);
     }
 
-    function upgradeMockFacet3() external override onlyFacetRegistered(_MOCK_FACET_3_RESOLVER_KEY, _versions()) {
-        InitializerStorageWrapper.setFacetToReady(_MOCK_FACET_3_RESOLVER_KEY);
+    function upgradeMockFacet3(
+        uint256 statusStep
+    ) external override onlyFacetRegistered(_MOCK_FACET_3_RESOLVER_KEY, _versions()) {
+        if (statusStep == 0) {
+            InitializerStorageWrapper.setFacetToReady(_MOCK_FACET_3_RESOLVER_KEY);
+        } else InitializerStorageWrapper.setFacetToCustomStatus(_MOCK_FACET_3_RESOLVER_KEY, statusStep);
     }
 
     function mockFacet3Method() external view override onlyOperational returns (string memory) {

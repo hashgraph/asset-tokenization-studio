@@ -73,11 +73,11 @@ describe("Operator Facet Tests", () => {
       expect(await asset.isOperator(signer_B.address, signer_C.address)).to.equal(true);
     });
 
-    it("GIVEN a paused token WHEN authorizeOperator THEN reverts with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN authorizeOperator THEN reverts with IsPaused", async () => {
       await asset.pause();
       await expect(asset.connect(signer_C).authorizeOperator(signer_B.address)).to.be.revertedWithCustomError(
         asset,
-        "TokenIsPaused",
+        "IsPaused",
       );
     });
 
@@ -103,12 +103,12 @@ describe("Operator Facet Tests", () => {
       expect(await asset.isOperator(signer_B.address, signer_C.address)).to.equal(false);
     });
 
-    it("GIVEN a paused token WHEN revokeOperator THEN reverts with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN revokeOperator THEN reverts with IsPaused", async () => {
       await asset.connect(signer_C).authorizeOperator(signer_B.address);
       await asset.pause();
       await expect(asset.connect(signer_C).revokeOperator(signer_B.address)).to.be.revertedWithCustomError(
         asset,
-        "TokenIsPaused",
+        "IsPaused",
       );
     });
 

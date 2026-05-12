@@ -58,6 +58,7 @@
     "release:ats": "changeset version --ignore '@hashgraph/mass-payout*'",
     "release:mp": "changeset version --ignore '@hashgraph/asset-tokenization-*'",
     "release:preview": "changeset status",
+    "test": "npm run ats:test && npm run mass-payout:test",
     "docs:start": "npm run start --workspace=apps/docs",
     "docs:build": "npm run build --workspace=apps/docs",
     "docs:serve": "npm run serve --workspace=apps/docs",

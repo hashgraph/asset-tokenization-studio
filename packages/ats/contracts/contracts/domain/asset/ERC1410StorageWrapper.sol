@@ -349,7 +349,7 @@ library ERC1410StorageWrapper {
             ERC20StorageWrapper.getName()
         );
 
-        NonceStorageWrapper.setNonceFor(protectionData.nonce, from);
+        NonceStorageWrapper.setNonceFor(from);
 
         return
             transferByPartition(
@@ -383,12 +383,13 @@ library ERC1410StorageWrapper {
             protectionData,
             ERC20StorageWrapper.getName()
         );
-        NonceStorageWrapper.setNonceFor(protectionData.nonce, from);
+        NonceStorageWrapper.setNonceFor(from);
 
         redeemByPartition(partition, from, EvmAccessors.getMsgSender(), amount, "", "");
     }
 
     function beforeTokenTransfer(bytes32 partition, address from, address to, uint256 amount) internal {
+        if (from == to) return;
         triggerAndSyncAll(partition, from, to);
 
         bool addTo;
@@ -694,9 +695,18 @@ library ERC1410StorageWrapper {
         uint256 lastIndex = erc1410Storage.partitions[holder].length - 1;
         if (index != lastIndex) {
             erc1410Storage.partitions[holder][index] = erc1410Storage.partitions[holder][lastIndex];
+            unchecked {
+                AdjustBalancesStorageWrapper.updateLabafByTokenHolderAndPartitionIndex(
+                    AdjustBalancesStorageWrapper.getLabafByUserAndPartitionIndex(lastIndex + 1, holder),
+                    holder,
+                    index + 1
+                );
+            }
+
             erc1410Storage.partitionToIndex[holder][erc1410Storage.partitions[holder][index].partition] = index + 1;
         }
         delete erc1410Storage.partitionToIndex[holder][partition];
         erc1410Storage.partitions[holder].pop();
+        AdjustBalancesStorageWrapper.popLabafUserPartition(holder);
     }
 }

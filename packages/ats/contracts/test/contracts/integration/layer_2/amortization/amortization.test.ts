@@ -69,12 +69,12 @@ describe("AmortizationFacet", () => {
         .withArgs(user3.address, ATS_ROLES.CORPORATE_ACTION_ROLE);
     });
 
-    it("GIVEN paused token WHEN setAmortization THEN reverts with TokenIsPaused", async () => {
+    it("GIVEN paused token WHEN setAmortization THEN reverts with IsPaused", async () => {
       await asset.grantRole(ATS_ROLES.PAUSER_ROLE, user1.address);
       await asset.connect(user1).pause();
 
       const data = await makeAmortizationData();
-      await expect(asset.connect(user2).setAmortization(data)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      await expect(asset.connect(user2).setAmortization(data)).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN recordDate >= executionDate WHEN setAmortization THEN reverts with WrongDates", async () => {
@@ -172,12 +172,12 @@ describe("AmortizationFacet", () => {
         .withArgs(user3.address, ATS_ROLES.CORPORATE_ACTION_ROLE);
     });
 
-    it("GIVEN paused token WHEN cancelAmortization THEN reverts with TokenIsPaused", async () => {
+    it("GIVEN paused token WHEN cancelAmortization THEN reverts with IsPaused", async () => {
       await asset.grantRole(ATS_ROLES.PAUSER_ROLE, user1.address);
 
       await asset.connect(user1).pause();
 
-      await expect(asset.connect(user2).cancelAmortization(1)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      await expect(asset.connect(user2).cancelAmortization(1)).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN non-existent amortization ID WHEN cancelAmortization THEN reverts with WrongIndexForAction", async () => {
@@ -680,7 +680,7 @@ describe("AmortizationFacet", () => {
         .withArgs(user3.address, ATS_ROLES.AMORTIZATION_ROLE);
     });
 
-    it("GIVEN paused token WHEN setAmortizationHold THEN reverts with TokenIsPaused", async () => {
+    it("GIVEN paused token WHEN setAmortizationHold THEN reverts with IsPaused", async () => {
       await asset.grantRole(ATS_ROLES.PAUSER_ROLE, user1.address);
 
       const data = await makeAmortizationData();
@@ -697,7 +697,7 @@ describe("AmortizationFacet", () => {
 
       await expect(
         asset.connect(user2).setAmortizationHold(1, deployer.address, BigInt(TOKENS_TO_REDEEM)),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN tokenAmount exceeds holder balance WHEN setAmortizationHold THEN reverts with AmortizationHoldFailed or hold error", async () => {
@@ -821,13 +821,13 @@ describe("AmortizationFacet", () => {
         .withArgs(user3.address, ATS_ROLES.AMORTIZATION_ROLE);
     });
 
-    it("GIVEN paused token WHEN releaseAmortizationHold THEN reverts with TokenIsPaused", async () => {
+    it("GIVEN paused token WHEN releaseAmortizationHold THEN reverts with IsPaused", async () => {
       await asset.grantRole(ATS_ROLES.PAUSER_ROLE, user1.address);
       await asset.connect(user1).pause();
 
       await expect(asset.connect(user2).releaseAmortizationHold(1, deployer.address)).to.be.revertedWithCustomError(
         asset,
-        "TokenIsPaused",
+        "IsPaused",
       );
     });
 

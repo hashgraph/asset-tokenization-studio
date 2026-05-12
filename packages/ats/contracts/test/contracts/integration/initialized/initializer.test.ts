@@ -25,7 +25,7 @@ import { deployAtsInfrastructureFixture } from "@test";
 import { INITIALIZE_MOCK_CONFIG_ID, ATS_ROLES } from "@scripts";
 import { decodeEvent } from "@scripts/infrastructure";
 
-describe.only("Initializer — InitializeMock domain", () => {
+describe("Initializer — InitializeMock domain", () => {
   // TEST-ONLY: mirrors `_INITIALIZER_RESOLVER_KEY` declared in
   // `contracts/constants/resolverKeys.sol`.
   const initializerFacetId = "0x65c891d003e7dc436f2c3d0863d599d91867c8695fee29923a476a2be3ec540f";
@@ -71,19 +71,7 @@ describe.only("Initializer — InitializeMock domain", () => {
   // assertions stay aligned with on-chain state. Reads `initializerFacet` from
   // the enclosing scope — only call after a successful `deployMockAsset(...)`.
   const expectFacetStates = async (expected: ExpectedFacetStates) => {
-    let a = await initializerFacet.getOperationalStatus(INITIALIZE_MOCK_CONFIG_ID, 1);
-    let b = await initializerFacet.getFacetVersionStatus(initializerFacetId, 1);
-    let c = await initializerFacet.getFacetVersionStatus(mockFacet1Id, 1);
-    let d = await initializerFacet.getFacetVersionStatus(mockFacet2Id, 1);
-    let e = await initializerFacet.getFacetVersionStatus(mockFacet3Id, 1);
-
-    console.log("getOperationalStatus:", a);
-    console.log("initializerFacet getFacetVersionStatus:", b);
-    console.log("mockFacet1 getFacetVersionStatus:", c);
-    console.log("mockFacet2 getFacetVersionStatus:", d);
-    console.log("mockFacet3 getFacetVersionStatus:", e);
-
-    /*expect(await initializerFacet.getOperationalStatus(INITIALIZE_MOCK_CONFIG_ID, 1)).to.equal(
+    expect(await initializerFacet.getOperationalStatus(INITIALIZE_MOCK_CONFIG_ID, 1)).to.equal(
       expected.operationalStatus,
     );
 
@@ -97,7 +85,7 @@ describe.only("Initializer — InitializeMock domain", () => {
     expect(await initializerFacet.getFacetLastVersion(initializerFacetId)).to.equal(expected.initializer.lastVersion);
     expect(await initializerFacet.getFacetLastVersion(mockFacet1Id)).to.equal(expected.mockFacet1.lastVersion);
     expect(await initializerFacet.getFacetLastVersion(mockFacet2Id)).to.equal(expected.mockFacet2.lastVersion);
-    expect(await initializerFacet.getFacetLastVersion(mockFacet3Id)).to.equal(expected.mockFacet3.lastVersion);*/
+    expect(await initializerFacet.getFacetLastVersion(mockFacet3Id)).to.equal(expected.mockFacet3.lastVersion);
   };
 
   // TEST-ONLY helper: deploy a fresh ResolverProxy at the InitializeMock configId
@@ -139,6 +127,12 @@ describe.only("Initializer — InitializeMock domain", () => {
       });
     });
 
+    it("GIVEN a freshly-deployed asset WHEN calling upgrade methods THEN reverts with FacetPreviousVersionNotAccepted AND every facet + operational status reads as 0", async () => {
+      await expect(mockFacet1.upgradeMockFacet1())
+        .to.be.revertedWithCustomError(initializerFacet, "FacetPreviousVersionNotAccepted")
+        .withArgs(mockFacet1Id, 0, [1, 2]);
+    });
+
     it("GIVEN initializeMockFacet1 called once THEN succeeds, WHEN called a second time THEN reverts with FacetAlreadyRegistered, AND mockFacet1Method still reverts with AssetNotOperational AND getOperationalStatus returns 0", async () => {
       await expect(mockFacet1.initializeMockFacet1()).to.not.be.reverted;
 
@@ -161,13 +155,45 @@ describe.only("Initializer — InitializeMock domain", () => {
       });
     });
 
+    it("GIVEN initializeMockFacet3 WHEN called multiple times with different status steps THEN succeeds", async () => {
+      await expect(mockFacet3.initializeMockFacet3(1)).to.not.be.reverted;
+
+      await expectFacetStates({
+        operationalStatus: 0,
+        initializer: { versionStatus: 0, lastVersion: 0 },
+        mockFacet1: { versionStatus: 0, lastVersion: 0 },
+        mockFacet2: { versionStatus: 0, lastVersion: 0 },
+        mockFacet3: { versionStatus: 2, lastVersion: 0 },
+      });
+
+      await expect(mockFacet3.initializeMockFacet3(50)).to.not.be.reverted;
+
+      await expectFacetStates({
+        operationalStatus: 0,
+        initializer: { versionStatus: 0, lastVersion: 0 },
+        mockFacet1: { versionStatus: 0, lastVersion: 0 },
+        mockFacet2: { versionStatus: 0, lastVersion: 0 },
+        mockFacet3: { versionStatus: 51, lastVersion: 0 },
+      });
+
+      await expect(mockFacet3.initializeMockFacet3(0)).to.not.be.reverted;
+
+      await expectFacetStates({
+        operationalStatus: 0,
+        initializer: { versionStatus: 0, lastVersion: 0 },
+        mockFacet1: { versionStatus: 0, lastVersion: 0 },
+        mockFacet2: { versionStatus: 0, lastVersion: 0 },
+        mockFacet3: { versionStatus: 1, lastVersion: 1 },
+      });
+    });
+
     it("GIVEN all four initializers called once successfully WHEN calling mockFacet1Method THEN reverts with AssetNotOperational AND getOperationalStatus returns 0", async () => {
       // TEST-ONLY: max-initializer index is an arbitrary positive number for this scenario.
       const maxInitializerFacetIndex = 3;
 
       await expect(mockFacet1.initializeMockFacet1()).to.not.be.reverted;
       await expect(mockFacet2.initializeMockFacet2()).to.not.be.reverted;
-      await expect(mockFacet3.initializeMockFacet3()).to.not.be.reverted;
+      await expect(mockFacet3.initializeMockFacet3(0)).to.not.be.reverted;
       await expect(initializerFacet.initializeInitializer(maxInitializerFacetIndex)).to.not.be.reverted;
 
       await expect(mockFacet1.mockFacet1Method()).to.be.revertedWithCustomError(
@@ -177,7 +203,7 @@ describe.only("Initializer — InitializeMock domain", () => {
 
       await expectFacetStates({
         operationalStatus: 0,
-        initializer: { versionStatus: 0, lastVersion: 0 },
+        initializer: { versionStatus: 1, lastVersion: 1 },
         mockFacet1: { versionStatus: 1, lastVersion: 1 },
         mockFacet2: { versionStatus: 1, lastVersion: 1 },
         mockFacet3: { versionStatus: 1, lastVersion: 1 },
@@ -190,7 +216,7 @@ describe.only("Initializer — InitializeMock domain", () => {
 
       await expect(mockFacet1.initializeMockFacet1()).to.not.be.reverted;
       await expect(mockFacet2.initializeMockFacet2()).to.not.be.reverted;
-      await expect(mockFacet3.initializeMockFacet3()).to.not.be.reverted;
+      await expect(mockFacet3.initializeMockFacet3(0)).to.not.be.reverted;
       await expect(initializerFacet.initializeInitializer(maxInitializerFacetIndex)).to.not.be.reverted;
 
       await expect(initializerFacet.setOperationalStatus()).to.not.be.reverted;
@@ -211,40 +237,28 @@ describe.only("Initializer — InitializeMock domain", () => {
       });
     });
 
-    it.only("GIVEN all four initializers called once successfully AND setOperationalStatus called twice WHEN calling mockFacet1Method THEN succeeds", async () => {
+    it("GIVEN all four initializers called once successfully AND setOperationalStatus called twice WHEN calling mockFacet1Method THEN succeeds", async () => {
       // TEST-ONLY: same max-initializer index as the previous test for consistency.
       const maxInitializerFacetIndex = 3;
 
       await expect(mockFacet1.initializeMockFacet1()).to.not.be.reverted;
       await expect(mockFacet2.initializeMockFacet2()).to.not.be.reverted;
-      await expect(mockFacet3.initializeMockFacet3()).to.not.be.reverted;
+      await expect(mockFacet3.initializeMockFacet3(0)).to.not.be.reverted;
       await expect(initializerFacet.initializeInitializer(maxInitializerFacetIndex)).to.not.be.reverted;
 
       await expect(initializerFacet.setOperationalStatus()).to.not.be.reverted;
       await expect(initializerFacet.setOperationalStatus()).to.not.be.reverted;
 
-      let i = await mockFacet1.mockFacet1Method();
-      console.log("mockFacet1Method output:", i);
+      let response = await mockFacet1.mockFacet1Method();
+      expect(response).to.equal("MockFacet1 method called");
 
-      let a = await initializerFacet.getOperationalStatus(INITIALIZE_MOCK_CONFIG_ID, 1);
-      let b = await initializerFacet.getFacetVersionStatus(initializerFacetId, 1);
-      let c = await initializerFacet.getFacetVersionStatus(mockFacet1Id, 1);
-      let d = await initializerFacet.getFacetVersionStatus(mockFacet2Id, 1);
-      let e = await initializerFacet.getFacetVersionStatus(mockFacet3Id, 1);
-
-      console.log("getOperationalStatus:", a);
-      console.log("initializerFacet getFacetVersionStatus:", b);
-      console.log("mockFacet1 getFacetVersionStatus:", c);
-      console.log("mockFacet2 getFacetVersionStatus:", d);
-      console.log("mockFacet3 getFacetVersionStatus:", e);
-
-      /*await expectFacetStates({
+      await expectFacetStates({
         operationalStatus: 1,
         initializer: { versionStatus: 1, lastVersion: 1 },
         mockFacet1: { versionStatus: 1, lastVersion: 1 },
         mockFacet2: { versionStatus: 1, lastVersion: 1 },
         mockFacet3: { versionStatus: 1, lastVersion: 1 },
-      });*/
+      });
     });
   });
 });

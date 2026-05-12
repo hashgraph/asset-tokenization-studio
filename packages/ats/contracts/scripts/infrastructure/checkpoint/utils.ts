@@ -31,11 +31,11 @@ const WORKFLOW_STEPS: Record<string, readonly string[]> = {
     "Bond SPT Rate Configuration",
     "Loan Configuration",
     "Loans Portfolio Configuration",
+    // for "Factory" remain stable across runs.
+    "Factory",
     // TEST-ONLY: only executed when `useTimeTravel` is enabled; the workflow
     // skips this step otherwise but its slot stays in the list so step indices
-    // for "Factory" remain stable across runs.
     "InitializeMock Configurations",
-    "Factory",
   ] as const,
   existingBlr: [
     "ProxyAdmin (Optional)",
@@ -218,6 +218,7 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
       getBondSustainabilityPerformanceTargetRateFacets: () => [],
       getLoanFacets: () => [],
       getLoansPortfolioFacets: () => [],
+      getFactoryFacets: () => [],
     },
   };
 }

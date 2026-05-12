@@ -161,7 +161,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
       await asset.connect(signer_B).pause();
     });
 
-    it("GIVEN a paused Token WHEN setInterestRate THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused Token WHEN setInterestRate THEN transaction fails with IsPaused", async () => {
       await expect(
         sustainabilityPerformanceTargetRateFacet.connect(signer_A).setInterestRate({
           baseRate: 60,
@@ -169,10 +169,10 @@ describe("Sustainability Performance Target Rate Tests", () => {
           startRate: 60,
           rateDecimals: 2,
         }),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
-    it("GIVEN a paused Token WHEN setImpactData THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused Token WHEN setImpactData THEN transaction fails with IsPaused", async () => {
       await expect(
         sustainabilityPerformanceTargetRateFacet.connect(signer_A).setImpactData(
           [
@@ -185,7 +185,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
           ],
           [project1],
         ),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
   });
 

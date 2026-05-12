@@ -40,7 +40,7 @@ library ClearingProtectedOps {
             ERC20StorageWrapper.getName()
         );
 
-        NonceStorageWrapper.setNonceFor(_protectedClearingOperation.nonce, _protectedClearingOperation.from);
+        NonceStorageWrapper.setNonceFor(_protectedClearingOperation.from);
 
         (success_, clearingId_) = ClearingOps.clearingTransferCreation(
             _protectedClearingOperation.clearingOperation,
@@ -74,7 +74,7 @@ library ClearingProtectedOps {
             ERC20StorageWrapper.getName()
         );
 
-        NonceStorageWrapper.setNonceFor(_protectedClearingOperation.nonce, _protectedClearingOperation.from);
+        NonceStorageWrapper.setNonceFor(_protectedClearingOperation.from);
 
         (success_, clearingId_) = ClearingOps.clearingRedeemCreation(
             _protectedClearingOperation.clearingOperation,
@@ -107,7 +107,7 @@ library ClearingProtectedOps {
             ERC20StorageWrapper.getName()
         );
 
-        NonceStorageWrapper.setNonceFor(_protectedClearingOperation.nonce, _protectedClearingOperation.from);
+        NonceStorageWrapper.setNonceFor(_protectedClearingOperation.from);
 
         (success_, clearingId_) = ClearingOps.clearingHoldCreationCreation(
             _protectedClearingOperation.clearingOperation,

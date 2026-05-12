@@ -27,7 +27,7 @@ contract PauseFacet is Pause, IStaticFunctionSelectors {
         staticFunctionSelectors_ = new bytes4[](3);
         staticFunctionSelectors_[selectorIndex++] = this.pause.selector;
         staticFunctionSelectors_[selectorIndex++] = this.unpause.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.isPaused.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.paused.selector;
     }
 
     /// @inheritdoc IStaticFunctionSelectors

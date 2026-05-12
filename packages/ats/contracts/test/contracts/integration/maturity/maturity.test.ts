@@ -134,12 +134,12 @@ describe("Maturity Tests", () => {
       );
     });
 
-    it("GIVEN the token is paused WHEN fullRedeemAtMaturity THEN reverts with TokenIsPaused", async () => {
+    it("GIVEN the token is paused WHEN fullRedeemAtMaturity THEN reverts with IsPaused", async () => {
       await grantRoleAndPauseToken(asset, ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
 
       await expect(asset.connect(signer_C).fullRedeemAtMaturity(signer_C.address)).to.be.revertedWithCustomError(
         asset,
-        "TokenIsPaused",
+        "IsPaused",
       );
     });
 
@@ -234,7 +234,7 @@ describe("Maturity Tests", () => {
       expect(maturityDateAfter).to.be.equal(maturityDateBefore);
     });
 
-    it("GIVEN the token is paused WHEN updateMaturityDate THEN reverts with TokenIsPaused", async () => {
+    it("GIVEN the token is paused WHEN updateMaturityDate THEN reverts with IsPaused", async () => {
       await grantRoleAndPauseToken(asset, ATS_ROLES.BOND_MANAGER_ROLE, signer_A, signer_B, signer_C.address);
 
       const maturityDateBefore = (await asset.getBondDetails()).maturityDate;
@@ -242,7 +242,7 @@ describe("Maturity Tests", () => {
 
       await expect(asset.connect(signer_C).updateMaturityDate(newMaturityDate)).to.be.revertedWithCustomError(
         asset,
-        "TokenIsPaused",
+        "IsPaused",
       );
       const maturityDateAfter = (await asset.getBondDetails()).maturityDate;
       expect(maturityDateAfter).to.be.equal(maturityDateBefore);
