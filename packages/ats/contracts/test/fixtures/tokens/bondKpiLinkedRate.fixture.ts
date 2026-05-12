@@ -94,11 +94,12 @@ export async function deployBondKpiLinkedRateTokenFixture({
     rateDecimals: interestRateParams?.rateDecimals ?? 0,
   };
   const impactData = {
-    maxDeviationCap: impactDataParams?.maxDeviationCap ?? 0,
-    baseLine: impactDataParams?.baseLine ?? 0,
-    maxDeviationFloor: impactDataParams?.maxDeviationFloor ?? 0,
-    impactDataDecimals: impactDataParams?.impactDataDecimals ?? 0,
-    adjustmentPrecision: impactDataParams?.adjustmentPrecision ?? 0,
+    maxDeviationCap: impactDataParams?.maxDeviationCap ?? DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.maxDeviationCap,
+    baseLine: impactDataParams?.baseLine ?? DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.baseLine,
+    maxDeviationFloor: impactDataParams?.maxDeviationFloor ?? DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.maxDeviationFloor,
+    impactDataDecimals: impactDataParams?.impactDataDecimals ?? DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.impactDataDecimals,
+    adjustmentPrecision:
+      impactDataParams?.adjustmentPrecision ?? DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.adjustmentPrecision,
   };
 
   const diamond = await deployBondKpiLinkedRateFromFactory(
