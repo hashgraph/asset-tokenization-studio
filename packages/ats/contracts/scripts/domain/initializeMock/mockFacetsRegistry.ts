@@ -1,25 +1,39 @@
 // SPDX-License-Identifier: Apache-2.0
 
-// TEST-ONLY FILE: registry entries for the three MockFacet contracts that live in
-// `contracts/test/mocks/MockFacets.sol`. These mocks are deliberately excluded from
-// the auto-generated `atsRegistry.data.ts` (the registry generator skips `**/test/**`),
-// so we hand-write the bare minimum FacetDefinition fields needed for deployment +
-// registration + configuration of the InitializeMock domain.
+// TEST-ONLY FILE: registry entries for the mock facet contracts that live in
+// `contracts/test/mocks/*.sol`. These mocks are deliberately excluded from the
+// auto-generated `atsRegistry.data.ts` (the registry generator skips
+// `**/test/**`), so we hand-write the bare minimum FacetDefinition fields
+// needed for deployment + registration + configuration of the InitializeMock
+// domain.
 
 import type { FacetDefinition } from "@scripts/infrastructure";
-import { MockFacet1__factory, MockFacet2__factory, MockFacet3__factory } from "@contract-types";
+import {
+  MockDiamondCut__factory,
+  MockFacet1__factory,
+  MockFacet2__factory,
+  MockFacet3__factory,
+} from "@contract-types";
 
-// Resolver keys mirror the `bytes32("MockFacetN")` literal declared in MockFacets.sol.
-// Solidity right-pads short string-to-bytes32 conversions with zeros: each name is
-// 10 ASCII bytes ("MockFacet" + digit) followed by 22 zero bytes.
+// Resolver keys mirror the `bytes32("...")` literals declared in the mock
+// contracts. Solidity right-pads short string-to-bytes32 conversions with
+// zeros: e.g. `MockFacetN` is 10 ASCII bytes + 22 zero bytes; `MockDiamondCut`
+// is 14 ASCII bytes + 18 zero bytes.
 const _MOCK_FACET_1_RESOLVER_KEY = "0x4d6f636b46616365743100000000000000000000000000000000000000000000";
 const _MOCK_FACET_2_RESOLVER_KEY = "0x4d6f636b46616365743200000000000000000000000000000000000000000000";
 const _MOCK_FACET_3_RESOLVER_KEY = "0x4d6f636b46616365743300000000000000000000000000000000000000000000";
+const _MOCK_DIAMOND_CUT_RESOLVER_KEY = "0x4d6f636b4469616d6f6e64437574000000000000000000000000000000000000";
 
-// TEST-ONLY: registry of the three mock facets, keyed by the contract name used in
-// `INITIALIZE_MOCK_FACETS`. Shape matches the production `FACET_REGISTRY` so the
-// deploy + configuration code can treat it the same way.
+// TEST-ONLY: registry of the mock facets, keyed by the contract name used in
+// `INITIALIZE_MOCK_FACETS`. Shape matches the production `FACET_REGISTRY` so
+// the deploy + configuration code can treat it the same way.
 export const MOCK_FACET_REGISTRY: Record<string, FacetDefinition> = {
+  MockDiamondCut: {
+    name: "MockDiamondCut",
+    description: "TEST-ONLY mock variant of DiamondFacet used by InitializeMock domain",
+    resolverKey: { name: "_MOCK_DIAMOND_CUT_RESOLVER_KEY", value: _MOCK_DIAMOND_CUT_RESOLVER_KEY },
+    factory: (signer) => new MockDiamondCut__factory(signer),
+  },
   MockFacet1: {
     name: "MockFacet1",
     description: "TEST-ONLY mock facet used by InitializeMock domain",

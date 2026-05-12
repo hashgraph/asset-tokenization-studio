@@ -116,7 +116,7 @@ contract MockFacet3 is IMockFacet3, Modifiers, IStaticFunctionSelectors {
     ) external override onlyFacetRegistered(_MOCK_FACET_3_RESOLVER_KEY, _versions()) {
         if (statusStep == 0) {
             InitializerStorageWrapper.setFacetToReady(_MOCK_FACET_3_RESOLVER_KEY);
-        } else InitializerStorageWrapper.setFacetToCustomStatus(_MOCK_FACET_3_RESOLVER_KEY, statusStep);
+        } else InitializerStorageWrapper.setFacetToCustomStatus(_MOCK_FACET_3_RESOLVER_KEY, statusStep + 1);
     }
 
     function mockFacet3Method() external view override onlyOperational returns (string memory) {

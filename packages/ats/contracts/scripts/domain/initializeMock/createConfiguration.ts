@@ -20,10 +20,19 @@ import { INITIALIZE_MOCK_CONFIG_ID } from "../constants";
 import { getMockFacetDefinition } from "./mockFacetsRegistry";
 
 // TEST-ONLY: facet set for the InitializeMock domain — the real InitializerFacet
-// followed by the three mock facets. `InitializerFacet` is resolved from
-// `atsRegistry`; the mocks are resolved from the local mock registry since they
-// are excluded from the auto-generated atsRegistry.
-const INITIALIZE_MOCK_FACETS = ["InitializerFacet", "MockFacet1", "MockFacet2", "MockFacet3"] as const;
+// followed by `MockDiamondCut` (a mock variant of `DiamondFacet` that exposes
+// the same diamond-cut/loupe surface plus an `initializeDiamondCut()` hook so
+// it can participate in the initializer flow) and the three mock facets.
+// `InitializerFacet` is resolved from `atsRegistry`; the mocks are resolved
+// from the local mock registry since they are excluded from the auto-generated
+// atsRegistry.
+const INITIALIZE_MOCK_FACETS = [
+  "InitializerFacet",
+  "MockDiamondCut",
+  "MockFacet1",
+  "MockFacet2",
+  "MockFacet3",
+] as const;
 
 /**
  * TEST-ONLY: create the InitializeMock configuration in BusinessLogicResolver.

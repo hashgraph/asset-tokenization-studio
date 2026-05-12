@@ -939,10 +939,13 @@ export async function deploySystemWithNewBlr(
     let initializeMockVersions: number[] = [];
 
     // TEST-ONLY: per-version facet-version maps. Order matters — index `i` is
-    // configId version `i + 1`.
+    // configId version `i + 1`. `MockDiamondCut` is pinned at v1 in both
+    // versions: it is only registered once in Step 3 and is included so the
+    // resulting ResolverProxy exposes `updateConfigVersion` / `getConfigInfo`
+    // through its mock variant of `DiamondFacet`.
     const INITIALIZE_MOCK_VERSION_MAPS: Array<Record<string, number>> = [
-      { InitializerFacet: 1, MockFacet1: 1, MockFacet2: 2, MockFacet3: 1 },
-      { InitializerFacet: 1, MockFacet1: 3, MockFacet2: 3, MockFacet3: 3 },
+      { InitializerFacet: 1, MockDiamondCut: 1, MockFacet1: 1, MockFacet2: 2, MockFacet3: 1 },
+      { InitializerFacet: 1, MockDiamondCut: 1, MockFacet1: 3, MockFacet2: 3, MockFacet3: 3 },
     ];
     // TEST-ONLY: target BLR version count for the three MockFacets (v1 minted
     // in Step 3, so we add v2 and v3 here). InitializerFacet is intentionally
