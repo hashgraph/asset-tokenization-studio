@@ -1341,6 +1341,88 @@ describe("Factory Tests", () => {
       );
     });
 
+    it("GIVEN invalid impact data (maxDeviationFloor == baseLine) WHEN deploying bond THEN transaction fails", async () => {
+      const bondKpiLinkedRateData = {
+        bondData: {
+          security: getSecurityData(businessLogicResolver, {
+            rbacs: init_rbacs,
+          }),
+          bondDetails: await getBondDetails(),
+          proceedRecipients: [],
+          proceedRecipientsData: [],
+        },
+        factoryRegulationData: getRegulationData(),
+        interestRate: {
+          maxRate: 1000,
+          baseRate: 500,
+          minRate: 100,
+          startPeriod: Math.floor(Date.now() / 1000) + 86400,
+          startRate: 500,
+          missedPenalty: 50,
+          reportPeriod: 86400 * 30,
+          rateDecimals: 2,
+        },
+        impactData: {
+          maxDeviationCap: 150,
+          baseLine: 100,
+          maxDeviationFloor: 100, // maxDeviationFloor == baseLine - INVALID (zero denominator)
+          impactDataDecimals: 2,
+          adjustmentPrecision: 100,
+        },
+      };
+
+      bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
+        key: BOND_KPI_LINKED_RATE_CONFIG_ID,
+        version: 1,
+      };
+
+      await expect(factory.deployBondKpiLinkedRate(bondKpiLinkedRateData)).to.be.revertedWithCustomError(
+        factory,
+        "WrongImpactDataValues",
+      );
+    });
+
+    it("GIVEN invalid impact data (baseLine == maxDeviationCap) WHEN deploying bond THEN transaction fails", async () => {
+      const bondKpiLinkedRateData = {
+        bondData: {
+          security: getSecurityData(businessLogicResolver, {
+            rbacs: init_rbacs,
+          }),
+          bondDetails: await getBondDetails(),
+          proceedRecipients: [],
+          proceedRecipientsData: [],
+        },
+        factoryRegulationData: getRegulationData(),
+        interestRate: {
+          maxRate: 1000,
+          baseRate: 500,
+          minRate: 100,
+          startPeriod: Math.floor(Date.now() / 1000) + 86400,
+          startRate: 500,
+          missedPenalty: 50,
+          reportPeriod: 86400 * 30,
+          rateDecimals: 2,
+        },
+        impactData: {
+          maxDeviationCap: 100,
+          baseLine: 100, // baseLine == maxDeviationCap - INVALID (zero denominator)
+          maxDeviationFloor: 50,
+          impactDataDecimals: 2,
+          adjustmentPrecision: 100,
+        },
+      };
+
+      bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
+        key: BOND_KPI_LINKED_RATE_CONFIG_ID,
+        version: 1,
+      };
+
+      await expect(factory.deployBondKpiLinkedRate(bondKpiLinkedRateData)).to.be.revertedWithCustomError(
+        factory,
+        "WrongImpactDataValues",
+      );
+    });
+
     it("GIVEN invalid interest rate (baseRate > maxRate) WHEN deploying bond THEN transaction fails", async () => {
       const bondKpiLinkedRateData = {
         bondData: {
