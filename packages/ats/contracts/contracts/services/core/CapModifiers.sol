@@ -82,7 +82,7 @@ abstract contract CapModifiers {
      * @param _timestamp The timestamp at which supplies are evaluated.
      */
     modifier onlyValidNewMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply, uint256 _timestamp) {
-        CapStorageWrapper.requireValidNewMaxSupplyByPartition(_partition, _maxSupply, _timestamp);
+        CapStorageWrapper.checkValidNewMaxSupplyByPartition(_partition, _maxSupply, _timestamp);
         _;
     }
 }
