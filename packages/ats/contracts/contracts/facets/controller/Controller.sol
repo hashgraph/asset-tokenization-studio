@@ -10,9 +10,6 @@ import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.s
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
-import { _CONTROLLER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 
 /**
  * @title Controller
