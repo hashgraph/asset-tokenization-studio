@@ -40,7 +40,7 @@ library LockStorageWrapper {
         uint256 expirationTimestamp,
         address operator
     ) internal returns (bool success_, uint256 lockId_) {
-        if (amount == 0) revert ILockTypes.InvalidLockAmount();
+        checkNonZeroLockAmount(amount);
 
         _prepareLock(partition, tokenHolder);
 
@@ -279,6 +279,10 @@ library LockStorageWrapper {
         assembly {
             lock_.slot := position
         }
+    }
+
+    function checkNonZeroLockAmount(uint256 amount) internal pure {
+        if (amount == 0) revert ILockTypes.InvalidLockAmount();
     }
 
     // --- Private helper functions ---

@@ -136,7 +136,7 @@ library ERC3643StorageWrapper {
     }
 
     function freezeTokensByPartition(bytes32 _partition, address _account, uint256 _amount) internal {
-        if (_amount == 0) revert IFreeze.InvalidFreezeAmount();
+        checkNonZeroFreezeAmount(_amount);
 
         ERC1410StorageWrapper.triggerAndSyncAll(_partition, _account, address(0));
         updateTotalFreeze(_partition, _account);
@@ -366,6 +366,10 @@ library ERC3643StorageWrapper {
         if (_addresses.length != _status.length) {
             revert IERC3643Types.InputBoolArrayLengthMismatch();
         }
+    }
+
+    function checkNonZeroFreezeAmount(uint256 _amount) internal pure {
+        if (_amount == 0) revert IFreeze.InvalidFreezeAmount();
     }
 
     function _transferFrozenBalanceOnly(bytes32 _partition, address _to, uint256 _amount) private {
