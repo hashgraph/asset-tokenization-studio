@@ -237,7 +237,7 @@ describe("reinitializeMock", () => {
       },
     ]);
     // The facet is now at the BLR's latest version. Query it.
-    const blrLatest = await ctx.blr.getLatestVersion();
+    const blrLatest = await ctx.blr.getLatestVersion(MOCK_STATEFUL_KEY);
 
     // Create config v3 with MockStatefulFacet at the new version, others at version 1
     const configs = Object.entries(ctx.facetKeys).map(([name, key]) => ({
@@ -387,7 +387,7 @@ describe("setOperationalStatus", () => {
           businessLogicAddress: ctx.facetAddresses.MockStatefulFacet,
         },
       ]);
-      const blrLatest = await ctx.blr.getLatestVersion();
+      const blrLatest = await ctx.blr.getLatestVersion(MOCK_STATEFUL_KEY);
 
       const configs = Object.entries(ctx.facetKeys).map(([name, key]) => ({
         id: key,

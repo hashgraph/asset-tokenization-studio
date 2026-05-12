@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-11T21:53:06.745Z
+ * Generated: 2026-05-12T08:21:31.484Z
  * Facets: 124
  * Infrastructure: 2
  *
@@ -3012,11 +3012,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xb5a1ee4f",
       },
-      {
-        name: "IsPaused",
-        signature: { full: "error IsPaused()", canonical: "IsPaused()" },
-        selector: "0x1309a563",
-      },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "WrongClearingId",
         signature: { full: "error WrongClearingId()", canonical: "WrongClearingId()" },
@@ -6205,7 +6201,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xbd29da3f",
       },
-      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "FacetAlreadyRegistered",
         signature: {
@@ -6230,6 +6225,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xb5a1ee4f",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "ListedControlList",
         signature: { full: "error ListedControlList(address controlList)", canonical: "ListedControlList(address)" },
@@ -6395,7 +6391,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x8a85ec02",
       },
-      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "FacetAlreadyRegistered",
         signature: {
@@ -6420,6 +6415,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xb5a1ee4f",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "ListedKycList",
         signature: { full: "error ListedKycList(address kycList)", canonical: "ListedKycList(address)" },
@@ -6574,7 +6570,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x2d931b36",
       },
-      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "FacetAlreadyRegistered",
         signature: {
@@ -6599,6 +6594,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xb5a1ee4f",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "ListedPause",
         signature: { full: "error ListedPause(address pause)", canonical: "ListedPause(address)" },
@@ -6748,9 +6744,32 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     errors: [
       {
+        name: "DuplicatedMember",
+        signature: {
+          full: "error DuplicatedMember(bytes32 role, address member)",
+          canonical: "DuplicatedMember(bytes32,address)",
+        },
+        selector: "0x445c9d63",
+      },
+      {
+        name: "DuplicatedRole",
+        signature: { full: "error DuplicatedRole(bytes32 role)", canonical: "DuplicatedRole(bytes32)" },
+        selector: "0x55e0476b",
+      },
+      {
+        name: "EmptyMembers",
+        signature: { full: "error EmptyMembers(bytes32 role)", canonical: "EmptyMembers(bytes32)" },
+        selector: "0x93d6186f",
+      },
+      {
         name: "EmptyResolver",
         signature: { full: "error EmptyResolver(address resolver)", canonical: "EmptyResolver(address)" },
         selector: "0x840a2011",
+      },
+      {
+        name: "FactoryCannotBeAdmin",
+        signature: { full: "error FactoryCannotBeAdmin()", canonical: "FactoryCannotBeAdmin()" },
+        selector: "0x7a946824",
       },
       {
         name: "NoInitialAdmins",
@@ -6764,6 +6783,16 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "RegulationTypeAndSubTypeForbidden(uint8,uint8)",
         },
         selector: "0xfcaaa691",
+      },
+      {
+        name: "SenderNotAdmin",
+        signature: { full: "error SenderNotAdmin(address sender)", canonical: "SenderNotAdmin(address)" },
+        selector: "0xc0d4daef",
+      },
+      {
+        name: "TokenDeploymentFailed",
+        signature: { full: "error TokenDeploymentFailed(address proxy)", canonical: "TokenDeploymentFailed(address)" },
+        selector: "0xc99ebb19",
       },
       {
         name: "WrongDates",
@@ -6803,6 +6832,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "WrongTimestamp",
         signature: { full: "error WrongTimestamp(uint256 timeStamp)", canonical: "WrongTimestamp(uint256)" },
         selector: "0xdcf61246",
+      },
+      {
+        name: "ZeroAddressNotAllowed",
+        signature: { full: "error ZeroAddressNotAllowed()", canonical: "ZeroAddressNotAllowed()" },
+        selector: "0x8579befe",
       },
     ],
     factory: (signer) => new FactoryFacet__factory(signer),

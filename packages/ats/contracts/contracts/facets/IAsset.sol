@@ -275,6 +275,5 @@ interface IAsset is
     IDeactivate,
     IOperatorByPartition,
     ISecurityHolders,
-    IOperatorByPartition,
     IInitializer
 {}
