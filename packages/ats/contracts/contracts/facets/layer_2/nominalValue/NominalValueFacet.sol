@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { NominalValue } from "./NominalValue.sol";
 import { INominalValue } from "./INominalValue.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../../infrastructure/proxy/Bytes4Builder.sol";
 import { _NOMINAL_VALUE_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
 /**
@@ -20,25 +21,20 @@ contract NominalValueFacet is NominalValue, IStaticFunctionSelectors {
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 6;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.setNominalValueCurrency.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.setNominalValue.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.initializeNominalValue.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getNominalValueDecimals.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getNominalValueCurrency.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getNominalValue.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.getNominalValue.selector,
+                this.getNominalValueCurrency.selector,
+                this.getNominalValueDecimals.selector,
+                this.initializeNominalValue.selector,
+                this.setNominalValue.selector,
+                this.setNominalValueCurrency.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        uint256 selectorIndex = 1;
-        staticInterfaceIds_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticInterfaceIds_[--selectorIndex] = type(INominalValue).interfaceId;
-        }
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(INominalValue).interfaceId);
     }
 }
