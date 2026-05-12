@@ -23,6 +23,7 @@ import { ClearingStorageWrapper } from "./ClearingStorageWrapper.sol";
 import { ClearingReadOps } from "../orchestrator/ClearingReadOps.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { NominalValueStorageWrapper } from "./nominalValue/NominalValueStorageWrapper.sol";
 
 /**
  * @notice Central storage layout for all snapshot-related data across the token system.
@@ -68,6 +69,10 @@ struct SnapshotStorage {
     mapping(uint256 => SnapshotsAddress) tokenHoldersSnapshots;
     /// @dev Snapshots for total number of token holders
     Snapshots totalTokenHoldersSnapshots;
+    /// @dev Snapshots for the nominal value
+    Snapshots nominalValueSnapshots;
+    /// @dev Snapshots for the nominal value decimals
+    Snapshots nominalValueDecimalsSnapshots;
 }
 
 /**
@@ -131,6 +136,17 @@ library SnapshotsStorageWrapper {
 
     function updateAssetTotalSupplySnapshot() internal {
         updateSnapshot(_snapshotStorage().totalSupplySnapshots, ERC20StorageWrapper.totalSupply());
+    }
+
+    function updateNominalValueSnapshot() internal {
+        updateSnapshot(_snapshotStorage().nominalValueSnapshots, NominalValueStorageWrapper.getNominalValue());
+    }
+
+    function updateNominalValueDecimalsSnapshot() internal {
+        updateSnapshot(
+            _snapshotStorage().nominalValueDecimalsSnapshots,
+            NominalValueStorageWrapper.getNominalValueDecimals()
+        );
     }
 
     /**
@@ -533,6 +549,16 @@ library SnapshotsStorageWrapper {
     function totalSupplyAt(uint256 snapshotId) internal view returns (uint256) {
         (bool snapshotted, uint256 value) = valueAt(snapshotId, _snapshotStorage().totalSupplySnapshots);
         return snapshotted ? value : ERC20StorageWrapper.totalSupply();
+    }
+
+    function nominalValueAtSnapshot(uint256 snapshotId) internal view returns (uint256) {
+        (bool snapshotted, uint256 value) = valueAt(snapshotId, _snapshotStorage().nominalValueSnapshots);
+        return snapshotted ? value : NominalValueStorageWrapper.getNominalValue();
+    }
+
+    function nominalValueDecimalsAtSnapshot(uint256 snapshotId) internal view returns (uint8) {
+        (bool snapshotted, uint256 value) = valueAt(snapshotId, _snapshotStorage().nominalValueDecimalsSnapshots);
+        return snapshotted ? uint8(value) : NominalValueStorageWrapper.getNominalValueDecimals();
     }
 
     function getCurrentSnapshotId() internal view returns (uint256) {

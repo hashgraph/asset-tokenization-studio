@@ -106,6 +106,7 @@ const LOANS_PORTFOLIO_FACETS = [
 
   // Nominal Value
   "NominalValueFacet",
+  "NominalValueAtSnapshotFacet",
 
   // Hold
   "HoldFacet",
