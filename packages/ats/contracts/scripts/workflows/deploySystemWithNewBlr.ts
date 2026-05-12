@@ -910,13 +910,45 @@ export async function deploySystemWithNewBlr(
 
     // ====================================================================
     // TEST-ONLY: Step 12 — InitializeMock Configurations.
-    // Calls `createInitializeMockConfiguration` four times in a row against
-    // the same configId so the BLR mints four versions (v1..v4) of an
-    // otherwise-identical 4-facet configuration. Only executed under
-    // `useTimeTravel`; skipped (but the step slot is still advanced) otherwise
-    // so Factory's step index stays stable across runs.
+    //
+    // Sets up the InitializeMock domain in the BLR so the
+    // initializer-versioning tests can deploy a ResolverProxy that combines
+    // different per-facet versions.
+    //
+    // Step 2/3 already deployed and registered v1 of `InitializerFacet`,
+    // `MockFacet1`, `MockFacet2` and `MockFacet3`. Here we additionally:
+    //   - deploy two extra fresh copies of each of `MockFacet1`, `MockFacet2`
+    //     and `MockFacet3` and register them in the BLR. Each registration
+    //     bumps the facet's BLR version, so after this loop the BLR holds
+    //     three distinct versions of every MockFacet, all backed by identical
+    //     bytecode but different addresses. `InitializerFacet` stays at v1
+    //     (no other config references higher versions of it).
+    //   - mint two versions of `INITIALIZE_MOCK_CONFIG_ID`, each pinning an
+    //     explicit per-facet version map:
+    //       v1: { InitializerFacet:1, MockFacet1:1, MockFacet2:2, MockFacet3:1 }
+    //       v2: { InitializerFacet:1, MockFacet1:3, MockFacet2:3, MockFacet3:3 }
+    //
+    // Only executed under `useTimeTravel`; skipped (but the step slot is still
+    // advanced) otherwise so Factory's step index stays stable across runs.
+    //
+    // Idempotency: before redeploying extra MockFacet copies we read the
+    // current BLR version for each. If it is already >= 3 we skip the deploys
+    // (e.g. when a previous failed run already minted them) — this prevents
+    // version drift that would break the pinned 1/2/3 mapping.
     // ====================================================================
     let initializeMockVersions: number[] = [];
+
+    // TEST-ONLY: per-version facet-version maps. Order matters — index `i` is
+    // configId version `i + 1`.
+    const INITIALIZE_MOCK_VERSION_MAPS: Array<Record<string, number>> = [
+      { InitializerFacet: 1, MockFacet1: 1, MockFacet2: 2, MockFacet3: 1 },
+      { InitializerFacet: 1, MockFacet1: 3, MockFacet2: 3, MockFacet3: 3 },
+    ];
+    // TEST-ONLY: target BLR version count for the three MockFacets (v1 minted
+    // in Step 3, so we add v2 and v3 here). InitializerFacet is intentionally
+    // excluded — only its v1 is referenced by either configId version.
+    const MOCK_FACET_TARGET_VERSIONS = 3;
+    const MOCK_FACET_NAMES_TO_MULTIPLY = ["MockFacet1", "MockFacet2", "MockFacet3"] as const;
 
     if (checkpoint.steps.configurations?.initializeMock && checkpoint.currentStep >= 11) {
       info(`\n✓ Step 12/${totalSteps}: InitializeMock configurations already created (resuming)`);
@@ -926,27 +958,89 @@ export async function deploySystemWithNewBlr(
       info(`✅ InitializeMock Versions: [${data.versions.join(", ")}]`);
       info(`✅ InitializeMock Facets: ${data.facetCount}`);
     } else if (useTimeTravel) {
-      info(`\n🧪 Step 12/${totalSteps}: Creating InitializeMock configurations (4 versions)...`);
+      info(`\n🧪 Step 12/${totalSteps}: Creating InitializeMock domain (3 MockFacet versions + 2 configIds)...`);
 
-      // TEST-ONLY: four identical calls; each one bumps the configId version.
-      const INITIALIZE_MOCK_RUNS = 4;
+      // TEST-ONLY: bring each MockFacet's BLR version count up to 3 by
+      // deploying and registering additional copies. Query current versions
+      // first so a partial retry does not over-bump.
+      const mockFacetDefs = MOCK_FACET_NAMES_TO_MULTIPLY.map((name) => {
+        const facetDef = getMockFacetDefinition(name);
+        if (!facetDef?.factory || !facetDef?.resolverKey?.value) {
+          throw new Error(`Mock facet ${name} missing factory or resolver key`);
+        }
+        return { name, factory: facetDef.factory, resolverKey: facetDef.resolverKey.value };
+      });
+
+      const currentVersionsRaw = await blrContract.getLatestVersions(mockFacetDefs.map((f) => f.resolverKey));
+      const currentVersions = currentVersionsRaw.map((v) => Number(v));
+
+      for (let idx = 0; idx < mockFacetDefs.length; idx++) {
+        const { name, factory, resolverKey } = mockFacetDefs[idx];
+        const startVersion = currentVersions[idx];
+
+        if (startVersion >= MOCK_FACET_TARGET_VERSIONS) {
+          info(`   ✓ ${name} already at v${startVersion} in BLR (skipping extra deploys)`);
+          continue;
+        }
+
+        for (let nextVersion = startVersion + 1; nextVersion <= MOCK_FACET_TARGET_VERSIONS; nextVersion++) {
+          info(`   📦 Deploying ${name} v${nextVersion} (extra copy)...`);
+          const factoriesForRound: Record<string, ContractFactory> = {
+            [`${name}@v${nextVersion}`]: factory(signer) as ContractFactory,
+          };
+          const deployResult = await deployFacets(factoriesForRound, {
+            confirmations,
+            enableRetry,
+            verifyDeployment,
+          });
+          if (!deployResult.success) {
+            const failedNames = Array.from(deployResult.failed.keys()).join(", ");
+            throw new Error(`InitializeMock extra deploy failed for: ${failedNames}`);
+          }
+          const deployed = deployResult.deployed.get(`${name}@v${nextVersion}`);
+          if (!deployed?.address) {
+            throw new Error(`InitializeMock extra deploy returned no address for ${name} v${nextVersion}`);
+          }
+
+          info(`   📝 Registering ${name} v${nextVersion} (${deployed.address}) in BLR...`);
+          const registerResult = await registerFacets(blrContract, {
+            facets: [{ name: `${name}@v${nextVersion}`, address: deployed.address, resolverKey }],
+          });
+          if (!registerResult.success) {
+            throw new Error(
+              `InitializeMock extra register failed for ${name} v${nextVersion}: ${registerResult.error}`,
+            );
+          }
+          totalGasUsed += registerResult.transactionGas?.reduce((sum, gas) => sum + gas, 0) ?? 0;
+        }
+      }
+
+      // TEST-ONLY: mint configId versions in order, each pinning its own
+      // facet-version map.
       let lastFacetCount = 0;
-      for (let i = 1; i <= INITIALIZE_MOCK_RUNS; i++) {
+      for (let i = 0; i < INITIALIZE_MOCK_VERSION_MAPS.length; i++) {
+        const facetVersions = INITIALIZE_MOCK_VERSION_MAPS[i];
         const result = await createInitializeMockConfiguration(
           blrContract,
           facetAddresses,
+          facetVersions,
           partialBatchDeploy,
           batchSize,
           confirmations,
         );
 
         if (!result.success) {
-          throw new Error(`InitializeMock config (run ${i}) failed: ${result.error} - ${result.message}`);
+          throw new Error(`InitializeMock config (run ${i + 1}) failed: ${result.error} - ${result.message}`);
         }
 
         initializeMockVersions.push(result.data.version);
         lastFacetCount = result.data.facetKeys.length;
-        info(`   ✅ Run ${i}/${INITIALIZE_MOCK_RUNS} → version ${result.data.version}`);
+        const pinned = Object.entries(facetVersions)
+          .map(([n, v]) => `${n}=v${v}`)
+          .join(", ");
+        info(
+          `   ✅ Run ${i + 1}/${INITIALIZE_MOCK_VERSION_MAPS.length} → configId v${result.data.version} [${pinned}]`,
+        );
       }
 
       info(`✅ InitializeMock Config ID: ${INITIALIZE_MOCK_CONFIG_ID}`);

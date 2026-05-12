@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // TEST-ONLY: integration tests for the InitializeMock domain. Loads the full
-// ATS infrastructure fixture (which, with useTimeTravel=true, also deploys the
-// 3 MockFacets and creates 4 versions of the InitializeMock configuration) and
-// deploys a ResolverProxy against INITIALIZE_MOCK_CONFIG_ID to exercise the
-// initializer-versioning flow on the four facets of that configuration.
+// ATS infrastructure fixture (which, with useTimeTravel=true, deploys three
+// distinct BLR versions of each of MockFacet1/2/3 — all backed by identical
+// bytecode — and creates two versions of the InitializeMock configuration:
+//   v1 = { InitializerFacet:1, MockFacet1:1, MockFacet2:2, MockFacet3:1 }
+//   v2 = { InitializerFacet:1, MockFacet1:3, MockFacet2:3, MockFacet3:3 }
+// and deploys a ResolverProxy against INITIALIZE_MOCK_CONFIG_ID to exercise
+// the initializer-versioning flow on the four facets of that configuration.
 
 import { expect } from "chai";
 import { ethers } from "hardhat";
@@ -25,7 +28,7 @@ import { deployAtsInfrastructureFixture } from "@test";
 import { INITIALIZE_MOCK_CONFIG_ID, ATS_ROLES } from "@scripts";
 import { decodeEvent } from "@scripts/infrastructure";
 
-describe("Initializer — InitializeMock domain", () => {
+describe.only("Initializer — InitializeMock domain", () => {
   // TEST-ONLY: mirrors `_INITIALIZER_RESOLVER_KEY` declared in
   // `contracts/constants/resolverKeys.sol`.
   const initializerFacetId = "0x65c891d003e7dc436f2c3d0863d599d91867c8695fee29923a476a2be3ec540f";
@@ -53,9 +56,10 @@ describe("Initializer — InitializeMock domain", () => {
   };
 
   // TEST-ONLY: shape used by `expectFacetStates` — operational status of the
-  // InitializeMock configId at version 1, plus one entry per facet expressing
-  // the expected `getFacetVersionStatus` and `getFacetLastVersion` readings.
-  type ExpectedFacetState = { versionStatus: number; lastVersion: number };
+  // InitializeMock configId at version 1, plus one entry per facet. Each entry
+  // carries the BLR `version` to query for `getFacetVersionStatus` and the
+  // expected `versionStatus` / `lastVersion` readings at that version.
+  type ExpectedFacetState = { version: number; versionStatus: number; lastVersion: number };
   type ExpectedFacetStates = {
     operationalStatus: number;
     initializer: ExpectedFacetState;
@@ -65,22 +69,29 @@ describe("Initializer — InitializeMock domain", () => {
   };
 
   // TEST-ONLY helper: asserts the configId's `getOperationalStatus` and each
-  // facet's `getFacetVersionStatus` (always queried at version 1) plus
-  // `getFacetLastVersion` readings match the given expected values. Resolves
-  // the bytes32 facet IDs from the registries used at deployment time so the
-  // assertions stay aligned with on-chain state. Reads `initializerFacet` from
-  // the enclosing scope — only call after a successful `deployMockAsset(...)`.
+  // facet's `getFacetVersionStatus` (queried at the per-facet `version` passed
+  // in `expected`) plus `getFacetLastVersion` readings match the given expected
+  // values. Resolves the bytes32 facet IDs from the registries used at
+  // deployment time so the assertions stay aligned with on-chain state. Reads
+  // `initializerFacet` from the enclosing scope — only call after a successful
+  // `deployMockAsset(...)`.
   const expectFacetStates = async (expected: ExpectedFacetStates) => {
     expect(await initializerFacet.getOperationalStatus(INITIALIZE_MOCK_CONFIG_ID, 1)).to.equal(
       expected.operationalStatus,
     );
 
-    expect(await initializerFacet.getFacetVersionStatus(initializerFacetId, 1)).to.equal(
+    expect(await initializerFacet.getFacetVersionStatus(initializerFacetId, expected.initializer.version)).to.equal(
       expected.initializer.versionStatus,
     );
-    expect(await initializerFacet.getFacetVersionStatus(mockFacet1Id, 1)).to.equal(expected.mockFacet1.versionStatus);
-    expect(await initializerFacet.getFacetVersionStatus(mockFacet2Id, 1)).to.equal(expected.mockFacet2.versionStatus);
-    expect(await initializerFacet.getFacetVersionStatus(mockFacet3Id, 1)).to.equal(expected.mockFacet3.versionStatus);
+    expect(await initializerFacet.getFacetVersionStatus(mockFacet1Id, expected.mockFacet1.version)).to.equal(
+      expected.mockFacet1.versionStatus,
+    );
+    expect(await initializerFacet.getFacetVersionStatus(mockFacet2Id, expected.mockFacet2.version)).to.equal(
+      expected.mockFacet2.versionStatus,
+    );
+    expect(await initializerFacet.getFacetVersionStatus(mockFacet3Id, expected.mockFacet3.version)).to.equal(
+      expected.mockFacet3.versionStatus,
+    );
 
     expect(await initializerFacet.getFacetLastVersion(initializerFacetId)).to.equal(expected.initializer.lastVersion);
     expect(await initializerFacet.getFacetLastVersion(mockFacet1Id)).to.equal(expected.mockFacet1.lastVersion);
@@ -120,10 +131,10 @@ describe("Initializer — InitializeMock domain", () => {
 
       await expectFacetStates({
         operationalStatus: 0,
-        initializer: { versionStatus: 0, lastVersion: 0 },
-        mockFacet1: { versionStatus: 0, lastVersion: 0 },
-        mockFacet2: { versionStatus: 0, lastVersion: 0 },
-        mockFacet3: { versionStatus: 0, lastVersion: 0 },
+        initializer: { version: 1, versionStatus: 0, lastVersion: 0 },
+        mockFacet1: { version: 1, versionStatus: 0, lastVersion: 0 },
+        mockFacet2: { version: 2, versionStatus: 0, lastVersion: 0 },
+        mockFacet3: { version: 1, versionStatus: 0, lastVersion: 0 },
       });
     });
 
@@ -148,10 +159,10 @@ describe("Initializer — InitializeMock domain", () => {
 
       await expectFacetStates({
         operationalStatus: 0,
-        initializer: { versionStatus: 0, lastVersion: 0 },
-        mockFacet1: { versionStatus: 1, lastVersion: 1 },
-        mockFacet2: { versionStatus: 0, lastVersion: 0 },
-        mockFacet3: { versionStatus: 0, lastVersion: 0 },
+        initializer: { version: 1, versionStatus: 0, lastVersion: 0 },
+        mockFacet1: { version: 1, versionStatus: 1, lastVersion: 1 },
+        mockFacet2: { version: 2, versionStatus: 0, lastVersion: 0 },
+        mockFacet3: { version: 1, versionStatus: 0, lastVersion: 0 },
       });
     });
 
@@ -160,30 +171,30 @@ describe("Initializer — InitializeMock domain", () => {
 
       await expectFacetStates({
         operationalStatus: 0,
-        initializer: { versionStatus: 0, lastVersion: 0 },
-        mockFacet1: { versionStatus: 0, lastVersion: 0 },
-        mockFacet2: { versionStatus: 0, lastVersion: 0 },
-        mockFacet3: { versionStatus: 2, lastVersion: 0 },
+        initializer: { version: 1, versionStatus: 0, lastVersion: 0 },
+        mockFacet1: { version: 1, versionStatus: 0, lastVersion: 0 },
+        mockFacet2: { version: 2, versionStatus: 0, lastVersion: 0 },
+        mockFacet3: { version: 1, versionStatus: 2, lastVersion: 0 },
       });
 
       await expect(mockFacet3.initializeMockFacet3(50)).to.not.be.reverted;
 
       await expectFacetStates({
         operationalStatus: 0,
-        initializer: { versionStatus: 0, lastVersion: 0 },
-        mockFacet1: { versionStatus: 0, lastVersion: 0 },
-        mockFacet2: { versionStatus: 0, lastVersion: 0 },
-        mockFacet3: { versionStatus: 51, lastVersion: 0 },
+        initializer: { version: 1, versionStatus: 0, lastVersion: 0 },
+        mockFacet1: { version: 1, versionStatus: 0, lastVersion: 0 },
+        mockFacet2: { version: 2, versionStatus: 0, lastVersion: 0 },
+        mockFacet3: { version: 1, versionStatus: 51, lastVersion: 0 },
       });
 
       await expect(mockFacet3.initializeMockFacet3(0)).to.not.be.reverted;
 
       await expectFacetStates({
         operationalStatus: 0,
-        initializer: { versionStatus: 0, lastVersion: 0 },
-        mockFacet1: { versionStatus: 0, lastVersion: 0 },
-        mockFacet2: { versionStatus: 0, lastVersion: 0 },
-        mockFacet3: { versionStatus: 1, lastVersion: 1 },
+        initializer: { version: 1, versionStatus: 0, lastVersion: 0 },
+        mockFacet1: { version: 1, versionStatus: 0, lastVersion: 0 },
+        mockFacet2: { version: 2, versionStatus: 0, lastVersion: 0 },
+        mockFacet3: { version: 1, versionStatus: 1, lastVersion: 1 },
       });
     });
 
@@ -203,10 +214,10 @@ describe("Initializer — InitializeMock domain", () => {
 
       await expectFacetStates({
         operationalStatus: 0,
-        initializer: { versionStatus: 1, lastVersion: 1 },
-        mockFacet1: { versionStatus: 1, lastVersion: 1 },
-        mockFacet2: { versionStatus: 1, lastVersion: 1 },
-        mockFacet3: { versionStatus: 1, lastVersion: 1 },
+        initializer: { version: 1, versionStatus: 1, lastVersion: 1 },
+        mockFacet1: { version: 1, versionStatus: 1, lastVersion: 1 },
+        mockFacet2: { version: 2, versionStatus: 1, lastVersion: 2 },
+        mockFacet3: { version: 1, versionStatus: 1, lastVersion: 1 },
       });
     });
 
@@ -230,10 +241,10 @@ describe("Initializer — InitializeMock domain", () => {
 
       await expectFacetStates({
         operationalStatus: 4,
-        initializer: { versionStatus: 1, lastVersion: 1 },
-        mockFacet1: { versionStatus: 1, lastVersion: 1 },
-        mockFacet2: { versionStatus: 1, lastVersion: 1 },
-        mockFacet3: { versionStatus: 1, lastVersion: 1 },
+        initializer: { version: 1, versionStatus: 1, lastVersion: 1 },
+        mockFacet1: { version: 1, versionStatus: 1, lastVersion: 1 },
+        mockFacet2: { version: 2, versionStatus: 1, lastVersion: 2 },
+        mockFacet3: { version: 1, versionStatus: 1, lastVersion: 1 },
       });
     });
 
@@ -254,11 +265,45 @@ describe("Initializer — InitializeMock domain", () => {
 
       await expectFacetStates({
         operationalStatus: 1,
-        initializer: { versionStatus: 1, lastVersion: 1 },
-        mockFacet1: { versionStatus: 1, lastVersion: 1 },
-        mockFacet2: { versionStatus: 1, lastVersion: 1 },
-        mockFacet3: { versionStatus: 1, lastVersion: 1 },
+        initializer: { version: 1, versionStatus: 1, lastVersion: 1 },
+        mockFacet1: { version: 1, versionStatus: 1, lastVersion: 1 },
+        mockFacet2: { version: 2, versionStatus: 1, lastVersion: 2 },
+        mockFacet3: { version: 1, versionStatus: 1, lastVersion: 1 },
       });
+    });
+
+    it("GIVEN all four initializers called once successfully when maxInitializerFacetIndex > 4 AND setOperationalStatus called once WHEN calling mockFacet1Method THEN succeeds", async () => {
+      // TEST-ONLY: same max-initializer index as the previous test for consistency.
+      const maxInitializerFacetIndex = 30;
+
+      await expect(mockFacet1.initializeMockFacet1()).to.not.be.reverted;
+      await expect(mockFacet2.initializeMockFacet2()).to.not.be.reverted;
+      await expect(mockFacet3.initializeMockFacet3(0)).to.not.be.reverted;
+      await expect(initializerFacet.initializeInitializer(maxInitializerFacetIndex)).to.not.be.reverted;
+
+      await expect(initializerFacet.setOperationalStatus()).to.not.be.reverted;
+
+      let response = await mockFacet1.mockFacet1Method();
+      expect(response).to.equal("MockFacet1 method called");
+
+      await expectFacetStates({
+        operationalStatus: 1,
+        initializer: { version: 1, versionStatus: 1, lastVersion: 1 },
+        mockFacet1: { version: 1, versionStatus: 1, lastVersion: 1 },
+        mockFacet2: { version: 2, versionStatus: 1, lastVersion: 2 },
+        mockFacet3: { version: 1, versionStatus: 1, lastVersion: 1 },
+      });
+    });
+  });
+
+  describe("Mock asset at version 2", () => {
+    beforeEach(async () => {
+      await deployMockAsset(1);
+      await mockFacet1.initializeMockFacet1();
+      await mockFacet2.initializeMockFacet2();
+      await mockFacet3.initializeMockFacet3(0);
+      await initializerFacet.initializeInitializer(100);
+      await initializerFacet.setOperationalStatus();
     });
   });
 });

@@ -31,7 +31,10 @@ const INITIALIZE_MOCK_FACETS = ["InitializerFacet", "MockFacet1", "MockFacet2", 
  * Behaves like `createBondConfiguration` and friends but:
  * - skips the TimeTravel branching (mocks have no TimeTravel variants);
  * - resolves the three mock facets through `getMockFacetDefinition` instead of
- *   the auto-generated atsRegistry.
+ *   the auto-generated atsRegistry;
+ * - accepts an explicit per-facet BLR version map so a single configId can
+ *   mint distinct versions that combine different facet versions (e.g.
+ *   v1 → MockFacet1 v1 / MockFacet2 v2, v2 → MockFacet1 v3 / MockFacet2 v3).
  *
  * Call this function more than once with the same `configurationId` to mint
  * additional versions in the BLR — each call increments the configId's version.
@@ -39,6 +42,14 @@ const INITIALIZE_MOCK_FACETS = ["InitializerFacet", "MockFacet1", "MockFacet2", 
  * @param blrContract        BusinessLogicResolver contract instance.
  * @param facetAddresses     Map of facet contract name → deployed address.
  *                           Must include `InitializerFacet` and `MockFacetN`.
+ *                           The address is only used as a marker in the batch
+ *                           payload; the BLR resolves the actual facet code
+ *                           through the (facetKey, version) tuple.
+ * @param facetVersions      Optional map of facet name → explicit BLR version
+ *                           to pin. When supplied, every facet in
+ *                           `INITIALIZE_MOCK_FACETS` must have an entry. When
+ *                           omitted, the latest BLR version of each facet is
+ *                           used (legacy behaviour).
  * @param partialBatchDeploy Whether to mark batches as non-final.
  * @param batchSize          Number of facets per batch.
  * @param confirmations      Number of confirmations to wait for.
@@ -46,6 +57,7 @@ const INITIALIZE_MOCK_FACETS = ["InitializerFacet", "MockFacet1", "MockFacet2", 
 export async function createInitializeMockConfiguration(
   blrContract: BusinessLogicResolver,
   facetAddresses: Record<string, string>,
+  facetVersions?: Record<string, number>,
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
@@ -70,5 +82,6 @@ export async function createInitializeMockConfiguration(
     partialBatchDeploy,
     batchSize,
     confirmations,
+    facetVersions,
   });
 }
