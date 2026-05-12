@@ -19,22 +19,17 @@ import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
  */
 abstract contract Core is ICore, Modifiers {
     /// @inheritdoc ICore
-    function initializeCore(
-        ICore.ERC20Metadata calldata metadata
-    ) external override onlyFacetNotRegistered(_CORE_RESOLVER_KEY) onlyRole(DEFAULT_ADMIN_ROLE) {
+    function initializeCore(ICore.ERC20Metadata calldata metadata) external override onlyNotERC20Initialized {
         ERC20StorageWrapper.initializeERC20(metadata);
-        InitializerStorageWrapper.setFacetToReady(_CORE_RESOLVER_KEY);
     }
 
     /// @inheritdoc ICore
-    function setName(string calldata _name) external override onlyUnpaused onlyRole(TREX_OWNER_ROLE) onlyOperational {
+    function setName(string calldata _name) external override onlyUnpaused onlyRole(TREX_OWNER_ROLE) {
         ERC3643StorageWrapper.setName(_name);
     }
 
     /// @inheritdoc ICore
-    function setSymbol(
-        string calldata _symbol
-    ) external override onlyUnpaused onlyRole(TREX_OWNER_ROLE) onlyOperational {
+    function setSymbol(string calldata _symbol) external override onlyUnpaused onlyRole(TREX_OWNER_ROLE) {
         ERC3643StorageWrapper.setSymbol(_symbol);
     }
 

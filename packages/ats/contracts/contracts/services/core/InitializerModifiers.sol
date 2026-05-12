@@ -13,24 +13,14 @@ import { ResolverProxyStorageWrapper } from "../../domain/core/ResolverProxyStor
  */
 abstract contract InitializerModifiers {
     modifier onlyOperational() {
-        InitializerStorageWrapper.checkOperational(
-            ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
-            ResolverProxyStorageWrapper.getResolverProxyVersion()
-        );
+        InitializerStorageWrapper.checkOperational();
         _;
     }
 
     // Using the Facet address (immutable variable) retrieves facet id and version from the BLR
     // Checks facetVersionStatus against reserved value "ready"
     modifier onlyFacetNotReady(bytes32 _facetId) {
-        uint256 versionId = ResolverProxyStorageWrapper
-            .getBusinessLogicResolver()
-            .getFacetVersionByConfigurationIdVersionAndFacetId(
-                ResolverProxyStorageWrapper.getResolverProxyConfigurationId(),
-                ResolverProxyStorageWrapper.getResolverProxyVersion(),
-                _facetId
-            );
-        InitializerStorageWrapper.checkFacetNotReady(_facetId, versionId);
+        InitializerStorageWrapper.checkFacetNotReady(_facetId);
         _;
     }
 
@@ -38,7 +28,7 @@ abstract contract InitializerModifiers {
     // Checks facetLastVersion
     // Makes sure that an upgrade method is only executed if the previous facet version was in a list of accepted ones.
     // "empty array" means that all previous versions are accepted.
-    modifier onlyFacetRegistered(bytes32 _facetId, uint256[] calldata _fromLastVersions) {
+    modifier onlyFacetRegistered(bytes32 _facetId, uint256[] memory _fromLastVersions) {
         InitializerStorageWrapper.checkFacetRegistered(_facetId, _fromLastVersions);
         _;
     }

@@ -17,13 +17,16 @@ contract InitializerFacet is Initializer, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 4;
+        uint256 selectorIndex = 7;
         staticFunctionSelectors_ = new bytes4[](selectorIndex);
         unchecked {
+            staticFunctionSelectors_[--selectorIndex] = this.initializeInitializer.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.updateMaxInitializerFacetIndex.selector;
             staticFunctionSelectors_[--selectorIndex] = this.setOperationalStatus.selector;
             staticFunctionSelectors_[--selectorIndex] = this.getOperationalStatus.selector;
             staticFunctionSelectors_[--selectorIndex] = this.getFacetVersionStatus.selector;
             staticFunctionSelectors_[--selectorIndex] = this.getFacetLastVersion.selector;
+            staticFunctionSelectors_[--selectorIndex] = this.getMaxInitializerFacetIndex.selector;
         }
     }
 
