@@ -13,7 +13,6 @@
 // (so it participates in the initializer flow just like the MockFacets).
 
 import { expect } from "chai";
-import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
@@ -317,7 +316,7 @@ describe("Initializer — InitializeMock domain", () => {
         .to.emit(initializerFacet, "OperationalStatusSet")
         .withArgs(await deployer.getAddress(), INITIALIZE_MOCK_CONFIG_ID, 1);
 
-      let response = await mockFacet1.mockFacet1Method();
+      const response = await mockFacet1.mockFacet1Method();
       expect(response).to.equal("MockFacet1 method called");
 
       await expectFacetStates({
@@ -343,7 +342,7 @@ describe("Initializer — InitializeMock domain", () => {
 
       await expect(initializerFacet.setOperationalStatus()).to.not.be.reverted;
 
-      let response = await mockFacet1.mockFacet1Method();
+      const response = await mockFacet1.mockFacet1Method();
       expect(response).to.equal("MockFacet1 method called");
 
       await expectFacetStates({
@@ -370,7 +369,7 @@ describe("Initializer — InitializeMock domain", () => {
     });
 
     it("GIVEN deployed mock asset version 1 WHEN upgrading to version 2 THEN all methods are disabledand initializer fail with FacetAlreadyRegistered", async () => {
-      let response = await mockFacet2.mockFacet2Method();
+      const response = await mockFacet2.mockFacet2Method();
       expect(response).to.equal("MockFacet2 method called");
 
       await mockDiamondCut.updateConfigVersion(2);
@@ -514,7 +513,7 @@ describe("Initializer — InitializeMock domain", () => {
         mockFacet3: { version: 3, versionStatus: 1, lastVersion: 3 },
       });
 
-      let response = await mockFacet2.mockFacet2Method();
+      const response = await mockFacet2.mockFacet2Method();
       expect(response).to.equal("MockFacet2 method called");
     });
   });

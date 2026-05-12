@@ -1127,8 +1127,6 @@ export async function deploySystemWithNewBlr(
 
     if (checkpoint.steps.factory && checkpoint.currentStep >= 12) {
       info(`\n✓ Step 13/${totalSteps}: Factory already deployed (resuming)`);
-      // Reconstruct DeployFactoryResult from checkpoint (with placeholder proxyResult)
-      const proxyAdminAddr = checkpoint.steps.proxyAdmin?.address || (proxyAdmin.target as string);
       factoryResult = {
         success: true,
         factoryAddress: checkpoint.steps.factory.proxy,
