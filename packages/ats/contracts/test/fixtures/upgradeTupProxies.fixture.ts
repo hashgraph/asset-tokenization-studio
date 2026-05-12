@@ -34,12 +34,6 @@ export interface TupUpgradeTestFixture {
   blrV1ImplementationAddress: string;
   blrProxy: BusinessLogicResolver;
   blrProxyAddress: string;
-
-  // Factory - V1 Implementation and Proxy
-  factoryV1Implementation: IFactory;
-  factoryV1ImplementationAddress: string;
-  factoryProxy: IFactory;
-  factoryProxyAddress: string;
 }
 
 /**
@@ -62,38 +56,39 @@ export interface V2ImplementationResult {
 }
 
 /**
- * Deploy complete infrastructure for TUP proxy upgrade testing.
+ * Deploy complete infrastructure for BLR TUP proxy upgrade testing.
  *
  * Creates a test environment with:
- * 1. Full ATS infrastructure (ProxyAdmin, BLR V1 proxy, Factory V1 proxy)
- * 2. All components deployed via TransparentUpgradeableProxy pattern
+ * 1. Full ATS infrastructure (ProxyAdmin, BLR V1 proxy)
+ * 2. BLR deployed via TransparentUpgradeableProxy pattern
  * 3. Ready for testing upgrade patterns
  *
- * @returns Complete TUP test fixture with infrastructure and proxies
+ * Note: Factory is a ResolverProxy (Diamond pattern), not a TUP. Factory upgrades use different
+ * mechanisms and are tested separately.
+ *
+ * @returns Complete TUP test fixture with BLR infrastructure
  */
 export async function deployTupUpgradeTestFixture(): Promise<TupUpgradeTestFixture> {
   // Configure logger to SILENT for tests
   configureLogger({ level: LogLevel.SILENT });
 
-  // Deploy full ATS infrastructure (provides BLR and Factory proxies)
+  // Deploy full ATS infrastructure (provides BLR proxy)
   const infrastructure = await deployAtsInfrastructureFixture(true, false);
 
-  const { deployer, unknownSigner, proxyAdmin, blr, factory } = infrastructure;
+  const { deployer, unknownSigner, proxyAdmin, blr } = infrastructure;
 
   // Get the ProxyAdmin address
   const proxyAdminAddress = await proxyAdmin.getAddress();
 
-  // Get proxy addresses
+  // Get BLR proxy address
   const blrProxyAddress = await blr.getAddress();
-  const factoryProxyAddress = await factory.getAddress();
 
-  // Get implementation addresses from proxy storage
+  // Get BLR implementation address from proxy storage
+  // BLR is a TUP, so get implementation from ProxyAdmin
   const blrImplAddress = await proxyAdmin.getProxyImplementation(blrProxyAddress);
-  const factoryImplAddress = await proxyAdmin.getProxyImplementation(factoryProxyAddress);
 
-  // Connect to implementations
+  // Connect to BLR implementation
   const blrV1Implementation = BusinessLogicResolver__factory.connect(blrImplAddress, deployer);
-  const factoryV1Implementation = Factory__factory.connect(factoryImplAddress, deployer);
 
   return {
     deployer,
@@ -104,10 +99,6 @@ export async function deployTupUpgradeTestFixture(): Promise<TupUpgradeTestFixtu
     blrV1ImplementationAddress: blrImplAddress,
     blrProxy: blr,
     blrProxyAddress,
-    factoryV1Implementation,
-    factoryV1ImplementationAddress: factoryImplAddress,
-    factoryProxy: factory,
-    factoryProxyAddress,
   };
 }
 
@@ -148,31 +139,6 @@ export async function deployBlrV2Implementation(signer: HardhatEthersSigner): Pr
 
   if (!result.success || !result.address || !result.transactionHash) {
     throw new Error(`BLR V2 deployment failed: ${result.error || "Unknown error"}`);
-  }
-
-  return {
-    address: result.address,
-    transactionHash: result.transactionHash,
-    gasUsed: result.gasUsed,
-  };
-}
-
-/**
- * Deploy a mock Factory V2 implementation for testing.
- *
- * @param signer - Signer to deploy with
- * @returns Deployed V2 implementation address and details
- */
-export async function deployFactoryV2Implementation(signer: HardhatEthersSigner): Promise<V2ImplementationResult> {
-  configureLogger({ level: LogLevel.SILENT });
-
-  const factory = new Factory__factory(signer);
-  const result = await deployContract(factory, {
-    confirmations: 0,
-  });
-
-  if (!result.success || !result.address || !result.transactionHash) {
-    throw new Error(`Factory V2 deployment failed: ${result.error || "Unknown error"}`);
   }
 
   return {

@@ -139,5 +139,12 @@ export async function deployAtsInfrastructureFixture(
       },
       {} as Record<string, string>,
     ),
+    factoryFacetKeys: deployment.helpers.getFactoryFacets().reduce(
+      (acc, f) => {
+        acc[f.name] = f.key;
+        return acc;
+      },
+      {} as Record<string, string>,
+    ),
   };
 }

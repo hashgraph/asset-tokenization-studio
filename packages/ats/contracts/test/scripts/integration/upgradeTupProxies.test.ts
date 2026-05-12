@@ -5,11 +5,14 @@
  *
  * Tests the complete workflow for upgrading TransparentUpgradeableProxy implementations including:
  * - Deploying new implementations or using provided addresses (two patterns)
- * - Upgrading one or both proxies (BLR and Factory)
+ * - Upgrading BLR proxy
  * - Verifying implementations before and after upgrades
  * - Checkpoint resumability from each workflow step
  * - Error handling with continue-on-error pattern
  * - Gas tracking and output formatting
+ *
+ * Note: Factory is a ResolverProxy (Diamond pattern), not a TUP. Factory upgrades use different
+ * mechanisms and are not tested here.
  *
  * @module test/scripts/integration/upgradeTupProxies.test
  */
@@ -20,11 +23,7 @@ import { join } from "path";
 import { upgradeTupProxies } from "@scripts";
 import { getTestCheckpointsDir } from "@scripts/infrastructure";
 import { silenceScriptLogging, createCheckpointCleanupHooks, removeTestDeployments, TEST_OPTIONS } from "@test";
-import {
-  deployTupUpgradeTestFixture,
-  deployBlrV2Implementation,
-  deployFactoryV2Implementation,
-} from "../../fixtures/upgradeTupProxies.fixture";
+import { deployTupUpgradeTestFixture, deployBlrV2Implementation } from "../../fixtures/upgradeTupProxies.fixture";
 
 describe("upgradeTupProxies - Integration Tests", () => {
   before(silenceScriptLogging);
@@ -34,35 +33,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
   });
 
   describe("Basic Upgrade Flow - Deploy New Implementations", () => {
-    it("should upgrade both BLR and Factory with new implementations", async () => {
-      const { deployer, proxyAdminAddress, blrProxyAddress, factoryProxyAddress } =
-        await loadFixture(deployTupUpgradeTestFixture);
-
-      const result = await upgradeTupProxies(deployer, "hardhat", {
-        proxyAdminAddress,
-        blrProxyAddress,
-        factoryProxyAddress,
-        deployNewBlrImpl: true,
-        deployNewFactoryImpl: true,
-        saveOutput: false,
-        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
-        ignoreCheckpoint: true,
-      });
-
-      expect(result.summary.success).to.be.true;
-      expect(result.summary.proxiesUpgraded).to.equal(2);
-      expect(result.summary.proxiesFailed).to.equal(0);
-      expect(result.blrUpgrade).to.exist;
-      expect(result.blrUpgrade?.success).to.be.true;
-      expect(result.blrUpgrade?.upgraded).to.be.true;
-      expect(result.factoryUpgrade).to.exist;
-      expect(result.factoryUpgrade?.success).to.be.true;
-      expect(result.factoryUpgrade?.upgraded).to.be.true;
-      expect(result.implementations?.blr).to.exist;
-      expect(result.implementations?.factory).to.exist;
-    });
-
-    it("should upgrade BLR only with new implementation", async () => {
+    it("should upgrade BLR with new implementation", async () => {
       const { deployer, proxyAdminAddress, blrProxyAddress } = await loadFixture(deployTupUpgradeTestFixture);
 
       const result = await upgradeTupProxies(deployer, "hardhat", {
@@ -78,29 +49,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
       expect(result.summary.proxiesUpgraded).to.equal(1);
       expect(result.blrUpgrade?.success).to.be.true;
       expect(result.blrUpgrade?.upgraded).to.be.true;
-      expect(result.factoryUpgrade).to.be.undefined;
       expect(result.implementations?.blr).to.exist;
-      expect(result.implementations?.factory).to.be.undefined;
-    });
-
-    it("should upgrade Factory only with new implementation", async () => {
-      const { deployer, proxyAdminAddress, factoryProxyAddress } = await loadFixture(deployTupUpgradeTestFixture);
-
-      const result = await upgradeTupProxies(deployer, "hardhat", {
-        proxyAdminAddress,
-        factoryProxyAddress,
-        deployNewFactoryImpl: true,
-        saveOutput: false,
-        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
-        ignoreCheckpoint: true,
-      });
-
-      expect(result.summary.success).to.be.true;
-      expect(result.summary.proxiesUpgraded).to.equal(1);
-      expect(result.factoryUpgrade?.success).to.be.true;
-      expect(result.factoryUpgrade?.upgraded).to.be.true;
-      expect(result.blrUpgrade).to.be.undefined;
-      expect(result.implementations?.factory).to.exist;
     });
 
     it("should include correct implementation addresses in upgrade results", async () => {
@@ -137,15 +86,12 @@ describe("upgradeTupProxies - Integration Tests", () => {
     });
 
     it("should generate correct output structure", async () => {
-      const { deployer, proxyAdminAddress, blrProxyAddress, factoryProxyAddress } =
-        await loadFixture(deployTupUpgradeTestFixture);
+      const { deployer, proxyAdminAddress, blrProxyAddress } = await loadFixture(deployTupUpgradeTestFixture);
 
       const result = await upgradeTupProxies(deployer, "hardhat", {
         proxyAdminAddress,
         blrProxyAddress,
-        factoryProxyAddress,
         deployNewBlrImpl: true,
-        deployNewFactoryImpl: true,
         saveOutput: false,
         confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
@@ -209,32 +155,6 @@ describe("upgradeTupProxies - Integration Tests", () => {
   });
 
   describe("Basic Upgrade Flow - Use Provided Implementations", () => {
-    it("should upgrade both using provided implementations", async () => {
-      const { deployer, proxyAdminAddress, blrProxyAddress, factoryProxyAddress } =
-        await loadFixture(deployTupUpgradeTestFixture);
-
-      // Deploy new implementations
-      const blrV2 = await deployBlrV2Implementation(deployer);
-      const factoryV2 = await deployFactoryV2Implementation(deployer);
-
-      const result = await upgradeTupProxies(deployer, "hardhat", {
-        proxyAdminAddress,
-        blrProxyAddress,
-        factoryProxyAddress,
-        blrImplementationAddress: blrV2.address,
-        factoryImplementationAddress: factoryV2.address,
-        saveOutput: false,
-        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
-        ignoreCheckpoint: true,
-      });
-
-      expect(result.summary.success).to.be.true;
-      expect(result.summary.proxiesUpgraded).to.equal(2);
-      expect(result.blrUpgrade?.newImplementation).to.equal(blrV2.address);
-      expect(result.factoryUpgrade?.newImplementation).to.equal(factoryV2.address);
-      expect(result.implementations).to.be.undefined;
-    });
-
     it("should upgrade BLR using provided implementation", async () => {
       const { deployer, proxyAdminAddress, blrProxyAddress } = await loadFixture(deployTupUpgradeTestFixture);
 
@@ -252,33 +172,6 @@ describe("upgradeTupProxies - Integration Tests", () => {
       expect(result.summary.success).to.be.true;
       expect(result.blrUpgrade?.newImplementation).to.equal(blrV2.address);
       expect(result.blrUpgrade?.upgraded).to.be.true;
-    });
-  });
-
-  describe("Mixed Patterns - Deploy and Provide", () => {
-    it("should upgrade one proxy with new impl and one with provided impl", async () => {
-      const { deployer, proxyAdminAddress, blrProxyAddress, factoryProxyAddress } =
-        await loadFixture(deployTupUpgradeTestFixture);
-
-      // Pre-deploy one implementation
-      const factoryV2 = await deployFactoryV2Implementation(deployer);
-
-      const result = await upgradeTupProxies(deployer, "hardhat", {
-        proxyAdminAddress,
-        blrProxyAddress,
-        factoryProxyAddress,
-        deployNewBlrImpl: true,
-        factoryImplementationAddress: factoryV2.address,
-        saveOutput: false,
-        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
-        ignoreCheckpoint: true,
-      });
-
-      expect(result.summary.success).to.be.true;
-      expect(result.summary.proxiesUpgraded).to.equal(2);
-      expect(result.implementations?.blr).to.exist;
-      expect(result.implementations?.factory).to.be.undefined;
-      expect(result.factoryUpgrade?.newImplementation).to.equal(factoryV2.address);
     });
   });
 
@@ -314,7 +207,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         expect.fail("Should have thrown");
       } catch (err) {
         expect(err instanceof Error).to.be.true;
-        expect((err as Error).message).to.include("At least one proxy address");
+        expect((err as Error).message).to.include("BLR proxy address is required");
       }
     });
 
@@ -333,24 +226,6 @@ describe("upgradeTupProxies - Integration Tests", () => {
       } catch (err) {
         expect(err instanceof Error).to.be.true;
         expect((err as Error).message).to.include("deployNewBlrImpl");
-      }
-    });
-
-    it("should fail if Factory proxy specified without impl source", async () => {
-      const { deployer, proxyAdminAddress, factoryProxyAddress } = await loadFixture(deployTupUpgradeTestFixture);
-
-      try {
-        await upgradeTupProxies(deployer, "hardhat", {
-          proxyAdminAddress,
-          factoryProxyAddress,
-          saveOutput: false,
-          confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
-          ignoreCheckpoint: true,
-        });
-        expect.fail("Should have thrown");
-      } catch (err) {
-        expect(err instanceof Error).to.be.true;
-        expect((err as Error).message).to.include("deployNewFactoryImpl");
       }
     });
 
@@ -407,51 +282,6 @@ describe("upgradeTupProxies - Integration Tests", () => {
       });
 
       expect(result.summary.deploymentTime).to.be.greaterThan(0);
-    });
-
-    it("should handle multiple upgrade results in output", async () => {
-      const { deployer, proxyAdminAddress, blrProxyAddress, factoryProxyAddress } =
-        await loadFixture(deployTupUpgradeTestFixture);
-
-      const result = await upgradeTupProxies(deployer, "hardhat", {
-        proxyAdminAddress,
-        blrProxyAddress,
-        factoryProxyAddress,
-        deployNewBlrImpl: true,
-        deployNewFactoryImpl: true,
-        saveOutput: false,
-        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
-        ignoreCheckpoint: true,
-      });
-
-      expect(result.blrUpgrade).to.exist;
-      expect(result.factoryUpgrade).to.exist;
-      expect(result.summary.proxiesUpgraded).to.equal(2);
-    });
-  });
-
-  describe("Continue-on-Error Pattern", () => {
-    it("should continue upgrading even if one proxy fails", async () => {
-      const { deployer, proxyAdminAddress, blrProxyAddress, factoryProxyAddress } =
-        await loadFixture(deployTupUpgradeTestFixture);
-
-      // Deploy only one new implementation
-      const blrV2 = await deployBlrV2Implementation(deployer);
-
-      const result = await upgradeTupProxies(deployer, "hardhat", {
-        proxyAdminAddress,
-        blrProxyAddress,
-        factoryProxyAddress,
-        blrImplementationAddress: blrV2.address,
-        deployNewFactoryImpl: true,
-        enableRetry: false,
-        saveOutput: false,
-        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
-        ignoreCheckpoint: true,
-      });
-
-      expect(result.blrUpgrade).to.exist;
-      expect(result.factoryUpgrade).to.exist;
     });
   });
 
