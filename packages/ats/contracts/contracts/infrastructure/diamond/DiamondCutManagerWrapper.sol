@@ -188,19 +188,19 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
      *   IDs, then removes the batch version.
      * @param _configurationId Configuration identifier to cancel.
      */
-    function _cancelBatchConfiguration(bytes32 _configurationId) internal {
+    function _cancelBatchConfiguration(bytes32 _configurationId) internal returns (uint256 batchVersion_) {
         DiamondCutManagerStorage storage dcms = _diamondCutManagerStorage();
-        uint256 batchVersion = _getBatchConfigurationVersion(_configurationId);
-        bytes32 configVersionHash = _buildHash(_configurationId, batchVersion);
+        batchVersion_ = _getBatchConfigurationVersion(_configurationId);
+        bytes32 configVersionHash = _buildHash(_configurationId, batchVersion_);
 
         bytes32[] storage facetIds = dcms.facetIds[configVersionHash];
         uint256 facetIdsLength = facetIds.length;
 
         for (uint256 index; index < facetIdsLength; ) {
-            bytes32 configVersionFacetHash = _buildHash(_configurationId, batchVersion, facetIds[index]);
+            bytes32 configVersionFacetHash = _buildHash(_configurationId, batchVersion_, facetIds[index]);
             delete dcms.addr[configVersionFacetHash];
-            _cleanSelectors(dcms, _configurationId, batchVersion, configVersionFacetHash);
-            _cleanInterfacesIds(dcms, _configurationId, batchVersion, configVersionFacetHash);
+            _cleanSelectors(dcms, _configurationId, batchVersion_, configVersionFacetHash);
+            _cleanInterfacesIds(dcms, _configurationId, batchVersion_, configVersionFacetHash);
             unchecked {
                 ++index;
             }

@@ -69,7 +69,7 @@ describe("Kpi Latest Tests", () => {
       );
     });
 
-    it("GIVEN a paused contract WHEN addKpiData is called THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused contract WHEN addKpiData is called THEN transaction fails with IsPaused", async () => {
       await asset.connect(signer_B).pause();
 
       const date = 1000;
@@ -77,7 +77,7 @@ describe("Kpi Latest Tests", () => {
 
       await expect(asset.connect(signer_A).addKpiData(date, value, project1)).to.be.revertedWithCustomError(
         asset,
-        "TokenIsPaused",
+        "IsPaused",
       );
     });
 

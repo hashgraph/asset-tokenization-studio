@@ -280,7 +280,7 @@ describe("ExternalPause Tests", () => {
   });
 
   describe("Pause Modifier Tests (onlyUnpaused)", () => {
-    it("GIVEN an external pause is paused WHEN calling a function with onlyUnpaused THEN it reverts with TokenIsPaused", async () => {
+    it("GIVEN an external pause is paused WHEN calling a function with onlyUnpaused THEN it reverts with IsPaused", async () => {
       await externalPauseMock1.setPaused(true, {
         gasLimit: GAS_LIMIT.default,
       });
@@ -289,19 +289,19 @@ describe("ExternalPause Tests", () => {
         asset.addExternalPause(externalPauseMock3.target as string, {
           gasLimit: GAS_LIMIT.default,
         }),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused"); // Assumes TokenIsPaused is inherited/available
+      ).to.be.revertedWithCustomError(asset, "IsPaused"); // Assumes IsPaused is inherited/available
       await expect(
         asset.removeExternalPause(externalPauseMock2.target as string, {
           gasLimit: GAS_LIMIT.default,
         }),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
       const pauses = [externalPauseMock2.target as string];
       const actives = [false];
       await expect(
         asset.updateExternalPauses(pauses, actives, {
           gasLimit: GAS_LIMIT.high,
         }),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN all external pauses are unpaused WHEN calling a function with onlyUnpaused THEN it succeeds", async () => {

@@ -195,10 +195,10 @@ describe("ControllerHoldByPartition Tests", () => {
         await asset.connect(signer_D).pause();
       });
 
-      it("GIVEN a paused Token WHEN controllerCreateHoldByPartition THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN controllerCreateHoldByPartition THEN transaction fails with IsPaused", async () => {
         await expect(
           asset.controllerCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
     });
 

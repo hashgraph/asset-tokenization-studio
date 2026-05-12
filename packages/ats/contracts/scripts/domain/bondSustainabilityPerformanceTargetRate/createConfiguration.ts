@@ -76,9 +76,9 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "MintByPartitionFacet",
   "ERC1410ManagementFacet",
   "ProtectedByPartitionFacet",
-  "ERC1410ReadFacet",
   "OperatorFacet",
-  "ERC1410TokenHolderFacet",
+  "TransferByPartitionFacet",
+  "PartitionsFacet",
   "OperatorByPartitionFacet",
   "BurnByPartitionFacet",
   "DocumentationFacet",
@@ -102,13 +102,12 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
 
   // Clearing & Settlement
   "ClearingByPartitionFacet",
-  "ClearingHoldCreationFacet",
+  "ProtectedClearingHoldByPartitionFacet",
   "ClearingHoldByPartitionFacet",
   "OperatorClearingHoldByPartitionFacet",
   "ClearingFacet",
-  "ClearingRedeemFacet",
-  "ClearingTransferFacet",
   "OperatorClearingByPartitionFacet",
+  "ProtectedClearingByPartitionFacet",
   "HoldFacet",
   "OperatorHoldByPartitionFacet",
   "ControllerHoldByPartitionFacet",
@@ -130,14 +129,16 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "ProceedRecipientsSustainabilityPerformanceTargetRateFacet", // rate-specific: triggers scheduled tasks
   "ProtectedPartitionsFacet",
   "ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet", // rate-specific: _onCouponListed override
+  "SecurityHoldersFacet",
   "CouponListingFacet",
   "SsiManagementFacet",
   "TransferAndLockFacet",
+  "TransferAndLockByPartitionFacet",
 
   "CouponSecurityHoldersFacet",
 
   // Interest Rate (rate-specific - keep variant names)
-  "CouponSustainabilityPerformanceTargetRateFacet",
+  "CouponFacet",
   "SustainabilityPerformanceTargetRateFacet",
   "KpisSustainabilityPerformanceTargetRateFacet",
 

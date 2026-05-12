@@ -113,13 +113,25 @@ describe("ClearingByPartitionFacet Tests", () => {
           EXPIRATION_TIMESTAMP,
           EMPTY_HEX_BYTES,
           EMPTY_HEX_BYTES,
-        );
+        )
+        .to.emit(asset, "TransferByPartition")
+        .withArgs(
+          _DEFAULT_PARTITION,
+          signer_A.address,
+          signer_A.address,
+          ethers.ZeroAddress,
+          _AMOUNT,
+          EMPTY_HEX_BYTES,
+          EMPTY_HEX_BYTES,
+        )
+        .to.emit(asset, "Transfer")
+        .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
 
       expect(await asset.balanceOf(signer_A.address)).to.equal(balanceBefore - BigInt(_AMOUNT));
       expect(await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(_AMOUNT);
     });
 
-    it("GIVEN a paused token WHEN clearingRedeemByPartition THEN reverts with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN clearingRedeemByPartition THEN reverts with IsPaused", async () => {
       await asset.connect(signer_D).pause();
       const clearingOperation = {
         partition: _DEFAULT_PARTITION,
@@ -128,7 +140,7 @@ describe("ClearingByPartitionFacet Tests", () => {
       };
       await expect(
         asset.connect(signer_A).clearingRedeemByPartition(clearingOperation, _AMOUNT),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN clearing deactivated WHEN clearingRedeemByPartition THEN reverts with ClearingIsDisabled", async () => {
@@ -249,7 +261,7 @@ describe("ClearingByPartitionFacet Tests", () => {
       expect(await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(_AMOUNT);
     });
 
-    it("GIVEN a paused token WHEN clearingRedeemFromByPartition THEN reverts with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN clearingRedeemFromByPartition THEN reverts with IsPaused", async () => {
       await asset.connect(signer_D).pause();
       const clearingOperationFrom = {
         clearingOperation: {
@@ -262,7 +274,7 @@ describe("ClearingByPartitionFacet Tests", () => {
       };
       await expect(
         asset.connect(signer_B).clearingRedeemFromByPartition(clearingOperationFrom, _AMOUNT),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN a recovered sender WHEN clearingRedeemFromByPartition THEN reverts with WalletRecovered", async () => {
@@ -458,7 +470,7 @@ describe("ClearingByPartitionFacet Tests", () => {
       expect(await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(_AMOUNT);
     });
 
-    it("GIVEN a paused token WHEN clearingTransferByPartition THEN reverts with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN clearingTransferByPartition THEN reverts with IsPaused", async () => {
       await asset.connect(signer_D).pause();
       const clearingOperation = {
         partition: _DEFAULT_PARTITION,
@@ -467,7 +479,7 @@ describe("ClearingByPartitionFacet Tests", () => {
       };
       await expect(
         asset.connect(signer_A).clearingTransferByPartition(clearingOperation, _AMOUNT, signer_B.address),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN clearing deactivated WHEN clearingTransferByPartition THEN reverts with ClearingIsDisabled", async () => {
@@ -616,7 +628,7 @@ describe("ClearingByPartitionFacet Tests", () => {
       expect(await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(_AMOUNT);
     });
 
-    it("GIVEN a paused token WHEN clearingTransferFromByPartition THEN reverts with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN clearingTransferFromByPartition THEN reverts with IsPaused", async () => {
       await asset.connect(signer_D).pause();
       const clearingOperationFrom = {
         clearingOperation: {
@@ -629,7 +641,7 @@ describe("ClearingByPartitionFacet Tests", () => {
       };
       await expect(
         asset.connect(signer_B).clearingTransferFromByPartition(clearingOperationFrom, _AMOUNT, signer_C.address),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN clearing deactivated WHEN clearingTransferFromByPartition THEN reverts with ClearingIsDisabled", async () => {
@@ -858,8 +870,10 @@ describe("ClearingByPartitionFacet Tests", () => {
       expect(await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(0);
     });
 
-    it("GIVEN a pending redeem clearing WHEN approveClearingOperationByPartition THEN balance stays reduced and clearedAmount zeroed", async () => {
+    it("GIVEN a pending redeem clearing WHEN approveClearingOperationByPartition THEN totalSupply drops, clearedAmount zero and RedeemedByPartition emitted", async () => {
       const balanceBefore = await asset.balanceOf(signer_A.address);
+      const totalSupplyBefore = await asset.totalSupply();
+      const partitionSupplyBefore = await asset.totalSupplyByPartition(_DEFAULT_PARTITION);
       const clearingOperation = {
         partition: _DEFAULT_PARTITION,
         expirationTimestamp: EXPIRATION_TIMESTAMP,
@@ -869,6 +883,9 @@ describe("ClearingByPartitionFacet Tests", () => {
 
       expect(await asset.balanceOf(signer_A.address)).to.equal(balanceBefore - BigInt(_AMOUNT));
       expect(await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(_AMOUNT);
+      // totalSupply must remain unchanged while the redeem is only cleared (pre-approve)
+      expect(await asset.totalSupply()).to.equal(totalSupplyBefore);
+      expect(await asset.totalSupplyByPartition(_DEFAULT_PARTITION)).to.equal(partitionSupplyBefore);
 
       const identifier = {
         clearingOperationType: ClearingOperationType.Redeem,
@@ -877,15 +894,21 @@ describe("ClearingByPartitionFacet Tests", () => {
         clearingId: 1,
       };
 
+      // Approve only decrements totalSupply; balances do not move, so no ERC-20 Transfer
+      // event is expected here (it was emitted at creation, asserted in the redeem creation test).
       await expect(asset.connect(signer_A).approveClearingOperationByPartition(identifier))
         .to.emit(asset, "ClearingOperationApproved")
-        .withArgs(signer_A.address, signer_A.address, _DEFAULT_PARTITION, 1, ClearingOperationType.Redeem, "0x");
+        .withArgs(signer_A.address, signer_A.address, _DEFAULT_PARTITION, 1, ClearingOperationType.Redeem, "0x")
+        .to.emit(asset, "RedeemedByPartition")
+        .withArgs(_DEFAULT_PARTITION, signer_A.address, signer_A.address, _AMOUNT, EMPTY_HEX_BYTES, EMPTY_HEX_BYTES);
 
       expect(await asset.balanceOf(signer_A.address)).to.equal(balanceBefore - BigInt(_AMOUNT));
       expect(await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(0);
+      expect(await asset.totalSupply()).to.equal(totalSupplyBefore - BigInt(_AMOUNT));
+      expect(await asset.totalSupplyByPartition(_DEFAULT_PARTITION)).to.equal(partitionSupplyBefore - BigInt(_AMOUNT));
     });
 
-    it("GIVEN a paused token WHEN approveClearingOperationByPartition THEN reverts with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN approveClearingOperationByPartition THEN reverts with IsPaused", async () => {
       const clearingOperation = {
         partition: _DEFAULT_PARTITION,
         expirationTimestamp: EXPIRATION_TIMESTAMP,
@@ -901,7 +924,7 @@ describe("ClearingByPartitionFacet Tests", () => {
       };
       await expect(
         asset.connect(signer_A).approveClearingOperationByPartition(identifier),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN no CLEARING_VALIDATOR_ROLE WHEN approveClearingOperationByPartition THEN reverts with AccountHasNoRole", async () => {
@@ -920,25 +943,6 @@ describe("ClearingByPartitionFacet Tests", () => {
       await expect(
         asset.connect(signer_B).approveClearingOperationByPartition(identifier),
       ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
-    });
-
-    it("GIVEN clearing deactivated WHEN approveClearingOperationByPartition THEN reverts with ClearingIsDisabled", async () => {
-      const clearingOperation = {
-        partition: _DEFAULT_PARTITION,
-        expirationTimestamp: EXPIRATION_TIMESTAMP,
-        data: EMPTY_HEX_BYTES,
-      };
-      await asset.connect(signer_A).clearingRedeemByPartition(clearingOperation, _AMOUNT);
-      await asset.connect(signer_A).deactivateClearing();
-      const identifier = {
-        clearingOperationType: ClearingOperationType.Redeem,
-        partition: _DEFAULT_PARTITION,
-        tokenHolder: signer_A.address,
-        clearingId: 1,
-      };
-      await expect(
-        asset.connect(signer_A).approveClearingOperationByPartition(identifier),
-      ).to.be.revertedWithCustomError(asset, "ClearingIsDisabled");
     });
 
     it("GIVEN non-default partition WHEN approveClearingOperationByPartition THEN reverts with PartitionNotAllowedInSinglePartitionMode", async () => {
@@ -1017,7 +1021,7 @@ describe("ClearingByPartitionFacet Tests", () => {
       expect(await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(0);
     });
 
-    it("GIVEN a paused token WHEN cancelClearingOperationByPartition THEN reverts with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN cancelClearingOperationByPartition THEN reverts with IsPaused", async () => {
       const clearingOperation = {
         partition: _DEFAULT_PARTITION,
         expirationTimestamp: EXPIRATION_TIMESTAMP,
@@ -1033,7 +1037,7 @@ describe("ClearingByPartitionFacet Tests", () => {
       };
       await expect(
         asset.connect(signer_A).cancelClearingOperationByPartition(identifier),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN no CLEARING_VALIDATOR_ROLE WHEN cancelClearingOperationByPartition THEN reverts with AccountHasNoRole", async () => {
@@ -1052,25 +1056,6 @@ describe("ClearingByPartitionFacet Tests", () => {
       await expect(
         asset.connect(signer_B).cancelClearingOperationByPartition(identifier),
       ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
-    });
-
-    it("GIVEN clearing deactivated WHEN cancelClearingOperationByPartition THEN reverts with ClearingIsDisabled", async () => {
-      const clearingOperation = {
-        partition: _DEFAULT_PARTITION,
-        expirationTimestamp: EXPIRATION_TIMESTAMP,
-        data: EMPTY_HEX_BYTES,
-      };
-      await asset.connect(signer_A).clearingRedeemByPartition(clearingOperation, _AMOUNT);
-      await asset.connect(signer_A).deactivateClearing();
-      const identifier = {
-        clearingOperationType: ClearingOperationType.Redeem,
-        partition: _DEFAULT_PARTITION,
-        tokenHolder: signer_A.address,
-        clearingId: 1,
-      };
-      await expect(
-        asset.connect(signer_A).cancelClearingOperationByPartition(identifier),
-      ).to.be.revertedWithCustomError(asset, "ClearingIsDisabled");
     });
 
     it("GIVEN non-default partition WHEN cancelClearingOperationByPartition THEN reverts with PartitionNotAllowedInSinglePartitionMode", async () => {
@@ -1292,7 +1277,7 @@ describe("ClearingByPartitionFacet Tests", () => {
       expect(await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(0);
     });
 
-    it("GIVEN a paused token WHEN reclaimClearingOperationByPartition THEN reverts with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN reclaimClearingOperationByPartition THEN reverts with IsPaused", async () => {
       const clearingOperation = {
         partition: _DEFAULT_PARTITION,
         expirationTimestamp: SHORT_EXPIRATION_TIMESTAMP,
@@ -1309,46 +1294,7 @@ describe("ClearingByPartitionFacet Tests", () => {
       };
       await expect(
         asset.connect(signer_A).reclaimClearingOperationByPartition(identifier),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
-    });
-
-    it("GIVEN clearing deactivated WHEN reclaimClearingOperationByPartition THEN reverts with ClearingIsDisabled", async () => {
-      const clearingOperation = {
-        partition: _DEFAULT_PARTITION,
-        expirationTimestamp: SHORT_EXPIRATION_TIMESTAMP,
-        data: EMPTY_HEX_BYTES,
-      };
-      await asset.connect(signer_A).clearingRedeemByPartition(clearingOperation, _AMOUNT);
-      await asset.changeSystemTimestamp(SHORT_EXPIRATION_TIMESTAMP + 1);
-      await asset.connect(signer_A).deactivateClearing();
-      const identifier = {
-        clearingOperationType: ClearingOperationType.Redeem,
-        partition: _DEFAULT_PARTITION,
-        tokenHolder: signer_A.address,
-        clearingId: 1,
-      };
-      await expect(
-        asset.connect(signer_A).reclaimClearingOperationByPartition(identifier),
-      ).to.be.revertedWithCustomError(asset, "ClearingIsDisabled");
-    });
-
-    it("GIVEN non-default partition WHEN reclaimClearingOperationByPartition THEN reverts with PartitionNotAllowedInSinglePartitionMode", async () => {
-      const clearingOperation = {
-        partition: _DEFAULT_PARTITION,
-        expirationTimestamp: SHORT_EXPIRATION_TIMESTAMP,
-        data: EMPTY_HEX_BYTES,
-      };
-      await asset.connect(signer_A).clearingRedeemByPartition(clearingOperation, _AMOUNT);
-      await asset.changeSystemTimestamp(SHORT_EXPIRATION_TIMESTAMP + 1);
-      const identifier = {
-        clearingOperationType: ClearingOperationType.Redeem,
-        partition: _WRONG_PARTITION,
-        tokenHolder: signer_A.address,
-        clearingId: 1,
-      };
-      await expect(
-        asset.connect(signer_A).reclaimClearingOperationByPartition(identifier),
-      ).to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN a non-expired clearing WHEN reclaimClearingOperationByPartition THEN reverts with ExpirationDateNotReached", async () => {

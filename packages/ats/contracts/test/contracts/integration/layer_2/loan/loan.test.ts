@@ -109,12 +109,12 @@ describe("Loan Tests", () => {
       );
     });
 
-    it("GIVEN a paused token WHEN setLoanDetails THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN setLoanDetails THEN transaction fails with IsPaused", async () => {
       await asset.connect(signer_B).pause();
       const loanDetails = await getLoanDetails();
       await expect(asset.connect(signer_A).setLoanDetails(loanDetails)).to.be.revertedWithCustomError(
         asset,
-        "TokenIsPaused",
+        "IsPaused",
       );
     });
 

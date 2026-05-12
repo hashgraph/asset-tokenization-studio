@@ -74,7 +74,7 @@ describe("Kpi Linked Rate Tests", () => {
       await asset.connect(signer_B).pause();
     });
 
-    it("GIVEN a paused Token WHEN setInterestRate THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused Token WHEN setInterestRate THEN transaction fails with IsPaused", async () => {
       // transfer with data fails
       await expect(
         kpiLinkedRateFacet.connect(signer_A).setInterestRate({
@@ -87,10 +87,10 @@ describe("Kpi Linked Rate Tests", () => {
           reportPeriod: 5000,
           rateDecimals: 1,
         }),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
-    it("GIVEN a paused Token WHEN setImpactData THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused Token WHEN setImpactData THEN transaction fails with IsPaused", async () => {
       // transfer with data fails
       await expect(
         kpiLinkedRateFacet.connect(signer_A).setImpactData({
@@ -100,7 +100,7 @@ describe("Kpi Linked Rate Tests", () => {
           impactDataDecimals: 1,
           adjustmentPrecision: 3,
         }),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
   });
 

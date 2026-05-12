@@ -68,9 +68,9 @@ describe("Fixed Rate Tests", () => {
       await asset.connect(signer_B).pause();
     });
 
-    it("GIVEN a paused Token WHEN setFixedRate THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused Token WHEN setFixedRate THEN transaction fails with IsPaused", async () => {
       // transfer with data fails
-      await expect(asset.connect(signer_A).setRate(1, 2)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      await expect(asset.connect(signer_A).setRate(1, 2)).to.be.revertedWithCustomError(asset, "IsPaused");
     });
   });
 

@@ -12,7 +12,7 @@ import { IControlList } from "../facets/controlList/IControlList.sol";
 import { ICore } from "../facets/core/ICore.sol";
 import { IERC20Votes } from "../facets/layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
 import { IController } from "../facets/controller/IController.sol";
-import { IERC1410 } from "../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
+import { IERC1410Management } from "../facets/layer_1/ERC1400/ERC1410/IERC1410Management.sol";
 import { ICap } from "../facets/cap/ICap.sol";
 import { IMint } from "../facets/mint/IMint.sol";
 import { IClearing } from "../facets/clearing/IClearing.sol";
@@ -368,7 +368,7 @@ contract Factory is IFactory {
     }
 
     function _tryInitialize_ERC1410(address securityAddress_, bool isMultiPartition) private {
-        try IERC1410(securityAddress_).initializeERC1410(isMultiPartition) {
+        try IERC1410Management(securityAddress_).initializeERC1410(isMultiPartition) {
             // success
         } catch {
             // facet not present - skip initialization

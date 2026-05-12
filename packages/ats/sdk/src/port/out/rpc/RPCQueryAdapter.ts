@@ -230,7 +230,7 @@ export class RPCQueryAdapter {
     const internalKycActivated = await this.connect(IAsset__factory, address.toString()).isInternalKycActivated();
     const isMultiPartition = await this.connect(IAsset__factory, address.toString()).isMultiPartition();
     const isIssuable = await this.connect(IAsset__factory, address.toString()).isIssuable();
-    const isPaused = await this.connect(IAsset__factory, address.toString()).isPaused();
+    const isPaused = await this.connect(IAsset__factory, address.toString()).paused();
     const regulationInfo = await this.connect(IAsset__factory, address.toString()).getSecurityRegulationData();
     const diamondAddress = await this.mirrorNode.getHederaIdfromContractAddress(address.toString());
     const regulation: Regulation = {
@@ -559,7 +559,7 @@ export class RPCQueryAdapter {
   async isPaused(address: EvmAddress): Promise<boolean> {
     LogService.logTrace(`Checking if the security: ${address.toString()} is paused`);
 
-    return await this.connect(IAsset__factory, address.toString()).isPaused();
+    return await this.connect(IAsset__factory, address.toString()).paused();
   }
 
   async arePartitionsProtected(address: EvmAddress): Promise<boolean> {

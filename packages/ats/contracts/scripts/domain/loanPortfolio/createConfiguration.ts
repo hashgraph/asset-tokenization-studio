@@ -80,9 +80,9 @@ const LOANS_PORTFOLIO_FACETS = [
   "MintByPartitionFacet",
   "ERC1410ManagementFacet",
   "ProtectedByPartitionFacet",
-  "ERC1410ReadFacet",
   "OperatorFacet",
-  "ERC1410TokenHolderFacet",
+  "TransferByPartitionFacet",
+  "PartitionsFacet",
   "OperatorByPartitionFacet",
   "BurnByPartitionFacet",
   "DocumentationFacet",
@@ -116,10 +116,9 @@ const LOANS_PORTFOLIO_FACETS = [
   "HoldByPartitionFacet",
 
   // Clearing & Settlement
-  "ClearingTransferFacet",
-  "ClearingRedeemFacet",
   "OperatorClearingByPartitionFacet",
-  "ClearingHoldCreationFacet",
+  "ProtectedClearingByPartitionFacet",
+  "ProtectedClearingHoldByPartitionFacet",
   "OperatorClearingHoldByPartitionFacet",
   "ClearingFacet",
   "ClearingByPartitionFacet",
@@ -138,7 +137,9 @@ const LOANS_PORTFOLIO_FACETS = [
   "LockFacet",
   "LockByPartitionFacet",
   "ProtectedPartitionsFacet",
+  "SecurityHoldersFacet",
   "TransferAndLockFacet",
+  "TransferAndLockByPartitionFacet",
 ] as const;
 
 export async function createLoansPortfolioConfiguration(

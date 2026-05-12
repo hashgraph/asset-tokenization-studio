@@ -356,6 +356,35 @@ describe("TREX Factory Tests", () => {
       expect(suiteDetails).to.not.equal(ADDRESS_ZERO);
     });
 
+    it("GIVEN no DEFAULT_ADMIN_ROLE in rbacs WHEN deploying equity THEN tRexOwner has DEFAULT_ADMIN_ROLE after deployment", async () => {
+      const equityData = {
+        security: getSecurityData(businessLogicResolver), // rbacs: [] — owner does NOT explicitly grant themselves DEFAULT_ADMIN_ROLE
+        equityDetails: getEquityDetails(),
+      };
+      equityData.security.resolverProxyConfiguration = {
+        key: EQUITY_CONFIG_ID,
+        version: 1,
+      };
+
+      const factoryRegulationData = getRegulationData();
+
+      const deploymentResult = await factoryAts
+        .connect(deployer)
+        .deployTREXSuiteAtsEquity(
+          "salt-equity-no-admin-role",
+          tokenDetails,
+          claimDetails,
+          equityData,
+          factoryRegulationData,
+        );
+
+      const deploymentReceipt = await deploymentResult.wait();
+      const decoded = await decodeEvent(factoryAts, "TREXSuiteDeployed", deploymentReceipt);
+      await setFacets(decoded._token);
+
+      expect(await accessControlFacet.hasRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, deployer.address)).to.be.true;
+    });
+
     it("GIVEN rbacs with existing TREX_OWNER_ROLE matching tRexOwner WHEN deploying equity THEN SecurityDeploymentLib handles owner match", async () => {
       const equityData = {
         security: getSecurityDataNoAdmin(businessLogicResolver, {
@@ -1229,6 +1258,31 @@ describe("TREX Factory Tests", () => {
 
       const suiteDetails = await factoryAts.getToken("salt-bond");
       expect(suiteDetails).to.not.equal(ADDRESS_ZERO);
+    });
+
+    it("GIVEN no DEFAULT_ADMIN_ROLE in rbacs WHEN deploying bond THEN tRexOwner has DEFAULT_ADMIN_ROLE after deployment", async () => {
+      const bondData = {
+        security: getSecurityData(businessLogicResolver), // rbacs: [] — owner does NOT explicitly grant themselves DEFAULT_ADMIN_ROLE
+        bondDetails: await getBondDetails(),
+        proceedRecipients: [],
+        proceedRecipientsData: [],
+      };
+      bondData.security.resolverProxyConfiguration = {
+        key: BOND_CONFIG_ID,
+        version: 1,
+      };
+
+      const factoryRegulationData = getRegulationData();
+
+      const deploymentResult = await factoryAts
+        .connect(deployer)
+        .deployTREXSuiteAtsBond("salt-bond-no-admin-role", tokenDetails, claimDetails, bondData, factoryRegulationData);
+
+      const deploymentReceipt = await deploymentResult.wait();
+      const decoded = await decodeEvent(factoryAts, "TREXSuiteDeployed", deploymentReceipt);
+      await setFacets(decoded._token);
+
+      expect(await accessControlFacet.hasRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, deployer.address)).to.be.true;
     });
 
     it("GIVEN rbacs with existing TREX_OWNER_ROLE matching tRexOwner WHEN deploying bond THEN SecurityDeploymentLib handles owner match", async () => {

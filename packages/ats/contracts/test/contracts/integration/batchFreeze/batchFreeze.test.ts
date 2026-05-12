@@ -117,7 +117,7 @@ describe("BatchFreeze Tests", () => {
         );
       });
 
-      it("GIVEN paused token WHEN batchSetAddressFrozen THEN fails with TokenIsPaused", async () => {
+      it("GIVEN paused token WHEN batchSetAddressFrozen THEN fails with IsPaused", async () => {
         const userAddresses = [signer_D.address, signer_E.address];
         // grant KYC to signer_A.address
         await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
@@ -127,7 +127,7 @@ describe("BatchFreeze Tests", () => {
         // First, freeze the addresses
         await expect(asset.batchSetAddressFrozen(userAddresses, [true, true])).to.revertedWithCustomError(
           asset,
-          "TokenIsPaused",
+          "IsPaused",
         );
       });
 
@@ -300,23 +300,23 @@ describe("BatchFreeze Tests", () => {
         await asset.pause();
       });
 
-      it("GIVEN a paused token WHEN batchFreezePartialTokens THEN transactions revert with TokenIsPaused error", async () => {
+      it("GIVEN a paused token WHEN batchFreezePartialTokens THEN transactions revert with IsPaused error", async () => {
         const userAddresses = [signer_D.address, signer_E.address];
         const amounts = [100, 100];
 
         await expect(asset.batchFreezePartialTokens(userAddresses, amounts)).to.be.revertedWithCustomError(
           asset,
-          "TokenIsPaused",
+          "IsPaused",
         );
       });
 
-      it("GIVEN a paused token WHEN batchUnfreezePartialTokens THEN transactions revert with TokenIsPaused error", async () => {
+      it("GIVEN a paused token WHEN batchUnfreezePartialTokens THEN transactions revert with IsPaused error", async () => {
         const userAddresses = [signer_D.address, signer_E.address];
         const amounts = [100, 100];
 
         await expect(asset.batchUnfreezePartialTokens(userAddresses, amounts)).to.be.revertedWithCustomError(
           asset,
-          "TokenIsPaused",
+          "IsPaused",
         );
       });
     });

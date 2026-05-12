@@ -97,12 +97,9 @@ describe("Cap Tests", () => {
       await asset.connect(signer_B).pause();
     });
 
-    it("GIVEN a paused Token WHEN setMaxSupply THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused Token WHEN setMaxSupply THEN transaction fails with IsPaused", async () => {
       // transfer with data fails
-      await expect(asset.connect(signer_C).setMaxSupply(maxSupply)).to.be.revertedWithCustomError(
-        asset,
-        "TokenIsPaused",
-      );
+      await expect(asset.connect(signer_C).setMaxSupply(maxSupply)).to.be.revertedWithCustomError(asset, "IsPaused");
     });
   });
 

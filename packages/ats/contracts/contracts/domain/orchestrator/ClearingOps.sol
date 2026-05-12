@@ -7,6 +7,7 @@ import { TokenCoreOps } from "./TokenCoreOps.sol";
 import { ERC1410StorageWrapper } from "../asset/ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../asset/ERC20StorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
+import { HoldStorageWrapper } from "../asset/HoldStorageWrapper.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
@@ -21,6 +22,8 @@ import { HoldOps } from "./HoldOps.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
+import { CLEARING_HOLD_CREATION } from "../../constants/values.sol";
 
 /**
  * @title ClearingOps - Orchestrator for clearing state-changing operations
@@ -119,7 +122,10 @@ library ClearingOps {
     /**
      * @notice Creates a clearing operation for a deferred redeem
      * @dev Reduces the holder's available balance by `_amount`, records the
-     * cleared amount, and stores the redeem metadata. Emits a third-party-
+     * cleared amount, and stores the redeem metadata. Mirrors the canonical
+     * `redeemByPartition` balance-movement events: emits the ERC-20 `Transfer`
+     * (via `performTransfer`) and the ERC-1410 burn-side `TransferByPartition`,
+     * keeping observers in sync with the holder's debit. Emits a third-party-
      * type-specific cleared redeem event. Reverts if the holder does not
      * have sufficient balance. Preconditions: `_from` must hold at least
      * `_amount` tokens in the partition. Postconditions: balance reduced,
@@ -162,6 +168,18 @@ library ClearingOps {
         ClearingStorageWrapper.increaseClearedAmounts(_from, partition, _amount);
 
         ERC20StorageWrapper.performTransfer(_from, address(0), _amount);
+
+        // Mirror redeemByPartition: emit the burn-side TransferByPartition so
+        // observers tracking ERC-1410 burns through this event see the debit
+        emit IERC1410Types.TransferByPartition(
+            partition,
+            EvmAccessors.getMsgSender(),
+            _from,
+            address(0),
+            _amount,
+            _clearingOperation.data,
+            _operatorData
+        );
 
         ClearingStorageWrapper.setClearingRedeemData(
             _from,
@@ -413,12 +431,12 @@ library ClearingOps {
 
         // Cancel/Reclaim: transfer back to holder, no compliance checks
         if (_actionType != IClearingTypes.ClearingActionType.Approve) {
-            transferClearingBalance(_id.partition, _id.tokenHolder, transferData.amount);
+            transferClearingBalance(_id.partition, _id.tokenHolder, _id.tokenHolder, transferData.amount);
             return;
         }
 
         // Approve: transfer to original destination
-        transferClearingBalance(_id.partition, transferData.destination, transferData.amount);
+        transferClearingBalance(_id.partition, _id.tokenHolder, transferData.destination, transferData.amount);
 
         // No identity/compliance check needed when holder is the destination
         if (_id.tokenHolder == transferData.destination) return;
@@ -444,11 +462,12 @@ library ClearingOps {
     /**
      * @notice Executes a clearing redeem operation (approve, cancel, or reclaim)
      * @dev On cancel/reclaim: moves the cleared amount back to the token
-     * holder. On approve: checks identity and compliance for burn
-     * (destination address(0)) but does not actually burn; the balance
-     * was already reduced at creation time and the tokens are effectively
-     * burned when the clearing is approved. No additional token transfer
-     * occurs.
+     * holder. On approve: verifies identity/compliance and finalises the
+     * burn. The holder balance and partition balance were already reduced
+     * at creation time, so this path snapshots and reduces totalSupply,
+     * notifies the compliance module on the default partition, runs the
+     * `afterTokenTransfer` hook so ERC-20 Votes' totalSupply checkpoints and
+     * the holder's voting power track the burn, and emits `RedeemedByPartition`.
      * @param _id Clearing operation identifier
      * @param _actionType Approve, Cancel, or Reclaim
      */
@@ -456,17 +475,49 @@ library ClearingOps {
         IClearingTypes.ClearingOperationIdentifier calldata _id,
         IClearingTypes.ClearingActionType _actionType
     ) internal {
+        IClearingTypes.ClearingRedeemData memory redeemData = ClearingStorageWrapper.getClearingRedeemForByPartition(
+            _id.partition,
+            _id.tokenHolder,
+            _id.clearingId
+        );
+
         // Cancel/Reclaim: restore ABAF-adjusted amount to holder
         if (_actionType != IClearingTypes.ClearingActionType.Approve) {
-            IClearingTypes.ClearingRedeemData memory redeemData = ClearingStorageWrapper
-                .getClearingRedeemForByPartition(_id.partition, _id.tokenHolder, _id.clearingId);
-            transferClearingBalance(_id.partition, _id.tokenHolder, redeemData.amount);
+            transferClearingBalance(_id.partition, _id.tokenHolder, _id.tokenHolder, redeemData.amount);
             return;
         }
 
-        // Approve: _verify identity/compliance (tokens are burned, no transfer back)
+        // Approve: verify identity/compliance for the burn destination address(0)
         TokenCoreOps.checkIdentity(_id.tokenHolder, address(0));
         TokenCoreOps.checkCompliance(_id.tokenHolder, address(0), false);
+
+        // Snapshot totalSupply before the burn so historical queries see pre-burn state
+        SnapshotsStorageWrapper.updateTotalSupplySnapshot(_id.partition);
+
+        // Finalise the burn: holder balance and partition balance were debited at
+        // creation, so only the partition supply and ERC-20 totalSupply remain to drop
+        ERC1410StorageWrapper.reduceTotalSupplyByPartition(_id.partition, redeemData.amount);
+
+        // Notify compliance module on the default partition (mirrors redeemByPartition)
+        if (_id.partition == _DEFAULT_PARTITION && ERC3643StorageWrapper.erc3643Storage().compliance != address(0)) {
+            (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
+                abi.encodeWithSelector(ICompliance.destroyed.selector, _id.tokenHolder, redeemData.amount),
+                IERC3643Types.ComplianceCallFailed.selector
+            );
+        }
+
+        // Mirror redeemByPartition: keep ERC-20 Votes' totalSupply checkpoints and the
+        // holder's delegated voting power aligned with the now-finalised burn
+        ERC1410StorageWrapper.afterTokenTransfer(_id.partition, _id.tokenHolder, address(0), redeemData.amount);
+
+        emit IERC1410Types.RedeemedByPartition(
+            _id.partition,
+            EvmAccessors.getMsgSender(),
+            _id.tokenHolder,
+            redeemData.amount,
+            redeemData.data,
+            redeemData.operatorData
+        );
     }
 
     /**
@@ -488,7 +539,7 @@ library ClearingOps {
             .getClearingHoldCreationForByPartition(_id.partition, _id.tokenHolder, _id.clearingId);
 
         // Always restore ABAF-adjusted amount to holder
-        transferClearingBalance(_id.partition, _id.tokenHolder, holdData.amount);
+        transferClearingBalance(_id.partition, _id.tokenHolder, _id.tokenHolder, holdData.amount);
 
         // Approve: create hold and return holdId
         if (_actionType == IClearingTypes.ClearingActionType.Approve) {
@@ -500,13 +551,26 @@ library ClearingOps {
                 data: holdData.holdData
             });
 
-            (, uint256 holdId) = HoldOps.createHoldByPartition(
+            (bool success, uint256 holdId) = HoldOps.createHoldByPartition(
                 _id.partition,
                 _id.tokenHolder,
                 hold,
                 holdData.operatorData,
                 holdData.operatorType
             );
+
+            _checkUnexpectedError(!success, CLEARING_HOLD_CREATION);
+
+            if (holdData.operatorType == ThirdPartyType.AUTHORIZED) {
+                address thirdPartyAddress = ClearingStorageWrapper.getClearingThirdParty(
+                    _id.partition,
+                    _id.tokenHolder,
+                    IClearingTypes.ClearingOperationType.HoldCreation,
+                    _id.clearingId
+                );
+                HoldStorageWrapper.setThirdPartyForHold(thirdPartyAddress, _id.partition, _id.tokenHolder, holdId);
+            }
+
             operationData_ = abi.encode(holdId);
         }
     }
@@ -523,12 +587,13 @@ library ClearingOps {
      * increased; otherwise, the partition is added to the destination.
      * Emits TransferByPartition and Transfer events.
      * @param _partition Partition identifier
+     * @param _from Original token holder whose cleared balance is being moved
      * @param _to Destination address receiving the cleared balance
      * @param _amount Amount to transfer
      */
-    function transferClearingBalance(bytes32 _partition, address _to, uint256 _amount) internal {
+    function transferClearingBalance(bytes32 _partition, address _from, address _to, uint256 _amount) internal {
         // Delegate to internal helper with direct StorageWrapper access
-        transferClearingBalanceInternal(_partition, _to, _amount);
+        transferClearingBalanceInternal(_partition, _from, _to, _amount);
     }
 
     /**
@@ -539,24 +604,16 @@ library ClearingOps {
      * balance; otherwise, adds the partition to the receiver's portfolio.
      * Emits TransferByPartition and Transfer events in both cases.
      * @param _partition Partition identifier
+     * @param _from Original token holder whose cleared balance is being moved
      * @param _to Destination address
      * @param _amount Amount to transfer
      */
-    function transferClearingBalanceInternal(bytes32 _partition, address _to, uint256 _amount) internal {
+    function transferClearingBalanceInternal(bytes32 _partition, address _from, address _to, uint256 _amount) internal {
         if (ERC1410StorageWrapper.validPartitionForReceiver(_partition, _to)) {
             ERC1410StorageWrapper.increasePartitionOnly(_to, _amount, _partition);
-            emit IERC1410Types.TransferByPartition(
-                _partition,
-                EvmAccessors.getMsgSender(),
-                address(0),
-                _to,
-                _amount,
-                "",
-                ""
-            );
-            return ERC20StorageWrapper.performTransfer(address(0), _to, _amount);
+        } else {
+            ERC1410StorageWrapper.addPartitionToOnly(_amount, _to, _partition);
         }
-        ERC1410StorageWrapper.addPartitionToOnly(_amount, _to, _partition);
         emit IERC1410Types.TransferByPartition(
             _partition,
             EvmAccessors.getMsgSender(),
@@ -567,6 +624,7 @@ library ClearingOps {
             ""
         );
         ERC20StorageWrapper.performTransfer(address(0), _to, _amount);
+        ERC1410StorageWrapper.afterTokenTransfer(_partition, _from, _to, _amount);
     }
 
     /**
@@ -688,13 +746,15 @@ library ClearingOps {
     }
 
     /**
-     * @notice Emits a cleared transfer event appropriate to the third party
-     * type
-     * @dev Dispatches to one of four event variants:
-     * ClearedTransferByPartition (NULL),
-     * ClearedTransferFromByPartition (AUTHORISED),
-     * ClearedOperatorTransferByPartition (OPERATOR),
-     * ProtectedClearedTransferByPartition (PROTECTED).
+     * @notice Emits a cleared transfer event appropriate to the third party type.
+     * @dev Dispatches to one of three event variants:
+     *      `ClearedTransferByPartition` (NULL),
+     *      `ClearedTransferFromByPartition` (AUTHORISED),
+     *      `ClearedOperatorTransferByPartition` (OPERATOR).
+     *      Emits nothing when `_thirdPartyType == PROTECTED` — the protected variant's event
+     *      (`ProtectedClearedTransferByPartition`) is owned and emitted by the writer
+     *      (`ProtectedClearingByPartitionFacet.protectedClearingTransferByPartition`),
+     *      keeping a single emit per external call (per the project event-emission rule).
      * @param _from Token holder
      * @param _to Intended recipient
      * @param _partition Partition
@@ -758,27 +818,18 @@ library ClearingOps {
             );
             return;
         }
-        emit IClearingTypes.ProtectedClearedTransferByPartition(
-            EvmAccessors.getMsgSender(),
-            _from,
-            _to,
-            _partition,
-            _clearingId,
-            _amount,
-            _expirationTimestamp,
-            _data,
-            _operatorData
-        );
     }
 
     /**
-     * @notice Emits a cleared redeem event appropriate to the third party
-     * type
-     * @dev Dispatches to one of four event variants:
-     * ClearedRedeemByPartition (NULL),
-     * ClearedRedeemFromByPartition (AUTHORISED),
-     * ClearedOperatorRedeemByPartition (OPERATOR),
-     * ProtectedClearedRedeemByPartition (PROTECTED).
+     * @notice Emits a cleared redeem event appropriate to the third party type.
+     * @dev Dispatches to one of three event variants:
+     *      `ClearedRedeemByPartition` (NULL),
+     *      `ClearedRedeemFromByPartition` (AUTHORISED),
+     *      `ClearedOperatorRedeemByPartition` (OPERATOR).
+     *      Emits nothing when `_thirdPartyType == PROTECTED` — the protected variant's event
+     *      (`ProtectedClearedRedeemByPartition`) is owned and emitted by the writer
+     *      (`ProtectedClearingByPartitionFacet.protectedClearingRedeemByPartition`),
+     *      keeping a single emit per external call (per the project event-emission rule).
      * @param _from Token holder
      * @param _partition Partition
      * @param _clearingId Clearing ID
@@ -837,25 +888,18 @@ library ClearingOps {
             );
             return;
         }
-        emit IClearingTypes.ProtectedClearedRedeemByPartition(
-            EvmAccessors.getMsgSender(),
-            _from,
-            _partition,
-            _clearingId,
-            _amount,
-            _expirationTimestamp,
-            _data,
-            _operatorData
-        );
     }
 
     /**
-     * @notice Emits a cleared hold event appropriate to the third party type
-     * @dev Dispatches to one of four event variants:
-     * ClearedHoldByPartition (NULL),
-     * ClearedHoldFromByPartition (AUTHORISED),
-     * ClearedOperatorHoldByPartition (OPERATOR),
-     * ProtectedClearedHoldByPartition (PROTECTED).
+     * @notice Emits a cleared hold event appropriate to the third party type.
+     * @dev Dispatches to one of three event variants:
+     *      `ClearedHoldByPartition` (NULL),
+     *      `ClearedHoldFromByPartition` (AUTHORISED),
+     *      `ClearedOperatorHoldByPartition` (OPERATOR).
+     *      Emits nothing when `_thirdPartyType == PROTECTED` — the protected variant's event
+     *      (`ProtectedClearedHoldByPartition`) is owned and emitted by the writer
+     *      (`ProtectedClearingHoldByPartitionFacet.protectedClearingCreateHoldByPartition`),
+     *      keeping a single emit per external call (per the project event-emission rule).
      * @param _from Token holder
      * @param _partition Partition
      * @param _clearingId Clearing ID
@@ -914,16 +958,6 @@ library ClearingOps {
             );
             return;
         }
-        emit IClearingTypes.ProtectedClearedHoldByPartition(
-            EvmAccessors.getMsgSender(),
-            _from,
-            _partition,
-            _clearingId,
-            _hold,
-            _expirationTimestamp,
-            _data,
-            _operatorData
-        );
     }
 
     // ============================================================================

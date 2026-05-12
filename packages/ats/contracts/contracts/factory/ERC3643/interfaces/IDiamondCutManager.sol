@@ -50,7 +50,7 @@ interface TRexIDiamondCutManager {
 
     /// @notice Emitted when a batch configuration creation is cancelled.
     /// @param configurationId Identifier of the cancelled configuration.
-    event DiamondBatchConfigurationCanceled(bytes32 configurationId);
+    event DiamondBatchConfigurationCanceled(bytes32 indexed configurationId, uint256 version);
 
     /// @notice Thrown when bytes32(0) is used as a configuration identifier.
     error DefaultValueForConfigurationIdNotPermitted();

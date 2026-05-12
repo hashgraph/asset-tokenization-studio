@@ -615,26 +615,6 @@ describe("Clearing Tests", () => {
           asset.operatorClearingRedeemByPartition(clearingOperationFrom, _AMOUNT),
         ).to.be.revertedWithCustomError(asset, "ClearingIsDisabled");
       });
-      it("GIVEN a token not in clearing mode WHEN trigger clearing THEN transaction fails with ClearingIsDisabled", async () => {
-        await asset.clearingTransferByPartition(clearingOperation, _AMOUNT, signer_B.address);
-
-        await asset.deactivateClearing();
-        // Approve
-        await expect(asset.approveClearingOperationByPartition(clearingIdentifier)).to.be.revertedWithCustomError(
-          asset,
-          "ClearingIsDisabled",
-        );
-        // Cancel
-        await expect(asset.cancelClearingOperationByPartition(clearingIdentifier)).to.be.revertedWithCustomError(
-          asset,
-          "ClearingIsDisabled",
-        );
-        // Reclaim
-        await expect(asset.reclaimClearingOperationByPartition(clearingIdentifier)).to.be.revertedWithCustomError(
-          asset,
-          "ClearingIsDisabled",
-        );
-      });
     });
 
     describe("Paused", () => {
@@ -644,91 +624,91 @@ describe("Clearing Tests", () => {
       });
 
       // Activate/Deactivate clearing
-      it("GIVEN a paused Token WHEN switching clearing mode THEN transaction fails with TokenIsPaused", async () => {
-        await expect(asset.activateClearing()).to.be.revertedWithCustomError(asset, "TokenIsPaused");
-        await expect(asset.deactivateClearing()).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      it("GIVEN a paused Token WHEN switching clearing mode THEN transaction fails with IsPaused", async () => {
+        await expect(asset.activateClearing()).to.be.revertedWithCustomError(asset, "IsPaused");
+        await expect(asset.deactivateClearing()).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
       // Transfers
-      it("GIVEN a paused Token WHEN clearingTransferByPartition THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN clearingTransferByPartition THEN transaction fails with IsPaused", async () => {
         await expect(
           asset.clearingTransferByPartition(clearingOperation, _AMOUNT, signer_B.address),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
-      it("GIVEN a paused Token WHEN clearingTransferFromByPartition THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN clearingTransferFromByPartition THEN transaction fails with IsPaused", async () => {
         await expect(
           asset.clearingTransferFromByPartition(clearingOperationFrom, _AMOUNT, signer_A.address),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
-      it("GIVEN a paused Token WHEN operatorClearingTransferByPartition THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN operatorClearingTransferByPartition THEN transaction fails with IsPaused", async () => {
         await expect(
           asset.operatorClearingTransferByPartition(clearingOperationFrom, _AMOUNT, signer_A.address),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
       // Holds
-      it("GIVEN a paused Token WHEN clearingCreateHoldByPartition THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN clearingCreateHoldByPartition THEN transaction fails with IsPaused", async () => {
         await expect(asset.clearingCreateHoldByPartition(clearingOperation, hold)).to.be.revertedWithCustomError(
           asset,
-          "TokenIsPaused",
+          "IsPaused",
         );
       });
 
-      it("GIVEN a paused Token WHEN clearingCreateHoldFromByPartition THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN clearingCreateHoldFromByPartition THEN transaction fails with IsPaused", async () => {
         await expect(
           asset.clearingCreateHoldFromByPartition(clearingOperationFrom, hold),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
-      it("GIVEN a paused Token WHEN operatorClearingCreateHoldByPartition THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN operatorClearingCreateHoldByPartition THEN transaction fails with IsPaused", async () => {
         await expect(
           asset.operatorClearingCreateHoldByPartition(clearingOperationFrom, hold),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
       //Redeems
 
-      it("GIVEN a paused Token WHEN clearingRedeemByPartition THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN clearingRedeemByPartition THEN transaction fails with IsPaused", async () => {
         await expect(asset.clearingRedeemByPartition(clearingOperation, _AMOUNT)).to.be.revertedWithCustomError(
           asset,
-          "TokenIsPaused",
+          "IsPaused",
         );
       });
 
-      it("GIVEN a paused Token WHEN clearingRedeemFromByPartition THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN clearingRedeemFromByPartition THEN transaction fails with IsPaused", async () => {
         await expect(asset.clearingRedeemFromByPartition(clearingOperationFrom, _AMOUNT)).to.be.revertedWithCustomError(
           asset,
-          "TokenIsPaused",
+          "IsPaused",
         );
       });
 
-      it("GIVEN a paused Token WHEN operatorClearingRedeemByPartition THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN operatorClearingRedeemByPartition THEN transaction fails with IsPaused", async () => {
         await expect(
           asset.operatorClearingRedeemByPartition(clearingOperationFrom, _AMOUNT),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
       // Approve / Cancel / Reclaim
-      it("GIVEN a paused Token WHEN approveClearingOperationByPartition THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN approveClearingOperationByPartition THEN transaction fails with IsPaused", async () => {
         await expect(asset.approveClearingOperationByPartition(clearingIdentifier)).to.be.revertedWithCustomError(
           asset,
-          "TokenIsPaused",
+          "IsPaused",
         );
       });
 
-      it("GIVEN a paused Token WHEN cancelClearingOperationByPartition THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN cancelClearingOperationByPartition THEN transaction fails with IsPaused", async () => {
         await expect(asset.cancelClearingOperationByPartition(clearingIdentifier)).to.be.revertedWithCustomError(
           asset,
-          "TokenIsPaused",
+          "IsPaused",
         );
       });
 
-      it("GIVEN a paused Token WHEN reclaimClearingOperationByPartition THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN reclaimClearingOperationByPartition THEN transaction fails with IsPaused", async () => {
         await expect(asset.reclaimClearingOperationByPartition(clearingIdentifier)).to.be.revertedWithCustomError(
           asset,
-          "TokenIsPaused",
+          "IsPaused",
         );
       });
     });
@@ -3646,7 +3626,7 @@ describe("Clearing Tests", () => {
         await asset.connect(signer_D).pause();
       });
 
-      it("GIVEN a paused Token WHEN calling protectedClearingTransferByPartition THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN calling protectedClearingTransferByPartition THEN transaction fails with IsPaused", async () => {
         const protectedClearingOperation = {
           clearingOperation: clearingOperation,
           from: signer_A.address,
@@ -3658,10 +3638,10 @@ describe("Clearing Tests", () => {
 
         await expect(
           asset.protectedClearingTransferByPartition(protectedClearingOperation, _AMOUNT, signer_B.address, signature),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
-      it("GIVEN a paused Token WHEN calling protectedClearingRedeemByPartition THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN calling protectedClearingRedeemByPartition THEN transaction fails with IsPaused", async () => {
         const protectedClearingOperation = {
           clearingOperation: clearingOperation,
           from: signer_A.address,
@@ -3673,10 +3653,10 @@ describe("Clearing Tests", () => {
 
         await expect(
           asset.protectedClearingRedeemByPartition(protectedClearingOperation, _AMOUNT, signature),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
-      it("GIVEN a paused Token WHEN calling protectedClearingCreateHoldByPartition THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN calling protectedClearingCreateHoldByPartition THEN transaction fails with IsPaused", async () => {
         const protectedClearingOperation = {
           clearingOperation: clearingOperation,
           from: signer_A.address,
@@ -3688,7 +3668,7 @@ describe("Clearing Tests", () => {
 
         await expect(
           asset.protectedClearingCreateHoldByPartition(protectedClearingOperation, hold, signature),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
     });
 

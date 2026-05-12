@@ -159,7 +159,7 @@ describe("LoansPortfolio Token Tests", () => {
       ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
     });
 
-    it("GIVEN a paused portfolio WHEN adding asset THEN reverts with TokenIsPaused", async () => {
+    it("GIVEN a paused portfolio WHEN adding asset THEN reverts with IsPaused", async () => {
       await asset.connect(signer_B).pause();
 
       await expect(
@@ -168,7 +168,7 @@ describe("LoansPortfolio Token Tests", () => {
           holdingsAssetType: HoldingsAssetType.LOAN,
           country: "ES",
         }),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN an unauthorized account WHEN adding asset THEN reverts with AccountHasNoRole", async () => {
@@ -277,7 +277,7 @@ describe("LoansPortfolio Token Tests", () => {
       ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
     });
 
-    it("GIVEN a paused portfolio WHEN removing LOAN asset THEN reverts with TokenIsPaused", async () => {
+    it("GIVEN a paused portfolio WHEN removing LOAN asset THEN reverts with IsPaused", async () => {
       const holdingsAsset = {
         assetAddress: await loanAsset.getAddress(),
         holdingsAssetType: HoldingsAssetType.LOAN,
@@ -286,7 +286,7 @@ describe("LoansPortfolio Token Tests", () => {
       await asset.addHoldingsAsset(holdingsAsset);
       await asset.connect(signer_B).pause();
 
-      await expect(asset.removeHoldingsAsset(holdingsAsset)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      await expect(asset.removeHoldingsAsset(holdingsAsset)).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN an unauthorized account WHEN removing LOAN asset THEN reverts with AccountHasNoRole", async () => {
@@ -368,7 +368,7 @@ describe("LoansPortfolio Token Tests", () => {
       );
     });
 
-    it("GIVEN a paused portfolio WHEN notifying update THEN reverts with TokenIsPaused", async () => {
+    it("GIVEN a paused portfolio WHEN notifying update THEN reverts with IsPaused", async () => {
       const loanAddress = await loanAsset.getAddress();
       await asset.addHoldingsAsset({
         assetAddress: loanAddress,
@@ -377,10 +377,7 @@ describe("LoansPortfolio Token Tests", () => {
       });
       await asset.connect(signer_B).pause();
 
-      await expect(asset.notifyLoanHoldingsAssetUpdate(loanAddress)).to.be.revertedWithCustomError(
-        asset,
-        "TokenIsPaused",
-      );
+      await expect(asset.notifyLoanHoldingsAssetUpdate(loanAddress)).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN an unauthorized account WHEN notifying update THEN reverts with AccountHasNoRole", async () => {
@@ -431,7 +428,7 @@ describe("LoansPortfolio Token Tests", () => {
       ).to.be.revertedWithCustomError(asset, "ZeroValue");
     });
 
-    it("GIVEN portfolio paused WHEN withdrawing THEN reverts with TokenIsPaused", async () => {
+    it("GIVEN portfolio paused WHEN withdrawing THEN reverts with IsPaused", async () => {
       await asset.addHoldingsAsset({
         assetAddress: await loanAsset.getAddress(),
         holdingsAssetType: HoldingsAssetType.LOAN,
@@ -442,7 +439,7 @@ describe("LoansPortfolio Token Tests", () => {
 
       await expect(
         asset.loansPortfolioWithdraw(await loanAsset.getAddress(), signer_A.address, 0n),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN asset not in portfolio WHEN withdrawing THEN reverts with HoldingAssetNotFound", async () => {

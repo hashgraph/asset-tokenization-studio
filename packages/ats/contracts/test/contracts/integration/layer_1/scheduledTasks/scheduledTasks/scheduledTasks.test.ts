@@ -57,18 +57,18 @@ describe("Scheduled Tasks Tests", () => {
     await loadFixture(deploySecurityFixtureSinglePartition);
   });
 
-  it("GIVEN a paused Token WHEN triggerTasks THEN transaction fails with TokenIsPaused", async () => {
+  it("GIVEN a paused Token WHEN triggerTasks THEN transaction fails with IsPaused", async () => {
     // Pausing the token
     await asset.connect(signer_B).pause();
 
     // trigger scheduled snapshots
     await expect(asset.connect(signer_C).triggerPendingScheduledCrossOrderedTasks()).to.be.revertedWithCustomError(
       asset,
-      "TokenIsPaused",
+      "IsPaused",
     );
     await expect(asset.connect(signer_C).triggerScheduledCrossOrderedTasks(1)).to.be.revertedWithCustomError(
       asset,
-      "TokenIsPaused",
+      "IsPaused",
     );
   });
 

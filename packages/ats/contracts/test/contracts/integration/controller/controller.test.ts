@@ -73,21 +73,21 @@ describe("Controller Tests", () => {
         await grantRoleAndPauseToken(asset, ATS_ROLES.CONTROLLER_ROLE, signer_A, signer_B, signer_C.address);
       });
 
-      it("GIVEN a paused Token WHEN controllerTransfer THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN controllerTransfer THEN transaction fails with IsPaused", async () => {
         await expect(
           asset.connect(signer_C).controllerTransfer(signer_D.address, signer_E.address, amount, "0x", "0x"),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
-      it("GIVEN a paused Token WHEN controllerRedeem THEN transaction fails with TokenIsPaused", async () => {
+      it("GIVEN a paused Token WHEN controllerRedeem THEN transaction fails with IsPaused", async () => {
         await expect(
           asset.connect(signer_C).controllerRedeem(signer_D.address, amount, "0x", "0x"),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
-      it("GIVEN a paused token WHEN attempting to addAgent or removeAgent THEN transactions revert with TokenIsPaused error", async () => {
-        await expect(asset.addAgent(signer_A.address)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
-        await expect(asset.removeAgent(signer_A.address)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      it("GIVEN a paused token WHEN attempting to addAgent or removeAgent THEN transactions revert with IsPaused error", async () => {
+        await expect(asset.addAgent(signer_A.address)).to.be.revertedWithCustomError(asset, "IsPaused");
+        await expect(asset.removeAgent(signer_A.address)).to.be.revertedWithCustomError(asset, "IsPaused");
       });
     });
 
@@ -242,12 +242,12 @@ describe("Controller Tests", () => {
         expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.be.equal(amount * 2);
       });
 
-      it("GIVEN a paused token WHEN attempting to forcedTransfer TokenIsPaused error", async () => {
+      it("GIVEN a paused token WHEN attempting to forcedTransfer IsPaused error", async () => {
         await asset.connect(signer_B).pause();
 
         await expect(
           asset.forcedTransfer(signer_A.address, signer_B.address, amount - 1),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
     });
 

@@ -102,9 +102,9 @@ describe("Core Facet Tests", () => {
       await expect(asset.connect(signer_C).setName(newName)).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
-    it("GIVEN a paused token WHEN setName THEN reverts with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN setName THEN reverts with IsPaused", async () => {
       await asset.connect(signer_B).pause();
-      await expect(asset.connect(signer_A).setName(newName)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      await expect(asset.connect(signer_A).setName(newName)).to.be.revertedWithCustomError(asset, "IsPaused");
     });
   });
 
@@ -127,9 +127,9 @@ describe("Core Facet Tests", () => {
       );
     });
 
-    it("GIVEN a paused token WHEN setSymbol THEN reverts with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN setSymbol THEN reverts with IsPaused", async () => {
       await asset.connect(signer_B).pause();
-      await expect(asset.connect(signer_A).setSymbol(newSymbol)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      await expect(asset.connect(signer_A).setSymbol(newSymbol)).to.be.revertedWithCustomError(asset, "IsPaused");
     });
   });
 

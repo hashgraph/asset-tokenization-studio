@@ -375,26 +375,26 @@ describe("ExternalKycList Management Tests", () => {
   });
 
   describe("Pause Tests", () => {
-    it("GIVEN a paused token WHEN addExternalKycList THEN it reverts with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN addExternalKycList THEN it reverts with IsPaused", async () => {
       await asset.connect(signer_A).pause();
       const newKycList = externalKycListMock3.target as string;
       await expect(
         asset.connect(signer_A).addExternalKycList(newKycList, {
           gasLimit: GAS_LIMIT.default,
         }),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
-    it("GIVEN a paused token WHEN removeExternalKycList THEN it reverts with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN removeExternalKycList THEN it reverts with IsPaused", async () => {
       await asset.connect(signer_A).pause();
       await expect(
         asset.connect(signer_A).removeExternalKycList(externalKycListMock1.target as string, {
           gasLimit: GAS_LIMIT.default,
         }),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
-    it("GIVEN a paused token WHEN updateExternalKycLists THEN it reverts with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN updateExternalKycLists THEN it reverts with IsPaused", async () => {
       await asset.connect(signer_A).pause();
       const kycLists = [externalKycListMock1.target as string];
       const actives = [false];
@@ -402,7 +402,7 @@ describe("ExternalKycList Management Tests", () => {
         asset.connect(signer_A).updateExternalKycLists(kycLists, actives, {
           gasLimit: GAS_LIMIT.high,
         }),
-      ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
   });
 

@@ -25,7 +25,7 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     function registerBusinessLogics(
         BusinessLogicRegistryData[] calldata _businessLogics
     ) external override onlyValidKeys(_businessLogics) onlyRole(DEFAULT_ADMIN_ROLE) onlyUnpaused {
-        uint256 latestVersion = _registerBusinessLogics(_businessLogics);
+        uint256[] memory latestVersion = _registerBusinessLogics(_businessLogics);
 
         emit BusinessLogicsRegistered(_businessLogics, latestVersion);
     }
@@ -45,13 +45,27 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     }
 
     function getVersionStatus(
+        bytes32 _businessLogicKey,
         uint256 _version
-    ) external view override validVersion(_version) returns (VersionStatus status_) {
-        status_ = _getVersionStatus(_version);
+    ) external view override validVersion(_businessLogicKey, _version) returns (VersionStatus status_) {
+        status_ = _getVersionStatus(_businessLogicKey, _version);
     }
 
-    function getLatestVersion() external view override returns (uint256 latestVersion_) {
-        latestVersion_ = _getLatestVersion();
+    function getLatestVersion(bytes32 _businessLogicKey) external view override returns (uint256 latestVersion_) {
+        latestVersion_ = _getLatestVersion(_businessLogicKey);
+    }
+
+    function getLatestVersions(
+        bytes32[] calldata _businessLogicKeys
+    ) external view override returns (uint256[] memory latestVersions_) {
+        uint256 length = _businessLogicKeys.length;
+        latestVersions_ = new uint256[](length);
+        for (uint256 i; i < length; ) {
+            latestVersions_[i] = _getLatestVersion(_businessLogicKeys[i]);
+            unchecked {
+                ++i;
+            }
+        }
     }
 
     function resolveLatestBusinessLogic(
@@ -63,7 +77,7 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     function resolveBusinessLogicByVersion(
         bytes32 _businessLogicKey,
         uint256 _version
-    ) external view override validVersion(_version) returns (address businessLogicAddress_) {
+    ) external view override validVersion(_businessLogicKey, _version) returns (address businessLogicAddress_) {
         businessLogicAddress_ = _resolveBusinessLogicByVersion(_businessLogicKey, _version);
     }
 

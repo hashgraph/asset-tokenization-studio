@@ -76,10 +76,10 @@ library PauseStorageWrapper {
     }
 
     function checkUnpaused() internal view {
-        if (isPaused()) revert IPause.TokenIsPaused();
+        if (isPaused()) revert IPause.IsPaused();
     }
 
     function checkPaused() internal view {
-        if (!isPaused()) revert IPause.TokenIsUnpaused();
+        if (!isPaused()) revert IPause.IsUnpaused();
     }
 }

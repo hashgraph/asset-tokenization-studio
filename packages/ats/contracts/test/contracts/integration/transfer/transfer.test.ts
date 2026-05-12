@@ -301,26 +301,23 @@ describe("Transfer Facet Tests", () => {
         await asset.connect(signer_B).pause();
       });
 
-      it("GIVEN a paused ERC20 WHEN transfer or transferFrom THEN reverts with TokenIsPaused", async () => {
-        await expect(assetSignerC.transfer(signer_D.address, amount)).to.be.revertedWithCustomError(
-          asset,
-          "TokenIsPaused",
-        );
+      it("GIVEN a paused ERC20 WHEN transfer or transferFrom THEN reverts with IsPaused", async () => {
+        await expect(assetSignerC.transfer(signer_D.address, amount)).to.be.revertedWithCustomError(asset, "IsPaused");
         await expect(
           assetSignerD.transferFrom(signer_C.address, signer_D.address, amount),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
-      it("GIVEN a paused token WHEN transferWithData THEN fails with TokenIsPaused", async () => {
+      it("GIVEN a paused token WHEN transferWithData THEN fails with IsPaused", async () => {
         await expect(
           asset.connect(signer_C).transferWithData(signer_D.address, amount / 2, DATA),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
-      it("GIVEN a paused token WHEN transferFromWithData THEN fails with TokenIsPaused", async () => {
+      it("GIVEN a paused token WHEN transferFromWithData THEN fails with IsPaused", async () => {
         await expect(
           asset.connect(signer_C).transferFromWithData(signer_E.address, signer_D.address, amount / 2, DATA),
-        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
       it("GIVEN a paused token WHEN transferWithData called by non-paused path THEN transferWithData is NOT blocked by pause", async () => {

@@ -136,12 +136,12 @@ describe("ERC20Votes Tests", () => {
       });
     });
 
-    it("GIVEN a paused token WHEN delegate THEN transaction fails with TokenIsPaused", async () => {
+    it("GIVEN a paused token WHEN delegate THEN transaction fails with IsPaused", async () => {
       // Pause the token
       await asset.pause();
 
       // Try to delegate while paused
-      await expect(asset.delegate(signer_B.address)).to.be.revertedWithCustomError(asset, "TokenIsPaused");
+      await expect(asset.delegate(signer_B.address)).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
     it("GIVEN tokens issued WHEN delegate THEN delegate is set correctly", async () => {
@@ -480,6 +480,165 @@ describe("ERC20Votes Tests", () => {
         .withArgs(signer_B.address, 0, amount * ABAF);
 
       await checkVotingPowerAfterAdjustment();
+    });
+  });
+
+  describe("Voting Power on Balance-Movement Paths", () => {
+    enum ClearingOperationType {
+      Transfer,
+      Redeem,
+      HoldCreation,
+    }
+
+    const HOLD_AMOUNT = 500;
+    const LOCK_AMOUNT = 300;
+    const FREEZE_AMOUNT = 400;
+    const CLEARING_AMOUNT = 600;
+    const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
+
+    beforeEach(async () => {
+      await asset.grantRole(ATS_ROLES.LOCKER_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.FREEZE_MANAGER_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.CLEARING_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.CLEARING_VALIDATOR_ROLE, signer_A.address);
+
+      await asset.issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: amount,
+        data: "0x",
+      });
+    });
+
+    it("GIVEN a hold with both holder and destination delegating WHEN executeHoldByPartition THEN voting power moves from the holder delegate to the recipient delegate", async () => {
+      // signer_A is the hold token holder, delegating to signer_B
+      // signer_C is the execution destination, delegating to signer_D
+      await asset.connect(signer_A).delegate(signer_B.address);
+      await asset.connect(signer_C).delegate(signer_D.address);
+
+      const currentTime = (await ethers.provider.getBlock("latest"))!.timestamp;
+      const hold = {
+        amount: HOLD_AMOUNT,
+        expirationTimestamp: currentTime + ONE_YEAR_IN_SECONDS,
+        escrow: signer_B.address,
+        to: ethers.ZeroAddress,
+        data: "0x",
+      };
+
+      await asset.connect(signer_A).createHoldByPartition(DEFAULT_PARTITION, hold);
+
+      const holdIdentifier = {
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        holdId: 1,
+      };
+
+      const votesB_before = await asset.getVotes(signer_B.address);
+      const votesD_before = await asset.getVotes(signer_D.address);
+
+      await expect(asset.connect(signer_B).executeHoldByPartition(holdIdentifier, signer_C.address, HOLD_AMOUNT))
+        .to.emit(asset, "DelegateVotesChanged")
+        .withArgs(signer_B.address, votesB_before, votesB_before - BigInt(HOLD_AMOUNT))
+        .to.emit(asset, "DelegateVotesChanged")
+        .withArgs(signer_D.address, votesD_before, votesD_before + BigInt(HOLD_AMOUNT));
+
+      expect(await asset.getVotes(signer_B.address)).to.equal(votesB_before - BigInt(HOLD_AMOUNT));
+      expect(await asset.getVotes(signer_D.address)).to.equal(votesD_before + BigInt(HOLD_AMOUNT));
+    });
+
+    it("GIVEN a lock with token holder delegating WHEN releaseByPartition THEN voting power is unchanged (same-holder no-op)", async () => {
+      await asset.connect(signer_A).delegate(signer_B.address);
+
+      const currentTime = (await ethers.provider.getBlock("latest"))!.timestamp;
+      const lockExpiration = currentTime + 60;
+
+      await asset.connect(signer_A).lockByPartition(DEFAULT_PARTITION, LOCK_AMOUNT, signer_A.address, lockExpiration);
+
+      await asset.changeSystemTimestamp(lockExpiration + 1);
+
+      const votesB_before = await asset.getVotes(signer_B.address);
+
+      await expect(asset.connect(signer_A).releaseByPartition(DEFAULT_PARTITION, 1, signer_A.address)).to.not.emit(
+        asset,
+        "DelegateVotesChanged",
+      );
+
+      expect(await asset.getVotes(signer_B.address)).to.equal(votesB_before);
+    });
+
+    it("GIVEN frozen tokens with token holder delegating WHEN unfreezePartialTokens THEN voting power is unchanged (same-holder no-op)", async () => {
+      // freezePartialTokens / unfreezePartialTokens are restricted to single-partition mode,
+      // so deploy a fresh single-partition fixture for this test.
+      const base = await deployEquityTokenFixture({
+        equityDataParams: {
+          securityData: {
+            isMultiPartition: false,
+            internalKycActivated: false,
+            erc20VotesActivated: true,
+          },
+        },
+      });
+      const singlePartitionAsset = await ethers.getContractAt("IAsset", base.diamond.target, base.deployer);
+      await executeRbac(singlePartitionAsset, [
+        { role: ATS_ROLES.ISSUER_ROLE, members: [base.deployer.address] },
+        { role: ATS_ROLES.FREEZE_MANAGER_ROLE, members: [base.deployer.address] },
+      ]);
+
+      await singlePartitionAsset.issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: base.deployer.address,
+        value: amount,
+        data: "0x",
+      });
+
+      await singlePartitionAsset.connect(base.deployer).delegate(base.user1.address);
+
+      await singlePartitionAsset.connect(base.deployer).freezePartialTokens(base.deployer.address, FREEZE_AMOUNT);
+
+      const votesB_before = await singlePartitionAsset.getVotes(base.user1.address);
+
+      await expect(
+        singlePartitionAsset.connect(base.deployer).unfreezePartialTokens(base.deployer.address, FREEZE_AMOUNT),
+      ).to.not.emit(singlePartitionAsset, "DelegateVotesChanged");
+
+      expect(await singlePartitionAsset.getVotes(base.user1.address)).to.equal(votesB_before);
+    });
+
+    it("GIVEN a pending clearing transfer with both holder and destination delegating WHEN approveClearingOperationByPartition THEN voting power moves from the holder delegate to the recipient delegate", async () => {
+      // signer_A is the clearing token holder, delegating to signer_C
+      // signer_B is the destination, delegating to itself
+      await asset.connect(signer_A).delegate(signer_C.address);
+      await asset.connect(signer_B).delegate(signer_B.address);
+
+      await asset.connect(signer_A).activateClearing();
+
+      const currentTime = (await ethers.provider.getBlock("latest"))!.timestamp;
+      const clearingOperation = {
+        partition: DEFAULT_PARTITION,
+        expirationTimestamp: currentTime + ONE_YEAR_IN_SECONDS,
+        data: "0x",
+      };
+
+      await asset.connect(signer_A).clearingTransferByPartition(clearingOperation, CLEARING_AMOUNT, signer_B.address);
+
+      const identifier = {
+        clearingOperationType: ClearingOperationType.Transfer,
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        clearingId: 1,
+      };
+
+      const votesC_before = await asset.getVotes(signer_C.address);
+      const votesB_before = await asset.getVotes(signer_B.address);
+
+      await expect(asset.connect(signer_A).approveClearingOperationByPartition(identifier))
+        .to.emit(asset, "DelegateVotesChanged")
+        .withArgs(signer_C.address, votesC_before, votesC_before - BigInt(CLEARING_AMOUNT))
+        .to.emit(asset, "DelegateVotesChanged")
+        .withArgs(signer_B.address, votesB_before, votesB_before + BigInt(CLEARING_AMOUNT));
+
+      expect(await asset.getVotes(signer_C.address)).to.equal(votesC_before - BigInt(CLEARING_AMOUNT));
+      expect(await asset.getVotes(signer_B.address)).to.equal(votesB_before + BigInt(CLEARING_AMOUNT));
     });
   });
 
