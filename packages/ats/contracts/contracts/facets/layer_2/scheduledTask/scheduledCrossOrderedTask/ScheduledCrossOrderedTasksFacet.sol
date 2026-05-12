@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IScheduledCrossOrderedTasks } from "./IScheduledCrossOrderedTasks.sol";
 import { ScheduledCrossOrderedTasks } from "./ScheduledCrossOrderedTasks.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../../../infrastructure/proxy/Bytes4Builder.sol";
 import { _SCHEDULED_TASKS_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 
 contract ScheduledCrossOrderedTasksFacet is ScheduledCrossOrderedTasks, IStaticFunctionSelectors {
@@ -11,18 +12,17 @@ contract ScheduledCrossOrderedTasksFacet is ScheduledCrossOrderedTasks, IStaticF
         staticResolverKey_ = _SCHEDULED_TASKS_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](4);
-        staticFunctionSelectors_[selectorIndex++] = this.triggerPendingScheduledCrossOrderedTasks.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.triggerScheduledCrossOrderedTasks.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.scheduledCrossOrderedTaskCount.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getScheduledCrossOrderedTasks.selector;
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.triggerPendingScheduledCrossOrderedTasks.selector,
+                this.triggerScheduledCrossOrderedTasks.selector,
+                this.scheduledCrossOrderedTaskCount.selector,
+                this.getScheduledCrossOrderedTasks.selector
+            );
     }
 
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IScheduledCrossOrderedTasks).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IScheduledCrossOrderedTasks).interfaceId);
     }
 }

@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IClearing } from "./IClearing.sol";
 import { Clearing } from "./Clearing.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { _CLEARING_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -22,25 +23,20 @@ contract ClearingFacet is Clearing, IStaticFunctionSelectors {
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 6;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.getClearingThirdParty.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getClearedAmountFor.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.isClearingActivated.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.deactivateClearing.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.activateClearing.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.initializeClearing.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.initializeClearing.selector,
+                this.activateClearing.selector,
+                this.deactivateClearing.selector,
+                this.isClearingActivated.selector,
+                this.getClearedAmountFor.selector,
+                this.getClearingThirdParty.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        uint256 selectorIndex = 1;
-        staticInterfaceIds_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticInterfaceIds_[--selectorIndex] = type(IClearing).interfaceId;
-        }
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IClearing).interfaceId);
     }
 }

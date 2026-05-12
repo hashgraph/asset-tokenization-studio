@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IBalanceTracker } from "./IBalanceTracker.sol";
 import { BalanceTracker } from "./BalanceTracker.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { _BALANCE_TRACKER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -29,22 +30,16 @@ contract BalanceTrackerFacet is BalanceTracker, IStaticFunctionSelectors {
      * @return staticFunctionSelectors_ Array containing selectors for `balanceOf`,
      *         `totalSupply`, and `getTotalBalanceFor`.
      */
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 3;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.getTotalBalanceFor.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.totalSupply.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.balanceOf.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(this.balanceOf.selector, this.totalSupply.selector, this.getTotalBalanceFor.selector);
     }
 
     /**
      * @notice Returns the interface IDs supported by this facet for ERC-165 introspection.
      * @return staticInterfaceIds_ Array containing the `IBalanceTracker` interface ID.
      */
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(IBalanceTracker).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IBalanceTracker).interfaceId);
     }
 }

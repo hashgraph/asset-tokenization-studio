@@ -7,6 +7,7 @@ import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
 import { IVotes } from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 import { ERC20Votes } from "./ERC20Votes.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../../../infrastructure/proxy/Bytes4Builder.sol";
 import { _ERC20VOTES_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 
 contract ERC20VotesFacet is ERC20Votes, IStaticFunctionSelectors {
@@ -14,28 +15,30 @@ contract ERC20VotesFacet is ERC20Votes, IStaticFunctionSelectors {
         staticResolverKey_ = _ERC20VOTES_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](11);
-        staticFunctionSelectors_[selectorIndex++] = this.initialize_ERC20Votes.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.delegate.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.clock.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.CLOCK_MODE.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getVotes.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getPastVotes.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getPastTotalSupply.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.delegates.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.checkpoints.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.numCheckpoints.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.isActivated.selector;
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.initialize_ERC20Votes.selector,
+                this.delegate.selector,
+                this.clock.selector,
+                this.CLOCK_MODE.selector,
+                this.getVotes.selector,
+                this.getPastVotes.selector,
+                this.getPastTotalSupply.selector,
+                this.delegates.selector,
+                this.checkpoints.selector,
+                this.numCheckpoints.selector,
+                this.isActivated.selector
+            );
     }
 
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](4);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IERC20Votes).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(IERC5805).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(IERC6372).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(IVotes).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                type(IERC20Votes).interfaceId,
+                type(IERC5805).interfaceId,
+                type(IERC6372).interfaceId,
+                type(IVotes).interfaceId
+            );
     }
 }

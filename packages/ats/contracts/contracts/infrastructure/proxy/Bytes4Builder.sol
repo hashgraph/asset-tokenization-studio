@@ -13,7 +13,7 @@ pragma solidity >=0.8.0 <0.9.0;
  *      boilerplate that facets otherwise carry. The compiler inlines each call, so the only
  *      runtime cost is argument marshalling onto the stack.
  *
- *      Overloads are provided for 1 through 6 elements. Facets needing larger arrays should
+ *      Overloads are provided for 1 through 12 elements. Facets needing larger arrays should
  *      fall back to the manual descending-loop form rather than padding this library with
  *      ever-wider overloads — the readability win flattens once N grows past the cap.
  */
@@ -113,5 +113,230 @@ library Bytes4Builder {
         r[3] = d;
         r[4] = e;
         r[5] = f;
+    }
+
+    /**
+     * @notice Returns a `bytes4[] memory` of length 7 containing `a` through `g` in order.
+     * @param a Element at index 0.
+     * @param b Element at index 1.
+     * @param c Element at index 2.
+     * @param d Element at index 3.
+     * @param e Element at index 4.
+     * @param f Element at index 5.
+     * @param g Element at index 6.
+     * @return r Newly allocated 7-element array.
+     */
+    function build(
+        bytes4 a,
+        bytes4 b,
+        bytes4 c,
+        bytes4 d,
+        bytes4 e,
+        bytes4 f,
+        bytes4 g
+    ) internal pure returns (bytes4[] memory r) {
+        r = new bytes4[](7);
+        r[0] = a;
+        r[1] = b;
+        r[2] = c;
+        r[3] = d;
+        r[4] = e;
+        r[5] = f;
+        r[6] = g;
+    }
+
+    /**
+     * @notice Returns a `bytes4[] memory` of length 8 containing `a` through `h` in order.
+     * @param a Element at index 0.
+     * @param b Element at index 1.
+     * @param c Element at index 2.
+     * @param d Element at index 3.
+     * @param e Element at index 4.
+     * @param f Element at index 5.
+     * @param g Element at index 6.
+     * @param h Element at index 7.
+     * @return r Newly allocated 8-element array.
+     */
+    function build(
+        bytes4 a,
+        bytes4 b,
+        bytes4 c,
+        bytes4 d,
+        bytes4 e,
+        bytes4 f,
+        bytes4 g,
+        bytes4 h
+    ) internal pure returns (bytes4[] memory r) {
+        r = new bytes4[](8);
+        r[0] = a;
+        r[1] = b;
+        r[2] = c;
+        r[3] = d;
+        r[4] = e;
+        r[5] = f;
+        r[6] = g;
+        r[7] = h;
+    }
+
+    /**
+     * @notice Returns a `bytes4[] memory` of length 9 containing `a` through `i` in order.
+     * @param a Element at index 0.
+     * @param b Element at index 1.
+     * @param c Element at index 2.
+     * @param d Element at index 3.
+     * @param e Element at index 4.
+     * @param f Element at index 5.
+     * @param g Element at index 6.
+     * @param h Element at index 7.
+     * @param i Element at index 8.
+     * @return r Newly allocated 9-element array.
+     */
+    function build(
+        bytes4 a,
+        bytes4 b,
+        bytes4 c,
+        bytes4 d,
+        bytes4 e,
+        bytes4 f,
+        bytes4 g,
+        bytes4 h,
+        bytes4 i
+    ) internal pure returns (bytes4[] memory r) {
+        r = new bytes4[](9);
+        r[0] = a;
+        r[1] = b;
+        r[2] = c;
+        r[3] = d;
+        r[4] = e;
+        r[5] = f;
+        r[6] = g;
+        r[7] = h;
+        r[8] = i;
+    }
+
+    /**
+     * @notice Returns a `bytes4[] memory` of length 10 containing `a` through `j` in order.
+     * @param a Element at index 0.
+     * @param b Element at index 1.
+     * @param c Element at index 2.
+     * @param d Element at index 3.
+     * @param e Element at index 4.
+     * @param f Element at index 5.
+     * @param g Element at index 6.
+     * @param h Element at index 7.
+     * @param i Element at index 8.
+     * @param j Element at index 9.
+     * @return r Newly allocated 10-element array.
+     */
+    function build(
+        bytes4 a,
+        bytes4 b,
+        bytes4 c,
+        bytes4 d,
+        bytes4 e,
+        bytes4 f,
+        bytes4 g,
+        bytes4 h,
+        bytes4 i,
+        bytes4 j
+    ) internal pure returns (bytes4[] memory r) {
+        r = new bytes4[](10);
+        r[0] = a;
+        r[1] = b;
+        r[2] = c;
+        r[3] = d;
+        r[4] = e;
+        r[5] = f;
+        r[6] = g;
+        r[7] = h;
+        r[8] = i;
+        r[9] = j;
+    }
+
+    /**
+     * @notice Returns a `bytes4[] memory` of length 11 containing `a` through `k` in order.
+     * @param a Element at index 0.
+     * @param b Element at index 1.
+     * @param c Element at index 2.
+     * @param d Element at index 3.
+     * @param e Element at index 4.
+     * @param f Element at index 5.
+     * @param g Element at index 6.
+     * @param h Element at index 7.
+     * @param i Element at index 8.
+     * @param j Element at index 9.
+     * @param k Element at index 10.
+     * @return r Newly allocated 11-element array.
+     */
+    function build(
+        bytes4 a,
+        bytes4 b,
+        bytes4 c,
+        bytes4 d,
+        bytes4 e,
+        bytes4 f,
+        bytes4 g,
+        bytes4 h,
+        bytes4 i,
+        bytes4 j,
+        bytes4 k
+    ) internal pure returns (bytes4[] memory r) {
+        r = new bytes4[](11);
+        r[0] = a;
+        r[1] = b;
+        r[2] = c;
+        r[3] = d;
+        r[4] = e;
+        r[5] = f;
+        r[6] = g;
+        r[7] = h;
+        r[8] = i;
+        r[9] = j;
+        r[10] = k;
+    }
+
+    /**
+     * @notice Returns a `bytes4[] memory` of length 12 containing `a` through `m` in order.
+     * @param a Element at index 0.
+     * @param b Element at index 1.
+     * @param c Element at index 2.
+     * @param d Element at index 3.
+     * @param e Element at index 4.
+     * @param f Element at index 5.
+     * @param g Element at index 6.
+     * @param h Element at index 7.
+     * @param i Element at index 8.
+     * @param j Element at index 9.
+     * @param k Element at index 10.
+     * @param m Element at index 11.
+     * @return r Newly allocated 12-element array.
+     */
+    function build(
+        bytes4 a,
+        bytes4 b,
+        bytes4 c,
+        bytes4 d,
+        bytes4 e,
+        bytes4 f,
+        bytes4 g,
+        bytes4 h,
+        bytes4 i,
+        bytes4 j,
+        bytes4 k,
+        bytes4 m
+    ) internal pure returns (bytes4[] memory r) {
+        r = new bytes4[](12);
+        r[0] = a;
+        r[1] = b;
+        r[2] = c;
+        r[3] = d;
+        r[4] = e;
+        r[5] = f;
+        r[6] = g;
+        r[7] = h;
+        r[8] = i;
+        r[9] = j;
+        r[10] = k;
+        r[11] = m;
     }
 }

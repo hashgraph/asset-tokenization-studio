@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IBurn } from "./IBurn.sol";
 import { Burn } from "./Burn.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { _BURN_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -22,19 +23,12 @@ contract BurnFacet is Burn, IStaticFunctionSelectors {
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 3;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.redeemFrom.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.redeem.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.burn.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(this.burn.selector, this.redeem.selector, this.redeemFrom.selector);
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(IBurn).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IBurn).interfaceId);
     }
 }
