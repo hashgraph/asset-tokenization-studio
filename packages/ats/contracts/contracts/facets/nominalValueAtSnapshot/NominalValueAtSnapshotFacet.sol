@@ -17,20 +17,14 @@ contract NominalValueAtSnapshotFacet is NominalValueAtSnapshot, IStaticFunctionS
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 2;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.nominalValueAtSnapshot.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.nominalValueDecimalsAtSnapshot.selector;
-        }
+        staticFunctionSelectors_ = new bytes4[](2);
+        staticFunctionSelectors_[0] = this.nominalValueAtSnapshot.selector;
+        staticFunctionSelectors_[1] = this.nominalValueDecimalsAtSnapshot.selector;
     }
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        uint256 selectorIndex = 1;
-        staticInterfaceIds_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticInterfaceIds_[--selectorIndex] = type(INominalValueAtSnapshot).interfaceId;
-        }
+        staticInterfaceIds_ = new bytes4[](1);
+        staticInterfaceIds_[0] = type(INominalValueAtSnapshot).interfaceId;
     }
 }
