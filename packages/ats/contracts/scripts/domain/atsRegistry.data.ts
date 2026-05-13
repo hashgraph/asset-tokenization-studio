@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-14T09:47:16.098Z
+ * Generated: 2026-05-14T13:18:17.732Z
  * Facets: 125
  * Infrastructure: 2
  *
@@ -5481,14 +5481,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
-        name: "AdjustmentBalanceSet",
-        signature: {
-          full: "event AdjustmentBalanceSet(address indexed operator, uint256 factor, uint8 decimals)",
-          canonical: "AdjustmentBalanceSet(address,uint256,uint8)",
-        },
-        topic0: "0x312510931206ef5f91f1ef19e1a01253812b7201fb8b2d5d4afa056cce53e34a",
-      },
-      {
         name: "DelegateChanged",
         signature: {
           full: "event DelegateChanged(address indexed delegator, address indexed fromDelegate, address indexed toDelegate)",
@@ -5503,14 +5495,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "DelegateVotesChanged(address,uint256,uint256)",
         },
         topic0: "0xdec2bacdd2f05b59de34da9b523dff8be42e5e38e818c82fdb0bae774387a724",
-      },
-      {
-        name: "SnapshotTriggered",
-        signature: {
-          full: "event SnapshotTriggered(uint256 snapshotId, bytes metadata)",
-          canonical: "SnapshotTriggered(uint256,bytes)",
-        },
-        topic0: "0xf256aa4705d42c3984e319d2b0a2d1eb0a18a8a820922b71ba13e37c7699828c",
       },
     ],
     errors: [
@@ -5539,19 +5523,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "BrokenClockMode",
         signature: { full: "error BrokenClockMode()", canonical: "BrokenClockMode()" },
         selector: "0xb2b9e563",
-      },
-      {
-        name: "CouponNotFound",
-        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
-        selector: "0x69a80e75",
-      },
-      {
-        name: "DecimalDifferenceTooLarge",
-        signature: {
-          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
-          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
-        },
-        selector: "0x552d04f9",
       },
       {
         name: "FutureLookup",
@@ -12666,14 +12637,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "function resetSystemTimestamp()", canonical: "resetSystemTimestamp()" },
         selector: "0x8f145250",
       },
-      {
-        name: "testOnlyAddDeprecatedCoupon",
-        signature: {
-          full: "function testOnlyAddDeprecatedCoupon(uint256 _couponID)",
-          canonical: "testOnlyAddDeprecatedCoupon(uint256)",
-        },
-        selector: "0xa1435b5a",
-      },
     ],
     events: [
       {
@@ -14483,8 +14446,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   NominalValueStorageWrapper: {
     name: "NominalValueStorageWrapper",
-    description:
-      "Storage wrapper for nominal value data, aggregating legacy bond and equity storage for backward compatibility during migration.",
+    description: "Storage wrapper for nominal value data on a security token.",
     methods: [],
   },
 

@@ -126,7 +126,12 @@ library ScheduledTasksStorageWrapper {
         return triggerScheduledTasks(scheduledCrossOrderedTaskStorage(), bytes32("crossOrdered"), _max);
     }
 
-    // TODO: REMOVE IT!!! Ya no es necesario el delegate call entre facetas, que se explote la librería externa.
+    /// @dev Kept as an external self-delegate-call dispatch (rather than inlining
+    /// `triggerScheduledCrossOrderedTasks(0)` directly into each caller) to keep
+    /// downstream facets — notably `HoldOps` via `HoldStorageWrapper` —
+    /// inside the 24 KB EIP-170 deployable-bytecode limit. Inlining the loop
+    /// body into every caller pushed `HoldOps` over the limit (measured
+    /// +7 KB).
     function callTriggerPendingScheduledCrossOrderedTasks() internal returns (uint256) {
         return IScheduledCrossOrderedTasks(address(this)).triggerPendingScheduledCrossOrderedTasks();
     }
