@@ -10,6 +10,7 @@ import {
     IScheduledCrossOrderedTasks
 } from "../../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
 import { IScheduledBalanceAdjustment } from "../../facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
+import { IAdjustBalances } from "../../facets/adjustBalances/IAdjustBalances.sol";
 import { ISnapshots } from "../../facets/layer_1/snapshot/ISnapshots.sol";
 import {
     _SCHEDULED_SNAPSHOTS_STORAGE_POSITION,
@@ -124,16 +125,6 @@ library ScheduledTasksStorageWrapper {
 
     function triggerScheduledCrossOrderedTasks(uint256 _max) internal returns (uint256) {
         return triggerScheduledTasks(scheduledCrossOrderedTaskStorage(), bytes32("crossOrdered"), _max);
-    }
-
-    /// @dev Kept as an external self-delegate-call dispatch (rather than inlining
-    /// `triggerScheduledCrossOrderedTasks(0)` directly into each caller) to keep
-    /// downstream facets — notably `HoldOps` via `HoldStorageWrapper` —
-    /// inside the 24 KB EIP-170 deployable-bytecode limit. Inlining the loop
-    /// body into every caller pushed `HoldOps` over the limit (measured
-    /// +7 KB).
-    function callTriggerPendingScheduledCrossOrderedTasks() internal returns (uint256) {
-        return IScheduledCrossOrderedTasks(address(this)).triggerPendingScheduledCrossOrderedTasks();
     }
 
     function requireValidTimestamp(uint256 _timestamp) internal view {
