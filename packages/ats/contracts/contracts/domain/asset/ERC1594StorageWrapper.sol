@@ -158,6 +158,20 @@ library ERC1594StorageWrapper {
     }
 
     /**
+     * @notice Reverts if the transfer between `from` and `to` fails
+     * compliance checks. Optionally checks sender compliance.
+     * @dev Forwards to `checkCompliance`. Used when the sender is not
+     * necessarily the `from` parameter.
+     * @param from Source address.
+     * @param to Destination address.
+     * @param checkSender Whether to perform compliance validation on the
+     * current `msg.sender`.
+     */
+    function requireCompliant(address from, address to, bool checkSender) internal view {
+        checkCompliance(from, to, checkSender);
+    }
+
+    /**
      * @notice Reverts if either `from` or `to` is listed as a recovered
      * wallet.
      * @dev Reverts with `WalletRecovered` for any non-zero address whose
@@ -311,33 +325,6 @@ library ERC1594StorageWrapper {
     }
 
     /**
-     * @notice Reverts if `account` fails individual account compliance checks.
-     * @dev Delegates to `_isAccountCompliant`, which validates the account against
-     * the recovery registry and the control list. Zero address is always allowed.
-     * @param account Address to validate.
-     */
-    function checkAccountCompliance(address account) internal view {
-        (bool isCompliant_, , bytes32 reasonCode, bytes memory details) = _isAccountCompliant(account);
-        if (!isCompliant_) LowLevelCall.revertWithData(bytes4(reasonCode), details);
-    }
-
-    /**
-     * @notice Reverts if the compliance module disallows a transfer from `from`
-     * to `to` for `value` tokens.
-     * @dev Delegates to `_validateTransferCompliance`, which calls the compliance
-     * contract's `canTransfer(from, to, value)` via staticcall. Use this when only
-     * the compliance module check is required, bypassing recovery and control list
-     * validation.
-     * @param from Source address.
-     * @param to Destination address.
-     * @param value Amount of tokens to transfer.
-     */
-    function checkTransferCompliance(address from, address to, uint256 value) internal view {
-        (bool isCompliant_, , bytes32 reasonCode, bytes memory details) = _validateTransferCompliance(from, to, value);
-        if (!isCompliant_) LowLevelCall.revertWithData(bytes4(reasonCode), details);
-    }
-
-    /**
      * @notice Returns the ERC1594 storage slot using the predefined
      * position constant.
      * @dev Uses inline assembly to retrieve the storage pointer.
@@ -391,56 +378,11 @@ library ERC1594StorageWrapper {
     }
 
     /**
-     * @notice Validates compliance for the sender involved in a transfer
-     * or redemption.
-     * @dev Checks the sender against recovery, control list, and compliance contract.
-     * @param from Source address (may be zero).
-     * @param to Destination address (may be zero).
-     * @param value Transfer amount.
-     * @param sender Address of the operator initiating the operation.
-     * @return status True if all compliance checks pass.
-     * @return statusCode EIP1066 status byte.
-     * @return reasonCode Selector of the blocking error.
-     * @return details Encoded error data (empty on success).
-     */
-    function _isSenderCompliant(
-        address from,
-        address to,
-        uint256 value,
-        address sender
-    ) private view returns (bool status, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
-        (status, statusCode, reasonCode, details) = _validateAccountForTransfer(sender, abi.encode(sender));
-        if (!status) return (status, statusCode, reasonCode, details);
-        (status, statusCode, reasonCode, details) = _validateSenderCompliance(sender, from, to, value);
-        if (!status) return (status, statusCode, reasonCode, details);
-    }
-
-    /**
-     * @notice Validates compliance for the 'from' involved in a transfer
-     * or redemption.
-     * @dev Checks the from against recovery, control list, and compliance contract.
-     * @param account Account address (may be zero).
-     * @return status True if all compliance checks pass.
-     * @return statusCode EIP1066 status byte.
-     * @return reasonCode Selector of the blocking error.
-     * @return details Encoded error data (empty on success).
-     */
-    function _isAccountCompliant(
-        address account
-    ) private view returns (bool status, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
-        if (account != address(0)) {
-            (status, statusCode, reasonCode, details) = _validateAccountForTransfer(account, abi.encode(account));
-            if (!status) return (status, statusCode, reasonCode, details);
-        }
-        return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
-    }
-
-    /**
      * @notice Validates compliance for all parties involved in a transfer
      * or redemption.
      * @dev Checks the sender (if flagged), `from`, and `to` against
      * recovery, control list, and compliance contract. The compliance
-     * contract is called via static call with `canTransfer`.
+     * contract is called via staticcall with `canTransfer`.
      * @param from Source address (may be zero).
      * @param to Destination address (may be zero).
      * @param value Transfer amount.
@@ -459,13 +401,19 @@ library ERC1594StorageWrapper {
         bool checkSender
     ) private view returns (bool status, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
         if (checkSender) {
-            (status, statusCode, reasonCode, details) = _isSenderCompliant(from, to, value, sender);
+            (status, statusCode, reasonCode, details) = _validateAccountForTransfer(sender, abi.encode(sender));
+            if (!status) return (status, statusCode, reasonCode, details);
+            (status, statusCode, reasonCode, details) = _validateSenderCompliance(sender, from, to, value);
             if (!status) return (status, statusCode, reasonCode, details);
         }
-        (status, statusCode, reasonCode, details) = _isAccountCompliant(from);
-        if (!status) return (status, statusCode, reasonCode, details);
-        (status, statusCode, reasonCode, details) = _isAccountCompliant(to);
-        if (!status) return (status, statusCode, reasonCode, details);
+        if (from != address(0)) {
+            (status, statusCode, reasonCode, details) = _validateAccountForTransfer(from, abi.encode(from));
+            if (!status) return (status, statusCode, reasonCode, details);
+        }
+        if (to != address(0)) {
+            (status, statusCode, reasonCode, details) = _validateAccountForTransfer(to, abi.encode(to));
+            if (!status) return (status, statusCode, reasonCode, details);
+        }
         (status, statusCode, reasonCode, details) = _validateTransferCompliance(from, to, value);
         if (!status) return (status, statusCode, reasonCode, details);
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
