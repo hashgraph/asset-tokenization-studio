@@ -25,7 +25,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         override
         onlyUnpaused
         onlyRole(LOANS_PORTFOLIO_MANAGER_ROLE)
-        notZeroAddress(_holdingsAsset.assetAddress)
+        onlyAddressNotZero(_holdingsAsset.assetAddress)
         onlySupportedHoldingsAssetType(_holdingsAsset)
         returns (bool success_)
     {
@@ -40,7 +40,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         override
         onlyUnpaused
         onlyRole(LOANS_PORTFOLIO_MANAGER_ROLE)
-        notZeroAddress(_holdingsAsset.assetAddress)
+        onlyAddressNotZero(_holdingsAsset.assetAddress)
         onlySupportedHoldingsAssetType(_holdingsAsset)
         returns (bool success_)
     {
@@ -55,7 +55,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         override
         onlyUnpaused
         onlyRole(LOANS_PORTFOLIO_MANAGER_ROLE)
-        notZeroAddress(_holdingsAssetAddress)
+        onlyAddressNotZero(_holdingsAssetAddress)
         returns (bool success_)
     {
         LoansPortfolioStorageWrapper.notifyLoanHoldingsAssetUpdate(_holdingsAssetAddress);
@@ -71,8 +71,8 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         override
         onlyUnpaused
         onlyRole(LOANS_PORTFOLIO_MANAGER_ROLE)
-        notZeroAddress(_assetAddress)
-        notZeroAddress(_to)
+        onlyAddressNotZero(_assetAddress)
+        onlyAddressNotZero(_to)
         returns (bool success_)
     {
         success_ = LoansPortfolioStorageWrapper.loansPortfolioWithdraw(_assetAddress, _to, _amount);

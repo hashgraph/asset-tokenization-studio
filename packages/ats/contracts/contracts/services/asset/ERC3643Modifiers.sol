@@ -127,7 +127,7 @@ abstract contract ERC3643Modifiers {
      * @param _to The recipient/target address to _verify.
      */
     modifier onlyIdentifiedAddresses(address _from, address _to) {
-        ERC1594StorageWrapper.requireIdentified(_from, _to);
+        ERC1594StorageWrapper.checkIdentity(_from, _to);
         _;
     }
 }

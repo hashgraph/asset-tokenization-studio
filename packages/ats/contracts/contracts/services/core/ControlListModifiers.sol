@@ -24,15 +24,6 @@ abstract contract ControlListModifiers {
     }
 
     /**
-     * @notice Modifier to ensure sender is allowed by control list
-     * @dev Reverts if msg.sender is blocked by the control list
-     */
-    modifier onlySenderListedAllowed() {
-        ControlListStorageWrapper.checkControlList(EvmAccessors.getMsgSender());
-        _;
-    }
-
-    /**
      * @notice Modifier to ensure control list has not been initialized
      * @dev Reverts with AlreadyInitialized if control list is already initialized
      */

@@ -23,7 +23,7 @@ abstract contract DefaultValuesModifiers {
      *
      * @param _address The address to check for
      */
-    modifier notZeroAddress(address _address) virtual {
+    modifier onlyAddressNotZero(address _address) {
         DefaultValueValidation.checkZeroAddress(_address);
         _;
     }
@@ -36,7 +36,7 @@ abstract contract DefaultValuesModifiers {
      *
      * @param _value The value to check
      */
-    modifier notZeroValue(uint256 _value) virtual {
+    modifier onlyValueNotZero(uint256 _value) {
         DefaultValueValidation.checkZeroValue(_value);
         _;
     }

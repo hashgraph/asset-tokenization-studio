@@ -9,6 +9,7 @@ import { ExternalListManagementStorageWrapper } from "../../domain/core/External
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DefaultValueValidation } from "../../infrastructure/utils/DefaultValueValidation.sol";
 
 /**
  * @title BatchFreeze
@@ -48,7 +49,7 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
     ) external onlyUnpaused onlyValidInputAmountsArrayLength(_userAddresses, _amounts) onlyWithoutMultiPartition {
         uint256 length = _userAddresses.length;
         for (uint256 i; i < length; ) {
-            ERC1410StorageWrapper.requireValidAddress(_userAddresses[i]);
+            DefaultValueValidation.checkZeroAddress(_userAddresses[i]);
             ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
             ERC3643StorageWrapper.freezeTokens(_userAddresses[i], _amounts[i]);
             emit IFreeze.TokensFrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);
@@ -65,7 +66,7 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
     ) external onlyUnpaused onlyValidInputAmountsArrayLength(_userAddresses, _amounts) onlyWithoutMultiPartition {
         uint256 length = _userAddresses.length;
         for (uint256 i; i < length; ) {
-            ERC1410StorageWrapper.requireValidAddress(_userAddresses[i]);
+            DefaultValueValidation.checkZeroAddress(_userAddresses[i]);
             ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
             ERC3643StorageWrapper.unfreezeTokens(_userAddresses[i], _amounts[i], 0);
             emit IFreeze.TokensUnfrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);

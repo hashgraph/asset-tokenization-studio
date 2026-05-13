@@ -24,6 +24,7 @@ import { ControlListStorageWrapper } from "../core/ControlListStorageWrapper.sol
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DefaultValueValidation } from "../../infrastructure/utils/DefaultValueValidation.sol";
 
 /**
  * @title HoldStorageWrapper
@@ -501,8 +502,8 @@ library HoldStorageWrapper {
         ERC3643StorageWrapper.requireUnrecoveredAddress(_account);
         ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
         ERC3643StorageWrapper.requireUnrecoveredAddress(_from);
-        ERC1410StorageWrapper.requireValidAddress(_from);
-        ERC1410StorageWrapper.requireValidAddress(_escrow);
+        DefaultValueValidation.checkZeroAddress(_from);
+        DefaultValueValidation.checkZeroAddress(_escrow);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
     }
 

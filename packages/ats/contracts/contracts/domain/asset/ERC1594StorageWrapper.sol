@@ -116,61 +116,6 @@ library ERC1594StorageWrapper {
     }
 
     /**
-     * @notice Reverts if a transfer from `from` to `to` of `value` in
-     * `partition` is not allowed.
-     * @dev Calls `checkCanTransferFromByPartition` with empty data and
-     * operator data. Reverts with the appropriate reason code otherwise.
-     * @param from Source address of the transfer.
-     * @param to Destination address of the transfer.
-     * @param partition Partition identifier for the transfer.
-     * @param value Amount of tokens to transfer.
-     */
-    function requireCanTransferFromByPartition(
-        address from,
-        address to,
-        bytes32 partition,
-        uint256 value
-    ) internal view {
-        checkCanTransferFromByPartition(from, to, partition, value, EMPTY_BYTES, EMPTY_BYTES);
-    }
-
-    /**
-     * @notice Reverts if a redemption from `from` in `partition` of `value`
-     * is not allowed.
-     * @dev Calls `checkCanRedeemFromByPartition` with empty data.
-     * @param from Address whose tokens will be redeemed.
-     * @param partition Partition identifier for the redemption.
-     * @param value Amount of tokens to redeem.
-     */
-    function requireCanRedeemFromByPartition(address from, bytes32 partition, uint256 value) internal view {
-        checkCanRedeemFromByPartition(from, partition, value, EMPTY_BYTES, EMPTY_BYTES);
-    }
-
-    /**
-     * @notice Reverts if either `from` or `to` fails identity verification.
-     * @dev Forwards to `checkIdentity`.
-     * @param from Source address.
-     * @param to Destination address.
-     */
-    function requireIdentified(address from, address to) internal view {
-        checkIdentity(from, to);
-    }
-
-    /**
-     * @notice Reverts if the transfer between `from` and `to` fails
-     * compliance checks. Optionally checks sender compliance.
-     * @dev Forwards to `checkCompliance`. Used when the sender is not
-     * necessarily the `from` parameter.
-     * @param from Source address.
-     * @param to Destination address.
-     * @param checkSender Whether to perform compliance validation on the
-     * current `msg.sender`.
-     */
-    function requireCompliant(address from, address to, bool checkSender) internal view {
-        checkCompliance(from, to, checkSender);
-    }
-
-    /**
      * @notice Reverts if either `from` or `to` is listed as a recovered
      * wallet.
      * @dev Reverts with `WalletRecovered` for any non-zero address whose
@@ -191,22 +136,22 @@ library ERC1594StorageWrapper {
         address from,
         bytes32 partition,
         uint256 value,
-        bytes memory /*_data*/,
-        bytes memory /*_operatorData*/
+        bytes memory _data,
+        bytes memory _operatorData
     ) internal view {
-        (bool isAbleToRedeemFrom, , bytes32 reasonCode, bytes memory details) = isAbleToRedeemFromByPartition(
+        (bool isAbleToRedeemFrom, , bytes32 reasonCode, bytes memory details) = canRedeemFromByPartition(
             from,
             partition,
             value,
-            EMPTY_BYTES,
-            EMPTY_BYTES
+            _data,
+            _operatorData
         );
         if (!isAbleToRedeemFrom) {
             LowLevelCall.revertWithData(bytes4(reasonCode), details);
         }
     }
 
-    function isAbleToRedeemFromByPartition(
+    function canRedeemFromByPartition(
         address from,
         bytes32 partition,
         uint256 value,
@@ -246,21 +191,21 @@ library ERC1594StorageWrapper {
         address to,
         bytes32 partition,
         uint256 value,
-        bytes memory /*_data*/,
-        bytes memory /*_operatorData*/
+        bytes memory _data,
+        bytes memory _operatorData
     ) internal view {
-        (bool isAbleToTransfer, , bytes32 reasonCode, bytes memory details) = isAbleToTransferFromByPartition(
+        (bool isAbleToTransfer, , bytes32 reasonCode, bytes memory details) = canTransferFromByPartition(
             from,
             to,
             partition,
             value,
-            EMPTY_BYTES,
-            EMPTY_BYTES
+            _data,
+            _operatorData
         );
         if (!isAbleToTransfer) LowLevelCall.revertWithData(bytes4(reasonCode), details);
     }
 
-    function isAbleToTransferFromByPartition(
+    function canTransferFromByPartition(
         address from,
         address to,
         bytes32 partition,

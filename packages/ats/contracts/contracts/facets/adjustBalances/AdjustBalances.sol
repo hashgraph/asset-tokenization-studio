@@ -74,7 +74,7 @@ abstract contract AdjustBalances is IAdjustBalances, Modifiers {
         override
         onlyUnpaused
         onlyRole(CORPORATE_ACTION_ROLE)
-        notZeroValue(_balanceAdjustmentId)
+        onlyValueNotZero(_balanceAdjustmentId)
         returns (bool success_)
     {
         EquityStorageWrapper.cancelScheduledBalanceAdjustment(_balanceAdjustmentId);
@@ -89,7 +89,7 @@ abstract contract AdjustBalances is IAdjustBalances, Modifiers {
         external
         view
         override
-        notZeroValue(_balanceAdjustmentID)
+        onlyValueNotZero(_balanceAdjustmentID)
         onlyMatchingActionType(BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE, _balanceAdjustmentID - 1)
         returns (IAdjustBalances.ScheduledBalanceAdjustment memory balanceAdjustment_, bool isDisabled_)
     {

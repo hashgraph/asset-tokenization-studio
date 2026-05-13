@@ -55,7 +55,7 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
         override
         onlyUnpaused
         onlyRole(CONTROL_LIST_MANAGER_ROLE)
-        onlyValidAddress(_controlList)
+        onlyAddressNotZero(_controlList)
         returns (bool success_)
     {
         success_ = ExternalListManagementStorageWrapper.addExternalList(

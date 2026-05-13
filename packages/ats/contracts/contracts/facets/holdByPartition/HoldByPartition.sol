@@ -31,7 +31,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
         onlyValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(_hold.to)
-        notZeroAddress(_hold.escrow)
+        onlyAddressNotZero(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)

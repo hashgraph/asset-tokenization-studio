@@ -22,8 +22,8 @@ abstract contract ERC20Permit is IERC20Permit, Modifiers {
         onlyListedAllowed(spender)
         onlyUnrecoveredAddress(owner)
         onlyUnrecoveredAddress(spender)
-        notZeroAddress(owner)
-        notZeroAddress(spender)
+        onlyAddressNotZero(owner)
+        onlyAddressNotZero(spender)
         onlyWithoutMultiPartition
     {
         ERC20PermitStorageWrapper.permit(owner, spender, value, deadline, v, r, s);

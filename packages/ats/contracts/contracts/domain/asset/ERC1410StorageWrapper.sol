@@ -644,10 +644,6 @@ library ERC1410StorageWrapper {
         }
     }
 
-    function requireValidAddress(address account) internal pure {
-        DefaultValueValidation.checkZeroAddress(account);
-    }
-
     function erc1410BasicStorage() internal pure returns (ERC1410BasicStorage storage erc1410BasicStorage_) {
         bytes32 position = _ERC1410_BASIC_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly

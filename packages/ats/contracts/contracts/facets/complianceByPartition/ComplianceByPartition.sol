@@ -12,8 +12,8 @@ import { Eip1066 } from "../../constants/eip1066.sol";
  * @author Asset Tokenization Studio Team
  * @notice Abstract implementation of `IComplianceByPartition`, providing partition-aware
  *         transfer and redemption eligibility checks.
- * @dev Delegates the actual validation to `ERC1594StorageWrapper.isAbleToTransferFromByPartition`
- *      and `ERC1594StorageWrapper.isAbleToRedeemFromByPartition`. When the token is paused both
+ * @dev Delegates the actual validation to `ERC1594StorageWrapper.canTransferFromByPartition`
+ *      and `ERC1594StorageWrapper.canRedeemFromByPartition`. When the token is paused both
  *      checks short-circuit with the EIP-1066 PAUSED status code. Intended to be inherited by
  *      `ComplianceByPartitionFacet`.
  */
@@ -30,7 +30,7 @@ abstract contract ComplianceByPartition is IComplianceByPartition {
         if (PauseStorageWrapper.isPaused()) {
             return (false, Eip1066.PAUSED, IPause.IsPaused.selector);
         }
-        (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToTransferFromByPartition(
+        (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.canTransferFromByPartition(
             _from,
             _to,
             _partition,
@@ -52,7 +52,7 @@ abstract contract ComplianceByPartition is IComplianceByPartition {
         if (PauseStorageWrapper.isPaused()) {
             return (false, Eip1066.PAUSED, IPause.IsPaused.selector);
         }
-        (bool status, bytes1 code, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToRedeemFromByPartition(
+        (bool status, bytes1 code, bytes32 reason, ) = ERC1594StorageWrapper.canRedeemFromByPartition(
             _from,
             _partition,
             _value,

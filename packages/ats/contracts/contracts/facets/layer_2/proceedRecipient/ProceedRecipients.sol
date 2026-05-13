@@ -38,7 +38,7 @@ abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
         override
         onlyUnpaused
         onlyRole(PROCEED_RECIPIENT_MANAGER_ROLE)
-        notZeroAddress(_proceedRecipient)
+        onlyAddressNotZero(_proceedRecipient)
         onlyIfProceedRecipient(_proceedRecipient)
     {
         ProceedRecipientsStorageWrapper.setProceedRecipientData(_proceedRecipient, _data);

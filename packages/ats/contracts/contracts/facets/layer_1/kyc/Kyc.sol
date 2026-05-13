@@ -37,7 +37,7 @@ abstract contract Kyc is IKyc, Modifiers {
         override
         onlyUnpaused
         onlyRole(KYC_ROLE)
-        notZeroAddress(_account)
+        onlyAddressNotZero(_account)
         onlyValidKycStatus(KycStatus.NOT_GRANTED, _account)
         onlyThreeValidDates(_validFrom, _validTo, TimeTravelStorageWrapper.getBlockTimestamp())
         onlyValidIssuer(_issuer)
@@ -49,7 +49,7 @@ abstract contract Kyc is IKyc, Modifiers {
 
     function revokeKyc(
         address _account
-    ) external virtual override onlyUnpaused onlyRole(KYC_ROLE) notZeroAddress(_account) returns (bool success_) {
+    ) external virtual override onlyUnpaused onlyRole(KYC_ROLE) onlyAddressNotZero(_account) returns (bool success_) {
         success_ = KycStorageWrapper.revokeKyc(_account);
         emit KycRevoked(_account, EvmAccessors.getMsgSender());
     }

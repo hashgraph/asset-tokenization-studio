@@ -148,6 +148,9 @@ AGENTS.md
 # Auto-generated MCP server context (added automatically)
 .mcp-server-context.md
 
+# Local analysis notes
+compliance-analysis.md
+
 # Engram AI agent memory
 .engram/
 

@@ -57,7 +57,7 @@ abstract contract OperatorByPartition is IOperatorByPartition, Modifiers {
     )
         external
         override
-        notZeroAddress(_operatorTransferData.to)
+        onlyAddressNotZero(_operatorTransferData.to)
         onlyDefaultPartitionWithSinglePartition(_operatorTransferData.partition)
         onlyUnProtectedPartitionsOrWildCardRole
         onlyCanTransferFromByPartition(

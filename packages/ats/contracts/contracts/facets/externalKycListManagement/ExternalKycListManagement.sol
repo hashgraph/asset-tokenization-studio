@@ -49,7 +49,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
     /// @inheritdoc IExternalKycListManagement
     function addExternalKycList(
         address _kycLists
-    ) external override onlyUnpaused onlyRole(KYC_MANAGER_ROLE) onlyValidAddress(_kycLists) returns (bool success_) {
+    ) external override onlyUnpaused onlyRole(KYC_MANAGER_ROLE) onlyAddressNotZero(_kycLists) returns (bool success_) {
         success_ = ExternalListManagementStorageWrapper.addExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists);
         if (!success_) {
             revert ListedKycList(_kycLists);
