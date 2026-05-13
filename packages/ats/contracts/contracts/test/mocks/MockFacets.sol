@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 
 bytes32 constant _MOCK_FACET_1_RESOLVER_KEY = bytes32("MockFacet1");
 bytes32 constant _MOCK_FACET_2_RESOLVER_KEY = bytes32("MockFacet2");
@@ -52,18 +53,17 @@ contract MockFacet1 is IMockFacet1, Modifiers, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](3);
-        staticFunctionSelectors_[selectorIndex++] = this.initializeMockFacet1.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.upgradeMockFacet1.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.mockFacet1Method.selector;
+        return
+            Bytes4Builder.build(
+                this.initializeMockFacet1.selector,
+                this.upgradeMockFacet1.selector,
+                this.mockFacet1Method.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IMockFacet1).interfaceId;
+        return Bytes4Builder.build(type(IMockFacet1).interfaceId);
     }
 }
 
@@ -87,18 +87,17 @@ contract MockFacet2 is IMockFacet2, Modifiers, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](3);
-        staticFunctionSelectors_[selectorIndex++] = this.initializeMockFacet2.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.upgradeMockFacet2.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.mockFacet2Method.selector;
+        return
+            Bytes4Builder.build(
+                this.initializeMockFacet2.selector,
+                this.upgradeMockFacet2.selector,
+                this.mockFacet2Method.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IMockFacet2).interfaceId;
+        return Bytes4Builder.build(type(IMockFacet2).interfaceId);
     }
 }
 
@@ -130,17 +129,16 @@ contract MockFacet3 is IMockFacet3, Modifiers, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](3);
-        staticFunctionSelectors_[selectorIndex++] = this.initializeMockFacet3.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.upgradeMockFacet3.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.mockFacet3Method.selector;
+        return
+            Bytes4Builder.build(
+                this.initializeMockFacet3.selector,
+                this.upgradeMockFacet3.selector,
+                this.mockFacet3Method.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IMockFacet3).interfaceId;
+        return Bytes4Builder.build(type(IMockFacet3).interfaceId);
     }
 }

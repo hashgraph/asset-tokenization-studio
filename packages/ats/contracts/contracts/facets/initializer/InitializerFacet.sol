@@ -5,6 +5,7 @@ import { IInitializer } from "./IInitializer.sol";
 import { Initializer } from "./Initializer.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { _INITIALIZER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 
 /**
  * @title InitializerFacet
@@ -17,22 +18,20 @@ contract InitializerFacet is Initializer, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 7;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.initializeInitializer.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.updateMaxInitializerFacetIndex.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.setOperationalStatus.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getOperationalStatus.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getFacetVersionStatus.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getFacetLastVersion.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getMaxInitializerFacetIndex.selector;
-        }
+        return
+            Bytes4Builder.build(
+                this.initializeInitializer.selector,
+                this.updateMaxInitializerFacetIndex.selector,
+                this.setOperationalStatus.selector,
+                this.getOperationalStatus.selector,
+                this.getFacetVersionStatus.selector,
+                this.getFacetLastVersion.selector,
+                this.getMaxInitializerFacetIndex.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(IInitializer).interfaceId;
+        return Bytes4Builder.build(type(IInitializer).interfaceId);
     }
 }

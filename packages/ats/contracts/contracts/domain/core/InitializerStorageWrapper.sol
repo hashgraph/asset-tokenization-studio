@@ -47,8 +47,7 @@ library InitializerStorageWrapper {
      * @param _maxInitializerFacetIndex Maximum number of facets validated per call.
      */
     function initializeInitializer(uint256 _maxInitializerFacetIndex) internal {
-        InitializerDataStorage storage initStorage = initializerStorage();
-        initStorage.maxInitializerFacetIndex = _maxInitializerFacetIndex;
+        initializerStorage().maxInitializerFacetIndex = _maxInitializerFacetIndex;
     }
 
     /**
@@ -56,8 +55,7 @@ library InitializerStorageWrapper {
      * @param _newMaxInitializerFacetIndex New batch size, in number of facets per call.
      */
     function updateMaxInitializerFacetIndex(uint256 _newMaxInitializerFacetIndex) internal {
-        InitializerDataStorage storage initStorage = initializerStorage();
-        initStorage.maxInitializerFacetIndex = _newMaxInitializerFacetIndex;
+        initializerStorage().maxInitializerFacetIndex = _newMaxInitializerFacetIndex;
     }
 
     /**
@@ -77,32 +75,35 @@ library InitializerStorageWrapper {
      */
     // Verifies that every facet of the current config+version is ready, in batches of MAX_INITIALIZER_FACET_INDEX.
     // Persists progress so next calls resume where the previous one stopped, until the whole config is operational.
-    function setOperationalStatus() internal returns (bool isOperational_, uint256 lastFacetIndex_) {
-        bytes32 configId = ResolverProxyStorageWrapper.getResolverProxyConfigurationId();
-        uint256 versionId = ResolverProxyStorageWrapper.getResolverProxyVersion();
+    function setOperationalStatus()
+        internal
+        returns (bool isOperational_, uint256 lastFacetIndex_, bytes32 configId_, uint256 versionId_)
+    {
+        configId_ = ResolverProxyStorageWrapper.getResolverProxyConfigurationId();
+        versionId_ = ResolverProxyStorageWrapper.getResolverProxyVersion();
 
-        uint256 operationStatus = getOperationalStatus(configId, versionId);
+        uint256 operationStatus = getOperationalStatus(configId_, versionId_);
 
         // Already fully operational — nothing to do.
         if (operationStatus == 1) {
-            return (true, 0);
+            return (true, 0, configId_, versionId_);
         }
 
         // Resume from previously stored progress (status > 1 encodes "resume index + 1"); 0 means start fresh.
-        uint256 nextFacetIndex = 0;
+        uint256 nextFacetIndex;
 
-        if (operationStatus > 1) {
-            nextFacetIndex = operationStatus - 1;
+        unchecked {
+            nextFacetIndex = operationStatus > 1 ? operationStatus - 1 : 0;
         }
 
-        InitializerDataStorage storage initStorage = initializerStorage();
-
         // Upper bound of this batch; clamped below to the actual facet count.
-        lastFacetIndex_ = getMaxInitializerFacetIndex() + nextFacetIndex;
+        unchecked {
+            lastFacetIndex_ = getMaxInitializerFacetIndex() + nextFacetIndex;
+        }
 
         uint256 facetsLength = ResolverProxyStorageWrapper
             .getBusinessLogicResolver()
-            .getFacetsLengthByConfigurationIdAndVersion(configId, versionId);
+            .getFacetsLengthByConfigurationIdAndVersion(configId_, versionId_);
 
         if (facetsLength < lastFacetIndex_) {
             lastFacetIndex_ = facetsLength;
@@ -110,43 +111,30 @@ library InitializerStorageWrapper {
 
         IDiamondCutManager.FacetConfiguration[] memory facetConfigurations = ResolverProxyStorageWrapper
             .getBusinessLogicResolver()
-            .getFacetConfigurationsByConfigurationIdAndVersion(configId, versionId, nextFacetIndex, lastFacetIndex_);
+            .getFacetConfigurationsByConfigurationIdAndVersion(configId_, versionId_, nextFacetIndex, lastFacetIndex_);
+
+        uint256 facetConfigurationsLength = facetConfigurations.length;
 
         // Walk the batch; stop at the first facet that is not ready and record where to resume next call.
-        for (uint256 facetIndex = 0; facetIndex < facetConfigurations.length; ) {
-            bytes32 facetId = facetConfigurations[facetIndex].id;
-            uint256 facetVersion = facetConfigurations[facetIndex].version;
+        for (uint256 facetIndex; facetIndex < facetConfigurationsLength; ) {
+            uint256 facetStatus = getFacetVersionStatus(
+                facetConfigurations[facetIndex].id,
+                facetConfigurations[facetIndex].version
+            );
 
-            uint256 facetStatus = getFacetVersionStatus(facetId, facetVersion);
-
-            if (facetStatus != 1) {
-                isOperational_ = false;
-                lastFacetIndex_ = nextFacetIndex + facetIndex;
-                break;
-            }
             unchecked {
+                if (facetStatus != 1) {
+                    isOperational_ = false;
+                    lastFacetIndex_ = nextFacetIndex + facetIndex;
+                    break;
+                }
                 ++facetIndex;
             }
         }
 
-        if (lastFacetIndex_ == facetsLength) {
-            // Reached the end with no failures — mark the config fully operational.
-            isOperational_ = true;
-            initStorage.configVersionStatus[configId][versionId] = 1;
-        } else if (lastFacetIndex_ > 0) {
-            // Partial progress — store (resume index + 1) so the next call picks up here.
-            initStorage.configVersionStatus[configId][versionId] = lastFacetIndex_ + 1;
-        }
-
-        if (isOperational_) {
-            emit IInitializer.OperationalStatusSet(EvmAccessors.getMsgSender(), configId, versionId);
-        } else {
-            emit IInitializer.OperationalStatusPartialSet(
-                EvmAccessors.getMsgSender(),
-                configId,
-                versionId,
-                lastFacetIndex_
-            );
+        isOperational_ = lastFacetIndex_ == facetsLength;
+        unchecked {
+            initializerStorage().configVersionStatus[configId_][versionId_] = isOperational_ ? 1 : lastFacetIndex_ + 1;
         }
     }
 
@@ -174,8 +162,7 @@ library InitializerStorageWrapper {
      *        "initialisation in progress").
      */
     function setFacetToCustomStatus(bytes32 _facetId, uint256 _status) internal {
-        uint256 versionId = currentFacetVersion(_facetId);
-        setFacetStatusForVersion(_facetId, versionId, _status);
+        setFacetStatusForVersion(_facetId, currentFacetVersion(_facetId), _status);
     }
 
     /**
@@ -250,20 +237,18 @@ library InitializerStorageWrapper {
      * @param _fromLastVersions Versions accepted as immediate predecessors of the current one.
      */
     function checkFacetRegistered(bytes32 _facetId, uint256[] memory _fromLastVersions) internal view {
-        bool found;
-        uint256 i = 0;
-
+        uint256 i;
         uint256 lastVersion = InitializerStorageWrapper.getFacetLastVersion(_facetId);
-
-        while (i < _fromLastVersions.length && !found) {
+        uint256 length = _fromLastVersions.length;
+        while (i < length) {
             if (lastVersion == _fromLastVersions[i]) {
-                found = true;
+                return;
             }
-            i++;
+            unchecked {
+                ++i;
+            }
         }
-        if (!found) {
-            revert IInitializer.FacetPreviousVersionNotAccepted(_facetId, lastVersion, _fromLastVersions);
-        }
+        revert IInitializer.FacetPreviousVersionNotAccepted(_facetId, lastVersion, _fromLastVersions);
     }
 
     /**

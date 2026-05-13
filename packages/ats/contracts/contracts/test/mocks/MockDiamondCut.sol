@@ -19,6 +19,7 @@ import { IDiamondLoupe } from "../../infrastructure/proxy/IDiamondLoupe.sol";
 import { InitializerModifiers } from "../../services/core/InitializerModifiers.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 
 // TEST-ONLY: resolver key for MockDiamondCut. Mirrors the
 // `bytes32("MockDiamondCut")` Solidity literal (14 ASCII bytes right-padded
@@ -44,36 +45,39 @@ contract MockDiamondCut is IDiamond, DiamondCut, DiamondLoupe, InitializerModifi
     }
 
     function getStaticFunctionSelectors() external pure returns (bytes4[] memory staticFunctionSelectors_) {
-        staticFunctionSelectors_ = new bytes4[](19);
-        uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this.initializeDiamondCut.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.updateConfigVersion.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.updateConfig.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.updateResolver.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getConfigInfo.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacets.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetsLength.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetsByPage.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetSelectors.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetSelectorsLength.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetSelectorsByPage.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetIds.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetIdsByPage.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetAddresses.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetAddressesByPage.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetIdBySelector.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacet.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetAddress.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.supportsInterface.selector;
+        uint256 selectorsIndex = 19;
+        staticFunctionSelectors_ = new bytes4[](selectorsIndex);
+        unchecked {
+            staticFunctionSelectors_[--selectorsIndex] = this.initializeDiamondCut.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.updateConfigVersion.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.updateConfig.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.updateResolver.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getConfigInfo.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacets.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacetsLength.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacetsByPage.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacetSelectors.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacetSelectorsLength.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacetSelectorsByPage.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacetIds.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacetIdsByPage.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacetAddresses.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacetAddressesByPage.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacetIdBySelector.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacet.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.getFacetAddress.selector;
+            staticFunctionSelectors_[--selectorsIndex] = this.supportsInterface.selector;
+        }
     }
 
     function getStaticInterfaceIds() external pure returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](5);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IDiamond).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(IDiamondCut).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(IDiamondLoupe).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(IERC165).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(IMockDiamondCut).interfaceId;
+        return
+            Bytes4Builder.build(
+                type(IDiamond).interfaceId,
+                type(IDiamondCut).interfaceId,
+                type(IDiamondLoupe).interfaceId,
+                type(IERC165).interfaceId,
+                type(IMockDiamondCut).interfaceId
+            );
     }
 }

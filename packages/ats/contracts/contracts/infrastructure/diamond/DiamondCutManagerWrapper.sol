@@ -306,8 +306,12 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
 
         facetConfigurations_ = new FacetConfiguration[](size);
 
-        for (uint256 index = 0; index < size; ) {
-            uint256 realIndex = _start + index;
+        uint256 realIndex = _start;
+
+        for (uint256 index; index < size; ) {
+            unchecked {
+                realIndex++;
+            }
             facetConfigurations_[index] = FacetConfiguration({
                 id: _dcms.facetIds[configVersionHash][realIndex],
                 version: _dcms.facetVersions[configVersionHash][realIndex]
@@ -395,7 +399,9 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
             revert FacetIdNotRegistered(_configurationId, _facetId);
         }
 
-        facetVersion_ = _dcms.facetVersions[_buildHash(_configurationId, _version)][pos - 1];
+        unchecked {
+            facetVersion_ = _dcms.facetVersions[_buildHash(_configurationId, _version)][pos - 1];
+        }
     }
 
     function _diamondCutManagerStorage() internal pure returns (DiamondCutManagerStorage storage ds) {

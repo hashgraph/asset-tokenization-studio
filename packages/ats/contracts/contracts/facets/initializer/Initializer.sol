@@ -31,7 +31,19 @@ abstract contract Initializer is IInitializer, Modifiers {
 
     /// @inheritdoc IInitializer
     function setOperationalStatus() external returns (bool isOperational_, uint256 lastFacetIndex_) {
-        return InitializerStorageWrapper.setOperationalStatus();
+        bytes32 configId;
+        uint256 versionId;
+        (isOperational_, lastFacetIndex_, configId, versionId) = InitializerStorageWrapper.setOperationalStatus();
+        if (isOperational_) {
+            emit IInitializer.OperationalStatusSet(EvmAccessors.getMsgSender(), configId, versionId);
+            return (isOperational_, lastFacetIndex_);
+        }
+        emit IInitializer.OperationalStatusPartialSet(
+            EvmAccessors.getMsgSender(),
+            configId,
+            versionId,
+            lastFacetIndex_
+        );
     }
 
     /// @inheritdoc IInitializer
