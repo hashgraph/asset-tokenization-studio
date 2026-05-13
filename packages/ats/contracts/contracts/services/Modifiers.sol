@@ -17,12 +17,21 @@ pragma solidity >=0.8.0 <0.9.0;
 import { AssetModifiers } from "./asset/AssetModifiers.sol";
 import { CoreModifiers } from "./core/CoreModifiers.sol";
 import { DatesValidation } from "../infrastructure/utils/DatesValidation.sol";
+import { EvmAccessors } from "../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract Modifiers is CoreModifiers, AssetModifiers {
     // This contract aggregates all modifiers through inheritance
     // No additional logic needed - modifiers are provided by parent contra
+    error UnauthorizedSelfCall(address caller);
+
     modifier validateDates(uint256 _firstDate, uint256 _secondDate) {
         DatesValidation.checkDates(_firstDate, _secondDate);
+        _;
+    }
+
+    modifier onlySelf() {
+        address sender = EvmAccessors.getMsgSender();
+        if (sender != address(this)) revert UnauthorizedSelfCall(sender);
         _;
     }
 }

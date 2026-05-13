@@ -4,9 +4,18 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ScheduledTask } from "../scheduledTasksCommon/IScheduledTasksCommon.sol";
 
 interface IScheduledCrossOrderedTasks {
+    event TaskExecutionFailed(bytes32 indexed actionId, bytes32 indexed taskType, uint256 scheduledTimestamp);
+
     function triggerPendingScheduledCrossOrderedTasks() external returns (uint256);
 
     function triggerScheduledCrossOrderedTasks(uint256 _max) external returns (uint256);
+
+    function executeScheduledTaskCallback(
+        bytes32 callbackType,
+        uint256 pos,
+        uint256 scheduledTasksLength,
+        ScheduledTask calldata task
+    ) external;
 
     function scheduledCrossOrderedTaskCount() external view returns (uint256);
 

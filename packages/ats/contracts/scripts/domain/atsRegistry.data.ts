@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-13T08:47:51.051Z
+ * Generated: 2026-05-13T15:34:26.498Z
  * Facets: 124
  * Infrastructure: 2
  *
@@ -394,6 +394,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xaa4b6234",
       },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
     ],
     factory: (signer) => new AccessControlFacet__factory(signer),
     timeTravelFactory: (signer) => new AccessControlFacetTimeTravel__factory(signer),
@@ -500,12 +505,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x71cd63a6f86ff487645dcceb29d3eac904f16d7006cfa7b1da3ea951a77a9666",
       },
       {
-        name: "SnapshotTriggered",
+        name: "TaskExecutionFailed",
         signature: {
-          full: "event SnapshotTriggered(uint256 snapshotId, bytes metadata)",
-          canonical: "SnapshotTriggered(uint256,bytes)",
+          full: "event TaskExecutionFailed(bytes32 indexed actionId, bytes32 indexed taskType, uint256 scheduledTimestamp)",
+          canonical: "TaskExecutionFailed(bytes32,bytes32,uint256)",
         },
-        topic0: "0xf256aa4705d42c3984e319d2b0a2d1eb0a18a8a820922b71ba13e37c7699828c",
+        topic0: "0xa0b134b3077bb9dc6662d0a839fcb6c50853fc25d4393af34d3709edf045477a",
       },
     ],
     errors: [
@@ -539,11 +544,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x0c68e660",
       },
       {
-        name: "CouponNotFound",
-        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
-        selector: "0x69a80e75",
-      },
-      {
         name: "FactorIsZero",
         signature: { full: "error FactorIsZero()", canonical: "FactorIsZero()" },
         selector: "0x936e9b6d",
@@ -554,6 +554,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xb7d09497",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
       {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
@@ -672,6 +677,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SpenderWithZeroAddress",
         signature: { full: "error SpenderWithZeroAddress()", canonical: "SpenderWithZeroAddress()" },
         selector: "0x80e32d8f",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
       {
         name: "UnexpectedError",
@@ -998,6 +1008,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf128004d",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
         selector: "0xc9622656",
@@ -1277,6 +1292,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error TokenIsNotControllable()", canonical: "TokenIsNotControllable()" },
         selector: "0xf4b7b072",
       },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
     ],
     factory: (signer) => new BatchBurnFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
@@ -1341,6 +1361,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "TokenIsNotControllable",
         signature: { full: "error TokenIsNotControllable()", canonical: "TokenIsNotControllable()" },
         selector: "0xf4b7b072",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
     ],
     factory: (signer) => new BatchControllerFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
@@ -1517,6 +1542,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf128004d",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
         selector: "0xc9622656",
@@ -1597,6 +1627,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
         selector: "0x76d08f88",
       },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
     ],
     factory: (signer) => new BatchMintFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
@@ -1653,6 +1688,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x55347310",
       },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
     ],
     factory: (signer) => new BatchTransferFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
@@ -1703,6 +1743,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "BondMaturityDateWrong",
         signature: { full: "error BondMaturityDateWrong()", canonical: "BondMaturityDateWrong()" },
         selector: "0x67d08758",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
     ],
     factory: (signer) => new BondUSAFacet__factory(signer),
@@ -1756,6 +1801,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error BondMaturityDateWrong()", canonical: "BondMaturityDateWrong()" },
         selector: "0x67d08758",
       },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
     ],
     factory: (signer) => new BondUSAFixedRateFacet__factory(signer),
     timeTravelFactory: (signer) => new BondUSAFixedRateFacetTimeTravel__factory(signer),
@@ -1807,6 +1857,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "BondMaturityDateWrong",
         signature: { full: "error BondMaturityDateWrong()", canonical: "BondMaturityDateWrong()" },
         selector: "0x67d08758",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
     ],
     factory: (signer) => new BondUSAKpiLinkedRateFacet__factory(signer),
@@ -2044,6 +2099,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error BondMaturityDateWrong()", canonical: "BondMaturityDateWrong()" },
         selector: "0x67d08758",
       },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
     ],
     factory: (signer) => new BondUSASustainabilityPerformanceTargetRateFacet__factory(signer),
     timeTravelFactory: (signer) => new BondUSASustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
@@ -2092,6 +2152,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "PartitionsAreProtectedAndNoRole(address,bytes32)",
         },
         selector: "0x55347310",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
     ],
     factory: (signer) => new BurnByPartitionFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
@@ -2189,6 +2254,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf4b7b072",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "WalletRecovered",
         signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
         selector: "0xf9f9bcf9",
@@ -2264,6 +2334,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "NewMaxSupplyForPartitionTooLow(bytes32,uint256,uint256)",
         },
         selector: "0x820c68a8",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
     ],
     factory: (signer) => new CapByPartitionFacet__factory(signer),
@@ -2375,6 +2450,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "NewMaxSupplyTooLow(uint256,uint256)",
         },
         selector: "0x98c2b03b",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
     ],
     factory: (signer) => new CapFacet__factory(signer),
@@ -2727,6 +2807,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x55347310",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "WalletRecovered",
         signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
         selector: "0xf9f9bcf9",
@@ -2954,6 +3039,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "WrongClearingId",
         signature: { full: "error WrongClearingId()", canonical: "WrongClearingId()" },
         selector: "0x2e37608c",
@@ -3154,6 +3244,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x55347310",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "WalletRecovered",
         signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
         selector: "0xf9f9bcf9",
@@ -3273,6 +3368,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
         selector: "0x76d08f88",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
     ],
     factory: (signer) => new ComplianceFacet__factory(signer),
@@ -3415,6 +3515,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "Unauthorized(address,address,bytes32)",
         },
         selector: "0x1e09743f",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
       {
         name: "ZeroPartition",
@@ -3659,6 +3764,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf4b7b072",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "WalletRecovered",
         signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
         selector: "0xf9f9bcf9",
@@ -3870,6 +3980,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf4b7b072",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "WrongExpirationTimestamp",
         signature: { full: "error WrongExpirationTimestamp()", canonical: "WrongExpirationTimestamp()" },
         selector: "0xe39f4776",
@@ -3998,6 +4113,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "ListedAccount",
         signature: { full: "error ListedAccount(address account)", canonical: "ListedAccount(address)" },
         selector: "0x1a4a04ba",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
       {
         name: "UnlistedAccount",
@@ -4158,6 +4278,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x0dc149f0",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
     ],
     factory: (signer) => new CoreFacet__factory(signer),
   },
@@ -4320,6 +4445,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "InvalidTimestamp",
         signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
         selector: "0xb7d09497",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
       {
         name: "UnexpectedError",
@@ -4530,6 +4660,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf128004d",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
         selector: "0xc9622656",
@@ -4687,6 +4822,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf128004d",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
         selector: "0xc9622656",
@@ -4763,6 +4903,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1142a68c",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
     ],
     factory: (signer) => new DeactivateFacet__factory(signer),
   },
@@ -5058,6 +5203,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf128004d",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
         selector: "0xc9622656",
@@ -5130,6 +5280,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
       {
         name: "WrongIndexForAction",
@@ -5224,6 +5379,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "EmptyName", signature: { full: "error EmptyName()", canonical: "EmptyName()" }, selector: "0x2ef13105" },
       { name: "EmptyURI", signature: { full: "error EmptyURI()", canonical: "EmptyURI()" }, selector: "0xd07b00d6" },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
     ],
     factory: (signer) => new DocumentationFacet__factory(signer),
   },
@@ -5297,6 +5457,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
     ],
     factory: (signer) => new EquityUSAFacet__factory(signer),
@@ -5419,6 +5584,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1e09743f",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "ZeroPartition",
         signature: { full: "error ZeroPartition()", canonical: "ZeroPartition()" },
         selector: "0x4a6f30c3",
@@ -5491,6 +5661,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SpenderWithZeroAddress",
         signature: { full: "error SpenderWithZeroAddress()", canonical: "SpenderWithZeroAddress()" },
         selector: "0x80e32d8f",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
       {
         name: "UnexpectedError",
@@ -5594,14 +5769,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
-        name: "AdjustmentBalanceSet",
-        signature: {
-          full: "event AdjustmentBalanceSet(address indexed operator, uint256 factor, uint8 decimals)",
-          canonical: "AdjustmentBalanceSet(address,uint256,uint8)",
-        },
-        topic0: "0x312510931206ef5f91f1ef19e1a01253812b7201fb8b2d5d4afa056cce53e34a",
-      },
-      {
         name: "DelegateChanged",
         signature: {
           full: "event DelegateChanged(address indexed delegator, address indexed fromDelegate, address indexed toDelegate)",
@@ -5618,12 +5785,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xdec2bacdd2f05b59de34da9b523dff8be42e5e38e818c82fdb0bae774387a724",
       },
       {
-        name: "SnapshotTriggered",
+        name: "TaskExecutionFailed",
         signature: {
-          full: "event SnapshotTriggered(uint256 snapshotId, bytes metadata)",
-          canonical: "SnapshotTriggered(uint256,bytes)",
+          full: "event TaskExecutionFailed(bytes32 indexed actionId, bytes32 indexed taskType, uint256 scheduledTimestamp)",
+          canonical: "TaskExecutionFailed(bytes32,bytes32,uint256)",
         },
-        topic0: "0xf256aa4705d42c3984e319d2b0a2d1eb0a18a8a820922b71ba13e37c7699828c",
+        topic0: "0xa0b134b3077bb9dc6662d0a839fcb6c50853fc25d4393af34d3709edf045477a",
       },
     ],
     errors: [
@@ -5654,11 +5821,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xb2b9e563",
       },
       {
-        name: "CouponNotFound",
-        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
-        selector: "0x69a80e75",
-      },
-      {
         name: "FutureLookup",
         signature: {
           full: "error FutureLookup(uint256 timepoint, uint256 currentClock)",
@@ -5667,6 +5829,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x7f07449b",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
       {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
@@ -5792,6 +5959,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "InsufficientFrozenBalance(address,uint256,uint256,bytes32)",
         },
         selector: "0xefafde54",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
       {
         name: "WalletRecovered",
@@ -5939,6 +6111,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "ListedControlList",
         signature: { full: "error ListedControlList(address controlList)", canonical: "ListedControlList(address)" },
         selector: "0x67a1e319",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
       {
         name: "UnlistedControlList",
@@ -6104,6 +6281,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x91c6b79d",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "UnlistedKycList",
         signature: { full: "error UnlistedKycList(address kycList)", canonical: "UnlistedKycList(address)" },
         selector: "0xf5cc4d79",
@@ -6254,6 +6436,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "ListedPause",
         signature: { full: "error ListedPause(address pause)", canonical: "ListedPause(address)" },
         selector: "0x267b9ec9",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
       {
         name: "UnlistedPause",
@@ -6527,6 +6714,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x849d4eb8",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
     ],
     factory: (signer) => new FixedRateFacet__factory(signer),
     timeTravelFactory: (signer) => new FixedRateFacetTimeTravel__factory(signer),
@@ -6779,6 +6971,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
       {
         name: "UnexpectedError",
@@ -7177,6 +7374,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf128004d",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
         selector: "0xc9622656",
@@ -7450,6 +7652,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
     ],
     factory: (signer) => new IdentityFacet__factory(signer),
   },
@@ -7683,6 +7890,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "WrongImpactDataValues",
         signature: {
           full: "error WrongImpactDataValues((uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData)",
@@ -7796,6 +8008,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x74efd82c",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
         selector: "0xc9622656",
@@ -7896,6 +8113,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "KpiDataAlreadyExists",
         signature: { full: "error KpiDataAlreadyExists(uint256 date)", canonical: "KpiDataAlreadyExists(uint256)" },
         selector: "0x74efd82c",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
       {
         name: "UnexpectedError",
@@ -8071,6 +8293,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xd5209e15",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "ZeroAddressNotAllowed",
         signature: { full: "error ZeroAddressNotAllowed()", canonical: "ZeroAddressNotAllowed()" },
         selector: "0x8579befe",
@@ -8155,6 +8382,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xb7d09497",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
       {
         name: "WrongDates",
         signature: {
@@ -8424,6 +8656,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "ZeroAddressNotAllowed",
         signature: { full: "error ZeroAddressNotAllowed()", canonical: "ZeroAddressNotAllowed()" },
         selector: "0x8579befe",
@@ -8683,6 +8920,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf128004d",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
         selector: "0xc9622656",
@@ -8910,6 +9152,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf128004d",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
         selector: "0xc9622656",
@@ -9069,6 +9316,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
       {
         name: "UnexpectedError",
@@ -9234,6 +9486,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf128004d",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
         selector: "0xc9622656",
@@ -9297,6 +9554,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
     ],
     factory: (signer) => new MetadataFacet__factory(signer),
   },
@@ -9358,6 +9620,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "PartitionNotAllowedInSinglePartitionMode(bytes32)",
         },
         selector: "0xb96d9539",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
       {
         name: "WalletRecovered",
@@ -9443,6 +9710,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
         selector: "0x76d08f88",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
     ],
     factory: (signer) => new MintFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
@@ -9594,6 +9866,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
     ],
     factory: (signer) => new NominalValueFacet__factory(signer),
@@ -9773,6 +10050,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "Unauthorized(address,address,bytes32)",
         },
         selector: "0x1e09743f",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
       {
         name: "ZeroAddressNotAllowed",
@@ -9978,6 +10260,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "Unauthorized(address,address,bytes32)",
         },
         selector: "0x1e09743f",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
       {
         name: "WalletRecovered",
@@ -10196,6 +10483,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1e09743f",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "WalletRecovered",
         signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
         selector: "0xf9f9bcf9",
@@ -10291,6 +10583,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x10210dec",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
     ],
     factory: (signer) => new OperatorFacet__factory(signer),
   },
@@ -10505,6 +10802,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1e09743f",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "WalletRecovered",
         signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
         selector: "0xf9f9bcf9",
@@ -10615,6 +10917,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "IsUnpaused",
         signature: { full: "error IsUnpaused()", canonical: "IsUnpaused()" },
         selector: "0xff1e9666",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
     ],
     factory: (signer) => new PauseFacet__factory(signer),
@@ -10782,6 +11089,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x664dc89c",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "ZeroAddressNotAllowed",
         signature: { full: "error ZeroAddressNotAllowed()", canonical: "ZeroAddressNotAllowed()" },
         selector: "0x8579befe",
@@ -10928,6 +11240,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "ProceedRecipientNotFound(address)",
         },
         selector: "0x664dc89c",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
       {
         name: "ZeroAddressNotAllowed",
@@ -11078,6 +11395,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x664dc89c",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "ZeroAddressNotAllowed",
         signature: { full: "error ZeroAddressNotAllowed()", canonical: "ZeroAddressNotAllowed()" },
         selector: "0x8579befe",
@@ -11155,6 +11477,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "PartitionsAreUnProtected",
         signature: { full: "error PartitionsAreUnProtected()", canonical: "PartitionsAreUnProtected()" },
         selector: "0x05681565",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
     ],
     factory: (signer) => new ProtectedByPartitionFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
@@ -11358,6 +11685,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "PartitionsAreUnProtected",
         signature: { full: "error PartitionsAreUnProtected()", canonical: "PartitionsAreUnProtected()" },
         selector: "0x05681565",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
       {
         name: "WalletRecovered",
@@ -11565,6 +11897,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "PartitionsAreUnProtected",
         signature: { full: "error PartitionsAreUnProtected()", canonical: "PartitionsAreUnProtected()" },
         selector: "0x05681565",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
       {
         name: "WalletRecovered",
@@ -11796,6 +12133,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf128004d",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "WalletRecovered",
         signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
         selector: "0xf9f9bcf9",
@@ -11957,6 +12299,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "PartitionsAreUnProtected",
         signature: { full: "error PartitionsAreUnProtected()", canonical: "PartitionsAreUnProtected()" },
         selector: "0x05681565",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
     ],
     factory: (signer) => new ProtectedPartitionsFacet__factory(signer),
@@ -12161,6 +12508,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf128004d",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
         selector: "0xc9622656",
@@ -12184,6 +12536,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["ScheduledCrossOrderedTasks", "IStaticFunctionSelectors"],
     methods: [
       {
+        name: "executeScheduledTaskCallback",
+        signature: {
+          full: "function executeScheduledTaskCallback(bytes32 callbackType, uint256 pos, uint256 scheduledTasksLength, (uint256 scheduledTimestamp, bytes data) task)",
+          canonical: "executeScheduledTaskCallback(bytes32,uint256,uint256,(uint256,bytes))",
+        },
+        selector: "0xb9baa695",
+      },
+      {
         name: "getScheduledCrossOrderedTasks",
         signature: {
           full: "function getScheduledCrossOrderedTasks(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledCrossOrderedTask_)",
@@ -12233,6 +12593,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         topic0: "0xf256aa4705d42c3984e319d2b0a2d1eb0a18a8a820922b71ba13e37c7699828c",
       },
+      {
+        name: "TaskExecutionFailed",
+        signature: {
+          full: "event TaskExecutionFailed(bytes32 indexed actionId, bytes32 indexed taskType, uint256 scheduledTimestamp)",
+          canonical: "TaskExecutionFailed(bytes32,bytes32,uint256)",
+        },
+        topic0: "0xa0b134b3077bb9dc6662d0a839fcb6c50853fc25d4393af34d3709edf045477a",
+      },
     ],
     errors: [
       {
@@ -12249,6 +12617,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x69a80e75",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
       {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
@@ -12268,6 +12641,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["ScheduledCrossOrderedTasks", "IStaticFunctionSelectors"],
     methods: [
       {
+        name: "executeScheduledTaskCallback",
+        signature: {
+          full: "function executeScheduledTaskCallback(bytes32 callbackType, uint256 pos, uint256 scheduledTasksLength, (uint256 scheduledTimestamp, bytes data) task)",
+          canonical: "executeScheduledTaskCallback(bytes32,uint256,uint256,(uint256,bytes))",
+        },
+        selector: "0xb9baa695",
+      },
+      {
         name: "getScheduledCrossOrderedTasks",
         signature: {
           full: "function getScheduledCrossOrderedTasks(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledCrossOrderedTask_)",
@@ -12317,6 +12698,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         topic0: "0xf256aa4705d42c3984e319d2b0a2d1eb0a18a8a820922b71ba13e37c7699828c",
       },
+      {
+        name: "TaskExecutionFailed",
+        signature: {
+          full: "event TaskExecutionFailed(bytes32 indexed actionId, bytes32 indexed taskType, uint256 scheduledTimestamp)",
+          canonical: "TaskExecutionFailed(bytes32,bytes32,uint256)",
+        },
+        topic0: "0xa0b134b3077bb9dc6662d0a839fcb6c50853fc25d4393af34d3709edf045477a",
+      },
     ],
     errors: [
       {
@@ -12333,6 +12722,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x69a80e75",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
       {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
@@ -12351,6 +12745,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     methods: [
       {
+        name: "executeScheduledTaskCallback",
+        signature: {
+          full: "function executeScheduledTaskCallback(bytes32 callbackType, uint256 pos, uint256 scheduledTasksLength, (uint256 scheduledTimestamp, bytes data) task)",
+          canonical: "executeScheduledTaskCallback(bytes32,uint256,uint256,(uint256,bytes))",
+        },
+        selector: "0xb9baa695",
+      },
+      {
         name: "getScheduledCrossOrderedTasks",
         signature: {
           full: "function getScheduledCrossOrderedTasks(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledCrossOrderedTask_)",
@@ -12400,6 +12802,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         topic0: "0xf256aa4705d42c3984e319d2b0a2d1eb0a18a8a820922b71ba13e37c7699828c",
       },
+      {
+        name: "TaskExecutionFailed",
+        signature: {
+          full: "event TaskExecutionFailed(bytes32 indexed actionId, bytes32 indexed taskType, uint256 scheduledTimestamp)",
+          canonical: "TaskExecutionFailed(bytes32,bytes32,uint256)",
+        },
+        topic0: "0xa0b134b3077bb9dc6662d0a839fcb6c50853fc25d4393af34d3709edf045477a",
+      },
     ],
     errors: [
       {
@@ -12416,6 +12826,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x69a80e75",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
       {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
@@ -12571,14 +12986,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
-        name: "AdjustmentBalanceSet",
-        signature: {
-          full: "event AdjustmentBalanceSet(address indexed operator, uint256 factor, uint8 decimals)",
-          canonical: "AdjustmentBalanceSet(address,uint256,uint8)",
-        },
-        topic0: "0x312510931206ef5f91f1ef19e1a01253812b7201fb8b2d5d4afa056cce53e34a",
-      },
-      {
         name: "SnapshotTaken",
         signature: {
           full: "event SnapshotTaken(address indexed operator, uint256 indexed snapshotID)",
@@ -12593,6 +13000,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "SnapshotTriggered(uint256,bytes)",
         },
         topic0: "0xf256aa4705d42c3984e319d2b0a2d1eb0a18a8a820922b71ba13e37c7699828c",
+      },
+      {
+        name: "TaskExecutionFailed",
+        signature: {
+          full: "event TaskExecutionFailed(bytes32 indexed actionId, bytes32 indexed taskType, uint256 scheduledTimestamp)",
+          canonical: "TaskExecutionFailed(bytes32,bytes32,uint256)",
+        },
+        topic0: "0xa0b134b3077bb9dc6662d0a839fcb6c50853fc25d4393af34d3709edf045477a",
       },
     ],
     errors: [
@@ -12612,11 +13027,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xa1180aad",
       },
-      {
-        name: "CouponNotFound",
-        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
-        selector: "0x69a80e75",
-      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "SnapshotIdDoesNotExists",
@@ -12632,9 +13042,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf128004d",
       },
       {
-        name: "UnexpectedError",
-        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
-        selector: "0xc9622656",
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
     ],
     factory: (signer) => new SnapshotsFacet__factory(signer),
@@ -12760,6 +13170,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xcb2beece",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "UnlistedIssuer",
         signature: { full: "error UnlistedIssuer(address issuer)", canonical: "UnlistedIssuer(address)" },
         selector: "0xd1243a92",
@@ -12880,6 +13295,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "ProvidedListsLengthMismatch(uint256,uint256)",
         },
         selector: "0x4470462b",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
     ],
     factory: (signer) => new SustainabilityPerformanceTargetRateFacet__factory(signer),
@@ -13123,6 +13543,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf128004d",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
         selector: "0xc9622656",
@@ -13259,6 +13684,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
       {
         name: "UnexpectedError",
@@ -13401,6 +13831,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf128004d",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
         selector: "0xc9622656",
@@ -13541,6 +13976,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf128004d",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
         selector: "0xc9622656",
@@ -13679,6 +14119,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
       {
         name: "UnexpectedError",
@@ -13825,6 +14270,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1e09743f",
       },
       {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
+      },
+      {
         name: "ZeroPartition",
         signature: { full: "error ZeroPartition()", canonical: "ZeroPartition()" },
         selector: "0x4a6f30c3",
@@ -13934,6 +14384,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "PartitionsAreProtectedAndNoRole(address,bytes32)",
         },
         selector: "0x55347310",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
       {
         name: "WalletRecovered",
@@ -14047,6 +14502,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
+      },
+      {
+        name: "UnauthorizedSelfCall",
+        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
+        selector: "0x52f3811b",
       },
       {
         name: "UnexpectedError",

@@ -15,6 +15,15 @@ abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks, Mod
         return ScheduledTasksStorageWrapper.triggerScheduledCrossOrderedTasks(_max);
     }
 
+    function executeScheduledTaskCallback(
+        bytes32 callbackType,
+        uint256 pos,
+        uint256 scheduledTasksLength,
+        ScheduledTask calldata task
+    ) external override onlySelf {
+        ScheduledTasksStorageWrapper.dispatchScheduledTask(callbackType, pos, scheduledTasksLength, task);
+    }
+
     function scheduledCrossOrderedTaskCount() external view override returns (uint256) {
         return ScheduledTasksStorageWrapper.getScheduledCrossOrderedTaskCount();
     }

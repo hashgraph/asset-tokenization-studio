@@ -73,7 +73,25 @@ library ScheduledTasksStorageWrapper {
             if (currentScheduledTask.scheduledTimestamp >= currentBlockTimestamp) break;
 
             ScheduledTasksLib.popScheduledTask(_scheduledTasks);
-            _dispatchScheduledTask(callbackType, pos, scheduledTasksLength, currentScheduledTask);
+
+            try
+                IScheduledCrossOrderedTasks(address(this)).executeScheduledTaskCallback(
+                    callbackType,
+                    pos,
+                    scheduledTasksLength,
+                    currentScheduledTask
+                )
+            {} catch {
+                bytes32 actionId = _getActionIdFromScheduledTask(currentScheduledTask);
+                if (callbackType != bytes32("crossOrdered")) {
+                    CorporateActionsStorageWrapper.cancelCorporateAction(actionId);
+                }
+                emit IScheduledCrossOrderedTasks.TaskExecutionFailed(
+                    actionId,
+                    callbackType,
+                    currentScheduledTask.scheduledTimestamp
+                );
+            }
 
             unchecked {
                 ++processed_;
@@ -129,6 +147,32 @@ library ScheduledTasksStorageWrapper {
     // TODO: REMOVE IT!!! Ya no es necesario el delegate call entre facetas, que se explote la librería externa.
     function callTriggerPendingScheduledCrossOrderedTasks() internal returns (uint256) {
         return IScheduledCrossOrderedTasks(address(this)).triggerPendingScheduledCrossOrderedTasks();
+    }
+
+    function dispatchScheduledTask(
+        bytes32 callbackType,
+        uint256 pos,
+        uint256 scheduledTasksLength,
+        ScheduledTask memory currentScheduledTask
+    ) internal {
+        if (callbackType == bytes32("snapshot")) {
+            _onScheduledSnapshotTriggered(pos, scheduledTasksLength, currentScheduledTask);
+            return;
+        }
+
+        if (callbackType == bytes32("coupon")) {
+            _onScheduledCouponListingTriggered(pos, scheduledTasksLength, currentScheduledTask);
+            return;
+        }
+
+        if (callbackType == bytes32("balance")) {
+            _onScheduledBalanceAdjustmentTriggered(pos, scheduledTasksLength, currentScheduledTask);
+            return;
+        }
+
+        if (callbackType == bytes32("crossOrdered")) {
+            _onScheduledCrossOrderedTaskTriggered(pos, scheduledTasksLength, currentScheduledTask);
+        }
     }
 
     function requireValidTimestamp(uint256 _timestamp) internal view {
@@ -302,32 +346,6 @@ library ScheduledTasksStorageWrapper {
     // ============================================================================
     // Private Callback Functions
     // ============================================================================
-
-    function _dispatchScheduledTask(
-        bytes32 callbackType,
-        uint256 pos,
-        uint256 scheduledTasksLength,
-        ScheduledTask memory currentScheduledTask
-    ) private {
-        if (callbackType == bytes32("snapshot")) {
-            _onScheduledSnapshotTriggered(pos, scheduledTasksLength, currentScheduledTask);
-            return;
-        }
-
-        if (callbackType == bytes32("coupon")) {
-            _onScheduledCouponListingTriggered(pos, scheduledTasksLength, currentScheduledTask);
-            return;
-        }
-
-        if (callbackType == bytes32("balance")) {
-            _onScheduledBalanceAdjustmentTriggered(pos, scheduledTasksLength, currentScheduledTask);
-            return;
-        }
-
-        if (callbackType == bytes32("crossOrdered")) {
-            _onScheduledCrossOrderedTaskTriggered(pos, scheduledTasksLength, currentScheduledTask);
-        }
-    }
 
     function _onScheduledSnapshotTriggered(
         uint256 /*_pos*/,

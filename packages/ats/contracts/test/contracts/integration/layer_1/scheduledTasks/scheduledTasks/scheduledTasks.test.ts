@@ -4,9 +4,17 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ZERO, EMPTY_STRING, dateToUnixTimestamp, ATS_ROLES, ATS_TASK } from "@scripts";
+import {
+  ZERO,
+  EMPTY_STRING,
+  dateToUnixTimestamp,
+  ATS_ROLES,
+  ATS_TASK,
+  EQUITY_CONFIG_ID,
+  TIME_PERIODS_S,
+} from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
+import { deployEquityTokenFixture, getDltTimestamp, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
 
 const _PARTITION_ID_1 = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -183,5 +191,153 @@ describe("Scheduled Tasks Tests", () => {
 
     expect(scheduledTasksCount).to.equal(0);
     expect(scheduledTasks.length).to.equal(scheduledTasksCount);
+  });
+});
+
+describe("Scheduled Tasks Failure Recovery", () => {
+  const CROSS_ORDERED_CB = ethers.encodeBytes32String("crossOrdered");
+
+  async function addFailingMockToDiamond(base: Awaited<ReturnType<typeof deployEquityTokenFixture>>) {
+    const { blr, deployer, diamond } = base;
+
+    const mockFactory = await ethers.getContractFactory("MockedFailingScheduledTaskCallback", deployer);
+    const mockContract = await mockFactory.deploy();
+    await mockContract.waitForDeployment();
+    const mockAddress = await mockContract.getAddress();
+
+    const resolverKey = await mockContract.getStaticResolverKey();
+
+    await blr.registerBusinessLogics([
+      {
+        businessLogicKey: resolverKey,
+        businessLogicAddress: mockAddress,
+      },
+    ]);
+
+    const latestMockVersion = Number(await blr.getLatestVersion(resolverKey));
+
+    const asset = await ethers.getContractAt("IAsset", diamond.target);
+    const facetIds: string[] = [...(await asset.getFacetIds())];
+
+    const latestVersions = await blr.getLatestVersions(facetIds);
+    const facetConfigs = facetIds.map((id: string, i: number) => ({
+      id,
+      version: id === resolverKey ? latestMockVersion : Number(latestVersions[i]),
+    }));
+
+    const BATCH_SIZE = 20;
+    for (let i = 0; i < facetConfigs.length; i += BATCH_SIZE) {
+      const batch = facetConfigs.slice(i, i + BATCH_SIZE);
+      const isLastBatch = i + BATCH_SIZE >= facetConfigs.length;
+      await blr.createBatchConfiguration(EQUITY_CONFIG_ID, batch, isLastBatch);
+    }
+
+    const newConfigVersion = Number(await blr.getLatestVersionByConfiguration(EQUITY_CONFIG_ID));
+    await asset.connect(deployer).updateConfigVersion(newConfigVersion);
+
+    return {
+      ...base,
+      asset,
+      mock: await ethers.getContractAt("MockedFailingScheduledTaskCallback", diamond.target, deployer),
+    };
+  }
+
+  async function deployWithMock() {
+    const base = await deployEquityTokenFixture();
+    await base.asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, base.deployer.address);
+    return addFailingMockToDiamond(base);
+  }
+
+  it("GIVEN executeScheduledTaskCallback WHEN called directly by an external account THEN reverts with UnauthorizedSelfCall", async () => {
+    const { mock, deployer } = await loadFixture(deployWithMock);
+
+    await expect(
+      mock.connect(deployer).executeScheduledTaskCallback(CROSS_ORDERED_CB, 0, 0, {
+        scheduledTimestamp: 0,
+        data: "0x",
+      }),
+    ).to.be.revertedWithCustomError(mock, "UnauthorizedSelfCall");
+  });
+
+  it("GIVEN a mock configured to fail WHEN a task is triggered THEN task is removed from queue AND TaskExecutionFailed is emitted", async () => {
+    const { mock, asset, deployer } = await loadFixture(deployWithMock);
+
+    await mock.setFailForCallbackType(CROSS_ORDERED_CB);
+
+    const currentTimestamp = await getDltTimestamp();
+    const recordDate = currentTimestamp + TIME_PERIODS_S.DAY;
+
+    await asset.connect(deployer).setDividend({
+      recordDate: recordDate.toString(),
+      executionDate: (recordDate + TIME_PERIODS_S.DAY).toString(),
+      amount: 1,
+      amountDecimals: 2,
+    });
+
+    expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(1);
+
+    await asset.changeSystemTimestamp(recordDate + 1);
+
+    await expect(asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks())
+      .to.emit(asset, "TaskExecutionFailed")
+      .withArgs(ATS_TASK.SNAPSHOT, CROSS_ORDERED_CB, recordDate);
+
+    expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(0);
+  });
+
+  it("GIVEN two tasks configured to fail WHEN all are triggered THEN queue fully drains AND TaskExecutionFailed is emitted for each", async () => {
+    const { mock, asset, deployer } = await loadFixture(deployWithMock);
+
+    await mock.setFailForCallbackType(CROSS_ORDERED_CB);
+
+    const currentTimestamp = await getDltTimestamp();
+    const recordDate1 = currentTimestamp + TIME_PERIODS_S.DAY;
+    const recordDate2 = currentTimestamp + TIME_PERIODS_S.DAY * 2;
+
+    await asset.connect(deployer).setDividend({
+      recordDate: recordDate1.toString(),
+      executionDate: (recordDate1 + TIME_PERIODS_S.DAY).toString(),
+      amount: 1,
+      amountDecimals: 2,
+    });
+    await asset.connect(deployer).setDividend({
+      recordDate: recordDate2.toString(),
+      executionDate: (recordDate2 + TIME_PERIODS_S.DAY).toString(),
+      amount: 1,
+      amountDecimals: 2,
+    });
+
+    expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(2);
+
+    await asset.changeSystemTimestamp(recordDate2 + 1);
+
+    const tx = asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks();
+    await expect(tx).to.emit(asset, "TaskExecutionFailed").withArgs(ATS_TASK.SNAPSHOT, CROSS_ORDERED_CB, recordDate2);
+    await expect(tx).to.emit(asset, "TaskExecutionFailed").withArgs(ATS_TASK.SNAPSHOT, CROSS_ORDERED_CB, recordDate1);
+
+    expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(0);
+  });
+
+  it("GIVEN a mock NOT configured to fail WHEN a task is triggered THEN task executes normally without TaskExecutionFailed", async () => {
+    const { asset, deployer } = await loadFixture(deployWithMock);
+
+    const currentTimestamp = await getDltTimestamp();
+    const recordDate = currentTimestamp + TIME_PERIODS_S.DAY;
+
+    await asset.connect(deployer).setDividend({
+      recordDate: recordDate.toString(),
+      executionDate: (recordDate + TIME_PERIODS_S.DAY).toString(),
+      amount: 1,
+      amountDecimals: 2,
+    });
+
+    await asset.changeSystemTimestamp(recordDate + 1);
+
+    await expect(asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks()).to.not.emit(
+      asset,
+      "TaskExecutionFailed",
+    );
+
+    expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(0);
   });
 });
