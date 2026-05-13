@@ -123,6 +123,7 @@ library ERC20StorageWrapper {
             revert IAllowanceTypes.SpenderWithZeroAddress();
         }
 
+        ERC1410StorageWrapper.triggerAndSyncAll(_DEFAULT_PARTITION, owner, spender);
         erc20Storage().allowed[owner][spender] = value;
         AdjustBalancesStorageWrapper.updateAllowanceLabaf(owner, spender, AdjustBalancesStorageWrapper.getAbaf());
         emit IAllowanceTypes.Approval(owner, spender, value);
