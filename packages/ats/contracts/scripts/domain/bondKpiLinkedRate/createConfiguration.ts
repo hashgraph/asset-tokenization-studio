@@ -122,6 +122,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "LockByPartitionFacet",
   "MaturityFacet",
   "NominalValueFacet",
+  "NominalValueAtSnapshotFacet",
   "ProceedRecipientsKpiLinkedRateFacet", // rate-specific: triggers scheduled tasks
   "ProtectedPartitionsFacet",
   "ScheduledCrossOrderedTasksKpiLinkedRateFacet", // rate-specific: _onCouponListed override

@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IVotingSecurityHolders } from "./IVotingSecurityHolders.sol";
 import { VotingSecurityHolders } from "./VotingSecurityHolders.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { _VOTING_SECURITY_HOLDERS_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -24,15 +25,12 @@ contract VotingSecurityHoldersFacet is VotingSecurityHolders, IStaticFunctionSel
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        staticFunctionSelectors_ = new bytes4[](2);
-        staticFunctionSelectors_[0] = this.getVotingHolders.selector;
-        staticFunctionSelectors_[1] = this.getTotalVotingHolders.selector;
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(this.getVotingHolders.selector, this.getTotalVotingHolders.selector);
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(IVotingSecurityHolders).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IVotingSecurityHolders).interfaceId);
     }
 }

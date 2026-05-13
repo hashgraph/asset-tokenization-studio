@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IKyc } from "./IKyc.sol";
 import { Kyc } from "./Kyc.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../../infrastructure/proxy/Bytes4Builder.sol";
 import { _KYC_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
 contract KycFacet is Kyc, IStaticFunctionSelectors {
@@ -11,24 +12,23 @@ contract KycFacet is Kyc, IStaticFunctionSelectors {
         staticResolverKey_ = _KYC_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](10);
-        staticFunctionSelectors_[selectorIndex++] = this.initializeInternalKyc.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.activateInternalKyc.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.deactivateInternalKyc.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.grantKyc.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.revokeKyc.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getKycFor.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getKycStatusFor.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getKycAccountsCount.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getKycAccountsData.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.isInternalKycActivated.selector;
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.initializeInternalKyc.selector,
+                this.activateInternalKyc.selector,
+                this.deactivateInternalKyc.selector,
+                this.grantKyc.selector,
+                this.revokeKyc.selector,
+                this.getKycFor.selector,
+                this.getKycStatusFor.selector,
+                this.getKycAccountsCount.selector,
+                this.getKycAccountsData.selector,
+                this.isInternalKycActivated.selector
+            );
     }
 
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IKyc).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IKyc).interfaceId);
     }
 }

@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IDocumentation } from "./IDocumentation.sol";
 import { Documentation } from "./Documentation.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { _DOCUMENTATION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -32,15 +33,14 @@ contract DocumentationFacet is Documentation, IStaticFunctionSelectors {
      * @return staticFunctionSelectors_ Array containing selectors for `getDocument`,
      *         `setDocument`, `removeDocument`, and `getAllDocuments`.
      */
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 4;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.getAllDocuments.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.removeDocument.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.setDocument.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getDocument.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.getDocument.selector,
+                this.setDocument.selector,
+                this.removeDocument.selector,
+                this.getAllDocuments.selector
+            );
     }
 
     /**
@@ -48,8 +48,7 @@ contract DocumentationFacet is Documentation, IStaticFunctionSelectors {
      *         introspection.
      * @return staticInterfaceIds_ Array containing the `IDocumentation` interface ID.
      */
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(IDocumentation).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IDocumentation).interfaceId);
     }
 }

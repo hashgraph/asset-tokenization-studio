@@ -82,15 +82,6 @@ interface ICap {
     error NewMaxSupplyForPartitionTooLow(bytes32 partition, uint256 maxSupply, uint256 totalSupply);
 
     /**
-     * @notice Thrown when a proposed new partition cap exceeds the global maximum supply,
-     *         violating the invariant that no partition cap may be greater than the global cap.
-     * @param partition The partition for which the cap was proposed.
-     * @param newMaxSupplyByPartition The proposed partition cap.
-     * @param maxSupply The current global maximum supply.
-     */
-    error NewMaxSupplyByPartitionTooHigh(bytes32 partition, uint256 newMaxSupplyByPartition, uint256 maxSupply);
-
-    /**
      * @notice One-time initialiser that sets the global maximum supply and optional per-partition
      *         caps.
      * @dev Can only be called once; subsequent calls revert via `onlyNotCapInitialized`. The new

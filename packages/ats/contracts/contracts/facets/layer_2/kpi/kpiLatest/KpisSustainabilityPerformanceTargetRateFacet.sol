@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IKpis } from "./IKpis.sol";
 import { Kpis } from "./Kpis.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../../../infrastructure/proxy/Bytes4Builder.sol";
 import {
     _KPIS_LATEST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY
 } from "../../../../constants/resolverKeys.sol";
@@ -13,18 +14,17 @@ contract KpisSustainabilityPerformanceTargetRateFacet is Kpis, IStaticFunctionSe
         staticResolverKey_ = _KPIS_LATEST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](4);
-        staticFunctionSelectors_[selectorIndex++] = this.addKpiData.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getLatestKpiData.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getMinDate.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.isCheckPointDate.selector;
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.addKpiData.selector,
+                this.getLatestKpiData.selector,
+                this.getMinDate.selector,
+                this.isCheckPointDate.selector
+            );
     }
 
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IKpis).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IKpis).interfaceId);
     }
 }

@@ -77,8 +77,9 @@ interface ICouponTypes is IKpiLinkedRateErrors {
      */
     struct CouponFor {
         uint256 tokenBalance;
-        uint256 nominalValue;
         uint8 decimals;
+        uint256 nominalValue;
+        uint256 nominalValueDecimals;
         bool recordDateReached;
         Coupon coupon;
         CouponAmountFor couponAmount;

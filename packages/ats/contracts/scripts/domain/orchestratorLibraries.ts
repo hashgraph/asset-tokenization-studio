@@ -222,8 +222,10 @@ export function toTypeChainLibraryAddresses(addresses?: OrchestratorLibraryAddre
  * Deploy all orchestrator libraries in correct dependency order.
  *
  * Deployment order:
- * 1. TokenCoreOps, HoldOps, ClearingReadOps (no dependencies)
- * 2. ClearingOps (depends on TokenCoreOps)
+ * 1. ClearingReadOps, HoldOps (no dependencies)
+ * 2. TokenCoreOps (depends on ClearingReadOps)
+ * 3. ClearingOps (depends on TokenCoreOps and HoldOps)
+ * 4. ClearingProtectedOps (depends on ClearingOps)
  *
  * After deployment, automatically calls `setOrchestratorLibraryAddresses()`.
  *
@@ -287,7 +289,7 @@ export async function deployOrchestratorLibraries(signer: Signer): Promise<Orche
   const clearingOpsAddr = await clearingOps.getAddress();
   info(`   ✓ ClearingOps deployed at ${clearingOpsAddr}`);
 
-  // Phase 3: Deploy ClearingProtectedOps (depends on ClearingOps via internal calls)
+  // Phase 4: Deploy ClearingProtectedOps (depends on ClearingOps via internal calls)
   const clearingProtectedOps = await new ClearingProtectedOps__factory(
     {
       [LIBRARY_KEYS.clearingOps]: clearingOpsAddr,

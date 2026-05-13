@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IProtectedPartitions } from "./IProtectedPartitions.sol";
 import { ProtectedPartitions } from "./ProtectedPartitions.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../../infrastructure/proxy/Bytes4Builder.sol";
 import { _PROTECTED_PARTITIONS_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
 contract ProtectedPartitionsFacet is ProtectedPartitions, IStaticFunctionSelectors {
@@ -11,19 +12,18 @@ contract ProtectedPartitionsFacet is ProtectedPartitions, IStaticFunctionSelecto
         staticResolverKey_ = _PROTECTED_PARTITIONS_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
-        staticFunctionSelectors_[selectorIndex++] = this.initialize_ProtectedPartitions.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.protectPartitions.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.unprotectPartitions.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.arePartitionsProtected.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.calculateRoleForPartition.selector;
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.initialize_ProtectedPartitions.selector,
+                this.protectPartitions.selector,
+                this.unprotectPartitions.selector,
+                this.arePartitionsProtected.selector,
+                this.calculateRoleForPartition.selector
+            );
     }
 
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IProtectedPartitions).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IProtectedPartitions).interfaceId);
     }
 }

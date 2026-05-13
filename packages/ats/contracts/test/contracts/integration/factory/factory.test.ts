@@ -1288,13 +1288,13 @@ describe("Factory Tests", () => {
       const bondAddress = decoded.bondAddress;
 
       // Verify KPI linked rate was set
-      const kpiLinkedRateFacet = await ethers.getContractAt("KpiLinkedRate", bondAddress);
-      const interestRate = await kpiLinkedRateFacet.getInterestRate();
+      const asset = await ethers.getContractAt("IAsset", bondAddress);
+      const interestRate = await asset.getKpiLinkedRateInterestRate();
       expect(interestRate.maxRate).to.equal(bondKpiLinkedRateData.interestRate.maxRate);
       expect(interestRate.baseRate).to.equal(bondKpiLinkedRateData.interestRate.baseRate);
       expect(interestRate.minRate).to.equal(bondKpiLinkedRateData.interestRate.minRate);
 
-      const impactData = await kpiLinkedRateFacet.getImpactData();
+      const impactData = await asset.getKpiLinkedRateImpactData();
       expect(impactData.maxDeviationCap).to.equal(bondKpiLinkedRateData.impactData.maxDeviationCap);
       expect(impactData.baseLine).to.equal(bondKpiLinkedRateData.impactData.baseLine);
       expect(impactData.maxDeviationFloor).to.equal(bondKpiLinkedRateData.impactData.maxDeviationFloor);
@@ -1338,6 +1338,88 @@ describe("Factory Tests", () => {
       await expect(factory.deployBondKpiLinkedRate(bondKpiLinkedRateData)).to.be.revertedWithCustomError(
         factory,
         "WrongInterestRateValues",
+      );
+    });
+
+    it("GIVEN invalid impact data (maxDeviationFloor == baseLine) WHEN deploying bond THEN transaction fails", async () => {
+      const bondKpiLinkedRateData = {
+        bondData: {
+          security: getSecurityData(businessLogicResolver, {
+            rbacs: init_rbacs,
+          }),
+          bondDetails: await getBondDetails(),
+          proceedRecipients: [],
+          proceedRecipientsData: [],
+        },
+        factoryRegulationData: getRegulationData(),
+        interestRate: {
+          maxRate: 1000,
+          baseRate: 500,
+          minRate: 100,
+          startPeriod: Math.floor(Date.now() / 1000) + 86400,
+          startRate: 500,
+          missedPenalty: 50,
+          reportPeriod: 86400 * 30,
+          rateDecimals: 2,
+        },
+        impactData: {
+          maxDeviationCap: 150,
+          baseLine: 100,
+          maxDeviationFloor: 100, // maxDeviationFloor == baseLine - INVALID (zero denominator)
+          impactDataDecimals: 2,
+          adjustmentPrecision: 100,
+        },
+      };
+
+      bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
+        key: BOND_KPI_LINKED_RATE_CONFIG_ID,
+        version: 1,
+      };
+
+      await expect(factory.deployBondKpiLinkedRate(bondKpiLinkedRateData)).to.be.revertedWithCustomError(
+        factory,
+        "WrongImpactDataValues",
+      );
+    });
+
+    it("GIVEN invalid impact data (baseLine == maxDeviationCap) WHEN deploying bond THEN transaction fails", async () => {
+      const bondKpiLinkedRateData = {
+        bondData: {
+          security: getSecurityData(businessLogicResolver, {
+            rbacs: init_rbacs,
+          }),
+          bondDetails: await getBondDetails(),
+          proceedRecipients: [],
+          proceedRecipientsData: [],
+        },
+        factoryRegulationData: getRegulationData(),
+        interestRate: {
+          maxRate: 1000,
+          baseRate: 500,
+          minRate: 100,
+          startPeriod: Math.floor(Date.now() / 1000) + 86400,
+          startRate: 500,
+          missedPenalty: 50,
+          reportPeriod: 86400 * 30,
+          rateDecimals: 2,
+        },
+        impactData: {
+          maxDeviationCap: 100,
+          baseLine: 100, // baseLine == maxDeviationCap - INVALID (zero denominator)
+          maxDeviationFloor: 50,
+          impactDataDecimals: 2,
+          adjustmentPrecision: 100,
+        },
+      };
+
+      bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
+        key: BOND_KPI_LINKED_RATE_CONFIG_ID,
+        version: 1,
+      };
+
+      await expect(factory.deployBondKpiLinkedRate(bondKpiLinkedRateData)).to.be.revertedWithCustomError(
+        factory,
+        "WrongImpactDataValues",
       );
     });
 
