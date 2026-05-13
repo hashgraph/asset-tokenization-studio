@@ -164,6 +164,7 @@ library ERC1410StorageWrapper {
         unchecked {
             --basicStorage.totalTokenHolders;
         }
+        delete basicStorage.tokenHolders[lastIndex];
     }
 
     function authorizeOperator(address operator) internal {
