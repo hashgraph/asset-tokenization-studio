@@ -66,4 +66,11 @@ interface ILockTypes {
      *      `LockStorageWrapper.checkValidLockId`.
      */
     error WrongLockId();
+
+    /**
+     * @notice Reverts when a lock creation is attempted with a zero amount.
+     * @dev Checked at the start of `LockStorageWrapper.lockByPartition`, which is the
+     *      single entry point shared by both `Lock.lock` and `LockByPartition.lockByPartition`.
+     */
+    error InvalidLockAmount();
 }
