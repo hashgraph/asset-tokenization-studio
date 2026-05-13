@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-12T19:03:01.323Z
+ * Generated: 2026-05-13T12:56:23.237Z
  * Facets: 125
  * Infrastructure: 2
  *
@@ -14915,6 +14915,8 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   InitializerStorageWrapper: {
     name: "InitializerStorageWrapper",
+    description:
+      'Library providing the storage operations and readiness checks consumed by the initializer facet and by every facet that needs to assert "operational" status before executing business logic.',
     methods: [],
   },
 
