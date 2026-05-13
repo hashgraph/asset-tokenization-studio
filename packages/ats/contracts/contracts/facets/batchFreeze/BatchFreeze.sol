@@ -32,7 +32,7 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
         uint256 length = _userAddresses.length;
         address sender = EvmAccessors.getMsgSender();
         for (uint256 i; i < length; ) {
-            ExternalListManagementStorageWrapper.checkValidAddress(_userAddresses[i]);
+            DefaultValueValidation.checkZeroAddress(_userAddresses[i]);
             ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
             ERC3643StorageWrapper.setAddressFrozen(_userAddresses[i], _freeze[i]);
             emit IFreeze.AddressFrozen(_userAddresses[i], _freeze[i], sender);

@@ -28,7 +28,7 @@ library ExternalListManagementStorageWrapper {
     ) internal returns (bool success_) {
         uint256 length = _lists.length;
         for (uint256 index; index < length; ) {
-            checkValidAddress(_lists[index]);
+            DefaultValueValidation.checkZeroAddress(_lists[index]);
             if (_actives[index]) {
                 if (!isExternalList(_position, _lists[index])) {
                     addExternalList(_position, _lists[index]);
@@ -63,7 +63,7 @@ library ExternalListManagementStorageWrapper {
     function initializeExternalControlLists(address[] calldata _controlLists) internal {
         uint256 length = _controlLists.length;
         for (uint256 index; index < length; ) {
-            checkValidAddress(_controlLists[index]);
+            DefaultValueValidation.checkZeroAddress(_controlLists[index]);
             addExternalList(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _controlLists[index]);
             unchecked {
                 ++index;
@@ -75,7 +75,7 @@ library ExternalListManagementStorageWrapper {
     function initializeExternalKycLists(address[] calldata _kycLists) internal {
         uint256 length = _kycLists.length;
         for (uint256 index; index < length; ) {
-            checkValidAddress(_kycLists[index]);
+            DefaultValueValidation.checkZeroAddress(_kycLists[index]);
             addExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists[index]);
             unchecked {
                 ++index;
@@ -133,10 +133,6 @@ library ExternalListManagementStorageWrapper {
 
     function isKycExternalInitialized() internal view returns (bool) {
         return externalListStorage(_KYC_MANAGEMENT_STORAGE_POSITION).initialized;
-    }
-
-    function checkValidAddress(address _addr) internal pure {
-        DefaultValueValidation.checkZeroAddress(_addr);
     }
 
     function externalListStorage(

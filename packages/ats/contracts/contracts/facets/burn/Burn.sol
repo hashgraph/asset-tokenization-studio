@@ -63,8 +63,6 @@ abstract contract Burn is IBurn, Modifiers, ProtectedPartitionRoleValidator {
     )
         external
         override
-        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
-        onlyUnrecoveredAddress(_tokenHolder)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         onlyCanRedeemFromByPartition(_tokenHolder, _DEFAULT_PARTITION, _value)

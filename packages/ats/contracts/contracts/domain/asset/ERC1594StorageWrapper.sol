@@ -139,14 +139,14 @@ library ERC1594StorageWrapper {
         bytes memory _data,
         bytes memory _operatorData
     ) internal view {
-        (bool isAbleToRedeemFrom, , bytes32 reasonCode, bytes memory details) = canRedeemFromByPartition(
+        (bool canRedeemFrom, , bytes32 reasonCode, bytes memory details) = canRedeemFromByPartition(
             from,
             partition,
             value,
             _data,
             _operatorData
         );
-        if (!isAbleToRedeemFrom) {
+        if (!canRedeemFrom) {
             LowLevelCall.revertWithData(bytes4(reasonCode), details);
         }
     }
@@ -157,9 +157,9 @@ library ERC1594StorageWrapper {
         uint256 value,
         bytes memory /*_data*/,
         bytes memory /*_operatorData*/
-    ) internal view returns (bool isAbleToRedeemFrom, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
-        (isAbleToRedeemFrom, statusCode, reasonCode, details) = _genericChecks();
-        if (!isAbleToRedeemFrom) return (isAbleToRedeemFrom, statusCode, reasonCode, details);
+    ) internal view returns (bool canRedeemFrom, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
+        (canRedeemFrom, statusCode, reasonCode, details) = _genericChecks();
+        if (!canRedeemFrom) return (canRedeemFrom, statusCode, reasonCode, details);
         // Format validation
         if (from == ZERO_ADDRESS) {
             return (
@@ -171,16 +171,10 @@ library ERC1594StorageWrapper {
         }
         address sender = EvmAccessors.getMsgSender();
         bool checkSender = _checkSenderHasProtectedPartitionRole(from, sender, partition);
-        (isAbleToRedeemFrom, statusCode, reasonCode, details) = _isCompliant(
-            from,
-            address(0),
-            value,
-            sender,
-            checkSender
-        );
-        if (!isAbleToRedeemFrom) return (isAbleToRedeemFrom, statusCode, reasonCode, details);
-        (isAbleToRedeemFrom, statusCode, reasonCode, details) = _isIdentified(from, address(0));
-        if (!isAbleToRedeemFrom) return (isAbleToRedeemFrom, statusCode, reasonCode, details);
+        (canRedeemFrom, statusCode, reasonCode, details) = _isCompliant(from, address(0), value, sender, checkSender);
+        if (!canRedeemFrom) return (canRedeemFrom, statusCode, reasonCode, details);
+        (canRedeemFrom, statusCode, reasonCode, details) = _isIdentified(from, address(0));
+        if (!canRedeemFrom) return (canRedeemFrom, statusCode, reasonCode, details);
         // Allowance check for the 'from' methods
         bool checkAllowance = checkSender && !ERC1410StorageWrapper.isAuthorized(partition, sender, from);
         return _businessLogicChecks(checkAllowance, from, value, partition);
@@ -194,7 +188,7 @@ library ERC1594StorageWrapper {
         bytes memory _data,
         bytes memory _operatorData
     ) internal view {
-        (bool isAbleToTransfer, , bytes32 reasonCode, bytes memory details) = canTransferFromByPartition(
+        (bool canTransfer, , bytes32 reasonCode, bytes memory details) = canTransferFromByPartition(
             from,
             to,
             partition,
@@ -202,7 +196,7 @@ library ERC1594StorageWrapper {
             _data,
             _operatorData
         );
-        if (!isAbleToTransfer) LowLevelCall.revertWithData(bytes4(reasonCode), details);
+        if (!canTransfer) LowLevelCall.revertWithData(bytes4(reasonCode), details);
     }
 
     function canTransferFromByPartition(
@@ -212,9 +206,9 @@ library ERC1594StorageWrapper {
         uint256 value,
         bytes memory /*_data*/,
         bytes memory /*_operatorData*/
-    ) internal view returns (bool isAbleToTransfer, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
-        (isAbleToTransfer, statusCode, reasonCode, details) = _genericChecks();
-        if (!isAbleToTransfer) return (isAbleToTransfer, statusCode, reasonCode, details);
+    ) internal view returns (bool canTransfer, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
+        (canTransfer, statusCode, reasonCode, details) = _genericChecks();
+        if (!canTransfer) return (canTransfer, statusCode, reasonCode, details);
         // Format validation
         if (from == ZERO_ADDRESS || to == ZERO_ADDRESS) {
             return (
@@ -226,10 +220,10 @@ library ERC1594StorageWrapper {
         }
         address sender = EvmAccessors.getMsgSender();
         bool checkSender = _checkSenderHasProtectedPartitionRole(from, sender, partition);
-        (isAbleToTransfer, statusCode, reasonCode, details) = _isCompliant(from, to, value, sender, checkSender);
-        if (!isAbleToTransfer) return (isAbleToTransfer, statusCode, reasonCode, details);
-        (isAbleToTransfer, statusCode, reasonCode, details) = _isIdentified(from, to);
-        if (!isAbleToTransfer) return (isAbleToTransfer, statusCode, reasonCode, details);
+        (canTransfer, statusCode, reasonCode, details) = _isCompliant(from, to, value, sender, checkSender);
+        if (!canTransfer) return (canTransfer, statusCode, reasonCode, details);
+        (canTransfer, statusCode, reasonCode, details) = _isIdentified(from, to);
+        if (!canTransfer) return (canTransfer, statusCode, reasonCode, details);
         // Allowance check for the 'from' methods
         bool checkAllowance = checkSender && !ERC1410StorageWrapper.isAuthorized(partition, sender, from);
         return _businessLogicChecks(checkAllowance, from, value, partition);
@@ -315,10 +309,10 @@ library ERC1594StorageWrapper {
     ) private view returns (bool checkSender_) {
         checkSender_ =
             _from != _sender &&
-            !AccessControlStorageWrapper.hasRole(
+            (!AccessControlStorageWrapper.hasRole(
                 ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition),
                 _sender
-            );
+            ) || !ProtectedPartitionsStorageWrapper.arePartitionsProtected());
     }
 
     /**
@@ -382,7 +376,7 @@ library ERC1594StorageWrapper {
         if (ERC3643StorageWrapper.isRecovered(account)) {
             return (false, Eip1066.REVOKED_OR_BANNED, IERC3643Types.WalletRecovered.selector, details);
         }
-        if (!ControlListStorageWrapper.isAbleToAccess(account)) {
+        if (!ControlListStorageWrapper.canAccess(account)) {
             return (false, Eip1066.DISALLOWED_OR_STOP, ICommonErrors.AccountIsBlocked.selector, details);
         }
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
@@ -520,7 +514,7 @@ library ERC1594StorageWrapper {
      * @param from Token holder address.
      * @param value Amount of tokens to transfer/redeem.
      * @param partition Partition identifier.
-     * @return isAbleToTransfer True if all business conditions are met.
+     * @return canTransfer True if all business conditions are met.
      * @return statusCode EIP1066 status byte.
      * @return reasonCode Selector of the blocking error.
      * @return details Encoded error data.
@@ -530,15 +524,15 @@ library ERC1594StorageWrapper {
         address from,
         uint256 value,
         bytes32 partition
-    ) private view returns (bool isAbleToTransfer, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
+    ) private view returns (bool canTransfer, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
         if (checkAllowance) {
-            (isAbleToTransfer, statusCode, reasonCode, details) = _checkAllowance(from, value);
-            if (!isAbleToTransfer) return (isAbleToTransfer, statusCode, reasonCode, details);
+            (canTransfer, statusCode, reasonCode, details) = _checkAllowance(from, value);
+            if (!canTransfer) return (canTransfer, statusCode, reasonCode, details);
         }
-        (isAbleToTransfer, statusCode, reasonCode, details) = _checkPartitionValidity(from, partition);
-        if (!isAbleToTransfer) return (isAbleToTransfer, statusCode, reasonCode, details);
-        (isAbleToTransfer, statusCode, reasonCode, details) = _checkPartitionBalance(from, value, partition);
-        if (!isAbleToTransfer) return (isAbleToTransfer, statusCode, reasonCode, details);
+        (canTransfer, statusCode, reasonCode, details) = _checkPartitionValidity(from, partition);
+        if (!canTransfer) return (canTransfer, statusCode, reasonCode, details);
+        (canTransfer, statusCode, reasonCode, details) = _checkPartitionBalance(from, value, partition);
+        if (!canTransfer) return (canTransfer, statusCode, reasonCode, details);
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
     }
 

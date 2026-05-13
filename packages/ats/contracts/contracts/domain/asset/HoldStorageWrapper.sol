@@ -654,7 +654,7 @@ library HoldStorageWrapper {
         IHoldTypes.HoldData memory holdData,
         address _to
     ) private view {
-        if (!ControlListStorageWrapper.isAbleToAccess(_holdIdentifier.tokenHolder)) {
+        if (!ControlListStorageWrapper.canAccess(_holdIdentifier.tokenHolder)) {
             revert ICommonErrors.AccountIsBlocked(_holdIdentifier.tokenHolder);
         }
 

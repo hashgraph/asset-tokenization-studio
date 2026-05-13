@@ -11,7 +11,7 @@ pragma solidity >=0.8.0 <0.9.0;
  *      `_CONTROL_LIST_STORAGE_POSITION` via `ControlListStorageWrapper`. `CONTROL_LIST_ROLE` is
  *      required for all state-mutating functions after initialisation. Note that
  *      `isInControlList` reflects raw set membership only; effective access is determined by
- *      `ControlListStorageWrapper.isAbleToAccess`, which combines the membership result with the
+ *      `ControlListStorageWrapper.canAccess`, which combines the membership result with the
  *      `isWhiteList` flag and external control list authorisation.
  */
 interface IControlList {

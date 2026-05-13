@@ -7,6 +7,7 @@ import {
 } from "../../constants/storagePositions.sol";
 import { IProceedRecipients } from "../../facets/layer_2/proceedRecipient/IProceedRecipients.sol";
 import { ExternalListManagementStorageWrapper } from "../core/ExternalListManagementStorageWrapper.sol";
+import { DefaultValueValidation } from "../../infrastructure/utils/DefaultValueValidation.sol";
 
 struct ProceedRecipientsDataStorage {
     mapping(address => bytes) proceedRecipientData;
@@ -17,7 +18,7 @@ library ProceedRecipientsStorageWrapper {
     function initialize_ProceedRecipients(address[] calldata _proceedRecipients, bytes[] calldata _data) internal {
         uint256 length = _proceedRecipients.length;
         for (uint256 index; index < length; ) {
-            ExternalListManagementStorageWrapper.checkValidAddress(_proceedRecipients[index]);
+            DefaultValueValidation.checkZeroAddress(_proceedRecipients[index]);
             ExternalListManagementStorageWrapper.addExternalList(
                 _PROCEED_RECIPIENTS_STORAGE_POSITION,
                 _proceedRecipients[index]

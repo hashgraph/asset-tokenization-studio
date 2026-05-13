@@ -48,7 +48,7 @@ library ControlListStorageWrapper {
 
     // solhint-disable-next-line ordering
     function checkControlList(address _account) internal view {
-        if (!isAbleToAccess(_account)) {
+        if (!canAccess(_account)) {
             revert ICommonErrors.AccountIsBlocked(_account);
         }
     }
@@ -67,7 +67,7 @@ library ControlListStorageWrapper {
     }
 
     // ✅ Internal function - ERC1594StorageWrapper calls this directly
-    function isAbleToAccess(address _account) internal view returns (bool) {
+    function canAccess(address _account) internal view returns (bool) {
         ControlListStorage storage cls = controlListStorage();
         return (cls.isWhiteList == cls.list.contains(_account) &&
             ExternalListManagementStorageWrapper.isExternallyAuthorized(_account));
