@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ITransfer } from "./ITransfer.sol";
 import { Transfer } from "./Transfer.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { _TRANSFER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -19,20 +20,18 @@ contract TransferFacet is Transfer, IStaticFunctionSelectors {
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 4;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.transferFromWithData.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.transferWithData.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.transferFrom.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.transfer.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.transfer.selector,
+                this.transferFrom.selector,
+                this.transferWithData.selector,
+                this.transferFromWithData.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(ITransfer).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(ITransfer).interfaceId);
     }
 }

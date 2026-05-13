@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IBalanceTrackerAtSnapshot } from "./IBalanceTrackerAtSnapshot.sol";
 import { BalanceTrackerAtSnapshot } from "./BalanceTrackerAtSnapshot.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { _BALANCE_TRACKER_AT_SNAPSHOT_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -22,22 +23,17 @@ contract BalanceTrackerAtSnapshotFacet is BalanceTrackerAtSnapshot, IStaticFunct
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 3;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.totalSupplyAtSnapshot.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.balancesOfAtSnapshot.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.balanceOfAtSnapshot.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.balanceOfAtSnapshot.selector,
+                this.balancesOfAtSnapshot.selector,
+                this.totalSupplyAtSnapshot.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        uint256 selectorIndex = 1;
-        staticInterfaceIds_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticInterfaceIds_[--selectorIndex] = type(IBalanceTrackerAtSnapshot).interfaceId;
-        }
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IBalanceTrackerAtSnapshot).interfaceId);
     }
 }

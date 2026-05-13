@@ -645,10 +645,16 @@ describe("Coupon Tests", () => {
     await expect(asset.connect(signer_C).cancelCoupon(999)).to.be.revertedWithCustomError(asset, "WrongIndexForAction");
   });
 
-  it("GIVEN a coupon without snapshot WHEN getCouponFor is called after record date THEN uses current balance", async () => {
+  it("GIVEN a coupon without snapshot WHEN getCouponFor is called after record date THEN uses balance at record date", async () => {
     const TotalAmount = 1000;
+    const Decimals = await asset.decimals();
+    const NominalValue = 2;
+    const NominalValueDecimals = 3;
+
     await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
     await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+
+    await asset.connect(signer_A).setNominalValue(NominalValue, NominalValueDecimals);
 
     await asset.connect(signer_A).issueByPartition({
       partition: DEFAULT_PARTITION,
@@ -657,8 +663,8 @@ describe("Coupon Tests", () => {
       data: "0x",
     });
 
-    couponRecordDateInSeconds = (await getDltTimestamp()) + 1000;
-    couponExecutionDateInSeconds = (await getDltTimestamp()) + 2000;
+    couponRecordDateInSeconds = (await getDltTimestamp()) + 10000;
+    couponExecutionDateInSeconds = (await getDltTimestamp()) + 20000;
 
     const couponData = {
       recordDate: couponRecordDateInSeconds.toString(),
@@ -670,11 +676,17 @@ describe("Coupon Tests", () => {
       fixingDate: couponFixingDateInSeconds.toString(),
       rateStatus: couponRateStatus,
     };
+    const balanceAdjustmentData = {
+      executionDate: BigInt(couponData.recordDate) + 1n,
+      factor: 20,
+      decimals: 1,
+    };
 
     await asset.connect(signer_A).setCoupon(couponData);
+    await asset.connect(signer_A).setScheduledBalanceAdjustment(balanceAdjustmentData);
 
     // Time travel past record date but DON'T trigger snapshot
-    await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+    await asset.changeSystemTimestamp(couponRecordDateInSeconds + 2);
 
     // Query couponFor without triggering snapshot - should use current balance path
     const couponFor = await asset.getCouponFor(1, signer_A.address);
@@ -683,7 +695,79 @@ describe("Coupon Tests", () => {
     expect(coupon.snapshotId).to.equal(0); // No snapshot taken
     expect(couponFor.recordDateReached).to.be.true;
     expect(couponFor.tokenBalance).to.equal(TotalAmount);
+    expect(couponFor.decimals).to.equal(Decimals);
+    expect(couponFor.nominalValue).to.equal(NominalValue);
+    expect(couponFor.nominalValueDecimals).to.equal(NominalValueDecimals);
     expect(couponFor.isDisabled).to.be.false;
+
+    await asset.connect(signer_A).setNominalValue(NominalValue + 1, NominalValueDecimals + 1);
+
+    const couponFor_2 = await asset.getCouponFor(1, signer_A.address);
+    expect(couponFor_2.nominalValue).to.equal(NominalValue);
+    expect(couponFor_2.nominalValueDecimals).to.equal(NominalValueDecimals);
+  });
+
+  it("GIVEN a coupon with a snapshot WHEN nominalValue changes after the snapshot THEN couponAmount uses snapshot-scale values", async () => {
+    const TotalAmount = 1000;
+    const NominalValue = 2;
+    const NominalValueDecimals = 3;
+
+    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+
+    await asset.connect(signer_A).setNominalValue(NominalValue, NominalValueDecimals);
+
+    await asset.connect(signer_A).issueByPartition({
+      partition: DEFAULT_PARTITION,
+      tokenHolder: signer_A.address,
+      value: TotalAmount,
+      data: "0x",
+    });
+
+    couponRecordDateInSeconds = (await getDltTimestamp()) + 10000;
+    couponExecutionDateInSeconds = (await getDltTimestamp()) + 20000;
+
+    const localCouponData = {
+      recordDate: couponRecordDateInSeconds.toString(),
+      executionDate: couponExecutionDateInSeconds.toString(),
+      rate: couponRate,
+      rateDecimals: couponRateDecimals,
+      startDate: couponStartDateInSeconds.toString(),
+      endDate: couponEndDateInSeconds.toString(),
+      fixingDate: couponFixingDateInSeconds.toString(),
+      rateStatus: couponRateStatus,
+    };
+
+    await asset.connect(signer_A).setCoupon(localCouponData);
+
+    // Cross record date and process scheduled tasks to take the snapshot bound to the coupon.
+    await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+    await asset.connect(signer_A).triggerPendingScheduledCrossOrderedTasks();
+
+    const registered = (await asset.getCoupon(1)).registeredCoupon_;
+    expect(registered.snapshotId).to.be.greaterThan(0);
+
+    // Change nominal value AFTER the snapshot — current scale now diverges from snapshot scale.
+    await asset.connect(signer_A).setNominalValue(NominalValue + 5, NominalValueDecimals + 2);
+
+    const couponFor = await asset.getCouponFor(1, signer_A.address);
+    const couponAmountFor = await asset.getCouponAmountFor(1, signer_A.address);
+    const period = couponFor.coupon.endDate - couponFor.coupon.startDate;
+
+    // Snapshot-scale metadata is preserved on the struct.
+    expect(couponFor.recordDateReached).to.equal(true);
+    expect(couponFor.nominalValue).to.equal(NominalValue);
+    expect(couponFor.nominalValueDecimals).to.equal(NominalValueDecimals);
+
+    // Numerator and denominator must use the snapshot-scale values returned in couponFor
+    // (NominalValue, NominalValueDecimals), not the current values just written above.
+    expect(couponAmountFor.recordDateReached).to.equal(true);
+    expect(couponAmountFor.numerator).to.equal(
+      couponFor.tokenBalance * couponFor.nominalValue * couponFor.coupon.rate * period,
+    );
+    expect(couponAmountFor.denominator).to.equal(
+      10n ** (couponFor.decimals + BigInt(NominalValueDecimals) + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS),
+    );
   });
 
   it("GIVEN a coupon WHEN getCoupon is called THEN decodes coupon data", async () => {

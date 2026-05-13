@@ -884,6 +884,11 @@ interface INominalValueTransactionAdapter {
     nominalValueDecimals: number,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
+  setNominalValueCurrency(
+    security: EvmAddress,
+    nominalValueCurrency: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
 }
 
 export interface IAmortizationTransactionAdapter {
@@ -1845,6 +1850,12 @@ export default abstract class TransactionAdapter
     security: EvmAddress,
     nominalValue: string,
     nominalValueDecimals: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+
+  abstract setNominalValueCurrency(
+    security: EvmAddress,
+    nominalValueCurrency: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
 

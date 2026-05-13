@@ -15,9 +15,9 @@ pragma solidity >=0.8.0 <0.9.0;
 interface ICapByPartition {
     /**
      * @notice Sets the maximum supply cap for a specific partition of the token.
-     * @dev Reverts with `NewMaxSupplyForPartitionTooLow` when `_maxSupply` is below the
-     *      partition's adjusted total supply, and with `NewMaxSupplyByPartitionTooHigh` when
-     *      it exceeds the global max supply. Emits {MaxSupplyByPartitionSet}.
+     * @dev Reverts with `NewMaxSupplyCannotBeZero` when `_maxSupply` is zero, and with
+     *      `NewMaxSupplyForPartitionTooLow` when it is below the partition's adjusted total
+     *      supply. Emits {MaxSupplyByPartitionSet}.
      * @param _partition The partition identifier whose cap is being updated.
      * @param _maxSupply The new maximum supply value for the partition.
      * @return success_ True when the cap is updated.

@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-11T09:54:55.025Z
- * Facets: 122
+ * Generated: 2026-05-13T08:47:51.051Z
+ * Facets: 124
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -77,6 +77,7 @@ import {
   ExternalControlListManagementFacet__factory,
   ExternalKycListManagementFacet__factory,
   ExternalPauseManagementFacet__factory,
+  FactoryFacet__factory,
   FixedRateFacet__factory,
   FreezeAtSnapshotByPartitionFacet__factory,
   FreezeAtSnapshotFacet__factory,
@@ -101,6 +102,7 @@ import {
   MetadataFacet__factory,
   MintByPartitionFacet__factory,
   MintFacet__factory,
+  NominalValueAtSnapshotFacet__factory,
   NominalValueFacet__factory,
   NoncesFacet__factory,
   OperatorByPartitionFacet__factory,
@@ -959,6 +961,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x57fbc6f7",
       },
       {
+        name: "InvalidHoldAmount",
+        signature: { full: "error InvalidHoldAmount()", canonical: "InvalidHoldAmount()" },
+        selector: "0x352b484a",
+      },
+      {
         name: "InvalidPartition",
         signature: {
           full: "error InvalidPartition(address account, bytes32 partition)",
@@ -1386,6 +1393,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x7fa523c84ab8d7fc5b72f08b9e46dbbf10c39e119a075b3e317002d14bc9f436",
       },
       {
+        name: "DelegateVotesChanged",
+        signature: {
+          full: "event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance)",
+          canonical: "DelegateVotesChanged(address,uint256,uint256)",
+        },
+        topic0: "0xdec2bacdd2f05b59de34da9b523dff8be42e5e38e818c82fdb0bae774387a724",
+      },
+      {
         name: "TokensFrozen",
         signature: {
           full: "event TokensFrozen(address indexed account, uint256 amount, bytes32 partition)",
@@ -1419,6 +1434,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
+      {
+        name: "AbafChangeForBlockForbidden",
+        signature: {
+          full: "error AbafChangeForBlockForbidden(uint256 blockNumber)",
+          canonical: "AbafChangeForBlockForbidden(uint256)",
+        },
+        selector: "0x5a2afdff",
+      },
       {
         name: "AccessControlRequired",
         signature: {
@@ -1462,6 +1485,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xefafde54",
       },
       {
+        name: "InvalidFreezeAmount",
+        signature: { full: "error InvalidFreezeAmount()", canonical: "InvalidFreezeAmount()" },
+        selector: "0xc5083c69",
+      },
+      {
         name: "InvalidPartition",
         signature: {
           full: "error InvalidPartition(address account, bytes32 partition)",
@@ -1487,6 +1515,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
       },
       {
         name: "WalletRecovered",
@@ -2220,12 +2253,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
-        name: "NewMaxSupplyByPartitionTooHigh",
-        signature: {
-          full: "error NewMaxSupplyByPartitionTooHigh(bytes32 partition, uint256 newMaxSupplyByPartition, uint256 maxSupply)",
-          canonical: "NewMaxSupplyByPartitionTooHigh(bytes32,uint256,uint256)",
-        },
-        selector: "0x21aa64a7",
+        name: "NewMaxSupplyCannotBeZero",
+        signature: { full: "error NewMaxSupplyCannotBeZero()", canonical: "NewMaxSupplyCannotBeZero()" },
+        selector: "0x76f138fb",
       },
       {
         name: "NewMaxSupplyForPartitionTooLow",
@@ -2324,14 +2354,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "MaxSupplyReachedForPartition(bytes32,uint256)",
         },
         selector: "0x57c004a9",
-      },
-      {
-        name: "NewMaxSupplyByPartitionTooHigh",
-        signature: {
-          full: "error NewMaxSupplyByPartitionTooHigh(bytes32 partition, uint256 newMaxSupplyByPartition, uint256 maxSupply)",
-          canonical: "NewMaxSupplyByPartitionTooHigh(bytes32,uint256,uint256)",
-        },
-        selector: "0x21aa64a7",
       },
       {
         name: "NewMaxSupplyCannotBeZero",
@@ -3803,6 +3825,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xdb0a3012",
       },
       {
+        name: "InvalidHoldAmount",
+        signature: { full: "error InvalidHoldAmount()", canonical: "InvalidHoldAmount()" },
+        selector: "0x352b484a",
+      },
+      {
         name: "InvalidPartition",
         signature: {
           full: "error InvalidPartition(address account, bytes32 partition)",
@@ -4398,7 +4425,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCouponFor",
         signature: {
-          full: "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint256 nominalValue, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, (uint256 numerator, uint256 denominator, bool recordDateReached) couponAmount, bool isDisabled) couponFor_)",
+          full: "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, uint256 nominalValue, uint256 nominalValueDecimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, (uint256 numerator, uint256 denominator, bool recordDateReached) couponAmount, bool isDisabled) couponFor_)",
           canonical: "getCouponFor(uint256,address)",
         },
         selector: "0xbba7b56d",
@@ -4618,7 +4645,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCouponsFor",
         signature: {
-          full: "function getCouponsFor(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 tokenBalance, uint256 nominalValue, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, (uint256 numerator, uint256 denominator, bool recordDateReached) couponAmount, bool isDisabled)[] couponFor_, address[] holders_)",
+          full: "function getCouponsFor(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 tokenBalance, uint8 decimals, uint256 nominalValue, uint256 nominalValueDecimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, (uint256 numerator, uint256 denominator, bool recordDateReached) couponAmount, bool isDisabled)[] couponFor_, address[] holders_)",
           canonical: "getCouponsFor(uint256,uint256,uint256)",
         },
         selector: "0x7327ad90",
@@ -6243,6 +6270,195 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) => new ExternalPauseManagementFacetTimeTravel__factory(signer),
   },
 
+  FactoryFacet: {
+    name: "FactoryFacet",
+    description:
+      "Diamond facet that exposes all Factory selectors under a single `_FACTORY_RESOLVER_KEY` for use as a ResolverProxy facet.",
+    resolverKey: {
+      name: "_FACTORY_RESOLVER_KEY",
+      value: "0xa5472d34be801f744a73bce4e1851e67767286307e3203726a3261b280a667b3",
+    },
+    inheritance: ["Factory", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "deployBond",
+        signature: {
+          full: "function deployBond(((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) _bondData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) _factoryRegulationData) returns (address bondAddress_)",
+          canonical:
+            "deployBond(((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bytes3,uint256,uint8,uint256,uint256),address[],bytes[]),(uint8,uint8,(bool,string,string)))",
+        },
+        selector: "0x5133f0e0",
+      },
+      {
+        name: "deployBondFixedRate",
+        signature: {
+          full: "function deployBondFixedRate((((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, (uint256 rate, uint8 rateDecimals) fixedRateData) _bondFixedRateData) returns (address bondAddress_)",
+          canonical:
+            "deployBondFixedRate((((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bytes3,uint256,uint8,uint256,uint256),address[],bytes[]),(uint8,uint8,(bool,string,string)),(uint256,uint8)))",
+        },
+        selector: "0x7c55cfdc",
+      },
+      {
+        name: "deployBondKpiLinkedRate",
+        signature: {
+          full: "function deployBondKpiLinkedRate((((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, (uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate, (uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData) _bondKpiLinkedRateData) returns (address bondAddress_)",
+          canonical:
+            "deployBondKpiLinkedRate((((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bytes3,uint256,uint8,uint256,uint256),address[],bytes[]),(uint8,uint8,(bool,string,string)),(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8),(uint256,uint256,uint256,uint8,uint256)))",
+        },
+        selector: "0x06e6effc",
+      },
+      {
+        name: "deployBondSustainabilityPerformanceTargetRate",
+        signature: {
+          full: "function deployBondSustainabilityPerformanceTargetRate((((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, (uint256 baseRate, uint256 startPeriod, uint256 startRate, uint8 rateDecimals) interestRate, (uint256 baseLine, uint8 baseLineMode, uint256 deltaRate, uint8 impactDataMode)[] impactData, address[] projects) _bondSustainabilityPerformanceTargetRateData) returns (address bondAddress_)",
+          canonical:
+            "deployBondSustainabilityPerformanceTargetRate((((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bytes3,uint256,uint8,uint256,uint256),address[],bytes[]),(uint8,uint8,(bool,string,string)),(uint256,uint256,uint256,uint8),(uint256,uint8,uint256,uint8)[],address[]))",
+        },
+        selector: "0x5bdc1ceb",
+      },
+      {
+        name: "deployEquity",
+        signature: {
+          full: "function deployEquity(((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) equityDetails) _equityData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) _factoryRegulationData) returns (address equityAddress_)",
+          canonical:
+            "deployEquity(((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bool,bool,bool,bool,bool,bool,bool,uint8,bytes3,uint256,uint8)),(uint8,uint8,(bool,string,string)))",
+        },
+        selector: "0xfb3c59d8",
+      },
+      {
+        name: "deployProxy",
+        signature: {
+          full: "function deployProxy(address _resolver, bytes32 _configKey, uint256 _version, (bytes32 role, address[] members)[] _rbacs) returns (address proxyAddress_)",
+          canonical: "deployProxy(address,bytes32,uint256,(bytes32,address[])[])",
+        },
+        selector: "0x8d0672db",
+      },
+      {
+        name: "getAppliedRegulationData",
+        signature: {
+          full: "function getAppliedRegulationData(uint8 _regulationType, uint8 _regulationSubType) pure returns ((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData_)",
+          canonical: "getAppliedRegulationData(uint8,uint8)",
+        },
+        selector: "0x7b5208d0",
+      },
+    ],
+    events: [
+      {
+        name: "BondDeployed",
+        signature: {
+          full: "event BondDeployed(address indexed deployer, address bondAddress, ((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) regulationData)",
+          canonical:
+            "BondDeployed(address,address,((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bytes3,uint256,uint8,uint256,uint256),address[],bytes[]),(uint8,uint8,(bool,string,string)))",
+        },
+        topic0: "0x01d3e27a30d468a96e49f71ff84af896733789c198ff030dae07d2d9ae9e9f17",
+      },
+      {
+        name: "BondFixedRateDeployed",
+        signature: {
+          full: "event BondFixedRateDeployed(address indexed deployer, address bondAddress, (((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, (uint256 rate, uint8 rateDecimals) fixedRateData) bondFixedRateData)",
+          canonical:
+            "BondFixedRateDeployed(address,address,(((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bytes3,uint256,uint8,uint256,uint256),address[],bytes[]),(uint8,uint8,(bool,string,string)),(uint256,uint8)))",
+        },
+        topic0: "0x7760a5a38dddb73a76a698ab856ee89aa872213a7df0adfbca3c176f2cb74b23",
+      },
+      {
+        name: "BondKpiLinkedRateDeployed",
+        signature: {
+          full: "event BondKpiLinkedRateDeployed(address indexed deployer, address bondAddress, (((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, (uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate, (uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData) bondKpiLinkedRateData)",
+          canonical:
+            "BondKpiLinkedRateDeployed(address,address,(((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bytes3,uint256,uint8,uint256,uint256),address[],bytes[]),(uint8,uint8,(bool,string,string)),(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8),(uint256,uint256,uint256,uint8,uint256)))",
+        },
+        topic0: "0x45915a0104ea5671b1651c88183b8d6175450f67c9ad1462ed080594e0b10ec6",
+      },
+      {
+        name: "BondSustainabilityPerformanceTargetRateDeployed",
+        signature: {
+          full: "event BondSustainabilityPerformanceTargetRateDeployed(address indexed deployer, address bondAddress, (((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, (uint256 baseRate, uint256 startPeriod, uint256 startRate, uint8 rateDecimals) interestRate, (uint256 baseLine, uint8 baseLineMode, uint256 deltaRate, uint8 impactDataMode)[] impactData, address[] projects) bondSustainabilityPerformanceTargetRateData)",
+          canonical:
+            "BondSustainabilityPerformanceTargetRateDeployed(address,address,(((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bytes3,uint256,uint8,uint256,uint256),address[],bytes[]),(uint8,uint8,(bool,string,string)),(uint256,uint256,uint256,uint8),(uint256,uint8,uint256,uint8)[],address[]))",
+        },
+        topic0: "0x7b0542f2e963c32efb54f91877cf0e1b675a89541e6dacf56cc26990d1534cda",
+      },
+      {
+        name: "EquityDeployed",
+        signature: {
+          full: "event EquityDeployed(address indexed deployer, address equityAddress, ((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) equityDetails) equityData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) regulationData)",
+          canonical:
+            "EquityDeployed(address,address,((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bool,bool,bool,bool,bool,bool,bool,uint8,bytes3,uint256,uint8)),(uint8,uint8,(bool,string,string)))",
+        },
+        topic0: "0x59f510d04f090e1185bc91d7647b595294572073ef9f4754e7604b2a8af1e5f2",
+      },
+      {
+        name: "ProxyDeployed",
+        signature: {
+          full: "event ProxyDeployed(address indexed proxyAddress, address resolver, bytes32 configKey, uint256 version, (bytes32 role, address[] members)[] rbac)",
+          canonical: "ProxyDeployed(address,address,bytes32,uint256,(bytes32,address[])[])",
+        },
+        topic0: "0x03b5b4bc23cb6eb6351f669151e62cc3d9c419885402adf41cb4c17fa9031966",
+      },
+    ],
+    errors: [
+      {
+        name: "EmptyResolver",
+        signature: { full: "error EmptyResolver(address resolver)", canonical: "EmptyResolver(address)" },
+        selector: "0x840a2011",
+      },
+      {
+        name: "NoInitialAdmins",
+        signature: { full: "error NoInitialAdmins()", canonical: "NoInitialAdmins()" },
+        selector: "0x0b845f7f",
+      },
+      {
+        name: "RegulationTypeAndSubTypeForbidden",
+        signature: {
+          full: "error RegulationTypeAndSubTypeForbidden(uint8 regulationType, uint8 regulationSubType)",
+          canonical: "RegulationTypeAndSubTypeForbidden(uint8,uint8)",
+        },
+        selector: "0xfcaaa691",
+      },
+      {
+        name: "WrongDates",
+        signature: {
+          full: "error WrongDates(uint256 firstDate, uint256 secondDate)",
+          canonical: "WrongDates(uint256,uint256)",
+        },
+        selector: "0x1c94559c",
+      },
+      {
+        name: "WrongImpactDataValues",
+        signature: {
+          full: "error WrongImpactDataValues((uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData)",
+          canonical: "WrongImpactDataValues((uint256,uint256,uint256,uint8,uint256))",
+        },
+        selector: "0xa60b6cba",
+      },
+      {
+        name: "WrongInterestRateValues",
+        signature: {
+          full: "error WrongInterestRateValues((uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate)",
+          canonical: "WrongInterestRateValues((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8))",
+        },
+        selector: "0x570cf0d3",
+      },
+      {
+        name: "WrongISIN",
+        signature: { full: "error WrongISIN(string isin)", canonical: "WrongISIN(string)" },
+        selector: "0xdf749cc5",
+      },
+      {
+        name: "WrongISINChecksum",
+        signature: { full: "error WrongISINChecksum(string isin)", canonical: "WrongISINChecksum(string)" },
+        selector: "0x342c92db",
+      },
+      {
+        name: "WrongTimestamp",
+        signature: { full: "error WrongTimestamp(uint256 timeStamp)", canonical: "WrongTimestamp(uint256)" },
+        selector: "0xdcf61246",
+      },
+    ],
+    factory: (signer) => new FactoryFacet__factory(signer),
+  },
+
   FixedRateFacet: {
     name: "FixedRateFacet",
     resolverKey: {
@@ -6451,6 +6667,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x7fa523c84ab8d7fc5b72f08b9e46dbbf10c39e119a075b3e317002d14bc9f436",
       },
       {
+        name: "DelegateVotesChanged",
+        signature: {
+          full: "event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance)",
+          canonical: "DelegateVotesChanged(address,uint256,uint256)",
+        },
+        topic0: "0xdec2bacdd2f05b59de34da9b523dff8be42e5e38e818c82fdb0bae774387a724",
+      },
+      {
         name: "TokensFrozen",
         signature: {
           full: "event TokensFrozen(address indexed account, uint256 amount, bytes32 partition)",
@@ -6485,6 +6709,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     errors: [
       {
+        name: "AbafChangeForBlockForbidden",
+        signature: {
+          full: "error AbafChangeForBlockForbidden(uint256 blockNumber)",
+          canonical: "AbafChangeForBlockForbidden(uint256)",
+        },
+        selector: "0x5a2afdff",
+      },
+      {
         name: "AccessControlRequired",
         signature: {
           full: "error AccessControlRequired(bytes32 role, address sender)",
@@ -6517,6 +6749,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xefafde54",
       },
       {
+        name: "InvalidFreezeAmount",
+        signature: { full: "error InvalidFreezeAmount()", canonical: "InvalidFreezeAmount()" },
+        selector: "0xc5083c69",
+      },
+      {
         name: "InvalidPartition",
         signature: {
           full: "error InvalidPartition(address account, bytes32 partition)",
@@ -6542,6 +6779,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
       },
       {
         name: "WalletRecovered",
@@ -6734,6 +6976,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x9c351ddf8b7b71a1ce0a58696d6128d479e0988ce349f51a44e84241addffca8",
       },
       {
+        name: "DelegateVotesChanged",
+        signature: {
+          full: "event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance)",
+          canonical: "DelegateVotesChanged(address,uint256,uint256)",
+        },
+        topic0: "0xdec2bacdd2f05b59de34da9b523dff8be42e5e38e818c82fdb0bae774387a724",
+      },
+      {
         name: "HeldByPartition",
         signature: {
           full: "event HeldByPartition(address indexed operator, address indexed tokenHolder, bytes32 partition, uint256 holdId, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, bytes operatorData)",
@@ -6811,6 +7061,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     errors: [
       {
+        name: "AbafChangeForBlockForbidden",
+        signature: {
+          full: "error AbafChangeForBlockForbidden(uint256 blockNumber)",
+          canonical: "AbafChangeForBlockForbidden(uint256)",
+        },
+        selector: "0x5a2afdff",
+      },
+      {
         name: "AccessControlRequired",
         signature: {
           full: "error AccessControlRequired(bytes32 role, address sender)",
@@ -6871,6 +7129,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xdb0a3012",
       },
       {
+        name: "InvalidHoldAmount",
+        signature: { full: "error InvalidHoldAmount()", canonical: "InvalidHoldAmount()" },
+        selector: "0x352b484a",
+      },
+      {
         name: "InvalidPartition",
         signature: {
           full: "error InvalidPartition(address account, bytes32 partition)",
@@ -6912,6 +7175,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
       },
       {
         name: "WalletRecovered",
@@ -7059,6 +7327,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "InvalidDestinationAddress(address,address)",
         },
         selector: "0xdb0a3012",
+      },
+      {
+        name: "InvalidHoldAmount",
+        signature: { full: "error InvalidHoldAmount()", canonical: "InvalidHoldAmount()" },
+        selector: "0x352b484a",
       },
       {
         name: "IsNotEscrow",
@@ -7300,6 +7573,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xdb0a3012",
       },
       {
+        name: "InvalidHoldAmount",
+        signature: { full: "error InvalidHoldAmount()", canonical: "InvalidHoldAmount()" },
+        selector: "0x352b484a",
+      },
+      {
         name: "IsNotEscrow",
         signature: { full: "error IsNotEscrow()", canonical: "IsNotEscrow()" },
         selector: "0xf86f2a37",
@@ -7314,6 +7592,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   KpiLinkedRateFacet: {
     name: "KpiLinkedRateFacet",
+    description: "Diamond facet that exposes the KPI-linked interest rate capability (`IKpiLinkedRate`) on a token.",
     resolverKey: {
       name: "_KPI_LINKED_RATE_RESOLVER_KEY",
       value: "0x92999bd0329d03e46274ce7743ebe0060df95286df4fa7b354937b7d21757d22",
@@ -7321,45 +7600,45 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["KpiLinkedRate", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "getImpactData",
+        name: "getKpiLinkedRateImpactData",
         signature: {
-          full: "function getImpactData() view returns ((uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData_)",
-          canonical: "getImpactData()",
+          full: "function getKpiLinkedRateImpactData() view returns ((uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData_)",
+          canonical: "getKpiLinkedRateImpactData()",
         },
-        selector: "0x24bffca8",
+        selector: "0x8e0ae3e7",
       },
       {
-        name: "getInterestRate",
+        name: "getKpiLinkedRateInterestRate",
         signature: {
-          full: "function getInterestRate() view returns ((uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate_)",
-          canonical: "getInterestRate()",
+          full: "function getKpiLinkedRateInterestRate() view returns ((uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate_)",
+          canonical: "getKpiLinkedRateInterestRate()",
         },
-        selector: "0x5257b566",
+        selector: "0x11cce521",
       },
       {
-        name: "initialize_KpiLinkedRate",
+        name: "initializeKpiLinkedRate",
         signature: {
-          full: "function initialize_KpiLinkedRate((uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) _interestRate, (uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) _impactData)",
+          full: "function initializeKpiLinkedRate((uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) _interestRate, (uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) _impactData)",
           canonical:
-            "initialize_KpiLinkedRate((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8),(uint256,uint256,uint256,uint8,uint256))",
+            "initializeKpiLinkedRate((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8),(uint256,uint256,uint256,uint8,uint256))",
         },
-        selector: "0x0b7c89d7",
+        selector: "0x4d1b66be",
       },
       {
-        name: "setImpactData",
+        name: "setKpiLinkedRateImpactData",
         signature: {
-          full: "function setImpactData((uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) _newImpactData)",
-          canonical: "setImpactData((uint256,uint256,uint256,uint8,uint256))",
+          full: "function setKpiLinkedRateImpactData((uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) _newImpactData)",
+          canonical: "setKpiLinkedRateImpactData((uint256,uint256,uint256,uint8,uint256))",
         },
-        selector: "0x9ce6e100",
+        selector: "0x5c993888",
       },
       {
-        name: "setInterestRate",
+        name: "setKpiLinkedRateInterestRate",
         signature: {
-          full: "function setInterestRate((uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) _newInterestRate)",
-          canonical: "setInterestRate((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8))",
+          full: "function setKpiLinkedRateInterestRate((uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) _newInterestRate)",
+          canonical: "setKpiLinkedRateInterestRate((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8))",
         },
-        selector: "0x9a833a5b",
+        selector: "0x6b4bbb7a",
       },
     ],
     events: [
@@ -7401,11 +7680,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
-      },
-      {
-        name: "InterestRateIsKpiLinked",
-        signature: { full: "error InterestRateIsKpiLinked()", canonical: "InterestRateIsKpiLinked()" },
-        selector: "0x68eba14f",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
@@ -8295,6 +8569,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
+        name: "DelegateVotesChanged",
+        signature: {
+          full: "event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance)",
+          canonical: "DelegateVotesChanged(address,uint256,uint256)",
+        },
+        topic0: "0xdec2bacdd2f05b59de34da9b523dff8be42e5e38e818c82fdb0bae774387a724",
+      },
+      {
         name: "LockByPartitionReleased",
         signature: {
           full: "event LockByPartitionReleased(address indexed operator, address indexed tokenHolder, bytes32 indexed partition, uint256 lockId)",
@@ -8329,6 +8611,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     errors: [
       {
+        name: "AbafChangeForBlockForbidden",
+        signature: {
+          full: "error AbafChangeForBlockForbidden(uint256 blockNumber)",
+          canonical: "AbafChangeForBlockForbidden(uint256)",
+        },
+        selector: "0x5a2afdff",
+      },
+      {
         name: "AccessControlRequired",
         signature: {
           full: "error AccessControlRequired(bytes32 role, address sender)",
@@ -8351,6 +8641,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "InsufficientBalance(address,uint256,uint256,bytes32)",
         },
         selector: "0x5d6824c4",
+      },
+      {
+        name: "InvalidLockAmount",
+        signature: { full: "error InvalidLockAmount()", canonical: "InvalidLockAmount()" },
+        selector: "0x409fef33",
       },
       {
         name: "InvalidPartition",
@@ -8386,6 +8681,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
       },
       {
         name: "WalletRecovered",
@@ -8483,6 +8783,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
+        name: "DelegateVotesChanged",
+        signature: {
+          full: "event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance)",
+          canonical: "DelegateVotesChanged(address,uint256,uint256)",
+        },
+        topic0: "0xdec2bacdd2f05b59de34da9b523dff8be42e5e38e818c82fdb0bae774387a724",
+      },
+      {
         name: "LockByPartitionReleased",
         signature: {
           full: "event LockByPartitionReleased(address indexed operator, address indexed tokenHolder, bytes32 indexed partition, uint256 lockId)",
@@ -8517,6 +8825,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     errors: [
       {
+        name: "AbafChangeForBlockForbidden",
+        signature: {
+          full: "error AbafChangeForBlockForbidden(uint256 blockNumber)",
+          canonical: "AbafChangeForBlockForbidden(uint256)",
+        },
+        selector: "0x5a2afdff",
+      },
+      {
         name: "AccessControlRequired",
         signature: {
           full: "error AccessControlRequired(bytes32 role, address sender)",
@@ -8547,6 +8863,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "InsufficientBalance(address,uint256,uint256,bytes32)",
         },
         selector: "0x5d6824c4",
+      },
+      {
+        name: "InvalidLockAmount",
+        signature: { full: "error InvalidLockAmount()", canonical: "InvalidLockAmount()" },
+        selector: "0x409fef33",
       },
       {
         name: "InvalidPartition",
@@ -8587,6 +8908,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "SnapshotIdNull",
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
+      },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
       },
       {
         name: "WalletRecovered",
@@ -8760,7 +9086,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x8579befe",
       },
     ],
-    factory: (signer) => new MaturityByPartitionFacet__factory(signer),
+    factory: (signer) => new MaturityByPartitionFacet__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   MaturityFacet: {
@@ -8923,7 +9249,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x8579befe",
       },
     ],
-    factory: (signer) => new MaturityFacet__factory(signer),
+    factory: (signer) => new MaturityFacet__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   MetadataFacet: {
@@ -9122,8 +9448,53 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     factory: (signer) => new MintFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
+  NominalValueAtSnapshotFacet: {
+    name: "NominalValueAtSnapshotFacet",
+    description: "NominalValueAtSnapshotFacet",
+    resolverKey: {
+      name: "_NOMINAL_VALUE_AT_SNAPSHOT_RESOLVER_KEY",
+      value: "0xa9eb978fb9b2f23119fbe6dc3a3f6010398d58b37b5221961eaa584486c8c6fb",
+    },
+    inheritance: ["NominalValueAtSnapshot", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "nominalValueAtSnapshot",
+        signature: {
+          full: "function nominalValueAtSnapshot(uint256 _snapshotID) view returns (uint256 nominalValue_)",
+          canonical: "nominalValueAtSnapshot(uint256)",
+        },
+        selector: "0x526ce5ee",
+      },
+      {
+        name: "nominalValueDecimalsAtSnapshot",
+        signature: {
+          full: "function nominalValueDecimalsAtSnapshot(uint256 _snapshotID) view returns (uint8 nominalValueDecimals_)",
+          canonical: "nominalValueDecimalsAtSnapshot(uint256)",
+        },
+        selector: "0x1fed7107",
+      },
+    ],
+    errors: [
+      {
+        name: "SnapshotIdDoesNotExists",
+        signature: {
+          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
+          canonical: "SnapshotIdDoesNotExists(uint256)",
+        },
+        selector: "0x8e81eb83",
+      },
+      {
+        name: "SnapshotIdNull",
+        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
+        selector: "0xf128004d",
+      },
+    ],
+    factory: (signer) => new NominalValueAtSnapshotFacet__factory(signer),
+  },
+
   NominalValueFacet: {
     name: "NominalValueFacet",
+    description: "Diamond facet that exposes the nominal value capability (`INominalValue`) on a token.",
     resolverKey: {
       name: "_NOMINAL_VALUE_RESOLVER_KEY",
       value: "0x48903d4da8b1f0a5e9a9874be74ec5d2f8043d4d5b65cc093173c3dae103df8f",
@@ -9136,6 +9507,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbd4ff0a9",
       },
       {
+        name: "getNominalValueCurrency",
+        signature: {
+          full: "function getNominalValueCurrency() view returns (bytes3)",
+          canonical: "getNominalValueCurrency()",
+        },
+        selector: "0x416b5554",
+      },
+      {
         name: "getNominalValueDecimals",
         signature: {
           full: "function getNominalValueDecimals() view returns (uint8)",
@@ -9144,12 +9523,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x27e4bb51",
       },
       {
-        name: "initialize_NominalValue",
+        name: "initializeNominalValue",
         signature: {
-          full: "function initialize_NominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals)",
-          canonical: "initialize_NominalValue(uint256,uint8)",
+          full: "function initializeNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals, bytes3 _nominalValueCurrency)",
+          canonical: "initializeNominalValue(uint256,uint8,bytes3)",
         },
-        selector: "0x0c0e65af",
+        selector: "0x1bc79e1d",
       },
       {
         name: "setNominalValue",
@@ -9159,8 +9538,32 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x40ba1a0d",
       },
+      {
+        name: "setNominalValueCurrency",
+        signature: {
+          full: "function setNominalValueCurrency(bytes3 _nominalValueCurrency)",
+          canonical: "setNominalValueCurrency(bytes3)",
+        },
+        selector: "0x1c941c77",
+      },
     ],
     events: [
+      {
+        name: "NominalValueCurrencySet",
+        signature: {
+          full: "event NominalValueCurrencySet(address indexed operator, bytes3 nominalValueCurrency)",
+          canonical: "NominalValueCurrencySet(address,bytes3)",
+        },
+        topic0: "0x121154ad7f7eb7b91da8448a24fd91b473ce28adcb1c5127257918f37b4a3508",
+      },
+      {
+        name: "NominalValueInitialized",
+        signature: {
+          full: "event NominalValueInitialized(address indexed operator, uint256 nominalValue, uint8 nominalValueDecimals, bytes3 nominalValueCurrency)",
+          canonical: "NominalValueInitialized(address,uint256,uint8,bytes3)",
+        },
+        topic0: "0x9a822fe5a63dc100e6c6c4e0c1bfcc813c9343a12c7adbaf651b92b91fbcf2db",
+      },
       {
         name: "NominalValueSet",
         signature: {
@@ -10044,6 +10447,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "InvalidDestinationAddress(address,address)",
         },
         selector: "0xdb0a3012",
+      },
+      {
+        name: "InvalidHoldAmount",
+        signature: { full: "error InvalidHoldAmount()", canonical: "InvalidHoldAmount()" },
+        selector: "0x352b484a",
       },
       {
         name: "InvalidPartition",
@@ -11351,6 +11759,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xdb0a3012",
       },
       {
+        name: "InvalidHoldAmount",
+        signature: { full: "error InvalidHoldAmount()", canonical: "InvalidHoldAmount()" },
+        selector: "0x352b484a",
+      },
+      {
         name: "InvalidPartition",
         signature: {
           full: "error InvalidPartition(address account, bytes32 partition)",
@@ -11717,6 +12130,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xefafde54",
       },
       {
+        name: "InvalidFreezeAmount",
+        signature: { full: "error InvalidFreezeAmount()", canonical: "InvalidFreezeAmount()" },
+        selector: "0xc5083c69",
+      },
+      {
         name: "InvalidPartition",
         signature: {
           full: "error InvalidPartition(address account, bytes32 partition)",
@@ -11753,8 +12171,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf9f9bcf9",
       },
     ],
-    factory: (signer) => new RecoveryFacet__factory(signer),
-    timeTravelFactory: (signer) => new RecoveryFacetTimeTravel__factory(signer),
+    factory: (signer) => new RecoveryFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) => new RecoveryFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   ScheduledCrossOrderedTasksFacet: {
@@ -12662,6 +13080,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5d6824c4",
       },
       {
+        name: "InvalidLockAmount",
+        signature: { full: "error InvalidLockAmount()", canonical: "InvalidLockAmount()" },
+        selector: "0x409fef33",
+      },
+      {
         name: "InvalidPartition",
         signature: {
           full: "error InvalidPartition(address account, bytes32 partition)",
@@ -12710,7 +13133,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe39f4776",
       },
     ],
-    factory: (signer) => new TransferAndLockByPartitionFacet__factory(signer),
+    factory: (signer) => new TransferAndLockByPartitionFacet__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   TransferAndLockFacet: {
@@ -12798,6 +13221,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5d6824c4",
       },
       {
+        name: "InvalidLockAmount",
+        signature: { full: "error InvalidLockAmount()", canonical: "InvalidLockAmount()" },
+        selector: "0x409fef33",
+      },
+      {
         name: "InvalidPartition",
         signature: {
           full: "error InvalidPartition(address account, bytes32 partition)",
@@ -12843,8 +13271,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe39f4776",
       },
     ],
-    factory: (signer) => new TransferAndLockFacet__factory(signer),
-    timeTravelFactory: (signer) => new TransferAndLockFacetTimeTravel__factory(signer),
+    factory: (signer) => new TransferAndLockFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new TransferAndLockFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   TransferAndLockFixedRateFacet: {
@@ -12932,6 +13361,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5d6824c4",
       },
       {
+        name: "InvalidLockAmount",
+        signature: { full: "error InvalidLockAmount()", canonical: "InvalidLockAmount()" },
+        selector: "0x409fef33",
+      },
+      {
         name: "InvalidPartition",
         signature: {
           full: "error InvalidPartition(address account, bytes32 partition)",
@@ -12977,8 +13411,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe39f4776",
       },
     ],
-    factory: (signer) => new TransferAndLockFixedRateFacet__factory(signer),
-    timeTravelFactory: (signer) => new TransferAndLockFixedRateFacetTimeTravel__factory(signer),
+    factory: (signer) => new TransferAndLockFixedRateFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new TransferAndLockFixedRateFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   TransferAndLockKpiLinkedRateFacet: {
@@ -13066,6 +13501,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5d6824c4",
       },
       {
+        name: "InvalidLockAmount",
+        signature: { full: "error InvalidLockAmount()", canonical: "InvalidLockAmount()" },
+        selector: "0x409fef33",
+      },
+      {
         name: "InvalidPartition",
         signature: {
           full: "error InvalidPartition(address account, bytes32 partition)",
@@ -13111,8 +13551,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe39f4776",
       },
     ],
-    factory: (signer) => new TransferAndLockKpiLinkedRateFacet__factory(signer),
-    timeTravelFactory: (signer) => new TransferAndLockKpiLinkedRateFacetTimeTravel__factory(signer),
+    factory: (signer) => new TransferAndLockKpiLinkedRateFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new TransferAndLockKpiLinkedRateFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   TransferAndLockSustainabilityPerformanceTargetRateFacet: {
@@ -13200,6 +13641,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5d6824c4",
       },
       {
+        name: "InvalidLockAmount",
+        signature: { full: "error InvalidLockAmount()", canonical: "InvalidLockAmount()" },
+        selector: "0x409fef33",
+      },
+      {
         name: "InvalidPartition",
         signature: {
           full: "error InvalidPartition(address account, bytes32 partition)",
@@ -13245,9 +13691,16 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe39f4776",
       },
     ],
-    factory: (signer) => new TransferAndLockSustainabilityPerformanceTargetRateFacet__factory(signer),
+    factory: (signer) =>
+      new TransferAndLockSustainabilityPerformanceTargetRateFacet__factory(
+        getLibLinks("clearingReadOps") as any,
+        signer,
+      ),
     timeTravelFactory: (signer) =>
-      new TransferAndLockSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
+      new TransferAndLockSustainabilityPerformanceTargetRateFacetTimeTravel__factory(
+        getLibLinks("clearingReadOps") as any,
+        signer,
+      ),
   },
 
   TransferByPartitionFacet: {
@@ -13675,7 +14128,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 122 as const;
+export const TOTAL_FACETS = 124 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

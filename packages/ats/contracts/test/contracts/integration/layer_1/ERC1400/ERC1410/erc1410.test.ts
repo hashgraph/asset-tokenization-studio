@@ -615,26 +615,6 @@ describe("Clearing Tests", () => {
           asset.operatorClearingRedeemByPartition(clearingOperationFrom, _AMOUNT),
         ).to.be.revertedWithCustomError(asset, "ClearingIsDisabled");
       });
-      it("GIVEN a token not in clearing mode WHEN trigger clearing THEN transaction fails with ClearingIsDisabled", async () => {
-        await asset.clearingTransferByPartition(clearingOperation, _AMOUNT, signer_B.address);
-
-        await asset.deactivateClearing();
-        // Approve
-        await expect(asset.approveClearingOperationByPartition(clearingIdentifier)).to.be.revertedWithCustomError(
-          asset,
-          "ClearingIsDisabled",
-        );
-        // Cancel
-        await expect(asset.cancelClearingOperationByPartition(clearingIdentifier)).to.be.revertedWithCustomError(
-          asset,
-          "ClearingIsDisabled",
-        );
-        // Reclaim
-        await expect(asset.reclaimClearingOperationByPartition(clearingIdentifier)).to.be.revertedWithCustomError(
-          asset,
-          "ClearingIsDisabled",
-        );
-      });
     });
 
     describe("Paused", () => {

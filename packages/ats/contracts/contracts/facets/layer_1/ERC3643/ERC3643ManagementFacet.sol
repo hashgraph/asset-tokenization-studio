@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IERC3643Management } from "./IERC3643Management.sol";
 import { ERC3643Management } from "./ERC3643Management.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../../infrastructure/proxy/Bytes4Builder.sol";
 import { _ERC3643_MANAGEMENT_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
 contract ERC3643ManagementFacet is ERC3643Management, IStaticFunctionSelectors {
@@ -11,16 +12,11 @@ contract ERC3643ManagementFacet is ERC3643Management, IStaticFunctionSelectors {
         staticResolverKey_ = _ERC3643_MANAGEMENT_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 1;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.initialize_ERC3643.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(this.initialize_ERC3643.selector);
     }
 
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(IERC3643Management).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IERC3643Management).interfaceId);
     }
 }
