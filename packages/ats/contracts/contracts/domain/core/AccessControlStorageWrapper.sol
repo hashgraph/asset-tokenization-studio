@@ -7,6 +7,7 @@ import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableS
 import { _ACCESS_CONTROL_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { IAccessControl } from "../../facets/accessControl/IAccessControl.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 
 struct RoleData {
     bytes32 roleAdmin;
@@ -113,6 +114,12 @@ library AccessControlStorageWrapper {
 
     function checkAnyRole(bytes32[] memory _roles, address _account) internal view {
         if (!hasAnyRole(_roles, _account)) revert IAccessControl.AccountHasNoRoles(_account, _roles);
+    }
+
+    function checkNotSoleAdmin(bytes32 _role) internal view {
+        if (_role == DEFAULT_ADMIN_ROLE && rolesStorage().roles[_role].roleMembers.length() <= 1) {
+            revert IAccessControl.CannotRenounceSoleAdmin();
+        }
     }
 
     function getRoleAdmin(bytes32 _role) internal view returns (bytes32) {
