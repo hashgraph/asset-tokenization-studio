@@ -3,14 +3,15 @@
 /**
  * Orchestrator library address management for external library linking.
  *
- * External orchestrator libraries (TokenCoreOps, HoldOps, ClearingOps, ClearingReadOps)
- * use Solidity `public` functions, which means they are deployed as separate contracts
- * and their addresses must be linked into facet bytecode at deployment time.
+ * External orchestrator libraries (TokenCoreOps, HoldOps, ClearingOps, ClearingLifecycleOps,
+ * ClearingReadOps, ClearingProtectedOps) use Solidity `public` functions, which means they
+ * are deployed as separate contracts and their addresses must be linked into facet bytecode
+ * at deployment time.
  *
  * This module provides:
  * - Address storage/retrieval for deployed orchestrator libraries
  * - `getLibLinks()` helper that returns TypeChain-format link addresses for factory constructors
- * - `deployOrchestratorLibraries()` to deploy all 4 libraries in correct dependency order
+ * - `deployOrchestratorLibraries()` to deploy all libraries in correct dependency order
  *
  * @module domain/orchestratorLibraries
  */
@@ -25,6 +26,7 @@ export interface OrchestratorLibraryAddresses {
   tokenCoreOps: string;
   holdOps: string;
   clearingOps: string;
+  clearingLifecycleOps: string;
   clearingReadOps: string;
   clearingProtectedOps: string;
 }
@@ -37,6 +39,7 @@ export const LIBRARY_KEYS = {
   tokenCoreOps: "contracts/domain/orchestrator/TokenCoreOps.sol:TokenCoreOps",
   holdOps: "contracts/domain/orchestrator/HoldOps.sol:HoldOps",
   clearingOps: "contracts/domain/orchestrator/ClearingOps.sol:ClearingOps",
+  clearingLifecycleOps: "contracts/domain/orchestrator/ClearingLifecycleOps.sol:ClearingLifecycleOps",
   clearingReadOps: "contracts/domain/orchestrator/ClearingReadOps.sol:ClearingReadOps",
   clearingProtectedOps: "contracts/domain/orchestrator/ClearingProtectedOps.sol:ClearingProtectedOps",
 } as const;
@@ -122,13 +125,15 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   AdjustBalancesFacet: ["tokenCoreOps"],
   // HoldOps dependencies - hold/lock operations
   OperatorHoldByPartitionFacet: ["holdOps"],
+  ControllerHoldByPartitionFacet: ["holdOps"],
+  ProtectedHoldByPartitionFacet: ["holdOps"],
   HoldFacet: ["holdOps"],
   HoldByPartitionFacet: ["holdOps"],
   // ClearingOps dependencies - clearing transfer operations
   ProtectedClearingHoldByPartitionFacet: ["clearingProtectedOps"],
   ClearingHoldByPartitionFacet: ["clearingOps", "clearingReadOps"],
   OperatorClearingHoldByPartitionFacet: ["clearingOps"],
-  ClearingByPartitionFacet: ["clearingOps", "clearingReadOps"],
+  ClearingByPartitionFacet: ["clearingOps", "clearingLifecycleOps", "clearingReadOps"],
   ClearingFacet: ["clearingReadOps"],
   ProtectedClearingByPartitionFacet: ["clearingProtectedOps"],
   // BalanceTrackerFacet + BalanceTrackerByPartitionFacet depend on SnapshotsStorageWrapper which uses ClearingReadOps
@@ -213,6 +218,7 @@ export function toTypeChainLibraryAddresses(addresses?: OrchestratorLibraryAddre
     [LIBRARY_KEYS.tokenCoreOps]: addrs.tokenCoreOps,
     [LIBRARY_KEYS.holdOps]: addrs.holdOps,
     [LIBRARY_KEYS.clearingOps]: addrs.clearingOps,
+    [LIBRARY_KEYS.clearingLifecycleOps]: addrs.clearingLifecycleOps,
     [LIBRARY_KEYS.clearingReadOps]: addrs.clearingReadOps,
     [LIBRARY_KEYS.clearingProtectedOps]: addrs.clearingProtectedOps,
   };
@@ -225,7 +231,8 @@ export function toTypeChainLibraryAddresses(addresses?: OrchestratorLibraryAddre
  * 1. ClearingReadOps, HoldOps (no dependencies)
  * 2. TokenCoreOps (depends on ClearingReadOps)
  * 3. ClearingOps (depends on TokenCoreOps and HoldOps)
- * 4. ClearingProtectedOps (depends on ClearingOps)
+ * 4. ClearingLifecycleOps (depends on ClearingOps, TokenCoreOps and HoldOps)
+ * 5. ClearingProtectedOps (depends on ClearingOps)
  *
  * After deployment, automatically calls `setOrchestratorLibraryAddresses()`.
  *
@@ -239,6 +246,7 @@ export async function deployOrchestratorLibraries(signer: Signer): Promise<Orche
     HoldOps__factory,
     ClearingReadOps__factory,
     ClearingOps__factory,
+    ClearingLifecycleOps__factory,
     ClearingProtectedOps__factory,
   } = await import("@contract-types");
 
@@ -289,7 +297,24 @@ export async function deployOrchestratorLibraries(signer: Signer): Promise<Orche
   const clearingOpsAddr = await clearingOps.getAddress();
   info(`   ✓ ClearingOps deployed at ${clearingOpsAddr}`);
 
-  // Phase 4: Deploy ClearingProtectedOps (depends on ClearingOps via internal calls)
+  // Phase 4: ClearingLifecycleOps owns the post-creation lifecycle (approve/cancel/reclaim).
+  // It calls ClearingOps.beforeClearingOperation as an `internal` cross-library call which
+  // the compiler inlines, so no ClearingOps link is required. It does however use
+  // TokenCoreOps, HoldOps and HoldStorageWrapper (which transitively reach ClearingReadOps).
+  const clearingLifecycleOps = await new ClearingLifecycleOps__factory(
+    {
+      [LIBRARY_KEYS.tokenCoreOps]: tokenCoreOpsAddr,
+      [LIBRARY_KEYS.holdOps]: holdOpsAddr,
+      [LIBRARY_KEYS.clearingReadOps]: clearingReadOpsAddr,
+    } as any,
+    signer,
+  ).deploy();
+  await clearingLifecycleOps.waitForDeployment();
+
+  const clearingLifecycleOpsAddr = await clearingLifecycleOps.getAddress();
+  info(`   ✓ ClearingLifecycleOps deployed at ${clearingLifecycleOpsAddr}`);
+
+  // Phase 5: Deploy ClearingProtectedOps (depends on ClearingOps via internal calls)
   const clearingProtectedOps = await new ClearingProtectedOps__factory(
     {
       [LIBRARY_KEYS.clearingOps]: clearingOpsAddr,
@@ -305,6 +330,7 @@ export async function deployOrchestratorLibraries(signer: Signer): Promise<Orche
     tokenCoreOps: tokenCoreOpsAddr,
     holdOps: holdOpsAddr,
     clearingOps: clearingOpsAddr,
+    clearingLifecycleOps: clearingLifecycleOpsAddr,
     clearingReadOps: clearingReadOpsAddr,
     clearingProtectedOps: clearingProtectedOpsAddr,
   };
