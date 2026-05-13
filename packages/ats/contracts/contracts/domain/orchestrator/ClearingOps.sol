@@ -228,6 +228,8 @@ library ClearingOps {
         bytes memory _operatorData,
         ThirdPartyType _thirdPartyType
     ) public returns (bool success_, uint256 clearingId_) {
+        HoldStorageWrapper.checkNonZeroHoldAmount(_hold.amount);
+
         bytes32 partition = _clearingOperation.partition;
 
         clearingId_ = ClearingStorageWrapper.increaseClearingId(

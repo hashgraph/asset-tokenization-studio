@@ -194,6 +194,28 @@ describe("Maturity Tests", () => {
       await expect(asset.connect(signer_A).fullRedeemAtMaturity(newUser.address)).to.not.be.reverted;
     });
 
+    it("GIVEN a zero-amount hold creation attempt WHEN createHoldByPartition THEN reverts with InvalidHoldAmount preventing ghost partition DoS on fullRedeemAtMaturity", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_C).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: amount,
+        data: "0x",
+      });
+
+      const zeroAmountHold = {
+        amount: 0,
+        expirationTimestamp: maturityDate,
+        escrow: signer_B.address,
+        to: signer_C.address,
+        data: "0x",
+      };
+
+      await expect(
+        asset.connect(signer_A).createHoldByPartition(DEFAULT_PARTITION, zeroAmountHold),
+      ).to.be.revertedWithCustomError(asset, "InvalidHoldAmount");
+    });
+
     it("GIVEN a multi-partition token holder WHEN fullRedeemAtMaturity THEN emits RedeemedByPartition for each partition", async () => {
       await deploySecurityFixture(true);
       await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
