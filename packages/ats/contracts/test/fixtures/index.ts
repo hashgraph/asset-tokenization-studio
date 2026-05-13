@@ -13,12 +13,7 @@
 export { deployAtsInfrastructureFixture } from "./infrastructure.fixture";
 
 // Integration test fixtures (lighter weight)
-export {
-  deployBlrFixture,
-  registerCommonFacetsFixture,
-  registerTransferFacetFixture,
-  registerMigrationFacetFixture,
-} from "./integration.fixture";
+export { deployBlrFixture, registerCommonFacetsFixture, registerTransferFacetFixture } from "./integration.fixture";
 
 // TUP proxy fixtures (TransparentUpgradeableProxy testing)
 export { deployTupProxyFixture, deployTupProxyWithV2Fixture, TUP_VERSIONS } from "./tupProxy.fixture";
