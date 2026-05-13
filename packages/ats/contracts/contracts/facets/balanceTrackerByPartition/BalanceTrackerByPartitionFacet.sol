@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IBalanceTrackerByPartition } from "./IBalanceTrackerByPartition.sol";
 import { BalanceTrackerByPartition } from "./BalanceTrackerByPartition.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { _BALANCE_TRACKER_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -23,22 +24,17 @@ contract BalanceTrackerByPartitionFacet is BalanceTrackerByPartition, IStaticFun
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 3;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.getTotalBalanceForByPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.totalSupplyByPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.balanceOfByPartition.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.balanceOfByPartition.selector,
+                this.totalSupplyByPartition.selector,
+                this.getTotalBalanceForByPartition.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        uint256 selectorIndex = 1;
-        staticInterfaceIds_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticInterfaceIds_[--selectorIndex] = type(IBalanceTrackerByPartition).interfaceId;
-        }
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IBalanceTrackerByPartition).interfaceId);
     }
 }

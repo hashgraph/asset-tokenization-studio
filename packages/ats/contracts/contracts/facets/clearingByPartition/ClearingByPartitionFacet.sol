@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IClearingByPartition } from "./IClearingByPartition.sol";
 import { ClearingByPartition } from "./ClearingByPartition.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { _CLEARING_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -21,31 +22,26 @@ contract ClearingByPartitionFacet is ClearingByPartition, IStaticFunctionSelecto
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 12;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.getClearingsIdForByPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getClearingCountForByPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getClearedAmountForByPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getClearingTransferForByPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.clearingTransferFromByPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.clearingTransferByPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getClearingRedeemForByPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.clearingRedeemFromByPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.clearingRedeemByPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.reclaimClearingOperationByPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.cancelClearingOperationByPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.approveClearingOperationByPartition.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.approveClearingOperationByPartition.selector,
+                this.cancelClearingOperationByPartition.selector,
+                this.reclaimClearingOperationByPartition.selector,
+                this.clearingRedeemByPartition.selector,
+                this.clearingRedeemFromByPartition.selector,
+                this.getClearingRedeemForByPartition.selector,
+                this.clearingTransferByPartition.selector,
+                this.clearingTransferFromByPartition.selector,
+                this.getClearingTransferForByPartition.selector,
+                this.getClearedAmountForByPartition.selector,
+                this.getClearingCountForByPartition.selector,
+                this.getClearingsIdForByPartition.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        uint256 selectorIndex = 1;
-        staticInterfaceIds_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticInterfaceIds_[--selectorIndex] = type(IClearingByPartition).interfaceId;
-        }
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IClearingByPartition).interfaceId);
     }
 }

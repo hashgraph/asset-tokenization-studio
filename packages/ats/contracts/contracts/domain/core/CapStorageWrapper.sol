@@ -85,22 +85,18 @@ library CapStorageWrapper {
         }
     }
 
-    function requireValidNewMaxSupplyByPartition(
+    function checkValidNewMaxSupplyByPartition(
         bytes32 _partition,
         uint256 _newMaxSupply,
         uint256 _timestamp
     ) internal view {
-        if (_newMaxSupply == 0) return;
+        if (_newMaxSupply == 0) revert ICap.NewMaxSupplyCannotBeZero();
         uint256 totalSupplyForPartition = AdjustBalancesStorageWrapper.totalSupplyByPartitionAdjustedAt(
             _partition,
             _timestamp
         );
         if (totalSupplyForPartition > _newMaxSupply) {
             revert ICap.NewMaxSupplyForPartitionTooLow(_partition, _newMaxSupply, totalSupplyForPartition);
-        }
-        uint256 maxSupplyOverall = getMaxSupplyAdjustedAt(_timestamp);
-        if (_newMaxSupply > maxSupplyOverall) {
-            revert ICap.NewMaxSupplyByPartitionTooHigh(_partition, _newMaxSupply, maxSupplyOverall);
         }
     }
 
