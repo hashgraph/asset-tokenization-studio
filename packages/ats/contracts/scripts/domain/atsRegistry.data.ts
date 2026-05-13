@@ -7217,7 +7217,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x8579befe",
       },
     ],
-    factory: (signer) => new HoldByPartitionFacet__factory(signer),
+    factory: (signer) => new HoldByPartitionFacet__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   HoldFacet: {
