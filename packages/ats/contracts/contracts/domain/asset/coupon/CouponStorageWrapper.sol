@@ -7,7 +7,6 @@ import {
     SNAPSHOT_RESULT_ID,
     SNAPSHOT_TASK_TYPE
 } from "../../../constants/values.sol";
-import { BondStorageWrapper } from "../BondStorageWrapper.sol";
 import { CorporateActionsStorageWrapper } from "../../core/CorporateActionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
@@ -273,11 +272,7 @@ library CouponStorageWrapper {
 
         uint256 actualOrderedListLengthTotal = getCouponsOrderedListTotal();
         if (pos < actualOrderedListLengthTotal) {
-            uint256 deprecatedTotal = BondStorageWrapper.DEPRECATED_getCouponsOrderedListTotal();
-            if (pos < deprecatedTotal) {
-                return BondStorageWrapper.DEPRECATED_getCouponsOrderedListByPosition(pos);
-            }
-            return _couponStorage().couponsOrderedListByIds[pos - deprecatedTotal];
+            return _couponStorage().couponsOrderedListByIds[pos];
         }
 
         uint256 pendingIndexOffset = pos - actualOrderedListLengthTotal;
@@ -315,9 +310,7 @@ library CouponStorageWrapper {
     }
 
     function getCouponsOrderedListTotal() internal view returns (uint256 total_) {
-        total_ =
-            _couponStorage().couponsOrderedListByIds.length +
-            BondStorageWrapper.DEPRECATED_getCouponsOrderedListTotal();
+        total_ = _couponStorage().couponsOrderedListByIds.length;
     }
 
     function getPreviousCouponInOrderedList(uint256 couponID) internal view returns (uint256 previousCouponID_) {
