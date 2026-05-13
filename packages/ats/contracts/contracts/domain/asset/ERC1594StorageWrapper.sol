@@ -300,24 +300,10 @@ library ERC1594StorageWrapper {
      * @param checkSender Whether to validate compliance of `msg.sender`.
      */
     function checkCompliance(address from, address to, bool checkSender) internal view {
-        checkCompliance(from, to, 0, checkSender);
-    }
-
-    /**
-     * @notice Reverts if the transfer between `from` and `to` fails
-     * compliance checks. Optionally checks sender compliance.
-     * @dev Delegates to `_isCompliant` and reverts with the encoded reason
-     * code and details on failure.
-     * @param from Source address (may be zero).
-     * @param to Destination address (may be zero).
-     * @param value Amount tried to be transferred.
-     * @param checkSender Whether to validate compliance of `msg.sender`.
-     */
-    function checkCompliance(address from, address to, uint256 value, bool checkSender) internal view {
         (bool isCompliant_, , bytes32 reasonCode, bytes memory details) = _isCompliant(
             from,
             to,
-            value,
+            0,
             EvmAccessors.getMsgSender(),
             checkSender
         );

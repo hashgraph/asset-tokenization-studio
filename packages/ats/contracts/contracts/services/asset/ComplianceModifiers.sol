@@ -64,18 +64,7 @@ abstract contract ComplianceModifiers {
      * @param checkSender Whether to also validate msg.sender against compliance rules.
      */
     modifier onlyCompliant(address from, address to, bool checkSender) {
-        ERC1594StorageWrapper.checkCompliance(from, to, 0, checkSender);
-        _;
-    }
-
-    /**
-     * @dev Modifier that verifies whether account satisfies
-     * all compliance rules enforced by the compliance module.
-     *
-     * @param account The account address to validate.
-     */
-    modifier onlyAccountCompliant(address account) {
-        ERC1594StorageWrapper.checkAccountCompliance(account);
+        ERC1594StorageWrapper.checkCompliance(from, to, checkSender);
         _;
     }
 }

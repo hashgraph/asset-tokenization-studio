@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-07T13:43:18.807Z
+ * Generated: 2026-05-13T09:49:48.091Z
  * Facets: 122
  * Infrastructure: 2
  *
@@ -1600,11 +1600,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccessControlRequired(bytes32,address)",
         },
         selector: "0x10210dec",
-      },
-      {
-        name: "ClearingIsActivated",
-        signature: { full: "error ClearingIsActivated()", canonical: "ClearingIsActivated()" },
-        selector: "0x5b2e3086",
       },
       {
         name: "InputAmountsArrayLengthMismatch",
