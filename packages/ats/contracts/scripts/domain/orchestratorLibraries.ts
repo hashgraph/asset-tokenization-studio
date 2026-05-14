@@ -30,6 +30,7 @@ export interface OrchestratorLibraryAddresses {
   clearingReadOps: string;
   clearingProtectedOps: string;
   scheduledTasksOps: string;
+  scheduledTasksDispatchOps: string;
 }
 
 /**
@@ -44,6 +45,7 @@ export const LIBRARY_KEYS = {
   clearingReadOps: "contracts/domain/orchestrator/ClearingReadOps.sol:ClearingReadOps",
   clearingProtectedOps: "contracts/domain/orchestrator/ClearingProtectedOps.sol:ClearingProtectedOps",
   scheduledTasksOps: "contracts/domain/orchestrator/ScheduledTasksOps.sol:ScheduledTasksOps",
+  scheduledTasksDispatchOps: "contracts/domain/orchestrator/ScheduledTasksDispatchOps.sol:ScheduledTasksDispatchOps",
 } as const;
 
 /**
@@ -109,7 +111,7 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   // TokenCoreOps dependencies - ERC20 and ERC1410 token operations
   TransferFacet: ["tokenCoreOps"],
   ERC20ReadFacet: ["tokenCoreOps"],
-  ERC20VotesFacet: ["clearingReadOps", "scheduledTasksOps"],
+  ERC20VotesFacet: ["clearingReadOps", "scheduledTasksOps", "scheduledTasksDispatchOps"],
   ERC1410ManagementFacet: ["tokenCoreOps"],
   ProtectedByPartitionFacet: ["tokenCoreOps"],
   ControllerByPartitionFacet: ["tokenCoreOps"],
@@ -127,7 +129,7 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   BatchTransferFacet: ["tokenCoreOps"],
   MintFacet: ["tokenCoreOps"],
   BurnFacet: ["tokenCoreOps"],
-  AdjustBalancesFacet: ["tokenCoreOps"],
+  AdjustBalancesFacet: ["tokenCoreOps", "scheduledTasksDispatchOps"],
   AllowanceFacet: ["tokenCoreOps", "scheduledTasksOps"],
   MaturityFacet: ["tokenCoreOps", "scheduledTasksOps"],
   MaturityByPartitionFacet: ["tokenCoreOps", "scheduledTasksOps"],
@@ -164,6 +166,11 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   CouponFacet: ["clearingReadOps"],
   DividendFacet: ["clearingReadOps"],
   VotingFacet: ["clearingReadOps"],
+  // ScheduledTasksDispatchOps dependencies — ScheduledTasksStorageWrapper uses try/catch delegatecall to this lib
+  SnapshotsFacet: ["scheduledTasksDispatchOps"],
+  ScheduledCrossOrderedTasksFacet: ["scheduledTasksDispatchOps"],
+  ScheduledCrossOrderedTasksKpiLinkedRateFacet: ["scheduledTasksDispatchOps"],
+  ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet: ["scheduledTasksDispatchOps"],
   // Additional facets with ScheduledTasksOps dependencies
   BatchFreezeFacet: ["scheduledTasksOps"],
   FreezeFacet: ["scheduledTasksOps"],
@@ -240,6 +247,7 @@ export function toTypeChainLibraryAddresses(addresses?: OrchestratorLibraryAddre
     [LIBRARY_KEYS.clearingReadOps]: addrs.clearingReadOps,
     [LIBRARY_KEYS.clearingProtectedOps]: addrs.clearingProtectedOps,
     [LIBRARY_KEYS.scheduledTasksOps]: addrs.scheduledTasksOps,
+    [LIBRARY_KEYS.scheduledTasksDispatchOps]: addrs.scheduledTasksDispatchOps,
   };
 }
 
@@ -247,11 +255,12 @@ export function toTypeChainLibraryAddresses(addresses?: OrchestratorLibraryAddre
  * Deploy all orchestrator libraries in correct dependency order.
  *
  * Deployment order:
- * 1. ClearingReadOps, HoldOps (no dependencies)
- * 2. TokenCoreOps (depends on ClearingReadOps)
- * 3. ClearingOps (depends on TokenCoreOps and HoldOps)
- * 4. ClearingLifecycleOps (depends on ClearingOps, TokenCoreOps and HoldOps)
- * 5. ClearingProtectedOps (depends on ClearingOps)
+ * 1. ScheduledTasksDispatchOps, ClearingReadOps (no dependencies)
+ * 2. ScheduledTasksOps (depends on ScheduledTasksDispatchOps via ScheduledTasksStorageWrapper)
+ * 3. TokenCoreOps and HoldOps (depend on ClearingReadOps + ScheduledTasksOps)
+ * 4. ClearingOps (depends on TokenCoreOps, HoldOps, ClearingReadOps, ScheduledTasksOps)
+ * 5. ClearingLifecycleOps (depends on TokenCoreOps, HoldOps, ClearingReadOps, ScheduledTasksOps)
+ * 6. ClearingProtectedOps (depends on ClearingOps)
  *
  * After deployment, automatically calls `setOrchestratorLibraryAddresses()`.
  *
@@ -268,6 +277,7 @@ export async function deployOrchestratorLibraries(signer: Signer): Promise<Orche
     ClearingLifecycleOps__factory,
     ClearingProtectedOps__factory,
     ScheduledTasksOps__factory,
+    ScheduledTasksDispatchOps__factory,
   } = await import("@contract-types");
 
   info("   Deploying orchestrator libraries...");
@@ -277,16 +287,29 @@ export async function deployOrchestratorLibraries(signer: Signer): Promise<Orche
   // eth_getTransactionCount before any transaction lands, so they all receive the
   // same nonce and stall indefinitely waiting for a receipt that never arrives.
 
-  // Phase 1: ScheduledTasksOps and ClearingReadOps have no library dependencies.
-  const scheduledTasksOps = await (await new ScheduledTasksOps__factory(signer).deploy()).waitForDeployment();
-  const scheduledTasksOpsAddr = await scheduledTasksOps.getAddress();
-  info(`   ✓ ScheduledTasksOps deployed at ${scheduledTasksOpsAddr}`);
+  // Phase 1: ScheduledTasksDispatchOps and ClearingReadOps have no library dependencies.
+  const scheduledTasksDispatchOps = await (
+    await new ScheduledTasksDispatchOps__factory(signer).deploy()
+  ).waitForDeployment();
+  const scheduledTasksDispatchOpsAddr = await scheduledTasksDispatchOps.getAddress();
+  info(`   ✓ ScheduledTasksDispatchOps deployed at ${scheduledTasksDispatchOpsAddr}`);
 
   const clearingReadOps = await (await new ClearingReadOps__factory(signer).deploy()).waitForDeployment();
   const clearingReadOpsAddr = await clearingReadOps.getAddress();
   info(`   ✓ ClearingReadOps deployed at ${clearingReadOpsAddr}`);
 
-  // Phase 2: TokenCoreOps and HoldOps depend on ClearingReadOps + ScheduledTasksOps.
+  // Phase 2: ScheduledTasksOps inlines ScheduledTasksStorageWrapper which calls ScheduledTasksDispatchOps.
+  const scheduledTasksOps = await new ScheduledTasksOps__factory(
+    {
+      [LIBRARY_KEYS.scheduledTasksDispatchOps]: scheduledTasksDispatchOpsAddr,
+    } as any,
+    signer,
+  ).deploy();
+  await scheduledTasksOps.waitForDeployment();
+  const scheduledTasksOpsAddr = await scheduledTasksOps.getAddress();
+  info(`   ✓ ScheduledTasksOps deployed at ${scheduledTasksOpsAddr}`);
+
+  // Phase 3: TokenCoreOps and HoldOps depend on ClearingReadOps + ScheduledTasksOps.
   const tokenCoreOps = await new TokenCoreOps__factory(
     {
       [LIBRARY_KEYS.clearingReadOps]: clearingReadOpsAddr,
@@ -309,7 +332,7 @@ export async function deployOrchestratorLibraries(signer: Signer): Promise<Orche
   const holdOpsAddr = await holdOps.getAddress();
   info(`   ✓ HoldOps deployed at ${holdOpsAddr}`);
 
-  // Phase 3: ClearingOps depends on TokenCoreOps, HoldOps, ClearingReadOps + ScheduledTasksOps.
+  // Phase 4: ClearingOps depends on TokenCoreOps, HoldOps, ClearingReadOps + ScheduledTasksOps.
   const clearingOps = await new ClearingOps__factory(
     {
       [LIBRARY_KEYS.tokenCoreOps]: tokenCoreOpsAddr,
@@ -324,7 +347,7 @@ export async function deployOrchestratorLibraries(signer: Signer): Promise<Orche
   const clearingOpsAddr = await clearingOps.getAddress();
   info(`   ✓ ClearingOps deployed at ${clearingOpsAddr}`);
 
-  // Phase 4: ClearingLifecycleOps owns the post-creation lifecycle (approve/cancel/reclaim).
+  // Phase 5: ClearingLifecycleOps owns the post-creation lifecycle (approve/cancel/reclaim).
   // It calls ClearingOps.beforeClearingOperation as an `internal` cross-library call which
   // the compiler inlines, so no ClearingOps link is required. It does however use
   // TokenCoreOps, HoldOps, ClearingReadOps, and ScheduledTasksOps.
@@ -342,7 +365,7 @@ export async function deployOrchestratorLibraries(signer: Signer): Promise<Orche
   const clearingLifecycleOpsAddr = await clearingLifecycleOps.getAddress();
   info(`   ✓ ClearingLifecycleOps deployed at ${clearingLifecycleOpsAddr}`);
 
-  // Phase 5: Deploy ClearingProtectedOps (depends on ClearingOps via internal calls)
+  // Phase 6: Deploy ClearingProtectedOps (depends on ClearingOps via internal calls)
   const clearingProtectedOps = await new ClearingProtectedOps__factory(
     {
       [LIBRARY_KEYS.clearingOps]: clearingOpsAddr,
@@ -362,6 +385,7 @@ export async function deployOrchestratorLibraries(signer: Signer): Promise<Orche
     clearingReadOps: clearingReadOpsAddr,
     clearingProtectedOps: clearingProtectedOpsAddr,
     scheduledTasksOps: scheduledTasksOpsAddr,
+    scheduledTasksDispatchOps: scheduledTasksDispatchOpsAddr,
   };
 
   setOrchestratorLibraryAddresses(addresses);
