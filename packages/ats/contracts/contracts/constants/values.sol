@@ -136,10 +136,6 @@ bytes32 constant _PROTECTED_CLEARING_TRANSFER_PARTITION_TYPEHASH = 0x9ac8bf58d69
 // solhint-disable-next-line max-line-length
 bytes32 constant _PROTECTED_CLEARING_REDEEM_TYPEHASH = 0x9800252304972e5a6e126479147b31373237346ee6c2c4cdbfd4ee18a138477e;
 
-// ============================================================================
-// UnexpectedError IDs - Defensive programming constants for impossible states
-// ============================================================================
-
 /// @dev ID for CorporateActionsStorageWrapper.addCorporateAction()
 bytes4 constant KPI_CA_ADD_ACTION = 0x00000001;
 
@@ -169,3 +165,6 @@ bytes4 constant KPI_BOND_REDEEM_BALANCE = 0x00000009;
 
 /// @dev ID for KpiLinkedRateLib._getPreviousCouponRate()
 bytes4 constant KPI_LINKED_RATE_COUPON = 0x0000000A;
+
+/// @dev ID for ClearingOps.clearingHoldCreationExecution()
+bytes4 constant CLEARING_HOLD_CREATION = 0x0000000B;

@@ -8,6 +8,7 @@ import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { LockStorageWrapper } from "../../domain/asset/LockStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 
 /**
  * @title  TransferAndLockByPartition
@@ -44,7 +45,7 @@ abstract contract TransferAndLockByPartition is ITransferAndLockByPartition, Mod
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 lockId_)
     {
-        ERC1410StorageWrapper.transferByPartition(
+        TokenCoreOps.transferByPartition(
             EvmAccessors.getMsgSender(),
             IERC1410Types.BasicTransferInfo(_to, _amount),
             _partition,

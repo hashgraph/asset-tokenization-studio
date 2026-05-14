@@ -113,4 +113,5 @@ interface IHoldTypes {
     error InsufficientHoldBalance(uint256 holdAmount, uint256 amount);
     error HoldExpirationReached();
     error IsNotEscrow();
+    error InvalidHoldAmount();
 }

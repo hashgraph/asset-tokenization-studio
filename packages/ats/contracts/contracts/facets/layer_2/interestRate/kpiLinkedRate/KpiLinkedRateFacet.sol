@@ -3,26 +3,38 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IKpiLinkedRate } from "./IKpiLinkedRate.sol";
 import { _KPI_LINKED_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../../../infrastructure/proxy/Bytes4Builder.sol";
 import { KpiLinkedRate } from "./KpiLinkedRate.sol";
 
+/**
+ * @title KpiLinkedRateFacet
+ * @author Asset Tokenization Studio Team
+ * @notice Diamond facet that exposes the KPI-linked interest rate capability
+ *         (`IKpiLinkedRate`) on a token.
+ * @dev Implements `IStaticFunctionSelectors` so the BusinessLogicResolver can register
+ *      the facet's selectors against the deterministic resolver key declared in
+ *      `constants/resolverKeys.sol`.
+ */
 contract KpiLinkedRateFacet is KpiLinkedRate, IStaticFunctionSelectors {
+    /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _KPI_LINKED_RATE_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
-        staticFunctionSelectors_[selectorIndex++] = this.initialize_KpiLinkedRate.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.setInterestRate.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.setImpactData.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getInterestRate.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getImpactData.selector;
+    /// @inheritdoc IStaticFunctionSelectors
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.getKpiLinkedRateImpactData.selector,
+                this.getKpiLinkedRateInterestRate.selector,
+                this.initializeKpiLinkedRate.selector,
+                this.setKpiLinkedRateImpactData.selector,
+                this.setKpiLinkedRateInterestRate.selector
+            );
     }
 
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IKpiLinkedRate).interfaceId;
+    /// @inheritdoc IStaticFunctionSelectors
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IKpiLinkedRate).interfaceId);
     }
 }

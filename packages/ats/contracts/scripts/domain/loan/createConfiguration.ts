@@ -41,6 +41,7 @@ const LOAN_FACETS = [
   "CouponSecurityHoldersFacet",
   "CouponListingFacet",
   "NominalValueFacet",
+  "NominalValueAtSnapshotFacet",
   "AmortizationFacet",
   "ProceedRecipientsFacet",
 
@@ -143,6 +144,7 @@ const LOAN_FACETS = [
   "LockFacet",
   "LockByPartitionFacet",
   "AdjustBalancesFacet",
+  "ScheduledBalanceAdjustmentFacet",
   "ProtectedPartitionsFacet",
 ] as const;
 

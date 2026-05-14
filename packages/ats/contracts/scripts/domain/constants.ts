@@ -43,7 +43,7 @@ export const BOND_FIXED_RATE_CONFIG_ID = "0x000000000000000000000000000000000000
 /**
  * Bond Kpi Linked Rate configuration ID.
  *
- * bytes32(uint256(3)) = 0x00...04
+ * bytes32(uint256(4)) = 0x00...04
  * Used by BusinessLogicResolver to identify bond kpi linked rate facet configuration.
  */
 export const BOND_KPI_LINKED_RATE_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000004";
@@ -51,7 +51,7 @@ export const BOND_KPI_LINKED_RATE_CONFIG_ID = "0x0000000000000000000000000000000
 /**
  * Bond Kpi Sustainability Performance Target Rate configuration ID.
  *
- * bytes32(uint256(3)) = 0x00...05
+ * bytes32(uint256(5)) = 0x00...05
  * Used by BusinessLogicResolver to identify bond sustainability performance target rate facet configuration.
  */
 export const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID =
@@ -73,6 +73,14 @@ export const LOAN_CONFIG_ID = "0x00000000000000000000000000000000000000000000000
  */
 export const LOANS_PORTFOLIO_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000007";
 
+/**
+ * Factory configuration ID.
+ *
+ * bytes32(uint256(8)) = 0x00...08
+ * Used by BusinessLogicResolver to identify factory facet configuration.
+ */
+export const FACTORY_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000008";
+
 // ============================================================================
 // ATS-Specific Contract Names
 // ============================================================================
@@ -84,7 +92,7 @@ export const LOANS_PORTFOLIO_CONFIG_ID = "0x000000000000000000000000000000000000
  * part of generic infrastructure.
  */
 export const ATS_CONTRACTS = {
-  FACTORY: "Factory",
+  FACTORY: "FactoryFacet",
 } as const;
 
 // ============================================================================

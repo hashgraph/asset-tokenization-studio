@@ -8,8 +8,10 @@ struct NonceDataStorage {
 }
 
 library NonceStorageWrapper {
-    function setNonceFor(uint256 _nonce, address _account) internal {
-        nonceStorage().nonces[_account] = _nonce;
+    function setNonceFor(address _account) internal {
+        unchecked {
+            ++nonceStorage().nonces[_account];
+        }
     }
 
     function getNonceFor(address _account) internal view returns (uint256) {

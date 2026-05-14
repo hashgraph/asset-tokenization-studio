@@ -6,6 +6,7 @@ import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC20StorageWrapper } from "../../domain/asset/ERC20StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 
 /**
  * @title Allowance
@@ -28,13 +29,11 @@ abstract contract Allowance is IAllowance, Modifiers {
         external
         override
         onlyUnpaused
-        onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
-        onlyUnrecoveredAddress(spender)
         onlyWithoutMultiPartition
         onlyCompliant(EvmAccessors.getMsgSender(), spender, false)
         returns (bool)
     {
-        return ERC20StorageWrapper.approve(EvmAccessors.getMsgSender(), spender, value);
+        return TokenCoreOps.approve(EvmAccessors.getMsgSender(), spender, value);
     }
 
     /**
@@ -53,7 +52,7 @@ abstract contract Allowance is IAllowance, Modifiers {
         onlyCompliant(EvmAccessors.getMsgSender(), spender, false)
         returns (bool)
     {
-        return ERC20StorageWrapper.increaseAllowance(spender, addedValue);
+        return TokenCoreOps.increaseAllowance(spender, addedValue);
     }
 
     /**
@@ -72,7 +71,7 @@ abstract contract Allowance is IAllowance, Modifiers {
         onlyCompliant(EvmAccessors.getMsgSender(), spender, false)
         returns (bool)
     {
-        return ERC20StorageWrapper.decreaseAllowance(spender, subtractedValue);
+        return TokenCoreOps.decreaseAllowance(spender, subtractedValue);
     }
 
     /**

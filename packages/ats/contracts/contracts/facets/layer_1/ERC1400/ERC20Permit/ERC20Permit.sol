@@ -18,12 +18,9 @@ abstract contract ERC20Permit is IERC20Permit, Modifiers {
         external
         override
         onlyUnpaused
-        onlyListedAllowed(owner)
-        onlyListedAllowed(spender)
-        onlyUnrecoveredAddress(owner)
-        onlyUnrecoveredAddress(spender)
         notZeroAddress(owner)
         notZeroAddress(spender)
+        onlyCompliant(owner, spender, false)
         onlyWithoutMultiPartition
     {
         ERC20PermitStorageWrapper.permit(owner, spender, value, deadline, v, r, s);

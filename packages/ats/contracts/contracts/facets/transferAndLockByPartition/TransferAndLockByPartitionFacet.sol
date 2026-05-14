@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ITransferAndLockByPartition } from "./ITransferAndLockByPartition.sol";
 import { TransferAndLockByPartition } from "./TransferAndLockByPartition.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { _TRANSFER_AND_LOCK_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -23,14 +24,12 @@ contract TransferAndLockByPartitionFacet is TransferAndLockByPartition, IStaticF
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        staticFunctionSelectors_ = new bytes4[](1);
-        staticFunctionSelectors_[0] = this.transferAndLockByPartition.selector;
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(this.transferAndLockByPartition.selector);
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(ITransferAndLockByPartition).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(ITransferAndLockByPartition).interfaceId);
     }
 }

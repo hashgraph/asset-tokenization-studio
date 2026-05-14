@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IMint } from "./IMint.sol";
 import { Mint } from "./Mint.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { _MINT_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -20,20 +21,18 @@ contract MintFacet is Mint, IStaticFunctionSelectors {
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 4;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.mint.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.issue.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.isIssuable.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.initialize_ERC1594.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.initialize_ERC1594.selector,
+                this.isIssuable.selector,
+                this.issue.selector,
+                this.mint.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(IMint).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IMint).interfaceId);
     }
 }

@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ADDRESS_ZERO, ATS_ROLES, EMPTY_STRING, ZERO } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const amount = 1000;
@@ -300,6 +300,38 @@ describe("Allowance Facet Tests", () => {
         await viaAllowance.approve(signer_D.address, 42n);
         expect(await viaAllowance.allowance(signer_C.address, signer_D.address)).to.equal(42n);
         expect(await asset.allowance(signer_C.address, signer_D.address)).to.equal(42n);
+      });
+    });
+
+    describe("ABAF/LABAF – approve inflation (FIND-095)", () => {
+      it("GIVEN balance adjustment already applied WHEN approve then transferFrom for more than approved THEN reverts with InsufficientAllowance", async () => {
+        await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+
+        const tokenAmount = 2000n;
+        await asset.connect(signer_B).issue(signer_C.address, tokenAmount, "0x");
+
+        const currentTimestamp = await asset.blockTimestamp();
+        const ONE_DAY = 86400n;
+        const executionDate = Number(currentTimestamp + ONE_DAY);
+
+        await asset.setScheduledBalanceAdjustment({
+          executionDate: executionDate.toString(),
+          factor: 2,
+          decimals: 0,
+        });
+
+        await asset.changeSystemTimestamp(executionDate + 1);
+
+        await asset.triggerScheduledCrossOrderedTasks(100);
+
+        await asset.connect(signer_A).triggerAndSyncAll(DEFAULT_PARTITION, signer_C.address, ethers.ZeroAddress);
+
+        const approvedAmount = 500n;
+        await assetSignerC.approve(signer_D.address, approvedAmount);
+
+        await expect(
+          assetSignerD.transferFrom(signer_C.address, signer_D.address, approvedAmount + 1n),
+        ).to.be.revertedWithCustomError(asset, "InsufficientAllowance");
       });
     });
   });

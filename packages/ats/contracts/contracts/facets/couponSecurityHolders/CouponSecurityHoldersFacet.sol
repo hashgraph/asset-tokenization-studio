@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ICouponSecurityHolders } from "./ICouponSecurityHolders.sol";
 import { CouponSecurityHolders } from "./CouponSecurityHolders.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { _COUPON_SECURITY_HOLDERS_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -25,22 +26,17 @@ contract CouponSecurityHoldersFacet is CouponSecurityHolders, IStaticFunctionSel
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 3;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.getTotalCouponHolders.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getCouponsFor.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getCouponHolders.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.getCouponHolders.selector,
+                this.getCouponsFor.selector,
+                this.getTotalCouponHolders.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        uint256 selectorIndex = 1;
-        staticInterfaceIds_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticInterfaceIds_[--selectorIndex] = type(ICouponSecurityHolders).interfaceId;
-        }
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(ICouponSecurityHolders).interfaceId);
     }
 }

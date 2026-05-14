@@ -35,12 +35,13 @@ import {
 
 // Domain layer
 import {
-  deployFactory,
   EQUITY_CONFIG_ID,
   BOND_CONFIG_ID,
   FACET_REGISTRY,
   FACET_REGISTRY_COUNT,
   atsRegistry,
+  createFactoryConfiguration,
+  deployFactory,
 } from "@scripts/domain";
 
 // Test helpers
@@ -56,6 +57,7 @@ import {
   Factory__factory,
   PauseFacet__factory,
   ProxyAdmin,
+  FactoryFacet__factory,
 } from "@contract-types";
 
 describe("Phase 1 Deployment System - Integration Tests", () => {
@@ -359,17 +361,37 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
       // First deploy BLR
       const blrResult = await deployBlr(deployer, {});
       expect(blrResult.success).to.be.true;
-
+      const blr = BusinessLogicResolver__factory.connect(blrResult.blrAddress, deployer);
+      const facets = await deployFacets(
+        {
+          FactoryFacet: new FactoryFacet__factory(deployer),
+        },
+        {
+          confirmations: 1,
+          enableRetry: false,
+        },
+      );
+      const factoryFacetAddress = facets.deployed.get("FactoryFacet")!.address!;
+      await registerFacets(blr, {
+        facets: [
+          {
+            name: "FactoryFacet",
+            address: factoryFacetAddress,
+            resolverKey: atsRegistry.getFacetDefinition("FactoryFacet")!.resolverKey!.value,
+          },
+        ],
+      });
+      await createFactoryConfiguration(blr, {
+        FactoryFacet: factoryFacetAddress,
+      });
       // Deploy Factory with BLR reference
       const factoryResult = await deployFactory(deployer, {
         blrAddress: blrResult.blrAddress,
-        existingProxyAdmin: blrResult.proxyResult.proxyAdmin,
+        factoryVersion: 1,
       });
 
       expect(factoryResult.success).to.be.true;
       expect(factoryResult.factoryAddress).to.match(/^0x[a-fA-F0-9]{40}$/);
-      expect(factoryResult.implementationAddress).to.match(/^0x[a-fA-F0-9]{40}$/);
-      expect(factoryResult.proxyAdminAddress).to.equal(blrResult.proxyAdminAddress);
 
       // Verify Factory deployment was successful (Factory doesn't have a getter for BLR address)
       expect(factoryResult.factoryAddress).to.not.equal(ethers.ZeroAddress);

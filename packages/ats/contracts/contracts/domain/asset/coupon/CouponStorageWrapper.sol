@@ -167,6 +167,28 @@ library CouponStorageWrapper {
         }
     }
 
+    /**
+     * @notice Returns the per-account view of a coupon, resolving the holder balance and the
+     *         metadata required to compute the payable fractional amount.
+     * @dev Branching by snapshot binding is load-bearing for scale correctness:
+     *      - When `registeredCoupon.snapshotId != 0`, `tokenBalance`, `decimals`, `nominalValue`
+     *        and `nominalValueDecimals` are all read at the snapshot scale via
+     *        `SnapshotsStorageWrapper`.
+     *      - Otherwise they fall back to the ABAF-adjusted state at the coupon's record date
+     *        (`ERC3643StorageWrapper.getTotalBalanceForAdjustedAt`,
+     *        `ERC20StorageWrapper.decimalsAdjustedAt`) and the live nominal-value pair from
+     *        `NominalValueStorageWrapper`.
+     *      The resolved quadruple is then handed to `_calculateCouponAmount`, which must keep
+     *      the numerator and denominator at one consistent scale; passing the live nominal value
+     *      pair alongside snapshot-scale balance/decimals would break that invariant — the
+     *      situation reported as FIND-121.
+     *      The amount block is skipped before the record date and when the coupon has been
+     *      cancelled (`isDisabled == true`), leaving the default zero-valued struct.
+     * @param couponID One-indexed identifier of the coupon to read.
+     * @param account Holder whose snapshot balance is being measured.
+     * @return couponFor_ Aggregated view including the captured balance, scale metadata, the
+     *         underlying coupon parameters and the fractional payable amount.
+     */
     function getCouponFor(
         uint256 couponID,
         address account
@@ -178,20 +200,33 @@ library CouponStorageWrapper {
 
         if (registeredCoupon.coupon.recordDate < TimeTravelStorageWrapper.getBlockTimestamp() && !isDisabled) {
             couponFor_.recordDateReached = true;
-            couponFor_.tokenBalance = (registeredCoupon.snapshotId != 0)
-                ? SnapshotsStorageWrapper.getTotalBalanceOfAtSnapshot(registeredCoupon.snapshotId, account)
-                : ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(
-                    account,
-                    TimeTravelStorageWrapper.getBlockTimestamp()
+            if (registeredCoupon.snapshotId != 0) {
+                couponFor_.tokenBalance = SnapshotsStorageWrapper.getTotalBalanceOfAtSnapshot(
+                    registeredCoupon.snapshotId,
+                    account
                 );
-            couponFor_.decimals = ERC20StorageWrapper.decimalsAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
-            couponFor_.nominalValue = NominalValueStorageWrapper.getNominalValue();
+                couponFor_.decimals = SnapshotsStorageWrapper.decimalsAtSnapshot(registeredCoupon.snapshotId);
+                couponFor_.nominalValue = SnapshotsStorageWrapper.nominalValueAtSnapshot(registeredCoupon.snapshotId);
+                couponFor_.nominalValueDecimals = SnapshotsStorageWrapper.nominalValueDecimalsAtSnapshot(
+                    registeredCoupon.snapshotId
+                );
+            } else {
+                couponFor_.tokenBalance = ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(
+                    account,
+                    registeredCoupon.coupon.recordDate
+                );
+                couponFor_.decimals = ERC20StorageWrapper.decimalsAdjustedAt(registeredCoupon.coupon.recordDate);
+                couponFor_.nominalValue = NominalValueStorageWrapper.getNominalValue();
+                couponFor_.nominalValueDecimals = NominalValueStorageWrapper.getNominalValueDecimals();
+            }
         }
 
         couponFor_.couponAmount = _calculateCouponAmount(
             registeredCoupon.coupon,
             couponFor_.tokenBalance,
             couponFor_.decimals,
+            couponFor_.nominalValue,
+            uint8(couponFor_.nominalValueDecimals),
             couponFor_.recordDateReached
         );
     }
@@ -292,16 +327,21 @@ library CouponStorageWrapper {
 
         if (getCouponFromOrderedListAt(0) == couponID) return (0);
 
-        orderedListLength--;
-        uint256 previousCouponId = 0;
-
-        for (uint256 index = 0; index < orderedListLength; index++) {
-            previousCouponId = getCouponFromOrderedListAt(index);
-            uint256 couponId = getCouponFromOrderedListAt(index + 1);
-            if (couponId == couponID) break;
+        unchecked {
+            orderedListLength--;
         }
+        uint256 previousCouponId;
 
-        return previousCouponId;
+        for (uint256 i; i < orderedListLength; ) {
+            previousCouponId = getCouponFromOrderedListAt(i);
+            uint256 couponId = getCouponFromOrderedListAt(i + 1);
+            if (couponId == couponID) return previousCouponId;
+
+            unchecked {
+                ++i;
+            }
+        }
+        return 0;
     }
 
     /**
@@ -337,17 +377,37 @@ library CouponStorageWrapper {
         resolved_ = newCoupon;
     }
 
+    /**
+     * @notice Builds the fractional coupon amount payable to a holder once the record date is
+     *         reached, expressed as `numerator / denominator` to defer rounding to the caller.
+     * @dev Scale invariant: `tokenBalance`, `decimals`, `nominalValue` and `nominalValueDecimals`
+     *      must all be sampled at the same point in time as the holder balance — either the
+     *      snapshot bound to the coupon or the ABAF-adjusted state at the record date. The
+     *      function is intentionally `pure`: it never reads live nominal-value storage. Reading
+     *      the live values here against a snapshot-scale balance was the FIND-121 defect: an
+     *      `ABAF` adjustment or a `setNominalValue` call between record date and query time
+     *      would inflate the numerator while leaving the denominator at the wrong precision.
+     *      Returns the default zero-valued struct (with `recordDateReached == false`) before the
+     *      record date is reached.
+     * @param coupon Underlying coupon parameters; `endDate`, `startDate` and `rate*` are used.
+     * @param tokenBalance Holder balance captured at the coupon's record date or snapshot.
+     * @param decimals Token decimals at the same scale as `tokenBalance`.
+     * @param nominalValue Nominal value at the same scale as `tokenBalance`.
+     * @param nominalValueDecimals Decimal precision applied to `nominalValue` at that scale.
+     * @param recordDateReached True once the record date has passed; gates the computation.
+     * @return couponAmountFor_ Fractional payable amount with matching `recordDateReached` flag.
+     */
     function _calculateCouponAmount(
         ICouponTypes.Coupon memory coupon,
         uint256 tokenBalance,
         uint8 decimals,
+        uint256 nominalValue,
+        uint8 nominalValueDecimals,
         bool recordDateReached
-    ) private view returns (ICouponTypes.CouponAmountFor memory couponAmountFor_) {
+    ) private pure returns (ICouponTypes.CouponAmountFor memory couponAmountFor_) {
         if (!recordDateReached) return couponAmountFor_;
 
         uint256 period = coupon.endDate - coupon.startDate;
-        uint256 nominalValue = NominalValueStorageWrapper.getNominalValue();
-        uint8 nominalValueDecimals = NominalValueStorageWrapper.getNominalValueDecimals();
 
         couponAmountFor_.recordDateReached = true;
         couponAmountFor_.numerator = tokenBalance * nominalValue * coupon.rate * period;

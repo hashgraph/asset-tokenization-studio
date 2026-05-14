@@ -302,9 +302,10 @@ export async function deployLoanTokenFixture({
   await externalKycListManagementFacet.initializeExternalKycLists([]);
   await erc20VotesFacet.initialize_ERC20Votes(securityData.erc20VotesActivated);
   await erc3643ManagementFacet.initialize_ERC3643(ZeroAddress, ZeroAddress);
-  await nominalValueFacet.initialize_NominalValue(
+  await nominalValueFacet.initializeNominalValue(
     loanParams?.nominalValue ?? DEFAULT_LOAN_PARAMS.nominalValue,
     loanParams?.nominalValueDecimals ?? DEFAULT_LOAN_PARAMS.nominalValueDecimals,
+    loanParams?.loanInit?.currency ?? DEFAULT_LOAN_PARAMS.currency,
   );
 
   await loanFacet.initialize_Loan(

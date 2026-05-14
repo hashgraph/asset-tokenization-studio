@@ -14,6 +14,7 @@ import {
   CANCEL_VOTING_EVENT,
   EVM_ZERO_ADDRESS,
   GAS,
+  NOMINAL_VALUE_CURRENCY_SET_EVENT,
   NOMINAL_VALUE_SET_EVENT,
   RELEASE_AMORTIZATION_HOLD_EVENT,
   SET_AMORTIZATION_EVENT,
@@ -60,7 +61,6 @@ import TransactionResponse from "@domain/context/transaction/TransactionResponse
 import { SecurityDataBuilder } from "@domain/context/util/SecurityDataBuilder";
 import {
   IAsset__factory,
-  KpiLinkedRate__factory,
   Factory__factory,
   MockedBlacklist__factory,
   MockedExternalKycList__factory,
@@ -68,7 +68,7 @@ import {
   MockedWhitelist__factory,
   TREXFactoryAts__factory,
 } from "@hashgraph/asset-tokenization-contracts";
-import type { IAdjustBalances } from "@hashgraph/asset-tokenization-contracts";
+import type { IScheduledBalanceAdjustment } from "@hashgraph/asset-tokenization-contracts";
 import { ContractId } from "@hiero-ledger/sdk";
 import EventService from "@service/event/EventService";
 import LogService from "@service/log/LogService";
@@ -896,7 +896,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
             factor: ${factor},
             decimals : ${decimals}  `,
     );
-    const scheduledBalanceAdjustmentStruct: IAdjustBalances.ScheduledBalanceAdjustmentStruct = {
+    const scheduledBalanceAdjustmentStruct: IScheduledBalanceAdjustment.ScheduledBalanceAdjustmentStruct = {
       executionDate: executionDate.toBigInt(),
       factor: factor.toBigInt(),
       decimals: decimals.toBigInt(),
@@ -2628,8 +2628,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Setting Interest Rate for security ${security.toString()}`);
     return this.executeTransaction(
-      KpiLinkedRate__factory.connect(security.toString(), this.getSignerOrProvider()),
-      "setInterestRate",
+      IAsset__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "setKpiLinkedRateInterestRate",
       [
         {
           maxRate: maxRate.toBigInt(),
@@ -2657,8 +2657,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Setting Impact Data for security ${security.toString()}`);
     return this.executeTransaction(
-      KpiLinkedRate__factory.connect(security.toString(), this.getSignerOrProvider()),
-      "setImpactData",
+      IAsset__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "setKpiLinkedRateImpactData",
       [
         {
           maxDeviationCap: maxDeviationCap.toBigInt(),
@@ -2716,6 +2716,18 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       [nominalValue, nominalValueDecimals],
       GAS.SET_NOMINAL_VALUE,
       NOMINAL_VALUE_SET_EVENT,
+    );
+  }
+
+  async setNominalValueCurrency(security: EvmAddress, nominalValueCurrency: string): Promise<TransactionResponse> {
+    LogService.logTrace(`Setting nominal value currency for security: ${security.toString()}`);
+
+    return this.executeTransaction(
+      IAsset__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "setNominalValueCurrency",
+      [nominalValueCurrency],
+      GAS.SET_NOMINAL_VALUE_CURRENCY,
+      NOMINAL_VALUE_CURRENCY_SET_EVENT,
     );
   }
 

@@ -14,7 +14,7 @@ library ClearingReadOps {
 
     /// @notice Get cleared amount for token holder adjusted at timestamp
     /// @dev Uses ABAF factor to adjust the cleared amount for balance adjustments
-    function getClearedAmountForAdjustedAt(address _tokenHolder, uint256 _timestamp) public view returns (uint256) {
+    function getClearedAmountForAdjustedAt(address _tokenHolder, uint256 _timestamp) external view returns (uint256) {
         return
             ClearingStorageWrapper.getClearedAmountFor(_tokenHolder) *
             AdjustBalancesStorageWrapper.calculateFactorForClearedAmountByTokenHolderAdjustedAt(
@@ -29,7 +29,7 @@ library ClearingReadOps {
         bytes32 _partition,
         address _tokenHolder,
         uint256 _timestamp
-    ) public view returns (uint256) {
+    ) external view returns (uint256) {
         return
             ClearingStorageWrapper.getClearedAmountForByPartition(_partition, _tokenHolder) *
             AdjustBalancesStorageWrapper.calculateFactor(
@@ -45,7 +45,7 @@ library ClearingReadOps {
         address _tokenHolder,
         uint256 _clearingId,
         uint256 _timestamp
-    ) public view returns (IClearingTypes.ClearingTransferData memory clearingTransferData_) {
+    ) external view returns (IClearingTypes.ClearingTransferData memory clearingTransferData_) {
         clearingTransferData_ = ClearingStorageWrapper.getClearingTransferForByPartition(
             _partition,
             _tokenHolder,
@@ -72,7 +72,7 @@ library ClearingReadOps {
         address _tokenHolder,
         uint256 _clearingId,
         uint256 _timestamp
-    ) public view returns (IClearingTypes.ClearingRedeemData memory clearingRedeemData_) {
+    ) external view returns (IClearingTypes.ClearingRedeemData memory clearingRedeemData_) {
         clearingRedeemData_ = ClearingStorageWrapper.getClearingRedeemForByPartition(
             _partition,
             _tokenHolder,
@@ -99,7 +99,7 @@ library ClearingReadOps {
         address _tokenHolder,
         uint256 _clearingId,
         uint256 _timestamp
-    ) public view returns (IClearingTypes.ClearingHoldCreationData memory clearingHoldCreationData_) {
+    ) external view returns (IClearingTypes.ClearingHoldCreationData memory clearingHoldCreationData_) {
         clearingHoldCreationData_ = ClearingStorageWrapper.getClearingHoldCreationForByPartition(
             _partition,
             _tokenHolder,
@@ -126,12 +126,15 @@ library ClearingReadOps {
         IClearingTypes.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
         bool _mustBeExpired,
         uint256 /* _blockTimestamp */
-    ) public view {
+    ) external view {
         ClearingStorageWrapper.requireExpirationTimestamp(_clearingOperationIdentifier, _mustBeExpired);
     }
 
     /// @notice Validate that a clearing expiration timestamp is in the future
-    function checkClearingValidExpirationTimestamp(uint256 _expirationTimestamp, uint256 _blockTimestamp) public pure {
+    function checkClearingValidExpirationTimestamp(
+        uint256 _expirationTimestamp,
+        uint256 _blockTimestamp
+    ) external pure {
         if (_expirationTimestamp < _blockTimestamp) revert ICommonErrors.WrongExpirationTimestamp();
     }
 }

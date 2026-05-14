@@ -155,8 +155,10 @@ import GetKycStatusMockRequest from "./security/externalKycLists/mock/GetKycStat
 import SetNameRequest from "./security/operations/tokeMetadata/SetNameRequest";
 import SetSymbolRequest from "./security/operations/tokeMetadata/SetSymbolRequest";
 import SetNominalValueRequest from "./security/operations/nominalValue/SetNominalValueRequest";
+import SetNominalValueCurrencyRequest from "./security/operations/nominalValue/SetNominalValueCurrencyRequest";
 import GetNominalValueRequest from "./security/operations/nominalValue/GetNominalValueRequest";
 import GetNominalValueDecimalsRequest from "./security/operations/nominalValue/GetNominalValueDecimalsRequest";
+import GetNominalValueCurrencyRequest from "./security/operations/nominalValue/GetNominalValueCurrencyRequest";
 import SetAmortizationRequest from "./security/amortization/SetAmortizationRequest";
 import CancelAmortizationRequest from "./security/amortization/CancelAmortizationRequest";
 import SetAmortizationHoldRequest from "./security/amortization/SetAmortizationHoldRequest";
@@ -468,8 +470,10 @@ export {
   CancelScheduledBalanceAdjustmentRequest,
   CancelVotingRequest,
   SetNominalValueRequest,
+  SetNominalValueCurrencyRequest,
   GetNominalValueRequest,
   GetNominalValueDecimalsRequest,
+  GetNominalValueCurrencyRequest,
   SetAmortizationRequest,
   CancelAmortizationRequest,
   SetAmortizationHoldRequest,
