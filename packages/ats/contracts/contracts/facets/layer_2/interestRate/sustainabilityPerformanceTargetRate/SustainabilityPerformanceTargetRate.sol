@@ -30,7 +30,7 @@ contract SustainabilityPerformanceTargetRate is ISustainabilityPerformanceTarget
 
     function setInterestRate(
         InterestRate calldata _newInterestRate
-    ) external onlyUnpaused onlyRole(INTEREST_RATE_MANAGER_ROLE) {
+    ) external onlyActivated onlyUnpaused onlyRole(INTEREST_RATE_MANAGER_ROLE) {
         InterestRateStorageWrapper.setSPTInterestRate(_newInterestRate);
         emit InterestRateUpdated(EvmAccessors.getMsgSender(), _newInterestRate);
     }
@@ -40,6 +40,7 @@ contract SustainabilityPerformanceTargetRate is ISustainabilityPerformanceTarget
         address[] calldata _projects
     )
         external
+        onlyActivated
         onlyUnpaused
         onlyRole(INTEREST_RATE_MANAGER_ROLE)
         onlyValidEqualLength(_newImpactData.length, _projects.length)

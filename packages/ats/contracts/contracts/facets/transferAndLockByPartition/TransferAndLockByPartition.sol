@@ -38,6 +38,7 @@ abstract contract TransferAndLockByPartition is ITransferAndLockByPartition, Mod
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(LOCKER_ROLE)
         onlyWithValidExpirationTimestamp(_expirationTimestamp)

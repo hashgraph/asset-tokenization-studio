@@ -7,8 +7,7 @@ import { ResolverProxy, type IAsset } from "@contract-types";
 import { DEFAULT_PARTITION, ATS_ROLES, TIME_PERIODS_S, ADDRESS_ZERO, ZERO, EMPTY_STRING } from "@scripts";
 import { getDltTimestamp, grantRoleAndPauseToken } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployBondTokenFixture } from "@test";
-import { executeRbac, MAX_UINT256 } from "@test";
+import { deployBondTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const numberOfUnits = 1000;
 let startingDate = 0;
@@ -245,6 +244,18 @@ describe("MaturityByPartition Tests", () => {
       await expect(asset.connect(signer_A).redeemAtMaturityByPartition(signer_A.address, _PARTITION_ID, amount))
         .to.emit(asset, "RedeemedByPartition")
         .withArgs(_PARTITION_ID, signer_A.address, signer_A.address, amount, "0x", "0x");
+    });
+  });
+
+  describe("Deactivated", () => {
+    it("GIVEN a deactivated asset WHEN redeemAtMaturityByPartition THEN transaction fails with Deactivated", async () => {
+      const base = await deployBondTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).redeemAtMaturityByPartition(ethers.ZeroAddress, ethers.ZeroHash, 0),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
 });

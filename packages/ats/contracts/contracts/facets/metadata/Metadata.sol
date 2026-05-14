@@ -20,7 +20,10 @@ abstract contract Metadata is IMetadata, Modifiers {
     /// @inheritdoc IMetadata
     /// @dev Requires `METADATA_MANAGER_ROLE` and the token to be unpaused. Delegates persistence
     ///      to `MetadataStorageWrapper.setMetadata`, which overwrites any existing array.
-    function setMetadata(bytes32 _key, bytes[] calldata _value) external onlyUnpaused onlyRole(METADATA_MANAGER_ROLE) {
+    function setMetadata(
+        bytes32 _key,
+        bytes[] calldata _value
+    ) external onlyActivated onlyUnpaused onlyRole(METADATA_MANAGER_ROLE) {
         MetadataStorageWrapper.setMetadata(_key, _value);
     }
 

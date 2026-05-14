@@ -396,4 +396,22 @@ describe("Sustainability Performance Target Rate Tests", () => {
       expect(impactData2.impactDataMode).to.equal(newImpactData[1].impactDataMode);
     });
   });
+
+  describe("Deactivated", () => {
+    it("GIVEN a deactivated asset WHEN setInterestRate THEN transaction fails with Deactivated", async () => {
+      const base = await deployBondSustainabilityPerformanceTargetRateTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      const deactivatedFacet = await ethers.getContractAt(
+        "SustainabilityPerformanceTargetRateFacet",
+        base.diamond.target,
+      );
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedFacet
+          .connect(base.deployer)
+          .setInterestRate({ baseRate: 0, startPeriod: 0, startRate: 0, rateDecimals: 0 }),
+      ).to.be.revertedWithCustomError(deactivatedFacet, "Deactivated");
+    });
+  });
 });

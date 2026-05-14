@@ -28,6 +28,7 @@ abstract contract Allowance is IAllowance, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyCompliant(EvmAccessors.getMsgSender(), spender, false)
@@ -47,6 +48,7 @@ abstract contract Allowance is IAllowance, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyCompliant(EvmAccessors.getMsgSender(), spender, false)
@@ -66,6 +68,7 @@ abstract contract Allowance is IAllowance, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyCompliant(EvmAccessors.getMsgSender(), spender, false)

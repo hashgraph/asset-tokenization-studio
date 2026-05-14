@@ -44,7 +44,7 @@ abstract contract NominalValue is INominalValue, Modifiers {
     function setNominalValue(
         uint256 _nominalValue,
         uint8 _nominalValueDecimals
-    ) external override onlyRole(NOMINAL_VALUE_ROLE) {
+    ) external override onlyActivated onlyRole(NOMINAL_VALUE_ROLE) {
         if (!NominalValueStorageWrapper.isNominalValueInitialized()) {
             NominalValueStorageWrapper.initializeNominalValue(_nominalValue, _nominalValueDecimals, bytes3(0));
         }
@@ -53,7 +53,9 @@ abstract contract NominalValue is INominalValue, Modifiers {
     }
 
     /// @inheritdoc INominalValue
-    function setNominalValueCurrency(bytes3 _nominalValueCurrency) external override onlyRole(NOMINAL_VALUE_ROLE) {
+    function setNominalValueCurrency(
+        bytes3 _nominalValueCurrency
+    ) external override onlyActivated onlyRole(NOMINAL_VALUE_ROLE) {
         NominalValueStorageWrapper.setNominalValueCurrency(_nominalValueCurrency);
         emit NominalValueCurrencySet(EvmAccessors.getMsgSender(), _nominalValueCurrency);
     }

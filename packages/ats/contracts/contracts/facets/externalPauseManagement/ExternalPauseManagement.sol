@@ -32,7 +32,7 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers
     function updateExternalPauses(
         address[] calldata _pauses,
         bool[] calldata _actives
-    ) external override onlyUnpaused onlyRole(PAUSE_MANAGER_ROLE) returns (bool success_) {
+    ) external override onlyActivated onlyUnpaused onlyRole(PAUSE_MANAGER_ROLE) returns (bool success_) {
         ArrayValidation.checkUniqueValues(_pauses, _actives);
         success_ = ExternalListManagementStorageWrapper.updateExternalLists(
             _PAUSE_MANAGEMENT_STORAGE_POSITION,
@@ -48,7 +48,15 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers
     /// @inheritdoc IExternalPauseManagement
     function addExternalPause(
         address _pause
-    ) external override onlyUnpaused onlyRole(PAUSE_MANAGER_ROLE) onlyValidAddress(_pause) returns (bool success_) {
+    )
+        external
+        override
+        onlyActivated
+        onlyUnpaused
+        onlyRole(PAUSE_MANAGER_ROLE)
+        onlyValidAddress(_pause)
+        returns (bool success_)
+    {
         success_ = ExternalListManagementStorageWrapper.addExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
         if (!success_) {
             revert ListedPause(_pause);
@@ -59,7 +67,7 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers
     /// @inheritdoc IExternalPauseManagement
     function removeExternalPause(
         address _pause
-    ) external override onlyUnpaused onlyRole(PAUSE_MANAGER_ROLE) returns (bool success_) {
+    ) external override onlyActivated onlyUnpaused onlyRole(PAUSE_MANAGER_ROLE) returns (bool success_) {
         success_ = ExternalListManagementStorageWrapper.removeExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
         if (!success_) {
             revert UnlistedPause(_pause);

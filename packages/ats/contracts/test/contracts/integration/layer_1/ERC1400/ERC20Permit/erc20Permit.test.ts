@@ -288,4 +288,18 @@ describe("ERC20Permit Tests", () => {
       ).to.be.revertedWithCustomError(asset, "WalletRecovered");
     });
   });
+
+  describe("Deactivated", () => {
+    it("GIVEN a deactivated asset WHEN permit THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset
+          .connect(base.deployer)
+          .permit(ethers.ZeroAddress, ethers.ZeroAddress, 0, 0, 0, ethers.ZeroHash, ethers.ZeroHash),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
 });

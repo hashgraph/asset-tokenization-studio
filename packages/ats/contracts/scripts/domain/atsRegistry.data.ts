@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-14T09:47:16.098Z
+ * Generated: 2026-05-14T14:36:39.145Z
  * Facets: 125
  * Infrastructure: 2
  *
@@ -378,6 +378,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xf50c17aa",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "RolesAndActivesLengthMismatch",
@@ -468,6 +473,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x69a80e75",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "DecimalDifferenceTooLarge",
         signature: {
           full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
@@ -551,6 +561,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccessControlRequired(bytes32,address)",
         },
         selector: "0x10210dec",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "InsufficientAllowance",
@@ -828,6 +843,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AmortizationNotActive(bytes32,uint256)",
         },
         selector: "0x3d9766c5",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "InsufficientBalance",
@@ -1155,6 +1175,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x90e55392",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InputAmountsArrayLengthMismatch",
         signature: { full: "error InputAmountsArrayLengthMismatch()", canonical: "InputAmountsArrayLengthMismatch()" },
         selector: "0x64f13710",
@@ -1218,6 +1243,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountHasNoRoles(address,bytes32[])",
         },
         selector: "0x90e55392",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "InputAmountsArrayLengthMismatch",
@@ -1352,6 +1382,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x90e55392",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InputAmountsArrayLengthMismatch",
         signature: { full: "error InputAmountsArrayLengthMismatch()", canonical: "InputAmountsArrayLengthMismatch()" },
         selector: "0x64f13710",
@@ -1475,6 +1510,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x90e55392",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InputAmountsArrayLengthMismatch",
         signature: { full: "error InputAmountsArrayLengthMismatch()", canonical: "InputAmountsArrayLengthMismatch()" },
         selector: "0x64f13710",
@@ -1521,6 +1561,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccessControlRequired(bytes32,address)",
         },
         selector: "0x10210dec",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "InputAmountsArrayLengthMismatch",
@@ -1966,6 +2011,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x10210dec",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "PartitionNotAllowedInSinglePartitionMode",
         signature: {
           full: "error PartitionNotAllowedInSinglePartitionMode(bytes32 partition)",
@@ -2048,6 +2098,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountHasNoRoles(address,bytes32[])",
         },
         selector: "0x90e55392",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
@@ -2139,6 +2194,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xa1180aad",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NewMaxSupplyCannotBeZero",
@@ -2228,6 +2288,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
@@ -2588,6 +2653,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9f2523d3",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "ExpirationDateNotReached",
         signature: { full: "error ExpirationDateNotReached()", canonical: "ExpirationDateNotReached()" },
         selector: "0xaffb3088",
@@ -2834,6 +2904,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9f2523d3",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "ExpirationDateNotReached",
         signature: { full: "error ExpirationDateNotReached()", canonical: "ExpirationDateNotReached()" },
         selector: "0xaffb3088",
@@ -3018,6 +3093,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9f2523d3",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "ExpirationDateNotReached",
         signature: { full: "error ExpirationDateNotReached()", canonical: "ExpirationDateNotReached()" },
         selector: "0xaffb3088",
@@ -3159,6 +3239,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xa1180aad",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NotAllowedInMultiPartitionMode",
@@ -3271,6 +3356,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountHasNoRoles(address,bytes32[])",
         },
         selector: "0x90e55392",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "InvalidPartition",
@@ -3516,6 +3606,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x66eb1b54",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "IdentityRegistryCallFailed",
         signature: { full: "error IdentityRegistryCallFailed()", canonical: "IdentityRegistryCallFailed()" },
         selector: "0xad87849e",
@@ -3664,6 +3759,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountHasNoRole(address,bytes32)",
         },
         selector: "0xa1180aad",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "HoldExpirationNotReached",
@@ -3840,6 +3940,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "ListedAccount",
@@ -4003,6 +4108,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
     ],
@@ -4346,6 +4456,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "CouponNotFound",
         signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
         selector: "0x69a80e75",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "DecimalDifferenceTooLarge",
@@ -4897,6 +5012,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "DividendAlreadyExecuted",
         signature: {
           full: "error DividendAlreadyExecuted(bytes32 corporateActionId, uint256 dividendId)",
@@ -5085,6 +5205,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountHasNoRole(address,bytes32)",
         },
         selector: "0xa1180aad",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "DocumentDoesNotExist",
@@ -5353,6 +5478,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x10210dec",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "ERC2612ExpiredSignature",
         signature: {
           full: "error ERC2612ExpiredSignature(uint256 deadline)",
@@ -5544,6 +5674,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "CouponNotFound",
         signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
         selector: "0x69a80e75",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "DecimalDifferenceTooLarge",
@@ -5822,6 +5957,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf50c17aa",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "ExternalControlListsNotUpdated",
         signature: {
           full: "error ExternalControlListsNotUpdated(address[] controlLista, bool[] actives)",
@@ -5985,6 +6125,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf50c17aa",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "ExternalKycListsNotUpdated",
         signature: {
           full: "error ExternalKycListsNotUpdated(address[] kycList, bool[] actives)",
@@ -6135,6 +6280,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "ContradictoryValuesInArray(uint256,uint256)",
         },
         selector: "0xf50c17aa",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "ExternalPausesNotUpdated",
@@ -6417,6 +6567,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x0dc149f0",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InterestRateIsFixed",
         signature: { full: "error InterestRateIsFixed()", canonical: "InterestRateIsFixed()" },
         selector: "0x849d4eb8",
@@ -6626,6 +6781,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountHasNoRoles(address,bytes32[])",
         },
         selector: "0x90e55392",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "InsufficientBalance",
@@ -6935,6 +7095,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "ClearingIsActivated",
         signature: { full: "error ClearingIsActivated()", canonical: "ClearingIsActivated()" },
         selector: "0x5b2e3086",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "HoldExpirationNotReached",
@@ -7257,6 +7422,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xa1180aad",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
     ],
     factory: (signer) => new IdentityFacet__factory(signer),
@@ -7489,6 +7659,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "WrongImpactDataValues",
@@ -7580,6 +7755,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "CouponNotFound",
         signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
         selector: "0x69a80e75",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "DecimalDifferenceTooLarge",
@@ -7690,6 +7870,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "CouponNotFound",
         signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
         selector: "0x69a80e75",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "DecimalDifferenceTooLarge",
@@ -7874,6 +8059,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x0dc149f0",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InvalidDates",
         signature: { full: "error InvalidDates()", canonical: "InvalidDates()" },
         selector: "0xd937486c",
@@ -7972,6 +8162,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "InvalidTimestamp",
@@ -8223,6 +8418,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x0dc149f0",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "HoldingAssetNotFound",
         signature: {
           full: "error HoldingAssetNotFound(address assetAddress)",
@@ -8459,6 +8659,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InsufficientBalance",
         signature: {
           full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
@@ -8681,6 +8886,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x90e55392",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InsufficientBalance",
         signature: {
           full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
@@ -8810,6 +9020,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5b2e3086",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InvalidKycStatus",
         signature: { full: "error InvalidKycStatus()", canonical: "InvalidKycStatus()" },
         selector: "0xfc855b1b",
@@ -8907,6 +9122,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5b2e3086",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InvalidKycStatus",
         signature: { full: "error InvalidKycStatus()", canonical: "InvalidKycStatus()" },
         selector: "0xfc855b1b",
@@ -8970,6 +9190,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xa1180aad",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
     ],
     factory: (signer) => new MetadataFacet__factory(signer),
@@ -9010,6 +9235,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountHasNoRoles(address,bytes32[])",
         },
         selector: "0x90e55392",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
@@ -9106,6 +9336,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
@@ -9269,6 +9504,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
     ],
     factory: (signer) => new NominalValueFacet__factory(signer),
   },
@@ -9409,6 +9649,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccessControlRequired(bytes32,address)",
         },
         selector: "0x10210dec",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "InvalidPartition",
@@ -9617,6 +9862,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "ClearingIsDisabled",
         signature: { full: "error ClearingIsDisabled()", canonical: "ClearingIsDisabled()" },
         selector: "0x9f2523d3",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "ExpirationDateNotReached",
@@ -9835,6 +10085,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9f2523d3",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "ExpirationDateNotReached",
         signature: { full: "error ExpirationDateNotReached()", canonical: "ExpirationDateNotReached()" },
         selector: "0xaffb3088",
@@ -9964,6 +10219,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x10210dec",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
     ],
     factory: (signer) => new OperatorFacet__factory(signer),
@@ -10071,6 +10331,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "ClearingIsActivated",
         signature: { full: "error ClearingIsActivated()", canonical: "ClearingIsActivated()" },
         selector: "0x5b2e3086",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "HoldExpirationNotReached",
@@ -10239,6 +10504,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xa1180aad",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "IsUnpaused",
@@ -10393,6 +10663,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "ProceedRecipientAlreadyExists",
@@ -10540,6 +10815,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
@@ -10689,6 +10969,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "ProceedRecipientAlreadyExists",
@@ -10778,6 +11063,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountHasNoRole(address,bytes32)",
         },
         selector: "0xa1180aad",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
@@ -10971,6 +11261,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "ClearingIsDisabled",
         signature: { full: "error ClearingIsDisabled()", canonical: "ClearingIsDisabled()" },
         selector: "0x9f2523d3",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "ExpirationDateNotReached",
@@ -11180,6 +11475,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9f2523d3",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "ExpirationDateNotReached",
         signature: { full: "error ExpirationDateNotReached()", canonical: "ExpirationDateNotReached()" },
         selector: "0xaffb3088",
@@ -11331,6 +11631,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "ClearingIsActivated",
         signature: { full: "error ClearingIsActivated()", canonical: "ClearingIsActivated()" },
         selector: "0x5b2e3086",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "HoldExpirationNotReached",
@@ -11500,6 +11805,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "PartitionsAreProtected",
@@ -11658,6 +11968,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "ComplianceNotAllowed",
         signature: { full: "error ComplianceNotAllowed()", canonical: "ComplianceNotAllowed()" },
         selector: "0x66eb1b54",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "IdentityRegistryCallFailed",
@@ -11844,6 +12159,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x0c68e660",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "FactorIsZero",
         signature: { full: "error FactorIsZero()", canonical: "FactorIsZero()" },
         selector: "0x936e9b6d",
@@ -11950,6 +12270,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x69a80e75",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "DecimalDifferenceTooLarge",
         signature: {
           full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
@@ -12042,6 +12367,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x69a80e75",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "DecimalDifferenceTooLarge",
         signature: {
           full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
@@ -12131,6 +12461,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "CouponNotFound",
         signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
         selector: "0x69a80e75",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "DecimalDifferenceTooLarge",
@@ -12343,6 +12678,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x69a80e75",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "DecimalDifferenceTooLarge",
         signature: {
           full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
@@ -12486,6 +12826,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error AccountIsNotIssuer(address issuer)", canonical: "AccountIsNotIssuer(address)" },
         selector: "0xcd324f53",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "ListedIssuer",
@@ -12591,6 +12936,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "InterestRateIsSustainabilityPerformanceTargetRate",
@@ -12789,6 +13139,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InsufficientBalance",
         signature: {
           full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
@@ -12907,6 +13262,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountHasNoRole(address,bytes32)",
         },
         selector: "0xa1180aad",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "InsufficientBalance",
@@ -13028,6 +13388,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InsufficientBalance",
         signature: {
           full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
@@ -13147,6 +13512,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InsufficientBalance",
         signature: {
           full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
@@ -13264,6 +13634,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountHasNoRole(address,bytes32)",
         },
         selector: "0xa1180aad",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "InsufficientBalance",
@@ -13413,6 +13788,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x10210dec",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InvalidPartition",
         signature: {
           full: "error InvalidPartition(address account, bytes32 partition)",
@@ -13539,6 +13919,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x10210dec",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InsufficientBalance",
         signature: {
           full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
@@ -13653,6 +14038,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountHasNoRole(address,bytes32)",
         },
         selector: "0xa1180aad",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "InvalidTimestamp",
