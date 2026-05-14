@@ -8,7 +8,7 @@ import {
     KPI_EQUITY_BALANCE_ADJ
 } from "../../constants/values.sol";
 import { IEquity } from "../../facets/layer_2/equity/IEquity.sol";
-import { IAdjustBalances } from "../../facets/adjustBalances/IAdjustBalances.sol";
+import { IScheduledBalanceAdjustment } from "../../facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
 import { NominalValueStorageWrapper } from "./nominalValue/NominalValueStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
@@ -57,7 +57,7 @@ library EquityStorageWrapper {
     }
 
     function setScheduledBalanceAdjustment(
-        IAdjustBalances.ScheduledBalanceAdjustment calldata newBalanceAdjustment
+        IScheduledBalanceAdjustment.ScheduledBalanceAdjustment calldata newBalanceAdjustment
     ) internal returns (bytes32 corporateActionId_, uint256 balanceAdjustmentID_) {
         bytes memory data = abi.encode(newBalanceAdjustment);
 
@@ -74,23 +74,23 @@ library EquityStorageWrapper {
             BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
             balanceAdjustmentId - 1
         );
-        IAdjustBalances.ScheduledBalanceAdjustment memory balanceAdjustment;
+        IScheduledBalanceAdjustment.ScheduledBalanceAdjustment memory balanceAdjustment;
         bytes32 corporateActionId;
         (balanceAdjustment, corporateActionId, ) = getScheduledBalanceAdjustment(balanceAdjustmentId);
         if (balanceAdjustment.executionDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
-            revert IAdjustBalances.BalanceAdjustmentAlreadyExecuted(corporateActionId, balanceAdjustmentId);
+            revert IScheduledBalanceAdjustment.BalanceAdjustmentAlreadyExecuted(corporateActionId, balanceAdjustmentId);
         }
         CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
     }
 
     function initBalanceAdjustment(bytes32 actionId, bytes memory data) internal {
         if (actionId == bytes32(0)) {
-            revert IAdjustBalances.BalanceAdjustmentCreationFailed();
+            revert IScheduledBalanceAdjustment.BalanceAdjustmentCreationFailed();
         }
 
-        IAdjustBalances.ScheduledBalanceAdjustment memory newBalanceAdjustment = abi.decode(
+        IScheduledBalanceAdjustment.ScheduledBalanceAdjustment memory newBalanceAdjustment = abi.decode(
             data,
-            (IAdjustBalances.ScheduledBalanceAdjustment)
+            (IScheduledBalanceAdjustment.ScheduledBalanceAdjustment)
         );
 
         ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(
@@ -145,7 +145,7 @@ library EquityStorageWrapper {
         internal
         view
         returns (
-            IAdjustBalances.ScheduledBalanceAdjustment memory balanceAdjustment_,
+            IScheduledBalanceAdjustment.ScheduledBalanceAdjustment memory balanceAdjustment_,
             bytes32 corporateActionId_,
             bool isDisabled_
         )
@@ -159,7 +159,7 @@ library EquityStorageWrapper {
         (, , data, isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(corporateActionId_);
 
         _checkUnexpectedError(data.length == 0, KPI_EQUITY_BALANCE_ADJ);
-        (balanceAdjustment_) = abi.decode(data, (IAdjustBalances.ScheduledBalanceAdjustment));
+        (balanceAdjustment_) = abi.decode(data, (IScheduledBalanceAdjustment.ScheduledBalanceAdjustment));
     }
 
     function getScheduledBalanceAdjustmentsCount() internal view returns (uint256 balanceAdjustmentCount_) {

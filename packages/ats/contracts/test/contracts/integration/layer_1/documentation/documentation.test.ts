@@ -164,6 +164,25 @@ describe("Documentation Tests", () => {
     expect(documents.length).to.equal(0);
   });
 
+  it("GIVEN a document that is removed THEN docIndexes storage slot is zeroed (audit fix FIND-123)", async () => {
+    await asset.connect(signer_A).grantRole(ATS_ROLES.DOCUMENTER_ROLE, signer_C.address);
+
+    await asset.connect(signer_C).setDocument(documentName_1, documentURI_1, documentHASH_1);
+    await asset.connect(signer_C).removeDocument(documentName_1);
+
+    // Compute storage slot for docIndexes[documentName_1].
+    // DocumentationDataStorage struct layout from _DOCUMENTATION_STORAGE_POSITION:
+    //   +0 documents, +1 docIndexes  ← mapping base slot, +2 docNames
+    const DOCS_BASE = BigInt("0x1fc4fd526525f9824b2c5281c13f150dcad8151e0be556d609cf96360a80fe2a");
+    const docIndexesMappingBaseSlot = DOCS_BASE + 1n;
+    const ghostSlot = ethers.keccak256(
+      ethers.AbiCoder.defaultAbiCoder().encode(["bytes32", "uint256"], [documentName_1, docIndexesMappingBaseSlot]),
+    );
+
+    const slotValue = await ethers.provider.getStorage(diamond.target, ghostSlot);
+    expect(slotValue).to.equal(ethers.ZeroHash);
+  });
+
   it("GIVEN an existing document WHEN setDocument is called again with same name THEN document is updated without adding to docNames array", async () => {
     await asset.connect(signer_A).grantRole(ATS_ROLES.DOCUMENTER_ROLE, signer_C.address);
 

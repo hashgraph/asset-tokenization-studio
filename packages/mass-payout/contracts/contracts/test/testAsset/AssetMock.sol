@@ -7,6 +7,9 @@ import { IAssetMock } from "./interfaces/IAssetMock.sol";
 import {
     ScheduledTask
 } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
+import {
+    IScheduledBalanceAdjustment
+} from "@hashgraph/asset-tokenization-contracts/contracts/facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
 import { IFactory } from "@hashgraph/asset-tokenization-contracts/contracts/factory/IFactory.sol";
 import { ICouponTypes } from "@hashgraph/asset-tokenization-contracts/contracts/facets/coupon/ICouponTypes.sol";
 import { IVotingTypes } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/voting/IVotingTypes.sol";
@@ -15,6 +18,17 @@ import { IDividendTypes } from "@hashgraph/asset-tokenization-contracts/contract
 import { IBondTypes } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/bond/IBondTypes.sol";
 import { IPrincipal } from "@hashgraph/asset-tokenization-contracts/contracts/facets/principal/IPrincipal.sol";
 
+/**
+ * @title AssetMock
+ * @author Asset Tokenization Studio Team
+ * @notice Test-only mock asset used by the mass-payout `LifeCycleCashFlow` integration
+ *         tests. Implements `IAssetMock`, which aggregates every facet interface the
+ *         flows interact with.
+ * @dev Most methods revert with `NotImplemented` — they exist solely to satisfy the
+ *      `IAssetMock` aggregated surface. A small subset returns canned values seeded by
+ *      the constructor parameters (`SecurityType`, `withHolders`, `amountNumerator`).
+ *      Production code MUST NOT instantiate or reference this mock.
+ */
 // solhint-disable no-unused-vars
 contract AssetMock is IAssetMock {
     IFactory.SecurityType private _securityType;
@@ -185,7 +199,9 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    function setScheduledBalanceAdjustment(ScheduledBalanceAdjustment calldata) external pure returns (uint256) {
+    function setScheduledBalanceAdjustment(
+        IScheduledBalanceAdjustment.ScheduledBalanceAdjustment calldata
+    ) external pure returns (uint256) {
         revert NotImplemented();
     }
 
@@ -252,7 +268,9 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    function getScheduledBalanceAdjustment(uint256) external pure returns (ScheduledBalanceAdjustment memory, bool) {
+    function getScheduledBalanceAdjustment(
+        uint256
+    ) external pure returns (IScheduledBalanceAdjustment.ScheduledBalanceAdjustment memory, bool) {
         revert NotImplemented();
     }
 
