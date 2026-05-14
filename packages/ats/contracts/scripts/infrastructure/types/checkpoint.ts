@@ -204,8 +204,6 @@ export interface DeploymentCheckpoint {
       bondFixedRate?: ConfigurationResult;
       /** Bond KpiLinked Rate configuration */
       bondKpiLinkedRate?: ConfigurationResult;
-      /** Bond Sustainability Performance Target Rate configuration */
-      bondSustainabilityPerformanceTargetRate?: ConfigurationResult;
       /** Loan configuration */
       loan?: ConfigurationResult;
       /** Loans Portfolio configuration */

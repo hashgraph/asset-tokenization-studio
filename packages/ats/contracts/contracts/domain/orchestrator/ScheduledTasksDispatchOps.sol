@@ -26,7 +26,6 @@ import { CouponStorageWrapper } from "../asset/coupon/CouponStorageWrapper.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { InterestRateStorageWrapper } from "../asset/InterestRateStorageWrapper.sol";
-import { SustainabilityPerformanceTargetRateLib } from "../asset/SustainabilityPerformanceTargetRateLib.sol";
 import { KpiLinkedRateLib } from "../asset/KpiLinkedRateLib.sol";
 import { ICouponTypes } from "../../facets/coupon/ICouponTypes.sol";
 
@@ -184,13 +183,6 @@ library ScheduledTasksDispatchOps {
 
     function _updateCouponRatesIfNeeded(uint256 couponID) private {
         (ICouponTypes.RegisteredCoupon memory registeredCoupon, , ) = CouponStorageWrapper.getCoupon(couponID);
-
-        if (InterestRateStorageWrapper.isSustainabilityPerformanceTargetRateInitialized()) {
-            (uint256 rate, uint8 rateDecimals) = SustainabilityPerformanceTargetRateLib
-                .calculateSustainabilityPerformanceTargetInterestRate(couponID, registeredCoupon.coupon);
-
-            CouponStorageWrapper.updateCouponRate(couponID, registeredCoupon.coupon, rate, rateDecimals);
-        }
 
         if (InterestRateStorageWrapper.isKpiLinkedRateInitialized()) {
             (uint256 rate, uint8 rateDecimals) = KpiLinkedRateLib.calculateKpiLinkedInterestRate(

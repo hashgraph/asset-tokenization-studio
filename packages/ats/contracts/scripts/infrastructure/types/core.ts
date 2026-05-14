@@ -762,7 +762,6 @@ export interface DeploymentOutputType {
     bond: ConfigurationMetadata;
     bondFixedRate: ConfigurationMetadata;
     bondKpiLinkedRate: ConfigurationMetadata;
-    bondSustainabilityPerformanceTargetRate: ConfigurationMetadata;
   };
   summary: {
     totalContracts: number;
@@ -777,7 +776,6 @@ export interface DeploymentOutputType {
     getBondFacets(): FacetMetadata[];
     getBondFixedRateFacets(): FacetMetadata[];
     getBondKpiLinkedRateFacets(): FacetMetadata[];
-    getBondSustainabilityPerformanceTargetRateFacets(): FacetMetadata[];
     getLoanFacets(): FacetMetadata[];
     getLoansPortfolioFacets(): FacetMetadata[];
     getFactoryFacets(): FacetMetadata[];

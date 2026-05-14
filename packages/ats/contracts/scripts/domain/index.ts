@@ -46,7 +46,6 @@ export * from "./factory/deployEquityToken";
 export * from "./factory/deployBondToken";
 export * from "./factory/deployBondFixedRateToken";
 export * from "./factory/deployBondKpiLinkedRateToken";
-export * from "./factory/deployBondSustainabilityPerformanceTargetRateToken";
 export * from "./factory/deployLoanToken";
 export * from "./factory/deployLoansPortfolioToken";
 
@@ -61,9 +60,6 @@ export * from "./bondFixedRate/createConfiguration";
 
 // Bond Kpi Linked Rate configuration
 export * from "./bondKpiLinkedRate/createConfiguration";
-
-// Bond Sustainability Performance Target Rate configuration
-export * from "./bondSustainabilityPerformanceTargetRate/createConfiguration";
 
 // Loan configuration
 export * from "./loan/createConfiguration";

@@ -157,7 +157,6 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   BondUSAReadFacet: ["clearingReadOps"],
   BondUSAReadFixedRateFacet: ["clearingReadOps"],
   BondUSAReadKpiLinkedRateFacet: ["clearingReadOps"],
-  BondUSAReadSustainabilityPerformanceTargetRateFacet: ["clearingReadOps"],
   // Layer 3 EquityUSA — same transitive dependency
   EquityUSAFacet: ["clearingReadOps"],
   // Layer 2 facet families — coupon/dividend/voting/amortization reach ClearingReadOps
