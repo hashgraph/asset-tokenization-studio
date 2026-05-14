@@ -168,10 +168,10 @@ export const DEFAULT_BATCH_SIZE = 15;
  * ```
  */
 export const GAS_LIMIT = {
-  max: 30_000_000,
+  max: 15_000_000,
   default: 5_000_000,
   low: 1_000_000,
-  high: 20_000_000,
+  high: 15_000_000,
   /** 2000 Gwei ? must be set alongside gasLimit to skip eth_estimateGas on Hedera */
   gasPrice: 2_000_000_000_000n,
   initialize: {
@@ -184,7 +184,7 @@ export const GAS_LIMIT = {
   businessLogicResolver: {
     getStaticResolverKey: 60_000,
     registerBusinessLogics: 10_000_000,
-    createConfiguration: 20_000_000,
+    createConfiguration: 15_000_000,
   },
 } as const;
 
