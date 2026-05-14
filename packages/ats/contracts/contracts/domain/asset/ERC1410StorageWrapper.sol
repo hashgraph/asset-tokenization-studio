@@ -21,6 +21,7 @@ import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
+import { ScheduledTasksOps } from "../orchestrator/ScheduledTasksOps.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
@@ -446,7 +447,7 @@ library ERC1410StorageWrapper {
     }
 
     function triggerAndSyncAll(bytes32 partition, address from, address to) internal {
-        ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();
+        ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
         syncBalanceAdjustments(partition, from, to);
     }
 

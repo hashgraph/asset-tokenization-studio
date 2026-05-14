@@ -10,6 +10,7 @@ import {
     IScheduledCrossOrderedTasks
 } from "../../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
 import { IScheduledBalanceAdjustment } from "../../facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
+import { IAdjustBalances } from "../../facets/adjustBalances/IAdjustBalances.sol";
 import { ISnapshots } from "../../facets/layer_1/snapshot/ISnapshots.sol";
 import {
     _SCHEDULED_SNAPSHOTS_STORAGE_POSITION,
@@ -123,11 +124,6 @@ library ScheduledTasksStorageWrapper {
 
     function triggerScheduledCrossOrderedTasks(uint256 _max) internal returns (uint256) {
         return triggerScheduledTasks(scheduledCrossOrderedTaskStorage(), bytes32("crossOrdered"), _max);
-    }
-
-    // TODO: REMOVE IT!!! Ya no es necesario el delegate call entre facetas, que se explote la librería externa.
-    function callTriggerPendingScheduledCrossOrderedTasks() internal returns (uint256) {
-        return IScheduledCrossOrderedTasks(address(this)).triggerPendingScheduledCrossOrderedTasks();
     }
 
     function requireValidTimestamp(uint256 _timestamp) internal view {

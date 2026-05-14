@@ -7,7 +7,7 @@ import { IERC20Votes } from "../../facets/layer_1/ERC1400/ERC20Votes/IERC20Votes
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Checkpoints } from "../../infrastructure/utils/Checkpoints.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
-import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
+import { ScheduledTasksOps } from "../orchestrator/ScheduledTasksOps.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
@@ -74,7 +74,7 @@ library ERC20VotesStorageWrapper {
     }
 
     function delegate(address delegator, address delegatee) internal {
-        ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();
+        ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
 
         takeAbafCheckpoint();
 
@@ -82,7 +82,7 @@ library ERC20VotesStorageWrapper {
 
         if (currentDelegate == delegatee) return;
 
-        ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();
+        ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
 
         takeAbafCheckpoint();
 

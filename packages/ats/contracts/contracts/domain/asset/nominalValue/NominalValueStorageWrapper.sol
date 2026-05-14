@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _NOMINAL_VALUE_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { SnapshotsStorageWrapper } from "../SnapshotsStorageWrapper.sol";
-import { ScheduledTasksStorageWrapper } from "../ScheduledTasksStorageWrapper.sol";
+import { ScheduledTasksOps } from "../../orchestrator/ScheduledTasksOps.sol";
 
 /**
  * @title NominalValueStorageWrapper - Nominal Value Storage Wrapper
@@ -45,7 +45,7 @@ library NominalValueStorageWrapper {
      * @param _nominalValueDecimals New decimals applied to `_nominalValue`.
      */
     function setNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) internal {
-        ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();
+        ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
 
         SnapshotsStorageWrapper.updateNominalValueSnapshot();
         SnapshotsStorageWrapper.updateNominalValueDecimalsSnapshot();

@@ -6,7 +6,6 @@ import { expect } from "chai";
 import {
   AccessControl,
   FreezeFacet,
-  FreezeFacet__factory,
   Pause,
   BusinessLogicResolver,
   PauseFacet,
@@ -16,9 +15,9 @@ import {
   KycFacet,
   KycFacet__factory,
   LockFacet,
-  LockFacet__factory,
 } from "@contract-types";
 import { EQUITY_CONFIG_ID, ATS_ROLES } from "@scripts";
+import { deployOrchestratorLibraries, getFacetLibraryLinks, hasOrchestratorLibraryAddresses } from "@scripts/domain";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 
 describe("BusinessLogicResolver", () => {
@@ -48,12 +47,26 @@ describe("BusinessLogicResolver", () => {
     await accessControl.grantRole(ATS_ROLES.PAUSER_ROLE, signer_B.address);
 
     pause = await ethers.getContractAt("Pause", businessLogicResolver.target);
-    freezeFacet = await new FreezeFacet__factory(signer_A).deploy();
+
+    // FreezeFacet and LockFacet inline call paths that DELEGATECALL into ScheduledTasksOps,
+    // so their bytecode carries a library link placeholder that must be resolved at deploy time.
+    if (!hasOrchestratorLibraryAddresses()) {
+      await deployOrchestratorLibraries(signer_A);
+    }
+    const freezeFactory = await ethers.getContractFactory("FreezeFacet", {
+      signer: signer_A,
+      libraries: getFacetLibraryLinks("FreezeFacet"),
+    });
+    freezeFacet = (await freezeFactory.deploy()) as unknown as FreezeFacet;
 
     const pauseFacet: PauseFacet = await new PauseFacet__factory(signer_A).deploy();
     const noncesFacet: NoncesFacet = await new NoncesFacet__factory(signer_A).deploy();
     const kycFacet: KycFacet = await new KycFacet__factory(signer_A).deploy();
-    const lockFacet: LockFacet = await new LockFacet__factory(signer_A).deploy();
+    const lockFactory = await ethers.getContractFactory("LockFacet", {
+      signer: signer_A,
+      libraries: getFacetLibraryLinks("LockFacet"),
+    });
+    const lockFacet: LockFacet = (await lockFactory.deploy()) as unknown as LockFacet;
 
     BUSINESS_LOGIC_KEYS = [
       {
