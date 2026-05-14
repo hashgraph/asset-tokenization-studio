@@ -228,6 +228,8 @@ library ClearingOps {
         bytes memory _operatorData,
         ThirdPartyType _thirdPartyType
     ) public returns (bool success_, uint256 clearingId_) {
+        HoldStorageWrapper.checkNonZeroHoldAmount(_hold.amount);
+
         bytes32 partition = _clearingOperation.partition;
 
         clearingId_ = ClearingStorageWrapper.increaseClearingId(
@@ -435,6 +437,8 @@ library ClearingOps {
             return;
         }
 
+        ERC1410StorageWrapper.updateSecurityHolder(_id.tokenHolder, transferData.destination, transferData.amount);
+
         // Approve: transfer to original destination
         transferClearingBalance(_id.partition, _id.tokenHolder, transferData.destination, transferData.amount);
 
@@ -486,6 +490,8 @@ library ClearingOps {
             transferClearingBalance(_id.partition, _id.tokenHolder, _id.tokenHolder, redeemData.amount);
             return;
         }
+
+        ERC1410StorageWrapper.updateSecurityHolder(_id.tokenHolder, address(0), redeemData.amount);
 
         // Approve: verify identity/compliance for the burn destination address(0)
         TokenCoreOps.checkIdentity(_id.tokenHolder, address(0));

@@ -844,13 +844,16 @@ describe("ClearingByPartitionFacet Tests", () => {
   describe("approveClearingOperationByPartition", () => {
     it("GIVEN a pending transfer clearing WHEN approveClearingOperationByPartition THEN balances updated and clearedAmount zeroed", async () => {
       const balanceA_before = await asset.balanceOf(signer_A.address);
-      const balanceB_before = await asset.balanceOf(signer_B.address);
       const clearingOperation = {
         partition: _DEFAULT_PARTITION,
         expirationTimestamp: EXPIRATION_TIMESTAMP,
         data: EMPTY_HEX_BYTES,
       };
-      await asset.connect(signer_A).clearingTransferByPartition(clearingOperation, _AMOUNT, signer_B.address);
+
+      const totalSecurityHoldersBefore = await asset.getTotalSecurityHolders();
+      const securityHoldersBefore = await asset.getSecurityHolders(0, totalSecurityHoldersBefore);
+
+      await asset.connect(signer_A).clearingTransferByPartition(clearingOperation, balanceA_before, signer_B.address);
 
       const identifier = {
         clearingOperationType: ClearingOperationType.Transfer,
@@ -863,11 +866,17 @@ describe("ClearingByPartitionFacet Tests", () => {
         .to.emit(asset, "ClearingOperationApproved")
         .withArgs(signer_A.address, signer_A.address, _DEFAULT_PARTITION, 1, ClearingOperationType.Transfer, "0x")
         .to.emit(asset, "Transfer")
-        .withArgs(ethers.ZeroAddress, signer_B.address, _AMOUNT);
+        .withArgs(ethers.ZeroAddress, signer_B.address, balanceA_before);
 
-      expect(await asset.balanceOf(signer_A.address)).to.equal(balanceA_before - BigInt(_AMOUNT));
-      expect(await asset.balanceOf(signer_B.address)).to.equal(balanceB_before + BigInt(_AMOUNT));
+      const totalSecurityHoldersAfter = await asset.getTotalSecurityHolders();
+      const securityHoldersAfter = await asset.getSecurityHolders(0, totalSecurityHoldersAfter);
+
+      expect(await asset.balanceOf(signer_A.address)).to.equal(0);
+      expect(await asset.balanceOf(signer_B.address)).to.equal(balanceA_before);
       expect(await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(0);
+      expect(totalSecurityHoldersAfter).to.equal(totalSecurityHoldersBefore);
+      expect(securityHoldersBefore).to.deep.equal([signer_A.address]);
+      expect(securityHoldersAfter).to.deep.equal([signer_B.address]);
     });
 
     it("GIVEN a pending redeem clearing WHEN approveClearingOperationByPartition THEN totalSupply drops, clearedAmount zero and RedeemedByPartition emitted", async () => {
@@ -879,10 +888,14 @@ describe("ClearingByPartitionFacet Tests", () => {
         expirationTimestamp: EXPIRATION_TIMESTAMP,
         data: EMPTY_HEX_BYTES,
       };
-      await asset.connect(signer_A).clearingRedeemByPartition(clearingOperation, _AMOUNT);
 
-      expect(await asset.balanceOf(signer_A.address)).to.equal(balanceBefore - BigInt(_AMOUNT));
-      expect(await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(_AMOUNT);
+      const totalSecurityHoldersBefore = await asset.getTotalSecurityHolders();
+      const securityHoldersBefore = await asset.getSecurityHolders(0, totalSecurityHoldersBefore);
+
+      await asset.connect(signer_A).clearingRedeemByPartition(clearingOperation, balanceBefore);
+
+      expect(await asset.balanceOf(signer_A.address)).to.equal(0);
+      expect(await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(balanceBefore);
       // totalSupply must remain unchanged while the redeem is only cleared (pre-approve)
       expect(await asset.totalSupply()).to.equal(totalSupplyBefore);
       expect(await asset.totalSupplyByPartition(_DEFAULT_PARTITION)).to.equal(partitionSupplyBefore);
@@ -902,10 +915,17 @@ describe("ClearingByPartitionFacet Tests", () => {
         .to.emit(asset, "RedeemedByPartition")
         .withArgs(_DEFAULT_PARTITION, signer_A.address, signer_A.address, _AMOUNT, EMPTY_HEX_BYTES, EMPTY_HEX_BYTES);
 
-      expect(await asset.balanceOf(signer_A.address)).to.equal(balanceBefore - BigInt(_AMOUNT));
+      const totalSecurityHoldersAfter = await asset.getTotalSecurityHolders();
+      const securityHoldersAfter = await asset.getSecurityHolders(0, totalSecurityHoldersAfter);
+
+      expect(await asset.balanceOf(signer_A.address)).to.equal(0);
       expect(await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(0);
-      expect(await asset.totalSupply()).to.equal(totalSupplyBefore - BigInt(_AMOUNT));
-      expect(await asset.totalSupplyByPartition(_DEFAULT_PARTITION)).to.equal(partitionSupplyBefore - BigInt(_AMOUNT));
+      expect(totalSecurityHoldersBefore).to.equal(1);
+      expect(totalSecurityHoldersAfter).to.equal(0);
+      expect(securityHoldersBefore).to.deep.equal([signer_A.address]);
+      expect(securityHoldersAfter).to.deep.equal([]);
+      expect(await asset.totalSupply()).to.equal(0);
+      expect(await asset.totalSupplyByPartition(_DEFAULT_PARTITION)).to.equal(0);
     });
 
     it("GIVEN a paused token WHEN approveClearingOperationByPartition THEN reverts with IsPaused", async () => {
