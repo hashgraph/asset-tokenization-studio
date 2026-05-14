@@ -53,6 +53,7 @@ interface ICommonErrors {
 
     error ZeroValueNotAllowed();
 
-    /// @notice Thrown when a call that must originate from the contract itself comes from an external address.
+    error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals);
+
     error UnauthorizedSelfCall(address caller);
 }
