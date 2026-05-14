@@ -122,64 +122,6 @@ describe("CouponListing Tests", () => {
     expect(totalCouponsInOrderedList).to.equal(2);
   });
 
-  it("GIVEN deprecated coupons in bond storage AND new coupons in coupon storage WHEN getCouponFromOrderedListAt is called THEN it correctly routes to both storages with offset", async () => {
-    const kpiLinkedRateBase = await deployBondKpiLinkedRateTokenFixture({
-      bondDataParams: {
-        securityData: {
-          isMultiPartition: false,
-        },
-        bondDetails: {
-          startingDate,
-          maturityDate,
-        },
-      },
-    });
-
-    const kpiDiamond = kpiLinkedRateBase.diamond;
-    const kpiAsset = await ethers.getContractAt("IAsset", kpiDiamond.target, signer_A);
-
-    await kpiAsset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
-
-    const timestamp = await getDltTimestamp();
-
-    const coupon1 = {
-      recordDate: (timestamp + TIME_PERIODS_S.DAY).toString(),
-      executionDate: (timestamp + TIME_PERIODS_S.DAY * 2).toString(),
-      rate: 0,
-      rateDecimals: 0,
-      startDate: timestamp.toString(),
-      endDate: (timestamp + TIME_PERIODS_S.DAY).toString(),
-      fixingDate: (timestamp + TIME_PERIODS_S.DAY).toString(),
-      rateStatus: 0,
-    };
-
-    await expect(kpiAsset.setCoupon(coupon1)).to.emit(kpiAsset, "CouponSet");
-
-    // Trigger scheduled tasks to move coupon1 to ordered list
-    await kpiAsset.changeSystemTimestamp(timestamp + TIME_PERIODS_S.DAY + 1);
-    await kpiAsset.triggerPendingScheduledCrossOrderedTasks();
-
-    // Add deprecated coupons to bond storage (simulating legacy data from before refactor)
-    // testOnlyAddDeprecatedCoupon is a test-helper only on TimeTravelFacet, not on IAsset
-    const timeTravelKpi = await ethers.getContractAt("TimeTravelFacet", kpiDiamond.target, signer_A);
-    await timeTravelKpi.testOnlyAddDeprecatedCoupon(100);
-
-    // 1 deprecated (in bond storage) + 1 new (in coupon storage)
-    const totalCoupons = await kpiAsset.getCouponsOrderedListTotal();
-    expect(totalCoupons).to.equal(2);
-
-    const pos0 = await kpiAsset.getCouponFromOrderedListAt(0);
-    expect(pos0).to.equal(100); // from deprecated bond storage
-
-    const pos1 = await kpiAsset.getCouponFromOrderedListAt(1);
-    expect(pos1).to.equal(1); // first new coupon
-
-    const fullList = await kpiAsset.getCouponsOrderedList(0, 10);
-    expect(fullList).to.have.lengthOf(2);
-    expect(fullList[0]).to.equal(100); // deprecated
-    expect(fullList[1]).to.equal(1); // new storage
-  });
-
   it("GIVEN empty ordered list WHEN getCouponFromOrderedListAt with _pos >= getCouponsOrderedListTotalAdjustedAt THEN returns 0", async () => {
     const couponIdAtPos0 = await asset.getCouponFromOrderedListAt(0);
     expect(couponIdAtPos0).to.equal(0);

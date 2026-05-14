@@ -8,7 +8,7 @@ import { ITransfer } from "../../facets/transfer/ITransfer.sol";
 import { IAllowanceTypes } from "../../facets/allowance/IAllowanceTypes.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { IFactory } from "../../factory/IFactory.sol";
-import { ERC1410BasicStorage, ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
+import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
@@ -51,35 +51,30 @@ library ERC20StorageWrapper {
     }
 
     function increaseBalance(address to, uint256 value) internal {
-        migrateBalanceIfNeeded(to);
         unchecked {
             erc20Storage().balances[to] += value;
         }
     }
 
     function reduceBalance(address from, uint256 value) internal {
-        migrateBalanceIfNeeded(from);
         unchecked {
             erc20Storage().balances[from] -= value;
         }
     }
 
     function increaseTotalSupply(uint256 value) internal {
-        migrateTotalSupplyIfNeeded();
         unchecked {
             erc20Storage().totalSupply += value;
         }
     }
 
     function reduceTotalSupply(uint256 value) internal {
-        migrateTotalSupplyIfNeeded();
         unchecked {
             erc20Storage().totalSupply -= value;
         }
     }
 
     function adjustTotalSupply(uint256 factor) internal {
-        migrateTotalSupplyIfNeeded();
         erc20Storage().totalSupply *= factor;
     }
 
@@ -88,7 +83,6 @@ library ERC20StorageWrapper {
     }
 
     function adjustTotalBalanceFor(uint256 abaf, address account) internal {
-        migrateBalanceIfNeeded(account);
         uint256 oldBalance = erc20Storage().balances[account];
         uint256 newBalance = oldBalance *
             AdjustBalancesStorageWrapper.calculateFactorByAbafAndTokenHolder(abaf, account);
@@ -213,28 +207,12 @@ library ERC20StorageWrapper {
         emit IAllowanceTypes.Approval(from, spender, erc20Storage().allowed[from][spender]);
     }
 
-    function migrateTotalSupplyIfNeeded() internal {
-        ERC1410BasicStorage storage $ = ERC1410StorageWrapper.erc1410BasicStorage();
-        if ($.DEPRECATED_totalSupply == 0) return;
-        erc20Storage().totalSupply = $.DEPRECATED_totalSupply;
-        $.DEPRECATED_totalSupply = 0;
+    function totalSupply() internal view returns (uint256) {
+        return erc20Storage().totalSupply;
     }
 
-    function migrateBalanceIfNeeded(address tokenHolder) internal {
-        ERC1410BasicStorage storage $ = ERC1410StorageWrapper.erc1410BasicStorage();
-        if ($.DEPRECATED_balances[tokenHolder] == 0) return;
-        erc20Storage().balances[tokenHolder] = $.DEPRECATED_balances[tokenHolder];
-        $.DEPRECATED_balances[tokenHolder] = 0;
-    }
-
-    function totalSupply() internal view returns (uint256 totalSupply_) {
-        totalSupply_ = ERC1410StorageWrapper.erc1410BasicStorage().DEPRECATED_totalSupply;
-        return totalSupply_ == 0 ? erc20Storage().totalSupply : totalSupply_;
-    }
-
-    function balanceOf(address tokenHolder) internal view returns (uint256 balance_) {
-        balance_ = ERC1410StorageWrapper.erc1410BasicStorage().DEPRECATED_balances[tokenHolder];
-        return balance_ == 0 ? erc20Storage().balances[tokenHolder] : balance_;
+    function balanceOf(address tokenHolder) internal view returns (uint256) {
+        return erc20Storage().balances[tokenHolder];
     }
 
     function allowance(address owner, address spender) internal view returns (uint256) {
