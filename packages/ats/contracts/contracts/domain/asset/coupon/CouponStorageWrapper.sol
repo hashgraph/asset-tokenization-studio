@@ -13,9 +13,7 @@ import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../core/ERC3643StorageWrapper.sol";
 import { ICoupon } from "../../../facets/coupon/ICoupon.sol";
 import { ICouponTypes } from "../../../facets/coupon/ICouponTypes.sol";
-import { IFixedRate } from "../../../facets/layer_2/interestRate/fixedRate/IFixedRate.sol";
-import { InterestRateStorageWrapper } from "../InterestRateStorageWrapper.sol";
-import { KpiLinkedRateLib } from "../KpiLinkedRateLib.sol";
+import { CouponRateDispatch } from "./CouponRateDispatch.sol";
 import { NominalValueStorageWrapper } from "../nominalValue/NominalValueStorageWrapper.sol";
 import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
 import { ScheduledTasksStorageWrapper } from "../ScheduledTasksStorageWrapper.sol";
@@ -35,21 +33,21 @@ library CouponStorageWrapper {
     /**
      * @notice Persists a new coupon corporate action and schedules its snapshot/listing
      *         tasks. Variant invariants and rate stamping are delegated to
-     *         `_validateAndResolveRate`, which mirrors the deferred dispatch performed by
-     *         `getCoupon` on the read path.
+     *         `CouponRateDispatch.validateAndStamp`, which mirrors the deferred dispatch
+     *         performed by `getCoupon` on the read path.
      * @dev Does NOT emit `ICoupon.CouponSet` — the writer abstract emits it inline after
      *      this call returns, per the project event-emission rule.
      * @param newCoupon Coupon parameters captured at scheduling time.
      * @return corporateActionId_ Identifier of the underlying corporate action.
      * @return couponID_ One-indexed identifier assigned to the new coupon.
      * @return resolved_ The persisted coupon after variant-specific rate stamping (input
-     *         struct unchanged for the standard / KPI / SPT variants; `rate`,
-     *         `rateDecimals`, `rateStatus` overwritten for the fixed-rate variant).
+     *         struct unchanged for the STANDARD / KPI_LINKED variants; `rate`,
+     *         `rateDecimals`, `rateStatus` overwritten for FIXED and forced to zero for NONE).
      */
     function setCoupon(
         ICouponTypes.Coupon memory newCoupon
     ) internal returns (bytes32 corporateActionId_, uint256 couponID_, ICouponTypes.Coupon memory resolved_) {
-        newCoupon = _validateAndResolveRate(newCoupon);
+        newCoupon = CouponRateDispatch.validateAndStamp(newCoupon);
 
         (corporateActionId_, couponID_) = CorporateActionsStorageWrapper.addCorporateAction(
             COUPON_CORPORATE_ACTION_TYPE,
@@ -141,9 +139,13 @@ library CouponStorageWrapper {
             registeredCoupon_.coupon.fixingDate > TimeTravelStorageWrapper.getBlockTimestamp()
         ) return (registeredCoupon_, corporateActionId_, isDisabled_);
 
-        if (InterestRateStorageWrapper.isKpiLinkedRateInitialized()) {
-            (registeredCoupon_.coupon.rate, registeredCoupon_.coupon.rateDecimals) = KpiLinkedRateLib
-                .calculateKpiLinkedInterestRate(couponID, registeredCoupon_.coupon);
+        (uint256 resolvedRate, uint8 resolvedDecimals, bool shouldOverride) = CouponRateDispatch.resolveRate(
+            couponID,
+            registeredCoupon_.coupon
+        );
+        if (shouldOverride) {
+            registeredCoupon_.coupon.rate = resolvedRate;
+            registeredCoupon_.coupon.rateDecimals = resolvedDecimals;
             registeredCoupon_.coupon.rateStatus = ICouponTypes.RateCalculationStatus.SET;
         }
     }
@@ -303,7 +305,7 @@ library CouponStorageWrapper {
         if (getCouponFromOrderedListAt(0) == couponID) return (0);
 
         unchecked {
-            orderedListLength--;
+            --orderedListLength;
         }
         uint256 previousCouponId;
 
@@ -320,52 +322,12 @@ library CouponStorageWrapper {
     }
 
     /**
-     * @notice Validates the coupon's rate triplet against the bond's rate variant and,
-     *         for fixed-rate bonds, stamps the configured rate before persistence.
-     * @dev Variant dispatch (write-path mirror of `getCoupon`'s read-path dispatch via
-     *      `InterestRateStorageWrapper.is<Variant>Initialized()`):
-     *      - **Fixed-rate** bonds: reject any user-supplied rate, then stamp the configured
-     *        rate from `InterestRateStorageWrapper.getRate()` and `rateStatus = SET`.
-     *      - **KPI-linked-rate** bonds: reject any user-supplied rate; the rate stays
-     *        `PENDING` and is resolved at read time.
-     *      - **Standard** bonds (no rate variant initialised): pass the user-supplied rate
-     *        through unchanged.
-     * @param newCoupon User-supplied coupon parameters.
-     * @return resolved_ The same coupon, potentially with `rate`, `rateDecimals` and
-     *         `rateStatus` overwritten for the fixed-rate variant.
-     */
-    function _validateAndResolveRate(
-        ICouponTypes.Coupon memory newCoupon
-    ) private view returns (ICouponTypes.Coupon memory resolved_) {
-        if (InterestRateStorageWrapper.isFixedRateInitialized()) {
-            if (!_isPendingRate(newCoupon)) revert IFixedRate.InterestRateIsFixed();
-            (newCoupon.rate, newCoupon.rateDecimals) = InterestRateStorageWrapper.getRate();
-            newCoupon.rateStatus = ICouponTypes.RateCalculationStatus.SET;
-        } else if (InterestRateStorageWrapper.isKpiLinkedRateInitialized()) {
-            if (!_isPendingRate(newCoupon)) revert ICoupon.InterestRateIsKpiLinked();
-        }
-        resolved_ = newCoupon;
-    }
-
-    /**
      * @notice Builds the fractional coupon amount payable to a holder once the record date is
      *         reached, expressed as `numerator / denominator` to defer rounding to the caller.
      * @dev Scale invariant: `tokenBalance`, `decimals`, `nominalValue` and `nominalValueDecimals`
      *      must all be sampled at the same point in time as the holder balance — either the
      *      snapshot bound to the coupon or the ABAF-adjusted state at the record date. The
-     *      function is intentionally `pure`: it never reads live nominal-value storage. Reading
-     *      the live values here against a snapshot-scale balance was the FIND-121 defect: an
-     *      `ABAF` adjustment or a `setNominalValue` call between record date and query time
-     *      would inflate the numerator while leaving the denominator at the wrong precision.
-     *      Returns the default zero-valued struct (with `recordDateReached == false`) before the
-     *      record date is reached.
-     * @param coupon Underlying coupon parameters; `endDate`, `startDate` and `rate*` are used.
-     * @param tokenBalance Holder balance captured at the coupon's record date or snapshot.
-     * @param decimals Token decimals at the same scale as `tokenBalance`.
-     * @param nominalValue Nominal value at the same scale as `tokenBalance`.
-     * @param nominalValueDecimals Decimal precision applied to `nominalValue` at that scale.
-     * @param recordDateReached True once the record date has passed; gates the computation.
-     * @return couponAmountFor_ Fractional payable amount with matching `recordDateReached` flag.
+     *      function is intentionally `pure`:
      */
     function _calculateCouponAmount(
         ICouponTypes.Coupon memory coupon,
@@ -382,21 +344,6 @@ library CouponStorageWrapper {
         couponAmountFor_.recordDateReached = true;
         couponAmountFor_.numerator = tokenBalance * nominalValue * coupon.rate * period;
         couponAmountFor_.denominator = 10 ** (decimals + nominalValueDecimals + coupon.rateDecimals) * 365 days;
-    }
-
-    /**
-     * @notice Tells whether a user-supplied coupon has its rate triplet in the
-     *         pending shape (`rateStatus = PENDING`, `rate = 0`, `rateDecimals = 0`).
-     * @dev Variant invariants reject any non-pending rate triplet so the user cannot
-     *      pre-stamp a rate for variants where the rate is owned by the protocol.
-     * @param newCoupon Coupon parameters captured at scheduling time.
-     * @return ok_ True iff the rate triplet is pending.
-     */
-    function _isPendingRate(ICouponTypes.Coupon memory newCoupon) private pure returns (bool ok_) {
-        ok_ =
-            newCoupon.rateStatus == ICouponTypes.RateCalculationStatus.PENDING &&
-            newCoupon.rate == 0 &&
-            newCoupon.rateDecimals == 0;
     }
 
     // solhint-disable-next-line func-name-mixedcase

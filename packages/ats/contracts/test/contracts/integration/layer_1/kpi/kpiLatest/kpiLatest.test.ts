@@ -37,10 +37,6 @@ describe("Kpi Latest Tests", () => {
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.INTEREST_RATE_MANAGER_ROLE,
-        members: [signer_A.address],
-      },
-      {
         role: ATS_ROLES.PROCEED_RECIPIENT_MANAGER_ROLE,
         members: [signer_A.address],
       },

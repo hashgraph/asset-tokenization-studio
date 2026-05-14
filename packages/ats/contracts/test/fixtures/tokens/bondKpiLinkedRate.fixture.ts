@@ -10,6 +10,7 @@ import {
   IAsset__factory,
 } from "@contract-types";
 import {
+  ATS_ROLES,
   DeployBondFromFactoryParams,
   InterestRateParams,
   ImpactDataParams,

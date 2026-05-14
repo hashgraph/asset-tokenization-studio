@@ -142,6 +142,7 @@ import { IBatchTransfer } from "./batchTransfer/IBatchTransfer.sol";
 import { IMetadata } from "./metadata/IMetadata.sol";
 import { IDeactivate } from "./deactivate/IDeactivate.sol";
 import { IOperatorByPartition } from "./operatorByPartition/IOperatorByPartition.sol";
+import { IInterestRate } from "./interestRate/IInterestRate.sol";
 
 // solhint-disable no-empty-blocks
 /**
@@ -278,5 +279,6 @@ interface IAsset is
     IMetadata,
     IDeactivate,
     IOperatorByPartition,
-    ISecurityHolders
+    ISecurityHolders,
+    IInterestRate
 {}

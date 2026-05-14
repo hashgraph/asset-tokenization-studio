@@ -166,3 +166,6 @@ bytes32 constant _DEACTIVATE_STORAGE_POSITION = 0x06257f792d30fc0103eef3c47e444b
 
 // keccak256('security.token.standard.initializer.storage');
 bytes32 constant _INITIALIZER_STORAGE_POSITION = 0x8702d507127ca9339928adcc33f288596f97cef44eb189657d00b2fafa46a088;
+
+// keccak256('security.token.standard.interest.rate.type.storage');
+bytes32 constant _INTEREST_RATE_TYPE_STORAGE_POSITION = 0x3078e1663be9ac07a8f77926f415d1f3142556ad397b1f0f4f556dcdc72c95ec;
