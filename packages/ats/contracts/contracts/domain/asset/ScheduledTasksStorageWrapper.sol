@@ -10,29 +10,16 @@ import {
     IScheduledCrossOrderedTasks
 } from "../../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
 import { IAdjustBalances } from "../../facets/adjustBalances/IAdjustBalances.sol";
-import { ISnapshots } from "../../facets/layer_1/snapshot/ISnapshots.sol";
 import {
     _SCHEDULED_SNAPSHOTS_STORAGE_POSITION,
     _SCHEDULED_COUPON_LISTING_STORAGE_POSITION,
     _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION,
     _SCHEDULED_CROSS_ORDERED_TASKS_STORAGE_POSITION
 } from "../../constants/storagePositions.sol";
-import {
-    SNAPSHOT_RESULT_ID,
-    COUPON_LISTING_RESULT_ID,
-    SNAPSHOT_TASK_TYPE,
-    BALANCE_ADJUSTMENT_TASK_TYPE,
-    COUPON_LISTING_TASK_TYPE
-} from "../../constants/values.sol";
-import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
-import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
-import { CouponStorageWrapper } from "./coupon/CouponStorageWrapper.sol";
+import { SNAPSHOT_TASK_TYPE, BALANCE_ADJUSTMENT_TASK_TYPE, COUPON_LISTING_TASK_TYPE } from "../../constants/values.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { InterestRateStorageWrapper } from "./InterestRateStorageWrapper.sol";
-import { SustainabilityPerformanceTargetRateLib } from "./SustainabilityPerformanceTargetRateLib.sol";
-import { ICouponTypes } from "../../facets/coupon/ICouponTypes.sol";
-import { KpiLinkedRateLib } from "./KpiLinkedRateLib.sol";
+import { ScheduledTasksDispatchOps } from "../orchestrator/ScheduledTasksDispatchOps.sol";
 
 /**
  * @title ScheduledTasksStorageWrapper
@@ -75,22 +62,9 @@ library ScheduledTasksStorageWrapper {
             ScheduledTasksLib.popScheduledTask(_scheduledTasks);
 
             try
-                IScheduledCrossOrderedTasks(address(this)).executeScheduledTaskCallback(
-                    callbackType,
-                    pos,
-                    scheduledTasksLength,
-                    currentScheduledTask
-                )
+                ScheduledTasksDispatchOps.execute(callbackType, pos, scheduledTasksLength, currentScheduledTask)
             {} catch {
-                bytes32 actionId = _getActionIdFromScheduledTask(currentScheduledTask);
-                if (callbackType != bytes32("crossOrdered")) {
-                    CorporateActionsStorageWrapper.cancelCorporateAction(actionId);
-                }
-                emit IScheduledCrossOrderedTasks.TaskExecutionFailed(
-                    actionId,
-                    callbackType,
-                    currentScheduledTask.scheduledTimestamp
-                );
+                _onTaskExecutionFailed(callbackType, currentScheduledTask);
             }
 
             unchecked {
@@ -147,32 +121,6 @@ library ScheduledTasksStorageWrapper {
     // TODO: REMOVE IT!!! Ya no es necesario el delegate call entre facetas, que se explote la librería externa.
     function callTriggerPendingScheduledCrossOrderedTasks() internal returns (uint256) {
         return IScheduledCrossOrderedTasks(address(this)).triggerPendingScheduledCrossOrderedTasks();
-    }
-
-    function dispatchScheduledTask(
-        bytes32 callbackType,
-        uint256 pos,
-        uint256 scheduledTasksLength,
-        ScheduledTask memory currentScheduledTask
-    ) internal {
-        if (callbackType == bytes32("snapshot")) {
-            _onScheduledSnapshotTriggered(pos, scheduledTasksLength, currentScheduledTask);
-            return;
-        }
-
-        if (callbackType == bytes32("coupon")) {
-            _onScheduledCouponListingTriggered(pos, scheduledTasksLength, currentScheduledTask);
-            return;
-        }
-
-        if (callbackType == bytes32("balance")) {
-            _onScheduledBalanceAdjustmentTriggered(pos, scheduledTasksLength, currentScheduledTask);
-            return;
-        }
-
-        if (callbackType == bytes32("crossOrdered")) {
-            _onScheduledCrossOrderedTaskTriggered(pos, scheduledTasksLength, currentScheduledTask);
-        }
     }
 
     function requireValidTimestamp(uint256 _timestamp) internal view {
@@ -343,112 +291,37 @@ library ScheduledTasksStorageWrapper {
         }
     }
 
-    function _onScheduledSnapshotTriggered(
-        uint256 /*_pos*/,
-        uint256 /*_scheduledTasksLength*/,
-        ScheduledTask memory _scheduledTask
-    ) private {
-        bytes32 actionId = abi.decode(_scheduledTask.data, (bytes32));
-        if (CorporateActionsStorageWrapper.isCorporateActionDisabled(actionId)) {
+    function _onTaskExecutionFailed(bytes32 callbackType, ScheduledTask memory task) private {
+        bytes32 actionId = _getActionIdFromScheduledTask(task);
+        if (callbackType == bytes32("crossOrdered")) {
+            _cancelPendingSubTaskAction(actionId);
+            emit IScheduledCrossOrderedTasks.TaskExecutionFailed(actionId, callbackType, task.scheduledTimestamp);
             return;
         }
-
-        uint256 newSnapShotID = SnapshotsStorageWrapper.takeSnapshot();
-        emit ISnapshots.SnapshotTriggered(newSnapShotID, abi.encodePacked(actionId));
-        CorporateActionsStorageWrapper.updateCorporateActionResult(
-            actionId,
-            SNAPSHOT_RESULT_ID,
-            abi.encodePacked(newSnapShotID)
-        );
+        CorporateActionsStorageWrapper.cancelCorporateAction(actionId);
+        emit IScheduledCrossOrderedTasks.TaskExecutionFailed(actionId, callbackType, task.scheduledTimestamp);
     }
 
-    function _onScheduledCouponListingTriggered(
-        uint256 /*_pos*/,
-        uint256 /*_scheduledTasksLength*/,
-        ScheduledTask memory _scheduledTask
-    ) private {
-        bytes32 actionId = _getActionIdFromScheduledTask(_scheduledTask);
-        if (CorporateActionsStorageWrapper.isCorporateActionDisabled(actionId)) {
-            return;
-        }
-
-        uint256 couponID = _getCouponIdFromAction(actionId);
-
-        CouponStorageWrapper.addToCouponsOrderedList(couponID);
-        uint256 orderedListPos = CouponStorageWrapper.getCouponsOrderedListTotal();
-
-        _updateCouponRatesIfNeeded(couponID);
-
-        CorporateActionsStorageWrapper.updateCorporateActionResult(
-            actionId,
-            COUPON_LISTING_RESULT_ID,
-            abi.encodePacked(orderedListPos)
-        );
-    }
-
-    function _onScheduledBalanceAdjustmentTriggered(
-        uint256 /*_pos*/,
-        uint256 /*_scheduledTasksLength*/,
-        ScheduledTask memory _scheduledTask
-    ) private {
-        (, , bytes memory balanceAdjustmentData, bool isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(
-            _getActionIdFromScheduledTask(_scheduledTask)
-        );
-
-        if (isDisabled_) return;
-
-        IAdjustBalances.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
-            balanceAdjustmentData,
-            (IAdjustBalances.ScheduledBalanceAdjustment)
-        );
-
-        AdjustBalancesStorageWrapper.adjustBalances(balanceAdjustment.factor, balanceAdjustment.decimals);
-    }
-
-    function _onScheduledCrossOrderedTaskTriggered(
-        uint256 /*_pos*/,
-        uint256 /*_scheduledTasksLength*/,
-        ScheduledTask memory _scheduledTask
-    ) private {
-        bytes32 taskType = _getActionIdFromScheduledTask(_scheduledTask);
-
+    function _cancelPendingSubTaskAction(bytes32 taskType) private {
         if (taskType == SNAPSHOT_TASK_TYPE) {
-            triggerScheduledSnapshots(1);
+            _cancelTopQueueAction(scheduledSnapshotStorage());
             return;
         }
-
         if (taskType == BALANCE_ADJUSTMENT_TASK_TYPE) {
-            triggerScheduledBalanceAdjustments(1);
+            _cancelTopQueueAction(scheduledBalanceAdjustmentStorage());
             return;
         }
-
         if (taskType == COUPON_LISTING_TASK_TYPE) {
-            triggerScheduledCouponListing(1);
+            _cancelTopQueueAction(scheduledCouponListingStorage());
         }
     }
 
-    function _updateCouponRatesIfNeeded(uint256 couponID) private {
-        (ICouponTypes.RegisteredCoupon memory registeredCoupon, , ) = CouponStorageWrapper.getCoupon(couponID);
+    function _cancelTopQueueAction(ScheduledTasksDataStorage storage subQueue) private {
+        uint256 count = ScheduledTasksLib.getScheduledTaskCount(subQueue);
+        if (count == 0) return;
 
-        if (InterestRateStorageWrapper.isSustainabilityPerformanceTargetRateInitialized()) {
-            (uint256 rate, uint8 rateDecimals) = SustainabilityPerformanceTargetRateLib
-                .calculateSustainabilityPerformanceTargetInterestRate(couponID, registeredCoupon.coupon);
-
-            CouponStorageWrapper.updateCouponRate(couponID, registeredCoupon.coupon, rate, rateDecimals);
-        }
-
-        if (InterestRateStorageWrapper.isKpiLinkedRateInitialized()) {
-            (uint256 rate, uint8 rateDecimals) = KpiLinkedRateLib.calculateKpiLinkedInterestRate(
-                couponID,
-                registeredCoupon.coupon
-            );
-
-            CouponStorageWrapper.updateCouponRate(couponID, registeredCoupon.coupon, rate, rateDecimals);
-        }
-    }
-
-    function _getCouponIdFromAction(bytes32 actionId) private view returns (uint256 couponID_) {
-        (, couponID_, , ) = CorporateActionsStorageWrapper.getCorporateAction(actionId);
+        ScheduledTask memory pendingTask = ScheduledTasksLib.getScheduledTasksByIndex(subQueue, count - 1);
+        CorporateActionsStorageWrapper.cancelCorporateAction(abi.decode(pendingTask.data, (bytes32)));
     }
 
     function _getActionIdFromScheduledTask(

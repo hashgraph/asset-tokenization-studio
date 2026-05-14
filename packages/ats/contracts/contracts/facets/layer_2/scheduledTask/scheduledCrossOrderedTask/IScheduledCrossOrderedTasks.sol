@@ -10,13 +10,6 @@ interface IScheduledCrossOrderedTasks {
 
     function triggerScheduledCrossOrderedTasks(uint256 _max) external returns (uint256);
 
-    function executeScheduledTaskCallback(
-        bytes32 callbackType,
-        uint256 pos,
-        uint256 scheduledTasksLength,
-        ScheduledTask calldata task
-    ) external;
-
     function scheduledCrossOrderedTaskCount() external view returns (uint256);
 
     function getScheduledCrossOrderedTasks(

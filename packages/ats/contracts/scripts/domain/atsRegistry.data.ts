@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-14T08:23:23.114Z
+ * Generated: 2026-05-14T12:06:54.101Z
  * Facets: 124
  * Infrastructure: 2
  *
@@ -568,7 +568,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9cf8540c",
       },
     ],
-    factory: (signer) => new AdjustBalancesFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    factory: (signer) =>
+      new AdjustBalancesFacet__factory(getLibLinks("scheduledTasksDispatchOps", "tokenCoreOps") as any, signer),
   },
 
   AllowanceFacet: {
@@ -4232,6 +4233,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x3a848637",
       },
       {
+        name: "DecimalDifferenceTooLarge",
+        signature: {
+          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
+          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
+        },
+        selector: "0x552d04f9",
+      },
+      {
         name: "DuplicatedCorporateAction",
         signature: {
           full: "error DuplicatedCorporateAction(bytes32 actionType, bytes data)",
@@ -4431,6 +4440,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x69a80e75",
       },
       {
+        name: "DecimalDifferenceTooLarge",
+        signature: {
+          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
+          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
+        },
+        selector: "0x552d04f9",
+      },
+      {
         name: "InterestRateIsFixed",
         signature: { full: "error InterestRateIsFixed()", canonical: "InterestRateIsFixed()" },
         selector: "0x849d4eb8",
@@ -4610,6 +4627,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "CouponNotFound",
         signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
         selector: "0x69a80e75",
+      },
+      {
+        name: "DecimalDifferenceTooLarge",
+        signature: {
+          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
+          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
+        },
+        selector: "0x552d04f9",
       },
       {
         name: "SnapshotIdDoesNotExists",
@@ -5614,9 +5639,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xc9622656",
       },
     ],
-    factory: (signer) => new ERC20VotesFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    factory: (signer) =>
+      new ERC20VotesFacet__factory(getLibLinks("clearingReadOps", "scheduledTasksDispatchOps") as any, signer),
     timeTravelFactory: (signer) =>
-      new ERC20VotesFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
+      new ERC20VotesFacetTimeTravel__factory(
+        getLibLinks("clearingReadOps", "scheduledTasksDispatchOps") as any,
+        signer,
+      ),
   },
 
   ERC3643ManagementFacet: {
@@ -7628,6 +7657,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x69a80e75",
       },
       {
+        name: "DecimalDifferenceTooLarge",
+        signature: {
+          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
+          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
+        },
+        selector: "0x552d04f9",
+      },
+      {
         name: "InvalidDate",
         signature: {
           full: "error InvalidDate(uint256 providedDate, uint256 minDate, uint256 maxDate)",
@@ -7728,6 +7765,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "CouponNotFound",
         signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
         selector: "0x69a80e75",
+      },
+      {
+        name: "DecimalDifferenceTooLarge",
+        signature: {
+          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
+          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
+        },
+        selector: "0x552d04f9",
       },
       {
         name: "InvalidDate",
@@ -11775,14 +11820,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["ScheduledCrossOrderedTasks", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "executeScheduledTaskCallback",
-        signature: {
-          full: "function executeScheduledTaskCallback(bytes32 callbackType, uint256 pos, uint256 scheduledTasksLength, (uint256 scheduledTimestamp, bytes data) task)",
-          canonical: "executeScheduledTaskCallback(bytes32,uint256,uint256,(uint256,bytes))",
-        },
-        selector: "0xb9baa695",
-      },
-      {
         name: "getScheduledCrossOrderedTasks",
         signature: {
           full: "function getScheduledCrossOrderedTasks(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledCrossOrderedTask_)",
@@ -11817,22 +11854,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
-        name: "AdjustmentBalanceSet",
-        signature: {
-          full: "event AdjustmentBalanceSet(address indexed operator, uint256 factor, uint8 decimals)",
-          canonical: "AdjustmentBalanceSet(address,uint256,uint8)",
-        },
-        topic0: "0x312510931206ef5f91f1ef19e1a01253812b7201fb8b2d5d4afa056cce53e34a",
-      },
-      {
-        name: "SnapshotTriggered",
-        signature: {
-          full: "event SnapshotTriggered(uint256 snapshotId, bytes metadata)",
-          canonical: "SnapshotTriggered(uint256,bytes)",
-        },
-        topic0: "0xf256aa4705d42c3984e319d2b0a2d1eb0a18a8a820922b71ba13e37c7699828c",
-      },
-      {
         name: "TaskExecutionFailed",
         signature: {
           full: "event TaskExecutionFailed(bytes32 indexed actionId, bytes32 indexed taskType, uint256 scheduledTimestamp)",
@@ -11850,25 +11871,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x10210dec",
       },
-      {
-        name: "CouponNotFound",
-        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
-        selector: "0x69a80e75",
-      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
-      {
-        name: "UnauthorizedSelfCall",
-        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
-        selector: "0x52f3811b",
-      },
-      {
-        name: "UnexpectedError",
-        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
-        selector: "0xc9622656",
-      },
     ],
-    factory: (signer) => new ScheduledCrossOrderedTasksFacet__factory(signer),
-    timeTravelFactory: (signer) => new ScheduledCrossOrderedTasksFacetTimeTravel__factory(signer),
+    factory: (signer) =>
+      new ScheduledCrossOrderedTasksFacet__factory(getLibLinks("scheduledTasksDispatchOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ScheduledCrossOrderedTasksFacetTimeTravel__factory(getLibLinks("scheduledTasksDispatchOps") as any, signer),
   },
 
   ScheduledCrossOrderedTasksKpiLinkedRateFacet: {
@@ -11880,14 +11888,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["ScheduledCrossOrderedTasks", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "executeScheduledTaskCallback",
-        signature: {
-          full: "function executeScheduledTaskCallback(bytes32 callbackType, uint256 pos, uint256 scheduledTasksLength, (uint256 scheduledTimestamp, bytes data) task)",
-          canonical: "executeScheduledTaskCallback(bytes32,uint256,uint256,(uint256,bytes))",
-        },
-        selector: "0xb9baa695",
-      },
-      {
         name: "getScheduledCrossOrderedTasks",
         signature: {
           full: "function getScheduledCrossOrderedTasks(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledCrossOrderedTask_)",
@@ -11922,22 +11922,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
-        name: "AdjustmentBalanceSet",
-        signature: {
-          full: "event AdjustmentBalanceSet(address indexed operator, uint256 factor, uint8 decimals)",
-          canonical: "AdjustmentBalanceSet(address,uint256,uint8)",
-        },
-        topic0: "0x312510931206ef5f91f1ef19e1a01253812b7201fb8b2d5d4afa056cce53e34a",
-      },
-      {
-        name: "SnapshotTriggered",
-        signature: {
-          full: "event SnapshotTriggered(uint256 snapshotId, bytes metadata)",
-          canonical: "SnapshotTriggered(uint256,bytes)",
-        },
-        topic0: "0xf256aa4705d42c3984e319d2b0a2d1eb0a18a8a820922b71ba13e37c7699828c",
-      },
-      {
         name: "TaskExecutionFailed",
         signature: {
           full: "event TaskExecutionFailed(bytes32 indexed actionId, bytes32 indexed taskType, uint256 scheduledTimestamp)",
@@ -11955,25 +11939,18 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x10210dec",
       },
-      {
-        name: "CouponNotFound",
-        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
-        selector: "0x69a80e75",
-      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
-      {
-        name: "UnauthorizedSelfCall",
-        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
-        selector: "0x52f3811b",
-      },
-      {
-        name: "UnexpectedError",
-        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
-        selector: "0xc9622656",
-      },
     ],
-    factory: (signer) => new ScheduledCrossOrderedTasksKpiLinkedRateFacet__factory(signer),
-    timeTravelFactory: (signer) => new ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel__factory(signer),
+    factory: (signer) =>
+      new ScheduledCrossOrderedTasksKpiLinkedRateFacet__factory(
+        getLibLinks("scheduledTasksDispatchOps") as any,
+        signer,
+      ),
+    timeTravelFactory: (signer) =>
+      new ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel__factory(
+        getLibLinks("scheduledTasksDispatchOps") as any,
+        signer,
+      ),
   },
 
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet: {
@@ -11984,14 +11961,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     methods: [
       {
-        name: "executeScheduledTaskCallback",
-        signature: {
-          full: "function executeScheduledTaskCallback(bytes32 callbackType, uint256 pos, uint256 scheduledTasksLength, (uint256 scheduledTimestamp, bytes data) task)",
-          canonical: "executeScheduledTaskCallback(bytes32,uint256,uint256,(uint256,bytes))",
-        },
-        selector: "0xb9baa695",
-      },
-      {
         name: "getScheduledCrossOrderedTasks",
         signature: {
           full: "function getScheduledCrossOrderedTasks(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledCrossOrderedTask_)",
@@ -12026,22 +11995,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
-        name: "AdjustmentBalanceSet",
-        signature: {
-          full: "event AdjustmentBalanceSet(address indexed operator, uint256 factor, uint8 decimals)",
-          canonical: "AdjustmentBalanceSet(address,uint256,uint8)",
-        },
-        topic0: "0x312510931206ef5f91f1ef19e1a01253812b7201fb8b2d5d4afa056cce53e34a",
-      },
-      {
-        name: "SnapshotTriggered",
-        signature: {
-          full: "event SnapshotTriggered(uint256 snapshotId, bytes metadata)",
-          canonical: "SnapshotTriggered(uint256,bytes)",
-        },
-        topic0: "0xf256aa4705d42c3984e319d2b0a2d1eb0a18a8a820922b71ba13e37c7699828c",
-      },
-      {
         name: "TaskExecutionFailed",
         signature: {
           full: "event TaskExecutionFailed(bytes32 indexed actionId, bytes32 indexed taskType, uint256 scheduledTimestamp)",
@@ -12059,26 +12012,18 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x10210dec",
       },
-      {
-        name: "CouponNotFound",
-        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
-        selector: "0x69a80e75",
-      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
-      {
-        name: "UnauthorizedSelfCall",
-        signature: { full: "error UnauthorizedSelfCall(address caller)", canonical: "UnauthorizedSelfCall(address)" },
-        selector: "0x52f3811b",
-      },
-      {
-        name: "UnexpectedError",
-        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
-        selector: "0xc9622656",
-      },
     ],
-    factory: (signer) => new ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet__factory(signer),
+    factory: (signer) =>
+      new ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet__factory(
+        getLibLinks("scheduledTasksDispatchOps") as any,
+        signer,
+      ),
     timeTravelFactory: (signer) =>
-      new ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
+      new ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel__factory(
+        getLibLinks("scheduledTasksDispatchOps") as any,
+        signer,
+      ),
   },
 
   SecurityHoldersAtSnapshotFacet: {
@@ -12281,8 +12226,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf128004d",
       },
     ],
-    factory: (signer) => new SnapshotsFacet__factory(signer),
-    timeTravelFactory: (signer) => new SnapshotsFacetTimeTravel__factory(signer),
+    factory: (signer) => new SnapshotsFacet__factory(getLibLinks("scheduledTasksDispatchOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new SnapshotsFacetTimeTravel__factory(getLibLinks("scheduledTasksDispatchOps") as any, signer),
   },
 
   SsiManagementFacet: {

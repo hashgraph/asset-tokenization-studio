@@ -18,8 +18,7 @@ contract ScheduledCrossOrderedTasksFacet is ScheduledCrossOrderedTasks, IStaticF
                 this.triggerPendingScheduledCrossOrderedTasks.selector,
                 this.triggerScheduledCrossOrderedTasks.selector,
                 this.scheduledCrossOrderedTaskCount.selector,
-                this.getScheduledCrossOrderedTasks.selector,
-                this.executeScheduledTaskCallback.selector
+                this.getScheduledCrossOrderedTasks.selector
             );
     }
 

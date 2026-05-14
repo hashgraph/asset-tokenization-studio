@@ -29,6 +29,7 @@ export interface OrchestratorLibraryAddresses {
   clearingLifecycleOps: string;
   clearingReadOps: string;
   clearingProtectedOps: string;
+  scheduledTasksDispatchOps: string;
 }
 
 /**
@@ -42,6 +43,7 @@ export const LIBRARY_KEYS = {
   clearingLifecycleOps: "contracts/domain/orchestrator/ClearingLifecycleOps.sol:ClearingLifecycleOps",
   clearingReadOps: "contracts/domain/orchestrator/ClearingReadOps.sol:ClearingReadOps",
   clearingProtectedOps: "contracts/domain/orchestrator/ClearingProtectedOps.sol:ClearingProtectedOps",
+  scheduledTasksDispatchOps: "contracts/domain/orchestrator/ScheduledTasksDispatchOps.sol:ScheduledTasksDispatchOps",
 } as const;
 
 /**
@@ -107,7 +109,7 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   // TokenCoreOps dependencies - ERC20 and ERC1410 token operations
   TransferFacet: ["tokenCoreOps"],
   ERC20ReadFacet: ["tokenCoreOps"],
-  ERC20VotesFacet: ["clearingReadOps"],
+  ERC20VotesFacet: ["clearingReadOps", "scheduledTasksDispatchOps"],
   ERC1410ManagementFacet: ["tokenCoreOps"],
   ProtectedByPartitionFacet: ["tokenCoreOps"],
   ControllerByPartitionFacet: ["tokenCoreOps"],
@@ -125,7 +127,7 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   BatchTransferFacet: ["tokenCoreOps"],
   MintFacet: ["tokenCoreOps"],
   BurnFacet: ["tokenCoreOps"],
-  AdjustBalancesFacet: ["tokenCoreOps"],
+  AdjustBalancesFacet: ["tokenCoreOps", "scheduledTasksDispatchOps"],
   AllowanceFacet: ["tokenCoreOps"],
   MaturityFacet: ["tokenCoreOps"],
   MaturityByPartitionFacet: ["tokenCoreOps"],
@@ -163,6 +165,11 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   CouponFacet: ["clearingReadOps"],
   DividendFacet: ["clearingReadOps"],
   VotingFacet: ["clearingReadOps"],
+  // ScheduledTasksDispatchOps dependencies — ScheduledTasksStorageWrapper uses try/catch delegatecall to this lib
+  SnapshotsFacet: ["scheduledTasksDispatchOps"],
+  ScheduledCrossOrderedTasksFacet: ["scheduledTasksDispatchOps"],
+  ScheduledCrossOrderedTasksKpiLinkedRateFacet: ["scheduledTasksDispatchOps"],
+  ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet: ["scheduledTasksDispatchOps"],
 };
 
 /**
@@ -227,6 +234,7 @@ export function toTypeChainLibraryAddresses(addresses?: OrchestratorLibraryAddre
     [LIBRARY_KEYS.clearingLifecycleOps]: addrs.clearingLifecycleOps,
     [LIBRARY_KEYS.clearingReadOps]: addrs.clearingReadOps,
     [LIBRARY_KEYS.clearingProtectedOps]: addrs.clearingProtectedOps,
+    [LIBRARY_KEYS.scheduledTasksDispatchOps]: addrs.scheduledTasksDispatchOps,
   };
 }
 
@@ -332,6 +340,14 @@ export async function deployOrchestratorLibraries(signer: Signer): Promise<Orche
   const clearingProtectedOpsAddr = await clearingProtectedOps.getAddress();
   info(`   ✓ ClearingProtectedOps deployed at ${clearingProtectedOpsAddr}`);
 
+  // Phase 6: ScheduledTasksDispatchOps has no external library dependencies.
+  const { ScheduledTasksDispatchOps__factory } = await import("@contract-types");
+  const scheduledTasksDispatchOps = await (
+    await new ScheduledTasksDispatchOps__factory(signer).deploy()
+  ).waitForDeployment();
+  const scheduledTasksDispatchOpsAddr = await scheduledTasksDispatchOps.getAddress();
+  info(`   ✓ ScheduledTasksDispatchOps deployed at ${scheduledTasksDispatchOpsAddr}`);
+
   const addresses: OrchestratorLibraryAddresses = {
     tokenCoreOps: tokenCoreOpsAddr,
     holdOps: holdOpsAddr,
@@ -339,6 +355,7 @@ export async function deployOrchestratorLibraries(signer: Signer): Promise<Orche
     clearingLifecycleOps: clearingLifecycleOpsAddr,
     clearingReadOps: clearingReadOpsAddr,
     clearingProtectedOps: clearingProtectedOpsAddr,
+    scheduledTasksDispatchOps: scheduledTasksDispatchOpsAddr,
   };
 
   setOrchestratorLibraryAddresses(addresses);
