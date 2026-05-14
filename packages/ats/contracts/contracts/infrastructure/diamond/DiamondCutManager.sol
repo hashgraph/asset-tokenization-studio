@@ -166,6 +166,32 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         );
     }
 
+    /**
+     * @notice Returns a paginated range of facet configurations for a configuration version.
+     * @dev Reads diamond cut manager storage without mutating state. The caller must provide a
+     *      valid configuration identifier, version, and pagination bounds accepted by the internal
+     *      configuration lookup. Reverts according to the storage helper's validation rules.
+     * @param _configurationId Identifier of the diamond configuration to query.
+     * @param _version Version of the configuration to query.
+     * @param _start Inclusive start index of the facet configuration range.
+     * @param _end Exclusive end index of the facet configuration range.
+     * @return facetConfigurations_ Facet configurations stored for the requested range.
+     */
+    function getFacetConfigurationsByConfigurationIdAndVersion(
+        bytes32 _configurationId,
+        uint256 _version,
+        uint256 _start,
+        uint256 _end
+    ) external view override returns (FacetConfiguration[] memory facetConfigurations_) {
+        facetConfigurations_ = _getFacetConfigurationsByConfigurationIdAndVersion(
+            _diamondCutManagerStorage(),
+            _configurationId,
+            _version,
+            _start,
+            _end
+        );
+    }
+
     function getFacetAddressesByConfigurationIdAndVersion(
         bytes32 _configurationId,
         uint256 _version,
@@ -213,6 +239,28 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         bytes32 _facetId
     ) external view override returns (address facetAddress_) {
         facetAddress_ = _getFacetAddressByConfigurationIdVersionAndFacetId(
+            _diamondCutManagerStorage(),
+            _configurationId,
+            _version,
+            _facetId
+        );
+    }
+
+    /**
+     * @notice Returns the facet version assigned to a facet within a configuration version.
+     * @dev Reads diamond cut manager storage and performs no state mutation. The lookup is scoped
+     *      by configuration identifier, configuration version, and facet identifier.
+     * @param _configurationId Identifier of the diamond configuration to query.
+     * @param _version Version of the configuration to inspect.
+     * @param _facetId Identifier of the facet whose version is requested.
+     * @return facetVersion_ Facet version registered for the requested configuration version.
+     */
+    function getFacetVersionByConfigurationIdVersionAndFacetId(
+        bytes32 _configurationId,
+        uint256 _version,
+        bytes32 _facetId
+    ) external view returns (uint256 facetVersion_) {
+        facetVersion_ = _getFacetVersionByConfigurationIdVersionAndFacetId(
             _diamondCutManagerStorage(),
             _configurationId,
             _version,

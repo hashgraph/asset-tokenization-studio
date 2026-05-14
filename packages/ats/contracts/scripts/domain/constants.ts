@@ -81,6 +81,16 @@ export const LOANS_PORTFOLIO_CONFIG_ID = "0x000000000000000000000000000000000000
  */
 export const FACTORY_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000008";
 
+// TEST-ONLY: configuration ID for the InitializeMock domain used by initializer-versioning tests.
+/**
+ * Initialize Mock configuration ID (TEST-ONLY).
+ *
+ * bytes32(uint256(9)) = 0x00...09
+ * Used by BusinessLogicResolver to identify the mock initializer-test facet configuration.
+ * Only registered when `useTimeTravel` is enabled in `deploySystemWithNewBlr`.
+ */
+export const INITIALIZE_MOCK_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000009";
+
 // ============================================================================
 // ATS-Specific Contract Names
 // ============================================================================
@@ -359,4 +369,4 @@ export const CURRENCIES = {
   JPY: "0x4a5059", // Japanese Yen
 } as const;
 
-export const FACET_REGISTRATION_BATCH_SIZE = 20;
+export const FACET_REGISTRATION_BATCH_SIZE = 10;

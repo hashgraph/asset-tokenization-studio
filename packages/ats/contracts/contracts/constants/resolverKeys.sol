@@ -728,3 +728,6 @@ bytes32 constant _NOMINAL_VALUE_AT_SNAPSHOT_RESOLVER_KEY = 0xa9eb978fb9b2f23119f
 
 // keccak256("security.token.standard.factory.resolverKey");
 bytes32 constant _FACTORY_RESOLVER_KEY = 0xa5472d34be801f744a73bce4e1851e67767286307e3203726a3261b280a667b3;
+
+// keccak256("security.token.standard.initializer.resolverKey");
+bytes32 constant _INITIALIZER_RESOLVER_KEY = 0x65c891d003e7dc436f2c3d0863d599d91867c8695fee29923a476a2be3ec540f;
