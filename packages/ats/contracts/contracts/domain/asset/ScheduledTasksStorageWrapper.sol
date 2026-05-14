@@ -299,10 +299,6 @@ library ScheduledTasksStorageWrapper {
         }
     }
 
-    // ============================================================================
-    // Private Callback Functions
-    // ============================================================================
-
     function _dispatchScheduledTask(
         bytes32 callbackType,
         uint256 pos,
