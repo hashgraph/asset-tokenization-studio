@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { HoldOps } from "../../domain/orchestrator/HoldOps.sol";
 import { HoldStorageWrapper } from "../../domain/asset/HoldStorageWrapper.sol";
 import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";
 import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
@@ -12,10 +13,13 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
 /**
  * @title HoldByPartition
  * @notice Abstract contract implementing all hold operations scoped to a specific partition.
- * @dev Combines the write operations from the former HoldTokenHolder (create, execute, release,
- *      reclaim) with the partition-scoped read operations from the former HoldReadFacet
- *      (getHeldAmountForByPartition, getHoldCountForByPartition, getHoldsIdForByPartition,
- *      getHoldForByPartition). All write methods delegate to HoldStorageWrapper via HoldOps.
+ * @dev Combines the write operations (create, execute, release, reclaim) with the partition-
+ *      scoped read operations (getHeldAmountForByPartition, getHoldCountForByPartition,
+ *      getHoldsIdForByPartition, getHoldForByPartition). Write methods route through the
+ *      deployed `HoldOps` library via DELEGATECALL so the inlined storage-wrapper chain
+ *      lives in `HoldOps` bytecode, keeping `HoldByPartitionFacet` well below the EIP-170
+ *      24 KiB cap. Read methods still inline `HoldStorageWrapper` view helpers directly
+ *      because `HoldOps` does not expose them and the read paths are lightweight.
  * @author Asset Tokenization Studio Team
  */
 abstract contract HoldByPartition is IHoldByPartition, Modifiers {
@@ -36,7 +40,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
-        (success_, holdId_) = HoldStorageWrapper.createHoldByPartition(
+        (success_, holdId_) = HoldOps.createHoldByPartition(
             _partition,
             EvmAccessors.getMsgSender(),
             _hold,
@@ -69,7 +73,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
         )
         returns (bool success_, uint256 holdId_)
     {
-        (success_, holdId_) = HoldStorageWrapper.createHoldByPartition(
+        (success_, holdId_) = HoldOps.createHoldByPartition(
             _partition,
             _from,
             _hold,
@@ -77,7 +81,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
             ThirdPartyType.AUTHORIZED
         );
 
-        HoldStorageWrapper.decreaseAllowedBalanceForHold(_partition, _from, _hold.amount, holdId_);
+        HoldOps.decreaseAllowedBalanceForHold(_partition, _from, _hold.amount, holdId_);
 
         emit HeldFromByPartition(EvmAccessors.getMsgSender(), _from, _partition, holdId_, _hold, _operatorData);
     }
@@ -97,7 +101,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
         onlyValidHoldId(_holdIdentifier)
         returns (bool success_, bytes32 partition_)
     {
-        (success_, partition_) = HoldStorageWrapper.executeHoldByPartition(_holdIdentifier, _to, _amount);
+        (success_, partition_) = HoldOps.executeHoldByPartition(_holdIdentifier, _to, _amount);
 
         emit HoldByPartitionExecuted(
             _holdIdentifier.tokenHolder,
@@ -120,7 +124,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
         onlyValidHoldId(_holdIdentifier)
         returns (bool success_)
     {
-        success_ = HoldStorageWrapper.releaseHoldByPartition(_holdIdentifier, _amount);
+        success_ = HoldOps.releaseHoldByPartition(_holdIdentifier, _amount);
         emit HoldByPartitionReleased(
             _holdIdentifier.tokenHolder,
             _holdIdentifier.partition,
@@ -141,7 +145,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
         returns (bool success_)
     {
         uint256 amount;
-        (success_, amount) = HoldStorageWrapper.reclaimHoldByPartition(_holdIdentifier);
+        (success_, amount) = HoldOps.reclaimHoldByPartition(_holdIdentifier);
         emit HoldByPartitionReclaimed(
             EvmAccessors.getMsgSender(),
             _holdIdentifier.tokenHolder,

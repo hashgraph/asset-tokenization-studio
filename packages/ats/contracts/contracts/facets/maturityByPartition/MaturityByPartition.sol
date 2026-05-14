@@ -8,6 +8,7 @@ import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 
 /**
  * @title MaturityByPartition
@@ -41,6 +42,6 @@ abstract contract MaturityByPartition is IMaturityByPartition, Modifiers {
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
         onlyValidMaturityDate(TimeTravelStorageWrapper.getBlockTimestamp())
     {
-        ERC1410StorageWrapper.redeemByPartition(_partition, _tokenHolder, EvmAccessors.getMsgSender(), _amount, "", "");
+        TokenCoreOps.redeemByPartition(_partition, _tokenHolder, EvmAccessors.getMsgSender(), _amount, "", "");
     }
 }

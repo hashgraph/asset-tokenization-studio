@@ -9,7 +9,7 @@ import {
 import {
     IScheduledCrossOrderedTasks
 } from "../../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
-import { IAdjustBalances } from "../../facets/adjustBalances/IAdjustBalances.sol";
+import { IScheduledBalanceAdjustment } from "../../facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
 import { ISnapshots } from "../../facets/layer_1/snapshot/ISnapshots.sol";
 import {
     _SCHEDULED_SNAPSHOTS_STORAGE_POSITION,
@@ -231,9 +231,9 @@ library ScheduledTasksStorageWrapper {
                     abi.decode(scheduledTask.data, (bytes32))
                 );
 
-                IAdjustBalances.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
+                IScheduledBalanceAdjustment.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
                     balanceAdjustmentData,
-                    (IAdjustBalances.ScheduledBalanceAdjustment)
+                    (IScheduledBalanceAdjustment.ScheduledBalanceAdjustment)
                 );
                 pendingABAF_ *= balanceAdjustment.factor;
                 pendingDecimals_ += balanceAdjustment.decimals;
@@ -298,10 +298,6 @@ library ScheduledTasksStorageWrapper {
             scheduledCrossOrderedTasks_.slot := position
         }
     }
-
-    // ============================================================================
-    // Private Callback Functions
-    // ============================================================================
 
     function _dispatchScheduledTask(
         bytes32 callbackType,
@@ -383,9 +379,9 @@ library ScheduledTasksStorageWrapper {
 
         if (isDisabled_) return;
 
-        IAdjustBalances.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
+        IScheduledBalanceAdjustment.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
             balanceAdjustmentData,
-            (IAdjustBalances.ScheduledBalanceAdjustment)
+            (IScheduledBalanceAdjustment.ScheduledBalanceAdjustment)
         );
 
         AdjustBalancesStorageWrapper.adjustBalances(balanceAdjustment.factor, balanceAdjustment.decimals);

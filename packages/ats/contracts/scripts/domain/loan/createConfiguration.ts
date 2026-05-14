@@ -144,6 +144,7 @@ const LOAN_FACETS = [
   "LockFacet",
   "LockByPartitionFacet",
   "AdjustBalancesFacet",
+  "ScheduledBalanceAdjustmentFacet",
   "ProtectedPartitionsFacet",
 ] as const;
 

@@ -68,7 +68,7 @@ import {
   MockedWhitelist__factory,
   TREXFactoryAts__factory,
 } from "@hashgraph/asset-tokenization-contracts";
-import type { IAdjustBalances } from "@hashgraph/asset-tokenization-contracts";
+import type { IScheduledBalanceAdjustment } from "@hashgraph/asset-tokenization-contracts";
 import { ContractId } from "@hiero-ledger/sdk";
 import EventService from "@service/event/EventService";
 import LogService from "@service/log/LogService";
@@ -896,7 +896,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
             factor: ${factor},
             decimals : ${decimals}  `,
     );
-    const scheduledBalanceAdjustmentStruct: IAdjustBalances.ScheduledBalanceAdjustmentStruct = {
+    const scheduledBalanceAdjustmentStruct: IScheduledBalanceAdjustment.ScheduledBalanceAdjustmentStruct = {
       executionDate: executionDate.toBigInt(),
       factor: factor.toBigInt(),
       decimals: decimals.toBigInt(),
@@ -2719,10 +2719,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
-  async setNominalValueCurrency(
-    security: EvmAddress,
-    nominalValueCurrency: string,
-  ): Promise<TransactionResponse> {
+  async setNominalValueCurrency(security: EvmAddress, nominalValueCurrency: string): Promise<TransactionResponse> {
     LogService.logTrace(`Setting nominal value currency for security: ${security.toString()}`);
 
     return this.executeTransaction(

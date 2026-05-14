@@ -42,6 +42,7 @@ struct ERC1594Storage {
 
 /**
  * @title ERC1594StorageWrapper
+ * @author Asset Tokenization Studio Team
  * @notice Library providing the core issuance, redemption, and compliance
  * checking logic for the ERC1594 token standard. Handles storage management,
  * balance mutations via ERC20/ERC1410 wrappers, and multi-layered access

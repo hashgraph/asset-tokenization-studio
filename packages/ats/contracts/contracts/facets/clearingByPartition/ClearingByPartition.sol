@@ -6,6 +6,7 @@ import { CLEARING_VALIDATOR_ROLE } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { ClearingOps } from "../../domain/orchestrator/ClearingOps.sol";
+import { ClearingLifecycleOps } from "../../domain/orchestrator/ClearingLifecycleOps.sol";
 import { ClearingReadOps } from "../../domain/orchestrator/ClearingReadOps.sol";
 import { ClearingStorageWrapper } from "../../domain/asset/ClearingStorageWrapper.sol";
 import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";
@@ -35,7 +36,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
         returns (bool success_, bytes32 partition_)
     {
         bytes memory operationData;
-        (success_, operationData, partition_) = ClearingOps.approveClearingOperationByPartition(
+        (success_, operationData, partition_) = ClearingLifecycleOps.approveClearingOperationByPartition(
             _clearingOperationIdentifier
         );
 
@@ -65,7 +66,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
             bool success_
         )
     {
-        success_ = ClearingOps.cancelClearingOperationByPartition(_clearingOperationIdentifier);
+        success_ = ClearingLifecycleOps.cancelClearingOperationByPartition(_clearingOperationIdentifier);
         emit ClearingOperationCanceled(
             EvmAccessors.getMsgSender(),
             _clearingOperationIdentifier.tokenHolder,
@@ -88,7 +89,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
         onlyIdentifiedAddresses(_clearingOperationIdentifier.tokenHolder, address(0))
         returns (bool success_)
     {
-        success_ = ClearingOps.reclaimClearingOperationByPartition(_clearingOperationIdentifier);
+        success_ = ClearingLifecycleOps.reclaimClearingOperationByPartition(_clearingOperationIdentifier);
         emit ClearingOperationReclaimed(
             EvmAccessors.getMsgSender(),
             _clearingOperationIdentifier.tokenHolder,
@@ -284,7 +285,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
         ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount,
         address _to
-    ) internal returns (bool success_, uint256 clearingId_) {
+    ) private returns (bool success_, uint256 clearingId_) {
         (success_, clearingId_) = ClearingOps.clearingTransferCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,

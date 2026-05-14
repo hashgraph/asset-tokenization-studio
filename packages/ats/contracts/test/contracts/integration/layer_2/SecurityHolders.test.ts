@@ -409,4 +409,48 @@ describe("SecurityHoldersFacet Tests", () => {
       expect(holders).to.include(signer_C.address);
     });
   });
+
+  describe("removeTokenHolder storage cleanup (audit fix FIND-123)", () => {
+    it("GIVEN two holders WHEN first holder transfers all tokens out THEN tokenHolders[lastIndex] storage slot is zeroed", async () => {
+      const tokenAmount = 1000n;
+
+      // Issue to two holders: signer_B at index 1, signer_C at index 2 (lastIndex)
+      await asset.connect(signer_A).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_B.address,
+        value: tokenAmount,
+        data: "0x",
+      });
+      await asset.connect(signer_A).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_C.address,
+        value: tokenAmount,
+        data: "0x",
+      });
+
+      expect(await asset.getTotalSecurityHolders()).to.equal(2);
+
+      // Transfer all of signer_B's tokens to signer_C → removeTokenHolder(signer_B) is triggered.
+      // Swap-and-pop moves signer_C (lastIndex=2) into slot 1.
+      // Without the fix, tokenHolders[2] retains signer_C's address as a ghost.
+      await asset.connect(signer_B).transfer(signer_C.address, tokenAmount);
+
+      expect(await asset.getTotalSecurityHolders()).to.equal(1);
+
+      // Compute storage slot for tokenHolders[2].
+      // ERC1410BasicStorage struct layout from _ERC1410_BASIC_STORAGE_POSITION:
+      //   +0 DEPRECATED_totalSupply, +1 totalSupplyByPartition, +2 DEPRECATED_balances,
+      //   +3 partitions, +4 partitionToIndex, +5 multiPartition+initialized (packed),
+      //   +6 tokenHolderIndex, +7 tokenHolders  ← mapping base slot
+      const ERC1410_BASE = BigInt("0x67661db80d37d3b9810c430f78991b4b5377bdebd3b71b39fbd3427092c1822a");
+      const tokenHoldersMappingBaseSlot = ERC1410_BASE + 7n;
+      const lastIndex = 2n;
+      const ghostSlot = ethers.keccak256(
+        ethers.AbiCoder.defaultAbiCoder().encode(["uint256", "uint256"], [lastIndex, tokenHoldersMappingBaseSlot]),
+      );
+
+      const slotValue = await ethers.provider.getStorage(diamond.target, ghostSlot);
+      expect(slotValue).to.equal(ethers.ZeroHash);
+    });
+  });
 });

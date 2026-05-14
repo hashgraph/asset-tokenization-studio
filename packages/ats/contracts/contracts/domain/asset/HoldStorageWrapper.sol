@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _HOLD_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
@@ -53,6 +52,8 @@ library HoldStorageWrapper {
         bytes memory _operatorData,
         ThirdPartyType _thirdPartyType
     ) internal returns (bool success_, uint256 holdId_) {
+        checkNonZeroHoldAmount(_hold.amount);
+
         _prepareHoldCreation(_partition, _from);
 
         uint256 abaf = updateTotalHold(_partition, _from);
@@ -120,6 +121,8 @@ library HoldStorageWrapper {
         uint256 _amount
     ) internal returns (bool success_, bytes32 partition_) {
         beforeExecuteHold(_holdIdentifier, _to);
+
+        ERC1410StorageWrapper.updateSecurityHolder(_holdIdentifier.tokenHolder, _to, _amount);
 
         success_ = operateHoldByPartition(_holdIdentifier, _to, _amount, IHoldTypes.OperationType.Execute);
         partition_ = _holdIdentifier.partition;
@@ -511,6 +514,10 @@ library HoldStorageWrapper {
         return _escrow == _hold.escrow;
     }
 
+    function checkNonZeroHoldAmount(uint256 _amount) internal pure {
+        if (_amount == 0) revert IHoldTypes.InvalidHoldAmount();
+    }
+
     function checkHoldAmount(uint256 _amount, IHoldTypes.HoldData memory holdData) internal pure {
         if (_amount > holdData.hold.amount) revert IHoldTypes.InsufficientHoldBalance(holdData.hold.amount, _amount);
     }
@@ -605,7 +612,7 @@ library HoldStorageWrapper {
         address _to,
         uint256 _amount
     ) private {
-        if (_holdIdentifier.tokenHolder == _to || _holdIdentifier.partition != _DEFAULT_PARTITION) return;
+        if (_holdIdentifier.tokenHolder == _to) return;
 
         (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
             abi.encodeWithSelector(ICompliance.transferred.selector, _holdIdentifier.tokenHolder, _to, _amount),

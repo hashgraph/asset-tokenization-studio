@@ -14,12 +14,12 @@ abstract contract SecurityHolders is ISecurityHolders {
     function getSecurityHolders(
         uint256 _pageIndex,
         uint256 _pageLength
-    ) public view virtual override returns (address[] memory holders) {
+    ) external view virtual override returns (address[] memory holders) {
         return ERC1410StorageWrapper.getTokenHolders(_pageIndex, _pageLength);
     }
 
     /// @inheritdoc ISecurityHolders
-    function getTotalSecurityHolders() public view virtual override returns (uint256 count) {
+    function getTotalSecurityHolders() external view virtual override returns (uint256 count) {
         return ERC1410StorageWrapper.getTotalTokenHolders();
     }
 }

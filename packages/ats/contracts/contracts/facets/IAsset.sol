@@ -93,6 +93,7 @@ import { ILockAtSnapshotByPartition } from "./lockAtSnapshotByPartition/ILockAtS
 import { ILockAtSnapshot } from "./lockAtSnapshot/ILockAtSnapshot.sol";
 import { IMaturityByPartition } from "./maturityByPartition/IMaturityByPartition.sol";
 import { ICouponListing } from "./couponListing/ICouponListing.sol";
+import { IScheduledBalanceAdjustment } from "./scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
 import { ICouponSecurityHolders } from "./couponSecurityHolders/ICouponSecurityHolders.sol";
 import { ISecurityHolders } from "./securityHolders/ISecurityHolders.sol";
 
@@ -198,6 +199,7 @@ interface IAsset is
     IAmortization,
     ILoan,
     IAdjustBalances,
+    IScheduledBalanceAdjustment,
     ILoansPortfolio,
     IVoting,
     IVotingSecurityHolders,

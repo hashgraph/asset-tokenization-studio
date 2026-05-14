@@ -31,7 +31,6 @@ library NominalValueStorageWrapper {
         bytes3 nominalValueCurrency;
     }
 
-    // ============================================= LEGACY SLOT OFFSETS =============================================
     // BondDataStorage layout (at _BOND_STORAGE_POSITION = keccak256("security.token.standard.bond.storage")):
     //   slot+0: bytes3  currency
     //   slot+1: uint256 nominalValue           <-- legacy bond nominalValue
@@ -46,8 +45,6 @@ library NominalValueStorageWrapper {
     //   slot+2: uint256 nominalValue           <-- legacy equity nominalValue
     //   slot+3: bool initialized (1 byte) + uint8 nominalValueDecimals (1 byte) — packed
     //             ^-- bool at byte 0, uint8 at byte 1
-    // ============================================ LEGACY SLOT OFFSETS =============================================
-
     /**
      * @notice Initialises the dedicated nominal value storage with amount, decimals, and currency.
      * @dev Order is load-bearing: `setNominalValue` runs the legacy bond/equity migration BEFORE

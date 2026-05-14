@@ -13,18 +13,16 @@
 import * as fs from "fs";
 import * as path from "path";
 import type { ContractMetadata, MethodDefinition, EventDefinition, ErrorDefinition } from "../types";
+import { REVERSE_LIBRARY_KEYS } from "../../../domain/orchestratorLibraries";
 
 /**
  * Reverse mapping from Hardhat linkReferences key format to short library name.
- * Maps "contracts/lib/orchestrator/TokenCoreOps.sol:TokenCoreOps" -> "tokenCoreOps"
+ * Re-exports `REVERSE_LIBRARY_KEYS` from `scripts/domain/orchestratorLibraries.ts`
+ * so the generator and the deployment registry share a single source of truth
+ * for orchestrator library identities. Adding a new library only requires
+ * updating `LIBRARY_KEYS` in that module.
  */
-const LINK_REF_TO_LIB_NAME: Record<string, string> = {
-  "contracts/domain/orchestrator/TokenCoreOps.sol:TokenCoreOps": "tokenCoreOps",
-  "contracts/domain/orchestrator/HoldOps.sol:HoldOps": "holdOps",
-  "contracts/domain/orchestrator/ClearingOps.sol:ClearingOps": "clearingOps",
-  "contracts/domain/orchestrator/ClearingReadOps.sol:ClearingReadOps": "clearingReadOps",
-  "contracts/domain/orchestrator/ClearingProtectedOps.sol:ClearingProtectedOps": "clearingProtectedOps",
-};
+const LINK_REF_TO_LIB_NAME: Record<string, string> = REVERSE_LIBRARY_KEYS;
 
 /**
  * Read Hardhat artifact and extract library dependencies.
