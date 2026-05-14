@@ -285,7 +285,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
         ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount,
         address _to
-    ) internal returns (bool success_, uint256 clearingId_) {
+    ) private returns (bool success_, uint256 clearingId_) {
         (success_, clearingId_) = ClearingOps.clearingTransferCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
