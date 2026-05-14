@@ -7,6 +7,7 @@ import { ExternalListManagementStorageWrapper } from "../../domain/core/External
 import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 
 /**
  * @title BatchTransfer
@@ -29,15 +30,15 @@ abstract contract BatchTransfer is IBatchTransfer, Modifiers {
         onlyValidInputAmountsArrayLength(_toList, _amounts)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
-        onlyIdentifiedAddresses(EvmAccessors.getMsgSender(), address(0))
-        onlyCompliant(EvmAccessors.getMsgSender(), address(0), false)
     {
         uint256 length = _toList.length;
         for (uint256 i; i < length; ) {
-            ExternalListManagementStorageWrapper.checkValidAddress(_toList[i]);
-            ERC1594StorageWrapper.checkIdentity(address(0), _toList[i]);
-            ERC1594StorageWrapper.checkCompliance(address(0), _toList[i], false);
+            ERC1594StorageWrapper.requireCanTransferFromByPartition(
+                EvmAccessors.getMsgSender(),
+                _toList[i],
+                _DEFAULT_PARTITION,
+                _amounts[i]
+            );
             unchecked {
                 ++i;
             }
