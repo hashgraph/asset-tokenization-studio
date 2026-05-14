@@ -303,10 +303,6 @@ library ClearingOps {
         ClearingStorageWrapper.setClearingThirdParty(_partition, _from, _clearingOperationType, _clearingId, spender);
     }
 
-    // ============================================================================
-    // INTERNAL: ABAF SYNCHRONISATION
-    // ============================================================================
-
     /**
      * @notice Hook executed before any clearing operation to synchronise
      * ABAF adjustments
@@ -384,10 +380,6 @@ library ClearingOps {
             AdjustBalancesStorageWrapper.setClearedLabafById(_id, abaf);
         }
     }
-
-    // ============================================================================
-    // INTERNAL: CREATION-PHASE EVENT EMITTERS
-    // ============================================================================
 
     /**
      * @notice Emits a cleared transfer event appropriate to the third party type.

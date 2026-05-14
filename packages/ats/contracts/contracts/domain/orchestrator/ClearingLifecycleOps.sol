@@ -95,10 +95,6 @@ library ClearingLifecycleOps {
         );
     }
 
-    // ============================================================================
-    // INTERNAL: OPERATION DISPATCH
-    // ============================================================================
-
     /**
      * @notice Dispatches a clearing operation to the appropriate execution
      * handler based on operation type
