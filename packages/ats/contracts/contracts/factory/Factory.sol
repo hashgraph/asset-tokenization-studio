@@ -71,7 +71,7 @@ abstract contract Factory is IFactory {
     }
 
     modifier checkAdmins(IResolverProxy.Rbac[] calldata rbacs) {
-        _requireAdmins(rbacs);
+        _checkAdmins(rbacs);
         _;
     }
 
@@ -500,7 +500,7 @@ abstract contract Factory is IFactory {
         ScheduledTasksStorageWrapper.requireValidTimestamp(maturityDate);
     }
 
-    function _requireAdmins(IResolverProxy.Rbac[] calldata rbacs) private pure {
+    function _checkAdmins(IResolverProxy.Rbac[] calldata rbacs) private pure {
         uint256 rbacsLength = rbacs.length;
         for (uint256 rbacsIndex; rbacsIndex < rbacsLength; ) {
             if (rbacs[rbacsIndex].role == DEFAULT_ADMIN_ROLE) {

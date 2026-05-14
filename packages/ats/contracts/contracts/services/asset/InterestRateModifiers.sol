@@ -59,7 +59,7 @@ abstract contract InterestRateModifiers {
      * @param rateType The rate type to validate.
      */
     modifier onlyValidRateType(IInterestRate.RateType rateType) {
-        InterestRateStorageWrapper.requireValidRateType(rateType);
+        InterestRateStorageWrapper.checkValidRateType(rateType);
         _;
     }
 }

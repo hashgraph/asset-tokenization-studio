@@ -201,7 +201,7 @@ library InterestRateStorageWrapper {
      * @param _rateType The rate type to validate.
      * @custom:revert IInterestRate.InvalidRateType If `_rateType` is `NONE`.
      */
-    function requireValidRateType(IInterestRate.RateType _rateType) internal pure {
+    function checkValidRateType(IInterestRate.RateType _rateType) internal pure {
         if (_rateType == IInterestRate.RateType.NONE) revert IInterestRate.InvalidRateType(_rateType);
     }
 

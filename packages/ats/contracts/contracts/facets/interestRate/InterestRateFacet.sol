@@ -34,7 +34,6 @@ contract InterestRateFacet is InterestRate, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(IInterestRate).interfaceId;
+        return Bytes4Builder.build(type(IInterestRate).interfaceId);
     }
 }
