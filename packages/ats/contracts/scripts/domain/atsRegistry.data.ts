@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-14T09:47:16.098Z
+ * Generated: 2026-05-14T12:16:16.064Z
  * Facets: 125
  * Infrastructure: 2
  *
@@ -1545,6 +1545,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "PartitionsAreProtectedAndNoRole(address,bytes32)",
         },
         selector: "0x55347310",
+      },
+      {
+        name: "ZeroAddressNotAllowed",
+        signature: { full: "error ZeroAddressNotAllowed()", canonical: "ZeroAddressNotAllowed()" },
+        selector: "0x8579befe",
       },
     ],
     factory: (signer) => new BatchTransferFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
