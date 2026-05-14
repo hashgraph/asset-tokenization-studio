@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-14T15:36:23.605Z
+ * Generated: 2026-05-14T15:58:26.977Z
  * Facets: 119
  * Infrastructure: 2
  *
@@ -887,7 +887,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xd3924f4e",
       },
     ],
-    factory: (signer) => new AmortizationFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    factory: (signer) =>
+      new AmortizationFacet__factory(getLibLinks("clearingReadOps", "scheduledTasksOps") as any, signer),
   },
 
   BalanceTrackerAdjustedFacet: {
@@ -1400,7 +1401,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x8579befe",
       },
     ],
-    factory: (signer) => new BatchFreezeFacet__factory(signer),
+    factory: (signer) => new BatchFreezeFacet__factory(getLibLinks("scheduledTasksOps") as any, signer),
   },
 
   BatchMintFacet: {
@@ -5264,8 +5265,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x8579befe",
       },
     ],
-    factory: (signer) => new ERC20PermitFacet__factory(signer),
-    timeTravelFactory: (signer) => new ERC20PermitFacetTimeTravel__factory(signer),
+    factory: (signer) => new ERC20PermitFacet__factory(getLibLinks("scheduledTasksOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ERC20PermitFacetTimeTravel__factory(getLibLinks("scheduledTasksOps") as any, signer),
   },
 
   ERC20VotesFacet: {
@@ -5370,14 +5372,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         topic0: "0xdec2bacdd2f05b59de34da9b523dff8be42e5e38e818c82fdb0bae774387a724",
       },
-      {
-        name: "TaskExecutionFailed",
-        signature: {
-          full: "event TaskExecutionFailed(bytes32 indexed actionId, bytes32 indexed taskType, uint256 scheduledTimestamp)",
-          canonical: "TaskExecutionFailed(bytes32,bytes32,uint256)",
-        },
-        topic0: "0xa0b134b3077bb9dc6662d0a839fcb6c50853fc25d4393af34d3709edf045477a",
-      },
     ],
     errors: [
       {
@@ -5422,12 +5416,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     factory: (signer) =>
-      new ERC20VotesFacet__factory(getLibLinks("clearingReadOps", "scheduledTasksDispatchOps") as any, signer),
+      new ERC20VotesFacet__factory(getLibLinks("clearingReadOps", "scheduledTasksOps") as any, signer),
     timeTravelFactory: (signer) =>
-      new ERC20VotesFacetTimeTravel__factory(
-        getLibLinks("clearingReadOps", "scheduledTasksDispatchOps") as any,
-        signer,
-      ),
+      new ERC20VotesFacetTimeTravel__factory(getLibLinks("clearingReadOps", "scheduledTasksOps") as any, signer),
   },
 
   ERC3643ManagementFacet: {
@@ -6530,8 +6521,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x8579befe",
       },
     ],
-    factory: (signer) => new FreezeFacet__factory(signer),
-    timeTravelFactory: (signer) => new FreezeFacetTimeTravel__factory(signer),
+    factory: (signer) => new FreezeFacet__factory(getLibLinks("scheduledTasksOps") as any, signer),
+    timeTravelFactory: (signer) => new FreezeFacetTimeTravel__factory(getLibLinks("scheduledTasksOps") as any, signer),
   },
 
   HoldAtSnapshotByPartitionFacet: {
@@ -7499,8 +7490,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x570cf0d3",
       },
     ],
-    factory: (signer) => new KpiLinkedRateFacet__factory(signer),
-    timeTravelFactory: (signer) => new KpiLinkedRateFacetTimeTravel__factory(signer),
+    factory: (signer) => new KpiLinkedRateFacet__factory(getLibLinks("scheduledTasksOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new KpiLinkedRateFacetTimeTravel__factory(getLibLinks("scheduledTasksOps") as any, signer),
   },
 
   KpisKpiLinkedRateFacet: {
@@ -8409,7 +8401,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x039be1dd",
       },
     ],
-    factory: (signer) => new LockByPartitionFacet__factory(signer),
+    factory: (signer) => new LockByPartitionFacet__factory(getLibLinks("scheduledTasksOps") as any, signer),
   },
 
   LockFacet: {
@@ -8636,8 +8628,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x039be1dd",
       },
     ],
-    factory: (signer) => new LockFacet__factory(signer),
-    timeTravelFactory: (signer) => new LockFacetTimeTravel__factory(signer),
+    factory: (signer) => new LockFacet__factory(getLibLinks("scheduledTasksOps") as any, signer),
+    timeTravelFactory: (signer) => new LockFacetTimeTravel__factory(getLibLinks("scheduledTasksOps") as any, signer),
   },
 
   MaturityByPartitionFacet: {
@@ -9152,7 +9144,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x0dc149f0",
       },
     ],
-    factory: (signer) => new NominalValueFacet__factory(signer),
+    factory: (signer) => new NominalValueFacet__factory(getLibLinks("scheduledTasksOps") as any, signer),
   },
 
   NoncesFacet: {
@@ -10446,8 +10438,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x8579befe",
       },
     ],
-    factory: (signer) => new ProceedRecipientsKpiLinkedRateFacet__factory(signer),
-    timeTravelFactory: (signer) => new ProceedRecipientsKpiLinkedRateFacetTimeTravel__factory(signer),
+    factory: (signer) =>
+      new ProceedRecipientsKpiLinkedRateFacet__factory(getLibLinks("scheduledTasksOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ProceedRecipientsKpiLinkedRateFacetTimeTravel__factory(getLibLinks("scheduledTasksOps") as any, signer),
   },
 
   ProtectedByPartitionFacet: {
@@ -11465,8 +11459,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf9f9bcf9",
       },
     ],
-    factory: (signer) => new RecoveryFacet__factory(getLibLinks("clearingReadOps") as any, signer),
-    timeTravelFactory: (signer) => new RecoveryFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
+    factory: (signer) => new RecoveryFacet__factory(getLibLinks("clearingReadOps", "scheduledTasksOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new RecoveryFacetTimeTravel__factory(getLibLinks("clearingReadOps", "scheduledTasksOps") as any, signer),
   },
 
   ScheduledBalanceAdjustmentFacet: {
@@ -12131,14 +12126,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "function resetSystemTimestamp()", canonical: "resetSystemTimestamp()" },
         selector: "0x8f145250",
       },
-      {
-        name: "testOnlyAddDeprecatedCoupon",
-        signature: {
-          full: "function testOnlyAddDeprecatedCoupon(uint256 _couponID)",
-          canonical: "testOnlyAddDeprecatedCoupon(uint256)",
-        },
-        selector: "0xa1435b5a",
-      },
     ],
     events: [
       {
@@ -12310,7 +12297,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe39f4776",
       },
     ],
-    factory: (signer) => new TransferAndLockByPartitionFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    factory: (signer) =>
+      new TransferAndLockByPartitionFacet__factory(getLibLinks("scheduledTasksOps", "tokenCoreOps") as any, signer),
   },
 
   TransferAndLockFacet: {
@@ -12427,9 +12415,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe39f4776",
       },
     ],
-    factory: (signer) => new TransferAndLockFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    factory: (signer) =>
+      new TransferAndLockFacet__factory(getLibLinks("scheduledTasksOps", "tokenCoreOps") as any, signer),
     timeTravelFactory: (signer) =>
-      new TransferAndLockFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
+      new TransferAndLockFacetTimeTravel__factory(getLibLinks("scheduledTasksOps", "tokenCoreOps") as any, signer),
   },
 
   TransferAndLockFixedRateFacet: {
@@ -12546,9 +12535,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe39f4776",
       },
     ],
-    factory: (signer) => new TransferAndLockFixedRateFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    factory: (signer) =>
+      new TransferAndLockFixedRateFacet__factory(getLibLinks("scheduledTasksOps", "tokenCoreOps") as any, signer),
     timeTravelFactory: (signer) =>
-      new TransferAndLockFixedRateFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
+      new TransferAndLockFixedRateFacetTimeTravel__factory(
+        getLibLinks("scheduledTasksOps", "tokenCoreOps") as any,
+        signer,
+      ),
   },
 
   TransferAndLockKpiLinkedRateFacet: {
@@ -12665,9 +12658,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe39f4776",
       },
     ],
-    factory: (signer) => new TransferAndLockKpiLinkedRateFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    factory: (signer) =>
+      new TransferAndLockKpiLinkedRateFacet__factory(getLibLinks("scheduledTasksOps", "tokenCoreOps") as any, signer),
     timeTravelFactory: (signer) =>
-      new TransferAndLockKpiLinkedRateFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
+      new TransferAndLockKpiLinkedRateFacetTimeTravel__factory(
+        getLibLinks("scheduledTasksOps", "tokenCoreOps") as any,
+        signer,
+      ),
   },
 
   TransferByPartitionFacet: {
@@ -13839,8 +13836,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   NominalValueStorageWrapper: {
     name: "NominalValueStorageWrapper",
-    description:
-      "Storage wrapper for nominal value data, aggregating legacy bond and equity storage for backward compatibility during migration.",
+    description: "Storage wrapper for nominal value data on a security token.",
     methods: [],
   },
 
