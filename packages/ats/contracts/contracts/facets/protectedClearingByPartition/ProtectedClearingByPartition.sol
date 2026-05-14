@@ -27,6 +27,7 @@ abstract contract ProtectedClearingByPartition is IProtectedClearingByPartition,
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyProtectedPartitions
         onlyValidAddress(_protectedClearingOperation.from)
@@ -57,6 +58,7 @@ abstract contract ProtectedClearingByPartition is IProtectedClearingByPartition,
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyProtectedPartitions
         notZeroAddress(_protectedClearingOperation.from)

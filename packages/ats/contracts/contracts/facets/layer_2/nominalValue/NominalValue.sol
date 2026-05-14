@@ -35,13 +35,15 @@ abstract contract NominalValue is INominalValue, Modifiers {
     function setNominalValue(
         uint256 _nominalValue,
         uint8 _nominalValueDecimals
-    ) external override onlyRole(NOMINAL_VALUE_ROLE) {
+    ) external override onlyActivated onlyRole(NOMINAL_VALUE_ROLE) {
         NominalValueStorageWrapper.setNominalValue(_nominalValue, _nominalValueDecimals);
         emit NominalValueSet(EvmAccessors.getMsgSender(), _nominalValue, _nominalValueDecimals);
     }
 
     /// @inheritdoc INominalValue
-    function setNominalValueCurrency(bytes3 _nominalValueCurrency) external override onlyRole(NOMINAL_VALUE_ROLE) {
+    function setNominalValueCurrency(
+        bytes3 _nominalValueCurrency
+    ) external override onlyActivated onlyRole(NOMINAL_VALUE_ROLE) {
         NominalValueStorageWrapper.setNominalValueCurrency(_nominalValueCurrency);
         emit NominalValueCurrencySet(EvmAccessors.getMsgSender(), _nominalValueCurrency);
     }

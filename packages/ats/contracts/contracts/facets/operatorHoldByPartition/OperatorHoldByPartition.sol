@@ -28,6 +28,7 @@ abstract contract OperatorHoldByPartition is IOperatorHoldByPartition, Modifiers
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyClearingDisabled
         onlyValidOperatorCreateHoldByPartition(

@@ -33,6 +33,7 @@ abstract contract Mint is IMint, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyAnyRole(_buildRoles(ISSUER_ROLE, AGENT_ROLE))
@@ -51,6 +52,7 @@ abstract contract Mint is IMint, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyAnyRole(_buildRoles(ISSUER_ROLE, AGENT_ROLE))

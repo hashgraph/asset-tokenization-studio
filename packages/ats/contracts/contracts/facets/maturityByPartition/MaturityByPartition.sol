@@ -32,6 +32,7 @@ abstract contract MaturityByPartition is IMaturityByPartition, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyClearingDisabled
         onlyRole(MATURITY_REDEEMER_ROLE)

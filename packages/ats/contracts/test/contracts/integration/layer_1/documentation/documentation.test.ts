@@ -214,4 +214,16 @@ describe("Documentation Tests", () => {
     expect(document[0]).to.equal(documentURI_2);
     expect(document[1]).to.equal(documentHASH_2);
   });
+
+  describe("Deactivated", () => {
+    it("GIVEN a deactivated asset WHEN setDocument THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).setDocument(ethers.ZeroHash, "", ethers.ZeroHash),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
 });

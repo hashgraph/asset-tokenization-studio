@@ -23,7 +23,15 @@ abstract contract AdjustBalances is IAdjustBalances, Modifiers {
     function adjustBalances(
         uint256 factor,
         uint8 decimals
-    ) external override onlyUnpaused onlyRole(ADJUSTMENT_BALANCE_ROLE) onlyValidFactor(factor) returns (bool success_) {
+    )
+        external
+        override
+        onlyActivated
+        onlyUnpaused
+        onlyRole(ADJUSTMENT_BALANCE_ROLE)
+        onlyValidFactor(factor)
+        returns (bool success_)
+    {
         ScheduledTasksStorageWrapper.triggerScheduledCrossOrderedTasks(0);
         AdjustBalancesStorageWrapper.adjustBalances(factor, decimals);
         success_ = true;
@@ -31,7 +39,11 @@ abstract contract AdjustBalances is IAdjustBalances, Modifiers {
 
     /// @inheritdoc IAdjustBalances
     /// @dev May emit {SnapshotTriggered} or {AdjustmentBalanceSet} depending on pending scheduled tasks.
-    function triggerAndSyncAll(bytes32 _partition, address _from, address _to) external override onlyUnpaused {
+    function triggerAndSyncAll(
+        bytes32 _partition,
+        address _from,
+        address _to
+    ) external override onlyActivated onlyUnpaused {
         TokenCoreOps.triggerAndSyncAll(_partition, _from, _to);
     }
 }

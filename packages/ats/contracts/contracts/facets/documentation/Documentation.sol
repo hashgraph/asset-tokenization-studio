@@ -40,6 +40,7 @@ abstract contract Documentation is IDocumentation, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(DOCUMENTER_ROLE)
         notEmptyName(_name)
@@ -65,7 +66,7 @@ abstract contract Documentation is IDocumentation, Modifiers {
      */
     function removeDocument(
         bytes32 _name
-    ) external override onlyUnpaused onlyRole(DOCUMENTER_ROLE) documentExists(_name) {
+    ) external override onlyActivated onlyUnpaused onlyRole(DOCUMENTER_ROLE) documentExists(_name) {
         (string memory uri, bytes32 docHash) = DocumentationStorageWrapper.removeDocumentEntry(_name);
         emit DocumentRemoved(_name, uri, docHash);
     }

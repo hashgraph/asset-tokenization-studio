@@ -21,12 +21,12 @@ abstract contract Core is ICore, Modifiers {
     }
 
     /// @inheritdoc ICore
-    function setName(string calldata _name) external override onlyUnpaused onlyRole(TREX_OWNER_ROLE) {
+    function setName(string calldata _name) external override onlyActivated onlyUnpaused onlyRole(TREX_OWNER_ROLE) {
         ERC3643StorageWrapper.setName(_name);
     }
 
     /// @inheritdoc ICore
-    function setSymbol(string calldata _symbol) external override onlyUnpaused onlyRole(TREX_OWNER_ROLE) {
+    function setSymbol(string calldata _symbol) external override onlyActivated onlyUnpaused onlyRole(TREX_OWNER_ROLE) {
         ERC3643StorageWrapper.setSymbol(_symbol);
     }
 

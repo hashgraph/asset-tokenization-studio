@@ -38,6 +38,7 @@ abstract contract Coupon is ICoupon, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(CORPORATE_ACTION_ROLE)
         onlyValidDates(_newCoupon.startDate, _newCoupon.endDate)
@@ -61,6 +62,7 @@ abstract contract Coupon is ICoupon, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(CORPORATE_ACTION_ROLE)
         onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)

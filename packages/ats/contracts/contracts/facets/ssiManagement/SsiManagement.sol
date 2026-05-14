@@ -22,7 +22,7 @@ abstract contract SsiManagement is ISsiManagement, Modifiers {
     /// @inheritdoc ISsiManagement
     function setRevocationRegistryAddress(
         address _revocationRegistryAddress
-    ) external override onlyUnpaused onlyRole(SSI_MANAGER_ROLE) returns (bool success_) {
+    ) external override onlyActivated onlyUnpaused onlyRole(SSI_MANAGER_ROLE) returns (bool success_) {
         address oldRevocationRegistryAddress = SsiManagementStorageWrapper.getRevocationRegistryAddress();
         success_ = SsiManagementStorageWrapper.setRevocationRegistryAddress(_revocationRegistryAddress);
         emit RevocationRegistryUpdated(
@@ -34,7 +34,7 @@ abstract contract SsiManagement is ISsiManagement, Modifiers {
     /// @inheritdoc ISsiManagement
     function addIssuer(
         address _issuer
-    ) external override onlyUnpaused onlyRole(SSI_MANAGER_ROLE) returns (bool success_) {
+    ) external override onlyActivated onlyUnpaused onlyRole(SSI_MANAGER_ROLE) returns (bool success_) {
         success_ = SsiManagementStorageWrapper.addIssuer(_issuer);
         if (!success_) {
             revert ListedIssuer(_issuer);
@@ -45,7 +45,7 @@ abstract contract SsiManagement is ISsiManagement, Modifiers {
     /// @inheritdoc ISsiManagement
     function removeIssuer(
         address _issuer
-    ) external override onlyUnpaused onlyRole(SSI_MANAGER_ROLE) returns (bool success_) {
+    ) external override onlyActivated onlyUnpaused onlyRole(SSI_MANAGER_ROLE) returns (bool success_) {
         success_ = SsiManagementStorageWrapper.removeIssuer(_issuer);
         if (!success_) {
             revert UnlistedIssuer(_issuer);
