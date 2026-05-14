@@ -85,6 +85,7 @@ library DocumentationStorageWrapper {
         }
         docStorage.docNames.pop();
         delete docStorage.documents[_name];
+        delete docStorage.docIndexes[_name];
     }
 
     /**
