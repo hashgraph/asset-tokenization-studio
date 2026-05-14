@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-14T07:08:59.443Z
+ * Generated: 2026-05-14T09:50:39.264Z
  * Facets: 124
  * Infrastructure: 2
  *
@@ -542,6 +542,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "CouponNotFound",
         signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
         selector: "0x69a80e75",
+      },
+      {
+        name: "DecimalDifferenceTooLarge",
+        signature: {
+          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
+          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
+        },
+        selector: "0x552d04f9",
       },
       {
         name: "FactorIsZero",
@@ -4237,6 +4245,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x3a848637",
       },
       {
+        name: "DecimalDifferenceTooLarge",
+        signature: {
+          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
+          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
+        },
+        selector: "0x552d04f9",
+      },
+      {
         name: "DuplicatedCorporateAction",
         signature: {
           full: "error DuplicatedCorporateAction(bytes32 actionType, bytes data)",
@@ -4431,6 +4447,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x69a80e75",
       },
       {
+        name: "DecimalDifferenceTooLarge",
+        signature: {
+          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
+          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
+        },
+        selector: "0x552d04f9",
+      },
+      {
         name: "InterestRateIsFixed",
         signature: { full: "error InterestRateIsFixed()", canonical: "InterestRateIsFixed()" },
         selector: "0x849d4eb8",
@@ -4610,6 +4634,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "CouponNotFound",
         signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
         selector: "0x69a80e75",
+      },
+      {
+        name: "DecimalDifferenceTooLarge",
+        signature: {
+          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
+          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
+        },
+        selector: "0x552d04f9",
       },
       {
         name: "SnapshotIdDoesNotExists",
@@ -5611,6 +5643,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "CouponNotFound",
         signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
         selector: "0x69a80e75",
+      },
+      {
+        name: "DecimalDifferenceTooLarge",
+        signature: {
+          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
+          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
+        },
+        selector: "0x552d04f9",
       },
       {
         name: "FutureLookup",
@@ -7641,6 +7681,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x69a80e75",
       },
       {
+        name: "DecimalDifferenceTooLarge",
+        signature: {
+          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
+          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
+        },
+        selector: "0x552d04f9",
+      },
+      {
         name: "InvalidDate",
         signature: {
           full: "error InvalidDate(uint256 providedDate, uint256 minDate, uint256 maxDate)",
@@ -7741,6 +7789,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "CouponNotFound",
         signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
         selector: "0x69a80e75",
+      },
+      {
+        name: "DecimalDifferenceTooLarge",
+        signature: {
+          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
+          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
+        },
+        selector: "0x552d04f9",
       },
       {
         name: "InvalidDate",
@@ -11852,6 +11908,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
         selector: "0x69a80e75",
       },
+      {
+        name: "DecimalDifferenceTooLarge",
+        signature: {
+          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
+          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
+        },
+        selector: "0x552d04f9",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "UnexpectedError",
@@ -11936,6 +12000,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
         selector: "0x69a80e75",
       },
+      {
+        name: "DecimalDifferenceTooLarge",
+        signature: {
+          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
+          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
+        },
+        selector: "0x552d04f9",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "UnexpectedError",
@@ -12018,6 +12090,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "CouponNotFound",
         signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
         selector: "0x69a80e75",
+      },
+      {
+        name: "DecimalDifferenceTooLarge",
+        signature: {
+          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
+          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
+        },
+        selector: "0x552d04f9",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
@@ -12220,6 +12300,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "CouponNotFound",
         signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
         selector: "0x69a80e75",
+      },
+      {
+        name: "DecimalDifferenceTooLarge",
+        signature: {
+          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
+          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
+        },
+        selector: "0x552d04f9",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
