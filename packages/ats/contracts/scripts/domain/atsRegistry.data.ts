@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-14T12:16:16.064Z
- * Facets: 125
+ * Generated: 2026-05-14T13:09:33.725Z
+ * Facets: 126
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -87,6 +87,7 @@ import {
   HoldByPartitionFacet__factory,
   HoldFacet__factory,
   IdentityFacet__factory,
+  InitializerFacet__factory,
   KpiLinkedRateFacet__factory,
   KpisKpiLinkedRateFacet__factory,
   KpisSustainabilityPerformanceTargetRateFacet__factory,
@@ -1523,11 +1524,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x10210dec",
       },
       {
-        name: "ClearingIsActivated",
-        signature: { full: "error ClearingIsActivated()", canonical: "ClearingIsActivated()" },
-        selector: "0x5b2e3086",
-      },
-      {
         name: "InputAmountsArrayLengthMismatch",
         signature: { full: "error InputAmountsArrayLengthMismatch()", canonical: "InputAmountsArrayLengthMismatch()" },
         selector: "0x64f13710",
@@ -1545,11 +1541,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "PartitionsAreProtectedAndNoRole(address,bytes32)",
         },
         selector: "0x55347310",
-      },
-      {
-        name: "ZeroAddressNotAllowed",
-        signature: { full: "error ZeroAddressNotAllowed()", canonical: "ZeroAddressNotAllowed()" },
-        selector: "0x8579befe",
       },
     ],
     factory: (signer) => new BatchTransferFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
@@ -7406,6 +7397,159 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x7e90c2c9",
       },
     ],
+  },
+
+  InitializerFacet: {
+    name: "InitializerFacet",
+    description: "InitializerFacet",
+    resolverKey: {
+      name: "_INITIALIZER_RESOLVER_KEY",
+      value: "0x65c891d003e7dc436f2c3d0863d599d91867c8695fee29923a476a2be3ec540f",
+    },
+    inheritance: ["Initializer", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "getFacetLastVersion",
+        signature: {
+          full: "function getFacetLastVersion(bytes32 _facetId) view returns (uint256 lastVersion_)",
+          canonical: "getFacetLastVersion(bytes32)",
+        },
+        selector: "0xccc02360",
+      },
+      {
+        name: "getFacetVersionStatus",
+        signature: {
+          full: "function getFacetVersionStatus(bytes32 _facetId, uint256 _versionId) view returns (uint256 status_)",
+          canonical: "getFacetVersionStatus(bytes32,uint256)",
+        },
+        selector: "0xab8365aa",
+      },
+      {
+        name: "getMaxInitializerFacetIndex",
+        signature: {
+          full: "function getMaxInitializerFacetIndex() view returns (uint256 maxInitializerFacetIndex_)",
+          canonical: "getMaxInitializerFacetIndex()",
+        },
+        selector: "0xdbc12e97",
+      },
+      {
+        name: "getOperationalStatus",
+        signature: {
+          full: "function getOperationalStatus(bytes32 _configId, uint256 _versionId) view returns (uint256 status_)",
+          canonical: "getOperationalStatus(bytes32,uint256)",
+        },
+        selector: "0x6da4c898",
+      },
+      {
+        name: "initializeInitializer",
+        signature: {
+          full: "function initializeInitializer(uint256 _maxInitializerFacetIndex)",
+          canonical: "initializeInitializer(uint256)",
+        },
+        selector: "0x14055c1c",
+      },
+      {
+        name: "setOperationalStatus",
+        signature: {
+          full: "function setOperationalStatus() returns (bool isOperational_, uint256 lastFacetIndex_)",
+          canonical: "setOperationalStatus()",
+        },
+        selector: "0x720ab28e",
+      },
+      {
+        name: "updateMaxInitializerFacetIndex",
+        signature: {
+          full: "function updateMaxInitializerFacetIndex(uint256 _newMaxInitializerFacetIndex)",
+          canonical: "updateMaxInitializerFacetIndex(uint256)",
+        },
+        selector: "0xdb5622a3",
+      },
+    ],
+    events: [
+      {
+        name: "InitializerInitialized",
+        signature: {
+          full: "event InitializerInitialized(address sender, uint256 maxInitializerFacetIndex)",
+          canonical: "InitializerInitialized(address,uint256)",
+        },
+        topic0: "0x0e3db3a608ed2b4a88e0762144c40dfe43e77de955fda9ba08f2fb8ef53f9bde",
+      },
+      {
+        name: "MaxInitializerFacetIndexUpdated",
+        signature: {
+          full: "event MaxInitializerFacetIndexUpdated(address sender, uint256 newMaxInitializerFacetIndex)",
+          canonical: "MaxInitializerFacetIndexUpdated(address,uint256)",
+        },
+        topic0: "0x1fe03cd52ef039e01408f6875d4ac467a39daf0cf29cf01e0fd58f33583fbcb3",
+      },
+      {
+        name: "OperationalStatusPartialSet",
+        signature: {
+          full: "event OperationalStatusPartialSet(address sender, bytes32 configurationId, uint256 version, uint256 lastIndex)",
+          canonical: "OperationalStatusPartialSet(address,bytes32,uint256,uint256)",
+        },
+        topic0: "0x504a816ac078747ff3036ed349b9a82449501c82d412e9e6d77eeac21119bcca",
+      },
+      {
+        name: "OperationalStatusSet",
+        signature: {
+          full: "event OperationalStatusSet(address sender, bytes32 configurationId, uint256 version)",
+          canonical: "OperationalStatusSet(address,bytes32,uint256)",
+        },
+        topic0: "0xdf83cd2c8c69cc49fd13de318c44ee279ef32227acce2ae0c6cfdd2108ba898c",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRole",
+        signature: {
+          full: "error AccountHasNoRole(address account, bytes32 role)",
+          canonical: "AccountHasNoRole(address,bytes32)",
+        },
+        selector: "0xa1180aad",
+      },
+      {
+        name: "AssetNotOperational",
+        signature: {
+          full: "error AssetNotOperational(bytes32 configId, uint256 versionId)",
+          canonical: "AssetNotOperational(bytes32,uint256)",
+        },
+        selector: "0xcea298d9",
+      },
+      {
+        name: "FacetAlreadyRegistered",
+        signature: {
+          full: "error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion)",
+          canonical: "FacetAlreadyRegistered(bytes32,uint256)",
+        },
+        selector: "0x05ebbb24",
+      },
+      {
+        name: "FacetPreviousVersionNotAccepted",
+        signature: {
+          full: "error FacetPreviousVersionNotAccepted(bytes32 facetId, uint256 lastVersion, uint256[] expectedVersions)",
+          canonical: "FacetPreviousVersionNotAccepted(bytes32,uint256,uint256[])",
+        },
+        selector: "0x5712fd94",
+      },
+      {
+        name: "FacetReady",
+        signature: {
+          full: "error FacetReady(bytes32 facetId, uint256 versionId)",
+          canonical: "FacetReady(bytes32,uint256)",
+        },
+        selector: "0xb5a1ee4f",
+      },
+    ],
+    factory: (signer) => new InitializerFacet__factory(signer),
   },
 
   KpiLinkedRateFacet: {
@@ -13763,7 +13907,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 125 as const;
+export const TOTAL_FACETS = 126 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -13879,6 +14023,14 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
         selector: "0x9e6030d1",
       },
       {
+        name: "getFacetConfigurationsByConfigurationIdAndVersion",
+        signature: {
+          full: "function getFacetConfigurationsByConfigurationIdAndVersion(bytes32 _configurationId, uint256 _version, uint256 _start, uint256 _end) view returns ((bytes32 id, uint256 version)[] facetConfigurations_)",
+          canonical: "getFacetConfigurationsByConfigurationIdAndVersion(bytes32,uint256,uint256,uint256)",
+        },
+        selector: "0x52971448",
+      },
+      {
         name: "getFacetIdByConfigurationIdVersionAndSelector",
         signature: {
           full: "function getFacetIdByConfigurationIdVersionAndSelector(bytes32 _configurationId, uint256 _version, bytes4 _selector) view returns (bytes32 facetId_)",
@@ -13909,6 +14061,14 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
           canonical: "getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(bytes32,uint256,bytes32)",
         },
         selector: "0xf1d3d2f9",
+      },
+      {
+        name: "getFacetVersionByConfigurationIdVersionAndFacetId",
+        signature: {
+          full: "function getFacetVersionByConfigurationIdVersionAndFacetId(bytes32 _configurationId, uint256 _version, bytes32 _facetId) view returns (uint256 facetVersion_)",
+          canonical: "getFacetVersionByConfigurationIdVersionAndFacetId(bytes32,uint256,bytes32)",
+        },
+        selector: "0x9135310a",
       },
       {
         name: "getFacetsByConfigurationIdAndVersion",
@@ -14448,6 +14608,13 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     ],
   },
 
+  InitializerStorageWrapper: {
+    name: "InitializerStorageWrapper",
+    description:
+      'Library providing the storage operations and readiness checks consumed by the initializer facet and by every facet that needs to assert "operational" status before executing business logic.',
+    methods: [],
+  },
+
   InterestRateStorageWrapper: {
     name: "InterestRateStorageWrapper",
     description:
@@ -14572,7 +14739,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 43 as const;
+export const TOTAL_STORAGE_WRAPPERS = 44 as const;
 
 /**
  * All role identifiers extracted from contracts.

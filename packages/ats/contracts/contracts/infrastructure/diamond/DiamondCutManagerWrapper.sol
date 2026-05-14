@@ -19,6 +19,8 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         mapping(bytes32 => bytes32[]) facetIds;
         // keccak256(configurationId, version)
         mapping(bytes32 => uint256[]) facetVersions;
+        //keccak256(configurationId, version, facetId)
+        mapping(bytes32 => uint256) facetIdPosition;
         // keccak256(configurationId, version, selector)
         mapping(bytes32 => address) facetAddress;
         // keccak256(configurationId, version, facetId)
@@ -91,6 +93,9 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
             uint256 facetVersion = _facetConfigurations[index].version;
             _dcms.facetIds[configVersionHash].push(facetId);
             _dcms.facetVersions[configVersionHash].push(facetVersion);
+            _dcms.facetIdPosition[_buildHash(_configurationId, _version, facetId)] = _dcms
+                .facetIds[configVersionHash]
+                .length;
             bytes32 configVersionFacetHash = _buildHash(_configurationId, _version, facetId);
 
             address addr = _resolveBusinessLogicByVersion(facetId, facetVersion);
@@ -288,6 +293,49 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         );
     }
 
+    /**
+     * @notice Returns paginated facet configurations for a configuration version.
+     * @dev Resolves `_version` before deriving the storage key. Pagination bounds
+     * determine the returned slice and may revert through `Pagination.getSize` if
+     * invalid. The function reads facet IDs and versions from aligned storage
+     * arrays and assumes both arrays remain length-synchronised for each resolved
+     * configuration version.
+     * @param _dcms Diamond cut manager storage containing registered facet data.
+     * @param _configurationId Identifier of the facet configuration set.
+     * @param _version Requested configuration version, or the sentinel handled by
+     * `_resolveVersion`.
+     * @param _start Inclusive start index of the requested page.
+     * @param _end Exclusive end index of the requested page.
+     * @return facetConfigurations_ Facet configuration entries within the requested
+     * page.
+     */
+    function _getFacetConfigurationsByConfigurationIdAndVersion(
+        DiamondCutManagerStorage storage _dcms,
+        bytes32 _configurationId,
+        uint256 _version,
+        uint256 _start,
+        uint256 _end
+    ) internal view returns (FacetConfiguration[] memory facetConfigurations_) {
+        bytes32 configVersionHash = _buildHash(_configurationId, _resolveVersion(_dcms, _configurationId, _version));
+
+        uint256 size = Pagination.getSize(_start, _end, _dcms.facetIds[configVersionHash].length);
+
+        facetConfigurations_ = new FacetConfiguration[](size);
+
+        uint256 realIndex = _start;
+
+        for (uint256 index; index < size; ) {
+            facetConfigurations_[index] = FacetConfiguration({
+                id: _dcms.facetIds[configVersionHash][realIndex],
+                version: _dcms.facetVersions[configVersionHash][realIndex]
+            });
+            unchecked {
+                ++index;
+                ++realIndex;
+            }
+        }
+    }
+
     function _getFacetAddressesByConfigurationIdAndVersion(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -351,6 +399,34 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         facetAddress_ = _dcms.addr[
             _buildHash(_configurationId, _resolveVersion(_dcms, _configurationId, _version), _facetId)
         ];
+    }
+
+    /**
+     * @notice Returns the facet version registered for a configuration version and facet identifier.
+     * @dev Reverts if the facet identifier is not registered for the supplied configuration version.
+     *      Reads positional indexes stored as one-based values and uses unchecked arithmetic after
+     *      validating that the position is non-zero.
+     * @param _dcms Diamond cut manager storage containing facet registration indexes and versions.
+     * @param _configurationId Identifier of the diamond configuration to query.
+     * @param _version Version of the configuration to query.
+     * @param _facetId Identifier of the facet whose registered version is requested.
+     * @return facetVersion_ Registered facet version for the supplied configuration and facet.
+     */
+    function _getFacetVersionByConfigurationIdVersionAndFacetId(
+        DiamondCutManagerStorage storage _dcms,
+        bytes32 _configurationId,
+        uint256 _version,
+        bytes32 _facetId
+    ) internal view returns (uint256 facetVersion_) {
+        uint256 pos = _dcms.facetIdPosition[_buildHash(_configurationId, _version, _facetId)];
+
+        if (pos == 0) {
+            revert FacetIdNotRegistered(_configurationId, _facetId);
+        }
+
+        unchecked {
+            facetVersion_ = _dcms.facetVersions[_buildHash(_configurationId, _version)][pos - 1];
+        }
     }
 
     function _diamondCutManagerStorage() internal pure returns (DiamondCutManagerStorage storage ds) {
