@@ -556,4 +556,170 @@ describe("Compliance Tests", () => {
       expect(await complianceMock.destroyedHit()).to.be.equal(1);
     });
   });
+
+  describe("Compliance notifications when compliance is address(0)", () => {
+    const NON_DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
+
+    async function deploySecurityFixtureMultiPartitionWithoutCompliance() {
+      const base = await deployEquityTokenFixture({
+        equityDataParams: {
+          securityData: {
+            isMultiPartition: true,
+            internalKycActivated: true,
+            maxSupply: MAX_SUPPLY,
+          },
+        },
+      });
+      diamond = base.diamond;
+      signer_A = base.deployer;
+      signer_B = base.user1;
+      signer_C = base.user2;
+      signer_D = base.user3;
+      signer_E = base.user4;
+
+      asset = await ethers.getContractAt("IAsset", diamond.target);
+
+      await executeRbac(asset, [
+        { role: ATS_ROLES.PAUSER_ROLE, members: [signer_B.address] },
+        { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
+        { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.CLEARING_ROLE, members: [signer_B.address] },
+        { role: ATS_ROLES.CLEARING_VALIDATOR_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.AGENT_ROLE, members: [signer_A.address] },
+      ]);
+
+      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+      await asset.addIssuer(signer_E.address);
+      await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
+      await asset.connect(signer_B).grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
+    }
+
+    beforeEach(async () => {
+      await loadFixture(deploySecurityFixtureMultiPartitionWithoutCompliance);
+    });
+
+    it("GIVEN compliance set to address(0) THEN the compliance getter returns the zero address", async () => {
+      expect(await asset.compliance()).to.equal(ethers.ZeroAddress);
+    });
+
+    it("GIVEN compliance set to address(0) WHEN issueByPartition on a non-default partition THEN the call does not revert", async () => {
+      await expect(
+        asset.issueByPartition({
+          partition: NON_DEFAULT_PARTITION,
+          tokenHolder: signer_E.address,
+          value: AMOUNT,
+          data: EMPTY_HEX_BYTES,
+        }),
+      ).to.not.be.reverted;
+    });
+
+    it("GIVEN compliance set to address(0) WHEN transferByPartition on a non-default partition THEN the call does not revert", async () => {
+      await asset.issueByPartition({
+        partition: NON_DEFAULT_PARTITION,
+        tokenHolder: signer_E.address,
+        value: AMOUNT,
+        data: EMPTY_HEX_BYTES,
+      });
+
+      await expect(
+        asset
+          .connect(signer_E)
+          .transferByPartition(NON_DEFAULT_PARTITION, { to: signer_D.address, value: AMOUNT / 2 }, EMPTY_HEX_BYTES),
+      ).to.not.be.reverted;
+    });
+
+    it("GIVEN compliance set to address(0) WHEN redeemByPartition on a non-default partition THEN the call does not revert", async () => {
+      await asset.issueByPartition({
+        partition: NON_DEFAULT_PARTITION,
+        tokenHolder: signer_E.address,
+        value: AMOUNT,
+        data: EMPTY_HEX_BYTES,
+      });
+
+      await expect(asset.connect(signer_E).redeemByPartition(NON_DEFAULT_PARTITION, AMOUNT / 2, EMPTY_HEX_BYTES)).to.not
+        .be.reverted;
+    });
+
+    it("GIVEN compliance set to address(0) WHEN executeHoldByPartition on a non-default partition THEN the call does not revert", async () => {
+      await asset.issueByPartition({
+        partition: NON_DEFAULT_PARTITION,
+        tokenHolder: signer_D.address,
+        value: AMOUNT,
+        data: EMPTY_HEX_BYTES,
+      });
+
+      const hold = {
+        amount: AMOUNT,
+        expirationTimestamp: dateToUnixTimestamp("2030-01-01T00:00:03Z"),
+        escrow: signer_E.address,
+        to: signer_E.address,
+        data: EMPTY_HEX_BYTES,
+      };
+      await asset.connect(signer_D).createHoldByPartition(NON_DEFAULT_PARTITION, hold);
+
+      await expect(
+        asset
+          .connect(signer_E)
+          .executeHoldByPartition(
+            { partition: NON_DEFAULT_PARTITION, tokenHolder: signer_D.address, holdId: 1 },
+            signer_E.address,
+            AMOUNT,
+          ),
+      ).to.not.be.reverted;
+    });
+
+    it("GIVEN compliance set to address(0) WHEN a clearing transfer is approved on a non-default partition THEN the call does not revert", async () => {
+      await asset.issueByPartition({
+        partition: NON_DEFAULT_PARTITION,
+        tokenHolder: signer_D.address,
+        value: AMOUNT,
+        data: EMPTY_HEX_BYTES,
+      });
+
+      await asset.connect(signer_B).activateClearing();
+
+      const clearingOperation = {
+        partition: NON_DEFAULT_PARTITION,
+        expirationTimestamp: dateToUnixTimestamp("2030-01-01T00:00:03Z"),
+        data: EMPTY_HEX_BYTES,
+      };
+      await asset.connect(signer_D).clearingTransferByPartition(clearingOperation, AMOUNT, signer_E.address);
+
+      await expect(
+        asset.approveClearingOperationByPartition({
+          partition: NON_DEFAULT_PARTITION,
+          tokenHolder: signer_D.address,
+          clearingId: 1,
+          clearingOperationType: ClearingOperationType.Transfer,
+        }),
+      ).to.not.be.reverted;
+    });
+
+    it("GIVEN compliance set to address(0) WHEN a clearing redeem is approved on a non-default partition THEN the call does not revert", async () => {
+      await asset.issueByPartition({
+        partition: NON_DEFAULT_PARTITION,
+        tokenHolder: signer_D.address,
+        value: AMOUNT,
+        data: EMPTY_HEX_BYTES,
+      });
+
+      await asset.connect(signer_B).activateClearing();
+
+      const clearingOperation = {
+        partition: NON_DEFAULT_PARTITION,
+        expirationTimestamp: dateToUnixTimestamp("2030-01-01T00:00:03Z"),
+        data: EMPTY_HEX_BYTES,
+      };
+      await asset.connect(signer_D).clearingRedeemByPartition(clearingOperation, AMOUNT);
+
+      await expect(
+        asset.approveClearingOperationByPartition({
+          partition: NON_DEFAULT_PARTITION,
+          tokenHolder: signer_D.address,
+          clearingId: 1,
+          clearingOperationType: ClearingOperationType.Redeem,
+        }),
+      ).to.not.be.reverted;
+    });
+  });
 });
