@@ -148,17 +148,19 @@ describe("Initializer — InitializeMock domain", () => {
     });
 
     it("GIVEN an asset WHEN non admin initializes THEN reverts with AccountHasNoRole", async () => {
-      await expect(
-        initializerFacet.connect(unknownSigner).initializeInitializer(1),
-      ).to.be.revertedWithCustomError(initializerFacet, "AccountHasNoRole");
+      await expect(initializerFacet.connect(unknownSigner).initializeInitializer(1)).to.be.revertedWithCustomError(
+        initializerFacet,
+        "AccountHasNoRole",
+      );
     });
 
     it("GIVEN an asset whose initializer has been initialized WHEN initialized again THEN reverts with FacetAlreadyRegistered", async () => {
       await expect(initializerFacet.initializeInitializer(1)).to.not.be.reverted;
 
-      await expect(
-        initializerFacet.initializeInitializer(1),
-      ).to.be.revertedWithCustomError(initializerFacet, "FacetAlreadyRegistered");
+      await expect(initializerFacet.initializeInitializer(1)).to.be.revertedWithCustomError(
+        initializerFacet,
+        "FacetAlreadyRegistered",
+      );
     });
 
     it("GIVEN a freshly-deployed asset WHEN admin updateMaxInitializerFacetIndex THEN succeeds", async () => {
