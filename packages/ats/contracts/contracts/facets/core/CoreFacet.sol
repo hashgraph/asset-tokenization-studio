@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ICore } from "./ICore.sol";
 import { Core } from "./Core.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { _CORE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -16,23 +17,21 @@ contract CoreFacet is Core, IStaticFunctionSelectors {
         staticResolverKey_ = _CORE_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 8;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.version.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.setSymbol.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.setName.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.getERC20Metadata.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.symbol.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.name.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.decimals.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.initializeCore.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.initializeCore.selector,
+                this.decimals.selector,
+                this.name.selector,
+                this.symbol.selector,
+                this.getERC20Metadata.selector,
+                this.setName.selector,
+                this.setSymbol.selector,
+                this.version.selector
+            );
     }
 
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(ICore).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(ICore).interfaceId);
     }
 }

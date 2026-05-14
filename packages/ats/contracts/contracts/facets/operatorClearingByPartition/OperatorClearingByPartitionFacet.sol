@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IOperatorClearingByPartition } from "./IOperatorClearingByPartition.sol";
 import { OperatorClearingByPartition } from "./OperatorClearingByPartition.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { _OPERATOR_CLEARING_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -19,21 +20,16 @@ contract OperatorClearingByPartitionFacet is OperatorClearingByPartition, IStati
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 2;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.operatorClearingTransferByPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.operatorClearingRedeemByPartition.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.operatorClearingRedeemByPartition.selector,
+                this.operatorClearingTransferByPartition.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        uint256 selectorIndex = 1;
-        staticInterfaceIds_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticInterfaceIds_[--selectorIndex] = type(IOperatorClearingByPartition).interfaceId;
-        }
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IOperatorClearingByPartition).interfaceId);
     }
 }

@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IPartitions } from "./IPartitions.sol";
 import { Partitions } from "./Partitions.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { _PARTITIONS_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -20,18 +21,12 @@ contract PartitionsFacet is Partitions, IStaticFunctionSelectors {
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 2;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.isMultiPartition.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.partitionsOf.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(this.partitionsOf.selector, this.isMultiPartition.selector);
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(IPartitions).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IPartitions).interfaceId);
     }
 }

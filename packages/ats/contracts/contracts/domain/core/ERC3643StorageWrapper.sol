@@ -5,6 +5,7 @@ import { _ERC3643_STORAGE_POSITION } from "../../constants/storagePositions.sol"
 import { AGENT_ROLE } from "../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
+import { IFreeze } from "../../facets/freeze/IFreeze.sol";
 import { IAccessControl } from "../../facets/accessControl/IAccessControl.sol";
 import { IIdentityRegistry } from "../../facets/layer_1/ERC3643/IIdentityRegistry.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
@@ -135,6 +136,8 @@ library ERC3643StorageWrapper {
     }
 
     function freezeTokensByPartition(bytes32 _partition, address _account, uint256 _amount) internal {
+        checkNonZeroFreezeAmount(_amount);
+
         ERC1410StorageWrapper.triggerAndSyncAll(_partition, _account, address(0));
         updateTotalFreeze(_partition, _account);
         SnapshotsStorageWrapper.updateAccountSnapshot(_account, _partition);
@@ -160,6 +163,7 @@ library ERC3643StorageWrapper {
 
         _transferFrozenBalanceOnly(_partition, _account, _amount);
         ERC20StorageWrapper.performTransfer(address(0), _account, _amount);
+        ERC1410StorageWrapper.afterTokenTransfer(_partition, _account, _account, _amount);
     }
 
     function updateTotalFreeze(bytes32 _partition, address _tokenHolder) internal returns (uint256 abaf_) {
@@ -362,6 +366,10 @@ library ERC3643StorageWrapper {
         if (_addresses.length != _status.length) {
             revert IERC3643Types.InputBoolArrayLengthMismatch();
         }
+    }
+
+    function checkNonZeroFreezeAmount(uint256 _amount) internal pure {
+        if (_amount == 0) revert IFreeze.InvalidFreezeAmount();
     }
 
     function _transferFrozenBalanceOnly(bytes32 _partition, address _to, uint256 _amount) private {

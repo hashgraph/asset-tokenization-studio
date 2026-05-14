@@ -315,16 +315,18 @@ library InterestRateStorageWrapper {
     }
 
     /**
-     * @notice Validates that the given KPI-linked impact data values are ordered
-     *         correctly (maxDeviationFloor ≤ baseLine ≤ maxDeviationCap).
-     * @dev Reverts with WrongImpactDataValues if the invariant is violated.
+     * @notice Validates that the given KPI-linked impact data values are strictly ordered
+     *         (maxDeviationFloor < baseLine < maxDeviationCap).
+     * @dev Equality is rejected because a zero denominator in the rate calculation would result
+     *      when baseLine == maxDeviationFloor or baseLine == maxDeviationCap, causing a permanent
+     *      revert that propagates through the scheduled-task queue and freezes all token operations.
      * @param _newImpactData The ImpactData struct to validate.
      * @custom:revert IKpiLinkedRateErrors.WrongImpactDataValues If ordering is invalid.
      */
     function requireValidImpactData(IKpiLinkedRateErrors.ImpactData calldata _newImpactData) internal pure {
         if (
-            _newImpactData.maxDeviationFloor > _newImpactData.baseLine ||
-            _newImpactData.baseLine > _newImpactData.maxDeviationCap
+            !(_newImpactData.maxDeviationFloor < _newImpactData.baseLine &&
+                _newImpactData.baseLine < _newImpactData.maxDeviationCap)
         ) {
             revert IKpiLinkedRateErrors.WrongImpactDataValues(_newImpactData);
         }

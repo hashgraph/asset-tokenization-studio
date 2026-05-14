@@ -83,7 +83,6 @@ export {
   deployTupUpgradeTestFixture,
   deployTupInfrastructureOnlyFixture,
   deployBlrV2Implementation,
-  deployFactoryV2Implementation,
   createMockImplementation,
   type TupUpgradeTestFixture,
   type TupInfrastructureOnlyFixture,

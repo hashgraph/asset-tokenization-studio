@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IERC1410Management } from "./IERC1410Management.sol";
 import { ERC1410Management } from "./ERC1410Management.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../../../infrastructure/proxy/Bytes4Builder.sol";
 import { _ERC1410_MANAGEMENT_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 
 contract ERC1410ManagementFacet is ERC1410Management, IStaticFunctionSelectors {
@@ -11,19 +12,11 @@ contract ERC1410ManagementFacet is ERC1410Management, IStaticFunctionSelectors {
         staticResolverKey_ = _ERC1410_MANAGEMENT_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 1;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.initialize_ERC1410.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(this.initialize_ERC1410.selector);
     }
 
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        uint256 selectorIndex = 1;
-        staticInterfaceIds_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticInterfaceIds_[--selectorIndex] = type(IERC1410Management).interfaceId;
-        }
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IERC1410Management).interfaceId);
     }
 }

@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IController } from "./IController.sol";
 import { Controller } from "./Controller.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { _CONTROLLER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -20,25 +21,23 @@ contract ControllerFacet is Controller, IStaticFunctionSelectors {
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex = 9;
-        staticFunctionSelectors_ = new bytes4[](selectorIndex);
-        unchecked {
-            staticFunctionSelectors_[--selectorIndex] = this.isAgent.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.removeAgent.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.addAgent.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.forcedTransfer.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.finalizeControllable.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.controllerRedeem.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.controllerTransfer.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.isControllable.selector;
-            staticFunctionSelectors_[--selectorIndex] = this.initializeController.selector;
-        }
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.initializeController.selector,
+                this.isControllable.selector,
+                this.controllerTransfer.selector,
+                this.controllerRedeem.selector,
+                this.finalizeControllable.selector,
+                this.forcedTransfer.selector,
+                this.addAgent.selector,
+                this.removeAgent.selector,
+                this.isAgent.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        staticInterfaceIds_[0] = type(IController).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IController).interfaceId);
     }
 }

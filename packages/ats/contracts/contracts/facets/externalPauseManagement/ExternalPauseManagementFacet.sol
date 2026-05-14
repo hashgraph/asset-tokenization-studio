@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IExternalPauseManagement } from "./IExternalPauseManagement.sol";
 import { ExternalPauseManagement } from "./ExternalPauseManagement.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { _EXTERNAL_PAUSE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -23,22 +24,21 @@ contract ExternalPauseManagementFacet is ExternalPauseManagement, IStaticFunctio
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](7);
-        staticFunctionSelectors_[selectorIndex++] = this.initializeExternalPauses.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.updateExternalPauses.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.addExternalPause.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.removeExternalPause.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.isExternalPause.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getExternalPausesCount.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getExternalPausesMembers.selector;
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
+        return
+            Bytes4Builder.build(
+                this.initializeExternalPauses.selector,
+                this.updateExternalPauses.selector,
+                this.addExternalPause.selector,
+                this.removeExternalPause.selector,
+                this.isExternalPause.selector,
+                this.getExternalPausesCount.selector,
+                this.getExternalPausesMembers.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors
-    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IExternalPauseManagement).interfaceId;
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
+        return Bytes4Builder.build(type(IExternalPauseManagement).interfaceId);
     }
 }
