@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICommonErrors } from "../errors/ICommonErrors.sol";
-
 /// @title EvmAccessors
 /// @notice Library for EVM context accessors with test override support.
 /// @dev Similar pattern to TimeTravelStorageWrapper but for msg.sender, tx.origin, and chainId.
@@ -114,11 +112,5 @@ library EvmAccessors {
         assembly {
             chainId_ := sload(slot)
         }
-    }
-
-    /// @notice Reverts if the effective sender is not the contract itself.
-    function checkSelf() internal view {
-        address sender = getMsgSender();
-        if (sender != address(this)) revert ICommonErrors.UnauthorizedSelfCall(sender);
     }
 }
