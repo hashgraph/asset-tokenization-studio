@@ -10,6 +10,7 @@ import {
     IScheduledCrossOrderedTasks
 } from "../../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
 import { IScheduledBalanceAdjustment } from "../../facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
+import { IAdjustBalances } from "../../facets/adjustBalances/IAdjustBalances.sol";
 import { ISnapshots } from "../../facets/layer_1/snapshot/ISnapshots.sol";
 import {
     _SCHEDULED_SNAPSHOTS_STORAGE_POSITION,
@@ -30,7 +31,6 @@ import { CouponStorageWrapper } from "./coupon/CouponStorageWrapper.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { InterestRateStorageWrapper } from "./InterestRateStorageWrapper.sol";
-import { SustainabilityPerformanceTargetRateLib } from "./SustainabilityPerformanceTargetRateLib.sol";
 import { ICouponTypes } from "../../facets/coupon/ICouponTypes.sol";
 import { KpiLinkedRateLib } from "./KpiLinkedRateLib.sol";
 
@@ -124,11 +124,6 @@ library ScheduledTasksStorageWrapper {
 
     function triggerScheduledCrossOrderedTasks(uint256 _max) internal returns (uint256) {
         return triggerScheduledTasks(scheduledCrossOrderedTaskStorage(), bytes32("crossOrdered"), _max);
-    }
-
-    // TODO: REMOVE IT!!! Ya no es necesario el delegate call entre facetas, que se explote la librería externa.
-    function callTriggerPendingScheduledCrossOrderedTasks() internal returns (uint256) {
-        return IScheduledCrossOrderedTasks(address(this)).triggerPendingScheduledCrossOrderedTasks();
     }
 
     function requireValidTimestamp(uint256 _timestamp) internal view {
@@ -411,13 +406,6 @@ library ScheduledTasksStorageWrapper {
 
     function _updateCouponRatesIfNeeded(uint256 couponID) private {
         (ICouponTypes.RegisteredCoupon memory registeredCoupon, , ) = CouponStorageWrapper.getCoupon(couponID);
-
-        if (InterestRateStorageWrapper.isSustainabilityPerformanceTargetRateInitialized()) {
-            (uint256 rate, uint8 rateDecimals) = SustainabilityPerformanceTargetRateLib
-                .calculateSustainabilityPerformanceTargetInterestRate(couponID, registeredCoupon.coupon);
-
-            CouponStorageWrapper.updateCouponRate(couponID, registeredCoupon.coupon, rate, rateDecimals);
-        }
 
         if (InterestRateStorageWrapper.isKpiLinkedRateInitialized()) {
             (uint256 rate, uint8 rateDecimals) = KpiLinkedRateLib.calculateKpiLinkedInterestRate(

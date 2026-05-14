@@ -31,7 +31,6 @@ contract FactoryFacet is Factory, IStaticFunctionSelectors {
         return
             Bytes4Builder.build(
                 this.getAppliedRegulationData.selector,
-                this.deployBondSustainabilityPerformanceTargetRate.selector,
                 this.deployBondKpiLinkedRate.selector,
                 this.deployBondFixedRate.selector,
                 this.deployBond.selector,

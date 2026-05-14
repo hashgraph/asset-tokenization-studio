@@ -28,10 +28,12 @@ const WORKFLOW_STEPS: Record<string, readonly string[]> = {
     "Bond Configuration",
     "Bond Fixed Rate Configuration",
     "Bond KpiLinked Rate Configuration",
-    "Bond SPT Rate Configuration",
     "Loan Configuration",
     "Loans Portfolio Configuration",
     "Factory",
+    // TEST-ONLY: only executed when `useTimeTravel` is enabled; the workflow
+    // skips this step otherwise but its slot stays in the list so step indices
+    "InitializeMock Configurations",
   ] as const,
   existingBlr: [
     "ProxyAdmin (Optional)",
@@ -41,9 +43,9 @@ const WORKFLOW_STEPS: Record<string, readonly string[]> = {
     "Bond Configuration",
     "Bond Fixed Rate Configuration",
     "Bond KpiLinked Rate Configuration",
-    "Bond SPT Rate Configuration",
     "Loan Configuration",
     "Loans Portfolio Configuration",
+    "Factory Configuration",
     "Factory",
   ] as const,
   upgradeConfigurations: [
@@ -111,8 +113,7 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
     !steps.configurations?.equity ||
     !steps.configurations?.bond ||
     !steps.configurations?.bondFixedRate ||
-    !steps.configurations?.bondKpiLinkedRate ||
-    !steps.configurations?.bondSustainabilityPerformanceTargetRate
+    !steps.configurations?.bondKpiLinkedRate
   ) {
     throw new Error("Checkpoint missing configurations");
   }
@@ -189,12 +190,6 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
         facetCount: steps.configurations.bondKpiLinkedRate.facetCount,
         facets: [], // Will be populated in actual workflow
       },
-      bondSustainabilityPerformanceTargetRate: {
-        configId: steps.configurations.bondSustainabilityPerformanceTargetRate.configId,
-        version: steps.configurations.bondSustainabilityPerformanceTargetRate.version,
-        facetCount: steps.configurations.bondSustainabilityPerformanceTargetRate.facetCount,
-        facets: [], // Will be populated in actual workflow
-      },
     },
 
     summary: {
@@ -211,7 +206,6 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
       getBondFacets: () => [],
       getBondFixedRateFacets: () => [],
       getBondKpiLinkedRateFacets: () => [],
-      getBondSustainabilityPerformanceTargetRateFacets: () => [],
       getLoanFacets: () => [],
       getLoansPortfolioFacets: () => [],
       getFactoryFacets: () => [],

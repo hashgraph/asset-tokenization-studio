@@ -29,7 +29,13 @@ import {
 } from "@scripts/infrastructure";
 
 // Domain layer - ATS-specific business logic
-import { EQUITY_CONFIG_ID, atsRegistry } from "@scripts/domain";
+import {
+  EQUITY_CONFIG_ID,
+  atsRegistry,
+  deployOrchestratorLibraries,
+  getFacetLibraryLinks,
+  hasOrchestratorLibraryAddresses,
+} from "@scripts/domain";
 
 // Test helpers
 import { TEST_SIZES, silenceScriptLogging } from "@test";
@@ -54,6 +60,13 @@ describe("External Facet Extensibility - Integration Tests", () => {
 
   beforeEach(async () => {
     [deployer] = await ethers.getSigners();
+
+    // FreezeFacet (used by some tests below) inlines a path that DELEGATECALLs into
+    // ScheduledTasksOps, so the orchestrator libraries must be deployed before any
+    // facet factory is constructed.
+    if (!hasOrchestratorLibraryAddresses()) {
+      await deployOrchestratorLibraries(deployer);
+    }
 
     // Deploy BLR for all tests
     const blrImplementationFactory = new BusinessLogicResolver__factory(deployer);
@@ -171,7 +184,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
       // For testing, we use a registry facet to verify the code path works
       const result = await deployFacets(
         {
-          FreezeFacet: new FreezeFacet__factory(deployer),
+          FreezeFacet: new FreezeFacet__factory(getFacetLibraryLinks("FreezeFacet") as any, deployer),
         },
         {
           confirmations: 0, // No confirmations needed for Hardhat
@@ -193,7 +206,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
           AccessControlFacet: new AccessControlFacet__factory(deployer),
           KycFacet: new KycFacet__factory(deployer),
           PauseFacet: new PauseFacet__factory(deployer),
-          FreezeFacet: new FreezeFacet__factory(deployer),
+          FreezeFacet: new FreezeFacet__factory(getFacetLibraryLinks("FreezeFacet") as any, deployer),
         },
         {
           confirmations: 0, // No confirmations needed for Hardhat
@@ -327,7 +340,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
       const pauseFactory = new PauseFacet__factory(deployer);
       const pauseResult = await deployContract(pauseFactory, {});
 
-      const freezeFactory = new FreezeFacet__factory(deployer);
+      const freezeFactory = new FreezeFacet__factory(getFacetLibraryLinks("FreezeFacet") as any, deployer);
       const freezeResult = await deployContract(freezeFactory, {});
 
       // Register external facets

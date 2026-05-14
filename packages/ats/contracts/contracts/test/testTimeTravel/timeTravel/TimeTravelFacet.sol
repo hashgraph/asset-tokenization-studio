@@ -3,7 +3,6 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 import { DatesValidation } from "../../../infrastructure/utils/DatesValidation.sol";
-import { BondStorageWrapper } from "../../../domain/asset/BondStorageWrapper.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { ITimeTravel } from "../ITimeTravel.sol";
 import { TimeTravelProvider } from "./TimeTravelProvider.sol";
@@ -41,11 +40,6 @@ contract TimeTravelFacet is IStaticFunctionSelectors, ITimeTravel, TimeTravelPro
         emit SystemBlocknumberReset();
     }
 
-    // solhint-disable-next-line func-name-mixedcase
-    function testOnlyAddDeprecatedCoupon(uint256 _couponID) external {
-        BondStorageWrapper.DEPRECATED_pushCouponOrderedListId(_couponID);
-    }
-
     function blockTimestamp() external view override returns (uint256) {
         return TimeTravelStorageWrapper.getBlockTimestamp();
     }
@@ -70,14 +64,13 @@ contract TimeTravelFacet is IStaticFunctionSelectors, ITimeTravel, TimeTravelPro
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](7);
+        staticFunctionSelectors_ = new bytes4[](6);
         staticFunctionSelectors_[selectorIndex++] = this.changeSystemTimestamp.selector;
         staticFunctionSelectors_[selectorIndex++] = this.resetSystemTimestamp.selector;
         staticFunctionSelectors_[selectorIndex++] = this.blockTimestamp.selector;
         staticFunctionSelectors_[selectorIndex++] = this.checkBlockChainid.selector;
         staticFunctionSelectors_[selectorIndex++] = this.changeSystemBlocknumber.selector;
         staticFunctionSelectors_[selectorIndex++] = this.resetSystemBlocknumber.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.testOnlyAddDeprecatedCoupon.selector;
     }
 
     function getStaticInterfaceIds() external pure virtual override returns (bytes4[] memory staticInterfaceIds_) {

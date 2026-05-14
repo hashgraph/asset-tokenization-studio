@@ -10,7 +10,7 @@ import { IAllowanceTypes } from "./IAllowanceTypes.sol";
  */
 interface IAllowance is IAllowanceTypes {
     /**
-     * @notice Sets `amount` as the allowance of `spender` over the caller's tokens.
+     * @notice Sets `value` as the allowance of `spender` over the caller's tokens.
      * @dev Overwrites any previously-granted allowance. Known race: moving a non-zero
      *      allowance directly to another non-zero value lets `spender` spend both the old and
      *      the new amount via unfortunate transaction ordering — see EIP-20 discussion
@@ -18,10 +18,10 @@ interface IAllowance is IAllowanceTypes {
      *      {increaseAllowance}/{decreaseAllowance}, or reset to zero before setting a new
      *      value. Emits {IAllowanceTypes.Approval} with the resulting allowance.
      * @param spender Address authorised to spend on the caller's behalf.
-     * @param amount Absolute allowance amount to grant.
+     * @param value Absolute allowance amount to grant.
      * @return Boolean flag indicating whether the operation succeeded.
      */
-    function approve(address spender, uint256 amount) external returns (bool);
+    function approve(address spender, uint256 value) external returns (bool);
 
     /**
      * @notice Atomically increases the allowance granted to `spender` by the caller.

@@ -43,7 +43,6 @@ export const SUPPORTED_STEPS = [
   "bond",
   "bondFixedRate",
   "bondKpiLinkedRate",
-  "bondSustainabilityPerformanceTargetRate",
   "factory",
 ] as const;
 

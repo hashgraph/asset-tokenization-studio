@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type IAsset, type ResolverProxy } from "@contract-types";
 import { ATS_ROLES, dateToUnixTimestamp } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployBondSustainabilityPerformanceTargetRateTokenFixture } from "@test";
+import { deployBondKpiLinkedRateTokenFixture } from "@test";
 import { executeRbac } from "@test";
 
 describe("Kpi Latest Tests", () => {
@@ -20,7 +20,7 @@ describe("Kpi Latest Tests", () => {
   let asset: IAsset;
 
   async function deploySecurityFixtureMultiPartition() {
-    const base = await deployBondSustainabilityPerformanceTargetRateTokenFixture();
+    const base = await deployBondKpiLinkedRateTokenFixture();
     diamond = base.diamond;
     signer_A = base.deployer;
     signer_B = base.user2;

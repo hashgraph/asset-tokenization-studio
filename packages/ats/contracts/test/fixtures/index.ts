@@ -13,12 +13,7 @@
 export { deployAtsInfrastructureFixture } from "./infrastructure.fixture";
 
 // Integration test fixtures (lighter weight)
-export {
-  deployBlrFixture,
-  registerCommonFacetsFixture,
-  registerTransferFacetFixture,
-  registerMigrationFacetFixture,
-} from "./integration.fixture";
+export { deployBlrFixture, registerCommonFacetsFixture, registerTransferFacetFixture } from "./integration.fixture";
 
 // TUP proxy fixtures (TransparentUpgradeableProxy testing)
 export { deployTupProxyFixture, deployTupProxyWithV2Fixture, TUP_VERSIONS } from "./tupProxy.fixture";
@@ -35,11 +30,6 @@ export {
   deployBondKpiLinkedRateTokenFixture,
   DEFAULT_BOND_KPI_LINKED_RATE_PARAMS,
 } from "./tokens/bondKpiLinkedRate.fixture";
-
-export {
-  deployBondSustainabilityPerformanceTargetRateTokenFixture,
-  DEFAULT_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_PARAMS,
-} from "./tokens/bondSustainabilityPerformanceTargetRate.fixture";
 
 // Loan token fixtures
 export { deployLoanTokenFixture, DEFAULT_LOAN_PARAMS, getLoanDetails } from "./tokens/loan.fixture";

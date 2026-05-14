@@ -7,7 +7,6 @@ import {
     SNAPSHOT_RESULT_ID,
     SNAPSHOT_TASK_TYPE
 } from "../../../constants/values.sol";
-import { BondStorageWrapper } from "../BondStorageWrapper.sol";
 import { CorporateActionsStorageWrapper } from "../../core/CorporateActionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
@@ -16,15 +15,9 @@ import { ICoupon } from "../../../facets/coupon/ICoupon.sol";
 import { ICouponTypes } from "../../../facets/coupon/ICouponTypes.sol";
 import { IFixedRate } from "../../../facets/layer_2/interestRate/fixedRate/IFixedRate.sol";
 import { InterestRateStorageWrapper } from "../InterestRateStorageWrapper.sol";
-/* solhint-disable max-line-length */
-import {
-    ISustainabilityPerformanceTargetRateTypes
-} from "../../../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRateTypes.sol";
-/* solhint-enable max-line-length */
 import { KpiLinkedRateLib } from "../KpiLinkedRateLib.sol";
 import { NominalValueStorageWrapper } from "../nominalValue/NominalValueStorageWrapper.sol";
 import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
-import { SustainabilityPerformanceTargetRateLib } from "../SustainabilityPerformanceTargetRateLib.sol";
 import { ScheduledTasksStorageWrapper } from "../ScheduledTasksStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "../SnapshotsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
@@ -148,18 +141,6 @@ library CouponStorageWrapper {
             registeredCoupon_.coupon.fixingDate > TimeTravelStorageWrapper.getBlockTimestamp()
         ) return (registeredCoupon_, corporateActionId_, isDisabled_);
 
-        if (InterestRateStorageWrapper.isSustainabilityPerformanceTargetRateInitialized()) {
-            (
-                registeredCoupon_.coupon.rate,
-                registeredCoupon_.coupon.rateDecimals
-            ) = SustainabilityPerformanceTargetRateLib.calculateSustainabilityPerformanceTargetInterestRate(
-                couponID,
-                registeredCoupon_.coupon
-            );
-            registeredCoupon_.coupon.rateStatus = ICouponTypes.RateCalculationStatus.SET;
-            return (registeredCoupon_, corporateActionId_, isDisabled_);
-        }
-
         if (InterestRateStorageWrapper.isKpiLinkedRateInitialized()) {
             (registeredCoupon_.coupon.rate, registeredCoupon_.coupon.rateDecimals) = KpiLinkedRateLib
                 .calculateKpiLinkedInterestRate(couponID, registeredCoupon_.coupon);
@@ -273,11 +254,7 @@ library CouponStorageWrapper {
 
         uint256 actualOrderedListLengthTotal = getCouponsOrderedListTotal();
         if (pos < actualOrderedListLengthTotal) {
-            uint256 deprecatedTotal = BondStorageWrapper.DEPRECATED_getCouponsOrderedListTotal();
-            if (pos < deprecatedTotal) {
-                return BondStorageWrapper.DEPRECATED_getCouponsOrderedListByPosition(pos);
-            }
-            return _couponStorage().couponsOrderedListByIds[pos - deprecatedTotal];
+            return _couponStorage().couponsOrderedListByIds[pos];
         }
 
         uint256 pendingIndexOffset = pos - actualOrderedListLengthTotal;
@@ -315,9 +292,7 @@ library CouponStorageWrapper {
     }
 
     function getCouponsOrderedListTotal() internal view returns (uint256 total_) {
-        total_ =
-            _couponStorage().couponsOrderedListByIds.length +
-            BondStorageWrapper.DEPRECATED_getCouponsOrderedListTotal();
+        total_ = _couponStorage().couponsOrderedListByIds.length;
     }
 
     function getPreviousCouponInOrderedList(uint256 couponID) internal view returns (uint256 previousCouponID_) {
@@ -353,7 +328,6 @@ library CouponStorageWrapper {
      *        rate from `InterestRateStorageWrapper.getRate()` and `rateStatus = SET`.
      *      - **KPI-linked-rate** bonds: reject any user-supplied rate; the rate stays
      *        `PENDING` and is resolved at read time.
-     *      - **SPT-rate** bonds: same shape as KPI-linked.
      *      - **Standard** bonds (no rate variant initialised): pass the user-supplied rate
      *        through unchanged.
      * @param newCoupon User-supplied coupon parameters.
@@ -369,10 +343,6 @@ library CouponStorageWrapper {
             newCoupon.rateStatus = ICouponTypes.RateCalculationStatus.SET;
         } else if (InterestRateStorageWrapper.isKpiLinkedRateInitialized()) {
             if (!_isPendingRate(newCoupon)) revert ICoupon.InterestRateIsKpiLinked();
-        } else if (InterestRateStorageWrapper.isSustainabilityPerformanceTargetRateInitialized()) {
-            if (!_isPendingRate(newCoupon)) {
-                revert ISustainabilityPerformanceTargetRateTypes.InterestRateIsSustainabilityPerformanceTargetRate();
-            }
         }
         resolved_ = newCoupon;
     }

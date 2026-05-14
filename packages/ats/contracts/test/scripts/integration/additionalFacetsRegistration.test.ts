@@ -78,8 +78,14 @@ describe("registerAdditionalFacets - Integration Tests", () => {
       expect(initialCount).to.equal(TEST_SIZES.TRIPLE);
 
       // Step 2: Register 2 additional facets
-      const freezeFactory = await ethers.getContractFactory("FreezeFacet", deployer);
-      const freeze = await deployContract(freezeFactory, {});
+      if (!hasOrchestratorLibraryAddresses()) {
+        setOrchestratorLibraryAddresses(await deployOrchestratorLibraries(deployer));
+      }
+      const freezeFactory = await ethers.getContractFactory("FreezeFacet", {
+        signer: deployer,
+        libraries: getLibLinks(...getFacetRequiredLibraries("FreezeFacet")),
+      });
+      const freeze = await deployContract(freezeFactory as any, {});
 
       const lockFactory = await ethers.getContractFactory("CapFacet", deployer);
       const lock = await deployContract(lockFactory, {});
@@ -236,8 +242,14 @@ describe("registerAdditionalFacets - Integration Tests", () => {
       const facet3Factory = await ethers.getContractFactory("PauseFacet", deployer);
       const facet3 = await deployContract(facet3Factory, {});
 
-      const facet4Factory = await ethers.getContractFactory("FreezeFacet", deployer);
-      const facet4 = await deployContract(facet4Factory, {});
+      if (!hasOrchestratorLibraryAddresses()) {
+        setOrchestratorLibraryAddresses(await deployOrchestratorLibraries(deployer));
+      }
+      const facet4Factory = await ethers.getContractFactory("FreezeFacet", {
+        signer: deployer,
+        libraries: getLibLinks(...getFacetRequiredLibraries("FreezeFacet")),
+      });
+      const facet4 = await deployContract(facet4Factory as any, {});
 
       const newFacetsWithKeys2 = [
         {
@@ -503,8 +515,14 @@ describe("registerAdditionalFacets - Integration Tests", () => {
       const { deployer, blr, blrAddress } = await loadFixture(deployBlrFixture);
 
       // Register facet
-      const facetFactory = await ethers.getContractFactory("FreezeFacet", deployer);
-      const facet = await deployContract(facetFactory, {});
+      if (!hasOrchestratorLibraryAddresses()) {
+        setOrchestratorLibraryAddresses(await deployOrchestratorLibraries(deployer));
+      }
+      const facetFactory = await ethers.getContractFactory("FreezeFacet", {
+        signer: deployer,
+        libraries: getLibLinks(...getFacetRequiredLibraries("FreezeFacet")),
+      });
+      const facet = await deployContract(facetFactory as any, {});
       const facetsWithKeys = [
         {
           name: "FreezeFacet",
@@ -669,8 +687,15 @@ describe("registerAdditionalFacets - Integration Tests", () => {
       const addresses2: Record<string, string> = {};
 
       for (const name of facets2) {
-        const factory = await ethers.getContractFactory(name, deployer);
-        const result = await deployContract(factory, {});
+        const requiredLibs = getFacetRequiredLibraries(name);
+        if (requiredLibs.length > 0 && !hasOrchestratorLibraryAddresses()) {
+          setOrchestratorLibraryAddresses(await deployOrchestratorLibraries(deployer));
+        }
+        const factory = await ethers.getContractFactory(name, {
+          signer: deployer,
+          libraries: requiredLibs.length > 0 ? getLibLinks(...requiredLibs) : undefined,
+        });
+        const result = await deployContract(factory as any, {});
         addresses2[name] = result.address!;
       }
 
@@ -726,8 +751,14 @@ describe("registerAdditionalFacets - Integration Tests", () => {
       });
 
       // Add more facets
-      const freezeFactory = await ethers.getContractFactory("FreezeFacet", deployer);
-      const freeze = await deployContract(freezeFactory, {});
+      if (!hasOrchestratorLibraryAddresses()) {
+        setOrchestratorLibraryAddresses(await deployOrchestratorLibraries(deployer));
+      }
+      const freezeFactory = await ethers.getContractFactory("FreezeFacet", {
+        signer: deployer,
+        libraries: getLibLinks(...getFacetRequiredLibraries("FreezeFacet")),
+      });
+      const freeze = await deployContract(freezeFactory as any, {});
 
       const lockFactory = await ethers.getContractFactory("CapFacet", deployer);
       const lock = await deployContract(lockFactory, {});

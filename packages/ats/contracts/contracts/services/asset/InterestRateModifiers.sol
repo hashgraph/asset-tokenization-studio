@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 /**
  * @title InterestRateModifiers
- * @notice Modifier contract for InterestRate domain - FixedRate, KpiLinkedRate, and SustainabilityPerformanceTargetRate
+ * @notice Modifier contract for InterestRate domain - FixedRate and KpiLinkedRate
  * @dev Provides modifiers that enforce initialization state invariants by calling
  *      _check* functions from InterestRateStorageWrapper. This follows the pattern
  *      where modifiers delegate to storage wrapper check functions rather than
@@ -30,13 +30,6 @@ abstract contract InterestRateModifiers {
         _;
     }
 
-    /// @notice Modifier that ensures sustainability performance target rate has not been initialized
-    /// @dev Calls _checkNotSustainabilityPerformanceTargetRateInitialized from InterestRateStorageWrapper
-    modifier onlyNotSustainabilityPerformanceTargetRateInitialized() {
-        _checkNotInitialized(InterestRateStorageWrapper.isSustainabilityPerformanceTargetRateInitialized());
-        _;
-    }
-
     modifier onlyValidInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) {
         InterestRateStorageWrapper.requireValidInterestRate(_newInterestRate);
         _;
@@ -44,20 +37,6 @@ abstract contract InterestRateModifiers {
 
     modifier onlyValidImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) {
         InterestRateStorageWrapper.requireValidImpactData(_newImpactData);
-        _;
-    }
-
-    /**
-     * @dev Modifier that validates that two array lengths are equal
-     *
-     * Requirements:
-     * - Both lengths must be identical
-     *
-     * @param _length1 Length of the first array
-     * @param _length2 Length of the second array
-     */
-    modifier onlyValidEqualLength(uint256 _length1, uint256 _length2) {
-        InterestRateStorageWrapper.requireEqualLength(_length1, _length2);
         _;
     }
 }
