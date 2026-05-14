@@ -9,6 +9,7 @@ import { BondStorageWrapper } from "../../domain/asset/BondStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 
 /**
  * @title  Maturity
@@ -44,7 +45,7 @@ abstract contract Maturity is IMaturity, Modifiers {
             bytes32 partition = partitions[i];
             uint256 balance = ERC1410StorageWrapper.balanceOfByPartition(partition, _tokenHolder);
             if (balance != 0) {
-                ERC1410StorageWrapper.redeemByPartition(partition, _tokenHolder, sender, balance, "", "");
+                _redeemByPartition(partition, _tokenHolder, sender, balance);
             }
             unchecked {
                 ++i;
@@ -66,5 +67,20 @@ abstract contract Maturity is IMaturity, Modifiers {
         emit MaturityDateUpdated(address(this), _newMaturityDate, BondStorageWrapper.getMaturityDate());
         BondStorageWrapper.setMaturityDate(_newMaturityDate);
         return true;
+    }
+
+    /**
+     * @notice Routes a single-partition redeem through `TokenCoreOps.redeemByPartition`.
+     * @dev Extracted to a `private` helper so the DELEGATECALL setup happens in a fresh
+     *      stack frame; the enclosing `fullRedeemAtMaturity` carries 9 modifiers plus 6
+     *      live loop locals, which exceeds the Solidity 16-slot stack window when the
+     *      6-arg call is inlined into the loop body.
+     * @param _partition  Partition holding the balance to redeem.
+     * @param _holder     Token holder whose balance is being redeemed.
+     * @param _sender     Operator initiating the redemption (msg.sender at the entry point).
+     * @param _amount     Balance to redeem from the partition.
+     */
+    function _redeemByPartition(bytes32 _partition, address _holder, address _sender, uint256 _amount) private {
+        TokenCoreOps.redeemByPartition(_partition, _holder, _sender, _amount, "", "");
     }
 }

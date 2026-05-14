@@ -18,7 +18,7 @@ library HoldOps {
         IHoldTypes.Hold memory _hold,
         bytes memory _operatorData,
         ThirdPartyType _thirdPartyType
-    ) public returns (bool success_, uint256 holdId_) {
+    ) external returns (bool success_, uint256 holdId_) {
         return HoldStorageWrapper.createHoldByPartition(_partition, _from, _hold, _operatorData, _thirdPartyType);
     }
 
@@ -28,7 +28,7 @@ library HoldOps {
         address _from,
         IHoldTypes.ProtectedHold memory _protectedHold,
         bytes calldata _signature
-    ) public returns (bool success_, uint256 holdId_) {
+    ) external returns (bool success_, uint256 holdId_) {
         return HoldStorageWrapper.protectedCreateHoldByPartition(_partition, _from, _protectedHold, _signature);
     }
 
@@ -39,7 +39,7 @@ library HoldOps {
         IHoldTypes.HoldIdentifier calldata _holdIdentifier,
         address _to,
         uint256 _amount
-    ) public returns (bool success_, bytes32 partition_) {
+    ) external returns (bool success_, bytes32 partition_) {
         return HoldStorageWrapper.executeHoldByPartition(_holdIdentifier, _to, _amount);
     }
 
@@ -47,21 +47,26 @@ library HoldOps {
     function releaseHoldByPartition(
         IHoldTypes.HoldIdentifier calldata _holdIdentifier,
         uint256 _amount
-    ) public returns (bool success_) {
+    ) external returns (bool success_) {
         return HoldStorageWrapper.releaseHoldByPartition(_holdIdentifier, _amount);
     }
 
     /// @notice Reclaim an expired hold — return full held amount to token holder
     function reclaimHoldByPartition(
         IHoldTypes.HoldIdentifier calldata _holdIdentifier
-    ) public returns (bool success_, uint256 amount_) {
+    ) external returns (bool success_, uint256 amount_) {
         return HoldStorageWrapper.reclaimHoldByPartition(_holdIdentifier);
     }
 
     // Public functions — Hold Allowance
 
     /// @notice Decrease allowed balance for an authorized third-party hold
-    function decreaseAllowedBalanceForHold(bytes32 _partition, address _from, uint256 _amount, uint256 _holdId) public {
+    function decreaseAllowedBalanceForHold(
+        bytes32 _partition,
+        address _from,
+        uint256 _amount,
+        uint256 _holdId
+    ) external {
         HoldStorageWrapper.decreaseAllowedBalanceForHold(_partition, _from, _amount, _holdId);
     }
 }

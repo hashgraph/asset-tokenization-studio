@@ -164,6 +164,7 @@ library ERC1410StorageWrapper {
         unchecked {
             --basicStorage.totalTokenHolders;
         }
+        delete basicStorage.tokenHolders[lastIndex];
     }
 
     function authorizeOperator(address operator) internal {
@@ -392,42 +393,43 @@ library ERC1410StorageWrapper {
         if (from == to) return;
         triggerAndSyncAll(partition, from, to);
 
-        bool addTo;
-        bool removeFrom;
-
         if (from == address(0)) {
             // mint | issue
             SnapshotsStorageWrapper.updateAccountSnapshot(to, partition);
             SnapshotsStorageWrapper.updateTotalSupplySnapshot(partition);
-            // balanceOf instead of balanceOfAdjusted because we are comparing it to 0
-            if (amount > 0 && ERC20StorageWrapper.balanceOf(to) == 0) addTo = true;
         } else if (to == address(0)) {
             // burn | redeem
             SnapshotsStorageWrapper.updateAccountSnapshot(from, partition);
             SnapshotsStorageWrapper.updateTotalSupplySnapshot(partition);
-            if (
-                amount > 0 &&
-                ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(
-                    from,
-                    TimeTravelStorageWrapper.getBlockTimestamp()
-                ) ==
-                amount
-            ) removeFrom = true;
         }
         // transfer
         else {
             SnapshotsStorageWrapper.updateAccountSnapshot(from, partition);
             SnapshotsStorageWrapper.updateAccountSnapshot(to, partition);
-            // balanceOf instead of balanceOfAdjusted because we are comparing it to 0
-            if (amount > 0 && ERC20StorageWrapper.balanceOf(to) == 0) addTo = true;
-            if (
-                amount > 0 &&
+        }
+
+        updateSecurityHolder(from, to, amount);
+    }
+
+    function updateSecurityHolder(address from, address to, uint256 amount) internal {
+        if (from == to) return;
+        if (amount == 0) return;
+
+        bool addTo;
+        bool removeFrom;
+
+        if (from != address(0)) {
+            removeFrom =
                 ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(
                     from,
                     TimeTravelStorageWrapper.getBlockTimestamp()
                 ) ==
-                amount
-            ) removeFrom = true;
+                amount;
+        }
+        if (to != address(0)) {
+            addTo =
+                ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(to, TimeTravelStorageWrapper.getBlockTimestamp()) ==
+                0;
         }
 
         if (!(addTo || removeFrom)) return;
