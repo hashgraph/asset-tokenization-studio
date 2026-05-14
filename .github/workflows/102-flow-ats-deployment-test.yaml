@@ -76,6 +76,7 @@ jobs:
             packages/ats/contracts/build
             packages/ats/contracts/typechain-types
             packages/ats/contracts/cache
+            packages/ats/contracts/scripts/domain/atsRegistry.generated.ts
           key: ${{ runner.os }}-contracts-build-${{ hashFiles('packages/ats/contracts/contracts/**/*.sol', 'packages/ats/contracts/hardhat.config.ts', 'package-lock.json') }}
 
       - name: Build contracts
@@ -142,11 +143,20 @@ jobs:
             packages/ats/contracts/build
             packages/ats/contracts/typechain-types
             packages/ats/contracts/cache
+            packages/ats/contracts/scripts/domain/atsRegistry.generated.ts
           key: ${{ runner.os }}-contracts-build-${{ hashFiles('packages/ats/contracts/contracts/**/*.sol', 'packages/ats/contracts/hardhat.config.ts', 'package-lock.json') }}
 
       - name: Build contracts
         if: steps.build-cache.outputs.cache-hit != 'true'
         run: npm run ats:contracts:build
+
+      - name: Ensure registry generated (cache-hit fallback)
+        working-directory: packages/ats/contracts
+        run: |
+          if [[ ! -f scripts/domain/atsRegistry.generated.ts ]]; then
+            echo "atsRegistry.generated.ts missing after cache restore - regenerating"
+            npm run generate:registry
+          fi
 
       - name: Start Hardhat node
         working-directory: packages/ats/contracts
@@ -276,11 +286,21 @@ jobs:
             packages/ats/contracts/build
             packages/ats/contracts/typechain-types
             packages/ats/contracts/cache
+            packages/ats/contracts/scripts/domain/atsRegistry.generated.ts
           key: ${{ runner.os }}-contracts-build-${{ hashFiles('packages/ats/contracts/contracts/**/*.sol', 'packages/ats/contracts/hardhat.config.ts', 'package-lock.json') }}
 
       - name: Build contracts
         if: steps.docker-check.outputs.available == 'true' && steps.build-cache.outputs.cache-hit != 'true'
         run: npm run ats:contracts:build
+
+      - name: Ensure registry generated (cache-hit fallback)
+        if: steps.docker-check.outputs.available == 'true'
+        working-directory: packages/ats/contracts
+        run: |
+          if [[ ! -f scripts/domain/atsRegistry.generated.ts ]]; then
+            echo "atsRegistry.generated.ts missing after cache restore - regenerating"
+            npm run generate:registry
+          fi
 
       - name: Setup Hiero Solo Network
         id: solo

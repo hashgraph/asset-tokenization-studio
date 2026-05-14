@@ -71,7 +71,7 @@ describe("Registry Generation Pipeline - Integration Tests", () => {
       expect(result.code).to.include("FACET_REGISTRY");
       expect(result.code).to.include("INFRASTRUCTURE_CONTRACTS");
       expect(result.code).to.include("STORAGE_WRAPPER_REGISTRY");
-      expect(result.code).to.include("export const ROLES");
+      expect(result.rolesCode).to.include("export const ROLES");
       expect(result.code).to.include("@scripts/infrastructure");
     }).timeout(30000);
 
@@ -168,10 +168,14 @@ describe("Registry Generation Pipeline - Integration Tests", () => {
 
     it("should write file when requested", async () => {
       const tempOutputPath = path.join(__dirname, "../temp-registry.data.ts");
+      const tempRolesPath = path.join(path.dirname(tempOutputPath), "atsRoles.generated.ts");
 
       // Clean up if exists
       if (fs.existsSync(tempOutputPath)) {
         fs.unlinkSync(tempOutputPath);
+      }
+      if (fs.existsSync(tempRolesPath)) {
+        fs.unlinkSync(tempRolesPath);
       }
 
       try {
@@ -195,6 +199,9 @@ describe("Registry Generation Pipeline - Integration Tests", () => {
         // Clean up
         if (fs.existsSync(tempOutputPath)) {
           fs.unlinkSync(tempOutputPath);
+        }
+        if (fs.existsSync(tempRolesPath)) {
+          fs.unlinkSync(tempRolesPath);
         }
       }
     }).timeout(30000);
@@ -587,7 +594,7 @@ contract MyContract {}
       // Should succeed even if standalone files don't match
       // (Roles may or may not be found depending on inline contract definitions)
       expect(result.stats.totalRoles).to.be.greaterThanOrEqual(0);
-      expect(result.code).to.include("export const ROLES");
+      expect(result.rolesCode).to.include("export const ROLES");
     }).timeout(30000);
   });
 });
