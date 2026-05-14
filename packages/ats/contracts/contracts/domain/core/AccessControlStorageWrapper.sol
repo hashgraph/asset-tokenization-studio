@@ -117,9 +117,11 @@ library AccessControlStorageWrapper {
     }
 
     function checkNotSoleAdmin(bytes32 _role) internal view {
-        if (_role == DEFAULT_ADMIN_ROLE && rolesStorage().roles[_role].roleMembers.length() <= 1) {
-            revert IAccessControl.CannotRenounceSoleAdmin();
-        }
+        if (_isSoleAdmin(_role)) revert IAccessControl.CannotRenounceSoleAdmin();
+    }
+
+    function _isSoleAdmin(bytes32 _role) private view returns (bool) {
+        return _role == DEFAULT_ADMIN_ROLE && rolesStorage().roles[_role].roleMembers.length() == 1;
     }
 
     function getRoleAdmin(bytes32 _role) internal view returns (bytes32) {
