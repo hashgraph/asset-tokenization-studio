@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _HOLD_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
@@ -612,7 +611,7 @@ library HoldStorageWrapper {
         address _to,
         uint256 _amount
     ) private {
-        if (_holdIdentifier.tokenHolder == _to || _holdIdentifier.partition != _DEFAULT_PARTITION) return;
+        if (_holdIdentifier.tokenHolder == _to) return;
 
         (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
             abi.encodeWithSelector(ICompliance.transferred.selector, _holdIdentifier.tokenHolder, _to, _amount),
