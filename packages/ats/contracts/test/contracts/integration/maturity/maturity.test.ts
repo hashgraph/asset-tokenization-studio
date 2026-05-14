@@ -297,4 +297,16 @@ describe("Maturity Tests", () => {
       expect(maturityDateAfter).to.be.equal(newMaturityDate);
     });
   });
+
+  describe("Deactivated", () => {
+    it("GIVEN a deactivated asset WHEN fullRedeemAtMaturity THEN transaction fails with Deactivated", async () => {
+      const base = await deployBondTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).fullRedeemAtMaturity(ethers.ZeroAddress),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
 });

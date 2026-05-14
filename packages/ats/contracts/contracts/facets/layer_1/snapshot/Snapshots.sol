@@ -23,7 +23,14 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract Snapshots is ISnapshots, Modifiers {
     /// @inheritdoc ISnapshots
-    function takeSnapshot() external override onlyUnpaused onlyRole(SNAPSHOT_ROLE) returns (uint256 snapshotID_) {
+    function takeSnapshot()
+        external
+        override
+        onlyActivated
+        onlyUnpaused
+        onlyRole(SNAPSHOT_ROLE)
+        returns (uint256 snapshotID_)
+    {
         ScheduledTasksStorageWrapper.triggerScheduledCrossOrderedTasks(0);
         snapshotID_ = SnapshotsStorageWrapper.takeSnapshot();
         emit SnapshotTaken(EvmAccessors.getMsgSender(), snapshotID_);

@@ -42,6 +42,7 @@ abstract contract Cap is ICap, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(CAP_ROLE)
         onlyValidNewMaxSupply(maxSupply, TimeTravelStorageWrapper.getBlockTimestamp())

@@ -25,6 +25,7 @@ abstract contract BatchController is IBatchController, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyValidInputAmountsArrayLength(_fromList, _amounts)
         onlyValidInputAmountsArrayLength(_toList, _amounts)

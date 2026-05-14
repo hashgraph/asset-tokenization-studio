@@ -26,6 +26,7 @@ abstract contract OperatorByPartition is IOperatorByPartition, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyCompliant(EvmAccessors.getMsgSender(), _operator, false)
@@ -42,6 +43,7 @@ abstract contract OperatorByPartition is IOperatorByPartition, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyIdentifiedAddresses(EvmAccessors.getMsgSender(), _operator)
@@ -57,6 +59,7 @@ abstract contract OperatorByPartition is IOperatorByPartition, Modifiers {
     )
         external
         override
+        onlyActivated
         notZeroAddress(_operatorTransferData.to)
         onlyDefaultPartitionWithSinglePartition(_operatorTransferData.partition)
         onlyUnProtectedPartitionsOrWildCardRole
@@ -83,6 +86,7 @@ abstract contract OperatorByPartition is IOperatorByPartition, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnProtectedPartitionsOrWildCardRole
         onlyCanRedeemFromByPartition(_tokenHolder, _partition, _value)

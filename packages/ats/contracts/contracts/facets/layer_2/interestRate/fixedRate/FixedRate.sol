@@ -17,7 +17,7 @@ contract FixedRate is IFixedRate, Modifiers {
     function setRate(
         uint256 _newRate,
         uint8 _newRateDecimals
-    ) external override onlyUnpaused onlyRole(INTEREST_RATE_MANAGER_ROLE) {
+    ) external override onlyActivated onlyUnpaused onlyRole(INTEREST_RATE_MANAGER_ROLE) {
         InterestRateStorageWrapper.setRate(_newRate, _newRateDecimals);
         emit RateUpdated(EvmAccessors.getMsgSender(), _newRate, _newRateDecimals);
     }

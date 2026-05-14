@@ -663,4 +663,17 @@ describe("Scheduled Snapshots Tests", () => {
     const [dividendAfter] = await asset.getDividend(1);
     expect(dividendAfter.snapshotId).to.equal(0);
   });
+
+  describe("Deactivated", () => {
+    it("GIVEN a deactivated asset WHEN takeSnapshot THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(deactivatedAsset.connect(base.deployer).takeSnapshot()).to.be.revertedWithCustomError(
+        deactivatedAsset,
+        "Deactivated",
+      );
+    });
+  });
 });

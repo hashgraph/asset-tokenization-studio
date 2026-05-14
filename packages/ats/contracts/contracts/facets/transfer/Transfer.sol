@@ -20,6 +20,7 @@ abstract contract Transfer is ITransfer, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
@@ -37,6 +38,7 @@ abstract contract Transfer is ITransfer, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
@@ -54,6 +56,7 @@ abstract contract Transfer is ITransfer, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         onlyCanTransferFromByPartition(EvmAccessors.getMsgSender(), _to, _DEFAULT_PARTITION, _value)
@@ -71,6 +74,7 @@ abstract contract Transfer is ITransfer, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(_to)
         onlyUnrecoveredAddress(_from)

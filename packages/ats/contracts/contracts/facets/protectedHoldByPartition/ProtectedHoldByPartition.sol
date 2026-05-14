@@ -30,6 +30,7 @@ abstract contract ProtectedHoldByPartition is IProtectedHoldByPartition, Modifie
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition))
         notZeroAddress(_from)

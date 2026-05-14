@@ -29,6 +29,7 @@ abstract contract Dividend is IDividend, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(CORPORATE_ACTION_ROLE)
         onlyValidDates(newDividend.recordDate, newDividend.executionDate)
@@ -46,6 +47,7 @@ abstract contract Dividend is IDividend, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, dividendId - 1)
         onlyUnpaused
         onlyRole(CORPORATE_ACTION_ROLE)

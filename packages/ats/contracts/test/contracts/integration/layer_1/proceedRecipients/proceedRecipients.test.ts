@@ -200,4 +200,16 @@ describe("Proceed Recipients Tests", () => {
       expect(await asset.getProceedRecipientData(PROCEED_RECIPIENT_2)).to.equal(PROCEED_RECIPIENT_1_DATA);
     });
   });
+
+  describe("Deactivated", () => {
+    it("GIVEN a deactivated asset WHEN addProceedRecipient THEN transaction fails with Deactivated", async () => {
+      const base = await deployBondTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).addProceedRecipient(ethers.ZeroAddress, "0x"),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
 });
