@@ -33,12 +33,7 @@ struct Partition {
 }
 
 struct ERC1410BasicStorage {
-    // solhint-disable-next-line var-name-mixedcase
-    uint256 DEPRECATED_totalSupply;
     mapping(bytes32 => uint256) totalSupplyByPartition;
-    /// @dev Mapping from investor to aggregated balance across all investor token sets
-    // solhint-disable-next-line var-name-mixedcase
-    mapping(address => uint256) DEPRECATED_balances;
     /// @dev Mapping from investor to their partitions
     mapping(address => Partition[]) partitions;
     /// @dev Mapping from (investor, partition) to index of corresponding partition in partitions

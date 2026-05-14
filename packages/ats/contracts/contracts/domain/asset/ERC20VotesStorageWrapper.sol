@@ -13,14 +13,8 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 
-//TODO: Remove revert reasons.
-
 struct ERC20VotesStorage {
     bool activated;
-    // solhint-disable-next-line var-name-mixedcase
-    string DEPRECATED_contractName;
-    // solhint-disable-next-line var-name-mixedcase
-    string DEPRECATED_contractVersion;
     mapping(address => address) delegates;
     mapping(address => Checkpoints.Checkpoint[]) checkpoints;
     Checkpoints.Checkpoint[] totalSupplyCheckpoints;
@@ -88,7 +82,7 @@ library ERC20VotesStorageWrapper {
 
         if (currentDelegate == delegatee) return;
 
-        ScheduledTasksStorageWrapper.triggerScheduledCrossOrderedTasks(0);
+        ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();
 
         takeAbafCheckpoint();
 

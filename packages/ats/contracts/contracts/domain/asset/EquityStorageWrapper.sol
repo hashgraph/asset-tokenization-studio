@@ -28,18 +28,11 @@ struct EquityDataStorage {
     bool putRight;
     IEquity.DividendType dividendRight;
     bytes3 currency;
-    /// @deprecated Kept for storage layout compatibility. Use NominalValueStorageWrapper instead.
-    // solhint-disable-next-line var-name-mixedcase
-    uint256 DEPRECATED_nominalValue;
     bool initialized;
-    /// @deprecated Kept for storage layout compatibility. Use NominalValueStorageWrapper instead.
-    // solhint-disable-next-line var-name-mixedcase
-    uint8 DEPRECATED_nominalValueDecimals;
 }
 
 /// @title Equity Storage Wrapper
 /// @notice Library for managing Equity token storage operations.
-/// @dev Provides structured access to EquityDataStorage with migration support for NominalValue.
 /// @author Asset Tokenization Studio Team
 library EquityStorageWrapper {
     function initializeEquityDetails(IEquity.EquityDetailsData memory equityDetailsData) internal {
@@ -98,29 +91,6 @@ library EquityStorageWrapper {
             BALANCE_ADJUSTMENT_TASK_TYPE
         );
         ScheduledTasksStorageWrapper.addScheduledBalanceAdjustment(newBalanceAdjustment.executionDate, actionId);
-    }
-
-    /// @dev DEPRECATED – MIGRATION: Remove this function and the DEPRECATED_ fields from
-    /// EquityDataStorage once all legacy tokens have been migrated.
-    function clearNominalValue() internal {
-        EquityDataStorage storage $ = _equityStorage();
-        $.DEPRECATED_nominalValue = 0;
-        $.DEPRECATED_nominalValueDecimals = 0;
-    }
-
-    // This is for testing only
-    function setDeprecatedNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) internal {
-        EquityDataStorage storage $ = _equityStorage();
-        $.DEPRECATED_nominalValue = _nominalValue;
-        $.DEPRECATED_nominalValueDecimals = _nominalValueDecimals;
-    }
-
-    function getDeprecatedNominalValue() internal view returns (uint256 nominalValue_) {
-        nominalValue_ = _equityStorage().DEPRECATED_nominalValue;
-    }
-
-    function getDeprecatedNominalValueDecimals() internal view returns (uint8 nominalValueDecimals_) {
-        nominalValueDecimals_ = _equityStorage().DEPRECATED_nominalValueDecimals;
     }
 
     function getEquityDetails() internal view returns (IEquity.EquityDetailsData memory equityDetails_) {
