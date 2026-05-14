@@ -6,7 +6,7 @@ import {
     ScheduledTask,
     ScheduledTasksDataStorage
 } from "../../facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
-import { IAdjustBalances } from "../../facets/adjustBalances/IAdjustBalances.sol";
+import { IScheduledBalanceAdjustment } from "../../facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
 import { ISnapshots } from "../../facets/layer_1/snapshot/ISnapshots.sol";
 import {
     _SCHEDULED_SNAPSHOTS_STORAGE_POSITION,
@@ -122,9 +122,9 @@ library ScheduledTasksDispatchOps {
 
         if (isDisabled_) return;
 
-        IAdjustBalances.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
+        IScheduledBalanceAdjustment.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
             balanceAdjustmentData,
-            (IAdjustBalances.ScheduledBalanceAdjustment)
+            (IScheduledBalanceAdjustment.ScheduledBalanceAdjustment)
         );
 
         AdjustBalancesStorageWrapper.adjustBalances(balanceAdjustment.factor, balanceAdjustment.decimals);

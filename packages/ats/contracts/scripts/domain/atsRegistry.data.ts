@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-14T12:06:54.101Z
- * Facets: 124
+ * Generated: 2026-05-14T14:25:31.860Z
+ * Facets: 126
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -87,6 +87,7 @@ import {
   HoldByPartitionFacet__factory,
   HoldFacet__factory,
   IdentityFacet__factory,
+  InitializerFacet__factory,
   KpiLinkedRateFacet__factory,
   KpisKpiLinkedRateFacet__factory,
   KpisSustainabilityPerformanceTargetRateFacet__factory,
@@ -122,6 +123,7 @@ import {
   ProtectedHoldByPartitionFacet__factory,
   ProtectedPartitionsFacet__factory,
   RecoveryFacet__factory,
+  ScheduledBalanceAdjustmentFacet__factory,
   ScheduledCrossOrderedTasksFacet__factory,
   ScheduledCrossOrderedTasksKpiLinkedRateFacet__factory,
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet__factory,
@@ -377,6 +379,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xf50c17aa",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "RolesAndActivesLengthMismatch",
@@ -402,7 +409,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   AdjustBalancesFacet: {
     name: "AdjustBalancesFacet",
     description:
-      "Diamond facet that consolidates all 8 balance-adjustment selectors under a single `_BALANCE_ADJUSTMENTS_RESOLVER_KEY`.",
+      "Diamond facet that consolidates the 2 immediate balance-adjustment selectors under a single `_BALANCE_ADJUSTMENTS_RESOLVER_KEY`.",
     resolverKey: {
       name: "_BALANCE_ADJUSTMENTS_RESOLVER_KEY",
       value: "0x2bbe9fb018f1e7dd12b4442154e7fdfd75aec7b0a65d07debf49de4ece5fe8b8",
@@ -416,54 +423,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "adjustBalances(uint256,uint8)",
         },
         selector: "0xe2d77e44",
-      },
-      {
-        name: "cancelScheduledBalanceAdjustment",
-        signature: {
-          full: "function cancelScheduledBalanceAdjustment(uint256 _balanceAdjustmentId) returns (bool success_)",
-          canonical: "cancelScheduledBalanceAdjustment(uint256)",
-        },
-        selector: "0x564387f9",
-      },
-      {
-        name: "getBalanceAdjustmentCount",
-        signature: {
-          full: "function getBalanceAdjustmentCount() view returns (uint256 balanceAdjustmentCount_)",
-          canonical: "getBalanceAdjustmentCount()",
-        },
-        selector: "0x0fdaff21",
-      },
-      {
-        name: "getPendingBalanceAdjustmentCount",
-        signature: {
-          full: "function getPendingBalanceAdjustmentCount() view returns (uint256)",
-          canonical: "getPendingBalanceAdjustmentCount()",
-        },
-        selector: "0x24b1dce6",
-      },
-      {
-        name: "getScheduledBalanceAdjustment",
-        signature: {
-          full: "function getScheduledBalanceAdjustment(uint256 _balanceAdjustmentID) view returns ((uint256 executionDate, uint256 factor, uint8 decimals) balanceAdjustment_, bool isDisabled_)",
-          canonical: "getScheduledBalanceAdjustment(uint256)",
-        },
-        selector: "0x3d5338e8",
-      },
-      {
-        name: "getScheduledBalanceAdjustments",
-        signature: {
-          full: "function getScheduledBalanceAdjustments(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledBalanceAdjustment_)",
-          canonical: "getScheduledBalanceAdjustments(uint256,uint256)",
-        },
-        selector: "0xcb884d41",
-      },
-      {
-        name: "setScheduledBalanceAdjustment",
-        signature: {
-          full: "function setScheduledBalanceAdjustment((uint256 executionDate, uint256 factor, uint8 decimals) _newBalanceAdjustment) returns (uint256 balanceAdjustmentID_)",
-          canonical: "setScheduledBalanceAdjustment((uint256,uint256,uint8))",
-        },
-        selector: "0xd1661084",
       },
       {
         name: "triggerAndSyncAll",
@@ -482,22 +441,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AdjustmentBalanceSet(address,uint256,uint8)",
         },
         topic0: "0x312510931206ef5f91f1ef19e1a01253812b7201fb8b2d5d4afa056cce53e34a",
-      },
-      {
-        name: "ScheduledBalanceAdjustmentCancelled",
-        signature: {
-          full: "event ScheduledBalanceAdjustmentCancelled(uint256 balanceAdjustmentId, address indexed operator)",
-          canonical: "ScheduledBalanceAdjustmentCancelled(uint256,address)",
-        },
-        topic0: "0x94a946c45b2317528f3b8fed727c5627bed2062d7fe7a83a5c6b38aa2dcc178a",
-      },
-      {
-        name: "ScheduledBalanceAdjustmentSet",
-        signature: {
-          full: "event ScheduledBalanceAdjustmentSet(bytes32 corporateActionId, uint256 balanceAdjustmentId, address indexed operator, uint256 indexed executionDate, uint256 factor, uint256 decimals)",
-          canonical: "ScheduledBalanceAdjustmentSet(bytes32,uint256,address,uint256,uint256,uint256)",
-        },
-        topic0: "0x71cd63a6f86ff487645dcceb29d3eac904f16d7006cfa7b1da3ea951a77a9666",
       },
       {
         name: "TaskExecutionFailed",
@@ -526,47 +469,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
-        name: "BalanceAdjustmentAlreadyExecuted",
-        signature: {
-          full: "error BalanceAdjustmentAlreadyExecuted(bytes32 corporateActionId, uint256 balanceAdjustmentId)",
-          canonical: "BalanceAdjustmentAlreadyExecuted(bytes32,uint256)",
-        },
-        selector: "0xd0447e7d",
-      },
-      {
-        name: "BalanceAdjustmentCreationFailed",
-        signature: { full: "error BalanceAdjustmentCreationFailed()", canonical: "BalanceAdjustmentCreationFailed()" },
-        selector: "0x0c68e660",
-      },
-      {
         name: "FactorIsZero",
         signature: { full: "error FactorIsZero()", canonical: "FactorIsZero()" },
         selector: "0x936e9b6d",
       },
-      {
-        name: "InvalidTimestamp",
-        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
-        selector: "0xb7d09497",
-      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
-      {
-        name: "UnexpectedError",
-        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
-        selector: "0xc9622656",
-      },
-      {
-        name: "WrongIndexForAction",
-        signature: {
-          full: "error WrongIndexForAction(uint256 index, bytes32 actionType)",
-          canonical: "WrongIndexForAction(uint256,bytes32)",
-        },
-        selector: "0xd3924f4e",
-      },
-      {
-        name: "ZeroValueNotAllowed",
-        signature: { full: "error ZeroValueNotAllowed()", canonical: "ZeroValueNotAllowed()" },
-        selector: "0x9cf8540c",
-      },
     ],
     factory: (signer) =>
       new AdjustBalancesFacet__factory(getLibLinks("scheduledTasksDispatchOps", "tokenCoreOps") as any, signer),
@@ -1603,11 +1510,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccessControlRequired(bytes32,address)",
         },
         selector: "0x10210dec",
-      },
-      {
-        name: "ClearingIsActivated",
-        signature: { full: "error ClearingIsActivated()", canonical: "ClearingIsActivated()" },
-        selector: "0x5b2e3086",
       },
       {
         name: "InputAmountsArrayLengthMismatch",
@@ -7473,6 +7375,159 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
   },
 
+  InitializerFacet: {
+    name: "InitializerFacet",
+    description: "InitializerFacet",
+    resolverKey: {
+      name: "_INITIALIZER_RESOLVER_KEY",
+      value: "0x65c891d003e7dc436f2c3d0863d599d91867c8695fee29923a476a2be3ec540f",
+    },
+    inheritance: ["Initializer", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "getFacetLastVersion",
+        signature: {
+          full: "function getFacetLastVersion(bytes32 _facetId) view returns (uint256 lastVersion_)",
+          canonical: "getFacetLastVersion(bytes32)",
+        },
+        selector: "0xccc02360",
+      },
+      {
+        name: "getFacetVersionStatus",
+        signature: {
+          full: "function getFacetVersionStatus(bytes32 _facetId, uint256 _versionId) view returns (uint256 status_)",
+          canonical: "getFacetVersionStatus(bytes32,uint256)",
+        },
+        selector: "0xab8365aa",
+      },
+      {
+        name: "getMaxInitializerFacetIndex",
+        signature: {
+          full: "function getMaxInitializerFacetIndex() view returns (uint256 maxInitializerFacetIndex_)",
+          canonical: "getMaxInitializerFacetIndex()",
+        },
+        selector: "0xdbc12e97",
+      },
+      {
+        name: "getOperationalStatus",
+        signature: {
+          full: "function getOperationalStatus(bytes32 _configId, uint256 _versionId) view returns (uint256 status_)",
+          canonical: "getOperationalStatus(bytes32,uint256)",
+        },
+        selector: "0x6da4c898",
+      },
+      {
+        name: "initializeInitializer",
+        signature: {
+          full: "function initializeInitializer(uint256 _maxInitializerFacetIndex)",
+          canonical: "initializeInitializer(uint256)",
+        },
+        selector: "0x14055c1c",
+      },
+      {
+        name: "setOperationalStatus",
+        signature: {
+          full: "function setOperationalStatus() returns (bool isOperational_, uint256 lastFacetIndex_)",
+          canonical: "setOperationalStatus()",
+        },
+        selector: "0x720ab28e",
+      },
+      {
+        name: "updateMaxInitializerFacetIndex",
+        signature: {
+          full: "function updateMaxInitializerFacetIndex(uint256 _newMaxInitializerFacetIndex)",
+          canonical: "updateMaxInitializerFacetIndex(uint256)",
+        },
+        selector: "0xdb5622a3",
+      },
+    ],
+    events: [
+      {
+        name: "InitializerInitialized",
+        signature: {
+          full: "event InitializerInitialized(address sender, uint256 maxInitializerFacetIndex)",
+          canonical: "InitializerInitialized(address,uint256)",
+        },
+        topic0: "0x0e3db3a608ed2b4a88e0762144c40dfe43e77de955fda9ba08f2fb8ef53f9bde",
+      },
+      {
+        name: "MaxInitializerFacetIndexUpdated",
+        signature: {
+          full: "event MaxInitializerFacetIndexUpdated(address sender, uint256 newMaxInitializerFacetIndex)",
+          canonical: "MaxInitializerFacetIndexUpdated(address,uint256)",
+        },
+        topic0: "0x1fe03cd52ef039e01408f6875d4ac467a39daf0cf29cf01e0fd58f33583fbcb3",
+      },
+      {
+        name: "OperationalStatusPartialSet",
+        signature: {
+          full: "event OperationalStatusPartialSet(address sender, bytes32 configurationId, uint256 version, uint256 lastIndex)",
+          canonical: "OperationalStatusPartialSet(address,bytes32,uint256,uint256)",
+        },
+        topic0: "0x504a816ac078747ff3036ed349b9a82449501c82d412e9e6d77eeac21119bcca",
+      },
+      {
+        name: "OperationalStatusSet",
+        signature: {
+          full: "event OperationalStatusSet(address sender, bytes32 configurationId, uint256 version)",
+          canonical: "OperationalStatusSet(address,bytes32,uint256)",
+        },
+        topic0: "0xdf83cd2c8c69cc49fd13de318c44ee279ef32227acce2ae0c6cfdd2108ba898c",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRole",
+        signature: {
+          full: "error AccountHasNoRole(address account, bytes32 role)",
+          canonical: "AccountHasNoRole(address,bytes32)",
+        },
+        selector: "0xa1180aad",
+      },
+      {
+        name: "AssetNotOperational",
+        signature: {
+          full: "error AssetNotOperational(bytes32 configId, uint256 versionId)",
+          canonical: "AssetNotOperational(bytes32,uint256)",
+        },
+        selector: "0xcea298d9",
+      },
+      {
+        name: "FacetAlreadyRegistered",
+        signature: {
+          full: "error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion)",
+          canonical: "FacetAlreadyRegistered(bytes32,uint256)",
+        },
+        selector: "0x05ebbb24",
+      },
+      {
+        name: "FacetPreviousVersionNotAccepted",
+        signature: {
+          full: "error FacetPreviousVersionNotAccepted(bytes32 facetId, uint256 lastVersion, uint256[] expectedVersions)",
+          canonical: "FacetPreviousVersionNotAccepted(bytes32,uint256,uint256[])",
+        },
+        selector: "0x5712fd94",
+      },
+      {
+        name: "FacetReady",
+        signature: {
+          full: "error FacetReady(bytes32 facetId, uint256 versionId)",
+          canonical: "FacetReady(bytes32,uint256)",
+        },
+        selector: "0xb5a1ee4f",
+      },
+    ],
+    factory: (signer) => new InitializerFacet__factory(signer),
+  },
+
   KpiLinkedRateFacet: {
     name: "KpiLinkedRateFacet",
     description: "Diamond facet that exposes the KPI-linked interest rate capability (`IKpiLinkedRate`) on a token.",
@@ -11811,6 +11866,146 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) => new RecoveryFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
+  ScheduledBalanceAdjustmentFacet: {
+    name: "ScheduledBalanceAdjustmentFacet",
+    description:
+      "Diamond facet that consolidates all 6 scheduled balance-adjustment selectors under a single `_SCHEDULED_BALANCE_ADJUSTMENT_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_SCHEDULED_BALANCE_ADJUSTMENT_RESOLVER_KEY",
+      value: "0xb1373c030944c4dcf728b6cc8106d93cbd0b7b2b8f59d82d57c56a369cb06487",
+    },
+    inheritance: ["ScheduledBalanceAdjustment", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "cancelScheduledBalanceAdjustment",
+        signature: {
+          full: "function cancelScheduledBalanceAdjustment(uint256 _balanceAdjustmentId) returns (bool success_)",
+          canonical: "cancelScheduledBalanceAdjustment(uint256)",
+        },
+        selector: "0x564387f9",
+      },
+      {
+        name: "getBalanceAdjustmentCount",
+        signature: {
+          full: "function getBalanceAdjustmentCount() view returns (uint256 balanceAdjustmentCount_)",
+          canonical: "getBalanceAdjustmentCount()",
+        },
+        selector: "0x0fdaff21",
+      },
+      {
+        name: "getPendingBalanceAdjustmentCount",
+        signature: {
+          full: "function getPendingBalanceAdjustmentCount() view returns (uint256)",
+          canonical: "getPendingBalanceAdjustmentCount()",
+        },
+        selector: "0x24b1dce6",
+      },
+      {
+        name: "getScheduledBalanceAdjustment",
+        signature: {
+          full: "function getScheduledBalanceAdjustment(uint256 _balanceAdjustmentID) view returns ((uint256 executionDate, uint256 factor, uint8 decimals) balanceAdjustment_, bool isDisabled_)",
+          canonical: "getScheduledBalanceAdjustment(uint256)",
+        },
+        selector: "0x3d5338e8",
+      },
+      {
+        name: "getScheduledBalanceAdjustments",
+        signature: {
+          full: "function getScheduledBalanceAdjustments(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledBalanceAdjustment_)",
+          canonical: "getScheduledBalanceAdjustments(uint256,uint256)",
+        },
+        selector: "0xcb884d41",
+      },
+      {
+        name: "setScheduledBalanceAdjustment",
+        signature: {
+          full: "function setScheduledBalanceAdjustment((uint256 executionDate, uint256 factor, uint8 decimals) _newBalanceAdjustment) returns (uint256 balanceAdjustmentID_)",
+          canonical: "setScheduledBalanceAdjustment((uint256,uint256,uint8))",
+        },
+        selector: "0xd1661084",
+      },
+    ],
+    events: [
+      {
+        name: "ScheduledBalanceAdjustmentCancelled",
+        signature: {
+          full: "event ScheduledBalanceAdjustmentCancelled(uint256 balanceAdjustmentId, address indexed operator)",
+          canonical: "ScheduledBalanceAdjustmentCancelled(uint256,address)",
+        },
+        topic0: "0x94a946c45b2317528f3b8fed727c5627bed2062d7fe7a83a5c6b38aa2dcc178a",
+      },
+      {
+        name: "ScheduledBalanceAdjustmentSet",
+        signature: {
+          full: "event ScheduledBalanceAdjustmentSet(bytes32 corporateActionId, uint256 balanceAdjustmentId, address indexed operator, uint256 indexed executionDate, uint256 factor, uint256 decimals)",
+          canonical: "ScheduledBalanceAdjustmentSet(bytes32,uint256,address,uint256,uint256,uint256)",
+        },
+        topic0: "0x71cd63a6f86ff487645dcceb29d3eac904f16d7006cfa7b1da3ea951a77a9666",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRole",
+        signature: {
+          full: "error AccountHasNoRole(address account, bytes32 role)",
+          canonical: "AccountHasNoRole(address,bytes32)",
+        },
+        selector: "0xa1180aad",
+      },
+      {
+        name: "BalanceAdjustmentAlreadyExecuted",
+        signature: {
+          full: "error BalanceAdjustmentAlreadyExecuted(bytes32 corporateActionId, uint256 balanceAdjustmentId)",
+          canonical: "BalanceAdjustmentAlreadyExecuted(bytes32,uint256)",
+        },
+        selector: "0xd0447e7d",
+      },
+      {
+        name: "BalanceAdjustmentCreationFailed",
+        signature: { full: "error BalanceAdjustmentCreationFailed()", canonical: "BalanceAdjustmentCreationFailed()" },
+        selector: "0x0c68e660",
+      },
+      {
+        name: "FactorIsZero",
+        signature: { full: "error FactorIsZero()", canonical: "FactorIsZero()" },
+        selector: "0x936e9b6d",
+      },
+      {
+        name: "InvalidTimestamp",
+        signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
+        selector: "0xb7d09497",
+      },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
+      {
+        name: "UnexpectedError",
+        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
+        selector: "0xc9622656",
+      },
+      {
+        name: "WrongIndexForAction",
+        signature: {
+          full: "error WrongIndexForAction(uint256 index, bytes32 actionType)",
+          canonical: "WrongIndexForAction(uint256,bytes32)",
+        },
+        selector: "0xd3924f4e",
+      },
+      {
+        name: "ZeroValueNotAllowed",
+        signature: { full: "error ZeroValueNotAllowed()", canonical: "ZeroValueNotAllowed()" },
+        selector: "0x9cf8540c",
+      },
+    ],
+    factory: (signer) => new ScheduledBalanceAdjustmentFacet__factory(signer),
+  },
+
   ScheduledCrossOrderedTasksFacet: {
     name: "ScheduledCrossOrderedTasksFacet",
     resolverKey: {
@@ -13610,7 +13805,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 124 as const;
+export const TOTAL_FACETS = 126 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -13726,6 +13921,14 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
         selector: "0x9e6030d1",
       },
       {
+        name: "getFacetConfigurationsByConfigurationIdAndVersion",
+        signature: {
+          full: "function getFacetConfigurationsByConfigurationIdAndVersion(bytes32 _configurationId, uint256 _version, uint256 _start, uint256 _end) view returns ((bytes32 id, uint256 version)[] facetConfigurations_)",
+          canonical: "getFacetConfigurationsByConfigurationIdAndVersion(bytes32,uint256,uint256,uint256)",
+        },
+        selector: "0x52971448",
+      },
+      {
         name: "getFacetIdByConfigurationIdVersionAndSelector",
         signature: {
           full: "function getFacetIdByConfigurationIdVersionAndSelector(bytes32 _configurationId, uint256 _version, bytes4 _selector) view returns (bytes32 facetId_)",
@@ -13756,6 +13959,14 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
           canonical: "getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(bytes32,uint256,bytes32)",
         },
         selector: "0xf1d3d2f9",
+      },
+      {
+        name: "getFacetVersionByConfigurationIdVersionAndFacetId",
+        signature: {
+          full: "function getFacetVersionByConfigurationIdVersionAndFacetId(bytes32 _configurationId, uint256 _version, bytes32 _facetId) view returns (uint256 facetVersion_)",
+          canonical: "getFacetVersionByConfigurationIdVersionAndFacetId(bytes32,uint256,bytes32)",
+        },
+        selector: "0x9135310a",
       },
       {
         name: "getFacetsByConfigurationIdAndVersion",
@@ -14295,6 +14506,13 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     ],
   },
 
+  InitializerStorageWrapper: {
+    name: "InitializerStorageWrapper",
+    description:
+      'Library providing the storage operations and readiness checks consumed by the initializer facet and by every facet that needs to assert "operational" status before executing business logic.',
+    methods: [],
+  },
+
   InterestRateStorageWrapper: {
     name: "InterestRateStorageWrapper",
     description:
@@ -14419,7 +14637,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 43 as const;
+export const TOTAL_STORAGE_WRAPPERS = 44 as const;
 
 /**
  * All role identifiers extracted from contracts.
