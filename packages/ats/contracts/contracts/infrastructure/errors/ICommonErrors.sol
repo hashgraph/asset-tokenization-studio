@@ -52,4 +52,7 @@ interface ICommonErrors {
     error ZeroAddressNotAllowed();
 
     error ZeroValueNotAllowed();
+
+    /// @notice Thrown when a call that must originate from the contract itself comes from an external address.
+    error UnauthorizedSelfCall(address caller);
 }
