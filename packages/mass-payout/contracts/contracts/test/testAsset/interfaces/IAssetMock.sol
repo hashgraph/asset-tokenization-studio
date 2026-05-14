@@ -9,7 +9,21 @@ import { IVoting } from "@hashgraph/asset-tokenization-contracts/contracts/facet
 import {
     IAdjustBalances
 } from "@hashgraph/asset-tokenization-contracts/contracts/facets/adjustBalances/IAdjustBalances.sol";
+import {
+    IScheduledBalanceAdjustment
+} from "@hashgraph/asset-tokenization-contracts/contracts/facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
 
-interface IAssetMock is ICoupon, IEquity, IVoting, ICore, IAdjustBalances {
+/**
+ * @title IAssetMock
+ * @author Asset Tokenization Studio Team
+ * @notice Aggregated test-only interface combining the asset facets that the mass-payout
+ *         LifeCycleCashFlow integration tests reach for on an asset token.
+ * @dev Mock surface used exclusively by `AssetMock`. Inherits every facet interface the
+ *      mass-payout flows interact with so the mock implementation can be typed against a
+ *      single handle. Production code MUST NOT depend on this interface — use the ATS
+ *      umbrella `IAsset` instead.
+ */
+interface IAssetMock is ICoupon, IEquity, IVoting, ICore, IAdjustBalances, IScheduledBalanceAdjustment {
+    /// @notice Reverts from any mock method that has not been given a canned implementation.
     error NotImplemented();
 }

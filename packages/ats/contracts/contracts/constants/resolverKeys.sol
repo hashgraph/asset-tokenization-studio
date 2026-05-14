@@ -629,6 +629,8 @@ bytes32 constant _SCHEDULED_CROSS_ORDERED_TASKS_SUSTAINABILITY_PERFORMANCE_TARGE
 // keccak256('security.token.standard.balanceAdjustments.resolverKey');
 bytes32 constant _BALANCE_ADJUSTMENTS_RESOLVER_KEY = 0x2bbe9fb018f1e7dd12b4442154e7fdfd75aec7b0a65d07debf49de4ece5fe8b8;
 
+// keccak256("security.token.standard.scheduledBalanceAdjustment.resolverKey");
+bytes32 constant _SCHEDULED_BALANCE_ADJUSTMENT_RESOLVER_KEY = 0xb1373c030944c4dcf728b6cc8106d93cbd0b7b2b8f59d82d57c56a369cb06487;
 // keccak256("security.token.standard.balanceAdjustments.fixed.rate.resolverKey");
 bytes32 constant _BALANCE_ADJUSTMENTS_FIXED_RATE_RESOLVER_KEY = 0xa7e8f6d5c4b3a2e1f9d8c7b6a5e4f3d2c1b9a8e7f6d5c4b3a2e1f9d8c7b6a5e4;
 

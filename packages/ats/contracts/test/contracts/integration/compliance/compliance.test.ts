@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type IAsset, type ResolverProxy, ComplianceMock, IdentityRegistryMock } from "@contract-types";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, EIP1066_CODES, EMPTY_STRING, ZERO } from "@scripts";
+import { ATS_ROLES, EIP1066_CODES, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO, dateToUnixTimestamp } from "@scripts";
 import { getSelector } from "@scripts/infrastructure";
 
 const AMOUNT = 1000;
@@ -21,8 +21,15 @@ describe("Compliance Tests", () => {
   let signer_C: HardhatEthersSigner;
   let signer_D: HardhatEthersSigner;
   let signer_E: HardhatEthersSigner;
+  let signer_F: HardhatEthersSigner;
 
   let asset: IAsset;
+
+  enum ClearingOperationType {
+    Transfer,
+    Redeem,
+    HoldCreation,
+  }
 
   describe("Multi partition mode", () => {
     async function deploySecurityFixtureMultiPartition() {
@@ -366,6 +373,187 @@ describe("Compliance Tests", () => {
         asset,
         "IsPaused",
       );
+    });
+  });
+
+  describe("Compliance notifications (multi partition)", () => {
+    const NON_DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
+    let complianceMock: ComplianceMock;
+    let identityRegistryMock: IdentityRegistryMock;
+
+    async function deploySecurityFixtureMultiPartitionWithCompliance() {
+      const infrastructure = await loadFixture(deployAtsInfrastructureFixture);
+
+      complianceMock = await (await ethers.getContractFactory("ComplianceMock", signer_A)).deploy(true, false);
+      await complianceMock.waitForDeployment();
+
+      identityRegistryMock = await (
+        await ethers.getContractFactory("IdentityRegistryMock", signer_A)
+      ).deploy(true, false);
+      await identityRegistryMock.waitForDeployment();
+
+      const base = await deployEquityTokenFixture({
+        equityDataParams: {
+          securityData: {
+            isMultiPartition: true,
+            compliance: complianceMock.target as string,
+            identityRegistry: identityRegistryMock.target as string,
+            maxSupply: MAX_SUPPLY,
+          },
+        },
+        infrastructure,
+      });
+      diamond = base.diamond;
+      signer_A = base.deployer;
+      signer_B = base.user1;
+      signer_C = base.user2;
+      signer_D = base.user3;
+      signer_E = base.user4;
+      signer_F = base.user5;
+
+      asset = await ethers.getContractAt("IAsset", diamond.target);
+
+      await executeRbac(asset, [
+        { role: ATS_ROLES.PAUSER_ROLE, members: [signer_B.address] },
+        { role: ATS_ROLES.ISSUER_ROLE, members: [signer_C.address] },
+        { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
+        { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.CLEARING_ROLE, members: [signer_B.address] },
+        { role: ATS_ROLES.CLEARING_VALIDATOR_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.AGENT_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.TREX_OWNER_ROLE, members: [signer_A.address] },
+      ]);
+
+      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+      await asset.addIssuer(signer_E.address);
+      await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
+      await asset.connect(signer_B).grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
+      await asset.connect(signer_B).grantKyc(signer_F.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
+    }
+
+    beforeEach(async () => {
+      await loadFixture(deploySecurityFixtureMultiPartitionWithCompliance);
+    });
+
+    it("GIVEN an issue on a non-default partition THEN created is called on the compliance contract", async () => {
+      await asset.issueByPartition({
+        partition: NON_DEFAULT_PARTITION,
+        tokenHolder: signer_E.address,
+        value: AMOUNT,
+        data: EMPTY_HEX_BYTES,
+      });
+
+      expect(await complianceMock.createdHit()).to.be.equal(1);
+    });
+
+    it("GIVEN a transferByPartition on a non-default partition THEN transferred is called on the compliance contract", async () => {
+      await asset.issueByPartition({
+        partition: NON_DEFAULT_PARTITION,
+        tokenHolder: signer_E.address,
+        value: AMOUNT,
+        data: EMPTY_HEX_BYTES,
+      });
+
+      await asset
+        .connect(signer_E)
+        .transferByPartition(NON_DEFAULT_PARTITION, { to: signer_D.address, value: AMOUNT / 2 }, EMPTY_HEX_BYTES);
+
+      expect(await complianceMock.transferredHit()).to.be.equal(1);
+    });
+
+    it("GIVEN a redeemByPartition on a non-default partition THEN destroyed is called on the compliance contract", async () => {
+      await asset.issueByPartition({
+        partition: NON_DEFAULT_PARTITION,
+        tokenHolder: signer_E.address,
+        value: AMOUNT,
+        data: EMPTY_HEX_BYTES,
+      });
+
+      await asset.connect(signer_E).redeemByPartition(NON_DEFAULT_PARTITION, AMOUNT / 2, EMPTY_HEX_BYTES);
+
+      expect(await complianceMock.destroyedHit()).to.be.equal(1);
+    });
+
+    it("GIVEN an executeHoldByPartition on a non-default partition THEN transferred is called on the compliance contract", async () => {
+      await asset.issueByPartition({
+        partition: NON_DEFAULT_PARTITION,
+        tokenHolder: signer_D.address,
+        value: AMOUNT,
+        data: EMPTY_HEX_BYTES,
+      });
+
+      const hold = {
+        amount: AMOUNT,
+        expirationTimestamp: dateToUnixTimestamp("2030-01-01T00:00:03Z"),
+        escrow: signer_E.address,
+        to: signer_E.address,
+        data: EMPTY_HEX_BYTES,
+      };
+      await asset.connect(signer_D).createHoldByPartition(NON_DEFAULT_PARTITION, hold);
+
+      await asset
+        .connect(signer_E)
+        .executeHoldByPartition(
+          { partition: NON_DEFAULT_PARTITION, tokenHolder: signer_D.address, holdId: 1 },
+          signer_E.address,
+          AMOUNT,
+        );
+
+      expect(await complianceMock.transferredHit()).to.be.equal(1);
+    });
+
+    it("GIVEN a clearing transfer approved on a non-default partition THEN transferred is called on the compliance contract", async () => {
+      await asset.issueByPartition({
+        partition: NON_DEFAULT_PARTITION,
+        tokenHolder: signer_D.address,
+        value: AMOUNT,
+        data: EMPTY_HEX_BYTES,
+      });
+
+      await asset.connect(signer_B).activateClearing();
+
+      const clearingOperation = {
+        partition: NON_DEFAULT_PARTITION,
+        expirationTimestamp: dateToUnixTimestamp("2030-01-01T00:00:03Z"),
+        data: EMPTY_HEX_BYTES,
+      };
+      await asset.connect(signer_D).clearingTransferByPartition(clearingOperation, AMOUNT, signer_E.address);
+
+      await asset.approveClearingOperationByPartition({
+        partition: NON_DEFAULT_PARTITION,
+        tokenHolder: signer_D.address,
+        clearingId: 1,
+        clearingOperationType: ClearingOperationType.Transfer,
+      });
+
+      expect(await complianceMock.transferredHit()).to.be.equal(1);
+    });
+
+    it("GIVEN a clearing redeem approved on a non-default partition THEN destroyed is called on the compliance contract", async () => {
+      await asset.issueByPartition({
+        partition: NON_DEFAULT_PARTITION,
+        tokenHolder: signer_D.address,
+        value: AMOUNT,
+        data: EMPTY_HEX_BYTES,
+      });
+
+      await asset.connect(signer_B).activateClearing();
+
+      const clearingOperation = {
+        partition: NON_DEFAULT_PARTITION,
+        expirationTimestamp: dateToUnixTimestamp("2030-01-01T00:00:03Z"),
+        data: EMPTY_HEX_BYTES,
+      };
+      await asset.connect(signer_D).clearingRedeemByPartition(clearingOperation, AMOUNT);
+
+      await asset.approveClearingOperationByPartition({
+        partition: NON_DEFAULT_PARTITION,
+        tokenHolder: signer_D.address,
+        clearingId: 1,
+        clearingOperationType: ClearingOperationType.Redeem,
+      });
+
+      expect(await complianceMock.destroyedHit()).to.be.equal(1);
     });
   });
 });

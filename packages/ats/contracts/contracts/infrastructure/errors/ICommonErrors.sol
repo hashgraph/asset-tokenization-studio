@@ -52,4 +52,6 @@ interface ICommonErrors {
     error ZeroAddressNotAllowed();
 
     error ZeroValueNotAllowed();
+
+    error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals);
 }
