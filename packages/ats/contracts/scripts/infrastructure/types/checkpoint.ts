@@ -212,6 +212,18 @@ export interface DeploymentCheckpoint {
       loansPortfolio?: ConfigurationResult;
       /** Factory configuration */
       factory?: ConfigurationResult;
+      // TEST-ONLY: InitializeMock configuration (gated by `useTimeTravel`).
+      // Records every version minted for the same configId in a single
+      // workflow step — the workflow calls `createInitializeMockConfiguration`
+      // multiple times in a row to mint v1..vN.
+      initializeMock?: {
+        /** Configuration ID (bytes32) */
+        configId: string;
+        /** Number of facets in each configuration version */
+        facetCount: number;
+        /** Versions minted, in call order (e.g. [1, 2, 3, 4]) */
+        versions: number[];
+      };
     };
 
     /** Factory deployment (step 6) */

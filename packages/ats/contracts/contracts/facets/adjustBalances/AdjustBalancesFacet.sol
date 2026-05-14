@@ -9,7 +9,7 @@ import { _BALANCE_ADJUSTMENTS_RESOLVER_KEY } from "../../constants/resolverKeys.
 
 /**
  * @title AdjustBalancesFacet
- * @notice Diamond facet that consolidates all 8 balance-adjustment selectors under a single
+ * @notice Diamond facet that consolidates the 2 immediate balance-adjustment selectors under a single
  *         `_BALANCE_ADJUSTMENTS_RESOLVER_KEY`.
  * @dev Inherits implementation from `AdjustBalances` and satisfies the `IStaticFunctionSelectors`
  *      contract required by the Diamond proxy for selector registration.
@@ -22,17 +22,7 @@ contract AdjustBalancesFacet is AdjustBalances, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return
-            Bytes4Builder.build(
-                this.adjustBalances.selector,
-                this.setScheduledBalanceAdjustment.selector,
-                this.cancelScheduledBalanceAdjustment.selector,
-                this.getScheduledBalanceAdjustment.selector,
-                this.getBalanceAdjustmentCount.selector,
-                this.getPendingBalanceAdjustmentCount.selector,
-                this.getScheduledBalanceAdjustments.selector,
-                this.triggerAndSyncAll.selector
-            );
+        return Bytes4Builder.build(this.adjustBalances.selector, this.triggerAndSyncAll.selector);
     }
 
     /// @inheritdoc IStaticFunctionSelectors

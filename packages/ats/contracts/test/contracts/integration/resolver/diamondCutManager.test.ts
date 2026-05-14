@@ -23,6 +23,7 @@ import {
   FACTORY_CONFIG_ID,
   LOAN_CONFIG_ID,
   LOANS_PORTFOLIO_CONFIG_ID,
+  INITIALIZE_MOCK_CONFIG_ID,
 } from "@scripts";
 import { deployAtsInfrastructureFixture, registerTransferFacetFixture } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -327,7 +328,7 @@ describe("DiamondCutManager", () => {
 
   it("GIVEN a resolver WHEN reading configuration information THEN everything matches", async () => {
     const configLength = Number(await diamondCutManager.getConfigurationsLength());
-    expect(configLength).to.equal(8);
+    expect(configLength).to.equal(9);
 
     const configIds = await diamondCutManager.getConfigurations(0, configLength);
     expect([...configIds]).to.have.members([
@@ -339,9 +340,11 @@ describe("DiamondCutManager", () => {
       LOAN_CONFIG_ID,
       LOANS_PORTFOLIO_CONFIG_ID,
       FACTORY_CONFIG_ID,
+      INITIALIZE_MOCK_CONFIG_ID,
     ]);
 
     for (const configId of configIds) {
+      if (configId == INITIALIZE_MOCK_CONFIG_ID) continue;
       const configLatestVersion = Number(await diamondCutManager.getLatestVersionByConfiguration(configId));
       expect(configLatestVersion).to.equal(1);
 
@@ -552,7 +555,7 @@ describe("DiamondCutManager", () => {
     await expect(
       diamondCutManager
         .connect(signer_A)
-        .createConfiguration(TEST_CONFIG_IDS.BLACKLIST_TEST, facetConfigurations, { gasLimit: 30_000_000 }),
+        .createConfiguration(TEST_CONFIG_IDS.BLACKLIST_TEST, facetConfigurations, { gasLimit: 60_000_000 }),
     )
       .to.be.revertedWithCustomError(diamondCutManager, "SelectorBlacklisted")
       .withArgs(blackListedSelectors[0]);
@@ -753,6 +756,14 @@ describe("DiamondCutManager", () => {
     await expect(diamondCutManager.checkResolverProxyConfigurationRegistered(configId, 1)).to.not.be.reverted;
     const isRegisteredV0 = await diamondCutManager.isResolverProxyConfigurationRegistered(configId, 0);
     expect(isRegisteredV0).to.be.true;
+  });
+
+  it("GIVEN a registered configuration WHEN getFacetVersionByConfigurationIdVersionAndFacetId called with non-existent facetId THEN reverts with FacetIdNotRegistered", async () => {
+    const nonExistentFacetId = "0x1234567890123456789012345678901234567890123456789012345678901234";
+
+    await expect(
+      diamondCutManager.getFacetVersionByConfigurationIdVersionAndFacetId(EQUITY_CONFIG_ID, 1, nonExistentFacetId),
+    ).to.be.revertedWithCustomError(diamondCutManager, "FacetIdNotRegistered");
   });
 
   it("GIVEN a resolver WHEN adding configuration with overlapping selectors from different facets THEN fails with SelectorAlreadyRegistered", async () => {

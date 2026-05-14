@@ -9,7 +9,7 @@ import {
 import {
     IScheduledCrossOrderedTasks
 } from "../../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
-import { IAdjustBalances } from "../../facets/adjustBalances/IAdjustBalances.sol";
+import { IScheduledBalanceAdjustment } from "../../facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
 import {
     _SCHEDULED_SNAPSHOTS_STORAGE_POSITION,
     _SCHEDULED_COUPON_LISTING_STORAGE_POSITION,
@@ -223,9 +223,9 @@ library ScheduledTasksStorageWrapper {
                     abi.decode(scheduledTask.data, (bytes32))
                 );
 
-                IAdjustBalances.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
+                IScheduledBalanceAdjustment.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
                     balanceAdjustmentData,
-                    (IAdjustBalances.ScheduledBalanceAdjustment)
+                    (IScheduledBalanceAdjustment.ScheduledBalanceAdjustment)
                 );
                 pendingABAF_ *= balanceAdjustment.factor;
                 pendingDecimals_ += balanceAdjustment.decimals;

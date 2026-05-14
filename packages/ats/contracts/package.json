@@ -136,7 +136,7 @@
     "test:trexFactory": "npx hardhat test test/contracts/integration/factory/trex/factory.test.ts",
     "test:resolver": "npx hardhat test test/contracts/integration/resolver/BusinessLogicResolver.test.ts",
     "test:coverage": "npm run test:coverage:all",
-    "test:coverage:all": "npm run test:coverage:layer1 && npm run test:coverage:factory && npm run test:coverage:resolver && npm run test:coverage:resolverProxy",
+    "test:coverage:all": "npx hardhat coverage --testfiles 'test/contracts/integration/**/*.ts'",
     "test:coverage:layer1": "npx hardhat coverage --testfiles 'test/contracts/integration/layer_1/**/*.ts'",
     "test:coverage:factory": "npx hardhat coverage --testfiles 'test/contracts/integration/factory/**/*.ts'",
     "test:coverage:resolver": "npx hardhat coverage --testfiles 'test/contracts/integration/resolver/**/*.ts'",

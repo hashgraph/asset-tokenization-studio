@@ -229,6 +229,13 @@ describe("BatchFreeze Tests", () => {
           "InputAmountsArrayLengthMismatch",
         );
       });
+
+      it("GIVEN address(0) in userAddresses WHEN batchFreezePartialTokens THEN transaction fails with ZeroAddressNotAllowed", async () => {
+        await expect(asset.batchFreezePartialTokens([ADDRESS_ZERO], [freezeAmount])).to.be.revertedWithCustomError(
+          asset,
+          "ZeroAddressNotAllowed",
+        );
+      });
     });
 
     describe("batchUnfreezePartialTokens", () => {
@@ -291,6 +298,13 @@ describe("BatchFreeze Tests", () => {
         await expect(asset.batchUnfreezePartialTokens(toList, amounts)).to.be.revertedWithCustomError(
           asset,
           "InputAmountsArrayLengthMismatch",
+        );
+      });
+
+      it("GIVEN address(0) in userAddresses WHEN batchUnfreezePartialTokens THEN transaction fails with ZeroAddressNotAllowed", async () => {
+        await expect(asset.batchUnfreezePartialTokens([ADDRESS_ZERO], [unfreezeAmount])).to.be.revertedWithCustomError(
+          asset,
+          "ZeroAddressNotAllowed",
         );
       });
     });
