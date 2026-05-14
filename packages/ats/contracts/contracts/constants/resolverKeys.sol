@@ -611,3 +611,6 @@ bytes32 constant _FACTORY_RESOLVER_KEY = 0xa5472d34be801f744a73bce4e1851e6776728
 
 // keccak256("security.token.standard.initializer.resolverKey");
 bytes32 constant _INITIALIZER_RESOLVER_KEY = 0x65c891d003e7dc436f2c3d0863d599d91867c8695fee29923a476a2be3ec540f;
+
+// keccak256('security.token.standard.interestRate.resolverKey');
+bytes32 constant _INTEREST_RATE_RESOLVER_KEY = 0x564574da835bfa15298fb9a545a3eb73fff192a56a6fadc086f705087433a9bf;

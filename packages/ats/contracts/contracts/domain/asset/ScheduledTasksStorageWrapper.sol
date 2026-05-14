@@ -404,6 +404,7 @@ library ScheduledTasksStorageWrapper {
      */
     function scheduledSnapshotStorage() internal pure returns (ScheduledTasksDataStorage storage scheduledSnapshots_) {
         bytes32 position = _SCHEDULED_SNAPSHOTS_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             scheduledSnapshots_.slot := position
         }
@@ -420,6 +421,7 @@ library ScheduledTasksStorageWrapper {
         returns (ScheduledTasksDataStorage storage scheduledCouponListing_)
     {
         bytes32 position = _SCHEDULED_COUPON_LISTING_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             scheduledCouponListing_.slot := position
         }
@@ -436,6 +438,7 @@ library ScheduledTasksStorageWrapper {
         returns (ScheduledTasksDataStorage storage scheduledBalanceAdjustments_)
     {
         bytes32 position = _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             scheduledBalanceAdjustments_.slot := position
         }
@@ -452,6 +455,7 @@ library ScheduledTasksStorageWrapper {
         returns (ScheduledTasksDataStorage storage scheduledCrossOrderedTasks_)
     {
         bytes32 position = _SCHEDULED_CROSS_ORDERED_TASKS_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             scheduledCrossOrderedTasks_.slot := position
         }

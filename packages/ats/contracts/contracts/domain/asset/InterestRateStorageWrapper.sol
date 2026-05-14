@@ -3,7 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _FIXED_RATE_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { _KPI_LINKED_RATE_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { _INTEREST_RATE_TYPE_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IKpiLinkedRateErrors } from "../../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRateErrors.sol";
+import { IInterestRate } from "../../facets/interestRate/IInterestRate.sol";
 
 /**
  * @title FixedRateDataStorage
@@ -53,6 +55,15 @@ struct KpiLinkedRateDataStorage {
     uint256 adjustmentPrecision;
     uint8 impactDataDecimals;
     bool initialized;
+}
+
+/**
+ * @title InterestRateTypeDataStorage
+ * @notice Stores the selected coupon rate type.
+ * @param rateType The `IInterestRate.RateType` discriminator selected by the admin.
+ */
+struct InterestRateTypeDataStorage {
+    IInterestRate.RateType rateType;
 }
 
 /**
@@ -106,6 +117,22 @@ library InterestRateStorageWrapper {
         kpiRateStorage.maxDeviationFloor = _newImpactData.maxDeviationFloor;
         kpiRateStorage.impactDataDecimals = _newImpactData.impactDataDecimals;
         kpiRateStorage.adjustmentPrecision = _newImpactData.adjustmentPrecision;
+    }
+
+    /**
+     * @notice Stores the selected coupon rate type and marks the slot as set.
+     * @param _rateType The `IInterestRate.RateType` to persist.
+     */
+    function setCouponRateType(IInterestRate.RateType _rateType) internal {
+        interestRateTypeStorage().rateType = _rateType;
+    }
+
+    /**
+     * @notice Returns the stored coupon rate type.
+     * @return rateType_ The `IInterestRate.RateType` value; defaults to `NONE` (0) if never set.
+     */
+    function getCouponRateType() internal view returns (IInterestRate.RateType rateType_) {
+        return interestRateTypeStorage().rateType;
     }
 
     /**
@@ -168,6 +195,17 @@ library InterestRateStorageWrapper {
     }
 
     /**
+     * @notice Reverts when `NONE` is supplied as the rate type.
+     * @dev `NONE` is the zero-value default reserved for uninitialised assets; it must never
+     *      be set explicitly.
+     * @param _rateType The rate type to validate.
+     * @custom:revert IInterestRate.InvalidRateType If `_rateType` is `NONE`.
+     */
+    function checkValidRateType(IInterestRate.RateType _rateType) internal pure {
+        if (_rateType == IInterestRate.RateType.NONE) revert IInterestRate.InvalidRateType(_rateType);
+    }
+
+    /**
      * @notice Validates that the given KPI-linked interest rate values are ordered
      *         correctly (minRate ≤ baseRate ≤ maxRate).
      * @dev Reverts with WrongInterestRateValues if the invariant is violated.
@@ -223,6 +261,19 @@ library InterestRateStorageWrapper {
         // solhint-disable-next-line no-inline-assembly
         assembly {
             kpiLinkedRateDataStorage_.slot := position
+        }
+    }
+
+    /**
+     * @notice Returns the storage pointer for the interest-rate-type data at a deterministic slot.
+     * @dev Uses inline assembly to load the slot from a precomputed constant value.
+     * @return data_ Storage pointer to InterestRateTypeDataStorage.
+     */
+    function interestRateTypeStorage() private pure returns (InterestRateTypeDataStorage storage data_) {
+        bytes32 position = _INTEREST_RATE_TYPE_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            data_.slot := position
         }
     }
 }
