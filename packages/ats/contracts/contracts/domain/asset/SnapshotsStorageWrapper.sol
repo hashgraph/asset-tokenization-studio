@@ -156,7 +156,7 @@ library SnapshotsStorageWrapper {
     function updateAccountSnapshot(address account, bytes32 partition) internal {
         uint256 currentSnapshotId = getCurrentSnapshotId();
 
-        if (currentSnapshotId == 0) return;
+        if (currentSnapshotId == 0 || account == address(0)) return;
 
         uint256 abafAtCurrentSnapshot = abafAtSnapshot(currentSnapshotId);
         uint256 abaf = AdjustBalancesStorageWrapper.getAbafAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());

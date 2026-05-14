@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { ComplianceMock, IdentityRegistryMock, IAsset, type ResolverProxy } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
-import { ATS_ROLES, EMPTY_STRING, ZERO } from "@scripts";
+import { ATS_ROLES, EMPTY_STRING, ZERO, ADDRESS_ZERO } from "@scripts";
 
 const AMOUNT = 1000;
 const MAX_SUPPLY = 10000000;
@@ -216,6 +216,12 @@ describe("BatchTransfer Tests", () => {
           asset,
           "ComplianceNotAllowed",
         );
+      });
+
+      it("GIVEN address(0) in toList WHEN batchTransfer THEN transaction fails with ZeroAddressNotAllowed", async () => {
+        await expect(
+          asset.connect(signer_E).batchTransfer([ADDRESS_ZERO], [transferAmount]),
+        ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
       });
     });
   });
