@@ -6,34 +6,47 @@ import { ResolverProxyStorageWrapper } from "../../domain/core/ResolverProxyStor
 
 /**
  * @title InitializerModifiers
- * @notice Abstract contract providing initializer-related modifiers
- * @dev Provides modifiers for initializer state validation using _check* pattern
- *      from InitializerStorageWrapper
+ * @notice Provides reusable guards for initializer and facet registration workflows.
+ * @dev Delegates validation to `InitializerStorageWrapper`; each modifier reverts through
+ *      the wrapper when the required resolver or initializer state is not satisfied.
  * @author Asset Tokenization Studio Team
  */
 abstract contract InitializerModifiers {
+    /**
+     * @notice Restricts execution to an operational initialisation context.
+     * @dev Requires the underlying initializer storage to report an operational state.
+     */
     modifier onlyOperational() {
         InitializerStorageWrapper.checkOperational();
         _;
     }
 
-    // Using the Facet address (immutable variable) retrieves facet id and version from the BLR
-    // Checks facetVersionStatus against reserved value "ready"
+    /**
+     * @notice Restricts execution to facets whose current version is not ready.
+     * @dev Uses the facet identifier to validate readiness through initializer storage.
+     * @param _facetId Identifier of the facet whose readiness status is checked.
+     */
     modifier onlyFacetNotReady(bytes32 _facetId) {
         InitializerStorageWrapper.checkFacetNotReady(_facetId);
         _;
     }
 
-    // Using the Facet address (immutable variable) retrieves facet id from the BLR
-    // Checks facetLastVersion
-    // Makes sure that an upgrade method is only executed if the previous facet version was in a list of accepted ones.
-    // "empty array" means that all previous versions are accepted.
+    /**
+     * @notice Restricts execution to registered facets with an accepted previous version.
+     * @dev An empty `_fromLastVersions` list accepts any registered previous version.
+     * @param _facetId Identifier of the facet whose registration state is checked.
+     * @param _fromLastVersions Accepted previous facet versions for the operation.
+     */
     modifier onlyFacetRegistered(bytes32 _facetId, uint256[] memory _fromLastVersions) {
         InitializerStorageWrapper.checkFacetRegistered(_facetId, _fromLastVersions);
         _;
     }
 
-    // If last version == 0
+    /**
+     * @notice Restricts execution to facets with no registered previous version.
+     * @dev Requires the facet last-version value to be unset in initializer storage.
+     * @param _facetId Identifier of the facet whose absence from registration is checked.
+     */
     modifier onlyFacetNotRegistered(bytes32 _facetId) {
         InitializerStorageWrapper.checkFacetNotRegistered(_facetId);
         _;

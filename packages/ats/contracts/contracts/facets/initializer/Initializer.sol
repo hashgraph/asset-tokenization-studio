@@ -16,7 +16,7 @@ abstract contract Initializer is IInitializer, Modifiers {
     function initializeInitializer(
         uint256 _maxInitializerFacetIndex
     ) external onlyFacetNotRegistered(_INITIALIZER_RESOLVER_KEY) onlyRole(DEFAULT_ADMIN_ROLE) {
-        InitializerStorageWrapper.initializeInitializer(_maxInitializerFacetIndex);
+        InitializerStorageWrapper.setMaxInitializerFacetIndex(_maxInitializerFacetIndex);
         InitializerStorageWrapper.setFacetToReady(_INITIALIZER_RESOLVER_KEY);
         emit InitializerInitialized(EvmAccessors.getMsgSender(), _maxInitializerFacetIndex);
     }
@@ -25,7 +25,7 @@ abstract contract Initializer is IInitializer, Modifiers {
     function updateMaxInitializerFacetIndex(
         uint256 _newMaxInitializerFacetIndex
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        InitializerStorageWrapper.updateMaxInitializerFacetIndex(_newMaxInitializerFacetIndex);
+        InitializerStorageWrapper.setMaxInitializerFacetIndex(_newMaxInitializerFacetIndex);
         emit MaxInitializerFacetIndexUpdated(EvmAccessors.getMsgSender(), _newMaxInitializerFacetIndex);
     }
 

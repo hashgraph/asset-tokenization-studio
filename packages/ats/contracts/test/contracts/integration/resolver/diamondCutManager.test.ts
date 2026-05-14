@@ -758,6 +758,14 @@ describe("DiamondCutManager", () => {
     expect(isRegisteredV0).to.be.true;
   });
 
+  it("GIVEN a registered configuration WHEN getFacetVersionByConfigurationIdVersionAndFacetId called with non-existent facetId THEN reverts with FacetIdNotRegistered", async () => {
+    const nonExistentFacetId = "0x1234567890123456789012345678901234567890123456789012345678901234";
+
+    await expect(
+      diamondCutManager.getFacetVersionByConfigurationIdVersionAndFacetId(EQUITY_CONFIG_ID, 1, nonExistentFacetId),
+    ).to.be.revertedWithCustomError(diamondCutManager, "FacetIdNotRegistered");
+  });
+
   it("GIVEN a resolver WHEN adding configuration with overlapping selectors from different facets THEN fails with SelectorAlreadyRegistered", async () => {
     // Use the lightweight fixture that includes TransferFacet
     const fixture = await loadFixture(registerTransferFacetFixture);

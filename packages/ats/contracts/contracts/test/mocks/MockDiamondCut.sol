@@ -21,6 +21,8 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 
+/* solhint-disable */
+
 // TEST-ONLY: resolver key for MockDiamondCut. Mirrors the
 // `bytes32("MockDiamondCut")` Solidity literal (14 ASCII bytes right-padded
 // with 18 zero bytes), matching the same scheme used for MockFacet1/2/3.
@@ -81,3 +83,4 @@ contract MockDiamondCut is IDiamond, DiamondCut, DiamondLoupe, InitializerModifi
             );
     }
 }
+/* solhint-enable */

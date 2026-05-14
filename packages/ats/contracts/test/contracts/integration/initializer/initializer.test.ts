@@ -372,6 +372,52 @@ describe("Initializer — InitializeMock domain", () => {
         mockFacet3: { version: 1, versionStatus: 1, lastVersion: 1 },
       });
     });
+
+    it("GIVEN a freshly-deployed asset WHEN calling mockFacet1NotReadyMethod THEN succeeds", async () => {
+      await expect(mockFacet1.mockFacet1NotReadyMethod()).to.not.be.reverted;
+    });
+
+    it("GIVEN initializeMockFacet1 already called WHEN calling mockFacet1NotReadyMethod THEN reverts with FacetReady", async () => {
+      await expect(mockFacet1.initializeMockFacet1()).to.not.be.reverted;
+
+      await expect(mockFacet1.mockFacet1NotReadyMethod()).to.be.revertedWithCustomError(initializerFacet, "FacetReady");
+    });
+
+    it("GIVEN fully operational asset WHEN calling setOperationalStatus again THEN returns (true, 0) and emits OperationalStatusSet", async () => {
+      const maxInitializerFacetIndex = 30;
+
+      await expect(mockFacet1.initializeMockFacet1()).to.not.be.reverted;
+      await expect(mockFacet2.initializeMockFacet2()).to.not.be.reverted;
+      await expect(mockFacet3.initializeMockFacet3(0)).to.not.be.reverted;
+      await expect(mockDiamondCut.initializeDiamondCut()).to.not.be.reverted;
+      await expect(initializerFacet.initializeInitializer(maxInitializerFacetIndex)).to.not.be.reverted;
+      await expect(initializerFacet.setOperationalStatus())
+        .to.emit(initializerFacet, "OperationalStatusSet")
+        .withArgs(await deployer.getAddress(), INITIALIZE_MOCK_CONFIG_ID, 1);
+
+      // Second call on an already-operational config triggers the early-return path.
+      await expect(initializerFacet.setOperationalStatus())
+        .to.emit(initializerFacet, "OperationalStatusSet")
+        .withArgs(await deployer.getAddress(), INITIALIZE_MOCK_CONFIG_ID, 1);
+
+      const [isOperational, lastFacetIndex] = await initializerFacet.setOperationalStatus.staticCall();
+      expect(isOperational).to.be.true;
+      expect(lastFacetIndex).to.equal(0);
+    });
+
+    it("GIVEN only initializer and mockDiamondCut initialized WHEN setOperationalStatus called with large batch THEN breaks at first unready facet", async () => {
+      // TEST-ONLY: batch large enough to cover all 5 facets in one pass.
+      const maxInitializerFacetIndex = 10;
+
+      await expect(mockDiamondCut.initializeDiamondCut()).to.not.be.reverted;
+      await expect(initializerFacet.initializeInitializer(maxInitializerFacetIndex)).to.not.be.reverted;
+
+      // MockFacet1/2/3 are NOT initialised — setOperationalStatus must break at the
+      // first unready facet (mockFacet1, index 2) and report lastFacetIndex_ = 2.
+      await expect(initializerFacet.setOperationalStatus())
+        .to.emit(initializerFacet, "OperationalStatusPartialSet")
+        .withArgs(await deployer.getAddress(), INITIALIZE_MOCK_CONFIG_ID, 1, 2);
+    });
   });
 
   describe("Mock asset at version 2", () => {

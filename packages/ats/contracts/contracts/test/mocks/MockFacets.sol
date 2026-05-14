@@ -6,6 +6,8 @@ import { Modifiers } from "../../services/Modifiers.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 
+/* solhint-disable */
+
 bytes32 constant _MOCK_FACET_1_RESOLVER_KEY = bytes32("MockFacet1");
 bytes32 constant _MOCK_FACET_2_RESOLVER_KEY = bytes32("MockFacet2");
 bytes32 constant _MOCK_FACET_3_RESOLVER_KEY = bytes32("MockFacet3");
@@ -19,6 +21,7 @@ interface IMockFacet1 {
     function initializeMockFacet1() external;
     function upgradeMockFacet1() external;
     function mockFacet1Method() external view returns (string memory);
+    function mockFacet1NotReadyMethod() external;
 }
 
 interface IMockFacet2 {
@@ -46,6 +49,8 @@ contract MockFacet1 is IMockFacet1, Modifiers, IStaticFunctionSelectors {
         return "MockFacet1 method called";
     }
 
+    function mockFacet1NotReadyMethod() external override onlyFacetNotReady(_MOCK_FACET_1_RESOLVER_KEY) {}
+
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _MOCK_FACET_1_RESOLVER_KEY;
@@ -57,7 +62,8 @@ contract MockFacet1 is IMockFacet1, Modifiers, IStaticFunctionSelectors {
             Bytes4Builder.build(
                 this.initializeMockFacet1.selector,
                 this.upgradeMockFacet1.selector,
-                this.mockFacet1Method.selector
+                this.mockFacet1Method.selector,
+                this.mockFacet1NotReadyMethod.selector
             );
     }
 
@@ -142,3 +148,4 @@ contract MockFacet3 is IMockFacet3, Modifiers, IStaticFunctionSelectors {
         return Bytes4Builder.build(type(IMockFacet3).interfaceId);
     }
 }
+/* solhint-enable */

@@ -42,20 +42,13 @@ struct InitializerDataStorage {
  */
 library InitializerStorageWrapper {
     /**
-     * @notice Initialises the storage layout by recording the batch size used when validating
-     *         large facet lists in `setOperationalStatus`.
-     * @param _maxInitializerFacetIndex Maximum number of facets validated per call.
+     * @notice Sets the highest initializer facet index available for initialisation.
+     * @dev Updates initializer storage directly. Callers must enforce any required
+     * access control and ensure the index matches the deployed initializer facet set.
+     * @param _maxInitializerFacetIndex Maximum initializer facet index to store.
      */
-    function initializeInitializer(uint256 _maxInitializerFacetIndex) internal {
+    function setMaxInitializerFacetIndex(uint256 _maxInitializerFacetIndex) internal {
         initializerStorage().maxInitializerFacetIndex = _maxInitializerFacetIndex;
-    }
-
-    /**
-     * @notice Updates the batch size used by `setOperationalStatus`.
-     * @param _newMaxInitializerFacetIndex New batch size, in number of facets per call.
-     */
-    function updateMaxInitializerFacetIndex(uint256 _newMaxInitializerFacetIndex) internal {
-        initializerStorage().maxInitializerFacetIndex = _newMaxInitializerFacetIndex;
     }
 
     /**
@@ -331,7 +324,7 @@ library InitializerStorageWrapper {
      * @return initializer_ Reference to the initializer storage struct.
      */
     // Diamond storage accessor: pins InitializerDataStorage to a fixed slot to avoid layout collisions across facets.
-    function initializerStorage() internal pure returns (InitializerDataStorage storage initializer_) {
+    function initializerStorage() private pure returns (InitializerDataStorage storage initializer_) {
         bytes32 position = _INITIALIZER_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
