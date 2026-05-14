@@ -330,12 +330,13 @@ export async function deployOrchestratorLibraries(signer: Signer): Promise<Orche
   // Phase 4: ClearingLifecycleOps owns the post-creation lifecycle (approve/cancel/reclaim).
   // It calls ClearingOps.beforeClearingOperation as an `internal` cross-library call which
   // the compiler inlines, so no ClearingOps link is required. It does however use
-  // TokenCoreOps, HoldOps and HoldStorageWrapper (which transitively reach ClearingReadOps).
+  // TokenCoreOps, HoldOps, ClearingReadOps, and ScheduledTasksOps.
   const clearingLifecycleOps = await new ClearingLifecycleOps__factory(
     {
       [LIBRARY_KEYS.tokenCoreOps]: tokenCoreOpsAddr,
       [LIBRARY_KEYS.holdOps]: holdOpsAddr,
       [LIBRARY_KEYS.clearingReadOps]: clearingReadOpsAddr,
+      [LIBRARY_KEYS.scheduledTasksOps]: scheduledTasksOpsAddr,
     } as any,
     signer,
   ).deploy();
