@@ -147,6 +147,20 @@ describe("Initializer — InitializeMock domain", () => {
       ).to.be.revertedWithCustomError(initializerFacet, "AccountHasNoRole");
     });
 
+    it("GIVEN an asset WHEN non admin initializes THEN reverts with AccountHasNoRole", async () => {
+      await expect(
+        initializerFacet.connect(unknownSigner).initializeInitializer(1),
+      ).to.be.revertedWithCustomError(initializerFacet, "AccountHasNoRole");
+    });
+
+    it("GIVEN an asset whose initializer has been initialized WHEN initialized again THEN reverts with FacetAlreadyRegistered", async () => {
+      await expect(initializerFacet.initializeInitializer(1)).to.not.be.reverted;
+
+      await expect(
+        initializerFacet.initializeInitializer(1),
+      ).to.be.revertedWithCustomError(initializerFacet, "FacetAlreadyRegistered");
+    });
+
     it("GIVEN a freshly-deployed asset WHEN admin updateMaxInitializerFacetIndex THEN succeeds", async () => {
       const maxInitializerFacetIndex = 3;
 
@@ -242,13 +256,14 @@ describe("Initializer — InitializeMock domain", () => {
       });
     });
 
-    it("GIVEN all four initializers called once successfully WHEN calling mockFacet1Method THEN reverts with AssetNotOperational AND getOperationalStatus returns 0", async () => {
+    it("GIVEN all initializers called once successfully WHEN calling mockFacet1Method THEN reverts with AssetNotOperational AND getOperationalStatus returns 0", async () => {
       // TEST-ONLY: max-initializer index is an arbitrary positive number for this scenario.
       const maxInitializerFacetIndex = 3;
 
       await expect(mockFacet1.initializeMockFacet1()).to.not.be.reverted;
       await expect(mockFacet2.initializeMockFacet2()).to.not.be.reverted;
       await expect(mockFacet3.initializeMockFacet3(0)).to.not.be.reverted;
+      await expect(mockDiamondCut.initializeDiamondCut()).to.not.be.reverted;
       await expect(initializerFacet.initializeInitializer(maxInitializerFacetIndex)).to.not.be.reverted;
 
       await expect(mockFacet1.mockFacet1Method()).to.be.revertedWithCustomError(
@@ -260,7 +275,7 @@ describe("Initializer — InitializeMock domain", () => {
         configVersion: 1,
         operationalStatus: 0,
         initializer: { version: 1, versionStatus: 1, lastVersion: 1 },
-        mockDiamondCut: { version: 1, versionStatus: 0, lastVersion: 0 },
+        mockDiamondCut: { version: 1, versionStatus: 1, lastVersion: 1 },
         mockFacet1: { version: 1, versionStatus: 1, lastVersion: 1 },
         mockFacet2: { version: 2, versionStatus: 1, lastVersion: 2 },
         mockFacet3: { version: 1, versionStatus: 1, lastVersion: 1 },
