@@ -913,7 +913,14 @@ describe("ClearingByPartitionFacet Tests", () => {
         .to.emit(asset, "ClearingOperationApproved")
         .withArgs(signer_A.address, signer_A.address, _DEFAULT_PARTITION, 1, ClearingOperationType.Redeem, "0x")
         .to.emit(asset, "RedeemedByPartition")
-        .withArgs(_DEFAULT_PARTITION, signer_A.address, signer_A.address, _AMOUNT, EMPTY_HEX_BYTES, EMPTY_HEX_BYTES);
+        .withArgs(
+          _DEFAULT_PARTITION,
+          signer_A.address,
+          signer_A.address,
+          balanceBefore,
+          EMPTY_HEX_BYTES,
+          EMPTY_HEX_BYTES,
+        );
 
       const totalSecurityHoldersAfter = await asset.getTotalSecurityHolders();
       const securityHoldersAfter = await asset.getSecurityHolders(0, totalSecurityHoldersAfter);

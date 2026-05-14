@@ -343,10 +343,6 @@ library ScheduledTasksStorageWrapper {
         }
     }
 
-    // ============================================================================
-    // Private Callback Functions
-    // ============================================================================
-
     function _onScheduledSnapshotTriggered(
         uint256 /*_pos*/,
         uint256 /*_scheduledTasksLength*/,
