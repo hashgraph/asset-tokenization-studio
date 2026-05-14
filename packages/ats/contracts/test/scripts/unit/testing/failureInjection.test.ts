@@ -382,7 +382,6 @@ describe("Failure Injection Utilities", () => {
         "bond",
         "bondFixedRate",
         "bondKpiLinkedRate",
-        "bondSustainabilityPerformanceTargetRate",
         "factory",
       ];
 
@@ -391,7 +390,7 @@ describe("Failure Injection Utilities", () => {
 
     it("should be a readonly array", () => {
       // TypeScript enforces this at compile time, but we can check length
-      expect(SUPPORTED_STEPS).to.have.length(10);
+      expect(SUPPORTED_STEPS).to.have.length(9);
     });
   });
 });

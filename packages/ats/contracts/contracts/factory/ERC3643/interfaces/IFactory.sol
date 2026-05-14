@@ -14,10 +14,6 @@ import { TRexIEquity as IEquity } from "./IEquity.sol";
 import { FactoryRegulationData, RegulationData, RegulationType, RegulationSubType } from "./regulation.sol";
 import { TRexIFixedRate as IFixedRate } from "./IFixedRate.sol";
 import { TRexIKpiLinkedRate as IKpiLinkedRate } from "./IKpiLinkedRate.sol";
-// prettier-ignore
-/* solhint-disable max-line-length */
-import {TRexISustainabilityPerformanceTargetRate as ISustainabilityPerformanceTargetRate} from "./ISustainabilityPerformanceTargetRate.sol";
-/* solhint-enable max-line-length */
 
 interface TRexIFactory {
     enum SecurityType {
@@ -25,7 +21,6 @@ interface TRexIFactory {
         Equity,
         BondFixedRate,
         BondKpiLinkedRate,
-        BondSPTRate,
         Loan
     }
 
@@ -73,14 +68,6 @@ interface TRexIFactory {
         IKpiLinkedRate.ImpactData impactData;
     }
 
-    struct BondSustainabilityPerformanceTargetRateData {
-        BondData bondData;
-        FactoryRegulationData factoryRegulationData;
-        ISustainabilityPerformanceTargetRate.InterestRate interestRate;
-        ISustainabilityPerformanceTargetRate.ImpactData[] impactData;
-        address[] projects;
-    }
-
     struct BondFixedRateData {
         BondData bondData;
         FactoryRegulationData factoryRegulationData;
@@ -107,12 +94,6 @@ interface TRexIFactory {
         address indexed deployer,
         address bondAddress,
         BondKpiLinkedRateData bondKpiLinkedRateData
-    );
-
-    event BondSustainabilityPerformanceTargetRateDeployed(
-        address indexed deployer,
-        address bondAddress,
-        BondSustainabilityPerformanceTargetRateData bondSustainabilityPerformanceTargetRateData
     );
 
     event ProxyDeployed(
@@ -156,10 +137,6 @@ interface TRexIFactory {
 
     function deployBondKpiLinkedRate(
         BondKpiLinkedRateData calldata _bondKpiLinkedRateData
-    ) external returns (address bondAddress_);
-
-    function deployBondSustainabilityPerformanceTargetRate(
-        BondSustainabilityPerformanceTargetRateData calldata _bondSustainabilityPerformanceTargetRateData
     ) external returns (address bondAddress_);
 
     function getAppliedRegulationData(

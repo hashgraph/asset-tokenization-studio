@@ -44,15 +44,10 @@ import { _validateISIN } from "./isinValidator.sol";
 import { IFixedRate } from "../facets/layer_2/interestRate/fixedRate/IFixedRate.sol";
 import { IKpiLinkedRate } from "../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
 import { InterestRateStorageWrapper } from "../domain/asset/InterestRateStorageWrapper.sol";
-/* solhint-disable max-line-length */
-import {
-    ISustainabilityPerformanceTargetRate
-} from "../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 import { EvmAccessors } from "../infrastructure/utils/EvmAccessors.sol";
 import { DatesValidation } from "../infrastructure/utils/DatesValidation.sol";
-/* solhint-enable max-line-length */
 
-contract Factory is IFactory {
+abstract contract Factory is IFactory {
     modifier checkResolver(IBusinessLogicResolver resolver) {
         if (address(resolver) == address(0)) {
             revert EmptyResolver(resolver);
@@ -225,31 +220,6 @@ contract Factory is IFactory {
         _emitBondKpiLinkedRateDeployed(bondAddress_, _bondKpiLinkedRateData);
     }
 
-    function deployBondSustainabilityPerformanceTargetRate(
-        BondSustainabilityPerformanceTargetRateData calldata _bondSustainabilityPerformanceTargetRateData
-    )
-        external
-        checkResolver(_bondSustainabilityPerformanceTargetRateData.bondData.security.resolver)
-        checkISIN(_bondSustainabilityPerformanceTargetRateData.bondData.security.erc20MetadataInfo.isin)
-        checkAdmins(_bondSustainabilityPerformanceTargetRateData.bondData.security.rbacs)
-        checkRegulation(
-            _bondSustainabilityPerformanceTargetRateData.factoryRegulationData.regulationType,
-            _bondSustainabilityPerformanceTargetRateData.factoryRegulationData.regulationSubType
-        )
-        checkBondDates(
-            _bondSustainabilityPerformanceTargetRateData.bondData.bondDetails.startingDate,
-            _bondSustainabilityPerformanceTargetRateData.bondData.bondDetails.maturityDate
-        )
-        returns (address bondAddress_)
-    {
-        bondAddress_ = _deployBondSustainabilityPerformanceTargetRate(_bondSustainabilityPerformanceTargetRateData);
-        emit BondSustainabilityPerformanceTargetRateDeployed(
-            EvmAccessors.getMsgSender(),
-            bondAddress_,
-            _bondSustainabilityPerformanceTargetRateData
-        );
-    }
-
     function getAppliedRegulationData(
         RegulationType _regulationType,
         RegulationSubType _regulationSubType
@@ -288,21 +258,6 @@ contract Factory is IFactory {
 
         // Initialize KPI linked rate (KpiLinkedRateFacet may not be present)
         _tryInitializeKpiLinkedRate(bondAddress_, _data.interestRate, _data.impactData);
-    }
-
-    function _deployBondSustainabilityPerformanceTargetRate(
-        BondSustainabilityPerformanceTargetRateData calldata _data
-    ) internal returns (address bondAddress_) {
-        bondAddress_ = _deployBond(_data.bondData, _data.factoryRegulationData, SecurityType.BondSPTRate);
-
-        // Initialize sustainability performance target rate
-        // (SustainabilityPerformanceTargetRateFacet may not be present)
-        _tryInitialize_SustainabilityPerformanceTargetRate(
-            bondAddress_,
-            _data.interestRate,
-            _data.impactData,
-            _data.projects
-        );
     }
 
     function _deploySecurity(
@@ -459,32 +414,6 @@ contract Factory is IFactory {
             // success
         } catch {
             // facet not present - skip initialization
-        }
-    }
-
-    function _tryInitialize_SustainabilityPerformanceTargetRate(
-        address securityAddress_,
-        ISustainabilityPerformanceTargetRate.InterestRate calldata interestRate,
-        ISustainabilityPerformanceTargetRate.ImpactData[] calldata impactData,
-        address[] calldata projects
-    ) private {
-        try
-            ISustainabilityPerformanceTargetRate(securityAddress_).initialize_SustainabilityPerformanceTargetRate(
-                interestRate,
-                impactData,
-                projects
-            )
-        {
-            // success
-        } catch (bytes memory reason) {
-            // Re-revert if the facet is present but initialization failed (non-empty revert data)
-            if (reason.length > 0) {
-                // solhint-disable-next-line no-inline-assembly
-                assembly {
-                    revert(add(reason, 32), mload(reason))
-                }
-            }
-            // Empty revert data means facet not present - skip initialization
         }
     }
 

@@ -77,7 +77,7 @@ describe("Checkpoint Utilities", () => {
       // Summary
       expect(output.summary.totalContracts).to.equal(5); // ProxyAdmin + BLR + Factory + 2 facets
       expect(output.summary.totalFacets).to.equal(2);
-      expect(output.summary.totalConfigurations).to.equal(5);
+      expect(output.summary.totalConfigurations).to.equal(4);
       expect(output.summary.success).to.be.true;
       expect(output.summary.deploymentTime).to.be.a("number");
       expect(output.summary.gasUsed).to.equal("1750000"); // 500000 + 450000 + 800000
@@ -233,9 +233,6 @@ describe("Checkpoint Utilities", () => {
         expect(getStepName(TEST_STEPS_NEW_BLR.BOND_KPI_LINKED_CONFIG, TEST_WORKFLOWS.NEW_BLR)).to.equal(
           "Bond KpiLinked Rate Configuration",
         );
-        expect(getStepName(TEST_STEPS_NEW_BLR.BOND_SPT_CONFIG, TEST_WORKFLOWS.NEW_BLR)).to.equal(
-          "Bond SPT Rate Configuration",
-        );
         expect(getStepName(TEST_STEPS_NEW_BLR.LOAN_CONFIG, TEST_WORKFLOWS.NEW_BLR)).to.equal("Loan Configuration");
         expect(getStepName(TEST_STEPS_NEW_BLR.LOANS_PORTFOLIO_CONFIG, TEST_WORKFLOWS.NEW_BLR)).to.equal(
           "Loans Portfolio Configuration",
@@ -273,9 +270,6 @@ describe("Checkpoint Utilities", () => {
         );
         expect(getStepName(TEST_STEPS_EXISTING_BLR.BOND_KPI_LINKED_CONFIG, TEST_WORKFLOWS.EXISTING_BLR)).to.equal(
           "Bond KpiLinked Rate Configuration",
-        );
-        expect(getStepName(TEST_STEPS_EXISTING_BLR.BOND_SPT_CONFIG, TEST_WORKFLOWS.EXISTING_BLR)).to.equal(
-          "Bond SPT Rate Configuration",
         );
         expect(getStepName(TEST_STEPS_EXISTING_BLR.LOAN_CONFIG, TEST_WORKFLOWS.EXISTING_BLR)).to.equal(
           "Loan Configuration",
