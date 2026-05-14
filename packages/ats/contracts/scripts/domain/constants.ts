@@ -369,4 +369,4 @@ export const CURRENCIES = {
   JPY: "0x4a5059", // Japanese Yen
 } as const;
 
-export const FACET_REGISTRATION_BATCH_SIZE = 20;
+export const FACET_REGISTRATION_BATCH_SIZE = 10;
