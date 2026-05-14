@@ -43,10 +43,6 @@ struct DocumentationDataStorage {
  * @author Hashgraph Asset Tokenization
  */
 library DocumentationStorageWrapper {
-    // -------------------------------------------------------------------------
-    // Write operations
-    // -------------------------------------------------------------------------
-
     /**
      * @notice Creates a new document entry or overwrites the URI and hash of an
      *         existing one.
@@ -91,10 +87,6 @@ library DocumentationStorageWrapper {
         delete docStorage.documents[_name];
     }
 
-    // -------------------------------------------------------------------------
-    // Read operations
-    // -------------------------------------------------------------------------
-
     /**
      * @notice Returns the URI, content hash, and last-modified timestamp of a document.
      * @param _name Unique `bytes32` identifier of the document to query.
@@ -120,10 +112,6 @@ library DocumentationStorageWrapper {
     function getDocumentNames() internal view returns (bytes32[] memory) {
         return _documentationStorage().docNames;
     }
-
-    // -------------------------------------------------------------------------
-    // Validation checks (called by DocumentationModifiers)
-    // -------------------------------------------------------------------------
 
     /**
      * @notice Reverts when `_name` has not been registered.
@@ -160,10 +148,6 @@ library DocumentationStorageWrapper {
     function checkNotEmptyHash(bytes32 _documentHash) internal pure {
         if (_documentHash == bytes32(0)) revert IDocumentation.EmptyHASH();
     }
-
-    // -------------------------------------------------------------------------
-    // Private storage accessor
-    // -------------------------------------------------------------------------
 
     /**
      * @notice Returns the diamond storage reference for the documentation domain.

@@ -35,6 +35,12 @@ interface Hold {
   data: string;
 }
 
+enum ClearingOperationType {
+  Transfer,
+  Redeem,
+  HoldCreation,
+}
+
 let clearingOperation: ClearingOperation;
 let clearingOperationFrom: ClearingOperationFrom;
 let hold: Hold;
@@ -303,6 +309,39 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
         const clearing = await asset.getClearingCreateHoldForByPartition(_DEFAULT_PARTITION, signer_A.address, 1);
         expect(clearing.amount).to.equal(_AMOUNT);
         expect(clearing.holdTo).to.equal(hold.to);
+      });
+
+      it("GIVEN an approved third party that clearingCreateHoldFromByPartition WHEN approving it THEN Hold is properly created with allowancesubstracted from original thrid party", async () => {
+        await asset.connect(signer_A).increaseAllowance(signer_D.address, _AMOUNT);
+        const allowanceBeforeAll = await asset.allowance(signer_A.address, signer_D.address);
+
+        await asset.connect(signer_D).clearingCreateHoldFromByPartition(clearingOperationFrom, hold);
+        const allowanceAfterClearingCreation = await asset.allowance(signer_A.address, signer_D.address);
+
+        const identifier = {
+          clearingOperationType: ClearingOperationType.HoldCreation,
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          clearingId: 1,
+        };
+
+        await asset.grantRole(ATS_ROLES.CLEARING_VALIDATOR_ROLE, signer_E.address);
+        await asset.connect(signer_E).approveClearingOperationByPartition(identifier);
+        const allowanceAfterClearingApproval = await asset.allowance(signer_A.address, signer_D.address);
+
+        const holdIdentifier = {
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          holdId: 1,
+        };
+
+        await asset.connect(signer_B).releaseHoldByPartition(holdIdentifier, _AMOUNT);
+        const allowanceAfterHoldReleased = await asset.allowance(signer_A.address, signer_D.address);
+
+        expect(allowanceBeforeAll).to.equal(BigInt(_AMOUNT));
+        expect(allowanceAfterClearingCreation).to.equal(0);
+        expect(allowanceAfterClearingApproval).to.equal(0);
+        expect(allowanceAfterHoldReleased).to.equal(BigInt(_AMOUNT));
       });
 
       describe("onlyUnpaused modifier", () => {

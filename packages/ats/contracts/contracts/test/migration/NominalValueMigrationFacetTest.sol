@@ -14,10 +14,6 @@ import { NominalValueStorageWrapper } from "../../domain/asset/nominalValue/Nomi
  * This facet is for testing purposes only and should not be deployed to production.
  */
 contract NominalValueMigrationFacetTest is Modifiers, IStaticFunctionSelectors {
-    // ========================================
-    // Legacy Storage Setters (for test setup)
-    // ========================================
-
     function setLegacyBondNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) external {
         BondStorageWrapper.setDeprecatedNominalValue(_nominalValue, _nominalValueDecimals);
     }
@@ -37,10 +33,6 @@ contract NominalValueMigrationFacetTest is Modifiers, IStaticFunctionSelectors {
         }
     }
 
-    // ========================================
-    // Legacy Storage Getters (for test verification)
-    // ========================================
-
     function getLegacyBondNominalValue() external view returns (uint256 nominalValue_, uint8 nominalValueDecimals_) {
         nominalValue_ = BondStorageWrapper.getDeprecatedNominalValue();
         nominalValueDecimals_ = BondStorageWrapper.getDeprecatedNominalValueDecimals();
@@ -51,10 +43,6 @@ contract NominalValueMigrationFacetTest is Modifiers, IStaticFunctionSelectors {
         nominalValueDecimals_ = EquityStorageWrapper.getDeprecatedNominalValueDecimals();
     }
 
-    // ========================================
-    // Aggregated Getter (for test verification)
-    // ========================================
-
     function getAggregatedNominalValue() external view returns (uint256) {
         return NominalValueStorageWrapper.getNominalValue();
     }
@@ -62,10 +50,6 @@ contract NominalValueMigrationFacetTest is Modifiers, IStaticFunctionSelectors {
     function getAggregatedNominalValueDecimals() external view returns (uint8) {
         return NominalValueStorageWrapper.getNominalValueDecimals();
     }
-
-    // ========================================
-    // IStaticFunctionSelectors Implementation
-    // ========================================
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         staticFunctionSelectors_ = new bytes4[](7);

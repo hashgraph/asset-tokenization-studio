@@ -40,6 +40,14 @@ interface IFreeze {
     event AddressFrozen(address indexed userAddress, bool indexed isFrozen, address indexed owner);
 
     /**
+     * @notice Reverts when a partial token freeze is attempted with a zero amount.
+     * @dev Checked at the start of `ERC3643StorageWrapper.freezeTokensByPartition`, the
+     *      single entry point shared by both `freezePartialTokens` and any partition-scoped
+     *      freeze call. Freezing zero tokens is semantically invalid and rejected early.
+     */
+    error InvalidFreezeAmount();
+
+    /**
      * @notice Freezes a specific amount of tokens for a wallet, reducing its liquid balance.
      * @dev Requires `FREEZE_MANAGER_ROLE` or `AGENT_ROLE`, the token to be unpaused, a non-zero
      *      non-recovered address, and a single-partition token (`onlyWithoutMultiPartition`).

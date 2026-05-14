@@ -16,6 +16,7 @@ import { InterestRateModifiers } from "./InterestRateModifiers.sol";
 import { KpisModifiers } from "./KpisModifiers.sol";
 import { LockModifiers } from "./LockModifiers.sol";
 import { MaturityModifiers } from "./MaturityModifiers.sol";
+import { NominalValueModifiers } from "./NominalValueModifiers.sol";
 import { ProceedRecipientModifiers } from "./ProceedRecipientModifiers.sol";
 import { StateModifiers } from "./StateModifiers.sol";
 import { AmortizationModifiers } from "./AmortizationModifiers.sol";
@@ -43,6 +44,7 @@ import { LoansPortfolioModifiers } from "./LoansPortfolioModifiers.sol";
  * - KpisModifiers: Kpis validation
  * - LockModifiers: Lock validation
  * - MaturityModifiers: Maturity validation
+ * - NominalValueModifiers: Nominal value initialization validation
  * - ProceedRecipientModifiers: Proceed recipients validation
  * - StateModifiers: State validation
  *
@@ -66,6 +68,7 @@ abstract contract AssetModifiers is
     LockModifiers,
     LoansPortfolioModifiers,
     MaturityModifiers,
+    NominalValueModifiers,
     ProceedRecipientModifiers,
     StateModifiers
 {

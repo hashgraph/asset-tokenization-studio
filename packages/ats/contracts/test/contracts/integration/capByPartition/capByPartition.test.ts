@@ -89,6 +89,15 @@ describe("CapByPartition Tests", () => {
   });
 
   describe("New Max Supply Too low or 0", () => {
+    it("GIVEN a token WHEN setMaxSupplyByPartition with 0 THEN transaction fails with NewMaxSupplyCannotBeZero", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
+
+      await expect(asset.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, 0)).to.be.revertedWithCustomError(
+        asset,
+        "NewMaxSupplyCannotBeZero",
+      );
+    });
+
     it("GIVEN a token WHEN setMaxSupplyByPartition a value that is less than the current total supply THEN transaction fails with NewMaxSupplyForPartitionTooLow", async () => {
       await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
       await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
@@ -107,18 +116,6 @@ describe("CapByPartition Tests", () => {
     });
   });
 
-  describe("New Max Supply By Partition Too High", () => {
-    it("GIVEN a token WHEN setMaxSupplyByPartition a value that is less than the current total supply THEN transaction fails with NewMaxSupplyByPartitionTooHigh", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
-
-      // add to list fails
-      await expect(
-        asset.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply * 100),
-      ).to.be.revertedWithCustomError(asset, "NewMaxSupplyByPartitionTooHigh");
-    });
-  });
-
   describe("New Max Supply OK", () => {
     it("GIVEN a token WHEN setMaxSupplyByPartition THEN transaction succeeds", async () => {
       await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
@@ -130,6 +127,18 @@ describe("CapByPartition Tests", () => {
       const currentMaxSupply = await asset.getMaxSupplyByPartition(_PARTITION_ID_1);
 
       expect(currentMaxSupply).to.equal(maxSupply * 2);
+    });
+
+    it("GIVEN a token WHEN setMaxSupplyByPartition exceeds global max supply THEN transaction succeeds", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
+
+      await expect(asset.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply * 100))
+        .to.emit(asset, "MaxSupplyByPartitionSet")
+        .withArgs(signer_C.address, _PARTITION_ID_1, maxSupply * 100, 0);
+
+      const currentMaxSupply = await asset.getMaxSupplyByPartition(_PARTITION_ID_1);
+
+      expect(currentMaxSupply).to.equal(maxSupply * 100);
     });
   });
 });

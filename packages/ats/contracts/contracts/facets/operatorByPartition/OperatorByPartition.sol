@@ -103,7 +103,7 @@ abstract contract OperatorByPartition is IOperatorByPartition, Modifiers {
         bytes32 _partition,
         address _operator,
         address _tokenHolder
-    ) public view override returns (bool) {
+    ) external view override returns (bool) {
         return ERC1410StorageWrapper.isOperatorForPartition(_partition, _operator, _tokenHolder);
     }
 }

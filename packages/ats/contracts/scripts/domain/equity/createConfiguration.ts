@@ -124,6 +124,7 @@ const EQUITY_FACETS = [
   "LockFacet",
   "LockByPartitionFacet",
   "NominalValueFacet",
+  "NominalValueAtSnapshotFacet",
   "ProtectedPartitionsFacet",
   "ScheduledCrossOrderedTasksFacet",
   "SecurityHoldersFacet",

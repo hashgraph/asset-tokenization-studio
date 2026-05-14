@@ -21,7 +21,7 @@ library ClearingProtectedOps {
         uint256 _amount,
         address _to,
         bytes calldata _signature
-    ) public returns (bool success_, uint256 clearingId_) {
+    ) external returns (bool success_, uint256 clearingId_) {
         _checkNonceAndDeadline(
             _protectedClearingOperation.nonce,
             _protectedClearingOperation.from,
@@ -56,7 +56,7 @@ library ClearingProtectedOps {
         IClearingTypes.ProtectedClearingOperation calldata _protectedClearingOperation,
         uint256 _amount,
         bytes calldata _signature
-    ) public returns (bool success_, uint256 clearingId_) {
+    ) external returns (bool success_, uint256 clearingId_) {
         _checkNonceAndDeadline(
             _protectedClearingOperation.nonce,
             _protectedClearingOperation.from,
@@ -89,7 +89,7 @@ library ClearingProtectedOps {
         IClearingTypes.ProtectedClearingOperation calldata _protectedClearingOperation,
         IHoldTypes.Hold calldata _hold,
         bytes calldata _signature
-    ) public returns (bool success_, uint256 clearingId_) {
+    ) external returns (bool success_, uint256 clearingId_) {
         _checkNonceAndDeadline(
             _protectedClearingOperation.nonce,
             _protectedClearingOperation.from,

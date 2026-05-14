@@ -23,7 +23,7 @@ library TokenCoreOps {
         bytes memory _data,
         address _operator,
         bytes memory _operatorData
-    ) public returns (bytes32) {
+    ) external returns (bytes32) {
         return
             ERC1410StorageWrapper.transferByPartition(
                 _from,
@@ -37,7 +37,7 @@ library TokenCoreOps {
 
     function operatorTransferByPartition(
         IERC1410Types.OperatorTransferData calldata _operatorTransferData
-    ) public returns (bytes32) {
+    ) external returns (bytes32) {
         return ERC1410StorageWrapper.operatorTransferByPartition(_operatorTransferData);
     }
 
@@ -47,11 +47,11 @@ library TokenCoreOps {
         address _to,
         uint256 _amount,
         IProtectedPartitions.ProtectionData calldata _protectionData
-    ) public returns (bytes32) {
+    ) external returns (bytes32) {
         return ERC1410StorageWrapper.protectedTransferFromByPartition(_partition, _from, _to, _amount, _protectionData);
     }
 
-    function issueByPartition(IERC1410Types.IssueData memory _issueData) public {
+    function issueByPartition(IERC1410Types.IssueData memory _issueData) external {
         ERC1410StorageWrapper.issueByPartition(_issueData);
     }
 
@@ -62,7 +62,7 @@ library TokenCoreOps {
         uint256 _value,
         bytes memory _data,
         bytes memory _operatorData
-    ) public {
+    ) external {
         ERC1410StorageWrapper.redeemByPartition(_partition, _from, _operator, _value, _data, _operatorData);
     }
 
@@ -71,51 +71,51 @@ library TokenCoreOps {
         address _from,
         uint256 _amount,
         IProtectedPartitions.ProtectionData calldata _protectionData
-    ) public {
+    ) external {
         ERC1410StorageWrapper.protectedRedeemFromByPartition(_partition, _from, _amount, _protectionData);
     }
 
-    function transfer(address _from, address _to, uint256 _value) public returns (bool) {
+    function transfer(address _from, address _to, uint256 _value) external returns (bool) {
         return ERC20StorageWrapper.transfer(_from, _to, _value);
     }
 
-    function transferFrom(address _spender, address _from, address _to, uint256 _value) public returns (bool) {
+    function transferFrom(address _spender, address _from, address _to, uint256 _value) external returns (bool) {
         return ERC20StorageWrapper.transferFrom(_spender, _from, _to, _value);
     }
 
-    function mint(address _to, uint256 _value) public {
+    function mint(address _to, uint256 _value) external {
         ERC20StorageWrapper.mint(_to, _value);
     }
 
-    function burn(address _from, uint256 _value) public {
+    function burn(address _from, uint256 _value) external {
         ERC20StorageWrapper.burn(_from, _value);
     }
 
-    function issue(address _tokenHolder, uint256 _value) public {
+    function issue(address _tokenHolder, uint256 _value) external {
         ERC1594StorageWrapper.issue(_tokenHolder, _value);
     }
 
-    function redeem(uint256 _value) public {
+    function redeem(uint256 _value) external {
         ERC1594StorageWrapper.redeem(_value);
     }
 
-    function redeemFrom(address _tokenHolder, uint256 _value) public {
+    function redeemFrom(address _tokenHolder, uint256 _value) external {
         ERC1594StorageWrapper.redeemFrom(_tokenHolder, _value);
     }
 
-    function approve(address _owner, address _spender, uint256 _value) public returns (bool) {
+    function approve(address _owner, address _spender, uint256 _value) external returns (bool) {
         return ERC20StorageWrapper.approve(_owner, _spender, _value);
     }
 
-    function increaseAllowance(address _spender, uint256 _addedValue) public returns (bool) {
+    function increaseAllowance(address _spender, uint256 _addedValue) external returns (bool) {
         return ERC20StorageWrapper.increaseAllowance(_spender, _addedValue);
     }
 
-    function decreaseAllowance(address _spender, uint256 _subtractedValue) public returns (bool) {
+    function decreaseAllowance(address _spender, uint256 _subtractedValue) external returns (bool) {
         return ERC20StorageWrapper.decreaseAllowance(_spender, _subtractedValue);
     }
 
-    function beforeAllowanceUpdate(address _owner, address _spender) public {
+    function beforeAllowanceUpdate(address _owner, address _spender) external {
         ERC20StorageWrapper.beforeAllowanceUpdate(_owner, _spender);
     }
 
@@ -124,35 +124,35 @@ library TokenCoreOps {
     /// @param _from    Source address.
     /// @param _to      Destination address.
     /// @param _amount  Amount to transfer.
-    function transferDefaultPartition(address _from, address _to, uint256 _amount) public {
+    function transferDefaultPartition(address _from, address _to, uint256 _amount) external {
         ERC20StorageWrapper.transfer(_from, _to, _amount);
     }
 
-    function increaseAllowedBalance(address _owner, address _spender, uint256 _amount) public {
+    function increaseAllowedBalance(address _owner, address _spender, uint256 _amount) external {
         ERC20StorageWrapper.increaseAllowedBalance(_owner, _spender, _amount);
     }
 
-    function decreaseAllowedBalance(address _owner, address _spender, uint256 _amount) public {
+    function decreaseAllowedBalance(address _owner, address _spender, uint256 _amount) external {
         ERC20StorageWrapper.decreaseAllowedBalance(_owner, _spender, _amount);
     }
 
-    function updateAccountSnapshot(address _account, bytes32 _partition) public {
+    function updateAccountSnapshot(address _account, bytes32 _partition) external {
         SnapshotsStorageWrapper.updateAccountSnapshot(_account, _partition);
     }
 
-    function updateAccountClearedBalancesSnapshot(address _account, bytes32 _partition) public {
+    function updateAccountClearedBalancesSnapshot(address _account, bytes32 _partition) external {
         SnapshotsStorageWrapper.updateAccountClearedBalancesSnapshot(_account, _partition);
     }
 
-    function triggerAndSyncAll(bytes32 _partition, address _from, address _to) public {
+    function triggerAndSyncAll(bytes32 _partition, address _from, address _to) external {
         ERC1410StorageWrapper.triggerAndSyncAll(_partition, _from, _to);
     }
 
-    function checkIdentity(address _from, address _to) public view {
+    function checkIdentity(address _from, address _to) external view {
         ERC1594StorageWrapper.checkIdentity(_from, _to);
     }
 
-    function checkCompliance(address _from, address _to, bool _checkSender) public view {
+    function checkCompliance(address _from, address _to, bool _checkSender) external view {
         ERC1594StorageWrapper.checkCompliance(_from, _to, _checkSender);
     }
 

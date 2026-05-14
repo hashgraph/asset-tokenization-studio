@@ -52,6 +52,8 @@ library HoldStorageWrapper {
         bytes memory _operatorData,
         ThirdPartyType _thirdPartyType
     ) internal returns (bool success_, uint256 holdId_) {
+        checkNonZeroHoldAmount(_hold.amount);
+
         _prepareHoldCreation(_partition, _from);
 
         uint256 abaf = updateTotalHold(_partition, _from);
@@ -101,7 +103,16 @@ library HoldStorageWrapper {
     ) internal {
         address thirdPartyAddress = EvmAccessors.getMsgSender();
         ERC20StorageWrapper.decreaseAllowedBalance(_from, thirdPartyAddress, _amount);
-        holdStorage().holdThirdPartyByAccountPartitionAndId[_from][_partition][_holdId] = thirdPartyAddress;
+        setThirdPartyForHold(thirdPartyAddress, _partition, _from, _holdId);
+    }
+
+    function setThirdPartyForHold(
+        address _thirdPartyAddress,
+        bytes32 _partition,
+        address _from,
+        uint256 _holdId
+    ) internal {
+        holdStorage().holdThirdPartyByAccountPartitionAndId[_from][_partition][_holdId] = _thirdPartyAddress;
     }
 
     function executeHoldByPartition(
@@ -110,6 +121,8 @@ library HoldStorageWrapper {
         uint256 _amount
     ) internal returns (bool success_, bytes32 partition_) {
         beforeExecuteHold(_holdIdentifier, _to);
+
+        ERC1410StorageWrapper.updateSecurityHolder(_holdIdentifier.tokenHolder, _to, _amount);
 
         success_ = operateHoldByPartition(_holdIdentifier, _to, _amount, IHoldTypes.OperationType.Execute);
         partition_ = _holdIdentifier.partition;
@@ -195,6 +208,8 @@ library HoldStorageWrapper {
         _notifyTransferComplianceIfNeeded(_holdIdentifier, _to, _amount);
 
         _emitHoldTransfer(_holdIdentifier, _to, _amount);
+
+        ERC1410StorageWrapper.afterTokenTransfer(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _to, _amount);
     }
 
     function decreaseHeldAmount(
@@ -497,6 +512,10 @@ library HoldStorageWrapper {
 
     function isEscrow(IHoldTypes.Hold memory _hold, address _escrow) internal pure returns (bool) {
         return _escrow == _hold.escrow;
+    }
+
+    function checkNonZeroHoldAmount(uint256 _amount) internal pure {
+        if (_amount == 0) revert IHoldTypes.InvalidHoldAmount();
     }
 
     function checkHoldAmount(uint256 _amount, IHoldTypes.HoldData memory holdData) internal pure {

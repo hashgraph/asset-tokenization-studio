@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { ResolverProxy, KpiLinkedRateFacetTimeTravel, IAsset } from "@contract-types";
+import { ResolverProxy, IAsset } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES, TIME_PERIODS_S } from "@scripts";
 import { SecurityType } from "@scripts/domain";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -45,7 +45,6 @@ describe("Bond KpiLinked Rate Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
-  let kpiLinkedRateFacet: KpiLinkedRateFacetTimeTravel;
 
   let couponData = {
     recordDate: couponRecordDateInSeconds.toString(),
@@ -91,8 +90,6 @@ describe("Bond KpiLinked Rate Tests", () => {
       },
     ]);
 
-    kpiLinkedRateFacet = await ethers.getContractAt("KpiLinkedRateFacetTimeTravel", diamond.target, signer_A);
-
     await asset.connect(signer_A).issue(signer_A.address, amount, "0x");
     await asset.connect(signer_A).addProceedRecipient(signer_B.address, "0x");
     await asset.connect(signer_A).addProceedRecipient(signer_C.address, "0x");
@@ -128,8 +125,8 @@ describe("Bond KpiLinked Rate Tests", () => {
       adjustmentPrecision: 2,
     };
 
-    await kpiLinkedRateFacet.connect(signer_A).setInterestRate(newInterestRate);
-    await kpiLinkedRateFacet.connect(signer_A).setImpactData(newImpactData);
+    await asset.connect(signer_A).setKpiLinkedRateInterestRate(newInterestRate);
+    await asset.connect(signer_A).setKpiLinkedRateImpactData(newImpactData);
   }
 
   async function checkCouponPostValues(
@@ -333,7 +330,7 @@ describe("Bond KpiLinked Rate Tests", () => {
       newInterestRate.missedPenalty = previousCouponRate;
       newInterestRate.rateDecimals = previousCouponRateDecimals + 1;
 
-      await kpiLinkedRateFacet.connect(signer_A).setInterestRate(newInterestRate);
+      await asset.connect(signer_A).setKpiLinkedRateInterestRate(newInterestRate);
 
       updateCouponDates();
 
@@ -356,7 +353,7 @@ describe("Bond KpiLinked Rate Tests", () => {
       newInterestRate.missedPenalty = previousCouponRate_2;
       newInterestRate.rateDecimals = previousCouponRateDecimals_2 - 1;
 
-      await kpiLinkedRateFacet.connect(signer_A).setInterestRate(newInterestRate);
+      await asset.connect(signer_A).setKpiLinkedRateInterestRate(newInterestRate);
 
       updateCouponDates();
 
@@ -378,7 +375,7 @@ describe("Bond KpiLinked Rate Tests", () => {
     it("GIVEN a kpiLinked rate bond WHEN no report is found but missing penalty is too high THEN transaction success and rate is max rate", async () => {
       await setKpiConfiguration(-10);
       newInterestRate.missedPenalty = newInterestRate.maxRate + 100;
-      await kpiLinkedRateFacet.connect(signer_A).setInterestRate(newInterestRate);
+      await asset.connect(signer_A).setKpiLinkedRateInterestRate(newInterestRate);
 
       // Test missed penalty when there is a single coupon
       await asset.connect(signer_A).setCoupon(couponData);
@@ -386,6 +383,33 @@ describe("Bond KpiLinked Rate Tests", () => {
       await asset.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
 
       await checkCouponPostValues(newInterestRate.maxRate, newInterestRate.rateDecimals, amount, 1, signer_A.address);
+    });
+
+    it("GIVEN a cancelled coupon not in the ordered list WHEN getCoupon THEN rate treats it as having no previous coupon", async () => {
+      await setKpiConfiguration(-10);
+
+      // Coupon 1 — will be in the ordered list
+      await asset.connect(signer_A).setCoupon(couponData);
+
+      // Coupon 2 — will be cancelled and therefore absent from the ordered list
+      updateCouponDates();
+      await asset.connect(signer_A).setCoupon(couponData);
+
+      // Coupon 3 — will be in the ordered list; coupon 2 becomes the gap between 1 and 3
+      updateCouponDates();
+      await asset.connect(signer_A).setCoupon(couponData);
+
+      await asset.connect(signer_A).cancelCoupon(2);
+
+      // Advance past all record dates and build ordered list [1, 3]
+      await asset.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
+      await asset.connect(signer_A).triggerScheduledCrossOrderedTasks(100);
+
+      // getCoupon(2) triggers a view-time rate calculation for the cancelled coupon.
+      // getPreviousCouponInOrderedList(2) on list [1, 3] must return 0 (not found),
+      // so the rate equals 0 + missedPenalty rather than coupon1.rate + missedPenalty.
+      const coupon2 = (await asset.getCoupon(2)).registeredCoupon_;
+      expect(coupon2.coupon.rate).to.equal(newInterestRate.missedPenalty);
     });
 
     it("GIVEN a kpiLinked rate bond WHEN impact data is above baseline THEN transaction success and rate is calculated", async () => {

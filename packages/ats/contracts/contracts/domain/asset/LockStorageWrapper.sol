@@ -40,6 +40,8 @@ library LockStorageWrapper {
         uint256 expirationTimestamp,
         address operator
     ) internal returns (bool success_, uint256 lockId_) {
+        checkNonZeroLockAmount(amount);
+
         _prepareLock(partition, tokenHolder);
 
         uint256 abaf = updateTotalLock(partition, tokenHolder);
@@ -69,6 +71,8 @@ library LockStorageWrapper {
         _restoreReleasedAmountOnly(partition, tokenHolder, lockAmount);
 
         _emitReleaseEvents(partition, operator, tokenHolder, lockAmount);
+
+        ERC1410StorageWrapper.afterTokenTransfer(partition, tokenHolder, tokenHolder, lockAmount);
 
         return true;
     }
@@ -275,6 +279,10 @@ library LockStorageWrapper {
         assembly {
             lock_.slot := position
         }
+    }
+
+    function checkNonZeroLockAmount(uint256 amount) internal pure {
+        if (amount == 0) revert ILockTypes.InvalidLockAmount();
     }
 
     // --- Private helper functions ---
