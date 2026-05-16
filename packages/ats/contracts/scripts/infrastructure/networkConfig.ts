@@ -42,8 +42,10 @@ export type KnownNetwork = (typeof KNOWN_NETWORKS)[keyof typeof KNOWN_NETWORKS];
  * Different from NetworkConfig in types.ts which contains RPC endpoints.
  */
 export interface DeploymentConfig {
-  /** Number of block confirmations to wait for */
+  /** Number of block confirmations to wait for contract deployments (waitForDeployment + deployTx.wait) */
   confirmations: number;
+  /** Number of block confirmations to wait for contract call transactions (e.g. createBatchConfiguration) */
+  txConfirmations: number;
   /** Transaction timeout in milliseconds */
   timeout: number;
   /** Retry configuration for failed transactions */
@@ -67,6 +69,7 @@ export const DEPLOYMENT_CONFIGS: Record<string, DeploymentConfig> = {
    */
   hardhat: {
     confirmations: 0,
+    txConfirmations: 0,
     timeout: 10_000, // 10 seconds (should never timeout)
     retryOptions: {
       maxRetries: 0,
@@ -78,13 +81,15 @@ export const DEPLOYMENT_CONFIGS: Record<string, DeploymentConfig> = {
   },
 
   /**
-   * Local Network (Hardhat node, Anvil, Ganache)
+   * Local Network (Hardhat node, Anvil, Ganache, Besu dev mode)
    * - External local node but still instant transactions
-   * - Minimal confirmations, no retries needed
-   * - Verification enabled for closer to production behavior
+   * - confirmations: 0 — waitForDeployment() handles the actual wait for contract deploys
+   * - txConfirmations: 1 — tx.wait(0) returns null on external nodes, causing false failures
+   * - Verification disabled for maximum deployment speed
    */
   local: {
-    confirmations: 1,
+    confirmations: 0,
+    txConfirmations: 1,
     timeout: 10_000, // 10 seconds (should rarely timeout)
     retryOptions: {
       maxRetries: 0,
@@ -92,7 +97,7 @@ export const DEPLOYMENT_CONFIGS: Record<string, DeploymentConfig> = {
       maxDelay: 0,
       logRetries: false,
     },
-    verifyDeployment: true,
+    verifyDeployment: false,
   },
 
   /**
@@ -103,6 +108,7 @@ export const DEPLOYMENT_CONFIGS: Record<string, DeploymentConfig> = {
    */
   "hedera-local": {
     confirmations: 1,
+    txConfirmations: 1,
     timeout: 60_000, // 60 seconds
     retryOptions: {
       maxRetries: 1, // 2 total attempts
@@ -122,6 +128,7 @@ export const DEPLOYMENT_CONFIGS: Record<string, DeploymentConfig> = {
    */
   "hedera-previewnet": {
     confirmations: 2,
+    txConfirmations: 2,
     timeout: 120_000, // 2 minutes per attempt
     retryOptions: {
       maxRetries: 2, // 3 total attempts
@@ -141,6 +148,7 @@ export const DEPLOYMENT_CONFIGS: Record<string, DeploymentConfig> = {
    */
   "hedera-testnet": {
     confirmations: 2,
+    txConfirmations: 2,
     timeout: 120_000, // 2 minutes per attempt
     retryOptions: {
       maxRetries: 2, // 2 retries after initial attempt (3 total attempts)
@@ -160,6 +168,7 @@ export const DEPLOYMENT_CONFIGS: Record<string, DeploymentConfig> = {
    */
   "hedera-mainnet": {
     confirmations: 3,
+    txConfirmations: 3,
     timeout: 60_000 * 5, // 5 minutes per attempt
     retryOptions: {
       maxRetries: 3, // 3 retries after initial attempt (4 total attempts)

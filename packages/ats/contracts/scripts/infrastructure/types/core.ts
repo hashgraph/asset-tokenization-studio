@@ -686,6 +686,7 @@ export interface FacetMetadata {
   address: string;
   contractId?: string;
   key: string;
+  version?: number;
 }
 
 /**

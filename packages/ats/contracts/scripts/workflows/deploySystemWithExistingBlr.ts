@@ -180,8 +180,11 @@ export interface DeploySystemWithExistingBlrOptions extends ResumeOptions {
   /** Existing ProxyAdmin address (optional, will deploy new one if not provided) */
   existingProxyAdminAddress?: string;
 
-  /** Number of confirmations to wait for each deployment (default: from network config) */
+  /** Number of confirmations for contract deployments — facets, factory (default: from network config) */
   confirmations?: number;
+
+  /** Number of confirmations for contract call transactions — registerFacets, createConfiguration (default: from network config) */
+  txConfirmations?: number;
 
   /** Enable retry mechanism for failed deployments (default: from network config) */
   enableRetry?: boolean;
@@ -253,6 +256,7 @@ export async function deploySystemWithExistingBlr(
     batchSize, // Use defaults from createEquityConfiguration/createBondConfiguration if not provided
     existingProxyAdminAddress,
     confirmations = networkConfig.confirmations,
+    txConfirmations = networkConfig.txConfirmations,
     enableRetry = networkConfig.retryOptions.maxRetries > 0,
     verifyDeployment = networkConfig.verifyDeployment,
     resumeFrom,
@@ -275,7 +279,8 @@ export async function deploySystemWithExistingBlr(
   info(`👤 Deployer: ${deployer}`);
   info(`🔷 BLR Address: ${blrAddress}`);
   info(`🔄 TimeTravel: ${useTimeTravel ? "Enabled" : "Disabled"}`);
-  info(`⏱️  Confirmations: ${confirmations}`);
+  info(`⏱️  Confirmations (deploy): ${confirmations}`);
+  info(`⏱️  Confirmations (tx): ${txConfirmations}`);
   info(`🔁 Retry: ${enableRetry ? "Enabled" : "Disabled"}`);
   info(`✅ Verification: ${verifyDeployment ? "Enabled" : "Disabled"}`);
   info("═".repeat(60));
@@ -614,7 +619,7 @@ export async function deploySystemWithExistingBlr(
             useTimeTravel,
             false,
             batchSize,
-            confirmations,
+            txConfirmations,
           );
 
           if (!equityConfig.success) {
@@ -658,7 +663,7 @@ export async function deploySystemWithExistingBlr(
             useTimeTravel,
             false,
             batchSize,
-            confirmations,
+            txConfirmations,
           );
 
           if (!bondConfig.success) {
@@ -699,7 +704,7 @@ export async function deploySystemWithExistingBlr(
             useTimeTravel,
             false,
             batchSize,
-            confirmations,
+            txConfirmations,
           );
 
           if (!bondFixedRateConfig.success) {
@@ -742,7 +747,7 @@ export async function deploySystemWithExistingBlr(
             useTimeTravel,
             false,
             batchSize,
-            confirmations,
+            txConfirmations,
           );
 
           if (!bondKpiLinkedRateConfig.success) {
@@ -796,7 +801,7 @@ export async function deploySystemWithExistingBlr(
           useTimeTravel,
           false,
           batchSize,
-          confirmations,
+          txConfirmations,
         );
 
         if (!factoryConfig.success) {
@@ -909,32 +914,51 @@ export async function deploySystemWithExistingBlr(
       },
 
       facets: facetsResult
-        ? await Promise.all(
-            Array.from(facetsResult.deployed.entries()).map(async ([facetName, deploymentResult]) => {
-              const facetAddress = deploymentResult.address!;
+        ? await (async () => {
+            // Pass 1: resolve keys in parallel
+            const facetEntries = await Promise.all(
+              Array.from(facetsResult.deployed.entries()).map(async ([facetName, deploymentResult]) => {
+                const facetAddress = deploymentResult.address!;
 
-              // Find matching key from config
-              const equityFacet = equityConfig?.success
-                ? equityConfig.data.facetKeys.find((ef) => ef.address === facetAddress)
-                : undefined;
-              const bondFacet = bondConfig?.success
-                ? bondConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
-                : undefined;
-              const bondFixedRateFacet = bondFixedRateConfig?.success
-                ? bondFixedRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
-                : undefined;
-              const bondKpiLinkedRateFacet = bondKpiLinkedRateConfig?.success
-                ? bondKpiLinkedRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
-                : undefined;
+                // Find matching key from config
+                const equityFacet = equityConfig?.success
+                  ? equityConfig.data.facetKeys.find((ef) => ef.address === facetAddress)
+                  : undefined;
+                const bondFacet = bondConfig?.success
+                  ? bondConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
+                  : undefined;
+                const bondFixedRateFacet = bondFixedRateConfig?.success
+                  ? bondFixedRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
+                  : undefined;
+                const bondKpiLinkedRateFacet = bondKpiLinkedRateConfig?.success
+                  ? bondKpiLinkedRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
+                  : undefined;
 
-              return {
+                const key =
+                  equityFacet?.key || bondFacet?.key || bondFixedRateFacet?.key || bondKpiLinkedRateFacet?.key || "";
+
+                return { facetName, facetAddress, key };
+              }),
+            );
+
+            // Pass 2: single batch call for all known keys (skip empty keys — not in any config)
+            const blrForVersions = BusinessLogicResolver__factory.connect(blrAddress, signer);
+            const knownKeys = facetEntries.map((e) => e.key).filter((k) => k !== "");
+            const uniqueKeys = [...new Set(knownKeys)];
+            const rawVersions = uniqueKeys.length > 0 ? await blrForVersions.getLatestVersions(uniqueKeys) : [];
+            const versionByKey = new Map(uniqueKeys.map((k, i) => [k, Number(rawVersions[i])]));
+
+            // Pass 3: assemble final output with contractId (parallel) and version
+            return Promise.all(
+              facetEntries.map(async ({ facetName, facetAddress, key }) => ({
                 name: facetName,
                 address: facetAddress,
                 contractId: await getContractId(facetAddress),
-                key: equityFacet?.key || bondFacet?.key || bondFixedRateFacet?.key || bondKpiLinkedRateFacet?.key || "",
-              };
-            }),
-          )
+                key,
+                version: versionByKey.get(key) ?? 0,
+              })),
+            );
+          })()
         : [],
 
       configurations: {

@@ -34,6 +34,7 @@ async function main() {
   const useTimeTravel = parseBooleanEnv("USE_TIMETRAVEL", false);
   const partialBatchDeploy = parseBooleanEnv("PARTIAL_BATCH_DEPLOY", false);
   const batchSize = parseIntEnv("BATCH_SIZE", DEFAULT_BATCH_SIZE);
+  const deployOnlyBondConfig = parseBooleanEnv("DEPLOY_ONLY_BOND_CONFIG", false);
 
   info(`🚀 Starting ATS deployment`);
   info("---");
@@ -41,6 +42,7 @@ async function main() {
   info(`⏰ TimeTravel: ${useTimeTravel ? "enabled" : "disabled"}`);
   info(`📦 PartialBatchDeploy: ${partialBatchDeploy ? "enabled" : "disabled"}`);
   info(`📊 Batch Size: ${batchSize}`);
+  if (deployOnlyBondConfig) info(`⚡ Mode: Bond-only (Equity, Bond variants, Loan, LoansPortfolio skipped)`);
   info("---");
 
   try {
@@ -52,6 +54,7 @@ async function main() {
       useTimeTravel,
       partialBatchDeploy,
       batchSize,
+      deployOnlyBondConfig,
       saveOutput: true,
     });
 

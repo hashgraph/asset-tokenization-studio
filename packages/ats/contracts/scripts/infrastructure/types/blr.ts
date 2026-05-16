@@ -75,7 +75,8 @@ export type ConfigurationError =
   | "INVALID_CONFIG_ID"
   | "FACET_NOT_FOUND"
   | "TRANSACTION_FAILED"
-  | "EVENT_PARSE_FAILED";
+  | "EVENT_PARSE_FAILED"
+  | "SKIPPED";
 
 /**
  * Configuration data returned on success.

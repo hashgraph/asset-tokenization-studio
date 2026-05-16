@@ -418,6 +418,29 @@ export async function createBatchConfiguration(
       versions = latestVersions.map((v) => Number(v));
     }
 
+    // Recover from a partial batch left by a previous crashed run.
+    // A non-zero batchVersion is detectable by querying version currentVersion+1:
+    // _resolveVersion returns explicit versions as-is, so if any facets were
+    // written to that slot the array will be non-empty.
+    const currentVersion = await getConfigurationVersion(blrContract, configurationId);
+    const ongoingBatchFacets = await blrContract.getFacetIdsByConfigurationIdAndVersion(
+      configurationId,
+      currentVersion + 1,
+      0,
+      1,
+    );
+    if (ongoingBatchFacets.length > 0) {
+      const { warn, GAS_LIMIT } = await import("@scripts/infrastructure");
+      warn(
+        `Detected uncommitted batch for config ${configurationId} (version ${currentVersion + 1}). ` +
+          `Cancelling to allow clean retry...`,
+      );
+      await blrContract.cancelBatchConfiguration(configurationId, {
+        gasLimit: GAS_LIMIT.businessLogicResolver.createConfiguration,
+        ...hederaGasOverrides(),
+      });
+    }
+
     info("Processing facets in batches", {
       facetCount: facetIdList.length,
       partialBatchDeploy,
