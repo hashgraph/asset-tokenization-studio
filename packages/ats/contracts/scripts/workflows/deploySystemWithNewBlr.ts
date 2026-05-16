@@ -111,6 +111,20 @@ export interface DeploySystemWithNewBlrOptions extends ResumeOptions {
    * Factory configuration and deployment are unaffected.
    */
   deployOnlyBondConfig?: boolean;
+
+  /**
+   * Submit facet deploy transactions in parallel chunks (size: `concurrency`).
+   * Intended for pipeline runs against external nodes (e.g. Besu) where the
+   * per-block wait dominates wall time.
+   *
+   * Implies `ignoreCheckpoint = true`: a fresh deployment per pipeline run, no
+   * filesystem checkpoint I/O. Also disables facet-deploy retries internally
+   * (NonceManager + retries leave permanent nonce gaps on failure).
+   */
+  parallelFacetDeployment?: boolean;
+
+  /** Max in-flight deploy transactions when `parallelFacetDeployment` is on. Default: 20 */
+  concurrency?: number;
 }
 
 /**
@@ -177,12 +191,18 @@ export async function deploySystemWithNewBlr(
     enableRetry = networkConfig.retryOptions.maxRetries > 0,
     verifyDeployment = networkConfig.verifyDeployment,
     deployOnlyBondConfig = false,
+    parallelFacetDeployment = false,
+    concurrency = 20,
     resumeFrom,
     autoResume = true,
-    ignoreCheckpoint = false,
+    ignoreCheckpoint: rawIgnoreCheckpoint = false,
     deleteOnSuccess = false,
     checkpointDir,
   } = options;
+
+  // Parallel facet deployment is meant for pipeline use — skip checkpoint I/O
+  // so each run is a clean slate.
+  const ignoreCheckpoint = parallelFacetDeployment ? true : rawIgnoreCheckpoint;
 
   const startTime = Date.now();
   const deployer = await signer.getAddress();
@@ -198,6 +218,8 @@ export async function deploySystemWithNewBlr(
   info(`🔁 Retry: ${enableRetry ? "Enabled" : "Disabled"}`);
   info(`✅ Verification: ${verifyDeployment ? "Enabled" : "Disabled"}`);
   if (deployOnlyBondConfig) info(`⚡ Mode: Bond-only (Equity, Bond variants, Loan, LoansPortfolio skipped)`);
+  if (parallelFacetDeployment)
+    info(`⚡ Parallel facet deployment: concurrency=${concurrency} (retries off, checkpoint skipped)`);
   info("═".repeat(60));
 
   // Initialize checkpoint manager
@@ -248,6 +270,8 @@ export async function deploySystemWithNewBlr(
         outputPath,
         partialBatchDeploy,
         batchSize,
+        parallelFacetDeployment,
+        concurrency,
       },
     });
 
@@ -434,6 +458,8 @@ export async function deploySystemWithNewBlr(
           enableRetry,
           verifyDeployment,
           overrides: facetOverrides,
+          parallelFacetDeployment,
+          concurrency,
         });
 
         // Always save deployed facets to checkpoint (even if some failed)

@@ -54,6 +54,26 @@ export interface DeployFacetsOptions {
    * Default: true
    */
   verifyDeployment?: boolean;
+
+  /**
+   * Submit facet deploy transactions in parallel chunks instead of one-at-a-time.
+   * Safe because the underlying signer is wrapped in ethers' NonceManager, which
+   * assigns sequential nonces synchronously. Intended for pipeline use against
+   * nodes the caller does not control (e.g. Besu) where waiting per-block
+   * dominates wall time.
+   *
+   * Forces `enableRetry = false` internally — retries combined with NonceManager
+   * leave permanent nonce gaps on failure.
+   *
+   * Default: false
+   */
+  parallelFacetDeployment?: boolean;
+
+  /**
+   * Max in-flight deploy transactions when `parallelFacetDeployment` is on.
+   * Default: 20
+   */
+  concurrency?: number;
 }
 
 /**
@@ -122,10 +142,16 @@ export async function deployFacets(
   const {
     confirmations = 2, // Increased default for Hedera reliability
     overrides = {},
-    enableRetry = true,
+    enableRetry: rawEnableRetry = true,
     retryOptions = {},
     verifyDeployment = true,
+    parallelFacetDeployment = false,
+    concurrency = 20,
   } = options;
+
+  // Retries with NonceManager leave permanent nonce gaps on failure when txs
+  // are in-flight in parallel — fail fast instead.
+  const enableRetry = parallelFacetDeployment ? false : rawEnableRetry;
 
   section("Deploying Facets");
 
@@ -148,66 +174,101 @@ export async function deployFacets(
 
     info(`Total facets to deploy: ${facetNames.length}`);
 
-    // Deploy each facet using its factory
-    for (let i = 0; i < facetNames.length; i++) {
-      const facetName = facetNames[i];
+    const deployOne = async (facetName: string): Promise<DeploymentResult> => {
       const factory = facetFactories[facetName];
-      const progress = `[${i + 1}/${facetNames.length}]`;
-
-      try {
-        info(`${progress} Deploying ${facetName}...`);
-
-        // Deploy function that can be retried
-        // Convert Result pattern to Exception pattern for retry mechanism
-        const deployFacet = async (): Promise<DeploymentResult> => {
-          const result = await deployContract(factory, {
-            confirmations,
-            overrides,
-            verifyDeployment,
-          });
-
-          // Throw exception if deployment failed so retryTransaction can catch and retry
-          if (!result.success) {
-            throw new Error(result.error || "Deployment failed");
-          }
-
-          return result;
-        };
-
-        // Deploy with retry if enabled
-        // retryTransaction will catch exceptions and retry up to maxRetries times
-        const result = enableRetry ? await retryTransaction(deployFacet, retryOptions) : await deployFacet();
-
-        // If we get here, deployment succeeded (either first try or after retries)
-        if (result.success && result.address) {
-          deployed.set(facetName, result);
-          info(`${progress} ✓ ${facetName} deployed successfully`);
-        } else {
-          // This should not happen now, but keep for safety
-          failed.set(facetName, result.error || "Unknown error");
-        }
-      } catch (err) {
-        // Deployment failed after all retry attempts
-        const errorMessage = err instanceof Error ? err.message : String(err);
-        failed.set(facetName, `Failed after retries: ${errorMessage}`);
+      const result = await deployContract(factory, {
+        confirmations,
+        overrides,
+        verifyDeployment,
+      });
+      if (!result.success) {
+        throw new Error(result.error || "Deployment failed");
       }
+      return result;
+    };
 
-      // Testing hook: Allow intentional failure for checkpoint testing
-      // Returns partial result instead of throwing to preserve deployed facets in checkpoint
-      // Supports both:
-      // - Legacy FAIL_AT_FACET=N (numeric)
-      // - New CHECKPOINT_TEST_FAIL_AT=facet:N or facet:FacetName
-      if (shouldFailAtFacet(deployed.size, facetName)) {
-        const testError = createTestFailureMessage("facet", deployed.size, facetName);
-        failed.set("__TEST_FAILURE__", testError);
-        warn(testError);
-        // Return partial result - workflow will save checkpoint before failing
-        return {
-          success: false,
-          deployed,
-          failed,
-          skipped,
-        };
+    if (parallelFacetDeployment) {
+      info(`Parallel mode: concurrency=${concurrency}, retries disabled`);
+
+      // Process in chunks so we cap in-flight txs without losing the
+      // NonceManager's sequential-nonce guarantee within each chunk.
+      for (let chunkStart = 0; chunkStart < facetNames.length; chunkStart += concurrency) {
+        const chunk = facetNames.slice(chunkStart, chunkStart + concurrency);
+        const settled = await Promise.allSettled(chunk.map((name) => deployOne(name)));
+
+        settled.forEach((outcome, i) => {
+          const facetName = chunk[i];
+          const globalIndex = chunkStart + i;
+          if (outcome.status === "fulfilled" && outcome.value.address) {
+            deployed.set(facetName, outcome.value);
+            info(`[${globalIndex + 1}/${facetNames.length}] ✓ ${facetName}`);
+          } else {
+            const reason =
+              outcome.status === "rejected" ? String(outcome.reason?.message ?? outcome.reason) : "Unknown error";
+            failed.set(facetName, reason);
+            warn(`[${globalIndex + 1}/${facetNames.length}] ✗ ${facetName}: ${reason}`);
+          }
+        });
+
+        // Testing hook: failure injection keyed on input position rather than
+        // dynamic deployed.size so behavior is deterministic under parallelism.
+        for (let i = 0; i < chunk.length; i++) {
+          const facetName = chunk[i];
+          const globalIndex = chunkStart + i;
+          if (shouldFailAtFacet(globalIndex + 1, facetName)) {
+            const testError = createTestFailureMessage("facet", globalIndex + 1, facetName);
+            failed.set("__TEST_FAILURE__", testError);
+            warn(testError);
+            return { success: false, deployed, failed, skipped };
+          }
+        }
+      }
+    } else {
+      // Deploy each facet using its factory
+      for (let i = 0; i < facetNames.length; i++) {
+        const facetName = facetNames[i];
+        const progress = `[${i + 1}/${facetNames.length}]`;
+
+        try {
+          info(`${progress} Deploying ${facetName}...`);
+
+          // Deploy with retry if enabled
+          // retryTransaction will catch exceptions and retry up to maxRetries times
+          const result = enableRetry
+            ? await retryTransaction(() => deployOne(facetName), retryOptions)
+            : await deployOne(facetName);
+
+          // If we get here, deployment succeeded (either first try or after retries)
+          if (result.success && result.address) {
+            deployed.set(facetName, result);
+            info(`${progress} ✓ ${facetName} deployed successfully`);
+          } else {
+            // This should not happen now, but keep for safety
+            failed.set(facetName, result.error || "Unknown error");
+          }
+        } catch (err) {
+          // Deployment failed after all retry attempts
+          const errorMessage = err instanceof Error ? err.message : String(err);
+          failed.set(facetName, `Failed after retries: ${errorMessage}`);
+        }
+
+        // Testing hook: Allow intentional failure for checkpoint testing
+        // Returns partial result instead of throwing to preserve deployed facets in checkpoint
+        // Supports both:
+        // - Legacy FAIL_AT_FACET=N (numeric)
+        // - New CHECKPOINT_TEST_FAIL_AT=facet:N or facet:FacetName
+        if (shouldFailAtFacet(deployed.size, facetName)) {
+          const testError = createTestFailureMessage("facet", deployed.size, facetName);
+          failed.set("__TEST_FAILURE__", testError);
+          warn(testError);
+          // Return partial result - workflow will save checkpoint before failing
+          return {
+            success: false,
+            deployed,
+            failed,
+            skipped,
+          };
+        }
       }
     }
 
