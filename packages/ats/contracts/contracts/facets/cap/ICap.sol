@@ -48,6 +48,15 @@ interface ICap {
     );
 
     /**
+     * @notice Emitted once when the Cap capability is initialised on a token.
+     * @dev Fires exclusively from `initializeCap` after the storage write succeeds.
+     * @param operator The account that invoked initialisation (deployer or upgrade caller).
+     * @param maxSupply The global maximum token supply that was set.
+     * @param partitionCap Array of per-partition cap configurations that were initialised.
+     */
+    event CapInitialized(address indexed operator, uint256 maxSupply, PartitionCap[] partitionCap);
+
+    /**
      * @notice Thrown when a mint would cause the total supply to exceed the global maximum.
      * @param maxSupply The current global maximum supply.
      */
@@ -84,10 +93,10 @@ interface ICap {
     /**
      * @notice One-time initialiser that sets the global maximum supply and optional per-partition
      *         caps.
-     * @dev Can only be called once; subsequent calls revert via `onlyNotCapInitialized`. The new
+     * @dev Can only be called once; subsequent calls revert via `onlyFacetNotRegistered`. The new
      *      cap is validated to be non-zero and at least equal to the current adjusted total
-     *      supply. The leading-underscore naming convention signals this is an initialiser.
-     *      Partition caps in `partitionCap` must each be no greater than `maxSupply`.
+     *      supply. Partition caps in `partitionCap` must each be no greater than `maxSupply`.
+     *      Emits `CapInitialized` on success.
      * @param maxSupply The global maximum token supply to set.
      * @param partitionCap Array of per-partition cap configurations to initialise.
      */

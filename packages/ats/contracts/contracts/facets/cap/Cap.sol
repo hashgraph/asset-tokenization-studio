@@ -7,6 +7,8 @@ import { Modifiers } from "../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../domain/core/CapStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _CAP_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title Cap
@@ -28,10 +30,12 @@ abstract contract Cap is ICap, Modifiers {
     )
         external
         override
-        onlyNotCapInitialized
+        onlyFacetNotRegistered(_CAP_RESOLVER_KEY)
         onlyValidNewMaxSupply(maxSupply, TimeTravelStorageWrapper.getBlockTimestamp())
     {
         CapStorageWrapper.initializeCap(maxSupply, partitionCap);
+        InitializerStorageWrapper.setFacetToReady(_CAP_RESOLVER_KEY);
+        emit ICap.CapInitialized(EvmAccessors.getMsgSender(), maxSupply, partitionCap);
     }
 
     /// @inheritdoc ICap

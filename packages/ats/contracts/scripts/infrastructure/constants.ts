@@ -167,11 +167,13 @@ export const DEFAULT_BATCH_SIZE = 15;
  * await contract.method({ gasLimit: GAS_LIMIT.businessLogicResolver.createConfiguration })
  * ```
  */
+const _isCoverage = process.argv.some((a) => a === "coverage");
+
 export const GAS_LIMIT = {
   max: 15_000_000,
   default: 3_000_000,
   low: 1_000_000,
-  high: 10_000_000,
+  high: _isCoverage ? 30_000_000 : 10_000_000,
   /** 2000 Gwei — must be set alongside gasLimit to skip eth_estimateGas on Hedera */
   gasPrice: 2_000_000_000_000n,
   initialize: {
