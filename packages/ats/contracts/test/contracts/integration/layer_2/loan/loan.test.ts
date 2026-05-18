@@ -243,5 +243,44 @@ describe("Loan Tests", () => {
         "Deactivated",
       );
     });
+
+    it("GIVEN a deactivated asset WHEN setLoanDetails THEN transaction fails with Deactivated", async () => {
+      const base = await deployLoanTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).setLoanDetails({
+          loanBasicData: {
+            currency: "0x000000",
+            startingDate: 0,
+            maturityDate: 0,
+            loanStructureType: 0,
+            repaymentType: 0,
+            interestType: 0,
+            signingDate: 0,
+            originatorAccount: ethers.ZeroAddress,
+            servicerAccount: ethers.ZeroAddress,
+          },
+          loanInterestData: {
+            baseReferenceRate: 0,
+            floorRate: 0,
+            capRate: 0,
+            rateMargin: 0,
+            dayCount: 0,
+            paymentFrequency: 0,
+            firstAccrualDate: 0,
+            prepaymentPenalty: 0,
+            commitmentFee: 0,
+            utilizationFee: 0,
+            utilizationFeeType: 0,
+            servicingFee: 0,
+          },
+          riskData: { internalRiskGrade: "", defaultProbability: 0, lossGivenDefault: 0 },
+          collateral: { totalCollateralValue: 0, loanToValue: 0 },
+          loanPerformanceStatus: { performanceStatus: 0, daysPastDue: 0 },
+        }),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
   });
 });

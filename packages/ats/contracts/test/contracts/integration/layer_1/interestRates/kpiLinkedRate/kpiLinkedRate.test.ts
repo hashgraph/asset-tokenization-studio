@@ -302,5 +302,21 @@ describe("Kpi Linked Rate Tests", () => {
         }),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
+
+    it("GIVEN a deactivated asset WHEN setKpiLinkedRateImpactData THEN transaction fails with Deactivated", async () => {
+      const base = await deployBondKpiLinkedRateTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).setKpiLinkedRateImpactData({
+          maxDeviationCap: 0,
+          baseLine: 0,
+          maxDeviationFloor: 0,
+          impactDataDecimals: 0,
+          adjustmentPrecision: 0,
+        }),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
   });
 });
