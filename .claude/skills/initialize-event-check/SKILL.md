@@ -185,3 +185,35 @@ initialize-event-check: Xxx.sol
     C8 ✗  FIXED — reordered setFacetToReady before emit
     C9 ✗  FIXED — added NatSpec to event in IXxx.sol
 ```
+
+---
+
+## 7. Changeset
+
+Create a changeset only if at least one fix was applied:
+
+```markdown
+---
+"@hashgraph/asset-tokenization-contracts": minor
+---
+
+Fix `[X]Initialized` event on `[FacetName].initializeXxx`: [brief description of what
+was wrong and what was corrected].
+```
+
+Use `patch` instead of `minor` if only NatSpec or emit argument order was corrected
+with no ABI change.
+
+---
+
+## 8. Verification checklist
+
+- [ ] C1–C9 all pass or are explicitly reported as ambiguous
+- [ ] No `emit` statement missing from any `initializeXxx`
+- [ ] Every event name matches the `[FacetName]Initialized` convention
+- [ ] Every event is declared in the interface (`IXxx.sol`), not only in the implementation
+- [ ] `address indexed operator` is the first parameter on every event
+- [ ] `EvmAccessors.getMsgSender()` is the first argument in every emit call
+- [ ] `setFacetToReady` precedes the emit in every function body
+- [ ] Test 3 (event emission with `withArgs`) exists and passes for every `initializeXxx`
+- [ ] Changeset created if any fix was applied
