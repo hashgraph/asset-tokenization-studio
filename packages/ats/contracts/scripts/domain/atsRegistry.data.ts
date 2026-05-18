@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-18T15:05:13.626Z
+ * Generated: 2026-05-18T15:40:24.336Z
  * Facets: 120
  * Infrastructure: 2
  *
@@ -3643,6 +3643,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountHasNoRole(address,bytes32)",
         },
         selector: "0xa1180aad",
+      },
+      {
+        name: "ClearingIsActivated",
+        signature: { full: "error ClearingIsActivated()", canonical: "ClearingIsActivated()" },
+        selector: "0x5b2e3086",
       },
       {
         name: "Deactivated",
