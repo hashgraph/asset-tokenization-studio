@@ -7,6 +7,7 @@ import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableS
 import { _ACCESS_CONTROL_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { IAccessControl } from "../../facets/accessControl/IAccessControl.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 
 struct RoleData {
     bytes32 roleAdmin;
@@ -113,6 +114,20 @@ library AccessControlStorageWrapper {
 
     function checkAnyRole(bytes32[] memory _roles, address _account) internal view {
         if (!hasAnyRole(_roles, _account)) revert IAccessControl.AccountHasNoRoles(_account, _roles);
+    }
+
+    /// @notice Reverts if the caller is the sole holder of `DEFAULT_ADMIN_ROLE`.
+    /// @dev Guards `renounceRole` so the contract cannot be left without an admin.
+    /// @param _role The role being renounced.
+    function checkNotSoleAdmin(bytes32 _role) internal view {
+        if (_isSoleAdmin(_role)) revert IAccessControl.CannotRenounceSoleAdmin();
+    }
+
+    /// @notice Returns `true` when `_role` is `DEFAULT_ADMIN_ROLE` and only one member holds it.
+    /// @param _role The role to inspect.
+    /// @return `true` if the caller would be the sole admin after renouncing.
+    function _isSoleAdmin(bytes32 _role) private view returns (bool) {
+        return _role == DEFAULT_ADMIN_ROLE && rolesStorage().roles[_role].roleMembers.length() == 1;
     }
 
     function getRoleAdmin(bytes32 _role) internal view returns (bytes32) {

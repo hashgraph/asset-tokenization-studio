@@ -105,6 +105,12 @@ interface TRexIAccessControl {
     error RolesNotApplied(bytes32[] roles, bool[] actives, address account);
 
     /**
+     * @notice Thrown when the sole holder of `DEFAULT_ADMIN_ROLE` attempts to renounce it,
+     *         which would permanently lock all admin-gated functions.
+     */
+    error CannotRenounceSoleAdmin();
+
+    /**
      * @notice Grants a role to an account.
      * @dev The caller must hold the admin role of `_role` (resolved dynamically via
      *      `getRoleAdmin`). Reverts with `AccountAssignedToRole` if the account already holds

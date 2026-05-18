@@ -60,8 +60,10 @@ abstract contract AccessControl is IAccessControl, Modifiers {
 
     /// @inheritdoc IAccessControl
     /// @dev Requires the token to be unpaused. No admin role required; acts on `msg.sender`.
+    ///      Reverts with `CannotRenounceSoleAdmin` if the caller is the sole DEFAULT_ADMIN_ROLE holder.
     function renounceRole(bytes32 _role) external override onlyActivated onlyUnpaused returns (bool success_) {
         address account = EvmAccessors.getMsgSender();
+        AccessControlStorageWrapper.checkNotSoleAdmin(_role);
         success_ = AccessControlStorageWrapper.revokeRole(_role, account);
         if (!success_) {
             revert AccountNotAssignedToRole(_role, account);
