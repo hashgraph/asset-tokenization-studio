@@ -144,4 +144,53 @@ describe("PrincipalFacet Tests", () => {
       expect(principalFor.numerator).to.equal(0n);
     });
   });
+
+  describe("overflow safety and precision invariants", () => {
+    it("GIVEN any holder WHEN getPrincipalFor THEN the returned fraction equals the canonical balance·nominal / 10^(nd+d) ratio", async () => {
+      // Ratio equivalence proof. The new (numerator, denominator) decomposition
+      // changes shape relative to the pre-FIND-052 form, but the represented ratio must
+      // remain identical. Verified by BigInt cross-multiplication (a/b == c/d iff a·d == b·c).
+      await asset.connect(signer_A).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: amount,
+        data: "0x",
+      });
+
+      const principalFor = await asset.getPrincipalFor(signer_A.address);
+      const bondDetails = await asset.getBondDetails();
+      const canonicalNumerator = bondDetails.nominalValue * BigInt(amount);
+      const canonicalDenominator = 10n ** (bondDetails.nominalValueDecimals + BigInt(DECIMALS));
+
+      expect(principalFor.numerator * canonicalDenominator).to.equal(canonicalNumerator * principalFor.denominator);
+    });
+
+    it("GIVEN a high-precision nominal that would have overflowed balance·nominal pre-fix WHEN getPrincipalFor THEN does not revert", async () => {
+      // Regression for the audit's overflow scenario. With a nominal scale of 10^60
+      // and a sizeable raw holding, the pre-fix `balance * nominalValue` product exceeds
+      // uint256's ceiling (~1.16·10^77). The new path uses 512-bit mulDiv so the operation
+      // completes and returns a well-formed fraction.
+      const HIGH_NOMINAL_DECIMALS = 60;
+      const NOMINAL = 10n ** BigInt(HIGH_NOMINAL_DECIMALS); // nominal_real = 1
+      const HOLDING = 10n ** 20n; // 10^20 raw tokens — well within uint256
+
+      // Self-document the overflow: prove the pre-fix product would not have fit in uint256.
+      const preFixProduct = NOMINAL * HOLDING;
+      expect(preFixProduct).to.be.greaterThan(2n ** 256n - 1n);
+
+      await asset.connect(signer_A).setNominalValue(NOMINAL, HIGH_NOMINAL_DECIMALS);
+      await asset.connect(signer_A).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: HOLDING,
+        data: "0x",
+      });
+
+      // Must not revert. The post-fix numerator is mulDiv(10^20, 10^60, 10^60) = 10^20,
+      // denominator is 10^DECIMALS, so the represented principal is 10^20 / 10^6 = 10^14.
+      const principalFor = await asset.getPrincipalFor(signer_A.address);
+      expect(principalFor.numerator).to.equal(HOLDING);
+      expect(principalFor.denominator).to.equal(10n ** BigInt(DECIMALS));
+    });
+  });
 });
