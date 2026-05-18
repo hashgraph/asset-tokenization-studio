@@ -256,6 +256,9 @@ If there was no rename, use `contracts: major` only.
 - [ ] `rg "onlyNot[X]Initialized" contracts/ -g "*.sol"` returns 0 matches
 - [ ] `rg "is[X]Initialized" contracts/ -g "*.sol"` returns 0 matches (or only comments)
 - [ ] `rg "oldFunctionName" . -g "*.sol" -g "*.ts"` returns 0 matches (if renamed)
+- [ ] `onlyFacetNotRegistered(_XXX_RESOLVER_KEY)` is the first modifier after `override`
+- [ ] `onlyRole(DEFAULT_ADMIN_ROLE)` is the second modifier
+- [ ] `import { DEFAULT_ADMIN_ROLE }` present in the facet
 - [ ] `bool initialized` deleted from the struct (no renaming — backward compatibility intentionally broken)
 - [ ] `setFacetToReady` called before the emit in the function body
 - [ ] Event declared in interface with `address indexed operator` as first param and NatSpec

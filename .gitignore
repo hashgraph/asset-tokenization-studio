@@ -143,6 +143,7 @@ asset-tokenization-studio.iml
 !.claude/skills/initialize-add/
 !.claude/skills/initialize-event-check/
 !.claude/skills/initialize-factory/
+!.claude/docs/
 .opencode/
 CLAUDE.md
 AGENTS.md

@@ -65,20 +65,11 @@ When the last facet of a config is merged:
 
 ## Key decisions encoded in the skills
 
-### Storage layout safety
+### Storage struct cleanup
 
-Removing `bool initialized` from a storage struct is only safe when the field does not
-shift subsequent fields in the same 32-byte slot. The skills carry a full classification:
-
-**Safe to remove** (14 structs — field is last, or all following fields are slot-boundary types):
-`CapDataStorage`, `ControlListStorage`, `ERC1410BasicStorage`, `ERC20Storage`,
-`ERC1594Storage`, `ERC1644Storage`, `ERC20VotesStorage`, `EquityDataStorage`,
-`BondDataStorage`, `FixedRateDataStorage`, `KpiLinkedRateDataStorage`, `LoanDataStorage`,
-`LoansPortfolioDataStorage`, `ERC3643Storage`
-
-**Must rename to `_deprecated_initialized`** (6 structs — removing shifts a packed field):
-`ClearingDataStorage`, `ProtectedPartitionsDataStorage`, `KycStorage`,
-`NominalValueDataStorage`, `ExternalListDataStorage`, `BusinessLogicResolverDataStorage`
+`bool initialized` is deleted unconditionally from every storage struct.
+This migration intentionally breaks storage backward compatibility — no renaming or
+deprecation shims.
 
 ### `onlyOperational` is a per-config action
 
