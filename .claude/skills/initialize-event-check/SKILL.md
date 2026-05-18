@@ -150,7 +150,42 @@ ACTION NEEDED: [what the developer must decide]
 
 ---
 
-## 5. Changeset
+## 5. Test verification
+
+After all fixes, verify that Test 3 (event emission) exists and uses **GIVEN/WHEN/THEN**
+naming and `withArgs` including `deployerAddress` as the first argument:
+
+```typescript
+it("GIVEN a fresh deployment WHEN initializeXxx is called THEN it emits XxxInitialized", async () => {
+  await expect(asset.connect(deployer).initializeXxx(/* args */))
+    .to.emit(asset, "XxxInitialized")
+    .withArgs(await deployer.getAddress() /* + other args in declaration order */);
+});
+```
+
+**If the event has dynamic types (struct or array params):**
+
+`.withArgs()` does not handle structs or arrays reliably. Use `decodeEvent` from
+`@scripts/infrastructure` and assert fields individually:
+
+```typescript
+import { decodeEvent } from "@scripts/infrastructure";
+
+it("GIVEN a fresh deployment WHEN initializeXxx is called THEN it emits XxxInitialized", async () => {
+  const tx = await asset.connect(deployer).initializeXxx(/* args */);
+  const receipt = await tx.wait();
+  const args = await decodeEvent(asset, "XxxInitialized", receipt!);
+  expect(args.operator).to.equal(await deployer.getAddress());
+  expect(args.param1).to.deep.equal(expectedStruct); // deep.equal for structs/arrays
+});
+```
+
+If this test does not exist, add it. If it exists but lacks `withArgs` or uses wrong
+naming convention, update it.
+
+---
+
+## 6. Changeset
 
 Create a changeset only if at least one fix was applied:
 
@@ -215,5 +250,8 @@ with no ABI change.
 - [ ] `address indexed operator` is the first parameter on every event
 - [ ] `EvmAccessors.getMsgSender()` is the first argument in every emit call
 - [ ] `setFacetToReady` precedes the emit in every function body
-- [ ] Test 3 (event emission with `withArgs`) exists and passes for every `initializeXxx`
+- [ ] Test 3 exists for every `initializeXxx`: uses `decodeEvent` if event has dynamic types, `.withArgs()` otherwise
+- [ ] `npm run format:check` passes on all modified files
+- [ ] `npm run compile` produces 0 warnings on modified contracts
+- [ ] Solhint produces no new errors on modified files
 - [ ] Changeset created if any fix was applied
