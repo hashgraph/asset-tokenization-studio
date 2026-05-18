@@ -26,6 +26,7 @@ abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, Mod
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(CORPORATE_ACTION_ROLE)
         onlyValidTimestamp(_newBalanceAdjustment.executionDate)
@@ -52,6 +53,7 @@ abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, Mod
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(CORPORATE_ACTION_ROLE)
         onlyValueNotZero(_balanceAdjustmentId)

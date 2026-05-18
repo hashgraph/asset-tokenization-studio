@@ -20,13 +20,13 @@ abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
     function addProceedRecipient(
         address _proceedRecipient,
         bytes calldata _data
-    ) external virtual override onlyUnpaused onlyRole(PROCEED_RECIPIENT_MANAGER_ROLE) {
+    ) external virtual override onlyActivated onlyUnpaused onlyRole(PROCEED_RECIPIENT_MANAGER_ROLE) {
         _addProceedRecipientInternal(_proceedRecipient, _data);
     }
 
     function removeProceedRecipient(
         address _proceedRecipient
-    ) external virtual override onlyUnpaused onlyRole(PROCEED_RECIPIENT_MANAGER_ROLE) {
+    ) external virtual override onlyActivated onlyUnpaused onlyRole(PROCEED_RECIPIENT_MANAGER_ROLE) {
         _removeProceedRecipientInternal(_proceedRecipient);
     }
 
@@ -36,6 +36,7 @@ abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(PROCEED_RECIPIENT_MANAGER_ROLE)
         onlyAddressNotZero(_proceedRecipient)

@@ -29,6 +29,7 @@ abstract contract Maturity is IMaturity, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyClearingDisabled
         onlyRole(MATURITY_REDEEMER_ROLE)
@@ -59,6 +60,7 @@ abstract contract Maturity is IMaturity, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(BOND_MANAGER_ROLE)
         onlyValidMaturityDate(_newMaturityDate)

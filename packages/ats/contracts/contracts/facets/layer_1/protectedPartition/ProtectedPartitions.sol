@@ -17,6 +17,7 @@ abstract contract ProtectedPartitions is IProtectedPartitions, Modifiers {
     function protectPartitions()
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(PROTECTED_PARTITIONS_ROLE)
         returns (bool success_)
@@ -28,6 +29,7 @@ abstract contract ProtectedPartitions is IProtectedPartitions, Modifiers {
     function unprotectPartitions()
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(PROTECTED_PARTITIONS_ROLE)
         returns (bool success_)

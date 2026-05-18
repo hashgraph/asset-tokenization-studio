@@ -47,7 +47,6 @@ import {
   createBondConfiguration,
   createBondFixedRateConfiguration,
   createBondKpiLinkedRateConfiguration,
-  createBondSustainabilityPerformanceTargetRateConfiguration,
   createFactoryConfiguration,
   deployOrchestratorLibraries,
   hasOrchestratorLibraryAddresses,
@@ -130,16 +129,6 @@ export interface DeploymentWithExistingBlrOutput {
       }>;
     };
     bondKpiLinkedRate: {
-      configId: string;
-      version: number;
-      facetCount: number;
-      facets: Array<{
-        facetName: string;
-        key: string;
-        address: string;
-      }>;
-    };
-    bondSustainabilityPerformanceTargetRate: {
       configId: string;
       version: number;
       facetCount: number;
@@ -593,10 +582,6 @@ export async function deploySystemWithExistingBlr(
     let bondConfig: Awaited<ReturnType<typeof createBondConfiguration>> | undefined;
     let bondFixedRateConfig: Awaited<ReturnType<typeof createBondFixedRateConfiguration>> | undefined;
     let bondKpiLinkedRateConfig: Awaited<ReturnType<typeof createBondKpiLinkedRateConfiguration>> | undefined;
-    let bondSustainabilityPerformanceTargetRateConfig:
-      | Awaited<ReturnType<typeof createBondSustainabilityPerformanceTargetRateConfiguration>>
-      | undefined;
-
     if (shouldCreateConfigurations) {
       if (Object.keys(facetAddresses).length === 0) {
         info(`\n⚠️  Step 5/${totalSteps}: Skipping configurations (no facets deployed)...`);
@@ -605,7 +590,6 @@ export async function deploySystemWithExistingBlr(
           "Bond configuration",
           "Bond Fixed Rate configuration",
           "Bond Kpi Linked Rate configuration",
-          "Bond Sustainability Performance Target Rate configuration",
         );
       } else {
         // Get BLR contract instance
@@ -781,76 +765,14 @@ export async function deploySystemWithExistingBlr(
           checkpoint.currentStep = 6;
           await checkpointManager.saveCheckpoint(checkpoint);
         }
-
-        // Step 7: Create Bond Sustainability Performance Target Rate Configuration
-        if (checkpoint.steps.configurations?.bondSustainabilityPerformanceTargetRate && checkpoint.currentStep >= 7) {
-          info(
-            `\n✓ Step 8/${totalSteps}: Bond Sustainability Performance Target Rate configuration already created (resuming)`,
-          );
-          const bondSustainabilityPerformanceTargetRateConfigData =
-            checkpoint.steps.configurations.bondSustainabilityPerformanceTargetRate;
-          info(
-            `✅ Bond Sustainability Performance Target Rate Config ID: ${bondSustainabilityPerformanceTargetRateConfigData.configId}`,
-          );
-          info(
-            `✅ Bond Sustainability Performance Target Rate Version: ${bondSustainabilityPerformanceTargetRateConfigData.version}`,
-          );
-          info(
-            `✅ Bond Sustainability Performance Target Rate Facets: ${bondSustainabilityPerformanceTargetRateConfigData.facetCount}`,
-          );
-
-          // Use converter to reconstruct full ConfigurationData from checkpoint
-          bondSustainabilityPerformanceTargetRateConfig = toConfigurationData(
-            bondSustainabilityPerformanceTargetRateConfigData,
-          );
-        } else {
-          info(`\n🏦 Step 8/${totalSteps}: Creating Bond Sustainability Performance Target Rate configuration...`);
-
-          bondSustainabilityPerformanceTargetRateConfig =
-            await createBondSustainabilityPerformanceTargetRateConfiguration(
-              blrContract,
-              facetAddresses,
-              useTimeTravel,
-              false,
-              batchSize,
-              confirmations,
-            );
-
-          if (!bondSustainabilityPerformanceTargetRateConfig.success) {
-            throw new Error(
-              `Bond Sustainability Performance Target Rate config creation failed: ${bondSustainabilityPerformanceTargetRateConfig.error} - ${bondSustainabilityPerformanceTargetRateConfig.message}`,
-            );
-          }
-
-          info(
-            `✅ Bond Sustainability Performance Target Rate Config ID: ${bondSustainabilityPerformanceTargetRateConfig.data.configurationId}`,
-          );
-          info(
-            `✅ Bond Sustainability Performance Target Rate Version: ${bondSustainabilityPerformanceTargetRateConfig.data.version}`,
-          );
-          info(
-            `✅ Bond Sustainability Performance Target Rate Facets: ${bondSustainabilityPerformanceTargetRateConfig.data.facetKeys.length}`,
-          );
-
-          // Save checkpoint
-          checkpoint.steps.configurations!.bondSustainabilityPerformanceTargetRate = {
-            configId: bondSustainabilityPerformanceTargetRateConfig.data.configurationId,
-            version: bondSustainabilityPerformanceTargetRateConfig.data.version,
-            facetCount: bondSustainabilityPerformanceTargetRateConfig.data.facetKeys.length,
-            txHash: "",
-          };
-          checkpoint.currentStep = 7;
-          await checkpointManager.saveCheckpoint(checkpoint);
-        }
       }
     } else {
-      info(`\n💼 Step 4-8/${totalSteps}: Skipping configurations...`);
+      info(`\n💼 Step 4-7/${totalSteps}: Skipping configurations...`);
       skippedSteps.push(
         "Equity configuration",
         "Bond configuration",
         "Bond Fixed Rate configuration",
         "Bond KpiLinked Rate configuration",
-        "Bond Sustainability Performance Target Rate configuration",
       );
     }
 
@@ -1004,24 +926,12 @@ export async function deploySystemWithExistingBlr(
               const bondKpiLinkedRateFacet = bondKpiLinkedRateConfig?.success
                 ? bondKpiLinkedRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
                 : undefined;
-              const bondSustainabilityPerformanceTargetRateFacet =
-                bondSustainabilityPerformanceTargetRateConfig?.success
-                  ? bondSustainabilityPerformanceTargetRateConfig.data.facetKeys.find(
-                      (bf) => bf.address === facetAddress,
-                    )
-                  : undefined;
 
               return {
                 name: facetName,
                 address: facetAddress,
                 contractId: await getContractId(facetAddress),
-                key:
-                  equityFacet?.key ||
-                  bondFacet?.key ||
-                  bondFixedRateFacet?.key ||
-                  bondKpiLinkedRateFacet?.key ||
-                  bondSustainabilityPerformanceTargetRateFacet?.key ||
-                  "",
+                key: equityFacet?.key || bondFacet?.key || bondFixedRateFacet?.key || bondKpiLinkedRateFacet?.key || "",
               };
             }),
           )
@@ -1084,20 +994,6 @@ export async function deploySystemWithExistingBlr(
                 facetCount: 0,
                 facets: [],
               },
-        bondSustainabilityPerformanceTargetRate:
-          bondSustainabilityPerformanceTargetRateConfig && bondSustainabilityPerformanceTargetRateConfig.success
-            ? {
-                configId: bondSustainabilityPerformanceTargetRateConfig.data.configurationId,
-                version: bondSustainabilityPerformanceTargetRateConfig.data.version,
-                facetCount: bondSustainabilityPerformanceTargetRateConfig.data.facetKeys.length,
-                facets: bondSustainabilityPerformanceTargetRateConfig.data.facetKeys,
-              }
-            : {
-                configId: "N/A (Not created)",
-                version: 0,
-                facetCount: 0,
-                facets: [],
-              },
       },
 
       summary: {
@@ -1107,8 +1003,7 @@ export async function deploySystemWithExistingBlr(
           (equityConfig ? 1 : 0) +
           (bondConfig ? 1 : 0) +
           (bondFixedRateConfig ? 1 : 0) +
-          (bondKpiLinkedRateConfig ? 1 : 0) +
-          (bondSustainabilityPerformanceTargetRateConfig ? 1 : 0),
+          (bondKpiLinkedRateConfig ? 1 : 0),
         deploymentTime: endTime - startTime,
         gasUsed: totalGasUsed.toString(),
         success: true,

@@ -34,7 +34,7 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
     function updateExternalControlLists(
         address[] calldata _controlLists,
         bool[] calldata _actives
-    ) external override onlyUnpaused onlyRole(CONTROL_LIST_MANAGER_ROLE) returns (bool success_) {
+    ) external override onlyActivated onlyUnpaused onlyRole(CONTROL_LIST_MANAGER_ROLE) returns (bool success_) {
         ArrayValidation.checkUniqueValues(_controlLists, _actives);
         success_ = ExternalListManagementStorageWrapper.updateExternalLists(
             _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
@@ -53,6 +53,7 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(CONTROL_LIST_MANAGER_ROLE)
         onlyAddressNotZero(_controlList)
@@ -71,7 +72,7 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
     /// @inheritdoc IExternalControlListManagement
     function removeExternalControlList(
         address _controlList
-    ) external override onlyUnpaused onlyRole(CONTROL_LIST_MANAGER_ROLE) returns (bool success_) {
+    ) external override onlyActivated onlyUnpaused onlyRole(CONTROL_LIST_MANAGER_ROLE) returns (bool success_) {
         success_ = ExternalListManagementStorageWrapper.removeExternalList(
             _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
             _controlList

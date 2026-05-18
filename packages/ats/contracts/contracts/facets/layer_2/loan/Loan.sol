@@ -36,6 +36,7 @@ abstract contract Loan is ILoan, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(LOAN_MANAGER_ROLE)
         onlyValidTimestamp(loanDetailsData_.loanBasicData.startingDate)

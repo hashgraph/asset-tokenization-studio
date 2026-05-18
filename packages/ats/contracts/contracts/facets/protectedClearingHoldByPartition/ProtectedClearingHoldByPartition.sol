@@ -29,6 +29,7 @@ abstract contract ProtectedClearingHoldByPartition is IProtectedClearingHoldByPa
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyUnrecoveredAddress(_protectedClearingOperation.from)
         onlyUnrecoveredAddress(_hold.to)

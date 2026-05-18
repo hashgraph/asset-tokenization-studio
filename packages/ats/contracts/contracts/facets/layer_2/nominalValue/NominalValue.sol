@@ -13,8 +13,7 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
  * @notice Writer abstract for the nominal value capability; sole emit site for the events
  *         declared on `INominalValue`.
  * @dev Concrete facet `NominalValueFacet` registers the external selectors. Storage operations
- *      delegate to `NominalValueStorageWrapper`, which holds the dedicated slot and the legacy
- *      bond/equity aggregation logic.
+ *      delegate to `NominalValueStorageWrapper`, which holds the dedicated slot.
  */
 abstract contract NominalValue is INominalValue, Modifiers {
     /// @inheritdoc INominalValue
@@ -32,28 +31,19 @@ abstract contract NominalValue is INominalValue, Modifiers {
         );
     }
 
-    /**
-     * @inheritdoc INominalValue
-     * @dev Legacy-bootstrap branch: when called on a token deployed before this facet existed,
-     *      the dedicated storage is uninitialised; this method auto-initialises it with
-     *      `bytes3(0)` as currency so subsequent reads work, then proceeds with the migration +
-     *      value/decimals write. MIGRATION: once all legacy tokens have been migrated, drop the
-     *      `isNominalValueInitialized` guard and leave only the
-     *      `setNominalValue(_nominalValue, _nominalValueDecimals)` call.
-     */
+    /// @inheritdoc INominalValue
     function setNominalValue(
         uint256 _nominalValue,
         uint8 _nominalValueDecimals
-    ) external override onlyRole(NOMINAL_VALUE_ROLE) {
-        if (!NominalValueStorageWrapper.isNominalValueInitialized()) {
-            NominalValueStorageWrapper.initializeNominalValue(_nominalValue, _nominalValueDecimals, bytes3(0));
-        }
+    ) external override onlyActivated onlyRole(NOMINAL_VALUE_ROLE) {
         NominalValueStorageWrapper.setNominalValue(_nominalValue, _nominalValueDecimals);
         emit NominalValueSet(EvmAccessors.getMsgSender(), _nominalValue, _nominalValueDecimals);
     }
 
     /// @inheritdoc INominalValue
-    function setNominalValueCurrency(bytes3 _nominalValueCurrency) external override onlyRole(NOMINAL_VALUE_ROLE) {
+    function setNominalValueCurrency(
+        bytes3 _nominalValueCurrency
+    ) external override onlyActivated onlyRole(NOMINAL_VALUE_ROLE) {
         NominalValueStorageWrapper.setNominalValueCurrency(_nominalValueCurrency);
         emit NominalValueCurrencySet(EvmAccessors.getMsgSender(), _nominalValueCurrency);
     }

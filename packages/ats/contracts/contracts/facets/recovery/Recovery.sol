@@ -21,6 +21,7 @@ abstract contract Recovery is IRecovery, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyRole(AGENT_ROLE)
         onlyUnrecoveredAddress(_lostWallet)
         onlyEmptyWallet(_lostWallet)

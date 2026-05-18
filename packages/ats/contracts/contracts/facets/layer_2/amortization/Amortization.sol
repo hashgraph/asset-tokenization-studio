@@ -13,6 +13,7 @@ abstract contract Amortization is IAmortization, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyRole(CORPORATE_ACTION_ROLE)
@@ -30,6 +31,7 @@ abstract contract Amortization is IAmortization, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
@@ -45,6 +47,7 @@ abstract contract Amortization is IAmortization, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyRole(AMORTIZATION_ROLE)
@@ -60,6 +63,7 @@ abstract contract Amortization is IAmortization, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyRole(AMORTIZATION_ROLE)

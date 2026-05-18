@@ -11,12 +11,13 @@ library DecimalsLib {
     ) internal pure returns (uint256 newAmount_) {
         if (_decimals == _newDecimals) return _amount;
 
+        uint8 diff;
         if (_decimals > _newDecimals) {
-            uint8 diff = _decimals - _newDecimals;
+            diff = _decimals - _newDecimals;
             if (diff >= 78) revert ICommonErrors.DecimalDifferenceTooLarge(_newDecimals, _decimals);
             return _amount / (10 ** diff);
         }
-        uint8 diff = _newDecimals - _decimals;
+        diff = _newDecimals - _decimals;
         if (diff >= 78) revert ICommonErrors.DecimalDifferenceTooLarge(_decimals, _newDecimals);
         return _amount * (10 ** diff);
     }

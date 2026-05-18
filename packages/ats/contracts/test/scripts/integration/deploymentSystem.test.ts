@@ -54,7 +54,6 @@ import {
   AccessControlFacetTimeTravel__factory,
   BusinessLogicResolver__factory,
   KycFacet__factory,
-  Factory__factory,
   PauseFacet__factory,
   ProxyAdmin,
   FactoryFacet__factory,
@@ -247,7 +246,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
       });
 
       // Deploy second proxy reusing ProxyAdmin
-      const implementationFactory2 = new Factory__factory(deployer);
+      const implementationFactory2 = new FactoryFacet__factory(deployer);
       const result2 = await deployProxy(deployer, {
         implementationFactory: implementationFactory2,
         existingProxyAdmin: result1.proxyAdmin,
@@ -479,7 +478,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
       expect(registerResult.registered.length).to.equal(TEST_SIZES.TRIPLE);
 
       // Step 5: Deploy Factory
-      const factoryImplementationFactory = new Factory__factory(deployer);
+      const factoryImplementationFactory = new FactoryFacet__factory(deployer);
       const factoryResult = await deployProxy(deployer, {
         implementationFactory: factoryImplementationFactory,
         existingProxyAdmin: proxyAdminResult.contract as unknown as ProxyAdmin,

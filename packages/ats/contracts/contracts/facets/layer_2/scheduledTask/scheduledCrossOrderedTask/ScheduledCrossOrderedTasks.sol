@@ -7,11 +7,13 @@ import { Modifiers } from "../../../../services/Modifiers.sol";
 import { ScheduledTasksStorageWrapper } from "../../../../domain/asset/ScheduledTasksStorageWrapper.sol";
 
 abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks, Modifiers {
-    function triggerPendingScheduledCrossOrderedTasks() external override onlyUnpaused returns (uint256) {
+    function triggerPendingScheduledCrossOrderedTasks() external override onlyActivated onlyUnpaused returns (uint256) {
         return ScheduledTasksStorageWrapper.triggerScheduledCrossOrderedTasks(0);
     }
 
-    function triggerScheduledCrossOrderedTasks(uint256 _max) external override onlyUnpaused returns (uint256) {
+    function triggerScheduledCrossOrderedTasks(
+        uint256 _max
+    ) external override onlyActivated onlyUnpaused returns (uint256) {
         return ScheduledTasksStorageWrapper.triggerScheduledCrossOrderedTasks(_max);
     }
 

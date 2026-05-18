@@ -21,6 +21,7 @@ abstract contract OperatorClearingByPartition is IOperatorClearingByPartition, M
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyClearingActivated
         onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
@@ -52,6 +53,7 @@ abstract contract OperatorClearingByPartition is IOperatorClearingByPartition, M
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyClearingActivated
         onlyUnProtectedPartitionsOrWildCardRole

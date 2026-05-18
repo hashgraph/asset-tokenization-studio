@@ -348,7 +348,6 @@ export function createMockFactory(receiptEvent: string, diamondAddress: string) 
     deployBond: sinon.stub().resolves(mockTx),
     deployBondFixedRate: sinon.stub().resolves(mockTx),
     deployBondKpiLinkedRate: sinon.stub().resolves(mockTx),
-    deployBondSustainabilityPerformanceTargetRate: sinon.stub().resolves(mockTx),
     signer: mockSigner,
     runner: mockSigner,
   };
@@ -381,7 +380,6 @@ export function createMockFactoryWithNoArgs(eventName: string) {
     deployBond: sinon.stub().resolves(mockTx),
     deployBondFixedRate: sinon.stub().resolves(mockTx),
     deployBondKpiLinkedRate: sinon.stub().resolves(mockTx),
-    deployBondSustainabilityPerformanceTargetRate: sinon.stub().resolves(mockTx),
     signer: mockSigner,
     runner: mockSigner,
   };

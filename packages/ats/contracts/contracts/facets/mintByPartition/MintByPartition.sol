@@ -25,6 +25,7 @@ abstract contract MintByPartition is IMintByPartition, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyAnyRole(_buildRoles(ISSUER_ROLE, AGENT_ROLE))
         onlyDefaultPartitionWithSinglePartition(_issueData.partition)

@@ -342,6 +342,15 @@ export async function createBatchConfiguration(
 
     /** Number of confirmations to wait for (default: 0 for test environments) */
     confirmations?: number;
+
+    /**
+     * Optional map of facet name -> explicit BLR version to pin in the
+     * configuration. When provided, every facet in `facets` must have an entry,
+     * and these versions are used instead of `getLatestVersions`. This is the
+     * escape hatch for test fixtures (notably InitializeMock) that need a
+     * configuration referencing earlier facet versions rather than the latest.
+     */
+    facetVersions?: Record<string, number>;
   },
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
   const {
@@ -351,6 +360,7 @@ export async function createBatchConfiguration(
     batchSize = DEFAULT_BATCH_SIZE,
     gasLimit,
     confirmations = 0,
+    facetVersions,
   } = options;
 
   // Dynamic imports for parallel test performance (see module JSDoc for explanation)
@@ -388,8 +398,25 @@ export async function createBatchConfiguration(
     info(`Resolved ${facetKeys.length} facets with addresses`, {});
 
     const facetIdList = facetKeys.map((f) => f.key);
-    const latestVersions = await blrContract.getLatestVersions(facetIdList);
-    const versions: number[] = latestVersions.map((v) => Number(v));
+    let versions: number[];
+    if (facetVersions) {
+      // Caller pinned explicit per-facet versions — every facet in the
+      // configuration must have a corresponding entry. We do not fall back to
+      // the latest version, otherwise a typo in the map would silently end up
+      // pinning whichever version happens to be latest in the BLR.
+      versions = facetKeys.map((f) => {
+        const pinned = facetVersions[f.facetName];
+        if (pinned === undefined) {
+          throw new Error(
+            `facetVersions provided to createBatchConfiguration but missing entry for facet: ${f.facetName}`,
+          );
+        }
+        return pinned;
+      });
+    } else {
+      const latestVersions = await blrContract.getLatestVersions(facetIdList);
+      versions = latestVersions.map((v) => Number(v));
+    }
 
     info("Processing facets in batches", {
       facetCount: facetIdList.length,

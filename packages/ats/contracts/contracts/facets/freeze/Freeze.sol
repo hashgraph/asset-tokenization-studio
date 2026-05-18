@@ -29,6 +29,7 @@ abstract contract Freeze is IFreeze, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyAddressNotZero(_userAddress)
         onlyUnrecoveredAddress(_userAddress)
@@ -45,6 +46,7 @@ abstract contract Freeze is IFreeze, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyUnrecoveredAddress(_userAddress)
         onlyAddressNotZero(_userAddress)
@@ -62,6 +64,7 @@ abstract contract Freeze is IFreeze, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyUnrecoveredAddress(_userAddress)
         onlyAddressNotZero(_userAddress)

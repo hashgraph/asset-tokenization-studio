@@ -1607,4 +1607,18 @@ describe("ClearingByPartitionFacet Tests", () => {
         .withArgs(signer_A.address, ethers.ZeroAddress, _AMOUNT);
     });
   });
+
+  describe("Deactivated", () => {
+    it("GIVEN a deactivated asset WHEN clearingRedeemByPartition THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset
+          .connect(base.deployer)
+          .clearingRedeemByPartition({ partition: ethers.ZeroHash, expirationTimestamp: 0, data: "0x" }, 0),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
 });

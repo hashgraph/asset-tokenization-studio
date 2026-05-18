@@ -27,6 +27,7 @@ abstract contract ControllerHoldByPartition is IControllerHoldByPartition, Modif
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(CONTROLLER_ROLE)
         onlyAddressNotZero(_from)

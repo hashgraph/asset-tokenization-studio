@@ -12,7 +12,7 @@ abstract contract ERC20Votes is IERC20Votes, Modifiers {
         ERC20VotesStorageWrapper.initialize_ERC20Votes(_activated);
     }
 
-    function delegate(address _delegatee) external override onlyUnpaused {
+    function delegate(address _delegatee) external override onlyActivated onlyUnpaused {
         ERC20VotesStorageWrapper.delegate(_delegatee);
     }
 

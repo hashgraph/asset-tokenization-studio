@@ -30,6 +30,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyClearingDisabled
         onlyValidExpirationTimestamp(_hold.expirationTimestamp)
@@ -60,6 +61,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyClearingDisabled
         onlyUnProtectedPartitionsOrWildCardRole
@@ -94,6 +96,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
         onlyIdentifiedAddresses(_holdIdentifier.tokenHolder, _to)
@@ -119,6 +122,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
         onlyValidHoldId(_holdIdentifier)
@@ -139,6 +143,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
         onlyValidHoldId(_holdIdentifier)

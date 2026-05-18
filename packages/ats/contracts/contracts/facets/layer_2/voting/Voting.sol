@@ -19,6 +19,7 @@ abstract contract Voting is IVoting, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(CORPORATE_ACTION_ROLE)
         onlyValidTimestamp(_newVoting.recordDate)
@@ -35,6 +36,7 @@ abstract contract Voting is IVoting, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(CORPORATE_ACTION_ROLE)
         onlyMatchingActionType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteId - 1)

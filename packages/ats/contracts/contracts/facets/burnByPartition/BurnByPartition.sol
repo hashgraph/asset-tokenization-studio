@@ -24,6 +24,7 @@ abstract contract BurnByPartition is IBurnByPartition, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnProtectedPartitionsOrWildCardRole
         onlyCanRedeemFromByPartition(EvmAccessors.getMsgSender(), _partition, _value)

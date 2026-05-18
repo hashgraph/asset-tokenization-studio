@@ -51,10 +51,9 @@ import { IKpiLinkedRate } from "./layer_2/interestRate/kpiLinkedRate/IKpiLinkedR
 import { IOperatorHoldByPartition } from "./operatorHoldByPartition/IOperatorHoldByPartition.sol";
 import { IHoldByPartition } from "./holdByPartition/IHoldByPartition.sol";
 import { IKyc } from "./layer_1/kyc/IKyc.sol";
-// ISustainabilityPerformanceTargetRate is excluded: its getInterestRate, setInterestRate,
-// getImpactData, setImpactData selectors still collide with the legacy (pre-rename) names.
-// It will be re-included once its own rename ticket runs. KPI-linked rate is now part of
-// IAsset following BBND-1731.
+// IKpiLinkedRate is excluded: it defines getInterestRate() with an incompatible return type
+// (different InterestRate struct), which cannot be reconciled in a single Solidity interface.
+// Use the typed instance directly when testing KPI-linked rate facets.
 import { ILoan } from "./layer_2/loan/ILoan.sol";
 import { INominalValue } from "./layer_2/nominalValue/INominalValue.sol";
 import { INominalValueAtSnapshot } from "./nominalValueAtSnapshot/INominalValueAtSnapshot.sol";
@@ -143,6 +142,7 @@ import { IBatchTransfer } from "./batchTransfer/IBatchTransfer.sol";
 import { IMetadata } from "./metadata/IMetadata.sol";
 import { IDeactivate } from "./deactivate/IDeactivate.sol";
 import { IOperatorByPartition } from "./operatorByPartition/IOperatorByPartition.sol";
+import { IInterestRate } from "./interestRate/IInterestRate.sol";
 
 // solhint-disable no-empty-blocks
 /**
@@ -158,9 +158,9 @@ import { IOperatorByPartition } from "./operatorByPartition/IOperatorByPartition
  *      sub-interfaces. IERC20Votes includes IERC5805 and IVotes. Solidity C3 linearisation
  *      handles the resulting diamond inheritance without conflicts.
  *
- *      Note: ISustainabilityPerformanceTargetRate is intentionally excluded
- *      due to an irreconcilable function selector conflict on getInterestRate(). Consumers that
- *      need the KPI-linked or SPTR surface must use those typed interfaces directly.
+ *      Note: IKpiLinkedRate is intentionally excluded due to an irreconcilable function selector
+ *      conflict on getInterestRate(). Consumers that need the KPI-linked rate surface must use
+ *      that typed interface directly.
  */
 interface IAsset is
     ICore,
@@ -279,5 +279,6 @@ interface IAsset is
     IMetadata,
     IDeactivate,
     IOperatorByPartition,
-    ISecurityHolders
+    ISecurityHolders,
+    IInterestRate
 {}

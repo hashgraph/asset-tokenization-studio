@@ -33,7 +33,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
     function updateExternalKycLists(
         address[] calldata _kycLists,
         bool[] calldata _actives
-    ) external override onlyUnpaused onlyRole(KYC_MANAGER_ROLE) returns (bool success_) {
+    ) external override onlyActivated onlyUnpaused onlyRole(KYC_MANAGER_ROLE) returns (bool success_) {
         ArrayValidation.checkUniqueValues(_kycLists, _actives);
         success_ = ExternalListManagementStorageWrapper.updateExternalLists(
             _KYC_MANAGEMENT_STORAGE_POSITION,
@@ -49,7 +49,15 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
     /// @inheritdoc IExternalKycListManagement
     function addExternalKycList(
         address _kycLists
-    ) external override onlyUnpaused onlyRole(KYC_MANAGER_ROLE) onlyAddressNotZero(_kycLists) returns (bool success_) {
+    )
+        external
+        override
+        onlyActivated
+        onlyUnpaused
+        onlyRole(KYC_MANAGER_ROLE)
+        onlyAddressNotZero(_kycLists)
+        returns (bool success_)
+    {
         success_ = ExternalListManagementStorageWrapper.addExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists);
         if (!success_) {
             revert ListedKycList(_kycLists);
@@ -60,7 +68,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
     /// @inheritdoc IExternalKycListManagement
     function removeExternalKycList(
         address _kycLists
-    ) external override onlyUnpaused onlyRole(KYC_MANAGER_ROLE) returns (bool success_) {
+    ) external override onlyActivated onlyUnpaused onlyRole(KYC_MANAGER_ROLE) returns (bool success_) {
         success_ = ExternalListManagementStorageWrapper.removeExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists);
         if (!success_) {
             revert UnlistedKycList(_kycLists);

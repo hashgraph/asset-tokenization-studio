@@ -23,6 +23,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(LOANS_PORTFOLIO_MANAGER_ROLE)
         onlyAddressNotZero(_holdingsAsset.assetAddress)
@@ -38,6 +39,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(LOANS_PORTFOLIO_MANAGER_ROLE)
         onlyAddressNotZero(_holdingsAsset.assetAddress)
@@ -53,6 +55,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(LOANS_PORTFOLIO_MANAGER_ROLE)
         onlyAddressNotZero(_holdingsAssetAddress)
@@ -69,6 +72,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(LOANS_PORTFOLIO_MANAGER_ROLE)
         onlyAddressNotZero(_assetAddress)
