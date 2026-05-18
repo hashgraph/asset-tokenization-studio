@@ -78,6 +78,7 @@ abstract contract Lock is ILock, Modifiers {
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
+        onlyUnrecoveredAddress(_tokenHolder)
         onlyWithValidLockId(_DEFAULT_PARTITION, _tokenHolder, _lockId)
         onlyWithLockedExpirationTimestamp(_DEFAULT_PARTITION, _tokenHolder, _lockId)
         returns (bool success_)
