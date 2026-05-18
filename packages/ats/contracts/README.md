@@ -532,7 +532,7 @@ The platform implements a comprehensive role-based access control system:
 
 #### Administrative Roles
 
-- **Admin Role**: Full administrative control over the security token
+- **Admin Role** (`DEFAULT_ADMIN_ROLE`): Full administrative control over the security token. Also authorises high-impact instant operations on the Diamond proxy (`updateResolver`, `updateConfig`, `updateConfigVersion`), which take effect in a single transaction with no on-chain timelock or user exit window. This role MUST be held by a multisig or governance contract — never an EOA in production — whose own approval workflow supplies the delay, review, and accountability surface for those actions.
 - **T-REX Owner**: Owner of ERC3643 tokens with special privileges for compliance configuration
 - **Diamond Owner**: Contract upgrade and facet management permissions
 
