@@ -199,36 +199,86 @@ function getStaticFunctionSelectors() external pure override returns (bytes4[] m
 
 ## 7. Step F — Add tests
 
-Add the following three tests in the facet's existing integration test file:
+Add a dedicated `describe` block in the facet's existing integration test file.
+Use the project's **GIVEN/WHEN/THEN** naming convention throughout.
+
+### Where to place them
+
+```typescript
+describe("initializeXxx", () => {
+  // Test 1, 2, 3 go here
+});
+```
+
+### Signers
+
+- `deployer` / `admin` — the account with `DEFAULT_ADMIN_ROLE` (comes from the fixture)
+- `nonAdmin` — any signer that has **no** `DEFAULT_ADMIN_ROLE`. Use `user3` or equivalent
+  from the fixture (verify it has not been granted the role in `beforeEach`).
 
 ### Test 1 — double initialisation reverts
 
+At this stage the factory does NOT yet call `initializeXxx` (that is wired in
+`initialize-factory` Part A). Call it once manually in a `beforeEach`, then try again:
+
 ```typescript
-it("should revert WHEN initializeXxx is called twice", async () => {
-  await expect(asset.initializeXxx(/* args */)).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
-});
+describe("initializeXxx", () => {
+  beforeEach(async () => {
+    await asset.connect(deployer).initializeXxx(/* args */);
+  });
+
+  it("GIVEN an already-initialised facet WHEN initializeXxx is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+    await expect(
+      asset.initializeXxx(/* args */)
+    ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+  });
 ```
 
 ### Test 2 — no DEFAULT_ADMIN_ROLE reverts
 
 ```typescript
-it("should revert WHEN caller does not have DEFAULT_ADMIN_ROLE", async () => {
+it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeXxx is called THEN it reverts with AccountHasNoRole", async () => {
   await expect(asset.connect(nonAdmin).initializeXxx(/* args */)).to.be.revertedWithCustomError(
     asset,
-    "AccessControlUnauthorizedAccount",
+    "AccountHasNoRole",
   );
 });
 ```
 
-### Test 3 — event emitted on success
+### Test 3 — event emitted on first call
+
+Because the factory does not yet call `initializeXxx`, the standard fixture produces
+a fresh asset. Call the function directly and verify the event:
 
 ```typescript
-it("should emit XxxInitialized WHEN initializeXxx succeeds", async () => {
-  await expect(freshAsset.initializeXxx(/* args */))
-    .to.emit(freshAsset, "XxxInitialized")
-    .withArgs(deployerAddress /* + other args in declaration order */);
+  it("GIVEN a fresh deployment WHEN initializeXxx is called THEN it emits XxxInitialized", async () => {
+    await expect(asset.connect(deployer).initializeXxx(/* args */))
+      .to.emit(asset, "XxxInitialized")
+      .withArgs(await deployer.getAddress() /* + other args in declaration order */);
+  });
+}); // end describe("initializeXxx")
+```
+
+**If the event has dynamic types (struct or array params):**
+
+`.withArgs()` does not handle structs or arrays reliably. Use `decodeEvent` from
+`@scripts/infrastructure` and assert fields individually:
+
+```typescript
+import { decodeEvent } from "@scripts/infrastructure";
+
+it("GIVEN a fresh deployment WHEN initializeXxx is called THEN it emits XxxInitialized", async () => {
+  const tx = await asset.connect(deployer).initializeXxx(/* args */);
+  const receipt = await tx.wait();
+  const args = await decodeEvent(asset, "XxxInitialized", receipt!);
+  expect(args.operator).to.equal(await deployer.getAddress());
+  expect(args.param1).to.deep.equal(expectedStruct); // deep.equal for structs/arrays
 });
 ```
+
+> Once `initialize-factory` Part A is applied (factory calls `initializeXxx`), Test 3
+> must be adapted: check the event in the factory deployment receipt (see Option A in
+> `initialize-update` Step G).
 
 ---
 
@@ -256,8 +306,11 @@ via `InitializerStorageWrapper.setFacetToReady`. Emits `[X]Initialized` event.
 - [ ] `InitializerStorageWrapper.setFacetToReady(_XXX_RESOLVER_KEY)` called before the emit
 - [ ] `emit XxxInitialized(EvmAccessors.getMsgSender(), ...)` is the last statement
 - [ ] `this.initializeXxx.selector` added to `getStaticFunctionSelectors`
+- [ ] If event has dynamic types (struct/array): Test 3 uses `decodeEvent`, not `.withArgs()`
 - [ ] All 3 new tests pass: `npm run test --no-compile --grep "initializeXxx"`
+- [ ] `npm run format:check` passes on all modified files
+- [ ] `npm run compile` produces 0 warnings on modified contracts
+- [ ] Solhint produces no new errors on modified files
 - [ ] `rg "initializeXxx" contracts/factory/Factory.sol` — note if a Factory call is missing;
       flag it for `initialize-factory` skill
 - [ ] Changeset file created under `.changeset/`
-- [ ] Solhint produces no new errors on modified files

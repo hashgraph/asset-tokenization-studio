@@ -179,20 +179,28 @@ counts them — but their read-only functions carry no runtime operational guard
 
 ### Step C3 — Update test fixtures
 
-In the fixture that deploys a full security of this config type (e.g.
-`test/fixtures/tokens/equity.fixture.ts`), add a `setOperationalStatus` loop after the
-factory call:
+**Pre-condition**: `IInitializer` must be part of `IAsset` (the aggregated interface used
+in tests). If it is not yet included, add it before proceeding:
+
+```solidity
+// In IAsset.sol — add the import and the inheritance:
+import { IInitializer } from "./initializer/IInitializer.sol";
+
+// ... existing interfaces ...
+interface IAsset is IInitializer {}
+```
+
+Once `IAsset` includes `IInitializer`, call `setOperationalStatus` directly on the
+typed `asset` variable — no separate factory connect needed:
 
 ```typescript
-import { IInitializer__factory } from '../../typechain-types';
-
-const initializer = IInitializer__factory.connect(securityAddress, deployer);
+// In the fixture (e.g. test/fixtures/tokens/equity.fixture.ts):
 let isOperational = false;
 while (!isOperational) {
-    const tx = await initializer.setOperationalStatus();
+    const tx = await asset.setOperationalStatus();
     const receipt = await tx.wait();
     isOperational = receipt?.logs.some(
-        log => /* matches OperationalStatusSet topic */
+        (log) => /* matches OperationalStatusSet topic */
     ) ?? false;
 }
 ```
@@ -262,7 +270,9 @@ console.log(`Asset ${deployedAddress} is now operational.`);
 **Part A:**
 
 - [ ] `rg "initializeXxx" contracts/factory/Factory.sol` returns at least one match
-- [ ] Factory compiles without errors
+- [ ] `npm run compile` produces 0 warnings on modified contracts
+- [ ] Solhint produces no new errors on modified files
+- [ ] `npm run format:check` passes on all modified files
 - [ ] Mandatory / optional pattern is correct for this facet's config membership
 - [ ] Changeset created
 
@@ -271,17 +281,24 @@ console.log(`Asset ${deployedAddress} is now operational.`);
 - [ ] `setOperationalStatus` loop in `SecurityDeploymentLib.deployEquity`
 - [ ] `setOperationalStatus` loop in `SecurityDeploymentLib.deployBond`
 - [ ] TREX factory tests pass: `test/contracts/integration/factory/trex/factory.test.ts`
+- [ ] `npm run compile` produces 0 warnings on modified contracts
+- [ ] Solhint produces no new errors on modified files
 - [ ] Changeset created
 
 **Part C:**
 
 - [ ] All facets in the config's `createConfiguration.ts` have been verified as migrated
 - [ ] `onlyOperational` is first modifier on every non-initialize/non-view/non-pure external function
+- [ ] `IInitializer` is part of `IAsset` (required for fixture to call `setOperationalStatus()` directly)
 - [ ] Fixture calls `setOperationalStatus()` loop and resolves to operational
 - [ ] All `it.skip([MIGRATION])` for this config removed and tests pass
+- [ ] `npm run compile` produces 0 warnings on modified contracts
+- [ ] Solhint produces no new errors on modified files
+- [ ] `npm run format:check` passes on all modified files
 - [ ] Changeset created
 
 **Part D:**
 
 - [ ] Deployment script includes `setOperationalStatus` loop for every factory call
+- [ ] `npm run format:check` passes on modified scripts
 - [ ] Changeset created
