@@ -116,10 +116,16 @@ library AccessControlStorageWrapper {
         if (!hasAnyRole(_roles, _account)) revert IAccessControl.AccountHasNoRoles(_account, _roles);
     }
 
+    /// @notice Reverts if the caller is the sole holder of `DEFAULT_ADMIN_ROLE`.
+    /// @dev Guards `renounceRole` so the contract cannot be left without an admin.
+    /// @param _role The role being renounced.
     function checkNotSoleAdmin(bytes32 _role) internal view {
         if (_isSoleAdmin(_role)) revert IAccessControl.CannotRenounceSoleAdmin();
     }
 
+    /// @notice Returns `true` when `_role` is `DEFAULT_ADMIN_ROLE` and only one member holds it.
+    /// @param _role The role to inspect.
+    /// @return `true` if the caller would be the sole admin after renouncing.
     function _isSoleAdmin(bytes32 _role) private view returns (bool) {
         return _role == DEFAULT_ADMIN_ROLE && rolesStorage().roles[_role].roleMembers.length() == 1;
     }
