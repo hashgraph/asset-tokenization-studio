@@ -284,3 +284,4 @@ console.log(`Asset ${deployedAddress} is now operational.`);
 **Part D:**
 
 - [ ] Deployment script includes `setOperationalStatus` loop for every factory call
+- [ ] Changeset created
