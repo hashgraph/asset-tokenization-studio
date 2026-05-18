@@ -111,6 +111,18 @@ describe("BusinessLogicResolver", () => {
         businessLogicResolver.registerBusinessLogics(BUSINESS_LOGIC_KEYS.slice(0, 2)),
       ).to.be.revertedWithCustomError(businessLogicResolver, "IsPaused");
     });
+
+    it("GIVEN a paused contract WHEN addSelectorsToBlacklist is called THEN transaction fails with IsPaused", async () => {
+      await expect(
+        businessLogicResolver.addSelectorsToBlacklist(EQUITY_CONFIG_ID, ["0x8456cb59"]),
+      ).to.be.revertedWithCustomError(businessLogicResolver, "IsPaused");
+    });
+
+    it("GIVEN a paused contract WHEN removeSelectorsFromBlacklist is called THEN transaction fails with IsPaused", async () => {
+      await expect(
+        businessLogicResolver.removeSelectorsFromBlacklist(EQUITY_CONFIG_ID, ["0x8456cb59"]),
+      ).to.be.revertedWithCustomError(businessLogicResolver, "IsPaused");
+    });
   });
 
   describe("AccessControl", () => {
