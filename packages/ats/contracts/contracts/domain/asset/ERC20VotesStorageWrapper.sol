@@ -17,12 +17,15 @@ bytes32 constant STORAGE_LOCATION_ERC20VOTES = 0xb9759d8916f84f61d52de275f833caf
 
 /// @custom:storage-location erc7201:security.token.standard.storage.Erc20votes
 struct ERC20VotesStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    bool initialized;
     bool activated;
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => address) delegates;
     mapping(address => Checkpoints.Checkpoint[]) checkpoints;
     Checkpoints.Checkpoint[] totalSupplyCheckpoints;
     Checkpoints.Checkpoint[] abafCheckpoints;
-    bool initialized;
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 library ERC20VotesStorageWrapper {

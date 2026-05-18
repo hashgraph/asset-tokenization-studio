@@ -32,8 +32,10 @@ bytes32 constant STORAGE_LOCATION_PROTECTED_PARTITIONS = 0x5b38507d21e10ec4c8c85
  */
 /// @custom:storage-location erc7201:security.token.standard.storage.ProtectedPartitions
 struct ProtectedPartitionsDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
     bool initialized;
     bool arePartitionsProtected;
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 /**

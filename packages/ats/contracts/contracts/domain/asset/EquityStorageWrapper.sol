@@ -22,6 +22,8 @@ bytes32 constant STORAGE_LOCATION_EQUITY = 0x94fe8bd2c421847f50afb78366b145478e2
 
 /// @custom:storage-location erc7201:security.token.standard.storage.Equity
 struct EquityDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    bool initialized;
     bool votingRight;
     bool informationRight;
     bool liquidationRight;
@@ -29,9 +31,10 @@ struct EquityDataStorage {
     bool conversionRight;
     bool redemptionRight;
     bool putRight;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     IEquity.DividendType dividendRight;
-    bytes3 currency;
-    bool initialized;
+
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 /// @title Equity Storage Wrapper
@@ -48,7 +51,6 @@ library EquityStorageWrapper {
         $.redemptionRight = equityDetailsData.redemptionRight;
         $.putRight = equityDetailsData.putRight;
         $.dividendRight = equityDetailsData.dividendRight;
-        $.currency = equityDetailsData.currency;
         $.initialized = true;
     }
 
@@ -106,7 +108,7 @@ library EquityStorageWrapper {
             redemptionRight: _equityStorage().redemptionRight,
             putRight: _equityStorage().putRight,
             dividendRight: _equityStorage().dividendRight,
-            currency: _equityStorage().currency,
+            currency: NominalValueStorageWrapper.getNominalValueCurrency(),
             nominalValue: NominalValueStorageWrapper.getNominalValue(),
             nominalValueDecimals: NominalValueStorageWrapper.getNominalValueDecimals()
         });

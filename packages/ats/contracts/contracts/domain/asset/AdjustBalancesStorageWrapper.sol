@@ -17,8 +17,10 @@ bytes32 constant STORAGE_LOCATION_ADJUST_BALANCES = 0x155c219135942fbe253879a75d
 
 /// @custom:storage-location erc7201:security.token.standard.storage.AdjustBalances
 struct AdjustBalancesStorage {
-    mapping(address => uint256[]) labafUserPartition;
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     uint256 abaf;
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+    mapping(address => uint256[]) labafUserPartition;
     mapping(address => uint256) labaf;
     mapping(bytes32 => uint256) labafByPartition;
     mapping(address => mapping(address => uint256)) labafsAllowances;
@@ -38,6 +40,7 @@ struct AdjustBalancesStorage {
     // Freezes
     mapping(address => uint256) labafFrozenAmountByAccount;
     mapping(address => mapping(bytes32 => uint256)) labafFrozenAmountByAccountAndPartition;
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 library AdjustBalancesStorageWrapper {

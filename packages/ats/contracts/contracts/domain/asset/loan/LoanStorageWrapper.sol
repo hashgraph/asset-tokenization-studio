@@ -15,41 +15,40 @@ bytes32 constant STORAGE_LOCATION_LOAN = 0x2af22e338cd16bdeda633a06c0ad54c1b9d04
 library LoanStorageWrapper {
     /// @custom:storage-location erc7201:security.token.standard.storage.Loan
     struct LoanDataStorage {
-        // LoanBasicData
+        // ─── R1 Lifecycle (bool flags) ───────────────────────────
+        bool initialized;
+        // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
         bytes3 currency;
-        uint256 startingDate;
-        uint256 maturityDate;
         uint8 loanStructureType;
         uint8 repaymentType;
         uint8 interestType;
-        uint256 signingDate;
+        uint8 baseReferenceRate;
+        uint8 dayCount;
+        uint8 paymentFrequency;
+        uint8 utilizationFeeType;
+        uint8 performanceStatus;
         address originatorAccount;
         address servicerAccount;
-        // LoanInterestData
-        uint8 baseReferenceRate;
+        // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+        uint256 startingDate;
+        uint256 maturityDate;
+        uint256 signingDate;
         uint256 floorRate;
         uint256 capRate;
         uint256 rateMargin;
-        uint8 dayCount;
-        uint8 paymentFrequency;
         uint256 firstAccrualDate;
         uint256 prepaymentPenalty;
         uint256 commitmentFee;
         uint256 utilizationFee;
-        uint8 utilizationFeeType;
         uint256 servicingFee;
-        // RiskData
         string internalRiskGrade;
         uint256 defaultProbability;
         uint256 lossGivenDefault;
-        // Collateral
         uint256 totalCollateralValue;
         uint256 loanToValue;
-        // LoanPerformanceStatus
-        uint8 performanceStatus;
         uint256 daysPastDue;
-        // State
-        bool initialized;
+
+        // ─── APPEND-ONLY ZONE BELOW ───
     }
 
     function initializeLoan(ILoan.LoanDetailsData calldata _loanDetailsData) internal {

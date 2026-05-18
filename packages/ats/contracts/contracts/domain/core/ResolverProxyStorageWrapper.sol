@@ -8,9 +8,11 @@ bytes32 constant STORAGE_LOCATION_RESOLVER_PROXY = 0x688a1184cf65cae3790aef0eb60
 
 /// @custom:storage-location erc7201:security.token.standard.storage.ResolverProxy
 struct ResolverProxyStorage {
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     IBusinessLogicResolver resolver;
     bytes32 resolverProxyConfigurationId;
     uint256 version;
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 library ResolverProxyStorageWrapper {

@@ -24,8 +24,10 @@ library ClearingStorageWrapper {
     // solhint-disable max-line-length
     /// @custom:storage-location erc7201:security.token.standard.storage.Clearing
     struct ClearingDataStorage {
+        // ─── R1 Lifecycle (bool flags) ───────────────────────────
         bool initialized;
         bool activated;
+        // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
         mapping(address => uint256) totalClearedAmountByAccount;
         mapping(address => mapping(bytes32 => uint256)) totalClearedAmountByAccountAndPartition;
         // solhint-disable-next-line max-line-length
@@ -40,6 +42,7 @@ library ClearingStorageWrapper {
         mapping(address => mapping(bytes32 => mapping(uint256 => IClearingTypes.ClearingHoldCreationData))) clearingHoldCreationByAccountPartitionAndId;
         // solhint-disable-next-line max-line-length
         mapping(address => mapping(bytes32 => mapping(IClearingTypes.ClearingOperationType => mapping(uint256 => address)))) clearingThirdPartyByAccountPartitionTypeAndId;
+        // ─── APPEND-ONLY ZONE BELOW ───
     }
     // solhint-enable max-line-length
 

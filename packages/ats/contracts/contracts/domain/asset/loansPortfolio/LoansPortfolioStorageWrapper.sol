@@ -47,8 +47,12 @@ library LoansPortfolioStorageWrapper {
      */
     /// @custom:storage-location erc7201:security.token.standard.storage.LoansPortfolio
     struct LoansPortfolioDataStorage {
+        // ─── R1 Lifecycle (bool flags) ───────────────────────────
+        bool initialized;
+        // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
         ILoansPortfolio.PortfolioType portfolioType;
         ILoansPortfolio.DistributionPolicy distributionPolicy;
+        // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
         EnumerableSet.AddressSet holdingsAssets;
         EnumerableSet.AddressSet loanHoldingsAssets;
         EnumerableSet.AddressSet cashHoldingsAssets;
@@ -60,7 +64,7 @@ library LoansPortfolioStorageWrapper {
         EnumerableSet.Bytes32Set loanHoldingsAssetsByCountryKeys;
         mapping(bytes32 => string) countryNames;
         mapping(bytes32 => uint256) loanHoldingsAssetsByCountry;
-        bool initialized;
+        // ─── APPEND-ONLY ZONE BELOW ───
     }
 
     /**

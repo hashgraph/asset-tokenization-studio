@@ -22,12 +22,15 @@ bytes32 constant STORAGE_LOCATION_INITIALIZER = 0x7f2d07b09acba6319339222a47bfb1
  */
 /// @custom:storage-location erc7201:security.token.standard.storage.Initializer
 struct InitializerDataStorage {
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     uint256 maxInitializerFacetIndex;
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     // configVersionStatus encoding: 0 = not started, 1 = fully operational, >1 = (resume facet index + 1)
     mapping(bytes32 configId => mapping(uint256 versionId => uint256 status)) configVersionStatus;
     // facetVersionStatus: 1 means the facet version is ready
     mapping(bytes32 facetId => mapping(uint256 versionId => uint256 status)) facetVersionStatus;
     mapping(bytes32 facetId => uint256 version) facetLastVersion;
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 /**

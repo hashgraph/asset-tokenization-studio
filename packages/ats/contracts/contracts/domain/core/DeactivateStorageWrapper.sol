@@ -16,7 +16,9 @@ bytes32 constant STORAGE_LOCATION_DEACTIVATE = 0x572f1b7cd92e0f948542520f56d2d4e
  */
 /// @custom:storage-location erc7201:security.token.standard.storage.Deactivate
 struct DeactivateDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
     bool deactivated;
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 /**

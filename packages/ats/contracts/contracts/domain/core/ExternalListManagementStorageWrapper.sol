@@ -23,8 +23,11 @@ bytes32 constant STORAGE_LOCATION_KYC_MANAGEMENT = 0x44eb866201f22832539d7232090
 ///      documented via its STORAGE_LOCATION_KYC_MANAGEMENT constant above.
 /// @custom:storage-location erc7201:security.token.standard.storage.ControlListManagement
 struct ExternalListDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
     bool initialized;
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     EnumerableSet.AddressSet list;
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 library ExternalListManagementStorageWrapper {

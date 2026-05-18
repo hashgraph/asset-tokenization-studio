@@ -19,17 +19,19 @@ bytes32 constant STORAGE_LOCATION_BOND = 0xa99cdff87e8b13602d53b3661888bce1eb21f
 library BondStorageWrapper {
     /// @custom:storage-location erc7201:security.token.standard.storage.Bond
     struct BondDataStorage {
-        bytes3 currency;
+        // ─── R1 Lifecycle (bool flags) ───────────────────────────
+        bool initialized;
+        // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
         uint256 startingDate;
         uint256 maturityDate;
-        bool initialized;
+
+        // ─── APPEND-ONLY ZONE BELOW ───
     }
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_bond(IBondTypes.BondDetailsData calldata bondDetailsData) internal {
         BondDataStorage storage bs = _bondStorage();
         bs.initialized = true;
-        bs.currency = bondDetailsData.currency;
         bs.startingDate = bondDetailsData.startingDate;
         bs.maturityDate = bondDetailsData.maturityDate;
     }
@@ -41,7 +43,7 @@ library BondStorageWrapper {
     function getBondDetails() internal view returns (IBondTypes.BondDetailsData memory bondDetails_) {
         BondDataStorage storage bs = _bondStorage();
         bondDetails_ = IBondTypes.BondDetailsData({
-            currency: bs.currency,
+            currency: NominalValueStorageWrapper.getNominalValueCurrency(),
             nominalValue: NominalValueStorageWrapper.getNominalValue(),
             nominalValueDecimals: NominalValueStorageWrapper.getNominalValueDecimals(),
             startingDate: bs.startingDate,

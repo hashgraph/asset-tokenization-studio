@@ -39,8 +39,11 @@ bytes32 constant STORAGE_LOCATION_ERC1594 = 0x6bb5986b529cbe1ac563af7efd06b91a80
  */
 /// @custom:storage-location erc7201:security.token.standard.storage.Erc1594
 struct ERC1594Storage {
-    bool issuance;
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
     bool initialized;
+    bool issuance;
+
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 /**

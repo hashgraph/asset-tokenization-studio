@@ -6,7 +6,9 @@ bytes32 constant STORAGE_LOCATION_NONCE = 0x9752efd73e12c56ed1d4aebb7f98c3d8260f
 
 /// @custom:storage-location erc7201:security.token.standard.storage.Nonce
 struct NonceDataStorage {
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => uint256) nonces;
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 library NonceStorageWrapper {

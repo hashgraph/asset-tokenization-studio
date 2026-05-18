@@ -14,9 +14,12 @@ bytes32 constant STORAGE_LOCATION_KPIS = 0x0016dc918f7b373bc12e22119ae85cf4b20c3
 
 /// @custom:storage-location erc7201:security.token.standard.storage.Kpis
 struct KpisDataStorage {
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    uint256 minDate;
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => Checkpoints.Checkpoint[]) checkpointsByProject;
     mapping(address => mapping(uint256 => bool)) checkpointsDatesByProject;
-    uint256 minDate;
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 library KpisStorageWrapper {

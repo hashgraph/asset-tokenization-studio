@@ -20,10 +20,12 @@ struct ActionData {
 
 /// @custom:storage-location erc7201:security.token.standard.storage.CorporateAction
 struct CorporateActionDataStorage {
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     EnumerableSet.Bytes32Set actions;
     mapping(bytes32 => ActionData) actionsData;
     mapping(bytes32 => bytes32[]) actionsByType;
     mapping(bytes32 => bool) actionsContentHashes;
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 /**

@@ -36,6 +36,11 @@ bytes32 constant STORAGE_LOCATION_SNAPSHOT = 0x2e9cb27cc6da952dbadc3ddf8f7c0573a
  */
 /// @custom:storage-location erc7201:security.token.standard.storage.Snapshot
 struct SnapshotStorage {
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    /// @dev Snapshot ids increase monotonically, with the first value being 1. An id of 0 is invalid.
+    /// Unique ID for the current snapshot
+    CountersUpgradeable.Counter currentSnapshotId;
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     /// @dev Snapshots for total balances per account
     mapping(address => Snapshots) accountBalanceSnapshots;
     /// @dev Snapshots for balances per account and partition
@@ -44,9 +49,6 @@ struct SnapshotStorage {
     mapping(address => PartitionSnapshots) accountPartitionMetadata;
     /// @dev Snapshots for the total supply
     Snapshots totalSupplySnapshots;
-    /// @dev Snapshot ids increase monotonically, with the first value being 1. An id of 0 is invalid.
-    /// Unique ID for the current snapshot
-    CountersUpgradeable.Counter currentSnapshotId;
     /// @dev Snapshots for locked balances per account
     mapping(address => Snapshots) accountLockedBalanceSnapshots;
     /// @dev Snapshots for locked balances per account and partition
@@ -77,6 +79,7 @@ struct SnapshotStorage {
     Snapshots nominalValueSnapshots;
     /// @dev Snapshots for the nominal value decimals
     Snapshots nominalValueDecimalsSnapshots;
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 /**

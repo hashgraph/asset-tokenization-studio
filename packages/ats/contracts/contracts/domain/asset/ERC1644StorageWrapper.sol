@@ -9,8 +9,11 @@ bytes32 constant STORAGE_LOCATION_ERC1644 = 0x96356235f59c9d131a29a98816b8ce8d9e
 
 /// @custom:storage-location erc7201:security.token.standard.storage.Erc1644
 struct ERC1644Storage {
-    bool isControllable;
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
     bool initialized;
+    bool isControllable;
+
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 library ERC1644StorageWrapper {

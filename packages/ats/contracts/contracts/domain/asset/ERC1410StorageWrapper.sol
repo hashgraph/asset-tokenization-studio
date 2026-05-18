@@ -39,25 +39,33 @@ struct Partition {
 
 /// @custom:storage-location erc7201:security.token.standard.storage.Erc1410Basic
 struct ERC1410BasicStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    bool initialized;
+    bool multiPartition;
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    uint256 totalTokenHolders;
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(bytes32 => uint256) totalSupplyByPartition;
     /// @dev Mapping from investor to their partitions
     mapping(address => Partition[]) partitions;
     /// @dev Mapping from (investor, partition) to index of corresponding partition in partitions
     /// @dev Stored value is always greater by 1 to avoid the 0 value of every index
     mapping(address => mapping(bytes32 => uint256)) partitionToIndex;
-    bool multiPartition;
-    bool initialized;
     mapping(address => uint256) tokenHolderIndex;
     mapping(uint256 => address) tokenHolders;
-    uint256 totalTokenHolders;
+
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 /// @custom:storage-location erc7201:security.token.standard.storage.Erc1410Operator
 struct ERC1410OperatorStorage {
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     /// @dev Mapping from (investor, partition, operator) to approved status
     mapping(address => mapping(bytes32 => mapping(address => bool))) partitionApprovals;
     /// @dev Mapping from (investor, operator) to approved status (can be used against any partition)
     mapping(address => mapping(address => bool)) approvals;
+
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 library ERC1410StorageWrapper {

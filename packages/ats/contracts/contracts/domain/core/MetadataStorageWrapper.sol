@@ -15,7 +15,9 @@ bytes32 constant STORAGE_LOCATION_METADATA = 0x88e64aeb880d89a6f66a0868c82854ac5
  */
 /// @custom:storage-location erc7201:security.token.standard.storage.Metadata
 struct MetadataDataStorage {
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(bytes32 => bytes[]) metadata;
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 /**

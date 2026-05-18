@@ -39,12 +39,14 @@ library HoldStorageWrapper {
 
     /// @custom:storage-location erc7201:security.token.standard.storage.Hold
     struct HoldDataStorage {
+        // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
         mapping(address => uint256) totalHeldAmountByAccount;
         mapping(address => mapping(bytes32 => uint256)) totalHeldAmountByAccountAndPartition;
         mapping(address => mapping(bytes32 => mapping(uint256 => IHoldTypes.HoldData))) holdsByAccountPartitionAndId;
         mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) holdIdsByAccountAndPartition;
         mapping(address => mapping(bytes32 => uint256)) nextHoldIdByAccountAndPartition;
         mapping(address => mapping(bytes32 => mapping(uint256 => address))) holdThirdPartyByAccountPartitionAndId;
+        // ─── APPEND-ONLY ZONE BELOW ───
     }
 
     function createHoldByPartition(

@@ -14,7 +14,9 @@ bytes32 constant STORAGE_LOCATION_PROCEED_RECIPIENTS_DATA = 0xc68f265b7453bab62d
 
 /// @custom:storage-location erc7201:security.token.standard.storage.ProceedRecipientsData
 struct ProceedRecipientsDataStorage {
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => bytes) proceedRecipientData;
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 library ProceedRecipientsStorageWrapper {

@@ -40,11 +40,13 @@ library AmortizationStorageWrapper {
     /// @custom:storage-location erc7201:security.token.standard.storage.Amortization
     struct AmortizationDataStorage {
         // solhint-disable max-line-length
+        // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
         mapping(bytes32 corporateActionId => mapping(address tokenHolder => IAmortizationStorageWrapper.AmortizationHoldInfo)) amortizationHolds;
         mapping(bytes32 corporateActionId => EnumerableSet.AddressSet) activeHoldHolders;
         EnumerableSet.UintSet activeAmortizationIds;
         mapping(bytes32 corporateActionId => uint256) totalHoldByAmortizationId;
         mapping(bytes32 corporateActionId => bool) disabledAmortizations;
+        // ─── APPEND-ONLY ZONE BELOW ───
     }
 
     function setAmortization(

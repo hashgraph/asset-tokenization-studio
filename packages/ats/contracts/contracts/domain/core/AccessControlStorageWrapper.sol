@@ -18,8 +18,10 @@ struct RoleData {
 
 /// @custom:storage-location erc7201:security.token.standard.storage.AccessControl
 struct RoleDataStorage {
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(bytes32 => RoleData) roles;
     mapping(address => EnumerableSet.Bytes32Set) memberRoles;
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 /**

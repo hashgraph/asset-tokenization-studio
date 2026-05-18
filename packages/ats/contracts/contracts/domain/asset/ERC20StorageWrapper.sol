@@ -3,10 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _DEFAULT_PARTITION, KPI_ERC20_APPROVE_OWNER } from "../../constants/values.sol";
 import { ICore } from "../../facets/core/ICore.sol";
+import { IFactory } from "../../factory/IFactory.sol";
 import { ITransfer } from "../../facets/transfer/ITransfer.sol";
 import { IAllowanceTypes } from "../../facets/allowance/IAllowanceTypes.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
-import { IFactory } from "../../factory/IFactory.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
@@ -18,15 +18,21 @@ bytes32 constant STORAGE_LOCATION_ERC20 = 0xba2beddc557de36eb4836f4ff1fd9d33a28d
 
 /// @custom:storage-location erc7201:security.token.standard.storage.Erc20
 struct ERC20Storage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    bool initialized;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    uint8 decimals;
+    IFactory.SecurityType securityType;
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     string name;
     string symbol;
     string isin;
-    uint8 decimals;
-    bool initialized;
-    mapping(address => mapping(address => uint256)) allowed;
-    IFactory.SecurityType securityType;
     uint256 totalSupply;
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => uint256) balances;
+    mapping(address => mapping(address => uint256)) allowed;
+
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 library ERC20StorageWrapper {
@@ -38,6 +44,14 @@ library ERC20StorageWrapper {
         erc20Stor.decimals = erc20Metadata.info.decimals;
         erc20Stor.securityType = erc20Metadata.securityType;
         erc20Stor.initialized = true;
+    }
+
+    function setName(string calldata _name) internal {
+        erc20Storage().name = _name;
+    }
+
+    function setSymbol(string calldata _symbol) internal {
+        erc20Storage().symbol = _symbol;
     }
 
     /// @notice Updates ERC-20 balances and emits the EIP-20 Transfer event.

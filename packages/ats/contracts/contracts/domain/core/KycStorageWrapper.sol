@@ -14,10 +14,13 @@ bytes32 constant STORAGE_LOCATION_KYC = 0x88f619eb35d79dd51bdbedb0638479d77479fa
 
 /// @custom:storage-location erc7201:security.token.standard.storage.Kyc
 struct KycStorage {
-    mapping(address => IKyc.KycData) kyc;
-    mapping(IKyc.KycStatus => EnumerableSet.AddressSet) kycAddressesByStatus;
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
     bool initialized;
     bool internalKycActivated;
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+    mapping(address => IKyc.KycData) kyc;
+    mapping(IKyc.KycStatus => EnumerableSet.AddressSet) kycAddressesByStatus;
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 /**

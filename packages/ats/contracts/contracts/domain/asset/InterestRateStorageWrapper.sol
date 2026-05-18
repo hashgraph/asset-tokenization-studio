@@ -24,9 +24,14 @@ bytes32 constant STORAGE_LOCATION_FIXED_RATE = 0x577d3b71f198de7595699f8f2861298
  */
 /// @custom:storage-location erc7201:security.token.standard.storage.FixedRate
 struct FixedRateDataStorage {
-    uint256 rate;
-    uint8 decimals;
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
     bool initialized;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    uint8 decimals;
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    uint256 rate;
+
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 /**
@@ -50,6 +55,12 @@ struct FixedRateDataStorage {
  */
 /// @custom:storage-location erc7201:security.token.standard.storage.KpiLinkedRate
 struct KpiLinkedRateDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    bool initialized;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    uint8 rateDecimals;
+    uint8 impactDataDecimals;
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     uint256 maxRate;
     uint256 baseRate;
     uint256 minRate;
@@ -57,13 +68,12 @@ struct KpiLinkedRateDataStorage {
     uint256 startRate;
     uint256 missedPenalty;
     uint256 reportPeriod;
-    uint8 rateDecimals;
     uint256 maxDeviationCap;
     uint256 baseLine;
     uint256 maxDeviationFloor;
     uint256 adjustmentPrecision;
-    uint8 impactDataDecimals;
-    bool initialized;
+
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 /**
@@ -74,8 +84,12 @@ struct KpiLinkedRateDataStorage {
  */
 /// @custom:storage-location erc7201:security.token.standard.storage.InterestRateType
 struct InterestRateTypeDataStorage {
-    IInterestRate.RateType rateType;
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
     bool initialized;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    IInterestRate.RateType rateType;
+
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 /**

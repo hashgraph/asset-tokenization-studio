@@ -11,9 +11,12 @@ bytes32 constant STORAGE_LOCATION_CONTROL_LIST = 0x880786188890a6f111c4f0814d49d
 
 /// @custom:storage-location erc7201:security.token.standard.storage.ControlList
 struct ControlListStorage {
-    bool isWhiteList;
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
     bool initialized;
+    bool isWhiteList;
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     EnumerableSet.AddressSet list;
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 /**

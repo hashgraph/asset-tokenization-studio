@@ -43,13 +43,17 @@ library ERC3643StorageWrapper {
 
     /// @custom:storage-location erc7201:security.token.standard.storage.Erc3643
     struct ERC3643Storage {
+        // ─── R1 Lifecycle (bool flags) ───────────────────────────
+        bool initialized;
+        // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
         address onchainID;
         address identityRegistry;
         address compliance;
+        // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
         mapping(address => uint256) frozenTokens;
         mapping(address => mapping(bytes32 => uint256)) frozenTokensByPartition;
         mapping(address => bool) addressRecovered;
-        bool initialized;
+        // ─── APPEND-ONLY ZONE BELOW ───
     }
 
     // solhint-disable-next-line func-name-mixedcase
@@ -94,8 +98,8 @@ library ERC3643StorageWrapper {
     }
 
     function setName(string calldata _name) internal {
+        ERC20StorageWrapper.setName(_name);
         ERC20Storage storage erc20Storage_ = ERC20StorageWrapper.erc20Storage();
-        erc20Storage_.name = _name;
         emit IERC3643Types.UpdatedTokenInformation(
             erc20Storage_.name,
             erc20Storage_.symbol,
@@ -106,8 +110,8 @@ library ERC3643StorageWrapper {
     }
 
     function setSymbol(string calldata _symbol) internal {
+        ERC20StorageWrapper.setSymbol(_symbol);
         ERC20Storage storage erc20Storage_ = ERC20StorageWrapper.erc20Storage();
-        erc20Storage_.symbol = _symbol;
         emit IERC3643Types.UpdatedTokenInformation(
             erc20Storage_.name,
             erc20Storage_.symbol,
@@ -118,8 +122,8 @@ library ERC3643StorageWrapper {
     }
 
     function setOnchainID(address _onchainID) internal {
-        ERC20Storage storage erc20Storage_ = ERC20StorageWrapper.erc20Storage();
         erc3643Storage().onchainID = _onchainID;
+        ERC20Storage storage erc20Storage_ = ERC20StorageWrapper.erc20Storage();
         emit IERC3643Types.UpdatedTokenInformation(
             erc20Storage_.name,
             erc20Storage_.symbol,
