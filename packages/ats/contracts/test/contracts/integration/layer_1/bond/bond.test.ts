@@ -147,9 +147,10 @@ describe("Bond Tests", () => {
 
       const principalFor = await asset.getPrincipalFor(signer_A.address);
       const bondDetails = await asset.getBondDetails();
+      const nominalScale = 10n ** bondDetails.nominalValueDecimals;
 
-      expect(principalFor.numerator).to.equal(bondDetails.nominalValue * BigInt(amount));
-      expect(principalFor.denominator).to.equal(10n ** (bondDetails.nominalValueDecimals + BigInt(DECIMALS)));
+      expect(principalFor.numerator).to.equal((bondDetails.nominalValue * BigInt(amount)) / nominalScale);
+      expect(principalFor.denominator).to.equal(10n ** BigInt(DECIMALS));
     });
 
     // NOTE: The "Redeem At Maturity" block below contains tests for both redeemAtMaturityByPartition
@@ -318,9 +319,10 @@ describe("Bond Tests", () => {
 
         const principalFor = await asset.getPrincipalFor(signer_A.address);
         const bondDetails = await asset.getBondDetails();
+        const nominalScale = 10n ** bondDetails.nominalValueDecimals;
 
-        expect(principalFor.numerator).to.equal(bondDetails.nominalValue * BigInt(amount) * 2n);
-        expect(principalFor.denominator).to.equal(10n ** (bondDetails.nominalValueDecimals + BigInt(DECIMALS)));
+        expect(principalFor.numerator).to.equal((bondDetails.nominalValue * BigInt(amount) * 2n) / nominalScale);
+        expect(principalFor.denominator).to.equal(10n ** BigInt(DECIMALS));
       });
 
       it("GIVEN a new diamond contract with multi-partition WHEN redeemAtMaturityByPartition is called THEN transaction success", async () => {

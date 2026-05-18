@@ -11,14 +11,16 @@ pragma solidity >=0.8.0 <0.9.0;
 interface IPrincipal {
     /**
      * @notice Encodes a principal value as a fraction.
-     * @dev `principal = (numerator / denominator)` expressed in the bond's currency unit.
-     *      `denominator` equals `10 ** (nominalValueDecimals + tokenDecimals)` and is constant
-     *      for a given bond configuration, so callers may cache it.
+     * @dev `principal = numerator / denominator` expressed in the bond's currency unit.
+     *      The specific decomposition of numerator and denominator is an implementation
+     *      detail and may change to preserve precision or overflow safety; only the ratio
+     *      is part of the public contract. Callers should never assume that `denominator`
+     *      matches any particular power of ten.
      */
     struct PrincipalFor {
-        /// @dev Token-holder balance multiplied by the bond's nominal value.
+        /// @dev Numerator of the principal fraction.
         uint256 numerator;
-        /// @dev Scale factor: `10 ** (nominalValueDecimals + tokenDecimals)`.
+        /// @dev Denominator of the principal fraction; non-zero when balance > 0.
         uint256 denominator;
     }
 

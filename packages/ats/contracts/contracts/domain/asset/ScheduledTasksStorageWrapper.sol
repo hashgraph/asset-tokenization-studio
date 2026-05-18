@@ -33,6 +33,7 @@ import { InterestRateStorageWrapper } from "./InterestRateStorageWrapper.sol";
 import { SustainabilityPerformanceTargetRateLib } from "./SustainabilityPerformanceTargetRateLib.sol";
 import { ICouponTypes } from "../../facets/coupon/ICouponTypes.sol";
 import { KpiLinkedRateLib } from "./KpiLinkedRateLib.sol";
+import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 
 /**
  * @title ScheduledTasksStorageWrapper
@@ -235,7 +236,9 @@ library ScheduledTasksStorageWrapper {
                     balanceAdjustmentData,
                     (IScheduledBalanceAdjustment.ScheduledBalanceAdjustment)
                 );
-                pendingABAF_ *= balanceAdjustment.factor;
+                // Apply each adjustment via 512-bit mulDiv so the accumulator stays the integer
+                // ratio at every step instead of compounding the 1e18-scale factor unchecked.
+                pendingABAF_ = Math.mulDiv(pendingABAF_, balanceAdjustment.factor, 10 ** balanceAdjustment.decimals);
                 pendingDecimals_ += balanceAdjustment.decimals;
                 unchecked {
                     ++i;

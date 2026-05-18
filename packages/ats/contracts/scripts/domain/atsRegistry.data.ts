@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-14T13:09:33.725Z
+ * Generated: 2026-05-18T10:25:05.862Z
  * Facets: 126
  * Infrastructure: 2
  *
@@ -378,6 +378,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "ContradictoryValuesInArray(uint256,uint256)",
         },
         selector: "0xf50c17aa",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {

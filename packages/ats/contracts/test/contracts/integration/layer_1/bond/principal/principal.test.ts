@@ -75,9 +75,10 @@ describe("PrincipalFacet Tests", () => {
 
       const principalFor = await asset.getPrincipalFor(signer_A.address);
       const bondDetails = await asset.getBondDetails();
+      const nominalScale = 10n ** bondDetails.nominalValueDecimals;
 
-      expect(principalFor.numerator).to.equal(bondDetails.nominalValue * BigInt(amount));
-      expect(principalFor.denominator).to.equal(10n ** (bondDetails.nominalValueDecimals + BigInt(DECIMALS)));
+      expect(principalFor.numerator).to.equal((bondDetails.nominalValue * BigInt(amount)) / nominalScale);
+      expect(principalFor.denominator).to.equal(10n ** BigInt(DECIMALS));
     });
 
     it("GIVEN two token holders WHEN getPrincipalFor THEN each returns independent principal", async () => {
@@ -100,11 +101,12 @@ describe("PrincipalFacet Tests", () => {
       const principalA = await asset.getPrincipalFor(signer_A.address);
       const principalC = await asset.getPrincipalFor(signer_C.address);
       const bondDetails = await asset.getBondDetails();
-      const denominator = 10n ** (bondDetails.nominalValueDecimals + BigInt(DECIMALS));
+      const nominalScale = 10n ** bondDetails.nominalValueDecimals;
+      const denominator = 10n ** BigInt(DECIMALS);
 
-      expect(principalA.numerator).to.equal(bondDetails.nominalValue * BigInt(amountA));
+      expect(principalA.numerator).to.equal((bondDetails.nominalValue * BigInt(amountA)) / nominalScale);
       expect(principalA.denominator).to.equal(denominator);
-      expect(principalC.numerator).to.equal(bondDetails.nominalValue * BigInt(amountC));
+      expect(principalC.numerator).to.equal((bondDetails.nominalValue * BigInt(amountC)) / nominalScale);
       expect(principalC.denominator).to.equal(denominator);
     });
   });
@@ -128,9 +130,10 @@ describe("PrincipalFacet Tests", () => {
 
       const principalFor = await asset.getPrincipalFor(signer_A.address);
       const bondDetails = await asset.getBondDetails();
+      const nominalScale = 10n ** bondDetails.nominalValueDecimals;
 
-      expect(principalFor.numerator).to.equal(bondDetails.nominalValue * BigInt(amount) * 2n);
-      expect(principalFor.denominator).to.equal(10n ** (bondDetails.nominalValueDecimals + BigInt(DECIMALS)));
+      expect(principalFor.numerator).to.equal((bondDetails.nominalValue * BigInt(amount) * 2n) / nominalScale);
+      expect(principalFor.denominator).to.equal(10n ** BigInt(DECIMALS));
     });
 
     it("GIVEN account with no balance WHEN getPrincipalFor on multi-partition bond THEN numerator is zero", async () => {

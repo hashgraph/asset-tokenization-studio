@@ -403,9 +403,10 @@ describe("Coupon Tests", () => {
     expect(couponHolders.length).to.equal(couponTotalHolders);
     expect([...couponHolders]).to.have.members([signer_A.address]);
     expect(couponAmountFor.recordDateReached).to.equal(couponFor.recordDateReached);
-    expect(couponAmountFor.numerator).to.equal(couponFor.tokenBalance * nominalValue * couponFor.coupon.rate * period);
+    const balanceNominalScaled = (couponFor.tokenBalance * nominalValue) / 10n ** nominalValueDecimals;
+    expect(couponAmountFor.numerator).to.equal(balanceNominalScaled * couponFor.coupon.rate * period);
     expect(couponAmountFor.denominator).to.equal(
-      10n ** (couponFor.decimals + nominalValueDecimals + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS),
+      10n ** (couponFor.decimals + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS),
     );
   });
 
@@ -475,9 +476,10 @@ describe("Coupon Tests", () => {
     expect(couponHolders.length).to.equal(couponTotalHolders);
     expect([...couponHolders]).to.have.members([signer_A.address]);
     expect(couponAmountFor.recordDateReached).to.equal(couponFor.recordDateReached);
-    expect(couponAmountFor.numerator).to.equal(couponFor.tokenBalance * nominalValue * couponFor.coupon.rate * period);
+    const balanceNominalScaled = (couponFor.tokenBalance * nominalValue) / 10n ** nominalValueDecimals;
+    expect(couponAmountFor.numerator).to.equal(balanceNominalScaled * couponFor.coupon.rate * period);
     expect(couponAmountFor.denominator).to.equal(
-      10n ** (couponFor.decimals + nominalValueDecimals + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS),
+      10n ** (couponFor.decimals + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS),
     );
   });
 
@@ -575,12 +577,11 @@ describe("Coupon Tests", () => {
     expect(couponFor.recordDateReached).to.equal(true);
     expect(couponFor.tokenBalance).to.equal(totalAmount); // normal+cleared+held+locked+frozen
     expect(couponAmountForAfter.recordDateReached).to.equal(couponFor.recordDateReached);
-    expect(couponAmountForAfter.numerator).to.equal(
-      couponFor.tokenBalance * bondDetails.nominalValue * couponFor.coupon.rate * period,
-    );
+    const balanceNominalScaled =
+      (couponFor.tokenBalance * bondDetails.nominalValue) / 10n ** bondDetails.nominalValueDecimals;
+    expect(couponAmountForAfter.numerator).to.equal(balanceNominalScaled * couponFor.coupon.rate * period);
     expect(couponAmountForAfter.denominator).to.equal(
-      10n ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals) *
-        BigInt(YEAR_SECONDS),
+      10n ** (couponFor.decimals + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS),
     );
   });
 
@@ -762,11 +763,11 @@ describe("Coupon Tests", () => {
     // Numerator and denominator must use the snapshot-scale values returned in couponFor
     // (NominalValue, NominalValueDecimals), not the current values just written above.
     expect(couponAmountFor.recordDateReached).to.equal(true);
-    expect(couponAmountFor.numerator).to.equal(
-      couponFor.tokenBalance * couponFor.nominalValue * couponFor.coupon.rate * period,
-    );
+    const balanceNominalScaled =
+      (couponFor.tokenBalance * couponFor.nominalValue) / 10n ** BigInt(NominalValueDecimals);
+    expect(couponAmountFor.numerator).to.equal(balanceNominalScaled * couponFor.coupon.rate * period);
     expect(couponAmountFor.denominator).to.equal(
-      10n ** (couponFor.decimals + BigInt(NominalValueDecimals) + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS),
+      10n ** (couponFor.decimals + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS),
     );
   });
 
