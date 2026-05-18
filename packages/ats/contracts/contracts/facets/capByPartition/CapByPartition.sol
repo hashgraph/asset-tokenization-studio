@@ -26,6 +26,7 @@ abstract contract CapByPartition is ICapByPartition, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(CAP_ROLE)
         onlyValidNewMaxSupplyByPartition(_partition, _maxSupply, TimeTravelStorageWrapper.getBlockTimestamp())

@@ -18,7 +18,6 @@ import {
   BOND_CONFIG_ID,
   BOND_FIXED_RATE_CONFIG_ID,
   BOND_KPI_LINKED_RATE_CONFIG_ID,
-  BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
   EQUITY_CONFIG_ID,
   FACTORY_CONFIG_ID,
   LOAN_CONFIG_ID,
@@ -57,7 +56,6 @@ describe("DiamondCutManager", () => {
   let bondFacetIdList: string[] = [];
   let bondFixedRateFacetIdList: string[] = [];
   let bondKpiLinkedRateFacetIdList: string[] = [];
-  let bondSustainabilityPerformanceTargetRateFacetIdList: string[] = [];
   let loanFacetIdList: string[] = [];
   let loansPortfolioFacetIdList: string[] = [];
   let factoryFacetIdList: string[] = [];
@@ -87,9 +85,6 @@ describe("DiamondCutManager", () => {
     bondFacetIdList = Object.values(infrastructure.bondFacetKeys);
     bondFixedRateFacetIdList = Object.values(infrastructure.bondFixedRateFacetKeys);
     bondKpiLinkedRateFacetIdList = Object.values(infrastructure.bondKpiLinkedRateFacetKeys);
-    bondSustainabilityPerformanceTargetRateFacetIdList = Object.values(
-      infrastructure.bondSustainabilityPerformanceTargetRateFacetKeys,
-    );
     loanFacetIdList = Object.values(infrastructure.loanFacetKeys);
     loansPortfolioFacetIdList = Object.values(infrastructure.loansPortfolioFacetKeys);
     factoryFacetIdList = Object.values(infrastructure.factoryFacetKeys);
@@ -100,7 +95,6 @@ describe("DiamondCutManager", () => {
       [BOND_CONFIG_ID]: bondFacetIdList,
       [BOND_FIXED_RATE_CONFIG_ID]: bondFixedRateFacetIdList,
       [BOND_KPI_LINKED_RATE_CONFIG_ID]: bondKpiLinkedRateFacetIdList,
-      [BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID]: bondSustainabilityPerformanceTargetRateFacetIdList,
       [LOAN_CONFIG_ID]: loanFacetIdList,
       [LOANS_PORTFOLIO_CONFIG_ID]: loansPortfolioFacetIdList,
       [FACTORY_CONFIG_ID]: factoryFacetIdList,
@@ -328,7 +322,7 @@ describe("DiamondCutManager", () => {
 
   it("GIVEN a resolver WHEN reading configuration information THEN everything matches", async () => {
     const configLength = Number(await diamondCutManager.getConfigurationsLength());
-    expect(configLength).to.equal(9);
+    expect(configLength).to.equal(8);
 
     const configIds = await diamondCutManager.getConfigurations(0, configLength);
     expect([...configIds]).to.have.members([
@@ -336,7 +330,6 @@ describe("DiamondCutManager", () => {
       BOND_CONFIG_ID,
       BOND_FIXED_RATE_CONFIG_ID,
       BOND_KPI_LINKED_RATE_CONFIG_ID,
-      BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
       LOAN_CONFIG_ID,
       LOANS_PORTFOLIO_CONFIG_ID,
       FACTORY_CONFIG_ID,

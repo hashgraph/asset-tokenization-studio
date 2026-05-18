@@ -29,6 +29,7 @@ abstract contract BatchMint is IBatchMint, Modifiers {
         uint256[] calldata _amounts
     )
         external
+        onlyActivated
         onlyUnpaused
         onlyValidInputAmountsArrayLength(_toList, _amounts)
         onlyWithoutMultiPartition

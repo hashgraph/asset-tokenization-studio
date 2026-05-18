@@ -12,15 +12,6 @@ import { ResolverProxyStorageWrapper } from "../core/ResolverProxyStorageWrapper
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
-struct ERC20PermitStorage {
-    // solhint-disable-next-line var-name-mixedcase
-    string DEPRECATED_contractName;
-    // solhint-disable-next-line var-name-mixedcase
-    string DEPRECATED_contractVersion;
-    // solhint-disable-next-line var-name-mixedcase
-    bool DEPRECATED_initialized;
-}
-
 library ERC20PermitStorageWrapper {
     function permit(
         address owner,

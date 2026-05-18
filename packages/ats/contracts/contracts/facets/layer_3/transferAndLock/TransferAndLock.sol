@@ -20,6 +20,7 @@ abstract contract TransferAndLock is ITransferAndLock, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(LOCKER_ROLE)
         onlyWithValidExpirationTimestamp(_expirationTimestamp)

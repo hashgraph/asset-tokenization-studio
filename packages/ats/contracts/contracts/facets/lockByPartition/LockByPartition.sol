@@ -37,6 +37,7 @@ abstract contract LockByPartition is ILockByPartition, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(LOCKER_ROLE)
         onlyValidExpirationTimestamp(_expirationTimestamp)
@@ -69,6 +70,7 @@ abstract contract LockByPartition is ILockByPartition, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyWithValidLockId(_partition, _tokenHolder, _lockId)

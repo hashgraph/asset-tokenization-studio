@@ -24,6 +24,7 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
         bool[] calldata _freeze
     )
         external
+        onlyActivated
         onlyUnpaused
         onlyValidInputBoolArrayLength(_userAddresses, _freeze)
         onlyFreezeRoles(EvmAccessors.getMsgSender())
@@ -45,7 +46,13 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
     function batchFreezePartialTokens(
         address[] calldata _userAddresses,
         uint256[] calldata _amounts
-    ) external onlyUnpaused onlyValidInputAmountsArrayLength(_userAddresses, _amounts) onlyWithoutMultiPartition {
+    )
+        external
+        onlyActivated
+        onlyUnpaused
+        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
+        onlyWithoutMultiPartition
+    {
         uint256 length = _userAddresses.length;
         for (uint256 i; i < length; ) {
             ExternalListManagementStorageWrapper.checkValidAddress(_userAddresses[i]);
@@ -62,7 +69,13 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
     function batchUnfreezePartialTokens(
         address[] calldata _userAddresses,
         uint256[] calldata _amounts
-    ) external onlyUnpaused onlyValidInputAmountsArrayLength(_userAddresses, _amounts) onlyWithoutMultiPartition {
+    )
+        external
+        onlyActivated
+        onlyUnpaused
+        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
+        onlyWithoutMultiPartition
+    {
         uint256 length = _userAddresses.length;
         for (uint256 i; i < length; ) {
             ExternalListManagementStorageWrapper.checkValidAddress(_userAddresses[i]);

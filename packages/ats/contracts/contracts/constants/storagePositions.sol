@@ -25,9 +25,6 @@ bytes32 constant _ERC1410_BASIC_STORAGE_POSITION = 0x67661db80d37d3b9810c430f789
 // keccak256('security.token.standard.erc20.storage');
 bytes32 constant _ERC20_STORAGE_POSITION = 0xd5228ac65cba3eaaef0669de6709c44cfdf33c0f1cce2989d4a133e0214cce57;
 
-// keccak256('security.token.standard.erc20permit.storage');
-bytes32 constant _ERC20PERMIT_STORAGE_POSITION = 0x2eab7c044bb5364d7d7f71ddae6058a0259318944e16332fb2c4b0d4df71bb00;
-
 // keccak256('security.token.standard.erc20votes.storage');
 bytes32 constant _ERC20VOTES_STORAGE_POSITION = 0x267abaf3c47dd2e587e53273fad716e2b95949f6838b817b0c728f0beea38c12;
 
@@ -138,9 +135,6 @@ bytes32 constant _FIXED_RATE_STORAGE_POSITION = 0x15c219561d57f111c36d547315cfca
 // keccak256('security.token.standard.kpiLinked.rate.storage');
 bytes32 constant _KPI_LINKED_RATE_STORAGE_POSITION = 0x3004b60ac76f4502c30ee18a6db5845c0ce175b00881a07640a1fd25d9506785;
 
-// keccak256('security.token.standard.sustainabilityPerformanceTarget.rate.storage');
-bytes32 constant _SUSTAINABILITY_PERFORMANCE_TARGET_RATE_STORAGE_POSITION = 0x93dfece0e867ca7a953a76c2874bb7238395e73f4592fa6a72639df7d5350c09;
-
 // keccak256('security.token.standard.nominalValue.storage');
 bytes32 constant _NOMINAL_VALUE_STORAGE_POSITION = 0xc0fde456b6db4817b54ba988cff47f70c0e04c5da2d340c51e72c7d679d44c40;
 
@@ -172,3 +166,6 @@ bytes32 constant _DEACTIVATE_STORAGE_POSITION = 0x06257f792d30fc0103eef3c47e444b
 
 // keccak256('security.token.standard.initializer.storage');
 bytes32 constant _INITIALIZER_STORAGE_POSITION = 0x8702d507127ca9339928adcc33f288596f97cef44eb189657d00b2fafa46a088;
+
+// keccak256('security.token.standard.interest.rate.type.storage');
+bytes32 constant _INTEREST_RATE_TYPE_STORAGE_POSITION = 0x3078e1663be9ac07a8f77926f415d1f3142556ad397b1f0f4f556dcdc72c95ec;

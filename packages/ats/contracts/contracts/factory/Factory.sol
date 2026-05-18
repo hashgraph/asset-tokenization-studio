@@ -44,15 +44,20 @@ import { _validateISIN } from "./isinValidator.sol";
 import { IFixedRate } from "../facets/layer_2/interestRate/fixedRate/IFixedRate.sol";
 import { IKpiLinkedRate } from "../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
 import { InterestRateStorageWrapper } from "../domain/asset/InterestRateStorageWrapper.sol";
-/* solhint-disable max-line-length */
-import {
-    ISustainabilityPerformanceTargetRate
-} from "../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+import { IInterestRate } from "../facets/interestRate/IInterestRate.sol";
 import { EvmAccessors } from "../infrastructure/utils/EvmAccessors.sol";
 import { DatesValidation } from "../infrastructure/utils/DatesValidation.sol";
-/* solhint-enable max-line-length */
 
-contract Factory is IFactory {
+/**
+ * @title Factory
+ * @author Asset Tokenization Studio Team
+ * @notice Abstract base contract implementing shared deployment logic for ATS securities
+ *         (equities, bonds, fixed-rate bonds, and KPI-linked-rate bonds).
+ * @dev Concrete subclasses must implement `IFactory`. Each `deploy*` function creates a
+ *      `ResolverProxy`, initialises all mandatory facets, and optionally initialises
+ *      optional facets through `try…catch` wrappers.
+ */
+abstract contract Factory is IFactory {
     modifier checkResolver(IBusinessLogicResolver resolver) {
         if (address(resolver) == address(0)) {
             revert EmptyResolver(resolver);
@@ -66,32 +71,7 @@ contract Factory is IFactory {
     }
 
     modifier checkAdmins(IResolverProxy.Rbac[] calldata rbacs) {
-        bool adminFound;
-
-        // Looking for admin role within initialization rbacas in order to add the factory
-        for (uint256 rbacsIndex = 0; rbacsIndex < rbacs.length; rbacsIndex++) {
-            if (rbacs[rbacsIndex].role == DEFAULT_ADMIN_ROLE) {
-                if (rbacs[rbacsIndex].members.length > 0) {
-                    for (
-                        uint256 adminMemberIndex = 0;
-                        adminMemberIndex < rbacs[rbacsIndex].members.length;
-                        adminMemberIndex++
-                    ) {
-                        if (rbacs[rbacsIndex].members[adminMemberIndex] != address(0)) {
-                            adminFound = true;
-                            break;
-                        }
-                    }
-                    if (adminFound) {
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (!adminFound) {
-            revert NoInitialAdmins();
-        }
+        _checkAdmins(rbacs);
         _;
     }
 
@@ -115,6 +95,14 @@ contract Factory is IFactory {
         _;
     }
 
+    /**
+     * @notice Deploys a bare `ResolverProxy` without any asset-specific initialisation.
+     * @param _resolver The `IBusinessLogicResolver` that will route calls for this proxy.
+     * @param _configKey Resolver configuration key that selects the facet set.
+     * @param _version Version of the resolver configuration to use.
+     * @param _rbacs Initial role-based access control assignments for the proxy.
+     * @return proxyAddress_ Address of the newly deployed `ResolverProxy`.
+     */
     function deployProxy(
         IBusinessLogicResolver _resolver,
         bytes32 _configKey,
@@ -125,6 +113,12 @@ contract Factory is IFactory {
         emit ProxyDeployed(proxyAddress_, _resolver, _configKey, _version, _rbacs);
     }
 
+    /**
+     * @notice Deploys and fully initialises an equity security proxy.
+     * @param _equityData Equity creation data including security configuration and equity details.
+     * @param _factoryRegulationData Regulation type and sub-type to apply to the equity.
+     * @return equityAddress_ Address of the newly deployed equity proxy.
+     */
     function deployEquity(
         EquityData calldata _equityData,
         FactoryRegulationData calldata _factoryRegulationData
@@ -153,9 +147,17 @@ contract Factory is IFactory {
             _equityData.equityDetails.currency
         );
 
+        _tryInitializeInterestRateType(equityAddress_, IInterestRate.RateType.STANDARD);
+
         emit EquityDeployed(EvmAccessors.getMsgSender(), equityAddress_, _equityData, _factoryRegulationData);
     }
 
+    /**
+     * @notice Deploys and fully initialises a variable-rate bond proxy.
+     * @param _bondData Bond creation data including security configuration and bond details.
+     * @param _factoryRegulationData Regulation type and sub-type to apply to the bond.
+     * @return bondAddress_ Address of the newly deployed bond proxy.
+     */
     function deployBond(
         BondData calldata _bondData,
         FactoryRegulationData calldata _factoryRegulationData
@@ -170,9 +172,17 @@ contract Factory is IFactory {
     {
         bondAddress_ = _deployBond(_bondData, _factoryRegulationData, SecurityType.BondVariableRate);
 
+        _tryInitializeInterestRateType(bondAddress_, IInterestRate.RateType.STANDARD);
+
         emit BondDeployed(EvmAccessors.getMsgSender(), bondAddress_, _bondData, _factoryRegulationData);
     }
 
+    /**
+     * @notice Deploys and fully initialises a fixed-rate bond proxy.
+     * @param _bondFixedRateData Fixed-rate bond creation data including bond data and rate
+     *        configuration.
+     * @return bondAddress_ Address of the newly deployed fixed-rate bond proxy.
+     */
     function deployBondFixedRate(
         BondFixedRateData calldata _bondFixedRateData
     )
@@ -199,9 +209,17 @@ contract Factory is IFactory {
         // Initialize fixed rate (FixedRateFacet may not be present)
         _tryInitialize_FixedRate(bondAddress_, _bondFixedRateData.fixedRateData);
 
+        _tryInitializeInterestRateType(bondAddress_, IInterestRate.RateType.FIXED);
+
         emit BondFixedRateDeployed(EvmAccessors.getMsgSender(), bondAddress_, _bondFixedRateData);
     }
 
+    /**
+     * @notice Deploys and fully initialises a KPI-linked-rate bond proxy.
+     * @param _bondKpiLinkedRateData KPI-linked-rate bond creation data including bond data,
+     *        interest rate parameters, and impact data.
+     * @return bondAddress_ Address of the newly deployed KPI-linked-rate bond proxy.
+     */
     function deployBondKpiLinkedRate(
         BondKpiLinkedRateData calldata _bondKpiLinkedRateData
     )
@@ -225,31 +243,13 @@ contract Factory is IFactory {
         _emitBondKpiLinkedRateDeployed(bondAddress_, _bondKpiLinkedRateData);
     }
 
-    function deployBondSustainabilityPerformanceTargetRate(
-        BondSustainabilityPerformanceTargetRateData calldata _bondSustainabilityPerformanceTargetRateData
-    )
-        external
-        checkResolver(_bondSustainabilityPerformanceTargetRateData.bondData.security.resolver)
-        checkISIN(_bondSustainabilityPerformanceTargetRateData.bondData.security.erc20MetadataInfo.isin)
-        checkAdmins(_bondSustainabilityPerformanceTargetRateData.bondData.security.rbacs)
-        checkRegulation(
-            _bondSustainabilityPerformanceTargetRateData.factoryRegulationData.regulationType,
-            _bondSustainabilityPerformanceTargetRateData.factoryRegulationData.regulationSubType
-        )
-        checkBondDates(
-            _bondSustainabilityPerformanceTargetRateData.bondData.bondDetails.startingDate,
-            _bondSustainabilityPerformanceTargetRateData.bondData.bondDetails.maturityDate
-        )
-        returns (address bondAddress_)
-    {
-        bondAddress_ = _deployBondSustainabilityPerformanceTargetRate(_bondSustainabilityPerformanceTargetRateData);
-        emit BondSustainabilityPerformanceTargetRateDeployed(
-            EvmAccessors.getMsgSender(),
-            bondAddress_,
-            _bondSustainabilityPerformanceTargetRateData
-        );
-    }
-
+    /**
+     * @notice Builds and returns the full `RegulationData` struct for a given regulation type
+     *         and sub-type combination.
+     * @param _regulationType The primary regulation category.
+     * @param _regulationSubType The secondary regulation category.
+     * @return regulationData_ The constructed `RegulationData` struct.
+     */
     function getAppliedRegulationData(
         RegulationType _regulationType,
         RegulationSubType _regulationSubType
@@ -288,23 +288,10 @@ contract Factory is IFactory {
 
         // Initialize KPI linked rate (KpiLinkedRateFacet may not be present)
         _tryInitializeKpiLinkedRate(bondAddress_, _data.interestRate, _data.impactData);
+        _tryInitializeInterestRateType(bondAddress_, IInterestRate.RateType.KPI_LINKED);
     }
 
-    function _deployBondSustainabilityPerformanceTargetRate(
-        BondSustainabilityPerformanceTargetRateData calldata _data
-    ) internal returns (address bondAddress_) {
-        bondAddress_ = _deployBond(_data.bondData, _data.factoryRegulationData, SecurityType.BondSPTRate);
-
-        // Initialize sustainability performance target rate
-        // (SustainabilityPerformanceTargetRateFacet may not be present)
-        _tryInitialize_SustainabilityPerformanceTargetRate(
-            bondAddress_,
-            _data.interestRate,
-            _data.impactData,
-            _data.projects
-        );
-    }
-
+    //solhint-disable-next-line function-max-lines
     function _deploySecurity(
         SecurityData calldata _securityData,
         SecurityType _securityType
@@ -462,32 +449,6 @@ contract Factory is IFactory {
         }
     }
 
-    function _tryInitialize_SustainabilityPerformanceTargetRate(
-        address securityAddress_,
-        ISustainabilityPerformanceTargetRate.InterestRate calldata interestRate,
-        ISustainabilityPerformanceTargetRate.ImpactData[] calldata impactData,
-        address[] calldata projects
-    ) private {
-        try
-            ISustainabilityPerformanceTargetRate(securityAddress_).initialize_SustainabilityPerformanceTargetRate(
-                interestRate,
-                impactData,
-                projects
-            )
-        {
-            // success
-        } catch (bytes memory reason) {
-            // Re-revert if the facet is present but initialization failed (non-empty revert data)
-            if (reason.length > 0) {
-                // solhint-disable-next-line no-inline-assembly
-                assembly {
-                    revert(add(reason, 32), mload(reason))
-                }
-            }
-            // Empty revert data means facet not present - skip initialization
-        }
-    }
-
     function _tryInitialize_ProceedRecipients(
         address securityAddress_,
         address[] calldata proceedRecipients,
@@ -526,8 +487,37 @@ contract Factory is IFactory {
         emit BondKpiLinkedRateDeployed(EvmAccessors.getMsgSender(), _bondAddress, _bondKpiLinkedRateData);
     }
 
+    function _tryInitializeInterestRateType(address securityAddress_, IInterestRate.RateType rateType) private {
+        try IInterestRate(securityAddress_).initializeInterestRateType(rateType) {
+            // success
+        } catch {
+            // facet not present - skip initialization
+        }
+    }
+
     function _checkBondDates(uint256 startingDate, uint256 maturityDate) private view {
         DatesValidation.checkDates(startingDate, maturityDate);
         ScheduledTasksStorageWrapper.requireValidTimestamp(maturityDate);
+    }
+
+    function _checkAdmins(IResolverProxy.Rbac[] calldata rbacs) private pure {
+        uint256 rbacsLength = rbacs.length;
+        for (uint256 rbacsIndex; rbacsIndex < rbacsLength; ) {
+            if (rbacs[rbacsIndex].role == DEFAULT_ADMIN_ROLE) {
+                uint256 membersLength = rbacs[rbacsIndex].members.length;
+                for (uint256 adminMemberIndex; adminMemberIndex < membersLength; ) {
+                    if (rbacs[rbacsIndex].members[adminMemberIndex] != address(0)) {
+                        return;
+                    }
+                    unchecked {
+                        ++adminMemberIndex;
+                    }
+                }
+            }
+            unchecked {
+                ++rbacsIndex;
+            }
+        }
+        revert NoInitialAdmins();
     }
 }

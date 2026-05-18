@@ -106,23 +106,11 @@ describe("Deployment File Utilities", () => {
           },
         ],
       },
-      bondSustainabilityPerformanceTargetRate: {
-        configId: TEST_CONFIG_IDS.BOND_SPT,
-        version: 1,
-        facetCount: 43,
-        facets: [
-          {
-            facetName: "AccessControlFacet",
-            key: TEST_CONFIG_IDS.BOND_SPT,
-            address: TEST_ADDRESSES.VALID_2,
-          },
-        ],
-      },
     },
     summary: {
       totalContracts: 48,
       totalFacets: 1,
-      totalConfigurations: 5,
+      totalConfigurations: 4,
       deploymentTime: 5000,
       gasUsed: "0",
       success: true,
@@ -132,9 +120,9 @@ describe("Deployment File Utilities", () => {
       getBondFacets: () => [],
       getBondFixedRateFacets: () => [],
       getBondKpiLinkedRateFacets: () => [],
-      getBondSustainabilityPerformanceTargetRateFacets: () => [],
       getLoanFacets: () => [],
       getLoansPortfolioFacets: () => [],
+      getFactoryFacets: () => [],
     },
   });
 

@@ -27,6 +27,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(CLEARING_VALIDATOR_ROLE)
         onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
@@ -56,6 +57,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(CLEARING_VALIDATOR_ROLE)
         onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
@@ -82,6 +84,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
         onlyWithValidClearingId(_clearingOperationIdentifier)
@@ -107,6 +110,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyClearingActivated
         onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
@@ -132,6 +136,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(_clearingOperationFrom.from)
@@ -167,6 +172,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyClearingActivated
         onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
@@ -196,6 +202,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyClearingActivated
         onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)

@@ -434,10 +434,10 @@ export const TEST_STEPS_NEW_BLR = {
   BOND_CONFIG: 5,
   BOND_FIXED_RATE_CONFIG: 6,
   BOND_KPI_LINKED_CONFIG: 7,
-  BOND_SPT_CONFIG: 8,
-  LOAN_CONFIG: 9,
-  LOANS_PORTFOLIO_CONFIG: 10,
-  FACTORY: 11,
+  LOAN_CONFIG: 8,
+  LOANS_PORTFOLIO_CONFIG: 9,
+  FACTORY: 10,
+  INITIALIZE_MOCK_CONFIG: 11,
 } as const;
 
 /**
@@ -451,9 +451,8 @@ export const TEST_STEPS_EXISTING_BLR = {
   BOND_CONFIG: 4,
   BOND_FIXED_RATE_CONFIG: 5,
   BOND_KPI_LINKED_CONFIG: 6,
-  BOND_SPT_CONFIG: 7,
-  LOAN_CONFIG: 8,
-  LOANS_PORTFOLIO_CONFIG: 9,
+  LOAN_CONFIG: 7,
+  LOANS_PORTFOLIO_CONFIG: 8,
   FACTORY: 10,
 } as const;
 
@@ -1029,9 +1028,6 @@ export const TEST_FACTORY_EVENTS = {
 
   /** Bond KPI Linked Rate deployed event */
   BOND_KPI_LINKED_RATE_DEPLOYED: "BondKpiLinkedRateDeployed",
-
-  /** Bond SPT deployed event */
-  BOND_SPT_DEPLOYED: "BondSustainabilityPerformanceTargetRateDeployed",
 
   /** Unknown event (for negative tests) */
   UNKNOWN: "UnknownEvent",

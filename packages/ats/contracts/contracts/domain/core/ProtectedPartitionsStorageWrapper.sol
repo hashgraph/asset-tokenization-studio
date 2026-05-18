@@ -26,19 +26,10 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  * @notice Storage layout for the protected partitions module.
  * @param initialized Whether the protected partitions feature has been initialised.
  * @param arePartitionsProtected Whether token partitions are currently protected.
- * @param DEPRECATED_contractName Deprecated field, formerly held the contract name.
- * @param DEPRECATED_contractVersion Deprecated field, formerly held the contract version.
- * @param DEPRECATED_nonces Deprecated mapping of address to nonce.
  */
 struct ProtectedPartitionsDataStorage {
     bool initialized;
     bool arePartitionsProtected;
-    // solhint-disable-next-line var-name-mixedcase
-    string DEPRECATED_contractName;
-    // solhint-disable-next-line var-name-mixedcase
-    string DEPRECATED_contractVersion;
-    // solhint-disable-next-line var-name-mixedcase
-    mapping(address => uint256) DEPRECATED_nonces;
 }
 
 /**

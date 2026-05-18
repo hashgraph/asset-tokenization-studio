@@ -320,4 +320,16 @@ describe("BurnByPartitionFacet Tests", () => {
       });
     });
   });
+
+  describe("Deactivated", () => {
+    it("GIVEN a deactivated asset WHEN redeemByPartition THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).redeemByPartition(ethers.ZeroHash, 0, "0x"),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
 });

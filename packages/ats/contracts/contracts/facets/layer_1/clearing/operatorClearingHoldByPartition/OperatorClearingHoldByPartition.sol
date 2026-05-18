@@ -22,6 +22,7 @@ abstract contract OperatorClearingHoldByPartition is IOperatorClearingHoldByPart
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyClearingActivated
         onlyValidOperatorClearingCreateHoldByPartition(

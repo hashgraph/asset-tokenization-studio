@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-18T10:25:05.862Z
- * Facets: 126
+ * Generated: 2026-05-18T08:32:55.426Z
+ * Facets: 120
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -39,8 +39,6 @@ import {
   BondUSAReadFacet__factory,
   BondUSAReadFixedRateFacet__factory,
   BondUSAReadKpiLinkedRateFacet__factory,
-  BondUSAReadSustainabilityPerformanceTargetRateFacet__factory,
-  BondUSASustainabilityPerformanceTargetRateFacet__factory,
   BurnByPartitionFacet__factory,
   BurnFacet__factory,
   CapByPartitionFacet__factory,
@@ -88,9 +86,9 @@ import {
   HoldFacet__factory,
   IdentityFacet__factory,
   InitializerFacet__factory,
+  InterestRateFacet__factory,
   KpiLinkedRateFacet__factory,
   KpisKpiLinkedRateFacet__factory,
-  KpisSustainabilityPerformanceTargetRateFacet__factory,
   KycFacet__factory,
   LoanFacet__factory,
   LoansPortfolioFacet__factory,
@@ -116,7 +114,6 @@ import {
   PrincipalFacet__factory,
   ProceedRecipientsFacet__factory,
   ProceedRecipientsKpiLinkedRateFacet__factory,
-  ProceedRecipientsSustainabilityPerformanceTargetRateFacet__factory,
   ProtectedByPartitionFacet__factory,
   ProtectedClearingByPartitionFacet__factory,
   ProtectedClearingHoldByPartitionFacet__factory,
@@ -126,19 +123,16 @@ import {
   ScheduledBalanceAdjustmentFacet__factory,
   ScheduledCrossOrderedTasksFacet__factory,
   ScheduledCrossOrderedTasksKpiLinkedRateFacet__factory,
-  ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet__factory,
   SecurityHoldersAtSnapshotFacet__factory,
   SecurityHoldersFacet__factory,
   SnapshotsByPartitionFacet__factory,
   SnapshotsFacet__factory,
   SsiManagementFacet__factory,
-  SustainabilityPerformanceTargetRateFacet__factory,
   TimeTravelFacet__factory,
   TransferAndLockByPartitionFacet__factory,
   TransferAndLockFacet__factory,
   TransferAndLockFixedRateFacet__factory,
   TransferAndLockKpiLinkedRateFacet__factory,
-  TransferAndLockSustainabilityPerformanceTargetRateFacet__factory,
   TransferByPartitionFacet__factory,
   TransferFacet__factory,
   VotingFacet__factory,
@@ -151,8 +145,6 @@ import {
   BondUSAReadFacetTimeTravel__factory,
   BondUSAReadFixedRateFacetTimeTravel__factory,
   BondUSAReadKpiLinkedRateFacetTimeTravel__factory,
-  BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
-  BondUSASustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   CapFacetTimeTravel__factory,
   ComplianceFacetTimeTravel__factory,
   ControlListFacetTimeTravel__factory,
@@ -173,7 +165,6 @@ import {
   HoldFacetTimeTravel__factory,
   KpiLinkedRateFacetTimeTravel__factory,
   KpisKpiLinkedRateFacetTimeTravel__factory,
-  KpisSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   KycFacetTimeTravel__factory,
   LoansPortfolioFacetTimeTravel__factory,
   LockFacetTimeTravel__factory,
@@ -181,20 +172,16 @@ import {
   PauseFacetTimeTravel__factory,
   ProceedRecipientsFacetTimeTravel__factory,
   ProceedRecipientsKpiLinkedRateFacetTimeTravel__factory,
-  ProceedRecipientsSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ProtectedPartitionsFacetTimeTravel__factory,
   RecoveryFacetTimeTravel__factory,
   ScheduledCrossOrderedTasksFacetTimeTravel__factory,
   ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel__factory,
-  ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   SnapshotsByPartitionFacetTimeTravel__factory,
   SnapshotsFacetTimeTravel__factory,
   SsiManagementFacetTimeTravel__factory,
-  SustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   TransferAndLockFacetTimeTravel__factory,
   TransferAndLockFixedRateFacetTimeTravel__factory,
   TransferAndLockKpiLinkedRateFacetTimeTravel__factory,
-  TransferAndLockSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   TransferByPartitionFacetTimeTravel__factory,
   TransferFacetTimeTravel__factory,
   VotingFacetTimeTravel__factory,
@@ -372,6 +359,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x3ad9a7ae",
       },
       {
+        name: "CannotRenounceSoleAdmin",
+        signature: { full: "error CannotRenounceSoleAdmin()", canonical: "CannotRenounceSoleAdmin()" },
+        selector: "0xa63be124",
+      },
+      {
         name: "ContradictoryValuesInArray",
         signature: {
           full: "error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex)",
@@ -443,12 +435,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x312510931206ef5f91f1ef19e1a01253812b7201fb8b2d5d4afa056cce53e34a",
       },
       {
-        name: "SnapshotTriggered",
+        name: "TaskExecutionFailed",
         signature: {
-          full: "event SnapshotTriggered(uint256 snapshotId, bytes metadata)",
-          canonical: "SnapshotTriggered(uint256,bytes)",
+          full: "event TaskExecutionFailed(bytes32 indexed actionId, bytes32 indexed taskType, uint256 scheduledTimestamp)",
+          canonical: "TaskExecutionFailed(bytes32,bytes32,uint256)",
         },
-        topic0: "0xf256aa4705d42c3984e319d2b0a2d1eb0a18a8a820922b71ba13e37c7699828c",
+        topic0: "0xa0b134b3077bb9dc6662d0a839fcb6c50853fc25d4393af34d3709edf045477a",
       },
     ],
     errors: [
@@ -469,17 +461,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
-        name: "CouponNotFound",
-        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
-        selector: "0x69a80e75",
-      },
-      {
-        name: "DecimalDifferenceTooLarge",
-        signature: {
-          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
-          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
-        },
-        selector: "0x552d04f9",
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "FactorIsZero",
@@ -487,13 +471,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x936e9b6d",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
-      {
-        name: "UnexpectedError",
-        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
-        selector: "0xc9622656",
-      },
     ],
-    factory: (signer) => new AdjustBalancesFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    factory: (signer) =>
+      new AdjustBalancesFacet__factory(getLibLinks("scheduledTasksDispatchOps", "tokenCoreOps") as any, signer),
   },
 
   AllowanceFacet: {
@@ -557,6 +537,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccessControlRequired(bytes32,address)",
         },
         selector: "0x10210dec",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "InsufficientAllowance",
@@ -836,6 +821,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x3d9766c5",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InsufficientBalance",
         signature: {
           full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
@@ -918,7 +908,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xd3924f4e",
       },
     ],
-    factory: (signer) => new AmortizationFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    factory: (signer) =>
+      new AmortizationFacet__factory(getLibLinks("clearingReadOps", "scheduledTasksOps") as any, signer),
   },
 
   BalanceTrackerAdjustedFacet: {
@@ -1161,6 +1152,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x90e55392",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InputAmountsArrayLengthMismatch",
         signature: { full: "error InputAmountsArrayLengthMismatch()", canonical: "InputAmountsArrayLengthMismatch()" },
         selector: "0x64f13710",
@@ -1224,6 +1220,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountHasNoRoles(address,bytes32[])",
         },
         selector: "0x90e55392",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "InputAmountsArrayLengthMismatch",
@@ -1358,6 +1359,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x90e55392",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InputAmountsArrayLengthMismatch",
         signature: { full: "error InputAmountsArrayLengthMismatch()", canonical: "InputAmountsArrayLengthMismatch()" },
         selector: "0x64f13710",
@@ -1431,7 +1437,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x8579befe",
       },
     ],
-    factory: (signer) => new BatchFreezeFacet__factory(signer),
+    factory: (signer) => new BatchFreezeFacet__factory(getLibLinks("scheduledTasksOps") as any, signer),
   },
 
   BatchMintFacet: {
@@ -1481,6 +1487,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x90e55392",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InputAmountsArrayLengthMismatch",
         signature: { full: "error InputAmountsArrayLengthMismatch()", canonical: "InputAmountsArrayLengthMismatch()" },
         selector: "0x64f13710",
@@ -1527,6 +1538,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccessControlRequired(bytes32,address)",
         },
         selector: "0x10210dec",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "InputAmountsArrayLengthMismatch",
@@ -1845,104 +1861,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     timeTravelFactory: (signer) => new BondUSAReadKpiLinkedRateFacetTimeTravel__factory(signer),
   },
 
-  BondUSAReadSustainabilityPerformanceTargetRateFacet: {
-    name: "BondUSAReadSustainabilityPerformanceTargetRateFacet",
-    resolverKey: {
-      name: "_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_READ_RESOLVER_KEY",
-      value: "0x339d458f2928ef5148317aab39e4375a27e6c531d2e5b9de2d4fb23ad0e8b504",
-    },
-    inheritance: ["BondUSAReadFacetBase"],
-    methods: [
-      {
-        name: "getBondDetails",
-        signature: {
-          full: "function getBondDetails() view returns ((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetailsData_)",
-          canonical: "getBondDetails()",
-        },
-        selector: "0x4ce02414",
-      },
-      {
-        name: "getSecurityRegulationData",
-        signature: {
-          full: "function getSecurityRegulationData() pure returns (((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
-          canonical: "getSecurityRegulationData()",
-        },
-        selector: "0x8fda5afe",
-      },
-    ],
-    events: [
-      {
-        name: "MaturityDateUpdated",
-        signature: {
-          full: "event MaturityDateUpdated(address indexed bondId, uint256 indexed maturityDate, uint256 indexed previousMaturityDate)",
-          canonical: "MaturityDateUpdated(address,uint256,uint256)",
-        },
-        topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
-      },
-    ],
-    errors: [
-      {
-        name: "BondMaturityDateWrong",
-        signature: { full: "error BondMaturityDateWrong()", canonical: "BondMaturityDateWrong()" },
-        selector: "0x67d08758",
-      },
-    ],
-    factory: (signer) => new BondUSAReadSustainabilityPerformanceTargetRateFacet__factory(signer),
-    timeTravelFactory: (signer) => new BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
-  },
-
-  BondUSASustainabilityPerformanceTargetRateFacet: {
-    name: "BondUSASustainabilityPerformanceTargetRateFacet",
-    resolverKey: {
-      name: "_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
-      value: "0x8048a878c656dcf3886e69ad27a9272a4fb9499299ab5f0e1b6c99ac3b1130f8",
-    },
-    inheritance: ["BondUSAFacetBase"],
-    methods: [
-      {
-        name: "_initialize_bondUSA",
-        signature: {
-          full: "function _initialize_bondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
-          canonical:
-            "_initialize_bondUSA((bytes3,uint256,uint8,uint256,uint256),(uint8,uint8,uint256,uint8,uint256,uint8,uint8,uint8),(bool,string,string))",
-        },
-        selector: "0x86d59729",
-      },
-    ],
-    events: [
-      {
-        name: "MaturityDateUpdated",
-        signature: {
-          full: "event MaturityDateUpdated(address indexed bondId, uint256 indexed maturityDate, uint256 indexed previousMaturityDate)",
-          canonical: "MaturityDateUpdated(address,uint256,uint256)",
-        },
-        topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
-      },
-    ],
-    errors: [
-      {
-        name: "AccessControlRequired",
-        signature: {
-          full: "error AccessControlRequired(bytes32 role, address sender)",
-          canonical: "AccessControlRequired(bytes32,address)",
-        },
-        selector: "0x10210dec",
-      },
-      {
-        name: "AlreadyInitialized",
-        signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
-        selector: "0x0dc149f0",
-      },
-      {
-        name: "BondMaturityDateWrong",
-        signature: { full: "error BondMaturityDateWrong()", canonical: "BondMaturityDateWrong()" },
-        selector: "0x67d08758",
-      },
-    ],
-    factory: (signer) => new BondUSASustainabilityPerformanceTargetRateFacet__factory(signer),
-    timeTravelFactory: (signer) => new BondUSASustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
-  },
-
   BurnByPartitionFacet: {
     name: "BurnByPartitionFacet",
     description:
@@ -1970,6 +1888,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccessControlRequired(bytes32,address)",
         },
         selector: "0x10210dec",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "PartitionNotAllowedInSinglePartitionMode",
@@ -2054,6 +1977,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountHasNoRoles(address,bytes32[])",
         },
         selector: "0x90e55392",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
@@ -2145,6 +2073,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xa1180aad",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NewMaxSupplyCannotBeZero",
@@ -2234,6 +2167,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
@@ -2594,6 +2532,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9f2523d3",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "ExpirationDateNotReached",
         signature: { full: "error ExpirationDateNotReached()", canonical: "ExpirationDateNotReached()" },
         selector: "0xaffb3088",
@@ -2840,6 +2783,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9f2523d3",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "ExpirationDateNotReached",
         signature: { full: "error ExpirationDateNotReached()", canonical: "ExpirationDateNotReached()" },
         selector: "0xaffb3088",
@@ -3024,6 +2972,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9f2523d3",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "ExpirationDateNotReached",
         signature: { full: "error ExpirationDateNotReached()", canonical: "ExpirationDateNotReached()" },
         selector: "0xaffb3088",
@@ -3165,6 +3118,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xa1180aad",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NotAllowedInMultiPartitionMode",
@@ -3277,6 +3235,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountHasNoRoles(address,bytes32[])",
         },
         selector: "0x90e55392",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "InvalidPartition",
@@ -3522,6 +3485,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x66eb1b54",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "IdentityRegistryCallFailed",
         signature: { full: "error IdentityRegistryCallFailed()", canonical: "IdentityRegistryCallFailed()" },
         selector: "0xad87849e",
@@ -3670,6 +3638,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountHasNoRole(address,bytes32)",
         },
         selector: "0xa1180aad",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "HoldExpirationNotReached",
@@ -3846,6 +3819,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "ListedAccount",
@@ -4009,6 +3987,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
     ],
@@ -4354,6 +4337,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x69a80e75",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "DecimalDifferenceTooLarge",
         signature: {
           full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
@@ -4370,14 +4358,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "InterestRateIsKpiLinked",
         signature: { full: "error InterestRateIsKpiLinked()", canonical: "InterestRateIsKpiLinked()" },
         selector: "0x68eba14f",
-      },
-      {
-        name: "InterestRateIsSustainabilityPerformanceTargetRate",
-        signature: {
-          full: "error InterestRateIsSustainabilityPerformanceTargetRate()",
-          canonical: "InterestRateIsSustainabilityPerformanceTargetRate()",
-        },
-        selector: "0x4f56f79f",
       },
       {
         name: "InvalidTimestamp",
@@ -4903,6 +4883,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "DividendAlreadyExecuted",
         signature: {
           full: "error DividendAlreadyExecuted(bytes32 corporateActionId, uint256 dividendId)",
@@ -5091,6 +5076,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountHasNoRole(address,bytes32)",
         },
         selector: "0xa1180aad",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "DocumentDoesNotExist",
@@ -5359,6 +5349,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x10210dec",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "ERC2612ExpiredSignature",
         signature: {
           full: "error ERC2612ExpiredSignature(uint256 deadline)",
@@ -5396,8 +5391,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x8579befe",
       },
     ],
-    factory: (signer) => new ERC20PermitFacet__factory(signer),
-    timeTravelFactory: (signer) => new ERC20PermitFacetTimeTravel__factory(signer),
+    factory: (signer) => new ERC20PermitFacet__factory(getLibLinks("scheduledTasksOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ERC20PermitFacetTimeTravel__factory(getLibLinks("scheduledTasksOps") as any, signer),
   },
 
   ERC20VotesFacet: {
@@ -5487,14 +5483,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
-        name: "AdjustmentBalanceSet",
-        signature: {
-          full: "event AdjustmentBalanceSet(address indexed operator, uint256 factor, uint8 decimals)",
-          canonical: "AdjustmentBalanceSet(address,uint256,uint8)",
-        },
-        topic0: "0x312510931206ef5f91f1ef19e1a01253812b7201fb8b2d5d4afa056cce53e34a",
-      },
-      {
         name: "DelegateChanged",
         signature: {
           full: "event DelegateChanged(address indexed delegator, address indexed fromDelegate, address indexed toDelegate)",
@@ -5509,14 +5497,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "DelegateVotesChanged(address,uint256,uint256)",
         },
         topic0: "0xdec2bacdd2f05b59de34da9b523dff8be42e5e38e818c82fdb0bae774387a724",
-      },
-      {
-        name: "SnapshotTriggered",
-        signature: {
-          full: "event SnapshotTriggered(uint256 snapshotId, bytes metadata)",
-          canonical: "SnapshotTriggered(uint256,bytes)",
-        },
-        topic0: "0xf256aa4705d42c3984e319d2b0a2d1eb0a18a8a820922b71ba13e37c7699828c",
       },
     ],
     errors: [
@@ -5547,17 +5527,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xb2b9e563",
       },
       {
-        name: "CouponNotFound",
-        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
-        selector: "0x69a80e75",
-      },
-      {
-        name: "DecimalDifferenceTooLarge",
-        signature: {
-          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
-          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
-        },
-        selector: "0x552d04f9",
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "FutureLookup",
@@ -5574,9 +5546,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xc9622656",
       },
     ],
-    factory: (signer) => new ERC20VotesFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    factory: (signer) =>
+      new ERC20VotesFacet__factory(getLibLinks("clearingReadOps", "scheduledTasksOps") as any, signer),
     timeTravelFactory: (signer) =>
-      new ERC20VotesFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
+      new ERC20VotesFacetTimeTravel__factory(getLibLinks("clearingReadOps", "scheduledTasksOps") as any, signer),
   },
 
   ERC3643ManagementFacet: {
@@ -5828,6 +5801,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf50c17aa",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "ExternalControlListsNotUpdated",
         signature: {
           full: "error ExternalControlListsNotUpdated(address[] controlLista, bool[] actives)",
@@ -5991,6 +5969,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf50c17aa",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "ExternalKycListsNotUpdated",
         signature: {
           full: "error ExternalKycListsNotUpdated(address[] kycList, bool[] actives)",
@@ -6143,6 +6126,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf50c17aa",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "ExternalPausesNotUpdated",
         signature: {
           full: "error ExternalPausesNotUpdated(address[] pauses, bool[] actives)",
@@ -6209,15 +6197,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x06e6effc",
       },
       {
-        name: "deployBondSustainabilityPerformanceTargetRate",
-        signature: {
-          full: "function deployBondSustainabilityPerformanceTargetRate((((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, (uint256 baseRate, uint256 startPeriod, uint256 startRate, uint8 rateDecimals) interestRate, (uint256 baseLine, uint8 baseLineMode, uint256 deltaRate, uint8 impactDataMode)[] impactData, address[] projects) _bondSustainabilityPerformanceTargetRateData) returns (address bondAddress_)",
-          canonical:
-            "deployBondSustainabilityPerformanceTargetRate((((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bytes3,uint256,uint8,uint256,uint256),address[],bytes[]),(uint8,uint8,(bool,string,string)),(uint256,uint256,uint256,uint8),(uint256,uint8,uint256,uint8)[],address[]))",
-        },
-        selector: "0x5bdc1ceb",
-      },
-      {
         name: "deployEquity",
         signature: {
           full: "function deployEquity(((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) equityDetails) _equityData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) _factoryRegulationData) returns (address equityAddress_)",
@@ -6270,15 +6249,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
             "BondKpiLinkedRateDeployed(address,address,(((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bytes3,uint256,uint8,uint256,uint256),address[],bytes[]),(uint8,uint8,(bool,string,string)),(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8),(uint256,uint256,uint256,uint8,uint256)))",
         },
         topic0: "0x45915a0104ea5671b1651c88183b8d6175450f67c9ad1462ed080594e0b10ec6",
-      },
-      {
-        name: "BondSustainabilityPerformanceTargetRateDeployed",
-        signature: {
-          full: "event BondSustainabilityPerformanceTargetRateDeployed(address indexed deployer, address bondAddress, (((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, (uint256 baseRate, uint256 startPeriod, uint256 startRate, uint8 rateDecimals) interestRate, (uint256 baseLine, uint8 baseLineMode, uint256 deltaRate, uint8 impactDataMode)[] impactData, address[] projects) bondSustainabilityPerformanceTargetRateData)",
-          canonical:
-            "BondSustainabilityPerformanceTargetRateDeployed(address,address,(((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bytes3,uint256,uint8,uint256,uint256),address[],bytes[]),(uint8,uint8,(bool,string,string)),(uint256,uint256,uint256,uint8),(uint256,uint8,uint256,uint8)[],address[]))",
-        },
-        topic0: "0x7b0542f2e963c32efb54f91877cf0e1b675a89541e6dacf56cc26990d1534cda",
       },
       {
         name: "EquityDeployed",
@@ -6421,6 +6391,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "InterestRateIsFixed",
@@ -6634,6 +6609,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x90e55392",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InsufficientBalance",
         signature: {
           full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
@@ -6697,8 +6677,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x8579befe",
       },
     ],
-    factory: (signer) => new FreezeFacet__factory(signer),
-    timeTravelFactory: (signer) => new FreezeFacetTimeTravel__factory(signer),
+    factory: (signer) => new FreezeFacet__factory(getLibLinks("scheduledTasksOps") as any, signer),
+    timeTravelFactory: (signer) => new FreezeFacetTimeTravel__factory(getLibLinks("scheduledTasksOps") as any, signer),
   },
 
   HoldAtSnapshotByPartitionFacet: {
@@ -6941,6 +6921,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "ClearingIsActivated",
         signature: { full: "error ClearingIsActivated()", canonical: "ClearingIsActivated()" },
         selector: "0x5b2e3086",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "HoldExpirationNotReached",
@@ -7263,6 +7248,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xa1180aad",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
     ],
     factory: (signer) => new IdentityFacet__factory(signer),
@@ -7557,6 +7547,76 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     factory: (signer) => new InitializerFacet__factory(signer),
   },
 
+  InterestRateFacet: {
+    name: "InterestRateFacet",
+    description:
+      "Diamond facet that exposes the coupon rate type selector — `initialize_InterestRateType`, `setCouponRateType`, and `getCouponRateType` — under `_INTEREST_RATE_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_INTEREST_RATE_RESOLVER_KEY",
+      value: "0x564574da835bfa15298fb9a545a3eb73fff192a56a6fadc086f705087433a9bf",
+    },
+    inheritance: ["InterestRate", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "getCouponRateType",
+        signature: { full: "function getCouponRateType() view returns (uint8)", canonical: "getCouponRateType()" },
+        selector: "0xfd525c04",
+      },
+      {
+        name: "initializeInterestRateType",
+        signature: {
+          full: "function initializeInterestRateType(uint8 rateType)",
+          canonical: "initializeInterestRateType(uint8)",
+        },
+        selector: "0x099c9f44",
+      },
+      {
+        name: "setCouponRateType",
+        signature: { full: "function setCouponRateType(uint8 rateType)", canonical: "setCouponRateType(uint8)" },
+        selector: "0x5f88f0d5",
+      },
+    ],
+    events: [
+      {
+        name: "CouponRateTypeSet",
+        signature: {
+          full: "event CouponRateTypeSet(address indexed operator, uint8 rateType)",
+          canonical: "CouponRateTypeSet(address,uint8)",
+        },
+        topic0: "0xe5ad378f2c6a99814d7ecfb31ad92a1d7fc90f0963df2fdb25fac6743ee8dc64",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRole",
+        signature: {
+          full: "error AccountHasNoRole(address account, bytes32 role)",
+          canonical: "AccountHasNoRole(address,bytes32)",
+        },
+        selector: "0xa1180aad",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
+        name: "InvalidRateType",
+        signature: { full: "error InvalidRateType(uint8 rateType)", canonical: "InvalidRateType(uint8)" },
+        selector: "0x6d912251",
+      },
+    ],
+    factory: (signer) => new InterestRateFacet__factory(signer),
+  },
+
   KpiLinkedRateFacet: {
     name: "KpiLinkedRateFacet",
     description: "Diamond facet that exposes the KPI-linked interest rate capability (`IKpiLinkedRate`) on a token.",
@@ -7648,6 +7708,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "WrongImpactDataValues",
@@ -7666,8 +7731,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x570cf0d3",
       },
     ],
-    factory: (signer) => new KpiLinkedRateFacet__factory(signer),
-    timeTravelFactory: (signer) => new KpiLinkedRateFacetTimeTravel__factory(signer),
+    factory: (signer) => new KpiLinkedRateFacet__factory(getLibLinks("scheduledTasksOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new KpiLinkedRateFacetTimeTravel__factory(getLibLinks("scheduledTasksOps") as any, signer),
   },
 
   KpisKpiLinkedRateFacet: {
@@ -7741,6 +7807,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x69a80e75",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "DecimalDifferenceTooLarge",
         signature: {
           full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
@@ -7778,116 +7849,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     factory: (signer) => new KpisKpiLinkedRateFacet__factory(signer),
     timeTravelFactory: (signer) => new KpisKpiLinkedRateFacetTimeTravel__factory(signer),
-  },
-
-  KpisSustainabilityPerformanceTargetRateFacet: {
-    name: "KpisSustainabilityPerformanceTargetRateFacet",
-    resolverKey: {
-      name: "_KPIS_LATEST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
-      value: "0xb668a0e99ee4bce486604d5a7097a4e5d837d1736e0cf43b190b56d0adea78b9",
-    },
-    inheritance: ["Kpis", "IStaticFunctionSelectors"],
-    methods: [
-      {
-        name: "addKpiData",
-        signature: {
-          full: "function addKpiData(uint256 _date, uint256 _value, address _project)",
-          canonical: "addKpiData(uint256,uint256,address)",
-        },
-        selector: "0x0de2be70",
-      },
-      {
-        name: "getLatestKpiData",
-        signature: {
-          full: "function getLatestKpiData(uint256 _from, uint256 _to, address _project) view returns (uint256 value_, bool exists_)",
-          canonical: "getLatestKpiData(uint256,uint256,address)",
-        },
-        selector: "0xfc7f5cb3",
-      },
-      {
-        name: "getMinDate",
-        signature: { full: "function getMinDate() view returns (uint256 minDate_)", canonical: "getMinDate()" },
-        selector: "0x48de6fa7",
-      },
-      {
-        name: "isCheckPointDate",
-        signature: {
-          full: "function isCheckPointDate(uint256 _date, address _project) view returns (bool exists_)",
-          canonical: "isCheckPointDate(uint256,address)",
-        },
-        selector: "0x8078ccd5",
-      },
-    ],
-    events: [
-      {
-        name: "KpiDataAdded",
-        signature: {
-          full: "event KpiDataAdded(address indexed project, uint256 date, uint256 value)",
-          canonical: "KpiDataAdded(address,uint256,uint256)",
-        },
-        topic0: "0xb14d0e5a6665e6c690dc5c7ffc777323768a449038bc6bfed9986ecd52547303",
-      },
-    ],
-    errors: [
-      {
-        name: "AccessControlRequired",
-        signature: {
-          full: "error AccessControlRequired(bytes32 role, address sender)",
-          canonical: "AccessControlRequired(bytes32,address)",
-        },
-        selector: "0x10210dec",
-      },
-      {
-        name: "AccountHasNoRole",
-        signature: {
-          full: "error AccountHasNoRole(address account, bytes32 role)",
-          canonical: "AccountHasNoRole(address,bytes32)",
-        },
-        selector: "0xa1180aad",
-      },
-      {
-        name: "CouponNotFound",
-        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
-        selector: "0x69a80e75",
-      },
-      {
-        name: "DecimalDifferenceTooLarge",
-        signature: {
-          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
-          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
-        },
-        selector: "0x552d04f9",
-      },
-      {
-        name: "InvalidDate",
-        signature: {
-          full: "error InvalidDate(uint256 providedDate, uint256 minDate, uint256 maxDate)",
-          canonical: "InvalidDate(uint256,uint256,uint256)",
-        },
-        selector: "0x1addb674",
-      },
-      {
-        name: "InvalidDateRange",
-        signature: {
-          full: "error InvalidDateRange(uint256 fromDate, uint256 toDate)",
-          canonical: "InvalidDateRange(uint256,uint256)",
-        },
-        selector: "0x8914d40b",
-      },
-      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
-      {
-        name: "KpiDataAlreadyExists",
-        signature: { full: "error KpiDataAlreadyExists(uint256 date)", canonical: "KpiDataAlreadyExists(uint256)" },
-        selector: "0x74efd82c",
-      },
-      {
-        name: "UnexpectedError",
-        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
-        selector: "0xc9622656",
-      },
-    ],
-    factory: (signer) => new KpisSustainabilityPerformanceTargetRateFacet__factory(signer),
-    timeTravelFactory: (signer) => new KpisSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
   },
 
   KycFacet: {
@@ -8033,6 +7994,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x0dc149f0",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InvalidDates",
         signature: { full: "error InvalidDates()", canonical: "InvalidDates()" },
         selector: "0xd937486c",
@@ -8131,6 +8097,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "InvalidTimestamp",
@@ -8382,6 +8353,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x0dc149f0",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "HoldingAssetNotFound",
         signature: {
           full: "error HoldingAssetNotFound(address assetAddress)",
@@ -8618,6 +8594,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InsufficientBalance",
         signature: {
           full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
@@ -8686,7 +8667,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x039be1dd",
       },
     ],
-    factory: (signer) => new LockByPartitionFacet__factory(signer),
+    factory: (signer) => new LockByPartitionFacet__factory(getLibLinks("scheduledTasksOps") as any, signer),
   },
 
   LockFacet: {
@@ -8840,6 +8821,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x90e55392",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InsufficientBalance",
         signature: {
           full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
@@ -8913,8 +8899,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x039be1dd",
       },
     ],
-    factory: (signer) => new LockFacet__factory(signer),
-    timeTravelFactory: (signer) => new LockFacetTimeTravel__factory(signer),
+    factory: (signer) => new LockFacet__factory(getLibLinks("scheduledTasksOps") as any, signer),
+    timeTravelFactory: (signer) => new LockFacetTimeTravel__factory(getLibLinks("scheduledTasksOps") as any, signer),
   },
 
   MaturityByPartitionFacet: {
@@ -8967,6 +8953,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "ClearingIsActivated",
         signature: { full: "error ClearingIsActivated()", canonical: "ClearingIsActivated()" },
         selector: "0x5b2e3086",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "InvalidKycStatus",
@@ -9066,6 +9057,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5b2e3086",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InvalidKycStatus",
         signature: { full: "error InvalidKycStatus()", canonical: "InvalidKycStatus()" },
         selector: "0xfc855b1b",
@@ -9129,6 +9125,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xa1180aad",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
     ],
     factory: (signer) => new MetadataFacet__factory(signer),
@@ -9169,6 +9170,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountHasNoRoles(address,bytes32[])",
         },
         selector: "0x90e55392",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
@@ -9265,6 +9271,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "AlreadyInitialized",
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
@@ -9428,8 +9439,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
     ],
-    factory: (signer) => new NominalValueFacet__factory(signer),
+    factory: (signer) => new NominalValueFacet__factory(getLibLinks("scheduledTasksOps") as any, signer),
   },
 
   NoncesFacet: {
@@ -9568,6 +9584,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccessControlRequired(bytes32,address)",
         },
         selector: "0x10210dec",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "InvalidPartition",
@@ -9776,6 +9797,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "ClearingIsDisabled",
         signature: { full: "error ClearingIsDisabled()", canonical: "ClearingIsDisabled()" },
         selector: "0x9f2523d3",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "ExpirationDateNotReached",
@@ -9994,6 +10020,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9f2523d3",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "ExpirationDateNotReached",
         signature: { full: "error ExpirationDateNotReached()", canonical: "ExpirationDateNotReached()" },
         selector: "0xaffb3088",
@@ -10123,6 +10154,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x10210dec",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
     ],
     factory: (signer) => new OperatorFacet__factory(signer),
@@ -10230,6 +10266,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "ClearingIsActivated",
         signature: { full: "error ClearingIsActivated()", canonical: "ClearingIsActivated()" },
         selector: "0x5b2e3086",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "HoldExpirationNotReached",
@@ -10398,6 +10439,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xa1180aad",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "IsUnpaused",
@@ -10552,6 +10598,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "ProceedRecipientAlreadyExists",
@@ -10700,153 +10751,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
       },
-      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
-        name: "ProceedRecipientAlreadyExists",
-        signature: {
-          full: "error ProceedRecipientAlreadyExists(address proceedRecipient)",
-          canonical: "ProceedRecipientAlreadyExists(address)",
-        },
-        selector: "0xb7fd3b5b",
-      },
-      {
-        name: "ProceedRecipientNotFound",
-        signature: {
-          full: "error ProceedRecipientNotFound(address proceedRecipient)",
-          canonical: "ProceedRecipientNotFound(address)",
-        },
-        selector: "0x664dc89c",
-      },
-      {
-        name: "ZeroAddressNotAllowed",
-        signature: { full: "error ZeroAddressNotAllowed()", canonical: "ZeroAddressNotAllowed()" },
-        selector: "0x8579befe",
-      },
-    ],
-    factory: (signer) => new ProceedRecipientsKpiLinkedRateFacet__factory(signer),
-    timeTravelFactory: (signer) => new ProceedRecipientsKpiLinkedRateFacetTimeTravel__factory(signer),
-  },
-
-  ProceedRecipientsSustainabilityPerformanceTargetRateFacet: {
-    name: "ProceedRecipientsSustainabilityPerformanceTargetRateFacet",
-    resolverKey: {
-      name: "_PROCEED_RECIPIENTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
-      value: "0xf3e4f2e1d9c8b7a6e5f4d3c2b1a9e8f7d6c5b4a3e2f1d9c8b7a6e5f4d3c2b1a9",
-    },
-    inheritance: ["ProceedRecipients", "IStaticFunctionSelectors"],
-    methods: [
-      {
-        name: "addProceedRecipient",
-        signature: {
-          full: "function addProceedRecipient(address _proceedRecipient, bytes _data)",
-          canonical: "addProceedRecipient(address,bytes)",
-        },
-        selector: "0x298f6222",
-      },
-      {
-        name: "getProceedRecipientData",
-        signature: {
-          full: "function getProceedRecipientData(address _proceedRecipient) view returns (bytes)",
-          canonical: "getProceedRecipientData(address)",
-        },
-        selector: "0x94c39122",
-      },
-      {
-        name: "getProceedRecipients",
-        signature: {
-          full: "function getProceedRecipients(uint256 _pageIndex, uint256 _pageLength) view returns (address[] proceedRecipients_)",
-          canonical: "getProceedRecipients(uint256,uint256)",
-        },
-        selector: "0x0a4f7d71",
-      },
-      {
-        name: "getProceedRecipientsCount",
-        signature: {
-          full: "function getProceedRecipientsCount() view returns (uint256)",
-          canonical: "getProceedRecipientsCount()",
-        },
-        selector: "0x03db0e0d",
-      },
-      {
-        name: "initialize_ProceedRecipients",
-        signature: {
-          full: "function initialize_ProceedRecipients(address[] _proceedRecipients, bytes[] _data)",
-          canonical: "initialize_ProceedRecipients(address[],bytes[])",
-        },
-        selector: "0x9005379e",
-      },
-      {
-        name: "isProceedRecipient",
-        signature: {
-          full: "function isProceedRecipient(address _proceedRecipient) view returns (bool)",
-          canonical: "isProceedRecipient(address)",
-        },
-        selector: "0xb9b6def1",
-      },
-      {
-        name: "removeProceedRecipient",
-        signature: {
-          full: "function removeProceedRecipient(address _proceedRecipient)",
-          canonical: "removeProceedRecipient(address)",
-        },
-        selector: "0x1f9810c8",
-      },
-      {
-        name: "updateProceedRecipientData",
-        signature: {
-          full: "function updateProceedRecipientData(address _proceedRecipient, bytes _data)",
-          canonical: "updateProceedRecipientData(address,bytes)",
-        },
-        selector: "0x654141cf",
-      },
-    ],
-    events: [
-      {
-        name: "ProceedRecipientAdded",
-        signature: {
-          full: "event ProceedRecipientAdded(address indexed operator, address indexed proceedRecipient, bytes data)",
-          canonical: "ProceedRecipientAdded(address,address,bytes)",
-        },
-        topic0: "0x95ea4c59332446575a504e49eab7549792d2378816950a0b6efb509e4df77b95",
-      },
-      {
-        name: "ProceedRecipientDataUpdated",
-        signature: {
-          full: "event ProceedRecipientDataUpdated(address indexed operator, address indexed proceedRecipient, bytes newData)",
-          canonical: "ProceedRecipientDataUpdated(address,address,bytes)",
-        },
-        topic0: "0xd3ca7f6e7e6927a35494a3d41bf1b250b7388cb459b84f19db41a7069a70f109",
-      },
-      {
-        name: "ProceedRecipientRemoved",
-        signature: {
-          full: "event ProceedRecipientRemoved(address indexed operator, address indexed proceedRecipient)",
-          canonical: "ProceedRecipientRemoved(address,address)",
-        },
-        topic0: "0x63204e4d4571f38dab60d621fa9e61d1a9430f6fe93627d35474eba0f7ca86e6",
-      },
-    ],
-    errors: [
-      {
-        name: "AccessControlRequired",
-        signature: {
-          full: "error AccessControlRequired(bytes32 role, address sender)",
-          canonical: "AccessControlRequired(bytes32,address)",
-        },
-        selector: "0x10210dec",
-      },
-      {
-        name: "AccountHasNoRole",
-        signature: {
-          full: "error AccountHasNoRole(address account, bytes32 role)",
-          canonical: "AccountHasNoRole(address,bytes32)",
-        },
-        selector: "0xa1180aad",
-      },
-      {
-        name: "AlreadyInitialized",
-        signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
-        selector: "0x0dc149f0",
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
@@ -10871,9 +10779,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x8579befe",
       },
     ],
-    factory: (signer) => new ProceedRecipientsSustainabilityPerformanceTargetRateFacet__factory(signer),
+    factory: (signer) =>
+      new ProceedRecipientsKpiLinkedRateFacet__factory(getLibLinks("scheduledTasksOps") as any, signer),
     timeTravelFactory: (signer) =>
-      new ProceedRecipientsSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
+      new ProceedRecipientsKpiLinkedRateFacetTimeTravel__factory(getLibLinks("scheduledTasksOps") as any, signer),
   },
 
   ProtectedByPartitionFacet: {
@@ -10937,6 +10846,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountHasNoRole(address,bytes32)",
         },
         selector: "0xa1180aad",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
@@ -11130,6 +11044,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "ClearingIsDisabled",
         signature: { full: "error ClearingIsDisabled()", canonical: "ClearingIsDisabled()" },
         selector: "0x9f2523d3",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "ExpirationDateNotReached",
@@ -11339,6 +11258,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9f2523d3",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "ExpirationDateNotReached",
         signature: { full: "error ExpirationDateNotReached()", canonical: "ExpirationDateNotReached()" },
         selector: "0xaffb3088",
@@ -11490,6 +11414,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "ClearingIsActivated",
         signature: { full: "error ClearingIsActivated()", canonical: "ClearingIsActivated()" },
         selector: "0x5b2e3086",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "HoldExpirationNotReached",
@@ -11659,6 +11588,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
         selector: "0x0dc149f0",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "PartitionsAreProtected",
@@ -11819,6 +11753,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x66eb1b54",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "IdentityRegistryCallFailed",
         signature: { full: "error IdentityRegistryCallFailed()", canonical: "IdentityRegistryCallFailed()" },
         selector: "0xad87849e",
@@ -11891,8 +11830,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf9f9bcf9",
       },
     ],
-    factory: (signer) => new RecoveryFacet__factory(getLibLinks("clearingReadOps") as any, signer),
-    timeTravelFactory: (signer) => new RecoveryFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
+    factory: (signer) => new RecoveryFacet__factory(getLibLinks("clearingReadOps", "scheduledTasksOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new RecoveryFacetTimeTravel__factory(getLibLinks("clearingReadOps", "scheduledTasksOps") as any, signer),
   },
 
   ScheduledBalanceAdjustmentFacet: {
@@ -12003,6 +11943,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x0c68e660",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "FactorIsZero",
         signature: { full: "error FactorIsZero()", canonical: "FactorIsZero()" },
         selector: "0x936e9b6d",
@@ -12078,20 +12023,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
-        name: "AdjustmentBalanceSet",
+        name: "TaskExecutionFailed",
         signature: {
-          full: "event AdjustmentBalanceSet(address indexed operator, uint256 factor, uint8 decimals)",
-          canonical: "AdjustmentBalanceSet(address,uint256,uint8)",
+          full: "event TaskExecutionFailed(bytes32 indexed actionId, bytes32 indexed taskType, uint256 scheduledTimestamp)",
+          canonical: "TaskExecutionFailed(bytes32,bytes32,uint256)",
         },
-        topic0: "0x312510931206ef5f91f1ef19e1a01253812b7201fb8b2d5d4afa056cce53e34a",
-      },
-      {
-        name: "SnapshotTriggered",
-        signature: {
-          full: "event SnapshotTriggered(uint256 snapshotId, bytes metadata)",
-          canonical: "SnapshotTriggered(uint256,bytes)",
-        },
-        topic0: "0xf256aa4705d42c3984e319d2b0a2d1eb0a18a8a820922b71ba13e37c7699828c",
+        topic0: "0xa0b134b3077bb9dc6662d0a839fcb6c50853fc25d4393af34d3709edf045477a",
       },
     ],
     errors: [
@@ -12104,27 +12041,16 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x10210dec",
       },
       {
-        name: "CouponNotFound",
-        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
-        selector: "0x69a80e75",
-      },
-      {
-        name: "DecimalDifferenceTooLarge",
-        signature: {
-          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
-          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
-        },
-        selector: "0x552d04f9",
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
-      {
-        name: "UnexpectedError",
-        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
-        selector: "0xc9622656",
-      },
     ],
-    factory: (signer) => new ScheduledCrossOrderedTasksFacet__factory(signer),
-    timeTravelFactory: (signer) => new ScheduledCrossOrderedTasksFacetTimeTravel__factory(signer),
+    factory: (signer) =>
+      new ScheduledCrossOrderedTasksFacet__factory(getLibLinks("scheduledTasksDispatchOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ScheduledCrossOrderedTasksFacetTimeTravel__factory(getLibLinks("scheduledTasksDispatchOps") as any, signer),
   },
 
   ScheduledCrossOrderedTasksKpiLinkedRateFacet: {
@@ -12170,20 +12096,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
-        name: "AdjustmentBalanceSet",
+        name: "TaskExecutionFailed",
         signature: {
-          full: "event AdjustmentBalanceSet(address indexed operator, uint256 factor, uint8 decimals)",
-          canonical: "AdjustmentBalanceSet(address,uint256,uint8)",
+          full: "event TaskExecutionFailed(bytes32 indexed actionId, bytes32 indexed taskType, uint256 scheduledTimestamp)",
+          canonical: "TaskExecutionFailed(bytes32,bytes32,uint256)",
         },
-        topic0: "0x312510931206ef5f91f1ef19e1a01253812b7201fb8b2d5d4afa056cce53e34a",
-      },
-      {
-        name: "SnapshotTriggered",
-        signature: {
-          full: "event SnapshotTriggered(uint256 snapshotId, bytes metadata)",
-          canonical: "SnapshotTriggered(uint256,bytes)",
-        },
-        topic0: "0xf256aa4705d42c3984e319d2b0a2d1eb0a18a8a820922b71ba13e37c7699828c",
+        topic0: "0xa0b134b3077bb9dc6662d0a839fcb6c50853fc25d4393af34d3709edf045477a",
       },
     ],
     errors: [
@@ -12196,119 +12114,22 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x10210dec",
       },
       {
-        name: "CouponNotFound",
-        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
-        selector: "0x69a80e75",
-      },
-      {
-        name: "DecimalDifferenceTooLarge",
-        signature: {
-          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
-          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
-        },
-        selector: "0x552d04f9",
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
-      {
-        name: "UnexpectedError",
-        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
-        selector: "0xc9622656",
-      },
     ],
-    factory: (signer) => new ScheduledCrossOrderedTasksKpiLinkedRateFacet__factory(signer),
-    timeTravelFactory: (signer) => new ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel__factory(signer),
-  },
-
-  ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet: {
-    name: "ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet",
-    resolverKey: {
-      name: "_SCHEDULED_CROSS_ORDERED_TASKS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
-      value: "0x23d3302e505d889e80b20005bf316ccd7cbbd3c547a7305d600e8f0d9bc73267",
-    },
-    methods: [
-      {
-        name: "getScheduledCrossOrderedTasks",
-        signature: {
-          full: "function getScheduledCrossOrderedTasks(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledCrossOrderedTask_)",
-          canonical: "getScheduledCrossOrderedTasks(uint256,uint256)",
-        },
-        selector: "0x72ed9041",
-      },
-      {
-        name: "scheduledCrossOrderedTaskCount",
-        signature: {
-          full: "function scheduledCrossOrderedTaskCount() view returns (uint256)",
-          canonical: "scheduledCrossOrderedTaskCount()",
-        },
-        selector: "0x46883133",
-      },
-      {
-        name: "triggerPendingScheduledCrossOrderedTasks",
-        signature: {
-          full: "function triggerPendingScheduledCrossOrderedTasks() returns (uint256)",
-          canonical: "triggerPendingScheduledCrossOrderedTasks()",
-        },
-        selector: "0x32194dbb",
-      },
-      {
-        name: "triggerScheduledCrossOrderedTasks",
-        signature: {
-          full: "function triggerScheduledCrossOrderedTasks(uint256 _max) returns (uint256)",
-          canonical: "triggerScheduledCrossOrderedTasks(uint256)",
-        },
-        selector: "0x5be4a143",
-      },
-    ],
-    events: [
-      {
-        name: "AdjustmentBalanceSet",
-        signature: {
-          full: "event AdjustmentBalanceSet(address indexed operator, uint256 factor, uint8 decimals)",
-          canonical: "AdjustmentBalanceSet(address,uint256,uint8)",
-        },
-        topic0: "0x312510931206ef5f91f1ef19e1a01253812b7201fb8b2d5d4afa056cce53e34a",
-      },
-      {
-        name: "SnapshotTriggered",
-        signature: {
-          full: "event SnapshotTriggered(uint256 snapshotId, bytes metadata)",
-          canonical: "SnapshotTriggered(uint256,bytes)",
-        },
-        topic0: "0xf256aa4705d42c3984e319d2b0a2d1eb0a18a8a820922b71ba13e37c7699828c",
-      },
-    ],
-    errors: [
-      {
-        name: "AccessControlRequired",
-        signature: {
-          full: "error AccessControlRequired(bytes32 role, address sender)",
-          canonical: "AccessControlRequired(bytes32,address)",
-        },
-        selector: "0x10210dec",
-      },
-      {
-        name: "CouponNotFound",
-        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
-        selector: "0x69a80e75",
-      },
-      {
-        name: "DecimalDifferenceTooLarge",
-        signature: {
-          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
-          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
-        },
-        selector: "0x552d04f9",
-      },
-      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
-      {
-        name: "UnexpectedError",
-        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
-        selector: "0xc9622656",
-      },
-    ],
-    factory: (signer) => new ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet__factory(signer),
+    factory: (signer) =>
+      new ScheduledCrossOrderedTasksKpiLinkedRateFacet__factory(
+        getLibLinks("scheduledTasksDispatchOps") as any,
+        signer,
+      ),
     timeTravelFactory: (signer) =>
-      new ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
+      new ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel__factory(
+        getLibLinks("scheduledTasksDispatchOps") as any,
+        signer,
+      ),
   },
 
   SecurityHoldersAtSnapshotFacet: {
@@ -12455,14 +12276,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
-        name: "AdjustmentBalanceSet",
-        signature: {
-          full: "event AdjustmentBalanceSet(address indexed operator, uint256 factor, uint8 decimals)",
-          canonical: "AdjustmentBalanceSet(address,uint256,uint8)",
-        },
-        topic0: "0x312510931206ef5f91f1ef19e1a01253812b7201fb8b2d5d4afa056cce53e34a",
-      },
-      {
         name: "SnapshotTaken",
         signature: {
           full: "event SnapshotTaken(address indexed operator, uint256 indexed snapshotID)",
@@ -12477,6 +12290,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "SnapshotTriggered(uint256,bytes)",
         },
         topic0: "0xf256aa4705d42c3984e319d2b0a2d1eb0a18a8a820922b71ba13e37c7699828c",
+      },
+      {
+        name: "TaskExecutionFailed",
+        signature: {
+          full: "event TaskExecutionFailed(bytes32 indexed actionId, bytes32 indexed taskType, uint256 scheduledTimestamp)",
+          canonical: "TaskExecutionFailed(bytes32,bytes32,uint256)",
+        },
+        topic0: "0xa0b134b3077bb9dc6662d0a839fcb6c50853fc25d4393af34d3709edf045477a",
       },
     ],
     errors: [
@@ -12497,17 +12318,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
-        name: "CouponNotFound",
-        signature: { full: "error CouponNotFound(uint256 couponID)", canonical: "CouponNotFound(uint256)" },
-        selector: "0x69a80e75",
-      },
-      {
-        name: "DecimalDifferenceTooLarge",
-        signature: {
-          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
-          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
-        },
-        selector: "0x552d04f9",
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
@@ -12523,14 +12336,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
         selector: "0xf128004d",
       },
-      {
-        name: "UnexpectedError",
-        signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },
-        selector: "0xc9622656",
-      },
     ],
-    factory: (signer) => new SnapshotsFacet__factory(signer),
-    timeTravelFactory: (signer) => new SnapshotsFacetTimeTravel__factory(signer),
+    factory: (signer) => new SnapshotsFacet__factory(getLibLinks("scheduledTasksDispatchOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new SnapshotsFacetTimeTravel__factory(getLibLinks("scheduledTasksDispatchOps") as any, signer),
   },
 
   SsiManagementFacet: {
@@ -12645,6 +12454,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error AccountIsNotIssuer(address issuer)", canonical: "AccountIsNotIssuer(address)" },
         selector: "0xcd324f53",
       },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "ListedIssuer",
@@ -12659,123 +12473,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     factory: (signer) => new SsiManagementFacet__factory(signer),
     timeTravelFactory: (signer) => new SsiManagementFacetTimeTravel__factory(signer),
-  },
-
-  SustainabilityPerformanceTargetRateFacet: {
-    name: "SustainabilityPerformanceTargetRateFacet",
-    resolverKey: {
-      name: "_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
-      value: "0xa261a7434029a925924f47ccea7fbe12af1e56efd74e8f1d8ac23bec19a27e49",
-    },
-    inheritance: ["SustainabilityPerformanceTargetRate", "IStaticFunctionSelectors"],
-    methods: [
-      {
-        name: "getImpactDataFor",
-        signature: {
-          full: "function getImpactDataFor(address _project) view returns ((uint256 baseLine, uint8 baseLineMode, uint256 deltaRate, uint8 impactDataMode) impactData_)",
-          canonical: "getImpactDataFor(address)",
-        },
-        selector: "0xb8cf9d2a",
-      },
-      {
-        name: "getInterestRate",
-        signature: {
-          full: "function getInterestRate() view returns ((uint256 baseRate, uint256 startPeriod, uint256 startRate, uint8 rateDecimals) interestRate_)",
-          canonical: "getInterestRate()",
-        },
-        selector: "0x5257b566",
-      },
-      {
-        name: "initialize_SustainabilityPerformanceTargetRate",
-        signature: {
-          full: "function initialize_SustainabilityPerformanceTargetRate((uint256 baseRate, uint256 startPeriod, uint256 startRate, uint8 rateDecimals) _interestRate, (uint256 baseLine, uint8 baseLineMode, uint256 deltaRate, uint8 impactDataMode)[] _impactData, address[] _projects)",
-          canonical:
-            "initialize_SustainabilityPerformanceTargetRate((uint256,uint256,uint256,uint8),(uint256,uint8,uint256,uint8)[],address[])",
-        },
-        selector: "0xe2ebedda",
-      },
-      {
-        name: "setImpactData",
-        signature: {
-          full: "function setImpactData((uint256 baseLine, uint8 baseLineMode, uint256 deltaRate, uint8 impactDataMode)[] _newImpactData, address[] _projects)",
-          canonical: "setImpactData((uint256,uint8,uint256,uint8)[],address[])",
-        },
-        selector: "0x3c200ec4",
-      },
-      {
-        name: "setInterestRate",
-        signature: {
-          full: "function setInterestRate((uint256 baseRate, uint256 startPeriod, uint256 startRate, uint8 rateDecimals) _newInterestRate)",
-          canonical: "setInterestRate((uint256,uint256,uint256,uint8))",
-        },
-        selector: "0xd7a0d0e8",
-      },
-    ],
-    events: [
-      {
-        name: "ImpactDataUpdated",
-        signature: {
-          full: "event ImpactDataUpdated(address indexed operator, (uint256 baseLine, uint8 baseLineMode, uint256 deltaRate, uint8 impactDataMode)[] newImpactData, address[] projects)",
-          canonical: "ImpactDataUpdated(address,(uint256,uint8,uint256,uint8)[],address[])",
-        },
-        topic0: "0xdf9489d0d261c999c855806a412e7985c60d112109c53991c8fb95f1854ed923",
-      },
-      {
-        name: "InterestRateUpdated",
-        signature: {
-          full: "event InterestRateUpdated(address indexed operator, (uint256 baseRate, uint256 startPeriod, uint256 startRate, uint8 rateDecimals) newInterestRate)",
-          canonical: "InterestRateUpdated(address,(uint256,uint256,uint256,uint8))",
-        },
-        topic0: "0xcdfd76ec4554b7a461772c0df0af27ade567494db0141c14031b9a804e10c3b6",
-      },
-    ],
-    errors: [
-      {
-        name: "AccessControlRequired",
-        signature: {
-          full: "error AccessControlRequired(bytes32 role, address sender)",
-          canonical: "AccessControlRequired(bytes32,address)",
-        },
-        selector: "0x10210dec",
-      },
-      {
-        name: "AccountHasNoRole",
-        signature: {
-          full: "error AccountHasNoRole(address account, bytes32 role)",
-          canonical: "AccountHasNoRole(address,bytes32)",
-        },
-        selector: "0xa1180aad",
-      },
-      {
-        name: "AlreadyInitialized",
-        signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
-        selector: "0x0dc149f0",
-      },
-      {
-        name: "InterestRateIsSustainabilityPerformanceTargetRate",
-        signature: {
-          full: "error InterestRateIsSustainabilityPerformanceTargetRate()",
-          canonical: "InterestRateIsSustainabilityPerformanceTargetRate()",
-        },
-        selector: "0x4f56f79f",
-      },
-      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
-      {
-        name: "NotExistingProject",
-        signature: { full: "error NotExistingProject(address project)", canonical: "NotExistingProject(address)" },
-        selector: "0x2f850995",
-      },
-      {
-        name: "ProvidedListsLengthMismatch",
-        signature: {
-          full: "error ProvidedListsLengthMismatch(uint256 impactDataLength, uint256 projectsLength)",
-          canonical: "ProvidedListsLengthMismatch(uint256,uint256)",
-        },
-        selector: "0x4470462b",
-      },
-    ],
-    factory: (signer) => new SustainabilityPerformanceTargetRateFacet__factory(signer),
-    timeTravelFactory: (signer) => new SustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
   },
 
   TimeTravelFacet: {
@@ -12824,14 +12521,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "resetSystemTimestamp",
         signature: { full: "function resetSystemTimestamp()", canonical: "resetSystemTimestamp()" },
         selector: "0x8f145250",
-      },
-      {
-        name: "testOnlyAddDeprecatedCoupon",
-        signature: {
-          full: "function testOnlyAddDeprecatedCoupon(uint256 _couponID)",
-          canonical: "testOnlyAddDeprecatedCoupon(uint256)",
-        },
-        selector: "0xa1435b5a",
       },
     ],
     events: [
@@ -12948,6 +12637,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InsufficientBalance",
         signature: {
           full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
@@ -13004,7 +12698,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe39f4776",
       },
     ],
-    factory: (signer) => new TransferAndLockByPartitionFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    factory: (signer) =>
+      new TransferAndLockByPartitionFacet__factory(getLibLinks("scheduledTasksOps", "tokenCoreOps") as any, signer),
   },
 
   TransferAndLockFacet: {
@@ -13068,6 +12763,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InsufficientBalance",
         signature: {
           full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
@@ -13121,9 +12821,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe39f4776",
       },
     ],
-    factory: (signer) => new TransferAndLockFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    factory: (signer) =>
+      new TransferAndLockFacet__factory(getLibLinks("scheduledTasksOps", "tokenCoreOps") as any, signer),
     timeTravelFactory: (signer) =>
-      new TransferAndLockFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
+      new TransferAndLockFacetTimeTravel__factory(getLibLinks("scheduledTasksOps", "tokenCoreOps") as any, signer),
   },
 
   TransferAndLockFixedRateFacet: {
@@ -13187,6 +12888,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InsufficientBalance",
         signature: {
           full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
@@ -13240,9 +12946,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe39f4776",
       },
     ],
-    factory: (signer) => new TransferAndLockFixedRateFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    factory: (signer) =>
+      new TransferAndLockFixedRateFacet__factory(getLibLinks("scheduledTasksOps", "tokenCoreOps") as any, signer),
     timeTravelFactory: (signer) =>
-      new TransferAndLockFixedRateFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
+      new TransferAndLockFixedRateFacetTimeTravel__factory(
+        getLibLinks("scheduledTasksOps", "tokenCoreOps") as any,
+        signer,
+      ),
   },
 
   TransferAndLockKpiLinkedRateFacet: {
@@ -13306,123 +13016,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
-        name: "InsufficientBalance",
-        signature: {
-          full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
-          canonical: "InsufficientBalance(address,uint256,uint256,bytes32)",
-        },
-        selector: "0x5d6824c4",
-      },
-      {
-        name: "InvalidLockAmount",
-        signature: { full: "error InvalidLockAmount()", canonical: "InvalidLockAmount()" },
-        selector: "0x409fef33",
-      },
-      {
-        name: "InvalidPartition",
-        signature: {
-          full: "error InvalidPartition(address account, bytes32 partition)",
-          canonical: "InvalidPartition(address,bytes32)",
-        },
-        selector: "0xbf84f4ec",
-      },
-      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
-      {
-        name: "NotAllowedInMultiPartitionMode",
-        signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
-        selector: "0x76d08f88",
-      },
-      {
-        name: "PartitionsAreProtectedAndNoRole",
-        signature: {
-          full: "error PartitionsAreProtectedAndNoRole(address account, bytes32 role)",
-          canonical: "PartitionsAreProtectedAndNoRole(address,bytes32)",
-        },
-        selector: "0x55347310",
-      },
-      {
-        name: "SnapshotIdDoesNotExists",
-        signature: {
-          full: "error SnapshotIdDoesNotExists(uint256 snapshotId)",
-          canonical: "SnapshotIdDoesNotExists(uint256)",
-        },
-        selector: "0x8e81eb83",
-      },
-      {
-        name: "SnapshotIdNull",
-        signature: { full: "error SnapshotIdNull()", canonical: "SnapshotIdNull()" },
-        selector: "0xf128004d",
-      },
-      {
-        name: "WrongExpirationTimestamp",
-        signature: { full: "error WrongExpirationTimestamp()", canonical: "WrongExpirationTimestamp()" },
-        selector: "0xe39f4776",
-      },
-    ],
-    factory: (signer) => new TransferAndLockKpiLinkedRateFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
-    timeTravelFactory: (signer) =>
-      new TransferAndLockKpiLinkedRateFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
-  },
-
-  TransferAndLockSustainabilityPerformanceTargetRateFacet: {
-    name: "TransferAndLockSustainabilityPerformanceTargetRateFacet",
-    resolverKey: {
-      name: "_TRANSFER_AND_LOCK_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
-      value: "0x9d1e3f5a7b9c0d2e4f6a8b0c1d3e5f7a9b0c2d4e6f8a9b1c3d5e7f9a0b2c4d6e",
-    },
-    inheritance: ["TransferAndLockFacetBase"],
-    methods: [
-      {
-        name: "transferAndLock",
-        signature: {
-          full: "function transferAndLock(address _to, uint256 _amount, bytes _data, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
-          canonical: "transferAndLock(address,uint256,bytes,uint256)",
-        },
-        selector: "0x0e92b90b",
-      },
-    ],
-    events: [
-      {
-        name: "PartitionTransferredAndLocked",
-        signature: {
-          full: "event PartitionTransferredAndLocked(bytes32 indexed partition, address indexed from, address to, uint256 value, bytes data, uint256 expirationTimestamp, uint256 lockId)",
-          canonical: "PartitionTransferredAndLocked(bytes32,address,address,uint256,bytes,uint256,uint256)",
-        },
-        topic0: "0xc2b09c570c5d1b74fb7cc5594554d1aa9fe25ad5b037856dfd980f3bbe17dda9",
-      },
-      {
-        name: "Transfer",
-        signature: {
-          full: "event Transfer(address indexed from, address indexed to, uint256 value)",
-          canonical: "Transfer(address,address,uint256)",
-        },
-        topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
-      },
-      {
-        name: "TransferByPartition",
-        signature: {
-          full: "event TransferByPartition(bytes32 indexed _fromPartition, address _operator, address indexed _from, address indexed _to, uint256 _value, bytes _data, bytes _operatorData)",
-          canonical: "TransferByPartition(bytes32,address,address,address,uint256,bytes,bytes)",
-        },
-        topic0: "0xff4e9a26af4eb73b8bacfaa4abd4fea03d9448e7b912dc5ff4019048875aa2d4",
-      },
-    ],
-    errors: [
-      {
-        name: "AccessControlRequired",
-        signature: {
-          full: "error AccessControlRequired(bytes32 role, address sender)",
-          canonical: "AccessControlRequired(bytes32,address)",
-        },
-        selector: "0x10210dec",
-      },
-      {
-        name: "AccountHasNoRole",
-        signature: {
-          full: "error AccountHasNoRole(address account, bytes32 role)",
-          canonical: "AccountHasNoRole(address,bytes32)",
-        },
-        selector: "0xa1180aad",
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "InsufficientBalance",
@@ -13479,10 +13075,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     factory: (signer) =>
-      new TransferAndLockSustainabilityPerformanceTargetRateFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+      new TransferAndLockKpiLinkedRateFacet__factory(getLibLinks("scheduledTasksOps", "tokenCoreOps") as any, signer),
     timeTravelFactory: (signer) =>
-      new TransferAndLockSustainabilityPerformanceTargetRateFacetTimeTravel__factory(
-        getLibLinks("tokenCoreOps") as any,
+      new TransferAndLockKpiLinkedRateFacetTimeTravel__factory(
+        getLibLinks("scheduledTasksOps", "tokenCoreOps") as any,
         signer,
       ),
   },
@@ -13570,6 +13166,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccessControlRequired(bytes32,address)",
         },
         selector: "0x10210dec",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
       },
       {
         name: "InvalidPartition",
@@ -13698,6 +13299,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x10210dec",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InsufficientBalance",
         signature: {
           full: "error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition)",
@@ -13814,6 +13420,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
         name: "InvalidTimestamp",
         signature: { full: "error InvalidTimestamp()", canonical: "InvalidTimestamp()" },
         selector: "0xb7d09497",
@@ -13912,7 +13523,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 126 as const;
+export const TOTAL_FACETS = 120 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -14286,6 +13897,8 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
 
   Factory: {
     name: "Factory",
+    description:
+      "Abstract base contract implementing shared deployment logic for ATS securities (equities, bonds, fixed-rate bonds, and KPI-linked-rate bonds).",
     inheritance: ["IFactory"],
     methods: [
       {
@@ -14314,15 +13927,6 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
             "deployBondKpiLinkedRate((((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bytes3,uint256,uint8,uint256,uint256),address[],bytes[]),(uint8,uint8,(bool,string,string)),(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8),(uint256,uint256,uint256,uint8,uint256)))",
         },
         selector: "0x06e6effc",
-      },
-      {
-        name: "deployBondSustainabilityPerformanceTargetRate",
-        signature: {
-          full: "function deployBondSustainabilityPerformanceTargetRate((((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, (uint256 baseRate, uint256 startPeriod, uint256 startRate, uint8 rateDecimals) interestRate, (uint256 baseLine, uint8 baseLineMode, uint256 deltaRate, uint8 impactDataMode)[] impactData, address[] projects) _bondSustainabilityPerformanceTargetRateData) returns (address bondAddress_)",
-          canonical:
-            "deployBondSustainabilityPerformanceTargetRate((((bool,bool,address,(bytes32,uint256),(bytes32,address[])[],bool,bool,uint256,(string,string,string,uint8),bool,bool,address[],address[],address[],bool,address,address),(bytes3,uint256,uint8,uint256,uint256),address[],bytes[]),(uint8,uint8,(bool,string,string)),(uint256,uint256,uint256,uint8),(uint256,uint8,uint256,uint8)[],address[]))",
-        },
-        selector: "0x5bdc1ceb",
       },
       {
         name: "deployEquity",
@@ -14623,7 +14227,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
   InterestRateStorageWrapper: {
     name: "InterestRateStorageWrapper",
     description:
-      "Library providing setters, getters, validation, and storage access for three interest rate models using deterministic storage slots.",
+      "Library providing setters, getters, validation, and storage access for two interest rate models (fixed rate and KPI-linked) using deterministic storage slots.",
     methods: [],
   },
 
@@ -14665,8 +14269,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   NominalValueStorageWrapper: {
     name: "NominalValueStorageWrapper",
-    description:
-      "Storage wrapper for nominal value data, aggregating legacy bond and equity storage for backward compatibility during migration.",
+    description: "Storage wrapper for nominal value data on a security token.",
     methods: [],
   },
 
@@ -14699,8 +14302,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   ScheduledTasksStorageWrapper: {
     name: "ScheduledTasksStorageWrapper",
-    description:
-      "Storage and execution layer for managing time‑based scheduled tasks (snapshots, coupon listings, balance adjustments, cross‑ordered tasks).",
+    description: "Manages storage, execution and queries for time-based scheduled task queues.",
     methods: [],
     errors: [
       {

@@ -12,28 +12,13 @@ import { _BOND_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 
 /// @title Bond Storage Wrapper
 /// @notice Library for managing Bond token storage operations.
-/// @dev Provides structured access to BondDataStorage with migration support for NominalValue.
 /// @author Asset Tokenization Studio Team
 library BondStorageWrapper {
     struct BondDataStorage {
         bytes3 currency;
-        /// @deprecated Kept for storage layout compatibility. Use NominalValueStorageWrapper instead.
-        // solhint-disable-next-line var-name-mixedcase
-        uint256 DEPRECATED_nominalValue;
         uint256 startingDate;
         uint256 maturityDate;
         bool initialized;
-        /// @deprecated Kept for storage layout compatibility. Use NominalValueStorageWrapper instead.
-        // solhint-disable-next-line var-name-mixedcase
-        uint8 DEPRECATED_nominalValueDecimals;
-        /// @deprecated Kept for storage layout compatibility. Use CouponStorageWrapper instead.
-        // solhint-disable-next-line var-name-mixedcase
-        uint256[] DEPRECATED_couponsOrderedListByIds;
-    }
-
-    // solhint-disable-next-line func-name-mixedcase
-    function DEPRECATED_pushCouponOrderedListId(uint256 couponID) internal {
-        _bondStorage().DEPRECATED_couponsOrderedListByIds.push(couponID);
     }
 
     // solhint-disable-next-line func-name-mixedcase
@@ -47,39 +32,6 @@ library BondStorageWrapper {
 
     function setMaturityDate(uint256 maturityDate) internal {
         _bondStorage().maturityDate = maturityDate;
-    }
-
-    /// @dev DEPRECATED – MIGRATION: Remove this function and the DEPRECATED_ fields from
-    /// BondDataStorage once all legacy tokens have been migrated.
-    function clearNominalValue() internal {
-        BondDataStorage storage $ = _bondStorage();
-        $.DEPRECATED_nominalValue = 0;
-        $.DEPRECATED_nominalValueDecimals = 0;
-    }
-
-    // This is for testing only
-    function setDeprecatedNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) internal {
-        BondDataStorage storage $ = _bondStorage();
-        $.DEPRECATED_nominalValue = _nominalValue;
-        $.DEPRECATED_nominalValueDecimals = _nominalValueDecimals;
-    }
-
-    function getDeprecatedNominalValue() internal view returns (uint256 nominalValue_) {
-        nominalValue_ = _bondStorage().DEPRECATED_nominalValue;
-    }
-
-    // solhint-disable-next-line func-name-mixedcase
-    function DEPRECATED_getCouponsOrderedListTotal() internal view returns (uint256) {
-        return _bondStorage().DEPRECATED_couponsOrderedListByIds.length;
-    }
-
-    // solhint-disable-next-line func-name-mixedcase
-    function DEPRECATED_getCouponsOrderedListByPosition(uint256 position) internal view returns (uint256) {
-        return _bondStorage().DEPRECATED_couponsOrderedListByIds[position];
-    }
-
-    function getDeprecatedNominalValueDecimals() internal view returns (uint8 nominalValueDecimals_) {
-        nominalValueDecimals_ = _bondStorage().DEPRECATED_nominalValueDecimals;
     }
 
     function getBondDetails() internal view returns (IBondTypes.BondDetailsData memory bondDetails_) {

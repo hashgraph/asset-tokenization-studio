@@ -934,4 +934,25 @@ describe("Coupon Fixed-Rate Variant Tests", () => {
     const receipt = await tx.wait();
     expectExactlyOneEvent(receipt!, asset, EVENT_NAMES.COUPON_SET);
   });
+
+  describe("Deactivated", () => {
+    it("GIVEN a deactivated asset WHEN setCoupon THEN transaction fails with Deactivated", async () => {
+      const base = await deployBondTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).setCoupon({
+          recordDate: 0,
+          executionDate: 0,
+          startDate: 0,
+          endDate: 0,
+          fixingDate: 0,
+          rate: 0,
+          rateDecimals: 0,
+          rateStatus: 0,
+        }),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
 });

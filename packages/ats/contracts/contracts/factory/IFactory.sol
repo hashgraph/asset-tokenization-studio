@@ -9,10 +9,6 @@ import { IEquity } from "../facets/layer_2/equity/IEquity.sol";
 import { FactoryRegulationData, RegulationData, RegulationType, RegulationSubType } from "../constants/regulation.sol";
 import { IFixedRate } from "../facets/layer_2/interestRate/fixedRate/IFixedRate.sol";
 import { IKpiLinkedRate } from "../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
-// prettier-ignore
-/* solhint-disable max-line-length */
-import { ISustainabilityPerformanceTargetRate } from "../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
-/* solhint-enable max-line-length */
 
 interface IFactory {
     enum SecurityType {
@@ -20,7 +16,6 @@ interface IFactory {
         Equity,
         BondFixedRate,
         BondKpiLinkedRate,
-        BondSPTRate,
         Loan
     }
 
@@ -68,14 +63,6 @@ interface IFactory {
         IKpiLinkedRate.ImpactData impactData;
     }
 
-    struct BondSustainabilityPerformanceTargetRateData {
-        BondData bondData;
-        FactoryRegulationData factoryRegulationData;
-        ISustainabilityPerformanceTargetRate.InterestRate interestRate;
-        ISustainabilityPerformanceTargetRate.ImpactData[] impactData;
-        address[] projects;
-    }
-
     struct BondFixedRateData {
         BondData bondData;
         FactoryRegulationData factoryRegulationData;
@@ -102,12 +89,6 @@ interface IFactory {
         address indexed deployer,
         address bondAddress,
         BondKpiLinkedRateData bondKpiLinkedRateData
-    );
-
-    event BondSustainabilityPerformanceTargetRateDeployed(
-        address indexed deployer,
-        address bondAddress,
-        BondSustainabilityPerformanceTargetRateData bondSustainabilityPerformanceTargetRateData
     );
 
     event ProxyDeployed(
@@ -151,10 +132,6 @@ interface IFactory {
 
     function deployBondKpiLinkedRate(
         BondKpiLinkedRateData calldata _bondKpiLinkedRateData
-    ) external returns (address bondAddress_);
-
-    function deployBondSustainabilityPerformanceTargetRate(
-        BondSustainabilityPerformanceTargetRateData calldata _bondSustainabilityPerformanceTargetRateData
     ) external returns (address bondAddress_);
 
     function getAppliedRegulationData(

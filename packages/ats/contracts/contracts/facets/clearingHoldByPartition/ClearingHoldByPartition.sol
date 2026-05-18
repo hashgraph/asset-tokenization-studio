@@ -28,6 +28,7 @@ abstract contract ClearingHoldByPartition is IClearingHoldByPartition, Modifiers
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyClearingActivated
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
@@ -56,6 +57,7 @@ abstract contract ClearingHoldByPartition is IClearingHoldByPartition, Modifiers
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyClearingActivated
         onlyValidClearingCreateHoldByPartition(
