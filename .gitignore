@@ -139,6 +139,10 @@ asset-tokenization-studio.iml
 !.claude/skills/
 .claude/skills/*
 !.claude/skills/solidity-natspec/
+!.claude/skills/initialize-update/
+!.claude/skills/initialize-add/
+!.claude/skills/initialize-event-check/
+!.claude/skills/initialize-factory/
 .opencode/
 CLAUDE.md
 AGENTS.md
