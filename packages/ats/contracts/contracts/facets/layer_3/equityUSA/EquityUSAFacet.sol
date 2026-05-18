@@ -6,7 +6,6 @@ import { _EQUITY_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../../infrastructure/proxy/Bytes4Builder.sol";
 import { IEquity } from "../../layer_2/equity/IEquity.sol";
-import { ISecurity } from "../../layer_2/security/ISecurity.sol";
 import { EquityUSA } from "./EquityUSA.sol";
 
 contract EquityUSAFacet is EquityUSA, IStaticFunctionSelectors {
@@ -15,12 +14,7 @@ contract EquityUSAFacet is EquityUSA, IStaticFunctionSelectors {
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return
-            Bytes4Builder.build(
-                this._initialize_equityUSA.selector,
-                this.getEquityDetails.selector,
-                this.getSecurityRegulationData.selector
-            );
+        return Bytes4Builder.build(this._initialize_equityUSA.selector, this.getEquityDetails.selector);
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {

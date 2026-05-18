@@ -123,6 +123,7 @@ import {
   ScheduledBalanceAdjustmentFacet__factory,
   ScheduledCrossOrderedTasksFacet__factory,
   ScheduledCrossOrderedTasksKpiLinkedRateFacet__factory,
+  SecurityFacet__factory,
   SecurityHoldersAtSnapshotFacet__factory,
   SecurityHoldersFacet__factory,
   SnapshotsByPartitionFacet__factory,
@@ -1583,11 +1584,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "_initialize_bondUSA",
         signature: {
-          full: "function _initialize_bondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
-          canonical:
-            "_initialize_bondUSA((bytes3,uint256,uint8,uint256,uint256),(uint8,uint8,uint256,uint8,uint256,uint8,uint8,uint8),(bool,string,string))",
+          full: "function _initialize_bondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData)",
+          canonical: "_initialize_bondUSA((bytes3,uint256,uint8,uint256,uint256))",
         },
-        selector: "0x86d59729",
+        selector: "0xd955f0a9",
       },
     ],
     events: [
@@ -1635,11 +1635,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "_initialize_bondUSA",
         signature: {
-          full: "function _initialize_bondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
-          canonical:
-            "_initialize_bondUSA((bytes3,uint256,uint8,uint256,uint256),(uint8,uint8,uint256,uint8,uint256,uint8,uint8,uint8),(bool,string,string))",
+          full: "function _initialize_bondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData)",
+          canonical: "_initialize_bondUSA((bytes3,uint256,uint8,uint256,uint256))",
         },
-        selector: "0x86d59729",
+        selector: "0xd955f0a9",
       },
     ],
     events: [
@@ -1687,11 +1686,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "_initialize_bondUSA",
         signature: {
-          full: "function _initialize_bondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
-          canonical:
-            "_initialize_bondUSA((bytes3,uint256,uint8,uint256,uint256),(uint8,uint8,uint256,uint8,uint256,uint8,uint8,uint8),(bool,string,string))",
+          full: "function _initialize_bondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData)",
+          canonical: "_initialize_bondUSA((bytes3,uint256,uint8,uint256,uint256))",
         },
-        selector: "0x86d59729",
+        selector: "0xd955f0a9",
       },
     ],
     events: [
@@ -1744,14 +1742,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x4ce02414",
       },
-      {
-        name: "getSecurityRegulationData",
-        signature: {
-          full: "function getSecurityRegulationData() pure returns (((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
-          canonical: "getSecurityRegulationData()",
-        },
-        selector: "0x8fda5afe",
-      },
     ],
     events: [
       {
@@ -1790,14 +1780,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0x4ce02414",
       },
-      {
-        name: "getSecurityRegulationData",
-        signature: {
-          full: "function getSecurityRegulationData() pure returns (((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
-          canonical: "getSecurityRegulationData()",
-        },
-        selector: "0x8fda5afe",
-      },
     ],
     events: [
       {
@@ -1835,14 +1817,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "getBondDetails()",
         },
         selector: "0x4ce02414",
-      },
-      {
-        name: "getSecurityRegulationData",
-        signature: {
-          full: "function getSecurityRegulationData() pure returns (((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
-          canonical: "getSecurityRegulationData()",
-        },
-        selector: "0x8fda5afe",
       },
     ],
     events: [
@@ -5167,11 +5141,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "_initialize_equityUSA",
         signature: {
-          full: "function _initialize_equityUSA((bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) _equityDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
-          canonical:
-            "_initialize_equityUSA((bool,bool,bool,bool,bool,bool,bool,uint8,bytes3,uint256,uint8),(uint8,uint8,uint256,uint8,uint256,uint8,uint8,uint8),(bool,string,string))",
+          full: "function _initialize_equityUSA((bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) _equityDetailsData)",
+          canonical: "_initialize_equityUSA((bool,bool,bool,bool,bool,bool,bool,uint8,bytes3,uint256,uint8))",
         },
-        selector: "0x8c505179",
+        selector: "0x0ec7b35b",
       },
       {
         name: "getEquityDetails",
@@ -5180,14 +5153,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "getEquityDetails()",
         },
         selector: "0xefcdcad8",
-      },
-      {
-        name: "getSecurityRegulationData",
-        signature: {
-          full: "function getSecurityRegulationData() pure returns (((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
-          canonical: "getSecurityRegulationData()",
-        },
-        selector: "0x8fda5afe",
       },
     ],
     errors: [
@@ -8096,11 +8061,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "initialize_Loan",
         signature: {
-          full: "function initialize_Loan(((bytes3 currency, uint256 startingDate, uint256 maturityDate, uint8 loanStructureType, uint8 repaymentType, uint8 interestType, uint256 signingDate, address originatorAccount, address servicerAccount) loanBasicData, (uint8 baseReferenceRate, uint256 floorRate, uint256 capRate, uint256 rateMargin, uint8 dayCount, uint8 paymentFrequency, uint256 firstAccrualDate, uint256 prepaymentPenalty, uint256 commitmentFee, uint256 utilizationFee, uint8 utilizationFeeType, uint256 servicingFee) loanInterestData, (string internalRiskGrade, uint256 defaultProbability, uint256 lossGivenDefault) riskData, (uint256 totalCollateralValue, uint256 loanToValue) collateral, (uint8 performanceStatus, uint256 daysPastDue) loanPerformanceStatus) _loanDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
+          full: "function initialize_Loan(((bytes3 currency, uint256 startingDate, uint256 maturityDate, uint8 loanStructureType, uint8 repaymentType, uint8 interestType, uint256 signingDate, address originatorAccount, address servicerAccount) loanBasicData, (uint8 baseReferenceRate, uint256 floorRate, uint256 capRate, uint256 rateMargin, uint8 dayCount, uint8 paymentFrequency, uint256 firstAccrualDate, uint256 prepaymentPenalty, uint256 commitmentFee, uint256 utilizationFee, uint8 utilizationFeeType, uint256 servicingFee) loanInterestData, (string internalRiskGrade, uint256 defaultProbability, uint256 lossGivenDefault) riskData, (uint256 totalCollateralValue, uint256 loanToValue) collateral, (uint8 performanceStatus, uint256 daysPastDue) loanPerformanceStatus) _loanDetailsData)",
           canonical:
-            "initialize_Loan(((bytes3,uint256,uint256,uint8,uint8,uint8,uint256,address,address),(uint8,uint256,uint256,uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint8,uint256),(string,uint256,uint256),(uint256,uint256),(uint8,uint256)),(uint8,uint8,uint256,uint8,uint256,uint8,uint8,uint8),(bool,string,string))",
+            "initialize_Loan(((bytes3,uint256,uint256,uint8,uint8,uint8,uint256,address,address),(uint8,uint256,uint256,uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint8,uint256),(string,uint256,uint256),(uint256,uint256),(uint8,uint256)))",
         },
-        selector: "0xdd5030fc",
+        selector: "0x88e0b0bd",
       },
       {
         name: "setLoanDetails",
@@ -8312,11 +8277,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "initializeLoansPortfolio",
         signature: {
-          full: "function initializeLoansPortfolio((uint8 portfolioType, uint8 distributionPolicy) _loansPortfolioData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
-          canonical:
-            "initializeLoansPortfolio((uint8,uint8),(uint8,uint8,uint256,uint8,uint256,uint8,uint8,uint8),(bool,string,string))",
+          full: "function initializeLoansPortfolio((uint8 portfolioType, uint8 distributionPolicy) _loansPortfolioData)",
+          canonical: "initializeLoansPortfolio((uint8,uint8))",
         },
-        selector: "0x3f8b0a67",
+        selector: "0x007f4973",
       },
       {
         name: "loansPortfolioWithdraw",
@@ -12185,6 +12149,50 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       ),
   },
 
+  SecurityFacet: {
+    name: "SecurityFacet",
+    description: "Diamond facet that exposes the security regulation capability (`ISecurity`) on a token.",
+    resolverKey: {
+      name: "_SECURITY_RESOLVER_KEY",
+      value: "0x6e220d4e6b6a59fc7585efed980dcd24d42ca706431cbd1c5e421454067c21a7",
+    },
+    inheritance: ["Security", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "getSecurityRegulationData",
+        signature: {
+          full: "function getSecurityRegulationData() view returns (((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
+          canonical: "getSecurityRegulationData()",
+        },
+        selector: "0x8fda5afe",
+      },
+      {
+        name: "initializeSecurity",
+        signature: {
+          full: "function initializeSecurity((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
+          canonical: "initializeSecurity((uint8,uint8,uint256,uint8,uint256,uint8,uint8,uint8),(bool,string,string))",
+        },
+        selector: "0x35f59a01",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AlreadyInitialized",
+        signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
+        selector: "0x0dc149f0",
+      },
+    ],
+    factory: (signer) => new SecurityFacet__factory(signer),
+  },
+
   SecurityHoldersAtSnapshotFacet: {
     name: "SecurityHoldersAtSnapshotFacet",
     description:
@@ -13576,7 +13584,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 120 as const;
+export const TOTAL_FACETS = 121 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

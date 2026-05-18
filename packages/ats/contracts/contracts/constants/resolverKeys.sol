@@ -464,6 +464,9 @@ bytes32 constant _MATURITY_BY_PARTITION_RESOLVER_KEY = 0x2b81c0fae3cdccac1d4a19f
 
 // Layer 2 Resolver Keys
 
+// keccak256("security.token.standard.security.management.resolverKey");
+bytes32 constant _SECURITY_RESOLVER_KEY = 0x6e220d4e6b6a59fc7585efed980dcd24d42ca706431cbd1c5e421454067c21a7;
+
 // keccak256('security.token.standard.equity.resolverKey');
 bytes32 constant _EQUITY_RESOLVER_KEY = 0xfe85fe0513f5a5676011f59495ae16b2b93c981c190e99e61903e5603542c810;
 

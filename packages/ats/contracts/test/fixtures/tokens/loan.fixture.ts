@@ -48,6 +48,7 @@ import {
   ProceedRecipientsFacet__factory,
   TimeTravelFacet__factory,
   Loan__factory,
+  ISecurity__factory,
 } from "@contract-types";
 import { decodeEvent } from "@scripts/infrastructure";
 import { DeepPartial, TIME_PERIODS_S } from "@scripts";
@@ -279,6 +280,7 @@ export async function deployLoanTokenFixture({
   const proceedRecipientsFacet = ProceedRecipientsFacet__factory.connect(proxyAddress, deployer);
   const timeTravelFacet = TimeTravelFacet__factory.connect(proxyAddress, deployer);
   const loanFacet = Loan__factory.connect(proxyAddress, deployer);
+  const securityFacet = ISecurity__factory.connect(proxyAddress, deployer);
 
   await controlListFacet.initializeControlList(securityData.isWhiteList);
   await erc1410ManagementFacet.initialize_ERC1410(securityData.isMultiPartition);
@@ -308,8 +310,9 @@ export async function deployLoanTokenFixture({
     loanParams?.loanInit?.currency ?? DEFAULT_LOAN_PARAMS.currency,
   );
 
-  await loanFacet.initialize_Loan(
-    loanDetails,
+  await loanFacet.initialize_Loan(loanDetails);
+
+  await securityFacet.initializeSecurity(
     buildRegulationData(regulationData.regulationType, regulationData.regulationSubType),
     {
       countriesControlListType: regulationData.additionalSecurityData.countriesControlListType,

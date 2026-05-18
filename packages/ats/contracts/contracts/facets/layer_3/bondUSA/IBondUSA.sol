@@ -2,14 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IBondTypes } from "../../layer_2/bond/IBondTypes.sol";
-import { RegulationData, AdditionalSecurityData } from "../../../constants/regulation.sol";
 
 interface IBondUSA is IBondTypes {
     // solhint-disable func-name-mixedcase
     // solhint-disable-next-line private-vars-leading-underscore
-    function _initialize_bondUSA(
-        IBondTypes.BondDetailsData calldata _bondDetailsData,
-        RegulationData memory _regulationData,
-        AdditionalSecurityData calldata _additionalSecurityData
-    ) external;
+    function _initialize_bondUSA(IBondTypes.BondDetailsData calldata _bondDetailsData) external;
 }

@@ -112,25 +112,10 @@ describe("Bond Tests", () => {
     });
 
     it("GIVEN an initialized bond WHEN trying to initialize again THEN transaction fails with AlreadyInitialized", async () => {
-      const regulationData = {
-        regulationType: 1, // REG_S
-        regulationSubType: 0, // NONE
-        dealSize: 0,
-        accreditedInvestors: 1, // ACCREDITATION_REQUIRED
-        maxNonAccreditedInvestors: 0,
-        manualInvestorVerification: 1, // VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED
-        internationalInvestors: 1, // ALLOWED
-        resaleHoldPeriod: 0, // NOT_APPLICABLE
-      };
-
-      const additionalSecurityData = {
-        countriesControlListType: false,
-        listOfCountries: "",
-        info: "",
-      };
-      await expect(
-        asset.connect(signer_A)._initialize_bondUSA(await getBondDetails(), regulationData, additionalSecurityData),
-      ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+      await expect(asset.connect(signer_A)._initialize_bondUSA(await getBondDetails())).to.be.revertedWithCustomError(
+        asset,
+        "AlreadyInitialized",
+      );
     });
   });
 

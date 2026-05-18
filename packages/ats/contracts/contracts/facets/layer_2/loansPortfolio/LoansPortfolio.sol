@@ -3,19 +3,14 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ILoansPortfolio } from "./ILoansPortfolio.sol";
 import { LOANS_PORTFOLIO_MANAGER_ROLE } from "../../../constants/roles.sol";
-import { RegulationData, AdditionalSecurityData } from "../../../constants/regulation.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { LoansPortfolioStorageWrapper } from "../../../domain/asset/loansPortfolio/LoansPortfolioStorageWrapper.sol";
-import { SecurityStorageWrapper } from "../../../domain/asset/SecurityStorageWrapper.sol";
 
 abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
     function initializeLoansPortfolio(
-        ILoansPortfolio.LoansPortfolioDetailsData calldata _loansPortfolioData,
-        RegulationData memory _regulationData,
-        AdditionalSecurityData calldata _additionalSecurityData
+        ILoansPortfolio.LoansPortfolioDetailsData calldata _loansPortfolioData
     ) external onlyUninitialized(LoansPortfolioStorageWrapper.isLoansPortfolioInitialized()) {
         LoansPortfolioStorageWrapper.initializeLoansPortfolio(_loansPortfolioData);
-        SecurityStorageWrapper.initializeSecurity(_regulationData, _additionalSecurityData);
     }
 
     function addHoldingsAsset(
