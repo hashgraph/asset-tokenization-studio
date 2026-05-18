@@ -2,8 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { DecimalsLib } from "../../infrastructure/utils/DecimalsLib.sol";
+import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 
-contract DecimalsLibMock {
+contract DecimalsLibMock is ICommonErrors {
     function calculateDecimalsAdjustment(
         uint256 _amount,
         uint8 _decimals,

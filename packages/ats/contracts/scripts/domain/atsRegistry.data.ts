@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-18T14:07:14.113Z
+ * Generated: 2026-05-18T14:30:42.326Z
  * Facets: 120
  * Infrastructure: 2
  *
@@ -4140,12 +4140,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x3a848637",
       },
       {
-        name: "DecimalDifferenceTooLarge",
-        signature: {
-          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
-          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
-        },
-        selector: "0x552d04f9",
+        name: "DecimalsTooLarge",
+        signature: { full: "error DecimalsTooLarge(uint8 decimals)", canonical: "DecimalsTooLarge(uint8)" },
+        selector: "0xc414eb7a",
       },
       {
         name: "DuplicatedCorporateAction",
@@ -4347,12 +4344,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1142a68c",
       },
       {
-        name: "DecimalDifferenceTooLarge",
-        signature: {
-          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
-          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
-        },
-        selector: "0x552d04f9",
+        name: "DecimalsTooLarge",
+        signature: { full: "error DecimalsTooLarge(uint8 decimals)", canonical: "DecimalsTooLarge(uint8)" },
+        selector: "0xc414eb7a",
       },
       {
         name: "InterestRateIsFixed",
@@ -4528,12 +4522,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x69a80e75",
       },
       {
-        name: "DecimalDifferenceTooLarge",
-        signature: {
-          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
-          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
-        },
-        selector: "0x552d04f9",
+        name: "DecimalsTooLarge",
+        signature: { full: "error DecimalsTooLarge(uint8 decimals)", canonical: "DecimalsTooLarge(uint8)" },
+        selector: "0xc414eb7a",
       },
       {
         name: "SnapshotIdDoesNotExists",
@@ -7817,12 +7808,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1142a68c",
       },
       {
-        name: "DecimalDifferenceTooLarge",
-        signature: {
-          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
-          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
-        },
-        selector: "0x552d04f9",
+        name: "DecimalsTooLarge",
+        signature: { full: "error DecimalsTooLarge(uint8 decimals)", canonical: "DecimalsTooLarge(uint8)" },
+        selector: "0xc414eb7a",
       },
       {
         name: "InvalidDate",
