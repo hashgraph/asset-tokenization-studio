@@ -148,6 +148,14 @@ Final body order:
 2. `InitializerStorageWrapper.setFacetToReady(_XXX_RESOLVER_KEY);`
 3. `emit XxxInitialized(...);`
 
+### Factory.sol note
+
+Do **not** patch the rbacs-copy block or add new conditional logic per migration. The Factory
+already appends a dedicated `DEFAULT_ADMIN_ROLE` entry unconditionally before constructing the
+proxy, and renounces it at the end of `_deploySecurity`. The only required change per migration is
+adding the new `initializeXxx` call at the correct position in the initialiser sequence, before the
+`renounceRole` call.
+
 ---
 
 ## 8. Step F — Add or fix the event
@@ -335,21 +343,97 @@ If there was no rename, use `contracts: major` only.
 
 ---
 
-## 11. Verification checklist
+## 11. Acceptance Criteria
 
-- [ ] `rg "onlyNot[X]Initialized" contracts/ -g "*.sol"` returns 0 matches
-- [ ] `rg "is[X]Initialized" contracts/ -g "*.sol"` returns 0 matches (or only comments)
-- [ ] `rg "oldFunctionName" . -g "*.sol" -g "*.ts"` returns 0 matches (if renamed)
+**This section is BLOCKING. Do NOT declare the skill complete until every command below
+passes. Run each command, show the output, and confirm the criterion is met.**
+
+### AC-1 — Dead code removed
+
+```bash
+rg "onlyNot[X]Initialized" packages/ats/contracts/contracts/ -g "*.sol"
+rg "is[X]Initialized"      packages/ats/contracts/contracts/ -g "*.sol"
+```
+
+Expected: 0 matches. If any match is found, stop and fix before continuing.
+
+### AC-2 — All 3 event-related tests exist in the test file
+
+```bash
+rg "XxxInitialized" packages/ats/contracts/test/ -g "*.ts" -l
+```
+
+Expected: at least one file listed. Then confirm the file contains all three tests:
+
+```bash
+rg "FacetAlreadyRegistered|AccountHasNoRole|XxxInitialized" \
+  <path-to-test-file> --count
+```
+
+Expected: 3 or more matches (one per test). If any are missing, write the missing
+tests from Step G before continuing.
+
+### AC-3 — All 3 tests pass
+
+```bash
+cd packages/ats/contracts && \
+  npm run test --no-compile -- --grep "initializeXxx"
+```
+
+Expected: 3 passing tests, 0 failing. If any test fails, fix the implementation
+or test — do NOT skip.
+
+### AC-4 — Event declared and NatSpec complete
+
+```bash
+rg "event XxxInitialized" packages/ats/contracts/contracts/ -g "*.sol"
+```
+
+Expected: exactly 1 match in the interface file (`IXxx.sol`). Verify manually that:
+
+- First param is `address indexed operator`
+- Remaining params match the function signature (without `calldata`/`memory`)
+- `@notice`, `@dev`, and all `@param` tags are present
+
+### AC-5 — Compile clean
+
+```bash
+cd packages/ats/contracts && npm run compile --force 2>&1 | grep -E "Warning|Error" | head -20
+```
+
+Expected: 0 warnings and 0 errors on the modified files.
+
+---
+
+## 12. Factory.sol note
+
+After the factory-bootstrap-admin refactor, `Factory.sol` handles bootstrap admin
+for **all** security tokens (Equity, Bond, etc.) by extending the `rbacs` array
+with the factory address as `DEFAULT_ADMIN_ROLE` before passing it to the
+`ResolverProxy` constructor. The factory renounces the role after running all
+initialisers.
+
+This means each migrated facet **no longer** needs a separate factory-side
+workaround for the `renounceRole` relayer pattern. The factory gets admin
+via the constructor and gives it up automatically — no per-migration
+patching required.
+
+Additions to Factory.sol for new facets are only needed if the facet is
+initialised directly in `_deploySecurity`. Optional facets that use
+`_tryInitialize*` wrappers do NOT need factory changes.
+
+---
+
+## 13. Verification checklist (static review — run after AC passes)
+
 - [ ] `onlyFacetNotRegistered(_XXX_RESOLVER_KEY)` is the first modifier after `override`
 - [ ] `onlyRole(DEFAULT_ADMIN_ROLE)` is the second modifier
 - [ ] `import { DEFAULT_ADMIN_ROLE }` present in the facet
-- [ ] `bool initialized` deleted from the struct (no renaming — backward compatibility intentionally broken)
+- [ ] `bool initialized` deleted from the struct (backward compatibility intentionally broken)
 - [ ] `setFacetToReady` called before the emit in the function body
-- [ ] Event declared in interface with `address indexed operator` as first param and NatSpec
 - [ ] If event has dynamic types (struct/array): Test 3 uses `decodeEvent`, not `.withArgs()`
 - [ ] If error has dynamic types (struct/array): assertion uses `decodeCustomError`, not `.withArgs()`
-- [ ] All 3 new tests pass: `npm run test --no-compile --grep "initializeXxx"`
 - [ ] `npm run format:check` passes on all modified files
-- [ ] `npm run compile` produces 0 warnings on modified contracts
 - [ ] Solhint produces no new errors on modified files
 - [ ] Changeset file created under `.changeset/`
+- [ ] `rg "oldFunctionName" . -g "*.sol" -g "*.ts"` returns 0 matches (if renamed)
