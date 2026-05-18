@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-14T17:55:43.515Z
+ * Generated: 2026-05-18T08:32:55.426Z
  * Facets: 120
  * Infrastructure: 2
  *
@@ -357,6 +357,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           canonical: "AccountNotAssignedToRole(bytes32,address)",
         },
         selector: "0x3ad9a7ae",
+      },
+      {
+        name: "CannotRenounceSoleAdmin",
+        signature: { full: "error CannotRenounceSoleAdmin()", canonical: "CannotRenounceSoleAdmin()" },
+        selector: "0xa63be124",
       },
       {
         name: "ContradictoryValuesInArray",
