@@ -15,6 +15,7 @@ import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedErro
 /// @custom:hash storage Erc20votes
 bytes32 constant STORAGE_LOCATION_ERC20VOTES = 0xb9759d8916f84f61d52de275f833cafd6ef9b06c1939ba841dc78330c7f3bf00;
 
+/// @custom:storage-location erc7201:security.token.standard.storage.Erc20votes
 struct ERC20VotesStorage {
     bool activated;
     mapping(address => address) delegates;

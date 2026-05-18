@@ -12,6 +12,7 @@ import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedErro
 /// @custom:hash storage Kpis
 bytes32 constant STORAGE_LOCATION_KPIS = 0x0016dc918f7b373bc12e22119ae85cf4b20c396d9179f6ed9b5f01993586a000;
 
+/// @custom:storage-location erc7201:security.token.standard.storage.Kpis
 struct KpisDataStorage {
     mapping(address => Checkpoints.Checkpoint[]) checkpointsByProject;
     mapping(address => mapping(uint256 => bool)) checkpointsDatesByProject;

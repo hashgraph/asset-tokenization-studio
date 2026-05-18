@@ -7,6 +7,7 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 /// @custom:hash storage Erc1644
 bytes32 constant STORAGE_LOCATION_ERC1644 = 0x96356235f59c9d131a29a98816b8ce8d9e8a5aa2b64c6d01293c66354dba3000;
 
+/// @custom:storage-location erc7201:security.token.standard.storage.Erc1644
 struct ERC1644Storage {
     bool isControllable;
     bool initialized;

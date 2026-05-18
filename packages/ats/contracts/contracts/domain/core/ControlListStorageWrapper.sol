@@ -9,6 +9,7 @@ import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 /// @custom:hash storage ControlList
 bytes32 constant STORAGE_LOCATION_CONTROL_LIST = 0x880786188890a6f111c4f0814d49de0f01f1a156bdbd97eda824d3baaabba900;
 
+/// @custom:storage-location erc7201:security.token.standard.storage.ControlList
 struct ControlListStorage {
     bool isWhiteList;
     bool initialized;

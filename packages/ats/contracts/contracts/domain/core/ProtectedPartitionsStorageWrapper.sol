@@ -30,6 +30,7 @@ bytes32 constant STORAGE_LOCATION_PROTECTED_PARTITIONS = 0x5b38507d21e10ec4c8c85
  * @param initialized Whether the protected partitions feature has been initialised.
  * @param arePartitionsProtected Whether token partitions are currently protected.
  */
+/// @custom:storage-location erc7201:security.token.standard.storage.ProtectedPartitions
 struct ProtectedPartitionsDataStorage {
     bool initialized;
     bool arePartitionsProtected;

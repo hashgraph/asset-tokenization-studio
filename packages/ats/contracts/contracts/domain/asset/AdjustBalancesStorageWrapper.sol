@@ -15,6 +15,7 @@ import { MAX_UINT256, MAX_UINT8 } from "../../constants/values.sol";
 /// @custom:hash storage AdjustBalances
 bytes32 constant STORAGE_LOCATION_ADJUST_BALANCES = 0x155c219135942fbe253879a75d7b29fe22563c8a767fff8bfb3bf08229d5ac00;
 
+/// @custom:storage-location erc7201:security.token.standard.storage.AdjustBalances
 struct AdjustBalancesStorage {
     mapping(address => uint256[]) labafUserPartition;
     uint256 abaf;

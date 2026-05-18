@@ -18,6 +18,7 @@ struct ActionData {
     bool isDisabled;
 }
 
+/// @custom:storage-location erc7201:security.token.standard.storage.CorporateAction
 struct CorporateActionDataStorage {
     EnumerableSet.Bytes32Set actions;
     mapping(bytes32 => ActionData) actionsData;

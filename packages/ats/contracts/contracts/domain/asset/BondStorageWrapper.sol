@@ -17,6 +17,7 @@ bytes32 constant STORAGE_LOCATION_BOND = 0xa99cdff87e8b13602d53b3661888bce1eb21f
 /// @notice Library for managing Bond token storage operations.
 /// @author Asset Tokenization Studio Team
 library BondStorageWrapper {
+    /// @custom:storage-location erc7201:security.token.standard.storage.Bond
     struct BondDataStorage {
         bytes3 currency;
         uint256 startingDate;

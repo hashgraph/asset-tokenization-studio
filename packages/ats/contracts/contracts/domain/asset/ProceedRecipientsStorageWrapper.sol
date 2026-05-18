@@ -12,6 +12,7 @@ bytes32 constant STORAGE_LOCATION_PROCEED_RECIPIENTS = 0x8c2710911f9e802eea5341b
 // solhint-disable-next-line max-line-length
 bytes32 constant STORAGE_LOCATION_PROCEED_RECIPIENTS_DATA = 0xc68f265b7453bab62daaefa3ddccae3b15389d80e305d8cccba13ceac0aca300;
 
+/// @custom:storage-location erc7201:security.token.standard.storage.ProceedRecipientsData
 struct ProceedRecipientsDataStorage {
     mapping(address => bytes) proceedRecipientData;
 }

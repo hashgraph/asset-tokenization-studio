@@ -13,6 +13,7 @@ bytes32 constant STORAGE_LOCATION_METADATA = 0x88e64aeb880d89a6f66a0868c82854ac5
  *      consumers; the contract treats values as raw bytes.
  * @param metadata Mapping from a metadata key to its ordered list of byte payloads.
  */
+/// @custom:storage-location erc7201:security.token.standard.storage.Metadata
 struct MetadataDataStorage {
     mapping(bytes32 => bytes[]) metadata;
 }

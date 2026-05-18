@@ -32,6 +32,7 @@ bytes32 constant STORAGE_LOCATION_COUPON = 0x83419e6b8093975a3157050eb9f883164e1
 /// @dev Provides structured access to CouponDataStorage at a dedicated storage slot.
 /// @author Asset Tokenization Studio Team
 library CouponStorageWrapper {
+    /// @custom:storage-location erc7201:security.token.standard.storage.Coupon
     struct CouponDataStorage {
         uint256[] couponsOrderedListByIds;
     }

@@ -6,6 +6,7 @@ import { IBusinessLogicResolver } from "../../infrastructure/diamond/IBusinessLo
 /// @custom:hash storage ResolverProxy
 bytes32 constant STORAGE_LOCATION_RESOLVER_PROXY = 0x688a1184cf65cae3790aef0eb6006209aa488bc22d1dd13eb263813b07a39300;
 
+/// @custom:storage-location erc7201:security.token.standard.storage.ResolverProxy
 struct ResolverProxyStorage {
     IBusinessLogicResolver resolver;
     bytes32 resolverProxyConfigurationId;

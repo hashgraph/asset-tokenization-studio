@@ -45,6 +45,7 @@ library LoansPortfolioStorageWrapper {
      * @param loanHoldingsAssetsByCountry Mapping from hashed key to count of loans in that country.
      * @param initialized Indicates whether the portfolio storage has been initialised.
      */
+    /// @custom:storage-location erc7201:security.token.standard.storage.LoansPortfolio
     struct LoansPortfolioDataStorage {
         ILoansPortfolio.PortfolioType portfolioType;
         ILoansPortfolio.DistributionPolicy distributionPolicy;

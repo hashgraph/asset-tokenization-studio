@@ -20,6 +20,7 @@ import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedErro
 /// @custom:hash storage Equity
 bytes32 constant STORAGE_LOCATION_EQUITY = 0x94fe8bd2c421847f50afb78366b145478e26f82c0fba2861c4fa9ade581d5800;
 
+/// @custom:storage-location erc7201:security.token.standard.storage.Equity
 struct EquityDataStorage {
     bool votingRight;
     bool informationRight;

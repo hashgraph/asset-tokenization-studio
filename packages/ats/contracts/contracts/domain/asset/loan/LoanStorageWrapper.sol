@@ -13,6 +13,7 @@ bytes32 constant STORAGE_LOCATION_LOAN = 0x2af22e338cd16bdeda633a06c0ad54c1b9d04
  * @author Hashgraph
  */
 library LoanStorageWrapper {
+    /// @custom:storage-location erc7201:security.token.standard.storage.Loan
     struct LoanDataStorage {
         // LoanBasicData
         bytes3 currency;

@@ -16,6 +16,7 @@ import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedErro
 /// @custom:hash storage Erc20
 bytes32 constant STORAGE_LOCATION_ERC20 = 0xba2beddc557de36eb4836f4ff1fd9d33a28d780fce70d36cf80b490142788200;
 
+/// @custom:storage-location erc7201:security.token.standard.storage.Erc20
 struct ERC20Storage {
     string name;
     string symbol;

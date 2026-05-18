@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 /// @custom:hash storage Nonce
 bytes32 constant STORAGE_LOCATION_NONCE = 0x9752efd73e12c56ed1d4aebb7f98c3d8260f0d65c130c4c2ebd9d9c92d79a600;
 
+/// @custom:storage-location erc7201:security.token.standard.storage.Nonce
 struct NonceDataStorage {
     mapping(address => uint256) nonces;
 }

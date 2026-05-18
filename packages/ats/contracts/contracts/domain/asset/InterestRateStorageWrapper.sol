@@ -22,6 +22,7 @@ bytes32 constant STORAGE_LOCATION_FIXED_RATE = 0x577d3b71f198de7595699f8f2861298
  * @param decimals Number of decimal places for the rate.
  * @param initialized Whether the fixed rate data has been initialised.
  */
+/// @custom:storage-location erc7201:security.token.standard.storage.FixedRate
 struct FixedRateDataStorage {
     uint256 rate;
     uint8 decimals;
@@ -47,6 +48,7 @@ struct FixedRateDataStorage {
  * @param impactDataDecimals Number of decimals for impact data fields.
  * @param initialized Whether the KPI-linked rate data has been initialised.
  */
+/// @custom:storage-location erc7201:security.token.standard.storage.KpiLinkedRate
 struct KpiLinkedRateDataStorage {
     uint256 maxRate;
     uint256 baseRate;
@@ -70,6 +72,7 @@ struct KpiLinkedRateDataStorage {
  * @param rateType The `IInterestRate.RateType` discriminator selected by the admin.
  * @param initialized Whether the coupon rate type has been initialised.
  */
+/// @custom:storage-location erc7201:security.token.standard.storage.InterestRateType
 struct InterestRateTypeDataStorage {
     IInterestRate.RateType rateType;
     bool initialized;

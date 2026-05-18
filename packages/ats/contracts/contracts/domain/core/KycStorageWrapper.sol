@@ -12,6 +12,7 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
 /// @custom:hash storage Kyc
 bytes32 constant STORAGE_LOCATION_KYC = 0x88f619eb35d79dd51bdbedb0638479d77479fa6ca039bb2a23ffdf42c8e30900;
 
+/// @custom:storage-location erc7201:security.token.standard.storage.Kyc
 struct KycStorage {
     mapping(address => IKyc.KycData) kyc;
     mapping(IKyc.KycStatus => EnumerableSet.AddressSet) kycAddressesByStatus;

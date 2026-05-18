@@ -37,6 +37,7 @@ struct Partition {
     bytes32 partition;
 }
 
+/// @custom:storage-location erc7201:security.token.standard.storage.Erc1410Basic
 struct ERC1410BasicStorage {
     mapping(bytes32 => uint256) totalSupplyByPartition;
     /// @dev Mapping from investor to their partitions
@@ -51,6 +52,7 @@ struct ERC1410BasicStorage {
     uint256 totalTokenHolders;
 }
 
+/// @custom:storage-location erc7201:security.token.standard.storage.Erc1410Operator
 struct ERC1410OperatorStorage {
     /// @dev Mapping from (investor, partition, operator) to approved status
     mapping(address => mapping(bytes32 => mapping(address => bool))) partitionApprovals;

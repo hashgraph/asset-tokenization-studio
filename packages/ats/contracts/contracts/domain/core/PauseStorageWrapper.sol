@@ -16,6 +16,7 @@ bytes32 constant STORAGE_LOCATION_PAUSE_MANAGEMENT = 0x930ab19e093b9d470c1f7056d
 /// @custom:hash storage Pause
 bytes32 constant STORAGE_LOCATION_PAUSE = 0x3bf57dcdaf5f1e5afff95a10b7216bcff83f9e35b273e271675d9ef0c0621100;
 
+/// @custom:storage-location erc7201:security.token.standard.storage.Pause
 struct PauseDataStorage {
     bool paused;
 }

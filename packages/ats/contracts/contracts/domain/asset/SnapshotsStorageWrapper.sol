@@ -34,6 +34,7 @@ bytes32 constant STORAGE_LOCATION_SNAPSHOT = 0x2e9cb27cc6da952dbadc3ddf8f7c0573a
  *      total supply, adjustment factors, decimals, token holder lists, and token holder counts.
  *      Designed to be used with the unstrucutred storage pattern via a private slot indicator.
  */
+/// @custom:storage-location erc7201:security.token.standard.storage.Snapshot
 struct SnapshotStorage {
     /// @dev Snapshots for total balances per account
     mapping(address => Snapshots) accountBalanceSnapshots;

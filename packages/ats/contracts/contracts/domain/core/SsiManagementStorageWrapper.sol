@@ -8,6 +8,7 @@ import { ISsiManagement } from "../../facets/ssiManagement/ISsiManagement.sol";
 /// @custom:hash storage SsiManagement
 bytes32 constant STORAGE_LOCATION_SSI_MANAGEMENT = 0xce722d9244e395d588d86bfe2318b3330226793a6bcb3ce028d3286061fb2f00;
 
+/// @custom:storage-location erc7201:security.token.standard.storage.SsiManagement
 struct SsiManagementStorage {
     EnumerableSet.AddressSet issuerList;
     address revocationRegistry;

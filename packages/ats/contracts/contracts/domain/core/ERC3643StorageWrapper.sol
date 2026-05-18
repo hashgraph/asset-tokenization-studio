@@ -41,6 +41,7 @@ library ERC3643StorageWrapper {
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
+    /// @custom:storage-location erc7201:security.token.standard.storage.Erc3643
     struct ERC3643Storage {
         address onchainID;
         address identityRegistry;

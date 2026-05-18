@@ -37,6 +37,7 @@ library AmortizationStorageWrapper {
     using Pagination for EnumerableSet.AddressSet;
     using Pagination for EnumerableSet.UintSet;
 
+    /// @custom:storage-location erc7201:security.token.standard.storage.Amortization
     struct AmortizationDataStorage {
         // solhint-disable max-line-length
         mapping(bytes32 corporateActionId => mapping(address tokenHolder => IAmortizationStorageWrapper.AmortizationHoldInfo)) amortizationHolds;

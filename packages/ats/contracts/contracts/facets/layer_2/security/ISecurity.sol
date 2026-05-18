@@ -20,6 +20,7 @@ interface ISecurity {
      *         stored for a token.
      * @dev Returned by `getSecurityRegulationData` as a memory copy of the two flat storage
      *      fields held in `SecurityStorageWrapper`.
+     * @custom:storage-location erc7201:security.token.standard.storage.Security
      */
     struct SecurityRegulationData {
         RegulationData regulationData;

@@ -37,6 +37,7 @@ library HoldStorageWrapper {
     using EnumerableSet for EnumerableSet.UintSet;
     using LowLevelCall for address;
 
+    /// @custom:storage-location erc7201:security.token.standard.storage.Hold
     struct HoldDataStorage {
         mapping(address => uint256) totalHeldAmountByAccount;
         mapping(address => mapping(bytes32 => uint256)) totalHeldAmountByAccountAndPartition;

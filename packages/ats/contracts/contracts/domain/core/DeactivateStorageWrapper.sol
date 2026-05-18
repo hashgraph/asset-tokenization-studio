@@ -14,6 +14,7 @@ bytes32 constant STORAGE_LOCATION_DEACTIVATE = 0x572f1b7cd92e0f948542520f56d2d4e
  *      changing the slot.
  * @param deactivated True once the token has been deactivated; transitions are one-way.
  */
+/// @custom:storage-location erc7201:security.token.standard.storage.Deactivate
 struct DeactivateDataStorage {
     bool deactivated;
 }

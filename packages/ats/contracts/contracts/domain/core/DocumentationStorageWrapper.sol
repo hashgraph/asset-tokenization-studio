@@ -26,6 +26,7 @@ struct Document {
  * @param docNames   Ordered array of all registered document names; maintains the
  *                   enumerable set of active documents.
  */
+/// @custom:storage-location erc7201:security.token.standard.storage.Documentation
 struct DocumentationDataStorage {
     mapping(bytes32 => Document) documents;
     mapping(bytes32 => uint256) docIndexes;

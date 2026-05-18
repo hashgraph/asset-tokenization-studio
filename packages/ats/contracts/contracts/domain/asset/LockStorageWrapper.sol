@@ -17,6 +17,7 @@ import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 /// @custom:hash storage Lock
 bytes32 constant STORAGE_LOCATION_LOCK = 0xd42ee8bdd326f30f9a4764fdaf28dd719168978dba1e4949fbeb1a3fd1c09000;
 
+/// @custom:storage-location erc7201:security.token.standard.storage.Lock
 struct LockDataStorage {
     mapping(address => uint256) totalLockedAmountByAccount;
     mapping(address => mapping(bytes32 => uint256)) totalLockedAmountByAccountAndPartition;

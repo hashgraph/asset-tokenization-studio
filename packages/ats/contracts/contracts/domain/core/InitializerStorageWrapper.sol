@@ -20,6 +20,7 @@ bytes32 constant STORAGE_LOCATION_INITIALIZER = 0x7f2d07b09acba6319339222a47bfb1
  *        is defined by each facet's own initialiser).
  * @param facetLastVersion Latest version recorded per facet (0 if never registered).
  */
+/// @custom:storage-location erc7201:security.token.standard.storage.Initializer
 struct InitializerDataStorage {
     uint256 maxInitializerFacetIndex;
     // configVersionStatus encoding: 0 = not started, 1 = fully operational, >1 = (resume facet index + 1)

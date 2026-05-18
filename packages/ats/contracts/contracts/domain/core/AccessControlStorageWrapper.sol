@@ -16,6 +16,7 @@ struct RoleData {
     EnumerableSet.AddressSet roleMembers;
 }
 
+/// @custom:storage-location erc7201:security.token.standard.storage.AccessControl
 struct RoleDataStorage {
     mapping(bytes32 => RoleData) roles;
     mapping(address => EnumerableSet.Bytes32Set) memberRoles;

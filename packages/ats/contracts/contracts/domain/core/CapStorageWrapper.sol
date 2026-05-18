@@ -10,6 +10,7 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 /// @custom:hash storage Cap
 bytes32 constant STORAGE_LOCATION_CAP = 0xabd29859a2443302b9905d8be07aab508a353cf611fff647d31b2a10ccb92100;
 
+/// @custom:storage-location erc7201:security.token.standard.storage.Cap
 struct CapDataStorage {
     uint256 maxSupply;
     mapping(bytes32 => uint256) maxSupplyByPartition;

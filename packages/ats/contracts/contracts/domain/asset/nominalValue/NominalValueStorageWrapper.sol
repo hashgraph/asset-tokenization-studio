@@ -18,6 +18,7 @@ bytes32 constant STORAGE_LOCATION_NOMINAL_VALUE = 0xf4ae98634996e72bf90c5471fce1
  * @author Asset Tokenization Studio Team
  */
 library NominalValueStorageWrapper {
+    /// @custom:storage-location erc7201:security.token.standard.storage.NominalValue
     struct NominalValueDataStorage {
         uint256 nominalValue;
         uint8 nominalValueDecimals;

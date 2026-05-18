@@ -37,6 +37,7 @@ bytes32 constant STORAGE_LOCATION_ERC1594 = 0x6bb5986b529cbe1ac563af7efd06b91a80
  * operating state.
  * @author Asset Tokenization Studio Team
  */
+/// @custom:storage-location erc7201:security.token.standard.storage.Erc1594
 struct ERC1594Storage {
     bool issuance;
     bool initialized;

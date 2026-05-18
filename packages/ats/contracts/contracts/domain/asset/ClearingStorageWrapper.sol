@@ -22,6 +22,7 @@ library ClearingStorageWrapper {
     using EnumerableSet for EnumerableSet.UintSet;
 
     // solhint-disable max-line-length
+    /// @custom:storage-location erc7201:security.token.standard.storage.Clearing
     struct ClearingDataStorage {
         bool initialized;
         bool activated;
