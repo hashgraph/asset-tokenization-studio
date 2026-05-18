@@ -73,6 +73,7 @@ abstract contract LockByPartition is ILockByPartition, Modifiers {
         onlyActivated
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyUnrecoveredAddress(_tokenHolder)
         onlyWithValidLockId(_partition, _tokenHolder, _lockId)
         onlyWithLockedExpirationTimestamp(_partition, _tokenHolder, _lockId)
         returns (bool success_)

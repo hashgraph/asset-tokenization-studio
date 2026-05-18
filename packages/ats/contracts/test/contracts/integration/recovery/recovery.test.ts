@@ -410,6 +410,36 @@ describe("Recovery Tests", () => {
         await expect(
           asset.lockByPartition(DEFAULT_PARTITION, amount, signer_C.address, MAX_UINT256),
         ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+        // FIND-127: recovered caller must not be able to issue/mint
+        await expect(
+          asset.connect(signer_C).issue(signer_D.address, amount, EMPTY_HEX_BYTES),
+        ).to.revertedWithCustomError(asset, "WalletRecovered");
+        await expect(asset.connect(signer_C).mint(signer_D.address, amount)).to.revertedWithCustomError(
+          asset,
+          "WalletRecovered",
+        );
+        await expect(asset.connect(signer_C).batchMint([signer_D.address], [amount])).to.revertedWithCustomError(
+          asset,
+          "WalletRecovered",
+        );
+        // FIND-127: release/releaseByPartition must not work on a recovered tokenHolder
+        await expect(asset.release(1, signer_C.address)).to.revertedWithCustomError(asset, "WalletRecovered");
+        await expect(asset.releaseByPartition(DEFAULT_PARTITION, 1, signer_C.address)).to.revertedWithCustomError(
+          asset,
+          "WalletRecovered",
+        );
+        // FIND-127: controllerCreateHoldByPartition must not work with a recovered _from
+        await asset.grantRole(ATS_ROLES.CONTROLLER_ROLE, signer_A.address);
+        const controllerHold = {
+          amount: amount,
+          expirationTimestamp: MAX_UINT256,
+          escrow: signer_B.address,
+          to: signer_A.address,
+          data: EMPTY_HEX_BYTES,
+        };
+        await expect(
+          asset.controllerCreateHoldByPartition(DEFAULT_PARTITION, signer_C.address, controllerHold, EMPTY_HEX_BYTES),
+        ).to.revertedWithCustomError(asset, "WalletRecovered");
         await asset.connect(signer_B).activateClearing();
         const clearingOperation = {
           partition: DEFAULT_PARTITION,
