@@ -1483,5 +1483,35 @@ describe("AmortizationFacet", () => {
         "Deactivated",
       );
     });
+
+    it("GIVEN a deactivated asset WHEN setAmortization THEN transaction fails with Deactivated", async () => {
+      const base = await deployLoanTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).setAmortization({ recordDate: 0, executionDate: 0, tokensToRedeem: 0 }),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN releaseAmortizationHold THEN transaction fails with Deactivated", async () => {
+      const base = await deployLoanTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).releaseAmortizationHold(0, ethers.ZeroAddress),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN setAmortizationHold THEN transaction fails with Deactivated", async () => {
+      const base = await deployLoanTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).setAmortizationHold(0, ethers.ZeroAddress, 0),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
   });
 });

@@ -13,14 +13,14 @@ contract ProceedRecipientsKpiLinkedRateFacet is ProceedRecipients, IStaticFuncti
     function addProceedRecipient(
         address _proceedRecipient,
         bytes calldata _data
-    ) external override onlyUnpaused onlyRole(PROCEED_RECIPIENT_MANAGER_ROLE) {
+    ) external override onlyActivated onlyUnpaused onlyRole(PROCEED_RECIPIENT_MANAGER_ROLE) {
         ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
         _addProceedRecipientInternal(_proceedRecipient, _data);
     }
 
     function removeProceedRecipient(
         address _proceedRecipient
-    ) external override onlyUnpaused onlyRole(PROCEED_RECIPIENT_MANAGER_ROLE) {
+    ) external override onlyActivated onlyUnpaused onlyRole(PROCEED_RECIPIENT_MANAGER_ROLE) {
         ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
         _removeProceedRecipientInternal(_proceedRecipient);
     }

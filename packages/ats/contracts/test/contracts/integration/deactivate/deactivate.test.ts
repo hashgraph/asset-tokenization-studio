@@ -74,4 +74,17 @@ describe("Deactivate Tests", () => {
     await expect(asset.connect(unknownSigner).deactivate()).to.be.revertedWithCustomError(asset, "Deactivated");
     expect(await asset.isDeactivated()).to.be.equal(true);
   });
+
+  describe("Deactivated", () => {
+    it("GIVEN a deactivated asset WHEN deactivate THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(deactivatedAsset.connect(base.deployer).deactivate()).to.be.revertedWithCustomError(
+        deactivatedAsset,
+        "Deactivated",
+      );
+    });
+  });
 });

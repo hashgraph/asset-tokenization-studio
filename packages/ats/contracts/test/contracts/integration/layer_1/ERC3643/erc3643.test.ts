@@ -1433,5 +1433,25 @@ describe("ERC3643 Tests", () => {
         deactivatedAsset.connect(base.deployer).setAddressFrozen(ethers.ZeroAddress, true),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
+
+    it("GIVEN a deactivated asset WHEN freezePartialTokens THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).freezePartialTokens(ethers.ZeroAddress, 0),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN unfreezePartialTokens THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).unfreezePartialTokens(ethers.ZeroAddress, 0),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
   });
 });
