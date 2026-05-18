@@ -135,6 +135,7 @@ const EQUITY_FACETS = [
   "VotingFacet",
   "VotingSecurityHoldersFacet",
 
+  "InterestRateFacet",
   // Jurisdiction-Specific (1)
   "EquityUSAFacet",
 

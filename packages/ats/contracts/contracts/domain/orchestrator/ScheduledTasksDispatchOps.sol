@@ -12,6 +12,7 @@ import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageW
 import { InterestRateStorageWrapper } from "../asset/InterestRateStorageWrapper.sol";
 import { KpiLinkedRateLib } from "../asset/KpiLinkedRateLib.sol";
 import { ICouponTypes } from "../../facets/coupon/ICouponTypes.sol";
+import { CouponRateDispatch } from "../../domain/asset/coupon/CouponRateDispatch.sol";
 
 /// @title ScheduledTasksDispatchOps - External library for isolated scheduled task dispatch
 /// @notice Deployed once as a separate contract. Called via DELEGATECALL through try/catch for
@@ -112,12 +113,12 @@ library ScheduledTasksDispatchOps {
     function _updateCouponRatesIfNeeded(uint256 couponID) private {
         (ICouponTypes.RegisteredCoupon memory registeredCoupon, , ) = CouponStorageWrapper.getCoupon(couponID);
 
-        if (InterestRateStorageWrapper.isKpiLinkedRateInitialized()) {
-            (uint256 rate, uint8 rateDecimals) = KpiLinkedRateLib.calculateKpiLinkedInterestRate(
-                couponID,
-                registeredCoupon.coupon
-            );
+        (uint256 rate, uint8 rateDecimals, bool shouldUpdate) = CouponRateDispatch.resolveRate(
+            couponID,
+            registeredCoupon.coupon
+        );
 
+        if (shouldUpdate) {
             CouponStorageWrapper.updateCouponRate(couponID, registeredCoupon.coupon, rate, rateDecimals);
         }
     }

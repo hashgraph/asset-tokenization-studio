@@ -9,7 +9,12 @@ import {
   ControlListFacet__factory,
   IAsset__factory,
 } from "@contract-types";
-import { DeployBondFromFactoryParams, FixedRateParams, deployBondFixedRateFromFactory } from "@scripts/domain";
+import {
+  ATS_ROLES,
+  DeployBondFromFactoryParams,
+  FixedRateParams,
+  deployBondFixedRateFromFactory,
+} from "@scripts/domain";
 import { FactoryRegulationDataParams } from "@scripts/domain";
 import { getRegulationData, getSecurityData } from "./common.fixture";
 import { getBondDetails } from "./bond.fixture";

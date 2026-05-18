@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-14T17:48:53.280Z
- * Facets: 119
+ * Generated: 2026-05-18T10:07:19.590Z
+ * Facets: 120
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -86,6 +86,7 @@ import {
   HoldFacet__factory,
   IdentityFacet__factory,
   InitializerFacet__factory,
+  InterestRateFacet__factory,
   KpiLinkedRateFacet__factory,
   KpisKpiLinkedRateFacet__factory,
   KycFacet__factory,
@@ -7541,6 +7542,76 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     factory: (signer) => new InitializerFacet__factory(signer),
   },
 
+  InterestRateFacet: {
+    name: "InterestRateFacet",
+    description:
+      "Diamond facet that exposes the coupon rate type selector — `initialize_InterestRateType`, `setCouponRateType`, and `getCouponRateType` — under `_INTEREST_RATE_RESOLVER_KEY`.",
+    resolverKey: {
+      name: "_INTEREST_RATE_RESOLVER_KEY",
+      value: "0x564574da835bfa15298fb9a545a3eb73fff192a56a6fadc086f705087433a9bf",
+    },
+    inheritance: ["InterestRate", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "getCouponRateType",
+        signature: { full: "function getCouponRateType() view returns (uint8)", canonical: "getCouponRateType()" },
+        selector: "0xfd525c04",
+      },
+      {
+        name: "initializeInterestRateType",
+        signature: {
+          full: "function initializeInterestRateType(uint8 rateType)",
+          canonical: "initializeInterestRateType(uint8)",
+        },
+        selector: "0x099c9f44",
+      },
+      {
+        name: "setCouponRateType",
+        signature: { full: "function setCouponRateType(uint8 rateType)", canonical: "setCouponRateType(uint8)" },
+        selector: "0x5f88f0d5",
+      },
+    ],
+    events: [
+      {
+        name: "CouponRateTypeSet",
+        signature: {
+          full: "event CouponRateTypeSet(address indexed operator, uint8 rateType)",
+          canonical: "CouponRateTypeSet(address,uint8)",
+        },
+        topic0: "0xe5ad378f2c6a99814d7ecfb31ad92a1d7fc90f0963df2fdb25fac6743ee8dc64",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlRequired",
+        signature: {
+          full: "error AccessControlRequired(bytes32 role, address sender)",
+          canonical: "AccessControlRequired(bytes32,address)",
+        },
+        selector: "0x10210dec",
+      },
+      {
+        name: "AccountHasNoRole",
+        signature: {
+          full: "error AccountHasNoRole(address account, bytes32 role)",
+          canonical: "AccountHasNoRole(address,bytes32)",
+        },
+        selector: "0xa1180aad",
+      },
+      {
+        name: "Deactivated",
+        signature: { full: "error Deactivated()", canonical: "Deactivated()" },
+        selector: "0x1142a68c",
+      },
+      {
+        name: "InvalidRateType",
+        signature: { full: "error InvalidRateType(uint8 rateType)", canonical: "InvalidRateType(uint8)" },
+        selector: "0x6d912251",
+      },
+    ],
+    factory: (signer) => new InterestRateFacet__factory(signer),
+  },
+
   KpiLinkedRateFacet: {
     name: "KpiLinkedRateFacet",
     description: "Diamond facet that exposes the KPI-linked interest rate capability (`IKpiLinkedRate`) on a token.",
@@ -13447,7 +13518,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 119 as const;
+export const TOTAL_FACETS = 120 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -13821,6 +13892,8 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
 
   Factory: {
     name: "Factory",
+    description:
+      "Abstract base contract implementing shared deployment logic for ATS securities (equities, bonds, fixed-rate bonds, and KPI-linked-rate bonds).",
     inheritance: ["IFactory"],
     methods: [
       {
