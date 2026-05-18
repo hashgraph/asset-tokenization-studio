@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-18T14:50:11.018Z
+ * Generated: 2026-05-18T15:05:13.626Z
  * Facets: 120
  * Infrastructure: 2
  *
@@ -1506,6 +1506,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
         selector: "0x76d08f88",
+      },
+      {
+        name: "WalletRecovered",
+        signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
+        selector: "0xf9f9bcf9",
       },
     ],
     factory: (signer) => new BatchMintFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
@@ -3693,6 +3698,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "TokenIsNotControllable",
         signature: { full: "error TokenIsNotControllable()", canonical: "TokenIsNotControllable()" },
         selector: "0xf4b7b072",
+      },
+      {
+        name: "WalletRecovered",
+        signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
+        selector: "0xf9f9bcf9",
       },
       {
         name: "WrongExpirationTimestamp",
@@ -9275,6 +9285,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
         selector: "0x76d08f88",
+      },
+      {
+        name: "WalletRecovered",
+        signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
+        selector: "0xf9f9bcf9",
       },
     ],
     factory: (signer) => new MintFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
