@@ -143,6 +143,7 @@ import { IMetadata } from "./metadata/IMetadata.sol";
 import { IDeactivate } from "./deactivate/IDeactivate.sol";
 import { IOperatorByPartition } from "./operatorByPartition/IOperatorByPartition.sol";
 import { IInterestRate } from "./interestRate/IInterestRate.sol";
+import { IInitializer } from "./initializer/IInitializer.sol";
 
 // solhint-disable no-empty-blocks
 /**
@@ -280,5 +281,6 @@ interface IAsset is
     IDeactivate,
     IOperatorByPartition,
     ISecurityHolders,
-    IInterestRate
+    IInterestRate,
+    IInitializer
 {}
