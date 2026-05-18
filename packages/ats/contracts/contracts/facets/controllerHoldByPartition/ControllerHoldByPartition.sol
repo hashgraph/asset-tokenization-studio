@@ -35,6 +35,7 @@ abstract contract ControllerHoldByPartition is IControllerHoldByPartition, Modif
         onlyValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyControllable
+        onlyClearingDisabled
         returns (bool success_, uint256 holdId_)
     {
         (success_, holdId_) = HoldOps.createHoldByPartition(
