@@ -26,6 +26,15 @@ interface ICap {
     }
 
     /**
+     * @notice Emitted once when the Cap capability is initialised on a token.
+     * @dev Fires exclusively from `initializeCap` after the storage write succeeds.
+     * @param operator The account that invoked initialisation (deployer or upgrade caller).
+     * @param maxSupply The global maximum token supply set during initialisation.
+     * @param partitionCap Array of per-partition cap configurations.
+     */
+    event CapInitialized(address indexed operator, uint256 maxSupply, ICap.PartitionCap[] partitionCap);
+
+    /**
      * @notice Emitted when the global maximum supply is updated.
      * @param operator Address of the caller who performed the update.
      * @param newMaxSupply The new maximum supply value.
@@ -84,10 +93,9 @@ interface ICap {
     /**
      * @notice One-time initialiser that sets the global maximum supply and optional per-partition
      *         caps.
-     * @dev Can only be called once; subsequent calls revert via `onlyNotCapInitialized`. The new
+     * @dev Can only be called once; subsequent calls revert via `onlyFacetNotRegistered`. The new
      *      cap is validated to be non-zero and at least equal to the current adjusted total
-     *      supply. The leading-underscore naming convention signals this is an initialiser.
-     *      Partition caps in `partitionCap` must each be no greater than `maxSupply`.
+     *      supply. Partition caps in `partitionCap` must each be no greater than `maxSupply`.
      * @param maxSupply The global maximum token supply to set.
      * @param partitionCap Array of per-partition cap configurations to initialise.
      */
