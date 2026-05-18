@@ -25,6 +25,7 @@ abstract contract BatchBurn is IBatchBurn, Modifiers {
         uint256[] calldata _amounts
     )
         external
+        onlyActivated
         onlyUnpaused
         onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
         onlyWithoutMultiPartition

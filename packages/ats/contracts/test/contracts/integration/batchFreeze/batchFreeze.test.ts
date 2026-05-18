@@ -229,6 +229,13 @@ describe("BatchFreeze Tests", () => {
           "InputAmountsArrayLengthMismatch",
         );
       });
+
+      it("GIVEN address(0) in userAddresses WHEN batchFreezePartialTokens THEN transaction fails with ZeroAddressNotAllowed", async () => {
+        await expect(asset.batchFreezePartialTokens([ADDRESS_ZERO], [freezeAmount])).to.be.revertedWithCustomError(
+          asset,
+          "ZeroAddressNotAllowed",
+        );
+      });
     });
 
     describe("batchUnfreezePartialTokens", () => {
@@ -293,6 +300,13 @@ describe("BatchFreeze Tests", () => {
           "InputAmountsArrayLengthMismatch",
         );
       });
+
+      it("GIVEN address(0) in userAddresses WHEN batchUnfreezePartialTokens THEN transaction fails with ZeroAddressNotAllowed", async () => {
+        await expect(asset.batchUnfreezePartialTokens([ADDRESS_ZERO], [unfreezeAmount])).to.be.revertedWithCustomError(
+          asset,
+          "ZeroAddressNotAllowed",
+        );
+      });
     });
 
     describe("Paused", () => {
@@ -352,6 +366,19 @@ describe("BatchFreeze Tests", () => {
           "NotAllowedInMultiPartitionMode",
         );
       });
+    });
+  });
+
+  describe("Deactivated", () => {
+    it("GIVEN a deactivated asset WHEN batchSetAddressFrozen THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(deactivatedAsset.connect(base.deployer).batchSetAddressFrozen([], [])).to.be.revertedWithCustomError(
+        deactivatedAsset,
+        "Deactivated",
+      );
     });
   });
 });

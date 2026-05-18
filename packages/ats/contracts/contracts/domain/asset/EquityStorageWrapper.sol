@@ -8,7 +8,7 @@ import {
     KPI_EQUITY_BALANCE_ADJ
 } from "../../constants/values.sol";
 import { IEquity } from "../../facets/layer_2/equity/IEquity.sol";
-import { IAdjustBalances } from "../../facets/adjustBalances/IAdjustBalances.sol";
+import { IScheduledBalanceAdjustment } from "../../facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
 import { NominalValueStorageWrapper } from "./nominalValue/NominalValueStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
@@ -28,18 +28,11 @@ struct EquityDataStorage {
     bool putRight;
     IEquity.DividendType dividendRight;
     bytes3 currency;
-    /// @deprecated Kept for storage layout compatibility. Use NominalValueStorageWrapper instead.
-    // solhint-disable-next-line var-name-mixedcase
-    uint256 DEPRECATED_nominalValue;
     bool initialized;
-    /// @deprecated Kept for storage layout compatibility. Use NominalValueStorageWrapper instead.
-    // solhint-disable-next-line var-name-mixedcase
-    uint8 DEPRECATED_nominalValueDecimals;
 }
 
 /// @title Equity Storage Wrapper
 /// @notice Library for managing Equity token storage operations.
-/// @dev Provides structured access to EquityDataStorage with migration support for NominalValue.
 /// @author Asset Tokenization Studio Team
 library EquityStorageWrapper {
     function initializeEquityDetails(IEquity.EquityDetailsData memory equityDetailsData) internal {
@@ -57,7 +50,7 @@ library EquityStorageWrapper {
     }
 
     function setScheduledBalanceAdjustment(
-        IAdjustBalances.ScheduledBalanceAdjustment calldata newBalanceAdjustment
+        IScheduledBalanceAdjustment.ScheduledBalanceAdjustment calldata newBalanceAdjustment
     ) internal returns (bytes32 corporateActionId_, uint256 balanceAdjustmentID_) {
         bytes memory data = abi.encode(newBalanceAdjustment);
 
@@ -74,23 +67,23 @@ library EquityStorageWrapper {
             BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
             balanceAdjustmentId - 1
         );
-        IAdjustBalances.ScheduledBalanceAdjustment memory balanceAdjustment;
+        IScheduledBalanceAdjustment.ScheduledBalanceAdjustment memory balanceAdjustment;
         bytes32 corporateActionId;
         (balanceAdjustment, corporateActionId, ) = getScheduledBalanceAdjustment(balanceAdjustmentId);
         if (balanceAdjustment.executionDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
-            revert IAdjustBalances.BalanceAdjustmentAlreadyExecuted(corporateActionId, balanceAdjustmentId);
+            revert IScheduledBalanceAdjustment.BalanceAdjustmentAlreadyExecuted(corporateActionId, balanceAdjustmentId);
         }
         CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
     }
 
     function initBalanceAdjustment(bytes32 actionId, bytes memory data) internal {
         if (actionId == bytes32(0)) {
-            revert IAdjustBalances.BalanceAdjustmentCreationFailed();
+            revert IScheduledBalanceAdjustment.BalanceAdjustmentCreationFailed();
         }
 
-        IAdjustBalances.ScheduledBalanceAdjustment memory newBalanceAdjustment = abi.decode(
+        IScheduledBalanceAdjustment.ScheduledBalanceAdjustment memory newBalanceAdjustment = abi.decode(
             data,
-            (IAdjustBalances.ScheduledBalanceAdjustment)
+            (IScheduledBalanceAdjustment.ScheduledBalanceAdjustment)
         );
 
         ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(
@@ -98,29 +91,6 @@ library EquityStorageWrapper {
             BALANCE_ADJUSTMENT_TASK_TYPE
         );
         ScheduledTasksStorageWrapper.addScheduledBalanceAdjustment(newBalanceAdjustment.executionDate, actionId);
-    }
-
-    /// @dev DEPRECATED – MIGRATION: Remove this function and the DEPRECATED_ fields from
-    /// EquityDataStorage once all legacy tokens have been migrated.
-    function clearNominalValue() internal {
-        EquityDataStorage storage $ = _equityStorage();
-        $.DEPRECATED_nominalValue = 0;
-        $.DEPRECATED_nominalValueDecimals = 0;
-    }
-
-    // This is for testing only
-    function setDeprecatedNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) internal {
-        EquityDataStorage storage $ = _equityStorage();
-        $.DEPRECATED_nominalValue = _nominalValue;
-        $.DEPRECATED_nominalValueDecimals = _nominalValueDecimals;
-    }
-
-    function getDeprecatedNominalValue() internal view returns (uint256 nominalValue_) {
-        nominalValue_ = _equityStorage().DEPRECATED_nominalValue;
-    }
-
-    function getDeprecatedNominalValueDecimals() internal view returns (uint8 nominalValueDecimals_) {
-        nominalValueDecimals_ = _equityStorage().DEPRECATED_nominalValueDecimals;
     }
 
     function getEquityDetails() internal view returns (IEquity.EquityDetailsData memory equityDetails_) {
@@ -145,7 +115,7 @@ library EquityStorageWrapper {
         internal
         view
         returns (
-            IAdjustBalances.ScheduledBalanceAdjustment memory balanceAdjustment_,
+            IScheduledBalanceAdjustment.ScheduledBalanceAdjustment memory balanceAdjustment_,
             bytes32 corporateActionId_,
             bool isDisabled_
         )
@@ -159,7 +129,7 @@ library EquityStorageWrapper {
         (, , data, isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(corporateActionId_);
 
         _checkUnexpectedError(data.length == 0, KPI_EQUITY_BALANCE_ADJ);
-        (balanceAdjustment_) = abi.decode(data, (IAdjustBalances.ScheduledBalanceAdjustment));
+        (balanceAdjustment_) = abi.decode(data, (IScheduledBalanceAdjustment.ScheduledBalanceAdjustment));
     }
 
     function getScheduledBalanceAdjustmentsCount() internal view returns (uint256 balanceAdjustmentCount_) {

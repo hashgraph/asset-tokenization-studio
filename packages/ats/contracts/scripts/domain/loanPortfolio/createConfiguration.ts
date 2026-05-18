@@ -135,6 +135,7 @@ const LOANS_PORTFOLIO_FACETS = [
 
   // Advanced Features
   "AdjustBalancesFacet",
+  "ScheduledBalanceAdjustmentFacet",
   "LockFacet",
   "LockByPartitionFacet",
   "ProtectedPartitionsFacet",

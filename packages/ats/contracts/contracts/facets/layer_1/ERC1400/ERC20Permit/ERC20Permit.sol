@@ -17,6 +17,7 @@ abstract contract ERC20Permit is IERC20Permit, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         notZeroAddress(owner)
         notZeroAddress(spender)

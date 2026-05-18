@@ -962,4 +962,18 @@ describe("LoansPortfolio Token Tests", () => {
       expect(result.length).to.equal(0);
     });
   });
+
+  describe("Deactivated", () => {
+    it("GIVEN a deactivated asset WHEN addHoldingsAsset THEN transaction fails with Deactivated", async () => {
+      const base = await deployLoansPortfolioTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset
+          .connect(base.deployer)
+          .addHoldingsAsset({ assetAddress: ethers.ZeroAddress, holdingsAssetType: 0, country: "" }),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
 });

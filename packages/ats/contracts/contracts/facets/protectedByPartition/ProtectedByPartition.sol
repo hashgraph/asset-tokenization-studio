@@ -35,6 +35,7 @@ abstract contract ProtectedByPartition is IProtectedByPartition, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition))
         onlyProtectedPartitions
@@ -62,6 +63,7 @@ abstract contract ProtectedByPartition is IProtectedByPartition, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlyRole(ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition))
         onlyProtectedPartitions

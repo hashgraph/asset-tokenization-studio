@@ -38,16 +38,40 @@ describe("Access Control Tests", () => {
     await loadFixture(deployFixture);
   });
 
+  it("GIVEN a deactivated asset WHEN grantRole THEN transaction fails with Deactivated", async () => {
+    await asset.connect(deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, deployer.address);
+    await asset.connect(deployer).deactivate();
+    await expect(
+      asset.connect(deployer).grantRole(ATS_ROLES.PAUSER_ROLE, unknownSigner.address),
+    ).to.be.revertedWithCustomError(asset, "Deactivated");
+  });
+
   it("GIVEN an account without administrative role WHEN grantRole THEN transaction fails with AccountHasNoRole", async () => {
     await expect(
       asset.connect(signer_C).grantRole(ATS_ROLES.PAUSER_ROLE, unknownSigner.address),
     ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
   });
 
+  it("GIVEN a deactivated asset WHEN revokeRole THEN transaction fails with Deactivated", async () => {
+    await asset.connect(deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, deployer.address);
+    await asset.connect(deployer).deactivate();
+    await expect(
+      asset.connect(deployer).revokeRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, unknownSigner.address),
+    ).to.be.revertedWithCustomError(asset, "Deactivated");
+  });
+
   it("GIVEN an account without administrative role WHEN revokeRole THEN transaction fails with AccountHasNoRole", async () => {
     await expect(
       asset.connect(signer_C).revokeRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, unknownSigner.address),
     ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+  });
+
+  it("GIVEN a deactivated asset WHEN applyRoles THEN transaction fails with Deactivated", async () => {
+    await asset.connect(deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, deployer.address);
+    await asset.connect(deployer).deactivate();
+    await expect(
+      asset.connect(signer_C).applyRoles([ATS_ROLES.DEFAULT_ADMIN_ROLE], [true], unknownSigner.address),
+    ).to.be.revertedWithCustomError(asset, "Deactivated");
   });
 
   it("GIVEN an account without administrative role WHEN applyRoles THEN transaction fails with AccountHasNoRole", async () => {
@@ -101,6 +125,15 @@ describe("Access Control Tests", () => {
     await expect(
       asset.connect(deployer).revokeRole(ATS_ROLES.PAUSER_ROLE, unknownSigner.address),
     ).to.be.revertedWithCustomError(asset, "IsPaused");
+  });
+
+  it("GIVEN a deactivated asset WHEN renounceRole THEN transaction fails with Deactivated", async () => {
+    await asset.connect(deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, deployer.address);
+    await asset.connect(deployer).deactivate();
+    await expect(asset.connect(signer_C).renounceRole(ATS_ROLES.PAUSER_ROLE)).to.be.revertedWithCustomError(
+      asset,
+      "Deactivated",
+    );
   });
 
   it("GIVEN a paused Token WHEN renounce THEN transaction fails with IsPaused", async () => {

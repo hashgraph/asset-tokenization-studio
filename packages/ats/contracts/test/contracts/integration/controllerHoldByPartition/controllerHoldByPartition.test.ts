@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
-import { DEFAULT_PARTITION, EMPTY_STRING, ZERO, EMPTY_HEX_BYTES, ADDRESS_ZERO } from "@scripts";
+import { DEFAULT_PARTITION, EMPTY_STRING, ZERO, EMPTY_HEX_BYTES, ADDRESS_ZERO, ATS_ROLES } from "@scripts";
 import { ResolverProxy, IAsset, IHoldTypes } from "@contract-types";
 
 const _WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
@@ -354,6 +354,25 @@ describe("ControllerHoldByPartition Tests", () => {
           .connect(signer_C)
           .controllerCreateHoldByPartition(_WRONG_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
       ).to.be.revertedWithCustomError(asset, "InvalidPartition");
+    });
+  });
+
+  describe("Deactivated", () => {
+    it("GIVEN a deactivated asset WHEN controllerCreateHoldByPartition THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset
+          .connect(base.deployer)
+          .controllerCreateHoldByPartition(
+            ethers.ZeroHash,
+            ethers.ZeroAddress,
+            { amount: 0, expirationTimestamp: 0, escrow: ethers.ZeroAddress, to: ethers.ZeroAddress, data: "0x" },
+            "0x",
+          ),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
 });

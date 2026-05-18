@@ -118,6 +118,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
 
   // Advanced Features
   "AdjustBalancesFacet",
+  "ScheduledBalanceAdjustmentFacet",
   "LockFacet",
   "LockByPartitionFacet",
   "MaturityFacet",
@@ -138,6 +139,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "CouponFacet",
   "KpiLinkedRateFacet",
   "KpisKpiLinkedRateFacet",
+  "InterestRateFacet",
 
   // Maturity By Partition
   "MaturityByPartitionFacet",

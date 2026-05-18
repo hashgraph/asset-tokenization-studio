@@ -151,4 +151,17 @@ describe("SSI Tests", () => {
       expect(await asset.connect(signer_C).getIssuerListMembers(0, 1)).to.deep.equal([]);
     });
   });
+
+  describe("Deactivated", () => {
+    it("GIVEN a deactivated asset WHEN addIssuer THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(deactivatedAsset.connect(base.deployer).addIssuer(ethers.ZeroAddress)).to.be.revertedWithCustomError(
+        deactivatedAsset,
+        "Deactivated",
+      );
+    });
+  });
 });

@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { ComplianceMock, IdentityRegistryMock, IAsset, type ResolverProxy } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
-import { ATS_ROLES, EMPTY_STRING, ZERO } from "@scripts";
+import { ATS_ROLES, EMPTY_STRING, ZERO, ADDRESS_ZERO } from "@scripts";
 
 const AMOUNT = 1000;
 const MAX_SUPPLY = 10000000;
@@ -78,6 +78,10 @@ describe("BatchTransfer Tests", () => {
       },
       {
         role: ATS_ROLES.PROTECTED_PARTITIONS_ROLE,
+        members: [signer_A.address],
+      },
+      {
+        role: ATS_ROLES.CONTROL_LIST_ROLE,
         members: [signer_A.address],
       },
     ]);
@@ -217,6 +221,64 @@ describe("BatchTransfer Tests", () => {
           "ComplianceNotAllowed",
         );
       });
+
+      describe("ControlList", () => {
+        it("GIVEN a blacklisted sender WHEN batchTransfer THEN transaction fails with AccountIsBlocked", async () => {
+          await asset.addToControlList(signer_E.address);
+
+          const toList = [signer_F.address];
+          const amounts = [transferAmount];
+
+          await expect(asset.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
+            asset,
+            "AccountIsBlocked",
+          );
+        });
+
+        it("GIVEN a blacklisted destination WHEN batchTransfer THEN transaction fails with AccountIsBlocked", async () => {
+          await asset.addToControlList(signer_F.address);
+
+          const toList = [signer_D.address, signer_F.address];
+          const amounts = [transferAmount, transferAmount];
+
+          await expect(asset.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
+            asset,
+            "AccountIsBlocked",
+          );
+        });
+      });
+
+      describe("Recovery", () => {
+        it("GIVEN a recovered sender WHEN batchTransfer THEN transaction fails with WalletRecovered", async () => {
+          await asset.recoveryAddress(signer_E.address, signer_D.address, ethers.ZeroAddress);
+
+          const toList = [signer_F.address];
+          const amounts = [transferAmount];
+
+          await expect(asset.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
+            asset,
+            "WalletRecovered",
+          );
+        });
+
+        it("GIVEN a recovered destination WHEN batchTransfer THEN transaction fails with WalletRecovered", async () => {
+          await asset.recoveryAddress(signer_F.address, signer_D.address, ethers.ZeroAddress);
+
+          const toList = [signer_F.address];
+          const amounts = [transferAmount];
+
+          await expect(asset.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
+            asset,
+            "WalletRecovered",
+          );
+        });
+      });
+
+      it("GIVEN address(0) in toList WHEN batchTransfer THEN transaction fails with ZeroAddressNotAllowed", async () => {
+        await expect(
+          asset.connect(signer_E).batchTransfer([ADDRESS_ZERO], [transferAmount]),
+        ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
+      });
     });
   });
 
@@ -239,6 +301,19 @@ describe("BatchTransfer Tests", () => {
       await expect(asset.batchTransfer([signer_A.address], [AMOUNT])).to.be.revertedWithCustomError(
         asset,
         "NotAllowedInMultiPartitionMode",
+      );
+    });
+  });
+
+  describe("Deactivated", () => {
+    it("GIVEN a deactivated asset WHEN batchTransfer THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(deactivatedAsset.connect(base.deployer).batchTransfer([], [])).to.be.revertedWithCustomError(
+        deactivatedAsset,
+        "Deactivated",
       );
     });
   });

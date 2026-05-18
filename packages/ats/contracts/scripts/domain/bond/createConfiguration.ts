@@ -128,6 +128,7 @@ const BOND_FACETS = [
 
   // Advanced Features
   "AdjustBalancesFacet",
+  "ScheduledBalanceAdjustmentFacet",
   "CouponFacet",
   "CouponSecurityHoldersFacet",
   "LockFacet",
@@ -143,6 +144,7 @@ const BOND_FACETS = [
   "SsiManagementFacet",
   "TransferAndLockFacet",
   "TransferAndLockByPartitionFacet",
+  "InterestRateFacet",
 
   // Maturity By Partition
   "MaturityByPartitionFacet",

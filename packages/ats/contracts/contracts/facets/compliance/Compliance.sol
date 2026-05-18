@@ -26,7 +26,7 @@ abstract contract Compliance is IComplianceFacet, Modifiers {
      * @notice Sets the compliance contract address
      * @param _compliance The address of the new compliance contract
      */
-    function setCompliance(address _compliance) external override onlyUnpaused onlyRole(TREX_OWNER_ROLE) {
+    function setCompliance(address _compliance) external override onlyActivated onlyUnpaused onlyRole(TREX_OWNER_ROLE) {
         ERC3643StorageWrapper.setCompliance(_compliance);
     }
 

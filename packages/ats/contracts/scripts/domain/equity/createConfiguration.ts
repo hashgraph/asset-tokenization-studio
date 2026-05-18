@@ -117,8 +117,9 @@ const EQUITY_FACETS = [
   "ExternalKycListManagementFacet",
   "ExternalPauseManagementFacet",
 
-  // Advanced Features (11)
+  // Advanced Features (12)
   "AdjustBalancesFacet",
+  "ScheduledBalanceAdjustmentFacet",
   "DividendFacet",
   "DividendSecurityHoldersFacet",
   "LockFacet",
@@ -134,6 +135,7 @@ const EQUITY_FACETS = [
   "VotingFacet",
   "VotingSecurityHoldersFacet",
 
+  "InterestRateFacet",
   // Jurisdiction-Specific (1)
   "EquityUSAFacet",
 

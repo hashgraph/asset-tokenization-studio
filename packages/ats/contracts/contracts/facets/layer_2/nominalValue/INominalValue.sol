@@ -32,8 +32,7 @@ interface INominalValue {
 
     /**
      * @notice Emitted when the nominal value amount or its decimals are updated post-initialisation.
-     * @dev Fires from `setNominalValue`, and also from the legacy-bootstrap branch of
-     *      `setNominalValue` that auto-initialises uninitialised tokens during migration.
+     * @dev Fires exclusively from `setNominalValue`.
      * @param operator The caller authorised by `NOMINAL_VALUE_ROLE`.
      * @param nominalValue The new nominal value amount.
      * @param nominalValueDecimals The new decimals applied to `nominalValue`.
@@ -67,9 +66,7 @@ interface INominalValue {
 
     /**
      * @notice Updates the nominal value amount and its decimals.
-     * @dev Restricted to holders of `NOMINAL_VALUE_ROLE`. For tokens deployed before this facet
-     *      existed, the call also bootstraps the dedicated storage from legacy bond/equity slots
-     *      (passing `bytes3(0)` as currency) so the capability becomes initialised on first use.
+     * @dev Restricted to holders of `NOMINAL_VALUE_ROLE`.
      * @param _nominalValue New nominal value amount.
      * @param _nominalValueDecimals New decimals applied to `_nominalValue`.
      */
@@ -84,23 +81,19 @@ interface INominalValue {
     function setNominalValueCurrency(bytes3 _nominalValueCurrency) external;
 
     /**
-     * @notice Returns the nominal value amount, aggregating dedicated storage with legacy
-     *         bond/equity slots for backward compatibility.
+     * @notice Returns the nominal value amount.
      * @return The current nominal value amount.
      */
     function getNominalValue() external view returns (uint256);
 
     /**
-     * @notice Returns the decimals applied to the nominal value, aggregating dedicated storage
-     *         with legacy bond/equity slots.
+     * @notice Returns the decimals applied to the nominal value.
      * @return The current decimals applied to `getNominalValue`.
      */
     function getNominalValueDecimals() external view returns (uint8);
 
     /**
      * @notice Returns the ISO 4217 currency code attached to the nominal value.
-     * @dev Reads only the dedicated storage slot; legacy `bytes3 currency` fields on
-     *      `BondDataStorage` / `EquityDataStorage` are NOT aggregated here.
      * @return The current ISO 4217 currency code as `bytes3`; `0x000000` means "unset".
      */
     function getNominalValueCurrency() external view returns (bytes3);

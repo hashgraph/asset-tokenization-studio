@@ -11,7 +11,7 @@ abstract contract Kpis is IKpis, Modifiers {
         uint256 _date,
         uint256 _value,
         address _project
-    ) external onlyUnpaused onlyRole(KPI_MANAGER_ROLE) onlyValidDate(_date, _project) {
+    ) external onlyActivated onlyUnpaused onlyRole(KPI_MANAGER_ROLE) onlyValidDate(_date, _project) {
         KpisStorageWrapper.addKpiData(_date, _value, _project);
     }
 

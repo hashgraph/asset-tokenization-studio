@@ -18,11 +18,11 @@ import {
   BOND_CONFIG_ID,
   BOND_FIXED_RATE_CONFIG_ID,
   BOND_KPI_LINKED_RATE_CONFIG_ID,
-  BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
   EQUITY_CONFIG_ID,
   FACTORY_CONFIG_ID,
   LOAN_CONFIG_ID,
   LOANS_PORTFOLIO_CONFIG_ID,
+  INITIALIZE_MOCK_CONFIG_ID,
 } from "@scripts";
 import { deployAtsInfrastructureFixture, registerTransferFacetFixture } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -56,7 +56,6 @@ describe("DiamondCutManager", () => {
   let bondFacetIdList: string[] = [];
   let bondFixedRateFacetIdList: string[] = [];
   let bondKpiLinkedRateFacetIdList: string[] = [];
-  let bondSustainabilityPerformanceTargetRateFacetIdList: string[] = [];
   let loanFacetIdList: string[] = [];
   let loansPortfolioFacetIdList: string[] = [];
   let factoryFacetIdList: string[] = [];
@@ -86,9 +85,6 @@ describe("DiamondCutManager", () => {
     bondFacetIdList = Object.values(infrastructure.bondFacetKeys);
     bondFixedRateFacetIdList = Object.values(infrastructure.bondFixedRateFacetKeys);
     bondKpiLinkedRateFacetIdList = Object.values(infrastructure.bondKpiLinkedRateFacetKeys);
-    bondSustainabilityPerformanceTargetRateFacetIdList = Object.values(
-      infrastructure.bondSustainabilityPerformanceTargetRateFacetKeys,
-    );
     loanFacetIdList = Object.values(infrastructure.loanFacetKeys);
     loansPortfolioFacetIdList = Object.values(infrastructure.loansPortfolioFacetKeys);
     factoryFacetIdList = Object.values(infrastructure.factoryFacetKeys);
@@ -99,7 +95,6 @@ describe("DiamondCutManager", () => {
       [BOND_CONFIG_ID]: bondFacetIdList,
       [BOND_FIXED_RATE_CONFIG_ID]: bondFixedRateFacetIdList,
       [BOND_KPI_LINKED_RATE_CONFIG_ID]: bondKpiLinkedRateFacetIdList,
-      [BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID]: bondSustainabilityPerformanceTargetRateFacetIdList,
       [LOAN_CONFIG_ID]: loanFacetIdList,
       [LOANS_PORTFOLIO_CONFIG_ID]: loansPortfolioFacetIdList,
       [FACTORY_CONFIG_ID]: factoryFacetIdList,
@@ -335,13 +330,14 @@ describe("DiamondCutManager", () => {
       BOND_CONFIG_ID,
       BOND_FIXED_RATE_CONFIG_ID,
       BOND_KPI_LINKED_RATE_CONFIG_ID,
-      BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
       LOAN_CONFIG_ID,
       LOANS_PORTFOLIO_CONFIG_ID,
       FACTORY_CONFIG_ID,
+      INITIALIZE_MOCK_CONFIG_ID,
     ]);
 
     for (const configId of configIds) {
+      if (configId == INITIALIZE_MOCK_CONFIG_ID) continue;
       const configLatestVersion = Number(await diamondCutManager.getLatestVersionByConfiguration(configId));
       expect(configLatestVersion).to.equal(1);
 
@@ -552,7 +548,7 @@ describe("DiamondCutManager", () => {
     await expect(
       diamondCutManager
         .connect(signer_A)
-        .createConfiguration(TEST_CONFIG_IDS.BLACKLIST_TEST, facetConfigurations, { gasLimit: 30_000_000 }),
+        .createConfiguration(TEST_CONFIG_IDS.BLACKLIST_TEST, facetConfigurations, { gasLimit: 60_000_000 }),
     )
       .to.be.revertedWithCustomError(diamondCutManager, "SelectorBlacklisted")
       .withArgs(blackListedSelectors[0]);
@@ -753,6 +749,14 @@ describe("DiamondCutManager", () => {
     await expect(diamondCutManager.checkResolverProxyConfigurationRegistered(configId, 1)).to.not.be.reverted;
     const isRegisteredV0 = await diamondCutManager.isResolverProxyConfigurationRegistered(configId, 0);
     expect(isRegisteredV0).to.be.true;
+  });
+
+  it("GIVEN a registered configuration WHEN getFacetVersionByConfigurationIdVersionAndFacetId called with non-existent facetId THEN reverts with FacetIdNotRegistered", async () => {
+    const nonExistentFacetId = "0x1234567890123456789012345678901234567890123456789012345678901234";
+
+    await expect(
+      diamondCutManager.getFacetVersionByConfigurationIdVersionAndFacetId(EQUITY_CONFIG_ID, 1, nonExistentFacetId),
+    ).to.be.revertedWithCustomError(diamondCutManager, "FacetIdNotRegistered");
   });
 
   it("GIVEN a resolver WHEN adding configuration with overlapping selectors from different facets THEN fails with SelectorAlreadyRegistered", async () => {

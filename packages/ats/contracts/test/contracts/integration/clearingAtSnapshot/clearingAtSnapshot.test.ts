@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type IAsset } from "@contract-types";
-import { ZERO, EMPTY_STRING, ATS_ROLES } from "@scripts";
+import { ZERO, EMPTY_STRING, ATS_ROLES, ADDRESS_ZERO } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
@@ -180,5 +180,48 @@ describe("ClearingAtSnapshot Tests", () => {
 
     const currentBalance_C_Partition_2 = await asset.balanceOfByPartition(_PARTITION_ID_2, signer_C.address);
     expect(currentBalance_C_Partition_2).to.equal(amount - clearedAmount_Partition_2);
+  });
+
+  it("GIVEN active snapshot WHEN clearing transfer creation THEN address(0) has no phantom snapshot balance", async () => {
+    const base = await deployEquityTokenFixture({
+      equityDataParams: {
+        securityData: {
+          isMultiPartition: true,
+          clearingActive: true,
+        },
+      },
+    });
+    const diamond = base.diamond;
+
+    asset = await ethers.getContractAt("IAsset", diamond.target);
+
+    await executeRbac(asset, set_initRbacs());
+    await asset.connect(signer_A).grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+
+    await asset.connect(signer_A).addIssuer(signer_A.address);
+    await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+    await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+
+    await asset.connect(signer_A).issueByPartition({
+      partition: _PARTITION_ID_1,
+      tokenHolder: signer_C.address,
+      value: balanceOf_C_Original,
+      data: "0x",
+    });
+
+    await asset.connect(signer_C).takeSnapshot();
+
+    await asset.connect(signer_C).clearingTransferByPartition(
+      {
+        partition: _PARTITION_ID_1,
+        expirationTimestamp: MAX_UINT256,
+        data: "0x",
+      },
+      amount,
+      signer_A.address,
+    );
+
+    expect(await asset.balanceOfAtSnapshot(1, ADDRESS_ZERO)).to.equal(0);
   });
 });

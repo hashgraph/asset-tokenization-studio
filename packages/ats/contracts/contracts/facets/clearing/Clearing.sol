@@ -27,13 +27,27 @@ abstract contract Clearing is IClearing, Modifiers {
     }
 
     /// @inheritdoc IClearing
-    function activateClearing() external override onlyUnpaused onlyRole(CLEARING_ROLE) returns (bool success_) {
+    function activateClearing()
+        external
+        override
+        onlyActivated
+        onlyUnpaused
+        onlyRole(CLEARING_ROLE)
+        returns (bool success_)
+    {
         emit ClearingActivated(EvmAccessors.getMsgSender());
         success_ = ClearingStorageWrapper.setClearing(true);
     }
 
     /// @inheritdoc IClearing
-    function deactivateClearing() external override onlyUnpaused onlyRole(CLEARING_ROLE) returns (bool success_) {
+    function deactivateClearing()
+        external
+        override
+        onlyActivated
+        onlyUnpaused
+        onlyRole(CLEARING_ROLE)
+        returns (bool success_)
+    {
         emit ClearingDeactivated(EvmAccessors.getMsgSender());
         success_ = ClearingStorageWrapper.setClearing(false);
     }

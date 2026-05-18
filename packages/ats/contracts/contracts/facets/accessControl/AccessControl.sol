@@ -23,7 +23,14 @@ abstract contract AccessControl is IAccessControl, Modifiers {
     function grantRole(
         bytes32 _role,
         address _account
-    ) external override onlyUnpaused onlyRole(AccessControlStorageWrapper.getRoleAdmin(_role)) returns (bool success_) {
+    )
+        external
+        override
+        onlyActivated
+        onlyUnpaused
+        onlyRole(AccessControlStorageWrapper.getRoleAdmin(_role))
+        returns (bool success_)
+    {
         if (!AccessControlStorageWrapper.grantRole(_role, _account)) {
             revert AccountAssignedToRole(_role, _account);
         }
@@ -36,7 +43,14 @@ abstract contract AccessControl is IAccessControl, Modifiers {
     function revokeRole(
         bytes32 _role,
         address _account
-    ) external override onlyUnpaused onlyRole(AccessControlStorageWrapper.getRoleAdmin(_role)) returns (bool success_) {
+    )
+        external
+        override
+        onlyActivated
+        onlyUnpaused
+        onlyRole(AccessControlStorageWrapper.getRoleAdmin(_role))
+        returns (bool success_)
+    {
         success_ = AccessControlStorageWrapper.revokeRole(_role, _account);
         if (!success_) {
             revert AccountNotAssignedToRole(_role, _account);
@@ -47,7 +61,7 @@ abstract contract AccessControl is IAccessControl, Modifiers {
     /// @inheritdoc IAccessControl
     /// @dev Requires the token to be unpaused. No admin role required; acts on `msg.sender`.
     ///      Reverts with `CannotRenounceSoleAdmin` if the caller is the sole DEFAULT_ADMIN_ROLE holder.
-    function renounceRole(bytes32 _role) external override onlyUnpaused returns (bool success_) {
+    function renounceRole(bytes32 _role) external override onlyActivated onlyUnpaused returns (bool success_) {
         address account = EvmAccessors.getMsgSender();
         AccessControlStorageWrapper.checkNotSoleAdmin(_role);
         success_ = AccessControlStorageWrapper.revokeRole(_role, account);
@@ -67,6 +81,7 @@ abstract contract AccessControl is IAccessControl, Modifiers {
     )
         external
         override
+        onlyActivated
         onlyUnpaused
         onlySameRolesAndActivesLength(_roles.length, _actives.length)
         onlyConsistentRoles(_roles, _actives)

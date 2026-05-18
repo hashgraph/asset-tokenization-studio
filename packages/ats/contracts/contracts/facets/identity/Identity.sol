@@ -18,12 +18,14 @@ import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.s
  */
 abstract contract Identity is IIdentity, Modifiers {
     /// @inheritdoc IIdentity
-    function setOnchainID(address _onchainID) external override onlyUnpaused onlyRole(TREX_OWNER_ROLE) {
+    function setOnchainID(address _onchainID) external override onlyActivated onlyUnpaused onlyRole(TREX_OWNER_ROLE) {
         ERC3643StorageWrapper.setOnchainID(_onchainID);
     }
 
     /// @inheritdoc IIdentity
-    function setIdentityRegistry(address _identityRegistry) external override onlyUnpaused onlyRole(TREX_OWNER_ROLE) {
+    function setIdentityRegistry(
+        address _identityRegistry
+    ) external override onlyActivated onlyUnpaused onlyRole(TREX_OWNER_ROLE) {
         ERC3643StorageWrapper.setIdentityRegistry(_identityRegistry);
     }
 

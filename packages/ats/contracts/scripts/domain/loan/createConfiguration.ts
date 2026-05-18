@@ -24,7 +24,7 @@ import { LOAN_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
 
 /**
- * Loan-specific facets list (45 facets total).
+ * Loan-specific facets list (46 facets total).
  *
  * This is an explicit positive list of all facets required for loan tokens.
  *
@@ -124,6 +124,9 @@ const LOAN_FACETS = [
   "ExternalControlListManagementFacet",
   "ExternalKycListManagementFacet",
 
+  // Deactivate
+  "DeactivateFacet",
+
   // Diamond
   "DiamondFacet",
 
@@ -144,6 +147,7 @@ const LOAN_FACETS = [
   "LockFacet",
   "LockByPartitionFacet",
   "AdjustBalancesFacet",
+  "ScheduledBalanceAdjustmentFacet",
   "ProtectedPartitionsFacet",
 ] as const;
 
@@ -152,7 +156,7 @@ const LOAN_FACETS = [
  *
  * Thin wrapper that calls the generic core operation with loan-specific data:
  * - Configuration ID: LOAN_CONFIG_ID
- * - Facet list: LOAN_FACETS (44 facets)
+ * - Facet list: LOAN_FACETS (46 facets)
  *
  * All implementation logic is handled by the generic createConfiguration()
  * operation in core/operations/blrConfigurations.ts.

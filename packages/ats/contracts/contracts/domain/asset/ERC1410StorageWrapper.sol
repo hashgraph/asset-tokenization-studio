@@ -21,6 +21,7 @@ import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
+import { ScheduledTasksOps } from "../orchestrator/ScheduledTasksOps.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
@@ -33,12 +34,7 @@ struct Partition {
 }
 
 struct ERC1410BasicStorage {
-    // solhint-disable-next-line var-name-mixedcase
-    uint256 DEPRECATED_totalSupply;
     mapping(bytes32 => uint256) totalSupplyByPartition;
-    /// @dev Mapping from investor to aggregated balance across all investor token sets
-    // solhint-disable-next-line var-name-mixedcase
-    mapping(address => uint256) DEPRECATED_balances;
     /// @dev Mapping from investor to their partitions
     mapping(address => Partition[]) partitions;
     /// @dev Mapping from (investor, partition) to index of corresponding partition in partitions
@@ -220,7 +216,7 @@ library ERC1410StorageWrapper {
             operatorData
         );
 
-        if (from != basicTransferInfo.to && partition == _DEFAULT_PARTITION) {
+        if (from != basicTransferInfo.to) {
             (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
                 abi.encodeWithSelector(
                     ICompliance.transferred.selector,
@@ -266,12 +262,10 @@ library ERC1410StorageWrapper {
 
         increaseTotalSupplyByPartition(issueData.partition, issueData.value);
 
-        if (issueData.partition == _DEFAULT_PARTITION) {
-            ERC3643StorageWrapper.erc3643Storage().compliance.functionCall(
-                abi.encodeWithSelector(ICompliance.created.selector, issueData.tokenHolder, issueData.value),
-                IERC3643Types.ComplianceCallFailed.selector
-            );
-        }
+        ERC3643StorageWrapper.erc3643Storage().compliance.functionCall(
+            abi.encodeWithSelector(ICompliance.created.selector, issueData.tokenHolder, issueData.value),
+            IERC3643Types.ComplianceCallFailed.selector
+        );
 
         afterTokenTransfer(issueData.partition, address(0), issueData.tokenHolder, issueData.value);
 
@@ -314,12 +308,10 @@ library ERC1410StorageWrapper {
 
         reduceTotalSupplyByPartition(partition, value);
 
-        if (partition == _DEFAULT_PARTITION) {
-            ERC3643StorageWrapper.erc3643Storage().compliance.functionCall(
-                abi.encodeWithSelector(ICompliance.destroyed.selector, from, value),
-                IERC3643Types.ComplianceCallFailed.selector
-            );
-        }
+        ERC3643StorageWrapper.erc3643Storage().compliance.functionCall(
+            abi.encodeWithSelector(ICompliance.destroyed.selector, from, value),
+            IERC3643Types.ComplianceCallFailed.selector
+        );
 
         afterTokenTransfer(partition, from, address(0), value);
 
@@ -455,7 +447,7 @@ library ERC1410StorageWrapper {
     }
 
     function triggerAndSyncAll(bytes32 partition, address from, address to) internal {
-        ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();
+        ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
         syncBalanceAdjustments(partition, from, to);
     }
 

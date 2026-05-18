@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type IAsset, type ResolverProxy } from "@contract-types";
 import { ATS_ROLES, dateToUnixTimestamp } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployBondSustainabilityPerformanceTargetRateTokenFixture } from "@test";
+import { deployBondKpiLinkedRateTokenFixture } from "@test";
 import { executeRbac } from "@test";
 
 describe("Kpi Latest Tests", () => {
@@ -20,7 +20,7 @@ describe("Kpi Latest Tests", () => {
   let asset: IAsset;
 
   async function deploySecurityFixtureMultiPartition() {
-    const base = await deployBondSustainabilityPerformanceTargetRateTokenFixture();
+    const base = await deployBondKpiLinkedRateTokenFixture();
     diamond = base.diamond;
     signer_A = base.deployer;
     signer_B = base.user2;
@@ -35,10 +35,6 @@ describe("Kpi Latest Tests", () => {
       {
         role: ATS_ROLES.PAUSER_ROLE,
         members: [signer_B.address],
-      },
-      {
-        role: ATS_ROLES.INTEREST_RATE_MANAGER_ROLE,
-        members: [signer_A.address],
       },
       {
         role: ATS_ROLES.PROCEED_RECIPIENT_MANAGER_ROLE,
@@ -265,6 +261,18 @@ describe("Kpi Latest Tests", () => {
       expect(await asset.isCheckPointDate(date1, project1)).to.be.true;
       expect(await asset.isCheckPointDate(date2, project1)).to.be.true;
       expect(await asset.isCheckPointDate(date3, project1)).to.be.false;
+    });
+  });
+
+  describe("Deactivated", () => {
+    it("GIVEN a deactivated asset WHEN addKpiData THEN transaction fails with Deactivated", async () => {
+      const base = await deployBondKpiLinkedRateTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).addKpiData(0, 0, ethers.ZeroAddress),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
 });
