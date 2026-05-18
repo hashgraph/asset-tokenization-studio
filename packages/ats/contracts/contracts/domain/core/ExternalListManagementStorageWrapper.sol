@@ -15,12 +15,17 @@ bytes32 constant STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT = 0x8d3f81a63425a80ad1
 /// @custom:hash storage KycManagement
 bytes32 constant STORAGE_LOCATION_KYC_MANAGEMENT = 0x44eb866201f22832539d72320900218d04c7d97cfb8ebacf9a6d65c395e5e700;
 
-/// @dev Generic external-list layout. ExternalListManagementStorageWrapper instantiates this
-///      struct at two independent ERC-7201 namespaces, one per consumer:
+/// @dev Generic external-list layout. The `externalListStorage(bytes32 _position)` accessor
+///      instantiates this struct at FOUR independent ERC-7201 namespaces, one per consumer:
 ///        - erc7201:security.token.standard.storage.ControlListManagement
 ///        - erc7201:security.token.standard.storage.KycManagement
-///      The annotation below names the first slot for tooling discovery; the second slot is
-///      documented via its STORAGE_LOCATION_KYC_MANAGEMENT constant above.
+///        - erc7201:security.token.standard.storage.PauseManagement
+///          (STORAGE_LOCATION_PAUSE_MANAGEMENT in PauseStorageWrapper.sol)
+///        - erc7201:security.token.standard.storage.ProceedRecipients
+///          (STORAGE_LOCATION_PROCEED_RECIPIENTS in ProceedRecipientsStorageWrapper.sol)
+///      The annotation below names the first slot for tooling discovery; the other three are
+///      documented via their STORAGE_LOCATION_* constants. No single annotation can capture
+///      the four-slot reuse.
 /// @custom:storage-location erc7201:security.token.standard.storage.ControlListManagement
 struct ExternalListDataStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────

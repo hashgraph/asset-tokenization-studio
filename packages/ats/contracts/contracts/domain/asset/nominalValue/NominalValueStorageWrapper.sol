@@ -7,6 +7,19 @@ import { ScheduledTasksOps } from "../../orchestrator/ScheduledTasksOps.sol";
 /// @custom:hash storage NominalValue
 bytes32 constant STORAGE_LOCATION_NOMINAL_VALUE = 0xf4ae98634996e72bf90c5471fce11baa245e9198f5fa7cdab6e4d46dfe7bfe00;
 
+/// @custom:storage-location erc7201:security.token.standard.storage.NominalValue
+struct NominalValueDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    bool initialized;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    uint8 nominalValueDecimals;
+    bytes3 nominalValueCurrency;
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    uint256 nominalValue;
+
+    // ─── APPEND-ONLY ZONE BELOW ───
+}
+
 /**
  * @title NominalValueStorageWrapper - Nominal Value Storage Wrapper
  * @notice Storage wrapper for nominal value data on a security token.
@@ -18,19 +31,6 @@ bytes32 constant STORAGE_LOCATION_NOMINAL_VALUE = 0xf4ae98634996e72bf90c5471fce1
  * @author Asset Tokenization Studio Team
  */
 library NominalValueStorageWrapper {
-    /// @custom:storage-location erc7201:security.token.standard.storage.NominalValue
-    struct NominalValueDataStorage {
-        // ─── R1 Lifecycle (bool flags) ───────────────────────────
-        bool initialized;
-        // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
-        uint8 nominalValueDecimals;
-        bytes3 nominalValueCurrency;
-        // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
-        uint256 nominalValue;
-
-        // ─── APPEND-ONLY ZONE BELOW ───
-    }
-
     /**
      * @notice Initialises the dedicated nominal value storage with amount, decimals, and currency.
      * @param _nominalValue Initial nominal value amount.

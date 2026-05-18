@@ -13,21 +13,21 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
 /// @custom:hash storage Bond
 bytes32 constant STORAGE_LOCATION_BOND = 0xa99cdff87e8b13602d53b3661888bce1eb21f534ea5cb3f8223de98640507c00;
 
+/// @custom:storage-location erc7201:security.token.standard.storage.Bond
+struct BondDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    bool initialized;
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    uint256 startingDate;
+    uint256 maturityDate;
+
+    // ─── APPEND-ONLY ZONE BELOW ───
+}
+
 /// @title Bond Storage Wrapper
 /// @notice Library for managing Bond token storage operations.
 /// @author Asset Tokenization Studio Team
 library BondStorageWrapper {
-    /// @custom:storage-location erc7201:security.token.standard.storage.Bond
-    struct BondDataStorage {
-        // ─── R1 Lifecycle (bool flags) ───────────────────────────
-        bool initialized;
-        // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
-        uint256 startingDate;
-        uint256 maturityDate;
-
-        // ─── APPEND-ONLY ZONE BELOW ───
-    }
-
     // solhint-disable-next-line func-name-mixedcase
     function initialize_bond(IBondTypes.BondDetailsData calldata bondDetailsData) internal {
         BondDataStorage storage bs = _bondStorage();

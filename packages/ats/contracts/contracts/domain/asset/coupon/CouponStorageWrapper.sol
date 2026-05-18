@@ -27,18 +27,18 @@ import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTrave
 /// @custom:hash storage Coupon
 bytes32 constant STORAGE_LOCATION_COUPON = 0x83419e6b8093975a3157050eb9f883164e1459426616bc1834d782d457195c00;
 
+/// @custom:storage-location erc7201:security.token.standard.storage.Coupon
+struct CouponDataStorage {
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+    uint256[] couponsOrderedListByIds;
+    // ─── APPEND-ONLY ZONE BELOW ───
+}
+
 /// @title Coupon Storage Wrapper
 /// @notice Library for managing Coupon storage operations.
 /// @dev Provides structured access to CouponDataStorage at a dedicated storage slot.
 /// @author Asset Tokenization Studio Team
 library CouponStorageWrapper {
-    /// @custom:storage-location erc7201:security.token.standard.storage.Coupon
-    struct CouponDataStorage {
-        // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
-        uint256[] couponsOrderedListByIds;
-        // ─── APPEND-ONLY ZONE BELOW ───
-    }
-
     /**
      * @notice Persists a new coupon corporate action and schedules its snapshot/listing
      *         tasks. Variant invariants and rate stamping are delegated to

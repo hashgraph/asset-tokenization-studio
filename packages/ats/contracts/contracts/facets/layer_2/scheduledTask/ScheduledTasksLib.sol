@@ -2,7 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
-import { ScheduledTask, ScheduledTasksDataStorage } from "./scheduledTasksCommon/IScheduledTasksCommon.sol";
+import { ScheduledTask } from "./scheduledTasksCommon/IScheduledTasksCommon.sol";
+import { ScheduledTasksDataStorage } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";
 
 library ScheduledTasksLib {
     function addScheduledTask(

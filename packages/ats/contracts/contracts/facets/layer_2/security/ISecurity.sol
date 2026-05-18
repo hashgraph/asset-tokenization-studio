@@ -7,6 +7,18 @@ import { RegulationData, AdditionalSecurityData } from "../../../constants/regul
 bytes32 constant RESOLVER_KEY_SECURITY = 0x4a0ea8dcc902efa355c705fe7211cb0da08f05ad9fc8888237dd67a8c4dc6f1a;
 
 /**
+ * @notice DTO returned by `ISecurity.getSecurityRegulationData`.
+ * @dev Public input/output shape only. Persistent on-chain layout is owned by
+ *      `SecurityStorageWrapper.SecurityRegulationDataStorage` — a separate type with the
+ *      same fields by coincidence, not by inheritance. The facet copies fields at the
+ *      boundary.
+ */
+struct SecurityRegulationData {
+    RegulationData regulationData;
+    AdditionalSecurityData additionalSecurityData;
+}
+
+/**
  * @title ISecurity
  * @author Asset Tokenization Studio Team
  * @notice External surface for the security regulation capability: declares the regulation and
@@ -15,18 +27,6 @@ bytes32 constant RESOLVER_KEY_SECURITY = 0x4a0ea8dcc902efa355c705fe7211cb0da08f0
  *      is one-shot and gated by `onlyNotSecurityInitialized` on the implementation.
  */
 interface ISecurity {
-    /**
-     * @notice Aggregated view of the regulation data and supplementary security configuration
-     *         stored for a token.
-     * @dev Returned by `getSecurityRegulationData` as a memory copy of the two flat storage
-     *      fields held in `SecurityStorageWrapper`.
-     * @custom:storage-location erc7201:security.token.standard.storage.Security
-     */
-    struct SecurityRegulationData {
-        RegulationData regulationData;
-        AdditionalSecurityData additionalSecurityData;
-    }
-
     /**
      * @notice Initialises the security regulation capability with regulation and additional data.
      * @dev Callable once per token; subsequent calls revert with `AlreadyInitialized` via the

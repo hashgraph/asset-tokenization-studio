@@ -6,6 +6,44 @@ import { ILoan } from "../../../facets/layer_2/loan/ILoan.sol";
 /// @custom:hash storage Loan
 bytes32 constant STORAGE_LOCATION_LOAN = 0x2af22e338cd16bdeda633a06c0ad54c1b9d04b19487a6b1ed48b48c18d643800;
 
+/// @custom:storage-location erc7201:security.token.standard.storage.Loan
+struct LoanDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    bool initialized;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    bytes3 currency;
+    uint8 loanStructureType;
+    uint8 repaymentType;
+    uint8 interestType;
+    uint8 baseReferenceRate;
+    uint8 dayCount;
+    uint8 paymentFrequency;
+    uint8 utilizationFeeType;
+    uint8 performanceStatus;
+    address originatorAccount;
+    address servicerAccount;
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    uint256 startingDate;
+    uint256 maturityDate;
+    uint256 signingDate;
+    uint256 floorRate;
+    uint256 capRate;
+    uint256 rateMargin;
+    uint256 firstAccrualDate;
+    uint256 prepaymentPenalty;
+    uint256 commitmentFee;
+    uint256 utilizationFee;
+    uint256 servicingFee;
+    string internalRiskGrade;
+    uint256 defaultProbability;
+    uint256 lossGivenDefault;
+    uint256 totalCollateralValue;
+    uint256 loanToValue;
+    uint256 daysPastDue;
+
+    // ─── APPEND-ONLY ZONE BELOW ───
+}
+
 /**
  * @title LoanStorageWrapper
  * @notice Storage wrapper for loan management operations in the Diamond Pattern
@@ -13,44 +51,6 @@ bytes32 constant STORAGE_LOCATION_LOAN = 0x2af22e338cd16bdeda633a06c0ad54c1b9d04
  * @author Hashgraph
  */
 library LoanStorageWrapper {
-    /// @custom:storage-location erc7201:security.token.standard.storage.Loan
-    struct LoanDataStorage {
-        // ─── R1 Lifecycle (bool flags) ───────────────────────────
-        bool initialized;
-        // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
-        bytes3 currency;
-        uint8 loanStructureType;
-        uint8 repaymentType;
-        uint8 interestType;
-        uint8 baseReferenceRate;
-        uint8 dayCount;
-        uint8 paymentFrequency;
-        uint8 utilizationFeeType;
-        uint8 performanceStatus;
-        address originatorAccount;
-        address servicerAccount;
-        // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
-        uint256 startingDate;
-        uint256 maturityDate;
-        uint256 signingDate;
-        uint256 floorRate;
-        uint256 capRate;
-        uint256 rateMargin;
-        uint256 firstAccrualDate;
-        uint256 prepaymentPenalty;
-        uint256 commitmentFee;
-        uint256 utilizationFee;
-        uint256 servicingFee;
-        string internalRiskGrade;
-        uint256 defaultProbability;
-        uint256 lossGivenDefault;
-        uint256 totalCollateralValue;
-        uint256 loanToValue;
-        uint256 daysPastDue;
-
-        // ─── APPEND-ONLY ZONE BELOW ───
-    }
-
     function initializeLoan(ILoan.LoanDetailsData calldata _loanDetailsData) internal {
         LoanDataStorage storage ls = _loanStorage();
         ls.initialized = true;

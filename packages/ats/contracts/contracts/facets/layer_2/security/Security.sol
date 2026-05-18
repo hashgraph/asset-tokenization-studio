@@ -1,10 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { SecurityStorageWrapper } from "../../../domain/asset/SecurityStorageWrapper.sol";
-import { ISecurity } from "./ISecurity.sol";
+import { ISecurity, SecurityRegulationData } from "./ISecurity.sol";
+import {
+    SecurityStorageWrapper,
+    SecurityRegulationDataStorage
+} from "../../../domain/asset/SecurityStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { RegulationData, AdditionalSecurityData } from "../../../constants/regulation.sol";
+import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 
 /**
  * @title Security
@@ -26,8 +30,12 @@ abstract contract Security is ISecurity, Modifiers {
         external
         view
         virtual
-        returns (ISecurity.SecurityRegulationData memory securityRegulationData_)
+        returns (SecurityRegulationData memory securityRegulationData_)
     {
-        securityRegulationData_ = SecurityStorageWrapper.getSecurityRegulationData();
+        SecurityRegulationDataStorage memory stored = SecurityStorageWrapper.getSecurityRegulationData();
+        securityRegulationData_ = SecurityRegulationData({
+            regulationData: stored.regulationData,
+            additionalSecurityData: stored.additionalSecurityData
+        });
     }
 }

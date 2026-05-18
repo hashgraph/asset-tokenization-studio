@@ -26,6 +26,18 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 /// @custom:hash storage Hold
 bytes32 constant STORAGE_LOCATION_HOLD = 0xaee7bac248b1ceeb630aa06b36647d058252989965cf9b4a02eac9b8aec67000;
 
+/// @custom:storage-location erc7201:security.token.standard.storage.Hold
+struct HoldDataStorage {
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+    mapping(address => uint256) totalHeldAmountByAccount;
+    mapping(address => mapping(bytes32 => uint256)) totalHeldAmountByAccountAndPartition;
+    mapping(address => mapping(bytes32 => mapping(uint256 => IHoldTypes.HoldData))) holdsByAccountPartitionAndId;
+    mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) holdIdsByAccountAndPartition;
+    mapping(address => mapping(bytes32 => uint256)) nextHoldIdByAccountAndPartition;
+    mapping(address => mapping(bytes32 => mapping(uint256 => address))) holdThirdPartyByAccountPartitionAndId;
+    // ─── APPEND-ONLY ZONE BELOW ───
+}
+
 /**
  * @title HoldStorageWrapper
  * @notice Storage wrapper for hold management operations
@@ -36,18 +48,6 @@ library HoldStorageWrapper {
     using Pagination for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.UintSet;
     using LowLevelCall for address;
-
-    /// @custom:storage-location erc7201:security.token.standard.storage.Hold
-    struct HoldDataStorage {
-        // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
-        mapping(address => uint256) totalHeldAmountByAccount;
-        mapping(address => mapping(bytes32 => uint256)) totalHeldAmountByAccountAndPartition;
-        mapping(address => mapping(bytes32 => mapping(uint256 => IHoldTypes.HoldData))) holdsByAccountPartitionAndId;
-        mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) holdIdsByAccountAndPartition;
-        mapping(address => mapping(bytes32 => uint256)) nextHoldIdByAccountAndPartition;
-        mapping(address => mapping(bytes32 => mapping(uint256 => address))) holdThirdPartyByAccountPartitionAndId;
-        // ─── APPEND-ONLY ZONE BELOW ───
-    }
 
     function createHoldByPartition(
         bytes32 _partition,

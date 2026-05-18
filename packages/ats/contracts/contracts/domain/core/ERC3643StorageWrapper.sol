@@ -26,6 +26,21 @@ import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
 /// @custom:hash storage Erc3643
 bytes32 constant STORAGE_LOCATION_ERC3643 = 0x167d628abbc681171e3e4d784cf450a7f9bb9f4668795474376d3b21d0ade300;
 
+/// @custom:storage-location erc7201:security.token.standard.storage.Erc3643
+struct ERC3643Storage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    bool initialized;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    address onchainID;
+    address identityRegistry;
+    address compliance;
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+    mapping(address => uint256) frozenTokens;
+    mapping(address => mapping(bytes32 => uint256)) frozenTokensByPartition;
+    mapping(address => bool) addressRecovered;
+    // ─── APPEND-ONLY ZONE BELOW ───
+}
+
 /**
  * @title ERC3643StorageWrapper
  * @notice Library that encapsulates storage management and core operations for an
@@ -40,21 +55,6 @@ library ERC3643StorageWrapper {
     using LowLevelCall for address;
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.Bytes32Set;
-
-    /// @custom:storage-location erc7201:security.token.standard.storage.Erc3643
-    struct ERC3643Storage {
-        // ─── R1 Lifecycle (bool flags) ───────────────────────────
-        bool initialized;
-        // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
-        address onchainID;
-        address identityRegistry;
-        address compliance;
-        // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
-        mapping(address => uint256) frozenTokens;
-        mapping(address => mapping(bytes32 => uint256)) frozenTokensByPartition;
-        mapping(address => bool) addressRecovered;
-        // ─── APPEND-ONLY ZONE BELOW ───
-    }
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC3643(address _compliance, address _identityRegistry) internal {

@@ -15,7 +15,7 @@ import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTrave
 import { CorporateActionsStorageWrapper } from "../../core/CorporateActionsStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../ScheduledTasksStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "../SnapshotsStorageWrapper.sol";
-import { HoldStorageWrapper } from "../HoldStorageWrapper.sol";
+import { HoldStorageWrapper, HoldDataStorage } from "../HoldStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "../AdjustBalancesStorageWrapper.sol";
 import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
@@ -24,6 +24,18 @@ import { NominalValueStorageWrapper } from "../nominalValue/NominalValueStorageW
 
 /// @custom:hash storage Amortization
 bytes32 constant STORAGE_LOCATION_AMORTIZATION = 0x6615a5e2562c1a115412fe21b082654124f5af2ecf5b5d6bc9a66d4da90c8600;
+
+/// @custom:storage-location erc7201:security.token.standard.storage.Amortization
+struct AmortizationDataStorage {
+    // solhint-disable max-line-length
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+    mapping(bytes32 corporateActionId => mapping(address tokenHolder => IAmortizationStorageWrapper.AmortizationHoldInfo)) amortizationHolds;
+    mapping(bytes32 corporateActionId => EnumerableSet.AddressSet) activeHoldHolders;
+    EnumerableSet.UintSet activeAmortizationIds;
+    mapping(bytes32 corporateActionId => uint256) totalHoldByAmortizationId;
+    mapping(bytes32 corporateActionId => bool) disabledAmortizations;
+    // ─── APPEND-ONLY ZONE BELOW ───
+}
 
 /**
  * @title AmortizationStorageWrapper
@@ -36,18 +48,6 @@ library AmortizationStorageWrapper {
     using EnumerableSet for EnumerableSet.UintSet;
     using Pagination for EnumerableSet.AddressSet;
     using Pagination for EnumerableSet.UintSet;
-
-    /// @custom:storage-location erc7201:security.token.standard.storage.Amortization
-    struct AmortizationDataStorage {
-        // solhint-disable max-line-length
-        // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
-        mapping(bytes32 corporateActionId => mapping(address tokenHolder => IAmortizationStorageWrapper.AmortizationHoldInfo)) amortizationHolds;
-        mapping(bytes32 corporateActionId => EnumerableSet.AddressSet) activeHoldHolders;
-        EnumerableSet.UintSet activeAmortizationIds;
-        mapping(bytes32 corporateActionId => uint256) totalHoldByAmortizationId;
-        mapping(bytes32 corporateActionId => bool) disabledAmortizations;
-        // ─── APPEND-ONLY ZONE BELOW ───
-    }
 
     function setAmortization(
         IAmortization.Amortization memory _newAmortization
@@ -398,7 +398,7 @@ library AmortizationStorageWrapper {
         bytes32 partition = _DEFAULT_PARTITION;
 
         // Direct storage access - no calldata conversion needed
-        HoldStorageWrapper.HoldDataStorage storage holdStorageRef = HoldStorageWrapper.holdStorage();
+        HoldDataStorage storage holdStorageRef = HoldStorageWrapper.holdStorage();
 
         // Get hold data
         IHoldTypes.HoldData storage holdData = holdStorageRef.holdsByAccountPartitionAndId[_tokenHolder][partition][
@@ -460,7 +460,7 @@ library AmortizationStorageWrapper {
         bytes32 partition = _DEFAULT_PARTITION;
 
         // Direct storage access - no calldata conversion needed
-        HoldStorageWrapper.HoldDataStorage storage holdStorageRef = HoldStorageWrapper.holdStorage();
+        HoldDataStorage storage holdStorageRef = HoldStorageWrapper.holdStorage();
         IHoldTypes.HoldData storage holdData = holdStorageRef.holdsByAccountPartitionAndId[_tokenHolder][partition][
             _holdId
         ];
