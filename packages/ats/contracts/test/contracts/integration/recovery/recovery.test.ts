@@ -119,6 +119,15 @@ describe("Recovery Tests", () => {
       await loadFixture(deployFixtureSinglePartition);
     });
 
+    describe("Paused", () => {
+      it("GIVEN a paused token WHEN recoveryAddress THEN transaction fails with IsPaused", async () => {
+        await asset.connect(signer_B).pause();
+        await expect(
+          asset.recoveryAddress(signer_A.address, signer_C.address, ADDRESS_ZERO),
+        ).to.be.revertedWithCustomError(asset, "IsPaused");
+      });
+    });
+
     describe("AccessControl", () => {
       it("GIVEN an account without AGENT_ROLE role WHEN recoveryAddress THEN transaction fails with AccountHasNoRole", async () => {
         await expect(

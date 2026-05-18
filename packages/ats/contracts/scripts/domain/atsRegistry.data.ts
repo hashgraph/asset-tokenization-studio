@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-18T12:00:05.710Z
+ * Generated: 2026-05-18T14:50:11.018Z
  * Facets: 120
  * Infrastructure: 2
  *
@@ -11789,6 +11789,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xbf84f4ec",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
