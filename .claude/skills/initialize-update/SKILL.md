@@ -197,35 +197,119 @@ event XxxInitialized(address indexed operator, ParamType1 param1);
 
 ## 9. Step G — Update tests
 
-Add or update in the facet's existing test file:
+Add a dedicated `describe` block in the facet's existing integration test file.
+Use the project's **GIVEN/WHEN/THEN** naming convention throughout.
+
+### Where to place them
+
+Find or create a block next to the existing initialisation tests:
+
+```typescript
+describe("initializeXxx", () => {
+  // Test 1, 2, 3 go here
+});
+```
+
+If a test for double-initialisation already exists (old pattern), move it inside this block
+and update the error name and description.
+
+### Signers
+
+- `deployer` / `admin` — the account with `DEFAULT_ADMIN_ROLE` (comes from the fixture)
+- `nonAdmin` — any signer that has **no** `DEFAULT_ADMIN_ROLE`. Use `user3` or equivalent
+  from the fixture (verify it has not been granted the role in `beforeEach`).
 
 ### Test 1 — double initialisation reverts
 
 ```typescript
-it("should revert WHEN initializeXxx is called twice", async () => {
-  await expect(asset.initializeXxx(/* same args */)).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+it("GIVEN an already-initialised facet WHEN initializeXxx is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+  await expect(asset.initializeXxx(/* same args as fixture */)).to.be.revertedWithCustomError(
+    asset,
+    "FacetAlreadyRegistered",
+  );
 });
 ```
 
 ### Test 2 — no DEFAULT_ADMIN_ROLE reverts
 
 ```typescript
-it("should revert WHEN caller does not have DEFAULT_ADMIN_ROLE", async () => {
+it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeXxx is called THEN it reverts with AccountHasNoRole", async () => {
   await expect(asset.connect(nonAdmin).initializeXxx(/* args */)).to.be.revertedWithCustomError(
     asset,
-    "AccessControlUnauthorizedAccount",
+    "AccountHasNoRole",
   );
 });
 ```
 
-### Test 3 — event emitted
+### Test 3 — event emitted on first call
+
+The factory already calls `initializeXxx` during deployment, so the standard fixture
+has the facet initialised. Two approaches:
+
+**Option A — check the event from the factory deployment receipt** (preferred when a
+fresh fixture is not available):
 
 ```typescript
-it("should emit XxxInitialized WHEN initializeXxx succeeds", async () => {
-  await expect(freshAsset.initializeXxx(/* args */))
-    .to.emit(freshAsset, "XxxInitialized")
-    .withArgs(deployerAddress /* + other args in order */);
+it("GIVEN a new deployment WHEN the factory calls initializeXxx THEN it emits XxxInitialized", async () => {
+  const { diamond, deployer, deploymentReceipt } = await deployXxxTokenFixture({ ... });
+  const iface = IXxx__factory.createInterface();
+  const event = deploymentReceipt.logs
+    .map((log) => { try { return iface.parseLog(log); } catch { return null; } })
+    .find((e) => e?.name === "XxxInitialized");
+  expect(event).to.not.be.undefined;
+  expect(event!.args.operator).to.equal(await deployer.getAddress());
 });
+```
+
+**Option B — deploy a fixture that does NOT call `initializeXxx`** (use when a minimal
+proxy fixture is available or can be created):
+
+```typescript
+it("GIVEN a fresh deployment WHEN initializeXxx is called THEN it emits XxxInitialized", async () => {
+  const { diamond, deployer } = await deployFreshProxyFixture(); // no initializeXxx called
+  const asset = await ethers.getContractAt("IXxx", diamond.target);
+  await expect(asset.connect(deployer).initializeXxx(/* args */))
+    .to.emit(asset, "XxxInitialized")
+    .withArgs(await deployer.getAddress() /* + other args in declaration order */);
+});
+```
+
+Choose the option that requires the least custom infrastructure. Document the choice
+with a one-line comment if it is not obvious.
+
+**If the event has dynamic types (struct or array params):**
+
+`.withArgs()` does not handle structs or arrays reliably. Use `decodeEvent` from
+`@scripts/infrastructure` and assert fields individually:
+
+```typescript
+import { decodeEvent } from "@scripts/infrastructure";
+
+// Option A — replace the parseLog approach:
+const args = await decodeEvent(asset, "XxxInitialized", deploymentReceipt);
+expect(args.operator).to.equal(await deployer.getAddress());
+expect(args.param1).to.deep.equal(expectedStruct); // deep.equal for structs/arrays
+
+// Option B — replace .withArgs():
+const tx = await asset.connect(deployer).initializeXxx(/* args */);
+const receipt = await tx.wait();
+const args = await decodeEvent(asset, "XxxInitialized", receipt!);
+expect(args.operator).to.equal(await deployer.getAddress());
+expect(args.param1).to.deep.equal(expectedStruct);
+```
+
+**If any error has dynamic type params (struct or array):**
+
+```typescript
+import { decodeCustomError } from "@scripts/infrastructure";
+
+try {
+  await asset.someAction();
+  expect.fail("Expected revert");
+} catch (e) {
+  const decoded = await decodeCustomError(asset, "ErrorName", e);
+  expect(decoded.param1).to.deep.equal(expected);
+}
 ```
 
 ---
@@ -262,6 +346,10 @@ If there was no rename, use `contracts: major` only.
 - [ ] `bool initialized` deleted from the struct (no renaming — backward compatibility intentionally broken)
 - [ ] `setFacetToReady` called before the emit in the function body
 - [ ] Event declared in interface with `address indexed operator` as first param and NatSpec
+- [ ] If event has dynamic types (struct/array): Test 3 uses `decodeEvent`, not `.withArgs()`
+- [ ] If error has dynamic types (struct/array): assertion uses `decodeCustomError`, not `.withArgs()`
 - [ ] All 3 new tests pass: `npm run test --no-compile --grep "initializeXxx"`
-- [ ] Changeset file created under `.changeset/`
+- [ ] `npm run format:check` passes on all modified files
+- [ ] `npm run compile` produces 0 warnings on modified contracts
 - [ ] Solhint produces no new errors on modified files
+- [ ] Changeset file created under `.changeset/`
