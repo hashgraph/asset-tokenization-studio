@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-18T14:40:43.633Z
+ * Generated: 2026-05-18T14:56:17.955Z
  * Facets: 120
  * Infrastructure: 2
  *
@@ -2551,6 +2551,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error ExpirationDateReached()", canonical: "ExpirationDateReached()" },
         selector: "0x5ea0e3b0",
       },
+      {
+        name: "InvalidClearingAmount",
+        signature: { full: "error InvalidClearingAmount()", canonical: "InvalidClearingAmount()" },
+        selector: "0x9437a6a1",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "PartitionNotAllowedInSinglePartitionMode",
@@ -2802,6 +2807,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error ExpirationDateReached()", canonical: "ExpirationDateReached()" },
         selector: "0x5ea0e3b0",
       },
+      {
+        name: "InvalidClearingAmount",
+        signature: { full: "error InvalidClearingAmount()", canonical: "InvalidClearingAmount()" },
+        selector: "0x9437a6a1",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "WrongClearingId",
@@ -2990,6 +3000,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "ExpirationDateReached",
         signature: { full: "error ExpirationDateReached()", canonical: "ExpirationDateReached()" },
         selector: "0x5ea0e3b0",
+      },
+      {
+        name: "InvalidClearingAmount",
+        signature: { full: "error InvalidClearingAmount()", canonical: "InvalidClearingAmount()" },
+        selector: "0x9437a6a1",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
@@ -9816,6 +9831,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error ExpirationDateReached()", canonical: "ExpirationDateReached()" },
         selector: "0x5ea0e3b0",
       },
+      {
+        name: "InvalidClearingAmount",
+        signature: { full: "error InvalidClearingAmount()", canonical: "InvalidClearingAmount()" },
+        selector: "0x9437a6a1",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "PartitionNotAllowedInSinglePartitionMode",
@@ -10036,6 +10056,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "ExpirationDateReached",
         signature: { full: "error ExpirationDateReached()", canonical: "ExpirationDateReached()" },
         selector: "0x5ea0e3b0",
+      },
+      {
+        name: "InvalidClearingAmount",
+        signature: { full: "error InvalidClearingAmount()", canonical: "InvalidClearingAmount()" },
+        selector: "0x9437a6a1",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
@@ -11063,6 +11088,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error ExpirationDateReached()", canonical: "ExpirationDateReached()" },
         selector: "0x5ea0e3b0",
       },
+      {
+        name: "InvalidClearingAmount",
+        signature: { full: "error InvalidClearingAmount()", canonical: "InvalidClearingAmount()" },
+        selector: "0x9437a6a1",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "PartitionsAreUnProtected",
@@ -11274,6 +11304,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "ExpirationDateReached",
         signature: { full: "error ExpirationDateReached()", canonical: "ExpirationDateReached()" },
         selector: "0x5ea0e3b0",
+      },
+      {
+        name: "InvalidClearingAmount",
+        signature: { full: "error InvalidClearingAmount()", canonical: "InvalidClearingAmount()" },
+        selector: "0x9437a6a1",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {

@@ -567,4 +567,8 @@ library ClearingStorageWrapper {
                 destination: data.holdTo
             });
     }
+
+    function checkNonZeroClearingAmount(uint256 _amount) internal pure {
+        if (_amount == 0) revert IClearingTypes.InvalidClearingAmount();
+    }
 }

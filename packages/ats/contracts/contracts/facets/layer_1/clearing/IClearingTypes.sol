@@ -211,4 +211,5 @@ interface IClearingTypes {
     error ClearingIsActivated();
     error ExpirationDateReached();
     error ExpirationDateNotReached();
+    error InvalidClearingAmount();
 }
