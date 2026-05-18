@@ -108,10 +108,9 @@ interface ICommonErrors {
     error ZeroValueNotAllowed();
 
     /**
-     * @notice Reverts when the decimal precision gap exceeds the supported range.
-     * @dev Protects decimal scaling logic from unsafe or unsupported conversions.
-     * @param smallerDecimals Lower decimal precision value.
-     * @param biggerDecimals Higher decimal precision value.
+     * @notice Reverts when the decimal precision exceeds the maximum value.
+     * @dev Protects decimals amount not te be greater than maximum.
+     * @param decimals decimals amount.
      */
-    error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals);
+    error DecimalsTooLarge(uint8 decimals);
 }
