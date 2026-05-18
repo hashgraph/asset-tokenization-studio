@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-18T08:32:55.426Z
+ * Generated: 2026-05-18T14:40:43.633Z
  * Facets: 120
  * Infrastructure: 2
  *
@@ -1506,6 +1506,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
         selector: "0x76d08f88",
+      },
+      {
+        name: "WalletRecovered",
+        signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
+        selector: "0xf9f9bcf9",
       },
     ],
     factory: (signer) => new BatchMintFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
@@ -3695,6 +3700,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf4b7b072",
       },
       {
+        name: "WalletRecovered",
+        signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
+        selector: "0xf9f9bcf9",
+      },
+      {
         name: "WrongExpirationTimestamp",
         signature: { full: "error WrongExpirationTimestamp()", canonical: "WrongExpirationTimestamp()" },
         selector: "0xe39f4776",
@@ -4135,12 +4145,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x3a848637",
       },
       {
-        name: "DecimalDifferenceTooLarge",
-        signature: {
-          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
-          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
-        },
-        selector: "0x552d04f9",
+        name: "DecimalsTooLarge",
+        signature: { full: "error DecimalsTooLarge(uint8 decimals)", canonical: "DecimalsTooLarge(uint8)" },
+        selector: "0xc414eb7a",
       },
       {
         name: "DuplicatedCorporateAction",
@@ -4342,12 +4349,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1142a68c",
       },
       {
-        name: "DecimalDifferenceTooLarge",
-        signature: {
-          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
-          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
-        },
-        selector: "0x552d04f9",
+        name: "DecimalsTooLarge",
+        signature: { full: "error DecimalsTooLarge(uint8 decimals)", canonical: "DecimalsTooLarge(uint8)" },
+        selector: "0xc414eb7a",
       },
       {
         name: "InterestRateIsFixed",
@@ -4523,12 +4527,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x69a80e75",
       },
       {
-        name: "DecimalDifferenceTooLarge",
-        signature: {
-          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
-          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
-        },
-        selector: "0x552d04f9",
+        name: "DecimalsTooLarge",
+        signature: { full: "error DecimalsTooLarge(uint8 decimals)", canonical: "DecimalsTooLarge(uint8)" },
+        selector: "0xc414eb7a",
       },
       {
         name: "SnapshotIdDoesNotExists",
@@ -7812,12 +7813,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1142a68c",
       },
       {
-        name: "DecimalDifferenceTooLarge",
-        signature: {
-          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
-          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
-        },
-        selector: "0x552d04f9",
+        name: "DecimalsTooLarge",
+        signature: { full: "error DecimalsTooLarge(uint8 decimals)", canonical: "DecimalsTooLarge(uint8)" },
+        selector: "0xc414eb7a",
       },
       {
         name: "InvalidDate",
@@ -9287,6 +9285,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
         selector: "0x76d08f88",
+      },
+      {
+        name: "WalletRecovered",
+        signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
+        selector: "0xf9f9bcf9",
       },
     ],
     factory: (signer) => new MintFacet__factory(getLibLinks("tokenCoreOps") as any, signer),

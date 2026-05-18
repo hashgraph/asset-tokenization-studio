@@ -168,3 +168,24 @@ bytes4 constant KPI_LINKED_RATE_COUPON = 0x0000000A;
 
 /// @dev ID for ClearingOps.clearingHoldCreationExecution()
 bytes4 constant CLEARING_HOLD_CREATION = 0x0000000B;
+
+/// @dev Precomputed constants for powers of 10 (0-18)
+uint256 constant POW10_0 = 1;
+uint256 constant POW10_1 = 10;
+uint256 constant POW10_2 = 100;
+uint256 constant POW10_3 = 1000;
+uint256 constant POW10_4 = 10000;
+uint256 constant POW10_5 = 100000;
+uint256 constant POW10_6 = 1000000;
+uint256 constant POW10_7 = 10000000;
+uint256 constant POW10_8 = 100000000;
+uint256 constant POW10_9 = 1000000000;
+uint256 constant POW10_10 = 1e10;
+uint256 constant POW10_11 = 1e11;
+uint256 constant POW10_12 = 1e12;
+uint256 constant POW10_13 = 1e13;
+uint256 constant POW10_14 = 1e14;
+uint256 constant POW10_15 = 1e15;
+uint256 constant POW10_16 = 1e16;
+uint256 constant POW10_17 = 1e17;
+uint256 constant POW10_18 = 1e18;
