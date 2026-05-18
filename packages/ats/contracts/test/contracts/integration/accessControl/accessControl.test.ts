@@ -331,4 +331,32 @@ describe("Access Control Tests", () => {
       .to.be.revertedWithCustomError(asset, "AccountNotAssignedToRole")
       .withArgs(ATS_ROLES.PAUSER_ROLE, unknownSigner.address);
   });
+
+  it("GIVEN the sole DEFAULT_ADMIN_ROLE holder WHEN renounceRole is called THEN transaction fails with CannotRenounceSoleAdmin", async () => {
+    // Verify deployer is the only admin
+    const memberCount = await asset.getRoleMemberCount(ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    expect(memberCount).to.equal(1);
+
+    // Sole admin cannot renounce
+    await expect(asset.connect(deployer).renounceRole(ATS_ROLES.DEFAULT_ADMIN_ROLE)).to.be.revertedWithCustomError(
+      asset,
+      "CannotRenounceSoleAdmin",
+    );
+  });
+
+  it("GIVEN two DEFAULT_ADMIN_ROLE holders WHEN one renounces THEN transaction succeeds and one admin remains", async () => {
+    // Grant DEFAULT_ADMIN_ROLE to signer_C so there are 2 admins
+    await asset.connect(deployer).applyRoles([ATS_ROLES.DEFAULT_ADMIN_ROLE], [true], signer_C.address);
+    expect(await asset.getRoleMemberCount(ATS_ROLES.DEFAULT_ADMIN_ROLE)).to.equal(2);
+
+    // deployer can renounce because signer_C is still admin
+    await expect(asset.connect(deployer).renounceRole(ATS_ROLES.DEFAULT_ADMIN_ROLE))
+      .to.emit(asset, "RoleRenounced")
+      .withArgs(deployer.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+
+    // deployer no longer has the role, signer_C still does
+    expect(await asset.hasRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, deployer.address)).to.equal(false);
+    expect(await asset.hasRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, signer_C.address)).to.equal(true);
+    expect(await asset.getRoleMemberCount(ATS_ROLES.DEFAULT_ADMIN_ROLE)).to.equal(1);
+  });
 });
