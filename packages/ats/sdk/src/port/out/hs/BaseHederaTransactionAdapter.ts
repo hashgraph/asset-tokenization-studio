@@ -30,6 +30,7 @@ import { LockOperations } from "./operations/LockOperations";
 import { SecurityOperations } from "./operations/SecurityOperations";
 import { SecurityMetadataOperations } from "./operations/SecurityMetadataOperations";
 import { AmortizationOperations } from "./operations/AmortizationOperations";
+import { DeactivateOperations } from "./operations/DeactivateOperations";
 
 export abstract class BaseHederaTransactionAdapter extends TransactionAdapter implements TransactionExecutor {
   mirrorNodes: MirrorNodes;
@@ -55,6 +56,7 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
   protected securityOps!: SecurityOperations;
   protected securityMetadataOps!: SecurityMetadataOperations;
   protected amortizationOps!: AmortizationOperations;
+  protected deactivateOps!: DeactivateOperations;
 
   constructor(
     protected readonly mirrorNodeAdapter: MirrorNodeAdapter,
@@ -74,6 +76,7 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     this.securityOps = new SecurityOperations(this);
     this.securityMetadataOps = new SecurityMetadataOperations(this);
     this.amortizationOps = new AmortizationOperations(this);
+    this.deactivateOps = new DeactivateOperations(this);
   }
 
   // ===== Abstract methods (implemented by concrete adapters) =====
@@ -604,6 +607,10 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
 
   async unpause(...args: Parameters<PauseOperations["unpause"]>): Promise<TransactionResponse> {
     return this.pauseOps.unpause(...args);
+  }
+
+  async deactivate(...args: Parameters<DeactivateOperations["deactivate"]>): Promise<TransactionResponse> {
+    return this.deactivateOps.deactivate(...args);
   }
 
   async updateExternalPauses(
