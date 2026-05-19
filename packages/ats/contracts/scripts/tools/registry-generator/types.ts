@@ -210,6 +210,7 @@ export interface RegistryStats {
  */
 export interface RegistryResult {
   code: string;
+  rolesCode: string;
   stats: RegistryStats;
   outputPath?: string;
   warnings: string[];

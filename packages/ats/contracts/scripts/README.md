@@ -126,7 +126,7 @@ The registry system provides **type-safe access to contract metadata** extracted
 # Regenerate registry from contracts/ directory
 npm run generate:registry
 
-# Output: scripts/domain/atsRegistry.data.ts (auto-generated, do not edit)
+# Output: scripts/domain/atsRegistry.generated.ts (auto-generated, do not edit)
 ```
 
 **What gets generated:**
@@ -317,11 +317,55 @@ if (conflicts.length > 0) {
 
 ### Registry Files
 
-- **`atsRegistry.data.ts`** - Auto-generated registry data (do not edit manually)
-- **`atsRegistry.ts`** - ATS-specific registry wrapper with helpers
+- **`atsRegistry.generated.ts`** - Auto-generated registry data, **gitignored** (do not edit manually)
+- **`atsRoles.generated.ts`** - Auto-generated role-hash map, **checked into git** (audit-visible)
+- **`atsRegistry.ts`** - ATS-specific registry wrapper with **lazy-load** helpers
 - **`registryFactory.ts`** - Generic factory for creating registry helpers
 - **`generateRegistryPipeline.ts`** - Reusable pipeline for generating registries
 - **`combineRegistries.ts`** - Multi-registry merging utilities (v1.17.0+)
+
+### Two-file split + lazy-load contract (BBND-1766)
+
+The registry generator emits **two** files with different lifecycles:
+
+| File                       | In git?             | Why                                                                                                                                                                                                                         |
+| -------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `atsRegistry.generated.ts` | **No** (gitignored) | Heavy (~14 k lines) facet / contract / storage-wrapper registry. Causes recurring merge conflicts and reviewer noise. Regenerated on every install / compile so a fresh checkout has the file before any consumer reads it. |
+| `atsRoles.generated.ts`    | **Yes**             | Small (~70 lines), audit-relevant. Role-hash changes are security-visible in PR diffs; burying them inside the 14 k-line registry would hide them.                                                                          |
+
+To keep this gitignore safe at bootstrap time (so `hardhat compile` can run on a
+fresh clone before the file exists), `atsRegistry.ts` exposes the registry data
+through **lazy access only**:
+
+- `import type` from `./atsRegistry.generated` — fully erased at runtime; Node
+  never resolves the file at module load.
+- `require("./atsRegistry.generated")` is invoked only inside function bodies
+  (`getFacetDefinition`, `getAllFacets`, etc.) and inside `Proxy` handlers for
+  the legacy raw exports (`FACET_REGISTRY`, `INFRASTRUCTURE_CONTRACTS`,
+  `STORAGE_WRAPPER_REGISTRY`).
+- Counts that used to be exported as `const ... : number` are now functions
+  (`getFacetRegistryCount()`, `getStorageWrapperRegistryCount()`) because a
+  primitive cannot be lazy.
+
+This means module-load of `atsRegistry.ts` (and anything that transitively
+imports it via the `@scripts` barrel) never touches the gitignored file.
+
+#### Prepare-hook contract
+
+`packages/ats/contracts/package.json` declares:
+
+```jsonc
+"scripts": {
+  "prepare": "npx hardhat compile"
+}
+```
+
+`prepare` runs after every `npm install` / `npm ci` (per-workspace). It invokes
+`hardhat compile`, which runs the registry generator as a post-compile step.
+The CI gate in `.github/workflows/100-flow-ats-test.yaml` asserts that
+`atsRegistry.generated.ts` exists after `npm ci` — catching any regression in
+the prepare hook before downstream build steps fail with a confusing
+module-not-found.
 
 ---
 
@@ -1141,7 +1185,7 @@ scripts/
 │ ├── index.ts # Public API exports
 │ ├── constants.ts # ATS constants (roles, regulations, etc.)
 │ ├── atsRegistry.ts # ATS registry with helpers
-│ ├── atsRegistry.data.ts # Auto-generated registry data
+│ ├── atsRegistry.generated.ts # Auto-generated registry data
 │ │
 │ ├── equity/ # Equity token logic
 │ │ └── createConfiguration.ts

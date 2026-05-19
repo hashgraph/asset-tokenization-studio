@@ -195,7 +195,7 @@ If you added a **new facet contract** (not just adding existing facet to configu
 npm run generate:registry
 ```
 
-This updates [domain/atsRegistry.data.ts](domain/atsRegistry.data.ts) with:
+This updates [domain/atsRegistry.generated.ts](domain/atsRegistry.generated.ts) with:
 
 - Facet metadata (methods, events, errors)
 - Resolver keys (from contract constants)
@@ -1353,7 +1353,7 @@ const output = await deploySystemWithNewBlr(signer, "hedera-testnet", {
 
 The registry system **automatically extracts metadata** from Solidity contracts and generates TypeScript definitions. This ensures resolver keys, function selectors, and contract metadata stay in sync with actual contracts.
 
-**Generated File**: [domain/atsRegistry.data.ts](domain/atsRegistry.data.ts) (auto-generated, don't edit)
+**Generated File**: [domain/atsRegistry.generated.ts](domain/atsRegistry.generated.ts) (auto-generated, don't edit)
 
 **What's Extracted**:
 
@@ -1386,7 +1386,7 @@ npm run generate:registry
 
 1. Scans all Solidity files in [contracts/](../contracts/)
 2. Extracts metadata using [MetadataExtractor](tools/scanner/metadataExtractor.ts)
-3. Generates TypeScript registry at [domain/atsRegistry.data.ts](domain/atsRegistry.data.ts)
+3. Generates TypeScript registry at [domain/atsRegistry.generated.ts](domain/atsRegistry.generated.ts)
 4. Creates helper functions via [registryFactory](infrastructure/registryFactory.ts)
 
 **Output Example**:
@@ -1653,7 +1653,7 @@ See [`types/core.ts:9-30`](infrastructure/types/core.ts#L9-L30) for detailed gui
 npm run generate:registry
 ```
 
-**Verify**: Check that `NewFacet` appears in [domain/atsRegistry.data.ts](domain/atsRegistry.data.ts)
+**Verify**: Check that `NewFacet` appears in [domain/atsRegistry.generated.ts](domain/atsRegistry.generated.ts)
 
 ---
 
@@ -1752,7 +1752,7 @@ await createFundConfiguration(
    ```bash
    npm run generate:registry
    ```
-4. Verify timestamp at top of [domain/atsRegistry.data.ts](domain/atsRegistry.data.ts)
+4. Verify timestamp at top of [domain/atsRegistry.generated.ts](domain/atsRegistry.generated.ts)
 
 ---
 

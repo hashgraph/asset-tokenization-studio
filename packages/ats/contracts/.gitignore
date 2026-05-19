@@ -44,6 +44,11 @@ artifacts
 typechain
 typechain-types
 
+# Auto-generated contract registry data (BBND-1766).
+# The heavy registry file is regenerated on every `prepare` / `hardhat compile`.
+# The sibling `atsRoles.generated.ts` stays in git (small, audit-relevant).
+scripts/domain/atsRegistry.generated.ts
+
 #Slither
 Slither/*
 slither.db.json

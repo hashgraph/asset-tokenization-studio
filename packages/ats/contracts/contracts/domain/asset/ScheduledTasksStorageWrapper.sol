@@ -78,9 +78,7 @@ library ScheduledTasksStorageWrapper {
 
             ScheduledTasksLib.popScheduledTask(_scheduledTasks);
 
-            try
-                ScheduledTasksDispatchOps.execute(callbackType, pos, scheduledTasksLength, currentScheduledTask)
-            returns (bytes32 subTaskType) {
+            try ScheduledTasksDispatchOps.execute(callbackType, currentScheduledTask) returns (bytes32 subTaskType) {
                 if (subTaskType != bytes32(0)) {
                     _triggerOneSubTask(subTaskType, currentBlockTimestamp);
                 }
@@ -498,7 +496,7 @@ library ScheduledTasksStorageWrapper {
 
         ScheduledTasksLib.popScheduledTask(subQueue_);
 
-        try ScheduledTasksDispatchOps.execute(subCallbackType, pos, count, subTask) returns (bytes32) {} catch {
+        try ScheduledTasksDispatchOps.execute(subCallbackType, subTask) returns (bytes32) {} catch {
             _onTaskExecutionFailed(subCallbackType, subTask);
         }
     }
