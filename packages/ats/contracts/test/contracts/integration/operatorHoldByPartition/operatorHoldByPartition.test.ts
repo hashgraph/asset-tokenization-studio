@@ -42,7 +42,7 @@ describe("operatorCreateHoldByPartition", () => {
 
   const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
     ["bytes32", "bytes32"],
-    [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, DEFAULT_PARTITION],
+    [ATS_ROLES.ROLE_PROTECTED_PARTITIONS_PARTICIPANT, DEFAULT_PARTITION],
   );
   const packedDataWithoutPrefix = packedData.slice(2);
   const ProtectedPartitionRole_1 = ethers.keccak256("0x" + packedDataWithoutPrefix);
@@ -50,43 +50,43 @@ describe("operatorCreateHoldByPartition", () => {
   function set_initRbacs() {
     return [
       {
-        role: ATS_ROLES.ISSUER_ROLE,
+        role: ATS_ROLES.ROLE_ISSUER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_D.address],
       },
       {
-        role: ATS_ROLES.KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.CLEARING_ROLE,
+        role: ATS_ROLES.ROLE_CLEARING,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.CORPORATE_ACTION_ROLE,
+        role: ATS_ROLES.ROLE_CORPORATE_ACTION,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.CONTROL_LIST_ROLE,
+        role: ATS_ROLES.ROLE_CONTROL_LIST,
         members: [signer_E.address],
       },
       {
-        role: ATS_ROLES.CONTROLLER_ROLE,
+        role: ATS_ROLES.ROLE_CONTROLLER,
         members: [signer_C.address],
       },
       {
-        role: ATS_ROLES.PROTECTED_PARTITIONS_ROLE,
+        role: ATS_ROLES.ROLE_PROTECTED_PARTITIONS,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.AGENT_ROLE,
+        role: ATS_ROLES.ROLE_AGENT,
         members: [signer_A.address],
       },
       { role: ProtectedPartitionRole_1, members: [signer_B.address] },
@@ -358,7 +358,7 @@ describe("operatorCreateHoldByPartition", () => {
   });
 
   // --- modifier: onlyUnProtectedPartitionsOrWildCardRole ---
-  it("GIVEN protected partitions with no WILD_CARD_ROLE WHEN operatorCreateHoldByPartition THEN reverts with PartitionsAreProtectedAndNoRole", async () => {
+  it("GIVEN protected partitions with no ROLE_WILD_CARD WHEN operatorCreateHoldByPartition THEN reverts with PartitionsAreProtectedAndNoRole", async () => {
     const base = await deployEquityTokenFixture({
       equityDataParams: {
         securityData: {
@@ -414,7 +414,7 @@ describe("operatorCreateHoldByPartition", () => {
     it("GIVEN a deactivated asset WHEN operatorCreateHoldByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset

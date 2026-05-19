@@ -42,27 +42,27 @@ describe("LockByPartition Tests", () => {
 
   function set_initRbacs(): Rbac[] {
     const rbacIssuer: Rbac = {
-      role: ATS_ROLES.ISSUER_ROLE,
+      role: ATS_ROLES.ROLE_ISSUER,
       members: [signer_B.address],
     };
     const rbacLocker: Rbac = {
-      role: ATS_ROLES.LOCKER_ROLE,
+      role: ATS_ROLES.ROLE_LOCKER,
       members: [signer_C.address],
     };
     const rbacPausable: Rbac = {
-      role: ATS_ROLES.PAUSER_ROLE,
+      role: ATS_ROLES.ROLE_PAUSER,
       members: [signer_D.address],
     };
     const rbacKYC: Rbac = {
-      role: ATS_ROLES.KYC_ROLE,
+      role: ATS_ROLES.ROLE_KYC,
       members: [signer_B.address],
     };
     const rbacSSI: Rbac = {
-      role: ATS_ROLES.SSI_MANAGER_ROLE,
+      role: ATS_ROLES.ROLE_SSI_MANAGER,
       members: [signer_A.address],
     };
     const rbacCorporateAction: Rbac = {
-      role: ATS_ROLES.CORPORATE_ACTION_ROLE,
+      role: ATS_ROLES.ROLE_CORPORATE_ACTION,
       members: [signer_B.address],
     };
     return [rbacIssuer, rbacLocker, rbacPausable, rbacKYC, rbacSSI, rbacCorporateAction];
@@ -296,11 +296,11 @@ describe("LockByPartition Tests", () => {
     describe("Adjust Balances", () => {
       async function setPreBalanceAdjustment() {
         // Granting Role to account C
-        await asset.connect(signer_A).grantRole(ATS_ROLES.ADJUSTMENT_BALANCE_ROLE, signer_C.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROLLER_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.LOCKER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ADJUSTMENT_BALANCE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CAP, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CONTROLLER, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_LOCKER, signer_A.address);
 
         await asset.connect(signer_A).setMaxSupply(maxSupply_Original);
         await asset.connect(signer_A).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply_Partition_1_Original);
@@ -519,9 +519,9 @@ describe("LockByPartition Tests", () => {
         const AMOUNT = 10;
         const EXPIRATION_TIMESTAMP = dateToUnixTimestamp(`2030-01-01T00:00:35Z`);
 
-        await asset.connect(signer_A).grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.LOCKER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_SNAPSHOT, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_LOCKER, signer_A.address);
 
         await asset.connect(signer_A).issueByPartition({
           partition: _DEFAULT_PARTITION,
@@ -648,7 +648,7 @@ describe("LockByPartition Tests", () => {
     it("GIVEN a deactivated asset WHEN lockByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).lockByPartition(ethers.ZeroHash, 0, ethers.ZeroAddress, 0),
@@ -658,7 +658,7 @@ describe("LockByPartition Tests", () => {
     it("GIVEN a deactivated asset WHEN releaseByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).releaseByPartition(ethers.ZeroHash, 0, ethers.ZeroAddress),

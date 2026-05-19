@@ -32,27 +32,27 @@ describe("Lock Tests", () => {
 
   function set_initRbacs(): Rbac[] {
     const rbacIssuer: Rbac = {
-      role: ATS_ROLES.ISSUER_ROLE,
+      role: ATS_ROLES.ROLE_ISSUER,
       members: [signer_B.address],
     };
     const rbacLocker: Rbac = {
-      role: ATS_ROLES.LOCKER_ROLE,
+      role: ATS_ROLES.ROLE_LOCKER,
       members: [signer_C.address],
     };
     const rbacPausable: Rbac = {
-      role: ATS_ROLES.PAUSER_ROLE,
+      role: ATS_ROLES.ROLE_PAUSER,
       members: [signer_D.address],
     };
     const rbacKYC: Rbac = {
-      role: ATS_ROLES.KYC_ROLE,
+      role: ATS_ROLES.ROLE_KYC,
       members: [signer_B.address],
     };
     const rbacSSI: Rbac = {
-      role: ATS_ROLES.SSI_MANAGER_ROLE,
+      role: ATS_ROLES.ROLE_SSI_MANAGER,
       members: [signer_A.address],
     };
     const rbacCorporateAction: Rbac = {
-      role: ATS_ROLES.CORPORATE_ACTION_ROLE,
+      role: ATS_ROLES.ROLE_CORPORATE_ACTION,
       members: [signer_B.address],
     };
     return [rbacIssuer, rbacLocker, rbacPausable, rbacKYC, rbacSSI, rbacCorporateAction];
@@ -268,7 +268,7 @@ describe("Lock Tests", () => {
     it("GIVEN a deactivated asset WHEN lock THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).lock(0, ethers.ZeroAddress, 0),
@@ -278,7 +278,7 @@ describe("Lock Tests", () => {
     it("GIVEN a deactivated asset WHEN release THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).release(0, ethers.ZeroAddress),
@@ -288,7 +288,7 @@ describe("Lock Tests", () => {
     it("GIVEN a deactivated asset WHEN forceReleaseByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       const lockFacet = await ethers.getContractAt("LockFacet", base.diamond.target);
       await expect(

@@ -33,15 +33,15 @@ describe("Kpi Latest Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.PROCEED_RECIPIENT_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_PROCEED_RECIPIENT_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.KPI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_KPI_MANAGER,
         members: [signer_A.address],
       },
     ]);
@@ -55,7 +55,7 @@ describe("Kpi Latest Tests", () => {
   });
 
   describe("addKpiData", () => {
-    it("GIVEN a user without KPI_MANAGER_ROLE WHEN addKpiData is called THEN transaction fails", async () => {
+    it("GIVEN a user without ROLE_KPI_MANAGER WHEN addKpiData is called THEN transaction fails", async () => {
       const date = 1000;
       const value = 750;
 
@@ -268,7 +268,7 @@ describe("Kpi Latest Tests", () => {
     it("GIVEN a deactivated asset WHEN addKpiData THEN transaction fails with Deactivated", async () => {
       const base = await deployBondKpiLinkedRateTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).addKpiData(0, 0, ethers.ZeroAddress),

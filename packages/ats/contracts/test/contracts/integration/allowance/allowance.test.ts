@@ -72,11 +72,11 @@ describe("Allowance Facet Tests", () => {
       assetSignerD = await ethers.getContractAt("IAsset", diamond.target, signer_D);
 
       await executeRbac(asset, [
-        { role: ATS_ROLES.ISSUER_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES.PAUSER_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES.CONTROL_LIST_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_PAUSER, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_CONTROL_LIST, members: [signer_A.address] },
       ]);
 
       await asset.addIssuer(signer_D.address);
@@ -174,7 +174,7 @@ describe("Allowance Facet Tests", () => {
       });
 
       it("GIVEN a recovered caller WHEN increaseAllowance THEN reverts with WalletRecovered", async () => {
-        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
         await asset.recoveryAddress(signer_C.address, signer_A.address, ADDRESS_ZERO);
         await expect(assetSignerC.increaseAllowance(signer_D.address, amount)).to.be.revertedWithCustomError(
           asset,
@@ -183,7 +183,7 @@ describe("Allowance Facet Tests", () => {
       });
 
       it("GIVEN a recovered spender WHEN increaseAllowance THEN reverts with WalletRecovered", async () => {
-        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
         await asset.recoveryAddress(signer_D.address, signer_A.address, ADDRESS_ZERO);
         await expect(assetSignerC.increaseAllowance(signer_D.address, amount)).to.be.revertedWithCustomError(
           asset,
@@ -241,7 +241,7 @@ describe("Allowance Facet Tests", () => {
       });
 
       it("GIVEN a recovered caller WHEN decreaseAllowance THEN reverts with WalletRecovered", async () => {
-        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
         await asset.recoveryAddress(signer_C.address, signer_A.address, ADDRESS_ZERO);
         await expect(assetSignerC.decreaseAllowance(signer_D.address, amount)).to.be.revertedWithCustomError(
           asset,
@@ -250,7 +250,7 @@ describe("Allowance Facet Tests", () => {
       });
 
       it("GIVEN a recovered spender WHEN decreaseAllowance THEN reverts with WalletRecovered", async () => {
-        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
         await asset.recoveryAddress(signer_D.address, signer_A.address, ADDRESS_ZERO);
         await expect(assetSignerC.decreaseAllowance(signer_D.address, amount)).to.be.revertedWithCustomError(
           asset,
@@ -270,7 +270,7 @@ describe("Allowance Facet Tests", () => {
       });
 
       it("GIVEN a recovered sender WHEN approve THEN reverts with WalletRecovered", async () => {
-        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
         await asset.recoveryAddress(signer_C.address, signer_A.address, ADDRESS_ZERO);
 
         expect(await asset.isAddressRecovered(signer_C.address)).to.be.true;
@@ -282,7 +282,7 @@ describe("Allowance Facet Tests", () => {
       });
 
       it("GIVEN a recovered spender WHEN approve THEN reverts with WalletRecovered", async () => {
-        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
         await asset.recoveryAddress(signer_D.address, signer_A.address, ADDRESS_ZERO);
 
         expect(await asset.isAddressRecovered(signer_D.address)).to.be.true;
@@ -305,7 +305,7 @@ describe("Allowance Facet Tests", () => {
 
     describe("ABAF/LABAF – approve inflation (FIND-095)", () => {
       it("GIVEN balance adjustment already applied WHEN approve then transferFrom for more than approved THEN reverts with InsufficientAllowance", async () => {
-        await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
 
         const tokenAmount = 2000n;
         await asset.connect(signer_B).issue(signer_C.address, tokenAmount, "0x");
@@ -340,7 +340,7 @@ describe("Allowance Facet Tests", () => {
     it("GIVEN a deactivated asset WHEN approve THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).approve(ethers.ZeroAddress, 0),
@@ -350,7 +350,7 @@ describe("Allowance Facet Tests", () => {
     it("GIVEN a deactivated asset WHEN increaseAllowance THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).increaseAllowance(ethers.ZeroAddress, 0),
@@ -360,7 +360,7 @@ describe("Allowance Facet Tests", () => {
     it("GIVEN a deactivated asset WHEN decreaseAllowance THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).decreaseAllowance(ethers.ZeroAddress, 0),

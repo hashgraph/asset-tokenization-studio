@@ -92,14 +92,14 @@ describe("OperatorClearingHoldByPartition Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
     await executeRbac(asset, [
-      { role: ATS_ROLES.ISSUER_ROLE, members: [signer_B.address] },
-      { role: ATS_ROLES.CONTROLLER_ROLE, members: [signer_C.address] },
-      { role: ATS_ROLES.PAUSER_ROLE, members: [signer_D.address] },
-      { role: ATS_ROLES.CONTROL_LIST_ROLE, members: [signer_E.address] },
-      { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
-      { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES.CLEARING_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES.CLEARING_VALIDATOR_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_CONTROLLER, members: [signer_C.address] },
+      { role: ATS_ROLES.ROLE_PAUSER, members: [signer_D.address] },
+      { role: ATS_ROLES.ROLE_CONTROL_LIST, members: [signer_E.address] },
+      { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_CLEARING, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_CLEARING_VALIDATOR, members: [signer_A.address] },
     ]);
 
     await setFacets(asset);
@@ -186,7 +186,7 @@ describe("OperatorClearingHoldByPartition Tests", () => {
     describe("onlyUnrecoveredAddress modifier", () => {
       it("GIVEN a recovered msgSender WHEN calling operatorClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
         await asset.connect(signer_B).authorizeOperator(signer_A.address);
-        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
         await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
 
         const clearingOperationFromB = {
@@ -201,7 +201,7 @@ describe("OperatorClearingHoldByPartition Tests", () => {
 
       it("GIVEN a recovered from address WHEN calling operatorClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
         await asset.connect(signer_B).authorizeOperator(signer_A.address);
-        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
         await asset.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
 
         const clearingOperationFromB = {
@@ -216,7 +216,7 @@ describe("OperatorClearingHoldByPartition Tests", () => {
 
       it("GIVEN a recovered hold.to WHEN calling operatorClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
         // Give signer_B some tokens and authorize operator
-        await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
         await asset.issueByPartition({
           partition: _DEFAULT_PARTITION,
           tokenHolder: signer_B.address,
@@ -224,7 +224,7 @@ describe("OperatorClearingHoldByPartition Tests", () => {
           data: _DATA,
         });
         await asset.connect(signer_B).authorizeOperator(signer_A.address);
-        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
         // Recover the hold.to address (signer_C - the actual hold.to)
         await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
 
@@ -244,7 +244,7 @@ describe("OperatorClearingHoldByPartition Tests", () => {
     it("GIVEN a deactivated asset WHEN operatorClearingCreateHoldByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).operatorClearingCreateHoldByPartition(

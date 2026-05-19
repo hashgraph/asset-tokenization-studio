@@ -32,11 +32,11 @@ describe("OperatorByPartitionFacet Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
 
     await executeRbac(asset, [
-      { role: ATS_ROLES.ISSUER_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES.KYC_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES.PAUSER_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES.CONTROL_LIST_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_ISSUER, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_KYC, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_PAUSER, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_CONTROL_LIST, members: [signer_A.address] },
     ]);
 
     await asset.addIssuer(signer_A.address);
@@ -282,7 +282,7 @@ describe("OperatorByPartitionFacet Tests", () => {
     it("GIVEN a deactivated asset WHEN authorizeOperatorByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).authorizeOperatorByPartition(ethers.ZeroHash, ethers.ZeroAddress),
@@ -292,7 +292,7 @@ describe("OperatorByPartitionFacet Tests", () => {
     it("GIVEN a deactivated asset WHEN revokeOperatorByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).revokeOperatorByPartition(ethers.ZeroHash, ethers.ZeroAddress),
@@ -302,7 +302,7 @@ describe("OperatorByPartitionFacet Tests", () => {
     it("GIVEN a deactivated asset WHEN operatorTransferByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).operatorTransferByPartition({
@@ -319,7 +319,7 @@ describe("OperatorByPartitionFacet Tests", () => {
     it("GIVEN a deactivated asset WHEN operatorRedeemByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset

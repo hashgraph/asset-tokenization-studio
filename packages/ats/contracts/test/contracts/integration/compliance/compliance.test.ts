@@ -51,20 +51,20 @@ describe("Compliance Tests", () => {
       asset = await ethers.getContractAt("IAsset", diamond.target);
       await executeRbac(asset, [
         {
-          role: ATS_ROLES.PAUSER_ROLE,
+          role: ATS_ROLES.ROLE_PAUSER,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.CLEARING_ROLE,
+          role: ATS_ROLES.ROLE_CLEARING,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.KYC_ROLE,
+          role: ATS_ROLES.ROLE_KYC,
           members: [signer_B.address],
         },
       ]);
 
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
     }
 
     beforeEach(async () => {
@@ -106,28 +106,28 @@ describe("Compliance Tests", () => {
       asset = await ethers.getContractAt("IAsset", diamond.target);
       await executeRbac(asset, [
         {
-          role: ATS_ROLES.PAUSER_ROLE,
+          role: ATS_ROLES.ROLE_PAUSER,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.ISSUER_ROLE,
+          role: ATS_ROLES.ROLE_ISSUER,
           members: [signer_C.address],
         },
         {
-          role: ATS_ROLES.KYC_ROLE,
+          role: ATS_ROLES.ROLE_KYC,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.SSI_MANAGER_ROLE,
+          role: ATS_ROLES.ROLE_SSI_MANAGER,
           members: [signer_A.address],
         },
         {
-          role: ATS_ROLES.CLEARING_ROLE,
+          role: ATS_ROLES.ROLE_CLEARING,
           members: [signer_B.address],
         },
       ]);
 
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
       await asset.connect(signer_A).addIssuer(signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
@@ -170,7 +170,7 @@ describe("Compliance Tests", () => {
         await asset.connect(signer_C).increaseAllowance(signer_A.address, AMOUNT);
         await asset.connect(signer_E).increaseAllowance(signer_C.address, AMOUNT);
         // Blacklisting accounts
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROL_LIST_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CONTROL_LIST, signer_A.address);
         await asset.connect(signer_A).addToControlList(signer_C.address);
 
         expect(await asset.connect(signer_C).canTransfer(signer_D.address, AMOUNT, DATA)).to.be.deep.equal([
@@ -330,16 +330,16 @@ describe("Compliance Tests", () => {
 
       await executeRbac(asset, [
         {
-          role: ATS_ROLES.PAUSER_ROLE,
+          role: ATS_ROLES.ROLE_PAUSER,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.TREX_OWNER_ROLE,
+          role: ATS_ROLES.ROLE_TREX_OWNER,
           members: [signer_A.address],
         },
       ]);
 
-      await asset.connect(signer_A).grantRole(ATS_ROLES.PAUSER_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_PAUSER, signer_A.address);
     }
 
     beforeEach(async () => {
@@ -414,17 +414,17 @@ describe("Compliance Tests", () => {
       asset = await ethers.getContractAt("IAsset", diamond.target);
 
       await executeRbac(asset, [
-        { role: ATS_ROLES.PAUSER_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES.ISSUER_ROLE, members: [signer_C.address] },
-        { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES.CLEARING_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES.CLEARING_VALIDATOR_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES.AGENT_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES.TREX_OWNER_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_PAUSER, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_ISSUER, members: [signer_C.address] },
+        { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_CLEARING, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_CLEARING_VALIDATOR, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_AGENT, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_TREX_OWNER, members: [signer_A.address] },
       ]);
 
-      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
       await asset.addIssuer(signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
@@ -561,7 +561,7 @@ describe("Compliance Tests", () => {
     it("GIVEN a deactivated asset WHEN setCompliance THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).setCompliance(ethers.ZeroAddress),
@@ -592,15 +592,15 @@ describe("Compliance Tests", () => {
       asset = await ethers.getContractAt("IAsset", diamond.target);
 
       await executeRbac(asset, [
-        { role: ATS_ROLES.PAUSER_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES.CLEARING_ROLE, members: [signer_B.address] },
-        { role: ATS_ROLES.CLEARING_VALIDATOR_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES.AGENT_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_PAUSER, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_CLEARING, members: [signer_B.address] },
+        { role: ATS_ROLES.ROLE_CLEARING_VALIDATOR, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_AGENT, members: [signer_A.address] },
       ]);
 
-      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
       await asset.addIssuer(signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
