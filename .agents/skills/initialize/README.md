@@ -1,7 +1,7 @@
 # AI Skills: Initializer Migration Automation
 
-This document describes the four Claude Code skills added to `.claude/skills/` that automate
-the migration of facet initialisation from the per-facet boolean guard pattern to the
+This document describes the `initialize` AI skill added to `.agents/skills/initialize/` that
+automates the migration of facet initialisation from the per-facet boolean guard pattern to the
 centralised `InitializerStorageWrapper` pattern.
 
 ---
@@ -16,19 +16,42 @@ deployment scripts, and test fixtures. Each step has non-obvious correctness con
 - **Event signature rules** (`address indexed operator` always first)
 - **CI strategy** for integration tests that span multiple facets
 
-These skills encode the analysis and decisions made upfront so the team can apply them
+The skill encodes the analysis and decisions made upfront so the team can apply them
 consistently without re-deriving the rules for each facet.
 
 ---
 
-## Skills
+## Skill Structure
 
-| Skill                            | Input                                    | What it does                                                                                                                                                                                                |
-| -------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/initialize-update <file>`      | Facet with existing `initializeXxx`      | Replaces old boolean guard with `onlyFacetNotRegistered` + `onlyRole`, handles storage struct safely, adds `setFacetToReady`, fixes event, updates Factory + TypeScript                                     |
-| `/initialize-add <file>`         | Facet without `initializeXxx`            | Creates event + function in interface, implements body, registers selector in `getStaticFunctionSelectors`                                                                                                  |
-| `/initialize-event-check <file>` | Any facet after migration                | Audits and auto-fixes event signature, NatSpec, emit position, and `operator` param                                                                                                                         |
-| `/initialize-factory <config>`   | Config name (`Equity` / `Bond` / `Loan`) | Adds new initializer calls to Factory, wires `setOperationalStatus` loop in TREXFactory, adds `onlyOperational` to business functions, updates fixtures and removes migration skips when config is complete |
+The skill lives at `.agents/skills/initialize/` and is composed of an orchestrator and four
+workflow files:
+
+```
+.agents/skills/initialize/
+  SKILL.md                ← orchestrator: introspects the facet and dispatches
+  workflows/
+    ADD.md                ← adds a new initializeXxx from scratch
+    UPDATE.md             ← migrates old boolean-guard init to centralised pattern
+    FACTORY.md            ← wires Factory.sol, TREXFactory, scripts, and fixtures
+    EVENT_CHECK.md        ← audits and fixes init event emission
+```
+
+### How it works
+
+You always invoke `/initialize <file>` (or describe the task in natural language). The skill
+reads `SKILL.md`, introspects the target facet, and decides which workflow to apply using the
+decision matrix below. You never need to pick a workflow manually.
+
+---
+
+## Decision Matrix
+
+| Situation                                                                           | Workflow applied           |
+| ----------------------------------------------------------------------------------- | -------------------------- |
+| Facet has **no** `initXxx` but has a `_RESOLVER_KEY`                                | `workflows/ADD.md`         |
+| Facet has `initXxx` using old boolean guard (`onlyNotXxxInitialised`)               | `workflows/UPDATE.md`      |
+| Factory needs to call newly-added/migrated `initXxx`; or a config is fully migrated | `workflows/FACTORY.md`     |
+| Event emission in `initXxx` is missing or malformed                                 | `workflows/EVENT_CHECK.md` |
 
 ---
 
@@ -36,29 +59,30 @@ consistently without re-deriving the rules for each facet.
 
 ```
 Per facet with existing initializer:
-  /initialize-update <file>  →  /initialize-event-check <file>
+  /initialize <file>            → runs UPDATE → EVENT_CHECK
 
 Per facet without initializer:
-  /initialize-add <file>  →  /initialize-event-check <file>
+  /initialize <file>            → runs ADD → EVENT_CHECK
 
 When the last facet of a config is merged:
-  /initialize-factory Equity   (or Bond / Loan)
+  /initialize <config>          → runs FACTORY (Part C + D)
 ```
 
-### Example
+### Examples
 
 ```bash
-# Migrate Cap facet (has existing initializer)
-/initialize-update packages/ats/contracts/contracts/facets/cap/Cap.sol
+# Migrate Cap facet (has existing initializer — runs UPDATE + EVENT_CHECK)
+/initialize packages/ats/contracts/contracts/facets/cap/Cap.sol
 
-# Add initializer to Allowance facet (has none)
-/initialize-add packages/ats/contracts/contracts/facets/allowance/Allowance.sol
+# Add initializer to Allowance facet (has none — runs ADD + EVENT_CHECK)
+/initialize packages/ats/contracts/contracts/facets/allowance/Allowance.sol
 
-# Verify event emission on any facet
-/initialize-event-check packages/ats/contracts/contracts/facets/cap/Cap.sol
+# Audit event emission only (safe to run standalone)
+/initialize packages/ats/contracts/contracts/facets/cap/Cap.sol
+# → if already migrated, skill runs EVENT_CHECK directly
 
 # Close out the Equity config once all its facets are done
-/initialize-factory Equity
+/initialize Equity
 ```
 
 ---
@@ -78,7 +102,7 @@ been migrated. Adding it per-facet would break the entire config's integration t
 immediately, since `setOperationalStatus()` cannot complete until every facet calls
 `setFacetToReady()`.
 
-`/initialize-factory` handles this as its final step, coordinated with the fixture update.
+`workflows/FACTORY.md` Part C handles this, coordinated with the fixture update.
 
 ### `onlyActivated` vs `onlyOperational`
 
@@ -104,7 +128,7 @@ it.skip(
 ```
 
 The PR that migrates the last facet of a config removes all `[MIGRATION]` skips for that
-config via `/initialize-factory`.
+config via `workflows/FACTORY.md`.
 
 ### TREX Factory
 

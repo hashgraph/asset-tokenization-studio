@@ -185,24 +185,6 @@ naming convention, update it.
 
 ---
 
-## 6. Changeset
-
-Create a changeset only if at least one fix was applied:
-
-```markdown
----
-"@hashgraph/asset-tokenization-contracts": minor
----
-
-Fix `[X]Initialized` event on `[FacetName].initializeXxx`: [brief description of what
-was wrong and what was corrected].
-```
-
-Use `patch` instead of `minor` if only NatSpec or emit argument order was corrected
-with no ABI change.
-
----
-
 ## 6. Output summary
 
 After processing a file, output a table of results:
