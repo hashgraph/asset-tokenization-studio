@@ -71,3 +71,8 @@ deployments/**/.checkpoints/
 
 # Engram AI agent memory
 .engram/
+
+gasReporterOutput.json
+
+# Auto-generated MCP server context (added automatically)
+.mcp-server-context.md
