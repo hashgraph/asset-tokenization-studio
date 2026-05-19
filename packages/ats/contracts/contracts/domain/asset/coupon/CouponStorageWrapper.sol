@@ -14,6 +14,7 @@ import { ERC3643StorageWrapper } from "../../core/ERC3643StorageWrapper.sol";
 import { ICoupon } from "../../../facets/coupon/ICoupon.sol";
 import { ICouponTypes } from "../../../facets/coupon/ICouponTypes.sol";
 import { CouponRateDispatch } from "./CouponRateDispatch.sol";
+import { DecimalsLib } from "../../../infrastructure/utils/DecimalsLib.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { NominalValueStorageWrapper } from "../nominalValue/NominalValueStorageWrapper.sol";
 import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
@@ -347,9 +348,9 @@ library CouponStorageWrapper {
         // numerator never materialises the full four-way product. The resulting fraction is
         // mathematically equivalent to the original (balance * nominal * rate * period) /
         // (10**(d+nd+rd) * 365 days), redistributed to keep every intermediate within uint256.
-        uint256 balanceNominalScaled = Math.mulDiv(tokenBalance, nominalValue, 10 ** nominalValueDecimals);
+        uint256 balanceNominalScaled = Math.mulDiv(tokenBalance, nominalValue, DecimalsLib.pow10(nominalValueDecimals));
         couponAmountFor_.numerator = balanceNominalScaled * coupon.rate * period;
-        couponAmountFor_.denominator = 10 ** (decimals + coupon.rateDecimals) * 365 days;
+        couponAmountFor_.denominator = DecimalsLib.pow10(uint256(decimals) + coupon.rateDecimals) * 365 days;
     }
 
     // solhint-disable-next-line func-name-mixedcase

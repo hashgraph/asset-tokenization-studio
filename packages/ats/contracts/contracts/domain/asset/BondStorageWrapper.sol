@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { DecimalsLib } from "../../infrastructure/utils/DecimalsLib.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { IBondTypes } from "../../facets/layer_2/bond/IBondTypes.sol";
@@ -59,9 +60,9 @@ library BondStorageWrapper {
         principalFor_.numerator = Math.mulDiv(
             ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(account, blockTimestamp),
             bondDetails.nominalValue,
-            10 ** bondDetails.nominalValueDecimals
+            DecimalsLib.pow10(bondDetails.nominalValueDecimals)
         );
-        principalFor_.denominator = 10 ** ERC20StorageWrapper.decimalsAdjustedAt(blockTimestamp);
+        principalFor_.denominator = DecimalsLib.pow10(ERC20StorageWrapper.decimalsAdjustedAt(blockTimestamp));
     }
 
     function isBondInitialized() internal view returns (bool) {

@@ -35,11 +35,11 @@ library DecimalsLib {
         if (_decimals == _newDecimals) return _amount;
         if (_newDecimals > _decimals) {
             if (_newDecimals >= MAX_DECIMALS) revert ICommonErrors.DecimalsTooLarge(_newDecimals);
-            return _amount * _pow10(_newDecimals - _decimals);
+            return _amount * pow10(_newDecimals - _decimals);
         }
         if (_decimals - _newDecimals >= MAX_DECIMALS) revert ICommonErrors.DecimalsTooLarge(_decimals);
         unchecked {
-            return _amount / _pow10(_decimals - _newDecimals);
+            return _amount / pow10(_decimals - _newDecimals);
         }
     }
 
@@ -51,7 +51,7 @@ library DecimalsLib {
      * @param _exponent The power to which 10 is raised (must be 0-77 inclusive).
      * @return result_ The computed power of 10.
      */
-    function _pow10(uint256 _exponent) private pure returns (uint256 result_) {
+    function pow10(uint256 _exponent) internal pure returns (uint256 result_) {
         assembly {
             // OPTIMIZATION: Fast path for common exponents (0-18)
             // Gas cost: ~50-75 gas total
