@@ -27,8 +27,10 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         _;
     }
 
-    modifier onlyValidKeys(IBusinessLogicResolver.BusinessLogicRegistryData[] calldata _businessLogicsRegistryDatas) {
-        _checkValidKeys(_businessLogicsRegistryDatas);
+    modifier onlyValidKeysAndAddresses(
+        IBusinessLogicResolver.BusinessLogicRegistryData[] calldata _businessLogicsRegistryDatas
+    ) {
+        _checkValidKeysAndAddresses(_businessLogicsRegistryDatas);
         _;
     }
 
@@ -221,17 +223,21 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
             revert BusinessLogicVersionDoesNotExist(_version);
     }
 
-    function _checkValidKeys(
+    function _checkValidKeysAndAddresses(
         IBusinessLogicResolver.BusinessLogicRegistryData[] calldata _businessLogicsRegistryDatas
     ) private pure {
         // Check all previously activated keys are in the array.this
         // Check non duplicated keys.
         bytes32 currentKey;
+        address currentAddress;
         uint256 length = _businessLogicsRegistryDatas.length;
         uint256 innerIndex;
         for (uint256 index; index < length; ) {
             currentKey = _businessLogicsRegistryDatas[index].businessLogicKey;
             if (uint256(currentKey) == 0) revert ZeroKeyNotValidForBusinessLogic();
+
+            currentAddress = _businessLogicsRegistryDatas[index].businessLogicAddress;
+            if (currentAddress == address(0)) revert ZeroAddressNotValidForBusinessLogic();
 
             unchecked {
                 innerIndex = index + 1;

@@ -25,7 +25,7 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
 
     function registerBusinessLogics(
         BusinessLogicRegistryData[] calldata _businessLogics
-    ) external override onlyValidKeys(_businessLogics) onlyRole(DEFAULT_ADMIN_ROLE) onlyUnpaused {
+    ) external override onlyValidKeysAndAddresses(_businessLogics) onlyRole(DEFAULT_ADMIN_ROLE) onlyUnpaused {
         uint256[] memory latestVersion = _registerBusinessLogics(_businessLogics);
 
         emit BusinessLogicsRegistered(_businessLogics, latestVersion);
