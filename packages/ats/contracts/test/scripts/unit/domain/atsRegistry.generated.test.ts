@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * Unit tests for atsRegistry.data.ts factory functions.
+ * Unit tests for `atsRegistry.generated.ts` factory functions.
  *
- * Tests the TimeTravel factory branch which is otherwise untested.
- * This achieves 100% coverage on the atsRegistry.data.ts file by
+ * @remarks
+ * Tests the TimeTravel factory branch which is otherwise untested. This
+ * achieves 100 % coverage on the `atsRegistry.generated.ts` file by
  * dynamically testing all facets that have TimeTravel variants.
  *
- * @module test/scripts/unit/domain/atsRegistry.data.test
+ * @module test/scripts/unit/domain/atsRegistry.generated.test
  */
 
 import { expect } from "chai";
@@ -22,16 +23,16 @@ import {
   getAllContracts,
   hasFacet,
   hasContract,
-  FACET_REGISTRY_COUNT,
+  getFacetRegistryCount,
   getStorageWrapperDefinition,
   getAllStorageWrappers,
   hasStorageWrapper,
-  STORAGE_WRAPPER_REGISTRY_COUNT,
+  getStorageWrapperRegistryCount,
   atsRegistry,
   isLibraryDependentFacet,
 } from "@scripts/domain";
 
-describe("atsRegistry.data - Factory Functions", () => {
+describe("atsRegistry.generated - Factory Functions", () => {
   const facetNames = Object.keys(FACET_REGISTRY);
 
   // Cache signer to avoid repeated Hardhat network bootstrap (saves ~4+ seconds)
@@ -172,9 +173,9 @@ describe("atsRegistry - Registry Helper Functions", () => {
       expect(hasFacet("NonExistentFacet")).to.be.false;
     });
 
-    it("FACET_REGISTRY_COUNT should match actual count", () => {
+    it("getFacetRegistryCount() should match actual count", () => {
       const facets = getAllFacets();
-      expect(FACET_REGISTRY_COUNT).to.equal(facets.length);
+      expect(getFacetRegistryCount()).to.equal(facets.length);
     });
   });
 
@@ -231,9 +232,9 @@ describe("atsRegistry - Registry Helper Functions", () => {
       expect(hasStorageWrapper("NonExistentWrapper")).to.be.false;
     });
 
-    it("STORAGE_WRAPPER_REGISTRY_COUNT should match actual count", () => {
+    it("getStorageWrapperRegistryCount() should match actual count", () => {
       const wrappers = getAllStorageWrappers();
-      expect(STORAGE_WRAPPER_REGISTRY_COUNT).to.equal(wrappers.length);
+      expect(getStorageWrapperRegistryCount()).to.equal(wrappers.length);
     });
   });
 

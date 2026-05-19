@@ -105,7 +105,17 @@ export const ATS_CONTRACTS = {
  *
  * These types provide type-safe access to roles from the auto-generated registry.
  */
-import { ROLES } from "./atsRegistry.data";
+/**
+ * @remarks
+ * BBND-1766: `ROLES` is imported from the dedicated `atsRoles.generated.ts`
+ * (checked into git) rather than the heavier `atsRegistry.generated.ts`
+ * (gitignored). This decouples the bootstrap-time import chain — including
+ * everything reachable from `hardhat.config.ts` via the `@scripts` barrel —
+ * from the auto-generated facet/contract registry, so a fresh clone can run
+ * `hardhat compile` to regenerate the heavy file without a chicken-and-egg
+ * failure.
+ */
+import { ROLES } from "./atsRoles.generated";
 
 export type AtsRoleName = keyof typeof ROLES;
 export type AtsRoleHash = (typeof ROLES)[AtsRoleName];

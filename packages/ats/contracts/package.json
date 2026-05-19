@@ -152,6 +152,7 @@
     "slither:inheritance": "docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v \"$(pwd)\":\"/home/ethsec/contracts\" -w \"/home/ethsec/contracts\" -u 0:0 trailofbits/eth-security-toolbox /bin/sh -c \"solc-select install 0.8.18 && solc-select use 0.8.18 && slither . --print inheritance --solc-remaps @=node_modules/@\"",
     "validate:package": "npm run build && npx publint && npx @arethetypeswrong/cli --pack",
     "prepack": "npm run build",
+    "prepare": "npx hardhat compile",
     "doc": "npx hardhat dodoc"
   },
   "dependencies": {

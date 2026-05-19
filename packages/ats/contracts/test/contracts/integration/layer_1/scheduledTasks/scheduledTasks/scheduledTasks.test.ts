@@ -273,6 +273,49 @@ describe("Scheduled Tasks Failure Recovery", () => {
     expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(0);
   });
 
+  it("GIVEN three due crossOrdered tasks WHEN triggered in a single call THEN all three are processed and queue is empty", async () => {
+    // Regression test for FIND-047: pos and scheduledTasksLength were dead params
+    // passed stale to ScheduledTasksDispatchOps.execute(). Verifies that removing
+    // them does not break multi-task processing across a full loop iteration.
+    const { asset, deployer } = await loadFixture(deployWithCorporateActionRole);
+
+    const currentTimestamp = await getDltTimestamp();
+    const recordDate1 = currentTimestamp + TIME_PERIODS_S.DAY;
+    const recordDate2 = currentTimestamp + TIME_PERIODS_S.DAY * 2;
+    const recordDate3 = currentTimestamp + TIME_PERIODS_S.DAY * 3;
+
+    await asset.connect(deployer).setDividend({
+      recordDate: recordDate1.toString(),
+      executionDate: (recordDate1 + TIME_PERIODS_S.DAY).toString(),
+      amount: 1,
+      amountDecimals: 2,
+    });
+    await asset.connect(deployer).setDividend({
+      recordDate: recordDate2.toString(),
+      executionDate: (recordDate2 + TIME_PERIODS_S.DAY).toString(),
+      amount: 1,
+      amountDecimals: 2,
+    });
+    await asset.connect(deployer).setDividend({
+      recordDate: recordDate3.toString(),
+      executionDate: (recordDate3 + TIME_PERIODS_S.DAY).toString(),
+      amount: 1,
+      amountDecimals: 2,
+    });
+
+    expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(3);
+
+    await asset.changeSystemTimestamp(recordDate3 + 1);
+
+    await expect(asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks()).to.not.emit(
+      asset,
+      "TaskExecutionFailed",
+    );
+
+    expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(0);
+    expect(await asset.scheduledSnapshotCount()).to.equal(0);
+  });
+
   // ─── Failure path: hardhat_setCode injection ───────────────────────────────
   //
   // MockScheduledTasksDispatchOps is swapped in at the real library address via
