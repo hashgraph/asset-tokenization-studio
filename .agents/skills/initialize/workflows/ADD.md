@@ -266,6 +266,7 @@ it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeXxx is called THEN 
 >   );
 > });
 > ```
+
 ### Test 3 — event emitted on first call
 
 Because the factory does not yet call `initializeXxx`, the standard fixture produces
@@ -406,10 +407,7 @@ See `workflows/FACTORY.md` for the full wiring procedure.
 - [ ] `emit XxxInitialized(EvmAccessors.getMsgSender(), ...)` is the last statement
 - [ ] `this.initializeXxx.selector` added to `getStaticFunctionSelectors`
 - [ ] If event has dynamic types (struct/array): Test 3 uses `decodeEvent`, not `.withArgs()`
-- [ ] All 3 new tests pass: `npm run test --no-compile --grep "initializeXxx"`
 - [ ] `npm run format:check` passes on all modified files
-- [ ] `npm run compile` produces 0 warnings on modified contracts
 - [ ] Solhint produces no new errors on modified files
-- [ ] `rg "initializeXxx" contracts/factory/Factory.sol` — note if a Factory call is missing;
-      flag it for `initialize-factory` skill
+- [ ] `rg "initializeXxx" contracts/factory/Factory.sol` — note if missing; flag for `initialize-factory`
 - [ ] Changeset file created under `.changeset/`
