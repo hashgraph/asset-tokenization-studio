@@ -3,6 +3,7 @@
 import { SetNameCommandHandler } from "@command/security/operations/tokenMetadata/setName/SetNameCommandHandler";
 import { TOKENS } from "../Tokens";
 import { SetSymbolCommandHandler } from "@command/security/operations/tokenMetadata/setSymbol/SetSymbolCommandHandler";
+import { SetMetadataCommandHandler } from "@command/security/operations/metadata/setMetadata/SetMetadataCommandHandler";
 
 export const COMMAND_HANDLERS_METADATA = [
   {
@@ -12,5 +13,9 @@ export const COMMAND_HANDLERS_METADATA = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: SetSymbolCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: SetMetadataCommandHandler,
   },
 ];

@@ -30,6 +30,7 @@ import { LockOperations } from "./operations/LockOperations";
 import { SecurityOperations } from "./operations/SecurityOperations";
 import { SecurityMetadataOperations } from "./operations/SecurityMetadataOperations";
 import { AmortizationOperations } from "./operations/AmortizationOperations";
+import { MetadataOperations } from "./operations/MetadataOperations";
 
 export abstract class BaseHederaTransactionAdapter extends TransactionAdapter implements TransactionExecutor {
   mirrorNodes: MirrorNodes;
@@ -55,6 +56,7 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
   protected securityOps!: SecurityOperations;
   protected securityMetadataOps!: SecurityMetadataOperations;
   protected amortizationOps!: AmortizationOperations;
+  protected metadataOps!: MetadataOperations;
 
   constructor(
     protected readonly mirrorNodeAdapter: MirrorNodeAdapter,
@@ -74,6 +76,7 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     this.securityOps = new SecurityOperations(this);
     this.securityMetadataOps = new SecurityMetadataOperations(this);
     this.amortizationOps = new AmortizationOperations(this);
+    this.metadataOps = new MetadataOperations(this);
   }
 
   // ===== Abstract methods (implemented by concrete adapters) =====
@@ -876,5 +879,11 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     ...args: Parameters<AmortizationOperations["releaseAmortizationHold"]>
   ): Promise<TransactionResponse> {
     return this.amortizationOps.releaseAmortizationHold(...args);
+  }
+
+  // ===== Metadata Operations =====
+
+  async setMetadata(...args: Parameters<MetadataOperations["setMetadata"]>): Promise<TransactionResponse> {
+    return this.metadataOps.setMetadata(...args);
   }
 }
