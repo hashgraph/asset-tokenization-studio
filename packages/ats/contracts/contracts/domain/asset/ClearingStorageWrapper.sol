@@ -567,4 +567,12 @@ library ClearingStorageWrapper {
                 destination: data.holdTo
             });
     }
+
+    /**
+     * @notice Reverts with `InvalidClearingAmount` if the supplied token amount is zero.
+     * @param _amount Token quantity to validate before registering a clearing operation.
+     */
+    function checkNonZeroClearingAmount(uint256 _amount) internal pure {
+        if (_amount == 0) revert IClearingTypes.InvalidClearingAmount();
+    }
 }
