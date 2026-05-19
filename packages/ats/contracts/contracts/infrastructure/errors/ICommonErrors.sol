@@ -108,9 +108,18 @@ interface ICommonErrors {
     error ZeroValueNotAllowed();
 
     /**
-     * @notice Reverts when the decimal precision exceeds the maximum value.
-     * @dev Protects decimals amount not te be greater than maximum.
-     * @param decimals decimals amount.
+     * @notice Reverts when the difference between current decimals and new decimals exceeds the maximum value.
+     * @dev Protects decimals amount difference between current and new not te be greater than maximum.
+     * @param currentDecimals the current decimals amount.
+     * @param newDecimals the new decimals amount.
      */
-    error DecimalsTooLarge(uint8 decimals);
+    error DecimalsTooLarge(uint8 currentDecimals, uint8 newDecimals);
+
+    /**
+     * @notice Reverts when multiplying `amount` by `10 ** decimals` would exceed `uint256` max.
+     * @dev Thrown by `DecimalsLib.calculateDecimalsAdjustment` when `amount > MAX_UINT256 / 10 ** decimals`.
+     * @param amount The token amount that cannot be scaled up.
+     * @param decimals The exponent that causes the overflow.
+     */
+    error GreaterThanMaxUint256(uint256 amount, uint8 decimals);
 }
