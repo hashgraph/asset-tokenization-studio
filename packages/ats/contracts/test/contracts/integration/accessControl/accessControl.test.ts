@@ -331,4 +331,47 @@ describe("Access Control Tests", () => {
       .to.be.revertedWithCustomError(asset, "AccountNotAssignedToRole")
       .withArgs(ATS_ROLES.PAUSER_ROLE, unknownSigner.address);
   });
+
+  describe("initializeAccessControl", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeAccessControl is called THEN it reverts with AccountHasNoRole", async () => {
+      // Must use fresh deployment since onlyFacetNotRegistered is checked before onlyRole
+      const base = await deployEquityTokenFixture();
+      const freshDiamond = base.diamond;
+      const freshAsset = await ethers.getContractAt("IAsset", freshDiamond.target);
+
+      await expect(freshAsset.connect(unknownSigner).initializeAccessControl()).to.be.revertedWithCustomError(
+        freshAsset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN an already-initialised facet WHEN initializeAccessControl is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      const base = await deployEquityTokenFixture();
+      const freshDiamond = base.diamond;
+      const freshAsset = await ethers.getContractAt("IAsset", freshDiamond.target);
+      const freshDeployer = base.deployer;
+
+      // Initialize first
+      await freshAsset.connect(freshDeployer).initializeAccessControl();
+
+      // Try again
+      await expect(freshAsset.initializeAccessControl()).to.be.revertedWithCustomError(
+        freshAsset,
+        "FacetAlreadyRegistered",
+      );
+    });
+  });
+
+  describe("initializeAccessControl event", () => {
+    it("GIVEN a fresh deployment WHEN initializeAccessControl is called THEN it emits AccessControlInitialized", async () => {
+      const base = await deployEquityTokenFixture();
+      const freshDiamond = base.diamond;
+      const freshAsset = await ethers.getContractAt("IAsset", freshDiamond.target);
+      const freshDeployer = base.deployer;
+
+      await expect(freshAsset.connect(freshDeployer).initializeAccessControl())
+        .to.emit(freshAsset, "AccessControlInitialized")
+        .withArgs(await freshDeployer.getAddress());
+    });
+  });
 });
