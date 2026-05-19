@@ -123,6 +123,10 @@ interface TRexIAccessControl {
      *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
      */
     function initializeAccessControl() external;
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeAccessControl() external;
 
     /**
      * @notice Grants a role to an account.
