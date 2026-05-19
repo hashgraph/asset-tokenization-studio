@@ -115,7 +115,7 @@ describe("Equity Tests", () => {
 
   describe("Initialization", () => {
     it("GIVEN an initialized equity WHEN trying to initialize again THEN transaction fails with AlreadyInitialized", async () => {
-      await expect(asset._initialize_equityUSA(getEquityDetails())).to.be.revertedWithCustomError(
+      await expect(asset.initializeEquityUSA(getEquityDetails())).to.be.revertedWithCustomError(
         asset,
         "AlreadyInitialized",
       );

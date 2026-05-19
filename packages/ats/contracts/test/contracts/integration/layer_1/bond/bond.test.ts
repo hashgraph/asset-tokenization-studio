@@ -112,7 +112,7 @@ describe("Bond Tests", () => {
     });
 
     it("GIVEN an initialized bond WHEN trying to initialize again THEN transaction fails with AlreadyInitialized", async () => {
-      await expect(asset.connect(signer_A)._initialize_bondUSA(await getBondDetails())).to.be.revertedWithCustomError(
+      await expect(asset.connect(signer_A).initializeBondUSA(await getBondDetails())).to.be.revertedWithCustomError(
         asset,
         "AlreadyInitialized",
       );

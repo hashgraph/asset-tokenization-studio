@@ -1582,12 +1582,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["BondUSAFacetBase"],
     methods: [
       {
-        name: "_initialize_bondUSA",
+        name: "initializeBondUSA",
         signature: {
-          full: "function _initialize_bondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData)",
-          canonical: "_initialize_bondUSA((bytes3,uint256,uint8,uint256,uint256))",
+          full: "function initializeBondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData)",
+          canonical: "initializeBondUSA((bytes3,uint256,uint8,uint256,uint256))",
         },
-        selector: "0xd955f0a9",
+        selector: "0xb8af2efd",
       },
     ],
     events: [
@@ -1633,12 +1633,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["BondUSAFacetBase"],
     methods: [
       {
-        name: "_initialize_bondUSA",
+        name: "initializeBondUSA",
         signature: {
-          full: "function _initialize_bondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData)",
-          canonical: "_initialize_bondUSA((bytes3,uint256,uint8,uint256,uint256))",
+          full: "function initializeBondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData)",
+          canonical: "initializeBondUSA((bytes3,uint256,uint8,uint256,uint256))",
         },
-        selector: "0xd955f0a9",
+        selector: "0xb8af2efd",
       },
     ],
     events: [
@@ -1684,12 +1684,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["BondUSAFacetBase"],
     methods: [
       {
-        name: "_initialize_bondUSA",
+        name: "initializeBondUSA",
         signature: {
-          full: "function _initialize_bondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData)",
-          canonical: "_initialize_bondUSA((bytes3,uint256,uint8,uint256,uint256))",
+          full: "function initializeBondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData)",
+          canonical: "initializeBondUSA((bytes3,uint256,uint8,uint256,uint256))",
         },
-        selector: "0xd955f0a9",
+        selector: "0xb8af2efd",
       },
     ],
     events: [
@@ -5139,20 +5139,20 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["EquityUSA", "IStaticFunctionSelectors"],
     methods: [
       {
-        name: "_initialize_equityUSA",
-        signature: {
-          full: "function _initialize_equityUSA((bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) _equityDetailsData)",
-          canonical: "_initialize_equityUSA((bool,bool,bool,bool,bool,bool,bool,uint8,bytes3,uint256,uint8))",
-        },
-        selector: "0x0ec7b35b",
-      },
-      {
         name: "getEquityDetails",
         signature: {
           full: "function getEquityDetails() view returns ((bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) equityDetailsData_)",
           canonical: "getEquityDetails()",
         },
         selector: "0xefcdcad8",
+      },
+      {
+        name: "initializeEquityUSA",
+        signature: {
+          full: "function initializeEquityUSA((bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) _equityDetailsData)",
+          canonical: "initializeEquityUSA((bool,bool,bool,bool,bool,bool,bool,uint8,bytes3,uint256,uint8))",
+        },
+        selector: "0xb3260511",
       },
     ],
     errors: [
@@ -8064,13 +8064,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa3b9e39d",
       },
       {
-        name: "initialize_Loan",
+        name: "initializeLoan",
         signature: {
-          full: "function initialize_Loan(((bytes3 currency, uint256 startingDate, uint256 maturityDate, uint8 loanStructureType, uint8 repaymentType, uint8 interestType, uint256 signingDate, address originatorAccount, address servicerAccount) loanBasicData, (uint8 baseReferenceRate, uint256 floorRate, uint256 capRate, uint256 rateMargin, uint8 dayCount, uint8 paymentFrequency, uint256 firstAccrualDate, uint256 prepaymentPenalty, uint256 commitmentFee, uint256 utilizationFee, uint8 utilizationFeeType, uint256 servicingFee) loanInterestData, (string internalRiskGrade, uint256 defaultProbability, uint256 lossGivenDefault) riskData, (uint256 totalCollateralValue, uint256 loanToValue) collateral, (uint8 performanceStatus, uint256 daysPastDue) loanPerformanceStatus) _loanDetailsData)",
+          full: "function initializeLoan(((bytes3 currency, uint256 startingDate, uint256 maturityDate, uint8 loanStructureType, uint8 repaymentType, uint8 interestType, uint256 signingDate, address originatorAccount, address servicerAccount) loanBasicData, (uint8 baseReferenceRate, uint256 floorRate, uint256 capRate, uint256 rateMargin, uint8 dayCount, uint8 paymentFrequency, uint256 firstAccrualDate, uint256 prepaymentPenalty, uint256 commitmentFee, uint256 utilizationFee, uint8 utilizationFeeType, uint256 servicingFee) loanInterestData, (string internalRiskGrade, uint256 defaultProbability, uint256 lossGivenDefault) riskData, (uint256 totalCollateralValue, uint256 loanToValue) collateral, (uint8 performanceStatus, uint256 daysPastDue) loanPerformanceStatus) _loanDetailsData)",
           canonical:
-            "initialize_Loan(((bytes3,uint256,uint256,uint8,uint8,uint8,uint256,address,address),(uint8,uint256,uint256,uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint8,uint256),(string,uint256,uint256),(uint256,uint256),(uint8,uint256)))",
+            "initializeLoan(((bytes3,uint256,uint256,uint8,uint8,uint8,uint256,address,address),(uint8,uint256,uint256,uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint8,uint256),(string,uint256,uint256),(uint256,uint256),(uint8,uint256)))",
         },
-        selector: "0x88e0b0bd",
+        selector: "0x84a2ac3e",
       },
       {
         name: "setLoanDetails",

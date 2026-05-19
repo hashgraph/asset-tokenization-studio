@@ -174,10 +174,10 @@ describe("Loan Tests", () => {
     });
   });
 
-  describe("initialize_Loan validations", () => {
+  describe("initializeLoan validations", () => {
     it("GIVEN an initialized loan WHEN trying to initialize again THEN transaction fails with AlreadyInitialized", async () => {
       const loanDetails = await getLoanDetails();
-      await expect(asset.connect(signer_A).initialize_Loan(loanDetails)).to.be.revertedWithCustomError(
+      await expect(asset.connect(signer_A).initializeLoan(loanDetails)).to.be.revertedWithCustomError(
         asset,
         "AlreadyInitialized",
       );

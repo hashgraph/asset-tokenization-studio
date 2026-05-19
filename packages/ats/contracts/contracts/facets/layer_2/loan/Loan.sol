@@ -13,8 +13,7 @@ import { Modifiers } from "../../../services/Modifiers.sol";
  * @author Hashgraph
  */
 abstract contract Loan is ILoan, Modifiers {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_Loan(
+    function initializeLoan(
         LoanDetailsData calldata _loanDetailsData
     )
         external

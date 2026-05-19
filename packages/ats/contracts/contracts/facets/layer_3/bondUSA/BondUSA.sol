@@ -7,9 +7,7 @@ import { Modifiers } from "../../../services/Modifiers.sol";
 import { BondStorageWrapper } from "../../../domain/asset/BondStorageWrapper.sol";
 
 abstract contract BondUSA is IBondUSA, Modifiers {
-    // solhint-disable func-name-mixedcase
-    // solhint-disable-next-line private-vars-leading-underscore
-    function _initialize_bondUSA(
+    function initializeBondUSA(
         IBondTypes.BondDetailsData calldata _bondDetailsData
     ) external override onlyNotBondInitialized {
         BondStorageWrapper.initialize_bond(_bondDetailsData);

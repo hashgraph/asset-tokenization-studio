@@ -96,8 +96,7 @@ interface ILoan {
 
     event LoanDetailsSet(LoanDetailsData loanDetails);
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_Loan(LoanDetailsData calldata _loanDetailsData) external;
+    function initializeLoan(LoanDetailsData calldata _loanDetailsData) external;
 
     /**
      * @dev Set the loan details

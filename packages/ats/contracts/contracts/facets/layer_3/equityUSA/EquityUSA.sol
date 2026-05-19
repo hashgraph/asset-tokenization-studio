@@ -5,9 +5,7 @@ import { IEquityUSA } from "./IEquityUSA.sol";
 import { Equity } from "../../layer_2/equity/Equity.sol";
 
 abstract contract EquityUSA is IEquityUSA, Equity {
-    // solhint-disable func-name-mixedcase
-    // solhint-disable-next-line private-vars-leading-underscore
-    function _initialize_equityUSA(
+    function initializeEquityUSA(
         EquityDetailsData calldata _equityDetailsData
     ) external override onlyNotEquityInitialized {
         _initializeEquity(_equityDetailsData);

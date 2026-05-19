@@ -134,7 +134,7 @@ abstract contract Factory is IFactory {
         equityAddress_ = _deploySecurity(_equityData.security, SecurityType.Equity);
 
         // Initialize equity USA features (EquityUSAFacet may not be present)
-        _tryInitialize_equityUSA(equityAddress_, _equityData.equityDetails);
+        _tryInitializeEquityUSA(equityAddress_, _equityData.equityDetails);
 
         // Initialize security regulation data (SecurityFacet may not be present)
         _tryInitializeSecurity(
@@ -268,7 +268,7 @@ abstract contract Factory is IFactory {
         bondAddress_ = _deploySecurity(_bondData.security, _securityType);
 
         // Initialize bond USA features (BondUSAFacet may not be present)
-        _tryInitialize_bondUSA(bondAddress_, _bondData.bondDetails);
+        _tryInitializeBondUSA(bondAddress_, _bondData.bondDetails);
 
         // Initialize security regulation data (SecurityFacet may not be present)
         _tryInitializeSecurity(
@@ -399,11 +399,11 @@ abstract contract Factory is IFactory {
         }
     }
 
-    function _tryInitialize_equityUSA(
+    function _tryInitializeEquityUSA(
         address securityAddress_,
         IEquityUSA.EquityDetailsData calldata equityDetailsData
     ) private {
-        try IEquityUSA(securityAddress_)._initialize_equityUSA(equityDetailsData) {
+        try IEquityUSA(securityAddress_).initializeEquityUSA(equityDetailsData) {
             // success
         } catch {
             // facet not present - skip initialization
@@ -422,11 +422,11 @@ abstract contract Factory is IFactory {
         }
     }
 
-    function _tryInitialize_bondUSA(
+    function _tryInitializeBondUSA(
         address securityAddress_,
         IBondRead.BondDetailsData calldata bondDetailsData
     ) private {
-        try IBondUSA(securityAddress_)._initialize_bondUSA(bondDetailsData) {
+        try IBondUSA(securityAddress_).initializeBondUSA(bondDetailsData) {
             // success
         } catch {
             // facet not present - skip initialization

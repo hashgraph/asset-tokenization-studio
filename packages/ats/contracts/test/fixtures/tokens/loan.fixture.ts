@@ -310,7 +310,7 @@ export async function deployLoanTokenFixture({
     loanParams?.loanInit?.currency ?? DEFAULT_LOAN_PARAMS.currency,
   );
 
-  await loanFacet.initialize_Loan(loanDetails);
+  await loanFacet.initializeLoan(loanDetails);
 
   await securityFacet.initializeSecurity(
     buildRegulationData(regulationData.regulationType, regulationData.regulationSubType),

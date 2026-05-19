@@ -75,7 +75,7 @@ describe("LoansPortfolio Token Tests", () => {
     await loadFixture(deployLoansPortfolioFixture);
   });
 
-  describe("_initialize_LoansPortfolio", () => {
+  describe("initializeLoansPortfolio", () => {
     it("GIVEN a deployed portfolio WHEN initializing THEN state is set correctly", async () => {
       const data = await asset.getLoansPortfolioData();
 
