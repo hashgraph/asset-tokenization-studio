@@ -37,7 +37,7 @@ describe("Network Configuration", () => {
     it("should return local config for local network", () => {
       const config = getDeploymentConfig("local");
 
-      expect(config.confirmations).to.equal(0);
+      expect(config.confirmations).to.equal(1);
       expect(config.timeout).to.equal(10_000);
       expect(config.retryOptions.maxRetries).to.equal(0);
       expect(config.verifyDeployment).to.be.false;
