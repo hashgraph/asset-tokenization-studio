@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-18T16:17:42.410Z
+ * Generated: 2026-05-19T10:55:33.486Z
  * Facets: 120
  * Infrastructure: 2
  *
@@ -4151,8 +4151,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       {
         name: "DecimalsTooLarge",
-        signature: { full: "error DecimalsTooLarge(uint8 decimals)", canonical: "DecimalsTooLarge(uint8)" },
-        selector: "0xc414eb7a",
+        signature: {
+          full: "error DecimalsTooLarge(uint8 currentDecimals, uint8 newDecimals)",
+          canonical: "DecimalsTooLarge(uint8,uint8)",
+        },
+        selector: "0xf6798fe8",
       },
       {
         name: "DuplicatedCorporateAction",
@@ -4166,6 +4169,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "ExpiredDeadline",
         signature: { full: "error ExpiredDeadline(uint256 deadline)", canonical: "ExpiredDeadline(uint256)" },
         selector: "0x724a779a",
+      },
+      {
+        name: "GreaterThanMaxUint256",
+        signature: {
+          full: "error GreaterThanMaxUint256(uint256 amount, uint8 decimals)",
+          canonical: "GreaterThanMaxUint256(uint256,uint8)",
+        },
+        selector: "0x3d3c41fd",
       },
       {
         name: "InvalidDates",
@@ -4355,8 +4366,19 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       {
         name: "DecimalsTooLarge",
-        signature: { full: "error DecimalsTooLarge(uint8 decimals)", canonical: "DecimalsTooLarge(uint8)" },
-        selector: "0xc414eb7a",
+        signature: {
+          full: "error DecimalsTooLarge(uint8 currentDecimals, uint8 newDecimals)",
+          canonical: "DecimalsTooLarge(uint8,uint8)",
+        },
+        selector: "0xf6798fe8",
+      },
+      {
+        name: "GreaterThanMaxUint256",
+        signature: {
+          full: "error GreaterThanMaxUint256(uint256 amount, uint8 decimals)",
+          canonical: "GreaterThanMaxUint256(uint256,uint8)",
+        },
+        selector: "0x3d3c41fd",
       },
       {
         name: "InterestRateIsFixed",
@@ -4533,8 +4555,19 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       {
         name: "DecimalsTooLarge",
-        signature: { full: "error DecimalsTooLarge(uint8 decimals)", canonical: "DecimalsTooLarge(uint8)" },
-        selector: "0xc414eb7a",
+        signature: {
+          full: "error DecimalsTooLarge(uint8 currentDecimals, uint8 newDecimals)",
+          canonical: "DecimalsTooLarge(uint8,uint8)",
+        },
+        selector: "0xf6798fe8",
+      },
+      {
+        name: "GreaterThanMaxUint256",
+        signature: {
+          full: "error GreaterThanMaxUint256(uint256 amount, uint8 decimals)",
+          canonical: "GreaterThanMaxUint256(uint256,uint8)",
+        },
+        selector: "0x3d3c41fd",
       },
       {
         name: "SnapshotIdDoesNotExists",
@@ -7819,8 +7852,19 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       {
         name: "DecimalsTooLarge",
-        signature: { full: "error DecimalsTooLarge(uint8 decimals)", canonical: "DecimalsTooLarge(uint8)" },
-        selector: "0xc414eb7a",
+        signature: {
+          full: "error DecimalsTooLarge(uint8 currentDecimals, uint8 newDecimals)",
+          canonical: "DecimalsTooLarge(uint8,uint8)",
+        },
+        selector: "0xf6798fe8",
+      },
+      {
+        name: "GreaterThanMaxUint256",
+        signature: {
+          full: "error GreaterThanMaxUint256(uint256 amount, uint8 decimals)",
+          canonical: "GreaterThanMaxUint256(uint256,uint8)",
+        },
+        selector: "0x3d3c41fd",
       },
       {
         name: "InvalidDate",

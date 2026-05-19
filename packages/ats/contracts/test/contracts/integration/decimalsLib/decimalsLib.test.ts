@@ -41,20 +41,19 @@ describe("DecimalsLib Tests", () => {
       it("GIVEN newDecimals of 78 WHEN calculateDecimalsAdjustment THEN reverts with DecimalsTooLarge", async () => {
         await expect(decimalsLib.calculateDecimalsAdjustment(1, 0, 78))
           .to.be.revertedWithCustomError(decimalsLib, "DecimalsTooLarge")
-          .withArgs(78);
+          .withArgs(0, 78);
       });
 
       it("GIVEN newDecimals above 78 WHEN calculateDecimalsAdjustment THEN reverts with DecimalsTooLarge", async () => {
         await expect(decimalsLib.calculateDecimalsAdjustment(1, 0, 100))
           .to.be.revertedWithCustomError(decimalsLib, "DecimalsTooLarge")
-          .withArgs(100);
+          .withArgs(0, 100);
       });
 
-      it("GIVEN non-zero decimals and diff of 78 WHEN calculateDecimalsAdjustment THEN reverts with DecimalsTooLarge for newDecimals", async () => {
-        // decimalsDiff = 83 - 5 = 78, error arg is _newDecimals
+      it("GIVEN non-zero decimals and diff of 78 WHEN calculateDecimalsAdjustment THEN reverts with DecimalsTooLarge", async () => {
         await expect(decimalsLib.calculateDecimalsAdjustment(1, 5, 83))
           .to.be.revertedWithCustomError(decimalsLib, "DecimalsTooLarge")
-          .withArgs(83);
+          .withArgs(5, 83);
       });
 
       it("GIVEN amount at exact overflow boundary WHEN calculateDecimalsAdjustment THEN succeeds", async () => {
@@ -63,26 +62,26 @@ describe("DecimalsLib Tests", () => {
         await expect(decimalsLib.calculateDecimalsAdjustment(amount, 0, 1)).to.not.be.reverted;
       });
 
-      it("GIVEN amount one above overflow boundary WHEN calculateDecimalsAdjustment THEN reverts with DecimalsTooLarge", async () => {
+      it("GIVEN amount one above overflow boundary WHEN calculateDecimalsAdjustment THEN reverts with GreaterThanMaxUint256", async () => {
         const maxUint256 = 2n ** 256n - 1n;
-        const amount = maxUint256 / 10n + 1n; // one above MAX_UINT256 / multiplier
+        const amount = maxUint256 / 10n + 1n;
         await expect(decimalsLib.calculateDecimalsAdjustment(amount, 0, 1))
-          .to.be.revertedWithCustomError(decimalsLib, "DecimalsTooLarge")
-          .withArgs(1);
+          .to.be.revertedWithCustomError(decimalsLib, "GreaterThanMaxUint256")
+          .withArgs(amount, 1);
       });
 
-      it("GIVEN MAX_UINT256 amount with diff 1 WHEN calculateDecimalsAdjustment THEN reverts with DecimalsTooLarge", async () => {
+      it("GIVEN MAX_UINT256 amount with diff 1 WHEN calculateDecimalsAdjustment THEN reverts with GreaterThanMaxUint256", async () => {
         const maxUint256 = 2n ** 256n - 1n;
         await expect(decimalsLib.calculateDecimalsAdjustment(maxUint256, 0, 1))
-          .to.be.revertedWithCustomError(decimalsLib, "DecimalsTooLarge")
-          .withArgs(1);
+          .to.be.revertedWithCustomError(decimalsLib, "GreaterThanMaxUint256")
+          .withArgs(maxUint256, 1);
       });
 
-      it("GIVEN amount that overflows with diff below 78 WHEN calculateDecimalsAdjustment THEN reverts with DecimalsTooLarge", async () => {
+      it("GIVEN amount that overflows with diff below 78 WHEN calculateDecimalsAdjustment THEN reverts with GreaterThanMaxUint256", async () => {
         // 2 * 10^77 > MAX_UINT256 (~1.157e77), so amount=2 with diff=77 overflows
         await expect(decimalsLib.calculateDecimalsAdjustment(2, 0, 77))
-          .to.be.revertedWithCustomError(decimalsLib, "DecimalsTooLarge")
-          .withArgs(77);
+          .to.be.revertedWithCustomError(decimalsLib, "GreaterThanMaxUint256")
+          .withArgs(2, 77);
       });
     });
 
@@ -109,13 +108,13 @@ describe("DecimalsLib Tests", () => {
       it("GIVEN decimals of 78 WHEN calculateDecimalsAdjustment THEN reverts with DecimalsTooLarge", async () => {
         await expect(decimalsLib.calculateDecimalsAdjustment(1, 78, 0))
           .to.be.revertedWithCustomError(decimalsLib, "DecimalsTooLarge")
-          .withArgs(78);
+          .withArgs(78, 0);
       });
 
       it("GIVEN decimals above 78 WHEN calculateDecimalsAdjustment THEN reverts with DecimalsTooLarge", async () => {
         await expect(decimalsLib.calculateDecimalsAdjustment(1, 100, 0))
           .to.be.revertedWithCustomError(decimalsLib, "DecimalsTooLarge")
-          .withArgs(100);
+          .withArgs(100, 0);
       });
     });
   });

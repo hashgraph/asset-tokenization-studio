@@ -37,15 +37,15 @@ library DecimalsLib {
         uint8 decimalsDiff;
         if (_newDecimals > _decimals) {
             decimalsDiff = _newDecimals - _decimals;
-            if (decimalsDiff >= MAX_DECIMALS) revert ICommonErrors.DecimalsTooLarge(_newDecimals);
+            if (decimalsDiff >= MAX_DECIMALS) revert ICommonErrors.DecimalsTooLarge(_decimals, _newDecimals);
             uint256 multiplier = _pow10(decimalsDiff);
-            if (_amount > (MAX_UINT256 / multiplier)) revert ICommonErrors.DecimalsTooLarge(_newDecimals);
+            if (_amount > (MAX_UINT256 / multiplier)) revert ICommonErrors.GreaterThanMaxUint256(_amount, decimalsDiff);
             unchecked {
                 return _amount * multiplier;
             }
         }
         decimalsDiff = _decimals - _newDecimals;
-        if (decimalsDiff >= MAX_DECIMALS) revert ICommonErrors.DecimalsTooLarge(_decimals);
+        if (decimalsDiff >= MAX_DECIMALS) revert ICommonErrors.DecimalsTooLarge(_decimals, _newDecimals);
         unchecked {
             return _amount / _pow10(decimalsDiff);
         }
