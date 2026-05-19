@@ -22,7 +22,6 @@ import { ScheduledTasksStorageWrapper } from "../ScheduledTasksStorageWrapper.so
 import { SnapshotsStorageWrapper } from "../SnapshotsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { _COUPON_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
-import { _checkUnexpectedError } from "../../../infrastructure/utils/UnexpectedError.sol";
 
 /// @title Coupon Storage Wrapper
 /// @notice Library for managing Coupon storage operations.
