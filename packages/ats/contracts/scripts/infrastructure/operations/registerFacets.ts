@@ -54,6 +54,14 @@ export interface RegisterFacetsOptions {
 
   /** Whether to verify facets exist before registration */
   verify?: boolean;
+
+  /**
+   * Number of facets registered per transaction. Defaults to
+   * {@link FACET_REGISTRATION_BATCH_SIZE} (10). Raise to 20 for nodes that
+   * can fit larger registration batches under their block gas limit (e.g.
+   * Besu) — typically combined with parallel facet deployment.
+   */
+  batchSize?: number;
 }
 
 /**
@@ -130,7 +138,7 @@ export async function registerFacets(
   blr: BusinessLogicResolver,
   options: RegisterFacetsOptions,
 ): Promise<RegisterFacetsResult> {
-  const { facets, overrides = {}, verify = true } = options;
+  const { facets, overrides = {}, verify = true, batchSize = FACET_REGISTRATION_BATCH_SIZE } = options;
 
   // Get BLR address from contract instance
   const blrAddress = await blr.getAddress();
@@ -214,16 +222,13 @@ export async function registerFacets(
       businessLogicName: facet.name,
     }));
 
-    const iterations = Math.ceil(businessLogics.length / FACET_REGISTRATION_BATCH_SIZE);
+    const iterations = Math.ceil(businessLogics.length / batchSize);
     const transactionHashes = [];
     const blockNumbers = [];
     const transactionGas = [];
 
     for (let i = 0; i < iterations; i++) {
-      const businessLogicsSlice = businessLogics.slice(
-        i * FACET_REGISTRATION_BATCH_SIZE,
-        (i + 1) * FACET_REGISTRATION_BATCH_SIZE,
-      );
+      const businessLogicsSlice = businessLogics.slice(i * batchSize, (i + 1) * batchSize);
 
       // Skip empty slices (defensive guard)
       if (businessLogicsSlice.length === 0) {

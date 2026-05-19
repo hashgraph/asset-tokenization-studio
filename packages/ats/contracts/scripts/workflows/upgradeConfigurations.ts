@@ -928,18 +928,31 @@ async function buildOutput(
     return network.toLowerCase().includes("hedera") ? await fetchHederaContractId(network, address) : undefined;
   };
 
-  // Build facets array with contract IDs
-  const facets = await Promise.all(
-    Array.from(checkpoint.steps.facets?.entries() || []).map(async ([facetName, facetData]) => {
-      const facetAddress = facetData.address;
+  // Build facets array with contract IDs and registered versions
+  const facetEntries = Array.from(checkpoint.steps.facets?.entries() || []).map(([facetName, facetData]) => {
+    const baseName = facetName.replace(/TimeTravel$/, "");
+    let key = "";
+    try {
+      key = atsRegistry.getFacetDefinition(baseName)?.resolverKey?.value ?? "";
+    } catch {
+      // Facet not in registry — leave key empty
+    }
+    return { facetName, facetAddress: facetData.address, key };
+  });
 
-      return {
-        name: facetName,
-        address: facetAddress,
-        contractId: await getContractId(facetAddress),
-        key: "", // Key information not needed in output
-      };
-    }),
+  const blrForVersions = BusinessLogicResolver__factory.connect(blrAddress, ctx.signer);
+  const uniqueKeys = [...new Set(facetEntries.map((e) => e.key).filter((k) => k !== ""))];
+  const rawVersions = uniqueKeys.length > 0 ? await blrForVersions.getLatestVersions(uniqueKeys) : [];
+  const versionByKey = new Map(uniqueKeys.map((k, i) => [k, Number(rawVersions[i])]));
+
+  const facets = await Promise.all(
+    facetEntries.map(async ({ facetName, facetAddress, key }) => ({
+      name: facetName,
+      address: facetAddress,
+      contractId: await getContractId(facetAddress),
+      key,
+      version: versionByKey.get(key) ?? 0,
+    })),
   );
 
   const output: UpgradeConfigurationsOutput = {

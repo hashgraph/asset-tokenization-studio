@@ -42,7 +42,7 @@ export type KnownNetwork = (typeof KNOWN_NETWORKS)[keyof typeof KNOWN_NETWORKS];
  * Different from NetworkConfig in types.ts which contains RPC endpoints.
  */
 export interface DeploymentConfig {
-  /** Number of block confirmations to wait for */
+  /** Number of block confirmations to wait for contract transactions */
   confirmations: number;
   /** Transaction timeout in milliseconds */
   timeout: number;
@@ -78,10 +78,10 @@ export const DEPLOYMENT_CONFIGS: Record<string, DeploymentConfig> = {
   },
 
   /**
-   * Local Network (Hardhat node, Anvil, Ganache)
+   * Local Network (Hardhat node, Anvil, Ganache, Besu dev mode)
    * - External local node but still instant transactions
-   * - Minimal confirmations, no retries needed
-   * - Verification enabled for closer to production behavior
+   * - confirmations: 1 — wait for 1 minted block
+   * - Verification disabled for maximum deployment speed
    */
   local: {
     confirmations: 1,
@@ -92,7 +92,7 @@ export const DEPLOYMENT_CONFIGS: Record<string, DeploymentConfig> = {
       maxDelay: 0,
       logRetries: false,
     },
-    verifyDeployment: true,
+    verifyDeployment: false,
   },
 
   /**
@@ -100,6 +100,7 @@ export const DEPLOYMENT_CONFIGS: Record<string, DeploymentConfig> = {
    * - Local Hedera/Hiero node running in Docker
    * - Similar to local but with Hedera-specific behavior
    * - Minimal confirmations with light retry logic
+   * - confirmations: 1 — wait for 1 minted block
    */
   "hedera-local": {
     confirmations: 1,

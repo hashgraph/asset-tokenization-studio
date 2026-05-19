@@ -272,6 +272,10 @@ export interface DeploymentCheckpoint {
     partialBatchDeploy?: boolean;
     /** Number of facets per batch (default: DEFAULT_BATCH_SIZE) */
     batchSize?: number;
+    /** Submit facet deploys in parallel chunks (pipeline mode) */
+    parallelFacetDeployment?: boolean;
+    /** Max in-flight facet deploys when `parallelFacetDeployment` is on */
+    concurrency?: number;
 
     // existingBlr workflow options
     deployFacets?: boolean;

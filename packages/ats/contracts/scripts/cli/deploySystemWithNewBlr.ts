@@ -21,7 +21,7 @@
  */
 
 import { deploySystemWithNewBlr } from "../workflows/deploySystemWithNewBlr";
-import { DEFAULT_BATCH_SIZE, info, success, error } from "@scripts/infrastructure";
+import { DEFAULT_BATCH_SIZE, info, success, error, isHederaNetwork } from "@scripts/infrastructure";
 import { requireNetworkSigner, parseBooleanEnv, parseIntEnv } from "./shared";
 
 /**
@@ -34,6 +34,9 @@ async function main() {
   const useTimeTravel = parseBooleanEnv("USE_TIMETRAVEL", false);
   const partialBatchDeploy = parseBooleanEnv("PARTIAL_BATCH_DEPLOY", false);
   const batchSize = parseIntEnv("BATCH_SIZE", DEFAULT_BATCH_SIZE);
+  const deployOnlyBondConfig = parseBooleanEnv("DEPLOY_ONLY_BOND_CONFIG", false);
+  const parallelFacetDeployment = parseBooleanEnv("PARALLEL_FACET_DEPLOYMENT", false);
+  const concurrency = parseIntEnv("FACET_DEPLOY_CONCURRENCY", 25);
 
   info(`🚀 Starting ATS deployment`);
   info("---");
@@ -41,7 +44,16 @@ async function main() {
   info(`⏰ TimeTravel: ${useTimeTravel ? "enabled" : "disabled"}`);
   info(`📦 PartialBatchDeploy: ${partialBatchDeploy ? "enabled" : "disabled"}`);
   info(`📊 Batch Size: ${batchSize}`);
+  if (deployOnlyBondConfig) info(`⚡ Mode: Bond-only (Equity, Bond variants, Loan, LoansPortfolio skipped)`);
+  if (parallelFacetDeployment)
+    info(`⚡ Parallel facet deployment: concurrency=${concurrency} (retries off, checkpoint skipped)`);
   info("---");
+
+  if (parallelFacetDeployment && isHederaNetwork(network)) {
+    throw new Error(
+      "parallelFacetDeployment is not supported on Hedera networks (relay rate-limit). Use Besu/local instead.",
+    );
+  }
 
   try {
     // Use signer from network configuration
@@ -52,6 +64,9 @@ async function main() {
       useTimeTravel,
       partialBatchDeploy,
       batchSize,
+      deployOnlyBondConfig,
+      parallelFacetDeployment,
+      concurrency,
       saveOutput: true,
     });
 

@@ -458,7 +458,7 @@ library ClearingStorageWrapper {
         bool _mustBeExpired
     ) internal view {
         if (
-            TimeTravelStorageWrapper.getBlockTimestamp() >
+            TimeTravelStorageWrapper.getBlockTimestamp() >=
             isClearingBasicInfo(_clearingOperationIdentifier).expirationTimestamp !=
             _mustBeExpired
         ) {

@@ -403,9 +403,10 @@ describe("Coupon Tests", () => {
     expect(couponHolders.length).to.equal(couponTotalHolders);
     expect([...couponHolders]).to.have.members([signer_A.address]);
     expect(couponAmountFor.recordDateReached).to.equal(couponFor.recordDateReached);
-    expect(couponAmountFor.numerator).to.equal(couponFor.tokenBalance * nominalValue * couponFor.coupon.rate * period);
+    const balanceNominalScaled = (couponFor.tokenBalance * nominalValue) / 10n ** nominalValueDecimals;
+    expect(couponAmountFor.numerator).to.equal(balanceNominalScaled * couponFor.coupon.rate * period);
     expect(couponAmountFor.denominator).to.equal(
-      10n ** (couponFor.decimals + nominalValueDecimals + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS),
+      10n ** (couponFor.decimals + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS),
     );
   });
 
@@ -475,9 +476,10 @@ describe("Coupon Tests", () => {
     expect(couponHolders.length).to.equal(couponTotalHolders);
     expect([...couponHolders]).to.have.members([signer_A.address]);
     expect(couponAmountFor.recordDateReached).to.equal(couponFor.recordDateReached);
-    expect(couponAmountFor.numerator).to.equal(couponFor.tokenBalance * nominalValue * couponFor.coupon.rate * period);
+    const balanceNominalScaled = (couponFor.tokenBalance * nominalValue) / 10n ** nominalValueDecimals;
+    expect(couponAmountFor.numerator).to.equal(balanceNominalScaled * couponFor.coupon.rate * period);
     expect(couponAmountFor.denominator).to.equal(
-      10n ** (couponFor.decimals + nominalValueDecimals + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS),
+      10n ** (couponFor.decimals + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS),
     );
   });
 
@@ -575,12 +577,11 @@ describe("Coupon Tests", () => {
     expect(couponFor.recordDateReached).to.equal(true);
     expect(couponFor.tokenBalance).to.equal(totalAmount); // normal+cleared+held+locked+frozen
     expect(couponAmountForAfter.recordDateReached).to.equal(couponFor.recordDateReached);
-    expect(couponAmountForAfter.numerator).to.equal(
-      couponFor.tokenBalance * bondDetails.nominalValue * couponFor.coupon.rate * period,
-    );
+    const balanceNominalScaled =
+      (couponFor.tokenBalance * bondDetails.nominalValue) / 10n ** bondDetails.nominalValueDecimals;
+    expect(couponAmountForAfter.numerator).to.equal(balanceNominalScaled * couponFor.coupon.rate * period);
     expect(couponAmountForAfter.denominator).to.equal(
-      10n ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals) *
-        BigInt(YEAR_SECONDS),
+      10n ** (couponFor.decimals + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS),
     );
   });
 
@@ -762,11 +763,11 @@ describe("Coupon Tests", () => {
     // Numerator and denominator must use the snapshot-scale values returned in couponFor
     // (NominalValue, NominalValueDecimals), not the current values just written above.
     expect(couponAmountFor.recordDateReached).to.equal(true);
-    expect(couponAmountFor.numerator).to.equal(
-      couponFor.tokenBalance * couponFor.nominalValue * couponFor.coupon.rate * period,
-    );
+    const balanceNominalScaled =
+      (couponFor.tokenBalance * couponFor.nominalValue) / 10n ** BigInt(NominalValueDecimals);
+    expect(couponAmountFor.numerator).to.equal(balanceNominalScaled * couponFor.coupon.rate * period);
     expect(couponAmountFor.denominator).to.equal(
-      10n ** (couponFor.decimals + BigInt(NominalValueDecimals) + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS),
+      10n ** (couponFor.decimals + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS),
     );
   });
 
@@ -862,6 +863,85 @@ describe("Coupon Tests", () => {
       asset,
       "WrongTimestamp",
     );
+  });
+
+  describe("overflow safety and precision invariants", () => {
+    it("GIVEN a coupon configuration WHEN getCouponAmountFor THEN the returned fraction equals the canonical balance·nominal·rate·period / (10^(d+nd+rd) · year) ratio", async () => {
+      // Ratio equivalence proof. The new (numerator, denominator) decomposition
+      // changes shape relative to  form, but the represented ratio must
+      // remain identical. Verified by BigInt cross-multiplication (a/b == c/d iff a·d == b·c).
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+      await asset.connect(signer_A).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: numberOfUnits,
+        data: "0x",
+      });
+
+      await asset.connect(signer_A).setCoupon(couponData);
+      await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+
+      const couponAmountFor = await asset.getCouponAmountFor(1, signer_A.address);
+      const couponFor = await asset.getCouponFor(1, signer_A.address);
+      const nominalValue = await asset.getNominalValue();
+      const nominalValueDecimals = await asset.getNominalValueDecimals();
+      const period = couponFor.coupon.endDate - couponFor.coupon.startDate;
+
+      const canonicalNumerator = couponFor.tokenBalance * nominalValue * couponFor.coupon.rate * period;
+      const canonicalDenominator =
+        10n ** (couponFor.decimals + nominalValueDecimals + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS);
+
+      expect(couponAmountFor.numerator * canonicalDenominator).to.equal(
+        canonicalNumerator * couponAmountFor.denominator,
+      );
+    });
+
+    it("GIVEN a high-precision configuration that overflows the pre-fix balance·nominal·rate·period four-way product WHEN getCouponAmountFor THEN does not revert", async () => {
+      // Regression for the audit's overflow scenario. With high nominal and rate
+      // decimals the pre-fix four-way product exceeds uint256's ceiling (~1.16·10^77).
+      // The new path stages the multiplication through 512-bit mulDiv so the operation
+      // completes and returns a well-formed fraction.
+      const HIGH_NOMINAL_DECIMALS = 35;
+      const HIGH_RATE_DECIMALS = 35;
+      const NOMINAL = 10n ** BigInt(HIGH_NOMINAL_DECIMALS); // nominal_real = 1
+      const RATE = 5n * 10n ** BigInt(HIGH_RATE_DECIMALS - 2); // rate_real = 0.05 (5%)
+      const HOLDING = 10n ** 15n; // 10^15 raw — well within uint256
+
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+      await asset.connect(signer_A).setNominalValue(NOMINAL, HIGH_NOMINAL_DECIMALS);
+      await asset.connect(signer_A).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: HOLDING,
+        data: "0x",
+      });
+
+      const localCouponData = {
+        ...couponData,
+        rate: RATE,
+        rateDecimals: HIGH_RATE_DECIMALS,
+      };
+      await asset.connect(signer_A).setCoupon(localCouponData);
+      await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+
+      const couponFor = await asset.getCouponFor(1, signer_A.address);
+      const period = couponFor.coupon.endDate - couponFor.coupon.startDate;
+
+      // Self-document the overflow: prove the pre-fix four-way product would not fit in uint256.
+      const preFixProduct = couponFor.tokenBalance * NOMINAL * RATE * period;
+      expect(preFixProduct).to.be.greaterThan(2n ** 256n - 1n);
+
+      // Must not revert.
+      const couponAmountFor = await asset.getCouponAmountFor(1, signer_A.address);
+      expect(couponAmountFor.recordDateReached).to.equal(true);
+
+      // And the ratio must still equal the canonical formula (exact BigInt cross-multiplication).
+      const canonicalDenominator =
+        10n ** (couponFor.decimals + BigInt(HIGH_NOMINAL_DECIMALS) + BigInt(HIGH_RATE_DECIMALS)) * BigInt(YEAR_SECONDS);
+      expect(couponAmountFor.numerator * canonicalDenominator).to.equal(preFixProduct * couponAmountFor.denominator);
+    });
   });
 });
 
