@@ -78,16 +78,13 @@ library KpiLinkedRateLib {
         uint256 fixingDate,
         uint256 reportPeriod
     ) private view returns (uint256 impactData_, bool reportFound_) {
+        uint256 windowStart = fixingDate > reportPeriod ? fixingDate - reportPeriod : fixingDate;
         uint256 projectCount = ProceedRecipientsStorageWrapper.getProceedRecipientsCount();
 
         for (uint256 index; index < projectCount; ) {
             address[] memory projects = ProceedRecipientsStorageWrapper.getProceedRecipients(index, 1);
 
-            (uint256 value, bool exists) = KpisStorageWrapper.getLatestKpiData(
-                fixingDate - reportPeriod,
-                fixingDate,
-                projects[0]
-            );
+            (uint256 value, bool exists) = KpisStorageWrapper.getLatestKpiData(windowStart, fixingDate, projects[0]);
 
             if (exists) {
                 impactData_ += value;
