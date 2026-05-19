@@ -21,10 +21,13 @@ interface IAdjustBalances {
     /// @notice Reverts when `factor` is zero, which would zero-out all holder balances.
     error FactorIsZero();
 
+    /// @notice Reverts when the proposed factor would overflow the cumulative ABAF.
     error FactorOverflow();
 
+    /// @notice Reverts when the cumulative decimals shift would overflow `uint8`.
     error DecimalsOverflow();
 
+    /// @notice Reverts when the proposed factor would overflow the projected total supply.
     error TotalSupplyOverflow();
 
     /**
