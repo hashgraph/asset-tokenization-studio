@@ -38,7 +38,7 @@ library DecimalsLib {
         if (_newDecimals > _decimals) {
             decimalsDiff = _newDecimals - _decimals;
             if (decimalsDiff >= MAX_DECIMALS) revert ICommonErrors.DecimalsTooLarge(_decimals, _newDecimals);
-            uint256 multiplier = _pow10(decimalsDiff);
+            uint256 multiplier = pow10(decimalsDiff);
             if (_amount > (MAX_UINT256 / multiplier)) revert ICommonErrors.GreaterThanMaxUint256(_amount, decimalsDiff);
             unchecked {
                 return _amount * multiplier;
@@ -47,7 +47,7 @@ library DecimalsLib {
         decimalsDiff = _decimals - _newDecimals;
         if (decimalsDiff >= MAX_DECIMALS) revert ICommonErrors.DecimalsTooLarge(_decimals, _newDecimals);
         unchecked {
-            return _amount / _pow10(decimalsDiff);
+            return _amount / pow10(decimalsDiff);
         }
     }
 
@@ -59,7 +59,7 @@ library DecimalsLib {
      * @param _exponent The power to which 10 is raised (must be 0-77 inclusive).
      * @return result_ The computed power of 10.
      */
-    function _pow10(uint256 _exponent) private pure returns (uint256 result_) {
+    function pow10(uint256 _exponent) internal pure returns (uint256 result_) {
         assembly {
             // OPTIMIZATION: Fast path for common exponents (0-18)
             // Gas cost: ~50-75 gas total

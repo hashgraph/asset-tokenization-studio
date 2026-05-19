@@ -140,16 +140,13 @@ describe("Bond KpiLinked Rate Tests", () => {
     const couponForPostFixingDate = await asset.getCouponFor(couponID, accountAddress);
     const couponAmountForPostFixingDate = await asset.getCouponAmountFor(couponID, accountAddress);
 
+    const balanceNominalScaled =
+      (BigInt(amount) * BigInt(DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.nominalValue)) /
+      BigInt(10) ** BigInt(DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.nominalValueDecimals);
     const numerator =
-      BigInt(amount) *
-      BigInt(DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.nominalValue) *
-      BigInt(interestRate) *
-      (BigInt(couponData.endDate) - BigInt(couponData.startDate));
+      balanceNominalScaled * BigInt(interestRate) * (BigInt(couponData.endDate) - BigInt(couponData.startDate));
     const denominator =
-      BigInt(10) **
-        (BigInt(couponForPostFixingDate.decimals) +
-          BigInt(DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.nominalValueDecimals) +
-          BigInt(interestRateDecimals)) *
+      BigInt(10) ** (BigInt(couponForPostFixingDate.decimals) + BigInt(interestRateDecimals)) *
       BigInt(365 * 24 * 60 * 60);
 
     expect(registeredCouponPostFixingDate.coupon.rate).to.equal(interestRate);

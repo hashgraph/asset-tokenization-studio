@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { DecimalsLib } from "../../infrastructure/utils/DecimalsLib.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { IBondTypes } from "../../facets/layer_2/bond/IBondTypes.sol";
 import { IPrincipal } from "../../facets/principal/IPrincipal.sol";
+import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { NominalValueStorageWrapper } from "./nominalValue/NominalValueStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { _BOND_STORAGE_POSITION } from "../../constants/storagePositions.sol";
@@ -50,14 +52,17 @@ library BondStorageWrapper {
 
     function getPrincipalFor(address account) internal view returns (IPrincipal.PrincipalFor memory principalFor_) {
         IBondTypes.BondDetailsData memory bondDetails = getBondDetails();
+        uint256 blockTimestamp = TimeTravelStorageWrapper.getBlockTimestamp();
 
-        principalFor_.numerator =
-            ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(account, TimeTravelStorageWrapper.getBlockTimestamp()) *
-            bondDetails.nominalValue;
-        principalFor_.denominator =
-            10 **
-                (ERC20StorageWrapper.decimalsAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp()) +
-                    bondDetails.nominalValueDecimals);
+        // Pre-apply the nominal-value scale via 512-bit mulDiv: balance * nominal stays bounded
+        // even at high precision, and the equivalent fraction keeps the token-decimal scale on
+        // the denominator so sub-unit balances survive (numerator/denominator == old fraction).
+        principalFor_.numerator = Math.mulDiv(
+            ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(account, blockTimestamp),
+            bondDetails.nominalValue,
+            DecimalsLib.pow10(bondDetails.nominalValueDecimals)
+        );
+        principalFor_.denominator = DecimalsLib.pow10(ERC20StorageWrapper.decimalsAdjustedAt(blockTimestamp));
     }
 
     function isBondInitialized() internal view returns (bool) {

@@ -14,6 +14,8 @@ import { ERC3643StorageWrapper } from "../../core/ERC3643StorageWrapper.sol";
 import { ICoupon } from "../../../facets/coupon/ICoupon.sol";
 import { ICouponTypes } from "../../../facets/coupon/ICouponTypes.sol";
 import { CouponRateDispatch } from "./CouponRateDispatch.sol";
+import { DecimalsLib } from "../../../infrastructure/utils/DecimalsLib.sol";
+import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { NominalValueStorageWrapper } from "../nominalValue/NominalValueStorageWrapper.sol";
 import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
 import { ScheduledTasksStorageWrapper } from "../ScheduledTasksStorageWrapper.sol";
@@ -342,8 +344,13 @@ library CouponStorageWrapper {
         uint256 period = coupon.endDate - coupon.startDate;
 
         couponAmountFor_.recordDateReached = true;
-        couponAmountFor_.numerator = tokenBalance * nominalValue * coupon.rate * period;
-        couponAmountFor_.denominator = 10 ** (decimals + nominalValueDecimals + coupon.rateDecimals) * 365 days;
+        // Staged multiplication: pre-apply the nominal-value scale via 512-bit mulDiv so the
+        // numerator never materialises the full four-way product. The resulting fraction is
+        // mathematically equivalent to the original (balance * nominal * rate * period) /
+        // (10**(d+nd+rd) * 365 days), redistributed to keep every intermediate within uint256.
+        uint256 balanceNominalScaled = Math.mulDiv(tokenBalance, nominalValue, DecimalsLib.pow10(nominalValueDecimals));
+        couponAmountFor_.numerator = balanceNominalScaled * coupon.rate * period;
+        couponAmountFor_.denominator = DecimalsLib.pow10(uint256(decimals) + coupon.rateDecimals) * 365 days;
     }
 
     // solhint-disable-next-line func-name-mixedcase
