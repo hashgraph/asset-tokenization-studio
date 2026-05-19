@@ -65,6 +65,8 @@ library ClearingOps {
         bytes memory _operatorData,
         ThirdPartyType _thirdPartyType
     ) external returns (bool success_, uint256 clearingId_) {
+        ClearingStorageWrapper.checkNonZeroClearingAmount(_amount);
+
         bytes32 partition = _clearingOperation.partition;
 
         clearingId_ = ClearingStorageWrapper.increaseClearingId(
@@ -142,6 +144,8 @@ library ClearingOps {
         bytes memory _operatorData,
         ThirdPartyType _thirdPartyType
     ) external returns (bool success_, uint256 clearingId_) {
+        ClearingStorageWrapper.checkNonZeroClearingAmount(_amount);
+
         bytes32 partition = _clearingOperation.partition;
 
         clearingId_ = ClearingStorageWrapper.increaseClearingId(

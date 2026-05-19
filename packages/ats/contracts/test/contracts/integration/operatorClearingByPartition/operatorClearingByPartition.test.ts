@@ -197,6 +197,13 @@ describe("OperatorClearingByPartition Tests", () => {
           ).to.be.revertedWithCustomError(asset, "WalletRecovered");
         });
       });
+
+      it("GIVEN amount is zero WHEN operatorClearingTransferByPartition THEN transaction fails with InvalidClearingAmount", async () => {
+        await asset.connect(signer_A).authorizeOperator(signer_B.address);
+        await expect(
+          asset.connect(signer_B).operatorClearingTransferByPartition(clearingOperationFrom, 0, signer_C.address),
+        ).to.be.revertedWithCustomError(asset, "InvalidClearingAmount");
+      });
     });
 
     describe("operatorClearingRedeemByPartition", () => {
@@ -266,6 +273,13 @@ describe("OperatorClearingByPartition Tests", () => {
             asset.connect(signer_B).operatorClearingRedeemByPartition(clearingOperationFrom, _AMOUNT),
           ).to.be.revertedWithCustomError(asset, "WalletRecovered");
         });
+      });
+
+      it("GIVEN amount is zero WHEN operatorClearingRedeemByPartition THEN transaction fails with InvalidClearingAmount", async () => {
+        await asset.connect(signer_A).authorizeOperator(signer_B.address);
+        await expect(
+          asset.connect(signer_B).operatorClearingRedeemByPartition(clearingOperationFrom, 0),
+        ).to.be.revertedWithCustomError(asset, "InvalidClearingAmount");
       });
     });
   });
