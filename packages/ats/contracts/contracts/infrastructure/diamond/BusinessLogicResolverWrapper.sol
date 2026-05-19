@@ -6,6 +6,7 @@ import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSetBytes4 } from "../../infrastructure/utils/EnumerableSetBytes4.sol";
 import { _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { DefaultValueValidation } from "../utils/DefaultValueValidation.sol";
 
 abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
     struct BusinessLogicResolverDataStorage {
@@ -229,15 +230,13 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         // Check all previously activated keys are in the array.this
         // Check non duplicated keys.
         bytes32 currentKey;
-        address currentAddress;
         uint256 length = _businessLogicsRegistryDatas.length;
         uint256 innerIndex;
         for (uint256 index; index < length; ) {
             currentKey = _businessLogicsRegistryDatas[index].businessLogicKey;
             if (uint256(currentKey) == 0) revert ZeroKeyNotValidForBusinessLogic();
 
-            currentAddress = _businessLogicsRegistryDatas[index].businessLogicAddress;
-            if (currentAddress == address(0)) revert ZeroAddressNotValidForBusinessLogic();
+            DefaultValueValidation.checkZeroAddress(_businessLogicsRegistryDatas[index].businessLogicAddress);
 
             unchecked {
                 innerIndex = index + 1;
