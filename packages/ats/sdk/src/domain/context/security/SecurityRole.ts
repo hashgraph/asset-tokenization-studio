@@ -36,6 +36,7 @@ export enum SecurityRole {
   _KPI_MANAGER_ROLE = "0x441e549cc2c88d01fa80bd9e7b40412d3106214149223501aa25d4fa23bf306d",
   _NOMINAL_VALUE_ROLE = "0x127c185a9f04723376575bc896cc0d3cf15a32dd0db17f01168dcac5d2de6102",
   _AMORTIZATION_ROLE = "0x29b3565c49b924f0c461060cea1eabe7d7136c83f454f891574239e9f8ee9431",
+  _DEACTIVATE_ROLE = "0x145ad831ea56153ed7168c7801290d85409e09d7dec17409bcc37e47a035c79f",
 }
 
 export function getProtectedPartitionRole(partitionId: string): string {

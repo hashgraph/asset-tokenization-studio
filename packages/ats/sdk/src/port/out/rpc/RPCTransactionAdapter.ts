@@ -388,6 +388,17 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
+  async deactivate(security: EvmAddress): Promise<TransactionResponse> {
+    LogService.logTrace(`Deactivating security: ${security.toString()}`);
+
+    return this.executeTransaction(
+      IAsset__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "deactivate",
+      [],
+      GAS.DEACTIVATE,
+    );
+  }
+
   async grantRole(security: EvmAddress, targetId: EvmAddress, role: SecurityRole): Promise<TransactionResponse> {
     LogService.logTrace(`Granting role ${role.toString()} to account: ${targetId.toString()}`);
 
