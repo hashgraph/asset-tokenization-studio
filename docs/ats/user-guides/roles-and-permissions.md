@@ -18,6 +18,15 @@ ATS uses role-based access control (RBAC) to manage permissions for security tok
 - **Who needs it**: Token issuer, primary administrator
 - ⚠️ **Warning**: Unrestricted access - use multi-signature wallets in production
 
+> **Instant-effect operations.** `DEFAULT_ADMIN_ROLE` can also swap the
+> Diamond proxy's resolver and configuration (`updateResolver`,
+> `updateConfig`, `updateConfigVersion`), which rewires every facet call in a
+> single transaction with no on-chain timelock or user exit window. The
+> contracts intentionally rely on the admin account itself — expected to be a
+> multisig or governance contract — to provide the delay, review, and
+> accountability surface for such changes. Assigning this role to an EOA in
+> production is unsupported.
+
 ### TREX_OWNER_ROLE
 
 - **Purpose**: Owner of ERC-3643 (T-REX) compliant tokens

@@ -34,14 +34,14 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     function addSelectorsToBlacklist(
         bytes32 _configurationId,
         bytes4[] calldata _selectors
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyUnpaused {
         _addSelectorsToBlacklist(_configurationId, _selectors);
     }
 
     function removeSelectorsFromBlacklist(
         bytes32 _configurationId,
         bytes4[] calldata _selectors
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyUnpaused {
         _removeSelectorsFromBlacklist(_configurationId, _selectors);
     }
 
