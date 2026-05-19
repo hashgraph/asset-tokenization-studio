@@ -16,7 +16,7 @@
  */
 
 import { Signer, ContractFactory } from "ethers";
-import { ProxyAdmin__factory } from "@contract-types";
+import { ProxyAdmin__factory, IStaticFunctionSelectors__factory } from "@contract-types";
 import {
   deployFacets,
   registerFacets,
@@ -180,7 +180,7 @@ export interface DeploySystemWithExistingBlrOptions extends ResumeOptions {
   /** Existing ProxyAdmin address (optional, will deploy new one if not provided) */
   existingProxyAdminAddress?: string;
 
-  /** Number of confirmations to wait for each deployment (default: from network config) */
+  /** Number of confirmations for contract transactions */
   confirmations?: number;
 
   /** Enable retry mechanism for failed deployments (default: from network config) */
@@ -275,7 +275,7 @@ export async function deploySystemWithExistingBlr(
   info(`👤 Deployer: ${deployer}`);
   info(`🔷 BLR Address: ${blrAddress}`);
   info(`🔄 TimeTravel: ${useTimeTravel ? "Enabled" : "Disabled"}`);
-  info(`⏱️  Confirmations: ${confirmations}`);
+  info(`⏱️  Confirmations (deploy): ${confirmations}`);
   info(`🔁 Retry: ${enableRetry ? "Enabled" : "Disabled"}`);
   info(`✅ Verification: ${verifyDeployment ? "Enabled" : "Disabled"}`);
   info("═".repeat(60));
@@ -909,32 +909,56 @@ export async function deploySystemWithExistingBlr(
       },
 
       facets: facetsResult
-        ? await Promise.all(
-            Array.from(facetsResult.deployed.entries()).map(async ([facetName, deploymentResult]) => {
-              const facetAddress = deploymentResult.address!;
+        ? await (async () => {
+            // Pass 1: resolve keys in parallel
+            const facetEntries = await Promise.all(
+              Array.from(facetsResult.deployed.entries()).map(async ([facetName, deploymentResult]) => {
+                const facetAddress = deploymentResult.address!;
 
-              // Find matching key from config
-              const equityFacet = equityConfig?.success
-                ? equityConfig.data.facetKeys.find((ef) => ef.address === facetAddress)
-                : undefined;
-              const bondFacet = bondConfig?.success
-                ? bondConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
-                : undefined;
-              const bondFixedRateFacet = bondFixedRateConfig?.success
-                ? bondFixedRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
-                : undefined;
-              const bondKpiLinkedRateFacet = bondKpiLinkedRateConfig?.success
-                ? bondKpiLinkedRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
-                : undefined;
+                // Find matching key from config
+                const equityFacet = equityConfig?.success
+                  ? equityConfig.data.facetKeys.find((ef) => ef.address === facetAddress)
+                  : undefined;
+                const bondFacet = bondConfig?.success
+                  ? bondConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
+                  : undefined;
+                const bondFixedRateFacet = bondFixedRateConfig?.success
+                  ? bondFixedRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
+                  : undefined;
+                const bondKpiLinkedRateFacet = bondKpiLinkedRateConfig?.success
+                  ? bondKpiLinkedRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
+                  : undefined;
 
-              return {
+                const staticFunctionSelectors = IStaticFunctionSelectors__factory.connect(facetAddress, signer);
+                const key =
+                  equityFacet?.key ||
+                  bondFacet?.key ||
+                  bondFixedRateFacet?.key ||
+                  bondKpiLinkedRateFacet?.key ||
+                  (await staticFunctionSelectors.getStaticResolverKey());
+
+                return { facetName, facetAddress, key };
+              }),
+            );
+
+            // Pass 2: single batch call for all known keys (skip empty keys — not in any config)
+            const blrForVersions = BusinessLogicResolver__factory.connect(blrAddress, signer);
+            const knownKeys = facetEntries.map((e) => e.key).filter((k) => k !== "");
+            const uniqueKeys = [...new Set(knownKeys)];
+            const rawVersions = uniqueKeys.length > 0 ? await blrForVersions.getLatestVersions(uniqueKeys) : [];
+            const versionByKey = new Map(uniqueKeys.map((k, i) => [k, Number(rawVersions[i])]));
+
+            // Pass 3: assemble final output with contractId (parallel) and version
+            return Promise.all(
+              facetEntries.map(async ({ facetName, facetAddress, key }) => ({
                 name: facetName,
                 address: facetAddress,
                 contractId: await getContractId(facetAddress),
-                key: equityFacet?.key || bondFacet?.key || bondFixedRateFacet?.key || bondKpiLinkedRateFacet?.key || "",
-              };
-            }),
-          )
+                key,
+                version: versionByKey.get(key) ?? 0,
+              })),
+            );
+          })()
         : [],
 
       configurations: {

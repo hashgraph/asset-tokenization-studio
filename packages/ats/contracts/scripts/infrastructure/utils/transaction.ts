@@ -61,20 +61,21 @@ export async function waitForTransaction(
   confirmations: number = DEFAULT_TRANSACTION_CONFIRMATIONS,
   timeout: number = DEFAULT_TRANSACTION_TIMEOUT,
 ): Promise<ContractTransactionReceipt> {
+  let receipt: ContractTransactionReceipt | null;
   try {
-    const receipt = await Promise.race([
+    receipt = await Promise.race([
       tx.wait(confirmations),
       new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Transaction timeout")), timeout)),
     ]);
-
-    if (!receipt || receipt.status === 0) {
-      throw new Error("Transaction failed");
-    }
-
-    return receipt;
   } catch (error) {
     throw new Error(`Transaction failed: ${error instanceof Error ? error.message : String(error)}`);
   }
+
+  if (!receipt || receipt.status === 0) {
+    throw new Error(`Transaction reverted (status=0): ${tx.hash}`);
+  }
+
+  return receipt;
 }
 
 /**
