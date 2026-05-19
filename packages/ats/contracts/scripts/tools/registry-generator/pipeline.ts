@@ -19,7 +19,7 @@ import { extractResolverKeys, extractRoles } from "./utils/solidityParser";
 import { LogLevel, configureLogger, section, info, success, warn, debug, table } from "./utils/logging";
 import { findAllContracts, categorizeContracts, pairTimeTravelVariants } from "./core/scanner";
 import { extractMetadata } from "./core/extractor";
-import { generateRegistry, generateSummary } from "./core/generator";
+import { generateRegistry, generateRolesFile, generateSummary } from "./core/generator";
 import { CacheManager } from "./cache/manager";
 
 /**
@@ -329,8 +329,28 @@ export async function generateRegistryPipeline(
     table(["Layer", "Count"], layerTable);
   }
 
+  /**
+   * @remarks
+   * BBND-1766: the registry generator now emits TWO files. The heavy
+   * `atsRegistry.generated.ts` (facet + contract + storage-wrapper registries) is
+   * gitignored and regenerated on every `prepare` / `hardhat compile`. The
+   * small `atsRoles.generated.ts` (role-hash map) is checked into git so
+   * `scripts/domain/constants.ts` can bootstrap on a fresh clone without
+   * waiting for regeneration. Role-hash diffs also stay reviewable in PRs.
+   */
+  const rolesCode = generateRolesFile(facetMetadata, infrastructureMetadata, allRoles);
+
+  /**
+   * @remarks
+   * The roles file sits alongside the main registry. We derive its absolute
+   * path from `outputPath` rather than introducing a new config field — the
+   * single-source-of-truth convention is "registry data lives in this folder".
+   */
+  const rolesOutputPath = path.join(path.dirname(fullConfig.outputPath), "atsRoles.generated.ts");
+
   // Step 9: Format with Prettier
   let formattedCode = registryCode;
+  let formattedRolesCode = rolesCode;
   try {
     const prettier = await import("prettier");
     const resolvedOutputPath = path.isAbsolute(fullConfig.outputPath)
@@ -341,6 +361,14 @@ export async function generateRegistryPipeline(
       ...prettierConfig,
       parser: "typescript",
       filepath: resolvedOutputPath,
+    });
+    const resolvedRolesOutputPath = path.isAbsolute(rolesOutputPath)
+      ? rolesOutputPath
+      : path.resolve(process.cwd(), rolesOutputPath);
+    formattedRolesCode = await prettier.format(rolesCode, {
+      ...prettierConfig,
+      parser: "typescript",
+      filepath: resolvedRolesOutputPath,
     });
   } catch (error) {
     warn(`Could not apply Prettier formatting: ${error}`);
@@ -376,6 +404,34 @@ export async function generateRegistryPipeline(
     }
 
     outputPath = resolvedOutputPath;
+
+    /**
+     * @remarks
+     * BBND-1766: also write the dedicated roles file. The same
+     * "skip-write-if-unchanged" guard prevents needless timestamp churn.
+     * Unlike the main registry, this file IS checked into git (small,
+     * audit-relevant) and so unchanged-content stability matters even more.
+     */
+    const resolvedRolesOutputPath = path.isAbsolute(rolesOutputPath)
+      ? rolesOutputPath
+      : path.resolve(process.cwd(), rolesOutputPath);
+
+    let shouldWriteRoles = true;
+    try {
+      const existingRolesContent = readFile(resolvedRolesOutputPath);
+      if (existingRolesContent === formattedRolesCode) {
+        shouldWriteRoles = false;
+        info("Roles file unchanged - preserving existing file and timestamp");
+      }
+    } catch {
+      shouldWriteRoles = true;
+    }
+
+    if (shouldWriteRoles) {
+      writeFile(resolvedRolesOutputPath, formattedRolesCode);
+      success("Roles file generated successfully!");
+      info(`Written to: ${resolvedRolesOutputPath}`);
+    }
   } else {
     info("Skipping file write (writeToFile = false)");
   }
@@ -410,6 +466,7 @@ export async function generateRegistryPipeline(
 
   return {
     code: formattedCode,
+    rolesCode: formattedRolesCode,
     stats: {
       totalFacets: facetMetadata.length,
       totalInfrastructure: infrastructureMetadata.length,

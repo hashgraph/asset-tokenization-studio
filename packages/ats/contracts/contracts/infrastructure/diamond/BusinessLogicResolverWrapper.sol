@@ -6,6 +6,7 @@ import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSetBytes4 } from "../../infrastructure/utils/EnumerableSetBytes4.sol";
 import { _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { DefaultValueValidation } from "../utils/DefaultValueValidation.sol";
 
 abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
     struct BusinessLogicResolverDataStorage {
@@ -27,8 +28,10 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         _;
     }
 
-    modifier onlyValidKeys(IBusinessLogicResolver.BusinessLogicRegistryData[] calldata _businessLogicsRegistryDatas) {
-        _checkValidKeys(_businessLogicsRegistryDatas);
+    modifier onlyValidKeysAndAddresses(
+        IBusinessLogicResolver.BusinessLogicRegistryData[] calldata _businessLogicsRegistryDatas
+    ) {
+        _checkValidKeysAndAddresses(_businessLogicsRegistryDatas);
         _;
     }
 
@@ -221,7 +224,7 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
             revert BusinessLogicVersionDoesNotExist(_version);
     }
 
-    function _checkValidKeys(
+    function _checkValidKeysAndAddresses(
         IBusinessLogicResolver.BusinessLogicRegistryData[] calldata _businessLogicsRegistryDatas
     ) private pure {
         // Check all previously activated keys are in the array.this
@@ -232,6 +235,8 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         for (uint256 index; index < length; ) {
             currentKey = _businessLogicsRegistryDatas[index].businessLogicKey;
             if (uint256(currentKey) == 0) revert ZeroKeyNotValidForBusinessLogic();
+
+            DefaultValueValidation.checkZeroAddress(_businessLogicsRegistryDatas[index].businessLogicAddress);
 
             unchecked {
                 innerIndex = index + 1;

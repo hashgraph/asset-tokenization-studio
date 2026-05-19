@@ -188,6 +188,19 @@ describe("BusinessLogicResolver", () => {
       ).to.be.revertedWithCustomError(businessLogicResolver, "ZeroKeyNotValidForBusinessLogic");
     });
 
+    it("GIVEN a zero address WHEN registerBusinessLogics THEN Fails with ZeroAddressNotAllowed", async () => {
+      const BUSINESS_LOGICS_TO_REGISTER = [
+        {
+          businessLogicKey: BUSINESS_LOGIC_KEYS[0].businessLogicKey,
+          businessLogicAddress: ethers.ZeroAddress,
+        },
+      ];
+
+      await expect(
+        businessLogicResolver.registerBusinessLogics(BUSINESS_LOGICS_TO_REGISTER),
+      ).to.be.revertedWithCustomError(businessLogicResolver, "ZeroAddressNotAllowed");
+    });
+
     it("GIVEN an duplicated key WHEN registerBusinessLogics THEN Fails with BusinessLogicKeyDuplicated", async () => {
       const BUSINESS_LOGICS_TO_REGISTER = [BUSINESS_LOGIC_KEYS[0], BUSINESS_LOGIC_KEYS[0]];
 

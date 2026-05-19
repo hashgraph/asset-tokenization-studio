@@ -38,7 +38,7 @@ import {
   EQUITY_CONFIG_ID,
   BOND_CONFIG_ID,
   FACET_REGISTRY,
-  FACET_REGISTRY_COUNT,
+  getFacetRegistryCount,
   atsRegistry,
   createFactoryConfiguration,
   deployFactory,
@@ -158,7 +158,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
 
     it("should return all facets", () => {
       const allFacets = atsRegistry.getAllFacets();
-      expect(allFacets.length).to.equal(FACET_REGISTRY_COUNT);
+      expect(allFacets.length).to.equal(getFacetRegistryCount());
 
       // Verify each facet has required fields
       allFacets.forEach((facet) => {

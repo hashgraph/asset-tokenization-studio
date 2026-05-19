@@ -477,7 +477,7 @@ library HoldStorageWrapper {
     }
 
     function isHoldExpired(IHoldTypes.Hold memory _hold) internal view returns (bool) {
-        return TimeTravelStorageWrapper.getBlockTimestamp() > _hold.expirationTimestamp;
+        return TimeTravelStorageWrapper.getBlockTimestamp() >= _hold.expirationTimestamp;
     }
 
     function checkOperatorCreateHoldByPartition(
