@@ -274,5 +274,26 @@ describe("Lock Tests", () => {
         deactivatedAsset.connect(base.deployer).lock(0, ethers.ZeroAddress, 0),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
+
+    it("GIVEN a deactivated asset WHEN release THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).release(0, ethers.ZeroAddress),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN forceReleaseByPartition THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      const lockFacet = await ethers.getContractAt("LockFacet", base.diamond.target);
+      await expect(
+        lockFacet.connect(base.deployer).forceReleaseByPartition(ethers.ZeroHash, 0, ethers.ZeroAddress),
+      ).to.be.revertedWithCustomError(lockFacet, "Deactivated");
+    });
   });
 });

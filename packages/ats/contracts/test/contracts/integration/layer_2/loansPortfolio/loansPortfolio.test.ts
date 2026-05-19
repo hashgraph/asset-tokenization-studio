@@ -975,5 +975,37 @@ describe("LoansPortfolio Token Tests", () => {
           .addHoldingsAsset({ assetAddress: ethers.ZeroAddress, holdingsAssetType: 0, country: "" }),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
+
+    it("GIVEN a deactivated asset WHEN removeHoldingsAsset THEN transaction fails with Deactivated", async () => {
+      const base = await deployLoansPortfolioTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset
+          .connect(base.deployer)
+          .removeHoldingsAsset({ assetAddress: ethers.ZeroAddress, holdingsAssetType: 0, country: "" }),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN notifyLoanHoldingsAssetUpdate THEN transaction fails with Deactivated", async () => {
+      const base = await deployLoansPortfolioTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).notifyLoanHoldingsAssetUpdate(ethers.ZeroAddress),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN loansPortfolioWithdraw THEN transaction fails with Deactivated", async () => {
+      const base = await deployLoansPortfolioTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).loansPortfolioWithdraw(ethers.ZeroAddress, ethers.ZeroAddress, 0),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
   });
 });

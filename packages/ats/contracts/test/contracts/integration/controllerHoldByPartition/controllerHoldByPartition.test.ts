@@ -212,6 +212,17 @@ describe("ControllerHoldByPartition Tests", () => {
       });
     });
 
+    describe("ClearingEnabled", () => {
+      it("GIVEN clearing is activated WHEN controllerCreateHoldByPartition THEN transaction fails with ClearingIsActivated", async () => {
+        await asset.connect(signer_A).activateClearing();
+        await expect(
+          asset
+            .connect(signer_C)
+            .controllerCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
+        ).to.be.revertedWithCustomError(asset, "ClearingIsActivated");
+      });
+    });
+
     describe("Create with wrong input arguments", () => {
       it("Given a invalid _from address when controllerCreateHoldByPartition THEN transaction fails with ZeroAddressNotAllowed", async () => {
         const hold_wrong = {

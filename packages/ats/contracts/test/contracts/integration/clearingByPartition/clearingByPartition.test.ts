@@ -223,6 +223,17 @@ describe("ClearingByPartitionFacet Tests", () => {
         asset.connect(signer_A).clearingRedeemByPartition(clearingOperation, _AMOUNT),
       ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
     });
+
+    it("GIVEN amount is zero WHEN clearingRedeemByPartition THEN reverts with InvalidClearingAmount", async () => {
+      const clearingOperation = {
+        partition: _DEFAULT_PARTITION,
+        expirationTimestamp: EXPIRATION_TIMESTAMP,
+        data: EMPTY_HEX_BYTES,
+      };
+      await expect(
+        asset.connect(signer_A).clearingRedeemByPartition(clearingOperation, 0),
+      ).to.be.revertedWithCustomError(asset, "InvalidClearingAmount");
+    });
   });
 
   // ─── clearingRedeemFromByPartition ────────────────────────────────────────
@@ -437,6 +448,21 @@ describe("ClearingByPartitionFacet Tests", () => {
         asset.connect(signer_B).clearingRedeemFromByPartition(clearingOperationFrom, _AMOUNT),
       ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
     });
+
+    it("GIVEN amount is zero WHEN clearingRedeemFromByPartition THEN reverts with InvalidClearingAmount", async () => {
+      const clearingOperationFrom = {
+        clearingOperation: {
+          partition: _DEFAULT_PARTITION,
+          expirationTimestamp: EXPIRATION_TIMESTAMP,
+          data: EMPTY_HEX_BYTES,
+        },
+        from: signer_A.address,
+        operatorData: EMPTY_HEX_BYTES,
+      };
+      await expect(
+        asset.connect(signer_B).clearingRedeemFromByPartition(clearingOperationFrom, 0),
+      ).to.be.revertedWithCustomError(asset, "InvalidClearingAmount");
+    });
   });
 
   // ─── clearingTransferByPartition ──────────────────────────────────────────
@@ -586,6 +612,17 @@ describe("ClearingByPartitionFacet Tests", () => {
       await expect(
         asset.connect(signer_A).clearingTransferByPartition(clearingOperation, _AMOUNT, signer_B.address),
       ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
+    });
+
+    it("GIVEN amount is zero WHEN clearingTransferByPartition THEN reverts with InvalidClearingAmount", async () => {
+      const clearingOperation = {
+        partition: _DEFAULT_PARTITION,
+        expirationTimestamp: EXPIRATION_TIMESTAMP,
+        data: EMPTY_HEX_BYTES,
+      };
+      await expect(
+        asset.connect(signer_A).clearingTransferByPartition(clearingOperation, 0, signer_B.address),
+      ).to.be.revertedWithCustomError(asset, "InvalidClearingAmount");
     });
   });
 
@@ -836,6 +873,21 @@ describe("ClearingByPartitionFacet Tests", () => {
       await expect(
         asset.connect(signer_B).clearingTransferFromByPartition(clearingOperationFrom, _AMOUNT, signer_C.address),
       ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
+    });
+
+    it("GIVEN amount is zero WHEN clearingTransferFromByPartition THEN reverts with InvalidClearingAmount", async () => {
+      const clearingOperationFrom = {
+        clearingOperation: {
+          partition: _DEFAULT_PARTITION,
+          expirationTimestamp: EXPIRATION_TIMESTAMP,
+          data: EMPTY_HEX_BYTES,
+        },
+        from: signer_A.address,
+        operatorData: EMPTY_HEX_BYTES,
+      };
+      await expect(
+        asset.connect(signer_B).clearingTransferFromByPartition(clearingOperationFrom, 0, signer_C.address),
+      ).to.be.revertedWithCustomError(asset, "InvalidClearingAmount");
     });
   });
 
@@ -1618,6 +1670,102 @@ describe("ClearingByPartitionFacet Tests", () => {
         deactivatedAsset
           .connect(base.deployer)
           .clearingRedeemByPartition({ partition: ethers.ZeroHash, expirationTimestamp: 0, data: "0x" }, 0),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN approveClearingOperationByPartition THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).approveClearingOperationByPartition({
+          clearingOperationType: 0,
+          partition: ethers.ZeroHash,
+          tokenHolder: ethers.ZeroAddress,
+          clearingId: 0,
+        }),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN cancelClearingOperationByPartition THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).cancelClearingOperationByPartition({
+          clearingOperationType: 0,
+          partition: ethers.ZeroHash,
+          tokenHolder: ethers.ZeroAddress,
+          clearingId: 0,
+        }),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN reclaimClearingOperationByPartition THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).reclaimClearingOperationByPartition({
+          clearingOperationType: 0,
+          partition: ethers.ZeroHash,
+          tokenHolder: ethers.ZeroAddress,
+          clearingId: 0,
+        }),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN clearingRedeemFromByPartition THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).clearingRedeemFromByPartition(
+          {
+            clearingOperation: { partition: ethers.ZeroHash, expirationTimestamp: 0, data: "0x" },
+            from: ethers.ZeroAddress,
+            operatorData: "0x",
+          },
+          0,
+        ),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN clearingTransferByPartition THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset
+          .connect(base.deployer)
+          .clearingTransferByPartition(
+            { partition: ethers.ZeroHash, expirationTimestamp: 0, data: "0x" },
+            0,
+            ethers.ZeroAddress,
+          ),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN clearingTransferFromByPartition THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).clearingTransferFromByPartition(
+          {
+            clearingOperation: { partition: ethers.ZeroHash, expirationTimestamp: 0, data: "0x" },
+            from: ethers.ZeroAddress,
+            operatorData: "0x",
+          },
+          0,
+          ethers.ZeroAddress,
+        ),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });

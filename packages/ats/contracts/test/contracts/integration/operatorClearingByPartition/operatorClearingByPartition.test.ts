@@ -197,6 +197,13 @@ describe("OperatorClearingByPartition Tests", () => {
           ).to.be.revertedWithCustomError(asset, "WalletRecovered");
         });
       });
+
+      it("GIVEN amount is zero WHEN operatorClearingTransferByPartition THEN transaction fails with InvalidClearingAmount", async () => {
+        await asset.connect(signer_A).authorizeOperator(signer_B.address);
+        await expect(
+          asset.connect(signer_B).operatorClearingTransferByPartition(clearingOperationFrom, 0, signer_C.address),
+        ).to.be.revertedWithCustomError(asset, "InvalidClearingAmount");
+      });
     });
 
     describe("operatorClearingRedeemByPartition", () => {
@@ -267,6 +274,13 @@ describe("OperatorClearingByPartition Tests", () => {
           ).to.be.revertedWithCustomError(asset, "WalletRecovered");
         });
       });
+
+      it("GIVEN amount is zero WHEN operatorClearingRedeemByPartition THEN transaction fails with InvalidClearingAmount", async () => {
+        await asset.connect(signer_A).authorizeOperator(signer_B.address);
+        await expect(
+          asset.connect(signer_B).operatorClearingRedeemByPartition(clearingOperationFrom, 0),
+        ).to.be.revertedWithCustomError(asset, "InvalidClearingAmount");
+      });
     });
   });
 
@@ -284,6 +298,24 @@ describe("OperatorClearingByPartition Tests", () => {
             operatorData: "0x",
           },
           0,
+        ),
+      ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+
+    it("GIVEN a deactivated asset WHEN operatorClearingTransferByPartition THEN transaction fails with Deactivated", async () => {
+      const base = await deployEquityTokenFixture();
+      const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).deactivate();
+      await expect(
+        deactivatedAsset.connect(base.deployer).operatorClearingTransferByPartition(
+          {
+            clearingOperation: { partition: ethers.ZeroHash, expirationTimestamp: 0, data: "0x" },
+            from: ethers.ZeroAddress,
+            operatorData: "0x",
+          },
+          0,
+          ethers.ZeroAddress,
         ),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });

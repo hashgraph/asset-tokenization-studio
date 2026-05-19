@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-18T08:32:55.426Z
+ * Generated: 2026-05-19T07:17:18.918Z
  * Facets: 120
  * Infrastructure: 2
  *
@@ -1507,6 +1507,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
         selector: "0x76d08f88",
       },
+      {
+        name: "WalletRecovered",
+        signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
+        selector: "0xf9f9bcf9",
+      },
     ],
     factory: (signer) => new BatchMintFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
@@ -2546,6 +2551,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error ExpirationDateReached()", canonical: "ExpirationDateReached()" },
         selector: "0x5ea0e3b0",
       },
+      {
+        name: "InvalidClearingAmount",
+        signature: { full: "error InvalidClearingAmount()", canonical: "InvalidClearingAmount()" },
+        selector: "0x9437a6a1",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "PartitionNotAllowedInSinglePartitionMode",
@@ -2797,6 +2807,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error ExpirationDateReached()", canonical: "ExpirationDateReached()" },
         selector: "0x5ea0e3b0",
       },
+      {
+        name: "InvalidClearingAmount",
+        signature: { full: "error InvalidClearingAmount()", canonical: "InvalidClearingAmount()" },
+        selector: "0x9437a6a1",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "WrongClearingId",
@@ -2985,6 +3000,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "ExpirationDateReached",
         signature: { full: "error ExpirationDateReached()", canonical: "ExpirationDateReached()" },
         selector: "0x5ea0e3b0",
+      },
+      {
+        name: "InvalidClearingAmount",
+        signature: { full: "error InvalidClearingAmount()", canonical: "InvalidClearingAmount()" },
+        selector: "0x9437a6a1",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
@@ -3640,6 +3660,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
+        name: "ClearingIsActivated",
+        signature: { full: "error ClearingIsActivated()", canonical: "ClearingIsActivated()" },
+        selector: "0x5b2e3086",
+      },
+      {
         name: "Deactivated",
         signature: { full: "error Deactivated()", canonical: "Deactivated()" },
         selector: "0x1142a68c",
@@ -3693,6 +3718,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "TokenIsNotControllable",
         signature: { full: "error TokenIsNotControllable()", canonical: "TokenIsNotControllable()" },
         selector: "0xf4b7b072",
+      },
+      {
+        name: "WalletRecovered",
+        signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
+        selector: "0xf9f9bcf9",
       },
       {
         name: "WrongExpirationTimestamp",
@@ -4135,12 +4165,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x3a848637",
       },
       {
-        name: "DecimalDifferenceTooLarge",
-        signature: {
-          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
-          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
-        },
-        selector: "0x552d04f9",
+        name: "DecimalsTooLarge",
+        signature: { full: "error DecimalsTooLarge(uint8 decimals)", canonical: "DecimalsTooLarge(uint8)" },
+        selector: "0xc414eb7a",
       },
       {
         name: "DuplicatedCorporateAction",
@@ -4342,12 +4369,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1142a68c",
       },
       {
-        name: "DecimalDifferenceTooLarge",
-        signature: {
-          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
-          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
-        },
-        selector: "0x552d04f9",
+        name: "DecimalsTooLarge",
+        signature: { full: "error DecimalsTooLarge(uint8 decimals)", canonical: "DecimalsTooLarge(uint8)" },
+        selector: "0xc414eb7a",
       },
       {
         name: "InterestRateIsFixed",
@@ -4523,12 +4547,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x69a80e75",
       },
       {
-        name: "DecimalDifferenceTooLarge",
-        signature: {
-          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
-          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
-        },
-        selector: "0x552d04f9",
+        name: "DecimalsTooLarge",
+        signature: { full: "error DecimalsTooLarge(uint8 decimals)", canonical: "DecimalsTooLarge(uint8)" },
+        selector: "0xc414eb7a",
       },
       {
         name: "SnapshotIdDoesNotExists",
@@ -7812,12 +7833,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1142a68c",
       },
       {
-        name: "DecimalDifferenceTooLarge",
-        signature: {
-          full: "error DecimalDifferenceTooLarge(uint8 smallerDecimals, uint8 biggerDecimals)",
-          canonical: "DecimalDifferenceTooLarge(uint8,uint8)",
-        },
-        selector: "0x552d04f9",
+        name: "DecimalsTooLarge",
+        signature: { full: "error DecimalsTooLarge(uint8 decimals)", canonical: "DecimalsTooLarge(uint8)" },
+        selector: "0xc414eb7a",
       },
       {
         name: "InvalidDate",
@@ -9288,6 +9306,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
         selector: "0x76d08f88",
       },
+      {
+        name: "WalletRecovered",
+        signature: { full: "error WalletRecovered()", canonical: "WalletRecovered()" },
+        selector: "0xf9f9bcf9",
+      },
     ],
     factory: (signer) => new MintFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
@@ -9813,6 +9836,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error ExpirationDateReached()", canonical: "ExpirationDateReached()" },
         selector: "0x5ea0e3b0",
       },
+      {
+        name: "InvalidClearingAmount",
+        signature: { full: "error InvalidClearingAmount()", canonical: "InvalidClearingAmount()" },
+        selector: "0x9437a6a1",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "PartitionNotAllowedInSinglePartitionMode",
@@ -10033,6 +10061,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "ExpirationDateReached",
         signature: { full: "error ExpirationDateReached()", canonical: "ExpirationDateReached()" },
         selector: "0x5ea0e3b0",
+      },
+      {
+        name: "InvalidClearingAmount",
+        signature: { full: "error InvalidClearingAmount()", canonical: "InvalidClearingAmount()" },
+        selector: "0x9437a6a1",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
@@ -11060,6 +11093,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: { full: "error ExpirationDateReached()", canonical: "ExpirationDateReached()" },
         selector: "0x5ea0e3b0",
       },
+      {
+        name: "InvalidClearingAmount",
+        signature: { full: "error InvalidClearingAmount()", canonical: "InvalidClearingAmount()" },
+        selector: "0x9437a6a1",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "PartitionsAreUnProtected",
@@ -11271,6 +11309,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "ExpirationDateReached",
         signature: { full: "error ExpirationDateReached()", canonical: "ExpirationDateReached()" },
         selector: "0x5ea0e3b0",
+      },
+      {
+        name: "InvalidClearingAmount",
+        signature: { full: "error InvalidClearingAmount()", canonical: "InvalidClearingAmount()" },
+        selector: "0x9437a6a1",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
@@ -11801,6 +11844,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         },
         selector: "0xbf84f4ec",
       },
+      { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
         name: "NotAllowedInMultiPartitionMode",
         signature: { full: "error NotAllowedInMultiPartitionMode()", canonical: "NotAllowedInMultiPartitionMode()" },
