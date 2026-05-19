@@ -13,7 +13,9 @@ import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../core/ERC3643StorageWrapper.sol";
 import { ICoupon } from "../../../facets/coupon/ICoupon.sol";
 import { ICouponTypes } from "../../../facets/coupon/ICouponTypes.sol";
+import { BondStorageWrapper } from "../BondStorageWrapper.sol";
 import { CouponRateDispatch } from "./CouponRateDispatch.sol";
+import { DatesValidation } from "../../../infrastructure/utils/DatesValidation.sol";
 import { NominalValueStorageWrapper } from "../nominalValue/NominalValueStorageWrapper.sol";
 import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
 import { ScheduledTasksStorageWrapper } from "../ScheduledTasksStorageWrapper.sol";
@@ -35,7 +37,10 @@ library CouponStorageWrapper {
      *         tasks. Variant invariants and rate stamping are delegated to
      *         `CouponRateDispatch.validateAndStamp`, which mirrors the deferred dispatch
      *         performed by `getCoupon` on the read path.
-     * @dev Does NOT emit `ICoupon.CouponSet` — the writer abstract emits it inline after
+     * @dev Reverts with `ICommonErrors.WrongDates` when the bond carries a non-zero maturity
+     *      date and `newCoupon.endDate` exceeds it. When `maturityDate` is zero the bond is
+     *      treated as open-ended and no constraint is applied.
+     *      Does NOT emit `ICoupon.CouponSet` — the writer abstract emits it inline after
      *      this call returns, per the project event-emission rule.
      * @param newCoupon Coupon parameters captured at scheduling time.
      * @return corporateActionId_ Identifier of the underlying corporate action.
@@ -47,6 +52,7 @@ library CouponStorageWrapper {
     function setCoupon(
         ICouponTypes.Coupon memory newCoupon
     ) internal returns (bytes32 corporateActionId_, uint256 couponID_, ICouponTypes.Coupon memory resolved_) {
+        checkEndDateAgainstMaturity(newCoupon.endDate);
         newCoupon = CouponRateDispatch.validateAndStamp(newCoupon);
 
         (corporateActionId_, couponID_) = CorporateActionsStorageWrapper.addCorporateAction(
@@ -109,6 +115,20 @@ library CouponStorageWrapper {
             CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(COUPON_CORPORATE_ACTION_TYPE, couponID - 1),
             abi.encode(coupon)
         );
+    }
+
+    /**
+     * @notice Reverts with `ICommonErrors.WrongDates` when the bond has a non-zero maturity date
+     *         and `endDate` exceeds it.
+     * @dev When `maturityDate` is zero the bond is treated as open-ended and no constraint is
+     *      applied. Delegates the ordered-date check to `DatesValidation.checkDates`.
+     * @param endDate Coupon end date to validate against the bond's maturity date.
+     */
+    function checkEndDateAgainstMaturity(uint256 endDate) internal view {
+        uint256 maturityDate = BondStorageWrapper.getMaturityDate();
+        if (maturityDate != 0) {
+            DatesValidation.checkDates(endDate, maturityDate);
+        }
     }
 
     function getCoupon(

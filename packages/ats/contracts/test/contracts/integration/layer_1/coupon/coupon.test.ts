@@ -863,6 +863,54 @@ describe("Coupon Tests", () => {
       "WrongTimestamp",
     );
   });
+
+  it("GIVEN endDate > maturityDate WHEN setCoupon THEN transaction fails with WrongDates", async () => {
+    await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+    const currentTimestamp = await getDltTimestamp();
+    const invalidCoupon = {
+      recordDate: currentTimestamp + TIME_PERIODS_S.DAY,
+      executionDate: currentTimestamp + TIME_PERIODS_S.DAY * 2,
+      rate: couponRate,
+      rateDecimals: couponRateDecimals,
+      startDate: currentTimestamp,
+      endDate: maturityDate + 1,
+      fixingDate: currentTimestamp + TIME_PERIODS_S.DAY,
+      rateStatus: couponRateStatus,
+    };
+    await expect(asset.connect(signer_C).setCoupon(invalidCoupon)).to.be.revertedWithCustomError(asset, "WrongDates");
+  });
+
+  it("GIVEN endDate == maturityDate WHEN setCoupon THEN transaction succeeds", async () => {
+    await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+    const currentTimestamp = await getDltTimestamp();
+    const validCoupon = {
+      recordDate: currentTimestamp + TIME_PERIODS_S.DAY,
+      executionDate: currentTimestamp + TIME_PERIODS_S.DAY * 2,
+      rate: couponRate,
+      rateDecimals: couponRateDecimals,
+      startDate: currentTimestamp,
+      endDate: maturityDate,
+      fixingDate: currentTimestamp + TIME_PERIODS_S.DAY,
+      rateStatus: couponRateStatus,
+    };
+    await expect(asset.connect(signer_C).setCoupon(validCoupon)).not.to.be.reverted;
+  });
+
+  it("GIVEN endDate < maturityDate WHEN setCoupon THEN transaction succeeds", async () => {
+    await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+    const currentTimestamp = await getDltTimestamp();
+    const validCoupon = {
+      recordDate: currentTimestamp + TIME_PERIODS_S.DAY,
+      executionDate: currentTimestamp + TIME_PERIODS_S.DAY * 2,
+      rate: couponRate,
+      rateDecimals: couponRateDecimals,
+      startDate: currentTimestamp,
+      endDate: maturityDate - TIME_PERIODS_S.DAY,
+      fixingDate: currentTimestamp + TIME_PERIODS_S.DAY,
+      rateStatus: couponRateStatus,
+    };
+    await expect(asset.connect(signer_C).setCoupon(validCoupon)).not.to.be.reverted;
+  });
 });
 
 describe("Coupon Fixed-Rate Variant Tests", () => {
