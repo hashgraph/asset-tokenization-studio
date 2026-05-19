@@ -3,10 +3,17 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ZERO, EMPTY_STRING, dateToUnixTimestamp, ATS_ROLES } from "@scripts";
+import {
+  type ResolverProxy,
+  type IAsset,
+  type IFactory,
+  type BusinessLogicResolver,
+  IAsset__factory,
+} from "@contract-types";
+import { ZERO, EMPTY_STRING, dateToUnixTimestamp, ATS_ROLES, GAS_LIMIT, EQUITY_CONFIG_ID } from "@scripts";
+import { decodeEvent } from "@scripts/infrastructure";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
+import { deployEquityTokenFixture, MAX_UINT256, getSecurityData, getEquityDetails, getRegulationData } from "@test";
 import { executeRbac } from "@test";
 
 const _PARTITION_ID_1 = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -30,6 +37,8 @@ describe("Cap Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let factory: IFactory;
+  let blr: BusinessLogicResolver;
 
   async function deploySecurityFixtureMultiPartition() {
     const base = await deployEquityTokenFixture({
@@ -44,6 +53,8 @@ describe("Cap Tests", () => {
     signer_A = base.deployer;
     signer_B = base.user2;
     signer_C = base.user3;
+    factory = base.factory as IFactory;
+    blr = base.blr as BusinessLogicResolver;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
@@ -87,8 +98,50 @@ describe("Cap Tests", () => {
     ).to.be.revertedWithCustomError(asset, "NewMaxSupplyCannotBeZero");
   });
 
-  it("GIVEN an already-initialised contract WHEN trying to initialize it again THEN transaction fails with FacetAlreadyRegistered", async () => {
-    await expect(asset.initializeCap(5, [])).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+  describe("initializeCap", () => {
+    it("GIVEN an already-initialised facet WHEN initializeCap is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeCap(5, [])).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeCap is called THEN it reverts with AccountHasNoRole", async () => {
+      // factory.deployProxy deploys the equity configuration without running any initializers,
+      // giving us an uninitialised proxy where onlyFacetNotRegistered passes and onlyRole fires.
+      const proxyTx = await factory.deployProxy(blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [signer_A.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(signer_C).initializeCap(5, [])).to.be.revertedWithCustomError(
+        freshAsset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN a new deployment WHEN the factory calls initializeCap THEN it emits CapInitialized", async () => {
+      const equityData = {
+        security: getSecurityData(blr, {
+          isMultiPartition: true,
+          maxSupply: maxSupply * 2,
+          rbacs: [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [signer_A.address] }],
+        }),
+        equityDetails: getEquityDetails(),
+      };
+      const tx = await factory.deployEquity(equityData, getRegulationData(), { gasLimit: GAS_LIMIT.high });
+      const receipt = await tx.wait();
+      const iface = IAsset__factory.createInterface();
+      const event = receipt!.logs
+        .map((log) => {
+          try {
+            return iface.parseLog(log);
+          } catch {
+            return null;
+          }
+        })
+        .find((e) => e?.name === "CapInitialized");
+      expect(event).to.not.be.undefined;
+      expect(event!.args.operator).to.equal(await factory.getAddress());
+    });
   });
 
   describe("Paused", () => {
