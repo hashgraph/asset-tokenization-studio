@@ -16,9 +16,11 @@ import { INTEREST_RATE_MANAGER_ROLE } from "../../constants/roles.sol";
  */
 abstract contract InterestRate is IInterestRate, Modifiers {
     /// @inheritdoc IInterestRate
-    /// @dev No role required. Protected by `onlyValidRateType`.
-    function initializeInterestRateType(IInterestRate.RateType rateType) external onlyValidRateType(rateType) {
-        InterestRateStorageWrapper.setCouponRateType(rateType);
+    /// @dev No role required. Protected by `onlyValidRateType` and `onlyNotInterestRateTypeInitialized`.
+    function initializeInterestRateType(
+        IInterestRate.RateType rateType
+    ) external onlyNotInterestRateTypeInitialized onlyValidRateType(rateType) {
+        InterestRateStorageWrapper.initializeCouponRateType(rateType);
         emit CouponRateTypeSet(msg.sender, rateType);
     }
 

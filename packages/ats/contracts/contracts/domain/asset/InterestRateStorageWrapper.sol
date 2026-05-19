@@ -59,11 +59,13 @@ struct KpiLinkedRateDataStorage {
 
 /**
  * @title InterestRateTypeDataStorage
- * @notice Stores the selected coupon rate type.
+ * @notice Stores the selected coupon rate type and its initialisation flag.
  * @param rateType The `IInterestRate.RateType` discriminator selected by the admin.
+ * @param initialized Whether the coupon rate type has been initialised.
  */
 struct InterestRateTypeDataStorage {
     IInterestRate.RateType rateType;
+    bool initialized;
 }
 
 /**
@@ -120,7 +122,20 @@ library InterestRateStorageWrapper {
     }
 
     /**
-     * @notice Stores the selected coupon rate type and marks the slot as set.
+     * @notice Writes the coupon rate type and sets the initialisation flag.
+     * @dev Called only once during asset deployment. Reverts via the caller's modifier
+     *      if already initialised.
+     * @param _rateType The `IInterestRate.RateType` to persist.
+     */
+    function initializeCouponRateType(IInterestRate.RateType _rateType) internal {
+        InterestRateTypeDataStorage storage s = interestRateTypeStorage();
+        s.rateType = _rateType;
+        s.initialized = true;
+    }
+
+    /**
+     * @notice Updates the coupon rate type after initialisation.
+     * @dev Used by the post-init admin setter; does not touch the `initialized` flag.
      * @param _rateType The `IInterestRate.RateType` to persist.
      */
     function setCouponRateType(IInterestRate.RateType _rateType) internal {
@@ -149,6 +164,14 @@ library InterestRateStorageWrapper {
      */
     function isKpiLinkedRateInitialized() internal view returns (bool) {
         return kpiLinkedRateStorage().initialized;
+    }
+
+    /**
+     * @notice Checks whether the coupon rate type has been initialised.
+     * @return True if the coupon rate type has been initialised, false otherwise.
+     */
+    function isInterestRateTypeInitialized() internal view returns (bool) {
+        return interestRateTypeStorage().initialized;
     }
 
     /**

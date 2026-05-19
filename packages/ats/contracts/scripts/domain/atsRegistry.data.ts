@@ -7608,6 +7608,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
+        name: "AlreadyInitialized",
+        signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
+        selector: "0x0dc149f0",
+      },
+      {
         name: "Deactivated",
         signature: { full: "error Deactivated()", canonical: "Deactivated()" },
         selector: "0x1142a68c",
