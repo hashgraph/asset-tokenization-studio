@@ -20,7 +20,6 @@ import { ScheduledTasksDispatchOps } from "../orchestrator/ScheduledTasksDispatc
 import {
     IScheduledCrossOrderedTasks
 } from "../../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
-import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 
 /**
  * @title Scheduled Tasks Storage Wrapper
@@ -362,9 +361,7 @@ library ScheduledTasksStorageWrapper {
                     (IScheduledBalanceAdjustment.ScheduledBalanceAdjustment)
                 );
 
-                // Apply each adjustment via 512-bit mulDiv so the accumulator stays the integer
-                // ratio at every step instead of compounding the 1e18-scale factor unchecked.
-                pendingABAF_ = Math.mulDiv(pendingABAF_, balanceAdjustment.factor, 10 ** balanceAdjustment.decimals);
+                pendingABAF_ *= balanceAdjustment.factor;
                 pendingDecimals_ += balanceAdjustment.decimals;
 
                 unchecked {
