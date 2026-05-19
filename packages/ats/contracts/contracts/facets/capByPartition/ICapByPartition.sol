@@ -22,7 +22,7 @@ interface ICapByPartition {
     /**
      * @notice Initialises the CapByPartition capability on the token.
      * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
-     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     *      Requires `DEFAULT_ADMIN_ROLE`.
      */
     function initializeCapByPartition() external;
 
