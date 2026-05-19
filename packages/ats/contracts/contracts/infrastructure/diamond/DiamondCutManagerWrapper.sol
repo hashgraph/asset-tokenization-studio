@@ -61,6 +61,9 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
     function _activateConfiguration(bytes32 _configurationId, bool _isLastBatch) internal {
         if (!_isLastBatch) return;
         DiamondCutManagerStorage storage _dcms = _diamondCutManagerStorage();
+        if (_dcms.facetIds[_buildHash(_configurationId, _dcms.batchVersion[_configurationId])].length == 0) {
+            revert EmptyFacetConfigurationNotPermitted(_configurationId);
+        }
         if (!_dcms.activeConfigurations[_configurationId]) {
             _dcms.configurations.push(_configurationId);
             _dcms.activeConfigurations[_configurationId] = true;
