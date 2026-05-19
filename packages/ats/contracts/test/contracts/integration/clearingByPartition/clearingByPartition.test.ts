@@ -1055,6 +1055,25 @@ describe("ClearingByPartitionFacet Tests", () => {
       ).to.be.revertedWithCustomError(asset, "ExpirationDateReached");
     });
 
+    it("GIVEN a clearing at exact expiration timestamp WHEN approveClearingOperationByPartition THEN reverts with ExpirationDateReached", async () => {
+      const clearingOperation = {
+        partition: _DEFAULT_PARTITION,
+        expirationTimestamp: SHORT_EXPIRATION_TIMESTAMP,
+        data: EMPTY_HEX_BYTES,
+      };
+      await asset.connect(signer_A).clearingTransferByPartition(clearingOperation, _AMOUNT, signer_B.address);
+      await asset.changeSystemTimestamp(SHORT_EXPIRATION_TIMESTAMP);
+      const identifier = {
+        clearingOperationType: ClearingOperationType.Transfer,
+        partition: _DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        clearingId: 1,
+      };
+      await expect(
+        asset.connect(signer_A).approveClearingOperationByPartition(identifier),
+      ).to.be.revertedWithCustomError(asset, "ExpirationDateReached");
+    });
+
     it("GIVEN wrong clearingId WHEN approveClearingOperationByPartition THEN reverts with WrongClearingId", async () => {
       const identifier = {
         clearingOperationType: ClearingOperationType.Redeem,
@@ -1338,6 +1357,37 @@ describe("ClearingByPartitionFacet Tests", () => {
       expect(await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(_AMOUNT);
 
       await asset.changeSystemTimestamp(SHORT_EXPIRATION_TIMESTAMP + 1);
+
+      const identifier = {
+        clearingOperationType: ClearingOperationType.Redeem,
+        partition: _DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        clearingId: 1,
+      };
+
+      await expect(asset.connect(signer_A).reclaimClearingOperationByPartition(identifier))
+        .to.emit(asset, "ClearingOperationReclaimed")
+        .withArgs(signer_A.address, signer_A.address, _DEFAULT_PARTITION, 1, ClearingOperationType.Redeem)
+        .to.emit(asset, "Transfer")
+        .withArgs(ethers.ZeroAddress, signer_A.address, _AMOUNT);
+
+      expect(await asset.balanceOf(signer_A.address)).to.equal(balanceBefore);
+      expect(await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(0);
+    });
+
+    it("GIVEN a clearing at exact expiration timestamp WHEN reclaimClearingOperationByPartition THEN balance restored and clearedAmount zeroed", async () => {
+      const balanceBefore = await asset.balanceOf(signer_A.address);
+      const clearingOperation = {
+        partition: _DEFAULT_PARTITION,
+        expirationTimestamp: SHORT_EXPIRATION_TIMESTAMP,
+        data: EMPTY_HEX_BYTES,
+      };
+      await asset.connect(signer_A).clearingRedeemByPartition(clearingOperation, _AMOUNT);
+
+      expect(await asset.balanceOf(signer_A.address)).to.equal(balanceBefore - BigInt(_AMOUNT));
+      expect(await asset.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address)).to.equal(_AMOUNT);
+
+      await asset.changeSystemTimestamp(SHORT_EXPIRATION_TIMESTAMP);
 
       const identifier = {
         clearingOperationType: ClearingOperationType.Redeem,

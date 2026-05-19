@@ -274,6 +274,23 @@ describe("LockByPartition Tests", () => {
         expect(await asset.balanceOfByPartition(_NON_DEFAULT_PARTITION, signer_A.address)).to.equal(_AMOUNT);
         expect(await asset.totalSupplyByPartition(_NON_DEFAULT_PARTITION)).to.equal(_AMOUNT);
       });
+
+      it("GIVEN a valid lockId WHEN releaseByPartition at exact expiration timestamp THEN transaction success", async () => {
+        await asset.connect(signer_B).issueByPartition({
+          partition: _NON_DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: _AMOUNT,
+          data: "0x",
+        });
+        await asset
+          .connect(signer_C)
+          .lockByPartition(_NON_DEFAULT_PARTITION, _AMOUNT, signer_A.address, expirationTimestamp);
+
+        await asset.changeSystemTimestamp(expirationTimestamp);
+        await expect(asset.connect(signer_C).releaseByPartition(_NON_DEFAULT_PARTITION, 1, signer_A.address))
+          .to.emit(asset, "LockByPartitionReleased")
+          .withArgs(signer_C.address, signer_A.address, _NON_DEFAULT_PARTITION, 1);
+      });
     });
 
     describe("Adjust Balances", () => {
