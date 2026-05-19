@@ -165,7 +165,7 @@ describe("Recovery Tests", () => {
         await expect(
           asset.recoveryAddress(signer_E.address, signer_B.address, ADDRESS_ZERO),
         ).to.be.revertedWithCustomError(asset, "CannotRecoverWallet");
-        await asset.changeSystemTimestamp(dateToUnixTimestamp("2030-01-01T00:00:06Z"));
+        await asset.changeSystemTimestamp(dateToUnixTimestamp("2030-01-01T00:00:05Z"));
         const holdIdentifier = {
           partition: DEFAULT_PARTITION,
           tokenHolder: signer_E.address,

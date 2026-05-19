@@ -616,6 +616,23 @@ describe("HoldByPartition Tests", () => {
         ).to.be.revertedWithCustomError(asset, "HoldExpirationReached");
       });
 
+      it("GIVEN a hold WHEN executeHoldByPartition at exact expiration timestamp THEN transaction fails with HoldExpirationReached", async () => {
+        const initDate = dateToUnixTimestamp("2030-01-01T00:00:03Z");
+        const expirationDate = dateToUnixTimestamp("2030-02-01T00:00:03Z");
+
+        hold.expirationTimestamp = expirationDate;
+
+        await asset.connect(signer_A).changeSystemTimestamp(initDate);
+
+        await asset.createHoldByPartition(_DEFAULT_PARTITION, hold);
+
+        await asset.connect(signer_A).changeSystemTimestamp(expirationDate);
+
+        await expect(
+          asset.connect(signer_B).executeHoldByPartition(holdIdentifier, signer_C.address, 1),
+        ).to.be.revertedWithCustomError(asset, "HoldExpirationReached");
+      });
+
       it("GIVEN a hold with a destination WHEN executeHoldByPartition to another destination THEN transaction fails with InvalidDestinationAddress", async () => {
         hold.to = signer_D.address;
 
@@ -673,6 +690,24 @@ describe("HoldByPartition Tests", () => {
         await asset.createHoldByPartition(_DEFAULT_PARTITION, hold);
 
         await asset.connect(signer_A).changeSystemTimestamp(finalDate);
+
+        await expect(asset.connect(signer_B).releaseHoldByPartition(holdIdentifier, 1)).to.be.revertedWithCustomError(
+          asset,
+          "HoldExpirationReached",
+        );
+      });
+
+      it("GIVEN hold WHEN releaseHoldByPartition at exact expiration timestamp THEN transaction fails with HoldExpirationReached", async () => {
+        const initDate = dateToUnixTimestamp("2030-01-01T00:00:03Z");
+        const expirationDate = dateToUnixTimestamp("2030-02-01T00:00:03Z");
+
+        hold.expirationTimestamp = expirationDate;
+
+        await asset.connect(signer_A).changeSystemTimestamp(initDate);
+
+        await asset.createHoldByPartition(_DEFAULT_PARTITION, hold);
+
+        await asset.connect(signer_A).changeSystemTimestamp(expirationDate);
 
         await expect(asset.connect(signer_B).releaseHoldByPartition(holdIdentifier, 1)).to.be.revertedWithCustomError(
           asset,
@@ -848,6 +883,25 @@ describe("HoldByPartition Tests", () => {
           ThirdPartyType.NULL,
           ADDRESS_ZERO,
         );
+      });
+
+      it("GIVEN hold WHEN reclaimHoldByPartition at exact expiration timestamp THEN transaction succeeds", async () => {
+        const initDate = dateToUnixTimestamp("2030-01-01T00:00:03Z");
+        const expirationDate = dateToUnixTimestamp("2030-02-01T00:00:03Z");
+
+        hold.expirationTimestamp = expirationDate;
+
+        await asset.connect(signer_A).changeSystemTimestamp(initDate);
+
+        await asset.createHoldByPartition(_DEFAULT_PARTITION, hold);
+
+        await asset.connect(signer_A).changeSystemTimestamp(expirationDate);
+
+        await expect(asset.connect(signer_B).reclaimHoldByPartition(holdIdentifier))
+          .to.emit(asset, "HoldByPartitionReclaimed")
+          .withArgs(signer_B.address, signer_A.address, _DEFAULT_PARTITION, 1, _AMOUNT)
+          .to.emit(asset, "Transfer")
+          .withArgs(ethers.ZeroAddress, signer_A.address, _AMOUNT);
       });
     });
 
