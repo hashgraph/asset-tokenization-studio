@@ -85,7 +85,14 @@ describe(DistributionTypeOrmRepository.name, () => {
         distribution.createdAt,
         new Date(),
       );
-      await expect(distributionRepository.saveDistribution(updatedDistribution)).resolves.toEqual(updatedDistribution);
+      // @UpdateDateColumn overrides updatedAt with the DB write timestamp; compare all other fields
+      const result = await distributionRepository.saveDistribution(updatedDistribution);
+      expect(result.id).toBe(updatedDistribution.id);
+      expect(result.status).toBe(updatedDistribution.status);
+      expect(result.details).toEqual(updatedDistribution.details);
+      expect(result.asset).toEqual(updatedDistribution.asset);
+      expect(result.createdAt).toEqual(updatedDistribution.createdAt);
+      expect(result.updatedAt).toBeInstanceOf(Date);
       const found = await internalDistributionRepository.findOne({
         where: { id: distribution.id },
       });

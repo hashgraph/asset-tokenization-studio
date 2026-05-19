@@ -22,24 +22,19 @@ import { CouponRateDispatch } from "../../domain/asset/coupon/CouponRateDispatch
 library ScheduledTasksDispatchOps {
     /// @return subTaskType_ Non-zero only for crossOrdered tasks: the sub-task type to trigger.
     ///         ScheduledTasksStorageWrapper reads this value and dispatches the sub-queue internally.
-    function execute(
-        bytes32 callbackType,
-        uint256 pos,
-        uint256 scheduledTasksLength,
-        ScheduledTask calldata task
-    ) external returns (bytes32 subTaskType_) {
+    function execute(bytes32 callbackType, ScheduledTask calldata task) external returns (bytes32 subTaskType_) {
         if (callbackType == bytes32("snapshot")) {
-            _onScheduledSnapshotTriggered(pos, scheduledTasksLength, task);
+            _onScheduledSnapshotTriggered(task);
             return bytes32(0);
         }
 
         if (callbackType == bytes32("coupon")) {
-            _onScheduledCouponListingTriggered(pos, scheduledTasksLength, task);
+            _onScheduledCouponListingTriggered(task);
             return bytes32(0);
         }
 
         if (callbackType == bytes32("balance")) {
-            _onScheduledBalanceAdjustmentTriggered(pos, scheduledTasksLength, task);
+            _onScheduledBalanceAdjustmentTriggered(task);
             return bytes32(0);
         }
 
@@ -48,11 +43,7 @@ library ScheduledTasksDispatchOps {
         }
     }
 
-    function _onScheduledSnapshotTriggered(
-        uint256 /*_pos*/,
-        uint256 /*_scheduledTasksLength*/,
-        ScheduledTask memory _scheduledTask
-    ) private {
+    function _onScheduledSnapshotTriggered(ScheduledTask memory _scheduledTask) private {
         bytes32 actionId = abi.decode(_scheduledTask.data, (bytes32));
         if (CorporateActionsStorageWrapper.isCorporateActionDisabled(actionId)) {
             return;
@@ -67,11 +58,7 @@ library ScheduledTasksDispatchOps {
         );
     }
 
-    function _onScheduledCouponListingTriggered(
-        uint256 /*_pos*/,
-        uint256 /*_scheduledTasksLength*/,
-        ScheduledTask memory _scheduledTask
-    ) private {
+    function _onScheduledCouponListingTriggered(ScheduledTask memory _scheduledTask) private {
         bytes32 actionId = _getActionIdFromScheduledTask(_scheduledTask);
         if (CorporateActionsStorageWrapper.isCorporateActionDisabled(actionId)) {
             return;
@@ -91,11 +78,7 @@ library ScheduledTasksDispatchOps {
         );
     }
 
-    function _onScheduledBalanceAdjustmentTriggered(
-        uint256 /*_pos*/,
-        uint256 /*_scheduledTasksLength*/,
-        ScheduledTask memory _scheduledTask
-    ) private {
+    function _onScheduledBalanceAdjustmentTriggered(ScheduledTask memory _scheduledTask) private {
         (, , bytes memory balanceAdjustmentData, bool isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(
             _getActionIdFromScheduledTask(_scheduledTask)
         );
