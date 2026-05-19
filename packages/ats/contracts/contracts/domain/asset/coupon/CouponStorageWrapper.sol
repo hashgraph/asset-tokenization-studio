@@ -5,7 +5,8 @@ import {
     COUPON_CORPORATE_ACTION_TYPE,
     COUPON_LISTING_TASK_TYPE,
     SNAPSHOT_RESULT_ID,
-    SNAPSHOT_TASK_TYPE
+    SNAPSHOT_TASK_TYPE,
+    UPDATE_COUPON_RATE
 } from "../../../constants/values.sol";
 import { CorporateActionsStorageWrapper } from "../../core/CorporateActionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../ERC1410StorageWrapper.sol";
@@ -20,6 +21,7 @@ import { ScheduledTasksStorageWrapper } from "../ScheduledTasksStorageWrapper.so
 import { SnapshotsStorageWrapper } from "../SnapshotsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { _COUPON_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
+import { _checkUnexpectedError } from "../../../infrastructure/utils/UnexpectedError.sol";
 
 /// @title Coupon Storage Wrapper
 /// @notice Library for managing Coupon storage operations.
@@ -99,8 +101,12 @@ library CouponStorageWrapper {
         uint256 couponID,
         ICouponTypes.Coupon memory coupon,
         uint256 rate,
-        uint8 rateDecimals
+        uint8 rateDecimals,
+        bool forceUpdate
     ) internal {
+        if (!forceUpdate)
+            _checkUnexpectedError(coupon.rateStatus == ICouponTypes.RateCalculationStatus.SET, UPDATE_COUPON_RATE);
+
         coupon.rate = rate;
         coupon.rateDecimals = rateDecimals;
         coupon.rateStatus = ICouponTypes.RateCalculationStatus.SET;

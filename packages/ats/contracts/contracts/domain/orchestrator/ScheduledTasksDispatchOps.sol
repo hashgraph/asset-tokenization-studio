@@ -102,7 +102,7 @@ library ScheduledTasksDispatchOps {
         );
 
         if (shouldUpdate) {
-            CouponStorageWrapper.updateCouponRate(couponID, registeredCoupon.coupon, rate, rateDecimals);
+            CouponStorageWrapper.updateCouponRate(couponID, registeredCoupon.coupon, rate, rateDecimals, false);
         }
     }
 
