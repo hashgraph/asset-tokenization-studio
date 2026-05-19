@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ScheduledTask } from "../../facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { IScheduledBalanceAdjustment } from "../../facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
 import { ISnapshots } from "../../facets/layer_1/snapshot/ISnapshots.sol";
-import { SNAPSHOT_RESULT_ID, COUPON_LISTING_RESULT_ID } from "../../constants/values.sol";
+import { SNAPSHOT_RESULT_ID, COUPON_LISTING_RESULT_ID, COUPON_CORPORATE_ACTION_TYPE } from "../../constants/values.sol";
 import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";
 import { CouponStorageWrapper } from "../asset/coupon/CouponStorageWrapper.sol";
@@ -13,6 +13,7 @@ import { InterestRateStorageWrapper } from "../asset/InterestRateStorageWrapper.
 import { KpiLinkedRateLib } from "../asset/KpiLinkedRateLib.sol";
 import { ICouponTypes } from "../../facets/coupon/ICouponTypes.sol";
 import { CouponRateDispatch } from "../../domain/asset/coupon/CouponRateDispatch.sol";
+import { IInterestRate } from "../../facets/interestRate/IInterestRate.sol";
 
 /// @title ScheduledTasksDispatchOps - External library for isolated scheduled task dispatch
 /// @notice Deployed once as a separate contract. Called via DELEGATECALL through try/catch for
@@ -96,13 +97,16 @@ library ScheduledTasksDispatchOps {
     function _updateCouponRatesIfNeeded(uint256 couponID) private {
         (ICouponTypes.RegisteredCoupon memory registeredCoupon, , ) = CouponStorageWrapper.getCoupon(couponID);
 
-        (uint256 rate, uint8 rateDecimals, bool shouldUpdate) = CouponRateDispatch.resolveRate(
-            couponID,
-            registeredCoupon.coupon
-        );
+        bool shouldUpdate = InterestRateStorageWrapper.getCouponRateType() == IInterestRate.RateType.KPI_LINKED;
 
         if (shouldUpdate) {
-            CouponStorageWrapper.updateCouponRate(couponID, registeredCoupon.coupon, rate, rateDecimals, false);
+            CorporateActionsStorageWrapper.updateCorporateActionData(
+                CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
+                    COUPON_CORPORATE_ACTION_TYPE,
+                    couponID - 1
+                ),
+                abi.encode(registeredCoupon.coupon)
+            );
         }
     }
 

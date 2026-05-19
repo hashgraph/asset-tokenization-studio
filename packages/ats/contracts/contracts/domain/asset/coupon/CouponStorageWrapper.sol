@@ -5,8 +5,7 @@ import {
     COUPON_CORPORATE_ACTION_TYPE,
     COUPON_LISTING_TASK_TYPE,
     SNAPSHOT_RESULT_ID,
-    SNAPSHOT_TASK_TYPE,
-    UPDATE_COUPON_RATE
+    SNAPSHOT_TASK_TYPE
 } from "../../../constants/values.sol";
 import { CorporateActionsStorageWrapper } from "../../core/CorporateActionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../ERC1410StorageWrapper.sol";
@@ -97,26 +96,6 @@ library CouponStorageWrapper {
 
     function addToCouponsOrderedList(uint256 couponID) internal {
         _couponStorage().couponsOrderedListByIds.push(couponID);
-    }
-
-    function updateCouponRate(
-        uint256 couponID,
-        ICouponTypes.Coupon memory coupon,
-        uint256 rate,
-        uint8 rateDecimals,
-        bool forceUpdate
-    ) internal {
-        if (!forceUpdate)
-            _checkUnexpectedError(coupon.rateStatus == ICouponTypes.RateCalculationStatus.SET, UPDATE_COUPON_RATE);
-
-        coupon.rate = rate;
-        coupon.rateDecimals = rateDecimals;
-        coupon.rateStatus = ICouponTypes.RateCalculationStatus.SET;
-
-        CorporateActionsStorageWrapper.updateCorporateActionData(
-            CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(COUPON_CORPORATE_ACTION_TYPE, couponID - 1),
-            abi.encode(coupon)
-        );
     }
 
     function getCoupon(
