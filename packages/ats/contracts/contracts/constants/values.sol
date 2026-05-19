@@ -7,7 +7,8 @@ pragma solidity >=0.8.0 <0.9.0;
  * @dev Shared values used across multiple facets for consistency.
  * Utility constants for type hashes, partitions, and corporate actions.
  */
-uint256 constant MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+uint256 constant MAX_UINT256 = type(uint256).max;
+uint8 constant MAX_UINT8 = type(uint8).max;
 address constant ZERO_ADDRESS = address(0);
 bytes32 constant EMPTY_BYTES32 = bytes32(0);
 bytes constant EMPTY_BYTES = bytes("");

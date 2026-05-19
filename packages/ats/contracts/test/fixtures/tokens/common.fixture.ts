@@ -15,6 +15,7 @@ import { MaxUint256, encodeBytes32String, parseUnits, ZeroAddress } from "ethers
 import { isinGenerator } from "@thomaschaplin/isin-generator";
 
 export const MAX_UINT256 = MaxUint256;
+export const MAX_UINT8 = 255;
 
 export const TEST_PARTITIONS = {
   DEFAULT: encodeBytes32String("default"),
