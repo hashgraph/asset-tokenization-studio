@@ -4,9 +4,13 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IBusinessLogicResolver } from "./IBusinessLogicResolver.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSetBytes4 } from "../../infrastructure/utils/EnumerableSetBytes4.sol";
-import { _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { DefaultValueValidation } from "../utils/DefaultValueValidation.sol";
+
+/// @custom:hash storage BusinessLogicResolver
+// solhint-disable-next-line max-line-length
+bytes32 constant STORAGE_LOCATION_BUSINESS_LOGIC_RESOLVER = 0xde52d5af2ee0e84dfa9eb9bcc42ec14eed20a1d286bfef34d73589ea7ee18800;
 
 abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
     struct BusinessLogicResolverDataStorage {
@@ -212,7 +216,7 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolver {
         pure
         returns (BusinessLogicResolverDataStorage storage businessLogicResolverData_)
     {
-        bytes32 position = _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_BUSINESS_LOGIC_RESOLVER;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             businessLogicResolverData_.slot := position

@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _METADATA_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IMetadata } from "../../facets/metadata/IMetadata.sol";
+
+/// @custom:hash storage Metadata
+bytes32 constant STORAGE_LOCATION_METADATA = 0x88e64aeb880d89a6f66a0868c82854ac54e6006a5ff8da89887d8a89ca5c8700;
 
 /**
  * @notice Diamond storage layout for the metadata domain.
@@ -21,7 +23,7 @@ struct MetadataDataStorage {
  * @notice Library providing diamond storage access and the read/write primitives used by the
  *         metadata facet to persist arbitrary key/value entries on a security token.
  * @dev Uses the ERC-2535 diamond storage pattern to isolate state under
- *      `_METADATA_STORAGE_POSITION`, preventing slot collisions with other facets. All entry
+ *      `STORAGE_LOCATION_METADATA`, preventing slot collisions with other facets. All entry
  *      points are `internal` so that callers (the `Metadata` facet) inline the logic rather than
  *      paying external-call overhead. Write semantics are full overwrite: each `setMetadata` call
  *      replaces the entire array stored under the key — there is no append or partial update.
@@ -65,14 +67,14 @@ library MetadataStorageWrapper {
 
     /**
      * @notice Returns the diamond storage reference for the metadata domain.
-     * @dev Resolves the storage struct at the deterministic slot `_METADATA_STORAGE_POSITION`
+     * @dev Resolves the storage struct at the deterministic slot `STORAGE_LOCATION_METADATA`
      *      using inline assembly, following the ERC-2535 diamond storage pattern. Marked `pure`
      *      because slot resolution does not read chain state; the returned reference is what the
      *      caller uses to read or write storage.
      * @return metadata_ Reference to the `MetadataDataStorage` struct at the metadata storage slot.
      */
     function metadataStorage() internal pure returns (MetadataDataStorage storage metadata_) {
-        bytes32 position = _METADATA_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_METADATA;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             metadata_.slot := position

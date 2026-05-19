@@ -1,15 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _NOMINAL_VALUE_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { SnapshotsStorageWrapper } from "../SnapshotsStorageWrapper.sol";
 import { ScheduledTasksOps } from "../../orchestrator/ScheduledTasksOps.sol";
+
+/// @custom:hash storage NominalValue
+bytes32 constant STORAGE_LOCATION_NOMINAL_VALUE = 0xf4ae98634996e72bf90c5471fce11baa245e9198f5fa7cdab6e4d46dfe7bfe00;
 
 /**
  * @title NominalValueStorageWrapper - Nominal Value Storage Wrapper
  * @notice Storage wrapper for nominal value data on a security token.
  * @dev Reads and writes the dedicated storage slot defined by
- *      `_NOMINAL_VALUE_STORAGE_POSITION`. Aggregation of any legacy bond/equity
+ *      `STORAGE_LOCATION_NOMINAL_VALUE`. Aggregation of any legacy bond/equity
  *      nominal-value slots has been retired — this slot is now the sole source
  *      of truth for `nominalValue`, `nominalValueDecimals`, and
  *      `nominalValueCurrency`.
@@ -84,7 +86,7 @@ library NominalValueStorageWrapper {
     }
 
     function _nominalValueStorage() private pure returns (NominalValueDataStorage storage nvData_) {
-        bytes32 position = _NOMINAL_VALUE_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_NOMINAL_VALUE;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             nvData_.slot := position

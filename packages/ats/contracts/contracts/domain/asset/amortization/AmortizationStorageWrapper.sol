@@ -2,13 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { _AMORTIZATION_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
-import {
-    AMORTIZATION_CORPORATE_ACTION_TYPE,
-    SNAPSHOT_RESULT_ID,
-    SNAPSHOT_TASK_TYPE,
-    _DEFAULT_PARTITION
-} from "../../../constants/values.sol";
+import { SNAPSHOT_RESULT_ID, _DEFAULT_PARTITION } from "../../../constants/values.sol";
+import { CORPORATE_ACTION_TYPE_AMORTIZATION, SCHEDULED_TASK_TYPE_SNAPSHOT } from "../../../constants/dispatchTypes.sol";
 import { IAmortization } from "../../../facets/layer_2/amortization/IAmortization.sol";
 import { IAmortizationStorageWrapper } from "./IAmortizationStorageWrapper.sol";
 import { IHoldTypes } from "../../../facets/layer_1/hold/IHoldTypes.sol";
@@ -26,6 +21,9 @@ import { AdjustBalancesStorageWrapper } from "../AdjustBalancesStorageWrapper.so
 import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 import { NominalValueStorageWrapper } from "../nominalValue/NominalValueStorageWrapper.sol";
+
+/// @custom:hash storage Amortization
+bytes32 constant STORAGE_LOCATION_AMORTIZATION = 0x6615a5e2562c1a115412fe21b082654124f5af2ecf5b5d6bc9a66d4da90c8600;
 
 /**
  * @title AmortizationStorageWrapper
@@ -52,13 +50,16 @@ library AmortizationStorageWrapper {
         IAmortization.Amortization memory _newAmortization
     ) internal returns (bytes32 corporateActionId_, uint256 amortizationID_) {
         (corporateActionId_, amortizationID_) = CorporateActionsStorageWrapper.addCorporateAction(
-            AMORTIZATION_CORPORATE_ACTION_TYPE,
+            CORPORATE_ACTION_TYPE_AMORTIZATION,
             abi.encode(_newAmortization)
         );
 
         if (corporateActionId_ == bytes32(0)) revert IAmortizationStorageWrapper.AmortizationCreationFailed();
 
-        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(_newAmortization.recordDate, SNAPSHOT_TASK_TYPE);
+        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(
+            _newAmortization.recordDate,
+            SCHEDULED_TASK_TYPE_SNAPSHOT
+        );
         ScheduledTasksStorageWrapper.addScheduledSnapshot(_newAmortization.recordDate, corporateActionId_);
         _amortizationStorage().activeAmortizationIds.add(amortizationID_);
 
@@ -98,7 +99,7 @@ library AmortizationStorageWrapper {
         uint256 _tokenAmount
     ) internal returns (uint256 holdId_) {
         bytes32 corporateActionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
-            AMORTIZATION_CORPORATE_ACTION_TYPE,
+            CORPORATE_ACTION_TYPE_AMORTIZATION,
             _amortizationID - 1
         );
 
@@ -159,7 +160,7 @@ library AmortizationStorageWrapper {
 
     function releaseAmortizationHold(uint256 _amortizationID, address _tokenHolder) internal {
         bytes32 corporateActionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
-            AMORTIZATION_CORPORATE_ACTION_TYPE,
+            CORPORATE_ACTION_TYPE_AMORTIZATION,
             _amortizationID - 1
         );
 
@@ -209,7 +210,7 @@ library AmortizationStorageWrapper {
         )
     {
         corporateActionId_ = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
-            AMORTIZATION_CORPORATE_ACTION_TYPE,
+            CORPORATE_ACTION_TYPE_AMORTIZATION,
             _amortizationID - 1
         );
 
@@ -291,7 +292,7 @@ library AmortizationStorageWrapper {
     }
 
     function getAmortizationsCount() internal view returns (uint256 amortizationCount_) {
-        return CorporateActionsStorageWrapper.getCorporateActionCountByType(AMORTIZATION_CORPORATE_ACTION_TYPE);
+        return CorporateActionsStorageWrapper.getCorporateActionCountByType(CORPORATE_ACTION_TYPE_AMORTIZATION);
     }
 
     function getAmortizationHolders(
@@ -341,7 +342,7 @@ library AmortizationStorageWrapper {
             _amortizationStorage()
                 .activeHoldHolders[
                     CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
-                        AMORTIZATION_CORPORATE_ACTION_TYPE,
+                        CORPORATE_ACTION_TYPE_AMORTIZATION,
                         _amortizationID - 1
                     )
                 ]
@@ -350,7 +351,7 @@ library AmortizationStorageWrapper {
 
     function getTotalAmortizationActiveHolders(uint256 _amortizationID) internal view returns (uint256) {
         bytes32 corporateActionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
-            AMORTIZATION_CORPORATE_ACTION_TYPE,
+            CORPORATE_ACTION_TYPE_AMORTIZATION,
             _amortizationID - 1
         );
         return _amortizationStorage().activeHoldHolders[corporateActionId].length();
@@ -358,7 +359,7 @@ library AmortizationStorageWrapper {
 
     function getTotalHoldByAmortizationId(uint256 _amortizationID) internal view returns (uint256) {
         bytes32 corporateActionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
-            AMORTIZATION_CORPORATE_ACTION_TYPE,
+            CORPORATE_ACTION_TYPE_AMORTIZATION,
             _amortizationID - 1
         );
         return _amortizationStorage().totalHoldByAmortizationId[corporateActionId];
@@ -377,7 +378,7 @@ library AmortizationStorageWrapper {
 
     function checkNoActiveAmortizationHolds(uint256 _amortizationID) internal view {
         bytes32 corporateActionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
-            AMORTIZATION_CORPORATE_ACTION_TYPE,
+            CORPORATE_ACTION_TYPE_AMORTIZATION,
             _amortizationID - 1
         );
         if (_amortizationStorage().activeHoldHolders[corporateActionId].length() > 0) {
@@ -472,7 +473,7 @@ library AmortizationStorageWrapper {
     }
 
     function _amortizationStorage() private pure returns (AmortizationDataStorage storage amortizationData_) {
-        bytes32 position = _AMORTIZATION_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_AMORTIZATION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             amortizationData_.slot := position

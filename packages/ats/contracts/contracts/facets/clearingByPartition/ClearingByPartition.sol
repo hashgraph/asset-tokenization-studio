@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearingByPartition } from "./IClearingByPartition.sol";
-import { CLEARING_VALIDATOR_ROLE } from "../../constants/roles.sol";
+import { ROLE_CLEARING_VALIDATOR } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { ClearingOps } from "../../domain/orchestrator/ClearingOps.sol";
@@ -29,7 +29,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(CLEARING_VALIDATOR_ROLE)
+        onlyRole(ROLE_CLEARING_VALIDATOR)
         onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
         onlyWithValidClearingId(_clearingOperationIdentifier)
         onlyValidExpirationTimestampForClearing(_clearingOperationIdentifier, false)
@@ -59,7 +59,7 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(CLEARING_VALIDATOR_ROLE)
+        onlyRole(ROLE_CLEARING_VALIDATOR)
         onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
         onlyWithValidClearingId(_clearingOperationIdentifier)
         onlyValidExpirationTimestampForClearing(_clearingOperationIdentifier, false)

@@ -18,7 +18,7 @@ interface ILockTypes {
      *         expiration timestamp.
      * @dev Emitted by both `lock` (default partition) and `lockByPartition` (any partition)
      *      so consumers can monitor every lock creation through a single topic.
-     * @param operator The caller that requested the lock (typically holds `LOCKER_ROLE`).
+     * @param operator The caller that requested the lock (typically holds `ROLE_LOCKER`).
      * @param tokenHolder The address whose tokens are locked.
      * @param partition The partition the tokens are locked on.
      * @param lockId The identifier assigned to the new lock for `(partition, tokenHolder)`.

@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _CAP_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { MAX_UINT256 } from "../../constants/values.sol";
 import { ICap } from "../../facets/cap/ICap.sol";
 import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../asset/ERC1410StorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+
+/// @custom:hash storage Cap
+bytes32 constant STORAGE_LOCATION_CAP = 0xabd29859a2443302b9905d8be07aab508a353cf611fff647d31b2a10ccb92100;
 
 struct CapDataStorage {
     uint256 maxSupply;
@@ -122,7 +124,7 @@ library CapStorageWrapper {
     }
 
     function capStorage() internal pure returns (CapDataStorage storage cap_) {
-        bytes32 position = _CAP_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_CAP;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             cap_.slot := position

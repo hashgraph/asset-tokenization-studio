@@ -1,18 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IERC20Votes } from "./IERC20Votes.sol";
+import { IERC20Votes, RESOLVER_KEY_ERC20VOTES } from "./IERC20Votes.sol";
 import { IERC5805 } from "@openzeppelin/contracts/interfaces/IERC5805.sol";
 import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
 import { IVotes } from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 import { ERC20Votes } from "./ERC20Votes.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../../../infrastructure/proxy/Bytes4Builder.sol";
-import { _ERC20VOTES_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
-
 contract ERC20VotesFacet is ERC20Votes, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _ERC20VOTES_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_ERC20VOTES;
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {

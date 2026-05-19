@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { DIVIDEND_CORPORATE_ACTION_TYPE, SNAPSHOT_RESULT_ID, SNAPSHOT_TASK_TYPE } from "../../../constants/values.sol";
+import { SNAPSHOT_RESULT_ID } from "../../../constants/values.sol";
+import { CORPORATE_ACTION_TYPE_DIVIDEND, SCHEDULED_TASK_TYPE_SNAPSHOT } from "../../../constants/dispatchTypes.sol";
 import { CorporateActionsStorageWrapper } from "../../core/CorporateActionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
@@ -44,7 +45,7 @@ library DividendStorageWrapper {
         bytes memory data = abi.encode(newDividend);
 
         (corporateActionId_, dividendId_) = CorporateActionsStorageWrapper.addCorporateAction(
-            DIVIDEND_CORPORATE_ACTION_TYPE,
+            CORPORATE_ACTION_TYPE_DIVIDEND,
             data
         );
 
@@ -102,7 +103,7 @@ library DividendStorageWrapper {
 
         IDividendTypes.Dividend memory newDividend = abi.decode(data, (IDividendTypes.Dividend));
 
-        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newDividend.recordDate, SNAPSHOT_TASK_TYPE);
+        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newDividend.recordDate, SCHEDULED_TASK_TYPE_SNAPSHOT);
         ScheduledTasksStorageWrapper.addScheduledSnapshot(newDividend.recordDate, actionId);
     }
 
@@ -130,7 +131,7 @@ library DividendStorageWrapper {
         )
     {
         corporateActionId_ = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
-            DIVIDEND_CORPORATE_ACTION_TYPE,
+            CORPORATE_ACTION_TYPE_DIVIDEND,
             dividendId - 1
         );
 
@@ -216,7 +217,7 @@ library DividendStorageWrapper {
      * @return dividendCount_ The current count of dividends created
      */
     function getDividendsCount() internal view returns (uint256 dividendCount_) {
-        return CorporateActionsStorageWrapper.getCorporateActionCountByType(DIVIDEND_CORPORATE_ACTION_TYPE);
+        return CorporateActionsStorageWrapper.getCorporateActionCountByType(CORPORATE_ACTION_TYPE_DIVIDEND);
     }
 
     /**

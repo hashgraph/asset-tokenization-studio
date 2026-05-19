@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _INITIALIZER_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { ResolverProxyStorageWrapper } from "./ResolverProxyStorageWrapper.sol";
 import { IDiamondCutManager } from "../../infrastructure/diamond/IDiamondCutManager.sol";
 import { IInitializer } from "../../facets/initializer/IInitializer.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+
+/// @custom:hash storage Initializer
+bytes32 constant STORAGE_LOCATION_INITIALIZER = 0x7f2d07b09acba6319339222a47bfb11d5f72a81023b8b3e9ec77c77ec694f200;
 
 /**
  * @notice Diamond-storage layout backing the initializer facet.
@@ -325,7 +327,7 @@ library InitializerStorageWrapper {
      */
     // Diamond storage accessor: pins InitializerDataStorage to a fixed slot to avoid layout collisions across facets.
     function initializerStorage() private pure returns (InitializerDataStorage storage initializer_) {
-        bytes32 position = _INITIALIZER_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_INITIALIZER;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             initializer_.slot := position

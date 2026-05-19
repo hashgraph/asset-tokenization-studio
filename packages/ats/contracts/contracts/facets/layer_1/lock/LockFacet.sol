@@ -2,16 +2,14 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { Lock } from "./Lock.sol";
-import { ILock } from "./ILock.sol";
+import { ILock, RESOLVER_KEY_LOCK } from "./ILock.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../../infrastructure/proxy/Bytes4Builder.sol";
-import { _LOCK_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
-
 /**
  * @title LockFacet
  * @author Asset Tokenization Studio Team
  * @notice Diamond facet exposing the default-partition lock surface and the all-partition
- *         read queries declared in `ILock`, registered under `_LOCK_RESOLVER_KEY`.
+ *         read queries declared in `ILock`, registered under `RESOLVER_KEY_LOCK`.
  * @dev Inherits the implementation from `Lock` and satisfies the
  *      `IStaticFunctionSelectors` contract required by the Diamond proxy for static
  *      selector registration. Exposes 8 selectors: `lock`, `release`,
@@ -22,7 +20,7 @@ import { _LOCK_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 contract LockFacet is Lock, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _LOCK_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_LOCK;
     }
 
     /// @inheritdoc IStaticFunctionSelectors

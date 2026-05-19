@@ -8,6 +8,9 @@ pragma solidity ^0.8.17;
 
 import { TRexIKpiLinkedRateErrors as IKpiLinkedRateErrors } from "./IKpiLinkedRateErrors.sol";
 
+/// @custom:hash resolverKey KpiLinkedRate
+bytes32 constant RESOLVER_KEY_KPI_LINKED_RATE = 0x47cd76ae576f0ec85f1abfc652d614750caefe22a465bef2c859f6cb32a89593;
+
 interface TRexIKpiLinkedRate is IKpiLinkedRateErrors {
     event InterestRateUpdated(address indexed operator, InterestRate newInterestRate);
     event ImpactDataUpdated(address indexed operator, ImpactData newImpactData);

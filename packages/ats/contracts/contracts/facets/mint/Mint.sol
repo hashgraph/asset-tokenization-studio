@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { AGENT_ROLE, ISSUER_ROLE, _buildRoles } from "../../constants/roles.sol";
+import { ROLE_AGENT, ROLE_ISSUER, _buildRoles } from "../../constants/roles.sol";
 import { IMint } from "./IMint.sol";
 import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
@@ -36,7 +36,7 @@ abstract contract Mint is IMint, Modifiers {
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
-        onlyAnyRole(_buildRoles(ISSUER_ROLE, AGENT_ROLE))
+        onlyAnyRole(_buildRoles(ROLE_ISSUER, ROLE_AGENT))
         onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyWithinMaxSupply(_value, TimeTravelStorageWrapper.getBlockTimestamp())
         onlyIdentifiedAddresses(address(0), _tokenHolder)
@@ -56,7 +56,7 @@ abstract contract Mint is IMint, Modifiers {
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
-        onlyAnyRole(_buildRoles(ISSUER_ROLE, AGENT_ROLE))
+        onlyAnyRole(_buildRoles(ROLE_ISSUER, ROLE_AGENT))
         onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyWithinMaxSupply(_amount, TimeTravelStorageWrapper.getBlockTimestamp())
         onlyIdentifiedAddresses(address(0), _to)

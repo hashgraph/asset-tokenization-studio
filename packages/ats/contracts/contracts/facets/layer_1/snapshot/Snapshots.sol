@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ISnapshots } from "./ISnapshots.sol";
-import { SNAPSHOT_ROLE } from "../../../constants/roles.sol";
+import { ROLE_SNAPSHOT } from "../../../constants/roles.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { SnapshotsStorageWrapper } from "../../../domain/asset/SnapshotsStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";
@@ -28,7 +28,7 @@ abstract contract Snapshots is ISnapshots, Modifiers {
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(SNAPSHOT_ROLE)
+        onlyRole(ROLE_SNAPSHOT)
         returns (uint256 snapshotID_)
     {
         ScheduledTasksStorageWrapper.triggerScheduledCrossOrderedTasks(0);

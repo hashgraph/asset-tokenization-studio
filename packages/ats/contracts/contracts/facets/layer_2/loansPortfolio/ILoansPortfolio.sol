@@ -3,6 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ILoansPortfolioStorageWrapper } from "../../../domain/asset/loansPortfolio/ILoansPortfolioStorageWrapper.sol";
 
+/// @custom:hash resolverKey LoansPortfolio
+bytes32 constant RESOLVER_KEY_LOANS_PORTFOLIO = 0x3f6ea14bbeaea82befb49409b874caf151715c6619ac1d26ba858039b7ece33e;
+
 interface ILoansPortfolio is ILoansPortfolioStorageWrapper {
     enum PortfolioType {
         NONE,

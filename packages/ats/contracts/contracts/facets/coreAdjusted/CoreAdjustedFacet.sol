@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICoreAdjusted } from "./ICoreAdjusted.sol";
+import { ICoreAdjusted, RESOLVER_KEY_CORE_ADJUSTED } from "./ICoreAdjusted.sol";
 import { CoreAdjusted } from "./CoreAdjusted.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _CORE_ADJUSTED_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title CoreAdjustedFacet
  * @notice Diamond facet for the CoreAdjusted domain. Registers the single selector that exposes
@@ -23,7 +21,7 @@ contract CoreAdjustedFacet is CoreAdjusted, IStaticFunctionSelectors {
      * @return staticResolverKey_ The keccak256 hash of the CoreAdjusted resolver key string.
      */
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _CORE_ADJUSTED_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_CORE_ADJUSTED;
     }
 
     /**

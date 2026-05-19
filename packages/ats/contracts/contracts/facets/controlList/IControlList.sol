@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey ControlList
+bytes32 constant RESOLVER_KEY_CONTROL_LIST = 0x7bbee58c68b6e19a08128d25f150956d20a69d1cc049afda563753771781ecc5;
+
 /**
  * @title IControlList
  * @author Asset Tokenization Studio Team
@@ -8,7 +11,7 @@ pragma solidity >=0.8.0 <0.9.0;
  *         operates in one of two modes set at initialisation: whitelist (only listed addresses may
  *         transfer) or blacklist (listed addresses are blocked from transferring).
  * @dev Part of the Diamond facet system. Control list state is stored at
- *      `_CONTROL_LIST_STORAGE_POSITION` via `ControlListStorageWrapper`. `CONTROL_LIST_ROLE` is
+ *      `STORAGE_LOCATION_CONTROL_LIST` via `ControlListStorageWrapper`. `ROLE_CONTROL_LIST` is
  *      required for all state-mutating functions after initialisation. Note that
  *      `isInControlList` reflects raw set membership only; effective access is determined by
  *      `ControlListStorageWrapper.isAbleToAccess`, which combines the membership result with the
@@ -55,7 +58,7 @@ interface IControlList {
 
     /**
      * @notice Adds an address to the control list.
-     * @dev Requires `CONTROL_LIST_ROLE` and the token to be unpaused. Reverts with
+     * @dev Requires `ROLE_CONTROL_LIST` and the token to be unpaused. Reverts with
      *      `ListedAccount` if the address is already present. Emits `AddedToControlList`.
      * @param _account The address to add.
      * @return success_ True if the address was successfully added.
@@ -64,7 +67,7 @@ interface IControlList {
 
     /**
      * @notice Removes an address from the control list.
-     * @dev Requires `CONTROL_LIST_ROLE` and the token to be unpaused. Reverts with
+     * @dev Requires `ROLE_CONTROL_LIST` and the token to be unpaused. Reverts with
      *      `UnlistedAccount` if the address is not present. Emits `RemovedFromControlList`.
      * @param _account The address to remove.
      * @return success_ True if the address was successfully removed.

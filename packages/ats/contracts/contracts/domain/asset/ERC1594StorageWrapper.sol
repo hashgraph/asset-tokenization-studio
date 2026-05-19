@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 import { ZERO_ADDRESS, EMPTY_BYTES, _DEFAULT_PARTITION } from "../../constants/values.sol";
-import { _ERC1594_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IKyc } from "../../facets/layer_1/kyc/IKyc.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { Eip1066 } from "../../constants/eip1066.sol";
@@ -27,6 +26,9 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
 import { IMint } from "../../facets/mint/IMint.sol";
 import { IBurn } from "../../facets/burn/IBurn.sol";
 
+/// @custom:hash storage Erc1594
+bytes32 constant STORAGE_LOCATION_ERC1594 = 0x6bb5986b529cbe1ac563af7efd06b91a80c235aad83852a102d3c187f67c5400;
+
 /**
  * @notice Tracks whether token issuance is enabled and whether the module
  * has been initialised.
@@ -49,7 +51,7 @@ struct ERC1594Storage {
  * controls (KYC, identity, compliance, control lists, allowances, partitions).
  * @dev All public functions revert with standard error selectors when
  * preconditions fail. Relies on EIP1066 status codes for categorisation.
- * Uses a diamond storage pattern anchored at `_ERC1594_STORAGE_POSITION`.
+ * Uses a diamond storage pattern anchored at `STORAGE_LOCATION_ERC1594`.
  * Internal and private helpers are designed for gas-efficient reusability
  * across transfer and redemption flows.
  */
@@ -331,7 +333,7 @@ library ERC1594StorageWrapper {
      * @return ds Storage reference to the `ERC1594Storage` struct.
      */
     function erc1594Storage() internal pure returns (ERC1594Storage storage ds) {
-        bytes32 position = _ERC1594_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_ERC1594;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             ds.slot := position

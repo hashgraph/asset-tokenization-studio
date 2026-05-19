@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _HOLD_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
@@ -11,7 +10,7 @@ import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { ThirdPartyType } from "./types/ThirdPartyType.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
-import { _checkNonceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
+import { _checkNonceAndDeadline } from "../../infrastructure/utils/EIP712.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
@@ -23,6 +22,9 @@ import { ControlListStorageWrapper } from "../core/ControlListStorageWrapper.sol
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+
+/// @custom:hash storage Hold
+bytes32 constant STORAGE_LOCATION_HOLD = 0xaee7bac248b1ceeb630aa06b36647d058252989965cf9b4a02eac9b8aec67000;
 
 /**
  * @title HoldStorageWrapper
@@ -522,7 +524,7 @@ library HoldStorageWrapper {
     }
 
     function holdStorage() internal pure returns (HoldDataStorage storage hold_) {
-        bytes32 position = _HOLD_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_HOLD;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             hold_.slot := position

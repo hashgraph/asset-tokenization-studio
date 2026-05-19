@@ -3,6 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 
+/// @custom:hash resolverKey OperatorByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_OPERATOR_BY_PARTITION = 0xfd060cda1c9927203f3914aa0d5916e4c5971977dec4026418bc4fff6d25b277;
+
 /**
  * @title  IOperatorByPartition
  * @notice Interface for per-partition operator management: authorise, revoke, and query

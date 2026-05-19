@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey Securityholders
+bytes32 constant RESOLVER_KEY_SECURITYHOLDERS = 0x744edd4f33c7d5e322286e40155d549553e22329ac9503643bf36fc149504bc9;
+
 /**
  * @title ISecurityHolders
  * @notice Interface for security holder operations in the ERC1410 standard

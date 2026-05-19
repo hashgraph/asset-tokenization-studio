@@ -3,6 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IAllowanceTypes } from "./IAllowanceTypes.sol";
 
+/// @custom:hash resolverKey Allowance
+bytes32 constant RESOLVER_KEY_ALLOWANCE = 0x329473cfbe06c7719b3c986b04b90a16a859b86307aad33eea0c3dfe87160ab7;
+
 /**
  * @title IAllowance
  * @notice Consolidated interface for the ERC-20 allowance domain: granting, reading and

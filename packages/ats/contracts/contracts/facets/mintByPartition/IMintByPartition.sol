@@ -3,6 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 
+/// @custom:hash resolverKey MintByPartition
+bytes32 constant RESOLVER_KEY_MINT_BY_PARTITION = 0x25ec74149ce0eadddeb82e668365e2e174db7431a04a80bada246f8f7887dadf;
+
 /**
  * @title IMintByPartition
  * @author Asset Tokenization Studio Team

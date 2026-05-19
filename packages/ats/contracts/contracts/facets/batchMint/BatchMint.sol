@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ISSUER_ROLE, AGENT_ROLE, _buildRoles } from "../../constants/roles.sol";
+import { ROLE_ISSUER, ROLE_AGENT, _buildRoles } from "../../constants/roles.sol";
 import { IBatchMint } from "./IBatchMint.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
@@ -33,7 +33,7 @@ abstract contract BatchMint is IBatchMint, Modifiers {
         onlyUnpaused
         onlyValidInputAmountsArrayLength(_toList, _amounts)
         onlyWithoutMultiPartition
-        onlyAnyRole(_buildRoles(ISSUER_ROLE, AGENT_ROLE))
+        onlyAnyRole(_buildRoles(ROLE_ISSUER, ROLE_AGENT))
         onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
     {
         uint256 totalAmount;

@@ -1,17 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBalanceTrackerAtSnapshot } from "./IBalanceTrackerAtSnapshot.sol";
+import { IBalanceTrackerAtSnapshot, RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT } from "./IBalanceTrackerAtSnapshot.sol";
 import { BalanceTrackerAtSnapshot } from "./BalanceTrackerAtSnapshot.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _BALANCE_TRACKER_AT_SNAPSHOT_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title BalanceTrackerAtSnapshotFacet
  * @notice Diamond facet that exposes snapshotted balance and total-supply queries through the
  *         `IBalanceTrackerAtSnapshot` interface, registered under
- *         `_BALANCE_TRACKER_AT_SNAPSHOT_RESOLVER_KEY`.
+ *         `RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT`.
  * @dev Inherits read logic from `BalanceTrackerAtSnapshot` and satisfies
  *      `IStaticFunctionSelectors` for Diamond proxy selector registration.
  *      Exposes three selectors: `balanceOfAtSnapshot`, `balancesOfAtSnapshot`, `totalSupplyAtSnapshot`.
@@ -19,7 +17,7 @@ import { _BALANCE_TRACKER_AT_SNAPSHOT_RESOLVER_KEY } from "../../constants/resol
 contract BalanceTrackerAtSnapshotFacet is BalanceTrackerAtSnapshot, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _BALANCE_TRACKER_AT_SNAPSHOT_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT;
     }
 
     /// @inheritdoc IStaticFunctionSelectors

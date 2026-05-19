@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _ERC20VOTES_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { KPI_VOTES_CALC_FACTOR } from "../../constants/values.sol";
 import { IERC20Votes } from "../../facets/layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
@@ -12,6 +11,9 @@ import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
+
+/// @custom:hash storage Erc20votes
+bytes32 constant STORAGE_LOCATION_ERC20VOTES = 0xb9759d8916f84f61d52de275f833cafd6ef9b06c1939ba841dc78330c7f3bf00;
 
 struct ERC20VotesStorage {
     bool activated;
@@ -214,7 +216,7 @@ library ERC20VotesStorageWrapper {
     }
 
     function erc20VotesStorage_() internal pure returns (ERC20VotesStorage storage erc20votesStorage_) {
-        bytes32 position = _ERC20VOTES_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_ERC20VOTES;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             erc20votesStorage_.slot := position

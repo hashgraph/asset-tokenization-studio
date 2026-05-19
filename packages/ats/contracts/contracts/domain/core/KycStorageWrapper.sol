@@ -5,10 +5,12 @@ import { IKyc } from "../../facets/layer_1/kyc/IKyc.sol";
 import { IRevocationList } from "../../facets/layer_1/kyc/IRevocationList.sol";
 import { ExternalListManagementStorageWrapper } from "./ExternalListManagementStorageWrapper.sol";
 import { SsiManagementStorageWrapper } from "./SsiManagementStorageWrapper.sol";
-import { _KYC_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+
+/// @custom:hash storage Kyc
+bytes32 constant STORAGE_LOCATION_KYC = 0x88f619eb35d79dd51bdbedb0638479d77479fa6ca039bb2a23ffdf42c8e30900;
 
 struct KycStorage {
     mapping(address => IKyc.KycData) kyc;
@@ -124,7 +126,7 @@ library KycStorageWrapper {
     }
 
     function kycStorage() internal pure returns (KycStorage storage kyc_) {
-        bytes32 position = _KYC_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_KYC;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             kyc_.slot := position

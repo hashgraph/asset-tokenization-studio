@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { CONTROLLER_ROLE, AGENT_ROLE, _buildRoles } from "../../constants/roles.sol";
+import { ROLE_CONTROLLER, ROLE_AGENT, _buildRoles } from "../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { IBurn } from "./IBurn.sol";
 import { IController } from "../controller/IController.sol";
@@ -33,7 +33,7 @@ abstract contract Burn is IBurn, Modifiers, ProtectedPartitionRoleValidator {
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyControllable
-        onlyAnyRole(_buildRoles(CONTROLLER_ROLE, AGENT_ROLE))
+        onlyAnyRole(_buildRoles(ROLE_CONTROLLER, ROLE_AGENT))
     {
         address sender = EvmAccessors.getMsgSender();
         TokenCoreOps.burn(_userAddress, _amount);

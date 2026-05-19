@@ -2,8 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { Coupon } from "./Coupon.sol";
-import { ICoupon } from "./ICoupon.sol";
-import { _COUPON_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
+import { ICoupon, RESOLVER_KEY_COUPON } from "./ICoupon.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 
@@ -12,7 +11,7 @@ import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
  * @author Asset Tokenization Studio Team
  * @notice Diamond facet exposing the standard (non-rate-variant) coupon writer surface
  *         (`setCoupon`, `cancelCoupon`) alongside the per-record reads under
- *         `_COUPON_RESOLVER_KEY`.
+ *         `RESOLVER_KEY_COUPON`.
  * @dev Inherits the writer logic from `Coupon` and satisfies `IStaticFunctionSelectors`
  *      for Diamond proxy selector registration. Read-only sibling facets
  *      `CouponSecurityHoldersFacet` and `CouponListingFacet` register under their own
@@ -21,7 +20,7 @@ import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 contract CouponFacet is Coupon, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _COUPON_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_COUPON;
     }
 
     /// @inheritdoc IStaticFunctionSelectors

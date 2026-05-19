@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey Transfer
+bytes32 constant RESOLVER_KEY_TRANSFER = 0xdb0637d5ac2d3a8a460b63275e82a566d4b5ac4b9d2d2938f70c6612970a4b64;
+
 /**
  * @title ITransferFacet
  * @notice Interface grouping all standard token transfer operations: ERC-20 style and

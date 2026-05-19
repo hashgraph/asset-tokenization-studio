@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey AccessControl
+bytes32 constant RESOLVER_KEY_ACCESS_CONTROL = 0xccc2e755f9225e65f6c822a258c866fc0d57a124ad12c8928adf3ff875ffcd70;
+
 /**
  * @title IAccessControl
  * @author Asset Tokenization Studio Team

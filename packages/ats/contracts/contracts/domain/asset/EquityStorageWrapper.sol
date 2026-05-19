@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _EQUITY_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { KPI_EQUITY_BALANCE_ADJ } from "../../constants/values.sol";
 import {
-    BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
-    BALANCE_ADJUSTMENT_TASK_TYPE,
-    KPI_EQUITY_BALANCE_ADJ
-} from "../../constants/values.sol";
+    CORPORATE_ACTION_TYPE_BALANCE_ADJUSTMENT,
+    SCHEDULED_TASK_TYPE_BALANCE_ADJUSTMENT
+} from "../../constants/dispatchTypes.sol";
 import { IEquity } from "../../facets/layer_2/equity/IEquity.sol";
 import { IScheduledBalanceAdjustment } from "../../facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
@@ -17,6 +16,9 @@ import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
+
+/// @custom:hash storage Equity
+bytes32 constant STORAGE_LOCATION_EQUITY = 0x94fe8bd2c421847f50afb78366b145478e26f82c0fba2861c4fa9ade581d5800;
 
 struct EquityDataStorage {
     bool votingRight;
@@ -55,7 +57,7 @@ library EquityStorageWrapper {
         bytes memory data = abi.encode(newBalanceAdjustment);
 
         (corporateActionId_, balanceAdjustmentID_) = CorporateActionsStorageWrapper.addCorporateAction(
-            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
+            CORPORATE_ACTION_TYPE_BALANCE_ADJUSTMENT,
             data
         );
 
@@ -64,7 +66,7 @@ library EquityStorageWrapper {
 
     function cancelScheduledBalanceAdjustment(uint256 balanceAdjustmentId) internal {
         CorporateActionsStorageWrapper.requireMatchingActionType(
-            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
+            CORPORATE_ACTION_TYPE_BALANCE_ADJUSTMENT,
             balanceAdjustmentId - 1
         );
         IScheduledBalanceAdjustment.ScheduledBalanceAdjustment memory balanceAdjustment;
@@ -88,7 +90,7 @@ library EquityStorageWrapper {
 
         ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(
             newBalanceAdjustment.executionDate,
-            BALANCE_ADJUSTMENT_TASK_TYPE
+            SCHEDULED_TASK_TYPE_BALANCE_ADJUSTMENT
         );
         ScheduledTasksStorageWrapper.addScheduledBalanceAdjustment(newBalanceAdjustment.executionDate, actionId);
     }
@@ -121,7 +123,7 @@ library EquityStorageWrapper {
         )
     {
         corporateActionId_ = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
-            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
+            CORPORATE_ACTION_TYPE_BALANCE_ADJUSTMENT,
             balanceAdjustmentID - 1
         );
 
@@ -133,7 +135,7 @@ library EquityStorageWrapper {
     }
 
     function getScheduledBalanceAdjustmentsCount() internal view returns (uint256 balanceAdjustmentCount_) {
-        return CorporateActionsStorageWrapper.getCorporateActionCountByType(BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE);
+        return CorporateActionsStorageWrapper.getCorporateActionCountByType(CORPORATE_ACTION_TYPE_BALANCE_ADJUSTMENT);
     }
 
     function getSnapshotBalanceForIfDateReached(
@@ -158,7 +160,7 @@ library EquityStorageWrapper {
     }
 
     function _equityStorage() private pure returns (EquityDataStorage storage equityData_) {
-        bytes32 position = _EQUITY_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_EQUITY;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             equityData_.slot := position

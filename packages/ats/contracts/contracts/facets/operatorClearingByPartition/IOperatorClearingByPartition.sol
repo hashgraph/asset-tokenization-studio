@@ -3,6 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
 
+/// @custom:hash resolverKey OperatorClearingByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_OPERATOR_CLEARING_BY_PARTITION = 0xaad3c9e6cb80e4d01b9e5f316a82f495c3d11d36f8d738b0c2e4bce2d3f6c01c;
+
 /**
  * @title IOperatorClearingByPartition
  * @notice Interface for operator-initiated clearing operations: redeem and transfer by partition.

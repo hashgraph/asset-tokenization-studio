@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey ClearingAtSnapshotByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_CLEARING_AT_SNAPSHOT_BY_PARTITION = 0xf55083b17a9ba346028d6a5c0772a7d913e0e90b4954f7a8b8e1912dcd383cbd;
+
 /**
  * @title IClearingAtSnapshotByPartition
  * @author Asset Tokenization Studio Team

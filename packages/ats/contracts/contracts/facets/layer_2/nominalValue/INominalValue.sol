@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey NominalValue
+bytes32 constant RESOLVER_KEY_NOMINAL_VALUE = 0xfa54bc09a6a76763f17be0504e29b9c28edd15cdc3432c07f92c2b6962f2fbbe;
+
 /**
  * @title INominalValue
  * @author Asset Tokenization Studio Team
@@ -33,7 +36,7 @@ interface INominalValue {
     /**
      * @notice Emitted when the nominal value amount or its decimals are updated post-initialisation.
      * @dev Fires exclusively from `setNominalValue`.
-     * @param operator The caller authorised by `NOMINAL_VALUE_ROLE`.
+     * @param operator The caller authorised by `ROLE_NOMINAL_VALUE`.
      * @param nominalValue The new nominal value amount.
      * @param nominalValueDecimals The new decimals applied to `nominalValue`.
      */
@@ -43,7 +46,7 @@ interface INominalValue {
      * @notice Emitted when the ISO 4217 currency code of the nominal value is updated.
      * @dev Fires exclusively from `setNominalValueCurrency`; initialisation goes through
      *      `NominalValueInitialized` instead.
-     * @param operator The caller authorised by `NOMINAL_VALUE_ROLE`.
+     * @param operator The caller authorised by `ROLE_NOMINAL_VALUE`.
      * @param nominalValueCurrency The new ISO 4217 currency code as `bytes3`.
      */
     event NominalValueCurrencySet(address indexed operator, bytes3 nominalValueCurrency);
@@ -66,7 +69,7 @@ interface INominalValue {
 
     /**
      * @notice Updates the nominal value amount and its decimals.
-     * @dev Restricted to holders of `NOMINAL_VALUE_ROLE`.
+     * @dev Restricted to holders of `ROLE_NOMINAL_VALUE`.
      * @param _nominalValue New nominal value amount.
      * @param _nominalValueDecimals New decimals applied to `_nominalValue`.
      */
@@ -74,7 +77,7 @@ interface INominalValue {
 
     /**
      * @notice Updates the ISO 4217 currency code attached to the nominal value.
-     * @dev Restricted to holders of `NOMINAL_VALUE_ROLE`. Does not touch the value/decimals;
+     * @dev Restricted to holders of `ROLE_NOMINAL_VALUE`. Does not touch the value/decimals;
      *      callers must update those separately via `setNominalValue` if both change.
      * @param _nominalValueCurrency New ISO 4217 currency code as `bytes3`.
      */

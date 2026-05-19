@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _LOAN_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { ILoan } from "../../../facets/layer_2/loan/ILoan.sol";
+
+/// @custom:hash storage Loan
+bytes32 constant STORAGE_LOCATION_LOAN = 0x2af22e338cd16bdeda633a06c0ad54c1b9d04b19487a6b1ed48b48c18d643800;
 
 /**
  * @title LoanStorageWrapper
@@ -143,7 +145,7 @@ library LoanStorageWrapper {
     }
 
     function _loanStorage() private pure returns (LoanDataStorage storage loanData_) {
-        bytes32 position = _LOAN_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_LOAN;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             loanData_.slot := position

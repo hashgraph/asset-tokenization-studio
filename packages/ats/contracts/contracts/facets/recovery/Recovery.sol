@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IRecovery } from "./IRecovery.sol";
-import { AGENT_ROLE } from "../../constants/roles.sol";
+import { ROLE_AGENT } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
@@ -23,7 +23,7 @@ abstract contract Recovery is IRecovery, Modifiers {
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(AGENT_ROLE)
+        onlyRole(ROLE_AGENT)
         onlyUnrecoveredAddress(_lostWallet)
         onlyEmptyWallet(_lostWallet)
         onlyWithoutMultiPartition

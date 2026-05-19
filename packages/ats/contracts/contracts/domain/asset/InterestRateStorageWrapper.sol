@@ -1,11 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _FIXED_RATE_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { _KPI_LINKED_RATE_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { _INTEREST_RATE_TYPE_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IKpiLinkedRateErrors } from "../../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRateErrors.sol";
 import { IInterestRate } from "../../facets/interestRate/IInterestRate.sol";
+
+/// @custom:hash storage InterestRateType
+// solhint-disable-next-line max-line-length
+bytes32 constant STORAGE_LOCATION_INTEREST_RATE_TYPE = 0xb307072990b6f669214acc1dea3ecf3325e96dd0c0bfc7f3707eee45be6a8a00;
+
+/// @custom:hash storage KpiLinkedRate
+bytes32 constant STORAGE_LOCATION_KPI_LINKED_RATE = 0xfd654781c90de8f4a5cbc1548092929b04718c1777cd90dc2720e57e9f459000;
+
+/// @custom:hash storage FixedRate
+bytes32 constant STORAGE_LOCATION_FIXED_RATE = 0x577d3b71f198de7595699f8f28612988ade0252ef23d62ee04fdaa63df28d200;
 
 /**
  * @title FixedRateDataStorage
@@ -267,7 +274,7 @@ library InterestRateStorageWrapper {
      * @return fixedRateDataStorage_ Storage pointer to FixedRateDataStorage.
      */
     function fixedRateStorage() internal pure returns (FixedRateDataStorage storage fixedRateDataStorage_) {
-        bytes32 position = _FIXED_RATE_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_FIXED_RATE;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             fixedRateDataStorage_.slot := position
@@ -280,7 +287,7 @@ library InterestRateStorageWrapper {
      * @return kpiLinkedRateDataStorage_ Storage pointer to KpiLinkedRateDataStorage.
      */
     function kpiLinkedRateStorage() internal pure returns (KpiLinkedRateDataStorage storage kpiLinkedRateDataStorage_) {
-        bytes32 position = _KPI_LINKED_RATE_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_KPI_LINKED_RATE;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             kpiLinkedRateDataStorage_.slot := position
@@ -293,7 +300,7 @@ library InterestRateStorageWrapper {
      * @return data_ Storage pointer to InterestRateTypeDataStorage.
      */
     function interestRateTypeStorage() private pure returns (InterestRateTypeDataStorage storage data_) {
-        bytes32 position = _INTEREST_RATE_TYPE_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_INTEREST_RATE_TYPE;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             data_.slot := position

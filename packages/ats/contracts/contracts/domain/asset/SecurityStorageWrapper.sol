@@ -2,16 +2,15 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { RegulationData, AdditionalSecurityData } from "../../constants/regulation.sol";
-import { _SECURITY_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { ISecurity } from "../../facets/layer_2/security/ISecurity.sol";
 
-/// @title SecurityStorageWrapper
-/// @notice Library for managing security regulation storage operations on a security token.
-/// @author Asset Tokenization Studio Team
+/// @custom:hash storage Security
+bytes32 constant STORAGE_LOCATION_SECURITY = 0x45ae5065a0bedd1836ba9c199c3e3b4f02a7772289c0a233200f5a4ec7df7e00;
+
 library SecurityStorageWrapper {
     /**
      * @notice Packed storage layout for security regulation state.
-     * @dev Stored at `_SECURITY_STORAGE_POSITION` via inline assembly. `initialized` must be
+     * @dev Stored at `STORAGE_LOCATION_SECURITY` via inline assembly. `initialized` must be
      *      checked before trusting the regulation fields, as uninitialised storage is
      *      indistinguishable from zero-value structs without this guard.
      */
@@ -74,7 +73,7 @@ library SecurityStorageWrapper {
     }
 
     function securityStorage() internal pure returns (SecurityDataStorage storage securityStorage_) {
-        bytes32 position = _SECURITY_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_SECURITY;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             securityStorage_.slot := position

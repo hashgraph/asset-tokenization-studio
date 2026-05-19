@@ -10,6 +10,9 @@ import { FactoryRegulationData, RegulationData, RegulationType, RegulationSubTyp
 import { IFixedRate } from "../facets/layer_2/interestRate/fixedRate/IFixedRate.sol";
 import { IKpiLinkedRate } from "../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
 
+/// @custom:hash resolverKey Factory
+bytes32 constant RESOLVER_KEY_FACTORY = 0x9fc26269cc1cb994e66f269ed6b58a5bb0c344a134b9dabd342ac466d48f95c7;
+
 interface IFactory {
     enum SecurityType {
         BondVariableRate,

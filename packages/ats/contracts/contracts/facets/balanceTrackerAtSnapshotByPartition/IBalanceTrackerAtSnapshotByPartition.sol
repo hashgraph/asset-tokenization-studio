@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey BalanceTrackerAtSnapshotByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT_BY_PARTITION = 0x58443162e33b704d1fc5afb40e87bf81357231beefee616de557cc06fef3aba8;
+
 /**
  * @title IBalanceTrackerAtSnapshotByPartition
  * @author Asset Tokenization Studio Team

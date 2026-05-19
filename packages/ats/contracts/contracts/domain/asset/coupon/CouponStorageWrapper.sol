@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { SNAPSHOT_RESULT_ID } from "../../../constants/values.sol";
 import {
-    COUPON_CORPORATE_ACTION_TYPE,
-    COUPON_LISTING_TASK_TYPE,
-    SNAPSHOT_RESULT_ID,
-    SNAPSHOT_TASK_TYPE
-} from "../../../constants/values.sol";
+    CORPORATE_ACTION_TYPE_COUPON,
+    SCHEDULED_TASK_TYPE_COUPON_LISTING,
+    SCHEDULED_TASK_TYPE_SNAPSHOT
+} from "../../../constants/dispatchTypes.sol";
 import { CorporateActionsStorageWrapper } from "../../core/CorporateActionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
@@ -23,7 +23,9 @@ import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
 import { ScheduledTasksStorageWrapper } from "../ScheduledTasksStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "../SnapshotsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { _COUPON_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
+
+/// @custom:hash storage Coupon
+bytes32 constant STORAGE_LOCATION_COUPON = 0x83419e6b8093975a3157050eb9f883164e1459426616bc1834d782d457195c00;
 
 /// @title Coupon Storage Wrapper
 /// @notice Library for managing Coupon storage operations.
@@ -56,7 +58,7 @@ library CouponStorageWrapper {
         newCoupon = CouponRateDispatch.validateAndStamp(newCoupon);
 
         (corporateActionId_, couponID_) = CorporateActionsStorageWrapper.addCorporateAction(
-            COUPON_CORPORATE_ACTION_TYPE,
+            CORPORATE_ACTION_TYPE_COUPON,
             abi.encode(newCoupon)
         );
 
@@ -90,10 +92,13 @@ library CouponStorageWrapper {
         if (actionId == bytes32(0)) {
             revert ICoupon.CouponCreationFailed();
         }
-        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newCoupon.recordDate, SNAPSHOT_TASK_TYPE);
+        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newCoupon.recordDate, SCHEDULED_TASK_TYPE_SNAPSHOT);
         ScheduledTasksStorageWrapper.addScheduledSnapshot(newCoupon.recordDate, actionId);
         if (newCoupon.fixingDate == 0) return;
-        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newCoupon.fixingDate, COUPON_LISTING_TASK_TYPE);
+        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(
+            newCoupon.fixingDate,
+            SCHEDULED_TASK_TYPE_COUPON_LISTING
+        );
         ScheduledTasksStorageWrapper.addScheduledCouponListing(newCoupon.fixingDate, actionId);
     }
 
@@ -112,7 +117,7 @@ library CouponStorageWrapper {
         coupon.rateStatus = ICouponTypes.RateCalculationStatus.SET;
 
         CorporateActionsStorageWrapper.updateCorporateActionData(
-            CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(COUPON_CORPORATE_ACTION_TYPE, couponID - 1),
+            CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(CORPORATE_ACTION_TYPE_COUPON, couponID - 1),
             abi.encode(coupon)
         );
     }
@@ -135,7 +140,7 @@ library CouponStorageWrapper {
         uint256 couponID
     ) internal view returns (ICouponTypes.Coupon memory rawCoupon_, bytes32 corporateActionId_, bool isDisabled_) {
         corporateActionId_ = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
-            COUPON_CORPORATE_ACTION_TYPE,
+            CORPORATE_ACTION_TYPE_COUPON,
             couponID - 1
         );
         bytes memory data;
@@ -248,7 +253,7 @@ library CouponStorageWrapper {
     }
 
     function getCouponCount() internal view returns (uint256 couponCount_) {
-        return CorporateActionsStorageWrapper.getCorporateActionCountByType(COUPON_CORPORATE_ACTION_TYPE);
+        return CorporateActionsStorageWrapper.getCorporateActionCountByType(CORPORATE_ACTION_TYPE_COUPON);
     }
 
     function getCouponHolders(
@@ -379,7 +384,7 @@ library CouponStorageWrapper {
 
     // solhint-disable-next-line func-name-mixedcase
     function _couponStorage() private pure returns (CouponDataStorage storage cs_) {
-        bytes32 position = _COUPON_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_COUPON;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             cs_.slot := position
