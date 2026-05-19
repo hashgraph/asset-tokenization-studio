@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-05-19T07:17:18.918Z
+ * Generated: 2026-05-19T11:38:23.678Z
  * Facets: 120
  * Infrastructure: 2
  *
@@ -466,11 +466,26 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1142a68c",
       },
       {
+        name: "DecimalsOverflow",
+        signature: { full: "error DecimalsOverflow()", canonical: "DecimalsOverflow()" },
+        selector: "0x68266a81",
+      },
+      {
         name: "FactorIsZero",
         signature: { full: "error FactorIsZero()", canonical: "FactorIsZero()" },
         selector: "0x936e9b6d",
       },
+      {
+        name: "FactorOverflow",
+        signature: { full: "error FactorOverflow()", canonical: "FactorOverflow()" },
+        selector: "0xbf4d83ab",
+      },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
+      {
+        name: "TotalSupplyOverflow",
+        signature: { full: "error TotalSupplyOverflow()", canonical: "TotalSupplyOverflow()" },
+        selector: "0xe5cfe957",
+      },
     ],
     factory: (signer) =>
       new AdjustBalancesFacet__factory(getLibLinks("scheduledTasksDispatchOps", "tokenCoreOps") as any, signer),
@@ -11992,9 +12007,19 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1142a68c",
       },
       {
+        name: "DecimalsOverflow",
+        signature: { full: "error DecimalsOverflow()", canonical: "DecimalsOverflow()" },
+        selector: "0x68266a81",
+      },
+      {
         name: "FactorIsZero",
         signature: { full: "error FactorIsZero()", canonical: "FactorIsZero()" },
         selector: "0x936e9b6d",
+      },
+      {
+        name: "FactorOverflow",
+        signature: { full: "error FactorOverflow()", canonical: "FactorOverflow()" },
+        selector: "0xbf4d83ab",
       },
       {
         name: "InvalidTimestamp",
@@ -12002,6 +12027,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xb7d09497",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
+      {
+        name: "TotalSupplyOverflow",
+        signature: { full: "error TotalSupplyOverflow()", canonical: "TotalSupplyOverflow()" },
+        selector: "0xe5cfe957",
+      },
       {
         name: "UnexpectedError",
         signature: { full: "error UnexpectedError(bytes4 _errorId)", canonical: "UnexpectedError(bytes4)" },

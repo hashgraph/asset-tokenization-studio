@@ -23,4 +23,9 @@ abstract contract AdjustBalancesModifiers {
         AdjustBalancesStorageWrapper.checkValidFactor(_factor);
         _;
     }
+
+    modifier onlyNotOverflowingAdjustment(uint256 _factor, uint8 _decimals) {
+        AdjustBalancesStorageWrapper.checkNotOverflowingAdjustment(_factor, _decimals);
+        _;
+    }
 }

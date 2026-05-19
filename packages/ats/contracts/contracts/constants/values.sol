@@ -8,6 +8,7 @@ pragma solidity >=0.8.0 <0.9.0;
  * Utility constants for type hashes, partitions, and corporate actions.
  */
 uint256 constant MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+uint8 constant MAX_UINT8 = 255;
 address constant ZERO_ADDRESS = address(0);
 bytes32 constant EMPTY_BYTES32 = bytes32(0);
 bytes constant EMPTY_BYTES = bytes("");

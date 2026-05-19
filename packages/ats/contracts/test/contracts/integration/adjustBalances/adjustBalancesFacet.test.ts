@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset } from "@contract-types";
 import { DEFAULT_PARTITION, ATS_ROLES, ZERO, dateToUnixTimestamp } from "@scripts";
-import { deployEquityTokenFixture, executeRbac, grantRoleAndPauseToken, MAX_UINT256 } from "@test";
+import { deployEquityTokenFixture, executeRbac, grantRoleAndPauseToken, MAX_UINT256, MAX_UINT8 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 const EMPTY_VC_ID = "";
@@ -380,6 +380,57 @@ describe("AdjustBalancesFacet Tests", () => {
       const results = await asset.getScheduledBalanceAdjustments(100, 10);
       expect(results.length).to.equal(0);
     });
+
+    it("GIVEN an overflowing factor WHEN setScheduledBalanceAdjustment THEN transaction fails with FactorOverflow", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+
+      await asset.connect(signer_A).setScheduledBalanceAdjustment(balanceAdjustmentData);
+
+      const invalidBalanceAdjustmentData = {
+        executionDate: (balanceAdjustmentData.executionDate + 10000).toString(),
+        factor: MAX_UINT256,
+        decimals: balanceAdjustmentData.decimals,
+      };
+
+      await expect(
+        asset.connect(signer_A).setScheduledBalanceAdjustment(invalidBalanceAdjustmentData),
+      ).to.be.revertedWithCustomError(asset, "FactorOverflow");
+    });
+
+    it("GIVEN an overflowing decimals WHEN setScheduledBalanceAdjustment THEN transaction fails with DecimalsOverflow", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+
+      await asset.connect(signer_A).setScheduledBalanceAdjustment(balanceAdjustmentData);
+
+      const invalidBalanceAdjustmentData = {
+        executionDate: (balanceAdjustmentData.executionDate + 10000).toString(),
+        factor: balanceAdjustmentData.factor,
+        decimals: MAX_UINT8,
+      };
+
+      await expect(
+        asset.connect(signer_A).setScheduledBalanceAdjustment(invalidBalanceAdjustmentData),
+      ).to.be.revertedWithCustomError(asset, "DecimalsOverflow");
+    });
+
+    it("GIVEN an overflowing total supply WHEN setScheduledBalanceAdjustment THEN transaction fails with TotalSupplyOverflow", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+
+      const TOTAL_SUPPLY = 100;
+
+      await asset.connect(signer_A).issue(signer_A.address, TOTAL_SUPPLY, "0x");
+
+      const invalidBalanceAdjustmentData = {
+        executionDate: (balanceAdjustmentData.executionDate + 10000).toString(),
+        factor: BigInt(MAX_UINT256) / BigInt(TOTAL_SUPPLY) + BigInt(1),
+        decimals: balanceAdjustmentData.decimals,
+      };
+
+      await expect(
+        asset.connect(signer_A).setScheduledBalanceAdjustment(invalidBalanceAdjustmentData),
+      ).to.be.revertedWithCustomError(asset, "TotalSupplyOverflow");
+    });
   });
 
   describe("adjustBalances", () => {
@@ -487,6 +538,41 @@ describe("AdjustBalancesFacet Tests", () => {
 
       const balanceAfter = await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_B.address);
       expect(balanceAfter).to.equal(tokenAmount * BigInt(factor));
+    });
+
+    it("GIVEN an overflowing factor WHEN adjustBalances THEN transaction fails with FactorOverflow", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ADJUSTMENT_BALANCE_ROLE, signer_A.address);
+
+      await asset.connect(signer_A).adjustBalances(adjustFactor, adjustDecimals);
+
+      await expect(asset.connect(signer_A).adjustBalances(MAX_UINT256, adjustDecimals)).to.be.revertedWithCustomError(
+        asset,
+        "FactorOverflow",
+      );
+    });
+
+    it("GIVEN an overflowing decimals WHEN adjustBalances THEN transaction fails with DecimalsOverflow", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ADJUSTMENT_BALANCE_ROLE, signer_A.address);
+
+      await asset.connect(signer_A).adjustBalances(adjustFactor, adjustDecimals);
+
+      await expect(asset.connect(signer_A).adjustBalances(1, MAX_UINT8)).to.be.revertedWithCustomError(
+        asset,
+        "DecimalsOverflow",
+      );
+    });
+
+    it("GIVEN an overflowing total supply WHEN adjustBalances THEN transaction fails with TotalSupplyOverflow", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ADJUSTMENT_BALANCE_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+
+      const TOTAL_SUPPLY = 100;
+
+      await asset.connect(signer_A).issue(signer_A.address, TOTAL_SUPPLY, "0x");
+
+      await expect(
+        asset.connect(signer_A).adjustBalances(BigInt(MAX_UINT256) / BigInt(TOTAL_SUPPLY) + BigInt(1), adjustDecimals),
+      ).to.be.revertedWithCustomError(asset, "TotalSupplyOverflow");
     });
   });
 

@@ -10,6 +10,8 @@ import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { CapStorageWrapper } from "../core/CapStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { IAdjustBalances } from "../../facets/adjustBalances/IAdjustBalances.sol";
+import { ScheduledTask } from "../../facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
+import { MAX_UINT8 } from "../../constants/values.sol";
 
 struct AdjustBalancesStorage {
     mapping(address => uint256[]) labafUserPartition;
@@ -352,6 +354,30 @@ library AdjustBalancesStorageWrapper {
 
     function checkValidFactor(uint256 _factor) internal pure {
         if (_factor == 0) revert IAdjustBalances.FactorIsZero();
+    }
+
+    function checkNotOverflowingAdjustment(uint256 _factor, uint8 _decimals) internal view {
+        ScheduledTask[] memory scheduledBalanceAdjustment = ScheduledTasksStorageWrapper.getScheduledBalanceAdjustments(
+            0,
+            1
+        );
+
+        uint256 totalSupply = zeroToOne(ERC20StorageWrapper.totalSupply());
+        uint256 abaf = getAbaf();
+        uint8 decimals = ERC20StorageWrapper.decimals();
+
+        if (scheduledBalanceAdjustment.length > 0) {
+            (uint256 pendingAbaf, uint8 pendingDecimals) = getPendingScheduledBalanceAdjustmentsAt(
+                scheduledBalanceAdjustment[0].scheduledTimestamp + 1
+            );
+            decimals += pendingDecimals;
+            abaf *= pendingAbaf;
+            totalSupply *= pendingAbaf;
+        }
+
+        if (MAX_UINT8 - decimals < _decimals) revert IAdjustBalances.DecimalsOverflow();
+        if (type(uint256).max / abaf < _factor) revert IAdjustBalances.FactorOverflow();
+        if (type(uint256).max / totalSupply < _factor) revert IAdjustBalances.TotalSupplyOverflow();
     }
 
     function adjustBalancesStorage() internal pure returns (AdjustBalancesStorage storage adjustBalancesStorage_) {

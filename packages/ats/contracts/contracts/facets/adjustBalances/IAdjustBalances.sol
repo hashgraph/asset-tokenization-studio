@@ -21,6 +21,12 @@ interface IAdjustBalances {
     /// @notice Reverts when `factor` is zero, which would zero-out all holder balances.
     error FactorIsZero();
 
+    error FactorOverflow();
+
+    error DecimalsOverflow();
+
+    error TotalSupplyOverflow();
+
     /**
      * @notice Applies a balance adjustment to all token holders immediately.
      * @dev Caller must hold `ADJUSTMENT_BALANCE_ROLE`. The token must not be paused and `factor`
