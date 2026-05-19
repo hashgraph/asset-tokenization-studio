@@ -16,7 +16,7 @@
  */
 
 import { Signer, ContractFactory } from "ethers";
-import { ProxyAdmin__factory } from "@contract-types";
+import { ProxyAdmin__factory, IStaticFunctionSelectors__factory } from "@contract-types";
 import {
   deployFacets,
   registerFacets,
@@ -180,11 +180,8 @@ export interface DeploySystemWithExistingBlrOptions extends ResumeOptions {
   /** Existing ProxyAdmin address (optional, will deploy new one if not provided) */
   existingProxyAdminAddress?: string;
 
-  /** Number of confirmations for contract deployments — facets, factory (default: from network config) */
+  /** Number of confirmations for contract transactions */
   confirmations?: number;
-
-  /** Number of confirmations for contract call transactions — registerFacets, createConfiguration (default: from network config) */
-  txConfirmations?: number;
 
   /** Enable retry mechanism for failed deployments (default: from network config) */
   enableRetry?: boolean;
@@ -256,7 +253,6 @@ export async function deploySystemWithExistingBlr(
     batchSize, // Use defaults from createEquityConfiguration/createBondConfiguration if not provided
     existingProxyAdminAddress,
     confirmations = networkConfig.confirmations,
-    txConfirmations = networkConfig.txConfirmations,
     enableRetry = networkConfig.retryOptions.maxRetries > 0,
     verifyDeployment = networkConfig.verifyDeployment,
     resumeFrom,
@@ -280,7 +276,6 @@ export async function deploySystemWithExistingBlr(
   info(`🔷 BLR Address: ${blrAddress}`);
   info(`🔄 TimeTravel: ${useTimeTravel ? "Enabled" : "Disabled"}`);
   info(`⏱️  Confirmations (deploy): ${confirmations}`);
-  info(`⏱️  Confirmations (tx): ${txConfirmations}`);
   info(`🔁 Retry: ${enableRetry ? "Enabled" : "Disabled"}`);
   info(`✅ Verification: ${verifyDeployment ? "Enabled" : "Disabled"}`);
   info("═".repeat(60));
@@ -619,7 +614,7 @@ export async function deploySystemWithExistingBlr(
             useTimeTravel,
             false,
             batchSize,
-            txConfirmations,
+            confirmations,
           );
 
           if (!equityConfig.success) {
@@ -663,7 +658,7 @@ export async function deploySystemWithExistingBlr(
             useTimeTravel,
             false,
             batchSize,
-            txConfirmations,
+            confirmations,
           );
 
           if (!bondConfig.success) {
@@ -704,7 +699,7 @@ export async function deploySystemWithExistingBlr(
             useTimeTravel,
             false,
             batchSize,
-            txConfirmations,
+            confirmations,
           );
 
           if (!bondFixedRateConfig.success) {
@@ -747,7 +742,7 @@ export async function deploySystemWithExistingBlr(
             useTimeTravel,
             false,
             batchSize,
-            txConfirmations,
+            confirmations,
           );
 
           if (!bondKpiLinkedRateConfig.success) {
@@ -801,7 +796,7 @@ export async function deploySystemWithExistingBlr(
           useTimeTravel,
           false,
           batchSize,
-          txConfirmations,
+          confirmations,
         );
 
         if (!factoryConfig.success) {
@@ -934,8 +929,13 @@ export async function deploySystemWithExistingBlr(
                   ? bondKpiLinkedRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
                   : undefined;
 
+                const staticFunctionSelectors = IStaticFunctionSelectors__factory.connect(facetAddress, signer);
                 const key =
-                  equityFacet?.key || bondFacet?.key || bondFixedRateFacet?.key || bondKpiLinkedRateFacet?.key || "";
+                  equityFacet?.key ||
+                  bondFacet?.key ||
+                  bondFixedRateFacet?.key ||
+                  bondKpiLinkedRateFacet?.key ||
+                  (await staticFunctionSelectors.getStaticResolverKey());
 
                 return { facetName, facetAddress, key };
               }),

@@ -21,7 +21,7 @@
  */
 
 import { deploySystemWithNewBlr } from "../workflows/deploySystemWithNewBlr";
-import { DEFAULT_BATCH_SIZE, info, success, error } from "@scripts/infrastructure";
+import { DEFAULT_BATCH_SIZE, info, success, error, isHederaNetwork } from "@scripts/infrastructure";
 import { requireNetworkSigner, parseBooleanEnv, parseIntEnv } from "./shared";
 
 /**
@@ -36,7 +36,7 @@ async function main() {
   const batchSize = parseIntEnv("BATCH_SIZE", DEFAULT_BATCH_SIZE);
   const deployOnlyBondConfig = parseBooleanEnv("DEPLOY_ONLY_BOND_CONFIG", false);
   const parallelFacetDeployment = parseBooleanEnv("PARALLEL_FACET_DEPLOYMENT", false);
-  const concurrency = parseIntEnv("FACET_DEPLOY_CONCURRENCY", 20);
+  const concurrency = parseIntEnv("FACET_DEPLOY_CONCURRENCY", 25);
 
   info(`🚀 Starting ATS deployment`);
   info("---");
@@ -48,6 +48,12 @@ async function main() {
   if (parallelFacetDeployment)
     info(`⚡ Parallel facet deployment: concurrency=${concurrency} (retries off, checkpoint skipped)`);
   info("---");
+
+  if (parallelFacetDeployment && isHederaNetwork(network)) {
+    throw new Error(
+      "parallelFacetDeployment is not supported on Hedera networks (relay rate-limit). Use Besu/local instead.",
+    );
+  }
 
   try {
     // Use signer from network configuration

@@ -43,6 +43,8 @@ import {
   waitForTransaction,
   isInstantMiningNetwork,
   hederaGasOverrides,
+  warn,
+  GAS_LIMIT,
 } from "@scripts/infrastructure";
 
 // Types imported from centralized types module
@@ -275,6 +277,17 @@ export async function sendBatchConfiguration(
     info(`  Transaction: ${receipt.hash}`);
     info(`  Block: ${receipt.blockNumber}`);
   } catch (err) {
+    // Re-simulate with staticCall to surface the decoded revert reason (custom
+    // errors, panic codes, etc.) that status=0 receipts don't carry.
+    try {
+      await blrContract.createBatchConfiguration.staticCall(configId, configurations, finalBatch, {
+        gasLimit: gasLimit || GAS_LIMIT.businessLogicResolver.createConfiguration,
+      });
+    } catch (simErr) {
+      const simMessage = simErr instanceof Error ? simErr.message : String(simErr);
+      logError(`Failed to send batch configuration: ${simMessage}`);
+      throw new Error(simMessage);
+    }
     const errorMessage = extractRevertReason(err);
     logError(`Failed to send batch configuration: ${errorMessage}`);
     throw err;
@@ -418,6 +431,18 @@ export async function createBatchConfiguration(
       versions = latestVersions.map((v) => Number(v));
     }
 
+    // Guard: version=0 means the facet was never registered in the BLR.
+    // Passing version=0 to createBatchConfiguration causes an arithmetic
+    // underflow panic in _resolveBusinessLogicByVersion (_version - 1 on
+    // uint256(0)), which surfaces only as a silent status=0 revert.
+    const unregistered = facetKeys.filter((_, i) => versions[i] === 0);
+    if (unregistered.length > 0) {
+      throw new Error(
+        `Cannot create configuration: ${unregistered.length} facet(s) have version 0 ` +
+          `(not registered in BLR): ${unregistered.map((f) => f.facetName).join(", ")}`,
+      );
+    }
+
     // Recover from a partial batch left by a previous crashed run.
     // A non-zero batchVersion is detectable by querying version currentVersion+1:
     // _resolveVersion returns explicit versions as-is, so if any facets were
@@ -430,15 +455,15 @@ export async function createBatchConfiguration(
       1,
     );
     if (ongoingBatchFacets.length > 0) {
-      const { warn, GAS_LIMIT } = await import("@scripts/infrastructure");
       warn(
         `Detected uncommitted batch for config ${configurationId} (version ${currentVersion + 1}). ` +
           `Cancelling to allow clean retry...`,
       );
-      await blrContract.cancelBatchConfiguration(configurationId, {
+      const cancelTx = await blrContract.cancelBatchConfiguration(configurationId, {
         gasLimit: GAS_LIMIT.businessLogicResolver.createConfiguration,
         ...hederaGasOverrides(),
       });
+      await cancelTx.wait(confirmations);
     }
 
     info("Processing facets in batches", {

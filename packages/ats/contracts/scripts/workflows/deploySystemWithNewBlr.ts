@@ -92,11 +92,8 @@ export interface DeploySystemWithNewBlrOptions extends ResumeOptions {
   /** Path to save deployment output (default: deployments/{network}/{network}-deployment-{timestamp}.json) */
   outputPath?: string;
 
-  /** Number of confirmations for contract deployments — facets, BLR, factory (default: from network config) */
+  /** Number of confirmations for contract transactions */
   confirmations?: number;
-
-  /** Number of confirmations for contract call transactions — registerFacets, createConfiguration (default: from network config) */
-  txConfirmations?: number;
 
   /** Enable retry mechanism for failed deployments (default: true) */
   enableRetry?: boolean;
@@ -187,7 +184,6 @@ export async function deploySystemWithNewBlr(
     batchSize = DEFAULT_BATCH_SIZE,
     outputPath,
     confirmations = networkConfig.confirmations,
-    txConfirmations = networkConfig.txConfirmations,
     enableRetry = networkConfig.retryOptions.maxRetries > 0,
     verifyDeployment = networkConfig.verifyDeployment,
     deployOnlyBondConfig = false,
@@ -214,12 +210,12 @@ export async function deploySystemWithNewBlr(
   info(`👤 Deployer: ${deployer}`);
   info(`🔄 TimeTravel: ${useTimeTravel ? "Enabled" : "Disabled"}`);
   info(`⏱️  Confirmations (deploy): ${confirmations}`);
-  info(`⏱️  Confirmations (tx): ${txConfirmations}`);
   info(`🔁 Retry: ${enableRetry ? "Enabled" : "Disabled"}`);
   info(`✅ Verification: ${verifyDeployment ? "Enabled" : "Disabled"}`);
   if (deployOnlyBondConfig) info(`⚡ Mode: Bond-only (Equity, Bond variants, Loan, LoansPortfolio skipped)`);
-  if (parallelFacetDeployment)
+  if (parallelFacetDeployment) {
     info(`⚡ Parallel facet deployment: concurrency=${concurrency} (retries off, checkpoint skipped)`);
+  }
   info("═".repeat(60));
 
   // Initialize checkpoint manager
@@ -262,7 +258,6 @@ export async function deploySystemWithNewBlr(
       options: {
         useTimeTravel,
         confirmations,
-        txConfirmations,
         enableRetry,
         verifyDeployment,
         deployOnlyBondConfig,
@@ -555,6 +550,9 @@ export async function deploySystemWithNewBlr(
 
       const registerResult = await registerFacets(blrContract, {
         facets: facetsToRegister,
+        // Besu/parallel-deploy nodes can fit a larger registration batch under
+        // their block gas limit; raise from the default 10 to 25
+        ...(parallelFacetDeployment ? { batchSize: 25 } : {}),
       });
 
       if (!registerResult.success) {
@@ -613,7 +611,7 @@ export async function deploySystemWithNewBlr(
         useTimeTravel,
         partialBatchDeploy,
         batchSize,
-        txConfirmations,
+        confirmations,
       );
 
       if (!equityConfig.success) {
@@ -664,7 +662,7 @@ export async function deploySystemWithNewBlr(
         useTimeTravel,
         partialBatchDeploy,
         batchSize,
-        txConfirmations,
+        confirmations,
       );
 
       if (!bondConfig.success) {
@@ -718,7 +716,7 @@ export async function deploySystemWithNewBlr(
         useTimeTravel,
         partialBatchDeploy,
         batchSize,
-        txConfirmations,
+        confirmations,
       );
 
       if (!bondFixedRateConfig.success) {
@@ -773,7 +771,7 @@ export async function deploySystemWithNewBlr(
         useTimeTravel,
         partialBatchDeploy,
         batchSize,
-        txConfirmations,
+        confirmations,
       );
 
       if (!bondKpiLinkedRateConfig.success) {
@@ -827,7 +825,7 @@ export async function deploySystemWithNewBlr(
         useTimeTravel,
         partialBatchDeploy,
         batchSize,
-        txConfirmations,
+        confirmations,
       );
 
       if (!loanConfig.success) {
@@ -880,7 +878,7 @@ export async function deploySystemWithNewBlr(
         useTimeTravel,
         partialBatchDeploy,
         batchSize,
-        txConfirmations,
+        confirmations,
       );
 
       if (!loansPortfolioConfig.success) {
@@ -1031,7 +1029,7 @@ export async function deploySystemWithNewBlr(
           facetVersions,
           partialBatchDeploy,
           batchSize,
-          txConfirmations,
+          confirmations,
         );
 
         if (!result.success) {
@@ -1093,7 +1091,7 @@ export async function deploySystemWithNewBlr(
         useTimeTravel,
         partialBatchDeploy,
         batchSize,
-        txConfirmations,
+        confirmations,
       );
 
       if (!factoryConfig.success) {
@@ -1238,7 +1236,7 @@ export async function deploySystemWithNewBlr(
             address: facetAddress,
             contractId: await getContractId(facetAddress),
             key,
-            version: versionByKey.get(key) ?? 0,
+            version: versionByKey.get(key) ?? undefined,
           })),
         );
       })(),

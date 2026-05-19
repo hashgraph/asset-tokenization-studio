@@ -9,7 +9,7 @@
  * @module core/operations/facetDeployment
  */
 
-import { ContractFactory, Overrides } from "ethers";
+import { ContractFactory, NonceManager, Overrides, Signer } from "ethers";
 import {
   DeploymentResult,
   deployContract,
@@ -57,10 +57,10 @@ export interface DeployFacetsOptions {
 
   /**
    * Submit facet deploy transactions in parallel chunks instead of one-at-a-time.
-   * Safe because the underlying signer is wrapped in ethers' NonceManager, which
-   * assigns sequential nonces synchronously. Intended for pipeline use against
-   * nodes the caller does not control (e.g. Besu) where waiting per-block
-   * dominates wall time.
+   * The signer is automatically wrapped in ethers' NonceManager (if not already),
+   * so parallel deploys get sequential nonces without races. Intended for pipeline
+   * use against nodes the caller does not control (e.g. Besu) where waiting
+   * per-block dominates wall time.
    *
    * Forces `enableRetry = false` internally — retries combined with NonceManager
    * leave permanent nonce gaps on failure.
@@ -188,6 +188,16 @@ export async function deployFacets(
     };
 
     if (parallelFacetDeployment) {
+      // Ensure all factories share one NonceManager so parallel deploys get
+      // sequential nonces without racing getTransactionCount('pending').
+      const firstRunner = facetFactories[facetNames[0]]?.runner;
+      if (firstRunner && !(firstRunner instanceof NonceManager)) {
+        const nonceMgr = new NonceManager(firstRunner as Signer);
+        facetFactories = Object.fromEntries(
+          Object.entries(facetFactories).map(([name, factory]) => [name, factory.connect(nonceMgr)]),
+        );
+      }
+
       info(`Parallel mode: concurrency=${concurrency}, retries disabled`);
 
       // Process in chunks so we cap in-flight txs without losing the
