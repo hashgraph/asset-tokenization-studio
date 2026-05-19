@@ -43,7 +43,7 @@ import {
 import { COMMAND_HANDLERS_KPI, QUERY_HANDLERS_KPI } from "./kpis/InjectableKpis";
 import { COMMAND_HANDLERS_NOMINAL_VALUE, QUERY_HANDLERS_NOMINAL_VALUE } from "./security/InjectableNominalValue";
 import { COMMAND_HANDLERS_AMORTIZATION, QUERY_HANDLERS_AMORTIZATION } from "./amortization/InjectableAmortization";
-import { COMMAND_HANDLERS_DEACTIVATION } from "./deactivation/InjectableDeactivation";
+import { COMMAND_HANDLERS_DEACTIVATION, QUERY_HANDLERS_DEACTIVATION } from "./deactivation/InjectableDeactivation";
 
 export const COMMAND_HANDLERS = [
   ...COMMAND_HANDLERS_AGENT,
@@ -111,6 +111,7 @@ export const QUERY_HANDLERS = [
   ...QUERY_HANDLERS_KPI,
   ...QUERY_HANDLERS_NOMINAL_VALUE,
   ...QUERY_HANDLERS_AMORTIZATION,
+  ...QUERY_HANDLERS_DEACTIVATION,
 ];
 
 export const TRANSACTION_HANDLER = [

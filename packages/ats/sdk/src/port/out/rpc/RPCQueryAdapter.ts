@@ -561,6 +561,12 @@ export class RPCQueryAdapter {
     return await this.connect(IAsset__factory, address.toString()).paused();
   }
 
+  async isDeactivated(address: EvmAddress): Promise<boolean> {
+    LogService.logTrace(`Checking if the security: ${address.toString()} is deactivated`);
+
+    return await this.connect(IAsset__factory, address.toString()).isDeactivated();
+  }
+
   async arePartitionsProtected(address: EvmAddress): Promise<boolean> {
     LogService.logTrace(`Checking if the security: ${address.toString()} partitions are protected`);
 
