@@ -5,6 +5,9 @@ import { IAccessControl } from "./IAccessControl.sol";
 import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { _ACCESS_CONTROL_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title AccessControl
@@ -18,6 +21,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  *      inside the storage layer. Intended to be inherited exclusively by `AccessControlFacet`.
  */
 abstract contract AccessControl is IAccessControl, Modifiers {
+    /// @inheritdoc IAccessControl
+    function initializeAccessControl()
+        external
+        override
+        onlyFacetNotRegistered(_ACCESS_CONTROL_RESOLVER_KEY)
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        InitializerStorageWrapper.setFacetToReady(_ACCESS_CONTROL_RESOLVER_KEY);
+        emit IAccessControl.AccessControlInitialized(EvmAccessors.getMsgSender());
+    }
+
     /// @inheritdoc IAccessControl
     /// @dev Requires the token to be unpaused and the caller to hold the admin role of `_role`.
     function grantRole(

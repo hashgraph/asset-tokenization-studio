@@ -27,6 +27,7 @@ contract AccessControlFacet is AccessControl, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeAccessControl.selector,
                 this.grantRole.selector,
                 this.revokeRole.selector,
                 this.renounceRole.selector,

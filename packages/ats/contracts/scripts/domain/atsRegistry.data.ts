@@ -260,6 +260,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x91d14854",
       },
       {
+        name: "initializeAccessControl",
+        signature: { full: "function initializeAccessControl()", canonical: "initializeAccessControl()" },
+        selector: "0xfea0c02e",
+      },
+      {
         name: "renounceRole",
         signature: {
           full: "function renounceRole(bytes32 _role) returns (bool success_)",
@@ -277,6 +282,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     events: [
+      {
+        name: "AccessControlInitialized",
+        signature: {
+          full: "event AccessControlInitialized(address indexed operator)",
+          canonical: "AccessControlInitialized(address)",
+        },
+        topic0: "0x42727e7e7b2799f056d5943c49ec98d33c864c4bd65266a6f508fc0c73fee071",
+      },
       {
         name: "RoleAdminChanged",
         signature: {
@@ -376,6 +389,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "Deactivated",
         signature: { full: "error Deactivated()", canonical: "Deactivated()" },
         selector: "0x1142a68c",
+      },
+      {
+        name: "FacetAlreadyRegistered",
+        signature: {
+          full: "error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion)",
+          canonical: "FacetAlreadyRegistered(bytes32,uint256)",
+        },
+        selector: "0x05ebbb24",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
@@ -13887,6 +13908,11 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
           canonical: "hasRole(bytes32,address)",
         },
         selector: "0x91d14854",
+      },
+      {
+        name: "initializeAccessControl",
+        signature: { full: "function initializeAccessControl()", canonical: "initializeAccessControl()" },
+        selector: "0xfea0c02e",
       },
       {
         name: "initialize_BusinessLogicResolver",
