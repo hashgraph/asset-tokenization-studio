@@ -70,10 +70,15 @@ library KycStorageWrapper {
 
         address revocationListAddress = SsiManagementStorageWrapper.getRevocationRegistryAddress();
 
-        if (
-            revocationListAddress != address(0) &&
-            IRevocationList(revocationListAddress).revoked(kycFor.issuer, kycFor.vcId)
-        ) return IKyc.KycStatus.NOT_GRANTED;
+        if (revocationListAddress != address(0)) {
+            try IRevocationList(revocationListAddress).revoked(kycFor.issuer, kycFor.vcId) returns (bool revoked) {
+                if (revoked) {
+                    return IKyc.KycStatus.NOT_GRANTED;
+                }
+            } catch {
+                // we consider that the kyc was not revoked
+            }
+        }
 
         return kycFor.status;
     }
