@@ -40,6 +40,29 @@ For interface implementations, use `@inheritdoc IFoo` on the concrete function (
 if the implementation introduces behaviour the interface doesn't describe — e.g. a pause gate, a
 facet-specific guard, a snapshot side-effect). Don't duplicate the interface block; it drifts.
 
+## Storage structs (ERC-7201)
+
+`@custom:storage-location erc7201:<namespace>` is a NatSpec **custom tag**, not a free-floating
+comment. Place it **inside** the struct's NatSpec block as the last tag — never as a `///` line
+above the block. Solc's NatSpec parser, `forge inspect storage-layout`, Slither, and the
+OpenZeppelin upgrades plugin all read the tag from the doc-comment block regardless of
+placement; keeping it inside the block keeps the annotation visually adjacent to the struct
+identifier and the whole doc unit contiguous.
+
+```solidity
+/**
+ * @notice Persistent storage layout for ERC-20 metadata and balances.
+ * @dev Holds the initialisation flag, decimals, total supply, balances, and allowances.
+ *      New fields must be appended below the marker to preserve ERC-7201 slot offsets.
+ * @custom:storage-location erc7201:security.token.standard.storage.Erc20
+ */
+struct ERC20Storage { ... }
+```
+
+When a single struct backs multiple ERC-7201 namespaces (e.g. `ScheduledTasksDataStorage`,
+`ExternalListDataStorage`), list every binding in a `@dev` block — no single
+`@custom:storage-location` line captures the multi-binding.
+
 ## Style
 
 - **British English**: _decentralised_, _behaviour_, _initialised_, _optimise_, _authorised_,
