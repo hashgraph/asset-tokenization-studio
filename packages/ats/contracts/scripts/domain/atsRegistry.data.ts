@@ -2109,6 +2109,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
+        name: "CapInitialized",
+        signature: {
+          full: "event CapInitialized(address indexed operator, uint256 maxSupply, (bytes32 partition, uint256 maxSupply)[] partitionCap)",
+          canonical: "CapInitialized(address,uint256,(bytes32,uint256)[])",
+        },
+        topic0: "0xb08ca9530e8e6d090bbded716fc4c6f88877dba36f621da6e89d77cbaabcafec",
+      },
+      {
         name: "MaxSupplyByPartitionSet",
         signature: {
           full: "event MaxSupplyByPartitionSet(address indexed operator, bytes32 indexed partition, uint256 newMaxSupply, uint256 previousMaxSupply)",
@@ -2143,14 +2151,17 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa1180aad",
       },
       {
-        name: "AlreadyInitialized",
-        signature: { full: "error AlreadyInitialized()", canonical: "AlreadyInitialized()" },
-        selector: "0x0dc149f0",
-      },
-      {
         name: "Deactivated",
         signature: { full: "error Deactivated()", canonical: "Deactivated()" },
         selector: "0x1142a68c",
+      },
+      {
+        name: "FacetAlreadyRegistered",
+        signature: {
+          full: "error FacetAlreadyRegistered(bytes32 facetId, uint256 lastVersion)",
+          canonical: "FacetAlreadyRegistered(bytes32,uint256)",
+        },
+        selector: "0x05ebbb24",
       },
       { name: "IsPaused", signature: { full: "error IsPaused()", canonical: "IsPaused()" }, selector: "0x1309a563" },
       {
