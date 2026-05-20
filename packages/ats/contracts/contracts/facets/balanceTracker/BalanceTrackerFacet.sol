@@ -32,7 +32,12 @@ contract BalanceTrackerFacet is BalanceTracker, IStaticFunctionSelectors {
      */
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
-            Bytes4Builder.build(this.balanceOf.selector, this.totalSupply.selector, this.getTotalBalanceFor.selector);
+            Bytes4Builder.build(
+                this.initializeBalanceTracker.selector,
+                this.balanceOf.selector,
+                this.totalSupply.selector,
+                this.getTotalBalanceFor.selector
+            );
     }
 
     /**

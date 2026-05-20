@@ -13,6 +13,20 @@ import { HolderBalance } from "../layer_1/snapshot/ISnapshots.sol";
  */
 interface IBalanceTrackerAtSnapshot {
     /**
+     * @notice Emitted once when the snapshot balance tracker capability is initialised on a token.
+     * @dev Fires exclusively from `initializeBalanceTrackerAtSnapshot` after the storage write succeeds.
+     * @param operator The account that invoked initialisation (deployer or upgrade caller).
+     */
+    event BalanceTrackerAtSnapshotInitialized(address indexed operator);
+
+    /**
+     * @notice Initialises the snapshot balance tracker capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeBalanceTrackerAtSnapshot() external;
+
+    /**
      * @notice Returns the balance of a token holder at the time of a given snapshot.
      * @param _snapshotID  The snapshot identifier returned by a prior `takeSnapshot` call.
      * @param _tokenHolder The address of the token holder.

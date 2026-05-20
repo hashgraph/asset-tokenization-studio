@@ -42,4 +42,14 @@ abstract contract InterestRateModifiers {
         InterestRateStorageWrapper.checkValidRateType(rateType);
         _;
     }
+
+    /**
+     * @notice Modifier that reverts when the interest rate type has already been initialised.
+     * @dev Prevents re-initialisation of the interest rate type. Uses the storage-backed
+     *      `isInterestRateTypeInitialized` check from `InterestRateStorageWrapper`.
+     */
+    modifier onlyNotInterestRateTypeInitialized() {
+        require(!InterestRateStorageWrapper.isInterestRateTypeInitialized(), "InterestRateTypeAlreadyInitialized");
+        _;
+    }
 }

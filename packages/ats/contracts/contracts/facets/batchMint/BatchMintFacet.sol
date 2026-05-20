@@ -25,7 +25,7 @@ contract BatchMintFacet is BatchMint, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.batchMint.selector);
+        return Bytes4Builder.build(this.initializeBatchMint.selector, this.batchMint.selector);
     }
 
     /// @inheritdoc IStaticFunctionSelectors

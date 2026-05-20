@@ -227,4 +227,32 @@ describe("BatchBurn Tests", () => {
       );
     });
   });
+  describe("initializeBatchBurn", () => {
+    it("GIVEN an already-initialised facet WHEN initializeBatchBurn is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      const base = await deployEquityTokenFixture();
+      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await freshAsset.connect(base.deployer).initializeBatchBurn();
+      await expect(freshAsset.connect(base.deployer).initializeBatchBurn()).to.be.revertedWithCustomError(
+        freshAsset,
+        "FacetAlreadyRegistered",
+      );
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeBatchBurn is called THEN it reverts with AccountHasNoRole", async () => {
+      const base = await deployEquityTokenFixture();
+      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await expect(freshAsset.connect(base.user3).initializeBatchBurn()).to.be.revertedWithCustomError(
+        freshAsset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN a fresh deployment WHEN initializeBatchBurn is called THEN it emits BatchBurnInitialized", async () => {
+      const base = await deployEquityTokenFixture();
+      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await expect(freshAsset.connect(base.deployer).initializeBatchBurn())
+        .to.emit(freshAsset, "BatchBurnInitialized")
+        .withArgs(await base.deployer.getAddress());
+    });
+  });
 });

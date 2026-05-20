@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { CONTROLLER_ROLE, AGENT_ROLE, _buildRoles } from "../../constants/roles.sol";
+import { CONTROLLER_ROLE, AGENT_ROLE, DEFAULT_ADMIN_ROLE, _buildRoles } from "../../constants/roles.sol";
 import { IBatchController } from "./IBatchController.sol";
 import { IController } from "../controller/IController.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _BATCH_CONTROLLER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title BatchController
@@ -17,6 +19,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  *      downstream indexers observe the same event stream as the single-shot path.
  */
 abstract contract BatchController is IBatchController, Modifiers {
+    /// @inheritdoc IBatchController
+    function initializeBatchController()
+        external
+        override
+        onlyFacetNotRegistered(_BATCH_CONTROLLER_RESOLVER_KEY)
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        InitializerStorageWrapper.setFacetToReady(_BATCH_CONTROLLER_RESOLVER_KEY);
+        emit IBatchController.BatchControllerInitialized(EvmAccessors.getMsgSender());
+    }
+
     /// @inheritdoc IBatchController
     function batchForcedTransfer(
         address[] calldata _fromList,

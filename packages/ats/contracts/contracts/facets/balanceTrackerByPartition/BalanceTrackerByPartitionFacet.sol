@@ -27,6 +27,7 @@ contract BalanceTrackerByPartitionFacet is BalanceTrackerByPartition, IStaticFun
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeBalanceTrackerByPartition.selector,
                 this.balanceOfByPartition.selector,
                 this.totalSupplyByPartition.selector,
                 this.getTotalBalanceForByPartition.selector

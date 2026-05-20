@@ -27,6 +27,8 @@ abstract contract Loan is ILoan, Modifiers {
         validateDates(_loanDetailsData.loanBasicData.startingDate, _loanDetailsData.loanBasicData.maturityDate)
     {
         LoanStorageWrapper.initializeLoan(_loanDetailsData);
+        // TODO: [LOAN-INTEGRATION] Security data should be initialised through TreasuryToken/deployment layer.
+        // SecurityStorageWrapper.initializeSecurity(_regulationData, _additionalSecurityData);
         InitializerStorageWrapper.setFacetToReady(_LOAN_RESOLVER_KEY);
         emit ILoan.LoanInitialized(_loanDetailsData);
     }

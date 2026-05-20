@@ -2,9 +2,14 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IBalanceTracker } from "./IBalanceTracker.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { _BALANCE_TRACKER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title BalanceTracker
@@ -14,7 +19,18 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
  *      passing the resolved timestamp from `TimeTravelStorageWrapper` to support
  *      non-triggered adjustment simulation. Intended to be inherited by `BalanceTrackerFacet`.
  */
-abstract contract BalanceTracker is IBalanceTracker {
+abstract contract BalanceTracker is IBalanceTracker, Modifiers {
+    /// @inheritdoc IBalanceTracker
+    function initializeBalanceTracker()
+        external
+        override
+        onlyFacetNotRegistered(_BALANCE_TRACKER_RESOLVER_KEY)
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        InitializerStorageWrapper.setFacetToReady(_BALANCE_TRACKER_RESOLVER_KEY);
+        emit IBalanceTracker.BalanceTrackerInitialized(EvmAccessors.getMsgSender());
+    }
+
     /**
      * @notice Returns the total token balance of a token holder across all partitions,
      *         simulating non-triggered balance adjustments up to the current timestamp.

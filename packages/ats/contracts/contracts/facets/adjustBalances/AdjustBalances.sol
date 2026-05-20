@@ -2,11 +2,14 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IAdjustBalances } from "./IAdjustBalances.sol";
-import { ADJUSTMENT_BALANCE_ROLE } from "../../constants/roles.sol";
+import { ADJUSTMENT_BALANCE_ROLE, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { AdjustBalancesStorageWrapper } from "../../domain/asset/AdjustBalancesStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { _BALANCE_ADJUSTMENTS_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title AdjustBalances
@@ -18,6 +21,17 @@ import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
  *      Intended to be inherited by `AdjustBalancesFacet`.
  */
 abstract contract AdjustBalances is IAdjustBalances, Modifiers {
+    /// @inheritdoc IAdjustBalances
+    function initializeBalanceAdjustments()
+        external
+        override
+        onlyFacetNotRegistered(_BALANCE_ADJUSTMENTS_RESOLVER_KEY)
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        InitializerStorageWrapper.setFacetToReady(_BALANCE_ADJUSTMENTS_RESOLVER_KEY);
+        emit IAdjustBalances.BalanceAdjustmentsInitialized(EvmAccessors.getMsgSender());
+    }
+
     /// @inheritdoc IAdjustBalances
     /// @dev Emits {AdjustmentBalanceSet}.
     function adjustBalances(
