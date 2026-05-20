@@ -42,13 +42,12 @@ library CouponRateDispatch {
         uint256 couponID,
         ICouponTypes.Coupon memory coupon
     ) internal view returns (ICouponTypes.Coupon memory resolvedCoupon_) {
+        resolvedCoupon_ = coupon;
         if (InterestRateStorageWrapper.getCouponRateType() == IInterestRate.RateType.KPI_LINKED) {
-            (coupon.rate, coupon.rateDecimals, coupon.rateStatus) = KpiLinkedRateLib.calculateKpiLinkedInterestRate(
-                couponID,
-                coupon
-            );
+            (resolvedCoupon_.rate, resolvedCoupon_.rateDecimals, resolvedCoupon_.rateStatus) = KpiLinkedRateLib
+                .calculateKpiLinkedInterestRate(couponID, coupon);
         }
-        return coupon;
+        return resolvedCoupon_;
         // NONE, STANDARD, FIXED: rate is owned at write time; no action needed at read/trigger time.
     }
 
