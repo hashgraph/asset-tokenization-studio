@@ -2,10 +2,13 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ICapByPartition } from "./ICapByPartition.sol";
-import { CAP_ROLE } from "../../constants/roles.sol";
+import { CAP_ROLE, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../domain/core/CapStorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { _CAP_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title CapByPartition
@@ -19,6 +22,17 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
  *      to be inherited by `CapByPartitionFacet`.
  */
 abstract contract CapByPartition is ICapByPartition, Modifiers {
+    /// @inheritdoc ICapByPartition
+    function initializeCapByPartition()
+        external
+        override
+        onlyFacetNotRegistered(_CAP_BY_PARTITION_RESOLVER_KEY)
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        InitializerStorageWrapper.setFacetToReady(_CAP_BY_PARTITION_RESOLVER_KEY);
+        emit ICapByPartition.CapByPartitionInitialized(EvmAccessors.getMsgSender());
+    }
+
     /// @inheritdoc ICapByPartition
     function setMaxSupplyByPartition(
         bytes32 _partition,

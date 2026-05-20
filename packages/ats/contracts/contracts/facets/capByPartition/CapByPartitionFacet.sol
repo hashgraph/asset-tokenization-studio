@@ -13,8 +13,8 @@ import { _CAP_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol
  * @notice Diamond facet that exposes the per-partition maximum supply cap surface through the
  *         `ICapByPartition` interface, registered under `_CAP_BY_PARTITION_RESOLVER_KEY`.
  * @dev Inherits behaviour from `CapByPartition` and satisfies `IStaticFunctionSelectors` for
- *      Diamond proxy selector registration. Exposes two selectors:
- *      `setMaxSupplyByPartition`, `getMaxSupplyByPartition`.
+ *      Diamond proxy selector registration. Exposes three selectors:
+ *      `initializeCapByPartition`, `setMaxSupplyByPartition`, `getMaxSupplyByPartition`.
  */
 contract CapByPartitionFacet is CapByPartition, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
@@ -24,7 +24,12 @@ contract CapByPartitionFacet is CapByPartition, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.setMaxSupplyByPartition.selector, this.getMaxSupplyByPartition.selector);
+        return
+            Bytes4Builder.build(
+                this.initializeCapByPartition.selector,
+                this.setMaxSupplyByPartition.selector,
+                this.getMaxSupplyByPartition.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors
