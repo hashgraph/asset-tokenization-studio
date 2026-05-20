@@ -22,6 +22,13 @@ interface IKyc {
     }
 
     /**
+     * @notice Emitted once when the KYC capability is initialised on a token.
+     * @dev Fires exclusively from `initializeInternalKyc` after the storage write succeeds.
+     * @param operator The account that invoked initialisation (deployer or upgrade caller).
+     */
+    event KycInitialized(address indexed operator);
+
+    /**
      * @dev Emitted when a Kyc is granted
      *
      * @param account The address for which the Kyc is granted

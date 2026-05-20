@@ -17,6 +17,13 @@ import { IKyc } from "../layer_1/kyc/IKyc.sol";
  */
 interface IExternalKycListManagement {
     /**
+     * @notice Emitted once when the external KYC list capability is initialised on a token.
+     * @dev Fires exclusively from `initializeExternalKycLists` after the storage write succeeds.
+     * @param operator The account that invoked initialisation (deployer or upgrade caller).
+     */
+    event ExternalKycListInitialized(address indexed operator);
+
+    /**
      * @notice Emitted when multiple external KYC list addresses are added or removed in a single
      *         batch.
      * @param operator Address of the caller who performed the update.
@@ -60,7 +67,7 @@ interface IExternalKycListManagement {
 
     /**
      * @notice One-time initialiser that populates the external KYC list at token deployment.
-     * @dev Can only be called once; subsequent calls revert via `onlyNotKycExternalInitialized`.
+     * @dev Can only be called once; subsequent calls revert via `onlyFacetNotRegistered`.
      *      The leading-underscore naming convention signals this is an initialiser function.
      * @param _kycLists Initial array of external KYC list contract addresses to register.
      */

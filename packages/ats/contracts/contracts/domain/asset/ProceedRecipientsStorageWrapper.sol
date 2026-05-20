@@ -27,8 +27,6 @@ library ProceedRecipientsStorageWrapper {
                 ++index;
             }
         }
-
-        ExternalListManagementStorageWrapper.setExternalListInitialized(_PROCEED_RECIPIENTS_STORAGE_POSITION);
     }
 
     function addProceedRecipient(address _proceedRecipient, bytes calldata _data) internal {
@@ -90,11 +88,6 @@ library ProceedRecipientsStorageWrapper {
                 _pageIndex,
                 _pageLength
             );
-    }
-
-    function isProceedRecipientsInitialized() internal view returns (bool) {
-        return
-            ExternalListManagementStorageWrapper.externalListStorage(_PROCEED_RECIPIENTS_STORAGE_POSITION).initialized;
     }
 
     function proceedRecipientsDataStorage()

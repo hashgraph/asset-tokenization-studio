@@ -8,6 +8,13 @@ interface IProtectedPartitions {
         bytes signature;
     }
 
+    /**
+     * @notice Emitted once when the protected partitions capability is initialised on a token.
+     * @dev Fires exclusively from `initialize_ProtectedPartitions` after the storage write succeeds.
+     * @param operator The account that invoked initialisation (deployer or upgrade caller).
+     */
+    event ProtectedPartitionsInitialized(address indexed operator);
+
     event PartitionsProtected(address indexed operator);
     event PartitionsUnProtected(address indexed operator);
     event ProtectedTransferFrom(

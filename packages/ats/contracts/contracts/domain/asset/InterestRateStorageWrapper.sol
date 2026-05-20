@@ -18,7 +18,6 @@ import { IInterestRate } from "../../facets/interestRate/IInterestRate.sol";
 struct FixedRateDataStorage {
     uint256 rate;
     uint8 decimals;
-    bool initialized;
 }
 
 /**
@@ -54,7 +53,6 @@ struct KpiLinkedRateDataStorage {
     uint256 maxDeviationFloor;
     uint256 adjustmentPrecision;
     uint8 impactDataDecimals;
-    bool initialized;
 }
 
 /**
@@ -154,18 +152,10 @@ library InterestRateStorageWrapper {
      * @notice Checks whether the fixed rate data has been initialised.
      * @return True if fixed rate data is initialised, false otherwise.
      */
-    function isFixedRateInitialized() internal view returns (bool) {
-        return fixedRateStorage().initialized;
-    }
-
     /**
      * @notice Checks whether the KPI-linked rate data has been initialised.
      * @return True if KPI-linked rate data is initialised, false otherwise.
      */
-    function isKpiLinkedRateInitialized() internal view returns (bool) {
-        return kpiLinkedRateStorage().initialized;
-    }
-
     /**
      * @notice Checks whether the coupon rate type has been initialised.
      * @return True if the coupon rate type has been initialised, false otherwise.

@@ -57,7 +57,6 @@ library LoansPortfolioStorageWrapper {
         EnumerableSet.Bytes32Set loanHoldingsAssetsByCountryKeys;
         mapping(bytes32 => string) countryNames;
         mapping(bytes32 => uint256) loanHoldingsAssetsByCountry;
-        bool initialized;
     }
 
     /**
@@ -66,8 +65,6 @@ library LoansPortfolioStorageWrapper {
      * @param _loansPortfolioData The portfolio details containing type and distribution policy.
      */
     function initializeLoansPortfolio(ILoansPortfolio.LoansPortfolioDetailsData calldata _loansPortfolioData) internal {
-        LoansPortfolioDataStorage storage s = loansPortfolioStorage();
-        s.initialized = true;
         storeLoansPortfolioDetails(_loansPortfolioData);
     }
 
@@ -318,10 +315,6 @@ library LoansPortfolioStorageWrapper {
      * @notice Returns whether the loans portfolio storage has been initialised.
      * @return True if `initializeLoansPortfolio` was called, false otherwise.
      */
-    function isLoansPortfolioInitialized() internal view returns (bool) {
-        return loansPortfolioStorage().initialized;
-    }
-
     /**
      * @notice Returns the number of loan holding assets in the portfolio.
      * @return numberOfLoans_ Count of loan holdings.

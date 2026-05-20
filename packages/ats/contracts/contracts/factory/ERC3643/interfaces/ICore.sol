@@ -35,6 +35,13 @@ interface TRexICore {
     }
 
     /**
+     * @notice Emitted once when the core ERC-20 metadata is initialised on a token.
+     * @dev Fires exclusively from `initializeCore` after the storage write succeeds.
+     * @param operator The account that invoked initialisation (deployer or upgrade caller).
+     */
+    event CoreInitialized(address indexed operator);
+
+    /**
      * @notice Initializes the Core domain (name, symbol, decimals and the rest of the ERC20 metadata).
      * @param metadata The full ERC-20 metadata bundle to persist.
      */

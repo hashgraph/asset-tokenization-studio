@@ -19,7 +19,6 @@ struct ERC20VotesStorage {
     mapping(address => Checkpoints.Checkpoint[]) checkpoints;
     Checkpoints.Checkpoint[] totalSupplyCheckpoints;
     Checkpoints.Checkpoint[] abafCheckpoints;
-    bool initialized;
 }
 
 library ERC20VotesStorageWrapper {
@@ -28,7 +27,6 @@ library ERC20VotesStorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20Votes(bool activated) internal {
         setActivate(activated);
-        erc20VotesStorage_().initialized = true;
     }
 
     function setActivate(bool activated) internal {
@@ -197,10 +195,6 @@ library ERC20VotesStorageWrapper {
 
     function isActivated() internal view returns (bool) {
         return erc20VotesStorage_().activated;
-    }
-
-    function isERC20VotesInitialized() internal view returns (bool) {
-        return erc20VotesStorage_().initialized;
     }
 
     function add(uint256 a, uint256 b) internal pure returns (uint256) {

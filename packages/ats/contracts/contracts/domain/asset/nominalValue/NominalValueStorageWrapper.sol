@@ -19,7 +19,6 @@ library NominalValueStorageWrapper {
     struct NominalValueDataStorage {
         uint256 nominalValue;
         uint8 nominalValueDecimals;
-        bool initialized;
         bytes3 nominalValueCurrency;
     }
 
@@ -34,7 +33,6 @@ library NominalValueStorageWrapper {
         uint8 _nominalValueDecimals,
         bytes3 _nominalValueCurrency
     ) internal {
-        _nominalValueStorage().initialized = true;
         setNominalValue(_nominalValue, _nominalValueDecimals);
         setNominalValueCurrency(_nominalValueCurrency);
     }
@@ -77,10 +75,6 @@ library NominalValueStorageWrapper {
      */
     function getNominalValueCurrency() internal view returns (bytes3) {
         return _nominalValueStorage().nominalValueCurrency;
-    }
-
-    function isNominalValueInitialized() internal view returns (bool) {
-        return _nominalValueStorage().initialized;
     }
 
     function _nominalValueStorage() private pure returns (NominalValueDataStorage storage nvData_) {

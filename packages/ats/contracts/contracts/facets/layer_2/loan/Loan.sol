@@ -2,9 +2,13 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ILoan } from "./ILoan.sol";
-import { LOAN_MANAGER_ROLE } from "../../../constants/roles.sol";
+import { LOAN_MANAGER_ROLE, DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
+import { _LOAN_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import { LoanStorageWrapper } from "../../../domain/asset/loan/LoanStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
+import { SecurityStorageWrapper } from "../../../domain/asset/SecurityStorageWrapper.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title Loan
@@ -18,11 +22,15 @@ abstract contract Loan is ILoan, Modifiers {
     )
         external
         override
-        onlyUninitialized(LoanStorageWrapper.isLoanInitialized())
+        onlyFacetNotRegistered(_LOAN_RESOLVER_KEY)
+        onlyRole(DEFAULT_ADMIN_ROLE)
         onlyValidTimestamp(_loanDetailsData.loanBasicData.startingDate)
         validateDates(_loanDetailsData.loanBasicData.startingDate, _loanDetailsData.loanBasicData.maturityDate)
     {
         LoanStorageWrapper.initializeLoan(_loanDetailsData);
+        SecurityStorageWrapper.initializeSecurity(_regulationData, _additionalSecurityData);
+        InitializerStorageWrapper.setFacetToReady(_LOAN_RESOLVER_KEY);
+        emit ILoan.LoanInitialized(EvmAccessors.getMsgSender());
     }
 
     function setLoanDetails(

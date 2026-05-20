@@ -54,7 +54,19 @@ Examples:
 
 ## 3. Step B — Define the event in the interface
 
-In `IXxx.sol`, add the event declaration before the function declarations.
+In `IXxx.sol`, add the event declaration before the function declarations but **after** all
+`struct` and `enum` definitions. Solhint enforces this ordering: any `event` that appears
+before a `struct` or `enum` in the same interface is an error.
+
+Correct placement:
+
+```
+struct Foo { ... }   // ← types first
+enum Bar { ... }     // ← types first
+
+event XxxInitialized(...);   // ← event AFTER all types
+event OtherEvent(...);
+```
 
 `address indexed operator` is **always** the first parameter, even when the function has no
 input parameters:
@@ -379,6 +391,16 @@ cd packages/ats/contracts && npm run compile --force 2>&1 | grep -E "Warning|Err
 
 Expected: 0 warnings and 0 errors on the modified files.
 
+### AC-6 — Solhint ordering clean
+
+```bash
+cd packages/ats/contracts && npx solhint --config solhint.config.js 'contracts/**/*.sol' 2>&1 | grep "ordering" | grep -i "error"
+```
+
+Expected: 0 lines. Any `ordering` error means a `struct` or `enum` was placed after an `event`
+in the modified interface — move the `XxxInitialized` event to appear after the last type
+definition. This is the most common mistake introduced by this skill.
+
 ---
 
 ## 10. Factory.sol note
@@ -400,6 +422,7 @@ See `workflows/FACTORY.md` for the full wiring procedure.
 ## 11. Verification checklist (static review)
 
 - [ ] Event declared in `IXxx.sol` with `address indexed operator` as first param and NatSpec
+- [ ] Event placed **after** all `struct`/`enum` definitions in `IXxx.sol` (Solhint ordering rule)
 - [ ] Function declared in `IXxx.sol` with NatSpec
 - [ ] `onlyFacetNotRegistered` is first modifier after `override`
 - [ ] `onlyRole(DEFAULT_ADMIN_ROLE)` is second modifier
@@ -411,3 +434,4 @@ See `workflows/FACTORY.md` for the full wiring procedure.
 - [ ] Solhint produces no new errors on modified files
 - [ ] `rg "initializeXxx" contracts/factory/Factory.sol` — note if missing; flag for `initialize-factory`
 - [ ] Changeset file created under `.changeset/`
+- [ ] If `XxxModifiers.sol` is now empty after migration: delete the file and remove its `import` and `is XxxModifiers` clause from `AssetModifiers.sol` (or equivalent aggregator)

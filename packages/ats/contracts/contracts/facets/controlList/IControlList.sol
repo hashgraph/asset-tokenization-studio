@@ -16,6 +16,14 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface IControlList {
     /**
+     * @notice Emitted once when the control list capability is initialised on a token.
+     * @dev Fires exclusively from `initializeControlList` after the storage write succeeds.
+     * @param operator The account that invoked initialisation (deployer or upgrade caller).
+     * @param isWhiteList Whether the control list operates in whitelist mode.
+     */
+    event ControlListInitialized(address indexed operator, bool isWhiteList);
+
+    /**
      * @notice Emitted when an account is added to the control list.
      * @param operator Address of the caller who performed the addition.
      * @param account Address of the account that was added.
@@ -45,7 +53,7 @@ interface IControlList {
 
     /**
      * @notice One-time initialiser that sets the control list operating mode.
-     * @dev Can only be called once; subsequent calls revert via `onlyNotControlListInitialized`.
+     * @dev Can only be called once; subsequent calls revert via `onlyFacetNotRegistered`.
      *      The leading-underscore naming convention signals this is an initialiser function.
      * @param _isWhiteList `true` to operate as a whitelist (only listed addresses allowed),
      *        `false` to operate as a blacklist (listed addresses blocked).

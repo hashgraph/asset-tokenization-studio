@@ -2,14 +2,22 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC20Votes } from "./IERC20Votes.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../../../constants/roles.sol";
+import { _ERC20VOTES_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 import { Checkpoints } from "../../../../infrastructure/utils/Checkpoints.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
 import { ERC20VotesStorageWrapper } from "../../../../domain/asset/ERC20VotesStorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../../../domain/core/InitializerStorageWrapper.sol";
+import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ERC20Votes is IERC20Votes, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC20Votes(bool _activated) external override onlyNotERC20VotesInitialized {
+    function initialize_ERC20Votes(
+        bool _activated
+    ) external override onlyFacetNotRegistered(_ERC20VOTES_RESOLVER_KEY) onlyRole(DEFAULT_ADMIN_ROLE) {
         ERC20VotesStorageWrapper.initialize_ERC20Votes(_activated);
+        InitializerStorageWrapper.setFacetToReady(_ERC20VOTES_RESOLVER_KEY);
+        emit IERC20Votes.ERC20VotesInitialized(EvmAccessors.getMsgSender());
     }
 
     function delegate(address _delegatee) external override onlyActivated onlyUnpaused {

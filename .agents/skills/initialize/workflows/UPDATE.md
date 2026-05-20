@@ -58,12 +58,20 @@ initialize_ERC1410    →  initializeERC1410
 
 Apply the rename in:
 
-1. Facet implementation
-2. Interface (`IXxx.sol`)
+1. Facet implementation — rename the function AND remove the `// solhint-disable-next-line func-name-mixedcase` comment immediately above it
+2. Interface (`IXxx.sol`) — rename the function signature AND remove the `// solhint-disable-next-line func-name-mixedcase` comment; also update any NatSpec `@dev` that references the old name
 3. `Factory.sol` — find the exact call and update it (preserve mandatory / `_tryInitialize_` pattern)
 4. TypeScript — every `.test.ts`, `fixture.ts`, and script file that references the old name
 
 > Do not rename functions that are already camelCase without underscores.
+
+> When removing the `// solhint-disable-next-line func-name-mixedcase` line, verify with:
+>
+> ```bash
+> rg "solhint-disable-next-line func-name-mixedcase" packages/ats/contracts/contracts/ -g "*.sol"
+> ```
+>
+> Expected: 0 matches after the rename (no suppress comment should remain for this function).
 
 ---
 
@@ -159,6 +167,21 @@ adding the new `initializeXxx` call at the correct position in the initialiser s
 ---
 
 ## 8. Step F — Add or fix the event
+
+### Solhint ordering rule
+
+In `IXxx.sol` the event MUST appear **after** all `struct` and `enum` definitions.
+Solhint reports a hard error if any event precedes a type definition in the same interface.
+Place `XxxInitialized` immediately before the other `event` declarations, never at the top:
+
+```solidity
+// correct
+struct Foo { ... }
+enum Bar { ... }
+
+event XxxInitialized(address indexed operator);  // ← after types
+event SomeOtherEvent(...);
+```
 
 ### Event signature rule
 
@@ -403,6 +426,15 @@ cd packages/ats/contracts && npm run compile --force 2>&1 | grep -E "Warning|Err
 
 Expected: 0 warnings and 0 errors on the modified files.
 
+### AC-6 — Solhint ordering clean
+
+```bash
+cd packages/ats/contracts && npx solhint --config solhint.config.js 'contracts/**/*.sol' 2>&1 | grep "ordering" | grep -i "error"
+```
+
+Expected: 0 lines. Any `ordering` error means a `struct` or `enum` was placed after an `event`
+in the modified interface — move `XxxInitialized` to appear after the last type definition.
+
 ---
 
 ## 12. Factory.sol note
@@ -428,6 +460,7 @@ initialised directly in `_deploySecurity`. Optional facets that use
 
 - [ ] `onlyFacetNotRegistered(_XXX_RESOLVER_KEY)` is the first modifier after `override`
 - [ ] `onlyRole(DEFAULT_ADMIN_ROLE)` is the second modifier
+- [ ] `XxxInitialized` event placed **after** all `struct`/`enum` definitions in `IXxx.sol` (Solhint ordering rule)
 - [ ] `import { DEFAULT_ADMIN_ROLE }` present in the facet
 - [ ] `bool initialized` deleted from the struct (backward compatibility intentionally broken)
 - [ ] `setFacetToReady` called before the emit in the function body
@@ -437,3 +470,5 @@ initialised directly in `_deploySecurity`. Optional facets that use
 - [ ] Solhint produces no new errors on modified files
 - [ ] Changeset file created under `.changeset/`
 - [ ] `rg "oldFunctionName" . -g "*.sol" -g "*.ts"` returns 0 matches (if renamed)
+- [ ] If function was renamed: `rg "solhint-disable-next-line func-name-mixedcase" contracts/ -g "*.sol"` returns 0 matches for the migrated facet
+- [ ] If modifier file (`XxxModifiers.sol`) is now empty after migration: delete it and remove all references (import + `is` clause) from aggregator contracts like `AssetModifiers.sol`

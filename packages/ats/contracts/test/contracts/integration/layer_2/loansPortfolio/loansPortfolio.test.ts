@@ -83,13 +83,23 @@ describe("LoansPortfolio Token Tests", () => {
       expect(data.distributionPolicy).to.equal(DEFAULT_LOANS_PORTFOLIO_PARAMS.distributionPolicy);
     });
 
-    it("GIVEN an already initialized portfolio WHEN initializing again THEN reverts with AlreadyInitialized", async () => {
+    it("GIVEN an already initialized portfolio WHEN initializing again THEN reverts with FacetAlreadyRegistered", async () => {
+      const regulationData = getRegulationData();
+
       await expect(
-        asset.initializeLoansPortfolio({
-          portfolioType: DEFAULT_LOANS_PORTFOLIO_PARAMS.portfolioType,
-          distributionPolicy: DEFAULT_LOANS_PORTFOLIO_PARAMS.distributionPolicy,
-        }),
-      ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+        asset.initializeLoansPortfolio(
+          {
+            portfolioType: DEFAULT_LOANS_PORTFOLIO_PARAMS.portfolioType,
+            distributionPolicy: DEFAULT_LOANS_PORTFOLIO_PARAMS.distributionPolicy,
+          },
+          buildRegulationData(regulationData.regulationType, regulationData.regulationSubType),
+          {
+            countriesControlListType: regulationData.additionalSecurityData.countriesControlListType,
+            listOfCountries: regulationData.additionalSecurityData.listOfCountries,
+            info: regulationData.additionalSecurityData.info,
+          },
+        ),
+      ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
     });
   });
 

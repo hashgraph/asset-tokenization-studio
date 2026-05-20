@@ -28,7 +28,6 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  * @param arePartitionsProtected Whether token partitions are currently protected.
  */
 struct ProtectedPartitionsDataStorage {
-    bool initialized;
     bool arePartitionsProtected;
 }
 
@@ -46,7 +45,6 @@ library ProtectedPartitionsStorageWrapper {
     function initialize_ProtectedPartitions(bool _protectPartitions) internal returns (bool success_) {
         ProtectedPartitionsDataStorage storage pps = protectedPartitionsStorage();
         pps.arePartitionsProtected = _protectPartitions;
-        pps.initialized = true;
         success_ = true;
     }
 
@@ -65,10 +63,6 @@ library ProtectedPartitionsStorageWrapper {
 
     function arePartitionsProtected() internal view returns (bool) {
         return protectedPartitionsStorage().arePartitionsProtected;
-    }
-
-    function isProtectedPartitionInitialized() internal view returns (bool) {
-        return protectedPartitionsStorage().initialized;
     }
 
     function requireUnProtectedPartitionsOrWildCardRole() internal view {

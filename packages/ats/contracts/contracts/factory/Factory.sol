@@ -153,6 +153,8 @@ abstract contract Factory is IFactory {
 
         _tryInitializeInterestRateType(equityAddress_, IInterestRate.RateType.STANDARD);
 
+        IAccessControl(equityAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
+
         emit EquityDeployed(EvmAccessors.getMsgSender(), equityAddress_, _equityData, _factoryRegulationData);
     }
 
@@ -177,6 +179,8 @@ abstract contract Factory is IFactory {
         bondAddress_ = _deployBond(_bondData, _factoryRegulationData, SecurityType.BondVariableRate);
 
         _tryInitializeInterestRateType(bondAddress_, IInterestRate.RateType.STANDARD);
+
+        IAccessControl(bondAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
 
         emit BondDeployed(EvmAccessors.getMsgSender(), bondAddress_, _bondData, _factoryRegulationData);
     }
@@ -215,6 +219,8 @@ abstract contract Factory is IFactory {
 
         _tryInitializeInterestRateType(bondAddress_, IInterestRate.RateType.FIXED);
 
+        IAccessControl(bondAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
+
         emit BondFixedRateDeployed(EvmAccessors.getMsgSender(), bondAddress_, _bondFixedRateData);
     }
 
@@ -244,6 +250,7 @@ abstract contract Factory is IFactory {
         returns (address bondAddress_)
     {
         bondAddress_ = _deployBondKpiLinkedRate(_bondKpiLinkedRateData);
+        IAccessControl(bondAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
         _emitBondKpiLinkedRateDeployed(bondAddress_, _bondKpiLinkedRateData);
     }
 
@@ -371,9 +378,6 @@ abstract contract Factory is IFactory {
 
         // configure ERC3643 (should be present)
         IERC3643(securityAddress_).initialize_ERC3643(_securityData.compliance, _securityData.identityRegistry);
-
-        // Renounce temporary admin role — factory no longer needs it after initializers.
-        IAccessControl(securityAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
     }
 
     function _tryInitialize_ERC1410(address securityAddress_, bool isMultiPartition) private {

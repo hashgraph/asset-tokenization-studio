@@ -45,13 +45,10 @@ library LoanStorageWrapper {
         // LoanPerformanceStatus
         uint8 performanceStatus;
         uint256 daysPastDue;
-        // State
-        bool initialized;
     }
 
     function initializeLoan(ILoan.LoanDetailsData calldata _loanDetailsData) internal {
         LoanDataStorage storage ls = _loanStorage();
-        ls.initialized = true;
         _writeLoanDetails(_loanDetailsData, ls);
     }
 
@@ -105,10 +102,6 @@ library LoanStorageWrapper {
             performanceStatus: ILoan.PerformanceStatus(ls.performanceStatus),
             daysPastDue: ls.daysPastDue
         });
-    }
-
-    function isLoanInitialized() internal view returns (bool) {
-        return _loanStorage().initialized;
     }
 
     function _writeLoanDetails(ILoan.LoanDetailsData memory _ld, LoanDataStorage storage _ls) private {

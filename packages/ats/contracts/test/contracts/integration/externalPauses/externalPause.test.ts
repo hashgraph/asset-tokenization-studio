@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, EQUITY_CONFIG_ID, GAS_LIMIT } from "@scripts";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture } from "@test";
 import { ResolverProxy, type IAsset, MockedExternalPause } from "@contract-types";
 
@@ -12,6 +12,7 @@ describe("ExternalPause Tests", () => {
   let diamond: ResolverProxy;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
   let externalPauseMock1: MockedExternalPause;
@@ -40,6 +41,7 @@ describe("ExternalPause Tests", () => {
     diamond = base.diamond;
     signer_A = base.deployer;
     signer_B = base.user1;
+    signer_D = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
 
@@ -399,8 +401,37 @@ describe("ExternalPause Tests", () => {
   });
 
   describe("Initialize Tests", () => {
-    it("GIVEN already initialized WHEN initializeExternalPauses is called again THEN it reverts with AlreadyInitialized", async () => {
-      await expect(asset.initializeExternalPauses([])).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+    it("GIVEN already initialized WHEN initializeExternalPauses is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeExternalPauses([])).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeExternalPauses is called THEN it reverts with AccountHasNoRole", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(signer_D).initializeExternalPauses([])).to.be.revertedWithCustomError(
+        freshAsset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN a new deployment WHEN initializeExternalPauses is called THEN it emits ExternalPauseInitialized", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      const deployReceipt = await (await freshAsset.connect(infra.deployer).initializeExternalPauses([])).wait();
+      const args = await decodeEvent(freshAsset, "ExternalPauseInitialized", deployReceipt);
+      expect(args.operator).to.equal(await infra.deployer.getAddress());
     });
   });
 

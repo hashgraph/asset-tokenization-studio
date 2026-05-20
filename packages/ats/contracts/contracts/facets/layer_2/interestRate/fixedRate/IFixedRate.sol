@@ -7,6 +7,11 @@ interface IFixedRate {
         uint8 rateDecimals;
     }
 
+    /// @notice Emitted once when the FixedRate capability is initialised on a token.
+    /// @dev Fires exclusively from `initialize_FixedRate` after the storage write succeeds.
+    /// @param operator The account that invoked initialisation (deployer or upgrade caller).
+    event FixedRateInitialized(address indexed operator);
+
     event RateUpdated(address indexed operator, uint256 newRate, uint8 newRateDecimals);
 
     error InterestRateIsFixed();

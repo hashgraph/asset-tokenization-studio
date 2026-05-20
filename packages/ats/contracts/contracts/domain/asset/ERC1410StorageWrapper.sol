@@ -41,7 +41,6 @@ struct ERC1410BasicStorage {
     /// @dev Stored value is always greater by 1 to avoid the 0 value of every index
     mapping(address => mapping(bytes32 => uint256)) partitionToIndex;
     bool multiPartition;
-    bool initialized;
     mapping(address => uint256) tokenHolderIndex;
     mapping(uint256 => address) tokenHolders;
     uint256 totalTokenHolders;
@@ -64,7 +63,6 @@ library ERC1410StorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1410(bool multiPartition) internal {
         erc1410BasicStorage().multiPartition = multiPartition;
-        erc1410BasicStorage().initialized = true;
     }
 
     /// @notice Reduces the ERC-1410 partition balance only — does NOT touch ERC-20 storage.
@@ -591,10 +589,6 @@ library ERC1410StorageWrapper {
 
     function isMultiPartition() internal view returns (bool) {
         return erc1410BasicStorage().multiPartition;
-    }
-
-    function isERC1410Initialized() internal view returns (bool) {
-        return erc1410BasicStorage().initialized;
     }
 
     function isOperator(address operator, address tokenHolder) internal view returns (bool) {

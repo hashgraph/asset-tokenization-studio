@@ -94,6 +94,11 @@ interface ILoan {
         uint256 daysPastDue;
     }
 
+    /// @notice Emitted once when the Loan capability is initialised on a token.
+    /// @dev Fires exclusively from `initialize_Loan` after the storage write succeeds.
+    /// @param operator The account that invoked initialisation (deployer or upgrade caller).
+    event LoanInitialized(address indexed operator);
+
     event LoanDetailsSet(LoanDetailsData loanDetails);
 
     function initializeLoan(LoanDetailsData calldata _loanDetailsData) external;

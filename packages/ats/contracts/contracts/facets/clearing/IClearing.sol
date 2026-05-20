@@ -15,8 +15,15 @@ import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
  */
 interface IClearing is IClearingTypes {
     /**
+     * @notice Emitted once when the clearing module is initialised on a token.
+     * @dev Fires exclusively from `initializeClearing` after the storage write succeeds.
+     * @param operator The account that invoked initialisation (deployer or upgrade caller).
+     */
+    event ClearingInitialized(address indexed operator);
+
+    /**
      * @notice Initializes the clearing module with the given activation state
-     * @dev Can only be called once per token; subsequent calls revert with `AlreadyInitialized`
+     * @dev Can only be called once per token; subsequent calls revert with `FacetAlreadyRegistered`
      * @param _activateClearing Whether clearing should be activated on initialization
      */
     function initializeClearing(bool _activateClearing) external;

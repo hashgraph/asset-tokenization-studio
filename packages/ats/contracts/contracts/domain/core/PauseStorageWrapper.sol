@@ -51,7 +51,6 @@ library PauseStorageWrapper {
                 ++index;
             }
         }
-        ExternalListManagementStorageWrapper.setExternalListInitialized(_PAUSE_MANAGEMENT_STORAGE_POSITION);
     }
 
     // solhint-disable-next-line ordering
@@ -70,10 +69,6 @@ library PauseStorageWrapper {
             }
         }
         return false;
-    }
-
-    function isExternalPauseInitialized() internal view returns (bool) {
-        return ExternalListManagementStorageWrapper.externalListStorage(_PAUSE_MANAGEMENT_STORAGE_POSITION).initialized;
     }
 
     function checkUnpaused() internal view {

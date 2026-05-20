@@ -42,10 +42,10 @@ describe("Fixed Rate Tests", () => {
     await loadFixture(deploySecurityFixtureMultiPartition);
   });
 
-  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
+  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with FacetAlreadyRegistered", async () => {
     await expect(
       asset.connect(signer_A).initialize_FixedRate({ rate: 1, rateDecimals: 0 }),
-    ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+    ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
   });
 
   describe("Paused", () => {

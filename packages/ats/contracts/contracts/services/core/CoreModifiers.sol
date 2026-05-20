@@ -13,7 +13,6 @@ pragma solidity >=0.8.0 <0.9.0;
  * - CapModifiers: Cap initialization validation
  * - ControlListModifiers: Control list validation (onlyListedAllowed)
  * - DateValidationModifiers: Date validation
- * - ExternalListModifiers: External list initialization validation
  * - PartitionModifiers: Partition protection validation
  * - PauseModifiers: Pause state validation (onlyUnpaused, onlyPaused)
  *
@@ -26,7 +25,6 @@ import { CapModifiers } from "./CapModifiers.sol";
 import { ControlListModifiers } from "./ControlListModifiers.sol";
 import { DateValidationModifiers } from "./DateValidationModifiers.sol";
 import { DocumentationModifiers } from "./DocumentationModifiers.sol";
-import { ExternalListModifiers } from "./ExternalListModifiers.sol";
 import { KycModifiers } from "./KycModifiers.sol";
 import { LoanModifiers } from "./LoanModifiers.sol";
 import { PartitionModifiers } from "./PartitionModifiers.sol";
@@ -42,7 +40,6 @@ abstract contract CoreModifiers is
     ControlListModifiers,
     DateValidationModifiers,
     DocumentationModifiers,
-    ExternalListModifiers,
     KycModifiers,
     LoanModifiers,
     PartitionModifiers,

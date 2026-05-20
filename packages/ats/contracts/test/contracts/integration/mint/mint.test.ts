@@ -5,8 +5,8 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type IAsset, type ResolverProxy } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
-import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO } from "@scripts";
+import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
+import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, EQUITY_CONFIG_ID, ZERO } from "@scripts";
 
 const AMOUNT = 1000;
 const DATA = "0x1234";
@@ -40,8 +40,8 @@ describe("MintFacet Tests", () => {
       await loadFixture(deployMultiPartitionFixture);
     });
 
-    it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-      await expect(asset.initialize_ERC1594()).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+    it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with FacetAlreadyRegistered", async () => {
+      await expect(asset.initialize_ERC1594()).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
     });
 
     it("GIVEN multi-partition mode WHEN issue THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
@@ -159,6 +159,44 @@ describe("MintFacet Tests", () => {
         deactivatedAsset,
         "Deactivated",
       );
+    });
+  });
+
+  describe("initialize_ERC1594", () => {
+    let signer_D: HardhatEthersSigner;
+
+    before(async () => {
+      const signers = await ethers.getSigners();
+      signer_D = signers[3];
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initialize_ERC1594 is called THEN it reverts with AccountHasNoRole", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(signer_D).initialize_ERC1594()).to.be.revertedWithCustomError(
+        freshAsset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN a new deployment WHEN initialize_ERC1594 is called THEN it emits ERC1594Initialized", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      const deployReceipt = await (await freshAsset.connect(infra.deployer).initialize_ERC1594()).wait();
+      const args = await decodeEvent(freshAsset, "ERC1594Initialized", deployReceipt);
+      expect(args.operator).to.equal(await infra.deployer.getAddress());
     });
   });
 });

@@ -41,6 +41,11 @@ interface ILoansPortfolio is ILoansPortfolioStorageWrapper {
         uint256 count;
     }
 
+    /// @notice Emitted once when the LoansPortfolio capability is initialised on a token.
+    /// @dev Fires exclusively from `initializeLoansPortfolio` after the storage write succeeds.
+    /// @param operator The account that invoked initialisation (deployer or upgrade caller).
+    event LoansPortfolioInitialized(address indexed operator);
+
     event HoldingsAssetAdded(HoldingsAsset holdingsAsset);
     event HoldingsAssetRemoved(HoldingsAsset holdingsAsset);
     event LoanHoldingsAssetUpdated(address loanHoldingsAsset);

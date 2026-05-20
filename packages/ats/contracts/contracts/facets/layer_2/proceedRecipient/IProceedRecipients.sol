@@ -2,6 +2,11 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 interface IProceedRecipients {
+    /// @notice Emitted once when the ProceedRecipients capability is initialised on a token.
+    /// @dev Fires exclusively from `initialize_ProceedRecipients` after the storage write succeeds.
+    /// @param operator The account that invoked initialisation (deployer or upgrade caller).
+    event ProceedRecipientsInitialized(address indexed operator);
+
     event ProceedRecipientAdded(address indexed operator, address indexed proceedRecipient, bytes data);
 
     event ProceedRecipientRemoved(address indexed operator, address indexed proceedRecipient);

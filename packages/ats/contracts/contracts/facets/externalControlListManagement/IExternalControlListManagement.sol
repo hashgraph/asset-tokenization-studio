@@ -14,6 +14,14 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface IExternalControlListManagement {
     /**
+     * @notice Emitted once when the external control list capability is initialised on a token.
+     * @dev Fires exclusively from `initializeExternalControlLists` after the storage write
+     *      succeeds.
+     * @param operator The account that invoked initialisation (deployer or upgrade caller).
+     */
+    event ExternalControlListInitialized(address indexed operator);
+
+    /**
      * @notice Emitted when multiple external control list addresses are added or removed in a
      *         single batch.
      * @param operator Address of the caller who performed the update.
@@ -60,7 +68,7 @@ interface IExternalControlListManagement {
     /**
      * @notice One-time initialiser that populates the external control list at token deployment.
      * @dev Can only be called once; subsequent calls revert via
-     *      `onlyNotExternalControlListInitialized`. The leading-underscore naming convention
+     *      `onlyFacetNotRegistered`. The leading-underscore naming convention
      *      signals this is an initialiser function.
      * @param _controlLists Initial array of external control list contract addresses to register.
      */

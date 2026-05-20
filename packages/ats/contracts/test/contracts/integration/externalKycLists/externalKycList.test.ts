@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, EQUITY_CONFIG_ID, GAS_LIMIT } from "@scripts";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture } from "@test";
 
 import { ResolverProxy, MockedExternalKycList, IAsset } from "@contract-types";
@@ -13,6 +13,7 @@ describe("ExternalKycList Management Tests", () => {
   let diamond: ResolverProxy;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
   let initMock1: MockedExternalKycList;
@@ -42,6 +43,7 @@ describe("ExternalKycList Management Tests", () => {
     diamond = base.diamond;
     signer_A = base.deployer;
     signer_B = base.user1;
+    signer_D = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
@@ -407,12 +409,42 @@ describe("ExternalKycList Management Tests", () => {
   });
 
   describe("Initialize Tests", () => {
-    it("GIVEN an already initialized contract WHEN initializeExternalKycLists is called again THEN it reverts with ContractAlreadyInitialized", async () => {
+    it("GIVEN an already initialized contract WHEN initializeExternalKycLists is called again THEN it reverts with FacetAlreadyRegistered", async () => {
       const newKycLists = [externalKycListMock3.target as string];
       await expect(asset.connect(signer_A).initializeExternalKycLists(newKycLists)).to.be.revertedWithCustomError(
         asset,
-        "AlreadyInitialized",
+        "FacetAlreadyRegistered",
       );
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeExternalKycLists is called THEN it reverts with AccountHasNoRole", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(
+        freshAsset.connect(signer_D).initializeExternalKycLists([initMock1.target as string]),
+      ).to.be.revertedWithCustomError(freshAsset, "AccountHasNoRole");
+    });
+
+    it("GIVEN a new deployment WHEN initializeExternalKycLists is called THEN it emits ExternalKycListInitialized", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      const deployReceipt = await (
+        await freshAsset.connect(infra.deployer).initializeExternalKycLists([initMock1.target as string])
+      ).wait();
+      const args = await decodeEvent(freshAsset, "ExternalKycListInitialized", deployReceipt);
+      expect(args.operator).to.equal(await infra.deployer.getAddress());
     });
   });
 

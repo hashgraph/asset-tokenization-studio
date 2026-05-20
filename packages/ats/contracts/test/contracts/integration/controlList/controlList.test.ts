@@ -2,9 +2,16 @@
 
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ATS_ROLES } from "@scripts";
-import { deployEquityTokenFixture } from "@test";
+import {
+  type ResolverProxy,
+  type IAsset,
+  type IFactory,
+  type BusinessLogicResolver,
+  IAsset__factory,
+} from "@contract-types";
+import { ATS_ROLES, EQUITY_CONFIG_ID, GAS_LIMIT } from "@scripts";
+import { decodeEvent } from "@scripts/infrastructure";
+import { deployEquityTokenFixture, getSecurityData, getEquityDetails, getRegulationData } from "@test";
 import { grantRoleAndPauseToken } from "@test";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { ethers } from "hardhat";
@@ -18,6 +25,8 @@ describe("Control List Tests", () => {
   let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
+  let factory: IFactory;
+  let blr: BusinessLogicResolver;
 
   async function deployEquityWithControlListFixture() {
     const base = await deployEquityTokenFixture();
@@ -26,6 +35,8 @@ describe("Control List Tests", () => {
     signer_B = base.user1;
     signer_C = base.user2;
     signer_D = base.user3;
+    factory = base.factory as IFactory;
+    blr = base.blr as BusinessLogicResolver;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
@@ -36,8 +47,8 @@ describe("Control List Tests", () => {
     await loadFixture(deployEquityWithControlListFixture);
   });
 
-  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-    await expect(asset.initializeControlList(true)).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with FacetAlreadyRegistered", async () => {
+    await expect(asset.initializeControlList(true)).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
   });
 
   it("GIVEN an account without controlList role WHEN addToControlList THEN transaction fails with AccountHasNoRole", async () => {
@@ -45,6 +56,70 @@ describe("Control List Tests", () => {
       asset,
       "AccountHasNoRole",
     );
+  });
+
+  it("GIVEN an account without controlList role WHEN removeFromControlList THEN transaction fails with AccountHasNoRole", async () => {
+    await expect(asset.connect(signer_B).removeFromControlList(signer_C.address)).to.be.revertedWithCustomError(
+      asset,
+      "AccountHasNoRole",
+    );
+  });
+
+  it("GIVEN an account without controlList role WHEN addToControlList THEN transaction fails with AccountHasNoRole", async () => {
+    await expect(asset.connect(signer_B).addToControlList(signer_C.address)).to.be.revertedWithCustomError(
+      asset,
+      "AccountHasNoRole",
+    );
+  });
+
+  it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeControlList is called THEN it reverts with AccountHasNoRole", async () => {
+    // factory.deployProxy deploys the equity configuration without running any initializers,
+    // giving us an uninitialised proxy where onlyFacetNotRegistered passes and onlyRole fires.
+    const proxyTx = await factory.deployProxy(blr.target as string, EQUITY_CONFIG_ID, 1, [
+      { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [signer_A.address] },
+    ]);
+    const proxyReceipt = await proxyTx.wait();
+    const { proxyAddress } = await decodeEvent(factory, "ProxyDeployed", proxyReceipt!);
+    const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+    await expect(freshAsset.connect(signer_D).initializeControlList(true)).to.be.revertedWithCustomError(
+      freshAsset,
+      "AccountHasNoRole",
+    );
+  });
+
+  it("GIVEN an already-initialised facet WHEN initializeControlList is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+    const base = await deployEquityTokenFixture();
+    const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+    const freshDeployer = base.deployer;
+
+    await expect(freshAsset.connect(freshDeployer).initializeControlList(true)).to.be.revertedWithCustomError(
+      freshAsset,
+      "FacetAlreadyRegistered",
+    );
+  });
+
+  it("GIVEN a new deployment WHEN initializeControlList is called THEN it emits ControlListInitialized", async () => {
+    const equityData = {
+      security: getSecurityData(blr, {
+        rbacs: [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [signer_A.address] }],
+      }),
+      equityDetails: getEquityDetails(),
+    };
+    const tx = await factory.deployEquity(equityData, getRegulationData(), { gasLimit: GAS_LIMIT.high });
+    const receipt = await tx.wait();
+    const iface = IAsset__factory.createInterface();
+    const event = receipt!.logs
+      .map((log) => {
+        try {
+          return iface.parseLog(log as unknown as { topics: string[]; data: string });
+        } catch {
+          return null;
+        }
+      })
+      .find((parsed) => parsed?.name === "ControlListInitialized");
+    expect(event).to.not.be.undefined;
+    expect(event!.args.operator).to.equal(factory.target);
+    expect(event!.args.isWhiteList).to.equal(equityData.security.isWhiteList);
   });
 
   it("GIVEN an account without controlList role WHEN removeFromControlList THEN transaction fails with AccountHasNoRole", async () => {

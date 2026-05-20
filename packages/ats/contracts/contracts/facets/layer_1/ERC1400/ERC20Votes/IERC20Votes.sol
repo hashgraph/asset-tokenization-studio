@@ -7,6 +7,11 @@ import { IERC5805 } from "./IERC5805.sol";
 import { Checkpoints } from "../../../../infrastructure/utils/Checkpoints.sol";
 
 interface IERC20Votes is IERC5805 {
+    /// @notice Emitted once when the ERC-20Votes capability is initialised on a token.
+    /// @dev Fires exclusively from `initialize_ERC20Votes` after the storage write succeeds.
+    /// @param operator The account that invoked initialisation (deployer or upgrade caller).
+    event ERC20VotesInitialized(address indexed operator);
+
     /// @notice Emitted when an account changes their delegate
     /// @param delegator The account that changed their delegation
     /// @param fromDelegate The previous delegate address
