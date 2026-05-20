@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IKyc } from "../../facets/layer_1/kyc/IKyc.sol";
 import { KycStorageWrapper } from "../../domain/core/KycStorageWrapper.sol";
 import { SsiManagementStorageWrapper } from "../../domain/core/SsiManagementStorageWrapper.sol";
+import { _checkNotInitialized } from "../InitializationErrors.sol";
 
 /**
  * @title KycModifiers
@@ -17,6 +18,15 @@ import { SsiManagementStorageWrapper } from "../../domain/core/SsiManagementStor
  * @author Asset Tokenization Studio Team
  */
 abstract contract KycModifiers {
+    /**
+     * @notice Modifier that ensures internal KYC has not been initialised.
+     * @dev Reverts with AlreadyInitialized if KYC is already initialised.
+     */
+    modifier onlyNotKycInitialized() {
+        _checkNotInitialized(KycStorageWrapper.isKycInitialized());
+        _;
+    }
+
     /**
      * @dev Modifier that validates KYC status for an account
      *

@@ -6,14 +6,13 @@ import { type IAsset } from "@contract-types";
 import {
   executeRbac,
   deployLoanTokenFixture,
-  getRegulationData,
   MAX_UINT256,
   deployLoansPortfolioTokenFixture,
   DEFAULT_LOANS_PORTFOLIO_PARAMS,
   getLoanDetails,
 } from "@test";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { ADDRESS_ZERO, ATS_ROLES, buildRegulationData, DEFAULT_PARTITION, EMPTY_STRING, ZERO } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO } from "@scripts";
 import { ethers } from "hardhat";
 import { HoldingsAssetType } from "@scripts/domain";
 
@@ -76,7 +75,7 @@ describe("LoansPortfolio Token Tests", () => {
     await loadFixture(deployLoansPortfolioFixture);
   });
 
-  describe("_initialize_LoansPortfolio", () => {
+  describe("initializeLoansPortfolio", () => {
     it("GIVEN a deployed portfolio WHEN initializing THEN state is set correctly", async () => {
       const data = await asset.getLoansPortfolioData();
 
@@ -85,21 +84,11 @@ describe("LoansPortfolio Token Tests", () => {
     });
 
     it("GIVEN an already initialized portfolio WHEN initializing again THEN reverts with AlreadyInitialized", async () => {
-      const regulationData = getRegulationData();
-
       await expect(
-        asset.initializeLoansPortfolio(
-          {
-            portfolioType: DEFAULT_LOANS_PORTFOLIO_PARAMS.portfolioType,
-            distributionPolicy: DEFAULT_LOANS_PORTFOLIO_PARAMS.distributionPolicy,
-          },
-          buildRegulationData(regulationData.regulationType, regulationData.regulationSubType),
-          {
-            countriesControlListType: regulationData.additionalSecurityData.countriesControlListType,
-            listOfCountries: regulationData.additionalSecurityData.listOfCountries,
-            info: regulationData.additionalSecurityData.info,
-          },
-        ),
+        asset.initializeLoansPortfolio({
+          portfolioType: DEFAULT_LOANS_PORTFOLIO_PARAMS.portfolioType,
+          distributionPolicy: DEFAULT_LOANS_PORTFOLIO_PARAMS.distributionPolicy,
+        }),
       ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
     });
   });

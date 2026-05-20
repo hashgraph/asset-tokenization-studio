@@ -147,6 +147,7 @@ const BOND_FIXED_RATE_FACETS = [
   "MaturityByPartitionFacet",
 
   // Jurisdiction-Specific
+  "SecurityFacet",
   "BondUSAFixedRateFacet",
   "BondUSAReadFacet",
   "PrincipalFacet",
