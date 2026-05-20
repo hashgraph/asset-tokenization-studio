@@ -163,4 +163,35 @@ describe("BalanceTrackerAdjusted Tests", () => {
       expect(await asset.balanceOfAt(signer_A.address, secondAdjustmentDate + 1)).to.equal(mintAmount * 2 * 3);
     });
   });
+  describe("initializeBalanceTrackerAdjusted", () => {
+    beforeEach(async () => {
+      const base = await deployEquityTokenFixture();
+      diamond = base.diamond;
+      signer_A = base.deployer;
+      signer_B = base.user1;
+      signer_C = base.user2;
+      asset = await ethers.getContractAt("IAsset", diamond.target);
+    });
+
+    it("GIVEN an already-initialised facet WHEN initializeBalanceTrackerAdjusted is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      await asset.connect(signer_A).initializeBalanceTrackerAdjusted();
+      await expect(asset.connect(signer_A).initializeBalanceTrackerAdjusted()).to.be.revertedWithCustomError(
+        asset,
+        "FacetAlreadyRegistered",
+      );
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeBalanceTrackerAdjusted is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeBalanceTrackerAdjusted()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN a fresh deployment WHEN initializeBalanceTrackerAdjusted is called THEN it emits BalanceTrackerAdjustedInitialized", async () => {
+      await expect(asset.connect(signer_A).initializeBalanceTrackerAdjusted())
+        .to.emit(asset, "BalanceTrackerAdjustedInitialized")
+        .withArgs(await signer_A.getAddress());
+    });
+  });
 });

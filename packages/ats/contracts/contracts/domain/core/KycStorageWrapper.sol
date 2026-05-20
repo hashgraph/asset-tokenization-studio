@@ -112,6 +112,10 @@ library KycStorageWrapper {
         return internalKycValid && ExternalListManagementStorageWrapper.isExternallyGranted(_account, _kycStatus);
     }
 
+    function isKycInitialized() internal view returns (bool) {
+        return kycStorage().internalKycActivated;
+    }
+
     function isInternalKycActivated() internal view returns (bool) {
         return kycStorage().internalKycActivated;
     }

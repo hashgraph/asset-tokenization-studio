@@ -12,6 +12,20 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface IBatchMint {
     /**
+     * @notice Emitted once when the batch mint capability is initialised on a token.
+     * @dev Fires exclusively from `initializeBatchMint` after the storage write succeeds.
+     * @param operator The account that invoked initialisation (deployer or upgrade caller).
+     */
+    event BatchMintInitialized(address indexed operator);
+
+    /**
+     * @notice Initialises the batch mint capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeBatchMint() external;
+
+    /**
      * @notice Batch mint tokens to multiple addresses.
      * @dev Iterates over `_toList` and `_amounts` in two passes: first validates identity,
      *      compliance, and cap constraints for every recipient, then issues tokens to each

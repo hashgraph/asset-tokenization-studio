@@ -166,4 +166,31 @@ describe("BalanceTrackerAtSnapshot Tests", () => {
       expect(await asset.totalSupplyAtSnapshot(1)).to.equal(mintAmount);
     });
   });
+  describe("initializeBalanceTrackerAtSnapshot", () => {
+    it("GIVEN an already-initialised facet WHEN initializeBalanceTrackerAtSnapshot is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      const base = await deployEquityTokenFixture();
+      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await freshAsset.connect(base.deployer).initializeBalanceTrackerAtSnapshot();
+      await expect(
+        freshAsset.connect(base.deployer).initializeBalanceTrackerAtSnapshot(),
+      ).to.be.revertedWithCustomError(freshAsset, "FacetAlreadyRegistered");
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeBalanceTrackerAtSnapshot is called THEN it reverts with AccountHasNoRole", async () => {
+      const base = await deployEquityTokenFixture();
+      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await expect(freshAsset.connect(base.user3).initializeBalanceTrackerAtSnapshot()).to.be.revertedWithCustomError(
+        freshAsset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN a fresh deployment WHEN initializeBalanceTrackerAtSnapshot is called THEN it emits BalanceTrackerAtSnapshotInitialized", async () => {
+      const base = await deployEquityTokenFixture();
+      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await expect(freshAsset.connect(base.deployer).initializeBalanceTrackerAtSnapshot())
+        .to.emit(freshAsset, "BalanceTrackerAtSnapshotInitialized")
+        .withArgs(await base.deployer.getAddress());
+    });
+  });
 });

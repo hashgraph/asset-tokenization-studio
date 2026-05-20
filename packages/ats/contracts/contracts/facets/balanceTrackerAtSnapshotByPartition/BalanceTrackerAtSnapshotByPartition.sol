@@ -2,7 +2,12 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IBalanceTrackerAtSnapshotByPartition } from "./IBalanceTrackerAtSnapshotByPartition.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { SnapshotsStorageWrapper } from "../../domain/asset/SnapshotsStorageWrapper.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { _BALANCE_TRACKER_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title BalanceTrackerAtSnapshotByPartition
@@ -12,7 +17,20 @@ import { SnapshotsStorageWrapper } from "../../domain/asset/SnapshotsStorageWrap
  * @dev Delegates storage reads to `SnapshotsStorageWrapper`. Intended to be inherited by
  *      `BalanceTrackerAtSnapshotByPartitionFacet`.
  */
-abstract contract BalanceTrackerAtSnapshotByPartition is IBalanceTrackerAtSnapshotByPartition {
+abstract contract BalanceTrackerAtSnapshotByPartition is IBalanceTrackerAtSnapshotByPartition, Modifiers {
+    /// @inheritdoc IBalanceTrackerAtSnapshotByPartition
+    function initializeBalanceTrackerAtSnapshotByPartition()
+        external
+        override
+        onlyFacetNotRegistered(_BALANCE_TRACKER_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY)
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        InitializerStorageWrapper.setFacetToReady(_BALANCE_TRACKER_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY);
+        emit IBalanceTrackerAtSnapshotByPartition.BalanceTrackerAtSnapshotByPartitionInitialized(
+            EvmAccessors.getMsgSender()
+        );
+    }
+
     /// @inheritdoc IBalanceTrackerAtSnapshotByPartition
     function balanceOfAtSnapshotByPartition(
         bytes32 _partition,
