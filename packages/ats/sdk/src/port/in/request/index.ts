@@ -15,6 +15,7 @@ import ForceTransferRequest from "./security/operations/transfer/ForceTransferRe
 import GetAccountBalanceRequest from "./account/GetAccountBalanceRequest";
 import GetAccountInfoRequest from "./account/GetAccountInfoRequest";
 import PauseRequest from "./security/operations/pause/PauseRequest";
+import DeactivateRequest from "./security/operations/deactivate/DeactivateRequest";
 import ControlListRequest from "./security/operations/controlList/ControlListRequest";
 import GetControlListCountRequest from "./security/operations/controlList/GetControlListCountRequest";
 import GetControlListMembersRequest from "./security/operations/controlList/GetControlListMembersRequest";
@@ -291,6 +292,7 @@ export {
   GetAccountBalanceRequest,
   GetAccountInfoRequest,
   PauseRequest,
+  DeactivateRequest,
   GetControlListTypeRequest,
   InitializationRequest,
   ConnectRequest,

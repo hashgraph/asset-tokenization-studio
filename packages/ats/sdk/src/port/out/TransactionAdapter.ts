@@ -199,6 +199,7 @@ interface ITransactionAdapter {
   ): Promise<TransactionResponse>;
   pause(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
   unpause(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
+  deactivate(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
   takeSnapshot(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
   setDividend(
     security: EvmAddress,
@@ -1173,6 +1174,7 @@ export default abstract class TransactionAdapter
   ): Promise<TransactionResponse<any, Error>>;
   abstract pause(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse<any, Error>>;
   abstract unpause(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse<any, Error>>;
+  abstract deactivate(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse<any, Error>>;
   abstract takeSnapshot(
     security: EvmAddress,
     securityId?: ContractId | string,
