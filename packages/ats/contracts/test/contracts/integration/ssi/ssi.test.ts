@@ -170,9 +170,9 @@ describe("SSI Tests", () => {
       asset = await ethers.getContractAt("IAsset", base.diamond.target);
 
       await executeRbac(asset, [
-        { role: ATS_ROLES.ISSUER_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES.KYC_ROLE, members: [signer_A.address] },
-        { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_ISSUER, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_KYC, members: [signer_A.address] },
+        { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
       ]);
 
       await asset.addIssuer(signer_A.address);

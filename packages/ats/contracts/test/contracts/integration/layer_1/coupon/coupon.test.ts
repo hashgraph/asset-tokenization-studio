@@ -918,8 +918,8 @@ describe("Coupon Tests", () => {
       // Ratio equivalence proof. The new (numerator, denominator) decomposition
       // changes shape relative to  form, but the represented ratio must
       // remain identical. Verified by BigInt cross-multiplication (a/b == c/d iff a·d == b·c).
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
       await asset.connect(signer_A).issueByPartition({
         partition: DEFAULT_PARTITION,
         tokenHolder: signer_A.address,
@@ -956,8 +956,8 @@ describe("Coupon Tests", () => {
       const RATE = 5n * 10n ** BigInt(HIGH_RATE_DECIMALS - 2); // rate_real = 0.05 (5%)
       const HOLDING = 10n ** 15n; // 10^15 raw — well within uint256
 
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
       await asset.connect(signer_A).setNominalValue(NOMINAL, HIGH_NOMINAL_DECIMALS);
       await asset.connect(signer_A).issueByPartition({
         partition: DEFAULT_PARTITION,

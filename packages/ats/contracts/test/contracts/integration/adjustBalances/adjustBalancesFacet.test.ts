@@ -382,7 +382,7 @@ describe("AdjustBalancesFacet Tests", () => {
     });
 
     it("GIVEN an overflowing factor WHEN setScheduledBalanceAdjustment THEN transaction fails with FactorOverflow", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
 
       await asset.connect(signer_A).setScheduledBalanceAdjustment(balanceAdjustmentData);
 
@@ -398,7 +398,7 @@ describe("AdjustBalancesFacet Tests", () => {
     });
 
     it("GIVEN an overflowing decimals WHEN setScheduledBalanceAdjustment THEN transaction fails with DecimalsOverflow", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
 
       await asset.connect(signer_A).setScheduledBalanceAdjustment(balanceAdjustmentData);
 
@@ -414,8 +414,8 @@ describe("AdjustBalancesFacet Tests", () => {
     });
 
     it("GIVEN an overflowing total supply WHEN setScheduledBalanceAdjustment THEN transaction fails with TotalSupplyOverflow", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
 
       const TOTAL_SUPPLY = 100;
 
@@ -541,7 +541,7 @@ describe("AdjustBalancesFacet Tests", () => {
     });
 
     it("GIVEN an overflowing factor WHEN adjustBalances THEN transaction fails with FactorOverflow", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ADJUSTMENT_BALANCE_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ADJUSTMENT_BALANCE, signer_A.address);
 
       await asset.connect(signer_A).adjustBalances(adjustFactor, adjustDecimals);
 
@@ -552,7 +552,7 @@ describe("AdjustBalancesFacet Tests", () => {
     });
 
     it("GIVEN an overflowing decimals WHEN adjustBalances THEN transaction fails with DecimalsOverflow", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ADJUSTMENT_BALANCE_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ADJUSTMENT_BALANCE, signer_A.address);
 
       await asset.connect(signer_A).adjustBalances(adjustFactor, adjustDecimals);
 
@@ -563,8 +563,8 @@ describe("AdjustBalancesFacet Tests", () => {
     });
 
     it("GIVEN an overflowing total supply WHEN adjustBalances THEN transaction fails with TotalSupplyOverflow", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ADJUSTMENT_BALANCE_ROLE, signer_A.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ADJUSTMENT_BALANCE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
 
       const TOTAL_SUPPLY = 100;
 
