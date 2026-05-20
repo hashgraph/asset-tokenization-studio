@@ -8,7 +8,7 @@ import { BondUSA } from "./BondUSA.sol";
 
 abstract contract BondUSAFacetBase is BondUSA, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this._initialize_bondUSA.selector);
+        return Bytes4Builder.build(this.initializeBondUSA.selector);
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {

@@ -1800,4 +1800,12 @@ export class RPCQueryAdapter {
 
     return Number(total);
   }
+
+  async getMetadata(address: EvmAddress, key: string): Promise<string[]> {
+    LogService.logTrace(`Getting metadata for the security: ${address.toString()}`);
+    const result = await this.connect(IAsset__factory, address.toString()).getMetadata(
+      ethers.encodeBytes32String(key),
+    );
+    return result.map((v) => ethers.toUtf8String(v));
+  }
 }

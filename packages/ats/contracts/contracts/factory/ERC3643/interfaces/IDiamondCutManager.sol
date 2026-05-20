@@ -75,6 +75,13 @@ interface TRexIDiamondCutManager {
     error DefaultValueForConfigurationIdNotPermitted();
 
     /**
+     * @notice Thrown when attempting to activate a configuration that contains no facets,
+     *         which would brick any ResolverProxy following the latest version.
+     * @param configurationId Configuration key that was supplied with an empty facet list.
+     */
+    error EmptyFacetConfigurationNotPermitted(bytes32 configurationId);
+
+    /**
      * @notice Thrown when a configuration references a facet id that is not registered in
      *         the business-logic resolver.
      * @param configurationId Configuration being created or modified.

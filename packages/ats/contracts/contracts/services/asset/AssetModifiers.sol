@@ -21,6 +21,7 @@ import { ProceedRecipientModifiers } from "./ProceedRecipientModifiers.sol";
 import { StateModifiers } from "./StateModifiers.sol";
 import { AmortizationModifiers } from "./AmortizationModifiers.sol";
 import { LoansPortfolioModifiers } from "./LoansPortfolioModifiers.sol";
+import { SecurityModifiers } from "./SecurityModifiers.sol";
 
 /**
  * @title AssetModifiers
@@ -70,6 +71,7 @@ abstract contract AssetModifiers is
     MaturityModifiers,
     NominalValueModifiers,
     ProceedRecipientModifiers,
+    SecurityModifiers,
     StateModifiers
 {
     // This contract aggregates all asset modifiers through inheritance

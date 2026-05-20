@@ -31,6 +31,7 @@ abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, Mod
         onlyRole(CORPORATE_ACTION_ROLE)
         onlyValidTimestamp(_newBalanceAdjustment.executionDate)
         onlyValidFactor(_newBalanceAdjustment.factor)
+        onlyNotOverflowingAdjustment(_newBalanceAdjustment.factor, _newBalanceAdjustment.decimals)
         returns (uint256 balanceAdjustmentID_)
     {
         bytes32 corporateActionID;

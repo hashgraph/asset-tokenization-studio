@@ -74,7 +74,7 @@ import EventService from "@service/event/EventService";
 import LogService from "@service/log/LogService";
 import NetworkService from "@service/network/NetworkService";
 import MetamaskService from "@service/wallet/metamask/MetamaskService";
-import { BaseContract, ContractTransactionResponse, Provider, Signer } from "ethers";
+import { BaseContract, ContractTransactionResponse, encodeBytes32String, Provider, Signer, toUtf8Bytes } from "ethers";
 import { singleton } from "tsyringe";
 import { SigningError } from "../error/SigningError";
 import { MirrorNodeAdapter } from "../mirror/MirrorNodeAdapter";
@@ -2017,6 +2017,17 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       "setSymbol",
       [symbol],
       GAS.SET_SYMBOL,
+    );
+  }
+
+  async setMetadata(security: EvmAddress, key: string, value: string[]): Promise<TransactionResponse> {
+    LogService.logTrace(`Setting metadata for security: ${security.toString()}`);
+
+    return this.executeTransaction(
+      IAsset__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "setMetadata",
+      [encodeBytes32String(key), value.map((v) => toUtf8Bytes(v))],
+      GAS.SET_METADATA,
     );
   }
 

@@ -4,10 +4,14 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type ResolverProxy, type IAsset, MockedT3RevocationRegistry } from "@contract-types";
-import { ATS_ROLES } from "@scripts";
-import { deployEquityTokenFixture } from "@test";
-import { executeRbac } from "@test";
+import {
+  type ResolverProxy,
+  type IAsset,
+  MockedT3RevocationRegistry,
+  RevertingRevocationRegistry,
+} from "@contract-types";
+import { ATS_ROLES, ZERO, DEFAULT_PARTITION, EMPTY_HEX_BYTES, EMPTY_STRING } from "@scripts";
+import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 describe("SSI Tests", () => {
   let diamond: ResolverProxy;
@@ -149,6 +153,65 @@ describe("SSI Tests", () => {
       expect(issuerListBefore.length).to.equal(1);
       expect(issuerListBefore).to.deep.equal([signer_B.address]);
       expect(await asset.connect(signer_C).getIssuerListMembers(0, 1)).to.deep.equal([]);
+    });
+  });
+
+  describe("RevocationRegistry", () => {
+    const VC_ID = "vc-001";
+    const AMOUNT = 1000;
+    let revertingRegistry: RevertingRevocationRegistry;
+
+    async function deployRevocationFixture() {
+      const base = await deployEquityTokenFixture();
+      signer_A = base.deployer;
+      signer_B = base.user1;
+      signer_C = base.user2;
+
+      asset = await ethers.getContractAt("IAsset", base.diamond.target);
+
+      await executeRbac(asset, [
+        { role: ATS_ROLES.ISSUER_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.KYC_ROLE, members: [signer_A.address] },
+        { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
+      ]);
+
+      await asset.addIssuer(signer_A.address);
+      await asset.grantKyc(signer_B.address, VC_ID, ZERO, MAX_UINT256, signer_A.address);
+      await asset.grantKyc(signer_C.address, EMPTY_STRING, ZERO, MAX_UINT256, signer_A.address);
+      await asset.issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_B.address,
+        value: AMOUNT,
+        data: EMPTY_HEX_BYTES,
+      });
+
+      revocationList = await (await ethers.getContractFactory("MockedT3RevocationRegistry")).deploy();
+      revertingRegistry = await (await ethers.getContractFactory("RevertingRevocationRegistry")).deploy();
+    }
+
+    beforeEach(async () => {
+      await loadFixture(deployRevocationFixture);
+    });
+
+    it("GIVEN a reverting registry WHEN transfer THEN succeeds treating KYC credential as not revoked", async () => {
+      await asset.setRevocationRegistryAddress(revertingRegistry.target);
+      await asset.connect(signer_B).transfer(signer_C.address, AMOUNT);
+      expect(await asset.balanceOf(signer_C.address)).to.equal(AMOUNT);
+    });
+
+    it("GIVEN a working registry with revoked credential WHEN transfer THEN reverts with InvalidKycStatus", async () => {
+      await asset.setRevocationRegistryAddress(revocationList.target);
+      await revocationList.revoke(VC_ID); // signer_A (the issuer) revokes the credential
+      await expect(asset.connect(signer_B).transfer(signer_C.address, AMOUNT)).to.be.revertedWithCustomError(
+        asset,
+        "InvalidKycStatus",
+      );
+    });
+
+    it("GIVEN a working registry with non-revoked credential WHEN transfer THEN succeeds", async () => {
+      await asset.setRevocationRegistryAddress(revocationList.target);
+      await asset.connect(signer_B).transfer(signer_C.address, AMOUNT);
+      expect(await asset.balanceOf(signer_C.address)).to.equal(AMOUNT);
     });
   });
 

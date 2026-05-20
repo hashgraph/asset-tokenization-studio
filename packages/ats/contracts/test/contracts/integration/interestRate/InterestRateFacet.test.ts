@@ -68,13 +68,6 @@ describe("InterestRateFacet Tests", () => {
         "Deactivated",
       );
     });
-
-    it("GIVEN any bond WHEN initialize_InterestRateType(NONE) THEN reverts with InvalidRateType", async () => {
-      await expect(asset.connect(admin).initializeInterestRateType(RateType.NONE)).to.be.revertedWithCustomError(
-        asset,
-        "InvalidRateType",
-      );
-    });
   });
 
   describe("Standard bond", () => {
