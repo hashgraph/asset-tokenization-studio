@@ -42,11 +42,8 @@ interface ISecurity {
         AdditionalSecurityData calldata _additionalSecurityData
     ) external;
 
-    /**
-     * @notice Returns the security regulation data stored for this token.
-     * @dev Reads from the dedicated `SecurityStorageWrapper` slot. Zero-value structs are returned
-     *      when the slot has never been initialised.
-     * @return securityRegulationData_ The packed `SecurityRegulationData` value from storage.
-     */
+    /// @notice Returns the security regulation data associated with the token.
+    /// @return securityRegulationData_ DTO bundling the core regulation payload and any
+    ///         additional security metadata.
     function getSecurityRegulationData() external view returns (SecurityRegulationData memory securityRegulationData_);
 }

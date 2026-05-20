@@ -375,8 +375,7 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1410_Basic(bool) external pure {
+    function initializeERC1410Basic(bool) external pure {
         revert NotImplemented();
     }
 

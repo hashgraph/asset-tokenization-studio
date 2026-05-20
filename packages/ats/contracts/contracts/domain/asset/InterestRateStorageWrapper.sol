@@ -18,11 +18,13 @@ bytes32 constant STORAGE_LOCATION_FIXED_RATE = 0x577d3b71f198de7595699f8f2861298
  * @title FixedRateDataStorage
  * @notice Struct holding the fixed interest rate value and its decimal precision,
  *         along with an initialisation flag.
- * @param rate The fixed interest rate value.
- * @param decimals Number of decimal places for the rate.
+ * @dev Backing storage for the fixed-rate coupon model; mutated only by
+ *      `InterestRateStorageWrapper` via the deterministic ERC-7201 slot.
  * @param initialized Whether the fixed rate data has been initialised.
+ * @param decimals Number of decimal places for the rate.
+ * @param rate The fixed interest rate value.
+ * @custom:storage-location erc7201:security.token.standard.storage.FixedRate
  */
-/// @custom:storage-location erc7201:security.token.standard.storage.FixedRate
 struct FixedRateDataStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
     bool initialized;
@@ -38,6 +40,12 @@ struct FixedRateDataStorage {
  * @title KpiLinkedRateDataStorage
  * @notice Stores parameters for a KPI-linked interest rate model, including rate
  *         boundaries, reporting constraints, and impact data bounds.
+ * @dev Backing storage for the KPI-linked coupon model; mutated only by
+ *      `InterestRateStorageWrapper`. Rate ordering (`minRate ≤ baseRate ≤ maxRate`)
+ *      and impact bound strict-ordering invariants are enforced at write time.
+ * @param initialized Whether the KPI-linked rate data has been initialised.
+ * @param rateDecimals Number of decimals for rate values.
+ * @param impactDataDecimals Number of decimals for impact data fields.
  * @param maxRate Upper bound for the KPI-linked rate.
  * @param baseRate Base rate from which adjustments are applied.
  * @param minRate Lower bound for the KPI-linked rate.
@@ -45,15 +53,12 @@ struct FixedRateDataStorage {
  * @param startRate Initial rate applicable at startPeriod.
  * @param missedPenalty Penalty rate applied when a report is missed.
  * @param reportPeriod Duration in seconds between successive reports.
- * @param rateDecimals Number of decimals for rate values.
  * @param maxDeviationCap Upper deviation cap for impact data.
  * @param baseLine Baseline value for impact deviation calculations.
  * @param maxDeviationFloor Lower deviation floor for impact data.
  * @param adjustmentPrecision Precision factor for the adjustment computation.
- * @param impactDataDecimals Number of decimals for impact data fields.
- * @param initialized Whether the KPI-linked rate data has been initialised.
+ * @custom:storage-location erc7201:security.token.standard.storage.KpiLinkedRate
  */
-/// @custom:storage-location erc7201:security.token.standard.storage.KpiLinkedRate
 struct KpiLinkedRateDataStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
     bool initialized;
@@ -78,11 +83,13 @@ struct KpiLinkedRateDataStorage {
 
 /**
  * @title InterestRateTypeDataStorage
- * @notice Stores the selected coupon rate type and its initialisation flag.
- * @param rateType The `IInterestRate.RateType` discriminator selected by the admin.
+ * @notice Stores the selected coupon rate type discriminator and its initialisation flag.
+ * @dev Decoupled from the rate-specific storages so the active model can be queried
+ *      without touching the fixed-rate or KPI-linked storage slots.
  * @param initialized Whether the coupon rate type has been initialised.
+ * @param rateType The `IInterestRate.RateType` discriminator selected by the admin.
+ * @custom:storage-location erc7201:security.token.standard.storage.InterestRateType
  */
-/// @custom:storage-location erc7201:security.token.standard.storage.InterestRateType
 struct InterestRateTypeDataStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
     bool initialized;

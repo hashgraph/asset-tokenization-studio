@@ -11,16 +11,16 @@ bytes32 constant STORAGE_LOCATION_INITIALIZER = 0x7f2d07b09acba6319339222a47bfb1
 
 /**
  * @notice Diamond-storage layout backing the initializer facet.
- * @param maxInitializerFacetIndex Maximum number of facets validated by
- *        `setOperationalStatus` per call.
- * @param configVersionStatus Per `(configurationId, version)` operational-status encoding:
- *        `0` = not started, `1` = fully operational, `>1` = resume facet index + 1.
- * @param facetVersionStatus Per `(facetId, version)` initialisation status: `0` = not
- *        started, `1` = ready, `>1` = initialisation in progress (exact intermediate value
- *        is defined by each facet's own initialiser).
- * @param facetLastVersion Latest version recorded per facet (0 if never registered).
+ * @dev Tracks operational status per `(configurationId, version)` and initialisation status per
+ *      `(facetId, version)`. Status encodings:
+ *      - `configVersionStatus`: `0` not started, `1` fully operational, `>1` resume facet index + 1.
+ *      - `facetVersionStatus`: `0` not started, `1` ready, `>1` initialisation in progress
+ *        (intermediate value defined by each facet's own initialiser).
+ *      `facetLastVersion` records the latest version per facet (`0` when never registered) and is
+ *      consulted by predecessor checks during upgrades. New fields must be appended below the
+ *      APPEND-ONLY marker to preserve upgrade safety.
+ * @custom:storage-location erc7201:security.token.standard.storage.Initializer
  */
-/// @custom:storage-location erc7201:security.token.standard.storage.Initializer
 struct InitializerDataStorage {
     // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
     uint256 maxInitializerFacetIndex;
@@ -71,6 +71,8 @@ library InitializerStorageWrapper {
      * @return isOperational_ True when every facet of the configuration version is ready.
      * @return lastFacetIndex_ Index reached in this call; on partial progress, the next call
      *         resumes here. Zero when the configuration was already operational.
+     * @return configId_ Resolver-proxy configuration identifier this call evaluated.
+     * @return versionId_ Configuration version this call evaluated.
      */
     // Verifies that every facet of the current config+version is ready, in batches of MAX_INITIALIZER_FACET_INDEX.
     // Persists progress so next calls resume where the previous one stopped, until the whole config is operational.

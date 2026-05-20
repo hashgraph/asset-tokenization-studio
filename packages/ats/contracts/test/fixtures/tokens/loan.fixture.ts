@@ -283,7 +283,7 @@ export async function deployLoanTokenFixture({
   const securityFacet = ISecurity__factory.connect(proxyAddress, deployer);
 
   await controlListFacet.initializeControlList(securityData.isWhiteList);
-  await erc1410ManagementFacet.initialize_ERC1410(securityData.isMultiPartition);
+  await erc1410ManagementFacet.initializeERC1410(securityData.isMultiPartition);
   await controllerFacet.initializeController(securityData.isControllable);
   await coreFacet.initializeCore({
     info: {
@@ -302,7 +302,7 @@ export async function deployLoanTokenFixture({
   await externalControlListManagementFacet.initializeExternalControlLists([]);
   await kycFacet.initializeInternalKyc(securityData.internalKycActivated);
   await externalKycListManagementFacet.initializeExternalKycLists([]);
-  await erc20VotesFacet.initialize_ERC20Votes(securityData.erc20VotesActivated);
+  await erc20VotesFacet.initializeERC20Votes(securityData.erc20VotesActivated);
   await erc3643ManagementFacet.initialize_ERC3643(ZeroAddress, ZeroAddress);
   await nominalValueFacet.initializeNominalValue(
     loanParams?.nominalValue ?? DEFAULT_LOAN_PARAMS.nominalValue,

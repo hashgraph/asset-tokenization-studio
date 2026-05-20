@@ -40,10 +40,6 @@ struct ClearingHold {
  *      the diamond.
  */
 interface IClearingTypes {
-    // -------------------------------------------------------------------------
-    // Enums
-    // -------------------------------------------------------------------------
-
     /**
      * @notice Classifies the token operation that has been placed under clearing.
      * @dev Used as a discriminant when inspecting a stored `ClearingOperation` to
@@ -67,10 +63,6 @@ interface IClearingTypes {
         Cancel,
         Reclaim
     }
-
-    // -------------------------------------------------------------------------
-    // Structs
-    // -------------------------------------------------------------------------
 
     /**
      * @notice Lightweight summary of a clearing operation, used to avoid loading the
@@ -208,10 +200,6 @@ interface IClearingTypes {
         bytes operatorData;
         ThirdPartyType operatorType;
     }
-
-    // -------------------------------------------------------------------------
-    // Events — operation registration
-    // -------------------------------------------------------------------------
 
     /**
      * @notice Emitted when a token holder registers a clearing-guarded redemption on a
@@ -410,10 +398,6 @@ interface IClearingTypes {
         bytes operatorData
     );
 
-    // -------------------------------------------------------------------------
-    // Events — feature lifecycle
-    // -------------------------------------------------------------------------
-
     /**
      * @notice Emitted when the clearing feature is enabled for the token.
      * @param operator Address of the administrator that activated clearing.
@@ -425,10 +409,6 @@ interface IClearingTypes {
      * @param operator Address of the administrator that deactivated clearing.
      */
     event ClearingDeactivated(address indexed operator);
-
-    // -------------------------------------------------------------------------
-    // Events — operation lifecycle
-    // -------------------------------------------------------------------------
 
     /**
      * @notice Emitted when a pending clearing operation is approved and the underlying
@@ -481,10 +461,6 @@ interface IClearingTypes {
         uint256 clearingId,
         ClearingOperationType clearingOperationType
     );
-
-    // -------------------------------------------------------------------------
-    // Errors
-    // -------------------------------------------------------------------------
 
     /**
      * @notice Thrown when the supplied `clearingId` does not correspond to an existing

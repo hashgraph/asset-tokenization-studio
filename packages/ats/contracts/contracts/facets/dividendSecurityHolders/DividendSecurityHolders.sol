@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IDividendSecurityHolders } from "./IDividendSecurityHolders.sol";
 import { CORPORATE_ACTION_TYPE_DIVIDEND } from "../../constants/dispatchTypes.sol";
-import { DividendStorageWrapper } from "../../domain/asset/dividend/DividendStorageWrapper.sol";
+import { DividendStorageWrapper } from "../../domain/asset/DividendStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 
 /**

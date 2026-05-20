@@ -10,10 +10,10 @@ bytes32 constant STORAGE_LOCATION_METADATA = 0x88e64aeb880d89a6f66a0868c82854ac5
  * @notice Diamond storage layout for the metadata domain.
  * @dev Holds an arbitrary key/value store where each `bytes32` key maps to an ordered list of
  *      opaque byte payloads. Payload encoding is the responsibility of off-chain producers and
- *      consumers; the contract treats values as raw bytes.
- * @param metadata Mapping from a metadata key to its ordered list of byte payloads.
+ *      consumers; the contract treats values as raw bytes. New fields must be appended below the
+ *      APPEND-ONLY marker to preserve upgrade safety.
+ * @custom:storage-location erc7201:security.token.standard.storage.Metadata
  */
-/// @custom:storage-location erc7201:security.token.standard.storage.Metadata
 struct MetadataDataStorage {
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(bytes32 => bytes[]) metadata;

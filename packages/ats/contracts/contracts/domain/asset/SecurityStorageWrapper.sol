@@ -6,7 +6,13 @@ import { RegulationData, AdditionalSecurityData } from "../../constants/regulati
 /// @custom:hash storage Security
 bytes32 constant STORAGE_LOCATION_SECURITY = 0x45ae5065a0bedd1836ba9c199c3e3b4f02a7772289c0a233200f5a4ec7df7e00;
 
-/// @custom:storage-location erc7201:security.token.standard.storage.Security
+/**
+ * @title SecurityRegulationDataStorage
+ * @notice Backing storage for the security regulation configuration of an asset.
+ * @dev Sole source of truth for regulation and additional security fields on this asset;
+ *      mutated only via `SecurityStorageWrapper` against the deterministic ERC-7201 slot.
+ * @custom:storage-location erc7201:security.token.standard.storage.Security
+ */
 struct SecurityRegulationDataStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
     bool initialized;
@@ -17,6 +23,15 @@ struct SecurityRegulationDataStorage {
     // ─── APPEND-ONLY ZONE BELOW ───
 }
 
+/**
+ * @title SecurityStorageWrapper - Security Regulation Storage Wrapper
+ * @notice Storage wrapper for security regulation data on a security token.
+ * @dev Reads and writes the dedicated storage slot defined by
+ *      `STORAGE_LOCATION_SECURITY`. All functions are `internal` — the library
+ *      is inlined at every call-site. External callers interact through the
+ *      facet layer, never directly.
+ * @author Asset Tokenization Studio Team
+ */
 library SecurityStorageWrapper {
     /**
      * @notice Initialises the security regulation storage and marks the slot as initialised.
@@ -68,6 +83,14 @@ library SecurityStorageWrapper {
         securityRegulationData_ = securityStorage();
     }
 
+    /**
+     * @notice Returns a storage pointer to the ERC-7201 namespaced
+     *         `SecurityRegulationDataStorage` slot.
+     * @dev Uses inline assembly to set the storage pointer to
+     *      `STORAGE_LOCATION_SECURITY`. All other functions in this library
+     *      must obtain their storage reference through this accessor.
+     * @return securityStorage_ Storage pointer to the security regulation data slot.
+     */
     function securityStorage() internal pure returns (SecurityRegulationDataStorage storage securityStorage_) {
         bytes32 position = STORAGE_LOCATION_SECURITY;
         // solhint-disable-next-line no-inline-assembly

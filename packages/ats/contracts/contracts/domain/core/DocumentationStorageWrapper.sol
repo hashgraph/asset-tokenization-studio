@@ -20,13 +20,12 @@ struct Document {
 
 /**
  * @notice Diamond storage layout for the documentation domain.
- * @param documents  Mapping from document name to its `Document` record.
- * @param docIndexes Mapping from document name to its one-based position in `docNames`,
- *                   used for O(1) existence checks and swap-and-pop removal.
- * @param docNames   Ordered array of all registered document names; maintains the
- *                   enumerable set of active documents.
+ * @dev `documents` maps each name to its `Document` record. `docIndexes` holds the
+ *      one-based position of each name within `docNames` to enable O(1) existence checks
+ *      and swap-and-pop removal. `docNames` is the ordered enumerable set of active
+ *      document names.
+ * @custom:storage-location erc7201:security.token.standard.storage.Documentation
  */
-/// @custom:storage-location erc7201:security.token.standard.storage.Documentation
 struct DocumentationDataStorage {
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(bytes32 => Document) documents;
@@ -113,9 +112,9 @@ library DocumentationStorageWrapper {
      * @notice Returns the names of all documents currently registered.
      * @dev Ordering reflects the internal `docNames` array and may change when
      *      documents are removed via swap-and-pop.
-     * @return Array of `bytes32` document names.
+     * @return names_ Array of `bytes32` document names currently registered.
      */
-    function getDocumentNames() internal view returns (bytes32[] memory) {
+    function getDocumentNames() internal view returns (bytes32[] memory names_) {
         return _documentationStorage().docNames;
     }
 

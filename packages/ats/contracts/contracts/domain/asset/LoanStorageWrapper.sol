@@ -1,12 +1,48 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ILoan } from "../../../facets/layer_2/loan/ILoan.sol";
+import { ILoan } from "../../facets/layer_2/loan/ILoan.sol";
 
 /// @custom:hash storage Loan
 bytes32 constant STORAGE_LOCATION_LOAN = 0x2af22e338cd16bdeda633a06c0ad54c1b9d04b19487a6b1ed48b48c18d643800;
 
-/// @custom:storage-location erc7201:security.token.standard.storage.Loan
+/**
+ * @title LoanDataStorage
+ * @notice Backing storage for a single loan instrument's full lifecycle data.
+ * @dev Enum-typed fields are stored as `uint8` for tight packing in region R2; the loan
+ *      facet round-trips them through their respective `ILoan` enums on read/write.
+ *      Mutated only through `LoanStorageWrapper` against the deterministic ERC-7201 slot.
+ * @param initialized Whether the loan data has been initialised.
+ * @param currency ISO 4217 currency code of the loan principal.
+ * @param loanStructureType Packed `ILoan.LoanStructureType` discriminator.
+ * @param repaymentType Packed `ILoan.RepaymentType` discriminator.
+ * @param interestType Packed `ILoan.InterestType` discriminator.
+ * @param baseReferenceRate Packed `ILoan.BaseReferenceRate` discriminator.
+ * @param dayCount Packed `ILoan.DayCount` discriminator.
+ * @param paymentFrequency Packed `ILoan.PaymentFrequency` discriminator.
+ * @param utilizationFeeType Packed `ILoan.UtilizationFeeType` discriminator.
+ * @param performanceStatus Packed `ILoan.PerformanceStatus` discriminator.
+ * @param originatorAccount Account that originated the loan.
+ * @param servicerAccount Account servicing the loan.
+ * @param startingDate Unix timestamp at which the loan starts accruing.
+ * @param maturityDate Unix timestamp at which the loan matures.
+ * @param signingDate Unix timestamp at which the loan was signed.
+ * @param floorRate Lower bound applied to the variable rate calculation.
+ * @param capRate Upper bound applied to the variable rate calculation.
+ * @param rateMargin Margin added to the base reference rate.
+ * @param firstAccrualDate Unix timestamp of the first interest accrual.
+ * @param prepaymentPenalty Penalty applied on prepayment.
+ * @param commitmentFee Fee charged for the unused portion of a commitment.
+ * @param utilizationFee Fee charged for the utilised portion.
+ * @param servicingFee Fee paid to the servicer.
+ * @param internalRiskGrade Free-form internal risk grade label.
+ * @param defaultProbability Probability of default (basis points or modelled units).
+ * @param lossGivenDefault Loss-given-default ratio (basis points or modelled units).
+ * @param totalCollateralValue Aggregate value of the collateral securing the loan.
+ * @param loanToValue Loan-to-value ratio (basis points or modelled units).
+ * @param daysPastDue Number of days the loan has been past due.
+ * @custom:storage-location erc7201:security.token.standard.storage.Loan
+ */
 struct LoanDataStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
     bool initialized;
@@ -51,17 +87,33 @@ struct LoanDataStorage {
  * @author Hashgraph
  */
 library LoanStorageWrapper {
+    /**
+     * @notice Initialises loan storage and writes the full loan details.
+     * @dev Sets the `initialized` flag and delegates field-by-field writes to
+     *      `_writeLoanDetails`. Intended to be called once per loan instrument.
+     * @param _loanDetailsData The full loan details data to persist.
+     */
     function initializeLoan(ILoan.LoanDetailsData calldata _loanDetailsData) internal {
         LoanDataStorage storage ls = _loanStorage();
         ls.initialized = true;
         _writeLoanDetails(_loanDetailsData, ls);
     }
 
+    /**
+     * @notice Overwrites the loan details and emits `LoanDetailsSet`.
+     * @dev Used for post-initialisation updates; does not toggle the `initialized` flag.
+     * @param _loanDetails The new loan details to persist.
+     */
     function setLoanDetails(ILoan.LoanDetailsData memory _loanDetails) internal {
         _writeLoanDetails(_loanDetails, _loanStorage());
         emit ILoan.LoanDetailsSet(_loanDetails);
     }
 
+    /**
+     * @notice Reads the full loan details from storage and reconstructs the structured DTO.
+     * @dev Re-hydrates packed `uint8` enum fields back into their `ILoan` enum counterparts.
+     * @return loanDetails_ The reconstructed `ILoan.LoanDetailsData` view.
+     */
     function getLoanDetails() internal view returns (ILoan.LoanDetailsData memory loanDetails_) {
         LoanDataStorage storage ls = _loanStorage();
 
@@ -109,10 +161,21 @@ library LoanStorageWrapper {
         });
     }
 
+    /**
+     * @notice Reports whether the loan storage has been initialised.
+     * @return True once `initializeLoan` has been called, false otherwise.
+     */
     function isLoanInitialized() internal view returns (bool) {
         return _loanStorage().initialized;
     }
 
+    /**
+     * @notice Persists every field of a `LoanDetailsData` DTO into storage.
+     * @dev Enum-typed source fields are narrowed to `uint8` for tight packing in
+     *      region R2 of the storage struct; readers re-hydrate them via casts.
+     * @param _ld The loan details DTO to persist.
+     * @param _ls Storage pointer to the loan storage struct.
+     */
     function _writeLoanDetails(ILoan.LoanDetailsData memory _ld, LoanDataStorage storage _ls) private {
         _ls.currency = _ld.loanBasicData.currency;
         _ls.startingDate = _ld.loanBasicData.startingDate;
@@ -144,6 +207,11 @@ library LoanStorageWrapper {
         _ls.daysPastDue = _ld.loanPerformanceStatus.daysPastDue;
     }
 
+    /**
+     * @notice Returns the storage pointer for loan data at the deterministic slot.
+     * @dev Uses inline assembly to load the ERC-7201 slot from a precomputed constant.
+     * @return loanData_ Storage pointer to `LoanDataStorage`.
+     */
     function _loanStorage() private pure returns (LoanDataStorage storage loanData_) {
         bytes32 position = STORAGE_LOCATION_LOAN;
         // solhint-disable-next-line no-inline-assembly
