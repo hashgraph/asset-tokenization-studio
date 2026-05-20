@@ -22,11 +22,11 @@ abstract contract Allowance is IAllowance, Modifiers {
     function initializeAllowance()
         external
         override
-        onlyFacetNotRegistered(_ALLOWANCE_RESOLVER_KEY)
         onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_ALLOWANCE_RESOLVER_KEY)
     {
         InitializerStorageWrapper.setFacetToReady(_ALLOWANCE_RESOLVER_KEY);
-        emit IAllowance.AllowanceInitialized(EvmAccessors.getMsgSender());
+        emit IAllowance.AllowanceInitialized();
     }
 
     /**

@@ -12,9 +12,8 @@ interface IBalanceTracker {
     /**
      * @notice Emitted once when the balance tracker capability is initialised on a token.
      * @dev Fires exclusively from `initializeBalanceTracker` after the storage write succeeds.
-     * @param operator The account that invoked initialisation (deployer or upgrade caller).
      */
-    event BalanceTrackerInitialized(address indexed operator);
+    event BalanceTrackerInitialized();
 
     /**
      * @notice Initialises the balance tracker capability on the token.

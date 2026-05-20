@@ -25,11 +25,11 @@ abstract contract BatchBurn is IBatchBurn, Modifiers {
     function initializeBatchBurn()
         external
         override
-        onlyFacetNotRegistered(_BATCH_BURN_RESOLVER_KEY)
         onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_BATCH_BURN_RESOLVER_KEY)
     {
         InitializerStorageWrapper.setFacetToReady(_BATCH_BURN_RESOLVER_KEY);
-        emit IBatchBurn.BatchBurnInitialized(EvmAccessors.getMsgSender());
+        emit IBatchBurn.BatchBurnInitialized();
     }
 
     /// @inheritdoc IBatchBurn

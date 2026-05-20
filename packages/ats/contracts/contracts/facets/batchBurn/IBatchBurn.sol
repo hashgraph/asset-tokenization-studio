@@ -12,9 +12,8 @@ interface IBatchBurn {
     /**
      * @notice Emitted once when the batch burn capability is initialised on a token.
      * @dev Fires exclusively from `initializeBatchBurn` after the storage write succeeds.
-     * @param operator The account that invoked initialisation (deployer or upgrade caller).
      */
-    event BatchBurnInitialized(address indexed operator);
+    event BatchBurnInitialized();
 
     /**
      * @notice Initialises the batch burn capability on the token.

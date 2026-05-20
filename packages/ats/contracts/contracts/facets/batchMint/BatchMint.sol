@@ -29,11 +29,11 @@ abstract contract BatchMint is IBatchMint, Modifiers {
     function initializeBatchMint()
         external
         override
-        onlyFacetNotRegistered(_BATCH_MINT_RESOLVER_KEY)
         onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_BATCH_MINT_RESOLVER_KEY)
     {
         InitializerStorageWrapper.setFacetToReady(_BATCH_MINT_RESOLVER_KEY);
-        emit IBatchMint.BatchMintInitialized(EvmAccessors.getMsgSender());
+        emit IBatchMint.BatchMintInitialized();
     }
 
     /// @inheritdoc IBatchMint

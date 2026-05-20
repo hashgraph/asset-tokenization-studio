@@ -189,9 +189,10 @@ describe("BalanceTrackerAdjusted Tests", () => {
     });
 
     it("GIVEN a fresh deployment WHEN initializeBalanceTrackerAdjusted is called THEN it emits BalanceTrackerAdjustedInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeBalanceTrackerAdjusted())
-        .to.emit(asset, "BalanceTrackerAdjustedInitialized")
-        .withArgs(await signer_A.getAddress());
+      await expect(asset.connect(signer_A).initializeBalanceTrackerAdjusted()).to.emit(
+        asset,
+        "BalanceTrackerAdjustedInitialized",
+      );
     });
   });
 });

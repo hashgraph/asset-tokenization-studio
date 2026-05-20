@@ -23,11 +23,11 @@ abstract contract BatchController is IBatchController, Modifiers {
     function initializeBatchController()
         external
         override
-        onlyFacetNotRegistered(_BATCH_CONTROLLER_RESOLVER_KEY)
         onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_BATCH_CONTROLLER_RESOLVER_KEY)
     {
         InitializerStorageWrapper.setFacetToReady(_BATCH_CONTROLLER_RESOLVER_KEY);
-        emit IBatchController.BatchControllerInitialized(EvmAccessors.getMsgSender());
+        emit IBatchController.BatchControllerInitialized();
     }
 
     /// @inheritdoc IBatchController

@@ -209,9 +209,7 @@ describe("BatchMint Tests", () => {
     it("GIVEN a fresh deployment WHEN initializeBatchMint is called THEN it emits BatchMintInitialized", async () => {
       const base = await deployEquityTokenFixture();
       const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await expect(freshAsset.connect(base.deployer).initializeBatchMint())
-        .to.emit(freshAsset, "BatchMintInitialized")
-        .withArgs(await base.deployer.getAddress());
+      await expect(freshAsset.connect(base.deployer).initializeBatchMint()).to.emit(freshAsset, "BatchMintInitialized");
     });
   });
 });

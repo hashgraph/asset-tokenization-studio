@@ -8,7 +8,6 @@ import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.s
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _BALANCE_TRACKER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -24,11 +23,11 @@ abstract contract BalanceTracker is IBalanceTracker, Modifiers {
     function initializeBalanceTracker()
         external
         override
-        onlyFacetNotRegistered(_BALANCE_TRACKER_RESOLVER_KEY)
         onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_BALANCE_TRACKER_RESOLVER_KEY)
     {
         InitializerStorageWrapper.setFacetToReady(_BALANCE_TRACKER_RESOLVER_KEY);
-        emit IBalanceTracker.BalanceTrackerInitialized(EvmAccessors.getMsgSender());
+        emit IBalanceTracker.BalanceTrackerInitialized();
     }
 
     /**

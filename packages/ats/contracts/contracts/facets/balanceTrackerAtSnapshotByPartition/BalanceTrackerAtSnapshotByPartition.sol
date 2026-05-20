@@ -6,7 +6,6 @@ import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { SnapshotsStorageWrapper } from "../../domain/asset/SnapshotsStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _BALANCE_TRACKER_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -22,13 +21,11 @@ abstract contract BalanceTrackerAtSnapshotByPartition is IBalanceTrackerAtSnapsh
     function initializeBalanceTrackerAtSnapshotByPartition()
         external
         override
-        onlyFacetNotRegistered(_BALANCE_TRACKER_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY)
         onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_BALANCE_TRACKER_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY)
     {
         InitializerStorageWrapper.setFacetToReady(_BALANCE_TRACKER_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY);
-        emit IBalanceTrackerAtSnapshotByPartition.BalanceTrackerAtSnapshotByPartitionInitialized(
-            EvmAccessors.getMsgSender()
-        );
+        emit IBalanceTrackerAtSnapshotByPartition.BalanceTrackerAtSnapshotByPartitionInitialized();
     }
 
     /// @inheritdoc IBalanceTrackerAtSnapshotByPartition

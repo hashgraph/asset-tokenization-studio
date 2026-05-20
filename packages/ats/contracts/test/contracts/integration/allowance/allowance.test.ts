@@ -390,9 +390,7 @@ describe("Allowance Facet Tests", () => {
     it("GIVEN a fresh deployment WHEN initializeAllowance is called THEN it emits AllowanceInitialized", async () => {
       const base = await deployEquityTokenFixture();
       const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await expect(freshAsset.connect(base.deployer).initializeAllowance())
-        .to.emit(freshAsset, "AllowanceInitialized")
-        .withArgs(await base.deployer.getAddress());
+      await expect(freshAsset.connect(base.deployer).initializeAllowance()).to.emit(freshAsset, "AllowanceInitialized");
     });
   });
 });

@@ -667,9 +667,10 @@ describe("AdjustBalancesFacet Tests", () => {
     it("GIVEN a fresh deployment WHEN initializeBalanceAdjustments is called THEN it emits BalanceAdjustmentsInitialized", async () => {
       const base = await deployEquityTokenFixture();
       const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await expect(freshAsset.connect(base.deployer).initializeBalanceAdjustments())
-        .to.emit(freshAsset, "BalanceAdjustmentsInitialized")
-        .withArgs(await base.deployer.getAddress());
+      await expect(freshAsset.connect(base.deployer).initializeBalanceAdjustments()).to.emit(
+        freshAsset,
+        "BalanceAdjustmentsInitialized",
+      );
     });
   });
 });

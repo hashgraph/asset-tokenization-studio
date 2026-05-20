@@ -14,9 +14,8 @@ interface IBatchMint {
     /**
      * @notice Emitted once when the batch mint capability is initialised on a token.
      * @dev Fires exclusively from `initializeBatchMint` after the storage write succeeds.
-     * @param operator The account that invoked initialisation (deployer or upgrade caller).
      */
-    event BatchMintInitialized(address indexed operator);
+    event BatchMintInitialized();
 
     /**
      * @notice Initialises the batch mint capability on the token.

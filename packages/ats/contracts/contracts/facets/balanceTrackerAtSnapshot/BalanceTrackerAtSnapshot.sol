@@ -7,7 +7,6 @@ import { HolderBalance } from "../layer_1/snapshot/ISnapshots.sol";
 import { SnapshotsStorageWrapper } from "../../domain/asset/SnapshotsStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _BALANCE_TRACKER_AT_SNAPSHOT_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -22,11 +21,11 @@ abstract contract BalanceTrackerAtSnapshot is IBalanceTrackerAtSnapshot, Modifie
     function initializeBalanceTrackerAtSnapshot()
         external
         override
-        onlyFacetNotRegistered(_BALANCE_TRACKER_AT_SNAPSHOT_RESOLVER_KEY)
         onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_BALANCE_TRACKER_AT_SNAPSHOT_RESOLVER_KEY)
     {
         InitializerStorageWrapper.setFacetToReady(_BALANCE_TRACKER_AT_SNAPSHOT_RESOLVER_KEY);
-        emit IBalanceTrackerAtSnapshot.BalanceTrackerAtSnapshotInitialized(EvmAccessors.getMsgSender());
+        emit IBalanceTrackerAtSnapshot.BalanceTrackerAtSnapshotInitialized();
     }
 
     /// @inheritdoc IBalanceTrackerAtSnapshot

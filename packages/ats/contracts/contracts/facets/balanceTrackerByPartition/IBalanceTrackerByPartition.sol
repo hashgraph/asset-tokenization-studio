@@ -12,9 +12,8 @@ interface IBalanceTrackerByPartition {
     /**
      * @notice Emitted once when the partition balance tracker capability is initialised on a token.
      * @dev Fires exclusively from `initializeBalanceTrackerByPartition` after the storage write succeeds.
-     * @param operator The account that invoked initialisation (deployer or upgrade caller).
      */
-    event BalanceTrackerByPartitionInitialized(address indexed operator);
+    event BalanceTrackerByPartitionInitialized();
 
     /**
      * @notice Initialises the partition balance tracker capability on the token.
