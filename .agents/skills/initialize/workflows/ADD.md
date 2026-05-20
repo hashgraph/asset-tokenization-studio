@@ -245,6 +245,28 @@ it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeXxx is called THEN 
 });
 ```
 
+> **After `initialize-factory` Part A is applied** (factory calls `initializeXxx` during
+> deployment), the standard fixture produces an already-initialised proxy. On that proxy
+> `onlyFacetNotRegistered` fires BEFORE `onlyRole`, so the test above would revert with
+> `FacetAlreadyRegistered` instead of `AccountHasNoRole`. Adapt it using
+> `factory.deployProxy` to get a fresh uninitialised proxy where `onlyFacetNotRegistered`
+> passes and `onlyRole` can fire:
+>
+> ```typescript
+> it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeXxx is called THEN it reverts with AccountHasNoRole", async () => {
+>   const proxyTx = await factory.deployProxy(blr.target as string, CONFIG_ID, 1, [
+>     { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [deployer.address] },
+>   ]);
+>   const proxyReceipt = await proxyTx.wait();
+>   const { proxyAddress } = await decodeEvent(factory, "ProxyDeployed", proxyReceipt!);
+>   const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+>   await expect(freshAsset.connect(nonAdmin).initializeXxx(/* args */)).to.be.revertedWithCustomError(
+>     freshAsset,
+>     "AccountHasNoRole",
+>   );
+> });
+> ```
+
 ### Test 3 — event emitted on first call
 
 Because the factory does not yet call `initializeXxx`, the standard fixture produces
@@ -297,7 +319,85 @@ via `InitializerStorageWrapper.setFacetToReady`. Emits `[X]Initialized` event.
 
 ---
 
-## 9. Verification checklist
+## 9. Acceptance Criteria
+
+**This section is BLOCKING. Do NOT declare the skill complete until every command below
+passes. Run each command, show the output, and confirm the criterion is met.**
+
+### AC-1 — Selector registered
+
+```bash
+rg "initializeXxx.selector" packages/ats/contracts/contracts/ -g "*.sol"
+```
+
+Expected: exactly 1 match in the concrete facet's `getStaticFunctionSelectors`. If missing,
+the proxy will silently swallow factory calls to `initializeXxx` — fix before continuing.
+
+### AC-2 — All 3 tests exist in the test file
+
+```bash
+rg "XxxInitialized" packages/ats/contracts/test/ -g "*.ts" -l
+```
+
+Expected: at least one file listed. Then confirm the file contains all three tests:
+
+```bash
+rg "FacetAlreadyRegistered|AccountHasNoRole|XxxInitialized" \
+  <path-to-test-file> --count
+```
+
+Expected: 3 or more matches (one per test). If any are missing, write the missing
+tests from Step F before continuing.
+
+### AC-3 — All 3 tests pass
+
+```bash
+cd packages/ats/contracts && \
+  npm run test --no-compile -- --grep "initializeXxx"
+```
+
+Expected: 3 passing tests, 0 failing. If any test fails, fix the implementation
+or test — do NOT skip.
+
+### AC-4 — Event declared and NatSpec complete
+
+```bash
+rg "event XxxInitialized" packages/ats/contracts/contracts/ -g "*.sol"
+```
+
+Expected: exactly 1 match in the interface file (`IXxx.sol`). Verify manually that:
+
+- First param is `address indexed operator`
+- Remaining params match the function signature (without `calldata`/`memory`)
+- `@notice`, `@dev`, and all `@param` tags are present
+
+### AC-5 — Compile clean
+
+```bash
+cd packages/ats/contracts && npm run compile --force 2>&1 | grep -E "Warning|Error" | head -20
+```
+
+Expected: 0 warnings and 0 errors on the modified files.
+
+---
+
+## 10. Factory.sol note
+
+`initialize-add` does **not** touch `Factory.sol` — that is handled by `initialize-factory`
+Part A. However, when `initialize-factory` eventually wires the new `initializeXxx` call,
+the bootstrap-admin invariant applies:
+
+- Do **not** patch the rbacs-copy block or add per-facet admin workarounds.
+- `Factory._deploySecurity` already appends `address(this)` as `DEFAULT_ADMIN_ROLE` before
+  constructing the `ResolverProxy` and renounces it after all initialisers run.
+- The only addition needed in `Factory.sol` is the `initializeXxx` call at the correct
+  position in the initialiser sequence, before `renounceRole`.
+
+See `workflows/FACTORY.md` for the full wiring procedure.
+
+---
+
+## 11. Verification checklist (static review — run after AC passes)
 
 - [ ] Event declared in `IXxx.sol` with `address indexed operator` as first param and NatSpec
 - [ ] Function declared in `IXxx.sol` with NatSpec
@@ -307,10 +407,7 @@ via `InitializerStorageWrapper.setFacetToReady`. Emits `[X]Initialized` event.
 - [ ] `emit XxxInitialized(EvmAccessors.getMsgSender(), ...)` is the last statement
 - [ ] `this.initializeXxx.selector` added to `getStaticFunctionSelectors`
 - [ ] If event has dynamic types (struct/array): Test 3 uses `decodeEvent`, not `.withArgs()`
-- [ ] All 3 new tests pass: `npm run test --no-compile --grep "initializeXxx"`
 - [ ] `npm run format:check` passes on all modified files
-- [ ] `npm run compile` produces 0 warnings on modified contracts
 - [ ] Solhint produces no new errors on modified files
-- [ ] `rg "initializeXxx" contracts/factory/Factory.sol` — note if a Factory call is missing;
-      flag it for `initialize-factory` skill
+- [ ] `rg "initializeXxx" contracts/factory/Factory.sol` — note if missing; flag for `initialize-factory`
 - [ ] Changeset file created under `.changeset/`

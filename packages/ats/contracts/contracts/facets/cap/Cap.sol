@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICap } from "./ICap.sol";
-import { ROLE_CAP } from "../../constants/roles.sol";
+import { ICap, RESOLVER_KEY_CAP } from "./ICap.sol";
+import { CAP_ROLE, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../domain/core/CapStorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
@@ -28,10 +29,13 @@ abstract contract Cap is ICap, Modifiers {
     )
         external
         override
-        onlyNotCapInitialized
+        onlyFacetNotRegistered(RESOLVER_KEY_CAP)
+        onlyRole(DEFAULT_ADMIN_ROLE)
         onlyValidNewMaxSupply(maxSupply, TimeTravelStorageWrapper.getBlockTimestamp())
     {
         CapStorageWrapper.initializeCap(maxSupply, partitionCap);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_CAP);
+        emit ICap.CapInitialized(EvmAccessors.getMsgSender(), maxSupply, partitionCap);
     }
 
     /// @inheritdoc ICap

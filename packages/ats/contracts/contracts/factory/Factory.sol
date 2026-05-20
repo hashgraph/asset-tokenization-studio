@@ -8,6 +8,7 @@ import { IFactory } from "./IFactory.sol";
 import { ResolverProxy } from "../infrastructure/proxy/ResolverProxy.sol";
 import { IResolverProxy } from "../infrastructure/proxy/IResolverProxy.sol";
 import { DEFAULT_ADMIN_ROLE } from "../constants/roles.sol";
+import { IAccessControl } from "../facets/accessControl/IAccessControl.sol";
 import { IControlList } from "../facets/controlList/IControlList.sol";
 import { ICore } from "../facets/core/ICore.sol";
 import { IERC20Votes } from "../facets/layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
@@ -301,11 +302,24 @@ abstract contract Factory is IFactory {
         SecurityData calldata _securityData,
         SecurityType _securityType
     ) private returns (address securityAddress_) {
+        // Build extended rbacs array that includes the factory as a temporary
+        // DEFAULT_ADMIN_ROLE holder during initialisation.
+        uint256 rbacsLen = _securityData.rbacs.length;
+        IResolverProxy.Rbac[] memory extendedRbacs = new IResolverProxy.Rbac[](rbacsLen + 1);
+        for (uint256 i; i < rbacsLen; ) {
+            extendedRbacs[i] = _securityData.rbacs[i];
+            unchecked {
+                ++i;
+            }
+        }
+        extendedRbacs[rbacsLen] = IResolverProxy.Rbac({ role: DEFAULT_ADMIN_ROLE, members: new address[](1) });
+        extendedRbacs[rbacsLen].members[0] = address(this);
+
         ResolverProxy equity = new ResolverProxy(
             _securityData.resolver,
             _securityData.resolverProxyConfiguration.key,
             _securityData.resolverProxyConfiguration.version,
-            _securityData.rbacs
+            extendedRbacs
         );
 
         securityAddress_ = address(equity);
@@ -357,6 +371,9 @@ abstract contract Factory is IFactory {
 
         // configure ERC3643 (should be present)
         IERC3643(securityAddress_).initialize_ERC3643(_securityData.compliance, _securityData.identityRegistry);
+
+        // Renounce temporary admin role — factory no longer needs it after initializers.
+        IAccessControl(securityAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
     }
 
     function _tryInitializeERC1410(address securityAddress_, bool isMultiPartition) private {
