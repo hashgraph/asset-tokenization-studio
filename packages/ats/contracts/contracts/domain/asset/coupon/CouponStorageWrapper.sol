@@ -22,6 +22,8 @@ import { ScheduledTasksStorageWrapper } from "../ScheduledTasksStorageWrapper.so
 import { SnapshotsStorageWrapper } from "../SnapshotsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { _COUPON_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
+import { InterestRateStorageWrapper } from "../InterestRateStorageWrapper.sol";
+import { IInterestRate } from "../../../facets/interestRate/IInterestRate.sol";
 
 /// @title Coupon Storage Wrapper
 /// @notice Library for managing Coupon storage operations.
@@ -72,10 +74,7 @@ library CouponStorageWrapper {
         ICouponTypes.RegisteredCoupon memory registeredCoupon;
         bytes32 corporateActionId;
         (registeredCoupon, corporateActionId, ) = getCoupon(couponId);
-        if (
-            registeredCoupon.coupon.executionDate != 0 &&
-            registeredCoupon.coupon.executionDate <= TimeTravelStorageWrapper.getBlockTimestamp()
-        ) {
+        if (registeredCoupon.coupon.executionDate <= TimeTravelStorageWrapper.getBlockTimestamp()) {
             revert ICoupon.CouponAlreadyExecuted(corporateActionId, couponId);
         }
         CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
@@ -88,7 +87,9 @@ library CouponStorageWrapper {
         }
         ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newCoupon.recordDate, SNAPSHOT_TASK_TYPE);
         ScheduledTasksStorageWrapper.addScheduledSnapshot(newCoupon.recordDate, actionId);
-        if (newCoupon.fixingDate == 0) return;
+
+        if (InterestRateStorageWrapper.getCouponRateType() != IInterestRate.RateType.KPI_LINKED) return;
+
         ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newCoupon.fixingDate, COUPON_LISTING_TASK_TYPE);
         ScheduledTasksStorageWrapper.addScheduledCouponListing(newCoupon.fixingDate, actionId);
     }
@@ -119,21 +120,8 @@ library CouponStorageWrapper {
             SNAPSHOT_RESULT_ID
         );
 
-        if (
-            registeredCoupon_.coupon.fixingDate == 0 ||
-            registeredCoupon_.coupon.rateStatus == ICouponTypes.RateCalculationStatus.SET ||
-            registeredCoupon_.coupon.fixingDate > TimeTravelStorageWrapper.getBlockTimestamp()
-        ) return (registeredCoupon_, corporateActionId_, isDisabled_);
-
-        (uint256 resolvedRate, uint8 resolvedDecimals, bool shouldOverride) = CouponRateDispatch.resolveRate(
-            couponID,
-            registeredCoupon_.coupon
-        );
-        if (shouldOverride) {
-            registeredCoupon_.coupon.rate = resolvedRate;
-            registeredCoupon_.coupon.rateDecimals = resolvedDecimals;
-            registeredCoupon_.coupon.rateStatus = ICouponTypes.RateCalculationStatus.SET;
-        }
+        if (registeredCoupon_.coupon.rateStatus != ICouponTypes.RateCalculationStatus.SET)
+            registeredCoupon_.coupon = CouponRateDispatch.resolveRate(couponID, registeredCoupon_.coupon);
     }
 
     /**

@@ -36,19 +36,19 @@ library CouponRateDispatch {
      *              been initialized.
      * @param couponID The coupon identifier.
      * @param coupon   The coupon data struct.
-     * @return rate_           Resolved rate value (meaningful only when shouldOverride_ is true).
-     * @return rateDecimals_   Decimal precision (meaningful only when shouldOverride_ is true).
-     * @return shouldOverride_ True when the caller must overwrite the coupon's rate fields.
+     * @return resolvedCoupon_  Coupon with the resolved rate value.
      */
     function resolveRate(
         uint256 couponID,
         ICouponTypes.Coupon memory coupon
-    ) internal view returns (uint256 rate_, uint8 rateDecimals_, bool shouldOverride_) {
+    ) internal view returns (ICouponTypes.Coupon memory resolvedCoupon_) {
         if (InterestRateStorageWrapper.getCouponRateType() == IInterestRate.RateType.KPI_LINKED) {
-            (rate_, rateDecimals_) = KpiLinkedRateLib.calculateKpiLinkedInterestRate(couponID, coupon);
-            return (rate_, rateDecimals_, true);
+            (coupon.rate, coupon.rateDecimals, coupon.rateStatus) = KpiLinkedRateLib.calculateKpiLinkedInterestRate(
+                couponID,
+                coupon
+            );
         }
-        return (rate_, rateDecimals_, shouldOverride_);
+        return coupon;
         // NONE, STANDARD, FIXED: rate is owned at write time; no action needed at read/trigger time.
     }
 
@@ -88,6 +88,11 @@ library CouponRateDispatch {
 
         if (rateType == IInterestRate.RateType.KPI_LINKED) {
             if (!_isPendingRate(newCoupon)) revert ICoupon.InterestRateIsKpiLinked();
+            return newCoupon;
+        }
+
+        if (rateType == IInterestRate.RateType.STANDARD) {
+            if (newCoupon.rateStatus != ICouponTypes.RateCalculationStatus.SET) revert ICoupon.InterestRateIsStandard();
             return newCoupon;
         }
 

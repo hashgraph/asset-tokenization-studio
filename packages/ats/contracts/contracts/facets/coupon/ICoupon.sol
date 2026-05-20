@@ -60,6 +60,8 @@ interface ICoupon is ICouponTypes {
      */
     error InterestRateIsKpiLinked();
 
+    error InterestRateIsStandard();
+
     /**
      * @notice Reverts when a coupon identifier does not resolve to an existing corporate
      *         action.

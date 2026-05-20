@@ -70,13 +70,14 @@ library ScheduledTasksDispatchOps {
         CouponStorageWrapper.addToCouponsOrderedList(couponID);
         uint256 orderedListPos = CouponStorageWrapper.getCouponsOrderedListTotal();
 
-        _updateCouponRatesIfNeeded(couponID);
-
         CorporateActionsStorageWrapper.updateCorporateActionResult(
             actionId,
             COUPON_LISTING_RESULT_ID,
             abi.encodePacked(orderedListPos)
         );
+
+        if (InterestRateStorageWrapper.getCouponRateType() == IInterestRate.RateType.KPI_LINKED)
+            updateCouponRate(couponID);
     }
 
     function _onScheduledBalanceAdjustmentTriggered(ScheduledTask memory _scheduledTask) private {
@@ -94,20 +95,13 @@ library ScheduledTasksDispatchOps {
         AdjustBalancesStorageWrapper.adjustBalances(balanceAdjustment.factor, balanceAdjustment.decimals);
     }
 
-    function _updateCouponRatesIfNeeded(uint256 couponID) private {
+    function updateCouponRate(uint256 couponID) private {
         (ICouponTypes.RegisteredCoupon memory registeredCoupon, , ) = CouponStorageWrapper.getCoupon(couponID);
 
-        bool shouldUpdate = InterestRateStorageWrapper.getCouponRateType() == IInterestRate.RateType.KPI_LINKED;
-
-        if (shouldUpdate) {
-            CorporateActionsStorageWrapper.updateCorporateActionData(
-                CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
-                    COUPON_CORPORATE_ACTION_TYPE,
-                    couponID - 1
-                ),
-                abi.encode(registeredCoupon.coupon)
-            );
-        }
+        CorporateActionsStorageWrapper.updateCorporateActionData(
+            CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(COUPON_CORPORATE_ACTION_TYPE, couponID - 1),
+            abi.encode(registeredCoupon.coupon)
+        );
     }
 
     function _getCouponIdFromAction(bytes32 actionId) private view returns (uint256 couponID_) {
