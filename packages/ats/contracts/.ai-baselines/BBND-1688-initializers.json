@@ -1,1 +1,0 @@
-{"ts":"2026-05-20T13:56:23+02:00","branch":"BBND-1688-initializers","commit":"f9b8458d9","cov":9,"br":4,"fn":8,"lh":470,"lf":4982,"brh":128,"brf":2822,"fnh":167,"fnf":2002,"lint_w":2675,"lint_e":0,"dur_format":"8.713s","dur_lint":"8.571s","dur_compile":"45.966s","dur_test":"256.579s","dur_coverage":"110.483s"}
