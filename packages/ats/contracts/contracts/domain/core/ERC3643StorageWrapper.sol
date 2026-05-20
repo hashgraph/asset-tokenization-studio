@@ -48,8 +48,7 @@ library ERC3643StorageWrapper {
         mapping(address => bool) addressRecovered;
     }
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC3643(address _compliance, address _identityRegistry) internal {
+    function initializeERC3643(address _compliance, address _identityRegistry) internal {
         setCompliance(_compliance);
         setIdentityRegistry(_identityRegistry);
     }

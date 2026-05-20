@@ -10,19 +10,18 @@ import { InitializerStorageWrapper } from "../../../domain/core/InitializerStora
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ProtectedPartitions is IProtectedPartitions, Modifiers {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ProtectedPartitions(
+    function initializeProtectedPartitions(
         bool _protectPartitions
     )
         external
         override
-        onlyFacetNotRegistered(_PROTECTED_PARTITIONS_RESOLVER_KEY)
         onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_PROTECTED_PARTITIONS_RESOLVER_KEY)
         returns (bool success_)
     {
-        success_ = ProtectedPartitionsStorageWrapper.initialize_ProtectedPartitions(_protectPartitions);
+        success_ = ProtectedPartitionsStorageWrapper.initializeProtectedPartitions(_protectPartitions);
         InitializerStorageWrapper.setFacetToReady(_PROTECTED_PARTITIONS_RESOLVER_KEY);
-        emit IProtectedPartitions.ProtectedPartitionsInitialized(EvmAccessors.getMsgSender());
+        emit IProtectedPartitions.ProtectedPartitionsInitialized(_protectPartitions);
     }
 
     function protectPartitions()

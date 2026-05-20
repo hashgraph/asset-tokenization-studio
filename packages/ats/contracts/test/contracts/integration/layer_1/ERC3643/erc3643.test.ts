@@ -16,6 +16,7 @@ import {
   ADDRESS_ZERO,
   EMPTY_HEX_BYTES,
   dateToUnixTimestamp,
+  EQUITY_CONFIG_ID,
 } from "@scripts";
 
 const name = "TEST";
@@ -152,7 +153,7 @@ describe("ERC3643 Tests", () => {
     describe("initialize", () => {
       it("GIVEN an already initialized token WHEN attempting to initialize again THEN transaction fails with FacetAlreadyRegistered", async () => {
         await expect(
-          asset.initialize_ERC3643(complianceMock.target as string, identityRegistryMock.target as string),
+          asset.initializeERC3643(complianceMock.target as string, identityRegistryMock.target as string),
         ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
       });
     });
@@ -1453,5 +1454,48 @@ describe("ERC3643 Tests", () => {
         deactivatedAsset.connect(base.deployer).unfreezePartialTokens(ethers.ZeroAddress, 0),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
+  });
+});
+
+describe("initializeERC3643", () => {
+  let signer_D: HardhatEthersSigner;
+  before(async () => {
+    const s = await ethers.getSigners();
+    signer_D = s[3];
+  });
+
+  it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeERC3643 is called THEN it reverts with AccountHasNoRole", async () => {
+    const { decodeEvent } = await import("@scripts/infrastructure");
+    const infra = await loadFixture(deployAtsInfrastructureFixture);
+    const cm = await (await ethers.getContractFactory("ComplianceMock")).connect(infra.deployer).deploy(true, false);
+    const im = await (await ethers.getContractFactory("IdentityRegistryMock"))
+      .connect(infra.deployer)
+      .deploy(true, false);
+    const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+      { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+    ]);
+    const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
+    const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+    await expect(freshAsset.connect(signer_D).initializeERC3643(cm.target, im.target)).to.be.revertedWithCustomError(
+      freshAsset,
+      "AccountHasNoRole",
+    );
+  });
+
+  it("GIVEN a new deployment WHEN initializeERC3643 is called THEN it emits ERC3643Initialized", async () => {
+    const { decodeEvent } = await import("@scripts/infrastructure");
+    const infra = await loadFixture(deployAtsInfrastructureFixture);
+    const cm = await (await ethers.getContractFactory("ComplianceMock")).connect(infra.deployer).deploy(true, false);
+    const im = await (await ethers.getContractFactory("IdentityRegistryMock"))
+      .connect(infra.deployer)
+      .deploy(true, false);
+    const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+      { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+    ]);
+    const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
+    const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+    await expect(freshAsset.connect(infra.deployer).initializeERC3643(cm.target, im.target))
+      .to.emit(freshAsset, "ERC3643Initialized")
+      .withArgs(cm.target, im.target);
   });
 });

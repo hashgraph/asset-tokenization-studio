@@ -17,9 +17,8 @@ interface IExternalPauseManagement {
     /**
      * @notice Emitted once when the external pause capability is initialised on a token.
      * @dev Fires exclusively from `initializeExternalPauses` after the storage write succeeds.
-     * @param operator The account that invoked initialisation (deployer or upgrade caller).
      */
-    event ExternalPauseInitialized(address indexed operator);
+    event ExternalPauseInitialized(address[] pauses);
 
     /**
      * @notice Emitted when multiple external pause addresses are added or removed in a single

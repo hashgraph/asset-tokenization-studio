@@ -14150,10 +14150,10 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
         selector: "0xfea0c02e",
       },
       {
-        name: "initialize_BusinessLogicResolver",
+        name: "initializeBusinessLogicResolver",
         signature: {
-          full: "function initialize_BusinessLogicResolver() returns (bool success_)",
-          canonical: "initialize_BusinessLogicResolver()",
+          full: "function initializeBusinessLogicResolver() returns (bool success_)",
+          canonical: "initializeBusinessLogicResolver()",
         },
         selector: "0xb86ffa1a",
       },

@@ -21,16 +21,15 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract Mint is IMint, Modifiers {
     /// @inheritdoc IMint
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1594()
+    function initializeERC1594()
         external
         override
-        onlyFacetNotRegistered(_MINT_RESOLVER_KEY)
         onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_MINT_RESOLVER_KEY)
     {
         ERC1594StorageWrapper.initialize();
         InitializerStorageWrapper.setFacetToReady(_MINT_RESOLVER_KEY);
-        emit IMint.ERC1594Initialized(EvmAccessors.getMsgSender());
+        emit IMint.ERC1594Initialized();
     }
 
     /// @inheritdoc IMint

@@ -14,11 +14,11 @@ contract KpiLinkedRate is IKpiLinkedRate, Modifiers {
     function initializeKpiLinkedRate(
         InterestRate calldata _interestRate,
         ImpactData calldata _impactData
-    ) external override onlyFacetNotRegistered(_KPI_LINKED_RATE_RESOLVER_KEY) onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_KPI_LINKED_RATE_RESOLVER_KEY) {
         InterestRateStorageWrapper.setInterestRate(_interestRate);
         InterestRateStorageWrapper.setImpactData(_impactData);
         InitializerStorageWrapper.setFacetToReady(_KPI_LINKED_RATE_RESOLVER_KEY);
-        emit IKpiLinkedRate.KpiLinkedRateInitialized(EvmAccessors.getMsgSender());
+        emit IKpiLinkedRate.KpiLinkedRateInitialized(_interestRate, _impactData);
     }
 
     function setKpiLinkedRateInterestRate(

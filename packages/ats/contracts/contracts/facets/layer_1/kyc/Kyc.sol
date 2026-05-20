@@ -13,10 +13,10 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 abstract contract Kyc is IKyc, Modifiers {
     function initializeInternalKyc(
         bool _internalKycActivated
-    ) external override onlyFacetNotRegistered(_KYC_RESOLVER_KEY) onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_KYC_RESOLVER_KEY) {
         KycStorageWrapper.initializeInternalKyc(_internalKycActivated);
         InitializerStorageWrapper.setFacetToReady(_KYC_RESOLVER_KEY);
-        emit IKyc.KycInitialized(EvmAccessors.getMsgSender());
+        emit IKyc.KycInitialized(_internalKycActivated);
     }
 
     function activateInternalKyc()

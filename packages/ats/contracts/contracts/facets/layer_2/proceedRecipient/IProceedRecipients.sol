@@ -3,9 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 interface IProceedRecipients {
     /// @notice Emitted once when the ProceedRecipients capability is initialised on a token.
-    /// @dev Fires exclusively from `initialize_ProceedRecipients` after the storage write succeeds.
-    /// @param operator The account that invoked initialisation (deployer or upgrade caller).
-    event ProceedRecipientsInitialized(address indexed operator);
+    /// @dev Fires exclusively from `initializeProceedRecipients` after the storage write succeeds.
+    event ProceedRecipientsInitialized(address[] proceedRecipients, bytes[] data);
 
     event ProceedRecipientAdded(address indexed operator, address indexed proceedRecipient, bytes data);
 
@@ -20,8 +19,7 @@ interface IProceedRecipients {
      * @notice Initializes the proceedRecipients contract with a list of initial proceedRecipients.
      * @param _proceedRecipients An array of addresses representing the initial proceedRecipients.
      */
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ProceedRecipients(address[] calldata _proceedRecipients, bytes[] calldata _data) external;
+    function initializeProceedRecipients(address[] calldata _proceedRecipients, bytes[] calldata _data) external;
 
     function addProceedRecipient(address _proceedRecipient, bytes calldata _data) external;
 

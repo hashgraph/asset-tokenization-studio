@@ -43,15 +43,13 @@ interface ILoansPortfolio is ILoansPortfolioStorageWrapper {
 
     /// @notice Emitted once when the LoansPortfolio capability is initialised on a token.
     /// @dev Fires exclusively from `initializeLoansPortfolio` after the storage write succeeds.
-    /// @param operator The account that invoked initialisation (deployer or upgrade caller).
-    event LoansPortfolioInitialized(address indexed operator);
+    event LoansPortfolioInitialized(LoansPortfolioDetailsData loansPortfolioData);
 
     event HoldingsAssetAdded(HoldingsAsset holdingsAsset);
     event HoldingsAssetRemoved(HoldingsAsset holdingsAsset);
     event LoanHoldingsAssetUpdated(address loanHoldingsAsset);
     event LoansPortfolioWithdrawn(address assetAddress, address to, uint256 amount);
 
-    // solhint-disable-next-line func-name-mixedcase
     function initializeLoansPortfolio(ILoansPortfolio.LoansPortfolioDetailsData calldata _loansPortfolioData) external;
 
     function addHoldingsAsset(HoldingsAsset memory _holdingsAsset) external returns (bool success_);

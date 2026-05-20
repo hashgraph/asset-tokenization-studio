@@ -6,8 +6,7 @@ import { IKpiLinkedRateErrors } from "./IKpiLinkedRateErrors.sol";
 interface IKpiLinkedRate is IKpiLinkedRateErrors {
     /// @notice Emitted once when the KpiLinkedRate capability is initialised on a token.
     /// @dev Fires exclusively from `initializeKpiLinkedRate` after the storage write succeeds.
-    /// @param operator The account that invoked initialisation (deployer or upgrade caller).
-    event KpiLinkedRateInitialized(address indexed operator);
+    event KpiLinkedRateInitialized(InterestRate interestRate, ImpactData impactData);
 
     event InterestRateUpdated(address indexed operator, InterestRate newInterestRate);
     event ImpactDataUpdated(address indexed operator, ImpactData newImpactData);

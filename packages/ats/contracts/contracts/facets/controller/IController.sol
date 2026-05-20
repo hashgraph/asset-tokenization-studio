@@ -13,9 +13,8 @@ interface IController is IERC3643Types {
     /**
      * @notice Emitted when the controller feature is initialised for a token.
      * @dev Fired inside `initializeController` once the facet is marked ready.
-     * @param operator Address that triggered the initialisation.
      */
-    event ControllerInitialized(address indexed operator);
+    event ControllerInitialized(bool controllable);
 
     /// @notice Emitted when the controller feature is permanently disabled for a token.
     event FinalizedControllerFeature(address operator);

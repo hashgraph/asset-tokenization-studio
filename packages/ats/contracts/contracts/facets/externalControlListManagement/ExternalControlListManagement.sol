@@ -28,10 +28,10 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
     /// @inheritdoc IExternalControlListManagement
     function initializeExternalControlLists(
         address[] calldata _controlLists
-    ) external override onlyFacetNotRegistered(_EXTERNAL_CONTROL_LIST_RESOLVER_KEY) onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_EXTERNAL_CONTROL_LIST_RESOLVER_KEY) {
         ExternalListManagementStorageWrapper.initializeExternalControlLists(_controlLists);
         InitializerStorageWrapper.setFacetToReady(_EXTERNAL_CONTROL_LIST_RESOLVER_KEY);
-        emit IExternalControlListManagement.ExternalControlListInitialized(EvmAccessors.getMsgSender());
+        emit IExternalControlListManagement.ExternalControlListInitialized(_controlLists);
     }
 
     /// @inheritdoc IExternalControlListManagement

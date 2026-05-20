@@ -10,10 +10,9 @@ interface IProtectedPartitions {
 
     /**
      * @notice Emitted once when the protected partitions capability is initialised on a token.
-     * @dev Fires exclusively from `initialize_ProtectedPartitions` after the storage write succeeds.
-     * @param operator The account that invoked initialisation (deployer or upgrade caller).
+     * @dev Fires exclusively from `initializeProtectedPartitions` after the storage write succeeds.
      */
-    event ProtectedPartitionsInitialized(address indexed operator);
+    event ProtectedPartitionsInitialized(bool arePartitionsProtected);
 
     event PartitionsProtected(address indexed operator);
     event PartitionsUnProtected(address indexed operator);
@@ -41,8 +40,7 @@ interface IProtectedPartitions {
     error PartitionsAreUnProtected();
     error PartitionsAreProtected();
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ProtectedPartitions(bool _arePartitionsProtected) external returns (bool success_);
+    function initializeProtectedPartitions(bool _arePartitionsProtected) external returns (bool success_);
 
     /**
      * @notice Activates the protected partitions mode

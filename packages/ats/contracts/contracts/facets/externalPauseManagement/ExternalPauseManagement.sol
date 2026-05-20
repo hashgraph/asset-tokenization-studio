@@ -28,10 +28,10 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers
     /// @inheritdoc IExternalPauseManagement
     function initializeExternalPauses(
         address[] calldata _pauses
-    ) external override onlyFacetNotRegistered(_EXTERNAL_PAUSE_RESOLVER_KEY) onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_EXTERNAL_PAUSE_RESOLVER_KEY) {
         PauseStorageWrapper.initializeExternalPauses(_pauses);
         InitializerStorageWrapper.setFacetToReady(_EXTERNAL_PAUSE_RESOLVER_KEY);
-        emit IExternalPauseManagement.ExternalPauseInitialized(EvmAccessors.getMsgSender());
+        emit IExternalPauseManagement.ExternalPauseInitialized(_pauses);
     }
 
     /// @inheritdoc IExternalPauseManagement

@@ -10,13 +10,12 @@ import { InitializerStorageWrapper } from "../../../../domain/core/InitializerSt
 import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
 contract FixedRate is IFixedRate, Modifiers {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_FixedRate(
+    function initializeFixedRate(
         FixedRateData calldata _initData
-    ) external override onlyFacetNotRegistered(_FIXED_RATE_RESOLVER_KEY) onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_FIXED_RATE_RESOLVER_KEY) {
         InterestRateStorageWrapper.setRate(_initData.rate, _initData.rateDecimals);
         InitializerStorageWrapper.setFacetToReady(_FIXED_RATE_RESOLVER_KEY);
-        emit IFixedRate.FixedRateInitialized(EvmAccessors.getMsgSender());
+        emit IFixedRate.FixedRateInitialized(_initData);
     }
 
     function setRate(

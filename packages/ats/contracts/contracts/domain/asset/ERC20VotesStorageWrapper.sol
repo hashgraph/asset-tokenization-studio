@@ -24,8 +24,7 @@ struct ERC20VotesStorage {
 library ERC20VotesStorageWrapper {
     using Checkpoints for Checkpoints.Checkpoint[];
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC20Votes(bool activated) internal {
+    function initializeERC20Votes(bool activated) internal {
         setActivate(activated);
     }
 

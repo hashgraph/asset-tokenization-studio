@@ -11,7 +11,7 @@ description: >
 # Skill: initialize-update
 
 Transforms an existing `initializeXxx` function from the old per-facet boolean guard to the
-centralised initializer pattern. Leaves the entire repository in a compilable, consistent
+centralised initialiser pattern. Leaves the entire repository in a compilable, consistent
 state after each run.
 
 ---
@@ -29,7 +29,16 @@ If the function already uses `onlyFacetNotRegistered`, this skill has already be
 
 ---
 
-## 2. Locate companion files
+## 2. Naming rules (non-negotiable)
+
+- Function name MUST be `initializeXxx` — camelCase, no underscore separator.
+- `initialize_Xxx` is **forbidden**. Never write it, never accept it from a generated diff.
+- Never add `// solhint-disable-next-line func-name-mixedcase` before an `initializeXxx`
+  function. If Solhint flags it, the name is wrong — fix the name, do not suppress the linter.
+
+---
+
+## 3. Locate companion files
 
 Before making any change, identify all files that will be touched:
 
@@ -45,7 +54,7 @@ Before making any change, identify all files that will be touched:
 
 ---
 
-## 3. Step A — Rename the function (if it contains `_`)
+## 4. Step A — Rename the function (if it contains `_`)
 
 Functions such as `initialize_ERC3643`, `_initialize_equityUSA`, `initialize_ERC1410` must be
 renamed to camelCase without underscores:
@@ -75,14 +84,14 @@ Apply the rename in:
 
 ---
 
-## 4. Step B — Replace modifiers
+## 5. Step B — Replace modifiers
 
 **Remove** the old per-facet guard modifier from the function signature.  
 **Add** in its place — immediately after `override` (if present), before any business modifiers:
 
 ```solidity
-onlyFacetNotRegistered(_XXX_RESOLVER_KEY)
 onlyRole(DEFAULT_ADMIN_ROLE)
+onlyFacetNotRegistered(_XXX_RESOLVER_KEY)
 ```
 
 Resulting order:
@@ -91,8 +100,8 @@ Resulting order:
 function initializeXxx(...)
     external
     override                                       // if present
-    onlyFacetNotRegistered(_XXX_RESOLVER_KEY)      // NEW — first after override
-    onlyRole(DEFAULT_ADMIN_ROLE)                   // NEW — second
+    onlyRole(DEFAULT_ADMIN_ROLE)                   // NEW — first after override; ensures non-admin tests work without a fresh fixture
+    onlyFacetNotRegistered(_XXX_RESOLVER_KEY)      // NEW — second
     onlyExistingBusinessModifier(...)              // keep all existing business modifiers
 {
 ```
@@ -116,7 +125,7 @@ No new `is` clause needed.
 
 ---
 
-## 5. Step C — Remove `bool initialized` from storage struct
+## 6. Step C — Remove `bool initialized` from storage struct
 
 Find the struct in the storage wrapper and delete the field unconditionally.
 This migration intentionally breaks storage backward compatibility.
@@ -125,11 +134,11 @@ Actions:
 
 - Delete the `bool initialized;` field from the struct
 - Delete the `is[X]Initialized()` getter function in the wrapper
-- Remove the `cs.initialized = true;` assignment from the internal initialize function
+- Remove the `cs.initialized = true;` assignment from the internal initialise function
 
 ---
 
-## 6. Step D — Remove old modifier infrastructure
+## 7. Step D — Remove old modifier infrastructure
 
 1. **Delete the modifier** `onlyNot[X]Initialized()` from its modifier file (`XxxModifiers.sol`)
 2. **Delete the check helper** (`_checkNotInitialized(bool)` or equivalent) only if no other
@@ -142,7 +151,7 @@ Actions:
 
 ---
 
-## 7. Step E — Update the function body
+## 8. Step E — Update the function body
 
 Add at the end of the function body, **before** any existing `emit` statement:
 
@@ -166,7 +175,7 @@ adding the new `initializeXxx` call at the correct position in the initialiser s
 
 ---
 
-## 8. Step F — Add or fix the event
+## 9. Step F — Add or fix the event
 
 ### Solhint ordering rule
 
@@ -185,23 +194,37 @@ event SomeOtherEvent(...);
 
 ### Event signature rule
 
+The event carries **only** the function's input parameters — no `operator`. The caller can
+always be retrieved from the transaction context.
+
+For functions with no input parameters, the event is **empty**:
+
+```solidity
+event XxxInitialized();
+emit XxxInitialized();
+```
+
+For functions with parameters:
+
 ```solidity
 // In the interface IXxx.sol:
 event XxxInitialized(
-    address indexed operator,   // ALWAYS first — mandatory even with no other params
-    ParamType1 param1,          // same params as the function, without calldata/memory
+    ParamType1 param1,   // same params as the function, without calldata/memory
     ParamType2 param2
 );
 
 // In the implementation:
-emit XxxInitialized(EvmAccessors.getMsgSender(), param1, param2);
+emit XxxInitialized(param1, param2);
 ```
 
-For functions with no input parameters:
+Structs are passed as-is — do not unpack them:
 
 ```solidity
-event XxxInitialized(address indexed operator);   // operator only — never empty
-emit XxxInitialized(EvmAccessors.getMsgSender());
+// ✅ correct
+event XxxInitialized(SomeStruct data);
+
+// ✗ wrong — unpacking adds maintenance burden
+event XxxInitialized(uint256 field1, address field2);
 ```
 
 ### Event naming
@@ -218,18 +241,28 @@ Strip `initialize` prefix, append `Initialized` suffix:
 /**
  * @notice Emitted once when the [facet name] capability is initialised on a token.
  * @dev Fires exclusively from `initializeXxx` after the storage write succeeds.
- * @param operator The account that invoked initialisation (deployer or upgrade caller).
  * @param param1 [Description].
  */
-event XxxInitialized(address indexed operator, ParamType1 param1);
+event XxxInitialized(ParamType1 param1);
+```
+
+For empty events (no input params):
+
+```solidity
+/**
+ * @notice Emitted once when the [facet name] capability is initialised on a token.
+ * @dev Fires exclusively from `initializeXxx`.
+ */
+event XxxInitialized();
 ```
 
 ---
 
-## 9. Step G — Update tests
+## 10. Step G — Update tests
 
 Add a dedicated `describe` block in the facet's existing integration test file.
 Use the project's **GIVEN/WHEN/THEN** naming convention throughout.
+Canonical reference: `test/contracts/integration/clearing.test.ts` → `describe("initializeClearing")`.
 
 ### Where to place them
 
@@ -237,7 +270,7 @@ Find or create a block next to the existing initialisation tests:
 
 ```typescript
 describe("initializeXxx", () => {
-  // Test 1, 2, 3 go here
+  // Tests 1, 2, 3 go here
 });
 ```
 
@@ -250,24 +283,38 @@ and update the error name and description.
 - `nonAdmin` — any signer that has **no** `DEFAULT_ADMIN_ROLE`. Use `user3` or equivalent
   from the fixture (verify it has not been granted the role in `beforeEach`).
 
-### Test 1 — double initialisation reverts
+### Test order (canonical — always this order)
+
+1. No `DEFAULT_ADMIN_ROLE` → `AccountHasNoRole`
+2. Already initialised → `FacetAlreadyRegistered`
+3. Success → event emitted
+
+### Test 1 — no DEFAULT_ADMIN_ROLE reverts
+
+`onlyRole` fires before `onlyFacetNotRegistered`, so a non-admin caller always gets
+`AccountHasNoRole` regardless of whether the facet is already registered. Use the standard
+`asset` directly — no fresh proxy needed:
+
+```typescript
+describe("initializeXxx", () => {
+  it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeXxx is called THEN it reverts with AccountHasNoRole", async () => {
+    await expect(asset.connect(nonAdmin).initializeXxx(/* args */)).to.be.revertedWithCustomError(
+      asset,
+      "AccountHasNoRole",
+    );
+  });
+```
+
+### Test 2 — double initialisation reverts
+
+The factory already calls `initializeXxx` during deployment, so the standard `asset` fixture
+is already initialised. Call again and assert the revert:
 
 ```typescript
 it("GIVEN an already-initialised facet WHEN initializeXxx is called again THEN it reverts with FacetAlreadyRegistered", async () => {
   await expect(asset.initializeXxx(/* same args as fixture */)).to.be.revertedWithCustomError(
     asset,
     "FacetAlreadyRegistered",
-  );
-});
-```
-
-### Test 2 — no DEFAULT_ADMIN_ROLE reverts
-
-```typescript
-it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeXxx is called THEN it reverts with AccountHasNoRole", async () => {
-  await expect(asset.connect(nonAdmin).initializeXxx(/* args */)).to.be.revertedWithCustomError(
-    asset,
-    "AccountHasNoRole",
   );
 });
 ```
@@ -281,51 +328,57 @@ has the facet initialised. Two approaches:
 fresh fixture is not available):
 
 ```typescript
-it("GIVEN a new deployment WHEN the factory calls initializeXxx THEN it emits XxxInitialized", async () => {
-  const { diamond, deployer, deploymentReceipt } = await deployXxxTokenFixture({ ... });
-  const iface = IXxx__factory.createInterface();
-  const event = deploymentReceipt.logs
-    .map((log) => { try { return iface.parseLog(log); } catch { return null; } })
-    .find((e) => e?.name === "XxxInitialized");
-  expect(event).to.not.be.undefined;
-  expect(event!.args.operator).to.equal(await deployer.getAddress());
-});
+  it("GIVEN a new deployment WHEN the factory calls initializeXxx THEN it emits XxxInitialized", async () => {
+    const { diamond, deployer, deploymentReceipt } = await deployXxxTokenFixture({ ... });
+    const iface = IXxx__factory.createInterface();
+    const event = deploymentReceipt.logs
+      .map((log) => { try { return iface.parseLog(log); } catch { return null; } })
+      .find((e) => e?.name === "XxxInitialized");
+    expect(event).to.not.be.undefined;
+    expect(event!.args.operator).to.equal(await deployer.getAddress());
+  });
 ```
 
 **Option B — deploy a fixture that does NOT call `initializeXxx`** (use when a minimal
 proxy fixture is available or can be created):
 
 ```typescript
-it("GIVEN a fresh deployment WHEN initializeXxx is called THEN it emits XxxInitialized", async () => {
-  const { diamond, deployer } = await deployFreshProxyFixture(); // no initializeXxx called
-  const asset = await ethers.getContractAt("IXxx", diamond.target);
-  await expect(asset.connect(deployer).initializeXxx(/* args */))
-    .to.emit(asset, "XxxInitialized")
-    .withArgs(await deployer.getAddress() /* + other args in declaration order */);
-});
+  it("GIVEN a fresh deployment WHEN initializeXxx is called THEN it emits XxxInitialized", async () => {
+    const { diamond, deployer } = await deployFreshProxyFixture(); // no initializeXxx called
+    const asset = await ethers.getContractAt("IXxx", diamond.target);
+    await expect(asset.connect(deployer).initializeXxx(/* args */))
+      .to.emit(asset, "XxxInitialized")
+      .withArgs(/* scalar args in declaration order — no operator */);
+  });
+}); // end describe("initializeXxx")
 ```
 
-Choose the option that requires the least custom infrastructure. Document the choice
-with a one-line comment if it is not obvious.
+Choose the option that requires the least custom infrastructure.
 
-**If the event has dynamic types (struct or array params):**
+**Decision rule — which assertion to use:**
 
-`.withArgs()` does not handle structs or arrays reliably. Use `decodeEvent` from
-`@scripts/infrastructure` and assert fields individually:
+| Event params                                               | Method                            |
+| ---------------------------------------------------------- | --------------------------------- |
+| No params (empty event)                                    | `.to.emit()` — no `.withArgs()`   |
+| All scalars (`bool`, `address`, `uint256`, `bytes3`, etc.) | `.withArgs(param1, ...)` — always |
+| Any `struct` or `array` param                              | `decodeEvent` — only then         |
+
+**Never use `decodeEvent` for scalar-only or empty events.** `.withArgs()` handles scalars
+correctly and is far cheaper to read and maintain.
+
+**Struct or array params only — `decodeEvent` without operator assertion:**
 
 ```typescript
 import { decodeEvent } from "@scripts/infrastructure";
 
 // Option A — replace the parseLog approach:
 const args = await decodeEvent(asset, "XxxInitialized", deploymentReceipt);
-expect(args.operator).to.equal(await deployer.getAddress());
 expect(args.param1).to.deep.equal(expectedStruct); // deep.equal for structs/arrays
 
 // Option B — replace .withArgs():
 const tx = await asset.connect(deployer).initializeXxx(/* args */);
 const receipt = await tx.wait();
 const args = await decodeEvent(asset, "XxxInitialized", receipt!);
-expect(args.operator).to.equal(await deployer.getAddress());
 expect(args.param1).to.deep.equal(expectedStruct);
 ```
 
@@ -345,7 +398,7 @@ try {
 
 ---
 
-## 10. Step H — Create changeset
+## 11. Step H — Create changeset
 
 Create `.changeset/initialize-[facet-name-kebab].md`:
 
@@ -357,7 +410,7 @@ Create `.changeset/initialize-[facet-name-kebab].md`:
 
 Migrate [FacetName] initialisation from per-facet boolean guard to centralised
 InitializerStorageWrapper pattern. Replaces `onlyNot[X]Initialized` with
-`onlyFacetNotRegistered` + `onlyRole(DEFAULT_ADMIN_ROLE)`. Emits `[X]Initialized`
+`onlyRole(DEFAULT_ADMIN_ROLE)` + `onlyFacetNotRegistered`. Emits `[X]Initialized`
 on successful initialisation.
 ```
 
@@ -366,7 +419,7 @@ If there was no rename, use `contracts: major` only.
 
 ---
 
-## 11. Acceptance Criteria
+## 12. Acceptance Criteria
 
 **This section is BLOCKING. Do NOT declare the skill complete until every command below
 passes. Run each command, show the output, and confirm the criterion is met.**
@@ -414,9 +467,10 @@ rg "event XxxInitialized" packages/ats/contracts/contracts/ -g "*.sol"
 
 Expected: exactly 1 match in the interface file (`IXxx.sol`). Verify manually that:
 
-- First param is `address indexed operator`
-- Remaining params match the function signature (without `calldata`/`memory`)
-- `@notice`, `@dev`, and all `@param` tags are present
+- No `operator` param — the event carries only the function's input parameters
+- For no-param functions: `event XxxInitialized()` with no params at all
+- Params match the function signature (without `calldata`/`memory`; structs as-is)
+- `@notice` and `@dev` tags are present; `@param` tags for each param (none for empty events)
 
 ### AC-5 — Compile clean
 
@@ -437,7 +491,7 @@ in the modified interface — move `XxxInitialized` to appear after the last typ
 
 ---
 
-## 12. Factory.sol note
+## 13. Factory.sol note
 
 After the factory-bootstrap-admin refactor, `Factory.sol` handles bootstrap admin
 for **all** security tokens (Equity, Bond, etc.) by extending the `rbacs` array
@@ -456,15 +510,19 @@ initialised directly in `_deploySecurity`. Optional facets that use
 
 ---
 
-## 13. Verification checklist (static review — run after AC passes)
+## 14. Verification checklist (static review — run after AC passes)
 
-- [ ] `onlyFacetNotRegistered(_XXX_RESOLVER_KEY)` is the first modifier after `override`
-- [ ] `onlyRole(DEFAULT_ADMIN_ROLE)` is the second modifier
+- [ ] Function name is `initializeXxx` (camelCase, no underscore — `initialize_Xxx` is forbidden)
+- [ ] No `// solhint-disable-next-line func-name-mixedcase` before the function
+- [ ] `onlyRole(DEFAULT_ADMIN_ROLE)` is the first modifier after `override`
+- [ ] `onlyFacetNotRegistered(_XXX_RESOLVER_KEY)` is the second modifier
 - [ ] `XxxInitialized` event placed **after** all `struct`/`enum` definitions in `IXxx.sol` (Solhint ordering rule)
+- [ ] Event carries only the function's input params — no `operator`; empty event for no-param functions
+- [ ] No `EvmAccessors.getMsgSender()` call in the emit statement
 - [ ] `import { DEFAULT_ADMIN_ROLE }` present in the facet
 - [ ] `bool initialized` deleted from the struct (backward compatibility intentionally broken)
 - [ ] `setFacetToReady` called before the emit in the function body
-- [ ] If event has dynamic types (struct/array): Test 3 uses `decodeEvent`, not `.withArgs()`
+- [ ] Test 3 uses no `.withArgs()` for empty events; `.withArgs(param1, ...)` for scalars; `decodeEvent` only for struct/array params
 - [ ] If error has dynamic types (struct/array): assertion uses `decodeCustomError`, not `.withArgs()`
 - [ ] `npm run format:check` passes on all modified files
 - [ ] Solhint produces no new errors on modified files

@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type IAsset, ResolverProxy } from "@contract-types";
 import { GAS_LIMIT, ATS_ROLES, ADDRESS_ZERO } from "@scripts";
-import { deployBondTokenFixture } from "@test";
+import { deployAtsInfrastructureFixture, deployBondTokenFixture } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 const PROCEED_RECIPIENT_1 = "0x1234567890123456789012345678901234567890";
@@ -43,9 +43,17 @@ describe("Proceed Recipients Tests", () => {
   });
 
   describe("Initialization Tests", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeProceedRecipients is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(
+        asset.connect(signer_B).initializeProceedRecipients([PROCEED_RECIPIENT_1], [PROCEED_RECIPIENT_1_DATA], {
+          gasLimit: GAS_LIMIT.default,
+        }),
+      ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+    });
+
     it("GIVEN a token WHEN initializing the proceed recipient again THEN it reverts with FacetAlreadyRegistered", async () => {
       await expect(
-        asset.initialize_ProceedRecipients([PROCEED_RECIPIENT_1], [PROCEED_RECIPIENT_1_DATA], {
+        asset.initializeProceedRecipients([PROCEED_RECIPIENT_1], [PROCEED_RECIPIENT_1_DATA], {
           gasLimit: GAS_LIMIT.default,
         }),
       ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
@@ -231,5 +239,25 @@ describe("Proceed Recipients Tests", () => {
         deactivatedAsset.connect(base.deployer).updateProceedRecipientData(ethers.ZeroAddress, "0x"),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
+  });
+});
+
+describe("initializeProceedRecipients", () => {
+  it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeProceedRecipients is called THEN it emits ProceedRecipientsInitialized", async () => {
+    const { decodeEvent } = await import("@scripts/infrastructure");
+    const { BOND_CONFIG_ID } = await import("@scripts/domain");
+    const infra = await loadFixture(deployAtsInfrastructureFixture);
+    const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, BOND_CONFIG_ID, 1, [
+      { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+    ]);
+    const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
+    const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+    const proceedRecipients = [PROCEED_RECIPIENT_1];
+    const data = [PROCEED_RECIPIENT_1_DATA];
+    const tx = await freshAsset.connect(infra.deployer).initializeProceedRecipients(proceedRecipients, data);
+    const receipt = await tx.wait();
+    const emitted = await decodeEvent(freshAsset, "ProceedRecipientsInitialized", receipt!);
+    expect(emitted.proceedRecipients).to.deep.equal(proceedRecipients);
+    expect(emitted.data).to.deep.equal(data);
   });
 });

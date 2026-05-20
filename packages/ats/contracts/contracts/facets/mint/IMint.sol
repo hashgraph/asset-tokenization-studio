@@ -12,11 +12,11 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface IMint {
     /**
+    /**
      * @notice Emitted once when the ERC-1594 capability is initialised on a token.
-     * @dev Fires exclusively from `initialize_ERC1594` after the storage write succeeds.
-     * @param operator The account that invoked initialisation (deployer or upgrade caller).
+     * @dev Fires exclusively from `initializeERC1594` after the storage write succeeds.
      */
-    event ERC1594Initialized(address indexed operator);
+    event ERC1594Initialized();
 
     /**
      * @notice Emitted when new tokens are issued to a holder.
@@ -32,8 +32,7 @@ interface IMint {
      * @dev Can only be invoked once per contract; subsequent calls revert via
      *      `onlyFacetNotRegistered`.
      */
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1594() external;
+    function initializeERC1594() external;
 
     /**
      * @notice Issues new tokens to a token holder under the ERC-1594 semantics.

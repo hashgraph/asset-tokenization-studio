@@ -11,14 +11,14 @@ import { DefaultValueValidation } from "../../../infrastructure/utils/DefaultVal
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ProceedRecipients(
+    /// @inheritdoc IProceedRecipients
+    function initializeProceedRecipients(
         address[] calldata _proceedRecipients,
         bytes[] calldata _data
-    ) external override onlyFacetNotRegistered(_PROCEED_RECIPIENTS_RESOLVER_KEY) onlyRole(DEFAULT_ADMIN_ROLE) {
-        ProceedRecipientsStorageWrapper.initialize_ProceedRecipients(_proceedRecipients, _data);
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_PROCEED_RECIPIENTS_RESOLVER_KEY) {
+        ProceedRecipientsStorageWrapper.initializeProceedRecipients(_proceedRecipients, _data);
         InitializerStorageWrapper.setFacetToReady(_PROCEED_RECIPIENTS_RESOLVER_KEY);
-        emit IProceedRecipients.ProceedRecipientsInitialized(EvmAccessors.getMsgSender());
+        emit IProceedRecipients.ProceedRecipientsInitialized(_proceedRecipients, _data);
     }
 
     function addProceedRecipient(

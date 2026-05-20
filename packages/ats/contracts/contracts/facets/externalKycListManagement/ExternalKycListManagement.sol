@@ -26,13 +26,12 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract ExternalKycListManagement is IExternalKycListManagement, Modifiers {
     /// @inheritdoc IExternalKycListManagement
-    // solhint-disable-next-line func-name-mixedcase
     function initializeExternalKycLists(
         address[] calldata _kycLists
-    ) external override onlyFacetNotRegistered(_EXTERNAL_KYC_LIST_RESOLVER_KEY) onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_EXTERNAL_KYC_LIST_RESOLVER_KEY) {
         ExternalListManagementStorageWrapper.initializeExternalKycLists(_kycLists);
         InitializerStorageWrapper.setFacetToReady(_EXTERNAL_KYC_LIST_RESOLVER_KEY);
-        emit IExternalKycListManagement.ExternalKycListInitialized(EvmAccessors.getMsgSender());
+        emit IExternalKycListManagement.ExternalKycListInitialized(_kycLists);
     }
 
     /// @inheritdoc IExternalKycListManagement

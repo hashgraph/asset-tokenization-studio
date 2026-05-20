@@ -406,16 +406,8 @@ describe("ExternalPause Tests", () => {
     });
 
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeExternalPauses is called THEN it reverts with AccountHasNoRole", async () => {
-      const { decodeEvent } = await import("@scripts/infrastructure");
-      const infra = await loadFixture(deployAtsInfrastructureFixture);
-      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
-        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
-      ]);
-      const proxyReceipt = await proxyTx.wait();
-      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
-      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
-      await expect(freshAsset.connect(signer_D).initializeExternalPauses([])).to.be.revertedWithCustomError(
-        freshAsset,
+      await expect(asset.connect(signer_D).initializeExternalPauses([])).to.be.revertedWithCustomError(
+        asset,
         "AccountHasNoRole",
       );
     });
@@ -429,9 +421,11 @@ describe("ExternalPause Tests", () => {
       const proxyReceipt = await proxyTx.wait();
       const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
       const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
-      const deployReceipt = await (await freshAsset.connect(infra.deployer).initializeExternalPauses([])).wait();
-      const args = await decodeEvent(freshAsset, "ExternalPauseInitialized", deployReceipt);
-      expect(args.operator).to.equal(await infra.deployer.getAddress());
+      const pauses: string[] = [];
+      const tx = await freshAsset.connect(infra.deployer).initializeExternalPauses(pauses);
+      const receipt = await tx.wait();
+      const emitted = await decodeEvent(freshAsset, "ExternalPauseInitialized", receipt!);
+      expect(emitted.pauses).to.deep.equal(pauses);
     });
   });
 

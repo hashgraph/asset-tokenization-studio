@@ -8,11 +8,10 @@ interface IInitializer {
     /**
      * @notice Emitted on the first successful call to `initializeInitializer`, which seeds the
      *         initializer storage with its batch size.
-     * @param sender Address that triggered initialisation.
      * @param maxInitializerFacetIndex Batch size used by `setOperationalStatus` to bound the
      *        number of facets checked per call.
      */
-    event InitializerInitialized(address sender, uint256 maxInitializerFacetIndex);
+    event InitializerInitialized(uint256 maxInitializerFacetIndex);
 
     /**
      * @notice Emitted by `setOperationalStatus` when only part of the facet list could be

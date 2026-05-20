@@ -63,20 +63,12 @@ describe("Core Facet Tests", () => {
     });
 
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeCore is called THEN it reverts with AccountHasNoRole", async () => {
-      const { decodeEvent } = await import("@scripts/infrastructure");
-      const infra = await loadFixture(deployAtsInfrastructureFixture);
-      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
-        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
-      ]);
-      const proxyReceipt = await proxyTx.wait();
-      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
-      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
       await expect(
-        freshAsset.connect(signer_D).initializeCore({
+        asset.connect(signer_D).initializeCore({
           info: { name: "X", symbol: "Y", isin: "ES1234567890", decimals: 6 },
           securityType: SecurityType.BOND_VARIABLE_RATE,
         }),
-      ).to.be.revertedWithCustomError(freshAsset, "AccountHasNoRole");
+      ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
     it("GIVEN a new deployment WHEN initializeCore is called THEN it emits CoreInitialized", async () => {
@@ -94,8 +86,7 @@ describe("Core Facet Tests", () => {
           securityType: SecurityType.EQUITY,
         })
       ).wait();
-      const args = await decodeEvent(freshAsset, "CoreInitialized", deployReceipt);
-      expect(args.operator).to.equal(await infra.deployer.getAddress());
+      await expect(deployReceipt).to.emit(freshAsset, "CoreInitialized");
     });
   });
 

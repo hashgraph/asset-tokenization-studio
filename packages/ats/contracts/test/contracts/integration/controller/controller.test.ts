@@ -101,8 +101,7 @@ describe("Controller Tests", () => {
       const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
       const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
       const deploymentReceipt = await (await freshAsset.connect(infra.deployer).initializeController(false)).wait();
-      const args = await decodeEvent(freshAsset, "ControllerInitialized", deploymentReceipt);
-      expect(args.operator).to.equal(await infra.deployer.getAddress());
+      await expect(deploymentReceipt).to.emit(freshAsset, "ControllerInitialized").withArgs(false);
     });
 
     describe("Paused", () => {

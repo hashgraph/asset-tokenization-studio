@@ -30,13 +30,13 @@ abstract contract Cap is ICap, Modifiers {
     )
         external
         override
-        onlyFacetNotRegistered(_CAP_RESOLVER_KEY)
         onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_CAP_RESOLVER_KEY)
         onlyValidNewMaxSupply(maxSupply, TimeTravelStorageWrapper.getBlockTimestamp())
     {
         CapStorageWrapper.initializeCap(maxSupply, partitionCap);
         InitializerStorageWrapper.setFacetToReady(_CAP_RESOLVER_KEY);
-        emit ICap.CapInitialized(EvmAccessors.getMsgSender(), maxSupply, partitionCap);
+        emit ICap.CapInitialized(maxSupply, partitionCap);
     }
 
     /// @inheritdoc ICap

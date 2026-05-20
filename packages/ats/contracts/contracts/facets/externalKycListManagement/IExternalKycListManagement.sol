@@ -19,9 +19,8 @@ interface IExternalKycListManagement {
     /**
      * @notice Emitted once when the external KYC list capability is initialised on a token.
      * @dev Fires exclusively from `initializeExternalKycLists` after the storage write succeeds.
-     * @param operator The account that invoked initialisation (deployer or upgrade caller).
      */
-    event ExternalKycListInitialized(address indexed operator);
+    event ExternalKycListInitialized(address[] kycLists);
 
     /**
      * @notice Emitted when multiple external KYC list addresses are added or removed in a single

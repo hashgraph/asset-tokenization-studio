@@ -29,7 +29,7 @@ abstract contract Clearing is IClearing, Modifiers {
     ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_CLEARING_RESOLVER_KEY) {
         ClearingStorageWrapper.initializeClearing(_activateClearing);
         InitializerStorageWrapper.setFacetToReady(_CLEARING_RESOLVER_KEY);
-        emit ClearingInitialized(EvmAccessors.getMsgSender());
+        emit ClearingInitialized(_activateClearing);
     }
 
     /// @inheritdoc IClearing

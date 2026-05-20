@@ -13,7 +13,7 @@ contract ERC3643ManagementFacet is ERC3643Management, IStaticFunctionSelectors {
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.initialize_ERC3643.selector);
+        return Bytes4Builder.build(this.initializeERC3643.selector);
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {

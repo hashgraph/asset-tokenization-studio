@@ -11,13 +11,12 @@ import { InitializerStorageWrapper } from "../../../../domain/core/InitializerSt
 import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ERC20Votes is IERC20Votes, Modifiers {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC20Votes(
+    function initializeERC20Votes(
         bool _activated
-    ) external override onlyFacetNotRegistered(_ERC20VOTES_RESOLVER_KEY) onlyRole(DEFAULT_ADMIN_ROLE) {
-        ERC20VotesStorageWrapper.initialize_ERC20Votes(_activated);
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_ERC20VOTES_RESOLVER_KEY) {
+        ERC20VotesStorageWrapper.initializeERC20Votes(_activated);
         InitializerStorageWrapper.setFacetToReady(_ERC20VOTES_RESOLVER_KEY);
-        emit IERC20Votes.ERC20VotesInitialized(EvmAccessors.getMsgSender());
+        emit IERC20Votes.ERC20VotesInitialized(_activated);
     }
 
     function delegate(address _delegatee) external override onlyActivated onlyUnpaused {

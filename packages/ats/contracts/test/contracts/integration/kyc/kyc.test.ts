@@ -50,8 +50,8 @@ describe("Kyc Init Tests", () => {
     const proxyReceipt = await proxyTx.wait();
     const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
     const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
-    const deployReceipt = await (await freshAsset.connect(infra.deployer).initializeInternalKyc(true)).wait();
-    const args = await decodeEvent(freshAsset, "KycInitialized", deployReceipt);
-    expect(args.operator).to.equal(await infra.deployer.getAddress());
+    await expect(freshAsset.connect(infra.deployer).initializeInternalKyc(true))
+      .to.emit(freshAsset, "KycInitialized")
+      .withArgs(true);
   });
 });

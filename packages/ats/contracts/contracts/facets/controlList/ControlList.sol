@@ -22,13 +22,12 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract ControlList is IControlList, Modifiers {
     /// @inheritdoc IControlList
-    // solhint-disable-next-line func-name-mixedcase
     function initializeControlList(
         bool _isWhiteList
-    ) external override onlyFacetNotRegistered(_CONTROL_LIST_RESOLVER_KEY) onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_CONTROL_LIST_RESOLVER_KEY) {
         ControlListStorageWrapper.initializeControlList(_isWhiteList);
         InitializerStorageWrapper.setFacetToReady(_CONTROL_LIST_RESOLVER_KEY);
-        emit ControlListInitialized(EvmAccessors.getMsgSender(), _isWhiteList);
+        emit ControlListInitialized(_isWhiteList);
     }
 
     /// @inheritdoc IControlList

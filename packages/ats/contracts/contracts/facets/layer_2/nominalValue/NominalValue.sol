@@ -23,15 +23,10 @@ abstract contract NominalValue is INominalValue, Modifiers {
         uint256 _nominalValue,
         uint8 _nominalValueDecimals,
         bytes3 _nominalValueCurrency
-    ) external override onlyFacetNotRegistered(_NOMINAL_VALUE_RESOLVER_KEY) onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_NOMINAL_VALUE_RESOLVER_KEY) {
         NominalValueStorageWrapper.initializeNominalValue(_nominalValue, _nominalValueDecimals, _nominalValueCurrency);
         InitializerStorageWrapper.setFacetToReady(_NOMINAL_VALUE_RESOLVER_KEY);
-        emit NominalValueInitialized(
-            EvmAccessors.getMsgSender(),
-            _nominalValue,
-            _nominalValueDecimals,
-            _nominalValueCurrency
-        );
+        emit NominalValueInitialized(_nominalValue, _nominalValueDecimals, _nominalValueCurrency);
     }
 
     /// @inheritdoc INominalValue

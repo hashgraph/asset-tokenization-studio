@@ -17,9 +17,8 @@ interface IClearing is IClearingTypes {
     /**
      * @notice Emitted once when the clearing module is initialised on a token.
      * @dev Fires exclusively from `initializeClearing` after the storage write succeeds.
-     * @param operator The account that invoked initialisation (deployer or upgrade caller).
      */
-    event ClearingInitialized(address indexed operator);
+    event ClearingInitialized(bool clearingActive);
 
     /**
      * @notice Initializes the clearing module with the given activation state

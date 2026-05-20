@@ -41,8 +41,7 @@ struct ProtectedPartitionsDataStorage {
  * @author Asset Tokenization Studio Team
  */
 library ProtectedPartitionsStorageWrapper {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ProtectedPartitions(bool _protectPartitions) internal returns (bool success_) {
+    function initializeProtectedPartitions(bool _protectPartitions) internal returns (bool success_) {
         ProtectedPartitionsDataStorage storage pps = protectedPartitionsStorage();
         pps.arePartitionsProtected = _protectPartitions;
         success_ = true;

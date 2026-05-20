@@ -42,7 +42,7 @@ describe("BusinessLogicResolver", () => {
     [signer_A, signer_B, signer_C] = await ethers.getSigners();
     businessLogicResolver = await (await ethers.getContractFactory("BusinessLogicResolver", signer_A)).deploy();
 
-    await businessLogicResolver.initialize_BusinessLogicResolver();
+    await businessLogicResolver.initializeBusinessLogicResolver();
     accessControl = await ethers.getContractAt("AccessControl", businessLogicResolver.target, signer_A);
     await accessControl.grantRole(ATS_ROLES.PAUSER_ROLE, signer_B.address);
 
@@ -93,7 +93,7 @@ describe("BusinessLogicResolver", () => {
   });
 
   it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-    await expect(businessLogicResolver.initialize_BusinessLogicResolver()).to.be.revertedWithCustomError(
+    await expect(businessLogicResolver.initializeBusinessLogicResolver()).to.be.revertedWithCustomError(
       businessLogicResolver,
       "AlreadyInitialized",
     );

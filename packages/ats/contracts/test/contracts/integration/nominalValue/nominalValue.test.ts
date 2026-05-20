@@ -54,10 +54,8 @@ describe("NominalValue Init Tests", () => {
     const proxyReceipt = await proxyTx.wait();
     const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
     const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
-    const deployReceipt = await (
-      await freshAsset.connect(infra.deployer).initializeNominalValue(100, 2, "0x455552")
-    ).wait();
-    const args = await decodeEvent(freshAsset, "NominalValueInitialized", deployReceipt);
-    expect(args.operator).to.equal(await infra.deployer.getAddress());
+    await expect(freshAsset.connect(infra.deployer).initializeNominalValue(100, 2, "0x455552"))
+      .to.emit(freshAsset, "NominalValueInitialized")
+      .withArgs(100, 2, "0x455552");
   });
 });

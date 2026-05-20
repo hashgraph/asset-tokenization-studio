@@ -140,7 +140,6 @@ describe("Cap Tests", () => {
         })
         .find((e) => e?.name === "CapInitialized");
       expect(event).to.not.be.undefined;
-      expect(event!.args.operator).to.equal(await factory.getAddress());
     });
   });
 

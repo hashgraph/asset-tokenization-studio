@@ -22,10 +22,10 @@ abstract contract Controller is IController, Modifiers {
     /// @inheritdoc IController
     function initializeController(
         bool _controllable
-    ) external override onlyFacetNotRegistered(_CONTROLLER_RESOLVER_KEY) onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_CONTROLLER_RESOLVER_KEY) {
         ERC1644StorageWrapper.initializeController(_controllable);
         InitializerStorageWrapper.setFacetToReady(_CONTROLLER_RESOLVER_KEY);
-        emit IController.ControllerInitialized(EvmAccessors.getMsgSender());
+        emit IController.ControllerInitialized(_controllable);
     }
 
     /// @inheritdoc IController

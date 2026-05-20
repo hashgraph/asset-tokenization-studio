@@ -18,10 +18,9 @@ interface IControlList {
     /**
      * @notice Emitted once when the control list capability is initialised on a token.
      * @dev Fires exclusively from `initializeControlList` after the storage write succeeds.
-     * @param operator The account that invoked initialisation (deployer or upgrade caller).
      * @param isWhiteList Whether the control list operates in whitelist mode.
      */
-    event ControlListInitialized(address indexed operator, bool isWhiteList);
+    event ControlListInitialized(bool isWhiteList);
 
     /**
      * @notice Emitted when an account is added to the control list.

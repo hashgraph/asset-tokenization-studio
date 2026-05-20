@@ -25,11 +25,11 @@ abstract contract AccessControl is IAccessControl, Modifiers {
     function initializeAccessControl()
         external
         override
-        onlyFacetNotRegistered(_ACCESS_CONTROL_RESOLVER_KEY)
         onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_ACCESS_CONTROL_RESOLVER_KEY)
     {
         InitializerStorageWrapper.setFacetToReady(_ACCESS_CONTROL_RESOLVER_KEY);
-        emit IAccessControl.AccessControlInitialized(EvmAccessors.getMsgSender());
+        emit IAccessControl.AccessControlInitialized();
     }
 
     /// @inheritdoc IAccessControl

@@ -14,12 +14,10 @@ import { IERC1410Types } from "./IERC1410Types.sol";
 interface IERC1410Management is IERC1410Types {
     /**
      * @notice Emitted once when the ERC-1410 partition management is initialised on a token.
-     * @dev Fires exclusively from `initialize_ERC1410` after the storage write succeeds.
-     * @param operator The account that invoked initialisation (deployer or upgrade caller).
+     * @dev Fires exclusively from `initializeERC1410` after the storage write succeeds.
      */
-    event ERC1410Initialized(address indexed operator);
+    event ERC1410Initialized(bool multiPartition);
 
-    // Initialization function
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1410(bool _multiPartition) external;
+    /// @notice One-time initialiser for ERC-1410 partition management.
+    function initializeERC1410(bool _multiPartition) external;
 }

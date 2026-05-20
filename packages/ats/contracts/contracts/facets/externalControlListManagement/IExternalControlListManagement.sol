@@ -17,9 +17,8 @@ interface IExternalControlListManagement {
      * @notice Emitted once when the external control list capability is initialised on a token.
      * @dev Fires exclusively from `initializeExternalControlLists` after the storage write
      *      succeeds.
-     * @param operator The account that invoked initialisation (deployer or upgrade caller).
      */
-    event ExternalControlListInitialized(address indexed operator);
+    event ExternalControlListInitialized(address[] controlLists);
 
     /**
      * @notice Emitted when multiple external control list addresses are added or removed in a

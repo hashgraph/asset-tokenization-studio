@@ -329,17 +329,9 @@ describe("ExternalControlList Management Tests", () => {
     });
 
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeExternalControlLists is called THEN it reverts with AccountHasNoRole", async () => {
-      const { decodeEvent } = await import("@scripts/infrastructure");
-      const infra = await loadFixture(deployAtsInfrastructureFixture);
-      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
-        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
-      ]);
-      const proxyReceipt = await proxyTx.wait();
-      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
-      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
       await expect(
-        freshAsset.connect(signer_D).initializeExternalControlLists([initMock1.target as string]),
-      ).to.be.revertedWithCustomError(freshAsset, "AccountHasNoRole");
+        asset.connect(signer_D).initializeExternalControlLists([initMock1.target as string]),
+      ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
     it("GIVEN a new deployment WHEN initializeExternalControlLists is called THEN it emits ExternalControlListInitialized", async () => {
@@ -351,11 +343,11 @@ describe("ExternalControlList Management Tests", () => {
       const proxyReceipt = await proxyTx.wait();
       const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
       const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
-      const deployReceipt = await (
-        await freshAsset.connect(infra.deployer).initializeExternalControlLists([initMock1.target as string])
-      ).wait();
-      const args = await decodeEvent(freshAsset, "ExternalControlListInitialized", deployReceipt);
-      expect(args.operator).to.equal(await infra.deployer.getAddress());
+      const controlLists = [initMock1.target as string];
+      const tx = await freshAsset.connect(infra.deployer).initializeExternalControlLists(controlLists);
+      const receipt = await tx.wait();
+      const emitted = await decodeEvent(freshAsset, "ExternalControlListInitialized", receipt!);
+      expect(emitted.controlLists).to.deep.equal(controlLists);
     });
   });
 

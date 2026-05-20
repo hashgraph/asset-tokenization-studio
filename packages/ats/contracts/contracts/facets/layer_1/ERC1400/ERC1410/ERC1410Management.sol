@@ -10,12 +10,11 @@ import { InitializerStorageWrapper } from "../../../../domain/core/InitializerSt
 import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ERC1410Management is IERC1410Management, Modifiers {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1410(
+    function initializeERC1410(
         bool _multiPartition
-    ) external override onlyFacetNotRegistered(_ERC1410_MANAGEMENT_RESOLVER_KEY) onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_ERC1410_MANAGEMENT_RESOLVER_KEY) {
         ERC1410StorageWrapper.initialize_ERC1410(_multiPartition);
         InitializerStorageWrapper.setFacetToReady(_ERC1410_MANAGEMENT_RESOLVER_KEY);
-        emit IERC1410Management.ERC1410Initialized(EvmAccessors.getMsgSender());
+        emit IERC1410Management.ERC1410Initialized(_multiPartition);
     }
 }

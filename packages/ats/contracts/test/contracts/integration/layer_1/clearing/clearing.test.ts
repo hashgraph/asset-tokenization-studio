@@ -3087,8 +3087,7 @@ describe("Clearing Tests", () => {
         const { proxyAddress } = await decodeInfraEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
         const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
         const deploymentReceipt = await (await freshAsset.connect(infra.deployer).initializeClearing(true)).wait();
-        const args = await decodeInfraEvent(freshAsset, "ClearingInitialized", deploymentReceipt);
-        expect(args.operator).to.equal(await infra.deployer.getAddress());
+        await expect(deploymentReceipt).to.emit(freshAsset, "ClearingInitialized").withArgs(true);
       });
     });
 

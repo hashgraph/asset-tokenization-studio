@@ -96,8 +96,7 @@ interface ILoan {
 
     /// @notice Emitted once when the Loan capability is initialised on a token.
     /// @dev Fires exclusively from `initialize_Loan` after the storage write succeeds.
-    /// @param operator The account that invoked initialisation (deployer or upgrade caller).
-    event LoanInitialized(address indexed operator);
+    event LoanInitialized(LoanDetailsData loanDetailsData);
 
     event LoanDetailsSet(LoanDetailsData loanDetails);
 

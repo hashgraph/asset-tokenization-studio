@@ -13,7 +13,6 @@ import {
 } from "../../constants/storagePositions.sol";
 
 struct ExternalListDataStorage {
-    bool initialized;
     EnumerableSet.AddressSet list;
 }
 
@@ -54,10 +53,6 @@ library ExternalListManagementStorageWrapper {
 
     function removeExternalList(bytes32 _position, address _list) internal returns (bool success_) {
         success_ = externalListStorage(_position).list.remove(_list);
-    }
-
-    function setExternalListInitialized(bytes32 _position) internal {
-        externalListStorage(_position).initialized = true;
     }
 
     function initializeExternalControlLists(address[] calldata _controlLists) internal {

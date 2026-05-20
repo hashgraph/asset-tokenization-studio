@@ -5,7 +5,8 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployEquityTokenFixture } from "@test";
+import { deployAtsInfrastructureFixture, deployEquityTokenFixture } from "@test";
+import { EQUITY_CONFIG_ID } from "@scripts";
 
 import { executeRbac } from "@test";
 import { ATS_ROLES, DEFAULT_PARTITION } from "@scripts";
@@ -85,7 +86,7 @@ describe("ERC20Votes Tests", () => {
 
   describe("Initialization", () => {
     it("GIVEN a initialized ERC20Votes WHEN initialize again THEN transaction fails with FacetAlreadyRegistered", async () => {
-      await expect(asset.initialize_ERC20Votes(true)).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+      await expect(asset.initializeERC20Votes(true)).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
     });
 
     it("GIVEN ERC20Votes activated WHEN calling isActivated THEN returns true", async () => {
@@ -788,5 +789,40 @@ describe("ERC20Votes Tests", () => {
         "Deactivated",
       );
     });
+  });
+});
+
+describe("initializeERC20Votes", () => {
+  let signer_D: HardhatEthersSigner;
+  before(async () => {
+    const s = await ethers.getSigners();
+    signer_D = s[3];
+  });
+
+  it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeERC20Votes is called THEN it reverts with AccountHasNoRole", async () => {
+    const { decodeEvent } = await import("@scripts/infrastructure");
+    const infra = await loadFixture(deployAtsInfrastructureFixture);
+    const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+      { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+    ]);
+    const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
+    const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+    await expect(freshAsset.connect(signer_D).initializeERC20Votes(true)).to.be.revertedWithCustomError(
+      freshAsset,
+      "AccountHasNoRole",
+    );
+  });
+
+  it("GIVEN a new deployment WHEN initializeERC20Votes is called THEN it emits ERC20VotesInitialized", async () => {
+    const { decodeEvent } = await import("@scripts/infrastructure");
+    const infra = await loadFixture(deployAtsInfrastructureFixture);
+    const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+      { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+    ]);
+    const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
+    const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+    await expect(freshAsset.connect(infra.deployer).initializeERC20Votes(true))
+      .to.emit(freshAsset, "ERC20VotesInitialized")
+      .withArgs(true);
   });
 });

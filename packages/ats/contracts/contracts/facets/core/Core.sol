@@ -21,10 +21,10 @@ abstract contract Core is ICore, Modifiers {
     /// @inheritdoc ICore
     function initializeCore(
         ICore.ERC20Metadata calldata metadata
-    ) external override onlyFacetNotRegistered(_CORE_RESOLVER_KEY) onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_CORE_RESOLVER_KEY) {
         ERC20StorageWrapper.initializeERC20(metadata);
         InitializerStorageWrapper.setFacetToReady(_CORE_RESOLVER_KEY);
-        emit ICore.CoreInitialized(EvmAccessors.getMsgSender());
+        emit ICore.CoreInitialized(metadata);
     }
 
     /// @inheritdoc ICore

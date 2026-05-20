@@ -18,7 +18,7 @@ contract ERC20VotesFacet is ERC20Votes, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
-                this.initialize_ERC20Votes.selector,
+                this.initializeERC20Votes.selector,
                 this.delegate.selector,
                 this.clock.selector,
                 this.CLOCK_MODE.selector,

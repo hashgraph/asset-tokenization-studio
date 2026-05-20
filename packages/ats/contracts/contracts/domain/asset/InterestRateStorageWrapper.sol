@@ -149,22 +149,6 @@ library InterestRateStorageWrapper {
     }
 
     /**
-     * @notice Checks whether the fixed rate data has been initialised.
-     * @return True if fixed rate data is initialised, false otherwise.
-     */
-    /**
-     * @notice Checks whether the KPI-linked rate data has been initialised.
-     * @return True if KPI-linked rate data is initialised, false otherwise.
-     */
-    /**
-     * @notice Checks whether the coupon rate type has been initialised.
-     * @return True if the coupon rate type has been initialised, false otherwise.
-     */
-    function isInterestRateTypeInitialized() internal view returns (bool) {
-        return interestRateTypeStorage().initialized;
-    }
-
-    /**
      * @notice Returns the stored fixed interest rate and its decimal count.
      * @return rate_ The fixed rate value.
      * @return decimals_ The number of decimals for the rate.

@@ -10,13 +10,12 @@ import { InitializerStorageWrapper } from "../../../domain/core/InitializerStora
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ERC3643Management is IERC3643Management, Modifiers {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC3643(
+    function initializeERC3643(
         address _compliance,
         address _identityRegistry
-    ) external onlyFacetNotRegistered(_ERC3643_MANAGEMENT_RESOLVER_KEY) onlyRole(DEFAULT_ADMIN_ROLE) {
-        ERC3643StorageWrapper.initialize_ERC3643(_compliance, _identityRegistry);
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_ERC3643_MANAGEMENT_RESOLVER_KEY) {
+        ERC3643StorageWrapper.initializeERC3643(_compliance, _identityRegistry);
         InitializerStorageWrapper.setFacetToReady(_ERC3643_MANAGEMENT_RESOLVER_KEY);
-        emit IERC3643Management.ERC3643Initialized(EvmAccessors.getMsgSender());
+        emit IERC3643Management.ERC3643Initialized(_compliance, _identityRegistry);
     }
 }
