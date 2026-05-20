@@ -112,25 +112,10 @@ describe("Bond Tests", () => {
     });
 
     it("GIVEN an initialized bond WHEN trying to initialize again THEN transaction fails with AlreadyInitialized", async () => {
-      const regulationData = {
-        regulationType: 1, // REG_S
-        regulationSubType: 0, // NONE
-        dealSize: 0,
-        accreditedInvestors: 1, // ACCREDITATION_REQUIRED
-        maxNonAccreditedInvestors: 0,
-        manualInvestorVerification: 1, // VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED
-        internationalInvestors: 1, // ALLOWED
-        resaleHoldPeriod: 0, // NOT_APPLICABLE
-      };
-
-      const additionalSecurityData = {
-        countriesControlListType: false,
-        listOfCountries: "",
-        info: "",
-      };
-      await expect(
-        asset.connect(signer_A)._initialize_bondUSA(await getBondDetails(), regulationData, additionalSecurityData),
-      ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+      await expect(asset.connect(signer_A).initializeBondUSA(await getBondDetails())).to.be.revertedWithCustomError(
+        asset,
+        "AlreadyInitialized",
+      );
     });
   });
 
@@ -147,9 +132,10 @@ describe("Bond Tests", () => {
 
       const principalFor = await asset.getPrincipalFor(signer_A.address);
       const bondDetails = await asset.getBondDetails();
+      const nominalScale = 10n ** bondDetails.nominalValueDecimals;
 
-      expect(principalFor.numerator).to.equal(bondDetails.nominalValue * BigInt(amount));
-      expect(principalFor.denominator).to.equal(10n ** (bondDetails.nominalValueDecimals + BigInt(DECIMALS)));
+      expect(principalFor.numerator).to.equal((bondDetails.nominalValue * BigInt(amount)) / nominalScale);
+      expect(principalFor.denominator).to.equal(10n ** BigInt(DECIMALS));
     });
 
     // NOTE: The "Redeem At Maturity" block below contains tests for both redeemAtMaturityByPartition
@@ -318,9 +304,10 @@ describe("Bond Tests", () => {
 
         const principalFor = await asset.getPrincipalFor(signer_A.address);
         const bondDetails = await asset.getBondDetails();
+        const nominalScale = 10n ** bondDetails.nominalValueDecimals;
 
-        expect(principalFor.numerator).to.equal(bondDetails.nominalValue * BigInt(amount) * 2n);
-        expect(principalFor.denominator).to.equal(10n ** (bondDetails.nominalValueDecimals + BigInt(DECIMALS)));
+        expect(principalFor.numerator).to.equal((bondDetails.nominalValue * BigInt(amount) * 2n) / nominalScale);
+        expect(principalFor.denominator).to.equal(10n ** BigInt(DECIMALS));
       });
 
       it("GIVEN a new diamond contract with multi-partition WHEN redeemAtMaturityByPartition is called THEN transaction success", async () => {

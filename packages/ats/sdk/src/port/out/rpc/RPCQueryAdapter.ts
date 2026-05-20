@@ -561,6 +561,12 @@ export class RPCQueryAdapter {
     return await this.connect(IAsset__factory, address.toString()).paused();
   }
 
+  async isDeactivated(address: EvmAddress): Promise<boolean> {
+    LogService.logTrace(`Checking if the security: ${address.toString()} is deactivated`);
+
+    return await this.connect(IAsset__factory, address.toString()).isDeactivated();
+  }
+
   async arePartitionsProtected(address: EvmAddress): Promise<boolean> {
     LogService.logTrace(`Checking if the security: ${address.toString()} partitions are protected`);
 
@@ -1793,5 +1799,13 @@ export class RPCQueryAdapter {
     const total = await this.connect(IAsset__factory, address.toString()).getTotalActiveAmortizationIds();
 
     return Number(total);
+  }
+
+  async getMetadata(address: EvmAddress, key: string): Promise<string[]> {
+    LogService.logTrace(`Getting metadata for the security: ${address.toString()}`);
+    const result = await this.connect(IAsset__factory, address.toString()).getMetadata(
+      ethers.encodeBytes32String(key),
+    );
+    return result.map((v) => ethers.toUtf8String(v));
   }
 }

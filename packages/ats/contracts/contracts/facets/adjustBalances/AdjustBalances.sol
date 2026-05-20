@@ -30,6 +30,7 @@ abstract contract AdjustBalances is IAdjustBalances, Modifiers {
         onlyUnpaused
         onlyRole(ADJUSTMENT_BALANCE_ROLE)
         onlyValidFactor(factor)
+        onlyNotOverflowingAdjustment(factor, decimals)
         returns (bool success_)
     {
         ScheduledTasksStorageWrapper.triggerScheduledCrossOrderedTasks(0);

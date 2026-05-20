@@ -136,7 +136,8 @@ const EQUITY_FACETS = [
   "VotingSecurityHoldersFacet",
 
   "InterestRateFacet",
-  // Jurisdiction-Specific (1)
+  // Jurisdiction-Specific (2)
+  "SecurityFacet",
   "EquityUSAFacet",
 
   // Loan & Loans Portfolio (2)

@@ -23,4 +23,22 @@ abstract contract AdjustBalancesModifiers {
         AdjustBalancesStorageWrapper.checkValidFactor(_factor);
         _;
     }
+
+    /**
+     * @notice Reverts when the proposed adjustment would overflow decimals, the ABAF or total supply.
+     * @dev Pending scheduled adjustments are folded in before each overflow check so combined
+     *      effects are validated, not the current state alone.
+     *
+     * Requirements:
+     * - `decimals + _decimals` must not exceed `MAX_UINT8`
+     * - `abaf * _factor` must not overflow `uint256`
+     * - `totalSupply * _factor` must not overflow `uint256`
+     *
+     * @param _factor   Numerator of the prospective adjustment
+     * @param _decimals Denominator exponent of the prospective adjustment
+     */
+    modifier onlyNotOverflowingAdjustment(uint256 _factor, uint8 _decimals) {
+        AdjustBalancesStorageWrapper.checkNotOverflowingAdjustment(_factor, _decimals);
+        _;
+    }
 }

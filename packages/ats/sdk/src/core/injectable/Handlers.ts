@@ -26,7 +26,7 @@ import { COMMAND_HANDLERS_RBAC, QUERY_HANDLERS_RBAC } from "./rbac/InjectableRba
 import { COMMAND_HANDLERS_RECOVERY, QUERY_HANDLERS_RECOVERY } from "./recovery/InjectableRecovery";
 import { COMMAND_HANDLERS_REDEEM, QUERY_HANDLERS_REDEEM } from "./redeem/InjectableRedeem";
 import { COMMAND_HANDLERS_RESOLVER, QUERY_HANDLERS_RESOLVER } from "./resolver/InjectableResolver";
-import { COMMAND_HANDLERS_METADATA } from "./security/InjectableMetadata";
+import { COMMAND_HANDLERS_METADATA, QUERY_HANDLERS_METADATA } from "./security/InjectableMetadata";
 import { COMMAND_HANDLERS_SNAPSHOT, QUERY_HANDLERS_SNAPSHOT } from "./snapshot/InjectableSnapshot";
 import { COMMAND_HANDLERS_SUPPLY, QUERY_HANDLERS_SUPPLY } from "./supply/InjectableSupply";
 import { COMMAND_HANDLERS_TRANSFER, QUERY_HANDLERS_TRANSFER } from "./transfer/InjectableTransfer";
@@ -43,6 +43,7 @@ import {
 import { COMMAND_HANDLERS_KPI, QUERY_HANDLERS_KPI } from "./kpis/InjectableKpis";
 import { COMMAND_HANDLERS_NOMINAL_VALUE, QUERY_HANDLERS_NOMINAL_VALUE } from "./security/InjectableNominalValue";
 import { COMMAND_HANDLERS_AMORTIZATION, QUERY_HANDLERS_AMORTIZATION } from "./amortization/InjectableAmortization";
+import { COMMAND_HANDLERS_DEACTIVATION, QUERY_HANDLERS_DEACTIVATION } from "./deactivation/InjectableDeactivation";
 
 export const COMMAND_HANDLERS = [
   ...COMMAND_HANDLERS_AGENT,
@@ -76,6 +77,7 @@ export const COMMAND_HANDLERS = [
   ...COMMAND_HANDLERS_KPI,
   ...COMMAND_HANDLERS_NOMINAL_VALUE,
   ...COMMAND_HANDLERS_AMORTIZATION,
+  ...COMMAND_HANDLERS_DEACTIVATION,
 ];
 
 export const QUERY_HANDLERS = [
@@ -109,6 +111,8 @@ export const QUERY_HANDLERS = [
   ...QUERY_HANDLERS_KPI,
   ...QUERY_HANDLERS_NOMINAL_VALUE,
   ...QUERY_HANDLERS_AMORTIZATION,
+  ...QUERY_HANDLERS_DEACTIVATION,
+  ...QUERY_HANDLERS_METADATA,
 ];
 
 export const TRANSACTION_HANDLER = [

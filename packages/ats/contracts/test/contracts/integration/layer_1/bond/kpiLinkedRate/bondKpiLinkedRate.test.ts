@@ -140,16 +140,13 @@ describe("Bond KpiLinked Rate Tests", () => {
     const couponForPostFixingDate = await asset.getCouponFor(couponID, accountAddress);
     const couponAmountForPostFixingDate = await asset.getCouponAmountFor(couponID, accountAddress);
 
+    const balanceNominalScaled =
+      (BigInt(amount) * BigInt(DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.nominalValue)) /
+      BigInt(10) ** BigInt(DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.nominalValueDecimals);
     const numerator =
-      BigInt(amount) *
-      BigInt(DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.nominalValue) *
-      BigInt(interestRate) *
-      (BigInt(couponData.endDate) - BigInt(couponData.startDate));
+      balanceNominalScaled * BigInt(interestRate) * (BigInt(couponData.endDate) - BigInt(couponData.startDate));
     const denominator =
-      BigInt(10) **
-        (BigInt(couponForPostFixingDate.decimals) +
-          BigInt(DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.nominalValueDecimals) +
-          BigInt(interestRateDecimals)) *
+      BigInt(10) ** (BigInt(couponForPostFixingDate.decimals) + BigInt(interestRateDecimals)) *
       BigInt(365 * 24 * 60 * 60);
 
     expect(registeredCouponPostFixingDate.coupon.rate).to.equal(interestRate);
@@ -370,6 +367,28 @@ describe("Bond KpiLinked Rate Tests", () => {
       await checkCouponPostValues(previousCouponRate_2, previousCouponRateDecimals_2, amount, 3, signer_A.address);
 
       await checkCouponPostValues(rate_2, newInterestRate.rateDecimals, amount, 4, signer_A.address);
+    });
+
+    it("GIVEN a kpiLinked rate bond WHEN reportPeriod is greater than fixingDate THEN no underflow and rate falls back to missed penalty", async () => {
+      await setKpiConfiguration(-10);
+
+      // Force reportPeriod > fixingDate so the legacy `fixingDate - reportPeriod` would underflow.
+      newInterestRate.reportPeriod = parseInt(couponData.fixingDate) + 1;
+      await asset.connect(signer_A).setKpiLinkedRateInterestRate(newInterestRate);
+
+      await asset.connect(signer_A).setCoupon(couponData);
+
+      await asset.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
+
+      // windowStart collapses to fixingDate -> empty lookup window -> no report found
+      // -> _getRateWhenNoReport branch -> rate = 0 + missedPenalty (no previous coupon).
+      await checkCouponPostValues(
+        newInterestRate.missedPenalty,
+        newInterestRate.rateDecimals,
+        amount,
+        1,
+        signer_A.address,
+      );
     });
 
     it("GIVEN a kpiLinked rate bond WHEN no report is found but missing penalty is too high THEN transaction success and rate is max rate", async () => {

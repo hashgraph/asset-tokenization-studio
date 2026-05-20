@@ -34,6 +34,15 @@ abstract contract InterestRateModifiers {
     }
 
     /**
+     * @notice Modifier that ensures the coupon rate type has not been initialized.
+     * @dev Reverts with AlreadyInitialized if the coupon rate type is already initialized.
+     */
+    modifier onlyNotInterestRateTypeInitialized() {
+        _checkNotInitialized(InterestRateStorageWrapper.isInterestRateTypeInitialized());
+        _;
+    }
+
+    /**
      * @notice Modifier that validates the KPI-linked interest rate ordering invariant.
      * @dev Reverts with WrongInterestRateValues if minRate > baseRate or baseRate > maxRate.
      * @param _newInterestRate The interest rate struct to validate.
