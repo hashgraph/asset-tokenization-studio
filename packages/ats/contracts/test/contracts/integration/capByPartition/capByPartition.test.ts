@@ -142,6 +142,40 @@ describe("CapByPartition Tests", () => {
     });
   });
 
+  describe("initializeCapByPartition", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeCapByPartition is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeCapByPartition()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN a fresh deployment WHEN initializeCapByPartition is called THEN it emits CapByPartitionInitialized", async () => {
+      const base = await deployEquityTokenFixture({
+        equityDataParams: {
+          securityData: {
+            isMultiPartition: true,
+            maxSupply: maxSupply * 2,
+          },
+        },
+      });
+      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await expect(freshAsset.connect(base.deployer).initializeCapByPartition())
+        .to.emit(freshAsset, "CapByPartitionInitialized")
+        .withArgs(base.deployer.address);
+    });
+
+    describe("when facet already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_A).initializeCapByPartition();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeCapByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.initializeCapByPartition()).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+      });
+    });
+  });
+
   describe("Deactivated", () => {
     it("GIVEN a deactivated asset WHEN setMaxSupplyByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();

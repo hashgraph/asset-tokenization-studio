@@ -17,6 +17,20 @@ bytes32 constant RESOLVER_KEY_CAP_BY_PARTITION = 0x0a9c473b0456240ebc327730dba40
  */
 interface ICapByPartition {
     /**
+     * @notice Emitted once when the CapByPartition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeCapByPartition` after the storage write succeeds.
+     * @param operator The account that invoked initialisation (deployer or upgrade caller).
+     */
+    event CapByPartitionInitialized(address indexed operator);
+
+    /**
+     * @notice Initialises the CapByPartition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeCapByPartition() external;
+
+    /**
      * @notice Sets the maximum supply cap for a specific partition of the token.
      * @dev Reverts with `NewMaxSupplyCannotBeZero` when `_maxSupply` is zero, and with
      *      `NewMaxSupplyForPartitionTooLow` when it is below the partition's adjusted total
