@@ -392,9 +392,10 @@ describe("Balance Tracker Tests", () => {
     it("GIVEN a fresh deployment WHEN initializeBalanceTracker is called THEN it emits BalanceTrackerInitialized", async () => {
       const base = await deployEquityTokenFixture();
       const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await expect(freshAsset.connect(base.deployer).initializeBalanceTracker())
-        .to.emit(freshAsset, "BalanceTrackerInitialized")
-        .withArgs(await base.deployer.getAddress());
+      await expect(freshAsset.connect(base.deployer).initializeBalanceTracker()).to.emit(
+        freshAsset,
+        "BalanceTrackerInitialized",
+      );
     });
   });
 });

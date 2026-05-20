@@ -12,9 +12,8 @@ interface IAllowance is IAllowanceTypes {
     /**
      * @notice Emitted once when the allowance capability is initialised on a token.
      * @dev Fires exclusively from `initializeAllowance` after the storage write succeeds.
-     * @param operator The account that invoked initialisation (deployer or upgrade caller).
      */
-    event AllowanceInitialized(address indexed operator);
+    event AllowanceInitialized();
 
     /**
      * @notice Initialises the allowance capability on the token.

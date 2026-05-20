@@ -392,9 +392,10 @@ describe("Balance Tracker By Partition Tests", () => {
     it("GIVEN a fresh deployment WHEN initializeBalanceTrackerByPartition is called THEN it emits BalanceTrackerByPartitionInitialized", async () => {
       const base = await deployEquityTokenFixture();
       const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await expect(freshAsset.connect(base.deployer).initializeBalanceTrackerByPartition())
-        .to.emit(freshAsset, "BalanceTrackerByPartitionInitialized")
-        .withArgs(await base.deployer.getAddress());
+      await expect(freshAsset.connect(base.deployer).initializeBalanceTrackerByPartition()).to.emit(
+        freshAsset,
+        "BalanceTrackerByPartitionInitialized",
+      );
     });
   });
 });

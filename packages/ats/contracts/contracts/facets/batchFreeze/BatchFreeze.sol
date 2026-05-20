@@ -25,11 +25,11 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
     function initializeBatchFreeze()
         external
         override
-        onlyFacetNotRegistered(_BATCH_FREEZE_RESOLVER_KEY)
         onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_BATCH_FREEZE_RESOLVER_KEY)
     {
         InitializerStorageWrapper.setFacetToReady(_BATCH_FREEZE_RESOLVER_KEY);
-        emit IBatchFreeze.BatchFreezeInitialized(EvmAccessors.getMsgSender());
+        emit IBatchFreeze.BatchFreezeInitialized();
     }
 
     /// @inheritdoc IBatchFreeze

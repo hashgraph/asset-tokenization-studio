@@ -188,9 +188,10 @@ describe("BalanceTrackerAtSnapshot Tests", () => {
     it("GIVEN a fresh deployment WHEN initializeBalanceTrackerAtSnapshot is called THEN it emits BalanceTrackerAtSnapshotInitialized", async () => {
       const base = await deployEquityTokenFixture();
       const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await expect(freshAsset.connect(base.deployer).initializeBalanceTrackerAtSnapshot())
-        .to.emit(freshAsset, "BalanceTrackerAtSnapshotInitialized")
-        .withArgs(await base.deployer.getAddress());
+      await expect(freshAsset.connect(base.deployer).initializeBalanceTrackerAtSnapshot()).to.emit(
+        freshAsset,
+        "BalanceTrackerAtSnapshotInitialized",
+      );
     });
   });
 });

@@ -250,9 +250,7 @@ describe("BatchBurn Tests", () => {
     it("GIVEN a fresh deployment WHEN initializeBatchBurn is called THEN it emits BatchBurnInitialized", async () => {
       const base = await deployEquityTokenFixture();
       const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await expect(freshAsset.connect(base.deployer).initializeBatchBurn())
-        .to.emit(freshAsset, "BatchBurnInitialized")
-        .withArgs(await base.deployer.getAddress());
+      await expect(freshAsset.connect(base.deployer).initializeBatchBurn()).to.emit(freshAsset, "BatchBurnInitialized");
     });
   });
 });

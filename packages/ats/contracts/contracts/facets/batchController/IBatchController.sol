@@ -13,9 +13,8 @@ interface IBatchController {
     /**
      * @notice Emitted once when the batch controller capability is initialised on a token.
      * @dev Fires exclusively from `initializeBatchController` after the storage write succeeds.
-     * @param operator The account that invoked initialisation (deployer or upgrade caller).
      */
-    event BatchControllerInitialized(address indexed operator);
+    event BatchControllerInitialized();
 
     /**
      * @notice Initialises the batch controller capability on the token.

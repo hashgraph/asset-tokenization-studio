@@ -8,7 +8,6 @@ import { AdjustBalancesStorageWrapper } from "../../domain/asset/AdjustBalancesS
 import { ScheduledTasksStorageWrapper } from "../../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
-import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _BALANCE_ADJUSTMENTS_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
@@ -25,11 +24,11 @@ abstract contract AdjustBalances is IAdjustBalances, Modifiers {
     function initializeBalanceAdjustments()
         external
         override
-        onlyFacetNotRegistered(_BALANCE_ADJUSTMENTS_RESOLVER_KEY)
         onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_BALANCE_ADJUSTMENTS_RESOLVER_KEY)
     {
         InitializerStorageWrapper.setFacetToReady(_BALANCE_ADJUSTMENTS_RESOLVER_KEY);
-        emit IAdjustBalances.BalanceAdjustmentsInitialized(EvmAccessors.getMsgSender());
+        emit IAdjustBalances.BalanceAdjustmentsInitialized();
     }
 
     /// @inheritdoc IAdjustBalances

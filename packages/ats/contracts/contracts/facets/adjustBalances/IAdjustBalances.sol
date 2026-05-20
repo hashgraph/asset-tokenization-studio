@@ -21,9 +21,8 @@ interface IAdjustBalances {
     /**
      * @notice Emitted once when the balance adjustment capability is initialised on a token.
      * @dev Fires exclusively from `initializeBalanceAdjustments` after the storage write succeeds.
-     * @param operator The account that invoked initialisation (deployer or upgrade caller).
      */
-    event BalanceAdjustmentsInitialized(address indexed operator);
+    event BalanceAdjustmentsInitialized();
 
     /// @notice Reverts when `factor` is zero, which would zero-out all holder balances.
     error FactorIsZero();

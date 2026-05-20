@@ -12,9 +12,8 @@ interface IBatchFreeze {
     /**
      * @notice Emitted once when the batch freeze capability is initialised on a token.
      * @dev Fires exclusively from `initializeBatchFreeze` after the storage write succeeds.
-     * @param operator The account that invoked initialisation (deployer or upgrade caller).
      */
-    event BatchFreezeInitialized(address indexed operator);
+    event BatchFreezeInitialized();
 
     /**
      * @notice Initialises the batch freeze capability on the token.
