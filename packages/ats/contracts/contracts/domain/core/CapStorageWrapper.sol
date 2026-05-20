@@ -11,7 +11,6 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 struct CapDataStorage {
     uint256 maxSupply;
     mapping(bytes32 => uint256) maxSupplyByPartition;
-    bool initialized;
 }
 
 library CapStorageWrapper {
@@ -25,7 +24,6 @@ library CapStorageWrapper {
                 ++i;
             }
         }
-        cs.initialized = true;
     }
 
     function setMaxSupply(uint256 _maxSupply, uint256 _timestamp) internal returns (uint256 previousMaxSupply) {
@@ -115,10 +113,6 @@ library CapStorageWrapper {
 
         uint256 limit = MAX_UINT256 / factor;
         return (cs.maxSupplyByPartition[partition] > limit) ? MAX_UINT256 : cs.maxSupplyByPartition[partition] * factor;
-    }
-
-    function isCapInitialized() internal view returns (bool) {
-        return capStorage().initialized;
     }
 
     function capStorage() internal pure returns (CapDataStorage storage cap_) {
