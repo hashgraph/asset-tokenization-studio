@@ -14,8 +14,8 @@ import { _BALANCE_TRACKER_BY_PARTITION_RESOLVER_KEY } from "../../constants/reso
  *         `_BALANCE_TRACKER_BY_PARTITION_RESOLVER_KEY`.
  * @dev Inherits balance logic from `BalanceTrackerByPartition` and satisfies the
  *      `IStaticFunctionSelectors` contract required by the Diamond proxy for selector registration.
- *      Exposes three selectors: `balanceOfByPartition`, `totalSupplyByPartition`, and
- *      `getTotalBalanceForByPartition`.
+ *      Exposes four selectors: `initializeBalanceTrackerByPartition`, `balanceOfByPartition`,
+ *      `totalSupplyByPartition`, and `getTotalBalanceForByPartition`.
  */
 contract BalanceTrackerByPartitionFacet is BalanceTrackerByPartition, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
