@@ -27,8 +27,7 @@ library KycStorageWrapper {
     using EnumerableSet for EnumerableSet.AddressSet;
 
     function initializeInternalKyc(bool _internalKycActivated) internal {
-        KycStorage storage ks = kycStorage();
-        ks.internalKycActivated = _internalKycActivated;
+        kycStorage().internalKycActivated = _internalKycActivated;
     }
 
     function setInternalKyc(bool _activated) internal returns (bool success_) {
@@ -111,10 +110,6 @@ library KycStorageWrapper {
         bool internalKycValid = !kycStorage().internalKycActivated ||
             getKycStatusFor(_account, TimeTravelStorageWrapper.getBlockTimestamp()) == _kycStatus;
         return internalKycValid && ExternalListManagementStorageWrapper.isExternallyGranted(_account, _kycStatus);
-    }
-
-    function isKycInitialized() internal view returns (bool) {
-        return kycStorage().internalKycActivated;
     }
 
     function isInternalKycActivated() internal view returns (bool) {
