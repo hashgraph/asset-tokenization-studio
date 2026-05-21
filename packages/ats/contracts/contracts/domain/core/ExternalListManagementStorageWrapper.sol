@@ -13,7 +13,6 @@ import {
 } from "../../constants/storagePositions.sol";
 
 struct ExternalListDataStorage {
-    bool initialized;
     EnumerableSet.AddressSet list;
 }
 
@@ -56,10 +55,6 @@ library ExternalListManagementStorageWrapper {
         success_ = externalListStorage(_position).list.remove(_list);
     }
 
-    function setExternalListInitialized(bytes32 _position) internal {
-        externalListStorage(_position).initialized = true;
-    }
-
     function initializeExternalControlLists(address[] calldata _controlLists) internal {
         uint256 length = _controlLists.length;
         for (uint256 index; index < length; ) {
@@ -69,7 +64,6 @@ library ExternalListManagementStorageWrapper {
                 ++index;
             }
         }
-        setExternalListInitialized(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION);
     }
 
     function initializeExternalKycLists(address[] calldata _kycLists) internal {
@@ -81,7 +75,6 @@ library ExternalListManagementStorageWrapper {
                 ++index;
             }
         }
-        setExternalListInitialized(_KYC_MANAGEMENT_STORAGE_POSITION);
     }
 
     function isExternalList(bytes32 _position, address _list) internal view returns (bool) {
@@ -114,10 +107,6 @@ library ExternalListManagementStorageWrapper {
         return true;
     }
 
-    function isExternalControlListInitialized() internal view returns (bool) {
-        return externalListStorage(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION).initialized;
-    }
-
     function isExternallyGranted(address _account, IKyc.KycStatus _kycStatus) internal view returns (bool) {
         ExternalListDataStorage storage externalKycListStorage = externalListStorage(_KYC_MANAGEMENT_STORAGE_POSITION);
         uint256 length = getExternalListsCount(_KYC_MANAGEMENT_STORAGE_POSITION);
@@ -129,10 +118,6 @@ library ExternalListManagementStorageWrapper {
             }
         }
         return true;
-    }
-
-    function isKycExternalInitialized() internal view returns (bool) {
-        return externalListStorage(_KYC_MANAGEMENT_STORAGE_POSITION).initialized;
     }
 
     function checkValidAddress(address _addr) internal pure {

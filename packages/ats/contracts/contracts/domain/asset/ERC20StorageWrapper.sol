@@ -19,7 +19,6 @@ struct ERC20Storage {
     string symbol;
     string isin;
     uint8 decimals;
-    bool initialized;
     mapping(address => mapping(address => uint256)) allowed;
     IFactory.SecurityType securityType;
     uint256 totalSupply;
@@ -34,7 +33,6 @@ library ERC20StorageWrapper {
         erc20Stor.isin = erc20Metadata.info.isin;
         erc20Stor.decimals = erc20Metadata.info.decimals;
         erc20Stor.securityType = erc20Metadata.securityType;
-        erc20Stor.initialized = true;
     }
 
     /// @notice Updates ERC-20 balances and emits the EIP-20 Transfer event.
@@ -225,10 +223,6 @@ library ERC20StorageWrapper {
 
     function decimals() internal view returns (uint8) {
         return erc20Storage().decimals;
-    }
-
-    function isERC20Initialized() internal view returns (bool) {
-        return erc20Storage().initialized;
     }
 
     function getERC20Metadata() internal view returns (ICore.ERC20Metadata memory erc20Metadata_) {

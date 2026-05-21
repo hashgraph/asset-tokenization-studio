@@ -2,8 +2,10 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IControlList } from "./IControlList.sol";
-import { CONTROL_LIST_ROLE } from "../../constants/roles.sol";
+import { CONTROL_LIST_ROLE, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { _CONTROL_LIST_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 import { ControlListStorageWrapper } from "../../domain/core/ControlListStorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
@@ -20,9 +22,12 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract ControlList is IControlList, Modifiers {
     /// @inheritdoc IControlList
-    // solhint-disable-next-line func-name-mixedcase
-    function initializeControlList(bool _isWhiteList) external override onlyNotControlListInitialized {
+    function initializeControlList(
+        bool _isWhiteList
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_CONTROL_LIST_RESOLVER_KEY) {
         ControlListStorageWrapper.initializeControlList(_isWhiteList);
+        InitializerStorageWrapper.setFacetToReady(_CONTROL_LIST_RESOLVER_KEY);
+        emit ControlListInitialized(_isWhiteList);
     }
 
     /// @inheritdoc IControlList

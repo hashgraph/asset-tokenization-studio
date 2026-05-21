@@ -4,10 +4,12 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IController } from "./IController.sol";
 import { IERC3643Types } from "../layer_1/ERC3643/IERC3643Types.sol";
 import { DEFAULT_ADMIN_ROLE, CONTROLLER_ROLE, AGENT_ROLE, _buildRoles } from "../../constants/roles.sol";
+import { _CONTROLLER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
 import { ERC1644StorageWrapper } from "../../domain/asset/ERC1644StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 
@@ -18,8 +20,12 @@ import { Modifiers } from "../../services/Modifiers.sol";
  */
 abstract contract Controller is IController, Modifiers {
     /// @inheritdoc IController
-    function initializeController(bool _controllable) external override onlyNotControllerInitialized {
+    function initializeController(
+        bool _controllable
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_CONTROLLER_RESOLVER_KEY) {
         ERC1644StorageWrapper.initializeController(_controllable);
+        InitializerStorageWrapper.setFacetToReady(_CONTROLLER_RESOLVER_KEY);
+        emit IController.ControllerInitialized(_controllable);
     }
 
     /// @inheritdoc IController

@@ -9,7 +9,6 @@ import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 
 struct ControlListStorage {
     bool isWhiteList;
-    bool initialized;
     EnumerableSet.AddressSet list;
 }
 
@@ -39,14 +38,8 @@ library ControlListStorageWrapper {
     function initializeControlList(bool _isWhiteList) internal {
         ControlListStorage storage cls = controlListStorage();
         cls.isWhiteList = _isWhiteList;
-        cls.initialized = true;
     }
 
-    function isControlListInitialized() internal view returns (bool) {
-        return controlListStorage().initialized;
-    }
-
-    // solhint-disable-next-line ordering
     function checkControlList(address _account) internal view {
         if (!isAbleToAccess(_account)) {
             revert ICommonErrors.AccountIsBlocked(_account);

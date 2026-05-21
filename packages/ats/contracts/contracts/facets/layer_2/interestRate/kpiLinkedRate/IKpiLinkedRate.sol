@@ -4,6 +4,10 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IKpiLinkedRateErrors } from "./IKpiLinkedRateErrors.sol";
 
 interface IKpiLinkedRate is IKpiLinkedRateErrors {
+    /// @notice Emitted once when the KpiLinkedRate capability is initialised on a token.
+    /// @dev Fires exclusively from `initializeKpiLinkedRate` after the storage write succeeds.
+    event KpiLinkedRateInitialized(InterestRate interestRate, ImpactData impactData);
+
     event InterestRateUpdated(address indexed operator, InterestRate newInterestRate);
     event ImpactDataUpdated(address indexed operator, ImpactData newImpactData);
 

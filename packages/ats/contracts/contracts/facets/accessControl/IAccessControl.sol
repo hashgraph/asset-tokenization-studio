@@ -56,9 +56,8 @@ interface IAccessControl {
     /**
      * @notice Emitted once when the AccessControl capability is initialised on a token.
      * @dev Fires exclusively from `initializeAccessControl` after the registration succeeds.
-     * @param operator The account that invoked initialisation (deployer or upgrade caller).
      */
-    event AccessControlInitialized(address indexed operator);
+    event AccessControlInitialized();
 
     /**
      * @notice Thrown when an account does not hold a required role.

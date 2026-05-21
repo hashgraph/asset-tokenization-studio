@@ -15,10 +15,10 @@ abstract contract Initializer is IInitializer, Modifiers {
     /// @inheritdoc IInitializer
     function initializeInitializer(
         uint256 _maxInitializerFacetIndex
-    ) external onlyFacetNotRegistered(_INITIALIZER_RESOLVER_KEY) onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_INITIALIZER_RESOLVER_KEY) {
         InitializerStorageWrapper.setMaxInitializerFacetIndex(_maxInitializerFacetIndex);
         InitializerStorageWrapper.setFacetToReady(_INITIALIZER_RESOLVER_KEY);
-        emit InitializerInitialized(EvmAccessors.getMsgSender(), _maxInitializerFacetIndex);
+        emit InitializerInitialized(_maxInitializerFacetIndex);
     }
 
     /// @inheritdoc IInitializer

@@ -2,10 +2,12 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalControlListManagement } from "./IExternalControlListManagement.sol";
-import { CONTROL_LIST_MANAGER_ROLE } from "../../constants/roles.sol";
+import { CONTROL_LIST_MANAGER_ROLE, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { _EXTERNAL_CONTROL_LIST_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 import { _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { ExternalListManagementStorageWrapper } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { ArrayValidation } from "../../infrastructure/utils/ArrayValidation.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
@@ -26,8 +28,10 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
     /// @inheritdoc IExternalControlListManagement
     function initializeExternalControlLists(
         address[] calldata _controlLists
-    ) external override onlyNotExternalControlListInitialized {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_EXTERNAL_CONTROL_LIST_RESOLVER_KEY) {
         ExternalListManagementStorageWrapper.initializeExternalControlLists(_controlLists);
+        InitializerStorageWrapper.setFacetToReady(_EXTERNAL_CONTROL_LIST_RESOLVER_KEY);
+        emit IExternalControlListManagement.ExternalControlListInitialized(_controlLists);
     }
 
     /// @inheritdoc IExternalControlListManagement

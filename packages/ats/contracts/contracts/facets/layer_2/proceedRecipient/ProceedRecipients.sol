@@ -2,19 +2,23 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IProceedRecipients } from "./IProceedRecipients.sol";
-import { PROCEED_RECIPIENT_MANAGER_ROLE } from "../../../constants/roles.sol";
+import { PROCEED_RECIPIENT_MANAGER_ROLE, DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
+import { _PROCEED_RECIPIENTS_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProceedRecipientsStorageWrapper } from "../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
 import { DefaultValueValidation } from "../../../infrastructure/utils/DefaultValueValidation.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ProceedRecipients(
+    /// @inheritdoc IProceedRecipients
+    function initializeProceedRecipients(
         address[] calldata _proceedRecipients,
         bytes[] calldata _data
-    ) external override onlyNotProceedRecipientsInitialized {
-        ProceedRecipientsStorageWrapper.initialize_ProceedRecipients(_proceedRecipients, _data);
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_PROCEED_RECIPIENTS_RESOLVER_KEY) {
+        ProceedRecipientsStorageWrapper.initializeProceedRecipients(_proceedRecipients, _data);
+        InitializerStorageWrapper.setFacetToReady(_PROCEED_RECIPIENTS_RESOLVER_KEY);
+        emit IProceedRecipients.ProceedRecipientsInitialized(_proceedRecipients, _data);
     }
 
     function addProceedRecipient(

@@ -2,9 +2,11 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { INominalValue } from "./INominalValue.sol";
-import { NOMINAL_VALUE_ROLE } from "../../../constants/roles.sol";
+import { NOMINAL_VALUE_ROLE, DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
+import { _NOMINAL_VALUE_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { NominalValueStorageWrapper } from "../../../domain/asset/nominalValue/NominalValueStorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 /**
@@ -21,14 +23,10 @@ abstract contract NominalValue is INominalValue, Modifiers {
         uint256 _nominalValue,
         uint8 _nominalValueDecimals,
         bytes3 _nominalValueCurrency
-    ) external override onlyNotNominalValueInitialized {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_NOMINAL_VALUE_RESOLVER_KEY) {
         NominalValueStorageWrapper.initializeNominalValue(_nominalValue, _nominalValueDecimals, _nominalValueCurrency);
-        emit NominalValueInitialized(
-            EvmAccessors.getMsgSender(),
-            _nominalValue,
-            _nominalValueDecimals,
-            _nominalValueCurrency
-        );
+        InitializerStorageWrapper.setFacetToReady(_NOMINAL_VALUE_RESOLVER_KEY);
+        emit NominalValueInitialized(_nominalValue, _nominalValueDecimals, _nominalValueCurrency);
     }
 
     /// @inheritdoc INominalValue

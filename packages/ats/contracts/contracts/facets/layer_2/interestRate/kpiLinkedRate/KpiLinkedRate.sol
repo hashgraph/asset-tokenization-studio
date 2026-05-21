@@ -2,20 +2,23 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IKpiLinkedRate } from "./IKpiLinkedRate.sol";
-import { INTEREST_RATE_MANAGER_ROLE } from "../../../../constants/roles.sol";
+import { INTEREST_RATE_MANAGER_ROLE, DEFAULT_ADMIN_ROLE } from "../../../../constants/roles.sol";
+import { _KPI_LINKED_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 import { InterestRateStorageWrapper } from "../../../../domain/asset/InterestRateStorageWrapper.sol";
 import { ScheduledTasksOps } from "../../../../domain/orchestrator/ScheduledTasksOps.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../../../domain/core/InitializerStorageWrapper.sol";
 import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
 contract KpiLinkedRate is IKpiLinkedRate, Modifiers {
     function initializeKpiLinkedRate(
         InterestRate calldata _interestRate,
         ImpactData calldata _impactData
-    ) external override onlyNotKpiLinkedRateInitialized {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_KPI_LINKED_RATE_RESOLVER_KEY) {
         InterestRateStorageWrapper.setInterestRate(_interestRate);
         InterestRateStorageWrapper.setImpactData(_impactData);
-        InterestRateStorageWrapper.kpiLinkedRateStorage().initialized = true;
+        InitializerStorageWrapper.setFacetToReady(_KPI_LINKED_RATE_RESOLVER_KEY);
+        emit IKpiLinkedRate.KpiLinkedRateInitialized(_interestRate, _impactData);
     }
 
     function setKpiLinkedRateInterestRate(

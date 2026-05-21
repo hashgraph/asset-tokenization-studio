@@ -229,9 +229,7 @@ describe("DiamondLoupeFacet", () => {
     });
 
     it("GIVEN a resolver WHEN checking IAccessControl interface THEN returns true", async () => {
-      const accessControlInterfaceId = "0x2fe9ac18"; // IAccessControl interface ID
-      const isSupported = await diamondLoupe.supportsInterface(accessControlInterfaceId);
-
+      const isSupported = await diamondLoupe.supportsInterface("0x2fe9ac18");
       expect(isSupported).to.be.true;
     });
   });

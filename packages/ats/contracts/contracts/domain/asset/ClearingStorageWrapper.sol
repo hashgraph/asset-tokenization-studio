@@ -21,7 +21,6 @@ library ClearingStorageWrapper {
 
     // solhint-disable max-line-length
     struct ClearingDataStorage {
-        bool initialized;
         bool activated;
         mapping(address => uint256) totalClearedAmountByAccount;
         mapping(address => mapping(bytes32 => uint256)) totalClearedAmountByAccountAndPartition;
@@ -41,18 +40,12 @@ library ClearingStorageWrapper {
     // solhint-enable max-line-length
 
     function initializeClearing(bool clearingActive) internal {
-        ClearingDataStorage storage clearingStorage_ = clearingStorage();
-        clearingStorage_.initialized = true;
-        clearingStorage_.activated = clearingActive;
+        clearingStorage().activated = clearingActive;
     }
 
     function setClearing(bool activated) internal returns (bool success_) {
         clearingStorage().activated = activated;
         return true;
-    }
-
-    function isClearingInitialized() internal view returns (bool) {
-        return clearingStorage().initialized;
     }
 
     function isClearingActivated() internal view returns (bool) {

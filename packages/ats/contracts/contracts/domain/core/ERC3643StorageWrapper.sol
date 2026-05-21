@@ -46,12 +46,9 @@ library ERC3643StorageWrapper {
         mapping(address => uint256) frozenTokens;
         mapping(address => mapping(bytes32 => uint256)) frozenTokensByPartition;
         mapping(address => bool) addressRecovered;
-        bool initialized;
     }
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC3643(address _compliance, address _identityRegistry) internal {
-        erc3643Storage().initialized = true;
+    function initializeERC3643(address _compliance, address _identityRegistry) internal {
         setCompliance(_compliance);
         setIdentityRegistry(_identityRegistry);
     }
@@ -296,10 +293,6 @@ library ERC3643StorageWrapper {
 
     function getOnchainID() internal view returns (address) {
         return erc3643Storage().onchainID;
-    }
-
-    function isERC3643Initialized() internal view returns (bool) {
-        return erc3643Storage().initialized;
     }
 
     function getFrozenAmountForAdjustedAt(address _tokenHolder, uint256 _timestamp) internal view returns (uint256) {

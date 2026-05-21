@@ -2,10 +2,12 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalKycListManagement } from "./IExternalKycListManagement.sol";
-import { KYC_MANAGER_ROLE } from "../../constants/roles.sol";
+import { KYC_MANAGER_ROLE, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { _EXTERNAL_KYC_LIST_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 import { _KYC_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { ExternalListManagementStorageWrapper } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { ArrayValidation } from "../../infrastructure/utils/ArrayValidation.sol";
 import { IKyc } from "../layer_1/kyc/IKyc.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
@@ -24,9 +26,12 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract ExternalKycListManagement is IExternalKycListManagement, Modifiers {
     /// @inheritdoc IExternalKycListManagement
-    // solhint-disable-next-line func-name-mixedcase
-    function initializeExternalKycLists(address[] calldata _kycLists) external override onlyNotKycExternalInitialized {
+    function initializeExternalKycLists(
+        address[] calldata _kycLists
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_EXTERNAL_KYC_LIST_RESOLVER_KEY) {
         ExternalListManagementStorageWrapper.initializeExternalKycLists(_kycLists);
+        InitializerStorageWrapper.setFacetToReady(_EXTERNAL_KYC_LIST_RESOLVER_KEY);
+        emit IExternalKycListManagement.ExternalKycListInitialized(_kycLists);
     }
 
     /// @inheritdoc IExternalKycListManagement

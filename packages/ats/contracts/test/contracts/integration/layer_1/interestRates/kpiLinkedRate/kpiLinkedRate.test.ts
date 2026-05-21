@@ -6,8 +6,12 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type ResolverProxy, type IAsset } from "@contract-types";
 import { ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { DEFAULT_BOND_KPI_LINKED_RATE_PARAMS, deployBondKpiLinkedRateTokenFixture } from "@test";
-import { executeRbac } from "@test";
+import {
+  DEFAULT_BOND_KPI_LINKED_RATE_PARAMS,
+  deployAtsInfrastructureFixture,
+  deployBondKpiLinkedRateTokenFixture,
+  executeRbac,
+} from "@test";
 
 describe("Kpi Linked Rate Tests", () => {
   let diamond: ResolverProxy;
@@ -41,7 +45,31 @@ describe("Kpi Linked Rate Tests", () => {
     await loadFixture(deploySecurityFixtureMultiPartition);
   });
 
-  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
+  it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeKpiLinkedRate is called THEN it reverts with AccountHasNoRole", async () => {
+    await expect(
+      asset.connect(signer_C).initializeKpiLinkedRate(
+        {
+          maxRate: 3,
+          baseRate: 2,
+          minRate: 1,
+          startPeriod: 1000,
+          startRate: 2,
+          missedPenalty: 2,
+          reportPeriod: 5000,
+          rateDecimals: 1,
+        },
+        {
+          maxDeviationCap: 1000,
+          baseLine: 700,
+          maxDeviationFloor: 300,
+          impactDataDecimals: 1,
+          adjustmentPrecision: 3,
+        },
+      ),
+    ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+  });
+
+  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with FacetAlreadyRegistered", async () => {
     await expect(
       asset.initializeKpiLinkedRate(
         {
@@ -62,7 +90,7 @@ describe("Kpi Linked Rate Tests", () => {
           adjustmentPrecision: 3,
         },
       ),
-    ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+    ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
   });
 
   describe("Paused", () => {
@@ -318,5 +346,40 @@ describe("Kpi Linked Rate Tests", () => {
         }),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
+  });
+});
+
+describe("initializeKpiLinkedRate", () => {
+  it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeKpiLinkedRate is called THEN it emits KpiLinkedRateInitialized", async () => {
+    const { decodeEvent } = await import("@scripts/infrastructure");
+    const { BOND_KPI_LINKED_RATE_CONFIG_ID } = await import("@scripts/domain");
+    const infra = await loadFixture(deployAtsInfrastructureFixture);
+    const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, BOND_KPI_LINKED_RATE_CONFIG_ID, 1, [
+      { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+    ]);
+    const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
+    const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+    const interestRateArgs = {
+      maxRate: 3,
+      baseRate: 2,
+      minRate: 1,
+      startPeriod: 1000,
+      startRate: 2,
+      missedPenalty: 2,
+      reportPeriod: 5000,
+      rateDecimals: 1,
+    };
+    const impactDataArgs = {
+      maxDeviationCap: 1000,
+      baseLine: 700,
+      maxDeviationFloor: 300,
+      impactDataDecimals: 1,
+      adjustmentPrecision: 3,
+    };
+    const tx = await freshAsset.connect(infra.deployer).initializeKpiLinkedRate(interestRateArgs, impactDataArgs);
+    const receipt = await tx.wait();
+    const emitted = await decodeEvent(freshAsset, "KpiLinkedRateInitialized", receipt!);
+    expect(emitted.interestRate.maxRate).to.equal(interestRateArgs.maxRate);
+    expect(emitted.impactData.maxDeviationCap).to.equal(impactDataArgs.maxDeviationCap);
   });
 });

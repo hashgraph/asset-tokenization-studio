@@ -7,6 +7,10 @@ import { IERC5805 } from "./IERC5805.sol";
 import { Checkpoints } from "../../../../infrastructure/utils/Checkpoints.sol";
 
 interface IERC20Votes is IERC5805 {
+    /// @notice Emitted once when the ERC-20Votes capability is initialised on a token.
+    /// @dev Fires exclusively from `initializeERC20Votes` after the storage write succeeds.
+    event ERC20VotesInitialized(bool activated);
+
     /// @notice Emitted when an account changes their delegate
     /// @param delegator The account that changed their delegation
     /// @param fromDelegate The previous delegate address
@@ -29,8 +33,7 @@ interface IERC20Votes is IERC5805 {
     /// @param currentClock The current clock value
     error FutureLookup(uint256 timepoint, uint256 currentClock);
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC20Votes(bool _activated) external;
+    function initializeERC20Votes(bool _activated) external;
 
     function isActivated() external view returns (bool);
 

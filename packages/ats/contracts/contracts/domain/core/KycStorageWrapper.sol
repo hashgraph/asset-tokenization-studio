@@ -13,7 +13,6 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
 struct KycStorage {
     mapping(address => IKyc.KycData) kyc;
     mapping(IKyc.KycStatus => EnumerableSet.AddressSet) kycAddressesByStatus;
-    bool initialized;
     bool internalKycActivated;
 }
 
@@ -28,9 +27,7 @@ library KycStorageWrapper {
     using EnumerableSet for EnumerableSet.AddressSet;
 
     function initializeInternalKyc(bool _internalKycActivated) internal {
-        KycStorage storage ks = kycStorage();
-        ks.initialized = true;
-        ks.internalKycActivated = _internalKycActivated;
+        kycStorage().internalKycActivated = _internalKycActivated;
     }
 
     function setInternalKyc(bool _activated) internal returns (bool success_) {
@@ -117,10 +114,6 @@ library KycStorageWrapper {
 
     function isInternalKycActivated() internal view returns (bool) {
         return kycStorage().internalKycActivated;
-    }
-
-    function isKycInitialized() internal view returns (bool) {
-        return kycStorage().initialized;
     }
 
     function kycStorage() internal pure returns (KycStorage storage kyc_) {

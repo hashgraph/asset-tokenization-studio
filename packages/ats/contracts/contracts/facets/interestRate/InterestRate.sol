@@ -4,7 +4,10 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IInterestRate } from "./IInterestRate.sol";
 import { InterestRateStorageWrapper } from "../../domain/asset/InterestRateStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
-import { INTEREST_RATE_MANAGER_ROLE } from "../../constants/roles.sol";
+import { DEFAULT_ADMIN_ROLE, INTEREST_RATE_MANAGER_ROLE } from "../../constants/roles.sol";
+import { _INTEREST_RATE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title InterestRate
@@ -16,12 +19,18 @@ import { INTEREST_RATE_MANAGER_ROLE } from "../../constants/roles.sol";
  */
 abstract contract InterestRate is IInterestRate, Modifiers {
     /// @inheritdoc IInterestRate
-    /// @dev No role required. Protected by `onlyValidRateType` and `onlyNotInterestRateTypeInitialized`.
     function initializeInterestRateType(
         IInterestRate.RateType rateType
-    ) external onlyNotInterestRateTypeInitialized onlyValidRateType(rateType) {
+    )
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_INTEREST_RATE_RESOLVER_KEY)
+        onlyValidRateType(rateType)
+    {
         InterestRateStorageWrapper.initializeCouponRateType(rateType);
-        emit CouponRateTypeSet(msg.sender, rateType);
+        InitializerStorageWrapper.setFacetToReady(_INTEREST_RATE_RESOLVER_KEY);
+        emit IInterestRate.InterestRateTypeInitialized(rateType);
     }
 
     /// @inheritdoc IInterestRate

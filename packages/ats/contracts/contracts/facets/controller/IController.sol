@@ -10,6 +10,12 @@ import { IERC3643Types } from "../layer_1/ERC3643/IERC3643Types.sol";
  *      management. Inherits `AgentAdded` and `AgentRemoved` events from `IERC3643Types`.
  */
 interface IController is IERC3643Types {
+    /**
+     * @notice Emitted when the controller feature is initialised for a token.
+     * @dev Fired inside `initializeController` once the facet is marked ready.
+     */
+    event ControllerInitialized(bool controllable);
+
     /// @notice Emitted when the controller feature is permanently disabled for a token.
     event FinalizedControllerFeature(address operator);
 

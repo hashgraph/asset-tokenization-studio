@@ -2,11 +2,13 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalPauseManagement } from "./IExternalPauseManagement.sol";
-import { PAUSE_MANAGER_ROLE } from "../../constants/roles.sol";
+import { PAUSE_MANAGER_ROLE, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { _EXTERNAL_PAUSE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 import { _PAUSE_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { PauseStorageWrapper } from "../../domain/core/PauseStorageWrapper.sol";
 import { ExternalListManagementStorageWrapper } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { ArrayValidation } from "../../infrastructure/utils/ArrayValidation.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
@@ -24,8 +26,12 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers {
     /// @inheritdoc IExternalPauseManagement
-    function initializeExternalPauses(address[] calldata _pauses) external override onlyNotExternalPauseInitialized {
+    function initializeExternalPauses(
+        address[] calldata _pauses
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_EXTERNAL_PAUSE_RESOLVER_KEY) {
         PauseStorageWrapper.initializeExternalPauses(_pauses);
+        InitializerStorageWrapper.setFacetToReady(_EXTERNAL_PAUSE_RESOLVER_KEY);
+        emit IExternalPauseManagement.ExternalPauseInitialized(_pauses);
     }
 
     /// @inheritdoc IExternalPauseManagement

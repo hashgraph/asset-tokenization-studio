@@ -2,15 +2,20 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ILoansPortfolio } from "./ILoansPortfolio.sol";
-import { LOANS_PORTFOLIO_MANAGER_ROLE } from "../../../constants/roles.sol";
+import { LOANS_PORTFOLIO_MANAGER_ROLE, DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
+import { _LOANS_PORTFOLIO_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { LoansPortfolioStorageWrapper } from "../../../domain/asset/loansPortfolio/LoansPortfolioStorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
     function initializeLoansPortfolio(
         ILoansPortfolio.LoansPortfolioDetailsData calldata _loansPortfolioData
-    ) external onlyUninitialized(LoansPortfolioStorageWrapper.isLoansPortfolioInitialized()) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_LOANS_PORTFOLIO_RESOLVER_KEY) {
         LoansPortfolioStorageWrapper.initializeLoansPortfolio(_loansPortfolioData);
+        InitializerStorageWrapper.setFacetToReady(_LOANS_PORTFOLIO_RESOLVER_KEY);
+        emit ILoansPortfolio.LoansPortfolioInitialized(_loansPortfolioData);
     }
 
     function addHoldingsAsset(

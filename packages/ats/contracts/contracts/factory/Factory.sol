@@ -153,6 +153,8 @@ abstract contract Factory is IFactory {
 
         _tryInitializeInterestRateType(equityAddress_, IInterestRate.RateType.STANDARD);
 
+        IAccessControl(equityAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
+
         emit EquityDeployed(EvmAccessors.getMsgSender(), equityAddress_, _equityData, _factoryRegulationData);
     }
 
@@ -177,6 +179,8 @@ abstract contract Factory is IFactory {
         bondAddress_ = _deployBond(_bondData, _factoryRegulationData, SecurityType.BondVariableRate);
 
         _tryInitializeInterestRateType(bondAddress_, IInterestRate.RateType.STANDARD);
+
+        IAccessControl(bondAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
 
         emit BondDeployed(EvmAccessors.getMsgSender(), bondAddress_, _bondData, _factoryRegulationData);
     }
@@ -215,6 +219,8 @@ abstract contract Factory is IFactory {
 
         _tryInitializeInterestRateType(bondAddress_, IInterestRate.RateType.FIXED);
 
+        IAccessControl(bondAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
+
         emit BondFixedRateDeployed(EvmAccessors.getMsgSender(), bondAddress_, _bondFixedRateData);
     }
 
@@ -244,6 +250,7 @@ abstract contract Factory is IFactory {
         returns (address bondAddress_)
     {
         bondAddress_ = _deployBondKpiLinkedRate(_bondKpiLinkedRateData);
+        IAccessControl(bondAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
         _emitBondKpiLinkedRateDeployed(bondAddress_, _bondKpiLinkedRateData);
     }
 
@@ -347,7 +354,7 @@ abstract contract Factory is IFactory {
         ICap(securityAddress_).initializeCap(_securityData.maxSupply, new ICap.PartitionCap[](0));
 
         // configure protected partitions (should be present)
-        IProtectedPartitions(securityAddress_).initialize_ProtectedPartitions(_securityData.arePartitionsProtected);
+        IProtectedPartitions(securityAddress_).initializeProtectedPartitions(_securityData.arePartitionsProtected);
 
         // configure clearing (ClearingFacet may not be present)
         _tryInitializeClearing(securityAddress_, _securityData.clearingActive);
@@ -370,14 +377,11 @@ abstract contract Factory is IFactory {
         _tryInitialize_ERC20Votes(securityAddress_, _securityData.erc20VotesActivated);
 
         // configure ERC3643 (should be present)
-        IERC3643(securityAddress_).initialize_ERC3643(_securityData.compliance, _securityData.identityRegistry);
-
-        // Renounce temporary admin role — factory no longer needs it after initializers.
-        IAccessControl(securityAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
+        IERC3643(securityAddress_).initializeERC3643(_securityData.compliance, _securityData.identityRegistry);
     }
 
     function _tryInitialize_ERC1410(address securityAddress_, bool isMultiPartition) private {
-        try IERC1410Management(securityAddress_).initialize_ERC1410(isMultiPartition) {
+        try IERC1410Management(securityAddress_).initializeERC1410(isMultiPartition) {
             // success
         } catch {
             // facet not present - skip initialization
@@ -393,7 +397,7 @@ abstract contract Factory is IFactory {
     }
 
     function _tryInitialize_ERC1594(address securityAddress_) private {
-        try IMint(securityAddress_).initialize_ERC1594() {
+        try IMint(securityAddress_).initializeERC1594() {
             // success
         } catch {
             // facet not present - skip initialization
@@ -409,7 +413,7 @@ abstract contract Factory is IFactory {
     }
 
     function _tryInitialize_ERC20Votes(address securityAddress_, bool erc20VotesActivated) private {
-        try IERC20Votes(securityAddress_).initialize_ERC20Votes(erc20VotesActivated) {
+        try IERC20Votes(securityAddress_).initializeERC20Votes(erc20VotesActivated) {
             // success
         } catch {
             // facet not present - skip initialization
@@ -454,7 +458,7 @@ abstract contract Factory is IFactory {
         address securityAddress_,
         IFixedRate.FixedRateData calldata fixedRateData
     ) private {
-        try IFixedRate(securityAddress_).initialize_FixedRate(fixedRateData) {
+        try IFixedRate(securityAddress_).initializeFixedRate(fixedRateData) {
             // success
         } catch {
             // facet not present - skip initialization
@@ -478,7 +482,7 @@ abstract contract Factory is IFactory {
         address[] calldata proceedRecipients,
         bytes[] calldata data
     ) private {
-        try IProceedRecipients(securityAddress_).initialize_ProceedRecipients(proceedRecipients, data) {
+        try IProceedRecipients(securityAddress_).initializeProceedRecipients(proceedRecipients, data) {
             // success
         } catch {
             // facet not present - skip initialization

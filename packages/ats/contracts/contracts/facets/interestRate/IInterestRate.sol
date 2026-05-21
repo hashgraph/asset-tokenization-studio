@@ -26,6 +26,13 @@ interface IInterestRate {
     }
 
     /**
+     * @notice Emitted once when the interest rate type is initialised on a token.
+     * @dev Fires exclusively from `initializeInterestRateType` after the storage write succeeds.
+     * @param rateType The rate type that was set.
+     */
+    event InterestRateTypeInitialized(RateType rateType);
+
+    /**
      * @notice Emitted when the coupon rate type is set (by factory initializer or admin).
      * @param operator The caller who invoked the setter.
      * @param rateType The `RateType` value that was selected.

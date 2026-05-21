@@ -6,10 +6,9 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { isinGenerator } from "@thomaschaplin/isin-generator";
 import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ATS_ROLES } from "@scripts";
+import { ATS_ROLES, EQUITY_CONFIG_ID } from "@scripts";
 import { SecurityType } from "@scripts/domain";
-import { assertObject } from "@test";
-import { deployEquityTokenFixture, executeRbac } from "@test";
+import { assertObject, deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac } from "@test";
 
 const name = "TEST_Core";
 const symbol = "TCR";
@@ -23,6 +22,7 @@ describe("Core Facet Tests", () => {
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
 
@@ -38,6 +38,7 @@ describe("Core Facet Tests", () => {
     signer_A = base.deployer;
     signer_B = base.user1;
     signer_C = base.user2;
+    signer_D = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
@@ -52,13 +53,40 @@ describe("Core Facet Tests", () => {
   });
 
   describe("initializeCore", () => {
-    it("GIVEN an initialized token WHEN initializeCore is called again THEN reverts with AlreadyInitialized", async () => {
+    it("GIVEN an initialized token WHEN initializeCore is called again THEN reverts with FacetAlreadyRegistered", async () => {
       await expect(
         asset.initializeCore({
           info: { name: "X", symbol: "Y", isin: "ES1234567890", decimals: 6 },
           securityType: SecurityType.BOND_VARIABLE_RATE,
         }),
-      ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+      ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeCore is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(
+        asset.connect(signer_D).initializeCore({
+          info: { name: "X", symbol: "Y", isin: "ES1234567890", decimals: 6 },
+          securityType: SecurityType.BOND_VARIABLE_RATE,
+        }),
+      ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+    });
+
+    it("GIVEN a new deployment WHEN initializeCore is called THEN it emits CoreInitialized", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      const deployReceipt = await (
+        await freshAsset.connect(infra.deployer).initializeCore({
+          info: { name, symbol, decimals, isin },
+          securityType: SecurityType.EQUITY,
+        })
+      ).wait();
+      await expect(deployReceipt).to.emit(freshAsset, "CoreInitialized");
     });
   });
 

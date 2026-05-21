@@ -12,12 +12,15 @@ interface TRexIFixedRate {
         uint8 rateDecimals;
     }
 
+    /// @notice Emitted once when the FixedRate capability is initialised on a token.
+    /// @dev Fires exclusively from `initializeFixedRate` after the storage write succeeds.
+    event FixedRateInitialized(FixedRateData initData);
+
     event RateUpdated(address indexed operator, uint256 newRate, uint8 newRateDecimals);
 
     error InterestRateIsFixed();
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_FixedRate(FixedRateData calldata _initData) external;
+    function initializeFixedRate(FixedRateData calldata _initData) external;
 
     function setRate(uint256 _newRate, uint8 _newRateDecimals) external;
 

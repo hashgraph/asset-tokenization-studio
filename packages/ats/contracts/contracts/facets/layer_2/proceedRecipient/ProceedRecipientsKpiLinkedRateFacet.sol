@@ -32,7 +32,7 @@ contract ProceedRecipientsKpiLinkedRateFacet is ProceedRecipients, IStaticFuncti
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
-                this.initialize_ProceedRecipients.selector,
+                this.initializeProceedRecipients.selector,
                 this.addProceedRecipient.selector,
                 this.removeProceedRecipient.selector,
                 this.updateProceedRecipientData.selector,

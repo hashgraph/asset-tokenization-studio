@@ -5,8 +5,9 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset } from "@contract-types";
 import { ATS_ROLES } from "@scripts";
+import { BOND_FIXED_RATE_CONFIG_ID } from "@scripts/domain";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { DEFAULT_BOND_FIXED_RATE_PARAMS, deployBondFixedRateTokenFixture } from "@test";
+import { deployAtsInfrastructureFixture, DEFAULT_BOND_FIXED_RATE_PARAMS, deployBondFixedRateTokenFixture } from "@test";
 import { executeRbac } from "@test";
 
 describe("Fixed Rate Tests", () => {
@@ -42,10 +43,10 @@ describe("Fixed Rate Tests", () => {
     await loadFixture(deploySecurityFixtureMultiPartition);
   });
 
-  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
+  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with FacetAlreadyRegistered", async () => {
     await expect(
-      asset.connect(signer_A).initialize_FixedRate({ rate: 1, rateDecimals: 0 }),
-    ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+      asset.connect(signer_A).initializeFixedRate({ rate: 1, rateDecimals: 0 }),
+    ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
   });
 
   describe("Paused", () => {
@@ -98,5 +99,23 @@ describe("Fixed Rate Tests", () => {
         "Deactivated",
       );
     });
+  });
+});
+
+describe("initializeFixedRate", () => {
+  it("GIVEN a new deployment WHEN initializeFixedRate is called THEN it emits FixedRateInitialized", async () => {
+    const { decodeEvent } = await import("@scripts/infrastructure");
+    const infra = await loadFixture(deployAtsInfrastructureFixture);
+    const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, BOND_FIXED_RATE_CONFIG_ID, 1, [
+      { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+    ]);
+    const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
+    const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+    const initData = { rate: 1, rateDecimals: 0 };
+    const tx = await freshAsset.connect(infra.deployer).initializeFixedRate(initData);
+    const receipt = await tx.wait();
+    const emitted = await decodeEvent(freshAsset, "FixedRateInitialized", receipt!);
+    expect(emitted.initData.rate).to.equal(initData.rate);
+    expect(emitted.initData.rateDecimals).to.equal(initData.rateDecimals);
   });
 });

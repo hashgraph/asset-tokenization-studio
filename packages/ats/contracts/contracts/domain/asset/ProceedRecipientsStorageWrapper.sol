@@ -13,8 +13,7 @@ struct ProceedRecipientsDataStorage {
 }
 
 library ProceedRecipientsStorageWrapper {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ProceedRecipients(address[] calldata _proceedRecipients, bytes[] calldata _data) internal {
+    function initializeProceedRecipients(address[] calldata _proceedRecipients, bytes[] calldata _data) internal {
         uint256 length = _proceedRecipients.length;
         for (uint256 index; index < length; ) {
             ExternalListManagementStorageWrapper.checkValidAddress(_proceedRecipients[index]);
@@ -27,8 +26,6 @@ library ProceedRecipientsStorageWrapper {
                 ++index;
             }
         }
-
-        ExternalListManagementStorageWrapper.setExternalListInitialized(_PROCEED_RECIPIENTS_STORAGE_POSITION);
     }
 
     function addProceedRecipient(address _proceedRecipient, bytes calldata _data) internal {
@@ -90,11 +87,6 @@ library ProceedRecipientsStorageWrapper {
                 _pageIndex,
                 _pageLength
             );
-    }
-
-    function isProceedRecipientsInitialized() internal view returns (bool) {
-        return
-            ExternalListManagementStorageWrapper.externalListStorage(_PROCEED_RECIPIENTS_STORAGE_POSITION).initialized;
     }
 
     function proceedRecipientsDataStorage()

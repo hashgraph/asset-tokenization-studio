@@ -12,7 +12,12 @@ import { IERC1410Types } from "./IERC1410Types.sol";
  *      live on `IProtectedByPartition`.
  */
 interface IERC1410Management is IERC1410Types {
-    // Initialization function
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1410(bool _multiPartition) external;
+    /**
+     * @notice Emitted once when the ERC-1410 partition management is initialised on a token.
+     * @dev Fires exclusively from `initializeERC1410` after the storage write succeeds.
+     */
+    event ERC1410Initialized(bool multiPartition);
+
+    /// @notice One-time initialiser for ERC-1410 partition management.
+    function initializeERC1410(bool _multiPartition) external;
 }
