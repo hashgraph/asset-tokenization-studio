@@ -23,6 +23,7 @@ contract TransferFacet is Transfer, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeTransfer.selector,
                 this.transfer.selector,
                 this.transferFrom.selector,
                 this.transferWithData.selector,

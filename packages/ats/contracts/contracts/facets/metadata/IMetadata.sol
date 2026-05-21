@@ -15,6 +15,19 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface IMetadata {
     /**
+     * @notice Emitted once when the metadata capability is initialised on a token.
+     * @dev Fires exclusively from `initializeMetadata`.
+     */
+    event MetadataInitialized();
+
+    /**
+     * @notice Initialises the metadata capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeMetadata() external;
+
+    /**
      * @notice Sets the ordered list of byte payloads associated with `_key`, replacing any
      *         previously stored value.
      * @dev Requires `METADATA_MANAGER_ROLE` and the token to be unpaused. Overwrites the entire

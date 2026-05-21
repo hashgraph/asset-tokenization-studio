@@ -3,6 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IVotingSecurityHolders } from "./IVotingSecurityHolders.sol";
 import { VotingStorageWrapper } from "../../domain/asset/voting/VotingStorageWrapper.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _VOTING_SECURITY_HOLDERS_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title VotingSecurityHolders
@@ -12,7 +16,18 @@ import { VotingStorageWrapper } from "../../domain/asset/voting/VotingStorageWra
  * @dev Stateless wrapper that delegates all storage reads to {VotingStorageWrapper}.
  *      Intended to be inherited by `VotingSecurityHoldersFacet`.
  */
-abstract contract VotingSecurityHolders is IVotingSecurityHolders {
+abstract contract VotingSecurityHolders is IVotingSecurityHolders, Modifiers {
+    /// @inheritdoc IVotingSecurityHolders
+    function initializeVotingSecurityHolders()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_VOTING_SECURITY_HOLDERS_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_VOTING_SECURITY_HOLDERS_RESOLVER_KEY);
+        emit VotingSecurityHoldersInitialized();
+    }
+
     /// @inheritdoc IVotingSecurityHolders
     function getVotingHolders(
         uint256 _voteID,

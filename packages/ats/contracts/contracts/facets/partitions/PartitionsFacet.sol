@@ -22,7 +22,12 @@ contract PartitionsFacet is Partitions, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.partitionsOf.selector, this.isMultiPartition.selector);
+        return
+            Bytes4Builder.build(
+                this.initializePartitions.selector,
+                this.partitionsOf.selector,
+                this.isMultiPartition.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors

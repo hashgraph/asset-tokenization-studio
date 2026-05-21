@@ -16,6 +16,19 @@ import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
  */
 interface IOperatorByPartition is IERC1410Types {
     /**
+     * @notice Emitted once when the operator-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeOperatorByPartition`.
+     */
+    event OperatorByPartitionInitialized();
+
+    /**
+     * @notice Initialises the operator-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeOperatorByPartition() external;
+
+    /**
      * @notice Authorises an operator to manage a specific partition of `msg.sender`'s tokens.
      * @dev    The token must not be paused. Both `msg.sender` and `_operator` must pass
      *         compliance checks. Reverts when the partition is incompatible with the token's

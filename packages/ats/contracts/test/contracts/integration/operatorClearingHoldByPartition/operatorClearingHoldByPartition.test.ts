@@ -258,4 +258,41 @@ describe("OperatorClearingHoldByPartition Tests", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
+
+  describe("initializeOperatorClearingHoldByPartition", () => {
+    beforeEach(async () => {
+      const base = await deployEquityTokenFixture();
+      signer_A = base.deployer;
+      signer_C = base.user2;
+      diamond = base.diamond;
+      asset = await ethers.getContractAt("IAsset", base.diamond.target, signer_A);
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeOperatorClearingHoldByPartition is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeOperatorClearingHoldByPartition()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_A).initializeOperatorClearingHoldByPartition();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeOperatorClearingHoldByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(signer_A).initializeOperatorClearingHoldByPartition()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeOperatorClearingHoldByPartition is called THEN it emits OperatorClearingHoldByPartitionInitialized", async () => {
+      await expect(asset.connect(signer_A).initializeOperatorClearingHoldByPartition()).to.emit(
+        asset,
+        "OperatorClearingHoldByPartitionInitialized",
+      );
+    });
+  });
 });

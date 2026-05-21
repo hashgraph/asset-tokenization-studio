@@ -6,6 +6,9 @@ import { PAUSER_ROLE } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { PauseStorageWrapper } from "../../domain/core/PauseStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _PAUSE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title Pause
@@ -17,6 +20,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  *      `PauseFacet`.
  */
 abstract contract Pause is IPause, Modifiers {
+    /// @inheritdoc IPause
+    function initializePause()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_PAUSE_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_PAUSE_RESOLVER_KEY);
+        emit PauseInitialized();
+    }
+
     /// @inheritdoc IPause
     function pause() external override onlyActivated onlyUnpaused onlyRole(PAUSER_ROLE) returns (bool success_) {
         PauseStorageWrapper.setPause(true);

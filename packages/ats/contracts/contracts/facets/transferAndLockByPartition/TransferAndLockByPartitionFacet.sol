@@ -25,7 +25,11 @@ contract TransferAndLockByPartitionFacet is TransferAndLockByPartition, IStaticF
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.transferAndLockByPartition.selector);
+        return
+            Bytes4Builder.build(
+                this.initializeTransferAndLockByPartition.selector,
+                this.transferAndLockByPartition.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors

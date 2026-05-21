@@ -428,4 +428,40 @@ describe("operatorCreateHoldByPartition", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
+
+  describe("initializeOperatorHoldByPartition", () => {
+    beforeEach(async () => {
+      const base = await deployEquityTokenFixture();
+      signer_A = base.deployer;
+      signer_C = base.user2;
+      asset = await ethers.getContractAt("IAsset", base.diamond.target, signer_A);
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeOperatorHoldByPartition is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeOperatorHoldByPartition()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_A).initializeOperatorHoldByPartition();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeOperatorHoldByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(signer_A).initializeOperatorHoldByPartition()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeOperatorHoldByPartition is called THEN it emits OperatorHoldByPartitionInitialized", async () => {
+      await expect(asset.connect(signer_A).initializeOperatorHoldByPartition()).to.emit(
+        asset,
+        "OperatorHoldByPartitionInitialized",
+      );
+    });
+  });
 });

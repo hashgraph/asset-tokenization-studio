@@ -6,6 +6,9 @@ import { ITransferByPartition } from "./ITransferByPartition.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _TRANSFER_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /// @title TransferByPartition
 /// @author Asset Tokenization Studio Team
@@ -14,6 +17,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 /// @dev Stateless; delegates to {TokenCoreOps.transferByPartition}.
 ///      Abstract because it is composed into the Diamond alongside other facets.
 abstract contract TransferByPartition is ITransferByPartition, Modifiers {
+    /// @inheritdoc ITransferByPartition
+    function initializeTransferByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_TRANSFER_BY_PARTITION_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_TRANSFER_BY_PARTITION_RESOLVER_KEY);
+        emit TransferByPartitionInitialized();
+    }
+
     /// @inheritdoc ITransferByPartition
     function transferByPartition(
         bytes32 _partition,

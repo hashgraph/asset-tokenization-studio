@@ -143,4 +143,37 @@ describe("Operator Facet Tests", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
+
+  describe("initializeOperator", () => {
+    beforeEach(async () => {
+      const base = await deployEquityTokenFixture();
+      signer_A = base.deployer;
+      signer_C = base.user2;
+      asset = await ethers.getContractAt("IAsset", base.diamond.target, signer_A);
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeOperator is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeOperator()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_A).initializeOperator();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeOperator is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(signer_A).initializeOperator()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeOperator is called THEN it emits OperatorInitialized", async () => {
+      await expect(asset.connect(signer_A).initializeOperator()).to.emit(asset, "OperatorInitialized");
+    });
+  });
 });

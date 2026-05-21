@@ -168,4 +168,40 @@ describe("SnapshotsByPartition Tests", () => {
       expect([...partitionsAtSnapshot2]).to.have.members([_PARTITION_ID_1, _PARTITION_ID_2]);
     });
   });
+
+  describe("initializeSnapshotsByPartition", () => {
+    beforeEach(async () => {
+      const base = await deployEquityTokenFixture();
+      signer_A = base.deployer;
+      signer_C = base.user2;
+      asset = await ethers.getContractAt("IAsset", base.diamond.target, signer_A);
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeSnapshotsByPartition is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeSnapshotsByPartition()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_A).initializeSnapshotsByPartition();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeSnapshotsByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(signer_A).initializeSnapshotsByPartition()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeSnapshotsByPartition is called THEN it emits SnapshotsByPartitionInitialized", async () => {
+      await expect(asset.connect(signer_A).initializeSnapshotsByPartition()).to.emit(
+        asset,
+        "SnapshotsByPartitionInitialized",
+      );
+    });
+  });
 });

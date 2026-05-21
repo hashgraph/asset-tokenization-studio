@@ -14,6 +14,19 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface INominalValueAtSnapshot {
     /**
+     * @notice Emitted once when the nominal-value-at-snapshot capability is initialised on a token.
+     * @dev Fires exclusively from `initializeNominalValueAtSnapshot`.
+     */
+    event NominalValueAtSnapshotInitialized();
+
+    /**
+     * @notice Initialises the nominal-value-at-snapshot capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeNominalValueAtSnapshot() external;
+
+    /**
      * @notice Returns the nominal value of the token at the time of a given snapshot.
      * @dev    Resolved against the `nominalValueSnapshots` series; falls back to the live
      *         nominal value when the snapshot id predates any recorded change.

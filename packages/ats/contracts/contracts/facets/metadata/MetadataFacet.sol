@@ -24,7 +24,8 @@ contract MetadataFacet is Metadata, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.getMetadata.selector, this.setMetadata.selector);
+        return
+            Bytes4Builder.build(this.initializeMetadata.selector, this.getMetadata.selector, this.setMetadata.selector);
     }
 
     /// @inheritdoc IStaticFunctionSelectors

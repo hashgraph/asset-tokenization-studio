@@ -14,6 +14,19 @@ import { ITransferAndLockTypes } from "../layer_3/transferAndLock/ITransferAndLo
  */
 interface ITransferAndLockByPartition is ITransferAndLockTypes {
     /**
+     * @notice Emitted once when the transfer-and-lock-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeTransferAndLockByPartition`.
+     */
+    event TransferAndLockByPartitionInitialized();
+
+    /**
+     * @notice Initialises the transfer-and-lock-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeTransferAndLockByPartition() external;
+
+    /**
      * @notice Transfers `_amount` tokens from the caller's `_partition` balance to
      *         `_to` and locks them until `_expirationTimestamp`.
      * @dev    Callers must hold `LOCKER_ROLE`. The token must be unpaused and

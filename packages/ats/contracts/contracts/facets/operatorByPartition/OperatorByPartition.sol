@@ -7,6 +7,9 @@ import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _OPERATOR_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title  OperatorByPartition
@@ -18,8 +21,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract OperatorByPartition is IOperatorByPartition, Modifiers {
     /// @inheritdoc IOperatorByPartition
-    /// @dev Emits {AuthorizedOperatorByPartition} via
-    ///      ERC1410StorageWrapper.authorizeOperatorByPartition.
+    function initializeOperatorByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_OPERATOR_BY_PARTITION_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_OPERATOR_BY_PARTITION_RESOLVER_KEY);
+        emit OperatorByPartitionInitialized();
+    }
+
+    /// @inheritdoc IOperatorByPartition
     function authorizeOperatorByPartition(
         bytes32 _partition,
         address _operator

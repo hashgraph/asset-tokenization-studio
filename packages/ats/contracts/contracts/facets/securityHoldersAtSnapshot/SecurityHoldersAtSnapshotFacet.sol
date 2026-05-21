@@ -27,7 +27,11 @@ contract SecurityHoldersAtSnapshotFacet is SecurityHoldersAtSnapshot, IStaticFun
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
-            Bytes4Builder.build(this.getTokenHoldersAtSnapshot.selector, this.getTotalTokenHoldersAtSnapshot.selector);
+            Bytes4Builder.build(
+                this.initializeSecurityHoldersAtSnapshot.selector,
+                this.getTokenHoldersAtSnapshot.selector,
+                this.getTotalTokenHoldersAtSnapshot.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors

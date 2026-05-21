@@ -11,6 +11,19 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface IPartitions {
     /**
+     * @notice Emitted once when the partitions capability is initialised on a token.
+     * @dev Fires exclusively from `initializePartitions`.
+     */
+    event PartitionsInitialized();
+
+    /**
+     * @notice Initialises the partitions capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializePartitions() external;
+
+    /**
      * @notice Use to get the list of partitions `_tokenHolder` is associated with.
      * @param _tokenHolder An address corresponds whom partition list is queried.
      * @return List of partitions.
