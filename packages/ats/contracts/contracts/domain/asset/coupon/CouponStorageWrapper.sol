@@ -39,9 +39,8 @@ library CouponStorageWrapper {
      *         tasks. Variant invariants and rate stamping are delegated to
      *         `CouponRateDispatch.validateAndStamp`, which mirrors the deferred dispatch
      *         performed by `getCoupon` on the read path.
-     * @dev Reverts with `ICommonErrors.WrongDates` when the bond carries a non-zero maturity
-     *      date and `newCoupon.endDate` exceeds it. When `maturityDate` is zero the bond is
-     *      treated as open-ended and no constraint is applied.
+     * @dev The end-date-against-maturity constraint is enforced by the caller before this
+     *      function is invoked (see `CouponModifiers.onlyValidCouponEndDate`).
      *      Does NOT emit `ICoupon.CouponSet` — the writer abstract emits it inline after
      *      this call returns, per the project event-emission rule.
      * @param newCoupon Coupon parameters captured at scheduling time.
@@ -54,7 +53,6 @@ library CouponStorageWrapper {
     function setCoupon(
         ICouponTypes.Coupon memory newCoupon
     ) internal returns (bytes32 corporateActionId_, uint256 couponID_, ICouponTypes.Coupon memory resolved_) {
-        checkEndDateAgainstMaturity(newCoupon.endDate);
         newCoupon = CouponRateDispatch.validateAndStamp(newCoupon);
 
         (corporateActionId_, couponID_) = CorporateActionsStorageWrapper.addCorporateAction(
