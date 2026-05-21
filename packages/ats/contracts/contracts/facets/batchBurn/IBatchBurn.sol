@@ -13,6 +13,19 @@ bytes32 constant RESOLVER_KEY_BATCH_BURN = 0x60fbdebafe46599d2a6d6cbec0e554cfdf6
  */
 interface IBatchBurn {
     /**
+     * @notice Emitted once when the batch burn capability is initialised on a token.
+     * @dev Fires exclusively from `initializeBatchBurn` after the storage write succeeds.
+     */
+    event BatchBurnInitialized();
+
+    /**
+     * @notice Initialises the batch burn capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeBatchBurn() external;
+
+    /**
      * @notice Burns tokens from multiple addresses in a single transaction.
      * @dev Caller must hold `ROLE_CONTROLLER` or `ROLE_AGENT`. The token must not be paused
      *      and must not be configured for multi-partition. Emits `IController.ControllerRedemption`

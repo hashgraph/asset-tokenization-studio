@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IAdjustBalances } from "./IAdjustBalances.sol";
-import { ROLE_ADJUSTMENT_BALANCE } from "../../constants/roles.sol";
+import { IAdjustBalances, RESOLVER_KEY_BALANCE_ADJUSTMENTS } from "./IAdjustBalances.sol";
+import { ROLE_ADJUSTMENT_BALANCE, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { AdjustBalancesStorageWrapper } from "../../domain/asset/AdjustBalancesStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title AdjustBalances
@@ -18,6 +19,17 @@ import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
  *      Intended to be inherited by `AdjustBalancesFacet`.
  */
 abstract contract AdjustBalances is IAdjustBalances, Modifiers {
+    /// @inheritdoc IAdjustBalances
+    function initializeBalanceAdjustments()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_BALANCE_ADJUSTMENTS)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_BALANCE_ADJUSTMENTS);
+        emit IAdjustBalances.BalanceAdjustmentsInitialized();
+    }
+
     /// @inheritdoc IAdjustBalances
     /// @dev Emits {AdjustmentBalanceSet}.
     function adjustBalances(

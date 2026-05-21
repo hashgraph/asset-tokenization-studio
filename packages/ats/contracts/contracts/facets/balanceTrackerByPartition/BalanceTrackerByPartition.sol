@@ -2,9 +2,13 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IBalanceTrackerByPartition } from "./IBalanceTrackerByPartition.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _BALANCE_TRACKER_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title BalanceTrackerByPartition
@@ -14,7 +18,18 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
  *      passing the resolved timestamp from `TimeTravelStorageWrapper` to support
  *      non-triggered adjustment simulation. Intended to be inherited by `BalanceTrackerByPartitionFacet`.
  */
-abstract contract BalanceTrackerByPartition is IBalanceTrackerByPartition {
+abstract contract BalanceTrackerByPartition is IBalanceTrackerByPartition, Modifiers {
+    /// @inheritdoc IBalanceTrackerByPartition
+    function initializeBalanceTrackerByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_BALANCE_TRACKER_BY_PARTITION_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_BALANCE_TRACKER_BY_PARTITION_RESOLVER_KEY);
+        emit IBalanceTrackerByPartition.BalanceTrackerByPartitionInitialized();
+    }
+
     /// @inheritdoc IBalanceTrackerByPartition
     function balanceOfByPartition(bytes32 _partition, address _tokenHolder) external view returns (uint256) {
         return

@@ -145,4 +145,31 @@ describe("BalanceTrackerAtSnapshotByPartition Tests", () => {
       expect(await asset.totalSupplyAtSnapshotByPartition(_UNKNOWN_PARTITION, 1)).to.equal(0);
     });
   });
+  describe("initializeBalanceTrackerAtSnapshotByPartition", () => {
+    it("GIVEN an already-initialised facet WHEN initializeBalanceTrackerAtSnapshotByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      const base = await deployEquityTokenFixture();
+      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await freshAsset.connect(base.deployer).initializeBalanceTrackerAtSnapshotByPartition();
+      await expect(
+        freshAsset.connect(base.deployer).initializeBalanceTrackerAtSnapshotByPartition(),
+      ).to.be.revertedWithCustomError(freshAsset, "FacetAlreadyRegistered");
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeBalanceTrackerAtSnapshotByPartition is called THEN it reverts with AccountHasNoRole", async () => {
+      const base = await deployEquityTokenFixture();
+      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await expect(
+        freshAsset.connect(base.user3).initializeBalanceTrackerAtSnapshotByPartition(),
+      ).to.be.revertedWithCustomError(freshAsset, "AccountHasNoRole");
+    });
+
+    it("GIVEN a fresh deployment WHEN initializeBalanceTrackerAtSnapshotByPartition is called THEN it emits BalanceTrackerAtSnapshotByPartitionInitialized", async () => {
+      const base = await deployEquityTokenFixture();
+      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await expect(freshAsset.connect(base.deployer).initializeBalanceTrackerAtSnapshotByPartition()).to.emit(
+        freshAsset,
+        "BalanceTrackerAtSnapshotByPartitionInitialized",
+      );
+    });
+  });
 });

@@ -370,4 +370,32 @@ describe("Balance Tracker By Partition Tests", () => {
       });
     });
   });
+  describe("initializeBalanceTrackerByPartition", () => {
+    it("GIVEN an already-initialised facet WHEN initializeBalanceTrackerByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      const base = await deployEquityTokenFixture();
+      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await freshAsset.connect(base.deployer).initializeBalanceTrackerByPartition();
+      await expect(
+        freshAsset.connect(base.deployer).initializeBalanceTrackerByPartition(),
+      ).to.be.revertedWithCustomError(freshAsset, "FacetAlreadyRegistered");
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeBalanceTrackerByPartition is called THEN it reverts with AccountHasNoRole", async () => {
+      const base = await deployEquityTokenFixture();
+      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await expect(freshAsset.connect(base.user3).initializeBalanceTrackerByPartition()).to.be.revertedWithCustomError(
+        freshAsset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN a fresh deployment WHEN initializeBalanceTrackerByPartition is called THEN it emits BalanceTrackerByPartitionInitialized", async () => {
+      const base = await deployEquityTokenFixture();
+      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await expect(freshAsset.connect(base.deployer).initializeBalanceTrackerByPartition()).to.emit(
+        freshAsset,
+        "BalanceTrackerByPartitionInitialized",
+      );
+    });
+  });
 });

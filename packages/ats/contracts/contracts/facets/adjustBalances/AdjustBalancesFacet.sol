@@ -20,7 +20,12 @@ contract AdjustBalancesFacet is AdjustBalances, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.adjustBalances.selector, this.triggerAndSyncAll.selector);
+        return
+            Bytes4Builder.build(
+                this.initializeBalanceAdjustments.selector,
+                this.adjustBalances.selector,
+                this.triggerAndSyncAll.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors

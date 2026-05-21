@@ -413,4 +413,33 @@ describe("BatchFreeze Tests", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
+  describe("initializeBatchFreeze", () => {
+    it("GIVEN an already-initialised facet WHEN initializeBatchFreeze is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      const base = await deployEquityTokenFixture();
+      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await freshAsset.connect(base.deployer).initializeBatchFreeze();
+      await expect(freshAsset.connect(base.deployer).initializeBatchFreeze()).to.be.revertedWithCustomError(
+        freshAsset,
+        "FacetAlreadyRegistered",
+      );
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeBatchFreeze is called THEN it reverts with AccountHasNoRole", async () => {
+      const base = await deployEquityTokenFixture();
+      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await expect(freshAsset.connect(base.user3).initializeBatchFreeze()).to.be.revertedWithCustomError(
+        freshAsset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN a fresh deployment WHEN initializeBatchFreeze is called THEN it emits BatchFreezeInitialized", async () => {
+      const base = await deployEquityTokenFixture();
+      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await expect(freshAsset.connect(base.deployer).initializeBatchFreeze()).to.emit(
+        freshAsset,
+        "BatchFreezeInitialized",
+      );
+    });
+  });
 });

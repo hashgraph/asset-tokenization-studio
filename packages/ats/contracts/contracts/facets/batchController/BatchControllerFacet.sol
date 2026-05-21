@@ -19,7 +19,7 @@ contract BatchControllerFacet is BatchController, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.batchForcedTransfer.selector);
+        return Bytes4Builder.build(this.initializeBatchController.selector, this.batchForcedTransfer.selector);
     }
 
     /// @inheritdoc IStaticFunctionSelectors

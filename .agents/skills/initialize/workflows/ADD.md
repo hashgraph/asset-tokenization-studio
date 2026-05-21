@@ -61,6 +61,40 @@ Examples:
 
 ---
 
+## 3. Step A.5 — Verify Modifiers inheritance
+
+Open the abstract contract (e.g., `Xxx.sol`) and check its `is` clause:
+
+- `is IInterface, Modifiers` → Modifiers already available, proceed to Step B
+- `is IInterface` only → Modifiers MUST be added to support the `initializeXxx` modifiers
+
+### Adding Modifiers to a view-only facet
+
+When the abstract contract does NOT inherit `Modifiers`, add the following imports and update
+the contract signature. This pattern is established by `CapByPartition` (see `capByPartition/CapByPartition.sol`):
+
+```solidity
+// In the abstract contract's import block — add:
+import { Modifiers } from "../../services/Modifiers.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { _XXX_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
+
+// Update the contract signature:
+// Before:
+abstract contract Xxx is IInterface {
+// After:
+abstract contract Xxx is IInterface, Modifiers {
+```
+
+> **Why add Modifiers to a view-only facet?** The `initializeXxx` function requires
+> `onlyFacetNotRegistered` and `onlyRole(DEFAULT_ADMIN_ROLE)`, both provided by the
+> modifier chain `Modifiers` → `CoreModifiers` → `InitializerModifiers` / `AccessControlModifiers`.
+> Adding `Modifiers` does NOT introduce state mutations visible through the read interface;
+> it only supplies the modifier machinery needed for the single initialisation entrypoint.
+
+---
 ## 4. Step B — Define the event in the interface
 
 In `IXxx.sol`, add the event declaration before the function declarations but **after** all
@@ -189,6 +223,8 @@ function initializeXxx() external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFace
 
 ### Required imports (adjust relative path from the facet's location)
 
+**If the abstract contract already inherits `Modifiers`:**
+
 ```solidity
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
@@ -198,9 +234,28 @@ import { _XXX_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 `EvmAccessors` is **not** needed — events no longer carry `operator`, so there is no
 `getMsgSender()` call in the function body.
 
+**If the abstract contract does NOT inherit `Modifiers` (view-only facets):**
+
+Add ALL of the above PLUS:
+
+```solidity
+import { Modifiers } from "../../services/Modifiers.sol";
+```
+
+And update the contract signature:
+
+```solidity
+// Before:
+abstract contract Xxx is IInterface {
+// After:
+abstract contract Xxx is IInterface, Modifiers {
+```
+
 `onlyFacetNotRegistered` and `onlyRole` are already in the inheritance chain through
 `Modifiers` → `CoreModifiers` → `InitializerModifiers` / `AccessControlModifiers`.
-No new `is` clause needed.
+When adding `Modifiers` to a view-only facet, no other contract changes are needed — the
+new `is` clause provides the modifier machinery without exposing state mutations on the
+read interface. See `CapByPartition` as the established precedent.
 
 ---
 
