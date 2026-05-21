@@ -415,4 +415,16 @@ contract AssetMock is IAssetMock {
     function getCouponsOrderedListTotal() external pure returns (uint256) {
         revert NotImplemented();
     }
+
+    function forceCancelBalanceAdjustment(uint256) external pure returns (bool) {
+        revert NotImplemented();
+    }
+
+    function forceCancelCoupon(uint256) external pure returns (bool) {
+        revert NotImplemented();
+    }
+
+    function forceCancelVoting(uint256) external pure returns (bool) {
+        revert NotImplemented();
+    }
 }
