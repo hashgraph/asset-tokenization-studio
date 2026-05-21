@@ -58,8 +58,8 @@ bytes32 constant CONTROL_LIST_ROLE = 0xca537e1c88c9f52dc5692c96c482841c3bea25aaf
 // keccak256('security.token.standard.role.corporateAction');
 bytes32 constant CORPORATE_ACTION_ROLE = 0x8a139eeb747b9809192ae3de1b88acfd2568c15241a5c4f85db0443a536d77d6;
 
-// keccak256('security.token.standard.role.corporateAction.cancelAdmin');
-bytes32 constant CORPORATE_ACTION_CANCEL_ADMIN_ROLE = 0xf0d1f3bb4d7e718844cc7f4a5a995d908d87ca7df2839727bcf205d87d7c8003;
+// keccak256('security.token.standard.role.corporateAction.forceCancel');
+bytes32 constant CORPORATE_ACTION_FORCE_CANCEL_ROLE = 0xfd941bfe4b6990584b9fc8b1b8930917400d8971b25b140ff723cdf76507c661;
 
 // keccak256('security.token.standard.role.documenter');
 bytes32 constant DOCUMENTER_ROLE = 0x83ace103a76d3729b4ba1350ad27522bbcda9a1a589d1e5091f443e76abccf41;

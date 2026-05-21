@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ICoupon } from "./ICoupon.sol";
 import { ICouponTypes } from "./ICouponTypes.sol";
-import { CORPORATE_ACTION_ROLE, CORPORATE_ACTION_CANCEL_ADMIN_ROLE } from "../../constants/roles.sol";
+import { CORPORATE_ACTION_ROLE, CORPORATE_ACTION_FORCE_CANCEL_ROLE } from "../../constants/roles.sol";
 import { COUPON_CORPORATE_ACTION_TYPE } from "../../constants/values.sol";
 import { CouponStorageWrapper } from "../../domain/asset/coupon/CouponStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
@@ -73,7 +73,7 @@ abstract contract Coupon is ICoupon, Modifiers {
     }
 
     /// @inheritdoc ICoupon
-    /// @dev Restricted to `CORPORATE_ACTION_CANCEL_ADMIN_ROLE`; gated by `onlyUnpaused` and
+    /// @dev Restricted to `CORPORATE_ACTION_FORCE_CANCEL_ROLE`; gated by `onlyUnpaused` and
     ///      `onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)`.
     function forceCancelCoupon(
         uint256 _couponID
@@ -82,7 +82,7 @@ abstract contract Coupon is ICoupon, Modifiers {
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(CORPORATE_ACTION_CANCEL_ADMIN_ROLE)
+        onlyRole(CORPORATE_ACTION_FORCE_CANCEL_ROLE)
         onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
         returns (bool success_)
     {

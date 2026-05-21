@@ -97,7 +97,7 @@ interface ICoupon is ICouponTypes {
 
     /**
      * @notice Force-cancels a coupon regardless of its execution date.
-     * @dev Restricted to `CORPORATE_ACTION_CANCEL_ADMIN_ROLE` and gated by the unpaused state
+     * @dev Restricted to `CORPORATE_ACTION_FORCE_CANCEL_ROLE` and gated by the unpaused state
      *      and `onlyMatchingActionType`. Marks the corporate action disabled unconditionally —
      *      bypasses `CouponAlreadyExecuted` — and emits `CouponForceCancelled`.
      * @param _couponID One-indexed identifier of the coupon to force-cancel.

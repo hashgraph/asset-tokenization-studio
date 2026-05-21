@@ -77,10 +77,6 @@ library EquityStorageWrapper {
     }
 
     function forceCancelScheduledBalanceAdjustment(uint256 balanceAdjustmentId) internal {
-        CorporateActionsStorageWrapper.requireMatchingActionType(
-            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
-            balanceAdjustmentId - 1
-        );
         bytes32 corporateActionId;
         (, corporateActionId, ) = getScheduledBalanceAdjustment(balanceAdjustmentId);
         CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);

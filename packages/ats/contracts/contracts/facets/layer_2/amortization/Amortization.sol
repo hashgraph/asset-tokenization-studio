@@ -5,7 +5,7 @@ import { IAmortization } from "./IAmortization.sol";
 import {
     AMORTIZATION_ROLE,
     CORPORATE_ACTION_ROLE,
-    CORPORATE_ACTION_CANCEL_ADMIN_ROLE
+    CORPORATE_ACTION_FORCE_CANCEL_ROLE
 } from "../../../constants/roles.sol";
 import { AMORTIZATION_CORPORATE_ACTION_TYPE } from "../../../constants/values.sol";
 import { AmortizationStorageWrapper } from "../../../domain/asset/amortization/AmortizationStorageWrapper.sol";
@@ -48,9 +48,9 @@ abstract contract Amortization is IAmortization, Modifiers {
     }
 
     /// @inheritdoc IAmortization
-    /// @dev Restricted to `CORPORATE_ACTION_CANCEL_ADMIN_ROLE`; gated by `onlyUnpaused`,
-    ///      `onlyWithoutMultiPartition`, `onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE,
-    ///      _amortizationID - 1)`, and `onlyNoActiveAmortizationHolds(_amortizationID)`.
+    /// @dev Restricted to `CORPORATE_ACTION_FORCE_CANCEL_ROLE`; gated by `onlyUnpaused`,
+    ///      `onlyWithoutMultiPartition`, and
+    ///      `onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)`.
     function forceCancelAmortization(
         uint256 _amortizationID
     )
@@ -60,8 +60,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
-        onlyRole(CORPORATE_ACTION_CANCEL_ADMIN_ROLE)
-        onlyNoActiveAmortizationHolds(_amortizationID)
+        onlyRole(CORPORATE_ACTION_FORCE_CANCEL_ROLE)
     {
         AmortizationStorageWrapper.forceCancelAmortization(_amortizationID);
         emit IAmortizationStorageWrapper.AmortizationForceCancelled(_amortizationID, EvmAccessors.getMsgSender());

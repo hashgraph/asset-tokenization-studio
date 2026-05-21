@@ -296,72 +296,63 @@ describe("AdjustBalancesFacet Tests", () => {
     });
 
     describe("Force Cancel Scheduled Balance Adjustment", () => {
-      it("GIVEN account with CORPORATE_ACTION_CANCEL_ADMIN_ROLE WHEN forceCancelBalanceAdjustment before execution date THEN transaction succeeds and isDisabled is true", async () => {
+      it("GIVEN account with CORPORATE_ACTION_FORCE_CANCEL_ROLE WHEN forceCancelScheduledBalanceAdjustment before execution date THEN transaction succeeds and isDisabled is true", async () => {
         await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_CANCEL_ADMIN_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_FORCE_CANCEL_ROLE, signer_C.address);
 
         await asset.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
 
-        await expect(asset.connect(signer_C).forceCancelBalanceAdjustment(1))
+        await expect(asset.connect(signer_C).forceCancelScheduledBalanceAdjustment(1))
           .to.emit(asset, "ScheduledBalanceAdjustmentForceCancelled")
           .withArgs(1, signer_C.address);
         const [, isDisabled] = await asset.getScheduledBalanceAdjustment(1);
         expect(isDisabled).to.equal(true);
       });
 
-      it("GIVEN account with CORPORATE_ACTION_CANCEL_ADMIN_ROLE WHEN forceCancelBalanceAdjustment after execution date THEN transaction succeeds bypassing date guard", async () => {
+      it("GIVEN account with CORPORATE_ACTION_FORCE_CANCEL_ROLE WHEN forceCancelScheduledBalanceAdjustment after execution date THEN transaction succeeds bypassing date guard", async () => {
         await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_CANCEL_ADMIN_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_FORCE_CANCEL_ROLE, signer_C.address);
 
         await asset.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
 
         await asset.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds + 1000);
 
-        await expect(asset.connect(signer_C).forceCancelBalanceAdjustment(1))
+        await expect(asset.connect(signer_C).forceCancelScheduledBalanceAdjustment(1))
           .to.emit(asset, "ScheduledBalanceAdjustmentForceCancelled")
           .withArgs(1, signer_C.address);
         const [, isDisabled] = await asset.getScheduledBalanceAdjustment(1);
         expect(isDisabled).to.equal(true);
       });
 
-      it("GIVEN account without CORPORATE_ACTION_CANCEL_ADMIN_ROLE WHEN forceCancelBalanceAdjustment THEN transaction fails with AccountHasNoRole", async () => {
+      it("GIVEN account without CORPORATE_ACTION_FORCE_CANCEL_ROLE WHEN forceCancelScheduledBalanceAdjustment THEN transaction fails with AccountHasNoRole", async () => {
         await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_B.address);
 
         await asset.connect(signer_B).setScheduledBalanceAdjustment(balanceAdjustmentData);
 
-        await expect(asset.connect(signer_C).forceCancelBalanceAdjustment(1)).to.be.revertedWithCustomError(
+        await expect(asset.connect(signer_C).forceCancelScheduledBalanceAdjustment(1)).to.be.revertedWithCustomError(
           asset,
           "AccountHasNoRole",
         );
       });
 
-      it("GIVEN paused token WHEN forceCancelBalanceAdjustment THEN transaction fails with IsPaused", async () => {
+      it("GIVEN paused token WHEN forceCancelScheduledBalanceAdjustment THEN transaction fails with IsPaused", async () => {
         await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_B.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_CANCEL_ADMIN_ROLE, signer_B.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_FORCE_CANCEL_ROLE, signer_B.address);
 
         await asset.connect(signer_B).setScheduledBalanceAdjustment(balanceAdjustmentData);
 
         await asset.connect(signer_B).pause();
 
-        await expect(asset.connect(signer_B).forceCancelBalanceAdjustment(1)).to.be.revertedWithCustomError(
+        await expect(asset.connect(signer_B).forceCancelScheduledBalanceAdjustment(1)).to.be.revertedWithCustomError(
           asset,
           "IsPaused",
         );
       });
 
-      it("GIVEN id is zero WHEN forceCancelBalanceAdjustment THEN reverts with ZeroValueNotAllowed", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_CANCEL_ADMIN_ROLE, signer_C.address);
+      it("GIVEN no existing balance adjustment WHEN forceCancelScheduledBalanceAdjustment with invalid ID THEN transaction fails with WrongIndexForAction", async () => {
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_FORCE_CANCEL_ROLE, signer_C.address);
 
-        await expect(asset.connect(signer_C).forceCancelBalanceAdjustment(0)).to.be.revertedWithCustomError(
-          asset,
-          "ZeroValueNotAllowed",
-        );
-      });
-
-      it("GIVEN no existing balance adjustment WHEN forceCancelBalanceAdjustment with invalid ID THEN transaction fails with WrongIndexForAction", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_CANCEL_ADMIN_ROLE, signer_C.address);
-
-        await expect(asset.connect(signer_C).forceCancelBalanceAdjustment(999)).to.be.revertedWithCustomError(
+        await expect(asset.connect(signer_C).forceCancelScheduledBalanceAdjustment(999)).to.be.revertedWithCustomError(
           asset,
           "WrongIndexForAction",
         );

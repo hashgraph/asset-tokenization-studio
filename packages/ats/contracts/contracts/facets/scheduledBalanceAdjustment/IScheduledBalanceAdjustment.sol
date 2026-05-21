@@ -90,13 +90,13 @@ interface IScheduledBalanceAdjustment {
 
     /**
      * @notice Force-cancels a balance adjustment regardless of its execution date.
-     * @dev Restricted to `CORPORATE_ACTION_CANCEL_ADMIN_ROLE` and gated by the unpaused state
+     * @dev Restricted to `CORPORATE_ACTION_FORCE_CANCEL_ROLE` and gated by the unpaused state
      *      and `notZeroValue`. Marks the corporate action disabled unconditionally — bypasses
      *      `BalanceAdjustmentAlreadyExecuted` — and emits `ScheduledBalanceAdjustmentForceCancelled`.
      * @param _balanceAdjustmentID Identifier of the scheduled adjustment to force-cancel.
      * @return success_ True if the force-cancellation succeeded.
      */
-    function forceCancelBalanceAdjustment(uint256 _balanceAdjustmentID) external returns (bool success_);
+    function forceCancelScheduledBalanceAdjustment(uint256 _balanceAdjustmentID) external returns (bool success_);
 
     /**
      * @notice Returns the parameters and disabled state of a previously scheduled balance adjustment.

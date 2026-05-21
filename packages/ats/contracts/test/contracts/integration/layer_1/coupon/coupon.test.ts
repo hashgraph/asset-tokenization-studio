@@ -647,9 +647,9 @@ describe("Coupon Tests", () => {
   });
 
   describe("Force Cancel Coupon", () => {
-    it("GIVEN account with CORPORATE_ACTION_CANCEL_ADMIN_ROLE WHEN forceCancelCoupon before execution date THEN transaction succeeds and isDisabled is true", async () => {
+    it("GIVEN account with CORPORATE_ACTION_FORCE_CANCEL_ROLE WHEN forceCancelCoupon before execution date THEN transaction succeeds and isDisabled is true", async () => {
       await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_CANCEL_ADMIN_ROLE, signer_C);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_FORCE_CANCEL_ROLE, signer_C);
 
       await asset.connect(signer_C).setCoupon(couponData);
 
@@ -660,9 +660,9 @@ describe("Coupon Tests", () => {
       expect(isDisabled).to.equal(true);
     });
 
-    it("GIVEN account with CORPORATE_ACTION_CANCEL_ADMIN_ROLE WHEN forceCancelCoupon after execution date THEN transaction succeeds bypassing date guard", async () => {
+    it("GIVEN account with CORPORATE_ACTION_FORCE_CANCEL_ROLE WHEN forceCancelCoupon after execution date THEN transaction succeeds bypassing date guard", async () => {
       await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_CANCEL_ADMIN_ROLE, signer_C);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_FORCE_CANCEL_ROLE, signer_C);
 
       await asset.connect(signer_C).setCoupon(couponData);
 
@@ -675,7 +675,7 @@ describe("Coupon Tests", () => {
       expect(isDisabled).to.equal(true);
     });
 
-    it("GIVEN account without CORPORATE_ACTION_CANCEL_ADMIN_ROLE WHEN forceCancelCoupon THEN transaction fails with AccountHasNoRole", async () => {
+    it("GIVEN account without CORPORATE_ACTION_FORCE_CANCEL_ROLE WHEN forceCancelCoupon THEN transaction fails with AccountHasNoRole", async () => {
       await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C);
 
       await asset.connect(signer_C).setCoupon(couponData);
@@ -688,7 +688,7 @@ describe("Coupon Tests", () => {
 
     it("GIVEN paused token WHEN forceCancelCoupon THEN transaction fails with IsPaused", async () => {
       await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_CANCEL_ADMIN_ROLE, signer_C);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_FORCE_CANCEL_ROLE, signer_C);
 
       await asset.connect(signer_C).setCoupon(couponData);
 
@@ -698,7 +698,7 @@ describe("Coupon Tests", () => {
     });
 
     it("GIVEN no existing coupon WHEN forceCancelCoupon with invalid ID THEN transaction fails with WrongIndexForAction", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_CANCEL_ADMIN_ROLE, signer_C);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_FORCE_CANCEL_ROLE, signer_C);
 
       await expect(asset.connect(signer_C).forceCancelCoupon(999)).to.be.revertedWithCustomError(
         asset,

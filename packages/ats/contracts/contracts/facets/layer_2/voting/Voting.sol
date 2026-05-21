@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IVoting } from "./IVoting.sol";
 import { IVotingTypes } from "./IVotingTypes.sol";
-import { CORPORATE_ACTION_ROLE, CORPORATE_ACTION_CANCEL_ADMIN_ROLE } from "../../../constants/roles.sol";
+import { CORPORATE_ACTION_ROLE, CORPORATE_ACTION_FORCE_CANCEL_ROLE } from "../../../constants/roles.sol";
 import { VOTING_RIGHTS_CORPORATE_ACTION_TYPE } from "../../../constants/values.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
@@ -47,7 +47,7 @@ abstract contract Voting is IVoting, Modifiers {
     }
 
     /// @inheritdoc IVoting
-    /// @dev Restricted to `CORPORATE_ACTION_CANCEL_ADMIN_ROLE`; gated by `onlyUnpaused` and
+    /// @dev Restricted to `CORPORATE_ACTION_FORCE_CANCEL_ROLE`; gated by `onlyUnpaused` and
     ///      `onlyMatchingActionType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteId - 1)`.
     function forceCancelVoting(
         uint256 _voteId
@@ -56,7 +56,7 @@ abstract contract Voting is IVoting, Modifiers {
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(CORPORATE_ACTION_CANCEL_ADMIN_ROLE)
+        onlyRole(CORPORATE_ACTION_FORCE_CANCEL_ROLE)
         onlyMatchingActionType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteId - 1)
         returns (bool success_)
     {

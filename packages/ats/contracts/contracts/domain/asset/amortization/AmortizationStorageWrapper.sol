@@ -84,9 +84,7 @@ library AmortizationStorageWrapper {
             revert IAmortizationStorageWrapper.AmortizationAlreadyExecuted(corporateActionId, _amortizationID);
         }
 
-        _amortizationStorage().disabledAmortizations[corporateActionId] = true;
-        _amortizationStorage().activeAmortizationIds.remove(_amortizationID);
-        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
+        _executeCancelAmortization(corporateActionId, _amortizationID);
 
         emit IAmortizationStorageWrapper.AmortizationCancelled(_amortizationID, EvmAccessors.getMsgSender());
         success_ = true;
@@ -95,9 +93,7 @@ library AmortizationStorageWrapper {
     function forceCancelAmortization(uint256 _amortizationID) internal returns (bool success_) {
         (, bytes32 corporateActionId, ) = getAmortization(_amortizationID);
 
-        _amortizationStorage().disabledAmortizations[corporateActionId] = true;
-        _amortizationStorage().activeAmortizationIds.remove(_amortizationID);
-        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
+        _executeCancelAmortization(corporateActionId, _amortizationID);
 
         success_ = true;
     }
@@ -397,6 +393,12 @@ library AmortizationStorageWrapper {
 
     function checkPositiveTokenAmount(uint256 _tokenAmount, uint256 _amortizationID) internal pure {
         if (_tokenAmount == 0) revert IAmortizationStorageWrapper.InvalidAmortizationHoldAmount(_amortizationID);
+    }
+
+    function _executeCancelAmortization(bytes32 corporateActionId, uint256 _amortizationID) private {
+        _amortizationStorage().disabledAmortizations[corporateActionId] = true;
+        _amortizationStorage().activeAmortizationIds.remove(_amortizationID);
+        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
     }
 
     /// @dev Helper to release a hold by directly accessing Hold storage (no calldata conversion needed).

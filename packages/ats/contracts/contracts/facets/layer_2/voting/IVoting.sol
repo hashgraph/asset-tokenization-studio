@@ -49,7 +49,7 @@ interface IVoting is IVotingTypes {
     function cancelVoting(uint256 _voteId) external returns (bool success_);
 
     /// @notice Force-cancels a voting regardless of its record date
-    /// @dev Restricted to `CORPORATE_ACTION_CANCEL_ADMIN_ROLE` and gated by the unpaused state
+    /// @dev Restricted to `CORPORATE_ACTION_FORCE_CANCEL_ROLE` and gated by the unpaused state
     ///      and `onlyMatchingActionType`. Marks the corporate action disabled unconditionally —
     ///      bypasses `VotingAlreadyRecorded` — and emits `VotingForceCancelled`.
     /// @param _voteId The ID of the voting to force-cancel
