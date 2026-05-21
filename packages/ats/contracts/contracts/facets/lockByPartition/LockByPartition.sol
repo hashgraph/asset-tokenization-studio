@@ -6,6 +6,9 @@ import { LOCKER_ROLE } from "../../constants/roles.sol";
 import { LockStorageWrapper } from "../../domain/asset/LockStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _LOCK_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
@@ -22,13 +25,18 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  *      `LockByPartitionFacet`.
  */
 abstract contract LockByPartition is ILockByPartition, Modifiers {
-    /**
-     * @inheritdoc ILockByPartition
-     * @dev Pause-gated, restricted to `LOCKER_ROLE`, validated against the
-     *      single-partition / default-partition rule and against unrecovered token
-     *      holders. Delegates to `LockStorageWrapper.lockByPartition` and emits
-     *      `LockedByPartition`.
-     */
+    /// @inheritdoc ILockByPartition
+    function initializeLockByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_LOCK_BY_PARTITION_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_LOCK_BY_PARTITION_RESOLVER_KEY);
+        emit LockByPartitionInitialized();
+    }
+
+    /// @inheritdoc ILockByPartition
     function lockByPartition(
         bytes32 _partition,
         uint256 _amount,

@@ -24,7 +24,12 @@ contract MaturityFacet is Maturity, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.fullRedeemAtMaturity.selector, this.updateMaturityDate.selector);
+        return
+            Bytes4Builder.build(
+                this.initializeMaturity.selector,
+                this.fullRedeemAtMaturity.selector,
+                this.updateMaturityDate.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors

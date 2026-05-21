@@ -163,4 +163,30 @@ describe("Pause Tests", () => {
       );
     });
   });
+
+  describe("initializePause", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializePause is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(unknownSigner).initializePause()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(deployer).initializePause();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializePause is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(deployer).initializePause()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializePause is called THEN it emits PauseInitialized", async () => {
+      await expect(asset.connect(deployer).initializePause()).to.emit(asset, "PauseInitialized");
+    });
+  });
 });

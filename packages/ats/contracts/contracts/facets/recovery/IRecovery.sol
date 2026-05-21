@@ -7,6 +7,19 @@ import { IERC3643Types } from "../layer_1/ERC3643/IERC3643Types.sol";
 /// @author Asset Tokenization Studio Team
 /// @notice Interface for the Recovery facet, exposing lost-wallet recovery and recovery-status reads.
 interface IRecovery is IERC3643Types {
+    /**
+     * @notice Emitted once when the recovery capability is initialised on a token.
+     * @dev Fires exclusively from `initializeRecovery`.
+     */
+    event RecoveryInitialized();
+
+    /**
+     * @notice Initialises the recovery capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeRecovery() external;
+
     /// @notice Transfers the token balance and frozen amounts of a lost wallet to a new wallet,
     ///         marking the lost wallet as recovered.
     /// @dev Caller must hold `AGENT_ROLE`. The lost wallet must not have already been recovered,

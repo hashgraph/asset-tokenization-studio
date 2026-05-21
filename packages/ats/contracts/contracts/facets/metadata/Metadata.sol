@@ -5,6 +5,9 @@ import { IMetadata } from "./IMetadata.sol";
 import { METADATA_MANAGER_ROLE } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { MetadataStorageWrapper } from "../../domain/core/MetadataStorageWrapper.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _METADATA_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title Metadata
@@ -18,8 +21,17 @@ import { MetadataStorageWrapper } from "../../domain/core/MetadataStorageWrapper
  */
 abstract contract Metadata is IMetadata, Modifiers {
     /// @inheritdoc IMetadata
-    /// @dev Requires `METADATA_MANAGER_ROLE` and the token to be unpaused. Delegates persistence
-    ///      to `MetadataStorageWrapper.setMetadata`, which overwrites any existing array.
+    function initializeMetadata()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_METADATA_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_METADATA_RESOLVER_KEY);
+        emit MetadataInitialized();
+    }
+
+    /// @inheritdoc IMetadata
     function setMetadata(
         bytes32 _key,
         bytes[] calldata _value

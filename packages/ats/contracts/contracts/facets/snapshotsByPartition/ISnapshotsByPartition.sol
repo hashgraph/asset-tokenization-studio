@@ -7,6 +7,19 @@ import { ISnapshotsTypes } from "../layer_1/snapshot/ISnapshotsTypes.sol";
 /// @author Asset Tokenization Studio Team
 /// @notice Interface for the SnapshotsByPartition facet, exposing partition-level snapshot reads.
 interface ISnapshotsByPartition is ISnapshotsTypes {
+    /**
+     * @notice Emitted once when the snapshots-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeSnapshotsByPartition`.
+     */
+    event SnapshotsByPartitionInitialized();
+
+    /**
+     * @notice Initialises the snapshots-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeSnapshotsByPartition() external;
+
     /// @notice Returns the list of partitions held by an account at the time of a given snapshot.
     /// @dev Reverts with {SnapshotIdNull} when `_snapshotID` is zero, and with
     ///      {SnapshotIdDoesNotExists} when the snapshot identifier does not correspond to a

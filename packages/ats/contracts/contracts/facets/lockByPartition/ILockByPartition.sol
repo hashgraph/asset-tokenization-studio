@@ -16,6 +16,19 @@ import { ILockTypes } from "../layer_1/lock/ILockTypes.sol";
  */
 interface ILockByPartition is ILockTypes {
     /**
+     * @notice Emitted once when the lock-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeLockByPartition`.
+     */
+    event LockByPartitionInitialized();
+
+    /**
+     * @notice Initialises the lock-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeLockByPartition() external;
+
+    /**
      * @notice Locks `_amount` tokens of `_tokenHolder` on `_partition` until
      *         `_expirationTimestamp`.
      * @dev Callers must hold `LOCKER_ROLE`. The implementation enforces the unpaused state,

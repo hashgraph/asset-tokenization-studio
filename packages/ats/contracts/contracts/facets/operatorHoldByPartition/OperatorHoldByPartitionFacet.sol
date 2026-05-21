@@ -24,7 +24,11 @@ contract OperatorHoldByPartitionFacet is OperatorHoldByPartition, IStaticFunctio
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.operatorCreateHoldByPartition.selector);
+        return
+            Bytes4Builder.build(
+                this.initializeOperatorHoldByPartition.selector,
+                this.operatorCreateHoldByPartition.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors

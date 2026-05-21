@@ -29,6 +29,7 @@ contract OperatorByPartitionFacet is OperatorByPartition, IStaticFunctionSelecto
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeOperatorByPartition.selector,
                 this.authorizeOperatorByPartition.selector,
                 this.revokeOperatorByPartition.selector,
                 this.isOperatorForPartition.selector,

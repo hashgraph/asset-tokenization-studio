@@ -14,6 +14,19 @@ import { IBondTypes } from "../layer_2/bond/IBondTypes.sol";
  */
 interface IMaturity is IBondTypes {
     /**
+     * @notice Emitted once when the maturity capability is initialised on a token.
+     * @dev Fires exclusively from `initializeMaturity`.
+     */
+    event MaturityInitialized();
+
+    /**
+     * @notice Initialises the maturity capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeMaturity() external;
+
+    /**
      * @notice Redeems all token partitions held by a token holder at bond maturity.
      * @dev    Caller must hold `MATURITY_REDEEMER_ROLE`. Contract must be unpaused and clearing
      *         must be disabled. `_tokenHolder` must be on the allowed list, hold granted KYC

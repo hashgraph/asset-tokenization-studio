@@ -9,6 +9,19 @@ import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
  */
 interface IOperatorClearingByPartition is IClearingTypes {
     /**
+     * @notice Emitted once when the operator-clearing-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeOperatorClearingByPartition`.
+     */
+    event OperatorClearingByPartitionInitialized();
+
+    /**
+     * @notice Initialises the operator-clearing-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeOperatorClearingByPartition() external;
+
+    /**
      * @notice Creates a redeem clearing operation for a partition from a third party
      * @dev Caller needs to be a token holder operator
      *

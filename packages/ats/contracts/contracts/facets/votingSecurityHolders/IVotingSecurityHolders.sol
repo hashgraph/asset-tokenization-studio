@@ -11,6 +11,19 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface IVotingSecurityHolders {
     /**
+     * @notice Emitted once when the voting-security-holders capability is initialised on a token.
+     * @dev Fires exclusively from `initializeVotingSecurityHolders`.
+     */
+    event VotingSecurityHoldersInitialized();
+
+    /**
+     * @notice Initialises the voting-security-holders capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeVotingSecurityHolders() external;
+
+    /**
      * @notice Returns a paginated list of token holders eligible for a voting.
      * @dev Resolved from the snapshot at the voting record date when one exists; falls back to
      *      the live holder list if no snapshot has been taken.

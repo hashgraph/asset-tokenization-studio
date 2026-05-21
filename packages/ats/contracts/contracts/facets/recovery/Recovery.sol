@@ -6,6 +6,9 @@ import { AGENT_ROLE } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _RECOVERY_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /// @title Recovery
 /// @author Asset Tokenization Studio Team
@@ -13,6 +16,17 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
 /// @dev Delegates storage reads and writes to {ERC3643StorageWrapper}. Inherits all access-control
 ///      and partition-validation modifiers from {Modifiers}.
 abstract contract Recovery is IRecovery, Modifiers {
+    /// @inheritdoc IRecovery
+    function initializeRecovery()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_RECOVERY_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_RECOVERY_RESOLVER_KEY);
+        emit RecoveryInitialized();
+    }
+
     /// @inheritdoc IRecovery
     function recoveryAddress(
         address _lostWallet,

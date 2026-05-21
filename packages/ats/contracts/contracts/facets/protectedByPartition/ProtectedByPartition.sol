@@ -8,6 +8,9 @@ import { ProtectedPartitionsStorageWrapper } from "../../domain/core/ProtectedPa
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _PROTECTED_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title ProtectedByPartition
@@ -22,10 +25,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract ProtectedByPartition is IProtectedByPartition, Modifiers {
     /// @inheritdoc IProtectedByPartition
-    /// @dev Emits `ProtectedTransferredByPartition` immediately before the `TokenCoreOps`
-    ///      library call as a stack-too-deep workaround; revert semantics make this
-    ///      functionally equivalent to emitting after a successful return (the event would
-    ///      be rolled back together with the rest of the transaction on revert).
+    function initializeProtectedByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_PROTECTED_BY_PARTITION_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_PROTECTED_BY_PARTITION_RESOLVER_KEY);
+        emit ProtectedByPartitionInitialized();
+    }
+
+    /// @inheritdoc IProtectedByPartition
     function protectedTransferFromByPartition(
         bytes32 _partition,
         address _from,

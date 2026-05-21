@@ -18,7 +18,12 @@ contract NominalValueAtSnapshotFacet is NominalValueAtSnapshot, IStaticFunctionS
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.nominalValueAtSnapshot.selector, this.nominalValueDecimalsAtSnapshot.selector);
+        return
+            Bytes4Builder.build(
+                this.initializeNominalValueAtSnapshot.selector,
+                this.nominalValueAtSnapshot.selector,
+                this.nominalValueDecimalsAtSnapshot.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors

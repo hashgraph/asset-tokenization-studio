@@ -26,6 +26,7 @@ contract SsiManagementFacet is SsiManagement, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeSsiManagement.selector,
                 this.setRevocationRegistryAddress.selector,
                 this.addIssuer.selector,
                 this.removeIssuer.selector,

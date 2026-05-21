@@ -320,4 +320,34 @@ describe("Maturity Tests", () => {
       );
     });
   });
+
+  describe("initializeMaturity", () => {
+    beforeEach(async () => {
+      await loadFixture(deploySecurityFixture);
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeMaturity is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeMaturity()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_A).initializeMaturity();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeMaturity is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(signer_A).initializeMaturity()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeMaturity is called THEN it emits MaturityInitialized", async () => {
+      await expect(asset.connect(signer_A).initializeMaturity()).to.emit(asset, "MaturityInitialized");
+    });
+  });
 });

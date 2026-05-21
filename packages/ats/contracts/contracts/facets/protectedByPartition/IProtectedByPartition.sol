@@ -13,6 +13,12 @@ import { IProtectedPartitions } from "../layer_1/protectedPartition/IProtectedPa
  */
 interface IProtectedByPartition {
     /**
+     * @notice Emitted once when the protected-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeProtectedByPartition`.
+     */
+    event ProtectedByPartitionInitialized();
+
+    /**
      * @notice Emitted when a protected transfer completes successfully.
      * @param operator The address that initiated the transfer (msg.sender).
      * @param from The token holder whose tokens are transferred.
@@ -45,6 +51,13 @@ interface IProtectedByPartition {
         bytes32 partition,
         IProtectedPartitions.ProtectionData protectionData
     );
+
+    /**
+     * @notice Initialises the protected-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeProtectedByPartition() external;
 
     /**
      * @notice Transfers tokens from a token holder to a recipient by presenting an

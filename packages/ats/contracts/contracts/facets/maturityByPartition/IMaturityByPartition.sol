@@ -14,6 +14,19 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface IMaturityByPartition {
     /**
+     * @notice Emitted once when the maturity-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeMaturityByPartition`.
+     */
+    event MaturityByPartitionInitialized();
+
+    /**
+     * @notice Initialises the maturity-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeMaturityByPartition() external;
+
+    /**
      * @notice Redeems a specified amount of tokens from a single partition at bond
      *         maturity.
      * @dev Emits a Transfer event on successful redemption via

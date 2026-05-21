@@ -22,6 +22,10 @@ contract MockBond is IBondRead, IPrincipal {
         // no-op for mock
     }
 
+    function initializePrincipal() external override {
+        // no-op for mock
+    }
+
     function getBondDetails() external view override returns (IBondTypes.BondDetailsData memory) {
         return _bondDetails;
     }

@@ -18,6 +18,12 @@ import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
  */
 interface IProtectedClearingHoldByPartition is IClearingTypes {
     /**
+     * @notice Emitted once when the protected-clearing-hold-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeProtectedClearingHoldByPartition`.
+     */
+    event ProtectedClearingHoldByPartitionInitialized();
+
+    /**
      * @notice Emitted when a protected clearing hold is created successfully.
      * @param operator The address that initiated the clearing hold creation.
      * @param tokenHolder The token holder whose tokens are placed on hold.
@@ -38,6 +44,13 @@ interface IProtectedClearingHoldByPartition is IClearingTypes {
         bytes data,
         bytes operatorData
     );
+
+    /**
+     * @notice Initialises the protected-clearing-hold-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeProtectedClearingHoldByPartition() external;
 
     /**
      * @notice Creates a hold for a protected clearing operation by partition, authorised by an

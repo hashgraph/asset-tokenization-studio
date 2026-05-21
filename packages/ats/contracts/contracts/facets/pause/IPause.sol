@@ -16,6 +16,12 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface IPause {
     /**
+     * @notice Emitted once when the pause capability is initialised on a token.
+     * @dev Fires exclusively from `initializePause`.
+     */
+    event PauseInitialized();
+
+    /**
      * @notice Emitted when the token's internal pause flag is set to `true`.
      * @param operator Address of the caller who triggered the pause.
      */
@@ -38,6 +44,13 @@ interface IPause {
      *         cleared.
      */
     error IsUnpaused();
+
+    /**
+     * @notice Initialises the pause capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializePause() external;
 
     /**
      * @notice Sets the token's internal pause flag, blocking all guarded operations.

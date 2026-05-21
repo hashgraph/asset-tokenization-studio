@@ -24,7 +24,13 @@ contract PauseFacet is Pause, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.pause.selector, this.unpause.selector, this.paused.selector);
+        return
+            Bytes4Builder.build(
+                this.initializePause.selector,
+                this.pause.selector,
+                this.unpause.selector,
+                this.paused.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors
