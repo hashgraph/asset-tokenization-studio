@@ -27,6 +27,8 @@ import {
   warn,
   error as logError,
   getDeploymentConfig,
+  DEFAULT_TRANSACTION_TIMEOUT,
+  retryTransaction,
   CheckpointManager,
   NullCheckpointManager,
   saveDeploymentOutput,
@@ -50,6 +52,7 @@ import {
   createFactoryConfiguration,
   deployOrchestratorLibraries,
   hasOrchestratorLibraryAddresses,
+  setOrchestratorLibraryAddresses,
 } from "@scripts/domain";
 
 import { BusinessLogicResolver__factory } from "@contract-types";
@@ -397,6 +400,44 @@ export async function deploySystemWithExistingBlr(
     const facetAddresses: Record<string, string> = {};
 
     if (shouldDeployFacets) {
+      // Resolve any pending facets left by a previous run that crashed between
+      // onTransactionSent and onFacetDeployed (i.e. during waitForDeployment).
+      if (checkpoint.steps.facets) {
+        const pendingEntries = [...checkpoint.steps.facets.entries()].filter(([, entry]) => entry.pending);
+        if (pendingEntries.length > 0) {
+          info(`\n⏳ Resolving ${pendingEntries.length} pending facet transaction(s) from previous run...`);
+          const provider = signer.provider;
+          if (!provider) throw new Error("Signer has no provider — cannot resolve pending facet transactions");
+          for (const [facetName, entry] of pendingEntries) {
+            info(`   Waiting for ${facetName} (tx: ${entry.txHash})...`);
+            try {
+              const receipt = await retryTransaction(
+                () => provider.waitForTransaction(entry.txHash, confirmations, DEFAULT_TRANSACTION_TIMEOUT * 3),
+                enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
+              );
+              if (receipt?.contractAddress) {
+                checkpoint.steps.facets.set(facetName, {
+                  address: receipt.contractAddress,
+                  txHash: entry.txHash,
+                  gasUsed: receipt.gasUsed.toString(),
+                  deployedAt: entry.deployedAt,
+                });
+                info(`   ✅ ${facetName} confirmed at ${receipt.contractAddress}`);
+              } else {
+                warn(`   ⚠ ${facetName} tx has no contract address (throttled?), will redeploy`);
+                checkpoint.steps.facets.delete(facetName);
+              }
+            } catch (pendingErr) {
+              warn(
+                `   ⚠ Could not confirm ${facetName}: ${pendingErr instanceof Error ? pendingErr.message : String(pendingErr)}, will redeploy`,
+              );
+              checkpoint.steps.facets.delete(facetName);
+            }
+            await checkpointManager.saveCheckpoint(checkpoint);
+          }
+        }
+      }
+
       if (checkpoint.steps.facets && checkpoint.currentStep >= 1) {
         info(`\n✓ Step 3/${totalSteps}: All facets already deployed (resuming)`);
         // Use converter to reconstruct facetsResult with proper DeploymentResult types
@@ -419,9 +460,17 @@ export async function deploySystemWithExistingBlr(
         info(`\n📦 Step 3/${totalSteps}: Deploying all facets...`);
 
         // Deploy orchestrator libraries first (required for facet factory linking)
-        if (!hasOrchestratorLibraryAddresses()) {
+        if (checkpoint.steps.libraries) {
+          const { deployedAt: _deployedAt, ...libAddrs } = checkpoint.steps.libraries;
+          setOrchestratorLibraryAddresses(libAddrs);
+          info("   Orchestrator libraries restored from checkpoint");
+        } else if (!hasOrchestratorLibraryAddresses()) {
           info("   Deploying orchestrator libraries (required for facet linking)...");
-          await deployOrchestratorLibraries(signer);
+          const libAddrs = await deployOrchestratorLibraries(signer, {
+            retryOptions: enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
+          });
+          checkpoint.steps.libraries = { ...libAddrs, deployedAt: new Date().toISOString() };
+          await checkpointManager.saveCheckpoint(checkpoint);
         }
 
         let allFacets = atsRegistry.getAllFacets();
@@ -454,8 +503,8 @@ export async function deploySystemWithExistingBlr(
           // Use the actual contract name from the factory
           const contractName = factory.constructor.name.replace("__factory", "");
 
-          // Skip if already deployed
-          if (checkpoint.steps.facets.has(contractName)) {
+          // Skip if already confirmed. Pending entries were resolved above.
+          if (checkpoint.steps.facets.has(contractName) && !checkpoint.steps.facets.get(contractName)!.pending) {
             info(`   ✓ ${contractName} already deployed (skipping)`);
             continue;
           }
@@ -471,6 +520,24 @@ export async function deploySystemWithExistingBlr(
             confirmations,
             enableRetry,
             verifyDeployment,
+            onTransactionSent: async (facetName, txHash) => {
+              checkpoint.steps.facets!.set(facetName, {
+                address: "",
+                txHash,
+                deployedAt: new Date().toISOString(),
+                pending: true,
+              });
+              await checkpointManager.saveCheckpoint(checkpoint);
+            },
+            onFacetDeployed: async (facetName, result) => {
+              checkpoint.steps.facets!.set(facetName, {
+                address: result.address!,
+                txHash: result.transactionHash || "",
+                gasUsed: result.gasUsed?.toString(),
+                deployedAt: new Date().toISOString(),
+              });
+              await checkpointManager.saveCheckpoint(checkpoint);
+            },
           });
 
           if (!facetsResult.success) {
@@ -554,6 +621,7 @@ export async function deploySystemWithExistingBlr(
 
         const registerResult = await registerFacets(blrContract, {
           facets: facetsToRegister,
+          retryOptions: enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
         });
 
         if (!registerResult.success) {
@@ -615,6 +683,7 @@ export async function deploySystemWithExistingBlr(
             false,
             batchSize,
             confirmations,
+            enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
           );
 
           if (!equityConfig.success) {
@@ -659,6 +728,7 @@ export async function deploySystemWithExistingBlr(
             false,
             batchSize,
             confirmations,
+            enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
           );
 
           if (!bondConfig.success) {
@@ -700,6 +770,7 @@ export async function deploySystemWithExistingBlr(
             false,
             batchSize,
             confirmations,
+            enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
           );
 
           if (!bondFixedRateConfig.success) {
@@ -743,6 +814,7 @@ export async function deploySystemWithExistingBlr(
             false,
             batchSize,
             confirmations,
+            enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
           );
 
           if (!bondKpiLinkedRateConfig.success) {
@@ -797,6 +869,7 @@ export async function deploySystemWithExistingBlr(
           false,
           batchSize,
           confirmations,
+          enableRetry ? networkConfig.retryOptions : { maxRetries: 0 },
         );
 
         if (!factoryConfig.success) {
