@@ -87,4 +87,30 @@ describe("Deactivate Tests", () => {
       );
     });
   });
+
+  describe("initializeDeactivate", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeDeactivate is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(unknownSigner).initializeDeactivate()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(deployer).initializeDeactivate();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeDeactivate is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(deployer).initializeDeactivate()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeDeactivate is called THEN it emits DeactivateInitialized", async () => {
+      await expect(asset.connect(deployer).initializeDeactivate()).to.emit(asset, "DeactivateInitialized");
+    });
+  });
 });

@@ -22,7 +22,7 @@ contract HoldAtSnapshotFacet is HoldAtSnapshot, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.heldBalanceOfAtSnapshot.selector);
+        return Bytes4Builder.build(this.initializeHoldAtSnapshot.selector, this.heldBalanceOfAtSnapshot.selector);
     }
 
     /// @inheritdoc IStaticFunctionSelectors

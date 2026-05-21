@@ -230,5 +230,28 @@ describe("Hold Tests", () => {
         expect(thirdParty).to.equal(ADDRESS_ZERO);
       });
     });
+
+    describe("initializeHold", () => {
+      it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeHold is called THEN it reverts with AccountHasNoRole", async () => {
+        await expect(asset.connect(signer_C).initializeHold()).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+      });
+
+      describe("when already initialised", () => {
+        beforeEach(async () => {
+          await asset.connect(signer_A).initializeHold();
+        });
+
+        it("GIVEN an already-initialised facet WHEN initializeHold is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+          await expect(asset.connect(signer_A).initializeHold()).to.be.revertedWithCustomError(
+            asset,
+            "FacetAlreadyRegistered",
+          );
+        });
+      });
+
+      it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeHold is called THEN it emits HoldInitialized", async () => {
+        await expect(asset.connect(signer_A).initializeHold()).to.emit(asset, "HoldInitialized");
+      });
+    });
   });
 });

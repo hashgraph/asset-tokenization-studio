@@ -109,4 +109,33 @@ describe("FreezeAtSnapshotByPartition Tests", () => {
     const currentFrozenBalance = await asset.getFrozenTokens(signer_C.address);
     expect(currentFrozenBalance).to.equal(frozenAmount);
   });
+
+  describe("initializeFreezeAtSnapshotByPartition", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeFreezeAtSnapshotByPartition is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeFreezeAtSnapshotByPartition()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_A).initializeFreezeAtSnapshotByPartition();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeFreezeAtSnapshotByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(signer_A).initializeFreezeAtSnapshotByPartition()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeFreezeAtSnapshotByPartition is called THEN it emits FreezeAtSnapshotByPartitionInitialized", async () => {
+      await expect(asset.connect(signer_A).initializeFreezeAtSnapshotByPartition()).to.emit(
+        asset,
+        "FreezeAtSnapshotByPartitionInitialized",
+      );
+    });
+  });
 });

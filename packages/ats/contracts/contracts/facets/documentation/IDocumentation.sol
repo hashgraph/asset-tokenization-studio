@@ -17,6 +17,12 @@ bytes32 constant RESOLVER_KEY_DOCUMENTATION = 0x3ab155fb7c96aefcaa7d730782cb640e
  */
 interface IDocumentation {
     /**
+     * @notice Emitted once when the documentation capability is initialised on a token.
+     * @dev Fires exclusively from `initializeDocumentation`.
+     */
+    event DocumentationInitialized();
+
+    /**
      * @notice Emitted when a document is permanently removed from the contract.
      * @param name         Unique identifier of the document that was removed.
      * @param uri          Off-chain URI that was associated with the document.
@@ -55,6 +61,13 @@ interface IDocumentation {
      * @param name The document name that could not be found in storage.
      */
     error DocumentDoesNotExist(bytes32 name);
+
+    /**
+     * @notice Initialises the documentation capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeDocumentation() external;
 
     /**
      * @notice Attaches a new document to the contract or updates the URI and hash of an

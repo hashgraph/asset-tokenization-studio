@@ -25,7 +25,11 @@ contract FreezeAtSnapshotByPartitionFacet is FreezeAtSnapshotByPartition, IStati
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.frozenBalanceOfAtSnapshotByPartition.selector);
+        return
+            Bytes4Builder.build(
+                this.initializeFreezeAtSnapshotByPartition.selector,
+                this.frozenBalanceOfAtSnapshotByPartition.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors

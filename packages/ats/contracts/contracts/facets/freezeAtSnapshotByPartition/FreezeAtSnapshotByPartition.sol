@@ -3,6 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IFreezeAtSnapshotByPartition } from "./IFreezeAtSnapshotByPartition.sol";
 import { SnapshotsStorageWrapper } from "../../domain/asset/SnapshotsStorageWrapper.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _FREEZE_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title FreezeAtSnapshotByPartition
@@ -12,7 +16,18 @@ import { SnapshotsStorageWrapper } from "../../domain/asset/SnapshotsStorageWrap
  * @dev Stateless wrapper that delegates the actual lookup to {SnapshotsStorageWrapper}.
  *      Intended to be inherited by `FreezeAtSnapshotByPartitionFacet`.
  */
-abstract contract FreezeAtSnapshotByPartition is IFreezeAtSnapshotByPartition {
+abstract contract FreezeAtSnapshotByPartition is IFreezeAtSnapshotByPartition, Modifiers {
+    /// @inheritdoc IFreezeAtSnapshotByPartition
+    function initializeFreezeAtSnapshotByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_FREEZE_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_FREEZE_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY);
+        emit FreezeAtSnapshotByPartitionInitialized();
+    }
+
     /// @inheritdoc IFreezeAtSnapshotByPartition
     function frozenBalanceOfAtSnapshotByPartition(
         bytes32 _partition,
