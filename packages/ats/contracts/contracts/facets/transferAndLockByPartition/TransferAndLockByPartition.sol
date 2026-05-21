@@ -9,6 +9,9 @@ import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.
 import { LockStorageWrapper } from "../../domain/asset/LockStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _TRANSFER_AND_LOCK_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title  TransferAndLockByPartition
@@ -23,12 +26,18 @@ import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
  * @author Asset Tokenization Studio Team
  */
 abstract contract TransferAndLockByPartition is ITransferAndLockByPartition, Modifiers {
-    /**
-     * @inheritdoc ITransferAndLockByPartition
-     * @dev Emits `PartitionTransferredAndLocked` directly after the transfer and
-     *      lock succeed. `TransferByPartition` and `Transfer` are emitted inside
-     *      `ERC1410StorageWrapper.transferByPartition`.
-     */
+    /// @inheritdoc ITransferAndLockByPartition
+    function initializeTransferAndLockByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_TRANSFER_AND_LOCK_BY_PARTITION_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_TRANSFER_AND_LOCK_BY_PARTITION_RESOLVER_KEY);
+        emit TransferAndLockByPartitionInitialized();
+    }
+
+    /// @inheritdoc ITransferAndLockByPartition
     function transferAndLockByPartition(
         bytes32 _partition,
         address _to,

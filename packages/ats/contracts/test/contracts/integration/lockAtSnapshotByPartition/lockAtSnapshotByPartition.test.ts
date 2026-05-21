@@ -166,4 +166,33 @@ describe("LockAtSnapshotByPartition Tests", () => {
       expect(balanceC_P2).to.equal(0);
     });
   });
+
+  describe("initializeLockAtSnapshotByPartition", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeLockAtSnapshotByPartition is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeLockAtSnapshotByPartition()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_A).initializeLockAtSnapshotByPartition();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeLockAtSnapshotByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(signer_A).initializeLockAtSnapshotByPartition()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeLockAtSnapshotByPartition is called THEN it emits LockAtSnapshotByPartitionInitialized", async () => {
+      await expect(asset.connect(signer_A).initializeLockAtSnapshotByPartition()).to.emit(
+        asset,
+        "LockAtSnapshotByPartitionInitialized",
+      );
+    });
+  });
 });

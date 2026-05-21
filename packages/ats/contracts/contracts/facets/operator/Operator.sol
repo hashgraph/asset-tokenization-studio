@@ -5,6 +5,9 @@ import { IOperator } from "./IOperator.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _OPERATOR_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title  Operator
@@ -14,6 +17,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  * @author Asset Tokenization Studio Team
  */
 abstract contract Operator is IOperator, Modifiers {
+    /// @inheritdoc IOperator
+    function initializeOperator()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_OPERATOR_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_OPERATOR_RESOLVER_KEY);
+        emit OperatorInitialized();
+    }
+
     /// @inheritdoc IOperator
     function authorizeOperator(
         address _operator

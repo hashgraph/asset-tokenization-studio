@@ -18,6 +18,19 @@ bytes32 constant RESOLVER_KEY_METADATA = 0x524fd484241fdce7c81d7872ddc2c45a3d44e
  */
 interface IMetadata {
     /**
+     * @notice Emitted once when the metadata capability is initialised on a token.
+     * @dev Fires exclusively from `initializeMetadata`.
+     */
+    event MetadataInitialized();
+
+    /**
+     * @notice Initialises the metadata capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeMetadata() external;
+
+    /**
      * @notice Sets the ordered list of byte payloads associated with `_key`, replacing any
      *         previously stored value.
      * @dev Requires `ROLE_METADATA_MANAGER` and the token to be unpaused. Overwrites the entire

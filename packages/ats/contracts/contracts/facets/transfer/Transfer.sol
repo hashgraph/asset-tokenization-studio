@@ -6,6 +6,9 @@ import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _TRANSFER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title Transfer
@@ -13,6 +16,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  *         semantics match `ERC20` / `ERC1594` exactly.
  */
 abstract contract Transfer is ITransfer, Modifiers {
+    /// @inheritdoc ITransfer
+    function initializeTransfer()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_TRANSFER_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_TRANSFER_RESOLVER_KEY);
+        emit TransferInitialized();
+    }
+
     /// @inheritdoc ITransfer
     function transfer(
         address to,

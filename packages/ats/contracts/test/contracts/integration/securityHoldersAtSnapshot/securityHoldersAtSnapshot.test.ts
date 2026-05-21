@@ -197,4 +197,40 @@ describe("SecurityHoldersAtSnapshot Tests", () => {
       expect(total).to.equal(3);
     });
   });
+
+  describe("initializeSecurityHoldersAtSnapshot", () => {
+    beforeEach(async () => {
+      const base = await deployEquityTokenFixture();
+      signer_A = base.deployer;
+      signer_C = base.user2;
+      asset = await ethers.getContractAt("IAsset", base.diamond.target, signer_A);
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeSecurityHoldersAtSnapshot is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeSecurityHoldersAtSnapshot()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_A).initializeSecurityHoldersAtSnapshot();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeSecurityHoldersAtSnapshot is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(signer_A).initializeSecurityHoldersAtSnapshot()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeSecurityHoldersAtSnapshot is called THEN it emits SecurityHoldersAtSnapshotInitialized", async () => {
+      await expect(asset.connect(signer_A).initializeSecurityHoldersAtSnapshot()).to.emit(
+        asset,
+        "SecurityHoldersAtSnapshotInitialized",
+      );
+    });
+  });
 });

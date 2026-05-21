@@ -6,6 +6,9 @@ import { ROLE_SSI_MANAGER } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { SsiManagementStorageWrapper } from "../../domain/core/SsiManagementStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _SSI_MANAGEMENT_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title SsiManagement
@@ -19,6 +22,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  *      by `SsiManagementFacet`.
  */
 abstract contract SsiManagement is ISsiManagement, Modifiers {
+    /// @inheritdoc ISsiManagement
+    function initializeSsiManagement()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_SSI_MANAGEMENT_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_SSI_MANAGEMENT_RESOLVER_KEY);
+        emit SsiManagementInitialized();
+    }
+
     /// @inheritdoc ISsiManagement
     function setRevocationRegistryAddress(
         address _revocationRegistryAddress

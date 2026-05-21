@@ -7,6 +7,9 @@ import { Modifiers } from "../../../../services/Modifiers.sol";
 import { ClearingOps } from "../../../../domain/orchestrator/ClearingOps.sol";
 import { ThirdPartyType } from "../../../../domain/asset/types/ThirdPartyType.sol";
 import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../../../domain/core/InitializerStorageWrapper.sol";
+import { _OPERATOR_CLEARING_HOLDBYPARTITION_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 
 /**
  * @title OperatorClearingHoldByPartition
@@ -15,6 +18,17 @@ import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol"
  * @dev Implementation logic for authorised operator-led clearing holds.
  */
 abstract contract OperatorClearingHoldByPartition is IOperatorClearingHoldByPartition, Modifiers {
+    /// @inheritdoc IOperatorClearingHoldByPartition
+    function initializeOperatorClearingHoldByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_OPERATOR_CLEARING_HOLDBYPARTITION_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_OPERATOR_CLEARING_HOLDBYPARTITION_RESOLVER_KEY);
+        emit OperatorClearingHoldByPartitionInitialized();
+    }
+
     /// @inheritdoc IOperatorClearingHoldByPartition
     function operatorClearingCreateHoldByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,

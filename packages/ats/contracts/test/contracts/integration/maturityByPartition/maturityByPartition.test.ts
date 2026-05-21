@@ -258,4 +258,37 @@ describe("MaturityByPartition Tests", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
+
+  describe("initializeMaturityByPartition", () => {
+    beforeEach(async () => {
+      await loadFixture(deploySecurityFixture);
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeMaturityByPartition is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeMaturityByPartition()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_A).initializeMaturityByPartition();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeMaturityByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(signer_A).initializeMaturityByPartition()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeMaturityByPartition is called THEN it emits MaturityByPartitionInitialized", async () => {
+      await expect(asset.connect(signer_A).initializeMaturityByPartition()).to.emit(
+        asset,
+        "MaturityByPartitionInitialized",
+      );
+    });
+  });
 });

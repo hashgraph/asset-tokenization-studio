@@ -3,15 +3,30 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { INominalValueAtSnapshot } from "./INominalValueAtSnapshot.sol";
 import { SnapshotsStorageWrapper } from "../../domain/asset/SnapshotsStorageWrapper.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _NOMINAL_VALUE_AT_SNAPSHOT_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title  NominalValueAtSnapshot
- * @author Asset Tokenization Studio Team
  * @notice Abstract implementation of `INominalValueAtSnapshot`.
- * @dev    Delegates all storage reads to `SnapshotsStorageWrapper`. Intended to be
- *         inherited solely by `NominalValueAtSnapshotFacet`.
+ * @dev    Delegates all storage reads to `SnapshotsStorageWrapper` and
+ *         `NominalValueStorageWrapper`. Intended to be inherited solely by
+ *         `NominalValueAtSnapshotFacet`.
+ * @author Asset Tokenization Studio Team
  */
-abstract contract NominalValueAtSnapshot is INominalValueAtSnapshot {
+abstract contract NominalValueAtSnapshot is INominalValueAtSnapshot, Modifiers {
+    /// @inheritdoc INominalValueAtSnapshot
+    function initializeNominalValueAtSnapshot()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_NOMINAL_VALUE_AT_SNAPSHOT_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_NOMINAL_VALUE_AT_SNAPSHOT_RESOLVER_KEY);
+        emit NominalValueAtSnapshotInitialized();
+    }
     /// @inheritdoc INominalValueAtSnapshot
     function nominalValueAtSnapshot(uint256 _snapshotID) external view override returns (uint256 nominalValue_) {
         nominalValue_ = SnapshotsStorageWrapper.nominalValueAtSnapshot(_snapshotID);

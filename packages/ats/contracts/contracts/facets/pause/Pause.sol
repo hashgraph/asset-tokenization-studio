@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IPause } from "./IPause.sol";
+import { IPause, RESOLVER_KEY_PAUSE } from "./IPause.sol";
 import { ROLE_PAUSER } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { PauseStorageWrapper } from "../../domain/core/PauseStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title Pause
@@ -17,6 +19,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  *      `PauseFacet`.
  */
 abstract contract Pause is IPause, Modifiers {
+    /// @inheritdoc IPause
+    function initializePause()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_PAUSE)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_PAUSE);
+        emit PauseInitialized();
+    }
+
     /// @inheritdoc IPause
     function pause() external override onlyActivated onlyUnpaused onlyRole(ROLE_PAUSER) returns (bool success_) {
         PauseStorageWrapper.setPause(true);

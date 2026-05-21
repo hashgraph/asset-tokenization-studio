@@ -23,6 +23,7 @@ contract OperatorFacet is Operator, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeOperator.selector,
                 this.isOperator.selector,
                 this.authorizeOperator.selector,
                 this.revokeOperator.selector

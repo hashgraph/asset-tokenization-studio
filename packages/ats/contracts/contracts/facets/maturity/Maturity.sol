@@ -10,20 +10,33 @@ import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _MATURITY_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title  Maturity
- * @notice Abstract implementation of `IMaturity` providing bond maturity redemption and maturity
- *         date management capabilities.
- * @dev    Delegates partition operations to `ERC1410StorageWrapper` and maturity date persistence
- *         to `BondStorageWrapper`. Access and state guards are applied via `Modifiers`. Intended
- *         to be inherited by `MaturityFacet`.
+ * @author Asset Tokenization Studio Team
+ * @notice Interface for bond maturity redemption and maturity date management.
+ * @dev    `fullRedeemAtMaturity` and `updateMaturityDate` are extracted from the Bond facet
+ *         into a dedicated Maturity facet registered under `_MATURITY_RESOLVER_KEY`.
+ *         Events and errors — `MaturityDateUpdated` and `BondMaturityDateWrong` — are
+ *         inherited from `IBondTypes`.
  * @author Asset Tokenization Studio Team
  */
 abstract contract Maturity is IMaturity, Modifiers {
     /// @inheritdoc IMaturity
-    /// @dev Emits {RedeemedByPartition} for each partition via
-    ///      `ERC1410StorageWrapper.redeemByPartition`.
+    function initializeMaturity()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_MATURITY_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_MATURITY_RESOLVER_KEY);
+        emit MaturityInitialized();
+    }
+
+    /// @inheritdoc IMaturity
     function fullRedeemAtMaturity(
         address _tokenHolder
     )

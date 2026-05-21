@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IMetadata } from "./IMetadata.sol";
+import { IMetadata, METADATA_RESOLVER_KEY } from "./IMetadata.sol";
 import { ROLE_METADATA_MANAGER } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { MetadataStorageWrapper } from "../../domain/core/MetadataStorageWrapper.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title Metadata
@@ -17,6 +19,17 @@ import { MetadataStorageWrapper } from "../../domain/core/MetadataStorageWrapper
  *      entire array under the key. Intended to be inherited exclusively by `MetadataFacet`.
  */
 abstract contract Metadata is IMetadata, Modifiers {
+    /// @inheritdoc IMetadata
+    function initializeMetadata()
+    external
+    override
+    onlyRole(DEFAULT_ADMIN_ROLE)
+    onlyFacetNotRegistered(_METADATA_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_METADATA_RESOLVER_KEY);
+        emit MetadataInitialized();
+    }
+
     /// @inheritdoc IMetadata
     /// @dev Requires `ROLE_METADATA_MANAGER` and the token to be unpaused. Delegates persistence
     ///      to `MetadataStorageWrapper.setMetadata`, which overwrites any existing array.

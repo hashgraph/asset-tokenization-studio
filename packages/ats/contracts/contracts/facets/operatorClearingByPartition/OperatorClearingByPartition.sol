@@ -6,6 +6,9 @@ import { Modifiers } from "../../services/Modifiers.sol";
 import { ClearingOps } from "../../domain/orchestrator/ClearingOps.sol";
 import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _OPERATOR_CLEARING_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title OperatorClearingByPartition
@@ -14,6 +17,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  * @dev Implementation logic for operator-led clearing redemptions and transfers.
  */
 abstract contract OperatorClearingByPartition is IOperatorClearingByPartition, Modifiers {
+    /// @inheritdoc IOperatorClearingByPartition
+    function initializeOperatorClearingByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_OPERATOR_CLEARING_BY_PARTITION_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_OPERATOR_CLEARING_BY_PARTITION_RESOLVER_KEY);
+        emit OperatorClearingByPartitionInitialized();
+    }
+
     /// @inheritdoc IOperatorClearingByPartition
     function operatorClearingRedeemByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,

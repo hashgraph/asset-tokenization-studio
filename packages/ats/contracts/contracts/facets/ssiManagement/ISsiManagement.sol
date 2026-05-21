@@ -16,6 +16,12 @@ bytes32 constant RESOLVER_KEY_SSI_MANAGEMENT = 0xba7dfd151d5ed77cbbf8b00c124c673
  */
 interface ISsiManagement {
     /**
+     * @notice Emitted once when the SSI management capability is initialised on a token.
+     * @dev Fires exclusively from `initializeSsiManagement`.
+     */
+    event SsiManagementInitialized();
+
+    /**
      * @notice Emitted when the revocation registry address is updated.
      * @param oldRegistryAddress Previous revocation registry contract address.
      * @param newRegistryAddress New revocation registry contract address.
@@ -53,6 +59,13 @@ interface ISsiManagement {
      * @param issuer The address that failed the issuer membership check.
      */
     error AccountIsNotIssuer(address issuer);
+
+    /**
+     * @notice Initialises the SSI management capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeSsiManagement() external;
 
     /**
      * @notice Sets the address of the revocation registry contract used for SSI credential
