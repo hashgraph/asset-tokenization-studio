@@ -27,8 +27,7 @@ library KycStorageWrapper {
     using EnumerableSet for EnumerableSet.AddressSet;
 
     function initializeInternalKyc(bool _internalKycActivated) internal {
-        KycStorage storage ks = kycStorage();
-        ks.internalKycActivated = _internalKycActivated;
+        kycStorage().internalKycActivated = _internalKycActivated;
     }
 
     function setInternalKyc(bool _activated) internal returns (bool success_) {
