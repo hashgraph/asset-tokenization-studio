@@ -419,4 +419,8 @@ contract AssetMock is IAssetMock {
     function getCouponsOrderedListTotal() external pure returns (uint256) {
         revert NotImplemented();
     }
+
+    function initializeCoupon() external pure {
+        revert NotImplemented();
+    }
 }

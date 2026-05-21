@@ -332,4 +332,43 @@ describe("BurnByPartitionFacet Tests", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
+  describe("initializeBurnByPartition", () => {
+    let initAsset: IAsset;
+    let initSigner_A: HardhatEthersSigner;
+    let initUser3: HardhatEthersSigner;
+
+    beforeEach(async () => {
+      const base = await deployEquityTokenFixture();
+      initSigner_A = base.deployer;
+      initUser3 = base.user3;
+      initAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeBurnByPartition is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(initAsset.connect(initUser3).initializeBurnByPartition()).to.be.revertedWithCustomError(
+        initAsset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await initAsset.connect(initSigner_A).initializeBurnByPartition();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeBurnByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(initAsset.connect(initSigner_A).initializeBurnByPartition()).to.be.revertedWithCustomError(
+          initAsset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeBurnByPartition is called THEN it emits BurnByPartitionInitialized", async () => {
+      await expect(initAsset.connect(initSigner_A).initializeBurnByPartition()).to.emit(
+        initAsset,
+        "BurnByPartitionInitialized",
+      );
+    });
+  });
 });

@@ -4,6 +4,9 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ICorporateActions } from "./ICorporateActions.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { CorporateActionsStorageWrapper } from "../../domain/core/CorporateActionsStorageWrapper.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _CORPORATE_ACTIONS_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title CorporateActions
@@ -17,6 +20,17 @@ import { CorporateActionsStorageWrapper } from "../../domain/core/CorporateActio
  *      exclusively by `CorporateActionsFacet`.
  */
 abstract contract CorporateActions is ICorporateActions, Modifiers {
+    /// @inheritdoc ICorporateActions
+    function initializeCorporateActions()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_CORPORATE_ACTIONS_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_CORPORATE_ACTIONS_RESOLVER_KEY);
+        emit CorporateActionsInitialized();
+    }
+
     /// @inheritdoc ICorporateActions
     function getCorporateAction(
         bytes32 _corporateActionId

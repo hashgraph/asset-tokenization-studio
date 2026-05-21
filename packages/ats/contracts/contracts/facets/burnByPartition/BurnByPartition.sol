@@ -5,6 +5,9 @@ import { IBurnByPartition } from "./IBurnByPartition.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _BURN_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title BurnByPartition
@@ -16,6 +19,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  *      Intended to be inherited by `BurnByPartitionFacet`.
  */
 abstract contract BurnByPartition is IBurnByPartition, Modifiers {
+    /// @inheritdoc IBurnByPartition
+    function initializeBurnByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_BURN_BY_PARTITION_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_BURN_BY_PARTITION_RESOLVER_KEY);
+        emit BurnByPartitionInitialized();
+    }
+
     /// @inheritdoc IBurnByPartition
     function redeemByPartition(
         bytes32 _partition,

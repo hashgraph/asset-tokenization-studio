@@ -11,6 +11,7 @@ import { ATS_ROLES, TIME_PERIODS_S } from "@scripts";
 describe("CouponListing Tests", () => {
   let diamond: ResolverProxy;
   let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
 
   let asset: IAsset;
 
@@ -36,6 +37,7 @@ describe("CouponListing Tests", () => {
 
     diamond = base.diamond;
     signer_A = base.deployer;
+    signer_B = base.user1;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
@@ -217,6 +219,31 @@ describe("CouponListing Tests", () => {
       expect(coupon).to.have.property("data");
       expect(coupon.scheduledTimestamp).to.be.gt(0);
       expect(coupon.data).to.not.equal("0x");
+    });
+  });
+  describe("initializeCouponListing", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeCouponListing is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_B).initializeCouponListing()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_A).initializeCouponListing();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeCouponListing is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(signer_A).initializeCouponListing()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeCouponListing is called THEN it emits CouponListingInitialized", async () => {
+      await expect(asset.connect(signer_A).initializeCouponListing()).to.emit(asset, "CouponListingInitialized");
     });
   });
 });

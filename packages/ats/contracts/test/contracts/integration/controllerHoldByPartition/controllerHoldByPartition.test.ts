@@ -343,6 +343,51 @@ describe("ControllerHoldByPartition Tests", () => {
       });
     });
   });
+  describe("initializeControllerHoldByPartition", () => {
+    let initAsset: IAsset;
+    let initSigner_A: HardhatEthersSigner;
+    let initSigner_D: HardhatEthersSigner;
+
+    beforeEach(async () => {
+      const base = await deployEquityTokenFixture();
+      initSigner_A = base.deployer;
+      initSigner_D = base.user3;
+      initAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await executeRbac(initAsset, [
+        { role: ATS_ROLES.PAUSER_ROLE, members: [initSigner_D.address] },
+        { role: ATS_ROLES.KYC_ROLE, members: [initSigner_D.address] },
+        { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [initSigner_A.address] },
+        { role: ATS_ROLES.CLEARING_ROLE, members: [initSigner_A.address] },
+        { role: ATS_ROLES.CORPORATE_ACTION_ROLE, members: [initSigner_A.address] },
+      ]);
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeControllerHoldByPartition is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(initAsset.connect(initSigner_D).initializeControllerHoldByPartition()).to.be.revertedWithCustomError(
+        initAsset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await initAsset.connect(initSigner_A).initializeControllerHoldByPartition();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeControllerHoldByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(
+          initAsset.connect(initSigner_A).initializeControllerHoldByPartition(),
+        ).to.be.revertedWithCustomError(initAsset, "FacetAlreadyRegistered");
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeControllerHoldByPartition is called THEN it emits ControllerHoldByPartitionInitialized", async () => {
+      await expect(initAsset.connect(initSigner_A).initializeControllerHoldByPartition()).to.emit(
+        initAsset,
+        "ControllerHoldByPartitionInitialized",
+      );
+    });
+  });
 
   describe("Multi-partition", () => {
     beforeEach(async () => {

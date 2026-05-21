@@ -24,7 +24,13 @@ contract BurnFacet is Burn, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.burn.selector, this.redeem.selector, this.redeemFrom.selector);
+        return
+            Bytes4Builder.build(
+                this.initializeBurn.selector,
+                this.burn.selector,
+                this.redeem.selector,
+                this.redeemFrom.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors

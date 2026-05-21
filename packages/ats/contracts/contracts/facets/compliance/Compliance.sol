@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { TREX_OWNER_ROLE } from "../../constants/roles.sol";
+import { TREX_OWNER_ROLE, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { IComplianceFacet } from "./IComplianceFacet.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
@@ -12,6 +12,8 @@ import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.s
 import { Eip1066 } from "../../constants/eip1066.sol";
 import { ICompliance } from "../layer_1/ERC3643/ICompliance.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _COMPLIANCE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title Compliance
@@ -22,6 +24,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  *      When the token is paused they short-circuit with the EIP-1066 PAUSED status code.
  */
 abstract contract Compliance is IComplianceFacet, Modifiers {
+    /// @inheritdoc IComplianceFacet
+    function initializeCompliance()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_COMPLIANCE_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_COMPLIANCE_RESOLVER_KEY);
+        emit ComplianceInitialized();
+    }
+
     /**
      * @notice Sets the compliance contract address
      * @param _compliance The address of the new compliance contract

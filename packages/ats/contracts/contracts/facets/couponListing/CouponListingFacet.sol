@@ -28,6 +28,7 @@ contract CouponListingFacet is CouponListing, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeCouponListing.selector,
                 this.getCouponFromOrderedListAt.selector,
                 this.getCouponsOrderedList.selector,
                 this.getCouponsOrderedListTotal.selector,

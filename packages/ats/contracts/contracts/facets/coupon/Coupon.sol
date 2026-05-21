@@ -3,11 +3,13 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ICoupon } from "./ICoupon.sol";
 import { ICouponTypes } from "./ICouponTypes.sol";
-import { CORPORATE_ACTION_ROLE } from "../../constants/roles.sol";
+import { CORPORATE_ACTION_ROLE, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { COUPON_CORPORATE_ACTION_TYPE } from "../../constants/values.sol";
 import { CouponStorageWrapper } from "../../domain/asset/coupon/CouponStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _COUPON_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title Coupon
@@ -26,6 +28,17 @@ import { Modifiers } from "../../services/Modifiers.sol";
  *      storage call returns, per the writer-abstract emit-site rule.
  */
 abstract contract Coupon is ICoupon, Modifiers {
+    /// @inheritdoc ICoupon
+    function initializeCoupon()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_COUPON_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_COUPON_RESOLVER_KEY);
+        emit CouponInitialized();
+    }
+
     /// @inheritdoc ICoupon
     /// @dev Restricted to `CORPORATE_ACTION_ROLE`; gated by `onlyUnpaused`,
     ///      `onlyValidDates(...)` (three pairs of date validations), and

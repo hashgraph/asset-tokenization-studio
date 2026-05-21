@@ -8,9 +8,27 @@ pragma solidity ^0.8.17;
 
 import { ScheduledTask } from "./IScheduledTasksCommon.sol";
 
-/// @title ICouponListing
-/// @notice Interface for coupon and scheduled-coupon listing queries.
+/**
+ * @title ICouponListing
+ * @author Asset Tokenization Studio Team
+ * @notice Interface for read-only coupon and scheduled-coupon listing queries.
+ * @dev Consolidates ordered-list methods previously in `ICoupon` and scheduled listing
+ *      methods from the former `IScheduledCouponListing`.
+ */
 interface TRexICouponListing {
+    /**
+     * @notice Emitted once when the coupon listing capability is initialised on a token.
+     * @dev Fires exclusively from `initializeCouponListing`.
+     */
+    event CouponListingInitialized();
+
+    /**
+     * @notice Initialises the coupon listing capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeCouponListing() external;
+
     /// @notice Retrieves a coupon ID from the ordered list at a specific position.
     /// @param _pos The position in the ordered coupon list.
     /// @return couponID_ The coupon ID at the specified position.

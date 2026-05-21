@@ -22,7 +22,12 @@ contract ComplianceByPartitionFacet is ComplianceByPartition, IStaticFunctionSel
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.canTransferByPartition.selector, this.canRedeemByPartition.selector);
+        return
+            Bytes4Builder.build(
+                this.initializeComplianceByPartition.selector,
+                this.canTransferByPartition.selector,
+                this.canRedeemByPartition.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors

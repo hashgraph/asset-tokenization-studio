@@ -27,6 +27,7 @@ contract CorporateActionsFacet is CorporateActions, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeCorporateActions.selector,
                 this.getCorporateAction.selector,
                 this.getCorporateActionCount.selector,
                 this.getCorporateActionIds.selector,

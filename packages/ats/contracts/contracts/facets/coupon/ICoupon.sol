@@ -18,6 +18,12 @@ import { ICouponTypes } from "./ICouponTypes.sol";
  */
 interface ICoupon is ICouponTypes {
     /**
+     * @notice Emitted once when the coupon capability is initialised on a token.
+     * @dev Fires exclusively from `initializeCoupon`.
+     */
+    event CouponInitialized();
+
+    /**
      * @notice Emitted when an operator schedules a new coupon corporate action.
      * @param corporateActionId Identifier of the underlying corporate action.
      * @param couponId One-indexed coupon identifier within the coupon corporate action type.
@@ -68,11 +74,18 @@ interface ICoupon is ICouponTypes {
     error CouponNotFound(uint256 couponID);
 
     /**
+     * @notice Initialises the coupon capability on the token.
+     * @dev Callable once; subsequent calls revert with FacetAlreadyRegistered.
+     *      Requires DEFAULT_ADMIN_ROLE. Called by the factory during deployment.
+     */
+    function initializeCoupon() external;
+
+    /**
      * @notice Schedules a new coupon corporate action and registers the snapshot/record-date
      *         tasks that drive its lifecycle.
-     * @dev Restricted to `CORPORATE_ACTION_ROLE` and gated by the unpaused state plus the
-     *      project date-validity modifiers; emits `CouponSet`. Reverts with
-     *      `CouponCreationFailed` if the underlying corporate-action store rejects the insert.
+     * @dev Restricted to CORPORATE_ACTION_ROLE and gated by the unpaused state plus the
+     *      project date-validity modifiers; emits CouponSet. Reverts with
+     *      CouponCreationFailed if the underlying corporate-action store rejects the insert.
      * @param _newCoupon Coupon parameters captured at scheduling time.
      * @return couponID_ One-indexed identifier assigned to the new coupon.
      */

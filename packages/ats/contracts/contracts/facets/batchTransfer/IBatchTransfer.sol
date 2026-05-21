@@ -11,6 +11,19 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface IBatchTransfer {
     /**
+     * @notice Emitted once when the batch transfer capability is initialised on a token.
+     * @dev Fires exclusively from `initializeBatchTransfer`.
+     */
+    event BatchTransferInitialized();
+
+    /**
+     * @notice Initialises the batch transfer capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeBatchTransfer() external;
+
+    /**
      * @notice Transfers tokens from the caller to multiple addresses in a single transaction.
      * @dev Token must be unpaused, not in multi-partition mode, clearing disabled, and the
      *      caller plus every recipient must satisfy identity and compliance checks. Delegates
