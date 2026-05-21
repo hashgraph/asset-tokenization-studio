@@ -577,7 +577,7 @@ library AdjustBalancesStorageWrapper {
      * @return Adjusted total supply.
      */
     function totalSupplyAdjustedAt(uint256 _timestamp) internal view returns (uint256) {
-        (uint256 pendingABAF, ) = getPendingScheduledBalanceAdjustmentsAt(_timestamp);
+        (uint256 pendingABAF, ) = getPendingScheduledBalanceAdjustmentsAt(_timestamp, false);
         return ERC1410StorageWrapper.totalSupply() * pendingABAF;
     }
 
@@ -631,9 +631,10 @@ library AdjustBalancesStorageWrapper {
      * @return pendingDecimals_ Sum of decimal exponents of all due scheduled adjustments.
      */
     function getPendingScheduledBalanceAdjustmentsAt(
-        uint256 _timestamp
+        uint256 _timestamp,
+        bool _includeDisabled
     ) internal view returns (uint256 pendingAbaf_, uint8 pendingDecimals_) {
-        return ScheduledTasksStorageWrapper.getPendingScheduledBalanceAdjustmentsAt(_timestamp);
+        return ScheduledTasksStorageWrapper.getPendingScheduledBalanceAdjustmentsAt(_timestamp, _includeDisabled);
     }
 
     /**
@@ -650,7 +651,7 @@ library AdjustBalancesStorageWrapper {
      * @return Projected ABAF.
      */
     function getAbafAdjustedAt(uint256 _timestamp) internal view returns (uint256) {
-        (uint256 pendingAbaf, ) = getPendingScheduledBalanceAdjustmentsAt(_timestamp);
+        (uint256 pendingAbaf, ) = getPendingScheduledBalanceAdjustmentsAt(_timestamp, false);
         return getAbaf() * pendingAbaf;
     }
 
@@ -662,7 +663,7 @@ library AdjustBalancesStorageWrapper {
      * @param _decimals Denominator exponent of the prospective adjustment.
      */
     function checkNotOverflowingAdjustment(uint256 _factor, uint8 _decimals) internal view {
-        (uint256 pendingAbaf, uint8 pendingDecimals) = getPendingScheduledBalanceAdjustmentsAt(MAX_UINT256);
+        (uint256 pendingAbaf, uint8 pendingDecimals) = getPendingScheduledBalanceAdjustmentsAt(MAX_UINT256, false);
 
         uint256 totalSupply = zeroToOne(ERC20StorageWrapper.totalSupply()) * pendingAbaf;
         uint256 abaf = getAbaf() * pendingAbaf;

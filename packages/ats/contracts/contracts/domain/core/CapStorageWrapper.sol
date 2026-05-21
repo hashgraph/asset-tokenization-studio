@@ -102,7 +102,10 @@ library CapStorageWrapper {
 
     function getMaxSupplyAdjustedAt(uint256 timestamp) internal view returns (uint256) {
         CapDataStorage storage cs = capStorage();
-        (uint256 pendingAbaf, ) = AdjustBalancesStorageWrapper.getPendingScheduledBalanceAdjustmentsAt(timestamp);
+        (uint256 pendingAbaf, ) = AdjustBalancesStorageWrapper.getPendingScheduledBalanceAdjustmentsAt(
+            timestamp,
+            false
+        );
         return (cs.maxSupply > (MAX_UINT256 / pendingAbaf)) ? MAX_UINT256 : cs.maxSupply * pendingAbaf;
     }
 

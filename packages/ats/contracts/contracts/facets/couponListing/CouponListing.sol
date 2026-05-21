@@ -18,7 +18,7 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
 abstract contract CouponListing is ICouponListing {
     /// @inheritdoc ICouponListing
     function getCouponFromOrderedListAt(uint256 _pos) external view override returns (uint256 couponID_) {
-        couponID_ = CouponStorageWrapper.getCouponFromOrderedListAt(_pos);
+        couponID_ = CouponStorageWrapper.getCouponFromOrderedListAt(_pos, false);
     }
 
     /// @inheritdoc ICouponListing
@@ -26,13 +26,14 @@ abstract contract CouponListing is ICouponListing {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (uint256[] memory couponIDs_) {
-        couponIDs_ = CouponStorageWrapper.getCouponsOrderedList(_pageIndex, _pageLength);
+        couponIDs_ = CouponStorageWrapper.getCouponsOrderedList(_pageIndex, _pageLength, false);
     }
 
     /// @inheritdoc ICouponListing
     function getCouponsOrderedListTotal() external view override returns (uint256 total_) {
         total_ = CouponStorageWrapper.getCouponsOrderedListTotalAdjustedAt(
-            TimeTravelStorageWrapper.getBlockTimestamp()
+            TimeTravelStorageWrapper.getBlockTimestamp(),
+            false
         );
     }
 

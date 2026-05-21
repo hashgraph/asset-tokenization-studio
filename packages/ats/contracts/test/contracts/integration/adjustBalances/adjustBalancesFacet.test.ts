@@ -293,6 +293,37 @@ describe("AdjustBalancesFacet Tests", () => {
         const balanceAfterTrigger = await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_A.address);
         expect(balanceAfterTrigger).to.equal(balanceBeforeAdjustment);
       });
+
+      it("GIVEN a cancelled balance adjustment WHEN balanceOfAt after its execution date THEN returns unadjusted balance", async () => {
+        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+
+        const mintAmount = 1000n;
+        await asset.connect(signer_C).issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: mintAmount,
+          data: "0x",
+        });
+
+        const executionDate = balanceAdjustmentExecutionDateInSeconds;
+        const adjustmentFactor = 2;
+        await asset.connect(signer_C).setScheduledBalanceAdjustment({
+          executionDate: executionDate.toString(),
+          factor: adjustmentFactor,
+          decimals: 0,
+        });
+
+        // Before cancel: pending task is included — projected balance is doubled
+        expect(await asset.balanceOfAt(signer_A.address, executionDate + 1)).to.equal(
+          mintAmount * BigInt(adjustmentFactor),
+        );
+
+        await asset.connect(signer_C).cancelScheduledBalanceAdjustment(1);
+
+        // After cancel: disabled task is excluded — balance is unchanged
+        expect(await asset.balanceOfAt(signer_A.address, executionDate + 1)).to.equal(mintAmount);
+      });
     });
   });
 

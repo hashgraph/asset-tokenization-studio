@@ -252,10 +252,15 @@ library ScheduledTasksStorageWrapper {
      * @notice Counts pending coupon listings scheduled before a timestamp.
      * @dev Iterates from the queue top and stops at the first task not earlier than the
      *      timestamp. Gas cost grows linearly with the number of matching pending tasks.
-     * @param _timestamp Exclusive upper bound for scheduled timestamps.
+     * @param _timestamp      Exclusive upper bound for scheduled timestamps.
+     * @param _includeDisabled When `false`, tasks belonging to a disabled corporate action are
+     *                         excluded from the count.
      * @return total_ Number of pending coupon listings scheduled before `_timestamp`.
      */
-    function getPendingScheduledCouponListingTotalAt(uint256 _timestamp) internal view returns (uint256 total_) {
+    function getPendingScheduledCouponListingTotalAt(
+        uint256 _timestamp,
+        bool _includeDisabled
+    ) internal view returns (uint256 total_) {
         ScheduledTasksDataStorage storage scheduledCouponListing = scheduledCouponListingStorage();
         uint256 length = ScheduledTasksLib.getScheduledTaskCount(scheduledCouponListing);
         uint256 pos;
@@ -271,8 +276,15 @@ library ScheduledTasksStorageWrapper {
             );
 
             if (scheduledTask.scheduledTimestamp < _timestamp) {
+                if (
+                    _includeDisabled ||
+                    !CorporateActionsStorageWrapper.isCorporateActionDisabled(abi.decode(scheduledTask.data, (bytes32)))
+                ) {
+                    unchecked {
+                        ++total_;
+                    }
+                }
                 unchecked {
-                    ++total_;
                     ++i;
                 }
                 continue;
@@ -280,6 +292,20 @@ library ScheduledTasksStorageWrapper {
 
             break;
         }
+    }
+
+    /**
+     * @notice Returns whether the coupon listing task at a given queue index belongs to a
+     *         disabled corporate action.
+     * @param _index Queue index of the scheduled coupon listing task.
+     * @return True if the related corporate action is disabled.
+     */
+    function isScheduledCouponListingDisabledAtIndex(uint256 _index) internal view returns (bool) {
+        ScheduledTask memory couponListing = ScheduledTasksLib.getScheduledTasksByIndex(
+            scheduledCouponListingStorage(),
+            _index
+        );
+        return CorporateActionsStorageWrapper.isCorporateActionDisabled(abi.decode(couponListing.data, (bytes32)));
     }
 
     /**
@@ -326,12 +352,15 @@ library ScheduledTasksStorageWrapper {
      * @notice Aggregates pending balance adjustment factors scheduled before a timestamp.
      * @dev Iterates from the queue top and stops at the first task not earlier than the
      *      timestamp. Gas cost grows linearly with the number of matching pending tasks.
-     * @param _timestamp Exclusive upper bound for scheduled timestamps.
+     * @param _timestamp       Exclusive upper bound for scheduled timestamps.
+     * @param _includeDisabled When `false`, tasks belonging to a disabled corporate action are
+     *                         excluded from the aggregation.
      * @return pendingABAF_ Product of pending adjustment factors, initialised to one.
      * @return pendingDecimals_ Sum of decimal adjustments for matching pending tasks.
      */
     function getPendingScheduledBalanceAdjustmentsAt(
-        uint256 _timestamp
+        uint256 _timestamp,
+        bool _includeDisabled
     ) internal view returns (uint256 pendingABAF_, uint8 pendingDecimals_) {
         // * Initialization
         pendingABAF_ = 1;
@@ -350,17 +379,21 @@ library ScheduledTasksStorageWrapper {
             );
 
             if (scheduledTask.scheduledTimestamp < _timestamp) {
-                bytes memory balanceAdjustmentData = CorporateActionsStorageWrapper.getCorporateActionData(
-                    abi.decode(scheduledTask.data, (bytes32))
-                );
+                bytes32 actionId = abi.decode(scheduledTask.data, (bytes32));
 
-                IScheduledBalanceAdjustment.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
-                    balanceAdjustmentData,
-                    (IScheduledBalanceAdjustment.ScheduledBalanceAdjustment)
-                );
+                if (_includeDisabled || !CorporateActionsStorageWrapper.isCorporateActionDisabled(actionId)) {
+                    bytes memory balanceAdjustmentData = CorporateActionsStorageWrapper.getCorporateActionData(
+                        actionId
+                    );
 
-                pendingABAF_ *= balanceAdjustment.factor;
-                pendingDecimals_ += balanceAdjustment.decimals;
+                    IScheduledBalanceAdjustment.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
+                        balanceAdjustmentData,
+                        (IScheduledBalanceAdjustment.ScheduledBalanceAdjustment)
+                    );
+
+                    pendingABAF_ *= balanceAdjustment.factor;
+                    pendingDecimals_ += balanceAdjustment.decimals;
+                }
 
                 unchecked {
                     ++i;
