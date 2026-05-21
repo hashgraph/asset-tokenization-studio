@@ -15,6 +15,7 @@ const adjustmentTimestamp = 100_000;
 describe("CoreAdjusted Facet Tests", () => {
   let diamond: ResolverProxy;
   let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
 
   let asset: IAsset;
 
@@ -28,6 +29,7 @@ describe("CoreAdjusted Facet Tests", () => {
     });
     diamond = base.diamond;
     signer_A = base.deployer;
+    signer_B = base.user1;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
@@ -66,6 +68,31 @@ describe("CoreAdjusted Facet Tests", () => {
       });
 
       expect(await asset.decimalsAt(adjustmentTimestamp - 1)).to.equal(decimals);
+    });
+  });
+  describe("initializeCoreAdjusted", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeCoreAdjusted is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_B).initializeCoreAdjusted()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_A).initializeCoreAdjusted();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeCoreAdjusted is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(signer_A).initializeCoreAdjusted()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeCoreAdjusted is called THEN it emits CoreAdjustedInitialized", async () => {
+      await expect(asset.connect(signer_A).initializeCoreAdjusted()).to.emit(asset, "CoreAdjustedInitialized");
     });
   });
 });

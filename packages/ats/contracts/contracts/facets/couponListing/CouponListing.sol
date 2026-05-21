@@ -6,6 +6,10 @@ import { ScheduledTask } from "../layer_2/scheduledTask/scheduledTasksCommon/ISc
 import { CouponStorageWrapper } from "../../domain/asset/coupon/CouponStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _COUPON_LISTING_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title CouponListing
@@ -15,7 +19,18 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
  * @dev Reads from `CouponStorageWrapper`, `ScheduledTasksStorageWrapper`, and
  *      `TimeTravelStorageWrapper`. Intended to be inherited by `CouponListingFacet`.
  */
-abstract contract CouponListing is ICouponListing {
+abstract contract CouponListing is ICouponListing, Modifiers {
+    /// @inheritdoc ICouponListing
+    function initializeCouponListing()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_COUPON_LISTING_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_COUPON_LISTING_RESOLVER_KEY);
+        emit CouponListingInitialized();
+    }
+
     /// @inheritdoc ICouponListing
     function getCouponFromOrderedListAt(uint256 _pos) external view override returns (uint256 couponID_) {
         couponID_ = CouponStorageWrapper.getCouponFromOrderedListAt(_pos);

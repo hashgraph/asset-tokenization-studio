@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IControllerByPartition } from "./IControllerByPartition.sol";
-import { ROLE_CONTROLLER, ROLE_AGENT, _buildRoles } from "../../constants/roles.sol";
+import { IControllerByPartition, RESOLVER_KEY_CONTROLLER_BY_PARTITION } from "./IControllerByPartition.sol";
+import { ROLE_CONTROLLER, ROLE_AGENT, _buildRoles, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title ControllerByPartition
@@ -18,6 +19,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  * @author Asset Tokenization Studio Team
  */
 abstract contract ControllerByPartition is IControllerByPartition, Modifiers {
+    /// @inheritdoc IControllerByPartition
+    function initializeControllerByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_CONTROLLER_BY_PARTITION)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_CONTROLLER_BY_PARTITION);
+        emit ControllerByPartitionInitialized();
+    }
+
     /// @inheritdoc IControllerByPartition
     /// @dev Emits {TransferByPartition} via TokenCoreOps.transferByPartition.
     function controllerTransferByPartition(

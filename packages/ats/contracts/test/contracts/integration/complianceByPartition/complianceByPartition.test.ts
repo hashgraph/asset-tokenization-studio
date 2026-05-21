@@ -314,4 +314,43 @@ describe("ComplianceByPartition Tests", () => {
       ).to.be.deep.equal([true, EIP1066_CODES.SUCCESS, ethers.ZeroHash]);
     });
   });
+  describe("initializeComplianceByPartition", () => {
+    let initAsset: IAsset;
+    let initSigner_A: HardhatEthersSigner;
+    let initSigner_D: HardhatEthersSigner;
+
+    beforeEach(async () => {
+      const base = await deployEquityTokenFixture();
+      initSigner_A = base.deployer;
+      initSigner_D = base.user3;
+      initAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeComplianceByPartition is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(initAsset.connect(initSigner_D).initializeComplianceByPartition()).to.be.revertedWithCustomError(
+        initAsset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await initAsset.connect(initSigner_A).initializeComplianceByPartition();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeComplianceByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(initAsset.connect(initSigner_A).initializeComplianceByPartition()).to.be.revertedWithCustomError(
+          initAsset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeComplianceByPartition is called THEN it emits ComplianceByPartitionInitialized", async () => {
+      await expect(initAsset.connect(initSigner_A).initializeComplianceByPartition()).to.emit(
+        initAsset,
+        "ComplianceByPartitionInitialized",
+      );
+    });
+  });
 });

@@ -317,4 +317,43 @@ describe("BatchTransfer Tests", () => {
       );
     });
   });
+  describe("initializeBatchTransfer", () => {
+    let initAsset: IAsset;
+    let initSigner_A: HardhatEthersSigner;
+    let initSigner_D: HardhatEthersSigner;
+
+    beforeEach(async () => {
+      const base = await deployEquityTokenFixture();
+      initSigner_A = base.deployer;
+      initSigner_D = base.user3;
+      initAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeBatchTransfer is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(initAsset.connect(initSigner_D).initializeBatchTransfer()).to.be.revertedWithCustomError(
+        initAsset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await initAsset.connect(initSigner_A).initializeBatchTransfer();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeBatchTransfer is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(initAsset.connect(initSigner_A).initializeBatchTransfer()).to.be.revertedWithCustomError(
+          initAsset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeBatchTransfer is called THEN it emits BatchTransferInitialized", async () => {
+      await expect(initAsset.connect(initSigner_A).initializeBatchTransfer()).to.emit(
+        initAsset,
+        "BatchTransferInitialized",
+      );
+    });
+  });
 });

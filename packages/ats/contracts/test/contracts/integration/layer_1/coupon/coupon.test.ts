@@ -1052,6 +1052,28 @@ describe("Coupon Tests", () => {
       expect(couponAmountFor.numerator * canonicalDenominator).to.equal(preFixProduct * couponAmountFor.denominator);
     });
   });
+  describe("initializeCoupon", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeCoupon is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeCoupon()).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_A).initializeCoupon();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeCoupon is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(signer_A).initializeCoupon()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeCoupon is called THEN it emits CouponInitialized", async () => {
+      await expect(asset.connect(signer_A).initializeCoupon()).to.emit(asset, "CouponInitialized");
+    });
+  });
 });
 
 describe("Coupon Fixed-Rate Variant Tests", () => {

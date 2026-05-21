@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICoupon } from "./ICoupon.sol";
+import { ICoupon, RESOLVER_KEY_COUPON } from "./ICoupon.sol";
 import { ICouponTypes } from "./ICouponTypes.sol";
-import { ROLE_CORPORATE_ACTION, ROLE_CORPORATE_ACTION_FORCE_CANCEL } from "../../constants/roles.sol";
+import { ROLE_CORPORATE_ACTION, ROLE_CORPORATE_ACTION_FORCE_CANCEL, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { CORPORATE_ACTION_TYPE_COUPON } from "../../constants/dispatchTypes.sol";
 import { CouponStorageWrapper } from "../../domain/asset/coupon/CouponStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title Coupon
@@ -26,6 +27,17 @@ import { Modifiers } from "../../services/Modifiers.sol";
  *      storage call returns, per the writer-abstract emit-site rule.
  */
 abstract contract Coupon is ICoupon, Modifiers {
+    /// @inheritdoc ICoupon
+    function initializeCoupon()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_COUPON)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_COUPON);
+        emit CouponInitialized();
+    }
+
     /// @inheritdoc ICoupon
     /// @dev Restricted to `ROLE_CORPORATE_ACTION`; gated by `onlyUnpaused`,
     ///      `onlyValidDates(...)` (three pairs of date validations), and

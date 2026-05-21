@@ -475,4 +475,40 @@ describe("Burn Tests", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
+  describe("initializeBurn", () => {
+    let initAsset: IAsset;
+    let initSigner_A: HardhatEthersSigner;
+    let initSigner_D: HardhatEthersSigner;
+
+    beforeEach(async () => {
+      const base = await deployEquityTokenFixture();
+      initSigner_A = base.deployer;
+      initSigner_D = base.user3;
+      initAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeBurn is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(initAsset.connect(initSigner_D).initializeBurn()).to.be.revertedWithCustomError(
+        initAsset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await initAsset.connect(initSigner_A).initializeBurn();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeBurn is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(initAsset.connect(initSigner_A).initializeBurn()).to.be.revertedWithCustomError(
+          initAsset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeBurn is called THEN it emits BurnInitialized", async () => {
+      await expect(initAsset.connect(initSigner_A).initializeBurn()).to.emit(initAsset, "BurnInitialized");
+    });
+  });
 });

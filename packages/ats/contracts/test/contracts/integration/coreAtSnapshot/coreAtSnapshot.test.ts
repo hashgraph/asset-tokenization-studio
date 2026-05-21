@@ -77,4 +77,29 @@ describe("CoreAtSnapshot Tests", () => {
       expect(await asset.decimalsAtSnapshot(snapshotId)).to.equal(DEFAULT_DECIMALS);
     });
   });
+  describe("initializeCoreAtSnapshot", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeCoreAtSnapshot is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_B).initializeCoreAtSnapshot()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_A).initializeCoreAtSnapshot();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeCoreAtSnapshot is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(signer_A).initializeCoreAtSnapshot()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeCoreAtSnapshot is called THEN it emits CoreAtSnapshotInitialized", async () => {
+      await expect(asset.connect(signer_A).initializeCoreAtSnapshot()).to.emit(asset, "CoreAtSnapshotInitialized");
+    });
+  });
 });

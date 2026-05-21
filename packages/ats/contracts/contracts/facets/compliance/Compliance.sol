@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ROLE_TREX_OWNER } from "../../constants/roles.sol";
+import { ROLE_TREX_OWNER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
-import { IComplianceFacet } from "./IComplianceFacet.sol";
+import { IComplianceFacet, RESOLVER_KEY_COMPLIANCE } from "./IComplianceFacet.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { PauseStorageWrapper } from "../../domain/core/PauseStorageWrapper.sol";
 import { IPause } from "../pause/IPause.sol";
@@ -12,6 +12,7 @@ import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.s
 import { Eip1066 } from "../../constants/eip1066.sol";
 import { ICompliance } from "../layer_1/ERC3643/ICompliance.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title Compliance
@@ -22,23 +23,23 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  *      When the token is paused they short-circuit with the EIP-1066 PAUSED status code.
  */
 abstract contract Compliance is IComplianceFacet, Modifiers {
-    /**
-     * @notice Sets the compliance contract address
-     * @param _compliance The address of the new compliance contract
-     */
+    /// @inheritdoc IComplianceFacet
+    function initializeCompliance()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_COMPLIANCE)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_COMPLIANCE);
+        emit ComplianceInitialized();
+    }
+
+    /// @inheritdoc IComplianceFacet
     function setCompliance(address _compliance) external override onlyActivated onlyUnpaused onlyRole(ROLE_TREX_OWNER) {
         ERC3643StorageWrapper.setCompliance(_compliance);
     }
 
-    /**
-     * @notice Checks if a transfer can be executed
-     * @param _to The recipient address
-     * @param _value The amount of tokens to transfer
-     * @param _data Additional data for the transfer check
-     * @return status True if the transfer can be executed
-     * @return code EIP1066 status code indicating the result
-     * @return reason Additional reason data for the result
-     */
+    /// @inheritdoc IComplianceFacet
     function canTransfer(
         address _to,
         uint256 _value,
@@ -58,16 +59,7 @@ abstract contract Compliance is IComplianceFacet, Modifiers {
         return (status, statusCode, reason);
     }
 
-    /**
-     * @notice Checks if a transferFrom can be executed
-     * @param _from The sender address
-     * @param _to The recipient address
-     * @param _value The amount of tokens to transfer
-     * @param _data Additional data for the transfer check
-     * @return status True if the transfer can be executed
-     * @return code EIP1066 status code indicating the result
-     * @return reason Additional reason data for the result
-     */
+    /// @inheritdoc IComplianceFacet
     function canTransferFrom(
         address _from,
         address _to,
@@ -88,10 +80,7 @@ abstract contract Compliance is IComplianceFacet, Modifiers {
         return (status, statusCode, reason);
     }
 
-    /**
-     * @notice Returns the address of the compliance contract
-     * @return ICompliance The compliance contract
-     */
+    /// @inheritdoc IComplianceFacet
     function compliance() external view override returns (ICompliance) {
         return ERC3643StorageWrapper.getCompliance();
     }

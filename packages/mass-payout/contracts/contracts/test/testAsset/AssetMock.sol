@@ -420,6 +420,10 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
+    function initializeCoupon() external pure {
+        revert NotImplemented();
+    }
+
     /// @notice Mock implementation — always reverts with `NotImplemented`.
     function forceCancelScheduledBalanceAdjustment(uint256) external pure returns (bool) {
         revert NotImplemented();

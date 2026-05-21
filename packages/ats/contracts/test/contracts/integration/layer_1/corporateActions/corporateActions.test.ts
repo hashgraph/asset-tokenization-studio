@@ -13,6 +13,7 @@ const corporateActionId_1 = "0x0000000000000000000000000000000000000000000000000
 
 describe("Corporate Actions Tests", () => {
   let diamond: ResolverProxy;
+  let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
 
@@ -21,6 +22,7 @@ describe("Corporate Actions Tests", () => {
   async function deploySecurityFixtureSinglePartition() {
     const base = await deployEquityTokenFixture();
     diamond = base.diamond;
+    signer_A = base.deployer;
     signer_B = base.user1;
     signer_C = base.user2;
 
@@ -117,5 +119,30 @@ describe("Corporate Actions Tests", () => {
     expect(corporateActions.actionIdByType_[0]).to.equal(corporateActionsByType.actionIdByType_[0]);
     expect(corporateActions.datas_[0]).to.equal(corporateActionsByType.datas_[0]);
     expect(corporateActions.isDisabled_[0]).to.equal(corporateActionsByType.isDisabled_[0]);
+  });
+  describe("initializeCorporateActions", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeCorporateActions is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_B).initializeCorporateActions()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_A).initializeCorporateActions();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeCorporateActions is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(signer_A).initializeCorporateActions()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeCorporateActions is called THEN it emits CorporateActionsInitialized", async () => {
+      await expect(asset.connect(signer_A).initializeCorporateActions()).to.emit(asset, "CorporateActionsInitialized");
+    });
   });
 });
