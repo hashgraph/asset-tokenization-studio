@@ -9,9 +9,9 @@ import { _ALLOWANCE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title AllowanceFacet
- * @notice Diamond facet for the Allowance domain. Registers the 4 selectors that define
- *         the ERC-20 allowance surface (`approve`, `increaseAllowance`, `decreaseAllowance`
- *         and `allowance`).
+ * @notice Diamond facet for the Allowance domain. Registers 5 selectors that define the
+ *         ERC-20 allowance surface (`initializeAllowance`, `approve`, `increaseAllowance`,
+ *         `decreaseAllowance` and `allowance`).
  */
 contract AllowanceFacet is Allowance, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
