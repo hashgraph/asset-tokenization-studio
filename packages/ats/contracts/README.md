@@ -15,6 +15,7 @@
 - **[Test](#test)**<br>
 - **[Architecture](#architecture)**<br>
 - **[ERC-3643 Compatibility](#erc-3643-compatibility)**<br>
+- **[⚠️ Force-Cancel Functions — HIGH RISK](#️-force-cancel-functions--high-risk)**<br>
 
 # Description
 
@@ -621,6 +622,46 @@ bytes32 constant _ADJUSTMENT_BALANCE_ROLE = 0x6d0d63b623e69df3a6ea8aebd01f360a02
 ## 🧩 Notes:
 
 - All roles are `bytes32` constants derived using: `keccak256("security.token.standard.role.<roleName>")` _(replace `<roleName>` with the actual role string)_
+
+---
+
+## ⚠️ Force-Cancel Functions — HIGH RISK
+
+> **WARNING: Using these functions incorrectly WILL corrupt or destroy your token. Read this section in full before touching them.**
+
+### What they are
+
+A small set of administrative override functions exist that bypass the normal date-based guards used by their regular counterparts:
+
+| Function                                         | File                             |
+| ------------------------------------------------ | -------------------------------- |
+| `forceCancelAmortization(uint256)`               | `AmortizationStorageWrapper.sol` |
+| `forceCancelCoupon(uint256)`                     | `CouponStorageWrapper.sol`       |
+| `forceCancelDividend(uint256)`                   | `DividendStorageWrapper.sol`     |
+| `forceCancelVoting(uint256)`                     | `VotingStorageWrapper.sol`       |
+| `forceCancelScheduledBalanceAdjustment(uint256)` | `EquityStorageWrapper.sol`       |
+
+The standard `cancel*` variants refuse to cancel a corporate action once its execution or record date has passed (they revert). The `forceCancel*` variants skip that check entirely and cancel the action unconditionally.
+
+### Why they exist
+
+They are a last-resort recovery mechanism for situations where a corporate action has already passed its execution date but was never processed — for example because an automated scheduled task failed, a network outage occurred, or the action was created with incorrect parameters that were only discovered after the deadline. Without these functions there would be no on-chain way to clean up the stale action.
+
+### Why they are dangerous
+
+Cancelling a corporate action that has **already been executed or partially settled** will leave on-chain state in an inconsistent condition:
+
+- Holder balances or holds that were already adjusted will not be rolled back.
+- Snapshot data bound to the action will become orphaned.
+- Downstream accounting (dividend payouts, amortisation payments, balance adjustments) will produce incorrect results.
+- **There is no undo.** Diamond storage writes are permanent. Recovering from misuse requires a coordinated off-chain remediation and potentially a full token migration.
+
+### Rules for safe use
+
+1. **Only call a `forceCancel*` function if the corresponding corporate action has never been executed.** Verify this off-chain before sending the transaction.
+2. **Require multisig approval.** The `CORPORATE_ACTION_ROLE` that gates these calls must be held by a multisig — never a single EOA — in any production or pre-production environment.
+3. **Do not use as a routine cancellation shortcut.** Use the standard `cancel*` function whenever the execution date has not yet passed.
+4. **Document every use.** Log the reason, the action ID, and the authorising signatures in your governance records before executing.
 
 ---
 

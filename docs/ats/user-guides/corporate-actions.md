@@ -251,6 +251,55 @@ To execute corporate actions, you need:
 
 See [Roles and Permissions](./roles-and-permissions.md) for more details.
 
+---
+
+## ⚠️ Emergency Force-Cancel Operations
+
+:::danger If you use these functions incorrectly you will permanently corrupt the token. There is no undo.
+:::
+
+### What are force-cancel functions?
+
+Every corporate action type exposes a `forceCancel*` variant alongside the standard `cancel*` function:
+
+| Function                                    | Applies to                     |
+| ------------------------------------------- | ------------------------------ |
+| `forceCancelAmortization(id)`               | Amortisation corporate actions |
+| `forceCancelCoupon(id)`                     | Coupon payments                |
+| `forceCancelDividend(id)`                   | Dividend distributions         |
+| `forceCancelVoting(id)`                     | Voting events                  |
+| `forceCancelScheduledBalanceAdjustment(id)` | Balance adjustments            |
+
+The standard `cancel*` functions refuse to cancel a corporate action once its execution or record date has already passed. The `forceCancel*` variants bypass that date check and cancel unconditionally.
+
+### When to use them
+
+These functions exist exclusively as a **last-resort recovery mechanism** for situations where:
+
+- A corporate action passed its execution date but was **never processed** (e.g. automated task failure, network outage).
+- The action was created with incorrect parameters discovered only after the deadline.
+- There is no other on-chain way to clean up the stale action.
+
+**Do not use them as a shortcut to cancel an action that could still be cancelled via the standard flow.**
+
+### Why they are dangerous
+
+Calling a `forceCancel*` function on an action that **has already been executed or partially settled** will leave the token in an inconsistent state:
+
+- Holder balances or holds that were already adjusted will **not** be rolled back.
+- Snapshot data bound to the action becomes orphaned.
+- Downstream accounting (dividend payouts, coupon payments, balance adjustments) will produce incorrect results for all affected holders.
+- **Recovery requires coordinated off-chain remediation and may necessitate a full token migration.**
+
+### Rules before you call a force-cancel
+
+1. **Verify off-chain that the action was never executed.** Check event logs and backend records before sending the transaction.
+2. **Use multisig approval.** The `CORPORATE_ACTION_ROLE` must be held by a multisig in any production environment. A single EOA must never be able to execute these functions unilaterally.
+3. **Document the operation.** Record the action ID, the reason, and the authorising signatures in your governance log before executing.
+4. **Notify all relevant parties.** Inform holders, custodians, and payment processors that the action has been cancelled and will not be settled.
+
+---
+
 ## Next Steps
 
 - [Mass Payout Documentation](/mass-payout/) - Large-scale payment distribution
