@@ -185,4 +185,26 @@ describe("Transfer and lock Tests", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
+
+  describe("initializeTransferAndLock", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeTransferAndLock is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeTransferAndLock()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeTransferAndLock is called THEN it emits TransferAndLockInitialized", async () => {
+      await expect(asset.connect(signer_A).initializeTransferAndLock()).to.emit(asset, "TransferAndLockInitialized");
+    });
+
+    describe("when already initialised", () => {
+      it("GIVEN an already-initialised facet WHEN initializeTransferAndLock is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(signer_A).initializeTransferAndLock()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+  });
 });

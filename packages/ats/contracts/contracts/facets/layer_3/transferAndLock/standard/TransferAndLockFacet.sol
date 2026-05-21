@@ -9,4 +9,8 @@ contract TransferAndLockFacet is TransferAndLockFacetBase {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = RESOLVER_KEY_TRANSFER_AND_LOCK;
     }
+
+    function _transferAndLockInitializerKey() internal pure override returns (bytes32) {
+        return _TRANSFER_AND_LOCK_RESOLVER_KEY;
+    }
 }

@@ -5,6 +5,19 @@ import { ITransferAndLockTypes } from "./ITransferAndLockTypes.sol";
 
 interface ITransferAndLock is ITransferAndLockTypes {
     /**
+     * @notice Emitted once when the transfer-and-lock capability is initialised on a token.
+     * @dev Fires exclusively from `initializeTransferAndLock`.
+     */
+    event TransferAndLockInitialized();
+
+    /**
+     * @notice Initialises the transfer-and-lock capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeTransferAndLock() external;
+
+    /**
      * @notice Transfers tokens to a specified address and locks them until the expiration
      *         timestamp using the default partition
      * @param _to The address to which tokens will be transferred and locked

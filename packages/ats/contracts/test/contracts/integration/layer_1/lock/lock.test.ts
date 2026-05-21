@@ -296,4 +296,31 @@ describe("Lock Tests", () => {
       ).to.be.revertedWithCustomError(lockFacet, "Deactivated");
     });
   });
+
+  describe("initializeLock", () => {
+    beforeEach(async () => {
+      await loadFixture(deploySecurityFixtureSinglePartition);
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeLock is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeLock()).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_A).initializeLock();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeLock is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(signer_A).initializeLock()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeLock is called THEN it emits LockInitialized", async () => {
+      await expect(asset.connect(signer_A).initializeLock()).to.emit(asset, "LockInitialized");
+    });
+  });
 });

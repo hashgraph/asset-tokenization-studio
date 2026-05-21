@@ -35,6 +35,19 @@ interface ILock is ILockTypes {
     }
 
     /**
+     * @notice Emitted once when the lock capability is initialised on a token.
+     * @dev Fires exclusively from `initializeLock`.
+     */
+    event LockInitialized();
+
+    /**
+     * @notice Initialises the lock capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeLock() external;
+
+    /**
      * @notice Locks `_amount` tokens of `_tokenHolder` on the default partition until
      *         `_expirationTimestamp`.
      * @dev Single-partition convenience for `lockByPartition` against the default
