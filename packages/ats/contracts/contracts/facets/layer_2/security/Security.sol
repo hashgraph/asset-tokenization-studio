@@ -5,6 +5,9 @@ import { SecurityStorageWrapper } from "../../../domain/asset/SecurityStorageWra
 import { ISecurity } from "./ISecurity.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { RegulationData, AdditionalSecurityData } from "../../../constants/regulation.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
+import { _SECURITY_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
 
 /**
  * @title Security
@@ -18,9 +21,12 @@ abstract contract Security is ISecurity, Modifiers {
     function initializeSecurity(
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
-    ) external override onlyNotSecurityInitialized {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_SECURITY_RESOLVER_KEY) {
         SecurityStorageWrapper.initializeSecurity(_regulationData, _additionalSecurityData);
+        InitializerStorageWrapper.setFacetToReady(_SECURITY_RESOLVER_KEY);
+        emit SecurityInitialized(_regulationData, _additionalSecurityData);
     }
+
     /// @inheritdoc ISecurity
     function getSecurityRegulationData()
         external
