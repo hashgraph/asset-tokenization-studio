@@ -139,4 +139,30 @@ describe("FreezeAtSnapshot Tests", () => {
     expect(frozen2).to.equal(100); // Frozen tokens tracked
     expect(balance2 + frozen2).to.equal(AMOUNT); // Total remains same
   });
+
+  describe("initializeFreezeAtSnapshot", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeFreezeAtSnapshot is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeFreezeAtSnapshot()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_A).initializeFreezeAtSnapshot();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeFreezeAtSnapshot is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(signer_A).initializeFreezeAtSnapshot()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeFreezeAtSnapshot is called THEN it emits FreezeAtSnapshotInitialized", async () => {
+      await expect(asset.connect(signer_A).initializeFreezeAtSnapshot()).to.emit(asset, "FreezeAtSnapshotInitialized");
+    });
+  });
 });

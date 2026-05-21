@@ -15,6 +15,19 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface IDividendSecurityHolders {
     /**
+     * @notice Emitted once when the dividend security holders capability is initialised on a token.
+     * @dev Fires exclusively from `initializeDividendSecurityHolders`.
+     */
+    event DividendSecurityHoldersInitialized();
+
+    /**
+     * @notice Initialises the dividend security holders capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeDividendSecurityHolders() external;
+
+    /**
      * @notice Returns the page of holder addresses eligible for a given dividend.
      * @dev Reverts via the `onlyMatchingActionType` modifier when `dividendId` does not resolve
      *      to a dividend corporate action. Pages past the holder count return an empty array.

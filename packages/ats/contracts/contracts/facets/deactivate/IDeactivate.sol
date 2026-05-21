@@ -16,10 +16,23 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface IDeactivate {
     /**
+     * @notice Emitted once when the deactivate capability is initialised on a token.
+     * @dev Fires exclusively from `initializeDeactivate`.
+     */
+    event DeactivateInitialized();
+
+    /**
      * @notice Thrown when an operation guarded by `onlyActivated` is attempted on a token whose
      *         deactivation flag has already been set.
      */
     error Deactivated();
+
+    /**
+     * @notice Initialises the deactivate capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeDeactivate() external;
 
     /**
      * @notice Sets the token's deactivation flag, retiring the token irreversibly.

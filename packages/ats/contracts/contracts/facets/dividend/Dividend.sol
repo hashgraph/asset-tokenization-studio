@@ -3,10 +3,12 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IDividend } from "./IDividend.sol";
 import { IDividendTypes } from "./IDividendTypes.sol";
-import { CORPORATE_ACTION_ROLE } from "../../constants/roles.sol";
+import { CORPORATE_ACTION_ROLE, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { DIVIDEND_CORPORATE_ACTION_TYPE } from "../../constants/values.sol";
 import { DividendStorageWrapper } from "../../domain/asset/dividend/DividendStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _DIVIDEND_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title Dividend
@@ -21,6 +23,17 @@ import { Modifiers } from "../../services/Modifiers.sol";
  *      dividend slots.
  */
 abstract contract Dividend is IDividend, Modifiers {
+    /// @inheritdoc IDividend
+    function initializeDividend()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_DIVIDEND_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_DIVIDEND_RESOLVER_KEY);
+        emit DividendInitialized();
+    }
+
     /// @inheritdoc IDividend
     /// @dev Restricted to `CORPORATE_ACTION_ROLE`; gated by `onlyUnpaused`,
     ///      `onlyValidDates(recordDate, executionDate)`, and `onlyValidTimestamp(recordDate)`.

@@ -12,6 +12,19 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface IFreezeAtSnapshotByPartition {
     /**
+     * @notice Emitted once when the freeze-at-snapshot-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeFreezeAtSnapshotByPartition`.
+     */
+    event FreezeAtSnapshotByPartitionInitialized();
+
+    /**
+     * @notice Initialises the freeze-at-snapshot-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeFreezeAtSnapshotByPartition() external;
+
+    /**
      * @notice Returns the frozen balance of an account for a given partition at the time of a
      *         given snapshot.
      * @param _partition The partition the frozen balance is queried in.

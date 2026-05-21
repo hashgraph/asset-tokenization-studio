@@ -15,6 +15,12 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface IFreeze {
     /**
+     * @notice Emitted once when the freeze capability is initialised on a token.
+     * @dev Fires exclusively from `initializeFreeze`.
+     */
+    event FreezeInitialized();
+
+    /**
      * @notice Emitted when a specific amount of tokens is frozen for a wallet.
      * @param account The wallet address whose tokens were frozen.
      * @param amount The amount of tokens frozen.
@@ -46,6 +52,13 @@ interface IFreeze {
      *      freeze call. Freezing zero tokens is semantically invalid and rejected early.
      */
     error InvalidFreezeAmount();
+
+    /**
+     * @notice Initialises the freeze capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeFreeze() external;
 
     /**
      * @notice Freezes a specific amount of tokens for a wallet, reducing its liquid balance.

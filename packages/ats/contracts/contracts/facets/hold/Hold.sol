@@ -5,6 +5,10 @@ import { IHoldFacet } from "./IHoldFacet.sol";
 import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
 import { HoldStorageWrapper } from "../../domain/asset/HoldStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _HOLD_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title Hold
@@ -13,7 +17,18 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
  *      block timestamp through `TimeTravelStorageWrapper` so the returned values remain
  *      consistent with partition-scoped queries under time-travel tests.
  */
-abstract contract Hold is IHoldFacet {
+abstract contract Hold is IHoldFacet, Modifiers {
+    /// @inheritdoc IHoldFacet
+    function initializeHold()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_HOLD_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_HOLD_RESOLVER_KEY);
+        emit HoldInitialized();
+    }
+
     /// @inheritdoc IHoldFacet
     function getHeldAmountFor(address _tokenHolder) external view override returns (uint256 amount_) {
         return

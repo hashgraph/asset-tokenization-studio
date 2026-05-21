@@ -14,6 +14,19 @@ import { ICouponTypes } from "../coupon/ICouponTypes.sol";
  */
 interface ICouponSecurityHolders is ICouponTypes {
     /**
+     * @notice Emitted once when the coupon security holders capability is initialised on a token.
+     * @dev Fires exclusively from `initializeCouponSecurityHolders`.
+     */
+    event CouponSecurityHoldersInitialized();
+
+    /**
+     * @notice Initialises the coupon security holders capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeCouponSecurityHolders() external;
+
+    /**
      * @notice Returns a paginated list of token holders eligible for a coupon.
      * @dev Holders are resolved from the snapshot at the coupon record date when one
      *      exists; falls back to the live holder list if no snapshot has been taken.

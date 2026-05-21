@@ -220,4 +220,33 @@ describe("CouponSecurityHolders Tests", () => {
     expect(couponsFor[0].recordDateReached).to.be.true;
     expect(accounts).to.include(signer_A.address);
   });
+
+  describe("initializeCouponSecurityHolders", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeCouponSecurityHolders is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_B).initializeCouponSecurityHolders()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_A).initializeCouponSecurityHolders();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeCouponSecurityHolders is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(signer_A).initializeCouponSecurityHolders()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeCouponSecurityHolders is called THEN it emits CouponSecurityHoldersInitialized", async () => {
+      await expect(asset.connect(signer_A).initializeCouponSecurityHolders()).to.emit(
+        asset,
+        "CouponSecurityHoldersInitialized",
+      );
+    });
+  });
 });

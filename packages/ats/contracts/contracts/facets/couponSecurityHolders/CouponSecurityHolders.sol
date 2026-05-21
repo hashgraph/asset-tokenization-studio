@@ -6,6 +6,9 @@ import { ICouponTypes } from "../coupon/ICouponTypes.sol";
 import { COUPON_CORPORATE_ACTION_TYPE } from "../../constants/values.sol";
 import { CouponStorageWrapper } from "../../domain/asset/coupon/CouponStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _COUPON_SECURITY_HOLDERS_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title CouponSecurityHolders
@@ -15,6 +18,17 @@ import { Modifiers } from "../../services/Modifiers.sol";
  * @author Asset Tokenization Studio Team
  */
 abstract contract CouponSecurityHolders is ICouponSecurityHolders, Modifiers {
+    /// @inheritdoc ICouponSecurityHolders
+    function initializeCouponSecurityHolders()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_COUPON_SECURITY_HOLDERS_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_COUPON_SECURITY_HOLDERS_RESOLVER_KEY);
+        emit CouponSecurityHoldersInitialized();
+    }
+
     /// @inheritdoc ICouponSecurityHolders
     function getCouponHolders(
         uint256 _couponID,

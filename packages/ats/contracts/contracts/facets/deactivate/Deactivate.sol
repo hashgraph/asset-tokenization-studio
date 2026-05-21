@@ -4,7 +4,9 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IDeactivate } from "./IDeactivate.sol";
 import { DeactivateStorageWrapper } from "../../domain/core/DeactivateStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
-import { DEACTIVATE_ROLE } from "../../constants/roles.sol";
+import { DEACTIVATE_ROLE, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _DEACTIVATE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title Deactivate
@@ -18,6 +20,17 @@ import { DEACTIVATE_ROLE } from "../../constants/roles.sol";
  *      facet operation guarded by it.
  */
 abstract contract Deactivate is IDeactivate, Modifiers {
+    /// @inheritdoc IDeactivate
+    function initializeDeactivate()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_DEACTIVATE_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_DEACTIVATE_RESOLVER_KEY);
+        emit DeactivateInitialized();
+    }
+
     /// @inheritdoc IDeactivate
     /// @dev Composed of three preconditions: `onlyUnpaused` rejects the call when the token is
     ///      paused (own flag or any external pause source), `onlyRole(DEACTIVATE_ROLE)`

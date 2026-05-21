@@ -5,6 +5,9 @@ import { IDividendSecurityHolders } from "./IDividendSecurityHolders.sol";
 import { DIVIDEND_CORPORATE_ACTION_TYPE } from "../../constants/values.sol";
 import { DividendStorageWrapper } from "../../domain/asset/dividend/DividendStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _DIVIDEND_SECURITY_HOLDERS_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title DividendSecurityHolders
@@ -17,6 +20,17 @@ import { Modifiers } from "../../services/Modifiers.sol";
  *      any storage read. The library handles snapshot vs. live-registry sourcing internally.
  */
 abstract contract DividendSecurityHolders is IDividendSecurityHolders, Modifiers {
+    /// @inheritdoc IDividendSecurityHolders
+    function initializeDividendSecurityHolders()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_DIVIDEND_SECURITY_HOLDERS_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_DIVIDEND_SECURITY_HOLDERS_RESOLVER_KEY);
+        emit DividendSecurityHoldersInitialized();
+    }
+
     /// @inheritdoc IDividendSecurityHolders
     /// @dev Reverts through `onlyMatchingActionType` if `dividendId` does not match the dividend
     ///      corporate action type at index `dividendId - 1`.
