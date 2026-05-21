@@ -28,6 +28,15 @@ import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTrave
  * @author Asset Tokenization Studio Team
  */
 library VotingStorageWrapper {
+    /**
+     * @notice Creates a new voting-rights corporate action and schedules its snapshot task.
+     * @dev Encodes `newVoting`, delegates creation to
+     *      `CorporateActionsStorageWrapper.addCorporateAction`, and calls `initVotingRights` to
+     *      register the record-date snapshot. Emits `IVoting.VotingSet`.
+     * @param newVoting        Voting parameters including record date and data payload.
+     * @return corporateActionId_ Identifier of the underlying corporate action.
+     * @return voteID_            One-indexed identifier of the newly created voting event.
+     */
     function setVoting(
         IVotingTypes.Voting calldata newVoting
     ) internal returns (bytes32 corporateActionId_, uint256 voteID_) {
@@ -49,6 +58,15 @@ library VotingStorageWrapper {
         );
     }
 
+    /**
+     * @notice Cancels a pending voting event, enforcing that the record date has not yet been
+     *         reached.
+     * @dev Reverts with `IVoting.VotingAlreadyRecorded` if the record date is in the past.
+     *      Delegates the cancellation to `CorporateActionsStorageWrapper.cancelCorporateAction`.
+     *      Emits `IVoting.VotingCancelled`.
+     * @param voteId    The identifier of the voting event to cancel.
+     * @return success_ Always true if no revert occurred.
+     */
     function cancelVoting(uint256 voteId) internal returns (bool success_) {
         (IVoting.RegisteredVoting memory registeredVoting, bytes32 corporateActionId, ) = getVoting(voteId);
 
@@ -62,12 +80,27 @@ library VotingStorageWrapper {
         emit IVoting.VotingCancelled(voteId, EvmAccessors.getMsgSender());
     }
 
+    /**
+     * @notice Cancels a voting unconditionally, bypassing the record-date guard.
+     * @dev Use when administrative override is required after the record date has passed.
+     *      Delegates to `CorporateActionsStorageWrapper.cancelCorporateAction` directly.
+     * @param voteId The identifier of the voting to cancel.
+     * @return success_ Always true if no revert occurred.
+     */
     function forceCancelVoting(uint256 voteId) internal returns (bool success_) {
         (, bytes32 corporateActionId, ) = getVoting(voteId);
         CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
         success_ = true;
     }
 
+    /**
+     * @notice Schedules the snapshot task for a newly created voting-rights corporate action.
+     * @dev Decodes `data` into `IVotingTypes.Voting` and registers a cross-ordered snapshot task
+     *      at `newVoting.recordDate` via `ScheduledTasksStorageWrapper`. Reverts with
+     *      `IVoting.VotingRightsCreationFailed` if `actionId` is zero.
+     * @param actionId The corporate action identifier (must be non-zero).
+     * @param data     ABI-encoded `IVotingTypes.Voting` struct.
+     */
     function initVotingRights(bytes32 actionId, bytes memory data) internal {
         if (actionId == bytes32(0)) {
             revert IVoting.VotingRightsCreationFailed();
@@ -79,6 +112,16 @@ library VotingStorageWrapper {
         ScheduledTasksStorageWrapper.addScheduledSnapshot(newVoting.recordDate, actionId);
     }
 
+    /**
+     * @notice Retrieves the registered voting record, corporate action ID, and disabled status.
+     * @dev Resolves the corporate action ID by type index, decodes the stored bytes, and reads
+     *      the snapshot result ID. Uses `assert` to enforce non-empty data — panics on storage
+     *      inconsistency.
+     * @param voteID               The one-indexed voting identifier.
+     * @return registeredVoting_   Decoded voting struct plus snapshot ID.
+     * @return corporateActionId_  Underlying corporate action identifier.
+     * @return isDisabled_         True if the voting event has been cancelled.
+     */
     function getVoting(
         uint256 voteID
     )
@@ -103,6 +146,15 @@ library VotingStorageWrapper {
         );
     }
 
+    /**
+     * @notice Returns the per-account view of a voting event, including snapshot balance at the
+     *         record date.
+     * @dev Populates `votingFor_` with the record date, data payload, disabled flag, and the
+     *      holder's balance and decimals resolved via `_getSnapshotBalanceForIfDateReached`.
+     * @param voteID      The one-indexed identifier of the voting event.
+     * @param account     The holder address to inspect.
+     * @return votingFor_ Aggregated view of the voting event for the account.
+     */
     function getVotingFor(
         uint256 voteID,
         address account
@@ -124,10 +176,25 @@ library VotingStorageWrapper {
         );
     }
 
+    /**
+     * @notice Returns the total number of voting-rights corporate actions ever created.
+     * @dev Delegates to `CorporateActionsStorageWrapper.getCorporateActionCountByType`.
+     * @return votingCount_ Total count of registered voting events.
+     */
     function getVotingCount() internal view returns (uint256 votingCount_) {
         return CorporateActionsStorageWrapper.getCorporateActionCountByType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE);
     }
 
+    /**
+     * @notice Returns a paginated list of token holders eligible to participate in a voting event.
+     * @dev Returns an empty array before the record date. After the record date, holders are
+     *      sourced from the bound snapshot when one exists, otherwise from the live ERC1410
+     *      holder set.
+     * @param voteID     The one-indexed identifier of the voting event.
+     * @param pageIndex  Zero-based page index.
+     * @param pageLength Maximum number of addresses per page.
+     * @return holders_  Paginated array of eligible holder addresses.
+     */
     function getVotingHolders(
         uint256 voteID,
         uint256 pageIndex,
@@ -143,6 +210,13 @@ library VotingStorageWrapper {
         return ERC1410StorageWrapper.getTokenHolders(pageIndex, pageLength);
     }
 
+    /**
+     * @notice Returns the total number of holders eligible to participate in a voting event.
+     * @dev Mirrors `getVotingHolders` logic but returns a count. Returns zero before the record
+     *      date.
+     * @param voteID The one-indexed identifier of the voting event.
+     * @return Total number of eligible holders.
+     */
     function getTotalVotingHolders(uint256 voteID) internal view returns (uint256) {
         (IVoting.RegisteredVoting memory registeredVoting, , ) = getVoting(voteID);
 
@@ -154,6 +228,19 @@ library VotingStorageWrapper {
         return ERC1410StorageWrapper.getTotalTokenHolders();
     }
 
+    /**
+     * @notice Returns a holder's token balance and decimals at `date`, if `date` has already
+     *         passed.
+     * @dev Returns zeros and `false` when `date` is still in the future. Balance and decimals are
+     *      sourced from the bound snapshot (if `snapshotId != 0`) or from ABAF-adjusted ERC3643
+     *      and ERC20 storage at `date`.
+     * @param date       The reference timestamp to compare against the current block.
+     * @param snapshotId Snapshot identifier (zero means no snapshot is bound).
+     * @param account    The holder address to query.
+     * @return balance_     Token balance of `account` at `date`, or zero.
+     * @return decimals_    Token decimals at `date`, or zero.
+     * @return dateReached_ True if `date` is in the past.
+     */
     function _getSnapshotBalanceForIfDateReached(
         uint256 date,
         uint256 snapshotId,

@@ -85,6 +85,13 @@ library DividendStorageWrapper {
         emit IDividend.DividendCancelled(dividendId, EvmAccessors.getMsgSender());
     }
 
+    /**
+     * @notice Cancels a dividend unconditionally, bypassing the execution-date guard.
+     * @dev Use when administrative override is required after the execution date has passed.
+     *      Delegates to `CorporateActionsStorageWrapper.cancelCorporateAction` directly.
+     * @param dividendId The identifier of the dividend to cancel.
+     * @return success_ Always true if no revert occurred.
+     */
     function forceCancelDividend(uint256 dividendId) internal returns (bool success_) {
         (, bytes32 corporateActionId, ) = getDividend(dividendId);
         CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.8.22;
+// solhint-disable
 
 import { IAssetMock } from "./interfaces/IAssetMock.sol";
 // solhint-disable-next-line max-line-length
@@ -416,6 +417,7 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
+    /// @notice Mock implementation — always reverts with `NotImplemented`.
     function forceCancelScheduledBalanceAdjustment(uint256) external pure returns (bool) {
         revert NotImplemented();
     }
@@ -428,3 +430,4 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 }
+// solhint-enable
