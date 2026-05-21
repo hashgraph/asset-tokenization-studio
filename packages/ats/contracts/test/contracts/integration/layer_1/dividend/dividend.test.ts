@@ -638,4 +638,30 @@ describe("Dividends", () => {
       );
     });
   });
+
+  describe("initializeDividend", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeDividend is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeDividend()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_A).initializeDividend();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeDividend is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(signer_A).initializeDividend()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeDividend is called THEN it emits DividendInitialized", async () => {
+      await expect(asset.connect(signer_A).initializeDividend()).to.emit(asset, "DividendInitialized");
+    });
+  });
 });

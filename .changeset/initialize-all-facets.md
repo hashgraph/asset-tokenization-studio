@@ -3,7 +3,7 @@
 ---
 
 Migrate all facet initialisation to centralised `InitializerStorageWrapper` pattern across
-27 facets. Each `initializeXxx` function is gated by `onlyRole(DEFAULT_ADMIN_ROLE)` (first)
+38 facets. Each `initializeXxx` function is gated by `onlyRole(DEFAULT_ADMIN_ROLE)` (first)
 and `onlyFacetNotRegistered(_XXX_RESOLVER_KEY)` (second), calls
 `InitializerStorageWrapper.setFacetToReady`, and emits `XxxInitialized()` with no parameters.
 Subsequent calls revert with `FacetAlreadyRegistered`.
@@ -16,7 +16,13 @@ BalanceTracker, BalanceTrackerAdjusted, BalanceTrackerAtSnapshot,
 BalanceTrackerAtSnapshotByPartition, BalanceTrackerByPartition, BatchBurn, BatchController,
 BatchFreeze, BatchMint, BatchTransfer, Burn, BurnByPartition, Compliance,
 ComplianceByPartition, ControllerByPartition, ControllerHoldByPartition, CoreAdjusted,
-CoreAtSnapshot, CorporateActions, Coupon, CouponListing.
+CoreAtSnapshot, CorporateActions, Coupon, CouponListing,
+CouponSecurityHolders, Deactivate, Dividend, DividendSecurityHolders, Documentation,
+EIP712, Freeze, FreezeAtSnapshot, FreezeAtSnapshotByPartition, Hold, HoldAtSnapshot.
 
 Four view-only abstract contracts (ComplianceByPartition, CoreAdjusted, CoreAtSnapshot,
 CouponListing) gain `Modifiers` inheritance to support the initialiser guards.
+
+Five additional view-only abstract contracts (EIP712, FreezeAtSnapshot,
+FreezeAtSnapshotByPartition, Hold, HoldAtSnapshot) gain `Modifiers` inheritance to support
+the initialiser guards.

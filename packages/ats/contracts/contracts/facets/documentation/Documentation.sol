@@ -2,10 +2,12 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IDocumentation } from "./IDocumentation.sol";
-import { DOCUMENTER_ROLE } from "../../constants/roles.sol";
+import { DOCUMENTER_ROLE, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { DocumentationStorageWrapper } from "../../domain/core/DocumentationStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _DOCUMENTATION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title Documentation
@@ -23,6 +25,17 @@ import { Modifiers } from "../../services/Modifiers.sol";
  * @author Hashgraph Asset Tokenization
  */
 abstract contract Documentation is IDocumentation, Modifiers {
+    /// @inheritdoc IDocumentation
+    function initializeDocumentation()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_DOCUMENTATION_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_DOCUMENTATION_RESOLVER_KEY);
+        emit DocumentationInitialized();
+    }
+
     /**
      * @notice Attaches a new document to the token or updates the URI and hash of an
      *         existing one.

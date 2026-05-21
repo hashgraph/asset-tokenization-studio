@@ -25,7 +25,12 @@ contract DividendSecurityHoldersFacet is DividendSecurityHolders, IStaticFunctio
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.getDividendHolders.selector, this.getTotalDividendHolders.selector);
+        return
+            Bytes4Builder.build(
+                this.initializeDividendSecurityHolders.selector,
+                this.getDividendHolders.selector,
+                this.getTotalDividendHolders.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors

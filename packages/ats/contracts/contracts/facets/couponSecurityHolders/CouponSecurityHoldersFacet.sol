@@ -29,6 +29,7 @@ contract CouponSecurityHoldersFacet is CouponSecurityHolders, IStaticFunctionSel
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeCouponSecurityHolders.selector,
                 this.getCouponHolders.selector,
                 this.getCouponsFor.selector,
                 this.getTotalCouponHolders.selector

@@ -236,4 +236,30 @@ describe("Documentation Tests", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
+
+  describe("initializeDocumentation", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeDocumentation is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeDocumentation()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_A).initializeDocumentation();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeDocumentation is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(signer_A).initializeDocumentation()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeDocumentation is called THEN it emits DocumentationInitialized", async () => {
+      await expect(asset.connect(signer_A).initializeDocumentation()).to.emit(asset, "DocumentationInitialized");
+    });
+  });
 });

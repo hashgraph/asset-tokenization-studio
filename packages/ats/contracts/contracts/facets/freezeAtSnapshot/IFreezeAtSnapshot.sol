@@ -11,6 +11,19 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface IFreezeAtSnapshot {
     /**
+     * @notice Emitted once when the freeze-at-snapshot capability is initialised on a token.
+     * @dev Fires exclusively from `initializeFreezeAtSnapshot`.
+     */
+    event FreezeAtSnapshotInitialized();
+
+    /**
+     * @notice Initialises the freeze-at-snapshot capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeFreezeAtSnapshot() external;
+
+    /**
      * @notice Returns the frozen balance of an account at the time of a given snapshot.
      * @param _snapshotID The identifier of the snapshot to query.
      * @param _tokenHolder The address whose frozen balance is being queried.

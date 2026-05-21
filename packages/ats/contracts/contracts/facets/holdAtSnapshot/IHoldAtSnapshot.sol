@@ -15,6 +15,19 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface IHoldAtSnapshot {
     /**
+     * @notice Emitted once when the hold-at-snapshot capability is initialised on a token.
+     * @dev Fires exclusively from `initializeHoldAtSnapshot`.
+     */
+    event HoldAtSnapshotInitialized();
+
+    /**
+     * @notice Initialises the hold-at-snapshot capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeHoldAtSnapshot() external;
+
+    /**
      * @notice Returns the held balance of a token holder at the time of a given snapshot.
      * @dev    Sums all hold escrow amounts active at `_snapshotID`, adjusted for any
      *         balance-adjustment factor recorded at that snapshot timestamp.

@@ -7,6 +7,9 @@ import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _FREEZE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title Freeze
@@ -22,6 +25,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  *      Intended to be inherited exclusively by `FreezeFacet`.
  */
 abstract contract Freeze is IFreeze, Modifiers {
+    /// @inheritdoc IFreeze
+    function initializeFreeze()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_FREEZE_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_FREEZE_RESOLVER_KEY);
+        emit FreezeInitialized();
+    }
+
     /// @inheritdoc IFreeze
     function setAddressFrozen(
         address _userAddress,
