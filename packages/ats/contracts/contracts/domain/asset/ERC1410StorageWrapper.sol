@@ -111,6 +111,9 @@ library ERC1410StorageWrapper {
 
     /// @notice Adds a new partition entry for an account — does NOT touch ERC-20 storage.
     /// @dev Callers are responsible for emitting Transfer via `ERC20StorageWrapper.performTransfer`.
+    ///      Captures the holder's partition list into the active snapshot BEFORE the new entry is
+    ///      pushed, so historical reads still observe the pre-mutation set. Also extends the LABAF
+    ///      array so the new partition index has a matching adjustment factor entry.
     /// @param value     Initial partition amount.
     /// @param account   Token holder receiving the partition.
     /// @param partition Partition identifier.
@@ -691,6 +694,15 @@ library ERC1410StorageWrapper {
         AdjustBalancesStorageWrapper.updateLabafByTokenHolderAndPartitionIndex(abaf, account, partitionsIndex);
     }
 
+    /// @notice Removes a partition entry from a holder's partition list via swap-and-pop.
+    /// @dev Captures the holder's partition list into the active snapshot BEFORE the entry is
+    ///      evicted, preserving the pre-mutation set for historical reads. When the removed slot
+    ///      is not the last one, the trailing partition is moved into its place and both
+    ///      `partitionToIndex` and the corresponding LABAF entry are rebased to the new index.
+    ///      The LABAF array is then popped to mirror the shrunk partition list.
+    /// @param holder    Token holder whose partition is being removed.
+    /// @param partition Partition identifier to evict from the holder's index map.
+    /// @param index     Zero-based position of the partition inside `partitions[holder]`.
     function deletePartitionForHolder(address holder, bytes32 partition, uint256 index) private {
         SnapshotsStorageWrapper.updatePartitionListSnapshot(holder);
         ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();

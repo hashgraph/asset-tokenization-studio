@@ -110,14 +110,16 @@ library SnapshotsStorageWrapper {
     }
 
     /**
-     * @dev Captures the holder's partition list at the current snapshot id.
-     *      Must be invoked BEFORE any mutation to `partitions[account]` so the
-     *      stored snapshot reflects the pre-mutation list, matching the
-     *      "lazy snapshot before mutation" semantics used throughout this
-     *      library. Only the two mutation points (`addPartitionToOnly`,
-     *      `deletePartitionForHolder`) call this; the per-transfer hot path
-     *      no longer touches the partition list, which keeps it O(1) instead
-     *      of O(N) in the holder's partition count.
+     * @notice Records the holder's partition list into the active snapshot before it is mutated.
+     * @dev Must be invoked BEFORE any mutation to `partitions[account]` so the stored snapshot
+     *      reflects the pre-mutation list, matching the "lazy snapshot before mutation" semantics
+     *      used throughout this library. No-ops when no snapshot is active (`currentSnapshotId == 0`),
+     *      when `account` is the zero address, or when this snapshot id has already been captured
+     *      for the holder — keeping the call idempotent within a single snapshot. Only the two
+     *      partition-list mutation points (`addPartitionToOnly`, `deletePartitionForHolder`) call
+     *      this; the per-transfer hot path no longer touches the partition list, which keeps it
+     *      O(1) instead of O(N) in the holder's partition count.
+     * @param account Token holder whose partition list is being captured.
      */
     function updatePartitionListSnapshot(address account) internal {
         uint256 currentId = getCurrentSnapshotId();
@@ -152,8 +154,17 @@ library SnapshotsStorageWrapper {
     }
 
     /**
-     * @dev Update balance and/or total supply snapshots before the values are modified. This is implemented
-     * in the _beforeTokenTransfer hook, which is executed for _mint, _burn, and _transfer operations.
+     * @notice Captures total and partition balances for an account into the active snapshot.
+     * @dev Invoked from the `_beforeTokenTransfer` hook so that mint, burn and transfer operations
+     *      preserve pre-mutation balances against the current snapshot id. Short-circuits when no
+     *      snapshot is active (`currentSnapshotId == 0`) or when `account` is the zero address.
+     *      When the ABAF has drifted since the active snapshot was opened, the recorded values
+     *      are back-scaled by `abaf / abafAtSnapshot` so the snapshot stays consistent with the
+     *      adjustment factor in force at snapshot time. Does NOT touch the holder's partition
+     *      list — that is captured separately by `updatePartitionListSnapshot` at partition
+     *      add/remove sites, decoupling the per-transfer hot path from the O(N) list copy.
+     * @param account   Token holder whose balances are being snapshotted.
+     * @param partition Partition whose balance, along with the account total, is recorded.
      */
     function updateAccountSnapshot(address account, bytes32 partition) internal {
         uint256 currentSnapshotId = getCurrentSnapshotId();
@@ -195,6 +206,19 @@ library SnapshotsStorageWrapper {
         );
     }
 
+    /**
+     * @notice Persists both total and partition balances into the active snapshot for an account.
+     * @dev Internal overload used by `updateAccountSnapshot(address,bytes32)` once the values to
+     *      record have been resolved (either directly from current state or back-scaled via the
+     *      ABAF factor). Each `Snapshots` slot is only written when its last recorded id is older
+     *      than the current snapshot, so repeated calls within the same snapshot are idempotent.
+     *      Does NOT touch the partition list metadata; that lives behind
+     *      `updatePartitionListSnapshot` and is only captured at partition add/remove sites.
+     * @param balanceSnapshots            Storage handle for the account's total balance history.
+     * @param currentValue                Total balance to record for the current snapshot id.
+     * @param partitionBalanceSnapshots   Storage handle for the account+partition balance history.
+     * @param currentValueForPartition    Partition balance to record for the current snapshot id.
+     */
     function updateAccountSnapshot(
         Snapshots storage balanceSnapshots,
         uint256 currentValue,
