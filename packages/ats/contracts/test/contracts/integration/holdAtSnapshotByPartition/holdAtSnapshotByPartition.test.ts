@@ -192,4 +192,33 @@ describe("HoldAtSnapshotByPartition Tests", () => {
     expect(heldBalance_A_2_Partition_2).to.equal(heldAmountOf_A_Partition_2);
     expect(heldBalance_C_2_Partition_2).to.equal(0);
   });
+
+  describe("initializeHoldAtSnapshotByPartition", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeHoldAtSnapshotByPartition is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeHoldAtSnapshotByPartition()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_A).initializeHoldAtSnapshotByPartition();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeHoldAtSnapshotByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(signer_A).initializeHoldAtSnapshotByPartition()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeHoldAtSnapshotByPartition is called THEN it emits HoldAtSnapshotByPartitionInitialized", async () => {
+      await expect(asset.connect(signer_A).initializeHoldAtSnapshotByPartition()).to.emit(
+        asset,
+        "HoldAtSnapshotByPartitionInitialized",
+      );
+    });
+  });
 });

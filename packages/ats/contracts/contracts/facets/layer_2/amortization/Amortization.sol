@@ -1,16 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IAmortization } from "./IAmortization.sol";
+import { IAmortization, RESOLVER_KEY_AMORTIZATION } from "./IAmortization.sol";
 import {
     ROLE_AMORTIZATION,
     ROLE_CORPORATE_ACTION,
-    ROLE_CORPORATE_ACTION_FORCE_CANCEL
+    ROLE_CORPORATE_ACTION_FORCE_CANCEL,
+    DEFAULT_ADMIN_ROLE
 } from "../../../constants/roles.sol";
 import { CORPORATE_ACTION_TYPE_AMORTIZATION } from "../../../constants/dispatchTypes.sol";
 import { AmortizationStorageWrapper } from "../../../domain/asset/AmortizationStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
 
 /**
  * @title Amortization
@@ -22,6 +24,16 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract Amortization is IAmortization, Modifiers {
     /// @inheritdoc IAmortization
+    function initializeAmortization()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_AMORTIZATION)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_AMORTIZATION);
+        emit AmortizationInitialized();
+    }
+
     function setAmortization(
         IAmortization.Amortization calldata _amortization
     )

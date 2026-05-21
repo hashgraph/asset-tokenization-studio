@@ -23,7 +23,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
     ///      portfolio's initialisation flag so repeat invocations revert.
     function initializeLoansPortfolio(
         ILoansPortfolio.LoansPortfolioDetailsData calldata _loansPortfolioData
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_LOANS_PORTFOLIO) {
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_LOANS_PORTFOLIO) {
         LoansPortfolioStorageWrapper.initializeLoansPortfolio(_loansPortfolioData);
         // TODO: [LOANS-PORTFOLIO-INTEGRATION]
         // Security data should be initialised through TreasuryToken/deployment layer.

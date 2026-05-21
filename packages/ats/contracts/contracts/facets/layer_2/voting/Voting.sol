@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IVoting } from "./IVoting.sol";
+import { IVoting, RESOLVER_KEY_VOTING } from "./IVoting.sol";
 import { IVotingTypes } from "./IVotingTypes.sol";
 import { ROLE_CORPORATE_ACTION, ROLE_CORPORATE_ACTION_FORCE_CANCEL } from "../../../constants/roles.sol";
 import { CORPORATE_ACTION_TYPE_VOTING_RIGHTS } from "../../../constants/dispatchTypes.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 import { VotingStorageWrapper } from "../../../domain/asset/VotingStorageWrapper.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
 
 /// @title Voting
 /// @author Asset Tokenization Studio Team
@@ -15,6 +17,17 @@ import { VotingStorageWrapper } from "../../../domain/asset/VotingStorageWrapper
 /// @dev Delegates persistence to `VotingStorageWrapper`; access is gated by
 ///      `ROLE_CORPORATE_ACTION` and the standard activation/pause modifiers.
 abstract contract Voting is IVoting, Modifiers {
+    /// @inheritdoc IVoting
+    function initializeVoting()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_VOTING)
+    {
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_VOTING);
+        emit VotingInitialized();
+    }
+
     /// @notice Sets a new voting for the security
     /// @param _newVoting The new voting to be set
     /// @return voteID_ The created voting identifier
