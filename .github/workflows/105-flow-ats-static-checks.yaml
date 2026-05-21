@@ -62,24 +62,51 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          # Use the GitHub API for the diff file list — avoids needing the merge
-          # base locally (the checkout is shallow by default, so `git diff
-          # origin/<base>...HEAD` cannot resolve it).
-          changed=$(gh pr diff "${PR_NUMBER}" --name-only \
-            | grep -E '^(packages/ats/contracts/.*\.sol|packages/ats/contracts/scripts/codegen/.*)$' || true)
+          # Step A — fetch the full PR file list via the paginated API. `gh pr
+          # diff --name-only` returns HTTP 406 on PRs with >300 files, and the
+          # workflow checkout is shallow so a local merge-base diff isn't
+          # viable either.
+          # NB: we explicitly DO NOT chain `|| true` here — the API call must
+          # fail loudly. The previous version silently swallowed a 406 and
+          # produced a false-green "no contracts touched" log line.
+          all_files=$(gh api --paginate "repos/${REPO}/pulls/${PR_NUMBER}/files" --jq '.[].filename')
+          if [[ -z "${all_files}" ]]; then
+            echo "::error::PR ${PR_NUMBER} file list came back empty — API call may have failed silently."
+            exit 1
+          fi
+
+          # Step B — narrow to in-scope files. `grep` exits 1 when no match,
+          # which is a LEGITIMATE skip, not a script error; catch it explicitly
+          # so we can distinguish that case from an upstream failure.
+          set +e
+          changed=$(echo "${all_files}" \
+            | grep -E '^(packages/ats/contracts/.*\.sol|packages/ats/contracts/scripts/codegen/.*)$')
+          grep_rc=$?
+          set -e
+          if [[ ${grep_rc} -gt 1 ]]; then
+            echo "::error::grep failed with rc=${grep_rc} while filtering changed files."
+            exit 1
+          fi
           if [[ -z "${changed}" ]]; then
             echo "No contracts or codegen files touched — skipping label."
             exit 0
           fi
-          # Grep the local working tree (already at PR HEAD) for hash-bearing
-          # signatures in any changed file, OR if any file under scripts/codegen
-          # was touched (formula changes).
+
+          # Step C — decide whether to label. Touching anything under
+          # scripts/codegen counts; otherwise grep the local checked-out files
+          # for hash-bearing signatures.
           if echo "${changed}" | grep -qE 'scripts/codegen/' \
              || grep -lE '@custom:hash|bytes32[[:space:]]+constant[[:space:]]+[A-Z_]+[[:space:]]*=[[:space:]]*0x[0-9a-fA-F]{64}' ${changed} >/dev/null 2>&1; then
             echo "Hash-bearing files were modified — applying 'hash-change' label."
-            gh pr edit "${PR_NUMBER}" --add-label hash-change
+            # Use the REST Labels API directly. `gh pr edit --add-label` works
+            # but its underlying GraphQL query touches the deprecated
+            # `repository.pullRequest.projectCards` field, which makes the gh
+            # CLI exit 1 even when the label is applied successfully.
+            gh api -X POST "repos/${REPO}/issues/${PR_NUMBER}/labels" \
+              -f 'labels[]=hash-change' >/dev/null
           else
             echo "No hash-bearing changes detected."
           fi

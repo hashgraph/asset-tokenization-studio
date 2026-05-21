@@ -866,7 +866,7 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN endDate > maturityDate WHEN setCoupon THEN transaction fails with WrongDates", async () => {
-    await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
     const currentTimestamp = await getDltTimestamp();
     const invalidCoupon = {
       recordDate: currentTimestamp + TIME_PERIODS_S.DAY,
@@ -882,7 +882,7 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN endDate == maturityDate WHEN setCoupon THEN transaction succeeds", async () => {
-    await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
     const currentTimestamp = await getDltTimestamp();
     const validCoupon = {
       recordDate: currentTimestamp + TIME_PERIODS_S.DAY,
@@ -898,7 +898,7 @@ describe("Coupon Tests", () => {
   });
 
   it("GIVEN endDate < maturityDate WHEN setCoupon THEN transaction succeeds", async () => {
-    await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
     const currentTimestamp = await getDltTimestamp();
     const validCoupon = {
       recordDate: currentTimestamp + TIME_PERIODS_S.DAY,
