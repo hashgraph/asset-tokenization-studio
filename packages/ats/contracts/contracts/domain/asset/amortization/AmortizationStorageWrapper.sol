@@ -92,6 +92,16 @@ library AmortizationStorageWrapper {
         success_ = true;
     }
 
+    function forceCancelAmortization(uint256 _amortizationID) internal returns (bool success_) {
+        (, bytes32 corporateActionId, ) = getAmortization(_amortizationID);
+
+        _amortizationStorage().disabledAmortizations[corporateActionId] = true;
+        _amortizationStorage().activeAmortizationIds.remove(_amortizationID);
+        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
+
+        success_ = true;
+    }
+
     function setAmortizationHold(
         uint256 _amortizationID,
         address _tokenHolder,

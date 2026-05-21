@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ICoupon } from "./ICoupon.sol";
 import { ICouponTypes } from "./ICouponTypes.sol";
-import { CORPORATE_ACTION_ROLE } from "../../constants/roles.sol";
+import { CORPORATE_ACTION_ROLE, CORPORATE_ACTION_CANCEL_ADMIN_ROLE } from "../../constants/roles.sol";
 import { COUPON_CORPORATE_ACTION_TYPE } from "../../constants/values.sol";
 import { CouponStorageWrapper } from "../../domain/asset/coupon/CouponStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
@@ -70,6 +70,24 @@ abstract contract Coupon is ICoupon, Modifiers {
     {
         success_ = CouponStorageWrapper.cancelCoupon(_couponID);
         emit ICoupon.CouponCancelled(_couponID, EvmAccessors.getMsgSender());
+    }
+
+    /// @inheritdoc ICoupon
+    /// @dev Restricted to `CORPORATE_ACTION_CANCEL_ADMIN_ROLE`; gated by `onlyUnpaused` and
+    ///      `onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)`.
+    function forceCancelCoupon(
+        uint256 _couponID
+    )
+        external
+        override
+        onlyActivated
+        onlyUnpaused
+        onlyRole(CORPORATE_ACTION_CANCEL_ADMIN_ROLE)
+        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
+        returns (bool success_)
+    {
+        success_ = CouponStorageWrapper.forceCancelCoupon(_couponID);
+        emit ICoupon.CouponForceCancelled(_couponID, EvmAccessors.getMsgSender());
     }
 
     /// @inheritdoc ICoupon

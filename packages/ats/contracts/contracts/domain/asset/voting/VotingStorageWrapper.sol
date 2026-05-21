@@ -62,6 +62,12 @@ library VotingStorageWrapper {
         emit IVoting.VotingCancelled(voteId, EvmAccessors.getMsgSender());
     }
 
+    function forceCancelVoting(uint256 voteId) internal returns (bool success_) {
+        (, bytes32 corporateActionId, ) = getVoting(voteId);
+        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
+        success_ = true;
+    }
+
     function initVotingRights(bytes32 actionId, bytes memory data) internal {
         if (actionId == bytes32(0)) {
             revert IVoting.VotingRightsCreationFailed();

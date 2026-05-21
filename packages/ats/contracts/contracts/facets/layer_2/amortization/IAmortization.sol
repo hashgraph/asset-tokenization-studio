@@ -60,6 +60,17 @@ interface IAmortization is IAmortizationStorageWrapper {
     function cancelAmortization(uint256 _amortizationID) external;
 
     /**
+     * @notice Force-cancels an amortization regardless of its execution date.
+     * @dev Restricted to `CORPORATE_ACTION_CANCEL_ADMIN_ROLE` and gated by the unpaused state,
+     *      `onlyWithoutMultiPartition`, `onlyMatchingActionType`, and
+     *      `onlyNoActiveAmortizationHolds`. Marks the corporate action disabled unconditionally —
+     *      bypasses `AmortizationAlreadyExecuted` and `AmortizationNotActive` — and emits
+     *      `AmortizationForceCancelled`. Active holds must still be released before calling.
+     * @param _amortizationID The ID of the amortization to force-cancel.
+     */
+    function forceCancelAmortization(uint256 _amortizationID) external;
+
+    /**
      * @notice Releases the active hold for a specific token holder in an amortization.
      * @dev Must be called for every holder with an active hold before `cancelAmortization` can succeed.
      *      Reverts if the holder has no active hold for this amortization.

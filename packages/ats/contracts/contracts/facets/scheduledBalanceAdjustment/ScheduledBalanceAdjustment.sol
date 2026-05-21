@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IScheduledBalanceAdjustment } from "./IScheduledBalanceAdjustment.sol";
-import { CORPORATE_ACTION_ROLE } from "../../constants/roles.sol";
+import { CORPORATE_ACTION_ROLE, CORPORATE_ACTION_CANCEL_ADMIN_ROLE } from "../../constants/roles.sol";
 import { BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE } from "../../constants/values.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { EquityStorageWrapper } from "../../domain/asset/EquityStorageWrapper.sol";
@@ -62,6 +62,28 @@ abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, Mod
     {
         EquityStorageWrapper.cancelScheduledBalanceAdjustment(_balanceAdjustmentId);
         emit IScheduledBalanceAdjustment.ScheduledBalanceAdjustmentCancelled(
+            _balanceAdjustmentId,
+            EvmAccessors.getMsgSender()
+        );
+        success_ = true;
+    }
+
+    /// @inheritdoc IScheduledBalanceAdjustment
+    /// @dev Restricted to `CORPORATE_ACTION_CANCEL_ADMIN_ROLE`; gated by `onlyUnpaused` and
+    ///      `notZeroValue(_balanceAdjustmentId)`.
+    function forceCancelBalanceAdjustment(
+        uint256 _balanceAdjustmentId
+    )
+        external
+        override
+        onlyActivated
+        onlyUnpaused
+        onlyRole(CORPORATE_ACTION_CANCEL_ADMIN_ROLE)
+        notZeroValue(_balanceAdjustmentId)
+        returns (bool success_)
+    {
+        EquityStorageWrapper.forceCancelScheduledBalanceAdjustment(_balanceAdjustmentId);
+        emit IScheduledBalanceAdjustment.ScheduledBalanceAdjustmentForceCancelled(
             _balanceAdjustmentId,
             EvmAccessors.getMsgSender()
         );

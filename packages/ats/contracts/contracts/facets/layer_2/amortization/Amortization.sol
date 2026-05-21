@@ -2,10 +2,16 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IAmortization } from "./IAmortization.sol";
-import { AMORTIZATION_ROLE, CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
+import {
+    AMORTIZATION_ROLE,
+    CORPORATE_ACTION_ROLE,
+    CORPORATE_ACTION_CANCEL_ADMIN_ROLE
+} from "../../../constants/roles.sol";
 import { AMORTIZATION_CORPORATE_ACTION_TYPE } from "../../../constants/values.sol";
 import { AmortizationStorageWrapper } from "../../../domain/asset/amortization/AmortizationStorageWrapper.sol";
+import { IAmortizationStorageWrapper } from "../../../domain/asset/amortization/IAmortizationStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract Amortization is IAmortization, Modifiers {
     function setAmortization(
@@ -39,6 +45,26 @@ abstract contract Amortization is IAmortization, Modifiers {
         onlyNoActiveAmortizationHolds(_amortizationID)
     {
         AmortizationStorageWrapper.cancelAmortization(_amortizationID);
+    }
+
+    /// @inheritdoc IAmortization
+    /// @dev Restricted to `CORPORATE_ACTION_CANCEL_ADMIN_ROLE`; gated by `onlyUnpaused`,
+    ///      `onlyWithoutMultiPartition`, `onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE,
+    ///      _amortizationID - 1)`, and `onlyNoActiveAmortizationHolds(_amortizationID)`.
+    function forceCancelAmortization(
+        uint256 _amortizationID
+    )
+        external
+        override
+        onlyActivated
+        onlyUnpaused
+        onlyWithoutMultiPartition
+        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        onlyRole(CORPORATE_ACTION_CANCEL_ADMIN_ROLE)
+        onlyNoActiveAmortizationHolds(_amortizationID)
+    {
+        AmortizationStorageWrapper.forceCancelAmortization(_amortizationID);
+        emit IAmortizationStorageWrapper.AmortizationForceCancelled(_amortizationID, EvmAccessors.getMsgSender());
     }
 
     function releaseAmortizationHold(

@@ -25,6 +25,11 @@ interface IVoting is IVotingTypes {
     /// @param operator The address of the operator who cancelled the voting
     event VotingCancelled(uint256 voteId, address indexed operator);
 
+    /// @notice Emitted when an admin force-cancels a voting, bypassing date guards
+    /// @param voteId The ID of the force-cancelled voting
+    /// @param operator The address of the operator who force-cancelled the voting
+    event VotingForceCancelled(uint256 voteId, address indexed operator);
+
     /// @notice Raised when voting rights creation fails
     error VotingRightsCreationFailed();
 
@@ -42,6 +47,14 @@ interface IVoting is IVotingTypes {
     /// @param _voteId The ID of the voting to be cancelled
     /// @return success_ Whether the cancellation was successful
     function cancelVoting(uint256 _voteId) external returns (bool success_);
+
+    /// @notice Force-cancels a voting regardless of its record date
+    /// @dev Restricted to `CORPORATE_ACTION_CANCEL_ADMIN_ROLE` and gated by the unpaused state
+    ///      and `onlyMatchingActionType`. Marks the corporate action disabled unconditionally —
+    ///      bypasses `VotingAlreadyRecorded` — and emits `VotingForceCancelled`.
+    /// @param _voteId The ID of the voting to force-cancel
+    /// @return success_ Whether the force-cancellation was successful
+    function forceCancelVoting(uint256 _voteId) external returns (bool success_);
 
     /// @notice Retrieves a registered voting by its ID
     /// @param _voteID The ID of the voting to retrieve

@@ -3,9 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IVoting } from "./IVoting.sol";
 import { IVotingTypes } from "./IVotingTypes.sol";
-import { CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
+import { CORPORATE_ACTION_ROLE, CORPORATE_ACTION_CANCEL_ADMIN_ROLE } from "../../../constants/roles.sol";
 import { VOTING_RIGHTS_CORPORATE_ACTION_TYPE } from "../../../constants/values.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 import { VotingStorageWrapper } from "../../../domain/asset/voting/VotingStorageWrapper.sol";
 
 /// @title Voting
@@ -43,6 +44,24 @@ abstract contract Voting is IVoting, Modifiers {
         returns (bool success_)
     {
         success_ = VotingStorageWrapper.cancelVoting(_voteId);
+    }
+
+    /// @inheritdoc IVoting
+    /// @dev Restricted to `CORPORATE_ACTION_CANCEL_ADMIN_ROLE`; gated by `onlyUnpaused` and
+    ///      `onlyMatchingActionType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteId - 1)`.
+    function forceCancelVoting(
+        uint256 _voteId
+    )
+        external
+        override
+        onlyActivated
+        onlyUnpaused
+        onlyRole(CORPORATE_ACTION_CANCEL_ADMIN_ROLE)
+        onlyMatchingActionType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteId - 1)
+        returns (bool success_)
+    {
+        success_ = VotingStorageWrapper.forceCancelVoting(_voteId);
+        emit IVoting.VotingForceCancelled(_voteId, EvmAccessors.getMsgSender());
     }
 
     /// @notice Retrieves a registered voting by its ID

@@ -34,6 +34,7 @@ contract CouponFacet is Coupon, IStaticFunctionSelectors {
             Bytes4Builder.build(
                 this.setCoupon.selector,
                 this.cancelCoupon.selector,
+                this.forceCancelCoupon.selector,
                 this.getCoupon.selector,
                 this.getCouponFor.selector,
                 this.getCouponAmountFor.selector,

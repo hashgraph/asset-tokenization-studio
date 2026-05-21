@@ -82,6 +82,13 @@ library CouponStorageWrapper {
         success_ = true;
     }
 
+    function forceCancelCoupon(uint256 couponId) internal returns (bool success_) {
+        bytes32 corporateActionId;
+        (, corporateActionId, ) = getCoupon(couponId);
+        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
+        success_ = true;
+    }
+
     function initCoupon(bytes32 actionId, ICouponTypes.Coupon memory newCoupon) internal {
         if (actionId == bytes32(0)) {
             revert ICoupon.CouponCreationFailed();

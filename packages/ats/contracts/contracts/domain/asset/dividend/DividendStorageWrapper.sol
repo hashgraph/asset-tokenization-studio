@@ -85,6 +85,12 @@ library DividendStorageWrapper {
         emit IDividend.DividendCancelled(dividendId, EvmAccessors.getMsgSender());
     }
 
+    function forceCancelDividend(uint256 dividendId) internal returns (bool success_) {
+        (, bytes32 corporateActionId, ) = getDividend(dividendId);
+        CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
+        success_ = true;
+    }
+
     /**
      * @notice Initialises scheduled tasks for a newly created dividend corporate
      *         action.

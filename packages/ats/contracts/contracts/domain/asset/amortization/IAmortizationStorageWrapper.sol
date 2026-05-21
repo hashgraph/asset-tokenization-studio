@@ -30,6 +30,13 @@ interface IAmortizationStorageWrapper {
     event AmortizationCancelled(uint256 amortizationId, address indexed operator);
 
     /**
+     * @notice Emitted when an admin force-cancels an amortization, bypassing date guards.
+     * @param amortizationId Identifier of the force-cancelled amortization.
+     * @param operator Address that performed the force-cancellation.
+     */
+    event AmortizationForceCancelled(uint256 amortizationId, address indexed operator);
+
+    /**
      * @notice Emitted when a hold is created or replaced for a token holder in an amortization.
      * @param corporateActionId Unique identifier grouping related corporate actions.
      * @param amortizationID Identifier of the amortization.

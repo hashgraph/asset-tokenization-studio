@@ -31,6 +31,7 @@ contract DividendFacet is Dividend, IStaticFunctionSelectors {
             Bytes4Builder.build(
                 this.setDividend.selector,
                 this.cancelDividend.selector,
+                this.forceCancelDividend.selector,
                 this.getDividend.selector,
                 this.getDividendFor.selector,
                 this.getDividendAmountFor.selector,
