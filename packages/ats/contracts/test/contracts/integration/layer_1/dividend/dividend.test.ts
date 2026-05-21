@@ -10,8 +10,9 @@ import {
   EMPTY_HEX_BYTES,
   dateToUnixTimestamp,
   EMPTY_STRING,
+  EQUITY_CONFIG_ID,
 } from "@scripts";
-import { MAX_UINT256, deployEquityTokenFixture, executeRbac } from "@test";
+import { MAX_UINT256, deployEquityTokenFixture, deployAtsInfrastructureFixture, executeRbac } from "@test";
 import { ethers } from "hardhat";
 import { grantRoleAndPauseToken } from "../../../../fixtures/hardhatHelpers";
 
@@ -641,27 +642,46 @@ describe("Dividends", () => {
 
   describe("initializeDividend", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeDividend is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeDividend()).to.be.revertedWithCustomError(
-        asset,
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(signer_C).initializeDividend()).to.be.revertedWithCustomError(
+        freshAsset,
         "AccountHasNoRole",
       );
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeDividend();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeDividend is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeDividend()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
+    it("GIVEN an already-initialised facet WHEN initializeDividend is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await freshAsset.connect(infra.deployer).initializeDividend();
+      await expect(freshAsset.connect(infra.deployer).initializeDividend()).to.be.revertedWithCustomError(
+        freshAsset,
+        "FacetAlreadyRegistered",
+      );
     });
 
     it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeDividend is called THEN it emits DividendInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeDividend()).to.emit(asset, "DividendInitialized");
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(infra.deployer).initializeDividend()).to.emit(freshAsset, "DividendInitialized");
     });
   });
 });

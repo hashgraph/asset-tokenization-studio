@@ -4,9 +4,17 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployEquityTokenFixture } from "@test";
+import { deployAtsInfrastructureFixture, deployEquityTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
-import { DEFAULT_PARTITION, EMPTY_STRING, ZERO, EMPTY_HEX_BYTES, ADDRESS_ZERO, ATS_ROLES } from "@scripts";
+import {
+  DEFAULT_PARTITION,
+  EMPTY_STRING,
+  ZERO,
+  EMPTY_HEX_BYTES,
+  ADDRESS_ZERO,
+  ATS_ROLES,
+  EQUITY_CONFIG_ID,
+} from "@scripts";
 import { ResolverProxy, IAsset, IHoldTypes } from "@contract-types";
 
 const _WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
@@ -344,46 +352,47 @@ describe("ControllerHoldByPartition Tests", () => {
     });
   });
   describe("initializeControllerHoldByPartition", () => {
-    let initAsset: IAsset;
-    let initSigner_A: HardhatEthersSigner;
-    let initSigner_D: HardhatEthersSigner;
-
-    beforeEach(async () => {
-      const base = await deployEquityTokenFixture();
-      initSigner_A = base.deployer;
-      initSigner_D = base.user3;
-      initAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await executeRbac(initAsset, [
-        { role: ATS_ROLES.PAUSER_ROLE, members: [initSigner_D.address] },
-        { role: ATS_ROLES.KYC_ROLE, members: [initSigner_D.address] },
-        { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [initSigner_A.address] },
-        { role: ATS_ROLES.CLEARING_ROLE, members: [initSigner_A.address] },
-        { role: ATS_ROLES.CORPORATE_ACTION_ROLE, members: [initSigner_A.address] },
-      ]);
-    });
-
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeControllerHoldByPartition is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(initAsset.connect(initSigner_D).initializeControllerHoldByPartition()).to.be.revertedWithCustomError(
-        initAsset,
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(signer_D).initializeControllerHoldByPartition()).to.be.revertedWithCustomError(
+        freshAsset,
         "AccountHasNoRole",
       );
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await initAsset.connect(initSigner_A).initializeControllerHoldByPartition();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeControllerHoldByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(
-          initAsset.connect(initSigner_A).initializeControllerHoldByPartition(),
-        ).to.be.revertedWithCustomError(initAsset, "FacetAlreadyRegistered");
-      });
+    it("GIVEN an already-initialised facet WHEN initializeControllerHoldByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await freshAsset.connect(infra.deployer).initializeControllerHoldByPartition();
+      await expect(
+        freshAsset.connect(infra.deployer).initializeControllerHoldByPartition(),
+      ).to.be.revertedWithCustomError(freshAsset, "FacetAlreadyRegistered");
     });
 
     it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeControllerHoldByPartition is called THEN it emits ControllerHoldByPartitionInitialized", async () => {
-      await expect(initAsset.connect(initSigner_A).initializeControllerHoldByPartition()).to.emit(
-        initAsset,
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(infra.deployer).initializeControllerHoldByPartition()).to.emit(
+        freshAsset,
         "ControllerHoldByPartitionInitialized",
       );
     });

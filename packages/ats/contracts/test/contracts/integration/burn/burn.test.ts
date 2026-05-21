@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type IAsset, type ResolverProxy } from "@contract-types";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO } from "@scripts";
+import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO, EQUITY_CONFIG_ID } from "@scripts";
 
 const AMOUNT = 1000;
 const BALANCE_OF_C_ORIGINAL = 2 * AMOUNT;
@@ -476,39 +476,47 @@ describe("Burn Tests", () => {
     });
   });
   describe("initializeBurn", () => {
-    let initAsset: IAsset;
-    let initSigner_A: HardhatEthersSigner;
-    let initSigner_D: HardhatEthersSigner;
-
-    beforeEach(async () => {
-      const base = await deployEquityTokenFixture();
-      initSigner_A = base.deployer;
-      initSigner_D = base.user3;
-      initAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-    });
-
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeBurn is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(initAsset.connect(initSigner_D).initializeBurn()).to.be.revertedWithCustomError(
-        initAsset,
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(infra.user3).initializeBurn()).to.be.revertedWithCustomError(
+        freshAsset,
         "AccountHasNoRole",
       );
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await initAsset.connect(initSigner_A).initializeBurn();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeBurn is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(initAsset.connect(initSigner_A).initializeBurn()).to.be.revertedWithCustomError(
-          initAsset,
-          "FacetAlreadyRegistered",
-        );
-      });
+    it("GIVEN an already-initialised facet WHEN initializeBurn is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await freshAsset.connect(infra.deployer).initializeBurn();
+      await expect(freshAsset.connect(infra.deployer).initializeBurn()).to.be.revertedWithCustomError(
+        freshAsset,
+        "FacetAlreadyRegistered",
+      );
     });
 
     it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeBurn is called THEN it emits BurnInitialized", async () => {
-      await expect(initAsset.connect(initSigner_A).initializeBurn()).to.emit(initAsset, "BurnInitialized");
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(infra.deployer).initializeBurn()).to.emit(freshAsset, "BurnInitialized");
     });
   });
 });

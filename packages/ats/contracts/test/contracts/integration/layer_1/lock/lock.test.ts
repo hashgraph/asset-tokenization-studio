@@ -6,10 +6,10 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { type ResolverProxy, type IAsset } from "@contract-types";
 
-import { deployEquityTokenFixture } from "@test";
+import { deployEquityTokenFixture, deployAtsInfrastructureFixture } from "@test";
 
 import { executeRbac, MAX_UINT256 } from "@test";
-import { EMPTY_STRING, ATS_ROLES, ZERO } from "@scripts";
+import { EMPTY_STRING, ATS_ROLES, ZERO, EQUITY_CONFIG_ID } from "@scripts";
 import { Rbac } from "@scripts/domain";
 
 const _NON_DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000011";
@@ -298,29 +298,47 @@ describe("Lock Tests", () => {
   });
 
   describe("initializeLock", () => {
-    beforeEach(async () => {
-      await loadFixture(deploySecurityFixtureSinglePartition);
-    });
-
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeLock is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeLock()).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(signer_C).initializeLock()).to.be.revertedWithCustomError(
+        freshAsset,
+        "AccountHasNoRole",
+      );
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeLock();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeLock is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeLock()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
+    it("GIVEN an already-initialised facet WHEN initializeLock is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await freshAsset.connect(infra.deployer).initializeLock();
+      await expect(freshAsset.connect(infra.deployer).initializeLock()).to.be.revertedWithCustomError(
+        freshAsset,
+        "FacetAlreadyRegistered",
+      );
     });
 
     it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeLock is called THEN it emits LockInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeLock()).to.emit(asset, "LockInitialized");
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(infra.deployer).initializeLock()).to.emit(freshAsset, "LockInitialized");
     });
   });
 });

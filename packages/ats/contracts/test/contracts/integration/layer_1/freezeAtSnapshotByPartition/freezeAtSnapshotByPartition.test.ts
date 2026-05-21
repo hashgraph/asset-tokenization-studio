@@ -4,9 +4,9 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ZERO, EMPTY_STRING, ATS_ROLES } from "@scripts";
+import { ZERO, EMPTY_STRING, ATS_ROLES, EQUITY_CONFIG_ID } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
+import { deployEquityTokenFixture, deployAtsInfrastructureFixture, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
 
 const balanceOf_C_Original = 2000;
@@ -112,28 +112,46 @@ describe("FreezeAtSnapshotByPartition Tests", () => {
 
   describe("initializeFreezeAtSnapshotByPartition", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeFreezeAtSnapshotByPartition is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeFreezeAtSnapshotByPartition()).to.be.revertedWithCustomError(
-        asset,
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(signer_C).initializeFreezeAtSnapshotByPartition()).to.be.revertedWithCustomError(
+        freshAsset,
         "AccountHasNoRole",
       );
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeFreezeAtSnapshotByPartition();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeFreezeAtSnapshotByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeFreezeAtSnapshotByPartition()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
+    it("GIVEN an already-initialised facet WHEN initializeFreezeAtSnapshotByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await freshAsset.connect(infra.deployer).initializeFreezeAtSnapshotByPartition();
+      await expect(
+        freshAsset.connect(infra.deployer).initializeFreezeAtSnapshotByPartition(),
+      ).to.be.revertedWithCustomError(freshAsset, "FacetAlreadyRegistered");
     });
 
     it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeFreezeAtSnapshotByPartition is called THEN it emits FreezeAtSnapshotByPartitionInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeFreezeAtSnapshotByPartition()).to.emit(
-        asset,
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(infra.deployer).initializeFreezeAtSnapshotByPartition()).to.emit(
+        freshAsset,
         "FreezeAtSnapshotByPartitionInitialized",
       );
     });

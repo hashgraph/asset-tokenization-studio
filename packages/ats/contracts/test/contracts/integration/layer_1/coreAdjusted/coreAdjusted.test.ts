@@ -5,8 +5,8 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ATS_ROLES } from "@scripts";
-import { deployEquityTokenFixture, executeRbac } from "@test";
+import { ATS_ROLES, EQUITY_CONFIG_ID } from "@scripts";
+import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac } from "@test";
 
 const decimals = 6;
 const decimalAdjustment = 2;
@@ -72,27 +72,49 @@ describe("CoreAdjusted Facet Tests", () => {
   });
   describe("initializeCoreAdjusted", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeCoreAdjusted is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_B).initializeCoreAdjusted()).to.be.revertedWithCustomError(
-        asset,
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(signer_B).initializeCoreAdjusted()).to.be.revertedWithCustomError(
+        freshAsset,
         "AccountHasNoRole",
       );
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeCoreAdjusted();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeCoreAdjusted is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeCoreAdjusted()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
+    it("GIVEN an already-initialised facet WHEN initializeCoreAdjusted is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await freshAsset.connect(infra.deployer).initializeCoreAdjusted();
+      await expect(freshAsset.connect(infra.deployer).initializeCoreAdjusted()).to.be.revertedWithCustomError(
+        freshAsset,
+        "FacetAlreadyRegistered",
+      );
     });
 
     it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeCoreAdjusted is called THEN it emits CoreAdjustedInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeCoreAdjusted()).to.emit(asset, "CoreAdjustedInitialized");
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(infra.deployer).initializeCoreAdjusted()).to.emit(
+        freshAsset,
+        "CoreAdjustedInitialized",
+      );
     });
   });
 });

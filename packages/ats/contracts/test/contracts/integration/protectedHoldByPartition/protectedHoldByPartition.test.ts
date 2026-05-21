@@ -4,9 +4,9 @@ import { expect } from "chai";
 import { ethers, network } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployEquityTokenFixture } from "@test";
+import { deployAtsInfrastructureFixture, deployEquityTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
-import { DEFAULT_PARTITION, EMPTY_STRING, ZERO, ADDRESS_ZERO, ATS_ROLES } from "@scripts";
+import { DEFAULT_PARTITION, EMPTY_STRING, EQUITY_CONFIG_ID, ZERO, ADDRESS_ZERO, ATS_ROLES } from "@scripts";
 import { ResolverProxy, IAsset } from "@contract-types";
 
 interface HoldData {
@@ -627,36 +627,47 @@ describe("ProtectedHoldByPartition Tests", () => {
   });
 
   describe("initializeProtectedHoldByPartition", () => {
-    beforeEach(async () => {
-      const base = await deployEquityTokenFixture();
-      signer_A = base.deployer;
-      signer_C = base.user2;
-      asset = await ethers.getContractAt("IAsset", base.diamond.target, signer_A);
-    });
-
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeProtectedHoldByPartition is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeProtectedHoldByPartition()).to.be.revertedWithCustomError(
-        asset,
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(signer_C).initializeProtectedHoldByPartition()).to.be.revertedWithCustomError(
+        freshAsset,
         "AccountHasNoRole",
       );
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeProtectedHoldByPartition();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeProtectedHoldByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeProtectedHoldByPartition()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
+    it("GIVEN an already-initialised facet WHEN initializeProtectedHoldByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await freshAsset.connect(infra.deployer).initializeProtectedHoldByPartition();
+      await expect(
+        freshAsset.connect(infra.deployer).initializeProtectedHoldByPartition(),
+      ).to.be.revertedWithCustomError(freshAsset, "FacetAlreadyRegistered");
     });
 
     it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeProtectedHoldByPartition is called THEN it emits ProtectedHoldByPartitionInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeProtectedHoldByPartition()).to.emit(
-        asset,
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(infra.deployer).initializeProtectedHoldByPartition()).to.emit(
+        freshAsset,
         "ProtectedHoldByPartitionInitialized",
       );
     });

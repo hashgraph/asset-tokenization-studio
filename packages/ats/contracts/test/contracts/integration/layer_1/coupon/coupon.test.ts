@@ -7,6 +7,7 @@ import { ResolverProxy, type IAsset } from "@contract-types";
 import {
   DEFAULT_PARTITION,
   ATS_ROLES,
+  BOND_CONFIG_ID,
   TIME_PERIODS_S,
   ADDRESS_ZERO,
   ZERO,
@@ -15,6 +16,7 @@ import {
 } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import {
+  deployAtsInfrastructureFixture,
   getDltTimestamp,
   grantRoleAndPauseToken,
   deployBondTokenFixture,
@@ -945,24 +947,46 @@ describe("Coupon Tests", () => {
   });
   describe("initializeCoupon", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeCoupon is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_D).initializeCoupon()).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, BOND_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(signer_D).initializeCoupon()).to.be.revertedWithCustomError(
+        freshAsset,
+        "AccountHasNoRole",
+      );
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeCoupon();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeCoupon is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeCoupon()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
+    it("GIVEN an already-initialised facet WHEN initializeCoupon is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, BOND_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await freshAsset.connect(infra.deployer).initializeCoupon();
+      await expect(freshAsset.connect(infra.deployer).initializeCoupon()).to.be.revertedWithCustomError(
+        freshAsset,
+        "FacetAlreadyRegistered",
+      );
     });
 
     it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeCoupon is called THEN it emits CouponInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeCoupon()).to.emit(asset, "CouponInitialized");
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, BOND_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(infra.deployer).initializeCoupon()).to.emit(freshAsset, "CouponInitialized");
     });
   });
 });

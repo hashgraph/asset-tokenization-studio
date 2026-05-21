@@ -5,9 +5,9 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { IAsset, type ResolverProxy } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployEquityTokenFixture } from "@test";
+import { deployAtsInfrastructureFixture, deployEquityTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
-import { EMPTY_STRING, ATS_ROLES, ZERO } from "@scripts";
+import { EMPTY_STRING, ATS_ROLES, ZERO, EQUITY_CONFIG_ID } from "@scripts";
 
 const AMOUNT = 1000;
 const MAX_SUPPLY = 10000000;
@@ -187,29 +187,50 @@ describe("BatchMint Tests", () => {
     });
   });
   describe("initializeBatchMint", () => {
-    it("GIVEN an already-initialised facet WHEN initializeBatchMint is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-      const base = await deployEquityTokenFixture();
-      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await freshAsset.connect(base.deployer).initializeBatchMint();
-      await expect(freshAsset.connect(base.deployer).initializeBatchMint()).to.be.revertedWithCustomError(
-        freshAsset,
-        "FacetAlreadyRegistered",
-      );
-    });
-
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeBatchMint is called THEN it reverts with AccountHasNoRole", async () => {
-      const base = await deployEquityTokenFixture();
-      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await expect(freshAsset.connect(base.user3).initializeBatchMint()).to.be.revertedWithCustomError(
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(infra.user3).initializeBatchMint()).to.be.revertedWithCustomError(
         freshAsset,
         "AccountHasNoRole",
       );
     });
 
-    it("GIVEN a fresh deployment WHEN initializeBatchMint is called THEN it emits BatchMintInitialized", async () => {
-      const base = await deployEquityTokenFixture();
-      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await expect(freshAsset.connect(base.deployer).initializeBatchMint()).to.emit(freshAsset, "BatchMintInitialized");
+    it("GIVEN an already-initialised facet WHEN initializeBatchMint is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await freshAsset.connect(infra.deployer).initializeBatchMint();
+      await expect(freshAsset.connect(infra.deployer).initializeBatchMint()).to.be.revertedWithCustomError(
+        freshAsset,
+        "FacetAlreadyRegistered",
+      );
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeBatchMint is called THEN it emits BatchMintInitialized", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(infra.deployer).initializeBatchMint()).to.emit(
+        freshAsset,
+        "BatchMintInitialized",
+      );
     });
   });
 });

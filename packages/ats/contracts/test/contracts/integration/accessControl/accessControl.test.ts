@@ -3,8 +3,8 @@
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ATS_ROLES } from "@scripts";
-import { deployEquityTokenFixture } from "@test";
+import { ATS_ROLES, EQUITY_CONFIG_ID } from "@scripts";
+import { deployAtsInfrastructureFixture, deployEquityTokenFixture } from "@test";
 import { executeRbac } from "@test";
 import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -362,42 +362,46 @@ describe("Access Control Tests", () => {
 
   describe("initializeAccessControl", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeAccessControl is called THEN it reverts with AccountHasNoRole", async () => {
-      // Must use fresh deployment since onlyFacetNotRegistered is checked before onlyRole
-      const base = await deployEquityTokenFixture();
-      const freshDiamond = base.diamond;
-      const freshAsset = await ethers.getContractAt("IAsset", freshDiamond.target);
-
-      await expect(freshAsset.connect(unknownSigner).initializeAccessControl()).to.be.revertedWithCustomError(
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(signer_C).initializeAccessControl()).to.be.revertedWithCustomError(
         freshAsset,
         "AccountHasNoRole",
       );
     });
 
     it("GIVEN an already-initialised facet WHEN initializeAccessControl is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-      const base = await deployEquityTokenFixture();
-      const freshDiamond = base.diamond;
-      const freshAsset = await ethers.getContractAt("IAsset", freshDiamond.target);
-      const freshDeployer = base.deployer;
-
-      // Initialize first
-      await freshAsset.connect(freshDeployer).initializeAccessControl();
-
-      // Try again
-      await expect(freshAsset.initializeAccessControl()).to.be.revertedWithCustomError(
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await freshAsset.connect(infra.deployer).initializeAccessControl();
+      await expect(freshAsset.connect(infra.deployer).initializeAccessControl()).to.be.revertedWithCustomError(
         freshAsset,
         "FacetAlreadyRegistered",
       );
     });
-  });
 
-  describe("initializeAccessControl event", () => {
-    it("GIVEN a fresh deployment WHEN initializeAccessControl is called THEN it emits AccessControlInitialized", async () => {
-      const base = await deployEquityTokenFixture();
-      const freshDiamond = base.diamond;
-      const freshAsset = await ethers.getContractAt("IAsset", freshDiamond.target);
-      const freshDeployer = base.deployer;
-
-      await expect(freshAsset.connect(freshDeployer).initializeAccessControl()).to.emit(
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeAccessControl is called THEN it emits AccessControlInitialized", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(infra.deployer).initializeAccessControl()).to.emit(
         freshAsset,
         "AccessControlInitialized",
       );

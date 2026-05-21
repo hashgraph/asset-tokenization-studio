@@ -4,8 +4,23 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { ResolverProxy, type IAsset } from "@contract-types";
-import { DEFAULT_PARTITION, ATS_ROLES, TIME_PERIODS_S, ADDRESS_ZERO, ZERO, EMPTY_STRING } from "@scripts";
-import { getDltTimestamp, grantRoleAndPauseToken, deployBondTokenFixture, executeRbac, MAX_UINT256 } from "@test";
+import {
+  DEFAULT_PARTITION,
+  ATS_ROLES,
+  TIME_PERIODS_S,
+  ADDRESS_ZERO,
+  ZERO,
+  EMPTY_STRING,
+  BOND_CONFIG_ID,
+} from "@scripts";
+import {
+  getDltTimestamp,
+  grantRoleAndPauseToken,
+  deployBondTokenFixture,
+  deployAtsInfrastructureFixture,
+  executeRbac,
+  MAX_UINT256,
+} from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 const numberOfUnits = 1000;
@@ -322,32 +337,47 @@ describe("Maturity Tests", () => {
   });
 
   describe("initializeMaturity", () => {
-    beforeEach(async () => {
-      await loadFixture(deploySecurityFixture);
-    });
-
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeMaturity is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeMaturity()).to.be.revertedWithCustomError(
-        asset,
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, BOND_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(signer_C).initializeMaturity()).to.be.revertedWithCustomError(
+        freshAsset,
         "AccountHasNoRole",
       );
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeMaturity();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeMaturity is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeMaturity()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
+    it("GIVEN an already-initialised facet WHEN initializeMaturity is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, BOND_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await freshAsset.connect(infra.deployer).initializeMaturity();
+      await expect(freshAsset.connect(infra.deployer).initializeMaturity()).to.be.revertedWithCustomError(
+        freshAsset,
+        "FacetAlreadyRegistered",
+      );
     });
 
     it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeMaturity is called THEN it emits MaturityInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeMaturity()).to.emit(asset, "MaturityInitialized");
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, BOND_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(infra.deployer).initializeMaturity()).to.emit(freshAsset, "MaturityInitialized");
     });
   });
 });

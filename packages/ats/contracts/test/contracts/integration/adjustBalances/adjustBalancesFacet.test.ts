@@ -4,8 +4,15 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset } from "@contract-types";
-import { DEFAULT_PARTITION, ATS_ROLES, ZERO, dateToUnixTimestamp } from "@scripts";
-import { deployEquityTokenFixture, executeRbac, grantRoleAndPauseToken, MAX_UINT256, MAX_UINT8 } from "@test";
+import { DEFAULT_PARTITION, ATS_ROLES, ZERO, dateToUnixTimestamp, EQUITY_CONFIG_ID } from "@scripts";
+import {
+  deployAtsInfrastructureFixture,
+  deployEquityTokenFixture,
+  executeRbac,
+  grantRoleAndPauseToken,
+  MAX_UINT256,
+  MAX_UINT8,
+} from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 const EMPTY_VC_ID = "";
@@ -645,29 +652,47 @@ describe("AdjustBalancesFacet Tests", () => {
     });
   });
   describe("initializeBalanceAdjustments", () => {
-    it("GIVEN an already-initialised facet WHEN initializeBalanceAdjustments is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-      const base = await deployEquityTokenFixture();
-      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await freshAsset.connect(base.deployer).initializeBalanceAdjustments();
-      await expect(freshAsset.connect(base.deployer).initializeBalanceAdjustments()).to.be.revertedWithCustomError(
-        freshAsset,
-        "FacetAlreadyRegistered",
-      );
-    });
-
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeBalanceAdjustments is called THEN it reverts with AccountHasNoRole", async () => {
-      const base = await deployEquityTokenFixture();
-      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await expect(freshAsset.connect(base.user3).initializeBalanceAdjustments()).to.be.revertedWithCustomError(
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(signer_C).initializeBalanceAdjustments()).to.be.revertedWithCustomError(
         freshAsset,
         "AccountHasNoRole",
       );
     });
 
-    it("GIVEN a fresh deployment WHEN initializeBalanceAdjustments is called THEN it emits BalanceAdjustmentsInitialized", async () => {
-      const base = await deployEquityTokenFixture();
-      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await expect(freshAsset.connect(base.deployer).initializeBalanceAdjustments()).to.emit(
+    it("GIVEN an already-initialised facet WHEN initializeBalanceAdjustments is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await freshAsset.connect(infra.deployer).initializeBalanceAdjustments();
+      await expect(freshAsset.connect(infra.deployer).initializeBalanceAdjustments()).to.be.revertedWithCustomError(
+        freshAsset,
+        "FacetAlreadyRegistered",
+      );
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeBalanceAdjustments is called THEN it emits BalanceAdjustmentsInitialized", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(infra.deployer).initializeBalanceAdjustments()).to.emit(
         freshAsset,
         "BalanceAdjustmentsInitialized",
       );

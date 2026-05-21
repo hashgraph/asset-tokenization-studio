@@ -5,8 +5,8 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { type IAsset, type ResolverProxy } from "@contract-types";
-import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
-import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
+import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, EMPTY_STRING, EQUITY_CONFIG_ID, ZERO } from "@scripts";
+import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
 const AMOUNT = 1000;
@@ -330,36 +330,48 @@ describe("OperatorByPartitionFacet Tests", () => {
   });
 
   describe("initializeOperatorByPartition", () => {
-    beforeEach(async () => {
-      const base = await deployEquityTokenFixture();
-      signer_A = base.deployer;
-      signer_C = base.user2;
-      asset = await ethers.getContractAt("IAsset", base.diamond.target, signer_A);
-    });
-
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeOperatorByPartition is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeOperatorByPartition()).to.be.revertedWithCustomError(
-        asset,
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(signer_C).initializeOperatorByPartition()).to.be.revertedWithCustomError(
+        freshAsset,
         "AccountHasNoRole",
       );
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeOperatorByPartition();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeOperatorByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeOperatorByPartition()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
+    it("GIVEN an already-initialised facet WHEN initializeOperatorByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await freshAsset.connect(infra.deployer).initializeOperatorByPartition();
+      await expect(freshAsset.connect(infra.deployer).initializeOperatorByPartition()).to.be.revertedWithCustomError(
+        freshAsset,
+        "FacetAlreadyRegistered",
+      );
     });
 
     it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeOperatorByPartition is called THEN it emits OperatorByPartitionInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeOperatorByPartition()).to.emit(
-        asset,
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(infra.deployer).initializeOperatorByPartition()).to.emit(
+        freshAsset,
         "OperatorByPartitionInitialized",
       );
     });

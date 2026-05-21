@@ -4,7 +4,9 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset } from "@contract-types";
-import { deployEquityTokenFixture } from "@test";
+import { ATS_ROLES, EQUITY_CONFIG_ID } from "@scripts";
+import { deployAtsInfrastructureFixture, deployEquityTokenFixture } from "@test";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 describe("EIP712 Tests", () => {
   let diamond: ResolverProxy;
@@ -42,24 +44,46 @@ describe("EIP712 Tests", () => {
 
   describe("initializeEIP712", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeEIP712 is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(nonAdmin).initializeEIP712()).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(nonAdmin).initializeEIP712()).to.be.revertedWithCustomError(
+        freshAsset,
+        "AccountHasNoRole",
+      );
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeEIP712();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeEIP712 is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeEIP712()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
+    it("GIVEN an already-initialised facet WHEN initializeEIP712 is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await freshAsset.connect(infra.deployer).initializeEIP712();
+      await expect(freshAsset.connect(infra.deployer).initializeEIP712()).to.be.revertedWithCustomError(
+        freshAsset,
+        "FacetAlreadyRegistered",
+      );
     });
 
     it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeEIP712 is called THEN it emits EIP712Initialized", async () => {
-      await expect(asset.connect(signer_A).initializeEIP712()).to.emit(asset, "EIP712Initialized");
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const proxyReceipt = await proxyTx.wait();
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(infra.deployer).initializeEIP712()).to.emit(freshAsset, "EIP712Initialized");
     });
   });
 });
