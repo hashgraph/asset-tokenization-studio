@@ -1514,4 +1514,34 @@ describe("AmortizationFacet", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
+
+  describe("initializeAmortization", () => {
+    beforeEach(async () => {
+      await loadFixture(deployAmortizationLoanFixture);
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeAmortization is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(user2).initializeAmortization()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(deployer).initializeAmortization();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeAmortization is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(deployer).initializeAmortization()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeAmortization is called THEN it emits AmortizationInitialized", async () => {
+      await expect(asset.connect(deployer).initializeAmortization()).to.emit(asset, "AmortizationInitialized");
+    });
+  });
 });

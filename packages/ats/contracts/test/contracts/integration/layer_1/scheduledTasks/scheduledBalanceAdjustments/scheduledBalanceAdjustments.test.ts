@@ -149,4 +149,33 @@ describe("Scheduled BalanceAdjustments Tests", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
+
+  describe("initializeScheduledBalanceAdjustment", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeScheduledBalanceAdjustment is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeScheduledBalanceAdjustment()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_A).initializeScheduledBalanceAdjustment();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeScheduledBalanceAdjustment is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(signer_A).initializeScheduledBalanceAdjustment()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeScheduledBalanceAdjustment is called THEN it emits ScheduledBalanceAdjustmentInitialized", async () => {
+      await expect(asset.connect(signer_A).initializeScheduledBalanceAdjustment()).to.emit(
+        asset,
+        "ScheduledBalanceAdjustmentInitialized",
+      );
+    });
+  });
 });

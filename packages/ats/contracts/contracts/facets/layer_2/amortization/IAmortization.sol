@@ -40,6 +40,18 @@ interface IAmortization is IAmortizationStorageWrapper {
         uint256 nominalValue; // face value of the token
         uint8 nominalValueDecimals; // decimals of the nominal value
     }
+    /**
+     * @notice Emitted once when the amortization capability is initialised on a token.
+     * @dev Fires exclusively from `initializeAmortization`.
+     */
+    event AmortizationInitialized();
+
+    /**
+     * @notice Initialises the amortization capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeAmortization() external;
 
     /**
      * @notice Sets a new amortization for the security.

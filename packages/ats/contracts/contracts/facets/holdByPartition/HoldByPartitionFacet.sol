@@ -29,6 +29,7 @@ contract HoldByPartitionFacet is HoldByPartition, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeHoldByPartition.selector,
                 this.createHoldByPartition.selector,
                 this.createHoldFromByPartition.selector,
                 this.executeHoldByPartition.selector,

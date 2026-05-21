@@ -6,8 +6,22 @@ import { AMORTIZATION_ROLE, CORPORATE_ACTION_ROLE } from "../../../constants/rol
 import { AMORTIZATION_CORPORATE_ACTION_TYPE } from "../../../constants/values.sol";
 import { AmortizationStorageWrapper } from "../../../domain/asset/amortization/AmortizationStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
+import { _AMORTIZATION_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
 abstract contract Amortization is IAmortization, Modifiers {
+    /// @inheritdoc IAmortization
+    function initializeAmortization()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_AMORTIZATION_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_AMORTIZATION_RESOLVER_KEY);
+        emit AmortizationInitialized();
+    }
+
     function setAmortization(
         IAmortization.Amortization calldata _amortization
     )
