@@ -14,6 +14,19 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface ILockAtSnapshot {
     /**
+     * @notice Emitted once when the lock-at-snapshot capability is initialised on a token.
+     * @dev Fires exclusively from `initializeLockAtSnapshot`.
+     */
+    event LockAtSnapshotInitialized();
+
+    /**
+     * @notice Initialises the lock-at-snapshot capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeLockAtSnapshot() external;
+
+    /**
      * @notice Returns the locked balance of a token holder at the time of a given snapshot.
      * @dev    Queries the adjusted locked-balance snapshot recorded by `LockStorageWrapper`
      *         at `_snapshotID`. The value reflects the lock escrow amount as it stood at

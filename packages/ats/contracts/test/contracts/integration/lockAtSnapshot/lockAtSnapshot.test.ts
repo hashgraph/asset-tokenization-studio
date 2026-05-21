@@ -156,4 +156,30 @@ describe("LockAtSnapshot Tests", () => {
       expect(balanceC).to.equal(lockedAmountC);
     });
   });
+
+  describe("initializeLockAtSnapshot", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeLockAtSnapshot is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeLockAtSnapshot()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_A).initializeLockAtSnapshot();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeLockAtSnapshot is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(signer_A).initializeLockAtSnapshot()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeLockAtSnapshot is called THEN it emits LockAtSnapshotInitialized", async () => {
+      await expect(asset.connect(signer_A).initializeLockAtSnapshot()).to.emit(asset, "LockAtSnapshotInitialized");
+    });
+  });
 });

@@ -3,6 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ILockAtSnapshot } from "./ILockAtSnapshot.sol";
 import { SnapshotsStorageWrapper } from "../../domain/asset/SnapshotsStorageWrapper.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _LOCK_AT_SNAPSHOT_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title  LockAtSnapshot
@@ -11,7 +15,18 @@ import { SnapshotsStorageWrapper } from "../../domain/asset/SnapshotsStorageWrap
  *         inherited solely by `LockAtSnapshotFacet`.
  * @author Asset Tokenization Studio Team
  */
-abstract contract LockAtSnapshot is ILockAtSnapshot {
+abstract contract LockAtSnapshot is ILockAtSnapshot, Modifiers {
+    /// @inheritdoc ILockAtSnapshot
+    function initializeLockAtSnapshot()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_LOCK_AT_SNAPSHOT_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_LOCK_AT_SNAPSHOT_RESOLVER_KEY);
+        emit LockAtSnapshotInitialized();
+    }
+
     /// @inheritdoc ILockAtSnapshot
     function lockedBalanceOfAtSnapshot(
         uint256 _snapshotID,

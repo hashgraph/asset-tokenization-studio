@@ -8,4 +8,8 @@ contract BondUSAFacet is BondUSAFacetBase {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _BOND_VARIABLE_RATE_RESOLVER_KEY;
     }
+
+    function _bondInitializerKey() internal pure override returns (bytes32) {
+        return _BOND_VARIABLE_RATE_RESOLVER_KEY;
+    }
 }

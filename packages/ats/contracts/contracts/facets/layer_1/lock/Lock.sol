@@ -9,6 +9,9 @@ import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
+import { _LOCK_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
 /**
  * @title Lock
@@ -24,6 +27,17 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
  *      time-travel testing.
  */
 abstract contract Lock is ILock, Modifiers {
+    /// @inheritdoc ILock
+    function initializeLock()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_LOCK_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_LOCK_RESOLVER_KEY);
+        emit LockInitialized();
+    }
+
     /**
      * @inheritdoc ILock
      * @dev Pause-gated, restricted to `LOCKER_ROLE`, only valid in single-partition mode and
