@@ -5,6 +5,7 @@ import { ActionValidationModifiers } from "./ActionValidationModifiers.sol";
 import { AdjustBalancesModifiers } from "./AdjustBalancesModifiers.sol";
 import { BondModifiers } from "./BondModifiers.sol";
 import { ClearingModifiers } from "./ClearingModifiers.sol";
+import { CouponModifiers } from "./CouponModifiers.sol";
 import { ComplianceModifiers } from "./ComplianceModifiers.sol";
 import { EquityModifiers } from "./EquityModifiers.sol";
 import { ERC20Modifiers } from "./ERC20Modifiers.sol";
@@ -35,6 +36,7 @@ import { SecurityModifiers } from "./SecurityModifiers.sol";
  * - AdjustBalancesModifiers: Adjust balances validation
  * - BondModifiers: Bond-specific validation
  * - ClearingModifiers: Clearing state validation
+ * - CouponModifiers: Coupon date validation
  * - ComplianceModifiers: Compliance validation
  * - EquityModifiers: Equity-specific validation
  * - ERC20Modifiers: ERC20 initialization validation
@@ -57,6 +59,7 @@ abstract contract AssetModifiers is
     AmortizationModifiers,
     BondModifiers,
     ClearingModifiers,
+    CouponModifiers,
     ComplianceModifiers,
     EquityModifiers,
     ERC1410Modifiers,

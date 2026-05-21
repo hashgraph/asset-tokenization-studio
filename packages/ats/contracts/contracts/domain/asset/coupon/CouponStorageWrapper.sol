@@ -13,7 +13,9 @@ import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
 import { TokenCoreOps } from "../../orchestrator/TokenCoreOps.sol";
 import { ICoupon } from "../../../facets/coupon/ICoupon.sol";
 import { ICouponTypes } from "../../../facets/coupon/ICouponTypes.sol";
+import { BondStorageWrapper } from "../BondStorageWrapper.sol";
 import { CouponRateDispatch } from "./CouponRateDispatch.sol";
+import { DatesValidation } from "../../../infrastructure/utils/DatesValidation.sol";
 import { DecimalsLib } from "../../../infrastructure/utils/DecimalsLib.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { NominalValueStorageWrapper } from "../nominalValue/NominalValueStorageWrapper.sol";
@@ -37,7 +39,9 @@ library CouponStorageWrapper {
      *         tasks. Variant invariants and rate stamping are delegated to
      *         `CouponRateDispatch.validateAndStamp`, which mirrors the deferred dispatch
      *         performed by `getCoupon` on the read path.
-     * @dev Does NOT emit `ICoupon.CouponSet` — the writer abstract emits it inline after
+     * @dev The end-date-against-maturity constraint is enforced by the caller before this
+     *      function is invoked (see `CouponModifiers.onlyValidCouponEndDate`).
+     *      Does NOT emit `ICoupon.CouponSet` — the writer abstract emits it inline after
      *      this call returns, per the project event-emission rule.
      * @param newCoupon Coupon parameters captured at scheduling time.
      * @return corporateActionId_ Identifier of the underlying corporate action.
@@ -111,6 +115,20 @@ library CouponStorageWrapper {
             CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(COUPON_CORPORATE_ACTION_TYPE, couponID - 1),
             abi.encode(coupon)
         );
+    }
+
+    /**
+     * @notice Reverts with `ICommonErrors.WrongDates` when the bond has a non-zero maturity date
+     *         and `endDate` exceeds it.
+     * @dev When `maturityDate` is zero the bond is treated as open-ended and no constraint is
+     *      applied. Delegates the ordered-date check to `DatesValidation.checkDates`.
+     * @param endDate Coupon end date to validate against the bond's maturity date.
+     */
+    function checkEndDateAgainstMaturity(uint256 endDate) internal view {
+        uint256 maturityDate = BondStorageWrapper.getMaturityDate();
+        if (maturityDate != 0) {
+            DatesValidation.checkDates(endDate, maturityDate);
+        }
     }
 
     function getRawCouponData(

@@ -35,7 +35,13 @@ describe("Bond Fixed Rate Tests", () => {
   let asset: IAsset;
 
   async function deploySecurityFixture() {
-    const base = await deployBondFixedRateTokenFixture();
+    const base = await deployBondFixedRateTokenFixture({
+      bondDataParams: {
+        bondDetails: {
+          maturityDate: dateToUnixTimestamp(`2031-01-01T00:00:00Z`),
+        },
+      },
+    });
 
     diamond = base.diamond;
     signer_A = base.deployer;
