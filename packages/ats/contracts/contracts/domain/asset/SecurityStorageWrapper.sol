@@ -11,20 +11,17 @@ import { ISecurity } from "../../facets/layer_2/security/ISecurity.sol";
 library SecurityStorageWrapper {
     /**
      * @notice Packed storage layout for security regulation state.
-     * @dev Stored at `_SECURITY_STORAGE_POSITION` via inline assembly. `initialized` must be
-     *      checked before trusting the regulation fields, as uninitialised storage is
-     *      indistinguishable from zero-value structs without this guard.
+     * @dev Stored at `_SECURITY_STORAGE_POSITION` via inline assembly.
      */
     struct SecurityDataStorage {
         RegulationData regulationData;
         AdditionalSecurityData additionalSecurityData;
-        bool initialized;
     }
 
     /**
-     * @notice Initialises the security regulation storage and marks the slot as initialised.
-     * @dev Sets both data fields then flips `initialized` to `true`. One-shot guarantee is
-     *      enforced by the caller via `onlyNotSecurityInitialized`.
+     * @notice Initializes the security.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
      * @param _regulationData The full regulation parameters to persist.
      * @param _additionalSecurityData The supplementary security configuration to persist.
      */
@@ -33,12 +30,10 @@ library SecurityStorageWrapper {
         AdditionalSecurityData calldata _additionalSecurityData
     ) internal {
         storeRegulationData(_regulationData, _additionalSecurityData);
-        securityStorage().initialized = true;
     }
 
     /**
      * @notice Writes regulation and additional security data to the dedicated storage slot.
-     * @dev Does not set the `initialized` flag; use `initializeSecurity` for first-write semantics.
      * @param _regulationData The regulation parameters to persist.
      * @param _additionalSecurityData The supplementary security configuration to persist.
      */
@@ -49,14 +44,6 @@ library SecurityStorageWrapper {
         SecurityDataStorage storage data = securityStorage();
         data.regulationData = _regulationData;
         data.additionalSecurityData = _additionalSecurityData;
-    }
-
-    /**
-     * @notice Returns whether the security regulation capability has been initialised.
-     * @return `true` if `initializeSecurity` has been called at least once; `false` otherwise.
-     */
-    function isSecurityInitialized() internal view returns (bool) {
-        return securityStorage().initialized;
     }
 
     /**
