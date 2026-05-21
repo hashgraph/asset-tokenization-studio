@@ -11,6 +11,19 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface IBurnByPartition {
     /**
+     * @notice Emitted once when the burn by partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeBurnByPartition`.
+     */
+    event BurnByPartitionInitialized();
+
+    /**
+     * @notice Initialises the burn by partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeBurnByPartition() external;
+
+    /**
      * @notice Decreases totalSupply and the corresponding amount of the specified partition of msg.sender
      * @dev Only callable when not paused. In single-partition mode only the default partition is accepted.
      *      The caller must pass redemption authorization checks for the given partition and amount.

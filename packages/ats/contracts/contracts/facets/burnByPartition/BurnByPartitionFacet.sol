@@ -26,7 +26,7 @@ contract BurnByPartitionFacet is BurnByPartition, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.redeemByPartition.selector);
+        return Bytes4Builder.build(this.initializeBurnByPartition.selector, this.redeemByPartition.selector);
     }
 
     /// @inheritdoc IStaticFunctionSelectors

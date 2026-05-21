@@ -2,11 +2,13 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IControllerByPartition } from "./IControllerByPartition.sol";
-import { CONTROLLER_ROLE, AGENT_ROLE, _buildRoles } from "../../constants/roles.sol";
+import { CONTROLLER_ROLE, AGENT_ROLE, _buildRoles, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _CONTROLLER_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title ControllerByPartition
@@ -18,6 +20,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  * @author Asset Tokenization Studio Team
  */
 abstract contract ControllerByPartition is IControllerByPartition, Modifiers {
+    /// @inheritdoc IControllerByPartition
+    function initializeControllerByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_CONTROLLER_BY_PARTITION_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_CONTROLLER_BY_PARTITION_RESOLVER_KEY);
+        emit ControllerByPartitionInitialized();
+    }
+
     /// @inheritdoc IControllerByPartition
     /// @dev Emits {TransferByPartition} via TokenCoreOps.transferByPartition.
     function controllerTransferByPartition(

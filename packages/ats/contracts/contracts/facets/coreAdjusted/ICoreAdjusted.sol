@@ -11,6 +11,19 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface ICoreAdjusted {
     /**
+     * @notice Emitted once when the core adjusted capability is initialised on a token.
+     * @dev Fires exclusively from `initializeCoreAdjusted`.
+     */
+    event CoreAdjustedInitialized();
+
+    /**
+     * @notice Initialises the core adjusted capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeCoreAdjusted() external;
+
+    /**
      * @notice Returns the effective token decimals at a given timestamp, simulating all pending
      *         scheduled balance adjustments (ABAFs) up to and including that timestamp.
      * @dev Delegates to `ERC20StorageWrapper.decimalsAdjustedAt`. Adjustments with an

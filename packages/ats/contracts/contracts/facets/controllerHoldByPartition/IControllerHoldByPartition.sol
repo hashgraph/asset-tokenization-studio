@@ -12,6 +12,19 @@ import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
  */
 interface IControllerHoldByPartition is IHoldTypes {
     /**
+     * @notice Emitted once when the controller hold by partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeControllerHoldByPartition`.
+     */
+    event ControllerHoldByPartitionInitialized();
+
+    /**
+     * @notice Initialises the controller hold by partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeControllerHoldByPartition() external;
+
+    /**
      * @notice Creates a hold on the tokens of a token holder, by a controller, on a specific partition.
      * @dev Can only be called by a user with the controller role. The contract must be controllable
      *      and not paused. Only valid in single-partition mode with the default partition.

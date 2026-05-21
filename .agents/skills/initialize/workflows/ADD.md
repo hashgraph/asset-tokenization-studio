@@ -95,20 +95,19 @@ abstract contract Xxx is IInterface, Modifiers {
 > it only supplies the modifier machinery needed for the single initialisation entrypoint.
 
 ---
+
 ## 4. Step B — Define the event in the interface
 
-In `IXxx.sol`, add the event declaration before the function declarations but **after** all
-`struct` and `enum` definitions. Solhint enforces this ordering: any `event` that appears
-before a `struct` or `enum` in the same interface is an error.
-
-Correct placement:
+In `IXxx.sol`, `XxxInitialized` must be the **first event declared** in the interface body.
+Place it immediately after the opening brace (or after any `struct`/`enum` definitions if
+present — Solhint requires types to precede events).
 
 ```
-struct Foo { ... }   // ← types first
-enum Bar { ... }     // ← types first
+struct Foo { ... }        // ← types first (if any)
+enum Bar { ... }          // ← types first (if any)
 
-event XxxInitialized(...);   // ← event AFTER all types
-event OtherEvent(...);
+event XxxInitialized();   // ← FIRST event — before all business events
+event OtherEvent(...);    // ← existing business events follow
 ```
 
 The event carries **only** the function's input parameters — no `operator`. The caller can
@@ -161,7 +160,20 @@ Strip `initialize` prefix, append `Initialized`:
 
 ## 5. Step C — Add the function to the interface
 
-In `IXxx.sol`, add the function signature with NatSpec:
+`initializeXxx` must be the **first function declared** in the interface body — before all
+business function signatures. Place it immediately after the events/errors block.
+
+```
+event XxxInitialized();           // ← first event (Step B)
+event OtherEvent(...);
+
+error SomeError();
+
+function initializeXxx() external;   // ← FIRST function — before all business functions
+function businessMethod(...) external;
+```
+
+With NatSpec:
 
 ```solidity
 /**
@@ -187,6 +199,11 @@ function initializeXxx() external;
 ---
 
 ## 6. Step D — Implement the function in the facet
+
+`initializeXxx` must be the **first function implemented** in the abstract contract body —
+before all business function implementations.
+
+Use the multi-line signature format when modifiers are present (which is always the case):
 
 ### With storage to initialise
 
@@ -396,18 +413,37 @@ import { decodeEvent } from "@scripts/infrastructure";
 
 ---
 
-## 9. Step G — Create changeset
+## 9. Step G — Update consolidated changeset
 
-Create `.changeset/initialize-[facet-name-kebab].md`:
+All initialisation work on this project is tracked in a single changeset file at the
+monorepo root: `.changeset/initialize-all-facets.md`.
+
+**Do NOT create a new per-facet changeset file.** Instead:
+
+1. Check whether `.changeset/initialize-all-facets.md` exists.
+
+2. **If it exists** — add `[FacetName]` to the "New `initializeXxx` added" list in the
+   description. The severity and frontmatter do not change.
+
+3. **If it does not exist** — create it with the following content, substituting the
+   actual facet name:
 
 ```markdown
 ---
-"@hashgraph/asset-tokenization-contracts": minor
+"@hashgraph/asset-tokenization-contracts": major
 ---
 
-Add `initializeXxx` function to [FacetName] facet with centralised registration
-via `InitializerStorageWrapper.setFacetToReady`. Emits `[X]Initialized` event.
+Migrate all facet initialisation to centralised `InitializerStorageWrapper` pattern.
+Each `initializeXxx` function is gated by `onlyRole(DEFAULT_ADMIN_ROLE)` (first) and
+`onlyFacetNotRegistered(_XXX_RESOLVER_KEY)` (second), calls
+`InitializerStorageWrapper.setFacetToReady`, and emits `XxxInitialized()` with no
+parameters. Subsequent calls revert with `FacetAlreadyRegistered`.
+
+**New `initializeXxx` added**: [FacetName].
 ```
+
+The changeset severity is always **`major`** — any change to a contract ABI (new selector,
+new event) warrants a major bump regardless of whether the function is purely additive.
 
 ---
 
@@ -506,8 +542,10 @@ See `workflows/FACTORY.md` for the full wiring procedure.
 - [ ] No `// solhint-disable-next-line func-name-mixedcase` before the function
 - [ ] Event declared in `IXxx.sol` with NatSpec — no `operator` param
 - [ ] Event carries only the function's input params (same types and order; structs as-is); empty event for no-param functions
-- [ ] Event placed **after** all `struct`/`enum` definitions in `IXxx.sol` (Solhint ordering rule)
-- [ ] Function declared in `IXxx.sol` with NatSpec
+- [ ] `XxxInitialized` is the **first event** in `IXxx.sol` (after any struct/enum definitions)
+- [ ] `initializeXxx` is the **first function** declared in `IXxx.sol` (before all business functions)
+- [ ] `initializeXxx` is the **first function** implemented in the abstract contract (before all business functions)
+- [ ] Function uses multi-line signature format (one modifier per line)
 - [ ] `onlyRole(DEFAULT_ADMIN_ROLE)` is the first modifier after `override`
 - [ ] `onlyFacetNotRegistered(_XXX_RESOLVER_KEY)` is the second modifier
 - [ ] `InitializerStorageWrapper.setFacetToReady(_XXX_RESOLVER_KEY)` called before the emit
@@ -517,5 +555,5 @@ See `workflows/FACTORY.md` for the full wiring procedure.
 - [ ] `npm run format:check` passes on all modified files
 - [ ] Solhint produces no new errors on modified files
 - [ ] `rg "initializeXxx" contracts/factory/Factory.sol` — note if missing; flag for `initialize-factory`
-- [ ] Changeset file created under `.changeset/`
+- [ ] `.changeset/initialize-all-facets.md` updated (facet added to the list, or file created if absent)
 - [ ] If `XxxModifiers.sol` is now empty after migration: delete the file and remove its `import` and `is XxxModifiers` clause from `AssetModifiers.sol` (or equivalent aggregator)

@@ -13,6 +13,19 @@ import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
  */
 interface IControllerByPartition is IERC1410Types {
     /**
+     * @notice Emitted once when the controller by partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeControllerByPartition`.
+     */
+    event ControllerByPartitionInitialized();
+
+    /**
+     * @notice Initialises the controller by partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeControllerByPartition() external;
+
+    /**
      * @notice Forces a transfer in a partition from a token holder to a destination address.
      * @dev Can only be called by a user with the controller or agent role. The contract must be
      *      controllable and not paused. Only valid in single-partition mode with the default partition.

@@ -8,6 +8,9 @@ import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _BATCH_TRANSFER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title BatchTransfer
@@ -20,6 +23,17 @@ import { _DEFAULT_PARTITION } from "../../constants/values.sol";
  * @author Asset Tokenization Studio Team
  */
 abstract contract BatchTransfer is IBatchTransfer, Modifiers {
+    /// @inheritdoc IBatchTransfer
+    function initializeBatchTransfer()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_BATCH_TRANSFER_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_BATCH_TRANSFER_RESOLVER_KEY);
+        emit BatchTransferInitialized();
+    }
+
     /// @inheritdoc IBatchTransfer
     function batchTransfer(
         address[] calldata _toList,

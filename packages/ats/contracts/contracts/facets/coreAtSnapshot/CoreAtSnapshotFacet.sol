@@ -23,7 +23,7 @@ contract CoreAtSnapshotFacet is CoreAtSnapshot, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.decimalsAtSnapshot.selector);
+        return Bytes4Builder.build(this.initializeCoreAtSnapshot.selector, this.decimalsAtSnapshot.selector);
     }
 
     /// @inheritdoc IStaticFunctionSelectors
