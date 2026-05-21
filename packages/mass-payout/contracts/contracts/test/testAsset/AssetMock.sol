@@ -339,6 +339,10 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
+    function initializeBalanceAdjustments() external pure {
+        revert NotImplemented();
+    }
+
     function transfer(address, uint256) external pure returns (bool) {
         revert NotImplemented();
     }
