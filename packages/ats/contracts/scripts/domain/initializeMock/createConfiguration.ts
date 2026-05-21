@@ -13,6 +13,7 @@ import {
   createBatchConfiguration,
   OperationResult,
   DEFAULT_BATCH_SIZE,
+  RetryOptions,
 } from "@scripts/infrastructure";
 import { BusinessLogicResolver } from "@contract-types";
 import { atsRegistry } from "../atsRegistry";
@@ -70,6 +71,7 @@ export async function createInitializeMockConfiguration(
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
+  retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
   // TEST-ONLY: build the facet list, pulling InitializerFacet from atsRegistry
   // and the three mocks from the local mock registry.
@@ -92,5 +94,6 @@ export async function createInitializeMockConfiguration(
     batchSize,
     confirmations,
     facetVersions,
+    retryOptions,
   });
 }

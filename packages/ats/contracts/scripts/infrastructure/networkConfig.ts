@@ -47,7 +47,7 @@ export interface DeploymentConfig {
   /** Transaction timeout in milliseconds */
   timeout: number;
   /** Retry configuration for failed transactions */
-  retryOptions: Required<RetryOptions>;
+  retryOptions: Omit<Required<RetryOptions>, "onRetry">;
   /** Whether to verify bytecode after deployment */
   verifyDeployment: boolean;
 }
@@ -118,16 +118,19 @@ export const DEPLOYMENT_CONFIGS: Record<string, DeploymentConfig> = {
    * Hedera Previewnet
    * - Optimized for speed while maintaining reliability
    * - 2 confirmations, 2 retries (3 total attempts)
-   * - Worst-case: 3 × 30s + 7s delays = 97 seconds
-   * - Typical: 3 × 5-10s + 7s = 22-37 seconds
+   * - Normal delays: 5s → 10s between retries
+   * - Throttle-error delays: ×5 multiplier applied on top of the capped value
+   *   (e.g. attempt 2: min(20s,10s)×5 = 50s) — see adjustDelayForErrorType
+   * - Worst-case: 3 × 120s + ~65s delays = ~7 minutes
+   * - Typical: 3 × 5-10s + 15s = ~30 seconds
    */
   "hedera-previewnet": {
     confirmations: 2,
     timeout: 120_000, // 2 minutes per attempt
     retryOptions: {
       maxRetries: 2, // 3 total attempts
-      baseDelay: 1000,
-      maxDelay: 4000, // 4 seconds cap (1s → 2s → 4s delays)
+      baseDelay: 5_000, // 5 second base delay
+      maxDelay: 10_000, // normal cap; throttle errors bypass this via ×5 multiplier
       logRetries: true,
     },
     verifyDeployment: true,
@@ -135,18 +138,22 @@ export const DEPLOYMENT_CONFIGS: Record<string, DeploymentConfig> = {
 
   /**
    * Hedera Testnet
-   * - Same as previewnet (optimized for development speed)
-   * - 2 confirmations, 2 retries (3 total attempts)
-   * - Worst-case: 3 × 30s + 7s delays = 97 seconds
-   * - Typical: 3 × 5-10s + 7s = 22-37 seconds
+   * - 2 confirmations, 3 retries (4 total attempts)
+   * - Normal delays: 10s → 20s between retries
+   * - Throttle-error delays: ×5 multiplier applied on top of the capped value
+   *   (e.g. attempt 2: min(40s,20s)×5 = 100s) — see adjustDelayForErrorType
+   *   This gives the per-account contract-creation throttle (60-120s window)
+   *   time to clear before the next attempt.
+   * - Worst-case: 4 × 120s + ~136s delays = ~9 minutes
+   * - Typical: 4 × 5-10s + 30s = ~50 seconds
    */
   "hedera-testnet": {
     confirmations: 2,
     timeout: 120_000, // 2 minutes per attempt
     retryOptions: {
-      maxRetries: 2, // 2 retries after initial attempt (3 total attempts)
-      baseDelay: 1000,
-      maxDelay: 4000, // 4 seconds cap (1s → 2s → 4s delays)
+      maxRetries: 3, // 3 retries after initial attempt (4 total attempts)
+      baseDelay: 10_000, // 10 second base delay — gives Hedera time to clear any queued tx
+      maxDelay: 20_000, // normal cap; throttle errors bypass this via ×5 multiplier
       logRetries: true,
     },
     verifyDeployment: true,
