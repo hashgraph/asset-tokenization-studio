@@ -10,7 +10,7 @@ import {
 import { CorporateActionsStorageWrapper } from "../../core/CorporateActionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
-import { ERC3643StorageWrapper } from "../../core/ERC3643StorageWrapper.sol";
+import { TokenCoreOps } from "../../orchestrator/TokenCoreOps.sol";
 import { ICoupon } from "../../../facets/coupon/ICoupon.sol";
 import { ICouponTypes } from "../../../facets/coupon/ICouponTypes.sol";
 import { BondStorageWrapper } from "../BondStorageWrapper.sol";
@@ -178,7 +178,7 @@ library CouponStorageWrapper {
      *        and `nominalValueDecimals` are all read at the snapshot scale via
      *        `SnapshotsStorageWrapper`.
      *      - Otherwise they fall back to the ABAF-adjusted state at the coupon's record date
-     *        (`ERC3643StorageWrapper.getTotalBalanceForAdjustedAt`,
+     *        (`TokenCoreOps.getTotalBalanceForAdjustedAt`,
      *        `ERC20StorageWrapper.decimalsAdjustedAt`) and the live nominal-value pair from
      *        `NominalValueStorageWrapper`.
      *      The resolved quadruple is then handed to `_calculateCouponAmount`, which must keep
@@ -214,7 +214,7 @@ library CouponStorageWrapper {
                     registeredCoupon.snapshotId
                 );
             } else {
-                couponFor_.tokenBalance = ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(
+                couponFor_.tokenBalance = TokenCoreOps.getTotalBalanceForAdjustedAt(
                     account,
                     registeredCoupon.coupon.recordDate
                 );
