@@ -416,7 +416,7 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    function forceCancelBalanceAdjustment(uint256) external pure returns (bool) {
+    function forceCancelScheduledBalanceAdjustment(uint256) external pure returns (bool) {
         revert NotImplemented();
     }
 
