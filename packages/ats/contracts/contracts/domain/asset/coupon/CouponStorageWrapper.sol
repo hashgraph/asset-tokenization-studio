@@ -10,7 +10,7 @@ import {
 import { CorporateActionsStorageWrapper } from "../../core/CorporateActionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
-import { ERC3643StorageWrapper } from "../../core/ERC3643StorageWrapper.sol";
+import { TokenCoreOps } from "../../orchestrator/TokenCoreOps.sol";
 import { ICoupon } from "../../../facets/coupon/ICoupon.sol";
 import { ICouponTypes } from "../../../facets/coupon/ICouponTypes.sol";
 import { CouponRateDispatch } from "./CouponRateDispatch.sol";
@@ -113,13 +113,9 @@ library CouponStorageWrapper {
         );
     }
 
-    function getCoupon(
+    function getRawCouponData(
         uint256 couponID
-    )
-        internal
-        view
-        returns (ICouponTypes.RegisteredCoupon memory registeredCoupon_, bytes32 corporateActionId_, bool isDisabled_)
-    {
+    ) internal view returns (ICouponTypes.Coupon memory rawCoupon_, bytes32 corporateActionId_, bool isDisabled_) {
         corporateActionId_ = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
             COUPON_CORPORATE_ACTION_TYPE,
             couponID - 1
@@ -128,7 +124,17 @@ library CouponStorageWrapper {
         (, , data, isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(corporateActionId_);
 
         if (data.length == 0) revert ICoupon.CouponNotFound(couponID);
-        (registeredCoupon_.coupon) = abi.decode(data, (ICouponTypes.Coupon));
+        rawCoupon_ = abi.decode(data, (ICouponTypes.Coupon));
+    }
+
+    function getCoupon(
+        uint256 couponID
+    )
+        internal
+        view
+        returns (ICouponTypes.RegisteredCoupon memory registeredCoupon_, bytes32 corporateActionId_, bool isDisabled_)
+    {
+        (registeredCoupon_.coupon, corporateActionId_, isDisabled_) = getRawCouponData(couponID);
 
         registeredCoupon_.snapshotId = CorporateActionsStorageWrapper.getUintResultAt(
             corporateActionId_,
@@ -160,7 +166,7 @@ library CouponStorageWrapper {
      *        and `nominalValueDecimals` are all read at the snapshot scale via
      *        `SnapshotsStorageWrapper`.
      *      - Otherwise they fall back to the ABAF-adjusted state at the coupon's record date
-     *        (`ERC3643StorageWrapper.getTotalBalanceForAdjustedAt`,
+     *        (`TokenCoreOps.getTotalBalanceForAdjustedAt`,
      *        `ERC20StorageWrapper.decimalsAdjustedAt`) and the live nominal-value pair from
      *        `NominalValueStorageWrapper`.
      *      The resolved quadruple is then handed to `_calculateCouponAmount`, which must keep
@@ -196,7 +202,7 @@ library CouponStorageWrapper {
                     registeredCoupon.snapshotId
                 );
             } else {
-                couponFor_.tokenBalance = ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(
+                couponFor_.tokenBalance = TokenCoreOps.getTotalBalanceForAdjustedAt(
                     account,
                     registeredCoupon.coupon.recordDate
                 );

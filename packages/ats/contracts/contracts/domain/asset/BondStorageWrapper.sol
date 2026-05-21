@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { DecimalsLib } from "../../infrastructure/utils/DecimalsLib.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
-import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
+import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
 import { IBondTypes } from "../../facets/layer_2/bond/IBondTypes.sol";
 import { IPrincipal } from "../../facets/principal/IPrincipal.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
@@ -58,7 +58,7 @@ library BondStorageWrapper {
         // even at high precision, and the equivalent fraction keeps the token-decimal scale on
         // the denominator so sub-unit balances survive (numerator/denominator == old fraction).
         principalFor_.numerator = Math.mulDiv(
-            ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(account, blockTimestamp),
+            TokenCoreOps.getTotalBalanceForAdjustedAt(account, blockTimestamp),
             bondDetails.nominalValue,
             DecimalsLib.pow10(bondDetails.nominalValueDecimals)
         );

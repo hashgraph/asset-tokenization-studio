@@ -21,6 +21,7 @@ import { LockStorageWrapper } from "./LockStorageWrapper.sol";
 import { HoldStorageWrapper } from "./HoldStorageWrapper.sol";
 import { ClearingStorageWrapper } from "./ClearingStorageWrapper.sol";
 import { ClearingReadOps } from "../orchestrator/ClearingReadOps.sol";
+import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { NominalValueStorageWrapper } from "./nominalValue/NominalValueStorageWrapper.sol";
@@ -609,7 +610,7 @@ library SnapshotsStorageWrapper {
 
         balance_ = (_snapshotId != 0)
             ? getTotalBalanceOfAtSnapshot(_snapshotId, _account)
-            : ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(_account, _date);
+            : TokenCoreOps.getTotalBalanceForAdjustedAt(_account, _date);
 
         decimals_ = (_snapshotId != 0)
             ? decimalsAtSnapshot(_snapshotId)
