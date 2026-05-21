@@ -1,0 +1,85 @@
+name: "105: [FLOW] ATS Static Checks"
+
+on:
+  pull_request:
+    paths:
+      - "packages/ats/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/105-flow-ats-static-checks.yaml"
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-checks:
+    name: static-checks
+    runs-on: token-studio-linux-medium
+    timeout-minutes: 15
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Setup NodeJS Environment
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Hash codegen — no drift, no duplicates, no shape violations
+        run: npm run ats:contracts:hashes:check
+
+      - name: Fetch base ref for stability check
+        if: github.event_name == 'pull_request'
+        run: git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+
+      - name: Hash stability — pre-existing hashes unchanged
+        if: github.event_name == 'pull_request'
+        run: |
+          npm run ats:contracts:hashes:stability -- \
+            --base "origin/${{ github.base_ref }}" --soft
+
+      - name: Label PR if hash-bearing files changed
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          # Use the GitHub API for the diff file list — avoids needing the merge
+          # base locally (the checkout is shallow by default, so `git diff
+          # origin/<base>...HEAD` cannot resolve it).
+          changed=$(gh pr diff "${PR_NUMBER}" --name-only \
+            | grep -E '^(packages/ats/contracts/.*\.sol|packages/ats/contracts/scripts/codegen/.*)$' || true)
+          if [[ -z "${changed}" ]]; then
+            echo "No contracts or codegen files touched — skipping label."
+            exit 0
+          fi
+          # Grep the local working tree (already at PR HEAD) for hash-bearing
+          # signatures in any changed file, OR if any file under scripts/codegen
+          # was touched (formula changes).
+          if echo "${changed}" | grep -qE 'scripts/codegen/' \
+             || grep -lE '@custom:hash|bytes32[[:space:]]+constant[[:space:]]+[A-Z_]+[[:space:]]*=[[:space:]]*0x[0-9a-fA-F]{64}' ${changed} >/dev/null 2>&1; then
+            echo "Hash-bearing files were modified — applying 'hash-change' label."
+            gh pr edit "${PR_NUMBER}" --add-label hash-change
+          else
+            echo "No hash-bearing changes detected."
+          fi

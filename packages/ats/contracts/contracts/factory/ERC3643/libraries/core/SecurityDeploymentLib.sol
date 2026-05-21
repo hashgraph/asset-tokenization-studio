@@ -29,7 +29,7 @@ library SecurityDeploymentLib {
     }
 
     /**
-     * @dev Prepares RBAC array by adding T_REX_OWNER_ROLE to address(this)
+     * @dev Prepares RBAC array by adding ROLE_TREX_OWNER to address(this)
      * @dev Checks if tRexOwner was already provided in the RBACs, if not, it is added
      */
     function _prepareRbacs(

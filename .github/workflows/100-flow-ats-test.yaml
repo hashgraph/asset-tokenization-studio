@@ -89,9 +89,6 @@ jobs:
       - name: Build ATS packages
         run: npm run ats:build
 
-      - name: Check hash codegen is up to date
-        run: npm run -w packages/ats/contracts check:hashes
-
       - name: Run ATS tests
         run: npm run ats:test:ci
 

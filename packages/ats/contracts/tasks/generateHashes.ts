@@ -7,9 +7,10 @@
 // folds it as a compile-time constant. Running it post-compile would defeat
 // the purpose.
 //
-// The task body shells out to `npm run generate:hashes` to keep one entry
-// point (`scripts/codegen/applyHashGen.ts`) shared between the CLI and the
-// compile hook — same pattern as `generate-registry`.
+// The task body shells out to `npm run hashes:generate` (workspace-local) to
+// keep one entry point (`scripts/codegen/applyHashGen.ts`) shared between the
+// CLI and the compile hook — same pattern as `generate-registry`. The root
+// alias `ats:contracts:hashes:generate` proxies the same workspace script.
 
 import { task } from "hardhat/config";
 import { execSync } from "child_process";
@@ -21,7 +22,7 @@ task("generate-hashes", "Rewrite annotated bytes32 constants from the canonical 
       console.log("🔐 Generating hash constants...");
     }
     try {
-      execSync("npm run generate:hashes", {
+      execSync("npm run hashes:generate", {
         cwd: __dirname + "/..",
         stdio: silent ? "pipe" : "inherit",
       });
