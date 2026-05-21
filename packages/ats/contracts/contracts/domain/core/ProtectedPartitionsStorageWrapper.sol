@@ -42,8 +42,7 @@ struct ProtectedPartitionsDataStorage {
  */
 library ProtectedPartitionsStorageWrapper {
     function initializeProtectedPartitions(bool _protectPartitions) internal returns (bool success_) {
-        ProtectedPartitionsDataStorage storage pps = protectedPartitionsStorage();
-        pps.arePartitionsProtected = _protectPartitions;
+        protectedPartitionsStorage().arePartitionsProtected = _protectPartitions;
         success_ = true;
     }
 
