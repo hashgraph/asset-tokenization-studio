@@ -10,8 +10,21 @@ import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapp
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 import { TokenCoreOps } from "../../../domain/orchestrator/TokenCoreOps.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
 
 abstract contract TransferAndLock is ITransferAndLock, Modifiers {
+    /// @inheritdoc ITransferAndLock
+    function initializeTransferAndLock()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_transferAndLockInitializerKey())
+    {
+        InitializerStorageWrapper.setFacetToReady(_transferAndLockInitializerKey());
+        emit TransferAndLockInitialized();
+    }
+
     function transferAndLock(
         address _to,
         uint256 _amount,
@@ -53,4 +66,6 @@ abstract contract TransferAndLock is ITransferAndLock, Modifiers {
             lockId_
         );
     }
+
+    function _transferAndLockInitializerKey() internal view virtual returns (bytes32);
 }

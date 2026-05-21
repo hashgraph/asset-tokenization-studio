@@ -24,7 +24,7 @@ contract LockAtSnapshotFacet is LockAtSnapshot, IStaticFunctionSelectors {
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.lockedBalanceOfAtSnapshot.selector);
+        return Bytes4Builder.build(this.initializeLockAtSnapshot.selector, this.lockedBalanceOfAtSnapshot.selector);
     }
 
     /// @inheritdoc IStaticFunctionSelectors

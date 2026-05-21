@@ -3,7 +3,7 @@
 ---
 
 Migrate all facet initialisation to centralised `InitializerStorageWrapper` pattern across
-44 facets. Each `initializeXxx` function is gated by `onlyRole(DEFAULT_ADMIN_ROLE)` (first)
+55 facets. Each `initializeXxx` function is gated by `onlyRole(DEFAULT_ADMIN_ROLE)` (first)
 and `onlyFacetNotRegistered(_XXX_RESOLVER_KEY)` (second), calls
 `InitializerStorageWrapper.setFacetToReady`, and emits `XxxInitialized()` with no parameters.
 Subsequent calls revert with `FacetAlreadyRegistered`.
@@ -19,7 +19,16 @@ ComplianceByPartition, ControllerByPartition, ControllerHoldByPartition, CoreAdj
 CoreAtSnapshot, CorporateActions, Coupon, CouponListing,
 CouponSecurityHolders, Deactivate, Dividend, DividendSecurityHolders, Documentation,
 EIP712, Freeze, FreezeAtSnapshot, FreezeAtSnapshotByPartition, Hold, HoldAtSnapshot,
-HoldAtSnapshotByPartition, HoldByPartition, Amortization, Kpis, ScheduledBalanceAdjustment, Voting.
+HoldAtSnapshotByPartition, HoldByPartition, Amortization, Kpis, ScheduledBalanceAdjustment, Voting,
+Lock, LockAtSnapshot, EquityUSA, BondUSA (migrated from old `onlyNotBondInitialized` guard),
+BondUSARead, TransferAndLock.
+
+**Migrated from per-facet boolean guard** (Batch 4): EquityUSA (migrated from `onlyNotEquityInitialized`),
+BondUSA write-side (migrated from `onlyNotBondInitialized`).
+
+Three facet groups (BondUSA write, BondUSA read, TransferAndLock) use the **virtual resolver-key
+pattern** (`_bondInitializerKey()`, `_bondReadInitializerKey()`, `_transferAndLockInitializerKey()`)
+to support multiple concrete facets sharing one abstract with different resolver keys.
 
 Four view-only abstract contracts (ComplianceByPartition, CoreAdjusted, CoreAtSnapshot,
 CouponListing) gain `Modifiers` inheritance to support the initialiser guards.

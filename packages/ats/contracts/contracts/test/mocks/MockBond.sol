@@ -17,7 +17,10 @@ contract MockBond is IBondRead, IPrincipal {
     function mock__setPrincipalFor(address account, IPrincipal.PrincipalFor calldata data) external {
         _principalFor[account] = data;
     }
-    // solhint-enable func-name-mixedcase
+
+    function initializeBondUSARead() external override {
+        // no-op for mock
+    }
 
     function getBondDetails() external view override returns (IBondTypes.BondDetailsData memory) {
         return _bondDetails;

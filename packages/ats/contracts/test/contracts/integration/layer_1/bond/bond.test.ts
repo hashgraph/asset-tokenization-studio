@@ -111,10 +111,10 @@ describe("Bond Tests", () => {
       expect(metadata.securityType).to.be.equal(SecurityType.BOND_VARIABLE_RATE);
     });
 
-    it("GIVEN an initialized bond WHEN trying to initialize again THEN transaction fails with AlreadyInitialized", async () => {
+    it("GIVEN an initialized bond WHEN trying to initialize again THEN transaction fails with FacetAlreadyRegistered", async () => {
       await expect(asset.connect(signer_A).initializeBondUSA(await getBondDetails())).to.be.revertedWithCustomError(
         asset,
-        "AlreadyInitialized",
+        "FacetAlreadyRegistered",
       );
     });
   });
