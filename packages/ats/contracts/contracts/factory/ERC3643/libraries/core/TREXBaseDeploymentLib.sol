@@ -49,7 +49,10 @@ library TREXBaseDeploymentLib {
         );
 
         IModularCompliance mc;
-        uint256 transferOwnership; // Bit 0 tracks MC and bit 1 IR
+        // Bit 0 tracks MC, bit 1 tracks IR/TIR/CTR, bit 2 tracks IRS — only newly deployed
+        // contracts have their ownership transferred to `_tokenDetails.owner`. Pre-existing
+        // shared infrastructure passed in by the caller is left untouched.
+        uint256 transferOwnership;
         if (_compliance == address(0)) {
             mc = IModularCompliance(_deployMC(_salt, _implementationAuthority));
             _token.setCompliance(address(mc));
@@ -66,6 +69,7 @@ library TREXBaseDeploymentLib {
             ctr = IClaimTopicsRegistry(_deployCTR(_salt, _implementationAuthority));
             if (_tokenDetails.irs == address(0)) {
                 irs = IIdentityRegistryStorage(_deployIRS(_salt, _implementationAuthority));
+                transferOwnership |= 1 << 2;
             } else {
                 irs = IIdentityRegistryStorage(_tokenDetails.irs);
             }
@@ -109,11 +113,21 @@ library TREXBaseDeploymentLib {
         // Equivalent to transfer ownership of the token to the new owner
         TRexIAccessControl(address(_token)).renounceRole(TREX_OWNER_ROLE);
         TRexIAccessControl(address(_token)).renounceRole(DEFAULT_ADMIN_ROLE);
-        (Ownable(_identityRegistry)).transferOwnership(_tokenDetails.owner);
-        (Ownable(address(tir))).transferOwnership(_tokenDetails.owner);
-        (Ownable(address(ctr))).transferOwnership(_tokenDetails.owner);
-        (Ownable(address(mc))).transferOwnership(_tokenDetails.owner);
-        (Ownable(address(irs))).transferOwnership(_tokenDetails.owner);
+        // Only transfer ownership of infrastructure contracts that were newly deployed in
+        // this call. Pre-existing contracts supplied by the caller must keep their current
+        // owner — otherwise deploying a new token could hijack admin control of shared
+        // infrastructure already used by previously deployed tokens.
+        if (transferOwnership & (1 << 1) != 0) {
+            (Ownable(_identityRegistry)).transferOwnership(_tokenDetails.owner);
+            (Ownable(address(tir))).transferOwnership(_tokenDetails.owner);
+            (Ownable(address(ctr))).transferOwnership(_tokenDetails.owner);
+        }
+        if (transferOwnership & 1 != 0) {
+            (Ownable(address(mc))).transferOwnership(_tokenDetails.owner);
+        }
+        if (transferOwnership & (1 << 2) != 0) {
+            (Ownable(address(irs))).transferOwnership(_tokenDetails.owner);
+        }
 
         emit TREXSuiteDeployed(
             address(_token),
