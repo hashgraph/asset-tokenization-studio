@@ -113,7 +113,9 @@ library KpisStorageWrapper {
 
         if (total == 0) return minDate_;
 
-        (ICouponTypes.RegisteredCoupon memory registeredCoupon, , ) = CouponStorageWrapper.getCoupon(
+        ICouponTypes.RegisteredCoupon memory registeredCoupon;
+
+        (registeredCoupon.coupon, , ) = CouponStorageWrapper.getRawCouponData(
             CouponStorageWrapper.getCouponFromOrderedListAt(total - 1)
         );
         uint256 lastFixingDate = registeredCoupon.coupon.fixingDate;
