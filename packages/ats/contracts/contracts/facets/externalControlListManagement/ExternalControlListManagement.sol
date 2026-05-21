@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IExternalControlListManagement } from "./IExternalControlListManagement.sol";
-import { ROLE_CONTROL_LIST_MANAGER } from "../../constants/roles.sol";
+import { IExternalControlListManagement, RESOLVER_KEY_EXTERNAL_CONTROL_LIST } from "./IExternalControlListManagement.sol";
+import { ROLE_CONTROL_LIST_MANAGER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { ExternalListManagementStorageWrapper } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { ArrayValidation } from "../../infrastructure/utils/ArrayValidation.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
@@ -26,8 +27,10 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
     /// @inheritdoc IExternalControlListManagement
     function initializeExternalControlLists(
         address[] calldata _controlLists
-    ) external override onlyNotExternalControlListInitialized {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_EXTERNAL_CONTROL_LIST) {
         ExternalListManagementStorageWrapper.initializeExternalControlLists(_controlLists);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_EXTERNAL_CONTROL_LIST);
+        emit IExternalControlListManagement.ExternalControlListInitialized(_controlLists);
     }
 
     /// @inheritdoc IExternalControlListManagement

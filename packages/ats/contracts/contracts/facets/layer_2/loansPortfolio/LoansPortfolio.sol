@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ILoansPortfolio } from "./ILoansPortfolio.sol";
-import { ROLE_LOANS_PORTFOLIO_MANAGER } from "../../../constants/roles.sol";
-import { RegulationData, AdditionalSecurityData } from "../../../constants/regulation.sol";
+import { ILoansPortfolio, RESOLVER_KEY_LOANS_PORTFOLIO } from "./ILoansPortfolio.sol";
+import { ROLE_LOANS_PORTFOLIO_MANAGER, DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { LoansPortfolioStorageWrapper } from "../../../domain/asset/LoansPortfolioStorageWrapper.sol";
 import { SecurityStorageWrapper } from "../../../domain/asset/SecurityStorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 /// @title LoansPortfolio
 /// @author Asset Tokenization Studio Team
@@ -22,8 +23,10 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
     ///      portfolio's initialisation flag so repeat invocations revert.
     function initializeLoansPortfolio(
         ILoansPortfolio.LoansPortfolioDetailsData calldata _loansPortfolioData
-    ) external onlyUninitialized(LoansPortfolioStorageWrapper.isLoansPortfolioInitialized()) {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_LOANS_PORTFOLIO) {
         LoansPortfolioStorageWrapper.initializeLoansPortfolio(_loansPortfolioData);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_LOANS_PORTFOLIO);
+        emit ILoansPortfolio.LoansPortfolioInitialized(_loansPortfolioData);
     }
 
     /// @inheritdoc ILoansPortfolio

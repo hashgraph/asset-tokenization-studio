@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IExternalKycListManagement } from "./IExternalKycListManagement.sol";
-import { ROLE_KYC_MANAGER } from "../../constants/roles.sol";
+import { IExternalKycListManagement, RESOLVER_KEY_EXTERNAL_KYC_LIST } from "./IExternalKycListManagement.sol";
+import { ROLE_KYC_MANAGER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { STORAGE_LOCATION_KYC_MANAGEMENT } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { ExternalListManagementStorageWrapper } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { ArrayValidation } from "../../infrastructure/utils/ArrayValidation.sol";
 import { IKyc } from "../layer_1/kyc/IKyc.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
@@ -24,9 +25,12 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract ExternalKycListManagement is IExternalKycListManagement, Modifiers {
     /// @inheritdoc IExternalKycListManagement
-    // solhint-disable-next-line func-name-mixedcase
-    function initializeExternalKycLists(address[] calldata _kycLists) external override onlyNotKycExternalInitialized {
+    function initializeExternalKycLists(
+        address[] calldata _kycLists
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_EXTERNAL_KYC_LIST_RESOLVER_KEY) {
         ExternalListManagementStorageWrapper.initializeExternalKycLists(_kycLists);
+        InitializerStorageWrapper.setFacetToReady(_EXTERNAL_KYC_LIST_RESOLVER_KEY);
+        emit IExternalKycListManagement.ExternalKycListInitialized(_kycLists);
     }
 
     /// @inheritdoc IExternalKycListManagement

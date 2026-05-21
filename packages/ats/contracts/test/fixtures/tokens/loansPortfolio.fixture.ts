@@ -167,16 +167,16 @@ export async function deployLoansPortfolioTokenFixture({
     },
     securityType: 1, // SecurityType.Equity (reuse for loan portfolio)
   });
-  await mintFacet.initialize_ERC1594();
+  await mintFacet.initializeERC1594();
   await capFacet.initializeCap(securityData.maxSupply, []);
-  await protectedPartitionsFacet.initialize_ProtectedPartitions(securityData.arePartitionsProtected);
+  await protectedPartitionsFacet.initializeProtectedPartitions(securityData.arePartitionsProtected);
   await clearingFacet.initializeClearing(securityData.clearingActive);
   await externalPauseManagementFacet.initializeExternalPauses([]);
   await externalControlListManagementFacet.initializeExternalControlLists([]);
   await kycFacet.initializeInternalKyc(securityData.internalKycActivated);
   await externalKycListManagementFacet.initializeExternalKycLists([]);
   await erc20VotesFacet.initializeERC20Votes(false);
-  await erc3643ManagementFacet.initialize_ERC3643(ZeroAddress, ZeroAddress);
+  await erc3643ManagementFacet.initializeERC3643(ZeroAddress, ZeroAddress);
   // Loan portfolios don't carry a per-token currency; pass bytes3(0).
   await nominalValueFacet.initializeNominalValue(
     loanPortfolioDetails.nominalValue,

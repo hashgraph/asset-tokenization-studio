@@ -26,9 +26,7 @@ bytes32 constant STORAGE_LOCATION_CLEARING = 0xd7a6e2f3304ec7238486e8af625921e3c
  */
 struct ClearingDataStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool initialized;
-    bool activated;
-    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+    bool activated;// ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => uint256) totalClearedAmountByAccount;
     mapping(address => mapping(bytes32 => uint256)) totalClearedAmountByAccountAndPartition;
     // solhint-disable-next-line max-line-length
@@ -62,9 +60,7 @@ library ClearingStorageWrapper {
      * @param clearingActive Whether clearing operations are active immediately after init.
      */
     function initializeClearing(bool clearingActive) internal {
-        ClearingDataStorage storage clearingStorage_ = clearingStorage();
-        clearingStorage_.initialized = true;
-        clearingStorage_.activated = clearingActive;
+        clearingStorage().activated = clearingActive;
     }
 
     /**
@@ -75,14 +71,6 @@ library ClearingStorageWrapper {
     function setClearing(bool activated) internal returns (bool success_) {
         clearingStorage().activated = activated;
         return true;
-    }
-
-    /**
-     * @notice Indicates whether the clearing storage has been initialised.
-     * @return Whether {initializeClearing} has already been executed for this token.
-     */
-    function isClearingInitialized() internal view returns (bool) {
-        return clearingStorage().initialized;
     }
 
     /**

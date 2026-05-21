@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IKpiLinkedRate } from "./IKpiLinkedRate.sol";
-import { ROLE_INTEREST_RATE_MANAGER } from "../../../../constants/roles.sol";
+import { IKpiLinkedRate, RESOLVER_KEY_KPI_LINKED_RATE } from "./IKpiLinkedRate.sol";
+import { ROLE_INTEREST_RATE_MANAGER, DEFAULT_ADMIN_ROLE } from "../../../../constants/roles.sol";
 import { InterestRateStorageWrapper } from "../../../../domain/asset/InterestRateStorageWrapper.sol";
 import { ScheduledTasksOps } from "../../../../domain/orchestrator/ScheduledTasksOps.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../../../domain/core/InitializerStorageWrapper.sol";
 import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
 contract KpiLinkedRate is IKpiLinkedRate, Modifiers {
@@ -15,14 +16,16 @@ contract KpiLinkedRate is IKpiLinkedRate, Modifiers {
     )
         external
         override
-        onlyNotKpiLinkedRateInitialized
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(RESOLVER_KEY_KPI_LINKED_RATE)
         onlyValidInterestRate(_interestRate)
         onlyValidImpactData(_impactData)
     {
         ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
         InterestRateStorageWrapper.setInterestRate(_interestRate);
         InterestRateStorageWrapper.setImpactData(_impactData);
-        InterestRateStorageWrapper.kpiLinkedRateStorage().initialized = true;
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_KPI_LINKED_RATE);
+        emit IKpiLinkedRate.KpiLinkedRateInitialized(_interestRate, _impactData);
     }
 
     function setKpiLinkedRateInterestRate(

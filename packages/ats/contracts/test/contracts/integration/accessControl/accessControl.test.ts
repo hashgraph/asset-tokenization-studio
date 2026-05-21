@@ -439,9 +439,10 @@ describe("Access Control Tests", () => {
       const freshAsset = await ethers.getContractAt("IAsset", freshDiamond.target);
       const freshDeployer = base.deployer;
 
-      await expect(freshAsset.connect(freshDeployer).initializeAccessControl())
-        .to.emit(freshAsset, "AccessControlInitialized")
-        .withArgs(await freshDeployer.getAddress());
+      await expect(freshAsset.connect(freshDeployer).initializeAccessControl()).to.emit(
+        freshAsset,
+        "AccessControlInitialized",
+      );
     });
   });
 });

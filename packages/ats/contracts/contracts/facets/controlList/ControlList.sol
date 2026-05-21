@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IControlList } from "./IControlList.sol";
-import { ROLE_CONTROL_LIST } from "../../constants/roles.sol";
+import { IControlList, RESOLVER_KEY_CONTROL_LIST } from "./IControlList.sol";
+import { ROLE_CONTROL_LIST, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { ControlListStorageWrapper } from "../../domain/core/ControlListStorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
@@ -20,9 +21,12 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract ControlList is IControlList, Modifiers {
     /// @inheritdoc IControlList
-    // solhint-disable-next-line func-name-mixedcase
-    function initializeControlList(bool _isWhiteList) external override onlyNotControlListInitialized {
+    function initializeControlList(
+        bool _isWhiteList
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_CONTROL_LIST) {
         ControlListStorageWrapper.initializeControlList(_isWhiteList);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_CONTROL_LIST);
+        emit ControlListInitialized(_isWhiteList);
     }
 
     /// @inheritdoc IControlList

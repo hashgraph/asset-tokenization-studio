@@ -44,26 +44,11 @@ library PauseStorageWrapper {
     using EnumerableSet for EnumerableSet.AddressSet;
 
     /**
-     * @notice Returns the storage pointer for the internal pause namespace.
-     * @dev Resolves the ERC-7201 slot via inline assembly to obtain a struct reference at
-     *      `STORAGE_LOCATION_PAUSE`.
-     * @return pause_ Storage reference to the `PauseDataStorage` struct.
-     */
-    function pauseStorage() internal pure returns (PauseDataStorage storage pause_) {
-        bytes32 position = STORAGE_LOCATION_PAUSE;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            pause_.slot := position
-        }
-    }
-
-    /**
      * @notice Sets the internal paused flag for the token.
      * @dev Does not affect the external-pause registry; callers requiring a combined check must
      *      use `isPaused`.
      * @param _paused New value of the internal paused flag.
      */
-    // solhint-disable-next-line ordering
     function setPause(bool _paused) internal {
         pauseStorage().paused = _paused;
     }
@@ -91,7 +76,6 @@ library PauseStorageWrapper {
      *         registered external pause contracts.
      * @return True when the internal flag is set or any external pause reports paused.
      */
-    // solhint-disable-next-line ordering
     function isPaused() internal view returns (bool) {
         return pauseStorage().paused || isExternallyPaused();
     }
@@ -113,14 +97,6 @@ library PauseStorageWrapper {
             }
         }
         return false;
-    }
-
-    /**
-     * @notice Reports whether the external-pause registry has been initialised.
-     * @return True when `initializeExternalPauses` has populated the registry.
-     */
-    function isExternalPauseInitialized() internal view returns (bool) {
-        return ExternalListManagementStorageWrapper.externalListStorage(STORAGE_LOCATION_PAUSE_MANAGEMENT).initialized;
     }
 
     /**
@@ -148,5 +124,19 @@ library PauseStorageWrapper {
      */
     function checkPaused() internal view {
         if (!isPaused()) revert IPause.IsUnpaused();
+    }
+
+    /**
+     * @notice Returns the storage pointer for the internal pause namespace.
+     * @dev Resolves the ERC-7201 slot via inline assembly to obtain a struct reference at
+     *      `STORAGE_LOCATION_PAUSE`.
+     * @return pause_ Storage reference to the `PauseDataStorage` struct.
+     */
+    function pauseStorage() internal pure returns (PauseDataStorage storage pause_) {
+        bytes32 position = STORAGE_LOCATION_PAUSE;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            pause_.slot := position
+        }
     }
 }

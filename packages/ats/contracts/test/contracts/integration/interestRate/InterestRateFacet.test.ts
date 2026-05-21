@@ -6,7 +6,12 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type IAsset } from "@contract-types";
 import { ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployBondFixedRateTokenFixture, deployBondTokenFixture, executeRbac } from "@test";
+import {
+  deployAtsInfrastructureFixture,
+  deployBondFixedRateTokenFixture,
+  deployBondTokenFixture,
+  executeRbac,
+} from "@test";
 
 // Must match ICouponTypes.RateType order
 enum RateType {
@@ -67,6 +72,52 @@ describe("InterestRateFacet Tests", () => {
         asset,
         "Deactivated",
       );
+    });
+  });
+
+  describe("initializeInterestRateType", () => {
+    let asset: IAsset;
+    let admin: HardhatEthersSigner;
+    let nonAdmin: HardhatEthersSigner;
+
+    async function deployFixture() {
+      const base = await deployBondFixedRateTokenFixture();
+      asset = await ethers.getContractAt("IAsset", base.diamond.target as string);
+      admin = base.deployer;
+      nonAdmin = base.user2;
+      await executeRbac(asset, [{ role: ATS_ROLES.INTEREST_RATE_MANAGER_ROLE, members: [admin.address] }]);
+    }
+
+    beforeEach(async () => {
+      await loadFixture(deployFixture);
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeInterestRateType is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(nonAdmin).initializeInterestRateType(RateType.FIXED)).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN an already-initialised facet WHEN initializeInterestRateType is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeInterestRateType(RateType.FIXED)).to.be.revertedWithCustomError(
+        asset,
+        "FacetAlreadyRegistered",
+      );
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeInterestRateType is called THEN it emits InterestRateTypeInitialized", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const { BOND_FIXED_RATE_CONFIG_ID } = await import("@scripts/domain");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, BOND_FIXED_RATE_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await expect(freshAsset.connect(infra.deployer).initializeInterestRateType(RateType.FIXED))
+        .to.emit(freshAsset, "InterestRateTypeInitialized")
+        .withArgs(RateType.FIXED);
     });
   });
 

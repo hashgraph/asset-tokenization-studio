@@ -27,9 +27,10 @@ abstract contract CapByPartition is ICapByPartition, Modifiers {
         override
         onlyFacetNotRegistered(RESOLVER_KEY_CAP_BY_PARTITION)
         onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_CAP_BY_PARTITION_RESOLVER_KEY)
     {
         InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_CAP_BY_PARTITION);
-        emit ICapByPartition.CapByPartitionInitialized(EvmAccessors.getMsgSender());
+        emit ICapByPartition.CapByPartitionInitialized();
     }
 
     /// @inheritdoc ICapByPartition

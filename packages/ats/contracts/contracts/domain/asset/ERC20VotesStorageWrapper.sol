@@ -24,7 +24,6 @@ bytes32 constant STORAGE_LOCATION_ERC20VOTES = 0xb9759d8916f84f61d52de275f833caf
  */
 struct ERC20VotesStorage {
     // ─── R1 Lifecycle (bool flags) ───────────────────────────
-    bool initialized;
     bool activated;
     // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
     mapping(address => address) delegates;
@@ -49,7 +48,6 @@ library ERC20VotesStorageWrapper {
      */
     function initializeERC20Votes(bool activated) internal {
         setActivate(activated);
-        erc20VotesStorage_().initialized = true;
     }
 
     /**
@@ -352,14 +350,6 @@ library ERC20VotesStorageWrapper {
      */
     function isActivated() internal view returns (bool) {
         return erc20VotesStorage_().activated;
-    }
-
-    /**
-     * @notice Returns whether ERC20Votes storage has been initialised.
-     * @return True if the storage has been initialised; false otherwise.
-     */
-    function isERC20VotesInitialized() internal view returns (bool) {
-        return erc20VotesStorage_().initialized;
     }
 
     /**

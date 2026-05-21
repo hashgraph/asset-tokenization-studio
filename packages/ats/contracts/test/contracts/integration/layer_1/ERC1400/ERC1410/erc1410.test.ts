@@ -6,8 +6,16 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 import { IAsset, type ResolverProxy } from "@contract-types";
-import { ADDRESS_ZERO, ATS_ROLES, dateToUnixTimestamp, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
-import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
+import {
+  ADDRESS_ZERO,
+  ATS_ROLES,
+  dateToUnixTimestamp,
+  EMPTY_HEX_BYTES,
+  EMPTY_STRING,
+  EQUITY_CONFIG_ID,
+  ZERO,
+} from "@scripts";
+import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const _WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
@@ -2826,8 +2834,8 @@ describe("Clearing Tests", () => {
     });
 
     describe("onlyUninitialized modifier", () => {
-      it("GIVEN clearing already initialized WHEN calling initializeClearing THEN transaction fails with AlreadyInitialized", async () => {
-        await expect(asset.initializeClearing(true)).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+      it("GIVEN clearing already initialized WHEN calling initializeClearing THEN transaction fails with FacetAlreadyRegistered", async () => {
+        await expect(asset.initializeClearing(true)).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
       });
     });
 
@@ -5129,5 +5137,35 @@ describe("Clearing Tests", () => {
         ).to.be.reverted;
       });
     });
+  });
+});
+
+describe("initializeERC1410", () => {
+  let signer_D: HardhatEthersSigner;
+  before(async () => {
+    const s = await ethers.getSigners();
+    signer_D = s[3];
+  });
+
+  it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeERC1410 is called THEN it reverts with AccountHasNoRole", async () => {
+    const base = await loadFixture(deployEquityTokenFixture);
+    const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+    await expect(freshAsset.connect(signer_D).initializeERC1410(true)).to.be.revertedWithCustomError(
+      freshAsset,
+      "AccountHasNoRole",
+    );
+  });
+
+  it("GIVEN a new deployment WHEN initializeERC1410 is called THEN it emits ERC1410Initialized", async () => {
+    const { decodeEvent } = await import("@scripts/infrastructure");
+    const infra = await loadFixture(deployAtsInfrastructureFixture);
+    const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+      { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+    ]);
+    const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
+    const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+    await expect(freshAsset.connect(infra.deployer).initializeERC1410(true))
+      .to.emit(freshAsset, "ERC1410Initialized")
+      .withArgs(true);
   });
 });

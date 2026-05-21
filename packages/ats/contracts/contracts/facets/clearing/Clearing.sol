@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IClearing } from "./IClearing.sol";
+import { IClearing, RESOLVER_KEY_CLEARING } from "./IClearing.sol";
 import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
-import { ROLE_CLEARING } from "../../constants/roles.sol";
+import { ROLE_CLEARING, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ClearingStorageWrapper } from "../../domain/asset/ClearingStorageWrapper.sol";
 import { ClearingReadOps } from "../../domain/orchestrator/ClearingReadOps.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
@@ -17,13 +18,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  * @dev Implements the one-shot initializer, the activation lifecycle and the account-scoped
  *      read queries on top of `ClearingStorageWrapper` and `ClearingReadOps`. The activation
  *      toggles enforce the `onlyUnpaused` and `onlyRole(ROLE_CLEARING)` guards;
- *      `initializeClearing` is gated by `onlyNotClearingInitialized`. Intended to be inherited
+ *      `initializeClearing` is gated by `onlyRole(DEFAULT_ADMIN_ROLE)` + `onlyFacetNotRegistered`.
  *      by `ClearingFacet`.
  */
 abstract contract Clearing is IClearing, Modifiers {
     /// @inheritdoc IClearing
-    function initializeClearing(bool _activateClearing) external override onlyNotClearingInitialized {
+    function initializeClearing(
+        bool _activateClearing
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_CLEARING) {
         ClearingStorageWrapper.initializeClearing(_activateClearing);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_CLEARING);
+        emit ClearingInitialized(_activateClearing);
     }
 
     /// @inheritdoc IClearing

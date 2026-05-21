@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IExternalPauseManagement } from "./IExternalPauseManagement.sol";
-import { ROLE_PAUSE_MANAGER } from "../../constants/roles.sol";
-
+import { IExternalPauseManagement, RESOLVER_KEY_EXTERNAL_PAUSE_MANAGEMENT } from "./IExternalPauseManagement.sol";
+import { ROLE_PAUSE_MANAGER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { PauseStorageWrapper, STORAGE_LOCATION_PAUSE_MANAGEMENT } from "../../domain/core/PauseStorageWrapper.sol";
 import { ExternalListManagementStorageWrapper } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { ArrayValidation } from "../../infrastructure/utils/ArrayValidation.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
@@ -24,8 +24,12 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers {
     /// @inheritdoc IExternalPauseManagement
-    function initializeExternalPauses(address[] calldata _pauses) external override onlyNotExternalPauseInitialized {
+    function initializeExternalPauses(
+        address[] calldata _pauses
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_EXTERNAL_PAUSE_MANAGEMENT) {
         PauseStorageWrapper.initializeExternalPauses(_pauses);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_EXTERNAL_PAUSE_MANAGEMENT);
+        emit IExternalPauseManagement.ExternalPauseInitialized(_pauses);
     }
 
     /// @inheritdoc IExternalPauseManagement

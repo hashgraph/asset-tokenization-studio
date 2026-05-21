@@ -44,6 +44,10 @@ interface TRexIBusinessLogicResolver is IDiamondCutManager {
         address businessLogicAddress;
     }
 
+    /// @notice Emitted once when the BLR itself is initialised.
+    /// @dev Fires exclusively from `initializeBusinessLogicResolver` after the storage write succeeds.
+    event BusinessLogicResolverInitialized();
+
     /// @notice Event emitted when Business Logic(s) are registered (updated or added).
     /// @param businessLogics list of registered Business Logics.
     /// @param newLatestVersions new latest version per registered key, in the same order as `businessLogics`.
@@ -54,8 +58,7 @@ interface TRexIBusinessLogicResolver is IDiamondCutManager {
     error BusinessLogicKeyMismatch(address implementation, bytes32 actualKey, bytes32 expectedKey);
     error ZeroKeyNotValidForBusinessLogic();
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_BusinessLogicResolver() external returns (bool success_);
+    function initializeBusinessLogicResolver() external returns (bool success_);
 
     /**
      * @notice Update existing business logics addresses or add new business logics to the register.

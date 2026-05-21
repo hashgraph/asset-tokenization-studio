@@ -15,5 +15,12 @@ bytes32 constant RESOLVER_KEY_ERC1410_MANAGEMENT = 0xb4096d676324d7f4d32415a0a08
  *      live on `IProtectedByPartition`.
  */
 interface IERC1410Management is IERC1410Types {
+    /**
+     * @notice Emitted once when the ERC-1410 partition management is initialised on a token.
+     * @dev Fires exclusively from `initializeERC1410` after the storage write succeeds.
+     */
+    event ERC1410Initialized(bool multiPartition);
+
+    /// @notice One-time initialiser for ERC-1410 partition management.
     function initializeERC1410(bool _multiPartition) external;
 }

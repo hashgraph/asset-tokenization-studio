@@ -5,7 +5,7 @@ import { ethers, network } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { type ResolverProxy, type IAsset, ComplianceMock } from "@contract-types";
-import { DEFAULT_PARTITION, ZERO, EMPTY_STRING, ADDRESS_ZERO, ATS_ROLES } from "@scripts";
+import { DEFAULT_PARTITION, ZERO, EMPTY_STRING, ADDRESS_ZERO, ATS_ROLES, EQUITY_CONFIG_ID } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import {
   deployAtsInfrastructureFixture,
@@ -359,9 +359,12 @@ describe("ProtectedPartitions Tests", () => {
     };
   });
 
-  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
+  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with FacetAlreadyRegistered", async () => {
     await setProtected();
-    await expect(asset.initialize_ProtectedPartitions(true)).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
+    await expect(asset.initializeProtectedPartitions(true)).to.be.revertedWithCustomError(
+      asset,
+      "FacetAlreadyRegistered",
+    );
   });
 
   describe("Generic set Partition Status Tests", () => {
@@ -1159,5 +1162,20 @@ describe("ProtectedPartitions Tests", () => {
         ),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
+  });
+});
+
+describe("initializeProtectedPartitions", () => {
+  it("GIVEN a new deployment WHEN initializeProtectedPartitions is called THEN it emits ProtectedPartitionsInitialized", async () => {
+    const { decodeEvent } = await import("@scripts/infrastructure");
+    const infra = await loadFixture(deployAtsInfrastructureFixture);
+    const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
+      { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+    ]);
+    const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
+    const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+    await expect(freshAsset.connect(infra.deployer).initializeProtectedPartitions(true))
+      .to.emit(freshAsset, "ProtectedPartitionsInitialized")
+      .withArgs(true);
   });
 });

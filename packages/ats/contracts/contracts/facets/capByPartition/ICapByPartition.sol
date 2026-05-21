@@ -19,9 +19,8 @@ interface ICapByPartition {
     /**
      * @notice Emitted once when the CapByPartition capability is initialised on a token.
      * @dev Fires exclusively from `initializeCapByPartition` after the storage write succeeds.
-     * @param operator The account that invoked initialisation (deployer or upgrade caller).
      */
-    event CapByPartitionInitialized(address indexed operator);
+    event CapByPartitionInitialized();
 
     /**
      * @notice Initialises the CapByPartition capability on the token.

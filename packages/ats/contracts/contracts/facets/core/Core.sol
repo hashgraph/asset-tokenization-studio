@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICore } from "./ICore.sol";
-import { ROLE_TREX_OWNER } from "../../constants/roles.sol";
+import { ICore, RESOLVER_KEY_CORE } from "./ICore.sol";
+import { ROLE_TREX_OWNER, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC20StorageWrapper } from "../../domain/asset/ERC20StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 /**
@@ -16,8 +18,12 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
  */
 abstract contract Core is ICore, Modifiers {
     /// @inheritdoc ICore
-    function initializeCore(ICore.ERC20Metadata calldata metadata) external override onlyNotERC20Initialized {
+    function initializeCore(
+        ICore.ERC20Metadata calldata metadata
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_CORE) {
         ERC20StorageWrapper.initializeERC20(metadata);
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_CORE);
+        emit ICore.CoreInitialized(metadata);
     }
 
     /// @inheritdoc ICore

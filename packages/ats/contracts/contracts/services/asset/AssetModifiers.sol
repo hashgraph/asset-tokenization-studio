@@ -8,7 +8,6 @@ import { ClearingModifiers } from "./ClearingModifiers.sol";
 import { CouponModifiers } from "./CouponModifiers.sol";
 import { ComplianceModifiers } from "./ComplianceModifiers.sol";
 import { EquityModifiers } from "./EquityModifiers.sol";
-import { ERC20Modifiers } from "./ERC20Modifiers.sol";
 import { ERC1410Modifiers } from "./ERC1410Modifiers.sol";
 import { ERC3643Modifiers } from "./ERC3643Modifiers.sol";
 import { ExpirationModifiers } from "./ExpirationModifiers.sol";
@@ -17,7 +16,6 @@ import { InterestRateModifiers } from "./InterestRateModifiers.sol";
 import { KpisModifiers } from "./KpisModifiers.sol";
 import { LockModifiers } from "./LockModifiers.sol";
 import { MaturityModifiers } from "./MaturityModifiers.sol";
-import { NominalValueModifiers } from "./NominalValueModifiers.sol";
 import { ProceedRecipientModifiers } from "./ProceedRecipientModifiers.sol";
 import { StateModifiers } from "./StateModifiers.sol";
 import { AmortizationModifiers } from "./AmortizationModifiers.sol";
@@ -39,7 +37,6 @@ import { SecurityModifiers } from "./SecurityModifiers.sol";
  * - CouponModifiers: Coupon date validation
  * - ComplianceModifiers: Compliance validation
  * - EquityModifiers: Equity-specific validation
- * - ERC20Modifiers: ERC20 initialization validation
  * - ERC3643Modifiers: ERC3643 initialization validation
  * - ExpirationModifiers: Expiration validation
  * - HoldModifiers: Hold validation
@@ -47,7 +44,6 @@ import { SecurityModifiers } from "./SecurityModifiers.sol";
  * - KpisModifiers: Kpis validation
  * - LockModifiers: Lock validation
  * - MaturityModifiers: Maturity validation
- * - NominalValueModifiers: Nominal value initialization validation
  * - ProceedRecipientModifiers: Proceed recipients validation
  * - StateModifiers: State validation
  *
@@ -63,7 +59,6 @@ abstract contract AssetModifiers is
     ComplianceModifiers,
     EquityModifiers,
     ERC1410Modifiers,
-    ERC20Modifiers,
     ERC3643Modifiers,
     ExpirationModifiers,
     HoldModifiers,
@@ -72,7 +67,6 @@ abstract contract AssetModifiers is
     LockModifiers,
     LoansPortfolioModifiers,
     MaturityModifiers,
-    NominalValueModifiers,
     ProceedRecipientModifiers,
     SecurityModifiers,
     StateModifiers

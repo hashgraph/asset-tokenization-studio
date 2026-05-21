@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { INominalValue } from "./INominalValue.sol";
-import { ROLE_NOMINAL_VALUE } from "../../../constants/roles.sol";
+import { INominalValue, RESOLVER_KEY_NOMINAL_VALUE } from "./INominalValue.sol";
+import { ROLE_NOMINAL_VALUE, DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { NominalValueStorageWrapper } from "../../../domain/asset/NominalValueStorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 /**
@@ -21,14 +22,10 @@ abstract contract NominalValue is INominalValue, Modifiers {
         uint256 _nominalValue,
         uint8 _nominalValueDecimals,
         bytes3 _nominalValueCurrency
-    ) external override onlyNotNominalValueInitialized {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(RESOLVER_KEY_NOMINAL_VALUE) {
         NominalValueStorageWrapper.initializeNominalValue(_nominalValue, _nominalValueDecimals, _nominalValueCurrency);
-        emit NominalValueInitialized(
-            EvmAccessors.getMsgSender(),
-            _nominalValue,
-            _nominalValueDecimals,
-            _nominalValueCurrency
-        );
+        InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_NOMINAL_VALUE);
+        emit NominalValueInitialized(_nominalValue, _nominalValueDecimals, _nominalValueCurrency);
     }
 
     /// @inheritdoc INominalValue

@@ -6,7 +6,13 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type IAsset } from "@contract-types";
 import { ZERO, EMPTY_STRING, ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployLoanTokenFixture, MAX_UINT256, executeRbac, getLoanDetails } from "@test";
+import {
+  deployAtsInfrastructureFixture,
+  deployLoanTokenFixture,
+  executeRbac,
+  getLoanDetails,
+  MAX_UINT256,
+} from "@test";
 
 const EMPTY_VC_ID = EMPTY_STRING;
 
@@ -175,12 +181,36 @@ describe("Loan Tests", () => {
   });
 
   describe("initializeLoan validations", () => {
-    it("GIVEN an initialized loan WHEN trying to initialize again THEN transaction fails with AlreadyInitialized", async () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeLoan is called THEN it reverts with AccountHasNoRole", async () => {
+      const loanDetails = await getLoanDetails();
+      await expect(asset.connect(signer_C).initializeLoan(loanDetails)).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN an initialized loan WHEN trying to initialize again THEN transaction fails with FacetAlreadyRegistered", async () => {
       const loanDetails = await getLoanDetails();
       await expect(asset.connect(signer_A).initializeLoan(loanDetails)).to.be.revertedWithCustomError(
         asset,
-        "AlreadyInitialized",
+        "FacetAlreadyRegistered",
       );
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeLoan is called THEN it emits LoanInitialized", async () => {
+      const { decodeEvent } = await import("@scripts/infrastructure");
+      const { LOAN_CONFIG_ID } = await import("@scripts/domain");
+      const infra = await loadFixture(deployAtsInfrastructureFixture);
+      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, LOAN_CONFIG_ID, 1, [
+        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
+      ]);
+      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
+      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      const loanDetails = await getLoanDetails();
+      const tx = await freshAsset.connect(infra.deployer).initializeLoan(loanDetails);
+      const receipt = await tx.wait();
+      const emitted = await decodeEvent(freshAsset, "LoanInitialized", receipt!);
+      expect(emitted.loanDetailsData.loanBasicData.currency).to.equal(loanDetails.loanBasicData.currency);
     });
 
     it("GIVEN startingDate is 0 WHEN deploying loan THEN transaction fails with WrongTimestamp", async () => {

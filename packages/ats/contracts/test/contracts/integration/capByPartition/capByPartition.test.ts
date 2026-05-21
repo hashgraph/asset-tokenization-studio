@@ -160,9 +160,10 @@ describe("CapByPartition Tests", () => {
         },
       });
       const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await expect(freshAsset.connect(base.deployer).initializeCapByPartition())
-        .to.emit(freshAsset, "CapByPartitionInitialized")
-        .withArgs(base.deployer.address);
+      await expect(freshAsset.connect(base.deployer).initializeCapByPartition()).to.emit(
+        freshAsset,
+        "CapByPartitionInitialized",
+      );
     });
 
     describe("when facet already initialised", () => {
