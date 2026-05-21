@@ -12,6 +12,7 @@ import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC20VotesStorageWrapper } from "./ERC20VotesStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
+import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
@@ -412,16 +413,10 @@ library ERC1410StorageWrapper {
 
         if (from != address(0)) {
             removeFrom =
-                ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(
-                    from,
-                    TimeTravelStorageWrapper.getBlockTimestamp()
-                ) ==
-                amount;
+                TokenCoreOps.getTotalBalanceForAdjustedAt(from, TimeTravelStorageWrapper.getBlockTimestamp()) == amount;
         }
         if (to != address(0)) {
-            addTo =
-                ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(to, TimeTravelStorageWrapper.getBlockTimestamp()) ==
-                0;
+            addTo = TokenCoreOps.getTotalBalanceForAdjustedAt(to, TimeTravelStorageWrapper.getBlockTimestamp()) == 0;
         }
 
         if (!(addTo || removeFrom)) return;

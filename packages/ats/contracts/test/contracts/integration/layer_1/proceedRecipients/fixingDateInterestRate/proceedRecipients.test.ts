@@ -30,7 +30,13 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
   };
 
   async function deploySecurityFixtureR() {
-    const base = await deployBondKpiLinkedRateTokenFixture();
+    const base = await deployBondKpiLinkedRateTokenFixture({
+      bondDataParams: {
+        bondDetails: {
+          maturityDate: dateToUnixTimestamp(`2031-01-01T00:00:00Z`),
+        },
+      },
+    });
 
     diamond = base.diamond;
     signer_A = base.deployer;

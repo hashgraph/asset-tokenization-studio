@@ -9,7 +9,7 @@ import {
 import { CorporateActionsStorageWrapper } from "../../core/CorporateActionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
-import { ERC3643StorageWrapper } from "../../core/ERC3643StorageWrapper.sol";
+import { TokenCoreOps } from "../../orchestrator/TokenCoreOps.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 import { IVoting } from "../../../facets/layer_2/voting/IVoting.sol";
 import { IVotingTypes } from "../../../facets/layer_2/voting/IVotingTypes.sol";
@@ -251,7 +251,7 @@ library VotingStorageWrapper {
 
         balance_ = (snapshotId != 0)
             ? SnapshotsStorageWrapper.getTotalBalanceOfAtSnapshot(snapshotId, account)
-            : ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(account, date);
+            : TokenCoreOps.getTotalBalanceForAdjustedAt(account, date);
 
         decimals_ = (snapshotId != 0)
             ? SnapshotsStorageWrapper.decimalsAtSnapshot(snapshotId)

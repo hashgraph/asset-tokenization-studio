@@ -10,10 +10,12 @@ import {
 import { CorporateActionsStorageWrapper } from "../../core/CorporateActionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
-import { ERC3643StorageWrapper } from "../../core/ERC3643StorageWrapper.sol";
+import { TokenCoreOps } from "../../orchestrator/TokenCoreOps.sol";
 import { ICoupon } from "../../../facets/coupon/ICoupon.sol";
 import { ICouponTypes } from "../../../facets/coupon/ICouponTypes.sol";
+import { BondStorageWrapper } from "../BondStorageWrapper.sol";
 import { CouponRateDispatch } from "./CouponRateDispatch.sol";
+import { DatesValidation } from "../../../infrastructure/utils/DatesValidation.sol";
 import { DecimalsLib } from "../../../infrastructure/utils/DecimalsLib.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { NominalValueStorageWrapper } from "../nominalValue/NominalValueStorageWrapper.sol";
@@ -43,7 +45,9 @@ library CouponStorageWrapper {
      *         tasks. Variant invariants and rate stamping are delegated to
      *         `CouponRateDispatch.validateAndStamp`, which mirrors the deferred dispatch
      *         performed by `getCoupon` on the read path.
-     * @dev Does NOT emit `ICoupon.CouponSet` — the writer abstract emits it inline after
+     * @dev The end-date-against-maturity constraint is enforced by the caller before this
+     *      function is invoked (see `CouponModifiers.onlyValidCouponEndDate`).
+     *      Does NOT emit `ICoupon.CouponSet` — the writer abstract emits it inline after
      *      this call returns, per the project event-emission rule.
      * @param newCoupon Coupon parameters captured at scheduling time.
      * @return corporateActionId_ Identifier of the underlying corporate action.
@@ -160,6 +164,45 @@ library CouponStorageWrapper {
     }
 
     /**
+     * @notice Reverts with `ICommonErrors.WrongDates` when the bond has a non-zero maturity date
+     *         and `endDate` exceeds it.
+     * @dev When `maturityDate` is zero the bond is treated as open-ended and no constraint is
+     *      applied. Delegates the ordered-date check to `DatesValidation.checkDates`.
+     * @param endDate Coupon end date to validate against the bond's maturity date.
+     */
+    function checkEndDateAgainstMaturity(uint256 endDate) internal view {
+        uint256 maturityDate = BondStorageWrapper.getMaturityDate();
+        if (maturityDate != 0) {
+            DatesValidation.checkDates(endDate, maturityDate);
+        }
+    }
+
+    /**
+     * @notice Fetches the raw (unresolved) coupon data, corporate action ID, and disabled status
+     *         for a given coupon without applying deferred rate resolution.
+     * @dev Unlike `getCoupon`, this function does not call `CouponRateDispatch.resolveRate` and
+     *      does not populate `snapshotId`. Use when only the stored bytes are needed.
+     *      Reverts with `ICoupon.CouponNotFound` if no data is stored.
+     * @param couponID             One-indexed identifier of the coupon to retrieve.
+     * @return rawCoupon_          Decoded coupon struct as stored, without rate resolution.
+     * @return corporateActionId_  Underlying corporate action identifier.
+     * @return isDisabled_         True if the coupon has been cancelled.
+     */
+    function getRawCouponData(
+        uint256 couponID
+    ) internal view returns (ICouponTypes.Coupon memory rawCoupon_, bytes32 corporateActionId_, bool isDisabled_) {
+        corporateActionId_ = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
+            COUPON_CORPORATE_ACTION_TYPE,
+            couponID - 1
+        );
+        bytes memory data;
+        (, , data, isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(corporateActionId_);
+
+        if (data.length == 0) revert ICoupon.CouponNotFound(couponID);
+        rawCoupon_ = abi.decode(data, (ICouponTypes.Coupon));
+    }
+
+    /**
      * @notice Retrieves the registered coupon record, corporate action ID, and disabled status.
      * @dev Resolves the corporate action ID by type index, decodes the stored coupon bytes, and
      *      reads the associated snapshot result ID. Applies deferred rate resolution via
@@ -177,15 +220,7 @@ library CouponStorageWrapper {
         view
         returns (ICouponTypes.RegisteredCoupon memory registeredCoupon_, bytes32 corporateActionId_, bool isDisabled_)
     {
-        corporateActionId_ = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
-            COUPON_CORPORATE_ACTION_TYPE,
-            couponID - 1
-        );
-        bytes memory data;
-        (, , data, isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(corporateActionId_);
-
-        if (data.length == 0) revert ICoupon.CouponNotFound(couponID);
-        (registeredCoupon_.coupon) = abi.decode(data, (ICouponTypes.Coupon));
+        (registeredCoupon_.coupon, corporateActionId_, isDisabled_) = getRawCouponData(couponID);
 
         registeredCoupon_.snapshotId = CorporateActionsStorageWrapper.getUintResultAt(
             corporateActionId_,
@@ -217,7 +252,7 @@ library CouponStorageWrapper {
      *        and `nominalValueDecimals` are all read at the snapshot scale via
      *        `SnapshotsStorageWrapper`.
      *      - Otherwise they fall back to the ABAF-adjusted state at the coupon's record date
-     *        (`ERC3643StorageWrapper.getTotalBalanceForAdjustedAt`,
+     *        (`TokenCoreOps.getTotalBalanceForAdjustedAt`,
      *        `ERC20StorageWrapper.decimalsAdjustedAt`) and the live nominal-value pair from
      *        `NominalValueStorageWrapper`.
      *      The resolved quadruple is then handed to `_calculateCouponAmount`, which must keep
@@ -253,7 +288,7 @@ library CouponStorageWrapper {
                     registeredCoupon.snapshotId
                 );
             } else {
-                couponFor_.tokenBalance = ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(
+                couponFor_.tokenBalance = TokenCoreOps.getTotalBalanceForAdjustedAt(
                     account,
                     registeredCoupon.coupon.recordDate
                 );

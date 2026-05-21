@@ -334,12 +334,6 @@ library ERC3643StorageWrapper {
             getFrozenAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _timestamp);
     }
 
-    function getTotalBalanceForAdjustedAt(address _tokenHolder, uint256 _timestamp) internal view returns (uint256) {
-        return
-            TokenCoreOps.getTotalBalanceForAdjustedAt(_tokenHolder, _timestamp) +
-            getFrozenAmountForAdjustedAt(_tokenHolder, _timestamp);
-    }
-
     function canRecover(address _tokenHolder) internal view returns (bool isEmpty_) {
         isEmpty_ =
             LockStorageWrapper.getLockedAmountFor(_tokenHolder) +

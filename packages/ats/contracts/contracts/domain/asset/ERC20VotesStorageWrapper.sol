@@ -8,7 +8,7 @@ import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Checkpoints } from "../../infrastructure/utils/Checkpoints.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { ScheduledTasksOps } from "../orchestrator/ScheduledTasksOps.sol";
-import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
+import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
@@ -93,7 +93,7 @@ library ERC20VotesStorageWrapper {
         moveVotingPower(
             currentDelegate,
             delegatee,
-            ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(delegator, TimeTravelStorageWrapper.getBlockTimestamp())
+            TokenCoreOps.getTotalBalanceForAdjustedAt(delegator, TimeTravelStorageWrapper.getBlockTimestamp())
         );
     }
 
