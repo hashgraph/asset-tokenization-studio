@@ -3,14 +3,14 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IBalanceTracker } from "./IBalanceTracker.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
-import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
+import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 /**
  * @title BalanceTracker
  * @notice Abstract implementation of `IBalanceTracker` that consolidates token balance and
  *         total supply queries into a single, time-aware read layer.
- * @dev Delegates all storage reads to `ERC1410StorageWrapper` and `ERC3643StorageWrapper`,
+ * @dev Delegates all storage reads to `ERC1410StorageWrapper` and `TokenCoreOps`,
  *      passing the resolved timestamp from `TimeTravelStorageWrapper` to support
  *      non-triggered adjustment simulation. Intended to be inherited by `BalanceTrackerFacet`.
  */
@@ -40,12 +40,11 @@ abstract contract BalanceTracker is IBalanceTracker {
      * @notice Returns the total balance held by an account across all partitions, including
      *         locked tokens, held tokens, and clearing amounts, simulating non-triggered
      *         adjustments up to the current timestamp.
-     * @dev Delegates to `ERC3643StorageWrapper.getTotalBalanceForAdjustedAt`. No state is mutated.
+     * @dev Delegates to `TokenCoreOps.getTotalBalanceForAdjustedAt`. No state is mutated.
      * @param _account The address of the account.
      * @return The adjusted total balance for the account at the current timestamp.
      */
     function getTotalBalanceFor(address _account) external view returns (uint256) {
-        return
-            ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(_account, TimeTravelStorageWrapper.getBlockTimestamp());
+        return TokenCoreOps.getTotalBalanceForAdjustedAt(_account, TimeTravelStorageWrapper.getBlockTimestamp());
     }
 }

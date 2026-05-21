@@ -14,7 +14,7 @@ import { NominalValueStorageWrapper } from "./nominalValue/NominalValueStorageWr
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
-import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
+import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 
@@ -146,7 +146,7 @@ library EquityStorageWrapper {
 
         balance_ = (snapshotId != 0)
             ? SnapshotsStorageWrapper.getTotalBalanceOfAtSnapshot(snapshotId, account)
-            : ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(account, date);
+            : TokenCoreOps.getTotalBalanceForAdjustedAt(account, date);
 
         decimals_ = (snapshotId != 0)
             ? SnapshotsStorageWrapper.decimalsAtSnapshot(snapshotId)
