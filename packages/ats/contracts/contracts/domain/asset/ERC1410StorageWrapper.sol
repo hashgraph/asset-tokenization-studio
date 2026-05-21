@@ -115,6 +115,7 @@ library ERC1410StorageWrapper {
     /// @param account   Token holder receiving the partition.
     /// @param partition Partition identifier.
     function addPartitionToOnly(uint256 value, address account, bytes32 partition) internal {
+        SnapshotsStorageWrapper.updatePartitionListSnapshot(account);
         AdjustBalancesStorageWrapper.pushLabafUserPartition(account, AdjustBalancesStorageWrapper.getAbaf());
 
         ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
@@ -691,6 +692,7 @@ library ERC1410StorageWrapper {
     }
 
     function deletePartitionForHolder(address holder, bytes32 partition, uint256 index) private {
+        SnapshotsStorageWrapper.updatePartitionListSnapshot(holder);
         ERC1410BasicStorage storage erc1410Storage = erc1410BasicStorage();
         uint256 lastIndex = erc1410Storage.partitions[holder].length - 1;
         if (index != lastIndex) {

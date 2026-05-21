@@ -109,21 +109,23 @@ library SnapshotsStorageWrapper {
         snapshots.values.push(currentValue);
     }
 
-    function updateSnapshotPartitions(
-        Snapshots storage snapshots,
-        PartitionSnapshots storage partitionSnapshots,
-        uint256 currentValueForPartition,
-        bytes32[] memory partitionIds
-    ) internal {
+    /**
+     * @dev Captures the holder's partition list at the current snapshot id.
+     *      Must be invoked BEFORE any mutation to `partitions[account]` so the
+     *      stored snapshot reflects the pre-mutation list, matching the
+     *      "lazy snapshot before mutation" semantics used throughout this
+     *      library. Only the two mutation points (`addPartitionToOnly`,
+     *      `deletePartitionForHolder`) call this; the per-transfer hot path
+     *      no longer touches the partition list, which keeps it O(1) instead
+     *      of O(N) in the holder's partition count.
+     */
+    function updatePartitionListSnapshot(address account) internal {
         uint256 currentId = getCurrentSnapshotId();
-        if (lastSnapshotId(snapshots.ids) < currentId) {
-            snapshots.ids.push(currentId);
-            snapshots.values.push(currentValueForPartition);
-        }
-        if (lastSnapshotId(partitionSnapshots.ids) < currentId) {
-            partitionSnapshots.ids.push(currentId);
-            partitionSnapshots.values.push(ListOfPartitions(partitionIds));
-        }
+        if (currentId == 0 || account == address(0)) return;
+        PartitionSnapshots storage partitionSnapshots = _snapshotStorage().accountPartitionMetadata[account];
+        if (lastSnapshotId(partitionSnapshots.ids) >= currentId) return;
+        partitionSnapshots.ids.push(currentId);
+        partitionSnapshots.values.push(ListOfPartitions(ERC1410StorageWrapper.partitionsOf(account)));
     }
 
     function updateAbafSnapshot() internal {
@@ -166,9 +168,7 @@ library SnapshotsStorageWrapper {
                 _snapshotStorage().accountBalanceSnapshots[account],
                 ERC20StorageWrapper.balanceOf(account),
                 _snapshotStorage().accountPartitionBalanceSnapshots[account][partition],
-                _snapshotStorage().accountPartitionMetadata[account],
-                ERC1410StorageWrapper.balanceOfByPartition(partition, account),
-                ERC1410StorageWrapper.partitionsOf(account)
+                ERC1410StorageWrapper.balanceOfByPartition(partition, account)
             );
             return;
         }
@@ -191,9 +191,7 @@ library SnapshotsStorageWrapper {
             _snapshotStorage().accountBalanceSnapshots[account],
             balance,
             _snapshotStorage().accountPartitionBalanceSnapshots[account][partition],
-            _snapshotStorage().accountPartitionMetadata[account],
-            balanceForPartition,
-            ERC1410StorageWrapper.partitionsOf(account)
+            balanceForPartition
         );
     }
 
@@ -201,12 +199,10 @@ library SnapshotsStorageWrapper {
         Snapshots storage balanceSnapshots,
         uint256 currentValue,
         Snapshots storage partitionBalanceSnapshots,
-        PartitionSnapshots storage partitionSnapshots,
-        uint256 currentValueForPartition,
-        bytes32[] memory partitionIds
+        uint256 currentValueForPartition
     ) internal {
         updateSnapshot(balanceSnapshots, currentValue);
-        updateSnapshotPartitions(partitionBalanceSnapshots, partitionSnapshots, currentValueForPartition, partitionIds);
+        updateSnapshot(partitionBalanceSnapshots, currentValueForPartition);
     }
 
     function updateAccountLockedBalancesSnapshot(address account, bytes32 partition) internal {
