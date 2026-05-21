@@ -125,14 +125,6 @@ library HoldStorageWrapper {
 
         success_ = operateHoldByPartition(_holdIdentifier, _to, _amount, IHoldTypes.OperationType.Execute);
         partition_ = _holdIdentifier.partition;
-
-        if (getHold(_holdIdentifier).hold.amount == 0) {
-            AdjustBalancesStorageWrapper.removeLabafHold(
-                _holdIdentifier.partition,
-                _holdIdentifier.tokenHolder,
-                _holdIdentifier.holdId
-            );
-        }
     }
 
     function releaseHoldByPartition(
@@ -149,14 +141,6 @@ library HoldStorageWrapper {
             _amount,
             IHoldTypes.OperationType.Release
         );
-
-        if (getHold(_holdIdentifier).hold.amount == 0) {
-            AdjustBalancesStorageWrapper.removeLabafHold(
-                _holdIdentifier.partition,
-                _holdIdentifier.tokenHolder,
-                _holdIdentifier.holdId
-            );
-        }
     }
 
     function reclaimHoldByPartition(
@@ -174,12 +158,6 @@ library HoldStorageWrapper {
             _holdIdentifier.tokenHolder,
             amount_,
             IHoldTypes.OperationType.Reclaim
-        );
-
-        AdjustBalancesStorageWrapper.removeLabafHold(
-            _holdIdentifier.partition,
-            _holdIdentifier.tokenHolder,
-            _holdIdentifier.holdId
         );
     }
 
