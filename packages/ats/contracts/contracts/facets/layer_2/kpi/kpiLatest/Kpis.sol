@@ -5,8 +5,22 @@ import { IKpis } from "./IKpis.sol";
 import { KPI_MANAGER_ROLE } from "../../../../constants/roles.sol";
 import { Modifiers } from "../../../../services/Modifiers.sol";
 import { KpisStorageWrapper } from "../../../../domain/asset/KpisStorageWrapper.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../../../domain/core/InitializerStorageWrapper.sol";
+import { _KPIS_LATEST_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 
 abstract contract Kpis is IKpis, Modifiers {
+    /// @inheritdoc IKpis
+    function initializeKpis()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_KPIS_LATEST_KPI_LINKED_RATE_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_KPIS_LATEST_KPI_LINKED_RATE_RESOLVER_KEY);
+        emit KpisInitialized();
+    }
+
     function addKpiData(
         uint256 _date,
         uint256 _value,

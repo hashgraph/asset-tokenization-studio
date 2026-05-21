@@ -25,6 +25,12 @@ interface IScheduledBalanceAdjustment {
     }
 
     /**
+     * @notice Emitted once when the scheduled balance adjustment capability is initialised on a token.
+     * @dev Fires exclusively from `initializeScheduledBalanceAdjustment`.
+     */
+    event ScheduledBalanceAdjustmentInitialized();
+
+    /**
      * @notice Emitted when a balance adjustment is successfully scheduled.
      * @param corporateActionId   On-chain identifier of the associated corporate action record.
      * @param balanceAdjustmentId Sequential identifier of the scheduled adjustment.
@@ -58,6 +64,13 @@ interface IScheduledBalanceAdjustment {
      * @param balanceAdjustmentId Identifier of the balance adjustment that was already executed.
      */
     error BalanceAdjustmentAlreadyExecuted(bytes32 corporateActionId, uint256 balanceAdjustmentId);
+
+    /**
+     * @notice Initialises the scheduled balance adjustment capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeScheduledBalanceAdjustment() external;
 
     /**
      * @notice Enqueues a balance adjustment to be executed at a future date.

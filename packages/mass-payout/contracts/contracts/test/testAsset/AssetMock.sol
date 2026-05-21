@@ -423,4 +423,12 @@ contract AssetMock is IAssetMock {
     function initializeCoupon() external pure {
         revert NotImplemented();
     }
+
+    function initializeScheduledBalanceAdjustment() external pure {
+        revert NotImplemented();
+    }
+
+    function initializeVoting() external pure {
+        revert NotImplemented();
+    }
 }

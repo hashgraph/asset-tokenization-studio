@@ -25,7 +25,11 @@ contract HoldAtSnapshotByPartitionFacet is HoldAtSnapshotByPartition, IStaticFun
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.heldBalanceOfAtSnapshotByPartition.selector);
+        return
+            Bytes4Builder.build(
+                this.initializeHoldAtSnapshotByPartition.selector,
+                this.heldBalanceOfAtSnapshotByPartition.selector
+            );
     }
 
     /// @inheritdoc IStaticFunctionSelectors

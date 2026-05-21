@@ -9,6 +9,9 @@ import { EquityStorageWrapper } from "../../domain/asset/EquityStorageWrapper.so
 import { ScheduledTasksStorageWrapper } from "../../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { ScheduledTask } from "../layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _SCHEDULED_BALANCE_ADJUSTMENT_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title ScheduledBalanceAdjustment
@@ -20,6 +23,17 @@ import { ScheduledTask } from "../layer_2/scheduledTask/scheduledTasksCommon/ISc
  *      inherited by `ScheduledBalanceAdjustmentFacet`.
  */
 abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, Modifiers {
+    /// @inheritdoc IScheduledBalanceAdjustment
+    function initializeScheduledBalanceAdjustment()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_SCHEDULED_BALANCE_ADJUSTMENT_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_SCHEDULED_BALANCE_ADJUSTMENT_RESOLVER_KEY);
+        emit ScheduledBalanceAdjustmentInitialized();
+    }
+
     /// @inheritdoc IScheduledBalanceAdjustment
     function setScheduledBalanceAdjustment(
         IScheduledBalanceAdjustment.ScheduledBalanceAdjustment calldata _newBalanceAdjustment

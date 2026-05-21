@@ -12,7 +12,7 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
     function initializeLoansPortfolio(
         ILoansPortfolio.LoansPortfolioDetailsData calldata _loansPortfolioData
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_LOANS_PORTFOLIO_RESOLVER_KEY) {
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_LOANS_PORTFOLIO_RESOLVER_KEY) {
         LoansPortfolioStorageWrapper.initializeLoansPortfolio(_loansPortfolioData);
         // TODO: [LOANS-PORTFOLIO-INTEGRATION]
         // Security data should be initialised through TreasuryToken/deployment layer.

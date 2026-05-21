@@ -7,10 +7,24 @@ import { CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
 import { VOTING_RIGHTS_CORPORATE_ACTION_TYPE } from "../../../constants/values.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { VotingStorageWrapper } from "../../../domain/asset/voting/VotingStorageWrapper.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
+import { _VOTING_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
 /// @title Voting
 /// @notice Abstract contract for voting rights management
 abstract contract Voting is IVoting, Modifiers {
+    /// @inheritdoc IVoting
+    function initializeVoting()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_VOTING_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_VOTING_RESOLVER_KEY);
+        emit VotingInitialized();
+    }
+
     /// @notice Sets a new voting for the security
     /// @param _newVoting The new voting to be set
     /// @return voteID_ The created voting identifier

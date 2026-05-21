@@ -275,4 +275,27 @@ describe("Kpi Latest Tests", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
+
+  describe("initializeKpis", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeKpis is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeKpis()).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+    });
+
+    describe("when already initialised", () => {
+      beforeEach(async () => {
+        await asset.connect(signer_A).initializeKpis();
+      });
+
+      it("GIVEN an already-initialised facet WHEN initializeKpis is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+        await expect(asset.connect(signer_A).initializeKpis()).to.be.revertedWithCustomError(
+          asset,
+          "FacetAlreadyRegistered",
+        );
+      });
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeKpis is called THEN it emits KpisInitialized", async () => {
+      await expect(asset.connect(signer_A).initializeKpis()).to.emit(asset, "KpisInitialized");
+    });
+  });
 });

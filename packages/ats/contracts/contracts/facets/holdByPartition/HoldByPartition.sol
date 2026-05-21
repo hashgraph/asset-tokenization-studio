@@ -9,6 +9,9 @@ import { IHoldByPartition } from "./IHoldByPartition.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _HOLD_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title HoldByPartition
@@ -23,6 +26,17 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
  * @author Asset Tokenization Studio Team
  */
 abstract contract HoldByPartition is IHoldByPartition, Modifiers {
+    /// @inheritdoc IHoldByPartition
+    function initializeHoldByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_HOLD_BY_PARTITION_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_HOLD_BY_PARTITION_RESOLVER_KEY);
+        emit HoldByPartitionInitialized();
+    }
+
     /// @inheritdoc IHoldByPartition
     function createHoldByPartition(
         bytes32 _partition,
