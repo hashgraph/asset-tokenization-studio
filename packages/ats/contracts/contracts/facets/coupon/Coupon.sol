@@ -46,9 +46,9 @@ abstract contract Coupon is ICoupon, Modifiers {
         onlyValidDates(_newCoupon.fixingDate, _newCoupon.executionDate)
         onlyValidTimestamp(_newCoupon.recordDate)
         onlyValidTimestamp(_newCoupon.fixingDate)
+        onlyValidCouponEndDate(_newCoupon.endDate)
         returns (uint256 couponID_)
     {
-        CouponStorageWrapper.checkEndDateAgainstMaturity(_newCoupon.endDate);
         bytes32 corporateActionId;
         ICouponTypes.Coupon memory resolved;
         (corporateActionId, couponID_, resolved) = CouponStorageWrapper.setCoupon(_newCoupon);
