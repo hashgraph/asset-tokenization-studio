@@ -10,6 +10,19 @@ import { IAllowanceTypes } from "./IAllowanceTypes.sol";
  */
 interface IAllowance is IAllowanceTypes {
     /**
+     * @notice Emitted once when the allowance capability is initialised on a token.
+     * @dev Fires exclusively from `initializeAllowance` after the storage write succeeds.
+     */
+    event AllowanceInitialized();
+
+    /**
+     * @notice Initialises the allowance capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeAllowance() external;
+
+    /**
      * @notice Sets `value` as the allowance of `spender` over the caller's tokens.
      * @dev Overwrites any previously-granted allowance. Known race: moving a non-zero
      *      allowance directly to another non-zero value lets `spender` spend both the old and

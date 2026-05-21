@@ -367,4 +367,30 @@ describe("Allowance Facet Tests", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
+  describe("initializeAllowance", () => {
+    it("GIVEN an already-initialised facet WHEN initializeAllowance is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      const base = await deployEquityTokenFixture();
+      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await freshAsset.connect(base.deployer).initializeAllowance();
+      await expect(freshAsset.connect(base.deployer).initializeAllowance()).to.be.revertedWithCustomError(
+        freshAsset,
+        "FacetAlreadyRegistered",
+      );
+    });
+
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeAllowance is called THEN it reverts with AccountHasNoRole", async () => {
+      const base = await deployEquityTokenFixture();
+      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await expect(freshAsset.connect(base.user3).initializeAllowance()).to.be.revertedWithCustomError(
+        freshAsset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN a fresh deployment WHEN initializeAllowance is called THEN it emits AllowanceInitialized", async () => {
+      const base = await deployEquityTokenFixture();
+      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      await expect(freshAsset.connect(base.deployer).initializeAllowance()).to.emit(freshAsset, "AllowanceInitialized");
+    });
+  });
 });

@@ -18,6 +18,12 @@ interface IAdjustBalances {
      */
     event AdjustmentBalanceSet(address indexed operator, uint256 factor, uint8 decimals);
 
+    /**
+     * @notice Emitted once when the balance adjustment capability is initialised on a token.
+     * @dev Fires exclusively from `initializeBalanceAdjustments` after the storage write succeeds.
+     */
+    event BalanceAdjustmentsInitialized();
+
     /// @notice Reverts when `factor` is zero, which would zero-out all holder balances.
     error FactorIsZero();
 
@@ -29,6 +35,13 @@ interface IAdjustBalances {
 
     /// @notice Reverts when the proposed factor would overflow the projected total supply.
     error TotalSupplyOverflow();
+
+    /**
+     * @notice Initialises the balance adjustment capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeBalanceAdjustments() external;
 
     /**
      * @notice Applies a balance adjustment to all token holders immediately.

@@ -2,11 +2,14 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IAllowance } from "./IAllowance.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC20StorageWrapper } from "../../domain/asset/ERC20StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _ALLOWANCE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title Allowance
@@ -15,6 +18,17 @@ import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
  *         during the transition period.
  */
 abstract contract Allowance is IAllowance, Modifiers {
+    /// @inheritdoc IAllowance
+    function initializeAllowance()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_ALLOWANCE_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_ALLOWANCE_RESOLVER_KEY);
+        emit IAllowance.AllowanceInitialized();
+    }
+
     /**
      * @inheritdoc IAllowance
      * @dev Restricted to unpaused state, non-recovered caller and spender, tokens without

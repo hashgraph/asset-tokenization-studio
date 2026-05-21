@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ISSUER_ROLE, AGENT_ROLE, _buildRoles } from "../../constants/roles.sol";
+import { ISSUER_ROLE, AGENT_ROLE, DEFAULT_ADMIN_ROLE, _buildRoles } from "../../constants/roles.sol";
 import { IBatchMint } from "./IBatchMint.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
@@ -10,6 +10,8 @@ import { ERC1594StorageWrapper } from "../../domain/asset/ERC1594StorageWrapper.
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 import { IMint } from "../mint/IMint.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _BATCH_MINT_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title BatchMint
@@ -23,6 +25,17 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  * @author Asset Tokenization Studio Team
  */
 abstract contract BatchMint is IBatchMint, Modifiers {
+    /// @inheritdoc IBatchMint
+    function initializeBatchMint()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_BATCH_MINT_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_BATCH_MINT_RESOLVER_KEY);
+        emit IBatchMint.BatchMintInitialized();
+    }
+
     /// @inheritdoc IBatchMint
     function batchMint(
         address[] calldata _toList,

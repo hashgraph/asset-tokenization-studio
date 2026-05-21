@@ -26,6 +26,7 @@ contract BalanceTrackerAtSnapshotFacet is BalanceTrackerAtSnapshot, IStaticFunct
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeBalanceTrackerAtSnapshot.selector,
                 this.balanceOfAtSnapshot.selector,
                 this.balancesOfAtSnapshot.selector,
                 this.totalSupplyAtSnapshot.selector

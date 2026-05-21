@@ -10,6 +10,19 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface IBalanceTrackerAdjusted {
     /**
+     * @notice Emitted once when the adjusted balance tracker capability is initialised on a token.
+     * @dev Fires exclusively from `initializeBalanceTrackerAdjusted` after the storage write succeeds.
+     */
+    event BalanceTrackerAdjustedInitialized();
+
+    /**
+     * @notice Initialises the adjusted balance tracker capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeBalanceTrackerAdjusted() external;
+
+    /**
      * @notice Returns the total token balance of a token holder at a given timestamp,
      *         simulating non-triggered balance adjustments up to that point in time.
      * @param _tokenHolder The address of the token holder.

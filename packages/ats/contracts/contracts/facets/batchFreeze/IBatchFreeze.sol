@@ -10,6 +10,19 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface IBatchFreeze {
     /**
+     * @notice Emitted once when the batch freeze capability is initialised on a token.
+     * @dev Fires exclusively from `initializeBatchFreeze` after the storage write succeeds.
+     */
+    event BatchFreezeInitialized();
+
+    /**
+     * @notice Initialises the batch freeze capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeBatchFreeze() external;
+
+    /**
      * @notice Batch freezes or unfreezes multiple addresses.
      * @param _userAddresses Array of addresses to freeze/unfreeze.
      * @param _freeze Array of freeze statuses (true = freeze, false = unfreeze).

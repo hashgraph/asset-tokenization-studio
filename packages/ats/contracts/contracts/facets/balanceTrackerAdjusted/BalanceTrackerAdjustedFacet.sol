@@ -24,7 +24,7 @@ contract BalanceTrackerAdjustedFacet is BalanceTrackerAdjusted, IStaticFunctionS
 
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.balanceOfAt.selector);
+        return Bytes4Builder.build(this.initializeBalanceTrackerAdjusted.selector, this.balanceOfAt.selector);
     }
 
     /// @inheritdoc IStaticFunctionSelectors

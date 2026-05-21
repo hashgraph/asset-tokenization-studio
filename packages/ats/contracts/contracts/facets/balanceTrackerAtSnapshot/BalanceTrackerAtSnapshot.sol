@@ -2,8 +2,12 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IBalanceTrackerAtSnapshot } from "./IBalanceTrackerAtSnapshot.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { HolderBalance } from "../layer_1/snapshot/ISnapshots.sol";
 import { SnapshotsStorageWrapper } from "../../domain/asset/SnapshotsStorageWrapper.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _BALANCE_TRACKER_AT_SNAPSHOT_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title BalanceTrackerAtSnapshot
@@ -12,7 +16,18 @@ import { SnapshotsStorageWrapper } from "../../domain/asset/SnapshotsStorageWrap
  * @dev Delegates storage reads to `SnapshotsStorageWrapper`. Intended to be inherited by
  *      `BalanceTrackerAtSnapshotFacet`.
  */
-abstract contract BalanceTrackerAtSnapshot is IBalanceTrackerAtSnapshot {
+abstract contract BalanceTrackerAtSnapshot is IBalanceTrackerAtSnapshot, Modifiers {
+    /// @inheritdoc IBalanceTrackerAtSnapshot
+    function initializeBalanceTrackerAtSnapshot()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_BALANCE_TRACKER_AT_SNAPSHOT_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_BALANCE_TRACKER_AT_SNAPSHOT_RESOLVER_KEY);
+        emit IBalanceTrackerAtSnapshot.BalanceTrackerAtSnapshotInitialized();
+    }
+
     /// @inheritdoc IBalanceTrackerAtSnapshot
     function balanceOfAtSnapshot(
         uint256 _snapshotID,

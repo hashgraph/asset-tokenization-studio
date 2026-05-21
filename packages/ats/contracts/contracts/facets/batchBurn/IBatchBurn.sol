@@ -10,6 +10,19 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface IBatchBurn {
     /**
+     * @notice Emitted once when the batch burn capability is initialised on a token.
+     * @dev Fires exclusively from `initializeBatchBurn` after the storage write succeeds.
+     */
+    event BatchBurnInitialized();
+
+    /**
+     * @notice Initialises the batch burn capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeBatchBurn() external;
+
+    /**
      * @notice Burns tokens from multiple addresses in a single transaction.
      * @dev Caller must hold `CONTROLLER_ROLE` or `AGENT_ROLE`. The token must not be paused
      *      and must not be configured for multi-partition. Emits `IController.ControllerRedemption`

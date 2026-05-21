@@ -10,6 +10,19 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface IBalanceTrackerByPartition {
     /**
+     * @notice Emitted once when the partition balance tracker capability is initialised on a token.
+     * @dev Fires exclusively from `initializeBalanceTrackerByPartition` after the storage write succeeds.
+     */
+    event BalanceTrackerByPartitionInitialized();
+
+    /**
+     * @notice Initialises the partition balance tracker capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeBalanceTrackerByPartition() external;
+
+    /**
      * @notice Returns the token balance of a holder within a specific partition,
      *         simulating non-triggered balance adjustments up to the current timestamp.
      * @param _partition The partition identifier
