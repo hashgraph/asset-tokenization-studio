@@ -23,14 +23,6 @@ bytes32 constant RESOLVER_KEY_ACCESS_CONTROL = 0xccc2e755f9225e65f6c822a258c866f
  */
 interface TRexIAccessControl {
     /**
-     * @notice Emitted when the admin role for a given role is changed.
-     * @param role The role whose admin role was updated.
-     * @param previousAdminRole The previous admin role.
-     * @param newAdminRole The new admin role.
-     */
-    event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);
-
-    /**
      * @notice Emitted when a role is granted to an account.
      * @param operator The address that performed the grant.
      * @param account The account that received the role.
