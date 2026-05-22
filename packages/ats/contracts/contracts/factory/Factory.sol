@@ -294,7 +294,7 @@ abstract contract Factory is IFactory {
         );
 
         // Initialize fixed rate (FixedRateFacet may not be present)
-        _tryInitialize_FixedRate(bondAddress_, _bondFixedRateData.fixedRateData);
+        _tryInitializeFixedRate(bondAddress_, _bondFixedRateData.fixedRateData);
 
         _tryInitializeInterestRateType(bondAddress_, IInterestRate.RateType.FIXED);
 
@@ -365,7 +365,7 @@ abstract contract Factory is IFactory {
         );
 
         // Initialize proceed recipients (ProceedRecipientsFacet may not be present)
-        _tryInitialize_ProceedRecipients(bondAddress_, _bondData.proceedRecipients, _bondData.proceedRecipientsData);
+        _tryInitializeProceedRecipients(bondAddress_, _bondData.proceedRecipients, _bondData.proceedRecipientsData);
 
         _tryInitializeNominalValue(
             bondAddress_,
@@ -414,7 +414,7 @@ abstract contract Factory is IFactory {
         IControlList(securityAddress_).initializeControlList(_securityData.isWhiteList);
 
         // configure multi partition flag (ERC1410ManagementFacet may not be present)
-        _tryInitialize_ERC1410(securityAddress_, _securityData.isMultiPartition);
+        _tryInitializeERC1410(securityAddress_, _securityData.isMultiPartition);
 
         // configure controller flag (ControllerFacet may not be present)
         _tryInitializeController(securityAddress_, _securityData.isControllable);
@@ -427,7 +427,7 @@ abstract contract Factory is IFactory {
         ICore(securityAddress_).initializeCore(erc20Metadata);
 
         // configure issue flag (ERC1594Facet may not be present)
-        _tryInitialize_ERC1594(securityAddress_);
+        _tryInitializeERC1594(securityAddress_);
 
         // configure cap (CapFacet should be present)
         ICap(securityAddress_).initializeCap(_securityData.maxSupply, new ICap.PartitionCap[](0));
@@ -453,233 +453,233 @@ abstract contract Factory is IFactory {
         IExternalKycListManagement(securityAddress_).initializeExternalKycLists(_securityData.externalKycLists);
 
         // configure ERC20Votes (ERC20VotesFacet may not be present)
-        _tryInitialize_ERC20Votes(securityAddress_, _securityData.erc20VotesActivated);
+        _tryInitializeERC20Votes(securityAddress_, _securityData.erc20VotesActivated);
 
         // configure ERC3643 (should be present)
         IERC3643(securityAddress_).initializeERC3643(_securityData.compliance, _securityData.identityRegistry);
 
         // configure access control (AccessControlFacet may not be present)
-        _tryInitialize_AccessControl(securityAddress_);
+        _tryInitializeAccessControl(securityAddress_);
 
         // configure allowance (AllowanceFacet may not be present)
-        _tryInitialize_Allowance(securityAddress_);
+        _tryInitializeAllowance(securityAddress_);
 
         // configure transfer (TransferFacet may not be present)
-        _tryInitialize_Transfer(securityAddress_);
+        _tryInitializeTransfer(securityAddress_);
 
         // configure core adjusted (CoreAdjustedFacet may not be present)
-        _tryInitialize_CoreAdjusted(securityAddress_);
+        _tryInitializeCoreAdjusted(securityAddress_);
 
         // configure metadata (MetadataFacet may not be present)
-        _tryInitialize_Metadata(securityAddress_);
+        _tryInitializeMetadata(securityAddress_);
 
         // configure freeze (FreezeFacet may not be present)
-        _tryInitialize_Freeze(securityAddress_);
+        _tryInitializeFreeze(securityAddress_);
 
         // configure batch freeze (BatchFreezeFacet may not be present)
-        _tryInitialize_BatchFreeze(securityAddress_);
+        _tryInitializeBatchFreeze(securityAddress_);
 
         // configure pause (PauseFacet may not be present)
-        _tryInitialize_Pause(securityAddress_);
+        _tryInitializePause(securityAddress_);
 
         // configure balance tracker (BalanceTrackerFacet may not be present)
-        _tryInitialize_BalanceTracker(securityAddress_);
+        _tryInitializeBalanceTracker(securityAddress_);
 
         // configure balance tracker adjusted (BalanceTrackerAdjustedFacet may not be present)
-        _tryInitialize_BalanceTrackerAdjusted(securityAddress_);
+        _tryInitializeBalanceTrackerAdjusted(securityAddress_);
 
         // configure snapshots by partition (SnapshotsByPartitionFacet may not be present)
-        _tryInitialize_SnapshotsByPartition(securityAddress_);
+        _tryInitializeSnapshotsByPartition(securityAddress_);
 
         // configure security holders at snapshot (SecurityHoldersAtSnapshotFacet may not be present)
-        _tryInitialize_SecurityHoldersAtSnapshot(securityAddress_);
+        _tryInitializeSecurityHoldersAtSnapshot(securityAddress_);
 
         // configure hold at snapshot (HoldAtSnapshotFacet may not be present)
-        _tryInitialize_HoldAtSnapshot(securityAddress_);
+        _tryInitializeHoldAtSnapshot(securityAddress_);
 
         // configure lock at snapshot by partition (LockAtSnapshotByPartitionFacet may not be present)
-        _tryInitialize_LockAtSnapshotByPartition(securityAddress_);
+        _tryInitializeLockAtSnapshotByPartition(securityAddress_);
 
         // configure freeze at snapshot (FreezeAtSnapshotFacet may not be present)
-        _tryInitialize_FreezeAtSnapshot(securityAddress_);
+        _tryInitializeFreezeAtSnapshot(securityAddress_);
 
         // configure freeze at snapshot by partition (FreezeAtSnapshotByPartitionFacet may not be present)
-        _tryInitialize_FreezeAtSnapshotByPartition(securityAddress_);
+        _tryInitializeFreezeAtSnapshotByPartition(securityAddress_);
 
         // configure lock at snapshot (LockAtSnapshotFacet may not be present)
-        _tryInitialize_LockAtSnapshot(securityAddress_);
+        _tryInitializeLockAtSnapshot(securityAddress_);
 
         // configure core at snapshot (CoreAtSnapshotFacet may not be present)
-        _tryInitialize_CoreAtSnapshot(securityAddress_);
+        _tryInitializeCoreAtSnapshot(securityAddress_);
 
         // configure balance tracker by partition (BalanceTrackerByPartitionFacet may not be present)
-        _tryInitialize_BalanceTrackerByPartition(securityAddress_);
+        _tryInitializeBalanceTrackerByPartition(securityAddress_);
 
         // configure balance tracker at snapshot (BalanceTrackerAtSnapshotFacet may not be present)
-        _tryInitialize_BalanceTrackerAtSnapshot(securityAddress_);
+        _tryInitializeBalanceTrackerAtSnapshot(securityAddress_);
 
         // configure balance tracker at snapshot by partition (BalanceTrackerAtSnapshotByPartitionFacet
         // may not be present)
-        _tryInitialize_BalanceTrackerAtSnapshotByPartition(securityAddress_);
+        _tryInitializeBalanceTrackerAtSnapshotByPartition(securityAddress_);
 
         // configure hold at snapshot by partition (HoldAtSnapshotByPartitionFacet may not be present)
-        _tryInitialize_HoldAtSnapshotByPartition(securityAddress_);
+        _tryInitializeHoldAtSnapshotByPartition(securityAddress_);
 
         // configure mint by partition (MintByPartitionFacet may not be present)
-        _tryInitialize_MintByPartition(securityAddress_);
+        _tryInitializeMintByPartition(securityAddress_);
 
         // configure protected by partition (ProtectedByPartitionFacet may not be present)
-        _tryInitialize_ProtectedByPartition(securityAddress_);
+        _tryInitializeProtectedByPartition(securityAddress_);
 
         // configure operator (OperatorFacet may not be present)
-        _tryInitialize_Operator(securityAddress_);
+        _tryInitializeOperator(securityAddress_);
 
         // configure transfer by partition (TransferByPartitionFacet may not be present)
-        _tryInitialize_TransferByPartition(securityAddress_);
+        _tryInitializeTransferByPartition(securityAddress_);
 
         // configure partitions (PartitionsFacet may not be present)
-        _tryInitialize_Partitions(securityAddress_);
+        _tryInitializePartitions(securityAddress_);
 
         // configure operator by partition (OperatorByPartitionFacet may not be present)
-        _tryInitialize_OperatorByPartition(securityAddress_);
+        _tryInitializeOperatorByPartition(securityAddress_);
 
         // configure burn by partition (BurnByPartitionFacet may not be present)
-        _tryInitialize_BurnByPartition(securityAddress_);
+        _tryInitializeBurnByPartition(securityAddress_);
 
         // configure documentation (DocumentationFacet may not be present)
-        _tryInitialize_Documentation(securityAddress_);
+        _tryInitializeDocumentation(securityAddress_);
 
         // configure EIP712 (EIP712Facet may not be present)
-        _tryInitialize_EIP712(securityAddress_);
+        _tryInitializeEIP712(securityAddress_);
 
         // configure nonces (NoncesFacet may not be present)
-        _tryInitialize_Nonces(securityAddress_);
+        _tryInitializeNonces(securityAddress_);
 
         // configure deactivate (DeactivateFacet may not be present)
-        _tryInitialize_Deactivate(securityAddress_);
+        _tryInitializeDeactivate(securityAddress_);
 
         // configure batch controller (BatchControllerFacet may not be present)
-        _tryInitialize_BatchController(securityAddress_);
+        _tryInitializeBatchController(securityAddress_);
 
         // configure batch burn (BatchBurnFacet may not be present)
-        _tryInitialize_BatchBurn(securityAddress_);
+        _tryInitializeBatchBurn(securityAddress_);
 
         // configure batch mint (BatchMintFacet may not be present)
-        _tryInitialize_BatchMint(securityAddress_);
+        _tryInitializeBatchMint(securityAddress_);
 
         // configure batch transfer (BatchTransferFacet may not be present)
-        _tryInitialize_BatchTransfer(securityAddress_);
+        _tryInitializeBatchTransfer(securityAddress_);
 
         // configure recovery (RecoveryFacet may not be present)
-        _tryInitialize_Recovery(securityAddress_);
+        _tryInitializeRecovery(securityAddress_);
 
         // configure compliance (ComplianceFacet may not be present)
-        _tryInitialize_Compliance(securityAddress_);
+        _tryInitializeCompliance(securityAddress_);
 
         // configure compliance by partition (ComplianceByPartitionFacet may not be present)
-        _tryInitialize_ComplianceByPartition(securityAddress_);
+        _tryInitializeComplianceByPartition(securityAddress_);
 
         // configure burn (BurnFacet may not be present)
-        _tryInitialize_Burn(securityAddress_);
+        _tryInitializeBurn(securityAddress_);
 
         // configure protected clearing hold by partition (ProtectedClearingHoldByPartitionFacet may not be present)
-        _tryInitialize_ProtectedClearingHoldByPartition(securityAddress_);
+        _tryInitializeProtectedClearingHoldByPartition(securityAddress_);
 
         // configure operator clearing hold by partition (OperatorClearingHoldByPartitionFacet may not be present)
-        _tryInitialize_OperatorClearingHoldByPartition(securityAddress_);
+        _tryInitializeOperatorClearingHoldByPartition(securityAddress_);
 
         // configure operator clearing by partition (OperatorClearingByPartitionFacet may not be present)
-        _tryInitialize_OperatorClearingByPartition(securityAddress_);
+        _tryInitializeOperatorClearingByPartition(securityAddress_);
 
         // configure protected clearing by partition (ProtectedClearingByPartitionFacet may not be present)
-        _tryInitialize_ProtectedClearingByPartition(securityAddress_);
+        _tryInitializeProtectedClearingByPartition(securityAddress_);
 
         // configure hold (HoldFacet may not be present)
-        _tryInitialize_Hold(securityAddress_);
+        _tryInitializeHold(securityAddress_);
 
         // configure operator hold by partition (OperatorHoldByPartitionFacet may not be present)
-        _tryInitialize_OperatorHoldByPartition(securityAddress_);
+        _tryInitializeOperatorHoldByPartition(securityAddress_);
 
         // configure controller hold by partition (ControllerHoldByPartitionFacet may not be present)
-        _tryInitialize_ControllerHoldByPartition(securityAddress_);
+        _tryInitializeControllerHoldByPartition(securityAddress_);
 
         // configure controller by partition (ControllerByPartitionFacet may not be present)
-        _tryInitialize_ControllerByPartition(securityAddress_);
+        _tryInitializeControllerByPartition(securityAddress_);
 
         // configure protected hold by partition (ProtectedHoldByPartitionFacet may not be present)
-        _tryInitialize_ProtectedHoldByPartition(securityAddress_);
+        _tryInitializeProtectedHoldByPartition(securityAddress_);
 
         // configure hold by partition (HoldByPartitionFacet may not be present)
-        _tryInitialize_HoldByPartition(securityAddress_);
+        _tryInitializeHoldByPartition(securityAddress_);
 
         // configure balance adjustments (AdjustBalancesFacet may not be present)
-        _tryInitialize_BalanceAdjustments(securityAddress_);
+        _tryInitializeBalanceAdjustments(securityAddress_);
 
         // configure scheduled balance adjustment (ScheduledBalanceAdjustmentFacet may not be present)
-        _tryInitialize_ScheduledBalanceAdjustment(securityAddress_);
+        _tryInitializeScheduledBalanceAdjustment(securityAddress_);
 
         // configure lock (LockFacet may not be present)
-        _tryInitialize_Lock(securityAddress_);
+        _tryInitializeLock(securityAddress_);
 
         // configure lock by partition (LockByPartitionFacet may not be present)
-        _tryInitialize_LockByPartition(securityAddress_);
+        _tryInitializeLockByPartition(securityAddress_);
 
         // configure nominal value at snapshot (NominalValueAtSnapshotFacet may not be present)
-        _tryInitialize_NominalValueAtSnapshot(securityAddress_);
+        _tryInitializeNominalValueAtSnapshot(securityAddress_);
 
         // configure security holders (SecurityHoldersFacet may not be present)
-        _tryInitialize_SecurityHolders(securityAddress_);
+        _tryInitializeSecurityHolders(securityAddress_);
 
         // configure SSI management (SsiManagementFacet may not be present)
-        _tryInitialize_SsiManagement(securityAddress_);
+        _tryInitializeSsiManagement(securityAddress_);
 
         // configure corporate actions (CorporateActionsFacet may not be present)
-        _tryInitialize_CorporateActions(securityAddress_);
+        _tryInitializeCorporateActions(securityAddress_);
 
         // configure transfer and lock (TransferAndLockFacet may not be present)
-        _tryInitialize_TransferAndLock(securityAddress_);
+        _tryInitializeTransferAndLock(securityAddress_);
 
         // configure transfer and lock by partition (TransferAndLockByPartitionFacet may not be present)
-        _tryInitialize_TransferAndLockByPartition(securityAddress_);
+        _tryInitializeTransferAndLockByPartition(securityAddress_);
 
         // configure cap by partition (CapByPartitionFacet may not be present)
-        _tryInitialize_CapByPartition(securityAddress_);
+        _tryInitializeCapByPartition(securityAddress_);
 
         // configure dividend (DividendFacet may not be present)
-        _tryInitialize_Dividend(securityAddress_);
+        _tryInitializeDividend(securityAddress_);
 
         // configure dividend security holders (DividendSecurityHoldersFacet may not be present)
-        _tryInitialize_DividendSecurityHolders(securityAddress_);
+        _tryInitializeDividendSecurityHolders(securityAddress_);
 
         // configure voting (VotingFacet may not be present)
-        _tryInitialize_Voting(securityAddress_);
+        _tryInitializeVoting(securityAddress_);
 
         // configure voting security holders (VotingSecurityHoldersFacet may not be present)
-        _tryInitialize_VotingSecurityHolders(securityAddress_);
+        _tryInitializeVotingSecurityHolders(securityAddress_);
 
         // configure coupon (CouponFacet may not be present)
-        _tryInitialize_Coupon(securityAddress_);
+        _tryInitializeCoupon(securityAddress_);
 
         // configure coupon listing (CouponListingFacet may not be present)
-        _tryInitialize_CouponListing(securityAddress_);
+        _tryInitializeCouponListing(securityAddress_);
 
         // configure coupon security holders (CouponSecurityHoldersFacet may not be present)
-        _tryInitialize_CouponSecurityHolders(securityAddress_);
+        _tryInitializeCouponSecurityHolders(securityAddress_);
 
         // configure maturity (MaturityFacet may not be present)
-        _tryInitialize_Maturity(securityAddress_);
+        _tryInitializeMaturity(securityAddress_);
 
         // configure maturity by partition (MaturityByPartitionFacet may not be present)
-        _tryInitialize_MaturityByPartition(securityAddress_);
+        _tryInitializeMaturityByPartition(securityAddress_);
 
         // configure principal (PrincipalFacet may not be present)
-        _tryInitialize_Principal(securityAddress_);
+        _tryInitializePrincipal(securityAddress_);
 
         // configure bond USA read (BondUSAReadFacet may not be present)
-        _tryInitialize_BondUSARead(securityAddress_);
+        _tryInitializeBondUSARead(securityAddress_);
     }
 
-    function _tryInitialize_ERC1410(address securityAddress_, bool isMultiPartition) private {
+    function _tryInitializeERC1410(address securityAddress_, bool isMultiPartition) private {
         try IERC1410Management(securityAddress_).initializeERC1410(isMultiPartition) {
             // success
         } catch {
@@ -695,7 +695,7 @@ abstract contract Factory is IFactory {
         }
     }
 
-    function _tryInitialize_ERC1594(address securityAddress_) private {
+    function _tryInitializeERC1594(address securityAddress_) private {
         try IMint(securityAddress_).initializeERC1594() {
             // success
         } catch {
@@ -711,7 +711,7 @@ abstract contract Factory is IFactory {
         }
     }
 
-    function _tryInitialize_ERC20Votes(address securityAddress_, bool erc20VotesActivated) private {
+    function _tryInitializeERC20Votes(address securityAddress_, bool erc20VotesActivated) private {
         try IERC20Votes(securityAddress_).initializeERC20Votes(erc20VotesActivated) {
             // success
         } catch {
@@ -753,7 +753,7 @@ abstract contract Factory is IFactory {
         }
     }
 
-    function _tryInitialize_FixedRate(
+    function _tryInitializeFixedRate(
         address securityAddress_,
         IFixedRate.FixedRateData calldata fixedRateData
     ) private {
@@ -776,7 +776,7 @@ abstract contract Factory is IFactory {
         }
     }
 
-    function _tryInitialize_ProceedRecipients(
+    function _tryInitializeProceedRecipients(
         address securityAddress_,
         address[] calldata proceedRecipients,
         bytes[] calldata data
@@ -822,297 +822,297 @@ abstract contract Factory is IFactory {
         }
     }
 
-    function _tryInitialize_AccessControl(address securityAddress_) private {
+    function _tryInitializeAccessControl(address securityAddress_) private {
         try IAccessControl(securityAddress_).initializeAccessControl() {} catch {}
     }
 
-    function _tryInitialize_Allowance(address securityAddress_) private {
+    function _tryInitializeAllowance(address securityAddress_) private {
         try IAllowance(securityAddress_).initializeAllowance() {} catch {}
     }
 
-    function _tryInitialize_Transfer(address securityAddress_) private {
+    function _tryInitializeTransfer(address securityAddress_) private {
         try ITransfer(securityAddress_).initializeTransfer() {} catch {}
     }
 
-    function _tryInitialize_CoreAdjusted(address securityAddress_) private {
+    function _tryInitializeCoreAdjusted(address securityAddress_) private {
         try ICoreAdjusted(securityAddress_).initializeCoreAdjusted() {} catch {}
     }
 
-    function _tryInitialize_Metadata(address securityAddress_) private {
+    function _tryInitializeMetadata(address securityAddress_) private {
         try IMetadata(securityAddress_).initializeMetadata() {} catch {}
     }
 
-    function _tryInitialize_Freeze(address securityAddress_) private {
+    function _tryInitializeFreeze(address securityAddress_) private {
         try IFreeze(securityAddress_).initializeFreeze() {} catch {}
     }
 
-    function _tryInitialize_BatchFreeze(address securityAddress_) private {
+    function _tryInitializeBatchFreeze(address securityAddress_) private {
         try IBatchFreeze(securityAddress_).initializeBatchFreeze() {} catch {}
     }
 
-    function _tryInitialize_Pause(address securityAddress_) private {
+    function _tryInitializePause(address securityAddress_) private {
         try IPause(securityAddress_).initializePause() {} catch {}
     }
 
-    function _tryInitialize_BalanceTracker(address securityAddress_) private {
+    function _tryInitializeBalanceTracker(address securityAddress_) private {
         try IBalanceTracker(securityAddress_).initializeBalanceTracker() {} catch {}
     }
 
-    function _tryInitialize_BalanceTrackerAdjusted(address securityAddress_) private {
+    function _tryInitializeBalanceTrackerAdjusted(address securityAddress_) private {
         try IBalanceTrackerAdjusted(securityAddress_).initializeBalanceTrackerAdjusted() {} catch {}
     }
 
-    function _tryInitialize_SnapshotsByPartition(address securityAddress_) private {
+    function _tryInitializeSnapshotsByPartition(address securityAddress_) private {
         try ISnapshotsByPartition(securityAddress_).initializeSnapshotsByPartition() {} catch {}
     }
 
-    function _tryInitialize_SecurityHoldersAtSnapshot(address securityAddress_) private {
+    function _tryInitializeSecurityHoldersAtSnapshot(address securityAddress_) private {
         try ISecurityHoldersAtSnapshot(securityAddress_).initializeSecurityHoldersAtSnapshot() {} catch {}
     }
 
-    function _tryInitialize_HoldAtSnapshot(address securityAddress_) private {
+    function _tryInitializeHoldAtSnapshot(address securityAddress_) private {
         try IHoldAtSnapshot(securityAddress_).initializeHoldAtSnapshot() {} catch {}
     }
 
-    function _tryInitialize_LockAtSnapshotByPartition(address securityAddress_) private {
+    function _tryInitializeLockAtSnapshotByPartition(address securityAddress_) private {
         try ILockAtSnapshotByPartition(securityAddress_).initializeLockAtSnapshotByPartition() {} catch {}
     }
 
-    function _tryInitialize_FreezeAtSnapshot(address securityAddress_) private {
+    function _tryInitializeFreezeAtSnapshot(address securityAddress_) private {
         try IFreezeAtSnapshot(securityAddress_).initializeFreezeAtSnapshot() {} catch {}
     }
 
-    function _tryInitialize_FreezeAtSnapshotByPartition(address securityAddress_) private {
+    function _tryInitializeFreezeAtSnapshotByPartition(address securityAddress_) private {
         try IFreezeAtSnapshotByPartition(securityAddress_).initializeFreezeAtSnapshotByPartition() {} catch {}
     }
 
-    function _tryInitialize_LockAtSnapshot(address securityAddress_) private {
+    function _tryInitializeLockAtSnapshot(address securityAddress_) private {
         try ILockAtSnapshot(securityAddress_).initializeLockAtSnapshot() {} catch {}
     }
 
-    function _tryInitialize_CoreAtSnapshot(address securityAddress_) private {
+    function _tryInitializeCoreAtSnapshot(address securityAddress_) private {
         try ICoreAtSnapshot(securityAddress_).initializeCoreAtSnapshot() {} catch {}
     }
 
-    function _tryInitialize_BalanceTrackerByPartition(address securityAddress_) private {
+    function _tryInitializeBalanceTrackerByPartition(address securityAddress_) private {
         try IBalanceTrackerByPartition(securityAddress_).initializeBalanceTrackerByPartition() {} catch {}
     }
 
-    function _tryInitialize_BalanceTrackerAtSnapshot(address securityAddress_) private {
+    function _tryInitializeBalanceTrackerAtSnapshot(address securityAddress_) private {
         try IBalanceTrackerAtSnapshot(securityAddress_).initializeBalanceTrackerAtSnapshot() {} catch {}
     }
 
-    function _tryInitialize_BalanceTrackerAtSnapshotByPartition(address securityAddress_) private {
+    function _tryInitializeBalanceTrackerAtSnapshotByPartition(address securityAddress_) private {
         try
             IBalanceTrackerAtSnapshotByPartition(securityAddress_).initializeBalanceTrackerAtSnapshotByPartition()
         {} catch {}
     }
 
-    function _tryInitialize_HoldAtSnapshotByPartition(address securityAddress_) private {
+    function _tryInitializeHoldAtSnapshotByPartition(address securityAddress_) private {
         try IHoldAtSnapshotByPartition(securityAddress_).initializeHoldAtSnapshotByPartition() {} catch {}
     }
 
-    function _tryInitialize_MintByPartition(address securityAddress_) private {
+    function _tryInitializeMintByPartition(address securityAddress_) private {
         try IMintByPartition(securityAddress_).initializeMintByPartition() {} catch {}
     }
 
-    function _tryInitialize_ProtectedByPartition(address securityAddress_) private {
+    function _tryInitializeProtectedByPartition(address securityAddress_) private {
         try IProtectedByPartition(securityAddress_).initializeProtectedByPartition() {} catch {}
     }
 
-    function _tryInitialize_Operator(address securityAddress_) private {
+    function _tryInitializeOperator(address securityAddress_) private {
         try IOperator(securityAddress_).initializeOperator() {} catch {}
     }
 
-    function _tryInitialize_TransferByPartition(address securityAddress_) private {
+    function _tryInitializeTransferByPartition(address securityAddress_) private {
         try ITransferByPartition(securityAddress_).initializeTransferByPartition() {} catch {}
     }
 
-    function _tryInitialize_Partitions(address securityAddress_) private {
+    function _tryInitializePartitions(address securityAddress_) private {
         try IPartitions(securityAddress_).initializePartitions() {} catch {}
     }
 
-    function _tryInitialize_OperatorByPartition(address securityAddress_) private {
+    function _tryInitializeOperatorByPartition(address securityAddress_) private {
         try IOperatorByPartition(securityAddress_).initializeOperatorByPartition() {} catch {}
     }
 
-    function _tryInitialize_BurnByPartition(address securityAddress_) private {
+    function _tryInitializeBurnByPartition(address securityAddress_) private {
         try IBurnByPartition(securityAddress_).initializeBurnByPartition() {} catch {}
     }
 
-    function _tryInitialize_Documentation(address securityAddress_) private {
+    function _tryInitializeDocumentation(address securityAddress_) private {
         try IDocumentation(securityAddress_).initializeDocumentation() {} catch {}
     }
 
-    function _tryInitialize_EIP712(address securityAddress_) private {
+    function _tryInitializeEIP712(address securityAddress_) private {
         try IEIP712(securityAddress_).initializeEIP712() {} catch {}
     }
 
-    function _tryInitialize_Nonces(address securityAddress_) private {
+    function _tryInitializeNonces(address securityAddress_) private {
         try INonces(securityAddress_).initializeNonces() {} catch {}
     }
 
-    function _tryInitialize_Deactivate(address securityAddress_) private {
+    function _tryInitializeDeactivate(address securityAddress_) private {
         try IDeactivate(securityAddress_).initializeDeactivate() {} catch {}
     }
 
-    function _tryInitialize_BatchController(address securityAddress_) private {
+    function _tryInitializeBatchController(address securityAddress_) private {
         try IBatchController(securityAddress_).initializeBatchController() {} catch {}
     }
 
-    function _tryInitialize_BatchBurn(address securityAddress_) private {
+    function _tryInitializeBatchBurn(address securityAddress_) private {
         try IBatchBurn(securityAddress_).initializeBatchBurn() {} catch {}
     }
 
-    function _tryInitialize_BatchMint(address securityAddress_) private {
+    function _tryInitializeBatchMint(address securityAddress_) private {
         try IBatchMint(securityAddress_).initializeBatchMint() {} catch {}
     }
 
-    function _tryInitialize_BatchTransfer(address securityAddress_) private {
+    function _tryInitializeBatchTransfer(address securityAddress_) private {
         try IBatchTransfer(securityAddress_).initializeBatchTransfer() {} catch {}
     }
 
-    function _tryInitialize_Recovery(address securityAddress_) private {
+    function _tryInitializeRecovery(address securityAddress_) private {
         try IRecovery(securityAddress_).initializeRecovery() {} catch {}
     }
 
-    function _tryInitialize_Compliance(address securityAddress_) private {
+    function _tryInitializeCompliance(address securityAddress_) private {
         try IComplianceFacet(securityAddress_).initializeCompliance() {} catch {}
     }
 
-    function _tryInitialize_ComplianceByPartition(address securityAddress_) private {
+    function _tryInitializeComplianceByPartition(address securityAddress_) private {
         try IComplianceByPartition(securityAddress_).initializeComplianceByPartition() {} catch {}
     }
 
-    function _tryInitialize_Burn(address securityAddress_) private {
+    function _tryInitializeBurn(address securityAddress_) private {
         try IBurn(securityAddress_).initializeBurn() {} catch {}
     }
 
-    function _tryInitialize_ProtectedClearingHoldByPartition(address securityAddress_) private {
+    function _tryInitializeProtectedClearingHoldByPartition(address securityAddress_) private {
         try IProtectedClearingHoldByPartition(securityAddress_).initializeProtectedClearingHoldByPartition() {} catch {}
     }
 
-    function _tryInitialize_OperatorClearingHoldByPartition(address securityAddress_) private {
+    function _tryInitializeOperatorClearingHoldByPartition(address securityAddress_) private {
         try IOperatorClearingHoldByPartition(securityAddress_).initializeOperatorClearingHoldByPartition() {} catch {}
     }
 
-    function _tryInitialize_OperatorClearingByPartition(address securityAddress_) private {
+    function _tryInitializeOperatorClearingByPartition(address securityAddress_) private {
         try IOperatorClearingByPartition(securityAddress_).initializeOperatorClearingByPartition() {} catch {}
     }
 
-    function _tryInitialize_ProtectedClearingByPartition(address securityAddress_) private {
+    function _tryInitializeProtectedClearingByPartition(address securityAddress_) private {
         try IProtectedClearingByPartition(securityAddress_).initializeProtectedClearingByPartition() {} catch {}
     }
 
-    function _tryInitialize_Hold(address securityAddress_) private {
+    function _tryInitializeHold(address securityAddress_) private {
         try IHoldFacet(securityAddress_).initializeHold() {} catch {}
     }
 
-    function _tryInitialize_OperatorHoldByPartition(address securityAddress_) private {
+    function _tryInitializeOperatorHoldByPartition(address securityAddress_) private {
         try IOperatorHoldByPartition(securityAddress_).initializeOperatorHoldByPartition() {} catch {}
     }
 
-    function _tryInitialize_ControllerHoldByPartition(address securityAddress_) private {
+    function _tryInitializeControllerHoldByPartition(address securityAddress_) private {
         try IControllerHoldByPartition(securityAddress_).initializeControllerHoldByPartition() {} catch {}
     }
 
-    function _tryInitialize_ControllerByPartition(address securityAddress_) private {
+    function _tryInitializeControllerByPartition(address securityAddress_) private {
         try IControllerByPartition(securityAddress_).initializeControllerByPartition() {} catch {}
     }
 
-    function _tryInitialize_ProtectedHoldByPartition(address securityAddress_) private {
+    function _tryInitializeProtectedHoldByPartition(address securityAddress_) private {
         try IProtectedHoldByPartition(securityAddress_).initializeProtectedHoldByPartition() {} catch {}
     }
 
-    function _tryInitialize_HoldByPartition(address securityAddress_) private {
+    function _tryInitializeHoldByPartition(address securityAddress_) private {
         try IHoldByPartition(securityAddress_).initializeHoldByPartition() {} catch {}
     }
 
-    function _tryInitialize_BalanceAdjustments(address securityAddress_) private {
+    function _tryInitializeBalanceAdjustments(address securityAddress_) private {
         try IAdjustBalances(securityAddress_).initializeBalanceAdjustments() {} catch {}
     }
 
-    function _tryInitialize_ScheduledBalanceAdjustment(address securityAddress_) private {
+    function _tryInitializeScheduledBalanceAdjustment(address securityAddress_) private {
         try IScheduledBalanceAdjustment(securityAddress_).initializeScheduledBalanceAdjustment() {} catch {}
     }
 
-    function _tryInitialize_Lock(address securityAddress_) private {
+    function _tryInitializeLock(address securityAddress_) private {
         try ILock(securityAddress_).initializeLock() {} catch {}
     }
 
-    function _tryInitialize_LockByPartition(address securityAddress_) private {
+    function _tryInitializeLockByPartition(address securityAddress_) private {
         try ILockByPartition(securityAddress_).initializeLockByPartition() {} catch {}
     }
 
-    function _tryInitialize_NominalValueAtSnapshot(address securityAddress_) private {
+    function _tryInitializeNominalValueAtSnapshot(address securityAddress_) private {
         try INominalValueAtSnapshot(securityAddress_).initializeNominalValueAtSnapshot() {} catch {}
     }
 
-    function _tryInitialize_SecurityHolders(address securityAddress_) private {
+    function _tryInitializeSecurityHolders(address securityAddress_) private {
         try ISecurityHolders(securityAddress_).initializeSecurityHolders() {} catch {}
     }
 
-    function _tryInitialize_SsiManagement(address securityAddress_) private {
+    function _tryInitializeSsiManagement(address securityAddress_) private {
         try ISsiManagement(securityAddress_).initializeSsiManagement() {} catch {}
     }
 
-    function _tryInitialize_CorporateActions(address securityAddress_) private {
+    function _tryInitializeCorporateActions(address securityAddress_) private {
         try ICorporateActions(securityAddress_).initializeCorporateActions() {} catch {}
     }
 
-    function _tryInitialize_TransferAndLock(address securityAddress_) private {
+    function _tryInitializeTransferAndLock(address securityAddress_) private {
         try ITransferAndLock(securityAddress_).initializeTransferAndLock() {} catch {}
     }
 
-    function _tryInitialize_TransferAndLockByPartition(address securityAddress_) private {
+    function _tryInitializeTransferAndLockByPartition(address securityAddress_) private {
         try ITransferAndLockByPartition(securityAddress_).initializeTransferAndLockByPartition() {} catch {}
     }
 
-    function _tryInitialize_CapByPartition(address securityAddress_) private {
+    function _tryInitializeCapByPartition(address securityAddress_) private {
         try ICapByPartition(securityAddress_).initializeCapByPartition() {} catch {}
     }
 
-    function _tryInitialize_Dividend(address securityAddress_) private {
+    function _tryInitializeDividend(address securityAddress_) private {
         try IDividend(securityAddress_).initializeDividend() {} catch {}
     }
 
-    function _tryInitialize_DividendSecurityHolders(address securityAddress_) private {
+    function _tryInitializeDividendSecurityHolders(address securityAddress_) private {
         try IDividendSecurityHolders(securityAddress_).initializeDividendSecurityHolders() {} catch {}
     }
 
-    function _tryInitialize_Voting(address securityAddress_) private {
+    function _tryInitializeVoting(address securityAddress_) private {
         try IVoting(securityAddress_).initializeVoting() {} catch {}
     }
 
-    function _tryInitialize_VotingSecurityHolders(address securityAddress_) private {
+    function _tryInitializeVotingSecurityHolders(address securityAddress_) private {
         try IVotingSecurityHolders(securityAddress_).initializeVotingSecurityHolders() {} catch {}
     }
 
-    function _tryInitialize_Coupon(address securityAddress_) private {
+    function _tryInitializeCoupon(address securityAddress_) private {
         try ICoupon(securityAddress_).initializeCoupon() {} catch {}
     }
 
-    function _tryInitialize_CouponListing(address securityAddress_) private {
+    function _tryInitializeCouponListing(address securityAddress_) private {
         try ICouponListing(securityAddress_).initializeCouponListing() {} catch {}
     }
 
-    function _tryInitialize_CouponSecurityHolders(address securityAddress_) private {
+    function _tryInitializeCouponSecurityHolders(address securityAddress_) private {
         try ICouponSecurityHolders(securityAddress_).initializeCouponSecurityHolders() {} catch {}
     }
 
-    function _tryInitialize_Maturity(address securityAddress_) private {
+    function _tryInitializeMaturity(address securityAddress_) private {
         try IMaturity(securityAddress_).initializeMaturity() {} catch {}
     }
 
-    function _tryInitialize_MaturityByPartition(address securityAddress_) private {
+    function _tryInitializeMaturityByPartition(address securityAddress_) private {
         try IMaturityByPartition(securityAddress_).initializeMaturityByPartition() {} catch {}
     }
 
-    function _tryInitialize_Principal(address securityAddress_) private {
+    function _tryInitializePrincipal(address securityAddress_) private {
         try IPrincipal(securityAddress_).initializePrincipal() {} catch {}
     }
 
-    function _tryInitialize_BondUSARead(address securityAddress_) private {
+    function _tryInitializeBondUSARead(address securityAddress_) private {
         try IBondRead(securityAddress_).initializeBondUSARead() {} catch {}
     }
 
