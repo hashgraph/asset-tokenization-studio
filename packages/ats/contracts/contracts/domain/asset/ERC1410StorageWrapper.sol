@@ -130,6 +130,7 @@ library ERC1410StorageWrapper {
         ERC1410BasicStorage storage basicStorage = erc1410BasicStorage();
 
         uint256 index = basicStorage.tokenHolderIndex[oldTokenHolder];
+        if (index == 0) revert IERC1410Types.TokenHolderNotFound(oldTokenHolder);
         basicStorage.tokenHolderIndex[newTokenHolder] = index;
         basicStorage.tokenHolders[index] = newTokenHolder;
         basicStorage.tokenHolderIndex[oldTokenHolder] = 0;
