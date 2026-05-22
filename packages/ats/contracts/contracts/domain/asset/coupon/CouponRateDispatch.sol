@@ -7,6 +7,8 @@ import { IInterestRate } from "../../../facets/interestRate/IInterestRate.sol";
 import { IFixedRate } from "../../../facets/layer_2/interestRate/fixedRate/IFixedRate.sol";
 import { InterestRateStorageWrapper } from "../InterestRateStorageWrapper.sol";
 import { KpiLinkedRateLib } from "../KpiLinkedRateLib.sol";
+import { _checkUnexpectedError } from "../../../infrastructure/utils/UnexpectedError.sol";
+import { UNRECOGNIZED_RATE_TYPE } from "../../../constants/values.sol";
 
 /**
  * @title CouponRateDispatch
@@ -70,33 +72,33 @@ library CouponRateDispatch {
         ICouponTypes.Coupon memory newCoupon
     ) internal view returns (ICouponTypes.Coupon memory resolved_) {
         IInterestRate.RateType rateType = InterestRateStorageWrapper.getCouponRateType();
+        resolved_ = newCoupon;
 
         if (rateType == IInterestRate.RateType.NONE) {
-            newCoupon.rate = 0;
-            newCoupon.rateDecimals = 0;
-            newCoupon.rateStatus = ICouponTypes.RateCalculationStatus.SET;
-            return newCoupon;
+            resolved_.rate = 0;
+            resolved_.rateDecimals = 0;
+            resolved_.rateStatus = ICouponTypes.RateCalculationStatus.SET;
+            return resolved_;
         }
 
         if (rateType == IInterestRate.RateType.FIXED) {
-            if (!_isPendingRate(newCoupon)) revert IFixedRate.InterestRateIsFixed();
-            (newCoupon.rate, newCoupon.rateDecimals) = InterestRateStorageWrapper.getRate();
-            newCoupon.rateStatus = ICouponTypes.RateCalculationStatus.SET;
-            return newCoupon;
+            if (!_isPendingRate(resolved_)) revert IFixedRate.InterestRateIsFixed();
+            (resolved_.rate, resolved_.rateDecimals) = InterestRateStorageWrapper.getRate();
+            resolved_.rateStatus = ICouponTypes.RateCalculationStatus.SET;
+            return resolved_;
         }
 
         if (rateType == IInterestRate.RateType.KPI_LINKED) {
-            if (!_isPendingRate(newCoupon)) revert ICoupon.InterestRateIsKpiLinked();
-            return newCoupon;
+            if (!_isPendingRate(resolved_)) revert ICoupon.InterestRateIsKpiLinked();
+            return resolved_;
         }
 
         if (rateType == IInterestRate.RateType.STANDARD) {
-            if (newCoupon.rateStatus != ICouponTypes.RateCalculationStatus.SET) revert ICoupon.InterestRateIsStandard();
-            return newCoupon;
+            if (resolved_.rateStatus != ICouponTypes.RateCalculationStatus.SET) revert ICoupon.InterestRateIsStandard();
+            return resolved_;
         }
 
-        // STANDARD: pass the user-supplied rate through unchanged.
-        resolved_ = newCoupon;
+        _checkUnexpectedError(true, UNRECOGNIZED_RATE_TYPE);
     }
 
     /**
