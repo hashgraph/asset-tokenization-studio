@@ -25,7 +25,6 @@ import {
   registerFacets,
   createBatchConfiguration,
   deployFacets,
-  LATEST_VERSION,
 } from "@scripts/infrastructure";
 
 // Domain layer - ATS-specific business logic
@@ -569,9 +568,8 @@ describe("External Facet Extensibility - Integration Tests", () => {
     });
   });
 
-  describe("LATEST_VERSION Auto-Updating Proxies", () => {
-    it("should deploy proxy with LATEST_VERSION (version: 0)", async () => {
-      // Deploy and register facet
+  describe("Explicit configuration version pinning", () => {
+    it("rejects version 0 with an explicit guard error", async () => {
       const accessControlFactory = new AccessControlFacet__factory(deployer);
       const accessControlResult = await deployContract(accessControlFactory, {});
 
@@ -585,8 +583,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
         ],
       });
 
-      // Create configuration
-      const configId = ethers.encodeBytes32String("TEST_CONFIG");
+      const configId = ethers.encodeBytes32String("TEST_CONFIG_REJECT_ZERO");
       await createBatchConfiguration(blrContract, {
         configurationId: configId,
         facets: [
@@ -598,21 +595,17 @@ describe("External Facet Extensibility - Integration Tests", () => {
         ],
       });
 
-      // Deploy proxy with explicit version: 0
-      const result = await deployResolverProxy(deployer, {
-        blrAddress,
-        configurationId: configId,
-        version: LATEST_VERSION,
-        rbac: [],
-      });
-
-      expect(result.success).to.be.true;
-      expect(result.proxyAddress).to.exist;
-      expect(result.version).to.equal(LATEST_VERSION);
+      await expect(
+        deployResolverProxy(deployer, {
+          blrAddress,
+          configurationId: configId,
+          version: 0,
+          rbac: [],
+        }),
+      ).to.be.rejectedWith(/'version' must be an integer >= 1/);
     });
 
-    it("should deploy proxy with default version (undefined = LATEST_VERSION)", async () => {
-      // Deploy and register facet
+    it("resolves the latest registered version explicitly and pins it", async () => {
       const kycFactory = new KycFacet__factory(deployer);
       const kycResult = await deployContract(kycFactory, {});
 
@@ -626,8 +619,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
         ],
       });
 
-      // Create configuration
-      const configId = ethers.encodeBytes32String("DEFAULT_TEST");
+      const configId = ethers.encodeBytes32String("EXPLICIT_LATEST_TEST");
       await createBatchConfiguration(blrContract, {
         configurationId: configId,
         facets: [
@@ -639,18 +631,20 @@ describe("External Facet Extensibility - Integration Tests", () => {
         ],
       });
 
-      // Deploy proxy WITHOUT specifying version (should default to LATEST_VERSION)
+      const latestRaw = await blrContract.getLatestVersionByConfiguration(configId);
+      const latest = Number(latestRaw);
+      expect(latest).to.be.greaterThan(0);
+
       const result = await deployResolverProxy(deployer, {
         blrAddress,
         configurationId: configId,
-        // version not specified - should default to LATEST_VERSION
+        version: latest,
         rbac: [],
       });
 
       expect(result.success).to.be.true;
       expect(result.proxyAddress).to.exist;
-      // Should have used the default LATEST_VERSION
-      expect(result.version).to.equal(LATEST_VERSION);
+      expect(result.version).to.equal(latest);
     });
   });
 
