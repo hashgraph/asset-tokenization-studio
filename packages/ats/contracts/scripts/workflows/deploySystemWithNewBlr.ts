@@ -1336,6 +1336,10 @@ export async function deploySystemWithNewBlr(
         );
       })(),
 
+      // Configuration summary. `version: 0` entries below are placeholders
+      // emitted when the corresponding configuration was skipped or failed to
+      // create — they are display-only and never sent on-chain. Successful
+      // entries carry the real registered version (>= 1) from the BLR.
       configurations: {
         equity: isSuccess(equityConfig)
           ? {
