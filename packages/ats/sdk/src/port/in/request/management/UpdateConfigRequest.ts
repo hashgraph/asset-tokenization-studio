@@ -2,6 +2,7 @@
 
 import ValidatedRequest from "@core/validation/ValidatedArgs";
 import FormatValidation from "../FormatValidation";
+import { MIN_CONFIG_VERSION } from "@core/Constants";
 
 export default class UpdateConfigRequest extends ValidatedRequest<UpdateConfigRequest> {
   configId: string;
@@ -19,7 +20,7 @@ export default class UpdateConfigRequest extends ValidatedRequest<UpdateConfigRe
   }) {
     super({
       configId: FormatValidation.checkBytes32Format(),
-      configVersion: FormatValidation.checkNumber(),
+      configVersion: FormatValidation.checkNumber({ min: MIN_CONFIG_VERSION }),
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
     });
 
