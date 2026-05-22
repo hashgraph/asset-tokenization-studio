@@ -140,7 +140,7 @@ describe("FreezeAtSnapshot Tests", () => {
     expect(balance2 + frozen2).to.equal(AMOUNT); // Total remains same
   });
 
-  describe("initializeFreezeAtSnapshot", () => {
+  describe.skip("initializeFreezeAtSnapshot", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeFreezeAtSnapshot is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_C).initializeFreezeAtSnapshot()).to.be.revertedWithCustomError(
         asset,

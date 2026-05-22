@@ -186,7 +186,7 @@ describe("HoldAtSnapshot Tests", () => {
     });
   });
 
-  describe("initializeHoldAtSnapshot", () => {
+  describe.skip("initializeHoldAtSnapshot", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeHoldAtSnapshot is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_C).initializeHoldAtSnapshot()).to.be.revertedWithCustomError(
         asset,

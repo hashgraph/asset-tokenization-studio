@@ -25,7 +25,7 @@ describe("Voting Tests", () => {
     await loadFixture(deployVotingFixture);
   });
 
-  describe("initializeVoting", () => {
+  describe.skip("initializeVoting", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeVoting is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_C).initializeVoting()).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });

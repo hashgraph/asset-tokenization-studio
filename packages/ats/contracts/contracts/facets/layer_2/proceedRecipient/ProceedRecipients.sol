@@ -5,7 +5,6 @@ import { IProceedRecipients, RESOLVER_KEY_PROCEED_RECIPIENT } from "./IProceedRe
 import { ROLE_PROCEED_RECIPIENT_MANAGER, DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProceedRecipientsStorageWrapper } from "../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
-import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
 import { DefaultValueValidation } from "../../../infrastructure/utils/DefaultValueValidation.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 

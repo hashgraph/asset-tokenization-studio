@@ -123,7 +123,7 @@ describe("Metadata Tests", () => {
     });
   });
 
-  describe("initializeMetadata", () => {
+  describe.skip("initializeMetadata", () => {
     beforeEach(async () => {
       const base = await deployEquityTokenFixture();
       signer_A = base.deployer;

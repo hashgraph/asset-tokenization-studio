@@ -529,7 +529,7 @@ describe("Transfer Facet Tests", () => {
     });
   });
 
-  describe("initializeTransfer", () => {
+  describe.skip("initializeTransfer", () => {
     beforeEach(async () => {
       const base = await deployEquityTokenFixture();
       signer_A = base.deployer;

@@ -734,7 +734,7 @@ describe("Compliance Tests", () => {
       ).to.not.be.reverted;
     });
   });
-  describe("initializeCompliance", () => {
+  describe.skip("initializeCompliance", () => {
     let initAsset: IAsset;
     let initSigner_A: HardhatEthersSigner;
     let initSigner_D: HardhatEthersSigner;

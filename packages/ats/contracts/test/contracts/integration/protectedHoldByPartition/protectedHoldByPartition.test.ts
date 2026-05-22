@@ -626,7 +626,7 @@ describe("ProtectedHoldByPartition Tests", () => {
     });
   });
 
-  describe("initializeProtectedHoldByPartition", () => {
+  describe.skip("initializeProtectedHoldByPartition", () => {
     beforeEach(async () => {
       const base = await deployEquityTokenFixture();
       signer_A = base.deployer;

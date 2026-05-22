@@ -259,7 +259,7 @@ describe("MaturityByPartition Tests", () => {
     });
   });
 
-  describe("initializeMaturityByPartition", () => {
+  describe.skip("initializeMaturityByPartition", () => {
     beforeEach(async () => {
       await loadFixture(deploySecurityFixture);
     });

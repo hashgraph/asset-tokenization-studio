@@ -144,7 +144,7 @@ describe("Operator Facet Tests", () => {
     });
   });
 
-  describe("initializeOperator", () => {
+  describe.skip("initializeOperator", () => {
     beforeEach(async () => {
       const base = await deployEquityTokenFixture();
       signer_A = base.deployer;

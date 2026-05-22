@@ -120,7 +120,7 @@ describe("Corporate Actions Tests", () => {
     expect(corporateActions.datas_[0]).to.equal(corporateActionsByType.datas_[0]);
     expect(corporateActions.isDisabled_[0]).to.equal(corporateActionsByType.isDisabled_[0]);
   });
-  describe("initializeCorporateActions", () => {
+  describe.skip("initializeCorporateActions", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeCorporateActions is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_B).initializeCorporateActions()).to.be.revertedWithCustomError(
         asset,

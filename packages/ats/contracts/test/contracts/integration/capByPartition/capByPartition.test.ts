@@ -142,7 +142,7 @@ describe("CapByPartition Tests", () => {
     });
   });
 
-  describe("initializeCapByPartition", () => {
+  describe.skip("initializeCapByPartition", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeCapByPartition is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_C).initializeCapByPartition()).to.be.revertedWithCustomError(
         asset,

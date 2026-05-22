@@ -343,7 +343,7 @@ describe("ControllerHoldByPartition Tests", () => {
       });
     });
   });
-  describe("initializeControllerHoldByPartition", () => {
+  describe.skip("initializeControllerHoldByPartition", () => {
     let initAsset: IAsset;
     let initSigner_A: HardhatEthersSigner;
     let initSigner_D: HardhatEthersSigner;

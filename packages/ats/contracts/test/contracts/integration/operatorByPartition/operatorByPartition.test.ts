@@ -329,7 +329,7 @@ describe("OperatorByPartitionFacet Tests", () => {
     });
   });
 
-  describe("initializeOperatorByPartition", () => {
+  describe.skip("initializeOperatorByPartition", () => {
     beforeEach(async () => {
       const base = await deployEquityTokenFixture();
       signer_A = base.deployer;

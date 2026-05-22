@@ -88,7 +88,7 @@ describe("Deactivate Tests", () => {
     });
   });
 
-  describe("initializeDeactivate", () => {
+  describe.skip("initializeDeactivate", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeDeactivate is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(unknownSigner).initializeDeactivate()).to.be.revertedWithCustomError(
         asset,

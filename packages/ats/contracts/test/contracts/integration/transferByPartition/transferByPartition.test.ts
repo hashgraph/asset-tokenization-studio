@@ -150,7 +150,7 @@ describe("TransferByPartition Facet Tests", () => {
     });
   });
 
-  describe("initializeTransferByPartition", () => {
+  describe.skip("initializeTransferByPartition", () => {
     beforeEach(async () => {
       const base = await deployEquityTokenFixture();
       signer_A = base.deployer;

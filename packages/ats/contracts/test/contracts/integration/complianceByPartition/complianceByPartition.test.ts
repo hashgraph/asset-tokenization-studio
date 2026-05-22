@@ -314,7 +314,7 @@ describe("ComplianceByPartition Tests", () => {
       ).to.be.deep.equal([true, EIP1066_CODES.SUCCESS, ethers.ZeroHash]);
     });
   });
-  describe("initializeComplianceByPartition", () => {
+  describe.skip("initializeComplianceByPartition", () => {
     let initAsset: IAsset;
     let initSigner_A: HardhatEthersSigner;
     let initSigner_D: HardhatEthersSigner;

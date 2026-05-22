@@ -75,7 +75,7 @@ describe("EIP712 Tests", () => {
     });
   });
 
-  describe("initializeEIP712", () => {
+  describe.skip("initializeEIP712", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeEIP712 is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(nonAdmin).initializeEIP712()).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });

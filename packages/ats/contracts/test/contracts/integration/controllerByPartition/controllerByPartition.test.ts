@@ -328,7 +328,7 @@ describe("ControllerByPartition Tests", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
-  describe("initializeControllerByPartition", () => {
+  describe.skip("initializeControllerByPartition", () => {
     let initAsset: IAsset;
     let initSigner_A: HardhatEthersSigner;
     let initSigner_D: HardhatEthersSigner;

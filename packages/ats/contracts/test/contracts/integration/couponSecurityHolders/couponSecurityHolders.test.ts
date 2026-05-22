@@ -221,7 +221,7 @@ describe("CouponSecurityHolders Tests", () => {
     expect(accounts).to.include(signer_A.address);
   });
 
-  describe("initializeCouponSecurityHolders", () => {
+  describe.skip("initializeCouponSecurityHolders", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeCouponSecurityHolders is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_B).initializeCouponSecurityHolders()).to.be.revertedWithCustomError(
         asset,

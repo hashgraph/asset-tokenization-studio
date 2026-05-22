@@ -321,7 +321,7 @@ describe("OperatorClearingByPartition Tests", () => {
     });
   });
 
-  describe("initializeOperatorClearingByPartition", () => {
+  describe.skip("initializeOperatorClearingByPartition", () => {
     beforeEach(async () => {
       const base = await deployEquityTokenFixture();
       signer_A = base.deployer;

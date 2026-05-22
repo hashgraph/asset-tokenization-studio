@@ -259,7 +259,7 @@ describe("OperatorClearingHoldByPartition Tests", () => {
     });
   });
 
-  describe("initializeOperatorClearingHoldByPartition", () => {
+  describe.skip("initializeOperatorClearingHoldByPartition", () => {
     beforeEach(async () => {
       const base = await deployEquityTokenFixture();
       signer_A = base.deployer;

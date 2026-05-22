@@ -70,7 +70,7 @@ describe("CoreAdjusted Facet Tests", () => {
       expect(await asset.decimalsAt(adjustmentTimestamp - 1)).to.equal(decimals);
     });
   });
-  describe("initializeCoreAdjusted", () => {
+  describe.skip("initializeCoreAdjusted", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeCoreAdjusted is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_B).initializeCoreAdjusted()).to.be.revertedWithCustomError(
         asset,

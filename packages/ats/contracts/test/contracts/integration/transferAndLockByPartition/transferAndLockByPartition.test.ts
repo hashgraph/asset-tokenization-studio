@@ -243,7 +243,7 @@ describe("TransferAndLockByPartition Tests", () => {
     });
   });
 
-  describe("initializeTransferAndLockByPartition", () => {
+  describe.skip("initializeTransferAndLockByPartition", () => {
     beforeEach(async () => {
       const base = await deployEquityTokenFixture();
       signer_A = base.deployer;

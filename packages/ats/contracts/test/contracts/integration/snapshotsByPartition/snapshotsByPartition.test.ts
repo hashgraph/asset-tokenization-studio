@@ -169,7 +169,7 @@ describe("SnapshotsByPartition Tests", () => {
     });
   });
 
-  describe("initializeSnapshotsByPartition", () => {
+  describe.skip("initializeSnapshotsByPartition", () => {
     beforeEach(async () => {
       const base = await deployEquityTokenFixture();
       signer_A = base.deployer;

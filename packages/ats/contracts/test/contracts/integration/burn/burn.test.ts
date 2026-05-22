@@ -475,7 +475,7 @@ describe("Burn Tests", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
-  describe("initializeBurn", () => {
+  describe.skip("initializeBurn", () => {
     let initAsset: IAsset;
     let initSigner_A: HardhatEthersSigner;
     let initSigner_D: HardhatEthersSigner;

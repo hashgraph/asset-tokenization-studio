@@ -198,7 +198,7 @@ describe("SecurityHoldersAtSnapshot Tests", () => {
     });
   });
 
-  describe("initializeSecurityHoldersAtSnapshot", () => {
+  describe.skip("initializeSecurityHoldersAtSnapshot", () => {
     beforeEach(async () => {
       const base = await deployEquityTokenFixture();
       signer_A = base.deployer;

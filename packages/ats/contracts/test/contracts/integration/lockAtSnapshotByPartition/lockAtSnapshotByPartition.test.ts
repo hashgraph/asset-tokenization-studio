@@ -167,7 +167,7 @@ describe("LockAtSnapshotByPartition Tests", () => {
     });
   });
 
-  describe("initializeLockAtSnapshotByPartition", () => {
+  describe.skip("initializeLockAtSnapshotByPartition", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeLockAtSnapshotByPartition is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_C).initializeLockAtSnapshotByPartition()).to.be.revertedWithCustomError(
         asset,

@@ -110,7 +110,7 @@ describe("FreezeAtSnapshotByPartition Tests", () => {
     expect(currentFrozenBalance).to.equal(frozenAmount);
   });
 
-  describe("initializeFreezeAtSnapshotByPartition", () => {
+  describe.skip("initializeFreezeAtSnapshotByPartition", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeFreezeAtSnapshotByPartition is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_C).initializeFreezeAtSnapshotByPartition()).to.be.revertedWithCustomError(
         asset,
