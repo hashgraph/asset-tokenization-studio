@@ -1,16 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBatchMint } from "./IBatchMint.sol";
+import { IBatchMint, RESOLVER_KEY_BATCH_MINT } from "./IBatchMint.sol";
 import { BatchMint } from "./BatchMint.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _BATCH_MINT_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title BatchMintFacet
  * @notice Diamond facet that exposes the ERC-3643 `batchMint` operation, registered under
- *         `_BATCH_MINT_RESOLVER_KEY`.
+ *         `RESOLVER_KEY_BATCH_MINT`.
  * @dev Inherits minting logic from `BatchMint` and satisfies the `IStaticFunctionSelectors`
  *      contract required by the Diamond proxy for static selector registration.
  *      Exposes one selector: `batchMint`.
@@ -20,7 +18,7 @@ import { _BATCH_MINT_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 contract BatchMintFacet is BatchMint, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _BATCH_MINT_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_BATCH_MINT;
     }
 
     /// @inheritdoc IStaticFunctionSelectors

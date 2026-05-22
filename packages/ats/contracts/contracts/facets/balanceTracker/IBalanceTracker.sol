@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey BalanceTracker
+bytes32 constant RESOLVER_KEY_BALANCE_TRACKER = 0xefbff5dcb4e5bf43bf472fd0646991b8b4731876498b2a4248f9aa9aee1a127b;
+
 /**
  * @title IBalanceTracker
  * @notice Interface for querying token balances and total supply across all partitions,

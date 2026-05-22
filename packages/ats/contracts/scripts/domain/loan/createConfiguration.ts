@@ -18,6 +18,7 @@ import {
   OperationResult,
   createBatchConfiguration,
   DEFAULT_BATCH_SIZE,
+  RetryOptions,
 } from "@scripts/infrastructure";
 import { BusinessLogicResolver } from "@contract-types";
 import { LOAN_CONFIG_ID } from "../constants";
@@ -149,6 +150,9 @@ const LOAN_FACETS = [
   "AdjustBalancesFacet",
   "ScheduledBalanceAdjustmentFacet",
   "ProtectedPartitionsFacet",
+
+  // Jurisdiction-Specific
+  "SecurityFacet",
 ] as const;
 
 /**
@@ -205,6 +209,7 @@ export async function createLoanConfiguration(
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
+  retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
   // Build facet data with resolver keys from registry
   const baseFacets = useTimeTravel ? [...LOAN_FACETS, "TimeTravelFacet"] : LOAN_FACETS;
@@ -231,5 +236,6 @@ export async function createLoanConfiguration(
     partialBatchDeploy,
     batchSize,
     confirmations,
+    retryOptions,
   });
 }

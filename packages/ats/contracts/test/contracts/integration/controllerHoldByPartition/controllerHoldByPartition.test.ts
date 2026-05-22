@@ -41,39 +41,39 @@ describe("ControllerHoldByPartition Tests", () => {
   function set_initRbacs() {
     return [
       {
-        role: "ISSUER_ROLE",
+        role: "ROLE_ISSUER",
         members: [signer_B.address],
       },
       {
-        role: "PAUSER_ROLE",
+        role: "ROLE_PAUSER",
         members: [signer_D.address],
       },
       {
-        role: "KYC_ROLE",
+        role: "ROLE_KYC",
         members: [signer_B.address],
       },
       {
-        role: "SSI_MANAGER_ROLE",
+        role: "ROLE_SSI_MANAGER",
         members: [signer_A.address],
       },
       {
-        role: "CLEARING_ROLE",
+        role: "ROLE_CLEARING",
         members: [signer_A.address],
       },
       {
-        role: "CORPORATE_ACTION_ROLE",
+        role: "ROLE_CORPORATE_ACTION",
         members: [signer_B.address],
       },
       {
-        role: "CONTROL_LIST_ROLE",
+        role: "ROLE_CONTROL_LIST",
         members: [signer_E.address],
       },
       {
-        role: "CONTROLLER_ROLE",
+        role: "ROLE_CONTROLLER",
         members: [signer_C.address],
       },
       {
-        role: "AGENT_ROLE",
+        role: "ROLE_AGENT",
         members: [signer_A.address],
       },
     ];
@@ -372,7 +372,7 @@ describe("ControllerHoldByPartition Tests", () => {
     it("GIVEN a deactivated asset WHEN controllerCreateHoldByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset

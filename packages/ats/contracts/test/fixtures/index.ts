@@ -44,6 +44,7 @@ export {
 // Common token utilities
 export {
   MAX_UINT256,
+  MAX_UINT8,
   TEST_PARTITIONS,
   TEST_AMOUNTS,
   executeRbac,

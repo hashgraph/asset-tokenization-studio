@@ -36,7 +36,7 @@ describe("Documentation Tests", () => {
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
     ]);
@@ -63,7 +63,7 @@ describe("Documentation Tests", () => {
 
   it("GIVEN a paused Token WHEN setDocument THEN transaction fails with IsPaused", async () => {
     // Granting Role to account C and Pause
-    await grantRoleAndPauseToken(asset, ATS_ROLES.DOCUMENTER_ROLE, signer_A, signer_B, signer_C.address);
+    await grantRoleAndPauseToken(asset, ATS_ROLES.ROLE_DOCUMENTER, signer_A, signer_B, signer_C.address);
 
     // add document fails
     await expect(
@@ -73,7 +73,7 @@ describe("Documentation Tests", () => {
 
   it("GIVEN a paused Token WHEN removeDocument THEN transaction fails with IsPaused", async () => {
     // Granting Role to account C and Pause
-    await grantRoleAndPauseToken(asset, ATS_ROLES.DOCUMENTER_ROLE, signer_A, signer_B, signer_C.address);
+    await grantRoleAndPauseToken(asset, ATS_ROLES.ROLE_DOCUMENTER, signer_A, signer_B, signer_C.address);
 
     // remove document
     await expect(asset.connect(signer_C).removeDocument(documentName_1)).to.be.revertedWithCustomError(
@@ -83,7 +83,7 @@ describe("Documentation Tests", () => {
   });
 
   it("GIVEN a document with no name WHEN setDocument THEN transaction fails with EmptyName", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.DOCUMENTER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_DOCUMENTER, signer_C.address);
 
     // add document fails
     await expect(
@@ -98,7 +98,7 @@ describe("Documentation Tests", () => {
   });
 
   it("GIVEN a document with no URI WHEN setDocument THEN transaction fails with EmptyURI", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.DOCUMENTER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_DOCUMENTER, signer_C.address);
     // add document fails
     await expect(asset.connect(signer_C).setDocument(documentName_1, "", documentHASH_1)).to.be.revertedWithCustomError(
       asset,
@@ -107,7 +107,7 @@ describe("Documentation Tests", () => {
   });
 
   it("GIVEN a document with no HASH WHEN setDocument THEN transaction fails with EmptyHASH", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.DOCUMENTER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_DOCUMENTER, signer_C.address);
 
     // add document fails
     await expect(
@@ -122,7 +122,7 @@ describe("Documentation Tests", () => {
   });
 
   it("GIVEN a document that does not exist WHEN removeDocument THEN transaction fails with DocumentDoesNotExist", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.DOCUMENTER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_DOCUMENTER, signer_C.address);
 
     // add document fails
     await expect(asset.connect(signer_C).removeDocument(documentName_1)).to.be.revertedWithCustomError(
@@ -133,7 +133,7 @@ describe("Documentation Tests", () => {
 
   it("GIVEN an account with documenter role WHEN setDocument and removeDocument THEN transaction succeeds", async () => {
     // ADD TO LIST ------------------------------------------------------------------
-    await asset.connect(signer_A).grantRole(ATS_ROLES.DOCUMENTER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_DOCUMENTER, signer_C.address);
 
     // check that Document not in the list
     let documents = await asset.getAllDocuments();
@@ -165,7 +165,7 @@ describe("Documentation Tests", () => {
   });
 
   it("GIVEN a document that is removed THEN docIndexes storage slot is zeroed (audit fix FIND-123)", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.DOCUMENTER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_DOCUMENTER, signer_C.address);
 
     await asset.connect(signer_C).setDocument(documentName_1, documentURI_1, documentHASH_1);
     await asset.connect(signer_C).removeDocument(documentName_1);
@@ -184,7 +184,7 @@ describe("Documentation Tests", () => {
   });
 
   it("GIVEN an existing document WHEN setDocument is called again with same name THEN document is updated without adding to docNames array", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.DOCUMENTER_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_DOCUMENTER, signer_C.address);
 
     // Add initial document
     await asset.connect(signer_C).setDocument(documentName_1, documentURI_1, documentHASH_1);
@@ -219,7 +219,7 @@ describe("Documentation Tests", () => {
     it("GIVEN a deactivated asset WHEN setDocument THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).setDocument(ethers.ZeroHash, "", ethers.ZeroHash),
@@ -229,7 +229,7 @@ describe("Documentation Tests", () => {
     it("GIVEN a deactivated asset WHEN removeDocument THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).removeDocument(ethers.ZeroHash),

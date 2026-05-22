@@ -3,8 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { DiamondCut } from "./DiamondCut.sol";
 import { DiamondLoupe } from "./DiamondLoupe.sol";
-import { _DIAMOND_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-import { IDiamond } from "../proxy/IDiamond.sol";
+import { IDiamond, RESOLVER_KEY_DIAMOND } from "../proxy/IDiamond.sol";
 import { IDiamondCut } from "../proxy/IDiamondCut.sol";
 import { IDiamondLoupe } from "../proxy/IDiamondLoupe.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
@@ -13,7 +12,7 @@ import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol
 // The loupe functions are required by the EIP2535 Diamonds standard
 contract DiamondFacet is IDiamond, DiamondCut, DiamondLoupe {
     function getStaticResolverKey() external pure returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _DIAMOND_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_DIAMOND;
     }
 
     function getStaticFunctionSelectors() external pure returns (bytes4[] memory staticFunctionSelectors_) {

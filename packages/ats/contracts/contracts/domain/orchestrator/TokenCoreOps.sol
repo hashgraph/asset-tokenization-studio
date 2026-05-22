@@ -11,6 +11,7 @@ import { ERC1594StorageWrapper } from "../asset/ERC1594StorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { IProtectedPartitions } from "../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
+import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 
 /// @title TokenCoreOps - Orchestrator for core token operations
 /// @notice Deployed once as a separate contract. Facets call via DELEGATECALL.
@@ -158,6 +159,12 @@ library TokenCoreOps {
 
     // Internal functions (inlined into calling StorageWrappers)
 
+    /// @notice Computes the total adjusted balance for a token holder at a given timestamp.
+    /// @dev Sums the spendable balance, locked, held, cleared, and frozen amounts, each
+    ///      scaled by their respective ABAF factors.
+    /// @param _tokenHolder Address of the token holder.
+    /// @param _timestamp   Block timestamp used for the ABAF adjustment calculation.
+    /// @return totalBalance_ Aggregate adjusted balance including frozen tokens.
     function getTotalBalanceForAdjustedAt(
         address _tokenHolder,
         uint256 _timestamp
@@ -166,7 +173,8 @@ library TokenCoreOps {
             AdjustBalancesStorageWrapper.balanceOfAdjustedAt(_tokenHolder, _timestamp) +
             LockStorageWrapper.getLockedAmountForAdjustedAt(_tokenHolder, _timestamp) +
             HoldStorageWrapper.getHeldAmountForAdjustedAt(_tokenHolder, _timestamp) +
-            ClearingReadOps.getClearedAmountForAdjustedAt(_tokenHolder, _timestamp);
+            ClearingReadOps.getClearedAmountForAdjustedAt(_tokenHolder, _timestamp) +
+            ERC3643StorageWrapper.getFrozenAmountForAdjustedAt(_tokenHolder, _timestamp);
     }
 
     function getTotalBalanceForByPartitionAdjustedAt(

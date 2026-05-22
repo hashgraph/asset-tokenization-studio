@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IProceedRecipients } from "./IProceedRecipients.sol";
+import { IProceedRecipients, RESOLVER_KEY_PROCEED_RECIPIENTS } from "./IProceedRecipients.sol";
 import { ProceedRecipients } from "./ProceedRecipients.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../../infrastructure/proxy/Bytes4Builder.sol";
-import { _PROCEED_RECIPIENTS_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
-
 contract ProceedRecipientsFacet is ProceedRecipients, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _PROCEED_RECIPIENTS_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_PROCEED_RECIPIENTS;
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {

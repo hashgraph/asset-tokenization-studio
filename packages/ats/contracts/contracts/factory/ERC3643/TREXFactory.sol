@@ -20,7 +20,7 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
     /// @notice TokenDetails with the ATS factory overlapping fields removed
     struct TokenDetailsAts {
         /// @dev Address of the owner of all contracts. The factory will append it to the provided RBACs if
-        /// the T_REX_OWNER_ROLE is not found. For a cheaper deployment, add the owner at the first position
+        /// the ROLE_TREX_OWNER is not found. For a cheaper deployment, add the owner at the first position
         /// in the array
         address owner;
         /// @dev Identity registry storage address. Set it to ZERO address if you want to deploy a new storage.

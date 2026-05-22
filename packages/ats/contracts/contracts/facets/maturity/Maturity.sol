@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IMaturity } from "./IMaturity.sol";
 import { IKyc } from "../layer_1/kyc/IKyc.sol";
-import { BOND_MANAGER_ROLE, MATURITY_REDEEMER_ROLE } from "../../constants/roles.sol";
+import { ROLE_BOND_MANAGER, ROLE_MATURITY_REDEEMER } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { BondStorageWrapper } from "../../domain/asset/BondStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
@@ -32,7 +32,7 @@ abstract contract Maturity is IMaturity, Modifiers {
         onlyActivated
         onlyUnpaused
         onlyClearingDisabled
-        onlyRole(MATURITY_REDEEMER_ROLE)
+        onlyRole(ROLE_MATURITY_REDEEMER)
         onlyValidAddress(_tokenHolder)
         onlyUnrecoveredAddress(_tokenHolder)
         onlyListedAllowed(_tokenHolder)
@@ -62,7 +62,7 @@ abstract contract Maturity is IMaturity, Modifiers {
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(BOND_MANAGER_ROLE)
+        onlyRole(ROLE_BOND_MANAGER)
         onlyValidMaturityDate(_newMaturityDate)
         returns (bool success_)
     {

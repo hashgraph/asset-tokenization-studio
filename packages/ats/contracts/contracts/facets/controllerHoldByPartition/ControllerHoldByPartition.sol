@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IControllerHoldByPartition } from "./IControllerHoldByPartition.sol";
-import { CONTROLLER_ROLE } from "../../constants/roles.sol";
+import { ROLE_CONTROLLER } from "../../constants/roles.sol";
 import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { HoldOps } from "../../domain/orchestrator/HoldOps.sol";
@@ -29,7 +29,7 @@ abstract contract ControllerHoldByPartition is IControllerHoldByPartition, Modif
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(CONTROLLER_ROLE)
+        onlyRole(ROLE_CONTROLLER)
         notZeroAddress(_from)
         notZeroAddress(_hold.escrow)
         onlyUnrecoveredAddress(_from)

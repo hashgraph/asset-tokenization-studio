@@ -3,14 +3,14 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ICouponSecurityHolders } from "./ICouponSecurityHolders.sol";
 import { ICouponTypes } from "../coupon/ICouponTypes.sol";
-import { COUPON_CORPORATE_ACTION_TYPE } from "../../constants/values.sol";
+import { CORPORATE_ACTION_TYPE_COUPON } from "../../constants/dispatchTypes.sol";
 import { CouponStorageWrapper } from "../../domain/asset/coupon/CouponStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 
 /**
  * @title CouponSecurityHolders
  * @notice Abstract implementation of `ICouponSecurityHolders`.
- * @dev All functions are guarded by `onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, …)`
+ * @dev All functions are guarded by `onlyMatchingActionType(CORPORATE_ACTION_TYPE_COUPON, …)`
  *      and delegate storage reads to `CouponStorageWrapper`.
  * @author Asset Tokenization Studio Team
  */
@@ -24,7 +24,7 @@ abstract contract CouponSecurityHolders is ICouponSecurityHolders, Modifiers {
         external
         view
         override
-        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_COUPON, _couponID - 1)
         returns (address[] memory holders_)
     {
         holders_ = CouponStorageWrapper.getCouponHolders(_couponID, _pageIndex, _pageLength);
@@ -39,7 +39,7 @@ abstract contract CouponSecurityHolders is ICouponSecurityHolders, Modifiers {
         external
         view
         override
-        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_COUPON, _couponID - 1)
         returns (ICouponTypes.CouponFor[] memory couponFor_, address[] memory holders_)
     {
         holders_ = CouponStorageWrapper.getCouponHolders(_couponID, _pageIndex, _pageLength);
@@ -56,7 +56,7 @@ abstract contract CouponSecurityHolders is ICouponSecurityHolders, Modifiers {
     /// @inheritdoc ICouponSecurityHolders
     function getTotalCouponHolders(
         uint256 _couponID
-    ) external view override onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1) returns (uint256) {
+    ) external view override onlyMatchingActionType(CORPORATE_ACTION_TYPE_COUPON, _couponID - 1) returns (uint256) {
         return CouponStorageWrapper.getTotalCouponHolders(_couponID);
     }
 }

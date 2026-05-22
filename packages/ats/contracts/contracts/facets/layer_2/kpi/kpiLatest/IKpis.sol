@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey KpisLatestKpiLinkedRate
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_KPIS_LATEST_KPI_LINKED_RATE = 0x6dfae69cde3163283ec603bbf97fe39bd603be2a03296d6e2770ea8f463102fb;
+
 interface IKpis {
     event KpiDataAdded(address indexed project, uint256 date, uint256 value);
 

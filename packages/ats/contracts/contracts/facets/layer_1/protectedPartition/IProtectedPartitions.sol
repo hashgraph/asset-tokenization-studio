@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey ProtectedPartitions
+bytes32 constant RESOLVER_KEY_PROTECTED_PARTITIONS = 0x895834530eae98f8a742fe98f3d528d3cce6c6a51af63b495414bdf391180dd7;
+
 interface IProtectedPartitions {
     struct ProtectionData {
         uint256 deadline;

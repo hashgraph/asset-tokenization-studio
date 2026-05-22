@@ -2,11 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { SecurityHolders } from "./SecurityHolders.sol";
-import { ISecurityHolders } from "./ISecurityHolders.sol";
+import { ISecurityHolders, RESOLVER_KEY_SECURITYHOLDERS } from "./ISecurityHolders.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _SECURITYHOLDERS_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title SecurityHoldersFacet
  * @notice Facet for security holder operations
@@ -15,7 +13,7 @@ import { _SECURITYHOLDERS_RESOLVER_KEY } from "../../constants/resolverKeys.sol"
 contract SecurityHoldersFacet is SecurityHolders, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _SECURITYHOLDERS_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_SECURITYHOLDERS;
     }
 
     /// @inheritdoc IStaticFunctionSelectors

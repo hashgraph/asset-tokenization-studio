@@ -3,6 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 
+/// @custom:hash resolverKey ControllerByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_CONTROLLER_BY_PARTITION = 0xa75865ef65a8410651c7bfebbfa9b89bd06e0bdf0dba55817ba1a6b49fdb1517;
+
 /**
  * @title IControllerByPartition
  * @notice Interface for controller-initiated forced transfers and redemptions on a specific partition.

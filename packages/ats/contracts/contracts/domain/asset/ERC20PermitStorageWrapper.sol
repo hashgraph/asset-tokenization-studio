@@ -3,8 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC20Permit } from "../../facets/layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import { ERC20PERMIT_TYPEHASH } from "../../constants/values.sol";
-import { _getDomainHash } from "../../infrastructure/utils/ERC712.sol";
+import { TYPEHASH_ERC20_PERMIT } from "../../constants/eip712.sol";
+import { _getDomainHash } from "../../infrastructure/utils/EIP712.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
@@ -33,7 +33,7 @@ library ERC20PermitStorageWrapper {
         address signer = ECDSA.recover(
             ECDSA.toTypedDataHash(
                 DOMAIN_SEPARATOR(),
-                keccak256(abi.encode(ERC20PERMIT_TYPEHASH, owner, spender, value, currentNonce, deadline))
+                keccak256(abi.encode(TYPEHASH_ERC20_PERMIT, owner, spender, value, currentNonce, deadline))
             ),
             v,
             r,

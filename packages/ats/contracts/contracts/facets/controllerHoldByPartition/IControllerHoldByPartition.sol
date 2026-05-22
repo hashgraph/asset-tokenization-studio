@@ -3,6 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
 
+/// @custom:hash resolverKey ControllerHoldByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_CONTROLLER_HOLD_BY_PARTITION = 0xc415f5239b26cab850bcaca08096196a95d9ea5bab0eed1a6e29ce81490efd33;
+
 /**
  * @title IControllerHoldByPartition
  * @notice Interface for the controller-initiated hold creation operation on a specific partition.

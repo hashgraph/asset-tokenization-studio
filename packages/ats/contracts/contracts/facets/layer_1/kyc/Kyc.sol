@@ -1,17 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { KYC_ROLE, INTERNAL_KYC_MANAGER_ROLE } from "../../../constants/roles.sol";
+import { ROLE_KYC, ROLE_INTERNAL_KYC_MANAGER } from "../../../constants/roles.sol";
 import { IKyc } from "./IKyc.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { KycStorageWrapper } from "../../../domain/core/KycStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract Kyc is IKyc, Modifiers {
-    function initializeInternalKyc(bool _internalKycActivated) external {
-        _checkNotInitialized(KycStorageWrapper.isKycInitialized());
+    function initializeInternalKyc(bool _internalKycActivated) external onlyNotKycInitialized {
         KycStorageWrapper.initializeInternalKyc(_internalKycActivated);
     }
 
@@ -19,7 +17,7 @@ abstract contract Kyc is IKyc, Modifiers {
         external
         onlyActivated
         onlyUnpaused
-        onlyRole(INTERNAL_KYC_MANAGER_ROLE)
+        onlyRole(ROLE_INTERNAL_KYC_MANAGER)
         returns (bool success_)
     {
         success_ = KycStorageWrapper.setInternalKyc(true);
@@ -30,7 +28,7 @@ abstract contract Kyc is IKyc, Modifiers {
         external
         onlyActivated
         onlyUnpaused
-        onlyRole(INTERNAL_KYC_MANAGER_ROLE)
+        onlyRole(ROLE_INTERNAL_KYC_MANAGER)
         returns (bool success_)
     {
         success_ = KycStorageWrapper.setInternalKyc(false);
@@ -49,7 +47,7 @@ abstract contract Kyc is IKyc, Modifiers {
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(KYC_ROLE)
+        onlyRole(ROLE_KYC)
         notZeroAddress(_account)
         onlyValidKycStatus(KycStatus.NOT_GRANTED, _account)
         onlyThreeValidDates(_validFrom, _validTo, TimeTravelStorageWrapper.getBlockTimestamp())
@@ -68,7 +66,7 @@ abstract contract Kyc is IKyc, Modifiers {
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(KYC_ROLE)
+        onlyRole(ROLE_KYC)
         notZeroAddress(_account)
         returns (bool success_)
     {

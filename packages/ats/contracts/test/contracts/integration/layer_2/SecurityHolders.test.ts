@@ -31,15 +31,15 @@ describe("SecurityHoldersFacet Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target);
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.ISSUER_ROLE,
+        role: ATS_ROLES.ROLE_ISSUER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
     ]);
@@ -359,7 +359,7 @@ describe("SecurityHoldersFacet Tests", () => {
 
   describe("holder registry integrity with encumbered tokens (FIND-120)", () => {
     beforeEach(async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.LOCKER_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_LOCKER, signer_A.address);
     });
 
     it("GIVEN a holder with locked tokens WHEN burning all free tokens via redeemByPartition THEN holder remains in registry", async () => {

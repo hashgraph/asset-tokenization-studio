@@ -18,6 +18,7 @@ import {
   createBatchConfiguration,
   OperationResult,
   DEFAULT_BATCH_SIZE,
+  RetryOptions,
 } from "@scripts/infrastructure";
 import { LOANS_PORTFOLIO_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
@@ -142,6 +143,9 @@ const LOANS_PORTFOLIO_FACETS = [
   "SecurityHoldersFacet",
   "TransferAndLockFacet",
   "TransferAndLockByPartitionFacet",
+
+  // Jurisdiction-Specific
+  "SecurityFacet",
 ] as const;
 
 export async function createLoansPortfolioConfiguration(
@@ -151,6 +155,7 @@ export async function createLoansPortfolioConfiguration(
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
+  retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
   const facetNames = useTimeTravel
     ? [...LOANS_PORTFOLIO_FACETS.map((name) => `${name}TimeTravel`), "TimeTravelFacet"]
@@ -176,5 +181,6 @@ export async function createLoansPortfolioConfiguration(
     partialBatchDeploy,
     batchSize,
     confirmations,
+    retryOptions,
   });
 }

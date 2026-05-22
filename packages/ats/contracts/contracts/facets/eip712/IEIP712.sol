@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey Eip712
+bytes32 constant RESOLVER_KEY_EIP712 = 0xaa031e71d3d43f715d16d62c62d7573406d29acdf4c080143dab629e08a8402f;
+
 /**
  * @title  IEIP712
  * @notice Exposes the EIP-712 typed-data domain separator for this contract.

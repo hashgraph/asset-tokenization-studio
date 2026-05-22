@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey LockAtSnapshotByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_LOCK_AT_SNAPSHOT_BY_PARTITION = 0x7740456ff352a04830411a3fdc359bd086a5d78fd7119bbb62a53c62c1911691;
+
 /**
  * @title  ILockAtSnapshotByPartition
  * @notice Interface for querying a token holder's locked balance for a specific partition at the

@@ -29,7 +29,7 @@ describe("Control List Tests", () => {
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
-    await executeRbac(asset, [{ role: ATS_ROLES.PAUSER_ROLE, members: [signer_B.address] }]);
+    await executeRbac(asset, [{ role: ATS_ROLES.ROLE_PAUSER, members: [signer_B.address] }]);
   }
 
   beforeEach(async () => {
@@ -55,7 +55,7 @@ describe("Control List Tests", () => {
   });
 
   it("GIVEN a paused Token WHEN addToControlList THEN transaction fails with IsPaused", async () => {
-    await grantRoleAndPauseToken(asset, ATS_ROLES.CONTROL_LIST_ROLE, signer_A, signer_B, signer_C.address);
+    await grantRoleAndPauseToken(asset, ATS_ROLES.ROLE_CONTROL_LIST, signer_A, signer_B, signer_C.address);
 
     await expect(asset.connect(signer_C).addToControlList(signer_D.address)).to.be.revertedWithCustomError(
       asset,
@@ -64,7 +64,7 @@ describe("Control List Tests", () => {
   });
 
   it("GIVEN a paused Token WHEN removeFromControlList THEN transaction fails with IsPaused", async () => {
-    await grantRoleAndPauseToken(asset, ATS_ROLES.CONTROL_LIST_ROLE, signer_A, signer_B, signer_C.address);
+    await grantRoleAndPauseToken(asset, ATS_ROLES.ROLE_CONTROL_LIST, signer_A, signer_B, signer_C.address);
 
     await expect(asset.connect(signer_C).removeFromControlList(signer_D.address)).to.be.revertedWithCustomError(
       asset,
@@ -73,7 +73,7 @@ describe("Control List Tests", () => {
   });
 
   it("GIVEN an account with controlList role WHEN addToControlList and removeFromControlList THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROL_LIST_ROLE, signer_B.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CONTROL_LIST, signer_B.address);
 
     let check_signer_B = await asset.isInControlList(signer_B.address);
     expect(check_signer_B).to.equal(false);
@@ -119,7 +119,7 @@ describe("Control List Tests", () => {
   });
 
   it("GIVEN an account already in control list WHEN addToControlList is called again THEN transaction fails with ListedAccount", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROL_LIST_ROLE, signer_B.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CONTROL_LIST, signer_B.address);
 
     // Add account to control list
     await asset.connect(signer_B).addToControlList(signer_C.address);
@@ -134,7 +134,7 @@ describe("Control List Tests", () => {
   });
 
   it("GIVEN an account not in control list WHEN removeFromControlList is called THEN transaction fails with UnlistedAccount", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROL_LIST_ROLE, signer_B.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CONTROL_LIST, signer_B.address);
 
     // Verify account is not in the list
     expect(await asset.isInControlList(signer_C.address)).to.equal(false);
@@ -149,7 +149,7 @@ describe("Control List Tests", () => {
     it("GIVEN a deactivated asset WHEN addToControlList THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).addToControlList(ethers.ZeroAddress),
@@ -159,7 +159,7 @@ describe("Control List Tests", () => {
     it("GIVEN a deactivated asset WHEN removeFromControlList THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).removeFromControlList(ethers.ZeroAddress),

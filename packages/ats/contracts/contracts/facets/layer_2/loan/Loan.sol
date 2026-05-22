@@ -2,11 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ILoan } from "./ILoan.sol";
-import { LOAN_MANAGER_ROLE } from "../../../constants/roles.sol";
+import { ROLE_LOAN_MANAGER } from "../../../constants/roles.sol";
 import { LoanStorageWrapper } from "../../../domain/asset/loan/LoanStorageWrapper.sol";
-import { RegulationData, AdditionalSecurityData } from "../../../constants/regulation.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
-import { SecurityStorageWrapper } from "../../../domain/asset/SecurityStorageWrapper.sol";
 
 /**
  * @title Loan
@@ -15,11 +13,8 @@ import { SecurityStorageWrapper } from "../../../domain/asset/SecurityStorageWra
  * @author Hashgraph
  */
 abstract contract Loan is ILoan, Modifiers {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_Loan(
-        LoanDetailsData calldata _loanDetailsData,
-        RegulationData memory _regulationData,
-        AdditionalSecurityData calldata _additionalSecurityData
+    function initializeLoan(
+        LoanDetailsData calldata _loanDetailsData
     )
         external
         override
@@ -28,7 +23,6 @@ abstract contract Loan is ILoan, Modifiers {
         validateDates(_loanDetailsData.loanBasicData.startingDate, _loanDetailsData.loanBasicData.maturityDate)
     {
         LoanStorageWrapper.initializeLoan(_loanDetailsData);
-        SecurityStorageWrapper.initializeSecurity(_regulationData, _additionalSecurityData);
     }
 
     function setLoanDetails(
@@ -38,7 +32,7 @@ abstract contract Loan is ILoan, Modifiers {
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(LOAN_MANAGER_ROLE)
+        onlyRole(ROLE_LOAN_MANAGER)
         onlyValidTimestamp(loanDetailsData_.loanBasicData.startingDate)
         onlyValidTimestamp(loanDetailsData_.loanBasicData.maturityDate)
         onlyValidTimestamp(loanDetailsData_.loanBasicData.signingDate)

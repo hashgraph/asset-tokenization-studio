@@ -45,6 +45,9 @@ import {
   hederaGasOverrides,
   warn,
   GAS_LIMIT,
+  retryTransaction,
+  RetryOptions,
+  withNonceReset,
 } from "@scripts/infrastructure";
 
 // Types imported from centralized types module
@@ -168,6 +171,7 @@ export async function processFacetLists(
   batchSize: number = DEFAULT_BATCH_SIZE,
   gasLimit?: number,
   confirmations: number = 0,
+  retryOptions?: RetryOptions,
 ): Promise<void> {
   // Get network name for instant mining check
   let networkName = "unknown";
@@ -206,7 +210,7 @@ export async function processFacetLists(
     // partialBatchDeploy only indicates if more configurations follow after this one
     const isLastBatch = i + chunkSize >= facetIdList.length;
 
-    await sendBatchConfiguration(configId, batch, isLastBatch, blrContract, gasLimit, confirmations);
+    await sendBatchConfiguration(configId, batch, isLastBatch, blrContract, gasLimit, confirmations, retryOptions);
   }
 }
 
@@ -248,6 +252,7 @@ export async function sendBatchConfiguration(
   blrContract: BusinessLogicResolver,
   gasLimit?: number,
   confirmations: number = 0,
+  retryOptions?: RetryOptions,
 ): Promise<void> {
   const finalBatch = isFinalBatch;
 
@@ -256,16 +261,24 @@ export async function sendBatchConfiguration(
   info(`  Is final batch: ${finalBatch}`);
   info(`  Confirmations to wait: ${confirmations}`);
 
+  // After a 502 the NonceManager's internal delta may be ahead of what Hedera received.
+  // Reset before each retry so the next attempt re-fetches the confirmed nonce.
+  // Only retry the send — once a tx hash is returned, the batch is committed on success;
+  // re-submitting would create a duplicate configuration version.
+  const effectiveRetryOptions: RetryOptions = withNonceReset(blrContract.runner, retryOptions);
+
   try {
     // Dynamic import for parallel test performance (see module JSDoc for explanation)
-    const { GAS_LIMIT } = await import("@scripts/infrastructure");
+    const { GAS_LIMIT: GL } = await import("@scripts/infrastructure");
 
-    const txResponse = await blrContract.createBatchConfiguration(configId, configurations, finalBatch, {
-      gasLimit: gasLimit || GAS_LIMIT.businessLogicResolver.createConfiguration,
-      ...hederaGasOverrides(),
-    });
-
-    info(`Batch configuration transaction sent: ${txResponse.hash}`);
+    const txResponse = await retryTransaction(async () => {
+      const sentTx = await blrContract.createBatchConfiguration(configId, configurations, finalBatch, {
+        gasLimit: gasLimit || GL.businessLogicResolver.createConfiguration,
+        ...hederaGasOverrides(),
+      });
+      info(`Batch configuration transaction sent: ${sentTx.hash}`);
+      return sentTx;
+    }, effectiveRetryOptions);
 
     // Wait for transaction confirmation with configurable confirmations
     const receipt = await waitForTransaction(txResponse, confirmations, DEFAULT_TRANSACTION_TIMEOUT);
@@ -364,6 +377,13 @@ export async function createBatchConfiguration(
      * configuration referencing earlier facet versions rather than the latest.
      */
     facetVersions?: Record<string, number>;
+
+    /**
+     * Retry configuration for each `createBatchConfiguration` transaction.
+     * On Hedera testnet, transient 502 responses can abort a batch mid-sequence.
+     * Default: no retries.
+     */
+    retryOptions?: RetryOptions;
   },
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
   const {
@@ -374,6 +394,7 @@ export async function createBatchConfiguration(
     gasLimit,
     confirmations = 0,
     facetVersions,
+    retryOptions,
   } = options;
 
   // Dynamic imports for parallel test performance (see module JSDoc for explanation)
@@ -481,6 +502,7 @@ export async function createBatchConfiguration(
       batchSize,
       gasLimit,
       confirmations,
+      retryOptions,
     );
 
     // Query the actual configuration-specific version after batch processing

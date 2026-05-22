@@ -2,8 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalControlListManagement } from "./IExternalControlListManagement.sol";
-import { CONTROL_LIST_MANAGER_ROLE } from "../../constants/roles.sol";
-import { _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { ROLE_CONTROL_LIST_MANAGER } from "../../constants/roles.sol";
+import { STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { ExternalListManagementStorageWrapper } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ArrayValidation } from "../../infrastructure/utils/ArrayValidation.sol";
@@ -16,9 +16,9 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  *         token. Maintains a list of trusted third-party control list contracts whose
  *         authorisation results are consulted during transfer compliance checks.
  * @dev Implements `IExternalControlListManagement`. The external control list is stored in diamond
- *      storage at `_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION` via
+ *      storage at `STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT` via
  *      `ExternalListManagementStorageWrapper`. All mutating functions after initialisation are
- *      gated by `CONTROL_LIST_MANAGER_ROLE` and the `onlyUnpaused` modifier inherited from
+ *      gated by `ROLE_CONTROL_LIST_MANAGER` and the `onlyUnpaused` modifier inherited from
  *      `Modifiers`. Intended to be inherited exclusively by
  *      `ExternalControlListManagementFacet`.
  */
@@ -34,10 +34,10 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
     function updateExternalControlLists(
         address[] calldata _controlLists,
         bool[] calldata _actives
-    ) external override onlyActivated onlyUnpaused onlyRole(CONTROL_LIST_MANAGER_ROLE) returns (bool success_) {
+    ) external override onlyActivated onlyUnpaused onlyRole(ROLE_CONTROL_LIST_MANAGER) returns (bool success_) {
         ArrayValidation.checkUniqueValues(_controlLists, _actives);
         success_ = ExternalListManagementStorageWrapper.updateExternalLists(
-            _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
+            STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT,
             _controlLists,
             _actives
         );
@@ -55,12 +55,12 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(CONTROL_LIST_MANAGER_ROLE)
+        onlyRole(ROLE_CONTROL_LIST_MANAGER)
         onlyValidAddress(_controlList)
         returns (bool success_)
     {
         success_ = ExternalListManagementStorageWrapper.addExternalList(
-            _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
+            STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT,
             _controlList
         );
         if (!success_) {
@@ -72,9 +72,9 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
     /// @inheritdoc IExternalControlListManagement
     function removeExternalControlList(
         address _controlList
-    ) external override onlyActivated onlyUnpaused onlyRole(CONTROL_LIST_MANAGER_ROLE) returns (bool success_) {
+    ) external override onlyActivated onlyUnpaused onlyRole(ROLE_CONTROL_LIST_MANAGER) returns (bool success_) {
         success_ = ExternalListManagementStorageWrapper.removeExternalList(
-            _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
+            STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT,
             _controlList
         );
         if (!success_) {
@@ -86,15 +86,12 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
     /// @inheritdoc IExternalControlListManagement
     function isExternalControlList(address _controlList) external view override returns (bool) {
         return
-            ExternalListManagementStorageWrapper.isExternalList(
-                _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
-                _controlList
-            );
+            ExternalListManagementStorageWrapper.isExternalList(STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT, _controlList);
     }
 
     /// @inheritdoc IExternalControlListManagement
     function getExternalControlListsCount() external view override returns (uint256 externalControlListsCount_) {
-        return ExternalListManagementStorageWrapper.getExternalListsCount(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION);
+        return ExternalListManagementStorageWrapper.getExternalListsCount(STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT);
     }
 
     /// @inheritdoc IExternalControlListManagement
@@ -104,7 +101,7 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
     ) external view override returns (address[] memory members_) {
         return
             ExternalListManagementStorageWrapper.getExternalListsMembers(
-                _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
+                STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT,
                 _pageIndex,
                 _pageLength
             );

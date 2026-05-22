@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _ERC20_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { _DEFAULT_PARTITION, KPI_ERC20_APPROVE_OWNER } from "../../constants/values.sol";
 import { ICore } from "../../facets/core/ICore.sol";
 import { ITransfer } from "../../facets/transfer/ITransfer.sol";
@@ -13,6 +12,9 @@ import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
+
+/// @custom:hash storage Erc20
+bytes32 constant STORAGE_LOCATION_ERC20 = 0xba2beddc557de36eb4836f4ff1fd9d33a28d780fce70d36cf80b490142788200;
 
 struct ERC20Storage {
     string name;
@@ -264,7 +266,7 @@ library ERC20StorageWrapper {
     }
 
     function erc20Storage() internal pure returns (ERC20Storage storage erc20Storage_) {
-        bytes32 position = _ERC20_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_ERC20;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             erc20Storage_.slot := position

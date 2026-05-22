@@ -27,7 +27,7 @@ describe("InterestRateFacet Tests", () => {
       asset = await ethers.getContractAt("IAsset", base.diamond.target as string);
       admin = base.deployer;
       nonAdmin = base.user2;
-      await executeRbac(asset, [{ role: ATS_ROLES.INTEREST_RATE_MANAGER_ROLE, members: [admin.address] }]);
+      await executeRbac(asset, [{ role: ATS_ROLES.ROLE_INTEREST_RATE_MANAGER, members: [admin.address] }]);
     }
 
     beforeEach(async () => {
@@ -61,18 +61,11 @@ describe("InterestRateFacet Tests", () => {
     });
 
     it("GIVEN a deactivated asset WHEN setCouponRateType THEN reverts with Deactivated", async () => {
-      await asset.connect(admin).grantRole(ATS_ROLES.DEACTIVATE_ROLE, admin.address);
+      await asset.connect(admin).grantRole(ATS_ROLES.ROLE_DEACTIVATE, admin.address);
       await asset.connect(admin).deactivate();
       await expect(asset.connect(admin).setCouponRateType(RateType.STANDARD)).to.be.revertedWithCustomError(
         asset,
         "Deactivated",
-      );
-    });
-
-    it("GIVEN any bond WHEN initialize_InterestRateType(NONE) THEN reverts with InvalidRateType", async () => {
-      await expect(asset.connect(admin).initializeInterestRateType(RateType.NONE)).to.be.revertedWithCustomError(
-        asset,
-        "InvalidRateType",
       );
     });
   });

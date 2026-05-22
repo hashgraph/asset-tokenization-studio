@@ -6,14 +6,13 @@ import { type IAsset } from "@contract-types";
 import {
   executeRbac,
   deployLoanTokenFixture,
-  getRegulationData,
   MAX_UINT256,
   deployLoansPortfolioTokenFixture,
   DEFAULT_LOANS_PORTFOLIO_PARAMS,
   getLoanDetails,
 } from "@test";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { ADDRESS_ZERO, ATS_ROLES, buildRegulationData, DEFAULT_PARTITION, EMPTY_STRING, ZERO } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO } from "@scripts";
 import { ethers } from "hardhat";
 import { HoldingsAssetType } from "@scripts/domain";
 
@@ -36,8 +35,8 @@ describe("LoansPortfolio Token Tests", () => {
     asset = await ethers.getContractAt("IAsset", base.tokenAddress, signer_A);
 
     await executeRbac(asset, [
-      { role: ATS_ROLES.LOANS_PORTFOLIO_MANAGER_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES.PAUSER_ROLE, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_LOANS_PORTFOLIO_MANAGER, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_PAUSER, members: [signer_B.address] },
     ]);
 
     loanAsset = await deployLoanToken();
@@ -60,10 +59,10 @@ describe("LoansPortfolio Token Tests", () => {
     const loanIAsset = await ethers.getContractAt("IAsset", loanBase.tokenAddress, signer_A);
 
     await executeRbac(loanIAsset, [
-      { role: ATS_ROLES.ISSUER_ROLE, members: [signer_A?.address] },
-      { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A?.address] },
-      { role: ATS_ROLES.KYC_ROLE, members: [signer_B?.address] },
-      { role: ATS_ROLES.LOAN_MANAGER_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_ISSUER, members: [signer_A?.address] },
+      { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A?.address] },
+      { role: ATS_ROLES.ROLE_KYC, members: [signer_B?.address] },
+      { role: ATS_ROLES.ROLE_LOAN_MANAGER, members: [signer_A.address] },
     ]);
 
     await loanIAsset.addIssuer(signer_A.address);
@@ -76,7 +75,7 @@ describe("LoansPortfolio Token Tests", () => {
     await loadFixture(deployLoansPortfolioFixture);
   });
 
-  describe("_initialize_LoansPortfolio", () => {
+  describe("initializeLoansPortfolio", () => {
     it("GIVEN a deployed portfolio WHEN initializing THEN state is set correctly", async () => {
       const data = await asset.getLoansPortfolioData();
 
@@ -85,21 +84,11 @@ describe("LoansPortfolio Token Tests", () => {
     });
 
     it("GIVEN an already initialized portfolio WHEN initializing again THEN reverts with AlreadyInitialized", async () => {
-      const regulationData = getRegulationData();
-
       await expect(
-        asset.initializeLoansPortfolio(
-          {
-            portfolioType: DEFAULT_LOANS_PORTFOLIO_PARAMS.portfolioType,
-            distributionPolicy: DEFAULT_LOANS_PORTFOLIO_PARAMS.distributionPolicy,
-          },
-          buildRegulationData(regulationData.regulationType, regulationData.regulationSubType),
-          {
-            countriesControlListType: regulationData.additionalSecurityData.countriesControlListType,
-            listOfCountries: regulationData.additionalSecurityData.listOfCountries,
-            info: regulationData.additionalSecurityData.info,
-          },
-        ),
+        asset.initializeLoansPortfolio({
+          portfolioType: DEFAULT_LOANS_PORTFOLIO_PARAMS.portfolioType,
+          distributionPolicy: DEFAULT_LOANS_PORTFOLIO_PARAMS.distributionPolicy,
+        }),
       ).to.be.revertedWithCustomError(asset, "AlreadyInitialized");
     });
   });
@@ -180,7 +169,7 @@ describe("LoansPortfolio Token Tests", () => {
         }),
       )
         .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
-        .withArgs(signer_C.address, ATS_ROLES.LOANS_PORTFOLIO_MANAGER_ROLE);
+        .withArgs(signer_C.address, ATS_ROLES.ROLE_LOANS_PORTFOLIO_MANAGER);
     });
 
     it("GIVEN an existing asset WHEN adding the same asset THEN reverts with HoldingsAssetAlreadyExists", async () => {
@@ -299,7 +288,7 @@ describe("LoansPortfolio Token Tests", () => {
 
       await expect(asset.connect(signer_C).removeHoldingsAsset(holdingsAsset))
         .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
-        .withArgs(signer_C.address, ATS_ROLES.LOANS_PORTFOLIO_MANAGER_ROLE);
+        .withArgs(signer_C.address, ATS_ROLES.ROLE_LOANS_PORTFOLIO_MANAGER);
     });
   });
 
@@ -383,7 +372,7 @@ describe("LoansPortfolio Token Tests", () => {
     it("GIVEN an unauthorized account WHEN notifying update THEN reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_C).notifyLoanHoldingsAssetUpdate(await loanAsset.getAddress()))
         .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
-        .withArgs(signer_C.address, ATS_ROLES.LOANS_PORTFOLIO_MANAGER_ROLE);
+        .withArgs(signer_C.address, ATS_ROLES.ROLE_LOANS_PORTFOLIO_MANAGER);
     });
   });
 
@@ -490,7 +479,7 @@ describe("LoansPortfolio Token Tests", () => {
 
       await expect(asset.connect(signer_C).loansPortfolioWithdraw(await loanAsset.getAddress(), signer_A.address, 100n))
         .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
-        .withArgs(signer_C.address, ATS_ROLES.LOANS_PORTFOLIO_MANAGER_ROLE);
+        .withArgs(signer_C.address, ATS_ROLES.ROLE_LOANS_PORTFOLIO_MANAGER);
     });
   });
 
@@ -967,7 +956,7 @@ describe("LoansPortfolio Token Tests", () => {
     it("GIVEN a deactivated asset WHEN addHoldingsAsset THEN transaction fails with Deactivated", async () => {
       const base = await deployLoansPortfolioTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset
@@ -979,7 +968,7 @@ describe("LoansPortfolio Token Tests", () => {
     it("GIVEN a deactivated asset WHEN removeHoldingsAsset THEN transaction fails with Deactivated", async () => {
       const base = await deployLoansPortfolioTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset
@@ -991,7 +980,7 @@ describe("LoansPortfolio Token Tests", () => {
     it("GIVEN a deactivated asset WHEN notifyLoanHoldingsAssetUpdate THEN transaction fails with Deactivated", async () => {
       const base = await deployLoansPortfolioTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).notifyLoanHoldingsAssetUpdate(ethers.ZeroAddress),
@@ -1001,7 +990,7 @@ describe("LoansPortfolio Token Tests", () => {
     it("GIVEN a deactivated asset WHEN loansPortfolioWithdraw THEN transaction fails with Deactivated", async () => {
       const base = await deployLoansPortfolioTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.tokenAddress);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).loansPortfolioWithdraw(ethers.ZeroAddress, ethers.ZeroAddress, 0),

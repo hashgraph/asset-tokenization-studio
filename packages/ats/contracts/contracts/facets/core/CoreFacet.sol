@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICore } from "./ICore.sol";
+import { ICore, RESOLVER_KEY_CORE } from "./ICore.sol";
 import { Core } from "./Core.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _CORE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title CoreFacet
  * @notice Diamond facet for the Core domain. Registers the 8 selectors that define the base
@@ -14,7 +12,7 @@ import { _CORE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
  */
 contract CoreFacet is Core, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _CORE_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_CORE;
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {

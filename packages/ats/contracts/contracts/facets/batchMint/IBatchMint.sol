@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey BatchMint
+bytes32 constant RESOLVER_KEY_BATCH_MINT = 0x7575e07f738065de9a6ba5370d7d18b79f7a0b885824780bf5c75784978e9530;
+
 /**
  * @title IBatchMint
  * @notice Interface for batch minting tokens to multiple addresses in a single transaction.

@@ -1,16 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey ExternalControlList
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_EXTERNAL_CONTROL_LIST = 0x1a8f526d3e49a86640ec4a268407478132e285f13c4efbe08c46324306fd6a04;
+
 /**
  * @title IExternalControlListManagement
  * @author Asset Tokenization Studio Team
  * @notice Interface for managing external control list contracts on a security token. External
  *         control lists are trusted third-party contracts that implement `IExternalControlList`
  *         and are consulted during transfer authorisation checks.
- * @dev Part of the Diamond facet system. `CONTROL_LIST_MANAGER_ROLE` is required for all
+ * @dev Part of the Diamond facet system. `ROLE_CONTROL_LIST_MANAGER` is required for all
  *      state-mutating functions after initialisation. The external control list and its
  *      initialisation flag are stored in diamond storage at
- *      `_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION` via `ExternalListManagementStorageWrapper`.
+ *      `STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT` via `ExternalListManagementStorageWrapper`.
  */
 interface IExternalControlListManagement {
     /**
@@ -68,7 +72,7 @@ interface IExternalControlListManagement {
 
     /**
      * @notice Adds or removes multiple external control list contracts in a single transaction.
-     * @dev Requires `CONTROL_LIST_MANAGER_ROLE` and the token to be unpaused. Both arrays must
+     * @dev Requires `ROLE_CONTROL_LIST_MANAGER` and the token to be unpaused. Both arrays must
      *      have the same length and contain no duplicate addresses, validated by
      *      `ArrayValidation.checkUniqueValues`. Reverts with `ExternalControlListsNotUpdated` on
      *      failure. Emits `ExternalControlListsUpdated`.
@@ -84,7 +88,7 @@ interface IExternalControlListManagement {
 
     /**
      * @notice Adds an external control list contract to the list.
-     * @dev Requires `CONTROL_LIST_MANAGER_ROLE`, the token to be unpaused, and a non-zero
+     * @dev Requires `ROLE_CONTROL_LIST_MANAGER`, the token to be unpaused, and a non-zero
      *      address. Reverts with `ListedControlList` if the address is already listed. Emits
      *      `AddedToExternalControlLists`.
      * @param _controlList Address of the external control list contract to add.
@@ -94,7 +98,7 @@ interface IExternalControlListManagement {
 
     /**
      * @notice Removes an external control list contract from the list.
-     * @dev Requires `CONTROL_LIST_MANAGER_ROLE` and the token to be unpaused. Reverts with
+     * @dev Requires `ROLE_CONTROL_LIST_MANAGER` and the token to be unpaused. Reverts with
      *      `UnlistedControlList` if the address is not listed. Emits
      *      `RemovedFromExternalControlLists`.
      * @param _controlList Address of the external control list contract to remove.

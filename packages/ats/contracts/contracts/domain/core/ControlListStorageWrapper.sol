@@ -4,8 +4,10 @@ pragma solidity >=0.8.0 <0.9.0;
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { ExternalListManagementStorageWrapper } from "./ExternalListManagementStorageWrapper.sol";
-import { _CONTROL_LIST_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
+
+/// @custom:hash storage ControlList
+bytes32 constant STORAGE_LOCATION_CONTROL_LIST = 0x880786188890a6f111c4f0814d49de0f01f1a156bdbd97eda824d3baaabba900;
 
 struct ControlListStorage {
     bool isWhiteList;
@@ -28,7 +30,7 @@ library ControlListStorageWrapper {
     using EnumerableSet for EnumerableSet.AddressSet;
 
     function controlListStorage() internal pure returns (ControlListStorage storage controlList_) {
-        bytes32 position = _CONTROL_LIST_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_CONTROL_LIST;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             controlList_.slot := position

@@ -57,9 +57,9 @@ describe("Network Configuration", () => {
 
       expect(config.confirmations).to.equal(2);
       expect(config.timeout).to.equal(120_000);
-      expect(config.retryOptions.maxRetries).to.equal(2);
-      expect(config.retryOptions.baseDelay).to.equal(1000);
-      expect(config.retryOptions.maxDelay).to.equal(4000);
+      expect(config.retryOptions.maxRetries).to.equal(3);
+      expect(config.retryOptions.baseDelay).to.equal(10_000);
+      expect(config.retryOptions.maxDelay).to.equal(20_000);
       expect(config.verifyDeployment).to.be.true;
     });
 

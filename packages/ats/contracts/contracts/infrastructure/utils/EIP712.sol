@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _DOMAIN_TYPE_HASH, _SALT } from "../../constants/values.sol";
+import { TYPEHASH_DOMAIN, EIP712_VERSIONED_PREFIX } from "../../constants/eip712.sol";
 import {
-    _PROTECTED_TRANSFER_FROM_PARTITION_TYPEHASH,
-    _PROTECTED_REDEEM_FROM_PARTITION_TYPEHASH,
-    _PROTECTED_CREATE_HOLD_FROM_PARTITION_TYPEHASH,
-    _PROTECTED_HOLD_TYPEHASH,
-    _HOLD_TYPEHASH,
-    _PROTECTED_CLEARING_TRANSFER_PARTITION_TYPEHASH,
-    _PROTECTED_CLEARING_REDEEM_TYPEHASH,
-    _CLEARING_OPERATION_TYPEHASH,
-    _PROTECTED_CLEARING_OPERATION_TYPEHASH,
-    _PROTECTED_CLEARING_CREATE_HOLD_FROM_PARTITION_TYPEHASH
-} from "../../constants/values.sol";
+    TYPEHASH_PROTECTED_TRANSFER_FROM_PARTITION,
+    TYPEHASH_PROTECTED_REDEEM_FROM_PARTITION,
+    TYPEHASH_PROTECTED_CREATE_HOLD_FROM_PARTITION,
+    TYPEHASH_PROTECTED_HOLD,
+    TYPEHASH_HOLD,
+    TYPEHASH_PROTECTED_CLEARING_TRANSFER_PARTITION,
+    TYPEHASH_PROTECTED_CLEARING_REDEEM,
+    TYPEHASH_CLEARING_OPERATION,
+    TYPEHASH_PROTECTED_CLEARING_OPERATION,
+    TYPEHASH_PROTECTED_CLEARING_CREATE_HOLD_FROM_PARTITION
+} from "../../constants/eip712.sol";
 import { IHoldTypes } from "../../facets/layer_1/hold/IHoldTypes.sol";
 import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
 import { ICommonErrors } from "../errors/ICommonErrors.sol";
@@ -27,7 +27,7 @@ function _getDomainHash(
     return
         keccak256(
             abi.encode(
-                _DOMAIN_TYPE_HASH,
+                TYPEHASH_DOMAIN,
                 keccak256(bytes(_contractName)),
                 keccak256(bytes(_contractVersion)),
                 _chainId,
@@ -46,7 +46,7 @@ function _getMessageHashTransfer(
 ) pure returns (bytes32) {
     return
         keccak256(
-            abi.encode(_PROTECTED_TRANSFER_FROM_PARTITION_TYPEHASH, _partition, _from, _to, _amount, _deadline, _nonce)
+            abi.encode(TYPEHASH_PROTECTED_TRANSFER_FROM_PARTITION, _partition, _from, _to, _amount, _deadline, _nonce)
         );
 }
 
@@ -58,7 +58,7 @@ function _getMessageHashRedeem(
     uint256 _nonce
 ) pure returns (bytes32) {
     return
-        keccak256(abi.encode(_PROTECTED_REDEEM_FROM_PARTITION_TYPEHASH, _partition, _from, _amount, _deadline, _nonce));
+        keccak256(abi.encode(TYPEHASH_PROTECTED_REDEEM_FROM_PARTITION, _partition, _from, _amount, _deadline, _nonce));
 }
 
 function _getMessageHashCreateHold(
@@ -69,15 +69,15 @@ function _getMessageHashCreateHold(
     return
         keccak256(
             abi.encode(
-                _PROTECTED_CREATE_HOLD_FROM_PARTITION_TYPEHASH,
+                TYPEHASH_PROTECTED_CREATE_HOLD_FROM_PARTITION,
                 _partition,
                 _from,
                 keccak256(
                     abi.encode(
-                        _PROTECTED_HOLD_TYPEHASH,
+                        TYPEHASH_PROTECTED_HOLD,
                         keccak256(
                             abi.encode(
-                                _HOLD_TYPEHASH,
+                                TYPEHASH_HOLD,
                                 _protectedHold.hold.amount,
                                 _protectedHold.hold.expirationTimestamp,
                                 _protectedHold.hold.escrow,
@@ -101,13 +101,13 @@ function _getMessageHashClearingTransfer(
     return
         keccak256(
             abi.encode(
-                _PROTECTED_CLEARING_TRANSFER_PARTITION_TYPEHASH,
+                TYPEHASH_PROTECTED_CLEARING_TRANSFER_PARTITION,
                 keccak256(
                     abi.encode(
-                        _PROTECTED_CLEARING_OPERATION_TYPEHASH,
+                        TYPEHASH_PROTECTED_CLEARING_OPERATION,
                         keccak256(
                             abi.encode(
-                                _CLEARING_OPERATION_TYPEHASH,
+                                TYPEHASH_CLEARING_OPERATION,
                                 _protectedClearing.clearingOperation.partition,
                                 _protectedClearing.clearingOperation.expirationTimestamp,
                                 keccak256(_protectedClearing.clearingOperation.data)
@@ -131,13 +131,13 @@ function _getMessageHashClearingCreateHold(
     return
         keccak256(
             abi.encode(
-                _PROTECTED_CLEARING_CREATE_HOLD_FROM_PARTITION_TYPEHASH,
+                TYPEHASH_PROTECTED_CLEARING_CREATE_HOLD_FROM_PARTITION,
                 keccak256(
                     abi.encode(
-                        _PROTECTED_CLEARING_OPERATION_TYPEHASH,
+                        TYPEHASH_PROTECTED_CLEARING_OPERATION,
                         keccak256(
                             abi.encode(
-                                _CLEARING_OPERATION_TYPEHASH,
+                                TYPEHASH_CLEARING_OPERATION,
                                 _protectedClearingOperation.clearingOperation.partition,
                                 _protectedClearingOperation.clearingOperation.expirationTimestamp,
                                 keccak256(_protectedClearingOperation.clearingOperation.data)
@@ -150,7 +150,7 @@ function _getMessageHashClearingCreateHold(
                 ),
                 keccak256(
                     abi.encode(
-                        _HOLD_TYPEHASH,
+                        TYPEHASH_HOLD,
                         _hold.amount,
                         _hold.expirationTimestamp,
                         _hold.escrow,
@@ -169,13 +169,13 @@ function _getMessageHashClearingRedeem(
     return
         keccak256(
             abi.encode(
-                _PROTECTED_CLEARING_REDEEM_TYPEHASH,
+                TYPEHASH_PROTECTED_CLEARING_REDEEM,
                 keccak256(
                     abi.encode(
-                        _PROTECTED_CLEARING_OPERATION_TYPEHASH,
+                        TYPEHASH_PROTECTED_CLEARING_OPERATION,
                         keccak256(
                             abi.encode(
-                                _CLEARING_OPERATION_TYPEHASH,
+                                TYPEHASH_CLEARING_OPERATION,
                                 _protectedClearing.clearingOperation.partition,
                                 _protectedClearing.clearingOperation.expirationTimestamp,
                                 keccak256(_protectedClearing.clearingOperation.data)
@@ -241,6 +241,6 @@ function _verify(
     address _contractAddress
 ) pure returns (bool) {
     bytes32 domainHash = _getDomainHash(_contractName, _contractVersion, _chainid, _contractAddress);
-    bytes32 prefixedHash = keccak256(abi.encodePacked(_SALT, domainHash, _functionHash));
+    bytes32 prefixedHash = keccak256(abi.encodePacked(EIP712_VERSIONED_PREFIX, domainHash, _functionHash));
     return (_recoverSigner(prefixedHash, _signature) == _signer);
 }

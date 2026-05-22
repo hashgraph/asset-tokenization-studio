@@ -3,6 +3,9 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey Erc20permit
+bytes32 constant RESOLVER_KEY_ERC20PERMIT = 0xb9b450cd33d22a14f4cc67bea5d1afefac1f0e7c5230fce1b942f751c37a9e6d;
+
 interface IERC20Permit {
     error ERC2612ExpiredSignature(uint256 deadline);
     error ERC2612InvalidSigner(address signer, address owner);

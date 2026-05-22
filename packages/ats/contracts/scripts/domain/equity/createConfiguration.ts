@@ -18,6 +18,7 @@ import {
   OperationResult,
   createBatchConfiguration,
   DEFAULT_BATCH_SIZE,
+  RetryOptions,
 } from "@scripts/infrastructure";
 import { BusinessLogicResolver } from "@contract-types";
 import { EQUITY_CONFIG_ID } from "../constants";
@@ -136,7 +137,8 @@ const EQUITY_FACETS = [
   "VotingSecurityHoldersFacet",
 
   "InterestRateFacet",
-  // Jurisdiction-Specific (1)
+  // Jurisdiction-Specific (2)
+  "SecurityFacet",
   "EquityUSAFacet",
 
   // Loan & Loans Portfolio (2)
@@ -199,6 +201,7 @@ export async function createEquityConfiguration(
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
+  retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
   // Build facet list based on time travel mode
   // When useTimeTravel=true, ALL facets get TimeTravel suffix (universal mapping)
@@ -229,5 +232,6 @@ export async function createEquityConfiguration(
     partialBatchDeploy,
     batchSize,
     confirmations,
+    retryOptions,
   });
 }

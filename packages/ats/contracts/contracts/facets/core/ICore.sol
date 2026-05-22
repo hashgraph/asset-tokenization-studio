@@ -3,6 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IFactory } from "../../factory/IFactory.sol";
 
+/// @custom:hash resolverKey Core
+bytes32 constant RESOLVER_KEY_CORE = 0xb54e0c9a42346a2760a44e59035a2b84a61d07bed66a2f24cffe3ca4bae1996f;
+
 /**
  * @title ICore
  * @notice Consolidated interface for the token "Core" domain: identity-defining methods

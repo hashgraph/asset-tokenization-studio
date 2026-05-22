@@ -9,7 +9,7 @@ import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsSt
 import { ERC1594StorageWrapper } from "../asset/ERC1594StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../asset/ERC20StorageWrapper.sol";
 import { ThirdPartyType } from "../asset/types/ThirdPartyType.sol";
-import { _checkNonceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
+import { _checkNonceAndDeadline } from "../../infrastructure/utils/EIP712.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 /// @title ClearingProtectedOps - Protected clearing operations with EIP-712 signatures

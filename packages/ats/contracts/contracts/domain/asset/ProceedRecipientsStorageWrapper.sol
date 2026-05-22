@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    _PROCEED_RECIPIENTS_STORAGE_POSITION,
-    _PROCEED_RECIPIENTS_DATA_STORAGE_POSITION
-} from "../../constants/storagePositions.sol";
 import { IProceedRecipients } from "../../facets/layer_2/proceedRecipient/IProceedRecipients.sol";
 import { ExternalListManagementStorageWrapper } from "../core/ExternalListManagementStorageWrapper.sol";
+
+/// @custom:hash storage ProceedRecipients
+// solhint-disable-next-line max-line-length
+bytes32 constant STORAGE_LOCATION_PROCEED_RECIPIENTS = 0x8c2710911f9e802eea5341bf3b90bd3427740e7a3a83a74abc9f43e92db5c600;
+
+/// @custom:hash storage ProceedRecipientsData
+// solhint-disable-next-line max-line-length
+bytes32 constant STORAGE_LOCATION_PROCEED_RECIPIENTS_DATA = 0xc68f265b7453bab62daaefa3ddccae3b15389d80e305d8cccba13ceac0aca300;
 
 struct ProceedRecipientsDataStorage {
     mapping(address => bytes) proceedRecipientData;
@@ -19,7 +23,7 @@ library ProceedRecipientsStorageWrapper {
         for (uint256 index; index < length; ) {
             ExternalListManagementStorageWrapper.checkValidAddress(_proceedRecipients[index]);
             ExternalListManagementStorageWrapper.addExternalList(
-                _PROCEED_RECIPIENTS_STORAGE_POSITION,
+                STORAGE_LOCATION_PROCEED_RECIPIENTS,
                 _proceedRecipients[index]
             );
             setProceedRecipientData(_proceedRecipients[index], _data[index]);
@@ -28,19 +32,16 @@ library ProceedRecipientsStorageWrapper {
             }
         }
 
-        ExternalListManagementStorageWrapper.setExternalListInitialized(_PROCEED_RECIPIENTS_STORAGE_POSITION);
+        ExternalListManagementStorageWrapper.setExternalListInitialized(STORAGE_LOCATION_PROCEED_RECIPIENTS);
     }
 
     function addProceedRecipient(address _proceedRecipient, bytes calldata _data) internal {
-        ExternalListManagementStorageWrapper.addExternalList(_PROCEED_RECIPIENTS_STORAGE_POSITION, _proceedRecipient);
+        ExternalListManagementStorageWrapper.addExternalList(STORAGE_LOCATION_PROCEED_RECIPIENTS, _proceedRecipient);
         setProceedRecipientData(_proceedRecipient, _data);
     }
 
     function removeProceedRecipient(address _proceedRecipient) internal {
-        ExternalListManagementStorageWrapper.removeExternalList(
-            _PROCEED_RECIPIENTS_STORAGE_POSITION,
-            _proceedRecipient
-        );
+        ExternalListManagementStorageWrapper.removeExternalList(STORAGE_LOCATION_PROCEED_RECIPIENTS, _proceedRecipient);
         removeProceedRecipientData(_proceedRecipient);
     }
 
@@ -70,14 +71,11 @@ library ProceedRecipientsStorageWrapper {
 
     function isProceedRecipient(address _proceedRecipient) internal view returns (bool) {
         return
-            ExternalListManagementStorageWrapper.isExternalList(
-                _PROCEED_RECIPIENTS_STORAGE_POSITION,
-                _proceedRecipient
-            );
+            ExternalListManagementStorageWrapper.isExternalList(STORAGE_LOCATION_PROCEED_RECIPIENTS, _proceedRecipient);
     }
 
     function getProceedRecipientsCount() internal view returns (uint256) {
-        return ExternalListManagementStorageWrapper.getExternalListsCount(_PROCEED_RECIPIENTS_STORAGE_POSITION);
+        return ExternalListManagementStorageWrapper.getExternalListsCount(STORAGE_LOCATION_PROCEED_RECIPIENTS);
     }
 
     function getProceedRecipients(
@@ -86,7 +84,7 @@ library ProceedRecipientsStorageWrapper {
     ) internal view returns (address[] memory proceedRecipients_) {
         return
             ExternalListManagementStorageWrapper.getExternalListsMembers(
-                _PROCEED_RECIPIENTS_STORAGE_POSITION,
+                STORAGE_LOCATION_PROCEED_RECIPIENTS,
                 _pageIndex,
                 _pageLength
             );
@@ -94,7 +92,7 @@ library ProceedRecipientsStorageWrapper {
 
     function isProceedRecipientsInitialized() internal view returns (bool) {
         return
-            ExternalListManagementStorageWrapper.externalListStorage(_PROCEED_RECIPIENTS_STORAGE_POSITION).initialized;
+            ExternalListManagementStorageWrapper.externalListStorage(STORAGE_LOCATION_PROCEED_RECIPIENTS).initialized;
     }
 
     function proceedRecipientsDataStorage()
@@ -102,7 +100,7 @@ library ProceedRecipientsStorageWrapper {
         pure
         returns (ProceedRecipientsDataStorage storage proceedRecipientsDataStorage_)
     {
-        bytes32 position = _PROCEED_RECIPIENTS_DATA_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_PROCEED_RECIPIENTS_DATA;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             proceedRecipientsDataStorage_.slot := position

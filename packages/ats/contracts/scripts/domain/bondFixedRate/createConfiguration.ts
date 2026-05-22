@@ -18,6 +18,7 @@ import {
   createBatchConfiguration,
   OperationResult,
   DEFAULT_BATCH_SIZE,
+  RetryOptions,
 } from "@scripts/infrastructure";
 import { BOND_FIXED_RATE_CONFIG_ID, atsRegistry } from "@scripts/domain";
 import { BusinessLogicResolver } from "@contract-types";
@@ -147,6 +148,7 @@ const BOND_FIXED_RATE_FACETS = [
   "MaturityByPartitionFacet",
 
   // Jurisdiction-Specific
+  "SecurityFacet",
   "BondUSAFixedRateFacet",
   "BondUSAReadFacet",
   "PrincipalFacet",
@@ -206,6 +208,7 @@ export async function createBondFixedRateConfiguration(
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
+  retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
   // Build facet list based on time travel mode
   // When useTimeTravel=true, ALL facets get TimeTravel suffix (universal mapping)
@@ -236,5 +239,6 @@ export async function createBondFixedRateConfiguration(
     partialBatchDeploy,
     batchSize,
     confirmations,
+    retryOptions,
   });
 }

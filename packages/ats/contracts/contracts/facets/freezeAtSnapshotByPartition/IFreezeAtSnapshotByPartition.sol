@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey FreezeAtSnapshotByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_FREEZE_AT_SNAPSHOT_BY_PARTITION = 0xac8fcbc19e12e099f6c6cff54357e28a589b49673267c81a18a965da1c7f4744;
+
 /**
  * @title IFreezeAtSnapshotByPartition
  * @author Asset Tokenization Studio Team

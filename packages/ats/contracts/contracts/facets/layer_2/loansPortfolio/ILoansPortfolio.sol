@@ -2,7 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ILoansPortfolioStorageWrapper } from "../../../domain/asset/loansPortfolio/ILoansPortfolioStorageWrapper.sol";
-import { RegulationData, AdditionalSecurityData } from "../../../constants/regulation.sol";
+
+/// @custom:hash resolverKey LoansPortfolio
+bytes32 constant RESOLVER_KEY_LOANS_PORTFOLIO = 0x3f6ea14bbeaea82befb49409b874caf151715c6619ac1d26ba858039b7ece33e;
 
 interface ILoansPortfolio is ILoansPortfolioStorageWrapper {
     enum PortfolioType {
@@ -48,11 +50,7 @@ interface ILoansPortfolio is ILoansPortfolioStorageWrapper {
     event LoansPortfolioWithdrawn(address assetAddress, address to, uint256 amount);
 
     // solhint-disable-next-line func-name-mixedcase
-    function initializeLoansPortfolio(
-        ILoansPortfolio.LoansPortfolioDetailsData calldata _loansPortfolioData,
-        RegulationData memory _regulationData,
-        AdditionalSecurityData calldata _additionalSecurityData
-    ) external;
+    function initializeLoansPortfolio(ILoansPortfolio.LoansPortfolioDetailsData calldata _loansPortfolioData) external;
 
     function addHoldingsAsset(HoldingsAsset memory _holdingsAsset) external returns (bool success_);
 

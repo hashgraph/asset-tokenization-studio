@@ -2,8 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { Dividend } from "./Dividend.sol";
-import { IDividend } from "./IDividend.sol";
-import { _DIVIDEND_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
+import { IDividend, RESOLVER_KEY_DIVIDEND } from "./IDividend.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 
@@ -12,7 +11,7 @@ import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
  * @author Asset Tokenization Studio Team
  * @notice Diamond facet exposing the dividend writer surface (`setDividend`, `cancelDividend`)
  *         alongside the per-record reads (`getDividend`, `getDividendFor`,
- *         `getDividendAmountFor`, `getDividendsCount`) under `_DIVIDEND_RESOLVER_KEY`.
+ *         `getDividendAmountFor`, `getDividendsCount`) under `RESOLVER_KEY_DIVIDEND`.
  * @dev Inherits the implementation from `Dividend` and satisfies `IStaticFunctionSelectors` so
  *      the Diamond resolver can register the six selectors. Carries no initialiser — dividend
  *      state is owned by `DividendStorageWrapper` and bootstrapped through the corporate-action
@@ -22,7 +21,7 @@ import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 contract DividendFacet is Dividend, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _DIVIDEND_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_DIVIDEND;
     }
 
     /// @inheritdoc IStaticFunctionSelectors

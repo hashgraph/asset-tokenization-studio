@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey Freeze
+bytes32 constant RESOLVER_KEY_FREEZE = 0xad51c3d79dbb37543854270a7bd1c7237cfa425b16cdf4dee9015c20917ced5a;
+
 /**
  * @title IFreeze
  * @author Asset Tokenization Studio Team
@@ -9,7 +12,7 @@ pragma solidity >=0.8.0 <0.9.0;
  *         token operations for the affected wallet.
  * @dev Part of the Diamond facet system. Freeze state is stored via `ERC3643StorageWrapper`.
  *      Partial token freeze/unfreeze operations are restricted to single-partition tokens.
- *      Both `FREEZE_MANAGER_ROLE` and `AGENT_ROLE` are authorised to call all mutating
+ *      Both `ROLE_FREEZE_MANAGER` and `ROLE_AGENT` are authorised to call all mutating
  *      functions. Freezing tokens reduces the holder's liquid balance; unfreezing restores it
  *      and emits a `Transfer` event from `address(0)`.
  */
@@ -49,7 +52,7 @@ interface IFreeze {
 
     /**
      * @notice Freezes a specific amount of tokens for a wallet, reducing its liquid balance.
-     * @dev Requires `FREEZE_MANAGER_ROLE` or `AGENT_ROLE`, the token to be unpaused, a non-zero
+     * @dev Requires `ROLE_FREEZE_MANAGER` or `ROLE_AGENT`, the token to be unpaused, a non-zero
      *      non-recovered address, and a single-partition token (`onlyWithoutMultiPartition`).
      *      Updates balance snapshots before mutating frozen state. Emits `TokensFrozen` with
      *      the default partition.
@@ -61,7 +64,7 @@ interface IFreeze {
     /**
      * @notice Unfreezes a specific amount of previously frozen tokens for a wallet, restoring
      *         them to the liquid balance.
-     * @dev Requires `FREEZE_MANAGER_ROLE` or `AGENT_ROLE`, the token to be unpaused, a non-zero
+     * @dev Requires `ROLE_FREEZE_MANAGER` or `ROLE_AGENT`, the token to be unpaused, a non-zero
      *      non-recovered address, and a single-partition token (`onlyWithoutMultiPartition`).
      *      Validates that `_amount` does not exceed the currently frozen balance. Updates balance
      *      snapshots before mutating frozen state. Emits `TokensUnfrozen` with the default
@@ -74,7 +77,7 @@ interface IFreeze {
     /**
      * @notice Sets the address-level frozen status for a wallet, blocking or restoring all token
      *         operations for that address.
-     * @dev Requires `FREEZE_MANAGER_ROLE` or `AGENT_ROLE`, the token to be unpaused, and a
+     * @dev Requires `ROLE_FREEZE_MANAGER` or `ROLE_AGENT`, the token to be unpaused, and a
      *      non-zero non-recovered address. Not restricted to single-partition tokens. Emits
      *      `AddressFrozen`.
      * @param _userAddress The address whose frozen status is to be updated.

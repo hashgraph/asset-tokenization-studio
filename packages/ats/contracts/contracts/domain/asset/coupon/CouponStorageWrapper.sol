@@ -1,19 +1,21 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { SNAPSHOT_RESULT_ID } from "../../../constants/values.sol";
 import {
-    COUPON_CORPORATE_ACTION_TYPE,
-    COUPON_LISTING_TASK_TYPE,
-    SNAPSHOT_RESULT_ID,
-    SNAPSHOT_TASK_TYPE
-} from "../../../constants/values.sol";
+    CORPORATE_ACTION_TYPE_COUPON,
+    SCHEDULED_TASK_TYPE_COUPON_LISTING,
+    SCHEDULED_TASK_TYPE_SNAPSHOT
+} from "../../../constants/dispatchTypes.sol";
 import { CorporateActionsStorageWrapper } from "../../core/CorporateActionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
-import { ERC3643StorageWrapper } from "../../core/ERC3643StorageWrapper.sol";
+import { TokenCoreOps } from "../../orchestrator/TokenCoreOps.sol";
 import { ICoupon } from "../../../facets/coupon/ICoupon.sol";
 import { ICouponTypes } from "../../../facets/coupon/ICouponTypes.sol";
+import { BondStorageWrapper } from "../BondStorageWrapper.sol";
 import { CouponRateDispatch } from "./CouponRateDispatch.sol";
+import { DatesValidation } from "../../../infrastructure/utils/DatesValidation.sol";
 import { DecimalsLib } from "../../../infrastructure/utils/DecimalsLib.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { NominalValueStorageWrapper } from "../nominalValue/NominalValueStorageWrapper.sol";
@@ -21,9 +23,11 @@ import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
 import { ScheduledTasksStorageWrapper } from "../ScheduledTasksStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "../SnapshotsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { _COUPON_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { InterestRateStorageWrapper } from "../InterestRateStorageWrapper.sol";
 import { IInterestRate } from "../../../facets/interestRate/IInterestRate.sol";
+
+/// @custom:hash storage Coupon
+bytes32 constant STORAGE_LOCATION_COUPON = 0x83419e6b8093975a3157050eb9f883164e1459426616bc1834d782d457195c00;
 
 /// @title Coupon Storage Wrapper
 /// @notice Library for managing Coupon storage operations.
@@ -39,7 +43,9 @@ library CouponStorageWrapper {
      *         tasks. Variant invariants and rate stamping are delegated to
      *         `CouponRateDispatch.validateAndStamp`, which mirrors the deferred dispatch
      *         performed by `getCoupon` on the read path.
-     * @dev Does NOT emit `ICoupon.CouponSet` — the writer abstract emits it inline after
+     * @dev The end-date-against-maturity constraint is enforced by the caller before this
+     *      function is invoked (see `CouponModifiers.onlyValidCouponEndDate`).
+     *      Does NOT emit `ICoupon.CouponSet` — the writer abstract emits it inline after
      *      this call returns, per the project event-emission rule.
      * @param newCoupon Coupon parameters captured at scheduling time.
      * @return corporateActionId_ Identifier of the underlying corporate action.
@@ -54,7 +60,7 @@ library CouponStorageWrapper {
         newCoupon = CouponRateDispatch.validateAndStamp(newCoupon);
 
         (corporateActionId_, couponID_) = CorporateActionsStorageWrapper.addCorporateAction(
-            COUPON_CORPORATE_ACTION_TYPE,
+            CORPORATE_ACTION_TYPE_COUPON,
             abi.encode(newCoupon)
         );
 
@@ -85,17 +91,48 @@ library CouponStorageWrapper {
         if (actionId == bytes32(0)) {
             revert ICoupon.CouponCreationFailed();
         }
-        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newCoupon.recordDate, SNAPSHOT_TASK_TYPE);
+        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newCoupon.recordDate, SCHEDULED_TASK_TYPE_SNAPSHOT);
         ScheduledTasksStorageWrapper.addScheduledSnapshot(newCoupon.recordDate, actionId);
 
         if (InterestRateStorageWrapper.getCouponRateType() != IInterestRate.RateType.KPI_LINKED) return;
 
-        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newCoupon.fixingDate, COUPON_LISTING_TASK_TYPE);
+        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(
+            newCoupon.fixingDate,
+            SCHEDULED_TASK_TYPE_COUPON_LISTING
+        );
         ScheduledTasksStorageWrapper.addScheduledCouponListing(newCoupon.fixingDate, actionId);
     }
 
     function addToCouponsOrderedList(uint256 couponID) internal {
         _couponStorage().couponsOrderedListByIds.push(couponID);
+    }
+
+    /**
+     * @notice Reverts with `ICommonErrors.WrongDates` when the bond has a non-zero maturity date
+     *         and `endDate` exceeds it.
+     * @dev When `maturityDate` is zero the bond is treated as open-ended and no constraint is
+     *      applied. Delegates the ordered-date check to `DatesValidation.checkDates`.
+     * @param endDate Coupon end date to validate against the bond's maturity date.
+     */
+    function checkEndDateAgainstMaturity(uint256 endDate) internal view {
+        uint256 maturityDate = BondStorageWrapper.getMaturityDate();
+        if (maturityDate != 0) {
+            DatesValidation.checkDates(endDate, maturityDate);
+        }
+    }
+
+    function getRawCouponData(
+        uint256 couponID
+    ) internal view returns (ICouponTypes.Coupon memory rawCoupon_, bytes32 corporateActionId_, bool isDisabled_) {
+        corporateActionId_ = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
+            CORPORATE_ACTION_TYPE_COUPON,
+            couponID - 1
+        );
+        bytes memory data;
+        (, , data, isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(corporateActionId_);
+
+        if (data.length == 0) revert ICoupon.CouponNotFound(couponID);
+        rawCoupon_ = abi.decode(data, (ICouponTypes.Coupon));
     }
 
     function getCoupon(
@@ -105,15 +142,7 @@ library CouponStorageWrapper {
         view
         returns (ICouponTypes.RegisteredCoupon memory registeredCoupon_, bytes32 corporateActionId_, bool isDisabled_)
     {
-        corporateActionId_ = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
-            COUPON_CORPORATE_ACTION_TYPE,
-            couponID - 1
-        );
-        bytes memory data;
-        (, , data, isDisabled_) = CorporateActionsStorageWrapper.getCorporateAction(corporateActionId_);
-
-        if (data.length == 0) revert ICoupon.CouponNotFound(couponID);
-        (registeredCoupon_.coupon) = abi.decode(data, (ICouponTypes.Coupon));
+        (registeredCoupon_.coupon, corporateActionId_, isDisabled_) = getRawCouponData(couponID);
 
         registeredCoupon_.snapshotId = CorporateActionsStorageWrapper.getUintResultAt(
             corporateActionId_,
@@ -132,7 +161,7 @@ library CouponStorageWrapper {
      *        and `nominalValueDecimals` are all read at the snapshot scale via
      *        `SnapshotsStorageWrapper`.
      *      - Otherwise they fall back to the ABAF-adjusted state at the coupon's record date
-     *        (`ERC3643StorageWrapper.getTotalBalanceForAdjustedAt`,
+     *        (`TokenCoreOps.getTotalBalanceForAdjustedAt`,
      *        `ERC20StorageWrapper.decimalsAdjustedAt`) and the live nominal-value pair from
      *        `NominalValueStorageWrapper`.
      *      The resolved quadruple is then handed to `_calculateCouponAmount`, which must keep
@@ -168,7 +197,7 @@ library CouponStorageWrapper {
                     registeredCoupon.snapshotId
                 );
             } else {
-                couponFor_.tokenBalance = ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(
+                couponFor_.tokenBalance = TokenCoreOps.getTotalBalanceForAdjustedAt(
                     account,
                     registeredCoupon.coupon.recordDate
                 );
@@ -196,7 +225,7 @@ library CouponStorageWrapper {
     }
 
     function getCouponCount() internal view returns (uint256 couponCount_) {
-        return CorporateActionsStorageWrapper.getCorporateActionCountByType(COUPON_CORPORATE_ACTION_TYPE);
+        return CorporateActionsStorageWrapper.getCorporateActionCountByType(CORPORATE_ACTION_TYPE_COUPON);
     }
 
     function getCouponHolders(
@@ -327,7 +356,7 @@ library CouponStorageWrapper {
 
     // solhint-disable-next-line func-name-mixedcase
     function _couponStorage() private pure returns (CouponDataStorage storage cs_) {
-        bytes32 position = _COUPON_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_COUPON;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             cs_.slot := position

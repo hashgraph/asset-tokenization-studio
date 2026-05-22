@@ -27,6 +27,9 @@ import {
   waitForTransaction,
   warn,
   DEFAULT_TRANSACTION_TIMEOUT,
+  retryTransaction,
+  RetryOptions,
+  withNonceReset,
 } from "@scripts/infrastructure";
 import { BusinessLogicResolver__factory } from "@contract-types";
 import type { RegisterFacetsResult, FacetRegistrationData } from "./registerFacets";
@@ -53,6 +56,13 @@ export interface RegisterAdditionalFacetsOptions {
 
   /** Maximum number of existing facets to query (default: 1000) */
   maxExistingFacets?: number;
+
+  /**
+   * Retry configuration for each batch registration transaction.
+   * On Hedera testnet, transient 502 responses can abort a batch mid-sequence.
+   * Default: no retries.
+   */
+  retryOptions?: RetryOptions;
 }
 
 /**
@@ -119,6 +129,7 @@ export async function registerAdditionalFacets(
     overrides = {},
     allowOverwrite = false,
     maxExistingFacets = 1000,
+    retryOptions,
   } = options;
 
   const registered: string[] = [];
@@ -146,6 +157,11 @@ export async function registerAdditionalFacets(
 
     // Get BLR contract instance using TypeChain
     const blr = BusinessLogicResolver__factory.connect(blrAddress, signer);
+
+    // After a 502 the NonceManager's internal delta is already incremented even though
+    // Hedera never received the tx — reset before each retry so the next attempt
+    // re-fetches the confirmed nonce from the network.
+    const effectiveRetryOptions: RetryOptions = withNonceReset(signer, retryOptions);
 
     // Verify BLR contract exists
     const blrCode = await signer.provider!.getCode(blrAddress);
@@ -319,9 +335,13 @@ export async function registerAdditionalFacets(
         i * FACET_REGISTRATION_BATCH_SIZE,
         (i + 1) * FACET_REGISTRATION_BATCH_SIZE,
       );
-      const tx = await blr.registerBusinessLogics(businessLogicsSlice, overrides);
-
-      info(`Registration transaction sent: ${tx.hash}`);
+      // Only retry the send — once a tx hash is returned the BLR version counter
+      // is committed on success; re-submitting would register the same facets twice.
+      const tx = await retryTransaction(async () => {
+        const sentTx = await blr.registerBusinessLogics(businessLogicsSlice, overrides);
+        info(`Registration transaction sent: ${sentTx.hash}`);
+        return sentTx;
+      }, effectiveRetryOptions);
 
       const receipt = await waitForTransaction(tx, 1, DEFAULT_TRANSACTION_TIMEOUT);
       transactionHashes.push(receipt.hash);

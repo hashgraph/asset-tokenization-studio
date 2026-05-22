@@ -3,6 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { HolderBalance } from "../layer_1/snapshot/ISnapshots.sol";
 
+/// @custom:hash resolverKey BalanceTrackerAtSnapshot
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_BALANCE_TRACKER_AT_SNAPSHOT = 0x2c9af26b5891593b8184a58e38f6c52e42af55578543d14ab176abd1213e3013;
+
 /**
  * @title IBalanceTrackerAtSnapshot
  * @notice Interface for querying snapshotted token balances and total supply across all partitions,

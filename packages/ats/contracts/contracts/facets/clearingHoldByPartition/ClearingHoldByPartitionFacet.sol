@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IClearingHoldByPartition } from "./IClearingHoldByPartition.sol";
+import { IClearingHoldByPartition, RESOLVER_KEY_CLEARING_HOLDBYPARTITION } from "./IClearingHoldByPartition.sol";
 import { ClearingHoldByPartition } from "./ClearingHoldByPartition.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _CLEARING_HOLDBYPARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title ClearingHoldByPartitionFacet
  * @author Asset Tokenization Studio Team
@@ -18,7 +16,7 @@ import { _CLEARING_HOLDBYPARTITION_RESOLVER_KEY } from "../../constants/resolver
 contract ClearingHoldByPartitionFacet is ClearingHoldByPartition, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _CLEARING_HOLDBYPARTITION_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_CLEARING_HOLDBYPARTITION;
     }
 
     /// @inheritdoc IStaticFunctionSelectors

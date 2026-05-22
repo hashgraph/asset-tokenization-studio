@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey SecurityHoldersAtSnapshot
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_SECURITY_HOLDERS_AT_SNAPSHOT = 0xf7707140407ccf0d6deaf72844217e3c1383270609a7a75e36def71a3c453b9e;
+
 /**
  * @title  ISecurityHoldersAtSnapshot
  * @notice Interface for querying the set of token holders captured at a specific snapshot.

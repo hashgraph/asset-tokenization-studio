@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IMaturityByPartition } from "./IMaturityByPartition.sol";
 import { IKyc } from "../layer_1/kyc/IKyc.sol";
-import { MATURITY_REDEEMER_ROLE } from "../../constants/roles.sol";
+import { ROLE_MATURITY_REDEEMER } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
@@ -35,7 +35,7 @@ abstract contract MaturityByPartition is IMaturityByPartition, Modifiers {
         onlyActivated
         onlyUnpaused
         onlyClearingDisabled
-        onlyRole(MATURITY_REDEEMER_ROLE)
+        onlyRole(ROLE_MATURITY_REDEEMER)
         onlyValidAddress(_tokenHolder)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnrecoveredAddress(_tokenHolder)

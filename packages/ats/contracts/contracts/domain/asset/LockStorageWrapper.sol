@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _LOCK_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { ILock } from "../../facets/layer_1/lock/ILock.sol";
@@ -14,6 +13,9 @@ import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
+
+/// @custom:hash storage Lock
+bytes32 constant STORAGE_LOCATION_LOCK = 0xd42ee8bdd326f30f9a4764fdaf28dd719168978dba1e4949fbeb1a3fd1c09000;
 
 struct LockDataStorage {
     mapping(address => uint256) totalLockedAmountByAccount;
@@ -274,7 +276,7 @@ library LockStorageWrapper {
     }
 
     function lockStorage() internal pure returns (LockDataStorage storage lock_) {
-        bytes32 position = _LOCK_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_LOCK;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             lock_.slot := position

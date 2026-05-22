@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey Initializer
+bytes32 constant RESOLVER_KEY_INITIALIZER = 0xe7caa2e00c841ed2a64c4c95e3981f3bfc29108599fad6e89b04f9483df0bf09;
+
 /**
  * @title IInitializer
  */
@@ -80,7 +83,7 @@ interface IInitializer {
      * @notice Seeds the initializer storage with the batch size used by `setOperationalStatus`
      *         and marks the initializer facet itself as ready for its current version.
      * @dev Restricted to `DEFAULT_ADMIN_ROLE` and guarded against re-registration via
-     *      `onlyFacetNotRegistered(_INITIALIZER_RESOLVER_KEY)`. Emits `InitializerInitialized`.
+     *      `onlyFacetNotRegistered(RESOLVER_KEY_INITIALIZER)`. Emits `InitializerInitialized`.
      * @param _maxInitializerFacetIndex Maximum number of facets validated per
      *        `setOperationalStatus` call.
      */

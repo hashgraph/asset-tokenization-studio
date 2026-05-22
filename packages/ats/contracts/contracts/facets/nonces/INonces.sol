@@ -3,6 +3,9 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey Nonces
+bytes32 constant RESOLVER_KEY_NONCES = 0xd1166cb96f266d69db4d4e49d81acaf5441b16bb11681f2b1b53dcf7e1bd3bf4;
+
 /**
  * @title INonces
  * @author Asset Tokenization Studio Team

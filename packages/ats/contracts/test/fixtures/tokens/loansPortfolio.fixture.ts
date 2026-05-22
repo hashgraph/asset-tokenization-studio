@@ -44,6 +44,7 @@ import {
   TimeTravelFacet__factory,
   ILoansPortfolio__factory,
   ILoansPortfolio,
+  ISecurity__factory,
 } from "@contract-types";
 
 import { decodeEvent } from "@scripts/infrastructure";
@@ -151,6 +152,7 @@ export async function deployLoansPortfolioTokenFixture({
   );
   const externalPauseManagementFacet = ExternalPauseManagementFacet__factory.connect(proxyAddress, deployer);
   const loanPortfolioFacet = ILoansPortfolio__factory.connect(proxyAddress, deployer);
+  const securityFacet = ISecurity__factory.connect(proxyAddress, deployer);
   const timeTravelFacet = TimeTravelFacet__factory.connect(proxyAddress, deployer);
 
   await controlListFacet.initializeControlList(securityData.isWhiteList);
@@ -181,11 +183,12 @@ export async function deployLoansPortfolioTokenFixture({
     loanPortfolioDetails.nominalValueDecimals,
     TEST_NOMINAL_VALUES.CURRENCY_ZERO,
   );
-  await loanPortfolioFacet.initializeLoansPortfolio(
-    {
-      portfolioType: loanPortfolioDetails.portfolioType,
-      distributionPolicy: loanPortfolioDetails.distributionPolicy,
-    },
+  await loanPortfolioFacet.initializeLoansPortfolio({
+    portfolioType: loanPortfolioDetails.portfolioType,
+    distributionPolicy: loanPortfolioDetails.distributionPolicy,
+  });
+
+  await securityFacet.initializeSecurity(
     buildRegulationData(regulationData.regulationType, regulationData.regulationSubType),
     {
       countriesControlListType: regulationData.additionalSecurityData.countriesControlListType,

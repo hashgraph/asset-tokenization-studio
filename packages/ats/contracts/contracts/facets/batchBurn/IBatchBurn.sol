@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey BatchBurn
+bytes32 constant RESOLVER_KEY_BATCH_BURN = 0x60fbdebafe46599d2a6d6cbec0e554cfdf693e5eb001a783852bbbc82e5c9984;
+
 /**
  * @title IBatchBurn
  * @notice Interface for batch burning tokens from multiple addresses in a single transaction.
@@ -11,7 +14,7 @@ pragma solidity >=0.8.0 <0.9.0;
 interface IBatchBurn {
     /**
      * @notice Burns tokens from multiple addresses in a single transaction.
-     * @dev Caller must hold `CONTROLLER_ROLE` or `AGENT_ROLE`. The token must not be paused
+     * @dev Caller must hold `ROLE_CONTROLLER` or `ROLE_AGENT`. The token must not be paused
      *      and must not be configured for multi-partition. Emits `IController.ControllerRedemption`
      *      for each address processed.
      * @param _userAddresses Addresses from which tokens will be burnt.

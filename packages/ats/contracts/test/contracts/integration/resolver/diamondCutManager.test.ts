@@ -76,7 +76,7 @@ describe("DiamondCutManager", () => {
 
     // Use TypeChain factories instead of ethers.getContractAt for proper ABI resolution
     accessControl = AccessControlFacet__factory.connect(businessLogicResolver.target.toString(), signer_A);
-    await accessControl.grantRole(ATS_ROLES.PAUSER_ROLE, signer_B.address);
+    await accessControl.grantRole(ATS_ROLES.ROLE_PAUSER, signer_B.address);
 
     pause = Pause__factory.connect(businessLogicResolver.target.toString(), signer_A);
 
@@ -757,6 +757,22 @@ describe("DiamondCutManager", () => {
     await expect(
       diamondCutManager.getFacetVersionByConfigurationIdVersionAndFacetId(EQUITY_CONFIG_ID, 1, nonExistentFacetId),
     ).to.be.revertedWithCustomError(diamondCutManager, "FacetIdNotRegistered");
+  });
+
+  it("GIVEN a resolver WHEN creating a configuration with empty facet array THEN fails with EmptyFacetConfigurationNotPermitted", async () => {
+    const emptyConfigId = "0x0000000000000000000000000000000000000000000000000000000000000040";
+
+    await expect(diamondCutManager.connect(signer_A).createConfiguration(emptyConfigId, []))
+      .to.be.revertedWithCustomError(diamondCutManager, "EmptyFacetConfigurationNotPermitted")
+      .withArgs(emptyConfigId);
+  });
+
+  it("GIVEN a resolver WHEN finalising a batch configuration with no facets accumulated THEN fails with EmptyFacetConfigurationNotPermitted", async () => {
+    const emptyBatchConfigId = "0x0000000000000000000000000000000000000000000000000000000000000041";
+
+    await expect(diamondCutManager.connect(signer_A).createBatchConfiguration(emptyBatchConfigId, [], true))
+      .to.be.revertedWithCustomError(diamondCutManager, "EmptyFacetConfigurationNotPermitted")
+      .withArgs(emptyBatchConfigId);
   });
 
   it("GIVEN a resolver WHEN adding configuration with overlapping selectors from different facets THEN fails with SelectorAlreadyRegistered", async () => {

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _CLEARING_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
@@ -11,6 +10,9 @@ import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { LockStorageWrapper } from "./LockStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { ThirdPartyType } from "./types/ThirdPartyType.sol";
+
+/// @custom:hash storage Clearing
+bytes32 constant STORAGE_LOCATION_CLEARING = 0xd7a6e2f3304ec7238486e8af625921e3cfd501a713f0b2036d4a701fd3e81800;
 
 /// @title ClearingStorageWrapper - Pure Storage Operations
 /// @notice Contains ONLY storage operations for clearing data.
@@ -60,7 +62,7 @@ library ClearingStorageWrapper {
     }
 
     function clearingStorage() internal pure returns (ClearingDataStorage storage clearing_) {
-        bytes32 position = _CLEARING_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_CLEARING;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             clearing_.slot := position

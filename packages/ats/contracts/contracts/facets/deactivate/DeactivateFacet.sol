@@ -1,25 +1,23 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IDeactivate } from "./IDeactivate.sol";
+import { IDeactivate, RESOLVER_KEY_DEACTIVATE } from "./IDeactivate.sol";
 import { Deactivate } from "./Deactivate.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _DEACTIVATE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title DeactivateFacet
  * @author Asset Tokenization Studio Team
  * @notice Diamond facet that exposes the irreversible deactivation operations — `deactivate`
  *         and the `isDeactivated` query — as selectable proxy functions.
  * @dev Inherits `Deactivate` for the business logic and implements `IStaticFunctionSelectors`
- *      for the Diamond resolver pattern. The resolver key `_DEACTIVATE_RESOLVER_KEY`
+ *      for the Diamond resolver pattern. The resolver key `RESOLVER_KEY_DEACTIVATE`
  *      identifies this facet within the diamond proxy.
  */
 contract DeactivateFacet is Deactivate, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _DEACTIVATE_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_DEACTIVATE;
     }
 
     /// @inheritdoc IStaticFunctionSelectors

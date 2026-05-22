@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IAdjustBalances } from "./IAdjustBalances.sol";
-import { ADJUSTMENT_BALANCE_ROLE } from "../../constants/roles.sol";
+import { ROLE_ADJUSTMENT_BALANCE } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { AdjustBalancesStorageWrapper } from "../../domain/asset/AdjustBalancesStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../domain/asset/ScheduledTasksStorageWrapper.sol";
@@ -28,8 +28,9 @@ abstract contract AdjustBalances is IAdjustBalances, Modifiers {
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(ADJUSTMENT_BALANCE_ROLE)
+        onlyRole(ROLE_ADJUSTMENT_BALANCE)
         onlyValidFactor(factor)
+        onlyNotOverflowingAdjustment(factor, decimals)
         returns (bool success_)
     {
         ScheduledTasksStorageWrapper.triggerScheduledCrossOrderedTasks(0);

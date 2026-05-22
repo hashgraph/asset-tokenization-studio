@@ -2,8 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IScheduledBalanceAdjustment } from "./IScheduledBalanceAdjustment.sol";
-import { CORPORATE_ACTION_ROLE } from "../../constants/roles.sol";
-import { BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE } from "../../constants/values.sol";
+import { ROLE_CORPORATE_ACTION } from "../../constants/roles.sol";
+import { CORPORATE_ACTION_TYPE_BALANCE_ADJUSTMENT } from "../../constants/dispatchTypes.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { EquityStorageWrapper } from "../../domain/asset/EquityStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../domain/asset/ScheduledTasksStorageWrapper.sol";
@@ -28,9 +28,10 @@ abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, Mod
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(CORPORATE_ACTION_ROLE)
+        onlyRole(ROLE_CORPORATE_ACTION)
         onlyValidTimestamp(_newBalanceAdjustment.executionDate)
         onlyValidFactor(_newBalanceAdjustment.factor)
+        onlyNotOverflowingAdjustment(_newBalanceAdjustment.factor, _newBalanceAdjustment.decimals)
         returns (uint256 balanceAdjustmentID_)
     {
         bytes32 corporateActionID;
@@ -55,7 +56,7 @@ abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, Mod
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(CORPORATE_ACTION_ROLE)
+        onlyRole(ROLE_CORPORATE_ACTION)
         notZeroValue(_balanceAdjustmentId)
         returns (bool success_)
     {
@@ -75,7 +76,7 @@ abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, Mod
         view
         override
         notZeroValue(_balanceAdjustmentID)
-        onlyMatchingActionType(BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE, _balanceAdjustmentID - 1)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_BALANCE_ADJUSTMENT, _balanceAdjustmentID - 1)
         returns (IScheduledBalanceAdjustment.ScheduledBalanceAdjustment memory balanceAdjustment_, bool isDisabled_)
     {
         (balanceAdjustment_, , isDisabled_) = EquityStorageWrapper.getScheduledBalanceAdjustment(_balanceAdjustmentID);

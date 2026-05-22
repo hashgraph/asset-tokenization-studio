@@ -18,6 +18,7 @@ import {
   createBatchConfiguration,
   OperationResult,
   DEFAULT_BATCH_SIZE,
+  RetryOptions,
 } from "@scripts/infrastructure";
 import { BOND_KPI_LINKED_RATE_CONFIG_ID, atsRegistry } from "@scripts/domain";
 import { BusinessLogicResolver } from "@contract-types";
@@ -145,6 +146,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "MaturityByPartitionFacet",
 
   // Jurisdiction-Specific (write facet and read facet are both rate-specific)
+  "SecurityFacet",
   "BondUSAKpiLinkedRateFacet",
   "BondUSAReadKpiLinkedRateFacet",
   "PrincipalFacet",
@@ -204,6 +206,7 @@ export async function createBondKpiLinkedRateConfiguration(
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
+  retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
   // Build facet list based on time travel mode
   // When useTimeTravel=true, ALL facets get TimeTravel suffix (universal mapping)
@@ -234,5 +237,6 @@ export async function createBondKpiLinkedRateConfiguration(
     partialBatchDeploy,
     batchSize,
     confirmations,
+    retryOptions,
   });
 }

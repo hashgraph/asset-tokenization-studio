@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey Pause
+bytes32 constant RESOLVER_KEY_PAUSE = 0x472ad8280a7d90bcd8b7876cad2cd5a4a2d31c116563ace7a685aff94eae8928;
+
 /**
  * @title IPause
  * @author Asset Tokenization Studio Team
@@ -9,7 +12,7 @@ pragma solidity >=0.8.0 <0.9.0;
  *         the token's own pause flag and the pause state of any registered external pause
  *         contracts.
  * @dev Part of the Diamond facet system. Pause state is stored via `PauseStorageWrapper`.
- *      `PAUSER_ROLE` is required for `pause` and `unpause`. `isPaused` consults both the
+ *      `ROLE_PAUSER` is required for `pause` and `unpause`. `isPaused` consults both the
  *      internal flag and every external pause contract registered via
  *      `ExternalPauseManagementFacet`; any single paused source makes the whole token paused.
  *      Clearing the internal flag with `unpause` does not override active external pauses.
@@ -41,7 +44,7 @@ interface IPause {
 
     /**
      * @notice Sets the token's internal pause flag, blocking all guarded operations.
-     * @dev Requires `PAUSER_ROLE` and the token to be currently unpaused. Reverts with
+     * @dev Requires `ROLE_PAUSER` and the token to be currently unpaused. Reverts with
      *      `IsPaused` if the token is already paused. Emits `Paused`.
      * @return success_ True if the token was successfully paused.
      */
@@ -49,7 +52,7 @@ interface IPause {
 
     /**
      * @notice Clears the token's internal pause flag, restoring guarded operations.
-     * @dev Requires `PAUSER_ROLE` and the token's internal flag to be set. Reverts with
+     * @dev Requires `ROLE_PAUSER` and the token's internal flag to be set. Reverts with
      *      `IsUnpaused` if the internal flag is already cleared. Emits `Unpaused`.
      *      Note: if any external pause contract remains paused, `isPaused` will still return
      *      `true` after this call.

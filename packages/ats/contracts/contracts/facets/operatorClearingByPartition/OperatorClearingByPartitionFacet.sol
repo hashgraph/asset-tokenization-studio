@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IOperatorClearingByPartition } from "./IOperatorClearingByPartition.sol";
+import {
+    IOperatorClearingByPartition,
+    RESOLVER_KEY_OPERATOR_CLEARING_BY_PARTITION
+} from "./IOperatorClearingByPartition.sol";
 import { OperatorClearingByPartition } from "./OperatorClearingByPartition.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _OPERATOR_CLEARING_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title OperatorClearingByPartitionFacet
  * @author Asset Tokenization Studio Team
@@ -16,7 +17,7 @@ import { _OPERATOR_CLEARING_BY_PARTITION_RESOLVER_KEY } from "../../constants/re
 contract OperatorClearingByPartitionFacet is OperatorClearingByPartition, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _OPERATOR_CLEARING_BY_PARTITION_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_OPERATOR_CLEARING_BY_PARTITION;
     }
 
     /// @inheritdoc IStaticFunctionSelectors

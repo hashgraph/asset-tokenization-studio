@@ -3,6 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC3643Types } from "../layer_1/ERC3643/IERC3643Types.sol";
 
+/// @custom:hash resolverKey Controller
+bytes32 constant RESOLVER_KEY_CONTROLLER = 0xf020acbcf895b1f0961c02558f58e8e3f0a254c27f0e6287127ac2f43893df46;
+
 /**
  * @title IController
  * @notice Interface for the ControllerFacet, grouping all controller and agent management operations.

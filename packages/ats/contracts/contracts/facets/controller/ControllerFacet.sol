@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IController } from "./IController.sol";
+import { IController, RESOLVER_KEY_CONTROLLER } from "./IController.sol";
 import { Controller } from "./Controller.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _CONTROLLER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title ControllerFacet
  * @notice Diamond facet exposing ERC-1644 forced-transfer operations and ERC-3643 agent management.
@@ -17,7 +15,7 @@ import { _CONTROLLER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 contract ControllerFacet is Controller, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _CONTROLLER_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_CONTROLLER;
     }
 
     /// @inheritdoc IStaticFunctionSelectors

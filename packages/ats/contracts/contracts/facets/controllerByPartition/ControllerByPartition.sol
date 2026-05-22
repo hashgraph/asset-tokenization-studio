@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IControllerByPartition } from "./IControllerByPartition.sol";
-import { CONTROLLER_ROLE, AGENT_ROLE, _buildRoles } from "../../constants/roles.sol";
+import { ROLE_CONTROLLER, ROLE_AGENT, _buildRoles } from "../../constants/roles.sol";
 import { IERC1410Types } from "../layer_1/ERC1400/ERC1410/IERC1410Types.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
@@ -34,7 +34,7 @@ abstract contract ControllerByPartition is IControllerByPartition, Modifiers {
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyControllable
-        onlyAnyRole(_buildRoles(CONTROLLER_ROLE, AGENT_ROLE))
+        onlyAnyRole(_buildRoles(ROLE_CONTROLLER, ROLE_AGENT))
         returns (bytes32)
     {
         return
@@ -63,7 +63,7 @@ abstract contract ControllerByPartition is IControllerByPartition, Modifiers {
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyControllable
-        onlyAnyRole(_buildRoles(CONTROLLER_ROLE, AGENT_ROLE))
+        onlyAnyRole(_buildRoles(ROLE_CONTROLLER, ROLE_AGENT))
     {
         TokenCoreOps.redeemByPartition(
             _partition,

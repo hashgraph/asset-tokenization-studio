@@ -3,6 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
 
+/// @custom:hash resolverKey OperatorHoldByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_OPERATOR_HOLD_BY_PARTITION = 0x2ac9004b9c057e04ee677ec0dda4bf57f4de5a2d382d97b9557aafb2600f257f;
+
 /**
  * @title  IOperatorHoldByPartition
  * @notice Interface for operator-initiated hold creation on a specific token partition.
@@ -19,7 +23,7 @@ interface IOperatorHoldByPartition is IHoldTypes {
      *         must be an authorised operator for `_partition` of `_from`. The expiration
      *         timestamp must be in the future. The caller, `_from`, and `_hold.to` must
      *         not be recovered addresses. Partitions must not be protected, or the caller
-     *         must hold `WILD_CARD_ROLE`.
+     *         must hold `ROLE_WILD_CARD`.
      *         Emits {OperatorHeldByPartition} on success.
      * @param _partition    The partition on which the hold is created.
      * @param _from         The address whose tokens are placed under hold.
