@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ScheduledTask } from "../../facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { IScheduledBalanceAdjustment } from "../../facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
 import { ISnapshots } from "../../facets/layer_1/snapshot/ISnapshots.sol";
-import { SNAPSHOT_RESULT_ID, COUPON_LISTING_RESULT_ID, COUPON_CORPORATE_ACTION_TYPE } from "../../constants/values.sol";
+import { SNAPSHOT_RESULT_ID, COUPON_LISTING_RESULT_ID } from "../../constants/values.sol";
 import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";
 import { CouponStorageWrapper } from "../asset/coupon/CouponStorageWrapper.sol";
@@ -14,6 +14,11 @@ import { KpiLinkedRateLib } from "../asset/KpiLinkedRateLib.sol";
 import { ICouponTypes } from "../../facets/coupon/ICouponTypes.sol";
 import { CouponRateDispatch } from "../../domain/asset/coupon/CouponRateDispatch.sol";
 import { IInterestRate } from "../../facets/interestRate/IInterestRate.sol";
+import {
+    CORPORATE_ACTION_TYPE_COUPON,
+    SCHEDULED_TASK_TYPE_COUPON_LISTING,
+    SCHEDULED_TASK_TYPE_SNAPSHOT
+} from "../../constants/dispatchTypes.sol";
 
 /// @title ScheduledTasksDispatchOps - External library for isolated scheduled task dispatch
 /// @notice Deployed once as a separate contract. Called via DELEGATECALL through try/catch for
@@ -99,7 +104,7 @@ library ScheduledTasksDispatchOps {
         (ICouponTypes.RegisteredCoupon memory registeredCoupon, , ) = CouponStorageWrapper.getCoupon(couponID);
 
         CorporateActionsStorageWrapper.updateCorporateActionData(
-            CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(COUPON_CORPORATE_ACTION_TYPE, couponID - 1),
+            CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(CORPORATE_ACTION_TYPE_COUPON, couponID - 1),
             abi.encode(registeredCoupon.coupon)
         );
     }
