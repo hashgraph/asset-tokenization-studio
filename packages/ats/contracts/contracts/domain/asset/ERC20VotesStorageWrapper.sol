@@ -126,19 +126,24 @@ library ERC20VotesStorageWrapper {
         uint256 delta
     ) internal returns (uint256 oldWeight, uint256 newWeight) {
         uint256 pos = ckpts.length;
+        Checkpoints.Checkpoint memory oldCkpt;
 
         unchecked {
-            Checkpoints.Checkpoint memory oldCkpt = pos == 0 ? Checkpoints.Checkpoint(0, 0) : ckpts[pos - 1];
+            oldCkpt = pos == 0 ? Checkpoints.Checkpoint(0, 0) : ckpts[pos - 1];
+        }
 
-            oldWeight = oldCkpt.value * calculateFactorBetween(oldCkpt.from, clock());
-            newWeight = isAdd ? add(oldWeight, delta) : subtract(oldWeight, delta);
+        oldWeight = oldCkpt.value * calculateFactorBetween(oldCkpt.from, clock());
 
+        newWeight = isAdd ? add(oldWeight, delta) : subtract(oldWeight, delta);
+
+        unchecked {
             if (pos > 0 && oldCkpt.from == clock()) {
                 ckpts[pos - 1].value = newWeight;
                 return (oldWeight, newWeight);
             }
-            ckpts.push(Checkpoints.Checkpoint({ from: clock(), value: newWeight }));
         }
+
+        ckpts.push(Checkpoints.Checkpoint({ from: clock(), value: newWeight }));
     }
 
     function clock() internal view returns (uint48) {
