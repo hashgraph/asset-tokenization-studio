@@ -204,48 +204,101 @@ library ScheduledTasksStorageWrapper {
 
     /**
      * @notice Returns the number of scheduled snapshot tasks.
-     * @dev Reads only the snapshot task queue.
-     * @return Number of queued snapshot tasks.
+     * @dev When `_includeDisabled` is `false`, iterates the queue and excludes tasks
+     *      belonging to a disabled corporate action (O(n)). When `true`, returns the raw
+     *      queue length in O(1).
+     * @param _includeDisabled When `false`, disabled tasks are excluded from the count.
+     * @return Number of queued snapshot tasks, optionally filtered.
      */
-    function getScheduledSnapshotCount() internal view returns (uint256) {
-        return ScheduledTasksLib.getScheduledTaskCount(scheduledSnapshotStorage());
+    function getScheduledSnapshotCount(bool _includeDisabled) internal view returns (uint256) {
+        ScheduledTasksDataStorage storage store = scheduledSnapshotStorage();
+        uint256 total = ScheduledTasksLib.getScheduledTaskCount(store);
+        if (_includeDisabled) return total;
+
+        uint256 active;
+        for (uint256 i; i < total; ) {
+            bytes32 actionId = abi.decode(ScheduledTasksLib.getScheduledTasksByIndex(store, i).data, (bytes32));
+            if (!CorporateActionsStorageWrapper.isCorporateActionDisabled(actionId)) {
+                unchecked {
+                    ++active;
+                }
+            }
+            unchecked {
+                ++i;
+            }
+        }
+        return active;
     }
 
     /**
      * @notice Returns a paginated list of scheduled snapshot tasks.
-     * @dev Pagination semantics are delegated to `ScheduledTasksLib`.
-     * @param _pageIndex Zero-based page index.
-     * @param _pageLength Maximum number of tasks to return.
+     * @dev When `_includeDisabled` is `true`, delegates to `ScheduledTasksLib` using direct
+     *      index arithmetic (O(1) per item). When `false`, iterates the full queue and skips
+     *      disabled tasks before applying pagination (O(n)).
+     * @param _pageIndex       Zero-based page index.
+     * @param _pageLength      Maximum number of tasks to return.
+     * @param _includeDisabled When `false`, tasks belonging to a disabled corporate action are
+     *                         excluded from the page.
      * @return scheduledSnapshots_ Snapshot tasks contained in the requested page.
      */
     function getScheduledSnapshots(
         uint256 _pageIndex,
-        uint256 _pageLength
+        uint256 _pageLength,
+        bool _includeDisabled
     ) internal view returns (ScheduledTask[] memory scheduledSnapshots_) {
-        return ScheduledTasksLib.getScheduledTasks(scheduledSnapshotStorage(), _pageIndex, _pageLength);
+        if (_includeDisabled) {
+            return ScheduledTasksLib.getScheduledTasks(scheduledSnapshotStorage(), _pageIndex, _pageLength);
+        }
+        return _getFilteredPage(scheduledSnapshotStorage(), _pageIndex, _pageLength);
     }
 
     /**
      * @notice Returns the number of scheduled coupon listing tasks.
-     * @dev Reads only the coupon listing task queue.
-     * @return Number of queued coupon listing tasks.
+     * @dev When `_includeDisabled` is `false`, iterates the queue and excludes tasks
+     *      belonging to a disabled corporate action (O(n)). When `true`, returns the raw
+     *      queue length in O(1) — use this form for internal iteration where the full
+     *      queue size is needed.
+     * @param _includeDisabled When `false`, disabled tasks are excluded from the count.
+     * @return Number of queued coupon listing tasks, optionally filtered.
      */
-    function getScheduledCouponListingCount() internal view returns (uint256) {
-        return ScheduledTasksLib.getScheduledTaskCount(scheduledCouponListingStorage());
+    function getScheduledCouponListingCount(bool _includeDisabled) internal view returns (uint256) {
+        uint256 total = ScheduledTasksLib.getScheduledTaskCount(scheduledCouponListingStorage());
+        if (_includeDisabled) return total;
+
+        uint256 active;
+        for (uint256 i; i < total; ) {
+            if (!isScheduledCouponListingDisabledAtIndex(i)) {
+                unchecked {
+                    ++active;
+                }
+            }
+            unchecked {
+                ++i;
+            }
+        }
+        return active;
     }
 
     /**
      * @notice Returns a paginated list of scheduled coupon listing tasks.
-     * @dev Pagination semantics are delegated to `ScheduledTasksLib`.
-     * @param _pageIndex Zero-based page index.
-     * @param _pageLength Maximum number of tasks to return.
+     * @dev When `_includeDisabled` is `true`, delegates to `ScheduledTasksLib` using direct
+     *      index arithmetic (O(1) per item). When `false`, iterates the full queue and skips
+     *      disabled tasks before applying pagination (O(n)).
+     * @param _pageIndex       Zero-based page index.
+     * @param _pageLength      Maximum number of tasks to return.
+     * @param _includeDisabled When `false`, tasks belonging to a disabled corporate action are
+     *                         excluded from the page.
      * @return scheduledCouponListing_ Coupon listing tasks contained in the requested page.
      */
     function getScheduledCouponListing(
         uint256 _pageIndex,
-        uint256 _pageLength
+        uint256 _pageLength,
+        bool _includeDisabled
     ) internal view returns (ScheduledTask[] memory scheduledCouponListing_) {
-        return ScheduledTasksLib.getScheduledTasks(scheduledCouponListingStorage(), _pageIndex, _pageLength);
+        if (_includeDisabled) {
+            return ScheduledTasksLib.getScheduledTasks(scheduledCouponListingStorage(), _pageIndex, _pageLength);
+        }
+        return _getFilteredPage(scheduledCouponListingStorage(), _pageIndex, _pageLength);
     }
 
     /**
@@ -327,25 +380,52 @@ library ScheduledTasksStorageWrapper {
 
     /**
      * @notice Returns the number of scheduled balance adjustment tasks.
-     * @dev Reads only the balance adjustment task queue.
-     * @return Number of queued balance adjustment tasks.
+     * @dev When `_includeDisabled` is `false`, iterates the queue and excludes tasks
+     *      belonging to a disabled corporate action (O(n)). When `true`, returns the raw
+     *      queue length in O(1).
+     * @param _includeDisabled When `false`, disabled tasks are excluded from the count.
+     * @return Number of queued balance adjustment tasks, optionally filtered.
      */
-    function getScheduledBalanceAdjustmentCount() internal view returns (uint256) {
-        return ScheduledTasksLib.getScheduledTaskCount(scheduledBalanceAdjustmentStorage());
+    function getScheduledBalanceAdjustmentCount(bool _includeDisabled) internal view returns (uint256) {
+        ScheduledTasksDataStorage storage store = scheduledBalanceAdjustmentStorage();
+        uint256 total = ScheduledTasksLib.getScheduledTaskCount(store);
+        if (_includeDisabled) return total;
+
+        uint256 active;
+        for (uint256 i; i < total; ) {
+            bytes32 actionId = abi.decode(ScheduledTasksLib.getScheduledTasksByIndex(store, i).data, (bytes32));
+            if (!CorporateActionsStorageWrapper.isCorporateActionDisabled(actionId)) {
+                unchecked {
+                    ++active;
+                }
+            }
+            unchecked {
+                ++i;
+            }
+        }
+        return active;
     }
 
     /**
      * @notice Returns a paginated list of scheduled balance adjustment tasks.
-     * @dev Pagination semantics are delegated to `ScheduledTasksLib`.
-     * @param _pageIndex Zero-based page index.
-     * @param _pageLength Maximum number of tasks to return.
+     * @dev When `_includeDisabled` is `true`, delegates to `ScheduledTasksLib` using direct
+     *      index arithmetic (O(1) per item). When `false`, iterates the full queue and skips
+     *      disabled tasks before applying pagination (O(n)).
+     * @param _pageIndex       Zero-based page index.
+     * @param _pageLength      Maximum number of tasks to return.
+     * @param _includeDisabled When `false`, tasks belonging to a disabled corporate action are
+     *                         excluded from the page.
      * @return scheduledBalanceAdjustment_ Adjustment tasks contained in the requested page.
      */
     function getScheduledBalanceAdjustments(
         uint256 _pageIndex,
-        uint256 _pageLength
+        uint256 _pageLength,
+        bool _includeDisabled
     ) internal view returns (ScheduledTask[] memory scheduledBalanceAdjustment_) {
-        return ScheduledTasksLib.getScheduledTasks(scheduledBalanceAdjustmentStorage(), _pageIndex, _pageLength);
+        if (_includeDisabled) {
+            return ScheduledTasksLib.getScheduledTasks(scheduledBalanceAdjustmentStorage(), _pageIndex, _pageLength);
+        }
+        return _getFilteredPage(scheduledBalanceAdjustmentStorage(), _pageIndex, _pageLength);
     }
 
     /**
@@ -587,6 +667,58 @@ library ScheduledTasksStorageWrapper {
 
         ScheduledTask memory pendingTask = ScheduledTasksLib.getScheduledTasksByIndex(subQueue, count - 1);
         CorporateActionsStorageWrapper.cancelCorporateAction(abi.decode(pendingTask.data, (bytes32)));
+    }
+
+    /**
+     * @notice Paginates a task queue excluding disabled corporate actions.
+     * @dev Single-pass O(n): allocates a worst-case buffer of `_pageLength`, fills it with
+     *      active tasks in the requested window, then returns a right-sized array. Used by
+     *      `getScheduledCouponListing` and `getScheduledBalanceAdjustments` when
+     *      `_includeDisabled` is `false`.
+     * @param _store      Storage pointer to the task queue to paginate.
+     * @param _pageIndex  Zero-based page index.
+     * @param _pageLength Maximum number of tasks per page.
+     * @return result_ Active tasks in the requested page, never longer than `_pageLength`.
+     */
+    function _getFilteredPage(
+        ScheduledTasksDataStorage storage _store,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) private view returns (ScheduledTask[] memory result_) {
+        uint256 total = ScheduledTasksLib.getScheduledTaskCount(_store);
+        uint256 start = _pageIndex * _pageLength;
+        ScheduledTask[] memory buffer = new ScheduledTask[](_pageLength);
+        uint256 activeIdx;
+        uint256 collected;
+
+        for (uint256 i; i < total; ) {
+            ScheduledTask memory task = ScheduledTasksLib.getScheduledTasksByIndex(_store, i);
+            if (!CorporateActionsStorageWrapper.isCorporateActionDisabled(abi.decode(task.data, (bytes32)))) {
+                if (activeIdx >= start) {
+                    buffer[collected] = task;
+                    unchecked {
+                        ++collected;
+                    }
+                    if (collected == _pageLength) break;
+                }
+                unchecked {
+                    ++activeIdx;
+                }
+            }
+            unchecked {
+                ++i;
+            }
+        }
+
+        if (collected == _pageLength) return buffer;
+
+        result_ = new ScheduledTask[](collected);
+        for (uint256 i; i < collected; ) {
+            result_[i] = buffer[i];
+            unchecked {
+                ++i;
+            }
+        }
     }
 
     /**

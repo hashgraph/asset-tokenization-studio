@@ -88,18 +88,20 @@ abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, Mod
     }
 
     /// @inheritdoc IScheduledBalanceAdjustment
-    function getPendingBalanceAdjustmentCount() external view override returns (uint256) {
-        return ScheduledTasksStorageWrapper.getScheduledBalanceAdjustmentCount();
+    function getPendingBalanceAdjustmentCount(bool _includeDisabled) external view override returns (uint256) {
+        return ScheduledTasksStorageWrapper.getScheduledBalanceAdjustmentCount(_includeDisabled);
     }
 
     /// @inheritdoc IScheduledBalanceAdjustment
     function getScheduledBalanceAdjustments(
         uint256 _pageIndex,
-        uint256 _pageLength
+        uint256 _pageLength,
+        bool _includeDisabled
     ) external view override returns (ScheduledTask[] memory scheduledBalanceAdjustment_) {
         scheduledBalanceAdjustment_ = ScheduledTasksStorageWrapper.getScheduledBalanceAdjustments(
             _pageIndex,
-            _pageLength
+            _pageLength,
+            _includeDisabled
         );
     }
 }

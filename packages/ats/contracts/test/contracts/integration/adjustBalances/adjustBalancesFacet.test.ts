@@ -348,7 +348,7 @@ describe("AdjustBalancesFacet Tests", () => {
 
   describe("getPendingBalanceAdjustmentCount", () => {
     it("GIVEN no scheduled adjustments WHEN getPendingBalanceAdjustmentCount THEN returns zero", async () => {
-      const count = await asset.getPendingBalanceAdjustmentCount();
+      const count = await asset.getPendingBalanceAdjustmentCount(false);
       expect(count).to.equal(0);
     });
 
@@ -362,7 +362,7 @@ describe("AdjustBalancesFacet Tests", () => {
         decimals: 1,
       });
 
-      const count = await asset.getPendingBalanceAdjustmentCount();
+      const count = await asset.getPendingBalanceAdjustmentCount(false);
       expect(count).to.equal(2);
     });
   });
@@ -390,7 +390,7 @@ describe("AdjustBalancesFacet Tests", () => {
 
   describe("getScheduledBalanceAdjustments", () => {
     it("GIVEN no scheduled adjustments WHEN getScheduledBalanceAdjustments THEN returns empty array", async () => {
-      const results = await asset.getScheduledBalanceAdjustments(0, 10);
+      const results = await asset.getScheduledBalanceAdjustments(0, 10, false);
       expect(results.length).to.equal(0);
     });
 
@@ -399,7 +399,7 @@ describe("AdjustBalancesFacet Tests", () => {
 
       await asset.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
 
-      const results = await asset.getScheduledBalanceAdjustments(0, 10);
+      const results = await asset.getScheduledBalanceAdjustments(0, 10, false);
       expect(results.length).to.be.gt(0);
     });
 
@@ -408,7 +408,7 @@ describe("AdjustBalancesFacet Tests", () => {
 
       await asset.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
 
-      const results = await asset.getScheduledBalanceAdjustments(100, 10);
+      const results = await asset.getScheduledBalanceAdjustments(100, 10, false);
       expect(results.length).to.equal(0);
     });
 
@@ -646,7 +646,7 @@ describe("AdjustBalancesFacet Tests", () => {
         .to.not.be.reverted;
 
       // The task queue should now be empty after triggering
-      const queueCount = await asset.getPendingBalanceAdjustmentCount();
+      const queueCount = await asset.getPendingBalanceAdjustmentCount(false);
       expect(queueCount).to.equal(0);
     });
   });

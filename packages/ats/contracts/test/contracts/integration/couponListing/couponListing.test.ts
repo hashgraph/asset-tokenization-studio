@@ -93,45 +93,45 @@ describe("CouponListing Tests", () => {
     await expect(kpiAsset.setCoupon(coupon1)).to.emit(kpiAsset, "CouponSet");
     await expect(kpiAsset.setCoupon(coupon2)).to.emit(kpiAsset, "CouponSet");
 
-    let orderedList = await kpiAsset.getCouponsOrderedList(0, 10);
+    let orderedList = await kpiAsset.getCouponsOrderedList(0, 10, false);
     expect(orderedList).to.be.an("array").with.lengthOf(0);
 
     await kpiAsset.changeSystemTimestamp(timestamp + TIME_PERIODS_S.DAY + 1);
     await kpiAsset.triggerPendingScheduledCrossOrderedTasks();
 
-    orderedList = await kpiAsset.getCouponsOrderedList(0, 10);
+    orderedList = await kpiAsset.getCouponsOrderedList(0, 10, false);
     expect(orderedList).to.be.an("array").with.lengthOf(1);
     expect(orderedList[0]).to.equal(1); // couponId 1
 
     await kpiAsset.changeSystemTimestamp(timestamp + TIME_PERIODS_S.DAY * 2 + 1);
     await kpiAsset.triggerPendingScheduledCrossOrderedTasks();
 
-    orderedList = await kpiAsset.getCouponsOrderedList(0, 10);
+    orderedList = await kpiAsset.getCouponsOrderedList(0, 10, false);
     expect(orderedList).to.be.an("array").with.lengthOf(2);
     expect(orderedList[0]).to.equal(1); // couponId 1
     expect(orderedList[1]).to.equal(2); // couponId 2
 
     // Verify getCouponFromOrderedListAt works correctly
-    const couponIdAtPos0 = await kpiAsset.getCouponFromOrderedListAt(0);
-    const couponIdAtPos1 = await kpiAsset.getCouponFromOrderedListAt(1);
+    const couponIdAtPos0 = await kpiAsset.getCouponFromOrderedListAt(0, false);
+    const couponIdAtPos1 = await kpiAsset.getCouponFromOrderedListAt(1, false);
     expect(couponIdAtPos0).to.equal(1);
     expect(couponIdAtPos1).to.equal(2);
 
     // Verify getCouponsOrderedListTotal
-    const totalCouponsInOrderedList = await kpiAsset.getCouponsOrderedListTotal();
+    const totalCouponsInOrderedList = await kpiAsset.getCouponsOrderedListTotal(false);
     expect(totalCouponsInOrderedList).to.equal(2);
   });
 
   it("GIVEN empty ordered list WHEN getCouponFromOrderedListAt with _pos >= getCouponsOrderedListTotalAdjustedAt THEN returns 0", async () => {
-    const couponIdAtPos0 = await asset.getCouponFromOrderedListAt(0);
+    const couponIdAtPos0 = await asset.getCouponFromOrderedListAt(0, false);
     expect(couponIdAtPos0).to.equal(0);
 
     // Test position 1 - should return 0 because list is empty
-    const couponIdAtPos1 = await asset.getCouponFromOrderedListAt(1);
+    const couponIdAtPos1 = await asset.getCouponFromOrderedListAt(1, false);
     expect(couponIdAtPos1).to.equal(0);
 
     // Test position 100 - should return 0 because list is empty
-    const couponIdAtPos100 = await asset.getCouponFromOrderedListAt(100);
+    const couponIdAtPos100 = await asset.getCouponFromOrderedListAt(100, false);
     expect(couponIdAtPos100).to.equal(0);
   });
 
@@ -139,7 +139,7 @@ describe("CouponListing Tests", () => {
 
   describe("scheduledCouponListingCount", () => {
     it("GIVEN no scheduled coupons WHEN scheduledCouponListingCount THEN returns 0", async () => {
-      const count = await asset.scheduledCouponListingCount();
+      const count = await asset.scheduledCouponListingCount(false);
       expect(count).to.equal(0);
     });
 
@@ -160,7 +160,7 @@ describe("CouponListing Tests", () => {
         });
       }
 
-      const count = await asset.scheduledCouponListingCount();
+      const count = await asset.scheduledCouponListingCount(false);
       expect(count).to.equal(3);
     });
   });
@@ -187,27 +187,27 @@ describe("CouponListing Tests", () => {
     });
 
     it("GIVEN scheduled coupons WHEN getScheduledCouponListing with page 0 and length 10 THEN returns all coupons", async () => {
-      const coupons = await asset.getScheduledCouponListing(0, 10);
+      const coupons = await asset.getScheduledCouponListing(0, 10, false);
       expect(coupons.length).to.equal(5);
     });
 
     it("GIVEN scheduled coupons WHEN getScheduledCouponListing with page 0 and length 3 THEN returns first 3 coupons", async () => {
-      const coupons = await asset.getScheduledCouponListing(0, 3);
+      const coupons = await asset.getScheduledCouponListing(0, 3, false);
       expect(coupons.length).to.equal(3);
     });
 
     it("GIVEN scheduled coupons WHEN getScheduledCouponListing with page 1 and length 3 THEN returns next 2 coupons", async () => {
-      const coupons = await asset.getScheduledCouponListing(1, 3);
+      const coupons = await asset.getScheduledCouponListing(1, 3, false);
       expect(coupons.length).to.equal(2);
     });
 
     it("GIVEN scheduled coupons WHEN getScheduledCouponListing with page 2 and length 3 THEN returns empty array", async () => {
-      const coupons = await asset.getScheduledCouponListing(2, 3);
+      const coupons = await asset.getScheduledCouponListing(2, 3, false);
       expect(coupons.length).to.equal(0);
     });
 
     it("GIVEN scheduled coupons WHEN getScheduledCouponListing THEN returns tasks with correct structure", async () => {
-      const coupons = await asset.getScheduledCouponListing(0, 1);
+      const coupons = await asset.getScheduledCouponListing(0, 1, false);
       expect(coupons.length).to.equal(1);
       const coupon = {
         scheduledTimestamp: coupons[0].scheduledTimestamp,
@@ -242,12 +242,12 @@ describe("CouponListing Tests", () => {
       await asset.changeSystemTimestamp(fixingDate + 1);
 
       // Before cancel: the pending task contributes to the total
-      expect(await asset.getCouponsOrderedListTotal()).to.equal(1);
+      expect(await asset.getCouponsOrderedListTotal(false)).to.equal(1);
 
       await asset.connect(signer_A).cancelCoupon(1);
 
       // After cancel: the disabled pending task is excluded
-      expect(await asset.getCouponsOrderedListTotal()).to.equal(0);
+      expect(await asset.getCouponsOrderedListTotal(false)).to.equal(0);
     });
 
     it("GIVEN a pending listing task WHEN its coupon is cancelled THEN getCouponsOrderedList returns empty array", async () => {
@@ -268,13 +268,13 @@ describe("CouponListing Tests", () => {
       await asset.changeSystemTimestamp(fixingDate + 1);
 
       // Before cancel: the coupon appears in the virtual ordered list
-      let list = await asset.getCouponsOrderedList(0, 10);
+      let list = await asset.getCouponsOrderedList(0, 10, false);
       expect(list).to.have.lengthOf(1);
 
       await asset.connect(signer_A).cancelCoupon(1);
 
       // After cancel: the list is empty
-      list = await asset.getCouponsOrderedList(0, 10);
+      list = await asset.getCouponsOrderedList(0, 10, false);
       expect(list).to.have.lengthOf(0);
     });
 
@@ -310,17 +310,137 @@ describe("CouponListing Tests", () => {
       // Travel past both fixingDates; executionDates not yet reached
       await asset.changeSystemTimestamp(fixingDate2 + 1);
 
-      expect(await asset.getCouponsOrderedListTotal()).to.equal(2);
+      expect(await asset.getCouponsOrderedListTotal(false)).to.equal(2);
 
       // Cancel the first coupon only
       await asset.connect(signer_A).cancelCoupon(1);
 
       // Only the second coupon's pending task remains
-      expect(await asset.getCouponsOrderedListTotal()).to.equal(1);
+      expect(await asset.getCouponsOrderedListTotal(false)).to.equal(1);
 
-      const list = await asset.getCouponsOrderedList(0, 10);
+      const list = await asset.getCouponsOrderedList(0, 10, false);
       expect(list).to.have.lengthOf(1);
       expect(list[0]).to.equal(2n);
+    });
+  });
+
+  // ─── _includeDisabled flag: true vs false ───
+
+  describe("_includeDisabled=true includes cancelled coupon tasks; false excludes them", () => {
+    it("GIVEN a cancelled pending listing task WHEN scheduledCouponListingCount(false) THEN returns 0 and (true) returns 1", async () => {
+      const fixingDate = startingDate + TIME_PERIODS_S.MONTH;
+      const executionDate = fixingDate + TIME_PERIODS_S.WEEK;
+
+      await asset.connect(signer_A).setCoupon({
+        recordDate: fixingDate.toString(),
+        executionDate: executionDate.toString(),
+        rate: 0,
+        rateDecimals: 0,
+        startDate: startingDate.toString(),
+        endDate: fixingDate.toString(),
+        fixingDate: fixingDate.toString(),
+        rateStatus: 0,
+      });
+
+      await asset.connect(signer_A).cancelCoupon(1);
+
+      expect(await asset.scheduledCouponListingCount(false)).to.equal(0);
+      expect(await asset.scheduledCouponListingCount(true)).to.equal(1);
+    });
+
+    it("GIVEN a cancelled pending listing task WHEN getScheduledCouponListing(false) THEN returns empty and (true) returns the task", async () => {
+      const fixingDate = startingDate + TIME_PERIODS_S.MONTH;
+      const executionDate = fixingDate + TIME_PERIODS_S.WEEK;
+
+      await asset.connect(signer_A).setCoupon({
+        recordDate: fixingDate.toString(),
+        executionDate: executionDate.toString(),
+        rate: 0,
+        rateDecimals: 0,
+        startDate: startingDate.toString(),
+        endDate: fixingDate.toString(),
+        fixingDate: fixingDate.toString(),
+        rateStatus: 0,
+      });
+
+      await asset.connect(signer_A).cancelCoupon(1);
+
+      const excluded = await asset.getScheduledCouponListing(0, 10, false);
+      expect(excluded).to.have.lengthOf(0);
+
+      const included = await asset.getScheduledCouponListing(0, 10, true);
+      expect(included).to.have.lengthOf(1);
+      expect(included[0].scheduledTimestamp).to.equal(BigInt(fixingDate));
+    });
+
+    it("GIVEN a cancelled pending listing task WHEN getCouponsOrderedListTotal(false) THEN returns 0 and (true) returns 1", async () => {
+      const fixingDate = startingDate + TIME_PERIODS_S.MONTH;
+      const executionDate = fixingDate + TIME_PERIODS_S.WEEK;
+
+      await asset.connect(signer_A).setCoupon({
+        recordDate: fixingDate.toString(),
+        executionDate: executionDate.toString(),
+        rate: 0,
+        rateDecimals: 0,
+        startDate: startingDate.toString(),
+        endDate: fixingDate.toString(),
+        fixingDate: fixingDate.toString(),
+        rateStatus: 0,
+      });
+
+      await asset.changeSystemTimestamp(fixingDate + 1);
+      await asset.connect(signer_A).cancelCoupon(1);
+
+      expect(await asset.getCouponsOrderedListTotal(false)).to.equal(0);
+      expect(await asset.getCouponsOrderedListTotal(true)).to.equal(1);
+    });
+
+    it("GIVEN a cancelled pending listing task WHEN getCouponsOrderedList(false) THEN returns empty and (true) returns cancelled coupon", async () => {
+      const fixingDate = startingDate + TIME_PERIODS_S.MONTH;
+      const executionDate = fixingDate + TIME_PERIODS_S.WEEK;
+
+      await asset.connect(signer_A).setCoupon({
+        recordDate: fixingDate.toString(),
+        executionDate: executionDate.toString(),
+        rate: 0,
+        rateDecimals: 0,
+        startDate: startingDate.toString(),
+        endDate: fixingDate.toString(),
+        fixingDate: fixingDate.toString(),
+        rateStatus: 0,
+      });
+
+      await asset.changeSystemTimestamp(fixingDate + 1);
+      await asset.connect(signer_A).cancelCoupon(1);
+
+      const excluded = await asset.getCouponsOrderedList(0, 10, false);
+      expect(excluded).to.have.lengthOf(0);
+
+      const included = await asset.getCouponsOrderedList(0, 10, true);
+      expect(included).to.have.lengthOf(1);
+      expect(included[0]).to.equal(1n);
+    });
+
+    it("GIVEN a cancelled pending listing task WHEN getCouponFromOrderedListAt(0, false) THEN returns 0 and (0, true) returns coupon id", async () => {
+      const fixingDate = startingDate + TIME_PERIODS_S.MONTH;
+      const executionDate = fixingDate + TIME_PERIODS_S.WEEK;
+
+      await asset.connect(signer_A).setCoupon({
+        recordDate: fixingDate.toString(),
+        executionDate: executionDate.toString(),
+        rate: 0,
+        rateDecimals: 0,
+        startDate: startingDate.toString(),
+        endDate: fixingDate.toString(),
+        fixingDate: fixingDate.toString(),
+        rateStatus: 0,
+      });
+
+      await asset.changeSystemTimestamp(fixingDate + 1);
+      await asset.connect(signer_A).cancelCoupon(1);
+
+      expect(await asset.getCouponFromOrderedListAt(0, false)).to.equal(0n);
+      expect(await asset.getCouponFromOrderedListAt(0, true)).to.equal(1n);
     });
   });
 });

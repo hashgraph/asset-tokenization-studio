@@ -313,7 +313,7 @@ describe("Scheduled Tasks Failure Recovery", () => {
     );
 
     expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(0);
-    expect(await asset.scheduledSnapshotCount()).to.equal(0);
+    expect(await asset.scheduledSnapshotCount(false)).to.equal(0);
   });
 
   // ─── Failure path: hardhat_setCode injection ───────────────────────────────
@@ -384,9 +384,9 @@ describe("Scheduled Tasks Failure Recovery", () => {
       .withArgs(ATS_TASK.SNAPSHOT, ethers.encodeBytes32String("crossOrdered"), recordDate);
 
     expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(0);
-    expect(await asset.scheduledSnapshotCount()).to.equal(1);
+    expect(await asset.scheduledSnapshotCount(true)).to.equal(1);
 
-    const snapshots = await asset.getScheduledSnapshots(0, 10);
+    const snapshots = await asset.getScheduledSnapshots(0, 10, true);
     const snapshotActionId = ethers.AbiCoder.defaultAbiCoder().decode(["bytes32"], snapshots[0].data)[0];
     const [, , , isDisabled] = await asset.getCorporateAction(snapshotActionId);
     expect(isDisabled).to.be.true;
@@ -418,7 +418,7 @@ describe("Scheduled Tasks Failure Recovery", () => {
 
     expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(0);
 
-    const balanceAdjustments = await asset.getScheduledBalanceAdjustments(0, 10);
+    const balanceAdjustments = await asset.getScheduledBalanceAdjustments(0, 10, true);
     expect(balanceAdjustments.length).to.equal(1);
 
     const balanceAdjustmentActionId = ethers.AbiCoder.defaultAbiCoder().decode(
@@ -461,9 +461,9 @@ describe("Scheduled Tasks Failure Recovery", () => {
       .withArgs(COUPON_LISTING_TASK_TYPE, ethers.encodeBytes32String("crossOrdered"), fixingDate);
 
     expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(0);
-    expect(await asset.scheduledCouponListingCount()).to.equal(1);
+    expect(await asset.scheduledCouponListingCount(true)).to.equal(1);
 
-    const couponListings = await asset.getScheduledCouponListing(0, 10);
+    const couponListings = await asset.getScheduledCouponListing(0, 10, true);
     const couponListingActionId = ethers.AbiCoder.defaultAbiCoder().decode(["bytes32"], couponListings[0].data)[0];
     const [, , , isDisabled] = await asset.getCorporateAction(couponListingActionId);
     expect(isDisabled).to.be.true;

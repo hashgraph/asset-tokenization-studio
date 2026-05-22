@@ -37,15 +37,20 @@ abstract contract Snapshots is ISnapshots, Modifiers {
     }
 
     /// @inheritdoc ISnapshots
-    function scheduledSnapshotCount() external view override returns (uint256) {
-        return ScheduledTasksStorageWrapper.getScheduledSnapshotCount();
+    function scheduledSnapshotCount(bool _includeDisabled) external view override returns (uint256) {
+        return ScheduledTasksStorageWrapper.getScheduledSnapshotCount(_includeDisabled);
     }
 
     /// @inheritdoc ISnapshots
     function getScheduledSnapshots(
         uint256 _pageIndex,
-        uint256 _pageLength
+        uint256 _pageLength,
+        bool _includeDisabled
     ) external view override returns (ScheduledTask[] memory scheduledSnapshot_) {
-        scheduledSnapshot_ = ScheduledTasksStorageWrapper.getScheduledSnapshots(_pageIndex, _pageLength);
+        scheduledSnapshot_ = ScheduledTasksStorageWrapper.getScheduledSnapshots(
+            _pageIndex,
+            _pageLength,
+            _includeDisabled
+        );
     }
 }

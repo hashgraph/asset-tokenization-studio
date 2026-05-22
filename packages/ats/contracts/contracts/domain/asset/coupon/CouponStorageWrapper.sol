@@ -271,13 +271,13 @@ library CouponStorageWrapper {
         uint256 pendingIndexOffset = pos - actualOrderedListLengthTotal;
 
         if (_includeDisabled) {
-            uint256 index = ScheduledTasksStorageWrapper.getScheduledCouponListingCount() - 1 - pendingIndexOffset;
+            uint256 index = ScheduledTasksStorageWrapper.getScheduledCouponListingCount(true) - 1 - pendingIndexOffset;
             return ScheduledTasksStorageWrapper.getScheduledCouponListingIdAtIndex(index);
         }
 
         // When excluding disabled, iterate the queue skipping disabled tasks to find the
         // correct coupon at the filtered pending index.
-        uint256 queueLen = ScheduledTasksStorageWrapper.getScheduledCouponListingCount();
+        uint256 queueLen = ScheduledTasksStorageWrapper.getScheduledCouponListingCount(true);
         uint256 seen = 0;
         for (uint256 j = queueLen; j > 0; ) {
             unchecked {

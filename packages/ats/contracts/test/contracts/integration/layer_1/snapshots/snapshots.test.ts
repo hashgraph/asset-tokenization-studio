@@ -572,8 +572,8 @@ describe("Scheduled Snapshots Tests", () => {
     const dividend_1_Id = "0x0000000000000000000000000000000000000000000000000000000000000003";
 
     // check schedled snapshots
-    let scheduledSnapshotCount = await asset.scheduledSnapshotCount();
-    let scheduledSnapshots = await asset.getScheduledSnapshots(0, 100);
+    let scheduledSnapshotCount = await asset.scheduledSnapshotCount(false);
+    let scheduledSnapshots = await asset.getScheduledSnapshots(0, 100, false);
 
     expect(scheduledSnapshotCount).to.equal(3);
     expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount);
@@ -590,8 +590,8 @@ describe("Scheduled Snapshots Tests", () => {
       .to.emit(asset, "SnapshotTriggered")
       .withArgs(1, dividend_1_Id);
 
-    scheduledSnapshotCount = await asset.scheduledSnapshotCount();
-    scheduledSnapshots = await asset.getScheduledSnapshots(0, 100);
+    scheduledSnapshotCount = await asset.scheduledSnapshotCount(false);
+    scheduledSnapshots = await asset.getScheduledSnapshots(0, 100, false);
 
     expect(scheduledSnapshotCount).to.equal(2);
     expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount);
@@ -606,8 +606,8 @@ describe("Scheduled Snapshots Tests", () => {
       .to.emit(asset, "SnapshotTriggered")
       .withArgs(2, dividend_2_Id);
 
-    scheduledSnapshotCount = await asset.scheduledSnapshotCount();
-    scheduledSnapshots = await asset.getScheduledSnapshots(0, 100);
+    scheduledSnapshotCount = await asset.scheduledSnapshotCount(false);
+    scheduledSnapshots = await asset.getScheduledSnapshots(0, 100, false);
 
     expect(scheduledSnapshotCount).to.equal(1);
     expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount);
@@ -620,8 +620,8 @@ describe("Scheduled Snapshots Tests", () => {
       .to.emit(asset, "SnapshotTriggered")
       .withArgs(3, dividend_3_Id);
 
-    scheduledSnapshotCount = await asset.scheduledSnapshotCount();
-    scheduledSnapshots = await asset.getScheduledSnapshots(0, 100);
+    scheduledSnapshotCount = await asset.scheduledSnapshotCount(false);
+    scheduledSnapshots = await asset.getScheduledSnapshots(0, 100, false);
 
     expect(scheduledSnapshotCount).to.equal(0);
     expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount);
@@ -642,7 +642,7 @@ describe("Scheduled Snapshots Tests", () => {
     };
     await asset.connect(signer_C).setDividend(dividendData);
 
-    let scheduledSnapshotCount = await asset.scheduledSnapshotCount();
+    let scheduledSnapshotCount = await asset.scheduledSnapshotCount(false);
     expect(scheduledSnapshotCount).to.equal(1);
 
     const [dividendBefore] = await asset.getDividend(1);
@@ -657,11 +657,53 @@ describe("Scheduled Snapshots Tests", () => {
       "SnapshotTriggered",
     );
 
-    scheduledSnapshotCount = await asset.scheduledSnapshotCount();
+    scheduledSnapshotCount = await asset.scheduledSnapshotCount(false);
     expect(scheduledSnapshotCount).to.equal(0);
 
     const [dividendAfter] = await asset.getDividend(1);
     expect(dividendAfter.snapshotId).to.equal(0);
+  });
+
+  describe("scheduledSnapshotCount / getScheduledSnapshots: _includeDisabled flag", () => {
+    it("GIVEN a cancelled snapshot task WHEN scheduledSnapshotCount(false) THEN returns 0 and (true) returns 1", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+
+      const recordDate = dateToUnixTimestamp("2030-01-01T00:00:06Z");
+      const executionDate = dateToUnixTimestamp("2030-01-01T00:01:00Z");
+      await asset.connect(signer_C).setDividend({
+        recordDate: recordDate.toString(),
+        executionDate: executionDate.toString(),
+        amount: 1,
+        amountDecimals: 3,
+      });
+
+      await asset.connect(signer_C).cancelDividend(1);
+
+      expect(await asset.scheduledSnapshotCount(false)).to.equal(0);
+      expect(await asset.scheduledSnapshotCount(true)).to.equal(1);
+    });
+
+    it("GIVEN a cancelled snapshot task WHEN getScheduledSnapshots(false) THEN returns empty and (true) returns the task", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+
+      const recordDate = dateToUnixTimestamp("2030-01-01T00:00:06Z");
+      const executionDate = dateToUnixTimestamp("2030-01-01T00:01:00Z");
+      await asset.connect(signer_C).setDividend({
+        recordDate: recordDate.toString(),
+        executionDate: executionDate.toString(),
+        amount: 1,
+        amountDecimals: 3,
+      });
+
+      await asset.connect(signer_C).cancelDividend(1);
+
+      const excluded = await asset.getScheduledSnapshots(0, 100, false);
+      expect(excluded).to.have.lengthOf(0);
+
+      const included = await asset.getScheduledSnapshots(0, 100, true);
+      expect(included).to.have.lengthOf(1);
+      expect(included[0].scheduledTimestamp).to.equal(BigInt(recordDate));
+    });
   });
 
   describe("Deactivated", () => {

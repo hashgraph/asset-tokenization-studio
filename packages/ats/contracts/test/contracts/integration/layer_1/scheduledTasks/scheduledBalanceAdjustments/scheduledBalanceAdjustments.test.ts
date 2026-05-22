@@ -77,8 +77,8 @@ describe("Scheduled BalanceAdjustments Tests", () => {
 
     // check schedled BalanceAdjustments
 
-    let scheduledBalanceAdjustmentCount = await asset.connect(signer_A).getPendingBalanceAdjustmentCount();
-    let scheduledBalanceAdjustments = await asset.connect(signer_A).getScheduledBalanceAdjustments(0, 100);
+    let scheduledBalanceAdjustmentCount = await asset.connect(signer_A).getPendingBalanceAdjustmentCount(false);
+    let scheduledBalanceAdjustments = await asset.connect(signer_A).getScheduledBalanceAdjustments(0, 100, false);
 
     expect(scheduledBalanceAdjustmentCount).to.equal(3);
     expect(scheduledBalanceAdjustments.length).to.equal(scheduledBalanceAdjustmentCount);
@@ -93,8 +93,8 @@ describe("Scheduled BalanceAdjustments Tests", () => {
     await asset.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_1 + 1);
     await asset.connect(signer_A).triggerPendingScheduledCrossOrderedTasks();
 
-    scheduledBalanceAdjustmentCount = await asset.connect(signer_A).getPendingBalanceAdjustmentCount();
-    scheduledBalanceAdjustments = await asset.connect(signer_A).getScheduledBalanceAdjustments(0, 100);
+    scheduledBalanceAdjustmentCount = await asset.connect(signer_A).getPendingBalanceAdjustmentCount(false);
+    scheduledBalanceAdjustments = await asset.connect(signer_A).getScheduledBalanceAdjustments(0, 100, false);
 
     expect(scheduledBalanceAdjustmentCount).to.equal(2);
     expect(scheduledBalanceAdjustments.length).to.equal(scheduledBalanceAdjustmentCount);
@@ -107,8 +107,8 @@ describe("Scheduled BalanceAdjustments Tests", () => {
     await asset.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_2 + 1);
     await asset.connect(signer_A).triggerScheduledCrossOrderedTasks(100);
 
-    scheduledBalanceAdjustmentCount = await asset.connect(signer_A).getPendingBalanceAdjustmentCount();
-    scheduledBalanceAdjustments = await asset.connect(signer_A).getScheduledBalanceAdjustments(0, 100);
+    scheduledBalanceAdjustmentCount = await asset.connect(signer_A).getPendingBalanceAdjustmentCount(false);
+    scheduledBalanceAdjustments = await asset.connect(signer_A).getScheduledBalanceAdjustments(0, 100, false);
 
     expect(scheduledBalanceAdjustmentCount).to.equal(1);
     expect(scheduledBalanceAdjustments.length).to.equal(scheduledBalanceAdjustmentCount);
@@ -119,11 +119,49 @@ describe("Scheduled BalanceAdjustments Tests", () => {
     await asset.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_3 + 1);
     await asset.connect(signer_A).triggerScheduledCrossOrderedTasks(0);
 
-    scheduledBalanceAdjustmentCount = await asset.connect(signer_A).getPendingBalanceAdjustmentCount();
-    scheduledBalanceAdjustments = await asset.connect(signer_A).getScheduledBalanceAdjustments(0, 100);
+    scheduledBalanceAdjustmentCount = await asset.connect(signer_A).getPendingBalanceAdjustmentCount(false);
+    scheduledBalanceAdjustments = await asset.connect(signer_A).getScheduledBalanceAdjustments(0, 100, false);
 
     expect(scheduledBalanceAdjustmentCount).to.equal(0);
     expect(scheduledBalanceAdjustments.length).to.equal(scheduledBalanceAdjustmentCount);
+  });
+
+  describe("getPendingBalanceAdjustmentCount / getScheduledBalanceAdjustments: _includeDisabled flag", () => {
+    it("GIVEN a cancelled balance adjustment WHEN getPendingBalanceAdjustmentCount(false) THEN returns 0 and (true) returns 1", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+
+      const executionDate = dateToUnixTimestamp("2030-01-01T00:00:06Z");
+      await asset.connect(signer_C).setScheduledBalanceAdjustment({
+        executionDate: executionDate.toString(),
+        factor: 1,
+        decimals: 2,
+      });
+
+      await asset.connect(signer_C).cancelScheduledBalanceAdjustment(1);
+
+      expect(await asset.getPendingBalanceAdjustmentCount(false)).to.equal(0);
+      expect(await asset.getPendingBalanceAdjustmentCount(true)).to.equal(1);
+    });
+
+    it("GIVEN a cancelled balance adjustment WHEN getScheduledBalanceAdjustments(false) THEN returns empty and (true) returns the task", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+
+      const executionDate = dateToUnixTimestamp("2030-01-01T00:00:06Z");
+      await asset.connect(signer_C).setScheduledBalanceAdjustment({
+        executionDate: executionDate.toString(),
+        factor: 1,
+        decimals: 2,
+      });
+
+      await asset.connect(signer_C).cancelScheduledBalanceAdjustment(1);
+
+      const excluded = await asset.getScheduledBalanceAdjustments(0, 100, false);
+      expect(excluded).to.have.lengthOf(0);
+
+      const included = await asset.getScheduledBalanceAdjustments(0, 100, true);
+      expect(included).to.have.lengthOf(1);
+      expect(included[0].scheduledTimestamp).to.equal(BigInt(executionDate));
+    });
   });
 
   describe("Deactivated", () => {

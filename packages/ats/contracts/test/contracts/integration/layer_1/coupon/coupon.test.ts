@@ -299,7 +299,7 @@ describe("Coupon Tests", () => {
 
     const [couponsFor, accounts] = await asset.getCouponsFor(1, 0, 10);
 
-    const couponsOrderedListTotal = await asset.getCouponsOrderedListTotal();
+    const couponsOrderedListTotal = await asset.getCouponsOrderedListTotal(false);
 
     expect(listCount).to.equal(1);
     expect(isDisabled).to.be.false;
