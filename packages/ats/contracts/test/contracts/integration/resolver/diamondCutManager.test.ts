@@ -554,7 +554,7 @@ describe("DiamondCutManager", () => {
       .withArgs(blackListedSelectors[0]);
   });
 
-  it("GIVEN a resolver WHEN creating configuration on an ongoing batch THEN uses the batch version", async () => {
+  it("GIVEN a resolver WHEN creating configuration on an ongoing batch THEN fails with OngoingBatchConfigurationNotPermitted", async () => {
     const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000010";
 
     const firstBatchFacets: IDiamondCutManager.FacetConfigurationStruct[] = [
@@ -573,45 +573,9 @@ describe("DiamondCutManager", () => {
       },
     ];
 
-    await diamondCutManager.connect(signer_A).createConfiguration(testConfigId, secondBatchFacets);
-
-    const latestVersion = Number(await diamondCutManager.getLatestVersionByConfiguration(testConfigId));
-    expect(latestVersion).to.equal(1);
-
-    const facetsLength = Number(await diamondCutManager.getFacetsLengthByConfigurationIdAndVersion(testConfigId, 1));
-    expect(facetsLength).to.equal(2);
-  });
-
-  it("GIVEN an ongoing batch configuration WHEN createConfiguration is called with different facets THEN silently merges into the batch", async () => {
-    const testConfigId = "0x000000000000000000000000000000000000000000000000000000000000001a";
-
-    const facet1: IDiamondCutManager.FacetConfigurationStruct[] = [
-      {
-        id: equityFacetIdList[0],
-        version: 1,
-      },
-    ];
-
-    // Step 1: Start an incomplete batch (_isLastBatch: false leaves batch open)
-    await diamondCutManager.connect(signer_A).createBatchConfiguration(testConfigId, facet1, false);
-
-    const facet2: IDiamondCutManager.FacetConfigurationStruct[] = [
-      {
-        id: equityFacetIdList[1],
-        version: 1,
-      },
-    ];
-
-    // Step 2: Call createConfiguration with a different facet — no explicit confirmation of merge
-    // ⚠️ BUG: This test documents silent batch re-use. facet2 was merged into an incomplete batch without explicit confirmation.
-    await diamondCutManager.connect(signer_A).createConfiguration(testConfigId, facet2);
-
-    // Step 3: Verify BOTH facets are now in the same configuration version
-    const latestVersion = Number(await diamondCutManager.getLatestVersionByConfiguration(testConfigId));
-    expect(latestVersion).to.equal(1);
-
-    const facetsLength = Number(await diamondCutManager.getFacetsLengthByConfigurationIdAndVersion(testConfigId, 1));
-    expect(facetsLength).to.equal(2);
+    await expect(diamondCutManager.connect(signer_A).createConfiguration(testConfigId, secondBatchFacets))
+      .to.be.revertedWithCustomError(diamondCutManager, "OngoingBatchConfigurationNotPermitted")
+      .withArgs(testConfigId);
   });
 
   it("GIVEN a resolver and a non admin user WHEN canceling a batch configuration THEN fails with AccountHasNoRole", async () => {

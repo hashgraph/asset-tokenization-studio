@@ -42,9 +42,8 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations
     ) internal returns (uint256 latestVersion_) {
-        latestVersion_ = _isOngoingConfiguration(_configurationId)
-            ? _getBatchConfigurationVersion(_configurationId)
-            : _startBatchConfiguration(_configurationId);
+        if (_isOngoingConfiguration(_configurationId)) revert OngoingBatchConfigurationNotPermitted(_configurationId);
+        latestVersion_ = _startBatchConfiguration(_configurationId);
         _addFacetsToBatchConfiguration(_configurationId, _facetConfigurations, latestVersion_);
         _activateConfiguration(_configurationId, true);
     }
