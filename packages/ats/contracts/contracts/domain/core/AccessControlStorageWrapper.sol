@@ -152,30 +152,51 @@ library AccessControlStorageWrapper {
         bytes32[] calldata _roles,
         bool[] calldata _actives,
         address _account
-    ) internal returns (bool success_) {
+    ) internal returns (bool success_, bytes32[] memory appliedRoles_, bool[] memory appliedActives_) {
         RoleDataStorage storage roleDataStorage = rolesStorage();
         address sender = EvmAccessors.getMsgSender();
         uint256 length = _roles.length;
+
+        appliedRoles_ = new bytes32[](length);
+        appliedActives_ = new bool[](length);
+        uint256 count;
+
         for (uint256 index; index < length; ) {
-            checkRole(getRoleAdmin(_roles[index]), sender);
-            if (_actives[index]) {
-                if (!_has(roleDataStorage, _roles[index], _account)) {
-                    roleDataStorage.roles[_roles[index]].roleMembers.add(_account);
-                    roleDataStorage.memberRoles[_account].add(_roles[index]);
+            bytes32 role = _roles[index];
+            bool active = _actives[index];
+
+            checkRole(getRoleAdmin(role), sender);
+
+            if (active) {
+                if (!_has(roleDataStorage, role, _account)) {
+                    roleDataStorage.roles[role].roleMembers.add(_account);
+                    roleDataStorage.memberRoles[_account].add(role);
+                    appliedRoles_[count] = role;
+                    appliedActives_[count] = true;
+                    unchecked {
+                        ++count;
+                    }
                 }
+            } else if (_has(roleDataStorage, role, _account)) {
+                roleDataStorage.roles[role].roleMembers.remove(_account);
+                roleDataStorage.memberRoles[_account].remove(role);
+                appliedRoles_[count] = role;
+                appliedActives_[count] = false;
                 unchecked {
-                    ++index;
+                    ++count;
                 }
-                continue;
             }
-            if (_has(roleDataStorage, _roles[index], _account)) {
-                roleDataStorage.roles[_roles[index]].roleMembers.remove(_account);
-                roleDataStorage.memberRoles[_account].remove(_roles[index]);
-            }
+
             unchecked {
                 ++index;
             }
         }
+
+        assembly {
+            mstore(appliedRoles_, count)
+            mstore(appliedActives_, count)
+        }
+
         success_ = true;
     }
 

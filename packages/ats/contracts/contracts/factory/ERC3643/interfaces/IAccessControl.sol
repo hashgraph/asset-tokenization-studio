@@ -47,11 +47,19 @@ interface TRexIAccessControl {
 
     /**
      * @notice Emitted when multiple roles are applied to an account in a single operation.
-     * @param roles The roles that were processed.
-     * @param actives Corresponding grant/revoke flags; `true` means granted, `false` revoked.
+     * @param requestedRoles The roles that were submitted by the caller.
+     * @param requestedActives Corresponding grant/revoke flags; `true` means granted, `false` revoked.
      * @param account The account to which the roles were applied.
+     * @param appliedRoles The roles that were successfully applied.
+     * @param appliedActives The corresponding grant/revoke flags for the applied roles.
      */
-    event RolesApplied(bytes32[] roles, bool[] actives, address account);
+    event RolesApplied(
+        bytes32[] requestedRoles,
+        bool[] requestedActives,
+        address account,
+        bytes32[] appliedRoles,
+        bool[] appliedActives
+    );
 
     /**
      * @notice Thrown when an account does not hold a required role.
