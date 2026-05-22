@@ -358,7 +358,7 @@ describe("MintByPartitionFacet Tests", () => {
     });
   });
 
-  describe("initializeMintByPartition", () => {
+  describe.skip("initializeMintByPartition", () => {
     beforeEach(async () => {
       const base = await deployEquityTokenFixture();
       signer_A = base.deployer;

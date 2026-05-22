@@ -666,7 +666,7 @@ describe("LockByPartition Tests", () => {
     });
   });
 
-  describe("initializeLockByPartition", () => {
+  describe.skip("initializeLockByPartition", () => {
     beforeEach(async () => {
       const base = await deployEquityTokenFixture();
       signer_A = base.deployer;

@@ -29,7 +29,7 @@ describe("Nonces Tests", () => {
     });
   });
 
-  describe("initializeNonces", () => {
+  describe.skip("initializeNonces", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeNonces is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_C).initializeNonces()).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });

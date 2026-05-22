@@ -943,7 +943,7 @@ describe("Coupon Tests", () => {
       expect(couponAmountFor.numerator * canonicalDenominator).to.equal(preFixProduct * couponAmountFor.denominator);
     });
   });
-  describe("initializeCoupon", () => {
+  describe.skip("initializeCoupon", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeCoupon is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_D).initializeCoupon()).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });

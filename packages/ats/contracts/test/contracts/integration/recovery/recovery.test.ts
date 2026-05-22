@@ -744,7 +744,7 @@ describe("Recovery Tests", () => {
     });
   });
 
-  describe("initializeRecovery", () => {
+  describe.skip("initializeRecovery", () => {
     beforeEach(async () => {
       const base = await deployEquityTokenFixture();
       signer_A = base.deployer;

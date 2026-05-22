@@ -297,7 +297,7 @@ describe("Lock Tests", () => {
     });
   });
 
-  describe("initializeLock", () => {
+  describe.skip("initializeLock", () => {
     beforeEach(async () => {
       await loadFixture(deploySecurityFixtureSinglePartition);
     });

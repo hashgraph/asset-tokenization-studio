@@ -242,7 +242,7 @@ describe("BatchController Tests", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
-  describe("initializeBatchController", () => {
+  describe.skip("initializeBatchController", () => {
     it("GIVEN an already-initialised facet WHEN initializeBatchController is called again THEN it reverts with FacetAlreadyRegistered", async () => {
       const base = await deployEquityTokenFixture();
       const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);

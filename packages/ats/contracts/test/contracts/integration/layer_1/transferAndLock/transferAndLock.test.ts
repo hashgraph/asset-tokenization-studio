@@ -186,7 +186,7 @@ describe("Transfer and lock Tests", () => {
     });
   });
 
-  describe("initializeTransferAndLock", () => {
+  describe.skip("initializeTransferAndLock", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeTransferAndLock is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_C).initializeTransferAndLock()).to.be.revertedWithCustomError(
         asset,

@@ -135,6 +135,8 @@ const BOND_FIXED_RATE_FACETS = [
   "SecurityHoldersFacet",
   "CouponListingFacet",
   "SsiManagementFacet",
+  "TransferAndLockFacet",
+  "TransferAndLockByPartitionFacet",
 
   "CouponSecurityHoldersFacet",
 

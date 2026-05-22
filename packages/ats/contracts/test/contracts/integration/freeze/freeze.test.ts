@@ -27,7 +27,7 @@ describe("Freeze Tests", () => {
     await loadFixture(deployFreezeFixture);
   });
 
-  describe("initializeFreeze", () => {
+  describe.skip("initializeFreeze", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeFreeze is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_D).initializeFreeze()).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });

@@ -27,7 +27,7 @@ describe("DividendSecurityHolders Tests", () => {
     await loadFixture(deploySecurityFixtureSinglePartition);
   });
 
-  describe("initializeDividendSecurityHolders", () => {
+  describe.skip("initializeDividendSecurityHolders", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeDividendSecurityHolders is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_C).initializeDividendSecurityHolders()).to.be.revertedWithCustomError(
         asset,

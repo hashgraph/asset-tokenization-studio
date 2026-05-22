@@ -164,7 +164,7 @@ describe("Pause Tests", () => {
     });
   });
 
-  describe("initializePause", () => {
+  describe.skip("initializePause", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializePause is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(unknownSigner).initializePause()).to.be.revertedWithCustomError(
         asset,

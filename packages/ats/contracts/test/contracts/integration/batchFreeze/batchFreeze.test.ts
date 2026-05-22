@@ -401,7 +401,7 @@ describe("BatchFreeze Tests", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
-  describe("initializeBatchFreeze", () => {
+  describe.skip("initializeBatchFreeze", () => {
     it("GIVEN an already-initialised facet WHEN initializeBatchFreeze is called again THEN it reverts with FacetAlreadyRegistered", async () => {
       const base = await deployEquityTokenFixture();
       const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);

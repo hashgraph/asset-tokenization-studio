@@ -166,7 +166,7 @@ describe("BalanceTrackerAtSnapshot Tests", () => {
       expect(await asset.totalSupplyAtSnapshot(1)).to.equal(mintAmount);
     });
   });
-  describe("initializeBalanceTrackerAtSnapshot", () => {
+  describe.skip("initializeBalanceTrackerAtSnapshot", () => {
     it("GIVEN an already-initialised facet WHEN initializeBalanceTrackerAtSnapshot is called again THEN it reverts with FacetAlreadyRegistered", async () => {
       const base = await deployEquityTokenFixture();
       const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);

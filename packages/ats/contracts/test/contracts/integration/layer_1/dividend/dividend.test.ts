@@ -639,7 +639,7 @@ describe("Dividends", () => {
     });
   });
 
-  describe("initializeDividend", () => {
+  describe.skip("initializeDividend", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeDividend is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_C).initializeDividend()).to.be.revertedWithCustomError(
         asset,

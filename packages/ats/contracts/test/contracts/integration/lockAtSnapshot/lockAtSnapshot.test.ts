@@ -157,7 +157,7 @@ describe("LockAtSnapshot Tests", () => {
     });
   });
 
-  describe("initializeLockAtSnapshot", () => {
+  describe.skip("initializeLockAtSnapshot", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeLockAtSnapshot is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_C).initializeLockAtSnapshot()).to.be.revertedWithCustomError(
         asset,

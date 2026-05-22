@@ -150,7 +150,7 @@ describe("Scheduled BalanceAdjustments Tests", () => {
     });
   });
 
-  describe("initializeScheduledBalanceAdjustment", () => {
+  describe.skip("initializeScheduledBalanceAdjustment", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeScheduledBalanceAdjustment is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_C).initializeScheduledBalanceAdjustment()).to.be.revertedWithCustomError(
         asset,

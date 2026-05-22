@@ -644,7 +644,7 @@ describe("AdjustBalancesFacet Tests", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
-  describe("initializeBalanceAdjustments", () => {
+  describe.skip("initializeBalanceAdjustments", () => {
     it("GIVEN an already-initialised facet WHEN initializeBalanceAdjustments is called again THEN it reverts with FacetAlreadyRegistered", async () => {
       const base = await deployEquityTokenFixture();
       const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);

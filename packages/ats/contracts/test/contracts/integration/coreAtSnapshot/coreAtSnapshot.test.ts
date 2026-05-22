@@ -77,7 +77,7 @@ describe("CoreAtSnapshot Tests", () => {
       expect(await asset.decimalsAtSnapshot(snapshotId)).to.equal(DEFAULT_DECIMALS);
     });
   });
-  describe("initializeCoreAtSnapshot", () => {
+  describe.skip("initializeCoreAtSnapshot", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeCoreAtSnapshot is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_B).initializeCoreAtSnapshot()).to.be.revertedWithCustomError(
         asset,

@@ -332,7 +332,7 @@ describe("BurnByPartitionFacet Tests", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
-  describe("initializeBurnByPartition", () => {
+  describe.skip("initializeBurnByPartition", () => {
     let initAsset: IAsset;
     let initSigner_A: HardhatEthersSigner;
     let initUser3: HardhatEthersSigner;

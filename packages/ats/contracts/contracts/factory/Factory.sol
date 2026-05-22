@@ -49,6 +49,85 @@ import { InterestRateStorageWrapper } from "../domain/asset/InterestRateStorageW
 import { IInterestRate } from "../facets/interestRate/IInterestRate.sol";
 import { EvmAccessors } from "../infrastructure/utils/EvmAccessors.sol";
 import { DatesValidation } from "../infrastructure/utils/DatesValidation.sol";
+import { IAdjustBalances } from "../facets/adjustBalances/IAdjustBalances.sol";
+import { IAllowance } from "../facets/allowance/IAllowance.sol";
+import { IBalanceTracker } from "../facets/balanceTracker/IBalanceTracker.sol";
+import { IBalanceTrackerAdjusted } from "../facets/balanceTrackerAdjusted/IBalanceTrackerAdjusted.sol";
+import { IBalanceTrackerAtSnapshot } from "../facets/balanceTrackerAtSnapshot/IBalanceTrackerAtSnapshot.sol";
+import {
+    IBalanceTrackerAtSnapshotByPartition
+} from "../facets/balanceTrackerAtSnapshotByPartition/IBalanceTrackerAtSnapshotByPartition.sol";
+import { IBalanceTrackerByPartition } from "../facets/balanceTrackerByPartition/IBalanceTrackerByPartition.sol";
+import { IBatchBurn } from "../facets/batchBurn/IBatchBurn.sol";
+import { IBatchController } from "../facets/batchController/IBatchController.sol";
+import { IBatchFreeze } from "../facets/batchFreeze/IBatchFreeze.sol";
+import { IBatchMint } from "../facets/batchMint/IBatchMint.sol";
+import { IBatchTransfer } from "../facets/batchTransfer/IBatchTransfer.sol";
+import { IBurn } from "../facets/burn/IBurn.sol";
+import { IBurnByPartition } from "../facets/burnByPartition/IBurnByPartition.sol";
+import { ICapByPartition } from "../facets/capByPartition/ICapByPartition.sol";
+import { IComplianceFacet } from "../facets/compliance/IComplianceFacet.sol";
+import { IComplianceByPartition } from "../facets/complianceByPartition/IComplianceByPartition.sol";
+import { IControllerByPartition } from "../facets/controllerByPartition/IControllerByPartition.sol";
+import { IControllerHoldByPartition } from "../facets/controllerHoldByPartition/IControllerHoldByPartition.sol";
+import { ICoreAdjusted } from "../facets/coreAdjusted/ICoreAdjusted.sol";
+import { ICoreAtSnapshot } from "../facets/coreAtSnapshot/ICoreAtSnapshot.sol";
+import { ICorporateActions } from "../facets/corporateActions/ICorporateActions.sol";
+import { ICoupon } from "../facets/coupon/ICoupon.sol";
+import { ICouponListing } from "../facets/couponListing/ICouponListing.sol";
+import { ICouponSecurityHolders } from "../facets/couponSecurityHolders/ICouponSecurityHolders.sol";
+import { IDeactivate } from "../facets/deactivate/IDeactivate.sol";
+import { IDividend } from "../facets/dividend/IDividend.sol";
+import { IDividendSecurityHolders } from "../facets/dividendSecurityHolders/IDividendSecurityHolders.sol";
+import { IDocumentation } from "../facets/documentation/IDocumentation.sol";
+import { IEIP712 } from "../facets/eip712/IEIP712.sol";
+import { IFreeze } from "../facets/freeze/IFreeze.sol";
+import { IFreezeAtSnapshot } from "../facets/freezeAtSnapshot/IFreezeAtSnapshot.sol";
+import { IFreezeAtSnapshotByPartition } from "../facets/freezeAtSnapshotByPartition/IFreezeAtSnapshotByPartition.sol";
+import { IHoldFacet } from "../facets/hold/IHoldFacet.sol";
+import { IHoldAtSnapshot } from "../facets/holdAtSnapshot/IHoldAtSnapshot.sol";
+import { IHoldAtSnapshotByPartition } from "../facets/holdAtSnapshotByPartition/IHoldAtSnapshotByPartition.sol";
+import { IHoldByPartition } from "../facets/holdByPartition/IHoldByPartition.sol";
+import { ILock } from "../facets/layer_1/lock/ILock.sol";
+import { ILockAtSnapshot } from "../facets/lockAtSnapshot/ILockAtSnapshot.sol";
+import { ILockAtSnapshotByPartition } from "../facets/lockAtSnapshotByPartition/ILockAtSnapshotByPartition.sol";
+import { ILockByPartition } from "../facets/lockByPartition/ILockByPartition.sol";
+import { IMaturity } from "../facets/maturity/IMaturity.sol";
+import { IMaturityByPartition } from "../facets/maturityByPartition/IMaturityByPartition.sol";
+import { IMetadata } from "../facets/metadata/IMetadata.sol";
+import { IMintByPartition } from "../facets/mintByPartition/IMintByPartition.sol";
+import { INominalValueAtSnapshot } from "../facets/nominalValueAtSnapshot/INominalValueAtSnapshot.sol";
+import { INonces } from "../facets/nonces/INonces.sol";
+import { IOperator } from "../facets/operator/IOperator.sol";
+import { IOperatorByPartition } from "../facets/operatorByPartition/IOperatorByPartition.sol";
+import { IOperatorClearingByPartition } from "../facets/operatorClearingByPartition/IOperatorClearingByPartition.sol";
+import {
+    IOperatorClearingHoldByPartition
+} from "../facets/layer_1/clearing/operatorClearingHoldByPartition/IOperatorClearingHoldByPartition.sol";
+import { IOperatorHoldByPartition } from "../facets/operatorHoldByPartition/IOperatorHoldByPartition.sol";
+import { IPartitions } from "../facets/partitions/IPartitions.sol";
+import { IPause } from "../facets/pause/IPause.sol";
+import { IPrincipal } from "../facets/principal/IPrincipal.sol";
+import { IProtectedByPartition } from "../facets/protectedByPartition/IProtectedByPartition.sol";
+import {
+    IProtectedClearingByPartition
+} from "../facets/protectedClearingByPartition/IProtectedClearingByPartition.sol";
+import {
+    IProtectedClearingHoldByPartition
+} from "../facets/protectedClearingHoldByPartition/IProtectedClearingHoldByPartition.sol";
+import { IProtectedHoldByPartition } from "../facets/protectedHoldByPartition/IProtectedHoldByPartition.sol";
+import { IRecovery } from "../facets/recovery/IRecovery.sol";
+import { IScheduledBalanceAdjustment } from "../facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
+import { ISecurityHolders } from "../facets/securityHolders/ISecurityHolders.sol";
+import { ISecurityHoldersAtSnapshot } from "../facets/securityHoldersAtSnapshot/ISecurityHoldersAtSnapshot.sol";
+import { ISnapshotsByPartition } from "../facets/snapshotsByPartition/ISnapshotsByPartition.sol";
+import { ISsiManagement } from "../facets/ssiManagement/ISsiManagement.sol";
+import { ITransfer } from "../facets/transfer/ITransfer.sol";
+import { ITransferAndLock } from "../facets/layer_3/transferAndLock/ITransferAndLock.sol";
+import { ITransferAndLockByPartition } from "../facets/transferAndLockByPartition/ITransferAndLockByPartition.sol";
+import { ITransferByPartition } from "../facets/transferByPartition/ITransferByPartition.sol";
+import { IVoting } from "../facets/layer_2/voting/IVoting.sol";
+import { IVotingSecurityHolders } from "../facets/votingSecurityHolders/IVotingSecurityHolders.sol";
 
 /**
  * @title Factory
@@ -56,8 +135,8 @@ import { DatesValidation } from "../infrastructure/utils/DatesValidation.sol";
  * @notice Abstract base contract implementing shared deployment logic for ATS securities
  *         (equities, bonds, fixed-rate bonds, and KPI-linked-rate bonds).
  * @dev Concrete subclasses must implement `IFactory`. Each `deploy*` function creates a
- *      `ResolverProxy`, initialises all mandatory facets, and optionally initialises
- *      optional facets through `try…catch` wrappers.
+ *      `ResolverProxy` and initialises all facets. If any initialisation fails the whole
+ *      deployment reverts.
  */
 abstract contract Factory is IFactory {
     modifier checkResolver(IBusinessLogicResolver resolver) {
@@ -134,24 +213,25 @@ abstract contract Factory is IFactory {
     {
         equityAddress_ = _deploySecurity(_equityData.security, SecurityType.Equity);
 
-        // Initialize equity USA features (EquityUSAFacet may not be present)
-        _tryInitializeEquityUSA(equityAddress_, _equityData.equityDetails);
+        IEquityUSA(equityAddress_).initializeEquityUSA(_equityData.equityDetails);
 
-        // Initialize security regulation data (SecurityFacet may not be present)
-        _tryInitializeSecurity(
-            equityAddress_,
+        ISecurity(equityAddress_).initializeSecurity(
             _buildRegulationData(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType),
             _factoryRegulationData.additionalSecurityData
         );
 
-        _tryInitializeNominalValue(
-            equityAddress_,
+        INominalValue(equityAddress_).initializeNominalValue(
             _equityData.equityDetails.nominalValue,
             _equityData.equityDetails.nominalValueDecimals,
             _equityData.equityDetails.currency
         );
 
-        _tryInitializeInterestRateType(equityAddress_, IInterestRate.RateType.STANDARD);
+        IInterestRate(equityAddress_).initializeInterestRateType(IInterestRate.RateType.STANDARD);
+
+        IDividend(equityAddress_).initializeDividend();
+        IDividendSecurityHolders(equityAddress_).initializeDividendSecurityHolders();
+        IVoting(equityAddress_).initializeVoting();
+        IVotingSecurityHolders(equityAddress_).initializeVotingSecurityHolders();
 
         IAccessControl(equityAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
 
@@ -178,7 +258,7 @@ abstract contract Factory is IFactory {
     {
         bondAddress_ = _deployBond(_bondData, _factoryRegulationData, SecurityType.BondVariableRate);
 
-        _tryInitializeInterestRateType(bondAddress_, IInterestRate.RateType.STANDARD);
+        IInterestRate(bondAddress_).initializeInterestRateType(IInterestRate.RateType.STANDARD);
 
         IAccessControl(bondAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
 
@@ -214,10 +294,9 @@ abstract contract Factory is IFactory {
             SecurityType.BondFixedRate
         );
 
-        // Initialize fixed rate (FixedRateFacet may not be present)
-        _tryInitialize_FixedRate(bondAddress_, _bondFixedRateData.fixedRateData);
+        IFixedRate(bondAddress_).initializeFixedRate(_bondFixedRateData.fixedRateData);
 
-        _tryInitializeInterestRateType(bondAddress_, IInterestRate.RateType.FIXED);
+        IInterestRate(bondAddress_).initializeInterestRateType(IInterestRate.RateType.FIXED);
 
         IAccessControl(bondAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
 
@@ -275,33 +354,38 @@ abstract contract Factory is IFactory {
     ) internal returns (address bondAddress_) {
         bondAddress_ = _deploySecurity(_bondData.security, _securityType);
 
-        // Initialize bond USA features (BondUSAFacet may not be present)
-        _tryInitializeBondUSA(bondAddress_, _bondData.bondDetails);
+        IBondUSA(bondAddress_).initializeBondUSA(_bondData.bondDetails);
 
-        // Initialize security regulation data (SecurityFacet may not be present)
-        _tryInitializeSecurity(
-            bondAddress_,
+        ISecurity(bondAddress_).initializeSecurity(
             _buildRegulationData(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType),
             _factoryRegulationData.additionalSecurityData
         );
 
-        // Initialize proceed recipients (ProceedRecipientsFacet may not be present)
-        _tryInitialize_ProceedRecipients(bondAddress_, _bondData.proceedRecipients, _bondData.proceedRecipientsData);
+        IProceedRecipients(bondAddress_).initializeProceedRecipients(
+            _bondData.proceedRecipients,
+            _bondData.proceedRecipientsData
+        );
 
-        _tryInitializeNominalValue(
-            bondAddress_,
+        INominalValue(bondAddress_).initializeNominalValue(
             _bondData.bondDetails.nominalValue,
             _bondData.bondDetails.nominalValueDecimals,
             _bondData.bondDetails.currency
         );
+
+        ICoupon(bondAddress_).initializeCoupon();
+        ICouponListing(bondAddress_).initializeCouponListing();
+        ICouponSecurityHolders(bondAddress_).initializeCouponSecurityHolders();
+        IMaturity(bondAddress_).initializeMaturity();
+        IMaturityByPartition(bondAddress_).initializeMaturityByPartition();
+        IPrincipal(bondAddress_).initializePrincipal();
+        IBondRead(bondAddress_).initializeBondUSARead();
     }
 
     function _deployBondKpiLinkedRate(BondKpiLinkedRateData calldata _data) internal returns (address bondAddress_) {
         bondAddress_ = _deployBond(_data.bondData, _data.factoryRegulationData, SecurityType.BondKpiLinkedRate);
 
-        // Initialize KPI linked rate (KpiLinkedRateFacet may not be present)
-        _tryInitializeKpiLinkedRate(bondAddress_, _data.interestRate, _data.impactData);
-        _tryInitializeInterestRateType(bondAddress_, IInterestRate.RateType.KPI_LINKED);
+        IKpiLinkedRate(bondAddress_).initializeKpiLinkedRate(_data.interestRate, _data.impactData);
+        IInterestRate(bondAddress_).initializeInterestRateType(IInterestRate.RateType.KPI_LINKED);
     }
 
     //solhint-disable-next-line function-max-lines
@@ -334,178 +418,236 @@ abstract contract Factory is IFactory {
         // configure Control List
         IControlList(securityAddress_).initializeControlList(_securityData.isWhiteList);
 
-        // configure multi partition flag (ERC1410ManagementFacet may not be present)
-        _tryInitialize_ERC1410(securityAddress_, _securityData.isMultiPartition);
+        // configure multi partition flag
+        IERC1410Management(securityAddress_).initializeERC1410(_securityData.isMultiPartition);
 
-        // configure controller flag (ControllerFacet may not be present)
-        _tryInitializeController(securityAddress_, _securityData.isControllable);
+        // configure controller flag
+        IController(securityAddress_).initializeController(_securityData.isControllable);
 
-        // configure erc20 metadata (CoreFacet may not be present)
+        // configure erc20 metadata
         ICore.ERC20Metadata memory erc20Metadata = ICore.ERC20Metadata({
             info: _securityData.erc20MetadataInfo,
             securityType: _securityType
         });
         ICore(securityAddress_).initializeCore(erc20Metadata);
 
-        // configure issue flag (ERC1594Facet may not be present)
-        _tryInitialize_ERC1594(securityAddress_);
+        // configure issue flag
+        IMint(securityAddress_).initializeERC1594();
 
-        // configure cap (CapFacet should be present)
+        // configure cap
         ICap(securityAddress_).initializeCap(_securityData.maxSupply, new ICap.PartitionCap[](0));
 
-        // configure protected partitions (should be present)
+        // configure protected partitions
         IProtectedPartitions(securityAddress_).initializeProtectedPartitions(_securityData.arePartitionsProtected);
 
-        // configure clearing (ClearingFacet may not be present)
-        _tryInitializeClearing(securityAddress_, _securityData.clearingActive);
+        // configure clearing
+        IClearing(securityAddress_).initializeClearing(_securityData.clearingActive);
 
-        // configure external pauses (should be present)
+        // configure external pauses
         IExternalPauseManagement(securityAddress_).initializeExternalPauses(_securityData.externalPauses);
 
-        // configure external control lists (should be present)
+        // configure external control lists
         IExternalControlListManagement(securityAddress_).initializeExternalControlLists(
             _securityData.externalControlLists
         );
 
-        // configure internal KYC (should be present)
+        // configure internal KYC
         IKyc(securityAddress_).initializeInternalKyc(_securityData.internalKycActivated);
 
-        // configure external KYC lists (should be present)
+        // configure external KYC lists
         IExternalKycListManagement(securityAddress_).initializeExternalKycLists(_securityData.externalKycLists);
 
-        // configure ERC20Votes (ERC20VotesFacet may not be present)
-        _tryInitialize_ERC20Votes(securityAddress_, _securityData.erc20VotesActivated);
+        // configure ERC20Votes
+        IERC20Votes(securityAddress_).initializeERC20Votes(_securityData.erc20VotesActivated);
 
-        // configure ERC3643 (should be present)
+        // configure ERC3643
         IERC3643(securityAddress_).initializeERC3643(_securityData.compliance, _securityData.identityRegistry);
-    }
 
-    function _tryInitialize_ERC1410(address securityAddress_, bool isMultiPartition) private {
-        try IERC1410Management(securityAddress_).initializeERC1410(isMultiPartition) {
-            // success
-        } catch {
-            // facet not present - skip initialization
-        }
-    }
+        // configure access control
+        IAccessControl(securityAddress_).initializeAccessControl();
 
-    function _tryInitializeController(address securityAddress_, bool isControllable) private {
-        try IController(securityAddress_).initializeController(isControllable) {
-            // success
-        } catch {
-            // facet not present - skip initialization
-        }
-    }
+        // configure allowance
+        IAllowance(securityAddress_).initializeAllowance();
 
-    function _tryInitialize_ERC1594(address securityAddress_) private {
-        try IMint(securityAddress_).initializeERC1594() {
-            // success
-        } catch {
-            // facet not present - skip initialization
-        }
-    }
+        // configure transfer
+        ITransfer(securityAddress_).initializeTransfer();
 
-    function _tryInitializeClearing(address securityAddress_, bool clearingActive) private {
-        try IClearing(securityAddress_).initializeClearing(clearingActive) {
-            // success
-        } catch {
-            // facet not present - skip initialization
-        }
-    }
+        // configure core adjusted
+        ICoreAdjusted(securityAddress_).initializeCoreAdjusted();
 
-    function _tryInitialize_ERC20Votes(address securityAddress_, bool erc20VotesActivated) private {
-        try IERC20Votes(securityAddress_).initializeERC20Votes(erc20VotesActivated) {
-            // success
-        } catch {
-            // facet not present - skip initialization
-        }
-    }
+        // configure metadata
+        IMetadata(securityAddress_).initializeMetadata();
 
-    function _tryInitializeEquityUSA(
-        address securityAddress_,
-        IEquityUSA.EquityDetailsData calldata equityDetailsData
-    ) private {
-        try IEquityUSA(securityAddress_).initializeEquityUSA(equityDetailsData) {
-            // success
-        } catch {
-            // facet not present - skip initialization
-        }
-    }
+        // configure freeze
+        IFreeze(securityAddress_).initializeFreeze();
 
-    function _tryInitializeSecurity(
-        address securityAddress_,
-        RegulationData memory regulationData,
-        AdditionalSecurityData calldata additionalSecurityData
-    ) private {
-        try ISecurity(securityAddress_).initializeSecurity(regulationData, additionalSecurityData) {
-            // success
-        } catch {
-            // facet not present - skip initialization
-        }
-    }
+        // configure batch freeze
+        IBatchFreeze(securityAddress_).initializeBatchFreeze();
 
-    function _tryInitializeBondUSA(
-        address securityAddress_,
-        IBondRead.BondDetailsData calldata bondDetailsData
-    ) private {
-        try IBondUSA(securityAddress_).initializeBondUSA(bondDetailsData) {
-            // success
-        } catch {
-            // facet not present - skip initialization
-        }
-    }
+        // configure pause
+        IPause(securityAddress_).initializePause();
 
-    function _tryInitialize_FixedRate(
-        address securityAddress_,
-        IFixedRate.FixedRateData calldata fixedRateData
-    ) private {
-        try IFixedRate(securityAddress_).initializeFixedRate(fixedRateData) {
-            // success
-        } catch {
-            // facet not present - skip initialization
-        }
-    }
+        // configure balance tracker
+        IBalanceTracker(securityAddress_).initializeBalanceTracker();
 
-    function _tryInitializeKpiLinkedRate(
-        address securityAddress_,
-        IKpiLinkedRate.InterestRate calldata interestRate,
-        IKpiLinkedRate.ImpactData calldata impactData
-    ) private {
-        try IKpiLinkedRate(securityAddress_).initializeKpiLinkedRate(interestRate, impactData) {
-            // success
-        } catch {
-            // facet not present - skip initialization
-        }
-    }
+        // configure balance tracker adjusted
+        IBalanceTrackerAdjusted(securityAddress_).initializeBalanceTrackerAdjusted();
 
-    function _tryInitialize_ProceedRecipients(
-        address securityAddress_,
-        address[] calldata proceedRecipients,
-        bytes[] calldata data
-    ) private {
-        try IProceedRecipients(securityAddress_).initializeProceedRecipients(proceedRecipients, data) {
-            // success
-        } catch {
-            // facet not present - skip initialization
-        }
-    }
+        // configure snapshots by partition
+        ISnapshotsByPartition(securityAddress_).initializeSnapshotsByPartition();
 
-    function _tryInitializeNominalValue(
-        address securityAddress_,
-        uint256 nominalValue,
-        uint8 nominalValueDecimals,
-        bytes3 nominalValueCurrency
-    ) private {
-        try
-            INominalValue(securityAddress_).initializeNominalValue(
-                nominalValue,
-                nominalValueDecimals,
-                nominalValueCurrency
-            )
-        {
-            // success
-        } catch {
-            // facet not present - skip initialization
-        }
+        // configure security holders at snapshot
+        ISecurityHoldersAtSnapshot(securityAddress_).initializeSecurityHoldersAtSnapshot();
+
+        // configure hold at snapshot
+        IHoldAtSnapshot(securityAddress_).initializeHoldAtSnapshot();
+
+        // configure lock at snapshot by partition
+        ILockAtSnapshotByPartition(securityAddress_).initializeLockAtSnapshotByPartition();
+
+        // configure freeze at snapshot
+        IFreezeAtSnapshot(securityAddress_).initializeFreezeAtSnapshot();
+
+        // configure freeze at snapshot by partition
+        IFreezeAtSnapshotByPartition(securityAddress_).initializeFreezeAtSnapshotByPartition();
+
+        // configure lock at snapshot
+        ILockAtSnapshot(securityAddress_).initializeLockAtSnapshot();
+
+        // configure core at snapshot
+        ICoreAtSnapshot(securityAddress_).initializeCoreAtSnapshot();
+
+        // configure balance tracker by partition
+        IBalanceTrackerByPartition(securityAddress_).initializeBalanceTrackerByPartition();
+
+        // configure balance tracker at snapshot
+        IBalanceTrackerAtSnapshot(securityAddress_).initializeBalanceTrackerAtSnapshot();
+
+        // configure balance tracker at snapshot by partition
+        IBalanceTrackerAtSnapshotByPartition(securityAddress_).initializeBalanceTrackerAtSnapshotByPartition();
+
+        // configure hold at snapshot by partition
+        IHoldAtSnapshotByPartition(securityAddress_).initializeHoldAtSnapshotByPartition();
+
+        // configure mint by partition
+        IMintByPartition(securityAddress_).initializeMintByPartition();
+
+        // configure protected by partition
+        IProtectedByPartition(securityAddress_).initializeProtectedByPartition();
+
+        // configure operator
+        IOperator(securityAddress_).initializeOperator();
+
+        // configure transfer by partition
+        ITransferByPartition(securityAddress_).initializeTransferByPartition();
+
+        // configure partitions
+        IPartitions(securityAddress_).initializePartitions();
+
+        // configure operator by partition
+        IOperatorByPartition(securityAddress_).initializeOperatorByPartition();
+
+        // configure burn by partition
+        IBurnByPartition(securityAddress_).initializeBurnByPartition();
+
+        // configure documentation
+        IDocumentation(securityAddress_).initializeDocumentation();
+
+        // configure EIP712
+        IEIP712(securityAddress_).initializeEIP712();
+
+        // configure nonces
+        INonces(securityAddress_).initializeNonces();
+
+        // configure deactivate
+        IDeactivate(securityAddress_).initializeDeactivate();
+
+        // configure batch controller
+        IBatchController(securityAddress_).initializeBatchController();
+
+        // configure batch burn
+        IBatchBurn(securityAddress_).initializeBatchBurn();
+
+        // configure batch mint
+        IBatchMint(securityAddress_).initializeBatchMint();
+
+        // configure batch transfer
+        IBatchTransfer(securityAddress_).initializeBatchTransfer();
+
+        // configure recovery
+        IRecovery(securityAddress_).initializeRecovery();
+
+        // configure compliance
+        IComplianceFacet(securityAddress_).initializeCompliance();
+
+        // configure compliance by partition
+        IComplianceByPartition(securityAddress_).initializeComplianceByPartition();
+
+        // configure burn
+        IBurn(securityAddress_).initializeBurn();
+
+        // configure protected clearing hold by partition
+        IProtectedClearingHoldByPartition(securityAddress_).initializeProtectedClearingHoldByPartition();
+
+        // configure operator clearing hold by partition
+        IOperatorClearingHoldByPartition(securityAddress_).initializeOperatorClearingHoldByPartition();
+
+        // configure operator clearing by partition
+        IOperatorClearingByPartition(securityAddress_).initializeOperatorClearingByPartition();
+
+        // configure protected clearing by partition
+        IProtectedClearingByPartition(securityAddress_).initializeProtectedClearingByPartition();
+
+        // configure hold
+        IHoldFacet(securityAddress_).initializeHold();
+
+        // configure operator hold by partition
+        IOperatorHoldByPartition(securityAddress_).initializeOperatorHoldByPartition();
+
+        // configure controller hold by partition
+        IControllerHoldByPartition(securityAddress_).initializeControllerHoldByPartition();
+
+        // configure controller by partition
+        IControllerByPartition(securityAddress_).initializeControllerByPartition();
+
+        // configure protected hold by partition
+        IProtectedHoldByPartition(securityAddress_).initializeProtectedHoldByPartition();
+
+        // configure hold by partition
+        IHoldByPartition(securityAddress_).initializeHoldByPartition();
+
+        // configure balance adjustments
+        IAdjustBalances(securityAddress_).initializeBalanceAdjustments();
+
+        // configure scheduled balance adjustment
+        IScheduledBalanceAdjustment(securityAddress_).initializeScheduledBalanceAdjustment();
+
+        // configure lock
+        ILock(securityAddress_).initializeLock();
+
+        // configure lock by partition
+        ILockByPartition(securityAddress_).initializeLockByPartition();
+
+        // configure nominal value at snapshot
+        INominalValueAtSnapshot(securityAddress_).initializeNominalValueAtSnapshot();
+
+        // configure security holders
+        ISecurityHolders(securityAddress_).initializeSecurityHolders();
+
+        // configure SSI management
+        ISsiManagement(securityAddress_).initializeSsiManagement();
+
+        // configure corporate actions
+        ICorporateActions(securityAddress_).initializeCorporateActions();
+
+        // configure transfer and lock
+        ITransferAndLock(securityAddress_).initializeTransferAndLock();
+
+        // configure transfer and lock by partition
+        ITransferAndLockByPartition(securityAddress_).initializeTransferAndLockByPartition();
+
+        // configure cap by partition
+        ICapByPartition(securityAddress_).initializeCapByPartition();
     }
 
     function _emitBondKpiLinkedRateDeployed(
@@ -513,14 +655,6 @@ abstract contract Factory is IFactory {
         BondKpiLinkedRateData calldata _bondKpiLinkedRateData
     ) private {
         emit BondKpiLinkedRateDeployed(EvmAccessors.getMsgSender(), _bondAddress, _bondKpiLinkedRateData);
-    }
-
-    function _tryInitializeInterestRateType(address securityAddress_, IInterestRate.RateType rateType) private {
-        try IInterestRate(securityAddress_).initializeInterestRateType(rateType) {
-            // success
-        } catch {
-            // facet not present - skip initialization
-        }
     }
 
     function _checkBondDates(uint256 startingDate, uint256 maturityDate) private view {

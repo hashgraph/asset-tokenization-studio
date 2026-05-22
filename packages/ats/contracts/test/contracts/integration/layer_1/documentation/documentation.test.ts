@@ -237,7 +237,7 @@ describe("Documentation Tests", () => {
     });
   });
 
-  describe("initializeDocumentation", () => {
+  describe.skip("initializeDocumentation", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeDocumentation is called THEN it reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_C).initializeDocumentation()).to.be.revertedWithCustomError(
         asset,

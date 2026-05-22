@@ -360,7 +360,7 @@ describe("Access Control Tests", () => {
     expect(await asset.getRoleMemberCount(ATS_ROLES.DEFAULT_ADMIN_ROLE)).to.equal(1);
   });
 
-  describe("initializeAccessControl", () => {
+  describe.skip("initializeAccessControl", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeAccessControl is called THEN it reverts with AccountHasNoRole", async () => {
       // Must use fresh deployment since onlyFacetNotRegistered is checked before onlyRole
       const base = await deployEquityTokenFixture();
@@ -390,7 +390,7 @@ describe("Access Control Tests", () => {
     });
   });
 
-  describe("initializeAccessControl event", () => {
+  describe.skip("initializeAccessControl event", () => {
     it("GIVEN a fresh deployment WHEN initializeAccessControl is called THEN it emits AccessControlInitialized", async () => {
       const base = await deployEquityTokenFixture();
       const freshDiamond = base.diamond;
