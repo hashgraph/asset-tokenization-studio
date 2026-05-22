@@ -13,10 +13,12 @@ import UpdateResolverRequest from "../request/management/UpdateResolverRequest";
 import { UpdateResolverCommand } from "@command/management/updateResolver/updateResolverCommand";
 import ContractId from "@domain/context/contract/ContractId";
 import { GetConfigInfoQuery } from "@query/management/GetConfigInfoQuery";
+import { ResolveLatestConfigVersionQuery } from "@query/management/resolveLatestConfigVersion/ResolveLatestConfigVersionQuery";
 import ConfigInfoViewModel from "../response/ConfigInfoViewModel";
 
 import { lazyInject } from "@core/decorator/LazyInjectDecorator";
 import { UpdateConfigRequest } from "../request";
+import ResolveLatestConfigVersionRequest from "../request/management/ResolveLatestConfigVersionRequest";
 import { UpdateConfigCommand } from "@command/management/updateConfig/updateConfigCommand";
 import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
 
@@ -25,6 +27,7 @@ interface IManagementInPort {
   updateConfig(request: UpdateConfigRequest): Promise<{ payload: boolean; transactionId: string }>;
 
   getConfigInfo(request: GetConfigInfoRequest): Promise<ConfigInfoViewModel>;
+  resolveLatestConfigVersion(request: ResolveLatestConfigVersionRequest): Promise<{ payload: number }>;
   updateResolver(request: UpdateResolverRequest): Promise<{ payload: boolean; transactionId: string }>;
 }
 
@@ -76,6 +79,17 @@ class ManagementInPort implements IManagementInPort {
       configId,
       configVersion,
     };
+  }
+
+  @LogError
+  async resolveLatestConfigVersion(request: ResolveLatestConfigVersionRequest): Promise<{ payload: number }> {
+    ValidatedRequest.handleValidation("ResolveLatestConfigVersionRequest", request);
+
+    const { payload } = await this.queryBus.execute(
+      new ResolveLatestConfigVersionQuery(request.resolverAddress, request.configurationId),
+    );
+
+    return { payload };
   }
 }
 

@@ -29,6 +29,7 @@ import {
   MockedExternalPause__factory,
   MockedWhitelist__factory,
   TREXFactoryAts__factory,
+  DiamondCutManager__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { ScheduledSnapshot } from "@domain/context/security/ScheduledSnapshot";
 import { VotingRights } from "@domain/context/equity/VotingRights";
@@ -791,6 +792,18 @@ export class RPCQueryAdapter {
     const configInfo = await this.connect(IAsset__factory, address.toString()).getConfigInfo();
 
     return [configInfo.resolver_.toString(), configInfo.configurationId_, Number(configInfo.version_)];
+  }
+
+  async getLatestVersionByConfiguration(resolverAddress: EvmAddress, configurationId: string): Promise<number> {
+    LogService.logTrace(
+      `Getting latest configuration version for resolver ${resolverAddress.toString()} and configurationId ${configurationId}`,
+    );
+    const latestVersion = await this.connect(
+      DiamondCutManager__factory,
+      resolverAddress.toString(),
+    ).getLatestVersionByConfiguration(configurationId);
+
+    return Number(latestVersion);
   }
 
   async getScheduledBalanceAdjustment(
