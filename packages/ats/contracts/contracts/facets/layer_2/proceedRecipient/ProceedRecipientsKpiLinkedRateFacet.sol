@@ -6,10 +6,26 @@ import { ProceedRecipients } from "./ProceedRecipients.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../../infrastructure/proxy/Bytes4Builder.sol";
 import { _PROCEED_RECIPIENTS_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
-import { PROCEED_RECIPIENT_MANAGER_ROLE } from "../../../constants/roles.sol";
+import { DEFAULT_ADMIN_ROLE, PROCEED_RECIPIENT_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { ScheduledTasksOps } from "../../../domain/orchestrator/ScheduledTasksOps.sol";
+import { ProceedRecipientsStorageWrapper } from "../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
 
 contract ProceedRecipientsKpiLinkedRateFacet is ProceedRecipients, IStaticFunctionSelectors {
+    function initializeProceedRecipients(
+        address[] calldata _proceedRecipients,
+        bytes[] calldata _data
+    )
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_PROCEED_RECIPIENTS_KPI_LINKED_RATE_RESOLVER_KEY)
+    {
+        ProceedRecipientsStorageWrapper.initializeProceedRecipients(_proceedRecipients, _data);
+        InitializerStorageWrapper.setFacetToReady(_PROCEED_RECIPIENTS_KPI_LINKED_RATE_RESOLVER_KEY);
+        emit IProceedRecipients.ProceedRecipientsInitialized(_proceedRecipients, _data);
+    }
+
     function addProceedRecipient(
         address _proceedRecipient,
         bytes calldata _data
