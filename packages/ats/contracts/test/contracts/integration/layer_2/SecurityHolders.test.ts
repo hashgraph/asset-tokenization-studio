@@ -493,4 +493,31 @@ describe("SecurityHoldersFacet Tests", () => {
       expect(slotValue).to.equal(ethers.ZeroHash);
     });
   });
+
+  describe("removeTokenHolder unregistered holder guard", () => {
+    let mock: MockERC1410StorageWrapper;
+
+    beforeEach(async () => {
+      const factory = await ethers.getContractFactory("MockERC1410StorageWrapper");
+      mock = (await factory.deploy()) as unknown as MockERC1410StorageWrapper;
+      await mock.waitForDeployment();
+    });
+
+    it("GIVEN an unregistered address WHEN removeTokenHolder is called THEN reverts with UnexpectedError", async () => {
+      await expect(mock.exposed_removeTokenHolder(signer_B.address))
+        .to.be.revertedWithCustomError(mock, "UnexpectedError")
+        .withArgs("0x0000000c");
+    });
+
+    it("GIVEN a registered holder WHEN removeTokenHolder is called THEN succeeds and holder count decrements", async () => {
+      await mock.exposed_addNewTokenHolder(signer_B.address);
+
+      expect(await mock.exposed_getTotalTokenHolders()).to.equal(1);
+
+      await mock.exposed_removeTokenHolder(signer_B.address);
+
+      expect(await mock.exposed_getTotalTokenHolders()).to.equal(0);
+      expect(await mock.exposed_getTokenHolderIndex(signer_B.address)).to.equal(0);
+    });
+  });
 });
