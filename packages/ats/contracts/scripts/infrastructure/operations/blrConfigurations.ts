@@ -466,8 +466,9 @@ export async function createBatchConfiguration(
 
     // Recover from a partial batch left by a previous crashed run.
     // A non-zero batchVersion is detectable by querying version currentVersion+1:
-    // _resolveVersion returns explicit versions as-is, so if any facets were
-    // written to that slot the array will be non-empty.
+    // every read helper in DiamondCutManager requires an explicit non-zero
+    // version (it reverts `VersionZero` on 0), so if any facets were written to
+    // that slot the array will be non-empty.
     const currentVersion = await getConfigurationVersion(blrContract, configurationId);
     const ongoingBatchFacets = await blrContract.getFacetIdsByConfigurationIdAndVersion(
       configurationId,

@@ -25,6 +25,7 @@ abstract contract Recovery is IRecovery, Modifiers {
         onlyUnpaused
         onlyRole(ROLE_AGENT)
         onlyUnrecoveredAddress(_lostWallet)
+        onlyUnrecoveredAddress(_newWallet)
         onlyEmptyWallet(_lostWallet)
         onlyWithoutMultiPartition
         returns (bool success_)

@@ -126,12 +126,12 @@ contracts/
 
 ### Domain: Storage Wrappers (formerly Layer 0)
 
-Provide type-safe access to Diamond storage, split into **core** and **asset** subdomains:
+Provide type-safe access to Diamond storage, split into **core** and **asset** subdomains. Every storage struct lives at file scope in `*StorageWrapper.sol` and is anchored at a deterministic slot via the ERC-7201 `@custom:storage-location erc7201:security.token.standard.storage.<PascalName>` annotation; the struct body follows the 5-region layout (R1 lifecycle bools → R2 packed scalars → R3 single-slot scalars → R4 aggregates → APPEND-ONLY ZONE).
 
 **Core** (cross-cutting concerns):
 
 - **ERC1400StorageWrapper** - Token state and partition data
-- **ERC20StorageWrapper** - ERC20 balances and total supply (with lazy migration from legacy storage)
+- **ERC20StorageWrapper** - ERC20 balances and total supply
 - **KycStorageWrapper** - KYC and identity management
 - **CapStorageWrapper** - Supply cap and issuance limits
 - **AccessControlStorageWrapper** - Role-based permissions
@@ -139,11 +139,12 @@ Provide type-safe access to Diamond storage, split into **core** and **asset** s
 
 **Asset** (asset-type-specific storage):
 
-- **BondStorageWrapper** - Bond-specific data (coupons, maturity, nominal value)
-- **EquityStorageWrapper** - Equity-specific data (dividends, nominal value)
+- **SecurityStorageWrapper** - Persistent regulation payload (`RegulationData` + `AdditionalSecurityData`) for the security. Identity fields (`name`, `symbol`, `isin`, `securityType`) stay in `ERC20StorageWrapper`.
+- **BondStorageWrapper** - Bond-specific data (coupons, maturity)
+- **EquityStorageWrapper** - Equity-specific data (dividends, voting/information/liquidation/subscription rights)
 - **VotingStorageWrapper** - Voting rights data (separated from equity storage)
 - **CorporateActionsStorageWrapper** - Corporate action lifecycle and cancellation state
-- **NominalValueStorageWrapper** - Dedicated nominal value storage with migration support
+- **NominalValueStorageWrapper** - Nominal value and denomination currency (single source of truth for currency across Bond/Equity)
 
 **Purpose**: Storage isolation per feature for safe upgradeability
 

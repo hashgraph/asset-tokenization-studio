@@ -6,8 +6,7 @@ import { Modifiers } from "../../../../services/Modifiers.sol";
 import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
 
 abstract contract ERC1410Management is IERC1410Management, Modifiers {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1410(bool _multiPartition) external override onlyNotERC1410Initialized {
-        ERC1410StorageWrapper.initialize_ERC1410(_multiPartition);
+    function initializeERC1410(bool _multiPartition) external override onlyNotERC1410Initialized {
+        ERC1410StorageWrapper.initializeERC1410(_multiPartition);
     }
 }

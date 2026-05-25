@@ -128,21 +128,22 @@ modifier onlyBondManager() {
 
 ### Storage Documentation
 
-Document storage structures and state variables:
+Storage structs live at **file scope** in `*StorageWrapper.sol` (never inside a contract or interface) and carry an ERC-7201 `@custom:storage-location erc7201:security.token.standard.storage.<PascalName>` annotation. The annotation argument shares the same PascalCase suffix as the paired `STORAGE_LOCATION_*` bytes32 constant — see `.claude/rules/20-solidity/conventions.md` §6 and `hash-constants-naming.md` §3 for the full 5-region layout convention.
 
 ```solidity
-/**
- * @notice Bond configuration and state data
- * @dev Stored in Diamond storage pattern to support upgradeability
- * @custom:storage-location erc1967:bondFacet.storage
- */
-struct BondStorage {
-  /// @notice Mapping of security addresses to their bond configurations
-  mapping(address => BondConfig) bondConfigs;
-  /// @notice Mapping of security and coupon date to payment records
-  mapping(address => mapping(uint256 => CouponPayment)) couponPayments;
-  /// @notice The default payment token for coupon distributions
+/// @custom:hash storage Bond
+bytes32 constant STORAGE_LOCATION_BOND = 0x0000000000000000000000000000000000000000000000000000000000000000;
+
+/// @custom:storage-location erc7201:security.token.standard.storage.Bond
+struct BondDataStorage {
+  // ─── R1 Lifecycle (bool flags) ───────────────────────────
+  bool initialized;
+  // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
   address defaultPaymentToken;
+  // ─── R4 Aggregates (mapping, array, EnumerableSet, checkpoint arrays) ──
+  mapping(address => BondConfig) bondConfigs;
+  mapping(address => mapping(uint256 => CouponPayment)) couponPayments;
+  // ─── APPEND-ONLY ZONE BELOW ───
 }
 ```
 

@@ -11,6 +11,7 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title ControllerHoldByPartition
+ * @author Asset Tokenization Studio Team
  * @notice Implementation of the ControllerHoldByPartition domain.
  * @dev Routes hold creation through `HoldOps.createHoldByPartition` (deployed orchestrator
  *      library, DELEGATECALL) tagged with `ThirdPartyType.CONTROLLER`, so the storage-
