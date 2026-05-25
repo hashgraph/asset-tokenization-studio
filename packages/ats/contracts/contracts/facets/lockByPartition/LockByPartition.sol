@@ -43,16 +43,10 @@ abstract contract LockByPartition is ILockByPartition, Modifiers {
         onlyValidExpirationTimestamp(_expirationTimestamp)
         onlyUnrecoveredAddress(_tokenHolder)
         onlyDefaultPartitionWithSinglePartition(_partition)
-        returns (bool success_, uint256 lockId_)
+        returns (uint256 lockId_)
     {
         address sender = EvmAccessors.getMsgSender();
-        (success_, lockId_) = LockStorageWrapper.lockByPartition(
-            _partition,
-            _amount,
-            _tokenHolder,
-            _expirationTimestamp,
-            sender
-        );
+        lockId_ = LockStorageWrapper.lockByPartition(_partition, _amount, _tokenHolder, _expirationTimestamp, sender);
         emit LockedByPartition(sender, _tokenHolder, _partition, lockId_, _amount, _expirationTimestamp);
     }
 

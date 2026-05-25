@@ -57,7 +57,6 @@ library LockStorageWrapper {
      * @param tokenHolder Holder whose tokens are being locked.
      * @param expirationTimestamp Unix timestamp from which the lock becomes releasable.
      * @param operator Address that authored the lock; surfaced in the emitted ERC1410 event.
-     * @return success_ Always `true` on successful return; the function reverts otherwise.
      * @return lockId_ The freshly-minted identifier assigned to this lock.
      */
     function lockByPartition(
@@ -66,7 +65,7 @@ library LockStorageWrapper {
         address tokenHolder,
         uint256 expirationTimestamp,
         address operator
-    ) internal returns (bool success_, uint256 lockId_) {
+    ) internal returns (uint256 lockId_) {
         checkNonZeroLockAmount(amount);
 
         _prepareLock(partition, tokenHolder);
@@ -78,7 +77,7 @@ library LockStorageWrapper {
 
         _emitLockEvents(partition, operator, tokenHolder, amount);
 
-        return (true, lockId_);
+        return (lockId_);
     }
 
     /**
