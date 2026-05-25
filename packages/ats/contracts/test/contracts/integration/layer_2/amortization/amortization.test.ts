@@ -253,7 +253,7 @@ describe("AmortizationFacet", () => {
     let amortizationData: Awaited<ReturnType<typeof makeAmortizationData>>;
 
     beforeEach(async () => {
-      await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, user2.address);
       await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, user2.address);
       amortizationData = await makeAmortizationData();
       await asset.connect(user2).setAmortization(amortizationData);

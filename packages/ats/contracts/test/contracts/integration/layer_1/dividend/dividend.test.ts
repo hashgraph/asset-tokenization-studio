@@ -616,7 +616,7 @@ describe("Dividends", () => {
 
   describe("Force Cancel Dividend", () => {
     it("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelDividend before execution date THEN transaction succeeds and isDisabled is true", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
       await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C.address);
 
       await asset.connect(signer_C).setDividend(dividendData);
@@ -628,7 +628,7 @@ describe("Dividends", () => {
     });
 
     it("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelDividend after execution date THEN transaction succeeds bypassing date guard", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
       await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C.address);
 
       await asset.connect(signer_C).setDividend(dividendData);
@@ -642,7 +642,7 @@ describe("Dividends", () => {
     });
 
     it("GIVEN account without ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelDividend THEN transaction fails with AccountHasNoRole", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_B.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_B.address);
 
       await asset.connect(signer_B).setDividend(dividendData);
 
@@ -653,7 +653,7 @@ describe("Dividends", () => {
     });
 
     it("GIVEN paused token WHEN forceCancelDividend THEN transaction fails with IsPaused", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_B.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_B.address);
       await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_B.address);
 
       await asset.connect(signer_B).setDividend(dividendData);

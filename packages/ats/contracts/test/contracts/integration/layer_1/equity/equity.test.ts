@@ -904,7 +904,7 @@ describe("Equity Tests", () => {
 
     describe("Force Cancel Voting", () => {
       it("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelVoting before record date THEN transaction succeeds and isDisabled is true", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
         await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C.address);
 
         await asset.connect(signer_C).setVoting(votingData);
@@ -916,7 +916,7 @@ describe("Equity Tests", () => {
       });
 
       it("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelVoting after record date THEN transaction succeeds bypassing date guard", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
         await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C.address);
 
         await asset.connect(signer_C).setVoting(votingData);
@@ -930,7 +930,7 @@ describe("Equity Tests", () => {
       });
 
       it("GIVEN account without ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelVoting THEN transaction fails with AccountHasNoRole", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_B.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_B.address);
 
         await asset.connect(signer_B).setVoting(votingData);
 
@@ -941,7 +941,7 @@ describe("Equity Tests", () => {
       });
 
       it("GIVEN paused token WHEN forceCancelVoting THEN transaction fails with IsPaused", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_B.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_B.address);
         await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_B.address);
 
         await asset.connect(signer_B).setVoting(votingData);

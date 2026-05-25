@@ -648,7 +648,7 @@ describe("Coupon Tests", () => {
 
   describe("Force Cancel Coupon", () => {
     it("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelCoupon before execution date THEN transaction succeeds and isDisabled is true", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C);
       await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C);
 
       await asset.connect(signer_C).setCoupon(couponData);
@@ -661,7 +661,7 @@ describe("Coupon Tests", () => {
     });
 
     it("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelCoupon after execution date THEN transaction succeeds bypassing date guard", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C);
       await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C);
 
       await asset.connect(signer_C).setCoupon(couponData);
@@ -676,7 +676,7 @@ describe("Coupon Tests", () => {
     });
 
     it("GIVEN account without ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelCoupon THEN transaction fails with AccountHasNoRole", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C);
 
       await asset.connect(signer_C).setCoupon(couponData);
 
@@ -687,7 +687,7 @@ describe("Coupon Tests", () => {
     });
 
     it("GIVEN paused token WHEN forceCancelCoupon THEN transaction fails with IsPaused", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C);
       await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C);
 
       await asset.connect(signer_C).setCoupon(couponData);
