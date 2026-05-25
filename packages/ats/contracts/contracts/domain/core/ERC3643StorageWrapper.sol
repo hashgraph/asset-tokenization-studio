@@ -342,6 +342,10 @@ library ERC3643StorageWrapper {
         address _investorOnchainID,
         uint256 _timestamp
     ) internal returns (bool) {
+        ERC3643Storage storage $ = erc3643Storage();
+        $.addressRecovered[_lostWallet] = true;
+        $.addressRecovered[_newWallet] = false;
+
         uint256 frozenBalance = getFrozenAmountForAdjustedAt(_lostWallet, _timestamp);
         if (frozenBalance > 0) {
             unfreezeTokens(_lostWallet, frozenBalance, _timestamp);
@@ -356,9 +360,6 @@ library ERC3643StorageWrapper {
         if (ControlListStorageWrapper.isInControlList(_lostWallet)) {
             ControlListStorageWrapper.addToControlList(_newWallet);
         }
-        ERC3643Storage storage $ = erc3643Storage();
-        $.addressRecovered[_lostWallet] = true;
-        $.addressRecovered[_newWallet] = false;
 
         emit IERC3643Types.RecoverySuccess(_lostWallet, _newWallet, _investorOnchainID);
         return true;
