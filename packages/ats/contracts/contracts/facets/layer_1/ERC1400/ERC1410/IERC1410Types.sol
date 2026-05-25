@@ -73,4 +73,6 @@ interface IERC1410Types {
     error InvalidPartition(address account, bytes32 partition);
 
     error Unauthorized(address operator, address tokenHolder, bytes32 partition);
+
+    error TokenHolderNotFound(address tokenHolder);
 }
