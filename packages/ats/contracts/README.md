@@ -645,7 +645,7 @@ The standard `cancel*` variants refuse to cancel a corporate action once its exe
 
 ### Why they exist
 
-They are a last-resort recovery mechanism for situations where a corporate action has already passed its execution date but was never processed — for example because an automated scheduled task failed, a network outage occurred, or the action was created with incorrect parameters that were only discovered after the deadline. Without these functions there would be no on-chain way to clean up the stale action.
+They are a last-resort recovery mechanism for situations where a corporate action has already passed its execution date but cannot be processed — this situation should never happen, corporate actions should have been properly tested before deploying them, but still nothing can ever be 100% guaranteed.
 
 ### Why they are dangerous
 
@@ -658,10 +658,9 @@ Cancelling a corporate action that has **already been executed or partially sett
 
 ### Rules for safe use
 
-1. **Only call a `forceCancel*` function if the corresponding corporate action has never been executed.** Verify this off-chain before sending the transaction.
-2. **Require multisig approval.** The `CORPORATE_ACTION_ROLE` that gates these calls must be held by a multisig — never a single EOA — in any production or pre-production environment.
-3. **Do not use as a routine cancellation shortcut.** Use the standard `cancel*` function whenever the execution date has not yet passed.
-4. **Document every use.** Log the reason, the action ID, and the authorising signatures in your governance records before executing.
+1. **Use regular `cancel*` functions when possible.** They include the necessary checks to ensure consistency.
+2. **Grant the ROLE_CORPORATE_ACTION_FORCE_CANCEL role only to multisig accounts.** The `ROLE_CORPORATE_ACTION_FORCE_CANCEL` that gates these calls must be held by a multisig — never a single EOA — in any production or pre-production environment.
+3. **Document every use.** So that external systems that might be relying on your tokens data consistency are informed and can potentially roll back their own changes.
 
 ---
 
