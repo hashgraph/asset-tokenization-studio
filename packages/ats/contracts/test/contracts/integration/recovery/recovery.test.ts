@@ -215,11 +215,18 @@ describe("Recovery Tests", () => {
         expect(isRecovered).to.equal(true);
       });
 
-      it("GIVEN lost wallet WHEN calling recovery using a previously recovered address THEN recovered status is set to false", async () => {
+      it("GIVEN _lostWallet is already recovered WHEN recoveryAddress THEN transaction fails with WalletRecovered", async () => {
         await asset.recoveryAddress(signer_C.address, signer_B.address, ADDRESS_ZERO);
-        await asset.recoveryAddress(signer_B.address, signer_C.address, ADDRESS_ZERO);
-        const isRecoveredC = await asset.isAddressRecovered(signer_C.address);
-        expect(isRecoveredC).to.equal(false);
+        await expect(
+          asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO),
+        ).to.be.revertedWithCustomError(asset, "WalletRecovered");
+      });
+
+      it("GIVEN _newWallet is already recovered WHEN recoveryAddress THEN transaction fails with WalletRecovered", async () => {
+        await asset.recoveryAddress(signer_C.address, signer_B.address, ADDRESS_ZERO);
+        await expect(
+          asset.recoveryAddress(signer_B.address, signer_C.address, ADDRESS_ZERO),
+        ).to.be.revertedWithCustomError(asset, "WalletRecovered");
       });
 
       it("GIVEN a recovered address THEN operations should fail", async () => {

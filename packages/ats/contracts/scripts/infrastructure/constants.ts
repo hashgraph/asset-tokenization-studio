@@ -189,16 +189,6 @@ export const GAS_LIMIT = {
 } as const;
 
 /**
- * Sentinel value for auto-updating ResolverProxy deployments.
- *
- * When used as the `version` parameter, the proxy automatically resolves
- * to the latest registered configuration version at runtime.
- *
- * Value: `0` (interpreted as "use latest" by `_resolveVersion()`)
- */
-export const LATEST_VERSION = 0;
-
-/**
  * Default partition for ERC1410 operations.
  *
  * bytes32(uint256(1)) = 0x00...01
