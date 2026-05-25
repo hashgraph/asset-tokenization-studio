@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IComplianceFacet } from "./IComplianceFacet.sol";
+import { IComplianceFacet, RESOLVER_KEY_COMPLIANCE } from "./IComplianceFacet.sol";
 import { Compliance } from "./Compliance.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _COMPLIANCE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title ComplianceFacet
  * @notice Diamond facet exposing transfer-eligibility checks and compliance contract management.
@@ -16,7 +14,7 @@ import { _COMPLIANCE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 contract ComplianceFacet is Compliance, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _COMPLIANCE_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_COMPLIANCE;
     }
 
     /// @inheritdoc IStaticFunctionSelectors

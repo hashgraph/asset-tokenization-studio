@@ -46,9 +46,9 @@ describe("ExternalControlList Management Tests", () => {
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
-    await base.accessControlFacet.grantRole(ATS_ROLES.CONTROL_LIST_MANAGER_ROLE, signer_A.address);
-    await base.accessControlFacet.grantRole(ATS_ROLES.PAUSER_ROLE, signer_A.address);
-    await base.accessControlFacet.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+    await base.accessControlFacet.grantRole(ATS_ROLES.ROLE_CONTROL_LIST_MANAGER, signer_A.address);
+    await base.accessControlFacet.grantRole(ATS_ROLES.ROLE_PAUSER, signer_A.address);
+    await base.accessControlFacet.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
 
     externalWhitelistMock1 = await (await ethers.getContractFactory("MockedWhitelist", signer_A)).deploy();
     await externalWhitelistMock1.waitForDeployment();
@@ -435,7 +435,7 @@ describe("ExternalControlList Management Tests", () => {
     it("GIVEN a deactivated asset WHEN addExternalControlList THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).addExternalControlList(ethers.ZeroAddress),
@@ -445,7 +445,7 @@ describe("ExternalControlList Management Tests", () => {
     it("GIVEN a deactivated asset WHEN updateExternalControlLists THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).updateExternalControlLists([], []),
@@ -455,7 +455,7 @@ describe("ExternalControlList Management Tests", () => {
     it("GIVEN a deactivated asset WHEN removeExternalControlList THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).removeExternalControlList(ethers.ZeroAddress),

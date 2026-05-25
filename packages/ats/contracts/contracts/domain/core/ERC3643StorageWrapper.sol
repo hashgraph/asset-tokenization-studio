@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _ERC3643_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { AGENT_ROLE } from "../../constants/roles.sol";
+import { ROLE_AGENT } from "../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { IERC3643Types } from "../../facets/layer_1/ERC3643/IERC3643Types.sol";
 import { IFreeze } from "../../facets/freeze/IFreeze.sol";
@@ -23,6 +22,9 @@ import { LockStorageWrapper } from "../asset/LockStorageWrapper.sol";
 import { HoldStorageWrapper } from "../asset/HoldStorageWrapper.sol";
 import { ClearingStorageWrapper } from "../asset/ClearingStorageWrapper.sol";
 import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
+
+/// @custom:hash storage Erc3643
+bytes32 constant STORAGE_LOCATION_ERC3643 = 0x167d628abbc681171e3e4d784cf450a7f9bb9f4668795474376d3b21d0ade300;
 
 /**
  * @title ERC3643StorageWrapper
@@ -69,14 +71,14 @@ library ERC3643StorageWrapper {
     }
 
     function addAgent(address _agent) internal {
-        if (!AccessControlStorageWrapper.grantRole(AGENT_ROLE, _agent)) {
-            revert IAccessControl.AccountAssignedToRole(AGENT_ROLE, _agent);
+        if (!AccessControlStorageWrapper.grantRole(ROLE_AGENT, _agent)) {
+            revert IAccessControl.AccountAssignedToRole(ROLE_AGENT, _agent);
         }
     }
 
     function removeAgent(address _agent) internal {
-        if (!AccessControlStorageWrapper.revokeRole(AGENT_ROLE, _agent)) {
-            revert IAccessControl.AccountNotAssignedToRole(AGENT_ROLE, _agent);
+        if (!AccessControlStorageWrapper.revokeRole(ROLE_AGENT, _agent)) {
+            revert IAccessControl.AccountNotAssignedToRole(ROLE_AGENT, _agent);
         }
     }
 
@@ -127,43 +129,35 @@ library ERC3643StorageWrapper {
     }
 
     function freezeTokens(address _account, uint256 _amount) internal {
-        freezeTokensByPartition(_DEFAULT_PARTITION, _account, _amount);
+        checkNonZeroFreezeAmount(_amount);
+
+        ERC1410StorageWrapper.triggerAndSyncAll(_DEFAULT_PARTITION, _account, address(0));
+        updateTotalFreeze(_DEFAULT_PARTITION, _account);
+        SnapshotsStorageWrapper.updateAccountSnapshot(_account, _DEFAULT_PARTITION);
+        SnapshotsStorageWrapper.updateAccountFrozenBalancesSnapshot(_account, _DEFAULT_PARTITION);
+
+        ERC3643Storage storage st = erc3643Storage();
+        st.frozenTokens[_account] += _amount;
+        st.frozenTokensByPartition[_account][_DEFAULT_PARTITION] += _amount;
+
+        ERC1410StorageWrapper.reducePartitionOnly(_account, _amount, _DEFAULT_PARTITION);
+        ERC20StorageWrapper.performTransfer(_account, address(0), _amount);
     }
 
     function unfreezeTokens(address _account, uint256 _amount, uint256 _timestamp) internal {
         _checkUnfreezeAmount(_DEFAULT_PARTITION, _account, _amount, _timestamp);
-        unfreezeTokensByPartition(_DEFAULT_PARTITION, _account, _amount);
-    }
-
-    function freezeTokensByPartition(bytes32 _partition, address _account, uint256 _amount) internal {
-        checkNonZeroFreezeAmount(_amount);
-
-        ERC1410StorageWrapper.triggerAndSyncAll(_partition, _account, address(0));
-        updateTotalFreeze(_partition, _account);
-        SnapshotsStorageWrapper.updateAccountSnapshot(_account, _partition);
-        SnapshotsStorageWrapper.updateAccountFrozenBalancesSnapshot(_account, _partition);
-
-        ERC3643Storage storage st = erc3643Storage();
-        st.frozenTokens[_account] += _amount;
-        st.frozenTokensByPartition[_account][_partition] += _amount;
-
-        ERC1410StorageWrapper.reducePartitionOnly(_account, _amount, _partition);
-        ERC20StorageWrapper.performTransfer(_account, address(0), _amount);
-    }
-
-    function unfreezeTokensByPartition(bytes32 _partition, address _account, uint256 _amount) internal {
-        ERC1410StorageWrapper.triggerAndSyncAll(_partition, _account, address(0));
-        updateTotalFreeze(_partition, _account);
-        SnapshotsStorageWrapper.updateAccountSnapshot(_account, _partition);
-        SnapshotsStorageWrapper.updateAccountFrozenBalancesSnapshot(_account, _partition);
+        ERC1410StorageWrapper.triggerAndSyncAll(_DEFAULT_PARTITION, _account, address(0));
+        updateTotalFreeze(_DEFAULT_PARTITION, _account);
+        SnapshotsStorageWrapper.updateAccountSnapshot(_account, _DEFAULT_PARTITION);
+        SnapshotsStorageWrapper.updateAccountFrozenBalancesSnapshot(_account, _DEFAULT_PARTITION);
 
         ERC3643Storage storage st = erc3643Storage();
         st.frozenTokens[_account] -= _amount;
-        st.frozenTokensByPartition[_account][_partition] -= _amount;
+        st.frozenTokensByPartition[_account][_DEFAULT_PARTITION] -= _amount;
 
-        _transferFrozenBalanceOnly(_partition, _account, _amount);
+        _transferFrozenBalanceOnly(_DEFAULT_PARTITION, _account, _amount);
         ERC20StorageWrapper.performTransfer(address(0), _account, _amount);
-        ERC1410StorageWrapper.afterTokenTransfer(_partition, _account, _account, _amount);
+        ERC1410StorageWrapper.afterTokenTransfer(_DEFAULT_PARTITION, _account, _account, _amount);
     }
 
     function updateTotalFreeze(bytes32 _partition, address _tokenHolder) internal returns (uint256 abaf_) {
@@ -343,7 +337,7 @@ library ERC3643StorageWrapper {
     }
 
     function erc3643Storage() internal pure returns (ERC3643Storage storage erc3643Storage_) {
-        bytes32 position = _ERC3643_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_ERC3643;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             erc3643Storage_.slot := position

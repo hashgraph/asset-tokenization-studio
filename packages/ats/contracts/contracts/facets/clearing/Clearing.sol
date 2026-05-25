@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearing } from "./IClearing.sol";
 import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
-import { CLEARING_ROLE } from "../../constants/roles.sol";
+import { ROLE_CLEARING } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ClearingStorageWrapper } from "../../domain/asset/ClearingStorageWrapper.sol";
 import { ClearingReadOps } from "../../domain/orchestrator/ClearingReadOps.sol";
@@ -16,7 +16,7 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  * @notice Abstract implementation of the clearing module's global state and account-level reads.
  * @dev Implements the one-shot initializer, the activation lifecycle and the account-scoped
  *      read queries on top of `ClearingStorageWrapper` and `ClearingReadOps`. The activation
- *      toggles enforce the `onlyUnpaused` and `onlyRole(CLEARING_ROLE)` guards;
+ *      toggles enforce the `onlyUnpaused` and `onlyRole(ROLE_CLEARING)` guards;
  *      `initializeClearing` is gated by `onlyNotClearingInitialized`. Intended to be inherited
  *      by `ClearingFacet`.
  */
@@ -32,7 +32,7 @@ abstract contract Clearing is IClearing, Modifiers {
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(CLEARING_ROLE)
+        onlyRole(ROLE_CLEARING)
         returns (bool success_)
     {
         emit ClearingActivated(EvmAccessors.getMsgSender());
@@ -45,7 +45,7 @@ abstract contract Clearing is IClearing, Modifiers {
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(CLEARING_ROLE)
+        onlyRole(ROLE_CLEARING)
         returns (bool success_)
     {
         emit ClearingDeactivated(EvmAccessors.getMsgSender());

@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey VotingSecurityHolders
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_VOTING_SECURITY_HOLDERS = 0xff4e971334f234a2d839b58b2fef84241254942cef8940a4457d1eecb63882b9;
+
 /**
  * @title IVotingSecurityHolders
  * @author Asset Tokenization Studio Team

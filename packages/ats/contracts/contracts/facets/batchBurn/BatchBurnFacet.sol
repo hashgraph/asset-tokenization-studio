@@ -1,16 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBatchBurn } from "./IBatchBurn.sol";
+import { IBatchBurn, RESOLVER_KEY_BATCH_BURN } from "./IBatchBurn.sol";
 import { BatchBurn } from "./BatchBurn.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _BATCH_BURN_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title BatchBurnFacet
  * @notice Diamond facet that exposes the batch burn capability through the `IBatchBurn`
- *         interface, registered under `_BATCH_BURN_RESOLVER_KEY`.
+ *         interface, registered under `RESOLVER_KEY_BATCH_BURN`.
  * @dev Inherits burn logic from `BatchBurn` and satisfies the `IStaticFunctionSelectors`
  *      contract required by the Diamond proxy for selector registration. Exposes one selector:
  *      `batchBurn`.
@@ -19,7 +17,7 @@ import { _BATCH_BURN_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 contract BatchBurnFacet is BatchBurn, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _BATCH_BURN_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_BATCH_BURN;
     }
 
     /// @inheritdoc IStaticFunctionSelectors

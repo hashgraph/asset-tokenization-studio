@@ -87,43 +87,43 @@ describe("Clearing Tests", () => {
   function set_initRbacs() {
     return [
       {
-        role: ATS_ROLES.ISSUER_ROLE,
+        role: ATS_ROLES.ROLE_ISSUER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_D.address],
       },
       {
-        role: ATS_ROLES.KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.CLEARING_ROLE,
+        role: ATS_ROLES.ROLE_CLEARING,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.CORPORATE_ACTION_ROLE,
+        role: ATS_ROLES.ROLE_CORPORATE_ACTION,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.CONTROL_LIST_ROLE,
+        role: ATS_ROLES.ROLE_CONTROL_LIST,
         members: [signer_E.address],
       },
       {
-        role: ATS_ROLES.CONTROLLER_ROLE,
+        role: ATS_ROLES.ROLE_CONTROLLER,
         members: [signer_C.address],
       },
       {
-        role: ATS_ROLES.PROTECTED_PARTITIONS_ROLE,
+        role: ATS_ROLES.ROLE_PROTECTED_PARTITIONS,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.AGENT_ROLE,
+        role: ATS_ROLES.ROLE_AGENT,
         members: [signer_A.address],
       },
     ];
@@ -176,35 +176,35 @@ describe("Clearing Tests", () => {
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.ISSUER_ROLE,
+        role: ATS_ROLES.ROLE_ISSUER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.CONTROLLER_ROLE,
+        role: ATS_ROLES.ROLE_CONTROLLER,
         members: [signer_C.address],
       },
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_D.address],
       },
       {
-        role: ATS_ROLES.CONTROL_LIST_ROLE,
+        role: ATS_ROLES.ROLE_CONTROL_LIST,
         members: [signer_E.address],
       },
       {
-        role: ATS_ROLES.KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.CLEARING_ROLE,
+        role: ATS_ROLES.ROLE_CLEARING,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.CLEARING_VALIDATOR_ROLE,
+        role: ATS_ROLES.ROLE_CLEARING_VALIDATOR,
         members: [signer_A.address],
       },
     ]);
@@ -232,35 +232,35 @@ describe("Clearing Tests", () => {
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.ISSUER_ROLE,
+        role: ATS_ROLES.ROLE_ISSUER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.CONTROLLER_ROLE,
+        role: ATS_ROLES.ROLE_CONTROLLER,
         members: [signer_C.address],
       },
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_D.address],
       },
       {
-        role: ATS_ROLES.CONTROL_LIST_ROLE,
+        role: ATS_ROLES.ROLE_CONTROL_LIST,
         members: [signer_E.address],
       },
       {
-        role: ATS_ROLES.KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.CLEARING_ROLE,
+        role: ATS_ROLES.ROLE_CLEARING,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.CLEARING_VALIDATOR_ROLE,
+        role: ATS_ROLES.ROLE_CLEARING_VALIDATOR,
         members: [signer_A.address],
       },
     ]);
@@ -469,9 +469,9 @@ describe("Clearing Tests", () => {
       it("GIVEN an account with snapshot role WHEN takeSnapshot and Clearing THEN transaction succeeds", async () => {
         const EXPIRATION_TIMESTAMP = dateToUnixTimestamp(`2030-01-01T00:00:35Z`);
 
-        await asset.connect(signer_A).grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.LOCKER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_SNAPSHOT, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_LOCKER, signer_A.address);
 
         // snapshot
         await asset.connect(signer_A).takeSnapshot();
@@ -544,7 +544,7 @@ describe("Clearing Tests", () => {
 
     describe("corporate actions integration", () => {
       it("GIVEN pending clearing WHEN record date is reached THEN dividends use total balance including cleared amounts", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
 
         const currentTime = await asset.blockTimestamp();
         const recordDate = currentTime + 100n;
@@ -2263,8 +2263,8 @@ describe("Clearing Tests", () => {
 
     describe("Balance Adjustments", () => {
       async function setPreBalanceAdjustment() {
-        await asset.connect(signer_A).grantRole(ATS_ROLES.ADJUSTMENT_BALANCE_ROLE, signer_C.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ADJUSTMENT_BALANCE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
       }
 
       it("GIVEN a clearing WHEN adjustBalances THEN clearing amount gets updated succeeds", async () => {
@@ -2732,7 +2732,7 @@ describe("Clearing Tests", () => {
         await asset.deactivateClearing();
 
         // Issue tokens to signer_A so they can create a hold
-        await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
         await asset.issueByPartition({
           partition: _DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
@@ -2777,7 +2777,7 @@ describe("Clearing Tests", () => {
         await asset.deactivateClearing();
 
         // Issue tokens to signer_A so they can create a hold
-        await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
         await asset.issueByPartition({
           partition: _DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
@@ -2861,7 +2861,7 @@ describe("Clearing Tests", () => {
       describe("clearingCreateHoldByPartition", () => {
         it("GIVEN a recovered msgSender WHEN calling clearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
           // Grant _AGENT_ROLE to call recoveryAddress
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
           // First recover signer_A's address
           await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
 
@@ -2873,7 +2873,7 @@ describe("Clearing Tests", () => {
 
         it("GIVEN a recovered hold.to address WHEN calling clearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
           // Grant _AGENT_ROLE to call recoveryAddress
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
           // Recover the hold.to address (signer_C - the actual hold.to)
           await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
 
@@ -2887,7 +2887,7 @@ describe("Clearing Tests", () => {
       describe("clearingCreateHoldFromByPartition", () => {
         it("GIVEN a recovered msgSender WHEN calling clearingCreateHoldFromByPartition THEN transaction fails with WalletRecovered", async () => {
           await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
           await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
 
           const clearingOperationFromB = {
@@ -2902,7 +2902,7 @@ describe("Clearing Tests", () => {
 
         it("GIVEN a recovered hold.to WHEN calling clearingCreateHoldFromByPartition THEN transaction fails with WalletRecovered", async () => {
           await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
           // Recover the hold.to address (signer_C)
           await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
 
@@ -2918,7 +2918,7 @@ describe("Clearing Tests", () => {
 
         it("GIVEN a recovered from address WHEN calling clearingCreateHoldFromByPartition THEN transaction fails with WalletRecovered", async () => {
           await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
           await asset.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
 
           const clearingOperationFromB = {
@@ -2934,7 +2934,7 @@ describe("Clearing Tests", () => {
 
       describe("clearingRedeemByPartition", () => {
         it("GIVEN a recovered msgSender WHEN calling clearingRedeemByPartition THEN transaction fails with WalletRecovered", async () => {
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
           await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
 
           await expect(
@@ -2946,7 +2946,7 @@ describe("Clearing Tests", () => {
       describe("clearingRedeemFromByPartition", () => {
         it("GIVEN a recovered msgSender WHEN calling clearingRedeemFromByPartition THEN transaction fails with WalletRecovered", async () => {
           await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
           await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
 
           const clearingOperationFromB = {
@@ -2961,7 +2961,7 @@ describe("Clearing Tests", () => {
 
         it("GIVEN a recovered from address WHEN calling clearingRedeemFromByPartition THEN transaction fails with WalletRecovered", async () => {
           await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
           await asset.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
 
           const clearingOperationFromB = {
@@ -2978,7 +2978,7 @@ describe("Clearing Tests", () => {
       describe("operatorClearingRedeemByPartition", () => {
         it("GIVEN a recovered msgSender WHEN calling operatorClearingRedeemByPartition THEN transaction fails with WalletRecovered", async () => {
           await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
           await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
 
           const clearingOperationFromB = {
@@ -2993,7 +2993,7 @@ describe("Clearing Tests", () => {
 
         it("GIVEN a recovered from address WHEN calling operatorClearingRedeemByPartition THEN transaction fails with WalletRecovered", async () => {
           await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
           await asset.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
 
           const clearingOperationFromB = {
@@ -3009,7 +3009,7 @@ describe("Clearing Tests", () => {
 
       describe("clearingTransferByPartition", () => {
         it("GIVEN a recovered msgSender WHEN calling clearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
           await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
 
           await expect(
@@ -3018,7 +3018,7 @@ describe("Clearing Tests", () => {
         });
 
         it("GIVEN a recovered to address WHEN calling clearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
           await asset.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
 
           await expect(
@@ -3030,7 +3030,7 @@ describe("Clearing Tests", () => {
       describe("clearingTransferFromByPartition", () => {
         it("GIVEN a recovered msgSender WHEN calling clearingTransferFromByPartition THEN transaction fails with WalletRecovered", async () => {
           await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
           await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
 
           const clearingOperationFromB = {
@@ -3045,7 +3045,7 @@ describe("Clearing Tests", () => {
 
         it("GIVEN a recovered to address WHEN calling clearingTransferFromByPartition THEN transaction fails with WalletRecovered", async () => {
           await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
           await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
 
           const clearingOperationFromB = {
@@ -3060,7 +3060,7 @@ describe("Clearing Tests", () => {
 
         it("GIVEN a recovered from address WHEN calling clearingTransferFromByPartition THEN transaction fails with WalletRecovered", async () => {
           await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
           await asset.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
 
           const clearingOperationFromB = {
@@ -3077,7 +3077,7 @@ describe("Clearing Tests", () => {
       describe("operatorClearingTransferByPartition", () => {
         it("GIVEN a recovered msgSender WHEN calling operatorClearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
           await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
           await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
 
           const clearingOperationFromB = {
@@ -3094,7 +3094,7 @@ describe("Clearing Tests", () => {
 
         it("GIVEN a recovered to address WHEN calling operatorClearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
           await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
           await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
 
           const clearingOperationFromB = {
@@ -3111,7 +3111,7 @@ describe("Clearing Tests", () => {
 
         it("GIVEN a recovered from address WHEN calling operatorClearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
           await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
           await asset.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
 
           const clearingOperationFromB = {
@@ -3131,7 +3131,7 @@ describe("Clearing Tests", () => {
     describe("onlyUnProtectedPartitionsOrWildCardRole modifier", () => {
       beforeEach(async () => {
         // Grant _PROTECTED_PARTITIONS_ROLE to call protectPartitions
-        await asset.grantRole(ATS_ROLES.PROTECTED_PARTITIONS_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_PROTECTED_PARTITIONS, signer_A.address);
         // Protect partitions
         await asset.protectPartitions();
       });
@@ -3145,7 +3145,7 @@ describe("Clearing Tests", () => {
 
       it("GIVEN protected partitions with wildcard role WHEN calling clearingCreateHoldByPartition THEN transaction succeeds", async () => {
         // Grant wildcard role to signer_A
-        await asset.grantRole(ATS_ROLES.WILD_CARD_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_WILD_CARD, signer_A.address);
 
         // Should succeed now
         await expect(asset.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold)).to.not.be.reverted;
@@ -3184,7 +3184,7 @@ describe("Clearing Tests", () => {
       describe("additional clearing methods", () => {
         it("GIVEN protected partitions with wildcard role WHEN calling clearingCreateHoldFromByPartition THEN transaction succeeds", async () => {
           // Give signer_B some tokens
-          await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
           await asset.issueByPartition({
             partition: _DEFAULT_PARTITION,
             tokenHolder: signer_B.address,
@@ -3192,7 +3192,7 @@ describe("Clearing Tests", () => {
             data: _DATA,
           });
           await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.grantRole(ATS_ROLES.WILD_CARD_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_WILD_CARD, signer_A.address);
 
           const clearingOperationFromB = {
             ...clearingOperationFrom,
@@ -3207,7 +3207,7 @@ describe("Clearing Tests", () => {
 
         it("GIVEN protected partitions with wildcard role WHEN calling operatorClearingCreateHoldByPartition THEN transaction succeeds", async () => {
           await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.grantRole(ATS_ROLES.WILD_CARD_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_WILD_CARD, signer_A.address);
 
           const clearingOperationFromB = {
             ...clearingOperationFrom,
@@ -3224,7 +3224,7 @@ describe("Clearing Tests", () => {
         });
 
         it("GIVEN protected partitions with wildcard role WHEN calling clearingRedeemByPartition THEN transaction succeeds", async () => {
-          await asset.grantRole(ATS_ROLES.WILD_CARD_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_WILD_CARD, signer_A.address);
 
           await asset.connect(signer_A).clearingRedeemByPartition(clearingOperation, _AMOUNT);
         });
@@ -3244,7 +3244,7 @@ describe("Clearing Tests", () => {
 
         it("GIVEN protected partitions with wildcard role WHEN calling clearingRedeemFromByPartition THEN transaction succeeds", async () => {
           // Give signer_B some tokens
-          await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
           await asset.issueByPartition({
             partition: _DEFAULT_PARTITION,
             tokenHolder: signer_B.address,
@@ -3252,7 +3252,7 @@ describe("Clearing Tests", () => {
             data: _DATA,
           });
           await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.grantRole(ATS_ROLES.WILD_CARD_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_WILD_CARD, signer_A.address);
 
           const clearingOperationFromB = {
             ...clearingOperationFrom,
@@ -3280,7 +3280,7 @@ describe("Clearing Tests", () => {
 
         it("GIVEN protected partitions with wildcard role WHEN calling operatorClearingRedeemByPartition THEN transaction succeeds", async () => {
           await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.grantRole(ATS_ROLES.WILD_CARD_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_WILD_CARD, signer_A.address);
 
           const clearingOperationFromB = {
             ...clearingOperationFrom,
@@ -3297,7 +3297,7 @@ describe("Clearing Tests", () => {
         });
 
         it("GIVEN protected partitions with wildcard role WHEN calling clearingTransferByPartition THEN transaction succeeds", async () => {
-          await asset.grantRole(ATS_ROLES.WILD_CARD_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_WILD_CARD, signer_A.address);
 
           await asset.connect(signer_A).clearingTransferByPartition(clearingOperation, _AMOUNT, signer_B.address);
         });
@@ -3317,7 +3317,7 @@ describe("Clearing Tests", () => {
 
         it("GIVEN protected partitions with wildcard role WHEN calling clearingTransferFromByPartition THEN transaction succeeds", async () => {
           // Give signer_B some tokens
-          await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
           await asset.issueByPartition({
             partition: _DEFAULT_PARTITION,
             tokenHolder: signer_B.address,
@@ -3325,7 +3325,7 @@ describe("Clearing Tests", () => {
             data: _DATA,
           });
           await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.grantRole(ATS_ROLES.WILD_CARD_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_WILD_CARD, signer_A.address);
 
           const clearingOperationFromB = {
             ...clearingOperationFrom,
@@ -3357,7 +3357,7 @@ describe("Clearing Tests", () => {
 
         it("GIVEN protected partitions with wildcard role WHEN calling operatorClearingTransferByPartition THEN transaction succeeds", async () => {
           await asset.connect(signer_B).authorizeOperator(signer_A.address);
-          await asset.grantRole(ATS_ROLES.WILD_CARD_ROLE, signer_A.address);
+          await asset.grantRole(ATS_ROLES.ROLE_WILD_CARD, signer_A.address);
 
           const clearingOperationFromB = {
             ...clearingOperationFrom,
@@ -3471,7 +3471,7 @@ describe("Clearing Tests", () => {
 
     describe("onlyUnrecoveredAddress modifier for protectedClearingCreateHoldByPartition", () => {
       it("GIVEN a recovered from address WHEN calling protectedClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
-        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
         await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
 
         const protectedClearingOperation = {
@@ -3489,7 +3489,7 @@ describe("Clearing Tests", () => {
       });
 
       it("GIVEN a recovered hold.to address WHEN calling protectedClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
-        await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
         // Recover the hold.to address (signer_C)
         await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
 
@@ -3519,7 +3519,7 @@ describe("Clearing Tests", () => {
       beforeEach(async () => {
         const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
           ["bytes32", "bytes32"],
-          [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+          [ATS_ROLES.ROLE_PROTECTED_PARTITIONS_PARTICIPANT, _DEFAULT_PARTITION],
         );
         const packedDataWithoutPrefix = packedData.slice(2);
         const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
@@ -3527,7 +3527,7 @@ describe("Clearing Tests", () => {
         await asset.connect(signer_A).grantRole(protectedPartitionRole, signer_A.address);
         await asset.connect(signer_A).grantRole(protectedPartitionRole, signer_B.address);
         await asset.connect(signer_A).grantRole(protectedPartitionRole, signer_C.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.PROTECTED_PARTITIONS_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_PROTECTED_PARTITIONS, signer_A.address);
         await asset.connect(signer_A).protectPartitions();
       });
 
@@ -3905,7 +3905,7 @@ describe("Clearing Tests", () => {
 
       it("GIVEN a valid signature WHEN calling protectedClearingTransferByPartition THEN transaction succeeds", async () => {
         // Setup: Issue tokens to signer_A
-        await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
         await asset.issueByPartition({
           partition: _DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
@@ -3914,13 +3914,13 @@ describe("Clearing Tests", () => {
         });
 
         // Enable protected partitions - grant role first
-        await asset.grantRole(ATS_ROLES.PROTECTED_PARTITIONS_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_PROTECTED_PARTITIONS, signer_A.address);
         await asset.protectPartitions();
 
         // Grant role for protected partition
         const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
           ["bytes32", "bytes32"],
-          [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+          [ATS_ROLES.ROLE_PROTECTED_PARTITIONS_PARTICIPANT, _DEFAULT_PARTITION],
         );
         const packedDataWithoutPrefix = packedData.slice(2);
         const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
@@ -3995,7 +3995,7 @@ describe("Clearing Tests", () => {
 
       it("GIVEN a valid signature WHEN calling protectedClearingRedeemByPartition THEN transaction succeeds", async () => {
         // Setup: Issue tokens to signer_A
-        await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
         await asset.issueByPartition({
           partition: _DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
@@ -4004,13 +4004,13 @@ describe("Clearing Tests", () => {
         });
 
         // Enable protected partitions - grant role first
-        await asset.grantRole(ATS_ROLES.PROTECTED_PARTITIONS_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_PROTECTED_PARTITIONS, signer_A.address);
         await asset.protectPartitions();
 
         // Grant role for protected partition
         const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
           ["bytes32", "bytes32"],
-          [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+          [ATS_ROLES.ROLE_PROTECTED_PARTITIONS_PARTICIPANT, _DEFAULT_PARTITION],
         );
         const packedDataWithoutPrefix = packedData.slice(2);
         const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
@@ -4083,7 +4083,7 @@ describe("Clearing Tests", () => {
 
       it("GIVEN a valid signature WHEN calling protectedClearingCreateHoldByPartition THEN transaction succeeds", async () => {
         // Setup: Issue tokens to signer_A
-        await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
         await asset.issueByPartition({
           partition: _DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
@@ -4092,13 +4092,13 @@ describe("Clearing Tests", () => {
         });
 
         // Enable protected partitions - grant role first
-        await asset.grantRole(ATS_ROLES.PROTECTED_PARTITIONS_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_PROTECTED_PARTITIONS, signer_A.address);
         await asset.protectPartitions();
 
         // Grant role for protected partition
         const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
           ["bytes32", "bytes32"],
-          [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+          [ATS_ROLES.ROLE_PROTECTED_PARTITIONS_PARTICIPANT, _DEFAULT_PARTITION],
         );
         const packedDataWithoutPrefix = packedData.slice(2);
         const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
@@ -4246,7 +4246,7 @@ describe("Clearing Tests", () => {
           });
 
           it("SHOULD revert WHEN to address is zero (validateAddress modifier)", async () => {
-            await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+            await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
             await asset.issueByPartition({
               partition: _DEFAULT_PARTITION,
               tokenHolder: signer_A.address,
@@ -4254,12 +4254,12 @@ describe("Clearing Tests", () => {
               data: _DATA,
             });
 
-            await asset.grantRole(ATS_ROLES.PROTECTED_PARTITIONS_ROLE, signer_A.address);
+            await asset.grantRole(ATS_ROLES.ROLE_PROTECTED_PARTITIONS, signer_A.address);
             await asset.protectPartitions();
 
             const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
               ["bytes32", "bytes32"],
-              [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+              [ATS_ROLES.ROLE_PROTECTED_PARTITIONS_PARTICIPANT, _DEFAULT_PARTITION],
             );
             const packedDataWithoutPrefix = packedData.slice(2);
             const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
@@ -4321,7 +4321,7 @@ describe("Clearing Tests", () => {
           });
 
           it("SHOULD revert WHEN expiration timestamp is invalid (onlyWithValidExpirationTimestamp modifier)", async () => {
-            await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+            await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
             await asset.issueByPartition({
               partition: _DEFAULT_PARTITION,
               tokenHolder: signer_A.address,
@@ -4329,12 +4329,12 @@ describe("Clearing Tests", () => {
               data: _DATA,
             });
 
-            await asset.grantRole(ATS_ROLES.PROTECTED_PARTITIONS_ROLE, signer_A.address);
+            await asset.grantRole(ATS_ROLES.ROLE_PROTECTED_PARTITIONS, signer_A.address);
             await asset.protectPartitions();
 
             const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
               ["bytes32", "bytes32"],
-              [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+              [ATS_ROLES.ROLE_PROTECTED_PARTITIONS_PARTICIPANT, _DEFAULT_PARTITION],
             );
             const packedDataWithoutPrefix = packedData.slice(2);
             const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
@@ -4396,7 +4396,7 @@ describe("Clearing Tests", () => {
           });
 
           it("SHOULD revert WHEN missing required role (onlyRole modifier)", async () => {
-            await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+            await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
             await asset.issueByPartition({
               partition: _DEFAULT_PARTITION,
               tokenHolder: signer_A.address,
@@ -4404,7 +4404,7 @@ describe("Clearing Tests", () => {
               data: _DATA,
             });
 
-            await asset.grantRole(ATS_ROLES.PROTECTED_PARTITIONS_ROLE, signer_A.address);
+            await asset.grantRole(ATS_ROLES.ROLE_PROTECTED_PARTITIONS, signer_A.address);
             await asset.protectPartitions();
 
             // Don't grant protectedPartitionRole
@@ -4465,7 +4465,7 @@ describe("Clearing Tests", () => {
           });
 
           it("SHOULD revert WHEN clearing not activated (onlyClearingActivated modifier)", async () => {
-            await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+            await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
             await asset.issueByPartition({
               partition: _DEFAULT_PARTITION,
               tokenHolder: signer_A.address,
@@ -4473,12 +4473,12 @@ describe("Clearing Tests", () => {
               data: _DATA,
             });
 
-            await asset.grantRole(ATS_ROLES.PROTECTED_PARTITIONS_ROLE, signer_A.address);
+            await asset.grantRole(ATS_ROLES.ROLE_PROTECTED_PARTITIONS, signer_A.address);
             await asset.protectPartitions();
 
             const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
               ["bytes32", "bytes32"],
-              [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+              [ATS_ROLES.ROLE_PROTECTED_PARTITIONS_PARTICIPANT, _DEFAULT_PARTITION],
             );
             const packedDataWithoutPrefix = packedData.slice(2);
             const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
@@ -4598,7 +4598,7 @@ describe("Clearing Tests", () => {
           });
 
           it("SHOULD revert WHEN clearing not activated (onlyClearingActivated modifier)", async () => {
-            await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+            await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
             await asset.issueByPartition({
               partition: _DEFAULT_PARTITION,
               tokenHolder: signer_A.address,
@@ -4606,12 +4606,12 @@ describe("Clearing Tests", () => {
               data: _DATA,
             });
 
-            await asset.grantRole(ATS_ROLES.PROTECTED_PARTITIONS_ROLE, signer_A.address);
+            await asset.grantRole(ATS_ROLES.ROLE_PROTECTED_PARTITIONS, signer_A.address);
             await asset.protectPartitions();
 
             const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
               ["bytes32", "bytes32"],
-              [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+              [ATS_ROLES.ROLE_PROTECTED_PARTITIONS_PARTICIPANT, _DEFAULT_PARTITION],
             );
             const packedDataWithoutPrefix = packedData.slice(2);
             const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
@@ -4741,7 +4741,7 @@ describe("Clearing Tests", () => {
           });
 
           it("SHOULD revert WHEN clearing not activated (onlyClearingActivated modifier)", async () => {
-            await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+            await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
             await asset.issueByPartition({
               partition: _DEFAULT_PARTITION,
               tokenHolder: signer_A.address,
@@ -4749,12 +4749,12 @@ describe("Clearing Tests", () => {
               data: _DATA,
             });
 
-            await asset.grantRole(ATS_ROLES.PROTECTED_PARTITIONS_ROLE, signer_A.address);
+            await asset.grantRole(ATS_ROLES.ROLE_PROTECTED_PARTITIONS, signer_A.address);
             await asset.protectPartitions();
 
             const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
               ["bytes32", "bytes32"],
-              [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+              [ATS_ROLES.ROLE_PROTECTED_PARTITIONS_PARTICIPANT, _DEFAULT_PARTITION],
             );
             const packedDataWithoutPrefix = packedData.slice(2);
             const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
@@ -4835,7 +4835,7 @@ describe("Clearing Tests", () => {
       // Recovery tests following hold.test.ts pattern
       it("GIVEN a from user recovering WHEN protectedClearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
         // Setup: Issue tokens to signer_A
-        await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
         await asset.issueByPartition({
           partition: _DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
@@ -4863,7 +4863,7 @@ describe("Clearing Tests", () => {
 
       it("GIVEN a to user recovering WHEN protectedClearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
         // Setup: Issue tokens to signer_A
-        await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
         await asset.issueByPartition({
           partition: _DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
@@ -4891,7 +4891,7 @@ describe("Clearing Tests", () => {
 
       it("GIVEN missing partition role WHEN protectedClearingRedeemByPartition THEN transaction fails with AccountHasNoRole", async () => {
         // Setup: Issue tokens to signer_A
-        await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
         await asset.issueByPartition({
           partition: _DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
@@ -4909,7 +4909,7 @@ describe("Clearing Tests", () => {
 
       it("GIVEN a from user recovering WHEN protectedClearingRedeemByPartition THEN transaction fails with WalletRecovered", async () => {
         // Setup: Issue tokens to signer_A
-        await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
         await asset.issueByPartition({
           partition: _DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
@@ -4920,7 +4920,7 @@ describe("Clearing Tests", () => {
         // Grant partition-specific role to signer_B
         const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
           ["bytes32", "bytes32"],
-          [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+          [ATS_ROLES.ROLE_PROTECTED_PARTITIONS_PARTICIPANT, _DEFAULT_PARTITION],
         );
         const packedDataWithoutPrefix = packedData.slice(2);
         const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
@@ -4937,7 +4937,7 @@ describe("Clearing Tests", () => {
 
       it("GIVEN a from user recovering WHEN protectedClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
         // Setup: Issue tokens to signer_A
-        await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
         await asset.issueByPartition({
           partition: _DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
@@ -4972,7 +4972,7 @@ describe("Clearing Tests", () => {
 
       it("GIVEN a to user recovering WHEN protectedClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
         // Setup: Issue tokens to signer_A
-        await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
         await asset.issueByPartition({
           partition: _DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
@@ -5007,7 +5007,7 @@ describe("Clearing Tests", () => {
 
       // Additional tests for missing branch coverage
       it("SHOULD revert WHEN expiration timestamp is invalid for protectedClearingRedeemByPartition", async () => {
-        await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
         await asset.issueByPartition({
           partition: _DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
@@ -5041,7 +5041,7 @@ describe("Clearing Tests", () => {
       });
 
       it("SHOULD revert WHEN expiration timestamp is invalid for protectedClearingCreateHoldByPartition", async () => {
-        await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
         await asset.issueByPartition({
           partition: _DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
@@ -5085,7 +5085,7 @@ describe("Clearing Tests", () => {
       });
 
       it("SHOULD revert WHEN missing required role for protectedClearingCreateHoldByPartition", async () => {
-        await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+        await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
         await asset.issueByPartition({
           partition: _DEFAULT_PARTITION,
           tokenHolder: signer_A.address,

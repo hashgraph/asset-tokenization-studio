@@ -49,39 +49,39 @@ describe("Maturity Tests", () => {
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.FREEZE_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_FREEZE_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.MATURITY_REDEEMER_ROLE,
+        role: ATS_ROLES.ROLE_MATURITY_REDEEMER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.CONTROL_LIST_ROLE,
+        role: ATS_ROLES.ROLE_CONTROL_LIST,
         members: [signer_D.address],
       },
       {
-        role: ATS_ROLES.CLEARING_ROLE,
+        role: ATS_ROLES.ROLE_CLEARING,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.PROTECTED_PARTITIONS_ROLE,
+        role: ATS_ROLES.ROLE_PROTECTED_PARTITIONS,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.AGENT_ROLE,
+        role: ATS_ROLES.ROLE_AGENT,
         members: [signer_A.address],
       },
     ]);
@@ -118,7 +118,7 @@ describe("Maturity Tests", () => {
       );
     });
 
-    it("GIVEN the caller lacks MATURITY_REDEEMER_ROLE WHEN fullRedeemAtMaturity THEN reverts with AccountHasNoRole", async () => {
+    it("GIVEN the caller lacks ROLE_MATURITY_REDEEMER WHEN fullRedeemAtMaturity THEN reverts with AccountHasNoRole", async () => {
       await expect(asset.connect(signer_B).fullRedeemAtMaturity(signer_C.address)).to.be.revertedWithCustomError(
         asset,
         "AccountHasNoRole",
@@ -135,7 +135,7 @@ describe("Maturity Tests", () => {
     });
 
     it("GIVEN the token is paused WHEN fullRedeemAtMaturity THEN reverts with IsPaused", async () => {
-      await grantRoleAndPauseToken(asset, ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A, signer_B, signer_C.address);
+      await grantRoleAndPauseToken(asset, ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A, signer_B, signer_C.address);
 
       await expect(asset.connect(signer_C).fullRedeemAtMaturity(signer_C.address)).to.be.revertedWithCustomError(
         asset,
@@ -167,7 +167,7 @@ describe("Maturity Tests", () => {
     });
 
     it("GIVEN all conditions are met WHEN fullRedeemAtMaturity THEN emits RedeemedByPartition", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
 
       await asset.connect(signer_C).issueByPartition({
         partition: DEFAULT_PARTITION,
@@ -195,7 +195,7 @@ describe("Maturity Tests", () => {
     });
 
     it("GIVEN a zero-amount hold creation attempt WHEN createHoldByPartition THEN reverts with InvalidHoldAmount preventing ghost partition DoS on fullRedeemAtMaturity", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
       await asset.connect(signer_C).issueByPartition({
         partition: DEFAULT_PARTITION,
         tokenHolder: signer_A.address,
@@ -218,7 +218,7 @@ describe("Maturity Tests", () => {
 
     it("GIVEN a multi-partition token holder WHEN fullRedeemAtMaturity THEN emits RedeemedByPartition for each partition", async () => {
       await deploySecurityFixture(true);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
 
       await asset.connect(signer_C).issueByPartition({
         partition: _PARTITION_ID,
@@ -244,7 +244,7 @@ describe("Maturity Tests", () => {
   });
 
   describe("updateMaturityDate", () => {
-    it("GIVEN the caller lacks BOND_MANAGER_ROLE WHEN updateMaturityDate THEN reverts with AccountHasNoRole", async () => {
+    it("GIVEN the caller lacks ROLE_BOND_MANAGER WHEN updateMaturityDate THEN reverts with AccountHasNoRole", async () => {
       const maturityDateBefore = (await asset.getBondDetails()).maturityDate;
       const newMaturityDate = maturityDateBefore + 86400n;
 
@@ -257,7 +257,7 @@ describe("Maturity Tests", () => {
     });
 
     it("GIVEN the token is paused WHEN updateMaturityDate THEN reverts with IsPaused", async () => {
-      await grantRoleAndPauseToken(asset, ATS_ROLES.BOND_MANAGER_ROLE, signer_A, signer_B, signer_C.address);
+      await grantRoleAndPauseToken(asset, ATS_ROLES.ROLE_BOND_MANAGER, signer_A, signer_B, signer_C.address);
 
       const maturityDateBefore = (await asset.getBondDetails()).maturityDate;
       const newMaturityDate = maturityDateBefore + 86400n;
@@ -271,7 +271,7 @@ describe("Maturity Tests", () => {
     });
 
     it("GIVEN a new date earlier than current maturity WHEN updateMaturityDate THEN reverts with BondMaturityDateWrong", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.BOND_MANAGER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_BOND_MANAGER, signer_C.address);
       const maturityDateBefore = (await asset.getBondDetails()).maturityDate;
       const dayBeforeCurrentMaturity = maturityDateBefore - 86400n;
 
@@ -283,8 +283,8 @@ describe("Maturity Tests", () => {
       expect(maturityDateAfter).to.be.equal(maturityDateBefore);
     });
 
-    it("GIVEN BOND_MANAGER_ROLE and a valid future date WHEN updateMaturityDate THEN emits MaturityDateUpdated and persists new date", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.BOND_MANAGER_ROLE, signer_C.address);
+    it("GIVEN ROLE_BOND_MANAGER and a valid future date WHEN updateMaturityDate THEN emits MaturityDateUpdated and persists new date", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_BOND_MANAGER, signer_C.address);
       const maturityDateBefore = (await asset.getBondDetails()).maturityDate;
       const newMaturityDate = maturityDateBefore + 86400n;
 
@@ -302,7 +302,7 @@ describe("Maturity Tests", () => {
     it("GIVEN a deactivated asset WHEN fullRedeemAtMaturity THEN transaction fails with Deactivated", async () => {
       const base = await deployBondTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).fullRedeemAtMaturity(ethers.ZeroAddress),
@@ -312,7 +312,7 @@ describe("Maturity Tests", () => {
     it("GIVEN a deactivated asset WHEN updateMaturityDate THEN transaction fails with Deactivated", async () => {
       const base = await deployBondTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).updateMaturityDate(0)).to.be.revertedWithCustomError(
         deactivatedAsset,

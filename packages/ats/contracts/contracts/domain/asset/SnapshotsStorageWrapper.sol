@@ -3,7 +3,6 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ArraysUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol";
 import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import { _SNAPSHOT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import {
     ISnapshots,
     Snapshots,
@@ -25,6 +24,9 @@ import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { NominalValueStorageWrapper } from "./nominalValue/NominalValueStorageWrapper.sol";
+
+/// @custom:hash storage Snapshot
+bytes32 constant STORAGE_LOCATION_SNAPSHOT = 0x2e9cb27cc6da952dbadc3ddf8f7c0573a7ed5a7613f07ac9a8da248ab9442000;
 
 /**
  * @notice Central storage layout for all snapshot-related data across the token system.
@@ -618,7 +620,7 @@ library SnapshotsStorageWrapper {
     }
 
     function _snapshotStorage() private pure returns (SnapshotStorage storage snapshotStorage_) {
-        bytes32 position = _SNAPSHOT_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_SNAPSHOT;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             snapshotStorage_.slot := position

@@ -3,8 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { _SSI_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { ISsiManagement } from "../../facets/ssiManagement/ISsiManagement.sol";
+
+/// @custom:hash storage SsiManagement
+bytes32 constant STORAGE_LOCATION_SSI_MANAGEMENT = 0xce722d9244e395d588d86bfe2318b3330226793a6bcb3ce028d3286061fb2f00;
 
 struct SsiManagementStorage {
     EnumerableSet.AddressSet issuerList;
@@ -52,7 +54,7 @@ library SsiManagementStorageWrapper {
     }
 
     function ssiManagementStorage() internal pure returns (SsiManagementStorage storage ssiManagement_) {
-        bytes32 position = _SSI_MANAGEMENT_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_SSI_MANAGEMENT;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             ssiManagement_.slot := position

@@ -3,6 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IBondTypes } from "../layer_2/bond/IBondTypes.sol";
 
+/// @custom:hash resolverKey Maturity
+bytes32 constant RESOLVER_KEY_MATURITY = 0x16825792debc7c17efd86bdf71500575f9ff5d4aa20e3a35031c583437a3ca82;
+
 /**
  * @title  IMaturity
  * @notice Interface for bond maturity redemption and maturity date management.
@@ -15,7 +18,7 @@ import { IBondTypes } from "../layer_2/bond/IBondTypes.sol";
 interface IMaturity is IBondTypes {
     /**
      * @notice Redeems all token partitions held by a token holder at bond maturity.
-     * @dev    Caller must hold `MATURITY_REDEEMER_ROLE`. Contract must be unpaused and clearing
+     * @dev    Caller must hold `ROLE_MATURITY_REDEEMER`. Contract must be unpaused and clearing
      *         must be disabled. `_tokenHolder` must be on the allowed list, hold granted KYC
      *         status, must not be recovered, and the current timestamp must be at or past the
      *         maturity date. Iterates every partition owned by `_tokenHolder` and redeems each
@@ -28,7 +31,7 @@ interface IMaturity is IBondTypes {
 
     /**
      * @notice Updates the bond maturity date to a new timestamp.
-     * @dev    Caller must hold `BOND_MANAGER_ROLE`. Contract must be unpaused. `_newMaturityDate`
+     * @dev    Caller must hold `ROLE_BOND_MANAGER`. Contract must be unpaused. `_newMaturityDate`
      *         must satisfy the validity constraint enforced by `onlyValidMaturityDate` — the new
      *         date must be strictly greater than the current maturity date. Persists the new date
      *         via `BondStorageWrapper.setMaturityDate`.

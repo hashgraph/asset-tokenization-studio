@@ -8,18 +8,32 @@ import {
 } from "../../facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { IScheduledBalanceAdjustment } from "../../facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
 import {
-    _SCHEDULED_SNAPSHOTS_STORAGE_POSITION,
-    _SCHEDULED_COUPON_LISTING_STORAGE_POSITION,
-    _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION,
-    _SCHEDULED_CROSS_ORDERED_TASKS_STORAGE_POSITION
-} from "../../constants/storagePositions.sol";
-import { SNAPSHOT_TASK_TYPE, BALANCE_ADJUSTMENT_TASK_TYPE, COUPON_LISTING_TASK_TYPE } from "../../constants/values.sol";
+    SCHEDULED_TASK_TYPE_SNAPSHOT,
+    SCHEDULED_TASK_TYPE_BALANCE_ADJUSTMENT,
+    SCHEDULED_TASK_TYPE_COUPON_LISTING
+} from "../../constants/dispatchTypes.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { ScheduledTasksDispatchOps } from "../orchestrator/ScheduledTasksDispatchOps.sol";
 import {
     IScheduledCrossOrderedTasks
 } from "../../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
+
+/// @custom:hash storage ScheduledSnapshots
+// solhint-disable-next-line max-line-length
+bytes32 constant STORAGE_LOCATION_SCHEDULED_SNAPSHOTS = 0xe2e07c157b61a7bd819a93fb196f6ac3e8a94f8b21b80c29eef98c4d9b337100;
+
+/// @custom:hash storage ScheduledCouponListing
+// solhint-disable-next-line max-line-length
+bytes32 constant STORAGE_LOCATION_SCHEDULED_COUPON_LISTING = 0xa0157ee35363346eb57cfbda57a41ce45f495ee1e325889bbdf25b28f39b3400;
+
+/// @custom:hash storage ScheduledBalanceAdjustments
+// solhint-disable-next-line max-line-length
+bytes32 constant STORAGE_LOCATION_SCHEDULED_BALANCE_ADJUSTMENTS = 0x2585709bc5ff555bc3cb151d59074172c414752354c927dc0f683157ac009500;
+
+/// @custom:hash storage ScheduledCrossOrderedTasks
+// solhint-disable-next-line max-line-length
+bytes32 constant STORAGE_LOCATION_SCHEDULED_CROSS_ORDERED_TASKS = 0xc0ba5b9a820688d8898770d2f45db1e829785cb69882e5bb2981fdd22d60f900;
 
 /**
  * @title Scheduled Tasks Storage Wrapper
@@ -514,7 +528,7 @@ library ScheduledTasksStorageWrapper {
      * @return scheduledSnapshots_ Storage reference for the snapshot task queue.
      */
     function scheduledSnapshotStorage() internal pure returns (ScheduledTasksDataStorage storage scheduledSnapshots_) {
-        bytes32 position = _SCHEDULED_SNAPSHOTS_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_SCHEDULED_SNAPSHOTS;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             scheduledSnapshots_.slot := position
@@ -531,7 +545,7 @@ library ScheduledTasksStorageWrapper {
         pure
         returns (ScheduledTasksDataStorage storage scheduledCouponListing_)
     {
-        bytes32 position = _SCHEDULED_COUPON_LISTING_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_SCHEDULED_COUPON_LISTING;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             scheduledCouponListing_.slot := position
@@ -548,7 +562,7 @@ library ScheduledTasksStorageWrapper {
         pure
         returns (ScheduledTasksDataStorage storage scheduledBalanceAdjustments_)
     {
-        bytes32 position = _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_SCHEDULED_BALANCE_ADJUSTMENTS;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             scheduledBalanceAdjustments_.slot := position
@@ -565,7 +579,7 @@ library ScheduledTasksStorageWrapper {
         pure
         returns (ScheduledTasksDataStorage storage scheduledCrossOrderedTasks_)
     {
-        bytes32 position = _SCHEDULED_CROSS_ORDERED_TASKS_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_SCHEDULED_CROSS_ORDERED_TASKS;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             scheduledCrossOrderedTasks_.slot := position
@@ -583,13 +597,13 @@ library ScheduledTasksStorageWrapper {
         ScheduledTasksDataStorage storage subQueue_;
         bytes32 subCallbackType;
 
-        if (subTaskType == SNAPSHOT_TASK_TYPE) {
+        if (subTaskType == SCHEDULED_TASK_TYPE_SNAPSHOT) {
             subQueue_ = scheduledSnapshotStorage();
             subCallbackType = bytes32("snapshot");
-        } else if (subTaskType == BALANCE_ADJUSTMENT_TASK_TYPE) {
+        } else if (subTaskType == SCHEDULED_TASK_TYPE_BALANCE_ADJUSTMENT) {
             subQueue_ = scheduledBalanceAdjustmentStorage();
             subCallbackType = bytes32("balance");
-        } else if (subTaskType == COUPON_LISTING_TASK_TYPE) {
+        } else if (subTaskType == SCHEDULED_TASK_TYPE_COUPON_LISTING) {
             subQueue_ = scheduledCouponListingStorage();
             subCallbackType = bytes32("coupon");
         } else {
@@ -641,17 +655,17 @@ library ScheduledTasksStorageWrapper {
      * @param taskType Task type identifying the sub-queue whose top action should be cancelled.
      */
     function _cancelPendingSubTaskAction(bytes32 taskType) private {
-        if (taskType == SNAPSHOT_TASK_TYPE) {
+        if (taskType == SCHEDULED_TASK_TYPE_SNAPSHOT) {
             _cancelTopQueueAction(scheduledSnapshotStorage());
             return;
         }
 
-        if (taskType == BALANCE_ADJUSTMENT_TASK_TYPE) {
+        if (taskType == SCHEDULED_TASK_TYPE_BALANCE_ADJUSTMENT) {
             _cancelTopQueueAction(scheduledBalanceAdjustmentStorage());
             return;
         }
 
-        if (taskType == COUPON_LISTING_TASK_TYPE) {
+        if (taskType == SCHEDULED_TASK_TYPE_COUPON_LISTING) {
             _cancelTopQueueAction(scheduledCouponListingStorage());
         }
     }

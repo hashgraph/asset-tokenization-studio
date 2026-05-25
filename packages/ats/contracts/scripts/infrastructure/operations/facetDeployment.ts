@@ -19,6 +19,7 @@ import {
   warn,
   retryTransaction,
   RetryOptions,
+  withNonceReset,
 } from "@scripts/infrastructure";
 import { shouldFailAtFacet, createTestFailureMessage } from "../testing/failureInjection";
 
@@ -74,6 +75,22 @@ export interface DeployFacetsOptions {
    * Default: 20
    */
   concurrency?: number;
+
+  /**
+   * Called immediately after each facet's deploy transaction is sent and the
+   * hash is available, before waiting for confirmation. Use this to checkpoint
+   * the tx hash so a crash during waitForDeployment is recoverable on resume.
+   * Only invoked in sequential mode (parallel mode does not support per-tx callbacks).
+   */
+  onTransactionSent?: (name: string, txHash: string) => void | Promise<void>;
+
+  /**
+   * Called immediately after each facet is successfully deployed.
+   * Use this to save per-facet checkpoint data so partial progress survives
+   * process termination or unhandled errors before the full batch completes.
+   * Only invoked in sequential mode (parallel mode checkpoints are not supported).
+   */
+  onFacetDeployed?: (name: string, result: DeploymentResult) => void | Promise<void>;
 }
 
 /**
@@ -147,6 +164,8 @@ export async function deployFacets(
     verifyDeployment = true,
     parallelFacetDeployment = false,
     concurrency = 20,
+    onTransactionSent,
+    onFacetDeployed,
   } = options;
 
   // Retries with NonceManager leave permanent nonce gaps on failure when txs
@@ -180,6 +199,7 @@ export async function deployFacets(
         confirmations,
         overrides,
         verifyDeployment,
+        onTransactionSent: onTransactionSent ? (txHash) => onTransactionSent(facetName, txHash) : undefined,
       });
       if (!result.success) {
         throw new Error(result.error || "Deployment failed");
@@ -234,6 +254,15 @@ export async function deployFacets(
         }
       }
     } else {
+      // In sequential mode the signer may be a NonceManager (injected by createNetworkSigner).
+      // After a 502 the NonceManager's internal delta is already incremented even though
+      // Hedera never received the tx — the next attempt would use nonce N+1 while Hedera
+      // still expects N.  Reset before each retry so the network nonce is re-fetched.
+      const effectiveRetryOptions: RetryOptions = withNonceReset(
+        Object.values(facetFactories)[0]?.runner,
+        retryOptions,
+      );
+
       // Deploy each facet using its factory
       for (let i = 0; i < facetNames.length; i++) {
         const facetName = facetNames[i];
@@ -245,13 +274,14 @@ export async function deployFacets(
           // Deploy with retry if enabled
           // retryTransaction will catch exceptions and retry up to maxRetries times
           const result = enableRetry
-            ? await retryTransaction(() => deployOne(facetName), retryOptions)
+            ? await retryTransaction(() => deployOne(facetName), effectiveRetryOptions)
             : await deployOne(facetName);
 
           // If we get here, deployment succeeded (either first try or after retries)
           if (result.success && result.address) {
             deployed.set(facetName, result);
             info(`${progress} ✓ ${facetName} deployed successfully`);
+            await onFacetDeployed?.(facetName, result);
           } else {
             // This should not happen now, but keep for safety
             failed.set(facetName, result.error || "Unknown error");

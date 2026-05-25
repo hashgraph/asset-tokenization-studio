@@ -15,6 +15,9 @@ import { FactoryRegulationData, RegulationData, RegulationType, RegulationSubTyp
 import { TRexIFixedRate as IFixedRate } from "./IFixedRate.sol";
 import { TRexIKpiLinkedRate as IKpiLinkedRate } from "./IKpiLinkedRate.sol";
 
+/// @custom:hash resolverKey Factory
+bytes32 constant RESOLVER_KEY_FACTORY = 0x9fc26269cc1cb994e66f269ed6b58a5bb0c344a134b9dabd342ac466d48f95c7;
+
 interface TRexIFactory {
     enum SecurityType {
         BondVariableRate,

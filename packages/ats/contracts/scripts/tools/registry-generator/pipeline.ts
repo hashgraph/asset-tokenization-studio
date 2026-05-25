@@ -30,7 +30,11 @@ export const DEFAULT_CONFIG: Required<Omit<RegistryConfig, "mockContractPaths">>
   artifactPath: "./artifacts/contracts",
   includePaths: ["**/*.sol"],
   excludePaths: ["**/test/**", "**/tests/**", "**/mocks/**", "**/mock/**", "**/*.t.sol", "**/*.s.sol"],
-  resolverKeyPaths: ["**/constants/resolverKeys.sol", "**/layer_*/constants/resolverKeys.sol"],
+  // Resolver keys now live as file-scope constants inside their facet's
+  // interface file (or the proxy interface, for IDiamond). The legacy
+  // `constants/resolverKeys.sol` is preserved here only for the test-only
+  // TimeTravel facets which still use a localised version of it.
+  resolverKeyPaths: ["**/I*.sol", "**/constants/resolverKeys.sol"],
   rolesPaths: ["**/constants/roles.sol", "**/interfaces/roles.sol"],
   includeStorageWrappers: true,
   includeTimeTravel: true,

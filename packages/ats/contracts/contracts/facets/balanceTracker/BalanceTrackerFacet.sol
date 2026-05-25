@@ -1,16 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBalanceTracker } from "./IBalanceTracker.sol";
+import { IBalanceTracker, RESOLVER_KEY_BALANCE_TRACKER } from "./IBalanceTracker.sol";
 import { BalanceTracker } from "./BalanceTracker.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _BALANCE_TRACKER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title BalanceTrackerFacet
  * @notice Diamond facet that exposes token balance and total supply queries through the
- *         `IBalanceTracker` interface, registered under `_BALANCE_TRACKER_RESOLVER_KEY`.
+ *         `IBalanceTracker` interface, registered under `RESOLVER_KEY_BALANCE_TRACKER`.
  * @dev Inherits balance logic from `BalanceTracker` and satisfies the `IStaticFunctionSelectors`
  *      contract required by the Diamond proxy for selector registration. Exposes three selectors:
  *      `balanceOf`, `totalSupply`, and `getTotalBalanceFor`.
@@ -19,10 +17,10 @@ import { _BALANCE_TRACKER_RESOLVER_KEY } from "../../constants/resolverKeys.sol"
 contract BalanceTrackerFacet is BalanceTracker, IStaticFunctionSelectors {
     /**
      * @notice Returns the resolver key used to register this facet in the Diamond proxy.
-     * @return staticResolverKey_ The `_BALANCE_TRACKER_RESOLVER_KEY` constant.
+     * @return staticResolverKey_ The `RESOLVER_KEY_BALANCE_TRACKER` constant.
      */
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _BALANCE_TRACKER_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_BALANCE_TRACKER;
     }
 
     /**

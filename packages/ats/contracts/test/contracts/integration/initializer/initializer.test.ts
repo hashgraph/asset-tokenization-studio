@@ -29,13 +29,14 @@ import {
   MockFacet3__factory,
 } from "@contract-types";
 import { deployAtsInfrastructureFixture } from "@test";
-import { INITIALIZE_MOCK_CONFIG_ID, ATS_ROLES } from "@scripts";
+import { INITIALIZE_MOCK_CONFIG_ID, ATS_ROLES, atsRegistry } from "@scripts";
 import { decodeEvent } from "@scripts/infrastructure";
 
 describe("Initializer — InitializeMock domain", () => {
-  // TEST-ONLY: mirrors `_INITIALIZER_RESOLVER_KEY` declared in
-  // `contracts/constants/resolverKeys.sol`.
-  const initializerFacetId = "0x65c891d003e7dc436f2c3d0863d599d91867c8695fee29923a476a2be3ec540f";
+  // TEST-ONLY: mirrors `RESOLVER_KEY_INITIALIZER` declared file-scope in
+  // `contracts/facets/initializer/IInitializer.sol`. Sourced from the
+  // auto-generated atsRegistry so the test stays in sync with the codegen.
+  const initializerFacetId = atsRegistry.getFacetDefinition("InitializerFacet")!.resolverKey!.value;
   // TEST-ONLY: mirrors the `_MOCK_FACET_N_RESOLVER_KEY = bytes32("MockFacetN")`
   // constants declared in `contracts/test/mocks/MockFacets.sol`.
   const mockFacet1Id = "0x4d6f636b46616365743100000000000000000000000000000000000000000000";

@@ -58,7 +58,13 @@ describe("Bond KpiLinked Rate Tests", () => {
   };
 
   async function deploySecurityFixture() {
-    const base = await deployBondKpiLinkedRateTokenFixture();
+    const base = await deployBondKpiLinkedRateTokenFixture({
+      bondDataParams: {
+        bondDetails: {
+          maturityDate: dateToUnixTimestamp(`2031-01-01T00:00:00Z`),
+        },
+      },
+    });
 
     diamond = base.diamond;
     signer_A = base.deployer;
@@ -69,23 +75,23 @@ describe("Bond KpiLinked Rate Tests", () => {
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.KPI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_KPI_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.PROCEED_RECIPIENT_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_PROCEED_RECIPIENT_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.CORPORATE_ACTION_ROLE,
+        role: ATS_ROLES.ROLE_CORPORATE_ACTION,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.INTEREST_RATE_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_INTEREST_RATE_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.ISSUER_ROLE,
+        role: ATS_ROLES.ROLE_ISSUER,
         members: [signer_A.address],
       },
     ]);

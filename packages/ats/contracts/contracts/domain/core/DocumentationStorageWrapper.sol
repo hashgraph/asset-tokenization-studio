@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _DOCUMENTATION_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IDocumentation } from "../../facets/documentation/IDocumentation.sol";
+
+/// @custom:hash storage Documentation
+bytes32 constant STORAGE_LOCATION_DOCUMENTATION = 0x724dca8e53dc19ee715164fa580caf24fc00a1e0ac5f55ff641bfd61b36cdf00;
 
 /**
  * @notice Represents a single off-chain document referenced by the contract.
@@ -35,7 +37,7 @@ struct DocumentationDataStorage {
  * @notice Library providing diamond storage access and all read/write operations for
  *         the documentation domain.
  * @dev Uses the ERC-2535 diamond storage pattern to isolate state under
- *      `_DOCUMENTATION_STORAGE_POSITION`. The raw storage getter is `private` so that
+ *      `STORAGE_LOCATION_DOCUMENTATION`. The raw storage getter is `private` so that
  *      all storage access from external contracts is channelled through the library's
  *      typed API, preventing uncontrolled direct slot manipulation.
  *      All public-facing functions are `internal` so they inline into callers without
@@ -157,7 +159,7 @@ library DocumentationStorageWrapper {
      * @return docStorage_ Reference to the `DocumentationStorage` struct.
      */
     function _documentationStorage() private pure returns (DocumentationDataStorage storage docStorage_) {
-        bytes32 position = _DOCUMENTATION_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_DOCUMENTATION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             docStorage_.slot := position

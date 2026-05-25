@@ -6,6 +6,9 @@
 // Edits to this file will be silently overwritten.
 pragma solidity ^0.8.17;
 
+/// @custom:hash resolverKey FixedRate
+bytes32 constant RESOLVER_KEY_FIXED_RATE = 0x82f13d957a7f7af45723926c5ca1a184f2d667df5221c37434ce37278a9af521;
+
 interface TRexIFixedRate {
     struct FixedRateData {
         uint256 rate;

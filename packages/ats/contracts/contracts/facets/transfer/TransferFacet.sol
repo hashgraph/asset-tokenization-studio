@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ITransfer } from "./ITransfer.sol";
+import { ITransfer, RESOLVER_KEY_TRANSFER } from "./ITransfer.sol";
 import { Transfer } from "./Transfer.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _TRANSFER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title TransferFacet
  * @notice Diamond facet exposing ERC-20 and ERC-1594 token transfer operations.
@@ -16,7 +14,7 @@ import { _TRANSFER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 contract TransferFacet is Transfer, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _TRANSFER_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_TRANSFER;
     }
 
     /// @inheritdoc IStaticFunctionSelectors

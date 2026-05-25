@@ -2,8 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalKycListManagement } from "./IExternalKycListManagement.sol";
-import { KYC_MANAGER_ROLE } from "../../constants/roles.sol";
-import { _KYC_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { ROLE_KYC_MANAGER } from "../../constants/roles.sol";
+import { STORAGE_LOCATION_KYC_MANAGEMENT } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { ExternalListManagementStorageWrapper } from "../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ArrayValidation } from "../../infrastructure/utils/ArrayValidation.sol";
@@ -17,8 +17,8 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  *         Maintains a list of trusted third-party KYC provider contracts whose combined KYC
  *         evaluation must be satisfied for an account to be considered externally KYC-granted.
  * @dev Implements `IExternalKycListManagement`. The external KYC list is stored in diamond storage
- *      at `_KYC_MANAGEMENT_STORAGE_POSITION` via `ExternalListManagementStorageWrapper`.
- *      All mutating functions after initialisation are gated by `KYC_MANAGER_ROLE` and the
+ *      at `STORAGE_LOCATION_KYC_MANAGEMENT` via `ExternalListManagementStorageWrapper`.
+ *      All mutating functions after initialisation are gated by `ROLE_KYC_MANAGER` and the
  *      `onlyUnpaused` modifier inherited from `Modifiers`. Intended to be inherited exclusively
  *      by `ExternalKycListManagementFacet`.
  */
@@ -33,10 +33,10 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
     function updateExternalKycLists(
         address[] calldata _kycLists,
         bool[] calldata _actives
-    ) external override onlyActivated onlyUnpaused onlyRole(KYC_MANAGER_ROLE) returns (bool success_) {
+    ) external override onlyActivated onlyUnpaused onlyRole(ROLE_KYC_MANAGER) returns (bool success_) {
         ArrayValidation.checkUniqueValues(_kycLists, _actives);
         success_ = ExternalListManagementStorageWrapper.updateExternalLists(
-            _KYC_MANAGEMENT_STORAGE_POSITION,
+            STORAGE_LOCATION_KYC_MANAGEMENT,
             _kycLists,
             _actives
         );
@@ -54,11 +54,11 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(KYC_MANAGER_ROLE)
+        onlyRole(ROLE_KYC_MANAGER)
         onlyValidAddress(_kycLists)
         returns (bool success_)
     {
-        success_ = ExternalListManagementStorageWrapper.addExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists);
+        success_ = ExternalListManagementStorageWrapper.addExternalList(STORAGE_LOCATION_KYC_MANAGEMENT, _kycLists);
         if (!success_) {
             revert ListedKycList(_kycLists);
         }
@@ -68,8 +68,8 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
     /// @inheritdoc IExternalKycListManagement
     function removeExternalKycList(
         address _kycLists
-    ) external override onlyActivated onlyUnpaused onlyRole(KYC_MANAGER_ROLE) returns (bool success_) {
-        success_ = ExternalListManagementStorageWrapper.removeExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists);
+    ) external override onlyActivated onlyUnpaused onlyRole(ROLE_KYC_MANAGER) returns (bool success_) {
+        success_ = ExternalListManagementStorageWrapper.removeExternalList(STORAGE_LOCATION_KYC_MANAGEMENT, _kycLists);
         if (!success_) {
             revert UnlistedKycList(_kycLists);
         }
@@ -78,7 +78,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
 
     /// @inheritdoc IExternalKycListManagement
     function isExternalKycList(address _kycList) external view override returns (bool) {
-        return ExternalListManagementStorageWrapper.isExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycList);
+        return ExternalListManagementStorageWrapper.isExternalList(STORAGE_LOCATION_KYC_MANAGEMENT, _kycList);
     }
 
     /// @inheritdoc IExternalKycListManagement
@@ -88,7 +88,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
 
     /// @inheritdoc IExternalKycListManagement
     function getExternalKycListsCount() external view override returns (uint256 externalKycListsCount_) {
-        return ExternalListManagementStorageWrapper.getExternalListsCount(_KYC_MANAGEMENT_STORAGE_POSITION);
+        return ExternalListManagementStorageWrapper.getExternalListsCount(STORAGE_LOCATION_KYC_MANAGEMENT);
     }
 
     /// @inheritdoc IExternalKycListManagement
@@ -98,7 +98,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
     ) external view override returns (address[] memory members_) {
         return
             ExternalListManagementStorageWrapper.getExternalListsMembers(
-                _KYC_MANAGEMENT_STORAGE_POSITION,
+                STORAGE_LOCATION_KYC_MANAGEMENT,
                 _pageIndex,
                 _pageLength
             );

@@ -125,9 +125,9 @@ function createConfiguration(bytes32 _configurationId, FacetConfiguration[] call
 const EQUITY_CONFIG_ID = ethers.zeroPadValue(ethers.toBeHex(1), 32);
 
 const facetConfigurations = [
-  { id: ACCESS_CONTROL_RESOLVER_KEY, version: 1 },
-  { id: EQUITY_RESOLVER_KEY, version: 1 },
-  { id: COMPLIANCE_RESOLVER_KEY, version: 1 },
+  { id: RESOLVER_KEY_ACCESS_CONTROL, version: 1 },
+  { id: RESOLVER_KEY_EQUITY, version: 1 },
+  { id: RESOLVER_KEY_COMPLIANCE, version: 1 },
   // ... all facets for the Equity token type
 ];
 
@@ -196,8 +196,8 @@ Upgrading a configuration follows the same process as creating one. When `create
 // Existing Equity config is at version 1.
 // Calling createConfiguration again creates version 2.
 const updatedFacets = [
-  { id: ACCESS_CONTROL_RESOLVER_KEY, version: 2 }, // upgraded facet
-  { id: EQUITY_RESOLVER_KEY, version: 1 }, // unchanged
+  { id: RESOLVER_KEY_ACCESS_CONTROL, version: 2 }, // upgraded facet
+  { id: RESOLVER_KEY_EQUITY, version: 1 }, // unchanged
   // ...
 ];
 

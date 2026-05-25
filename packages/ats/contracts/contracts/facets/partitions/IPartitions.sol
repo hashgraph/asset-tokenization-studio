@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey Partitions
+bytes32 constant RESOLVER_KEY_PARTITIONS = 0x9caef059931effa6169ed564cfd0d8dac03be612be61f4fc934e8554cfe1c53f;
+
 /**
  * @title IPartitions
  * @author Asset Tokenization Studio Team

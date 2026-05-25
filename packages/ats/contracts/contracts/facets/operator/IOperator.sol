@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey Operator
+bytes32 constant RESOLVER_KEY_OPERATOR = 0x5c2062c6ba02b76ae0c3884d5c0fdd3416b2012195a964efaa34e09b1fa31c95;
+
 /**
  * @title IOperator
  * @notice Interface for operator management: query, authorize and revoke operators for all partitions.

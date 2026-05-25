@@ -30,8 +30,8 @@ describe("Pause Tests", () => {
     await externalPauseMock.waitForDeployment();
 
     // Add external pause to the token
-    await asset.connect(base.deployer).grantRole(ATS_ROLES.PAUSER_ROLE, base.deployer.address);
-    await asset.connect(base.deployer).grantRole(ATS_ROLES.PAUSE_MANAGER_ROLE, base.deployer.address);
+    await asset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_PAUSER, base.deployer.address);
+    await asset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_PAUSE_MANAGER, base.deployer.address);
     await asset.connect(base.deployer).addExternalPause(externalPauseMock.target, {
       gasLimit: GAS_LIMIT.high,
     });
@@ -57,7 +57,7 @@ describe("Pause Tests", () => {
     // Granting Role and Pause
     await grantRoleAndPauseToken(
       asset,
-      ATS_ROLES.PAUSER_ROLE,
+      ATS_ROLES.ROLE_PAUSER,
       deployer,
       unknownSigner,
       await unknownSigner.getAddress(),
@@ -68,7 +68,7 @@ describe("Pause Tests", () => {
   });
 
   it("GIVEN an unpause Token WHEN unpause THEN transaction fails with IsUnpaused", async () => {
-    await asset.connect(deployer).grantRole(ATS_ROLES.PAUSER_ROLE, await unknownSigner.getAddress());
+    await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_PAUSER, await unknownSigner.getAddress());
 
     // unpause fails
     await expect(asset.connect(unknownSigner).unpause()).to.be.revertedWithCustomError(asset, "IsUnpaused");
@@ -76,7 +76,7 @@ describe("Pause Tests", () => {
 
   it("GIVEN an account with pause role WHEN pause and unpause THEN transaction succeeds", async () => {
     // Granting Role
-    await asset.connect(deployer).grantRole(ATS_ROLES.PAUSER_ROLE, await unknownSigner.getAddress());
+    await asset.connect(deployer).grantRole(ATS_ROLES.ROLE_PAUSER, await unknownSigner.getAddress());
 
     // PAUSE
     await expect(asset.connect(unknownSigner).pause())
@@ -144,7 +144,7 @@ describe("Pause Tests", () => {
     it("GIVEN a deactivated asset WHEN pause THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).pause()).to.be.revertedWithCustomError(
         deactivatedAsset,
@@ -155,7 +155,7 @@ describe("Pause Tests", () => {
     it("GIVEN a deactivated asset WHEN unpause THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).unpause()).to.be.revertedWithCustomError(
         deactivatedAsset,

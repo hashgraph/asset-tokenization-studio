@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IScheduledCrossOrderedTasks } from "./IScheduledCrossOrderedTasks.sol";
+import { IScheduledCrossOrderedTasks, RESOLVER_KEY_SCHEDULED_TASKS } from "./IScheduledCrossOrderedTasks.sol";
 import { ScheduledCrossOrderedTasks } from "./ScheduledCrossOrderedTasks.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../../../infrastructure/proxy/Bytes4Builder.sol";
-import { _SCHEDULED_TASKS_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
-
 contract ScheduledCrossOrderedTasksFacet is ScheduledCrossOrderedTasks, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _SCHEDULED_TASKS_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_SCHEDULED_TASKS;
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {

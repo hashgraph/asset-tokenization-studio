@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IExternalKycListManagement } from "./IExternalKycListManagement.sol";
+import { IExternalKycListManagement, RESOLVER_KEY_EXTERNAL_KYC_LIST } from "./IExternalKycListManagement.sol";
 import { ExternalKycListManagement } from "./ExternalKycListManagement.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _EXTERNAL_KYC_LIST_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title ExternalKycListManagementFacet
  * @author Asset Tokenization Studio Team
@@ -15,12 +13,12 @@ import { _EXTERNAL_KYC_LIST_RESOLVER_KEY } from "../../constants/resolverKeys.so
  *         pagination — as selectable proxy functions.
  * @dev Inherits `ExternalKycListManagement` for the business logic and implements
  *      `IStaticFunctionSelectors` for the Diamond resolver pattern. The resolver key
- *      `_EXTERNAL_KYC_LIST_RESOLVER_KEY` identifies this facet within the diamond proxy.
+ *      `RESOLVER_KEY_EXTERNAL_KYC_LIST` identifies this facet within the diamond proxy.
  */
 contract ExternalKycListManagementFacet is ExternalKycListManagement, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _EXTERNAL_KYC_LIST_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_EXTERNAL_KYC_LIST;
     }
 
     /// @inheritdoc IStaticFunctionSelectors

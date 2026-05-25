@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _ADJUST_BALANCES_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
@@ -12,6 +11,9 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { IAdjustBalances } from "../../facets/adjustBalances/IAdjustBalances.sol";
 import { ScheduledTask } from "../../facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { MAX_UINT256, MAX_UINT8 } from "../../constants/values.sol";
+
+/// @custom:hash storage AdjustBalances
+bytes32 constant STORAGE_LOCATION_ADJUST_BALANCES = 0x155c219135942fbe253879a75d7b29fe22563c8a767fff8bfb3bf08229d5ac00;
 
 struct AdjustBalancesStorage {
     mapping(address => uint256[]) labafUserPartition;
@@ -710,7 +712,7 @@ library AdjustBalancesStorageWrapper {
      * @return adjustBalancesStorage_ Reference to the storage struct.
      */
     function adjustBalancesStorage() internal pure returns (AdjustBalancesStorage storage adjustBalancesStorage_) {
-        bytes32 position = _ADJUST_BALANCES_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_ADJUST_BALANCES;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             adjustBalancesStorage_.slot := position

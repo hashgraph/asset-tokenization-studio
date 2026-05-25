@@ -7,7 +7,10 @@ import { IDiamondCutManager } from "./IDiamondCutManager.sol";
 import { IStaticFunctionSelectors } from "../proxy/IStaticFunctionSelectors.sol";
 import { IDiamondLoupe } from "../proxy/IDiamondLoupe.sol";
 import { BusinessLogicResolverWrapper } from "./BusinessLogicResolverWrapper.sol";
-import { _DIAMOND_CUT_MANAGER_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+
+/// @custom:hash storage DiamondCutManager
+// solhint-disable-next-line max-line-length
+bytes32 constant STORAGE_LOCATION_DIAMOND_CUT_MANAGER = 0xc9161810d6144bfe5b28041c8a23ceedf202e65acda5c323c5b387259e601000;
 
 abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicResolverWrapper {
     struct DiamondCutManagerStorage {
@@ -39,9 +42,8 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations
     ) internal returns (uint256 latestVersion_) {
-        latestVersion_ = _isOngoingConfiguration(_configurationId)
-            ? _getBatchConfigurationVersion(_configurationId)
-            : _startBatchConfiguration(_configurationId);
+        if (_isOngoingConfiguration(_configurationId)) revert OngoingBatchConfigurationNotPermitted(_configurationId);
+        latestVersion_ = _startBatchConfiguration(_configurationId);
         _addFacetsToBatchConfiguration(_configurationId, _facetConfigurations, latestVersion_);
         _activateConfiguration(_configurationId, true);
     }
@@ -431,7 +433,7 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
     }
 
     function _diamondCutManagerStorage() internal pure returns (DiamondCutManagerStorage storage ds) {
-        bytes32 position = _DIAMOND_CUT_MANAGER_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_DIAMOND_CUT_MANAGER;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             ds.slot := position

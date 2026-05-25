@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey DividendSecurityHolders
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_DIVIDEND_SECURITY_HOLDERS = 0x1478127ed7121d4c1f51d4844183242705cd85c8948b44acb7756ecf98830402;
+
 /**
  * @title IDividendSecurityHolders
  * @author Asset Tokenization Studio Team

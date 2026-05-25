@@ -3,6 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ScheduledTask } from "../layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 
+/// @custom:hash resolverKey CouponListing
+bytes32 constant RESOLVER_KEY_COUPON_LISTING = 0x91e4a085c95cddedc7143dae7647c320f59b0f0214ed0f49ab95d7cedb4db176;
+
 /**
  * @title ICouponListing
  * @author Asset Tokenization Studio Team

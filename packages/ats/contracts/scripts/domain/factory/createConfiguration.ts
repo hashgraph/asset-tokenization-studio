@@ -18,6 +18,7 @@ import {
   OperationResult,
   createBatchConfiguration,
   DEFAULT_BATCH_SIZE,
+  RetryOptions,
 } from "@scripts/infrastructure";
 import { BusinessLogicResolver } from "@contract-types";
 import { FACTORY_CONFIG_ID } from "../constants";
@@ -82,6 +83,7 @@ export async function createFactoryConfiguration(
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
+  retryOptions?: RetryOptions,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
   // Build facet list based on time travel mode
   const facetNames = useTimeTravel ? FACTORY_FACETS.map((name) => `${name}TimeTravel`) : [...FACTORY_FACETS];
@@ -108,5 +110,6 @@ export async function createFactoryConfiguration(
     partialBatchDeploy,
     batchSize,
     confirmations,
+    retryOptions,
   });
 }

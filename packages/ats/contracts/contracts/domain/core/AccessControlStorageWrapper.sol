@@ -4,10 +4,12 @@ pragma solidity >=0.8.0 <0.9.0;
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { ArrayValidation } from "../../infrastructure/utils/ArrayValidation.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { _ACCESS_CONTROL_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { IAccessControl } from "../../facets/accessControl/IAccessControl.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+
+/// @custom:hash storage AccessControl
+bytes32 constant STORAGE_LOCATION_ACCESS_CONTROL = 0xff8881325a7cc80adb7ddfb5e52c7103d092b4d7833f49efafbcb1abd73a4900;
 
 struct RoleData {
     bytes32 roleAdmin;
@@ -37,7 +39,7 @@ library AccessControlStorageWrapper {
 
     // ✅ Diamond storage pattern
     function rolesStorage() internal pure returns (RoleDataStorage storage roles_) {
-        bytes32 position = _ACCESS_CONTROL_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_ACCESS_CONTROL;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             roles_.slot := position

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { LOCKER_ROLE, CONTROLLER_ROLE } from "../../../constants/roles.sol";
+import { ROLE_LOCKER, ROLE_CONTROLLER } from "../../../constants/roles.sol";
 import { ILock } from "./ILock.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
@@ -26,7 +26,7 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 abstract contract Lock is ILock, Modifiers {
     /**
      * @inheritdoc ILock
-     * @dev Pause-gated, restricted to `LOCKER_ROLE`, only valid in single-partition mode and
+     * @dev Pause-gated, restricted to `ROLE_LOCKER`, only valid in single-partition mode and
      *      against unrecovered token holders. Delegates to
      *      `LockStorageWrapper.lockByPartition` against the default partition and emits
      *      `LockedByPartition`.
@@ -40,7 +40,7 @@ abstract contract Lock is ILock, Modifiers {
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(LOCKER_ROLE)
+        onlyRole(ROLE_LOCKER)
         onlyWithoutMultiPartition
         onlyUnrecoveredAddress(_tokenHolder)
         onlyValidExpirationTimestamp(_expirationTimestamp)
@@ -96,7 +96,7 @@ abstract contract Lock is ILock, Modifiers {
      * @notice Releases a lock unconditionally, before its expiration timestamp.
      * @dev Authorised path used to recover locked balances when the holder is unable to do
      *      so. Pause-gated, partition validated against single-partition mode and
-     *      restricted to callers holding `LOCKER_ROLE` or `CONTROLLER_ROLE` (checked
+     *      restricted to callers holding `ROLE_LOCKER` or `ROLE_CONTROLLER` (checked
      *      explicitly via `AccessControlStorageWrapper.checkAnyRole`). Skips the
      *      `LockExpirationNotReached` guard that `releaseByPartition` enforces. Emits
      *      `LockByPartitionReleased`.
@@ -111,8 +111,8 @@ abstract contract Lock is ILock, Modifiers {
         address _tokenHolder
     ) external onlyActivated onlyUnpaused onlyDefaultPartitionWithSinglePartition(_partition) returns (bool success_) {
         bytes32[] memory roles = new bytes32[](2);
-        roles[0] = LOCKER_ROLE;
-        roles[1] = CONTROLLER_ROLE;
+        roles[0] = ROLE_LOCKER;
+        roles[1] = ROLE_CONTROLLER;
         AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         success_ = LockStorageWrapper.releaseByPartition(
             _partition,

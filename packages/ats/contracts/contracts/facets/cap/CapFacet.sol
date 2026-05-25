@@ -1,25 +1,23 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICap } from "./ICap.sol";
+import { ICap, RESOLVER_KEY_CAP } from "./ICap.sol";
 import { Cap } from "./Cap.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _CAP_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title CapFacet
  * @author Asset Tokenization Studio Team
  * @notice Diamond facet that exposes maximum supply management operations — initialisation, cap
  *         update, and cap query — as selectable proxy functions.
  * @dev Inherits `Cap` for the business logic and implements `IStaticFunctionSelectors` for the
- *      Diamond resolver pattern. The resolver key `_CAP_RESOLVER_KEY` identifies this facet
+ *      Diamond resolver pattern. The resolver key `RESOLVER_KEY_CAP` identifies this facet
  *      within the diamond proxy.
  */
 contract CapFacet is Cap, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _CAP_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_CAP;
     }
 
     /// @inheritdoc IStaticFunctionSelectors

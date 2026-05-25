@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey BatchController
+bytes32 constant RESOLVER_KEY_BATCH_CONTROLLER = 0x535258ade68566dbac2304c09e172709e8b0ab3f78d2be54014d021ddb03ab58;
+
 /**
  * @title IBatchController
  * @notice Interface for controller-only batch transfer operations.

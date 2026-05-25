@@ -91,6 +91,14 @@ interface IDiamondCutManager {
     error DuplicatedFacetInConfiguration(bytes32 facetId);
 
     /**
+     * @notice Thrown when {createConfiguration} is called for a configuration id that already
+     *         has an in-progress batch, which would prematurely finalise the incomplete batch
+     *         and absorb any facets that were intended for subsequent batch additions.
+     * @param configurationId Configuration key whose batch is currently open.
+     */
+    error OngoingBatchConfigurationNotPermitted(bytes32 configurationId);
+
+    /**
      * @notice Thrown when a (configurationId, version) pair is referenced but has not been
      *         registered (or is still mid-batch and therefore not yet finalised).
      * @param resolverProxyConfigurationId Configuration key that was looked up.

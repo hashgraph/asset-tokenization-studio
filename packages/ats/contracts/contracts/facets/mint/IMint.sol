@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey Mint
+bytes32 constant RESOLVER_KEY_MINT = 0x394ec838636f78e91b7dbb3e4ea567e07bbb3886ab70a66652c40be856ab9b7a;
+
 /**
  * @title IMint
  * @author Asset Tokenization Studio Team

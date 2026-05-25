@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey LockAtSnapshot
+bytes32 constant RESOLVER_KEY_LOCK_AT_SNAPSHOT = 0x91e5d78963175418e7eb62ff74343d1349d9522d316525e922e145c770cc4d18;
+
 /**
  * @title  ILockAtSnapshot
  * @notice Interface for querying a token holder's locked balance at the time of a

@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey BalanceAdjustments
+bytes32 constant RESOLVER_KEY_BALANCE_ADJUSTMENTS = 0x0d52158578e1e30e77e2dd3caffc1aa31af5397866b92131f66858f01b2e8f01;
+
 /**
  * @title IAdjustBalances
  * @author Asset Tokenization Studio Team
@@ -32,7 +35,7 @@ interface IAdjustBalances {
 
     /**
      * @notice Applies a balance adjustment to all token holders immediately.
-     * @dev Caller must hold `ADJUSTMENT_BALANCE_ROLE`. The token must not be paused and `factor`
+     * @dev Caller must hold `ROLE_ADJUSTMENT_BALANCE`. The token must not be paused and `factor`
      *      must be non-zero. Pending scheduled tasks at index 0 are triggered before the adjustment
      *      is applied, ensuring consistent ordering.
      * @param factor   Numerator of the multiplier; effective ratio = factor / 10^decimals.

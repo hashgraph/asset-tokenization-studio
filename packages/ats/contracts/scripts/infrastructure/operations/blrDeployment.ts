@@ -113,22 +113,16 @@ export async function deployBlr(signer: Signer, options: DeployBlrOptions = {}):
     if (initialize) {
       info("Initializing BLR...");
 
-      try {
-        const blr = BusinessLogicResolver__factory.connect(blrAddress, signer);
+      const blr = BusinessLogicResolver__factory.connect(blrAddress, signer);
 
-        const initTx = await blr.initialize_BusinessLogicResolver({
-          gasLimit: GAS_LIMIT.initialize.businessLogicResolver,
-          ...hederaGasOverrides(),
-        });
-        await initTx.wait();
+      const initTx = await blr.initialize_BusinessLogicResolver({
+        gasLimit: GAS_LIMIT.initialize.businessLogicResolver,
+        ...hederaGasOverrides(),
+      });
+      await initTx.wait();
 
-        initialized = true;
-        success("BLR initialized");
-      } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : String(err);
-        logError(`BLR initialization failed: ${errorMsg}`);
-        // Don't fail deployment if initialization fails
-      }
+      initialized = true;
+      success("BLR initialized");
     }
 
     success("BLR deployment complete");

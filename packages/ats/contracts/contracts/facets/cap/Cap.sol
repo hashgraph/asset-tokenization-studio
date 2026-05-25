@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ICap } from "./ICap.sol";
-import { CAP_ROLE } from "../../constants/roles.sol";
+import { ROLE_CAP } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../domain/core/CapStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
@@ -13,7 +13,7 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  * @author Asset Tokenization Studio Team
  * @notice Abstract contract implementing maximum supply management for a security token, both
  *         globally and per partition.
- * @dev Implements `ICap`. Cap state is stored at `_CAP_STORAGE_POSITION` via
+ * @dev Implements `ICap`. Cap state is stored at `STORAGE_LOCATION_CAP` via
  *      `CapStorageWrapper`. All timestamp-sensitive operations delegate to
  *      `TimeTravelStorageWrapper.getBlockTimestamp()` so the same code path is exercisable in
  *      test environments. `setMaxSupply` and `getMaxSupply` use the adjusted supply
@@ -35,7 +35,7 @@ abstract contract Cap is ICap, Modifiers {
     }
 
     /// @inheritdoc ICap
-    /// @dev Requires the token to be unpaused and `CAP_ROLE`. Cap validation and event emission
+    /// @dev Requires the token to be unpaused and `ROLE_CAP`. Cap validation and event emission
     ///      are handled inside `CapStorageWrapper.setMaxSupply`.
     function setMaxSupply(
         uint256 maxSupply
@@ -44,7 +44,7 @@ abstract contract Cap is ICap, Modifiers {
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(CAP_ROLE)
+        onlyRole(ROLE_CAP)
         onlyValidNewMaxSupply(maxSupply, TimeTravelStorageWrapper.getBlockTimestamp())
         returns (bool success_)
     {

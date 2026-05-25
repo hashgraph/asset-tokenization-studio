@@ -241,7 +241,7 @@ export interface RoleDefinition {
  * @example
  * ```typescript
  * const roles = extractRoles(source)
- * // [{name: 'ISSUER_ROLE', value: '0x4be32e8...'}]
+ * // [{name: 'ROLE_ISSUER', value: '0x4be32e8...'}]
  * // [{name: '_ISSUER_ROLE', value: '0x4be32e8...'}] (legacy ATS)
  * ```
  */
@@ -250,13 +250,13 @@ export function extractRoles(source: string): RoleDefinition[] {
   const lines = source.split("\n");
 
   for (const line of lines) {
-    // Quick check to avoid processing irrelevant lines
-    if (!line.includes("_ROLE") || !line.includes("bytes32") || !line.includes("constant")) {
+    if (!line.includes("bytes32") || !line.includes("constant")) {
       continue;
     }
-
-    // Parse using string operations to avoid ReDoS
-    const role = parseConstantDefinition(line, "_ROLE");
+    if (!line.includes("ROLE_") && !line.includes("DEFAULT_ADMIN_ROLE")) {
+      continue;
+    }
+    const role = parseConstantByPredicate(line, (name) => name.startsWith("ROLE_") || name === "DEFAULT_ADMIN_ROLE");
     if (role) {
       roles.push(role);
     }
@@ -267,9 +267,13 @@ export function extractRoles(source: string): RoleDefinition[] {
 
 /**
  * Parse a constant definition (role or resolver key) using string operations.
- * Matches: bytes32 [public] constant NAME = value;
+ * Matches: bytes32 [public] constant NAME = value; and returns the (name, value)
+ * pair only when `accept(name)` returns true.
  */
-function parseConstantDefinition(line: string, suffix: string): { name: string; value: string } | null {
+function parseConstantByPredicate(
+  line: string,
+  accept: (name: string) => boolean,
+): { name: string; value: string } | null {
   const normalized = normalizeWhitespace(line.trim());
 
   // Must contain "bytes32 "
@@ -299,8 +303,7 @@ function parseConstantDefinition(line: string, suffix: string): { name: string; 
 
   const name = rest.slice(0, eqIdx).trim();
 
-  // Must end with the expected suffix
-  if (!name.endsWith(suffix)) {
+  if (!accept(name)) {
     return null;
   }
 
@@ -352,13 +355,16 @@ export function extractResolverKeys(source: string): ResolverKeyDefinition[] {
   const lines = source.split("\n");
 
   for (const line of lines) {
-    // Quick check to avoid processing irrelevant lines
-    if (!line.includes("_RESOLVER_KEY") || !line.includes("bytes32") || !line.includes("constant")) {
+    if (!line.includes("RESOLVER_KEY") || !line.includes("bytes32") || !line.includes("constant")) {
       continue;
     }
-
-    // Parse using string operations to avoid ReDoS
-    const key = parseConstantDefinition(line, "_RESOLVER_KEY");
+    // Accept both the legacy `_<FACET>_RESOLVER_KEY` suffix style and the
+    // canonical `RESOLVER_KEY_<FACET>` prefix style during the BBND-1674
+    // transition.
+    const key = parseConstantByPredicate(
+      line,
+      (name) => name.startsWith("RESOLVER_KEY_") || name.endsWith("_RESOLVER_KEY"),
+    );
     if (key) {
       keys.push(key);
     }
@@ -604,13 +610,14 @@ function parseResolverKeyFromImports(source: string): string | null {
     // Extract content between braces
     const content = source.slice(braceStart + 1, braceEnd);
 
-    // Check if this import contains a resolver key
-    if (content.includes("_RESOLVER_KEY")) {
-      // Split by comma and find the resolver key
+    // Check if this import contains a resolver key — accept both the
+    // canonical `RESOLVER_KEY_<NAME>` prefix and the legacy
+    // `_<NAME>_RESOLVER_KEY` suffix during the BBND-1674 transition.
+    if (content.includes("RESOLVER_KEY")) {
       const parts = content.split(",");
       for (const part of parts) {
         const trimmed = part.trim();
-        if (trimmed.endsWith("_RESOLVER_KEY")) {
+        if (trimmed.startsWith("RESOLVER_KEY_") || trimmed.endsWith("_RESOLVER_KEY")) {
           return trimmed;
         }
       }

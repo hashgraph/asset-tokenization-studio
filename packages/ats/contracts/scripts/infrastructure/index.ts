@@ -238,6 +238,7 @@ export {
   estimateGasLimit,
   formatGasUsage,
   retryTransaction,
+  withNonceReset,
   isNonceTooLowError,
   isGasError,
   isNetworkError,
