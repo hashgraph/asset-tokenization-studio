@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { ISsiManagement } from "../../facets/ssiManagement/ISsiManagement.sol";
+import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 
 /// @custom:hash storage SsiManagement
 bytes32 constant STORAGE_LOCATION_SSI_MANAGEMENT = 0xce722d9244e395d588d86bfe2318b3330226793a6bcb3ce028d3286061fb2f00;
@@ -23,6 +24,7 @@ library SsiManagementStorageWrapper {
     }
 
     function addIssuer(address _issuer) internal returns (bool success_) {
+        if (_issuer == address(0)) revert ICommonErrors.ZeroAddressNotAllowed();
         success_ = ssiManagementStorage().issuerList.add(_issuer);
     }
 
