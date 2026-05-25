@@ -28,7 +28,6 @@ interface ILockByPartition is ILockTypes {
      * @param _amount The amount of tokens to lock.
      * @param _tokenHolder The address whose tokens are locked.
      * @param _expirationTimestamp Unix timestamp at which the lock becomes releasable.
-     * @return success_ True when the lock has been recorded.
      * @return lockId_ Identifier assigned to the new lock for `(partition, tokenHolder)`.
      */
     function lockByPartition(
@@ -36,7 +35,7 @@ interface ILockByPartition is ILockTypes {
         uint256 _amount,
         address _tokenHolder,
         uint256 _expirationTimestamp
-    ) external returns (bool success_, uint256 lockId_);
+    ) external returns (uint256 lockId_);
 
     /**
      * @notice Releases a lock on `_partition` previously created with `lockByPartition`.
