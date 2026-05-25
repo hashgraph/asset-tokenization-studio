@@ -62,4 +62,4 @@ export const ROLES = {
 /**
  * Total number of unique roles in the registry.
  */
-export const TOTAL_ROLES = 36 as const;
+export const TOTAL_ROLES = 37 as const;
