@@ -7,10 +7,13 @@ import { ROLE_CORPORATE_ACTION, ROLE_CORPORATE_ACTION_FORCE_CANCEL } from "../..
 import { CORPORATE_ACTION_TYPE_VOTING_RIGHTS } from "../../../constants/dispatchTypes.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
-import { VotingStorageWrapper } from "../../../domain/asset/voting/VotingStorageWrapper.sol";
+import { VotingStorageWrapper } from "../../../domain/asset/VotingStorageWrapper.sol";
 
 /// @title Voting
-/// @notice Abstract contract for voting rights management
+/// @author Asset Tokenization Studio Team
+/// @notice Abstract facet implementing the voting-rights corporate action lifecycle.
+/// @dev Delegates persistence to `VotingStorageWrapper`; access is gated by
+///      `ROLE_CORPORATE_ACTION` and the standard activation/pause modifiers.
 abstract contract Voting is IVoting, Modifiers {
     /// @notice Sets a new voting for the security
     /// @param _newVoting The new voting to be set

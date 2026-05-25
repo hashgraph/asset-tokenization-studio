@@ -9,7 +9,7 @@ import {
 import { IEquity } from "../../facets/layer_2/equity/IEquity.sol";
 import { IScheduledBalanceAdjustment } from "../../facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
-import { NominalValueStorageWrapper } from "./nominalValue/NominalValueStorageWrapper.sol";
+import { NominalValueStorageWrapper } from "./NominalValueStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
@@ -21,12 +21,16 @@ import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedErro
 bytes32 constant STORAGE_LOCATION_EQUITY = 0x94fe8bd2c421847f50afb78366b145478e26f82c0fba2861c4fa9ade581d5800;
 
 /**
- * @notice Diamond-storage layout for equity-specific rights and configuration.
- * @dev Stored at `_EQUITY_STORAGE_POSITION` via `EquityStorageWrapper._equityStorage()`.
- *      `initialized` guards against re-initialisation. Rights flags and `currency` are
- *      set once at token deployment by `EquityStorageWrapper.initializeEquityDetails`.
+ * @notice Persistent storage layout for the Equity facet.
+ * @dev Captures the equity rights matrix (voting, information, liquidation, subscription,
+ *      conversion, redemption, put, dividend) plus the initialised flag. Currency, nominal
+ *      value and nominal-value decimals are owned by {NominalValueStorageWrapper}. New
+ *      fields must be appended below the marker to preserve ERC-7201 slot offsets.
+ * @custom:storage-location erc7201:security.token.standard.storage.Equity
  */
 struct EquityDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    bool initialized;
     bool votingRight;
     bool informationRight;
     bool liquidationRight;
@@ -34,9 +38,10 @@ struct EquityDataStorage {
     bool conversionRight;
     bool redemptionRight;
     bool putRight;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
     IEquity.DividendType dividendRight;
-    bytes3 currency;
-    bool initialized;
+
+    // ─── APPEND-ONLY ZONE BELOW ───
 }
 
 /// @title Equity Storage Wrapper
@@ -44,12 +49,11 @@ struct EquityDataStorage {
 /// @author Asset Tokenization Studio Team
 library EquityStorageWrapper {
     /**
-     * @notice Writes the equity rights and configuration flags into diamond storage.
-     * @dev Intended to be called once at token deployment. Does not enforce
-     *      non-re-initialisation internally — callers must check `isEquityInitialized`
-     *      beforehand. Sets `initialized` to `true` on completion.
-     * @param equityDetailsData Struct containing voting, information, liquidation, subscription,
-     *                          conversion, redemption, and put rights, dividend type, and currency.
+     * @notice Initialises the equity rights matrix from the supplied deployment data.
+     * @dev Copies every right flag plus the dividend type into storage and marks the
+     *      facet as initialised. Currency / nominal-value fields live in
+     *      {NominalValueStorageWrapper} and are populated separately.
+     * @param equityDetailsData The equity rights and dividend type supplied at deployment.
      */
     function initializeEquityDetails(IEquity.EquityDetailsData memory equityDetailsData) internal {
         EquityDataStorage storage $ = _equityStorage();
@@ -61,18 +65,16 @@ library EquityStorageWrapper {
         $.redemptionRight = equityDetailsData.redemptionRight;
         $.putRight = equityDetailsData.putRight;
         $.dividendRight = equityDetailsData.dividendRight;
-        $.currency = equityDetailsData.currency;
         $.initialized = true;
     }
 
     /**
-     * @notice Creates a new scheduled balance adjustment corporate action.
-     * @dev Encodes `newBalanceAdjustment`, delegates creation to
-     *      `CorporateActionsStorageWrapper.addCorporateAction`, and calls `initBalanceAdjustment`
-     *      to schedule the execution task.
-     * @param newBalanceAdjustment     The balance adjustment parameters including execution date.
-     * @return corporateActionId_      Identifier of the underlying corporate action.
-     * @return balanceAdjustmentID_    One-indexed identifier of the newly created adjustment.
+     * @notice Registers a scheduled balance adjustment as a corporate action.
+     * @dev Records the corporate action of type `BALANCE_ADJUSTMENT`, then schedules the
+     *      cross-ordered task and the balance-adjustment entry that drive the runtime.
+     * @param newBalanceAdjustment The balance-adjustment payload to schedule.
+     * @return corporateActionId_ The corporate action identifier issued for the adjustment.
+     * @return balanceAdjustmentID_ The one-based index of the adjustment within its type list.
      */
     function setScheduledBalanceAdjustment(
         IScheduledBalanceAdjustment.ScheduledBalanceAdjustment calldata newBalanceAdjustment
@@ -88,13 +90,11 @@ library EquityStorageWrapper {
     }
 
     /**
-     * @notice Cancels a pending scheduled balance adjustment, enforcing that the execution date
-     *         has not yet been reached.
-     * @dev Validates the action type via `requireMatchingActionType`, then reverts with
-     *      `IScheduledBalanceAdjustment.BalanceAdjustmentAlreadyExecuted` if the execution date
-     *      is in the past. Delegates the cancellation to
-     *      `CorporateActionsStorageWrapper.cancelCorporateAction`.
-     * @param balanceAdjustmentId The identifier of the balance adjustment to cancel.
+     * @notice Cancels a previously scheduled balance adjustment that has not yet executed.
+     * @dev Reverts via {BalanceAdjustmentAlreadyExecuted} if the execution date has already
+     *      been reached at the current block timestamp; otherwise marks the underlying
+     *      corporate action as cancelled.
+     * @param balanceAdjustmentId The one-based index of the adjustment within its type list.
      */
     function cancelScheduledBalanceAdjustment(uint256 balanceAdjustmentId) internal {
         CorporateActionsStorageWrapper.requireMatchingActionType(
@@ -124,14 +124,12 @@ library EquityStorageWrapper {
     }
 
     /**
-     * @notice Schedules the execution task for a newly created balance adjustment corporate
-     *         action.
-     * @dev Decodes `data` into `IScheduledBalanceAdjustment.ScheduledBalanceAdjustment` and
-     *      registers a cross-ordered balance-adjustment task at `executionDate` via
-     *      `ScheduledTasksStorageWrapper`. Reverts with
-     *      `IScheduledBalanceAdjustment.BalanceAdjustmentCreationFailed` if `actionId` is zero.
-     * @param actionId The corporate action identifier (must be non-zero).
-     * @param data     ABI-encoded `IScheduledBalanceAdjustment.ScheduledBalanceAdjustment` struct.
+     * @notice Schedules the runtime tasks that materialise a balance adjustment.
+     * @dev Reverts with {BalanceAdjustmentCreationFailed} when the corporate action
+     *      identifier is zero. Otherwise registers the cross-ordered scheduled task and
+     *      the balance-adjustment task at the supplied execution date.
+     * @param actionId The corporate action identifier returned by the registry.
+     * @param data The ABI-encoded {ScheduledBalanceAdjustment} payload.
      */
     function initBalanceAdjustment(bytes32 actionId, bytes memory data) internal {
         if (actionId == bytes32(0)) {
@@ -151,11 +149,10 @@ library EquityStorageWrapper {
     }
 
     /**
-     * @notice Returns the full equity rights and configuration record from storage.
-     * @dev Assembles `IEquity.EquityDetailsData` from individual storage flags and appends the
-     *      live nominal value from `NominalValueStorageWrapper`.
-     * @return equityDetails_ Struct containing all equity rights flags, dividend type, currency,
-     *                        nominal value, and nominal value decimals.
+     * @notice Returns the aggregated equity details, combining rights and nominal-value data.
+     * @dev Reads rights and dividend type from this wrapper's storage and currency, nominal
+     *      value, nominal-value decimals from {NominalValueStorageWrapper}.
+     * @return equityDetails_ The equity details snapshot.
      */
     function getEquityDetails() internal view returns (IEquity.EquityDetailsData memory equityDetails_) {
         equityDetails_ = IEquity.EquityDetailsData({
@@ -167,21 +164,21 @@ library EquityStorageWrapper {
             redemptionRight: _equityStorage().redemptionRight,
             putRight: _equityStorage().putRight,
             dividendRight: _equityStorage().dividendRight,
-            currency: _equityStorage().currency,
+            currency: NominalValueStorageWrapper.getNominalValueCurrency(),
             nominalValue: NominalValueStorageWrapper.getNominalValue(),
             nominalValueDecimals: NominalValueStorageWrapper.getNominalValueDecimals()
         });
     }
 
     /**
-     * @notice Retrieves the full balance adjustment record, corporate action ID, and disabled
-     *         status.
-     * @dev Resolves the corporate action ID by type index, fetches and decodes the stored bytes.
-     *      Uses `_checkUnexpectedError` (panic guard) to assert data is non-empty.
-     * @param balanceAdjustmentID     The one-indexed identifier of the adjustment.
-     * @return balanceAdjustment_     Decoded balance adjustment struct.
-     * @return corporateActionId_     Underlying corporate action identifier.
-     * @return isDisabled_            True if the adjustment has been cancelled.
+     * @notice Returns a scheduled balance adjustment by its one-based identifier.
+     * @dev Resolves the corporate action id via the registry, decodes the persisted bytes
+     *      payload, and reports whether the corporate action has been disabled.
+     *      Reverts via {_checkUnexpectedError} when the underlying payload is empty.
+     * @param balanceAdjustmentID The one-based index of the adjustment within its type list.
+     * @return balanceAdjustment_ The decoded scheduled balance adjustment.
+     * @return corporateActionId_ The corporate action identifier that backs the adjustment.
+     * @return isDisabled_ Whether the corporate action has been cancelled.
      */
     function getScheduledBalanceAdjustment(
         uint256 balanceAdjustmentID
@@ -207,27 +204,24 @@ library EquityStorageWrapper {
     }
 
     /**
-     * @notice Returns the total number of scheduled balance adjustment corporate actions ever
-     *         created.
-     * @dev Delegates to `CorporateActionsStorageWrapper.getCorporateActionCountByType`.
-     * @return balanceAdjustmentCount_ Total count of registered balance adjustments.
+     * @notice Returns the total number of balance adjustments scheduled for this token.
+     * @return balanceAdjustmentCount_ The count of corporate actions of type BALANCE_ADJUSTMENT.
      */
     function getScheduledBalanceAdjustmentsCount() internal view returns (uint256 balanceAdjustmentCount_) {
         return CorporateActionsStorageWrapper.getCorporateActionCountByType(CORPORATE_ACTION_TYPE_BALANCE_ADJUSTMENT);
     }
 
     /**
-     * @notice Returns a holder's token balance and decimals at `date`, if `date` has already
-     *         passed.
-     * @dev Returns zeros and `false` when `date` is still in the future. Balance and decimals are
-     *      sourced from the bound snapshot (if `snapshotId != 0`) or from ABAF-adjusted ERC3643
-     *      and ERC20 storage at `date`.
-     * @param date       The reference timestamp to compare against the current block.
-     * @param snapshotId Snapshot identifier (zero means no snapshot is bound).
-     * @param account    The holder address to query.
-     * @return balance_     Token balance of `account` at `date`, or zero.
-     * @return decimals_    Token decimals at `date`, or zero.
-     * @return dateReached_ True if `date` is in the past.
+     * @notice Returns a holder's balance and the token decimals at a given date, if reached.
+     * @dev When `date` is still in the future, returns zeros with `dateReached_` false; when
+     *      reached, draws from the supplied snapshot (if non-zero) or from the historical
+     *      ERC-3643 adjusted balance / ERC-20 adjusted decimals at that date.
+     * @param date The reference timestamp.
+     * @param snapshotId The snapshot identifier to read from, or zero to use the adjusted history.
+     * @param account The token holder being inspected.
+     * @return balance_ The holder's total balance at the reference date.
+     * @return decimals_ The token decimals applicable at the reference date.
+     * @return dateReached_ Whether `date` is at or before the current block timestamp.
      */
     function getSnapshotBalanceForIfDateReached(
         uint256 date,
@@ -247,20 +241,17 @@ library EquityStorageWrapper {
     }
 
     /**
-     * @notice Returns whether the equity storage has been initialised.
-     * @dev Reads the `initialized` flag from `EquityDataStorage`. Use as a guard before calling
-     *      `initializeEquityDetails`.
-     * @return True if equity details have already been set; false otherwise.
+     * @notice Indicates whether the equity storage has been initialised.
+     * @return Whether {initializeEquityDetails} has already been executed for this token.
      */
     function isEquityInitialized() internal view returns (bool) {
         return _equityStorage().initialized;
     }
 
     /**
-     * @notice Returns a storage pointer to `EquityDataStorage` at the dedicated slot.
-     * @dev Uses inline assembly with the diamond-storage pattern to load the struct pointer at
-     *      `_EQUITY_STORAGE_POSITION`.
-     * @return equityData_ Storage reference to the equity data layout.
+     * @notice Returns the storage reference at the ERC-7201 slot for the equity namespace.
+     * @dev Resolved via inline assembly against {STORAGE_LOCATION_EQUITY}.
+     * @return equityData_ The storage reference for the equity data struct.
      */
     function _equityStorage() private pure returns (EquityDataStorage storage equityData_) {
         bytes32 position = STORAGE_LOCATION_EQUITY;

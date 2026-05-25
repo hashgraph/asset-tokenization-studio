@@ -5,7 +5,7 @@ import { IDividend } from "./IDividend.sol";
 import { IDividendTypes } from "./IDividendTypes.sol";
 import { ROLE_CORPORATE_ACTION, ROLE_CORPORATE_ACTION_FORCE_CANCEL } from "../../constants/roles.sol";
 import { CORPORATE_ACTION_TYPE_DIVIDEND } from "../../constants/dispatchTypes.sol";
-import { DividendStorageWrapper } from "../../domain/asset/dividend/DividendStorageWrapper.sol";
+import { DividendStorageWrapper } from "../../domain/asset/DividendStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 

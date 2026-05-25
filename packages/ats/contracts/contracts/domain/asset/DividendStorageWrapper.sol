@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { SNAPSHOT_RESULT_ID } from "../../../constants/values.sol";
-import { CORPORATE_ACTION_TYPE_DIVIDEND, SCHEDULED_TASK_TYPE_SNAPSHOT } from "../../../constants/dispatchTypes.sol";
-import { CorporateActionsStorageWrapper } from "../../core/CorporateActionsStorageWrapper.sol";
-import { ERC1410StorageWrapper } from "../ERC1410StorageWrapper.sol";
-import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
-import { TokenCoreOps } from "../../orchestrator/TokenCoreOps.sol";
-import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
-import { IDividend } from "../../../facets/dividend/IDividend.sol";
-import { IDividendTypes } from "../../../facets/dividend/IDividendTypes.sol";
-import { ScheduledTasksStorageWrapper } from "../ScheduledTasksStorageWrapper.sol";
-import { SnapshotsStorageWrapper } from "../SnapshotsStorageWrapper.sol";
-import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { SNAPSHOT_RESULT_ID } from "../../constants/values.sol";
+import { CORPORATE_ACTION_TYPE_DIVIDEND, SCHEDULED_TASK_TYPE_SNAPSHOT } from "../../constants/dispatchTypes.sol";
+import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
+import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
+import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
+import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { IDividend } from "../../facets/dividend/IDividend.sol";
+import { IDividendTypes } from "../../facets/dividend/IDividendTypes.sol";
+import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
+import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
+import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 /**
  * @title Dividend Storage Wrapper Library
