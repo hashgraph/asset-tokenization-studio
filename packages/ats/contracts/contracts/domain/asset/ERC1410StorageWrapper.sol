@@ -21,8 +21,9 @@ import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol
 import { ScheduledTasksOps } from "../orchestrator/ScheduledTasksOps.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { _DEFAULT_PARTITION, KPI_ERC1410_REMOVE_HOLDER } from "../../constants/values.sol";
 import { _checkNonceAndDeadline } from "../../infrastructure/utils/EIP712.sol";
+import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
 
 /// @custom:hash storage Erc1410Basic
 bytes32 constant STORAGE_LOCATION_ERC1410_BASIC = 0x2b7b9d433e782d7e5384db9a591ac5085e24b04d9aa9a09e22954f9f253cf000;
@@ -149,8 +150,9 @@ library ERC1410StorageWrapper {
         ERC1410BasicStorage storage basicStorage = erc1410BasicStorage();
 
         uint256 lastIndex = basicStorage.totalTokenHolders;
+        uint256 tokenHolderIndex = basicStorage.tokenHolderIndex[tokenHolder];
+        _checkUnexpectedError(tokenHolderIndex == 0, KPI_ERC1410_REMOVE_HOLDER);
         if (lastIndex > 1) {
-            uint256 tokenHolderIndex = basicStorage.tokenHolderIndex[tokenHolder];
             if (tokenHolderIndex < lastIndex) {
                 address lastTokenHolder = basicStorage.tokenHolders[lastIndex];
 
