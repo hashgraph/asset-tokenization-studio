@@ -2,17 +2,60 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
-import { ILoansPortfolioStorageWrapper } from "./ILoansPortfolioStorageWrapper.sol";
-import { ILoansPortfolio } from "../../../facets/layer_2/loansPortfolio/ILoansPortfolio.sol";
-import { ILoan } from "../../../facets/layer_2/loan/ILoan.sol";
-import { IERC1410Types } from "../../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
-import { ITransferByPartition } from "../../../facets/transferByPartition/ITransferByPartition.sol";
-import { IBalanceTrackerByPartition } from "../../../facets/balanceTrackerByPartition/IBalanceTrackerByPartition.sol";
-import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
+import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { ILoansPortfolio } from "../../facets/layer_2/loansPortfolio/ILoansPortfolio.sol";
+import { ILoan } from "../../facets/layer_2/loan/ILoan.sol";
+import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { ITransferByPartition } from "../../facets/transferByPartition/ITransferByPartition.sol";
+import { IBalanceTrackerByPartition } from "../../facets/balanceTrackerByPartition/IBalanceTrackerByPartition.sol";
+import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 
 /// @custom:hash storage LoansPortfolio
 bytes32 constant STORAGE_LOCATION_LOANS_PORTFOLIO = 0x5981f3997a6cf8235e2e8b5dd35e430c9a70b916501c3c7672c830ad91b0d400;
+
+/**
+ * @title LoansPortfolioDataStorage
+ * @notice Data structure representing the entire loans portfolio storage.
+ * @dev Backing storage for the loans portfolio facet. Loan classification sets
+ *      (secured / non-secured, performing / non-performing / defaulted) and the country
+ *      tracking maps are maintained in lockstep with the master `loanHoldingsAssets` set;
+ *      mutations must keep all derived sets consistent.
+ * @param initialized Indicates whether the portfolio storage has been initialised.
+ * @param portfolioType The type of the portfolio (e.g., SECURED, UNSECURED).
+ * @param distributionPolicy The distribution policy applied to the portfolio (e.g., PRO_RATA).
+ * @param holdingsAssets Set of all holding asset addresses (loans and cash).
+ * @param loanHoldingsAssets Set of all loan holding asset addresses.
+ * @param cashHoldingsAssets Set of all cash holding asset addresses.
+ * @param securedLoanHoldingsAssets Set of loan addresses that are collateralised.
+ * @param nonSecuredLoanHoldingsAssets Set of loan addresses that are not collateralised.
+ * @param performingLoanHoldingsAssets Set of loan addresses currently performing.
+ * @param nonPerformingLoanHoldingsAssets Set of loan addresses currently non-performing.
+ * @param defaultedLoanHoldingsAssets Set of loan addresses that have defaulted.
+ * @param loanHoldingsAssetsByCountryKeys Set of hashed country keys for geographical tracking.
+ * @param countryNames Mapping from hashed key to human-readable country name.
+ * @param loanHoldingsAssetsByCountry Mapping from hashed key to count of loans in that country.
+ * @custom:storage-location erc7201:security.token.standard.storage.LoansPortfolio
+ */
+struct LoansPortfolioDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    bool initialized;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    ILoansPortfolio.PortfolioType portfolioType;
+    ILoansPortfolio.DistributionPolicy distributionPolicy;
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+    EnumerableSet.AddressSet holdingsAssets;
+    EnumerableSet.AddressSet loanHoldingsAssets;
+    EnumerableSet.AddressSet cashHoldingsAssets;
+    EnumerableSet.AddressSet securedLoanHoldingsAssets;
+    EnumerableSet.AddressSet nonSecuredLoanHoldingsAssets;
+    EnumerableSet.AddressSet performingLoanHoldingsAssets;
+    EnumerableSet.AddressSet nonPerformingLoanHoldingsAssets;
+    EnumerableSet.AddressSet defaultedLoanHoldingsAssets;
+    EnumerableSet.Bytes32Set loanHoldingsAssetsByCountryKeys;
+    mapping(bytes32 => string) countryNames;
+    mapping(bytes32 => uint256) loanHoldingsAssetsByCountry;
+    // ─── APPEND-ONLY ZONE BELOW ───
+}
 
 /**
  * @title LoansPortfolioStorageWrapper
@@ -27,40 +70,6 @@ library LoansPortfolioStorageWrapper {
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.Bytes32Set;
     using Pagination for EnumerableSet.AddressSet;
-
-    /**
-     * @notice Data structure representing the entire loans portfolio storage.
-     * @param portfolioType The type of the portfolio (e.g., SECURED, UNSECURED).
-     * @param distributionPolicy The distribution policy applied to the portfolio (e.g., PRO_RATA).
-     * @param holdingsAssets Set of all holding asset addresses (loans and cash).
-     * @param loanHoldingsAssets Set of all loan holding asset addresses.
-     * @param cashHoldingsAssets Set of all cash holding asset addresses.
-     * @param securedLoanHoldingsAssets Set of loan addresses that are collateralised.
-     * @param nonSecuredLoanHoldingsAssets Set of loan addresses that are not collateralised.
-     * @param performingLoanHoldingsAssets Set of loan addresses currently performing.
-     * @param nonPerformingLoanHoldingsAssets Set of loan addresses currently non-performing.
-     * @param defaultedLoanHoldingsAssets Set of loan addresses that have defaulted.
-     * @param loanHoldingsAssetsByCountryKeys Set of hashed country keys for geographical tracking.
-     * @param countryNames Mapping from hashed key to human-readable country name.
-     * @param loanHoldingsAssetsByCountry Mapping from hashed key to count of loans in that country.
-     * @param initialized Indicates whether the portfolio storage has been initialised.
-     */
-    struct LoansPortfolioDataStorage {
-        ILoansPortfolio.PortfolioType portfolioType;
-        ILoansPortfolio.DistributionPolicy distributionPolicy;
-        EnumerableSet.AddressSet holdingsAssets;
-        EnumerableSet.AddressSet loanHoldingsAssets;
-        EnumerableSet.AddressSet cashHoldingsAssets;
-        EnumerableSet.AddressSet securedLoanHoldingsAssets;
-        EnumerableSet.AddressSet nonSecuredLoanHoldingsAssets;
-        EnumerableSet.AddressSet performingLoanHoldingsAssets;
-        EnumerableSet.AddressSet nonPerformingLoanHoldingsAssets;
-        EnumerableSet.AddressSet defaultedLoanHoldingsAssets;
-        EnumerableSet.Bytes32Set loanHoldingsAssetsByCountryKeys;
-        mapping(bytes32 => string) countryNames;
-        mapping(bytes32 => uint256) loanHoldingsAssetsByCountry;
-        bool initialized;
-    }
 
     /**
      * @notice Initialises the loans portfolio storage with the provided details.
@@ -98,7 +107,7 @@ library LoansPortfolioStorageWrapper {
         ILoansPortfolio.HoldingsAssetType holdingsAssetType = _holdingsAsset.holdingsAssetType;
         LoansPortfolioDataStorage storage loanPortfolioStorage = loansPortfolioStorage();
         if (loanPortfolioStorage.holdingsAssets.contains(_holdingsAsset.assetAddress)) {
-            revert ILoansPortfolioStorageWrapper.HoldingsAssetAlreadyExists(_holdingsAsset.assetAddress);
+            revert ILoansPortfolio.HoldingsAssetAlreadyExists(_holdingsAsset.assetAddress);
         }
         if (holdingsAssetType == ILoansPortfolio.HoldingsAssetType.LOAN) {
             _addLoanHoldingsAsset(loanPortfolioStorage, _holdingsAsset.assetAddress);
@@ -195,7 +204,7 @@ library LoansPortfolioStorageWrapper {
      */
     function checkHoldingAssetExists(address _assetAddress) internal view {
         if (!loansPortfolioStorage().holdingsAssets.contains(_assetAddress)) {
-            revert ILoansPortfolioStorageWrapper.HoldingAssetNotFound(_assetAddress);
+            revert ILoansPortfolio.HoldingAssetNotFound(_assetAddress);
         }
     }
 

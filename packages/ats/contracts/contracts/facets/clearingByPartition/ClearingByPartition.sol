@@ -288,6 +288,16 @@ abstract contract ClearingByPartition is IClearingByPartition, Modifiers {
             );
     }
 
+    /**
+     * @notice Creates a clearing transfer entry on behalf of an authorised operator.
+     * @dev Dispatches into {ClearingOps.clearingTransferCreation} with the
+     *      {ThirdPartyType.AUTHORIZED} tag and reduces the operator's clearing allowance.
+     * @param _clearingOperationFrom Operator envelope (clearing operation, holder, operator data).
+     * @param _amount Amount to clear for transfer.
+     * @param _to Destination address that will receive the cleared transfer.
+     * @return success_ True when the clearing entry was created.
+     * @return clearingId_ Identifier assigned to the new clearing record.
+     */
     function _clearingTransferFromByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount,

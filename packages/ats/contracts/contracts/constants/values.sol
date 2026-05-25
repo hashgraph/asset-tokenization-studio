@@ -90,6 +90,9 @@ bytes4 constant KPI_LINKED_RATE_COUPON = 0x0000000A;
 /// @dev ID for ClearingOps.clearingHoldCreationExecution()
 bytes4 constant CLEARING_HOLD_CREATION = 0x0000000B;
 
+/// @dev ID for ERC1410StorageWrapper.removeTokenHolder()
+bytes4 constant KPI_ERC1410_REMOVE_HOLDER = 0x0000000C;
+
 /// @dev ID for CouponRateDispatch.unrecognizedRateType()
 bytes4 constant UNRECOGNIZED_RATE_TYPE = 0x0000000C;
 

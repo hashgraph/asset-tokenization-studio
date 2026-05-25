@@ -1028,12 +1028,16 @@ export async function deploySystemWithExistingBlr(
                 address: facetAddress,
                 contractId: await getContractId(facetAddress),
                 key,
-                version: versionByKey.get(key) ?? 0,
+                version: versionByKey.get(key) ?? undefined,
               })),
             );
           })()
         : [],
 
+      // Configuration summary. `version: 0` entries below are placeholders
+      // emitted when the corresponding configuration was skipped or failed to
+      // create — they are display-only and never sent on-chain. Successful
+      // entries carry the real registered version (>= 1) from the BLR.
       configurations: {
         equity:
           equityConfig && equityConfig.success

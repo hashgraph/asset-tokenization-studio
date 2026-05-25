@@ -32,8 +32,7 @@ interface IERC20Votes is IERC5805 {
     /// @param currentClock The current clock value
     error FutureLookup(uint256 timepoint, uint256 currentClock);
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC20Votes(bool _activated) external;
+    function initializeERC20Votes(bool _activated) external;
 
     function isActivated() external view returns (bool);
 

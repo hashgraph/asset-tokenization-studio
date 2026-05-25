@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
+import { type ResolverProxy, type IAsset, MockERC1410StorageWrapper } from "@contract-types";
 import { DEFAULT_PARTITION, ATS_ROLES, ZERO, EMPTY_HEX_BYTES } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -410,6 +410,46 @@ describe("SecurityHoldersFacet Tests", () => {
     });
   });
 
+  describe("replaceTokenHolder existence guard (audit fix)", () => {
+    let mock: MockERC1410StorageWrapper;
+
+    beforeEach(async () => {
+      const factory = await ethers.getContractFactory("MockERC1410StorageWrapper");
+      mock = (await factory.deploy()) as unknown as MockERC1410StorageWrapper;
+      await mock.waitForDeployment();
+    });
+
+    it("GIVEN oldTokenHolder is not registered (index == 0) WHEN replaceTokenHolder THEN reverts with TokenHolderNotFound", async () => {
+      await expect(mock.exposed_replaceTokenHolder(signer_B.address, signer_C.address))
+        .to.be.revertedWithCustomError(mock, "TokenHolderNotFound")
+        .withArgs(signer_C.address);
+    });
+
+    it("GIVEN oldTokenHolder was registered and then removed (index reset to 0) WHEN replaceTokenHolder THEN reverts with TokenHolderNotFound", async () => {
+      await mock.exposed_addNewTokenHolder(signer_B.address);
+      await mock.exposed_addNewTokenHolder(signer_C.address);
+      await mock.exposed_removeTokenHolder(signer_B.address);
+
+      expect(await mock.exposed_getTokenHolderIndex(signer_B.address)).to.equal(0);
+
+      await expect(mock.exposed_replaceTokenHolder(signer_D.address, signer_B.address))
+        .to.be.revertedWithCustomError(mock, "TokenHolderNotFound")
+        .withArgs(signer_B.address);
+    });
+
+    it("GIVEN a registered oldTokenHolder WHEN replaceTokenHolder THEN registry is updated and slot 0 is never corrupted", async () => {
+      await mock.exposed_addNewTokenHolder(signer_B.address);
+      const indexBefore = await mock.exposed_getTokenHolderIndex(signer_B.address);
+
+      await mock.exposed_replaceTokenHolder(signer_C.address, signer_B.address);
+
+      expect(await mock.exposed_getTokenHolderIndex(signer_B.address)).to.equal(0);
+      expect(await mock.exposed_getTokenHolderIndex(signer_C.address)).to.equal(indexBefore);
+      expect(await mock.exposed_getTokenHolder(Number(indexBefore))).to.equal(signer_C.address);
+      expect(await mock.exposed_getTokenHolder(0)).to.equal(ethers.ZeroAddress);
+    });
+  });
+
   describe("removeTokenHolder storage cleanup (audit fix FIND-123)", () => {
     it("GIVEN two holders WHEN first holder transfers all tokens out THEN tokenHolders[lastIndex] storage slot is zeroed", async () => {
       const tokenAmount = 1000n;
@@ -451,6 +491,33 @@ describe("SecurityHoldersFacet Tests", () => {
 
       const slotValue = await ethers.provider.getStorage(diamond.target, ghostSlot);
       expect(slotValue).to.equal(ethers.ZeroHash);
+    });
+  });
+
+  describe("removeTokenHolder unregistered holder guard", () => {
+    let mock: MockERC1410StorageWrapper;
+
+    beforeEach(async () => {
+      const factory = await ethers.getContractFactory("MockERC1410StorageWrapper");
+      mock = (await factory.deploy()) as unknown as MockERC1410StorageWrapper;
+      await mock.waitForDeployment();
+    });
+
+    it("GIVEN an unregistered address WHEN removeTokenHolder is called THEN reverts with UnexpectedError", async () => {
+      await expect(mock.exposed_removeTokenHolder(signer_B.address))
+        .to.be.revertedWithCustomError(mock, "UnexpectedError")
+        .withArgs("0x0000000c");
+    });
+
+    it("GIVEN a registered holder WHEN removeTokenHolder is called THEN succeeds and holder count decrements", async () => {
+      await mock.exposed_addNewTokenHolder(signer_B.address);
+
+      expect(await mock.exposed_getTotalTokenHolders()).to.equal(1);
+
+      await mock.exposed_removeTokenHolder(signer_B.address);
+
+      expect(await mock.exposed_getTotalTokenHolders()).to.equal(0);
+      expect(await mock.exposed_getTokenHolderIndex(signer_B.address)).to.equal(0);
     });
   });
 });

@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IVotingSecurityHolders } from "./IVotingSecurityHolders.sol";
-import { VotingStorageWrapper } from "../../domain/asset/voting/VotingStorageWrapper.sol";
+import { VotingStorageWrapper } from "../../domain/asset/VotingStorageWrapper.sol";
 
 /**
  * @title VotingSecurityHolders
