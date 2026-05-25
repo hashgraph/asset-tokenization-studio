@@ -45,3 +45,7 @@ gas-report.txt
 
 # Documentation
 Smart Contracts Audit Report.pdf
+
+# Symlinks to AGENTS.md — prettier refuses to format symbolic links
+CLAUDE.md
+GEMINI.md

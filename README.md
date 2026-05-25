@@ -307,6 +307,22 @@ Each submodule provides additional test options (unit, e2e, coverage).
 - WalletConnect for dApp integration
 - Custodian libraries: Dfns, Fireblocks, AWS KMS
 
+## AI Agent Integration
+
+This project uses the [AGENTS.md](https://agents.md/) convention for agent context and the [Agent Skills](https://agentskills.io/) open standard for shared automation skills.
+
+```
+AGENTS.md                     # Project context for any AI agent
+.agents/
+  skills/                     # Agent Skills (agentskills.io standard)
+    update-docs/SKILL.md      # Update docs based on recent commits
+packages/
+  ats/contracts/AGENTS.md     # Contract-specific agent context
+  ats/sdk/AGENTS.md           # SDK-specific agent context
+```
+
+No agent-specific directories are committed. Each agent reads `AGENTS.md` and self-configures on session start. Skills in `.agents/skills/` are auto-discovered by compatible agents (Gemini CLI, OpenAI Codex, Cursor, VS Code, GitHub Copilot, and others). To add a new skill, create `.agents/skills/<name>/SKILL.md` following the [spec](https://agentskills.io/specification).
+
 ## Continuous Integration
 
 The project uses separate GitHub Actions workflows for different components:
