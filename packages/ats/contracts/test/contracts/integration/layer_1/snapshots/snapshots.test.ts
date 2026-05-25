@@ -666,7 +666,7 @@ describe("Scheduled Snapshots Tests", () => {
 
   describe("scheduledSnapshotCount / getScheduledSnapshots: _includeDisabled flag", () => {
     it("GIVEN a cancelled snapshot task WHEN scheduledSnapshotCount(false) THEN returns 0 and (true) returns 1", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
       const recordDate = dateToUnixTimestamp("2030-01-01T00:00:06Z");
       const executionDate = dateToUnixTimestamp("2030-01-01T00:01:00Z");
@@ -684,7 +684,7 @@ describe("Scheduled Snapshots Tests", () => {
     });
 
     it("GIVEN a cancelled snapshot task WHEN getScheduledSnapshots(false) THEN returns empty and (true) returns the task", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
       const recordDate = dateToUnixTimestamp("2030-01-01T00:00:06Z");
       const executionDate = dateToUnixTimestamp("2030-01-01T00:01:00Z");

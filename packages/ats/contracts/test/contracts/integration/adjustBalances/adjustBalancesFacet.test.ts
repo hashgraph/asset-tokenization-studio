@@ -295,8 +295,8 @@ describe("AdjustBalancesFacet Tests", () => {
       });
 
       it("GIVEN a cancelled balance adjustment WHEN balanceOfAt after its execution date THEN returns unadjusted balance", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
-        await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
 
         const mintAmount = 1000n;
         await asset.connect(signer_C).issueByPartition({

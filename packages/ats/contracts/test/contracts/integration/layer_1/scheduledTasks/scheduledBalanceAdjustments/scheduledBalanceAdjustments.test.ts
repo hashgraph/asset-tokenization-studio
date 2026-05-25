@@ -128,7 +128,7 @@ describe("Scheduled BalanceAdjustments Tests", () => {
 
   describe("getPendingBalanceAdjustmentCount / getScheduledBalanceAdjustments: _includeDisabled flag", () => {
     it("GIVEN a cancelled balance adjustment WHEN getPendingBalanceAdjustmentCount(false) THEN returns 0 and (true) returns 1", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
       const executionDate = dateToUnixTimestamp("2030-01-01T00:00:06Z");
       await asset.connect(signer_C).setScheduledBalanceAdjustment({
@@ -144,7 +144,7 @@ describe("Scheduled BalanceAdjustments Tests", () => {
     });
 
     it("GIVEN a cancelled balance adjustment WHEN getScheduledBalanceAdjustments(false) THEN returns empty and (true) returns the task", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
       const executionDate = dateToUnixTimestamp("2030-01-01T00:00:06Z");
       await asset.connect(signer_C).setScheduledBalanceAdjustment({
