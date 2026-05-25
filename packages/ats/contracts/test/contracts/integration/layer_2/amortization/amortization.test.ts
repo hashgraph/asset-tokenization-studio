@@ -286,7 +286,7 @@ describe("AmortizationFacet", () => {
     });
 
     it("GIVEN paused token WHEN forceCancelAmortization THEN reverts with IsPaused", async () => {
-      await asset.grantRole(ATS_ROLES.PAUSER_ROLE, user1.address);
+      await asset.grantRole(ATS_ROLES.ROLE_PAUSER, user1.address);
 
       await asset.connect(user1).pause();
 
@@ -301,8 +301,8 @@ describe("AmortizationFacet", () => {
     });
 
     it("GIVEN amortization with one active hold WHEN forceCancelAmortization THEN succeeds bypassing hold guard", async () => {
-      await asset.grantRole(ATS_ROLES.AMORTIZATION_ROLE, user2.address);
-      await asset.grantRole(ATS_ROLES.ISSUER_ROLE, user2.address);
+      await asset.grantRole(ATS_ROLES.ROLE_AMORTIZATION, user2.address);
+      await asset.grantRole(ATS_ROLES.ROLE_ISSUER, user2.address);
 
       await asset.connect(user2).issueByPartition({
         partition: DEFAULT_PARTITION,
