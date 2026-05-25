@@ -40,6 +40,11 @@ library KycStorageWrapper {
         success_ = true;
     }
 
+    /**
+     * @dev A KYC entry with GRANTED status may no longer be valid once its
+     * `validTo` has elapsed. To keep a clean list of granted accounts,
+     * expired entries must be explicitly removed via `revokeKyc`.
+     */
     function grantKyc(
         address _account,
         string memory _vcId,
@@ -63,6 +68,11 @@ library KycStorageWrapper {
         if (!verifyKycStatus(_kycStatus, _account)) revert IKyc.InvalidKycStatus();
     }
 
+    /**
+     * @dev A GRANTED entry whose `validTo` has elapsed is reported here as
+     * `NOT_GRANTED`. The GRANTED list is not pruned automatically; expired
+     * entries must be explicitly removed via `revokeKyc` to keep it clean.
+     */
     function getKycStatusFor(address _account, uint256 _timestamp) internal view returns (IKyc.KycStatus) {
         IKyc.KycData memory kycFor = getKycFor(_account);
 
@@ -89,10 +99,20 @@ library KycStorageWrapper {
         return kycStorage().kyc[_account];
     }
 
+    /**
+     * @dev For `GRANTED`, the count may include entries whose `validTo` has
+     * elapsed and are therefore no longer valid. To keep a clean list,
+     * expired entries must be explicitly removed via `revokeKyc`.
+     */
     function getKycAccountsCount(IKyc.KycStatus _kycStatus) internal view returns (uint256 kycAccountsCount_) {
         kycAccountsCount_ = kycStorage().kycAddressesByStatus[_kycStatus].length();
     }
 
+    /**
+     * @dev For `GRANTED`, the returned page may include entries whose
+     * `validTo` has elapsed and are therefore no longer valid. To keep a
+     * clean list, expired entries must be explicitly removed via `revokeKyc`.
+     */
     function getKycAccountsData(
         IKyc.KycStatus _kycStatus,
         uint256 _pageIndex,
