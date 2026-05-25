@@ -661,32 +661,6 @@ describe("DiamondCutManager", () => {
     expect(countOfTestConfigId).to.equal(1);
   });
 
-  it("GIVEN a configuration WHEN querying facets with version 0 THEN uses latest version", async () => {
-    const configId = EQUITY_CONFIG_ID;
-
-    const facetsWithVersion0 = await diamondCutManager.getFacetsByConfigurationIdAndVersion(
-      configId,
-      0,
-      0,
-      equityFacetIdList.length,
-    );
-
-    const facetsWithVersion1 = await diamondCutManager.getFacetsByConfigurationIdAndVersion(
-      configId,
-      1,
-      0,
-      equityFacetIdList.length,
-    );
-
-    expect(facetsWithVersion0.length).to.equal(facetsWithVersion1.length);
-    expect(facetsWithVersion0.length).to.be.greaterThan(0);
-
-    for (let i = 0; i < facetsWithVersion0.length; i++) {
-      expect(facetsWithVersion0[i].id).to.equal(facetsWithVersion1[i].id);
-      expect(facetsWithVersion0[i].addr).to.equal(facetsWithVersion1[i].addr);
-    }
-  });
-
   it("GIVEN a non-existent configuration WHEN checking if registered THEN returns false", async () => {
     const nonExistentConfigId = "0x0000000000000000000000000000000000000000000000000000000000000099";
 
@@ -712,7 +686,32 @@ describe("DiamondCutManager", () => {
 
     await expect(diamondCutManager.checkResolverProxyConfigurationRegistered(configId, 1)).to.not.be.reverted;
     const isRegisteredV0 = await diamondCutManager.isResolverProxyConfigurationRegistered(configId, 0);
-    expect(isRegisteredV0).to.be.true;
+    expect(isRegisteredV0).to.be.false;
+  });
+
+  it("GIVEN an existing configuration WHEN checking registration with version 0 THEN reverts with VersionZero", async () => {
+    await expect(diamondCutManager.checkResolverProxyConfigurationRegistered(EQUITY_CONFIG_ID, 0))
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(EQUITY_CONFIG_ID);
+  });
+
+  it("GIVEN an existing configuration WHEN resolving a call with version 0 THEN reverts with VersionZero", async () => {
+    const pauseSelector = "0x8456cb59";
+    await expect(diamondCutManager.resolveResolverProxyCall(EQUITY_CONFIG_ID, 0, pauseSelector))
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(EQUITY_CONFIG_ID);
+  });
+
+  it("GIVEN an existing configuration WHEN resolveSupportsInterface called with version 0 THEN reverts with VersionZero", async () => {
+    await expect(diamondCutManager.resolveSupportsInterface(EQUITY_CONFIG_ID, 0, "0x01ffc9a7"))
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(EQUITY_CONFIG_ID);
+  });
+
+  it("GIVEN an existing configuration WHEN getFacetsByConfigurationIdAndVersion called with version 0 THEN reverts with VersionZero", async () => {
+    await expect(diamondCutManager.getFacetsByConfigurationIdAndVersion(EQUITY_CONFIG_ID, 0, 0, 10))
+      .to.be.revertedWithCustomError(diamondCutManager, "VersionZero")
+      .withArgs(EQUITY_CONFIG_ID);
   });
 
   it("GIVEN a registered configuration WHEN getFacetVersionByConfigurationIdVersionAndFacetId called with non-existent facetId THEN reverts with FacetIdNotRegistered", async () => {

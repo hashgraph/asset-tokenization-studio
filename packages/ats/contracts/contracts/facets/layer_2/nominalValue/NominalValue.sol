@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { INominalValue } from "./INominalValue.sol";
 import { ROLE_NOMINAL_VALUE } from "../../../constants/roles.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
-import { NominalValueStorageWrapper } from "../../../domain/asset/nominalValue/NominalValueStorageWrapper.sol";
+import { NominalValueStorageWrapper } from "../../../domain/asset/NominalValueStorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 /**

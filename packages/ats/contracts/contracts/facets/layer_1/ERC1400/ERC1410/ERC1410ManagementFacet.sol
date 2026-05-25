@@ -11,7 +11,7 @@ contract ERC1410ManagementFacet is ERC1410Management, IStaticFunctionSelectors {
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
-        return Bytes4Builder.build(this.initialize_ERC1410.selector);
+        return Bytes4Builder.build(this.initializeERC1410.selector);
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {

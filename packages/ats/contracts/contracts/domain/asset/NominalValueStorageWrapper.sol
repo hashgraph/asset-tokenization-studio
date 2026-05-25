@@ -1,11 +1,34 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { SnapshotsStorageWrapper } from "../SnapshotsStorageWrapper.sol";
-import { ScheduledTasksOps } from "../../orchestrator/ScheduledTasksOps.sol";
+import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
+import { ScheduledTasksOps } from "../orchestrator/ScheduledTasksOps.sol";
 
 /// @custom:hash storage NominalValue
 bytes32 constant STORAGE_LOCATION_NOMINAL_VALUE = 0xf4ae98634996e72bf90c5471fce11baa245e9198f5fa7cdab6e4d46dfe7bfe00;
+
+/**
+ * @title NominalValueDataStorage
+ * @notice Backing storage for nominal value, decimals, and ISO 4217 currency code.
+ * @dev Sole source of truth for nominal-value fields on this asset; mutated only via
+ *      `NominalValueStorageWrapper` against the deterministic ERC-7201 slot.
+ * @param initialized Whether the nominal value data has been initialised.
+ * @param nominalValueDecimals Number of decimals applied to `nominalValue`.
+ * @param nominalValueCurrency ISO 4217 currency code (`0x000000` when unset).
+ * @param nominalValue Nominal value amount expressed with `nominalValueDecimals` precision.
+ * @custom:storage-location erc7201:security.token.standard.storage.NominalValue
+ */
+struct NominalValueDataStorage {
+    // ─── R1 Lifecycle (bool flags) ───────────────────────────
+    bool initialized;
+    // ─── R2 Packed scalars (uint8, bytes3, address, enum) ────
+    uint8 nominalValueDecimals;
+    bytes3 nominalValueCurrency;
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    uint256 nominalValue;
+
+    // ─── APPEND-ONLY ZONE BELOW ───
+}
 
 /**
  * @title NominalValueStorageWrapper - Nominal Value Storage Wrapper
@@ -18,13 +41,6 @@ bytes32 constant STORAGE_LOCATION_NOMINAL_VALUE = 0xf4ae98634996e72bf90c5471fce1
  * @author Asset Tokenization Studio Team
  */
 library NominalValueStorageWrapper {
-    struct NominalValueDataStorage {
-        uint256 nominalValue;
-        uint8 nominalValueDecimals;
-        bool initialized;
-        bytes3 nominalValueCurrency;
-    }
-
     /**
      * @notice Initialises the dedicated nominal value storage with amount, decimals, and currency.
      * @param _nominalValue Initial nominal value amount.
@@ -65,10 +81,18 @@ library NominalValueStorageWrapper {
         _nominalValueStorage().nominalValueCurrency = _nominalValueCurrency;
     }
 
+    /**
+     * @notice Reads the nominal value amount from the dedicated storage slot.
+     * @return The nominal value amount expressed with `getNominalValueDecimals()` precision.
+     */
     function getNominalValue() internal view returns (uint256) {
         return _nominalValueStorage().nominalValue;
     }
 
+    /**
+     * @notice Reads the nominal value decimals from the dedicated storage slot.
+     * @return The number of decimals applied to the nominal value amount.
+     */
     function getNominalValueDecimals() internal view returns (uint8) {
         return _nominalValueStorage().nominalValueDecimals;
     }
@@ -81,10 +105,19 @@ library NominalValueStorageWrapper {
         return _nominalValueStorage().nominalValueCurrency;
     }
 
+    /**
+     * @notice Reports whether the nominal value storage has been initialised.
+     * @return True once `initializeNominalValue` has been called, false otherwise.
+     */
     function isNominalValueInitialized() internal view returns (bool) {
         return _nominalValueStorage().initialized;
     }
 
+    /**
+     * @notice Returns the storage pointer for nominal value data at the deterministic slot.
+     * @dev Uses inline assembly to load the ERC-7201 slot from a precomputed constant.
+     * @return nvData_ Storage pointer to `NominalValueDataStorage`.
+     */
     function _nominalValueStorage() private pure returns (NominalValueDataStorage storage nvData_) {
         bytes32 position = STORAGE_LOCATION_NOMINAL_VALUE;
         // solhint-disable-next-line no-inline-assembly
