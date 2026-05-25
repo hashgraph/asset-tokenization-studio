@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IPause } from "./IPause.sol";
-import { PAUSER_ROLE } from "../../constants/roles.sol";
+import { ROLE_PAUSER } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { PauseStorageWrapper } from "../../domain/core/PauseStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
@@ -18,14 +18,14 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract Pause is IPause, Modifiers {
     /// @inheritdoc IPause
-    function pause() external override onlyActivated onlyUnpaused onlyRole(PAUSER_ROLE) returns (bool success_) {
+    function pause() external override onlyActivated onlyUnpaused onlyRole(ROLE_PAUSER) returns (bool success_) {
         PauseStorageWrapper.setPause(true);
         emit IPause.Paused(EvmAccessors.getMsgSender());
         success_ = true;
     }
 
     /// @inheritdoc IPause
-    function unpause() external override onlyActivated onlyRole(PAUSER_ROLE) onlyPaused returns (bool success_) {
+    function unpause() external override onlyActivated onlyRole(ROLE_PAUSER) onlyPaused returns (bool success_) {
         PauseStorageWrapper.setPause(false);
         emit IPause.Unpaused(EvmAccessors.getMsgSender());
         success_ = true;

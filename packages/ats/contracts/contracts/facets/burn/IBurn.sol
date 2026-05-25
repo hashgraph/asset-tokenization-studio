@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey Burn
+bytes32 constant RESOLVER_KEY_BURN = 0xa9ec330b49ea310aaeba8dae3ba4f2a0b94fd35fafb9d8d8afbb804b73d50ce2;
+
 /**
  * @title IBurn
  * @author Asset Tokenization Studio Team
@@ -20,7 +23,7 @@ interface IBurn {
 
     /**
      * @notice Burns `_amount` tokens from `_userAddress` on behalf of a controller or agent.
-     * @dev Caller must hold `CONTROLLER_ROLE` or `AGENT_ROLE`. Emits
+     * @dev Caller must hold `ROLE_CONTROLLER` or `ROLE_AGENT`. Emits
      *      `IController.ControllerRedemption` rather than `Redeemed`.
      * @param _userAddress Address whose token balance is reduced.
      * @param _amount Amount of tokens to burn, denominated in base units.

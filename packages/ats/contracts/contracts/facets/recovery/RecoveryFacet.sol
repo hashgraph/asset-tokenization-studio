@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IRecovery } from "./IRecovery.sol";
+import { IRecovery, RESOLVER_KEY_RECOVERY } from "./IRecovery.sol";
 import { Recovery } from "./Recovery.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _RECOVERY_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /// @title RecoveryFacet
 /// @author Asset Tokenization Studio Team
 /// @notice Diamond facet exposing lost-wallet recovery operations.
@@ -15,7 +13,7 @@ import { _RECOVERY_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 contract RecoveryFacet is Recovery, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _RECOVERY_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_RECOVERY;
     }
 
     /// @inheritdoc IStaticFunctionSelectors

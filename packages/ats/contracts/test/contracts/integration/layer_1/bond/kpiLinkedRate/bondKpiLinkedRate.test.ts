@@ -75,23 +75,23 @@ describe("Bond KpiLinked Rate Tests", () => {
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.KPI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_KPI_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.PROCEED_RECIPIENT_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_PROCEED_RECIPIENT_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.CORPORATE_ACTION_ROLE,
+        role: ATS_ROLES.ROLE_CORPORATE_ACTION,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.INTEREST_RATE_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_INTEREST_RATE_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.ISSUER_ROLE,
+        role: ATS_ROLES.ROLE_ISSUER,
         members: [signer_A.address],
       },
     ]);

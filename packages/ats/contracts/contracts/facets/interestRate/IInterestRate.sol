@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey InterestRate
+bytes32 constant RESOLVER_KEY_INTEREST_RATE = 0xc09a5111a37fc8806e149b4a20c17a33a9487c6da8ee95f8a2b8ac31ea8dd2f3;
+
 /**
  * @title IInterestRate
  * @author Asset Tokenization Studio Team
@@ -50,7 +53,7 @@ interface IInterestRate {
 
     /**
      * @notice Sets the coupon rate type discriminator for this asset.
-     * @dev Requires `INTEREST_RATE_MANAGER_ROLE`.
+     * @dev Requires `ROLE_INTEREST_RATE_MANAGER`.
      *      Reverts with `InvalidRateType` if `rateType` is `NONE`.
      * @param rateType The `RateType` to persist (STANDARD, FIXED, or KPI_LINKED).
      */

@@ -11,7 +11,7 @@ import { CorporateActionsStorageWrapper } from "../../domain/core/CorporateActio
  * @notice Abstract contract implementing read-only corporate action query logic for a security
  *         token. Exposes retrieval of individual actions, paginated lists, type-scoped views,
  *         and content-hash deduplication checks.
- * @dev Implements `ICorporateActions`. All data is stored at `_CORPORATE_ACTION_STORAGE_POSITION`
+ * @dev Implements `ICorporateActions`. All data is stored at `STORAGE_LOCATION_CORPORATE_ACTION`
  *      via `CorporateActionsStorageWrapper`. Write operations (add, cancel, update) are provided
  *      by domain-specific abstract contracts that extend this one. Intended to be inherited
  *      exclusively by `CorporateActionsFacet`.

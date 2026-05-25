@@ -57,30 +57,30 @@ describe("BatchFreeze Tests", () => {
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.AGENT_ROLE,
+        role: ATS_ROLES.ROLE_AGENT,
         members: [signer_A.address],
       },
     ]);
 
-    await asset.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+    await asset.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
     await asset.addIssuer(signer_E.address);
     await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
     await asset.connect(signer_B).grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
     await asset.connect(signer_B).grantKyc(signer_F.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
-    await asset.grantRole(ATS_ROLES.FREEZE_MANAGER_ROLE, signer_A.address);
-    await asset.grantRole(ATS_ROLES.PAUSER_ROLE, signer_A.address);
+    await asset.grantRole(ATS_ROLES.ROLE_FREEZE_MANAGER, signer_A.address);
+    await asset.grantRole(ATS_ROLES.ROLE_PAUSER, signer_A.address);
   }
 
   describe("single partition", () => {
@@ -163,7 +163,7 @@ describe("BatchFreeze Tests", () => {
         expect(await asset.balanceOf(signer_E.address)).to.equal(mintAmount - transferAmount);
       });
 
-      it("GIVEN an account without ATS_ROLES.FREEZE_MANAGER_ROLE WHEN batchSetAddressFrozen THEN transaction fails", async () => {
+      it("GIVEN an account without ATS_ROLES.ROLE_FREEZE_MANAGER WHEN batchSetAddressFrozen THEN transaction fails", async () => {
         const userAddresses = [signer_D.address, signer_E.address];
         const freezeFlags = [true, true];
 
@@ -190,7 +190,7 @@ describe("BatchFreeze Tests", () => {
         await asset.mint(signer_E.address, freezeAmount);
       });
 
-      it("GIVEN ATS_ROLES.FREEZE_MANAGER_ROLE WHEN batchFreezePartialTokens THEN tokens are frozen successfully", async () => {
+      it("GIVEN ATS_ROLES.ROLE_FREEZE_MANAGER WHEN batchFreezePartialTokens THEN tokens are frozen successfully", async () => {
         const userAddresses = [signer_D.address, signer_E.address];
         const amounts = [freezeAmount, freezeAmount];
 
@@ -353,14 +353,14 @@ describe("BatchFreeze Tests", () => {
     });
 
     describe("Freeze", () => {
-      it("GIVEN an account with ATS_ROLES.FREEZE_MANAGER_ROLE WHEN batchFreezePartialTokens THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
+      it("GIVEN an account with ATS_ROLES.ROLE_FREEZE_MANAGER WHEN batchFreezePartialTokens THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
         await expect(asset.batchFreezePartialTokens([signer_A.address], [AMOUNT])).to.be.revertedWithCustomError(
           asset,
           "NotAllowedInMultiPartitionMode",
         );
       });
 
-      it("GIVEN an account with ATS_ROLES.FREEZE_MANAGER_ROLE WHEN batchUnfreezePartialTokens THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
+      it("GIVEN an account with ATS_ROLES.ROLE_FREEZE_MANAGER WHEN batchUnfreezePartialTokens THEN transaction fails with NotAllowedInMultiPartitionMode", async () => {
         await expect(asset.batchUnfreezePartialTokens([signer_A.address], [AMOUNT])).to.be.revertedWithCustomError(
           asset,
           "NotAllowedInMultiPartitionMode",
@@ -373,7 +373,7 @@ describe("BatchFreeze Tests", () => {
     it("GIVEN a deactivated asset WHEN batchSetAddressFrozen THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).batchSetAddressFrozen([], [])).to.be.revertedWithCustomError(
         deactivatedAsset,
@@ -384,7 +384,7 @@ describe("BatchFreeze Tests", () => {
     it("GIVEN a deactivated asset WHEN batchFreezePartialTokens THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).batchFreezePartialTokens([], []),
@@ -394,7 +394,7 @@ describe("BatchFreeze Tests", () => {
     it("GIVEN a deactivated asset WHEN batchUnfreezePartialTokens THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).batchUnfreezePartialTokens([], []),

@@ -4,6 +4,9 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ISnapshotsTypes } from "./ISnapshotsTypes.sol";
 import { ScheduledTask } from "../../layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 
+/// @custom:hash resolverKey Snapshots
+bytes32 constant RESOLVER_KEY_SNAPSHOTS = 0xbc4e3ace00cf7d347ee7bf90737d3091c02f7d6607c195bf0d4b81e33644f0e1;
+
 // Snapshot values have arrays of ids and the value corresponding to that id. These could be an array of a
 // Snapshot struct, but that would impede usage of functions that work on an array.
 struct Snapshots {

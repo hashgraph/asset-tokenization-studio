@@ -52,35 +52,35 @@ describe("Snapshots Tests", () => {
   function set_initRbacs(): any[] {
     return [
       {
-        role: ATS_ROLES.ISSUER_ROLE,
+        role: ATS_ROLES.ROLE_ISSUER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.LOCKER_ROLE,
+        role: ATS_ROLES.ROLE_LOCKER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.FREEZE_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_FREEZE_MANAGER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.CLEARING_ROLE,
+        role: ATS_ROLES.ROLE_CLEARING,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.CLEARING_VALIDATOR_ROLE,
+        role: ATS_ROLES.ROLE_CLEARING_VALIDATOR,
         members: [signer_B.address],
       },
     ];
@@ -97,7 +97,7 @@ describe("Snapshots Tests", () => {
 
   it("GIVEN a paused Token WHEN takeSnapshot THEN transaction fails with IsPaused", async () => {
     // Granting Role to account C and Pause
-    await grantRoleAndPauseToken(asset, ATS_ROLES.SNAPSHOT_ROLE, signer_A, signer_B, signer_C.address);
+    await grantRoleAndPauseToken(asset, ATS_ROLES.ROLE_SNAPSHOT, signer_A, signer_B, signer_C.address);
 
     await expect(asset.connect(signer_C).takeSnapshot()).to.be.revertedWithCustomError(asset, "IsPaused");
   });
@@ -139,8 +139,8 @@ describe("Snapshots Tests", () => {
   });
 
   it("GIVEN an account with snapshot role WHEN takeSnapshot THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_C.address);
-    await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_SNAPSHOT, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
 
     await asset.connect(signer_A).addIssuer(signer_A.address);
     await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -322,9 +322,9 @@ describe("Snapshots Tests", () => {
 
   describe("Scheduled tasks", async () => {
     it("GIVEN an account with snapshot role WHEN takeSnapshot THEN scheduled tasks get executed succeeds", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_A.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_SNAPSHOT, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
 
       await asset.connect(signer_A).addIssuer(signer_A.address);
       await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_STRING, ZERO, MAX_UINT256, signer_A.address);
@@ -525,7 +525,7 @@ describe("Scheduled Snapshots Tests", () => {
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
     ]);
@@ -536,7 +536,7 @@ describe("Scheduled Snapshots Tests", () => {
   });
 
   it("GIVEN a token WHEN triggerSnapshots THEN transaction succeeds", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
     // set dividend
     const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp("2030-01-01T00:00:06Z");
@@ -628,7 +628,7 @@ describe("Scheduled Snapshots Tests", () => {
   });
 
   it("GIVEN a disabled corporate action WHEN triggerSnapshots is called THEN snapshot is not executed", async () => {
-    await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
+    await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
 
     const dividendsRecordDateInSeconds = dateToUnixTimestamp("2030-01-01T00:00:06Z");
     const dividendsExecutionDateInSeconds = dateToUnixTimestamp("2030-01-01T00:01:00Z");
@@ -668,7 +668,7 @@ describe("Scheduled Snapshots Tests", () => {
     it("GIVEN a deactivated asset WHEN takeSnapshot THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).takeSnapshot()).to.be.revertedWithCustomError(
         deactivatedAsset,

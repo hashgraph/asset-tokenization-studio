@@ -43,28 +43,28 @@ describe("ERC1594 Tests", () => {
       asset = await ethers.getContractAt("IAsset", diamond.target);
       await executeRbac(asset, [
         {
-          role: ATS_ROLES.PAUSER_ROLE,
+          role: ATS_ROLES.ROLE_PAUSER,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.ISSUER_ROLE,
+          role: ATS_ROLES.ROLE_ISSUER,
           members: [signer_C.address],
         },
         {
-          role: ATS_ROLES.KYC_ROLE,
+          role: ATS_ROLES.ROLE_KYC,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.SSI_MANAGER_ROLE,
+          role: ATS_ROLES.ROLE_SSI_MANAGER,
           members: [signer_A.address],
         },
         {
-          role: ATS_ROLES.CLEARING_ROLE,
+          role: ATS_ROLES.ROLE_CLEARING,
           members: [signer_B.address],
         },
       ]);
 
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
       await asset.connect(signer_A).addIssuer(signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
@@ -96,9 +96,9 @@ describe("ERC1594 Tests", () => {
 
         // accounts are blacklisted by default (white list)
         const newAccessControl = asset.attach(newTokenFixture.diamond.target).connect(signer_A) as IAsset;
-        await newAccessControl.grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
-        await newAccessControl.grantRole(ATS_ROLES.KYC_ROLE, signer_B.address);
-        await newAccessControl.grantRole(ATS_ROLES.SSI_MANAGER_ROLE, signer_A.address);
+        await newAccessControl.grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
+        await newAccessControl.grantRole(ATS_ROLES.ROLE_KYC, signer_B.address);
+        await newAccessControl.grantRole(ATS_ROLES.ROLE_SSI_MANAGER, signer_A.address);
 
         const newSsiManagement = asset.attach(newTokenFixture.diamond.target).connect(signer_A) as IAsset;
         await newSsiManagement.addIssuer(signer_E.address);
@@ -116,7 +116,7 @@ describe("ERC1594 Tests", () => {
 
       it("GIVEN blocked accounts (sender, from) WHEN redeem THEN transaction fails with AccountIsBlocked", async () => {
         // Blacklisting accounts
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROL_LIST_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CONTROL_LIST, signer_A.address);
         await asset.connect(signer_A).addToControlList(signer_C.address);
 
         // redeem with data fails

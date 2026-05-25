@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey ComplianceByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_COMPLIANCE_BY_PARTITION = 0xafad2096960379c99c5eae984f0f4ceddafa69c3e08352bcaf84e804ec4135b6;
+
 /**
  * @title IComplianceByPartition
  * @author Asset Tokenization Studio Team

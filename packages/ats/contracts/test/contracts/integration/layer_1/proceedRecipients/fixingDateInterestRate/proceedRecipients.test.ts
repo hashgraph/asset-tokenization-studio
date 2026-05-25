@@ -43,8 +43,8 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
 
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
 
-    await asset.grantRole(ATS_ROLES.PROCEED_RECIPIENT_MANAGER_ROLE, signer_A.address);
-    await asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_A.address);
+    await asset.grantRole(ATS_ROLES.ROLE_PROCEED_RECIPIENT_MANAGER, signer_A.address);
+    await asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_A.address);
   }
 
   beforeEach(async () => {

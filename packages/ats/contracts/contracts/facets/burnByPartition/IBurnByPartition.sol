@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey BurnByPartition
+bytes32 constant RESOLVER_KEY_BURN_BY_PARTITION = 0x8d135078123ea705bd40f02ac0cd59ac08da08600b3510ba6150fe0e4a588684;
+
 /**
  * @title IBurnByPartition
  * @author Asset Tokenization Studio Team

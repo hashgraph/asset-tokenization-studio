@@ -324,7 +324,7 @@ describe("TREX Factory Tests", () => {
       expect(await coreFacet.name()).to.equal(equityData.security.erc20MetadataInfo.name);
       expect(await coreFacet.symbol()).to.equal(equityData.security.erc20MetadataInfo.symbol);
       expect(await coreFacet.decimals()).to.equal(equityData.security.erc20MetadataInfo.decimals);
-      expect(await accessControlFacet.hasRole(ATS_ROLES.TREX_OWNER_ROLE, deployer.address)).to.be.true;
+      expect(await accessControlFacet.hasRole(ATS_ROLES.ROLE_TREX_OWNER, deployer.address)).to.be.true;
       expect(await accessControlFacet.hasRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, deployer.address)).to.be.true;
     });
 
@@ -377,12 +377,12 @@ describe("TREX Factory Tests", () => {
       expect(await accessControlFacet.hasRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, deployer.address)).to.be.true;
     });
 
-    it("GIVEN rbacs with existing TREX_OWNER_ROLE matching tRexOwner WHEN deploying equity THEN SecurityDeploymentLib handles owner match", async () => {
+    it("GIVEN rbacs with existing ROLE_TREX_OWNER matching tRexOwner WHEN deploying equity THEN SecurityDeploymentLib handles owner match", async () => {
       const equityData = {
         security: getSecurityData(businessLogicResolver, {
           rbacs: [
             {
-              role: ATS_ROLES.TREX_OWNER_ROLE,
+              role: ATS_ROLES.ROLE_TREX_OWNER,
               members: [deployer.address],
             },
             {
@@ -478,11 +478,11 @@ describe("TREX Factory Tests", () => {
       tokenDetails.complianceSettings = [];
     });
 
-    it("GIVEN rbacs with TREX_OWNER_ROLE but different member WHEN deploying equity THEN owner is added to rbacs", async () => {
+    it("GIVEN rbacs with ROLE_TREX_OWNER but different member WHEN deploying equity THEN owner is added to rbacs", async () => {
       const [, , , , , otherUser] = await ethers.getSigners();
       const rbacWithDifferentOwner = [
         {
-          role: ATS_ROLES.TREX_OWNER_ROLE,
+          role: ATS_ROLES.ROLE_TREX_OWNER,
           members: [otherUser.address],
         },
       ];
@@ -1216,7 +1216,7 @@ describe("TREX Factory Tests", () => {
       expect(await coreFacet.name()).to.equal(bondData.security.erc20MetadataInfo.name);
       expect(await coreFacet.symbol()).to.equal(bondData.security.erc20MetadataInfo.symbol);
       expect(await coreFacet.decimals()).to.equal(bondData.security.erc20MetadataInfo.decimals);
-      expect(await accessControlFacet.hasRole(ATS_ROLES.TREX_OWNER_ROLE, deployer.address)).to.be.true;
+      expect(await accessControlFacet.hasRole(ATS_ROLES.ROLE_TREX_OWNER, deployer.address)).to.be.true;
       expect(await accessControlFacet.hasRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, deployer.address)).to.be.true;
     });
 
@@ -1267,12 +1267,12 @@ describe("TREX Factory Tests", () => {
       expect(await accessControlFacet.hasRole(ATS_ROLES.DEFAULT_ADMIN_ROLE, deployer.address)).to.be.true;
     });
 
-    it("GIVEN rbacs with existing TREX_OWNER_ROLE matching tRexOwner WHEN deploying bond THEN SecurityDeploymentLib handles owner match", async () => {
+    it("GIVEN rbacs with existing ROLE_TREX_OWNER matching tRexOwner WHEN deploying bond THEN SecurityDeploymentLib handles owner match", async () => {
       const bondData = {
         security: getSecurityData(businessLogicResolver, {
           rbacs: [
             {
-              role: ATS_ROLES.TREX_OWNER_ROLE,
+              role: ATS_ROLES.ROLE_TREX_OWNER,
               members: [deployer.address],
             },
             {
@@ -1360,11 +1360,11 @@ describe("TREX Factory Tests", () => {
       tokenDetails.complianceSettings = [];
     });
 
-    it("GIVEN rbacs with TREX_OWNER_ROLE but different member WHEN deploying bond THEN owner is added to rbacs", async () => {
+    it("GIVEN rbacs with ROLE_TREX_OWNER but different member WHEN deploying bond THEN owner is added to rbacs", async () => {
       const [, , , , , otherUser] = await ethers.getSigners();
       const rbacWithDifferentOwner = [
         {
-          role: ATS_ROLES.TREX_OWNER_ROLE,
+          role: ATS_ROLES.ROLE_TREX_OWNER,
           members: [otherUser.address],
         },
       ];

@@ -3,6 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
 
+/// @custom:hash resolverKey ProtectedHoldByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_PROTECTED_HOLD_BY_PARTITION = 0x5b77b995d3e53c3e46f114bbf37642ce3169369548c8135b8b11f5cebd3fb07b;
+
 /**
  * @title IProtectedHoldByPartition
  * @author Asset Tokenization Studio Team

@@ -3,10 +3,6 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ITransfer } from "../../facets/transfer/ITransfer.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
-import {
-    _ERC1410_BASIC_STORAGE_POSITION,
-    _ERC1410_OPERATOR_STORAGE_POSITION
-} from "../../constants/storagePositions.sol";
 import { DefaultValueValidation } from "../../infrastructure/utils/DefaultValueValidation.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
@@ -25,8 +21,15 @@ import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol
 import { ScheduledTasksOps } from "../orchestrator/ScheduledTasksOps.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
-import { _checkNonceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
+import { _DEFAULT_PARTITION, KPI_ERC1410_REMOVE_HOLDER } from "../../constants/values.sol";
+import { _checkNonceAndDeadline } from "../../infrastructure/utils/EIP712.sol";
+import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
+
+/// @custom:hash storage Erc1410Basic
+bytes32 constant STORAGE_LOCATION_ERC1410_BASIC = 0x2b7b9d433e782d7e5384db9a591ac5085e24b04d9aa9a09e22954f9f253cf000;
+
+/// @custom:hash storage Erc1410Operator
+bytes32 constant STORAGE_LOCATION_ERC1410_OPERATOR = 0x2847bc5c05acc04a27b4f2e0fd8d48afe56e923c88ddb18bdee3a9e54ce5ad00;
 
 /// @dev Represents a fungible set of tokens.
 struct Partition {
@@ -128,6 +131,7 @@ library ERC1410StorageWrapper {
         ERC1410BasicStorage storage basicStorage = erc1410BasicStorage();
 
         uint256 index = basicStorage.tokenHolderIndex[oldTokenHolder];
+        if (index == 0) revert IERC1410Types.TokenHolderNotFound(oldTokenHolder);
         basicStorage.tokenHolderIndex[newTokenHolder] = index;
         basicStorage.tokenHolders[index] = newTokenHolder;
         basicStorage.tokenHolderIndex[oldTokenHolder] = 0;
@@ -147,8 +151,9 @@ library ERC1410StorageWrapper {
         ERC1410BasicStorage storage basicStorage = erc1410BasicStorage();
 
         uint256 lastIndex = basicStorage.totalTokenHolders;
+        uint256 tokenHolderIndex = basicStorage.tokenHolderIndex[tokenHolder];
+        _checkUnexpectedError(tokenHolderIndex == 0, KPI_ERC1410_REMOVE_HOLDER);
         if (lastIndex > 1) {
-            uint256 tokenHolderIndex = basicStorage.tokenHolderIndex[tokenHolder];
             if (tokenHolderIndex < lastIndex) {
                 address lastTokenHolder = basicStorage.tokenHolders[lastIndex];
 
@@ -638,7 +643,7 @@ library ERC1410StorageWrapper {
     }
 
     function erc1410BasicStorage() internal pure returns (ERC1410BasicStorage storage erc1410BasicStorage_) {
-        bytes32 position = _ERC1410_BASIC_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_ERC1410_BASIC;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             erc1410BasicStorage_.slot := position
@@ -646,7 +651,7 @@ library ERC1410StorageWrapper {
     }
 
     function erc1410OperatorStorage() internal pure returns (ERC1410OperatorStorage storage erc1410OperatorStorage_) {
-        bytes32 position = _ERC1410_OPERATOR_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_ERC1410_OPERATOR;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             erc1410OperatorStorage_.slot := position

@@ -3,6 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
 
+/// @custom:hash resolverKey ClearingByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_CLEARING_BY_PARTITION = 0xb63156d6db31ae3207bca0dd4a8a45f227171367d85a3833a0d7a1622212c5ec;
+
 /**
  * @title IClearingByPartition
  * @author Asset Tokenization Studio Team

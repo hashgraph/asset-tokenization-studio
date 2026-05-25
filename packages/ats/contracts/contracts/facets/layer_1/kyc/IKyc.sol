@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey Kyc
+bytes32 constant RESOLVER_KEY_KYC = 0xf7fc316b28304fa0b62b8849c3c91a901e72894380ecf746c2bc13e5656549cd;
+
 /**
  * @title IKyc Interface
  * @notice Interface for KYC (Know Your Customer) management operations

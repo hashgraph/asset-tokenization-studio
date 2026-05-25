@@ -7,133 +7,135 @@
 pragma solidity ^0.8.17;
 
 /*
- * Roles Constants
+ * Role identifiers for access control across every facet.
  *
- * Role identifiers for access control in the Diamond Pattern.
- * These constants are used for role-based access control (RBAC) across all facets.
+ * Naming convention:
+ *   Identifier  ROLE_<UPPER_SNAKE_NAME>
+ *   Keccak in   asset.tokenization.standard.role.<PascalName>
  *
- * Author: Hashgraph
+ * Hex values are populated by `npm run generate:hashes` from the
+ * `/// @custom:hash role <PascalName>` annotation above each constant. Do not
+ * hand-edit the hex.
+ *
+ * Exception: `DEFAULT_ADMIN_ROLE = 0x00` keeps its OpenZeppelin-compatible
+ * shape — that name is part of the OZ public API and cannot be renamed.
+ *
+ * CANONICAL SOURCE — a pragma-rewritten copy is auto-generated to
+ * contracts/factory/ERC3643/interfaces/roles.sol on every compile by the
+ * `erc3643-clone-interfaces` task. Do NOT edit the generated copy.
  */
-
-// CANONICAL SOURCE — single source of truth for ATS role identifiers.
-// A pragma-rewritten copy is auto-generated to
-// `contracts/factory/ERC3643/interfaces/roles.sol` on every compile by the
-// `erc3643-clone-interfaces` task in `tasks/compile.ts` for T-REX ABI compatibility.
-// Do NOT edit the generated copy — it is rewritten on every `npx hardhat compile`.
-
-// solhint-disable max-line-length
 
 bytes32 constant DEFAULT_ADMIN_ROLE = 0x00;
 
-// keccak256('security.token.standard.role.adjustmentBalance');
-bytes32 constant ADJUSTMENT_BALANCE_ROLE = 0x6d0d63b623e69df3a6ea8aebd01f360a0250a880cbc44f7f10c49726a80a78a9;
+/// @custom:hash role AdjustmentBalance
+bytes32 constant ROLE_ADJUSTMENT_BALANCE = 0xb246506a8ded65dd6360e8ce033fd9462936d1be64fb9f85c5f60d28cd3ca6da;
 
-// keccak256('security.token.standard.role.agent');
-bytes32 constant AGENT_ROLE = 0xc4aed0454da9bde6defa5baf93bb49d4690626fc243d138104e12d1def783ea6;
+/// @custom:hash role Agent
+bytes32 constant ROLE_AGENT = 0x9830aa071a741c08855dd42130bdb0ff50f7bdf5a4b72f12181eefded0c6542b;
 
-// keccak256('security.token.standard.role.amortization');
-bytes32 constant AMORTIZATION_ROLE = 0x29b3565c49b924f0c461060cea1eabe7d7136c83f454f891574239e9f8ee9431;
+/// @custom:hash role Amortization
+bytes32 constant ROLE_AMORTIZATION = 0x0c8c9cf3db23765397bf525e10c9158fd2a7b58b280d5da82a642247779ae3c1;
 
-// keccak256('security.token.standard.role.bondManager');
-bytes32 constant BOND_MANAGER_ROLE = 0x8e99f55d84328dd46dd7790df91f368b44ea448d246199c88b97896b3f83f65d;
+/// @custom:hash role BondManager
+bytes32 constant ROLE_BOND_MANAGER = 0x68fe577385095e80beadf873ac12a3100f9a9d1b6d40f0d123eecf3d01bf5c49;
 
-// keccak256('security.token.standard.role.cap');
-bytes32 constant CAP_ROLE = 0xb60cac52541732a1020ce6841bc7449e99ed73090af03b50911c75d631476571;
+/// @custom:hash role Cap
+bytes32 constant ROLE_CAP = 0x58d502b7184e1a264e0cacf1a19a6c268356c6d9fda5ad83ab3b599cd3b7f41c;
 
-// keccak256('security.token.standard.role.clearing');
-bytes32 constant CLEARING_ROLE = 0x2292383e7bb988fb281e5195ab88da11e62fec74cf43e8685cff613d6b906450;
+/// @custom:hash role Clearing
+bytes32 constant ROLE_CLEARING = 0xd0fe259e861ec493f60fb83851f1a173155b0f2acc3da153de2a23fb0ad26db6;
 
-// keccak256('security.token.standard.role.clearing.validator');
-bytes32 constant CLEARING_VALIDATOR_ROLE = 0x7b688898673e16c47810f5da9ce1262a3d7d022dfe27c8ff9305371cd435c619;
+/// @custom:hash role ClearingValidator
+bytes32 constant ROLE_CLEARING_VALIDATOR = 0xa24ef577c383d98a9326f932c69c76129dd89a71abcb626993d9f047f4e74abb;
 
-// keccak256('security.token.standard.role.controller');
-bytes32 constant CONTROLLER_ROLE = 0xa72964c08512ad29f46841ce735cff038789243c2b506a89163cc99f76d06c0f;
+/// @custom:hash role Controller
+bytes32 constant ROLE_CONTROLLER = 0xb4d2b850c3ed8a234d390d5c157bbb1824883213c335ffe2a0f0761bb168713e;
 
-// keccak256('security.token.standard.role.controllist.manager');
-bytes32 constant CONTROL_LIST_MANAGER_ROLE = 0x0e625647b832ec7d4146c12550c31c065b71e0a698095568fd8320dd2aa72e75;
+/// @custom:hash role ControlList
+bytes32 constant ROLE_CONTROL_LIST = 0x6ed9a91e996c6475ecdc28ecbdbe9bd1122fc62b30cdbe6da8271884b51ec74d;
 
-// keccak256('security.token.standard.role.controlList');
-bytes32 constant CONTROL_LIST_ROLE = 0xca537e1c88c9f52dc5692c96c482841c3bea25aafc5f3bfe96f645b5f800cac3;
+/// @custom:hash role ControlListManager
+bytes32 constant ROLE_CONTROL_LIST_MANAGER = 0xccf29bda8369877bcc921e38f30df86156a571ca5c5b8e777bf7ff75270313ea;
 
-// keccak256('security.token.standard.role.corporateAction');
-bytes32 constant CORPORATE_ACTION_ROLE = 0x8a139eeb747b9809192ae3de1b88acfd2568c15241a5c4f85db0443a536d77d6;
+/// @custom:hash role CorporateAction
+bytes32 constant ROLE_CORPORATE_ACTION = 0xa1acfc499025c99f55059195e6276f639d34a18aad7b8121b9192b7f438c55cd;
 
-// keccak256('security.token.standard.role.corporateAction.forceCancel');
-bytes32 constant CORPORATE_ACTION_FORCE_CANCEL_ROLE = 0xfd941bfe4b6990584b9fc8b1b8930917400d8971b25b140ff723cdf76507c661;
+/// @custom:hash role CorporateActionForceCancel
+// solhint-disable-next-line max-line-length
+bytes32 constant ROLE_CORPORATE_ACTION_FORCE_CANCEL = 0x34c18461eba17dd4b2a410f90e80f2a3d6e466af7753bf1b9519c24697c199f5;
 
-// keccak256('security.token.standard.role.documenter');
-bytes32 constant DOCUMENTER_ROLE = 0x83ace103a76d3729b4ba1350ad27522bbcda9a1a589d1e5091f443e76abccf41;
+/// @custom:hash role Deactivate
+bytes32 constant ROLE_DEACTIVATE = 0x31e3e0f7cd6b1bdc19162dd52d4ce1ed67de0aff8f89b768dcbfad8776b2ae4d;
 
-// keccak256('security.token.standard.role.freeze.manager');
-bytes32 constant FREEZE_MANAGER_ROLE = 0xd0e5294c1fc630933e135c5b668c5d577576754d33964d700bbbcdbfd7e1361b;
+/// @custom:hash role Documenter
+bytes32 constant ROLE_DOCUMENTER = 0xb7b1452b94e2932605f7ad2a3ceba0bafd68db64704c9bd667f27163c57ca319;
 
-// keccak256('security.token.standard.role.interestRateManager');
-bytes32 constant INTEREST_RATE_MANAGER_ROLE = 0xa174f099c94c902831d8b8a07810700505da86a76ea0bcb7629884ef26cf682e;
+/// @custom:hash role FreezeManager
+bytes32 constant ROLE_FREEZE_MANAGER = 0x71ae38482e1ab1c28e767d64766d686215b490c8c1bd7dfe6b101525187c2155;
 
-// keccak256('security.token.standard.role.internal.kyc.manager');
-bytes32 constant INTERNAL_KYC_MANAGER_ROLE = 0x3916c5c9e68488134c2ee70660332559707c133d0a295a25971da4085441522e;
+/// @custom:hash role InterestRateManager
+bytes32 constant ROLE_INTEREST_RATE_MANAGER = 0xfa80c71f8de1628faf2c0e9bd02c2f4a3da1f16823b75e61e84b90164a07b4a4;
 
-// keccak256('security.token.standard.role.issuer');
-bytes32 constant ISSUER_ROLE = 0x4be32e8849414d19186807008dabd451c1d87dae5f8e22f32f5ce94d486da842;
+/// @custom:hash role InternalKycManager
+bytes32 constant ROLE_INTERNAL_KYC_MANAGER = 0xdd78fdcd1b38a5360405cef8d91e758ad0f42bf2ced681b803b3c2704b0a32a7;
 
-// keccak256('security.token.standard.role.kpiManager');
-bytes32 constant KPI_MANAGER_ROLE = 0x441e549cc2c88d01fa80bd9e7b40412d3106214149223501aa25d4fa23bf306d;
+/// @custom:hash role Issuer
+bytes32 constant ROLE_ISSUER = 0x5eeaf5602c75bf26e73b5206d0bd6ee82f621166255e5fd73cc06bc7bd84a95f;
 
-// keccak256('security.token.standard.role.kyc.manager');
-bytes32 constant KYC_MANAGER_ROLE = 0x8ebae577938c1afa7fb3dc7b06459c79c86ffd2ac9805b6da92ee4cbbf080449;
+/// @custom:hash role KpiManager
+bytes32 constant ROLE_KPI_MANAGER = 0x7895574f0552ac1a42245f5d7ea23bea04d0cfbc73df53282d588fdaa00f7fb3;
 
-// keccak256('security.token.standard.role.kyc');
-bytes32 constant KYC_ROLE = 0x6fbd421e041603fa367357d79ffc3b2f9fd37a6fc4eec661aa5537a9ae75f93d;
+/// @custom:hash role Kyc
+bytes32 constant ROLE_KYC = 0x754f499f9fdfbb089d12bdec817a6863d593d8a3ea7f546c00a5cafd20957bfc;
 
-// keccak256('security.token.standard.role.locker');
-bytes32 constant LOCKER_ROLE = 0xd8aa8c6f92fe8ac3f3c0f88216e25f7c08b3a6c374b4452a04d200c29786ce88;
+/// @custom:hash role KycManager
+bytes32 constant ROLE_KYC_MANAGER = 0xec811504e835acf29535b5b62307b08000468f0c61ca6163ed6f17a03629b91e;
 
-// keccak256('security.token.standard.role.maturity.redeemer');
-bytes32 constant MATURITY_REDEEMER_ROLE = 0xa0d696902e9ed231892dc96649f0c62b808a1cb9dd1269e78e0adc1cc4b8358c;
+/// @custom:hash role LoanManager
+bytes32 constant ROLE_LOAN_MANAGER = 0xcfd49258c7f1641d56add8e8efadca919969eb6aab447ec47f2ed34c8492547a;
 
-// keccak256('security.token.standard.role.pauser');
-bytes32 constant PAUSER_ROLE = 0x6f65556918c1422809d0d567462eafeb371be30159d74b38ac958dc58864faeb;
+/// @custom:hash role LoansPortfolioManager
+bytes32 constant ROLE_LOANS_PORTFOLIO_MANAGER = 0x90f7adc9b7132ce9c095619ba3e77e8505f2824b906ee99892386b8349a016c6;
 
-// keccak256('security.token.standard.role.pause.manager');
-bytes32 constant PAUSE_MANAGER_ROLE = 0xbc36fbd776e95c4811506a63b650c876b4159cb152d827a5f717968b67c69b84;
+/// @custom:hash role Locker
+bytes32 constant ROLE_LOCKER = 0xd327cd9a2be405896f3d4584b3b437d798833cc4aa0aafb34c870659c0d47184;
 
-// keccak256('security.token.standard.role.proceedRecipient');
-bytes32 constant PROCEED_RECIPIENT_MANAGER_ROLE = 0xebc53fe99fea28c7aa9476a714959af5b931f34a8a8734365ec63113198d512f;
+/// @custom:hash role MaturityRedeemer
+bytes32 constant ROLE_MATURITY_REDEEMER = 0x433f48f8aca23480f6ab07666cbc9131d32a0b4672033453f65e18f4dd390523;
 
-// keccak256('security.token.standard.protected.partitions.participant');
-bytes32 constant PROTECTED_PARTITIONS_PARTICIPANT_ROLE = 0xdaba153046c65d49da6a7597abc24374aa681e3eee7004426ca6185b3927a3f5;
+/// @custom:hash role MetadataManager
+bytes32 constant ROLE_METADATA_MANAGER = 0x4f7e4b68edeb0f234a42d9cbed9d053fbaf6637d8ba9159a9d83f8e42ffc6733;
 
-// keccak256('security.token.standard.protected.partitions');
-bytes32 constant PROTECTED_PARTITIONS_ROLE = 0x8e359333991af626d1f6087d9bc57221ef1207a053860aaa78b7609c2c8f96b6;
+/// @custom:hash role NominalValue
+bytes32 constant ROLE_NOMINAL_VALUE = 0xebf9ab6852aef7bc1e4068a64bd360845c54d5d95d4fed9fd47c52bbe7c15b8b;
 
-// keccak256('security.token.standard.role.snapshot');
-bytes32 constant SNAPSHOT_ROLE = 0x3fbb44760c0954eea3f6cb9f1f210568f5ae959dcbbef66e72f749dbaa7cc2da;
+/// @custom:hash role PauseManager
+bytes32 constant ROLE_PAUSE_MANAGER = 0x03e7c996eea5565d823330975718325a2eccfaf55d5ec99de9a1d9d7253c318e;
 
-// keccak256('security.token.standard.role.ssi.manager');
-bytes32 constant SSI_MANAGER_ROLE = 0x0995a089e16ba792fdf9ec5a4235cba5445a9fb250d6e96224c586678b81ebd0;
+/// @custom:hash role Pauser
+bytes32 constant ROLE_PAUSER = 0x3cb8b459fdb6e7dc3d2a2aa529e530f885d45e03584adb438423209c86a2731f;
 
-// keccak256('security.token.standard.role.trex.owner');
-bytes32 constant TREX_OWNER_ROLE = 0x03ce2fdc316501dd97f5219e6ad908a3238f1e90f910aa17b627f801a6aafab7;
+/// @custom:hash role ProceedRecipientManager
+bytes32 constant ROLE_PROCEED_RECIPIENT_MANAGER = 0x29baa8e752c40494481d6b4caa718d054ad999653716d39b1aa896387c68ae78;
 
-// keccak256('security.token.standard.role.wildcard');
-bytes32 constant WILD_CARD_ROLE = 0x96658f163b67573bbf1e3f9e9330b199b3ac2f6ec0139ea95f622e20a5df2f46;
+/// @custom:hash role ProtectedPartitions
+bytes32 constant ROLE_PROTECTED_PARTITIONS = 0x2d40a5b0ae1bfaa74e8787cae4b47373670a5b71b3e6031c4d849ed22e376bfd;
 
-// Layer 2 Roles
+/// @custom:hash role ProtectedPartitionsParticipant
+// solhint-disable-next-line max-line-length
+bytes32 constant ROLE_PROTECTED_PARTITIONS_PARTICIPANT = 0xda17771b6b3d06197fabbe8db1d7586004df4869992b9c7c7fccec5f36dcf604;
 
-// keccak256('security.token.standard.role.nominalValue');
-bytes32 constant NOMINAL_VALUE_ROLE = 0x127c185a9f04723376575bc896cc0d3cf15a32dd0db17f01168dcac5d2de6102;
+/// @custom:hash role Snapshot
+bytes32 constant ROLE_SNAPSHOT = 0xf7d999723d2160432933a2aeffaae83e262a5a46fe94f34614a7676d1d1f67c6;
 
-// keccak256('security.token.standard.role.loanManager');
-bytes32 constant LOAN_MANAGER_ROLE = 0xc085daff7cbf912b30437b0b95363f3920f33cbd53213a269a2fc5d44ee8289d;
+/// @custom:hash role SsiManager
+bytes32 constant ROLE_SSI_MANAGER = 0x3120494a82251fe85b0403877539486dbfcf0f94c20741a3229cfad31f625ee1;
 
-// keccak256('security.token.standard.role.loansPortfolioManager');
-bytes32 constant LOANS_PORTFOLIO_MANAGER_ROLE = 0xa6b5c56eb64684d38c620773854f4720f1c51c63e6fa070641fff03465904e6c;
+/// @custom:hash role TrexOwner
+bytes32 constant ROLE_TREX_OWNER = 0xd9e1264632ee9a37e8673a0c55a0a1d8b38c758e843084168ee08cd2d1f7e6f0;
 
-// keccak256('security.token.standard.role.metadataManager');
-bytes32 constant METADATA_MANAGER_ROLE = 0x046ae081641a4ef86cb01b128a7c78952aa4b37c6d18f35f8f794b14dcd59797;
-
-// keccak256('security.token.standard.role.deactivate');
-bytes32 constant DEACTIVATE_ROLE = 0x145ad831ea56153ed7168c7801290d85409e09d7dec17409bcc37e47a035c79f;
+/// @custom:hash role WildCard
+bytes32 constant ROLE_WILD_CARD = 0x309337df95ff8f6d0075117d46b40fd103d8ae87db1914f1c60acb63487fb157;
 
 function _buildRoles(bytes32 role1, bytes32 role2) pure returns (bytes32[] memory roles_) {
     roles_ = new bytes32[](2);

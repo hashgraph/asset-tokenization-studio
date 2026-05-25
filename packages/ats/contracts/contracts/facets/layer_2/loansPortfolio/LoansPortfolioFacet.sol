@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ILoansPortfolio } from "./ILoansPortfolio.sol";
+import { ILoansPortfolio, RESOLVER_KEY_LOANS_PORTFOLIO } from "./ILoansPortfolio.sol";
 import { LoansPortfolio } from "./LoansPortfolio.sol";
-import { _LOANS_PORTFOLIO_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 
 contract LoansPortfolioFacet is LoansPortfolio, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _LOANS_PORTFOLIO_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_LOANS_PORTFOLIO;
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {

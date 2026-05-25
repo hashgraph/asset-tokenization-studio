@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { _LOANS_PORTFOLIO_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
 import { ILoansPortfolioStorageWrapper } from "./ILoansPortfolioStorageWrapper.sol";
 import { ILoansPortfolio } from "../../../facets/layer_2/loansPortfolio/ILoansPortfolio.sol";
@@ -11,6 +10,9 @@ import { IERC1410Types } from "../../../facets/layer_1/ERC1400/ERC1410/IERC1410T
 import { ITransferByPartition } from "../../../facets/transferByPartition/ITransferByPartition.sol";
 import { IBalanceTrackerByPartition } from "../../../facets/balanceTrackerByPartition/IBalanceTrackerByPartition.sol";
 import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
+
+/// @custom:hash storage LoansPortfolio
+bytes32 constant STORAGE_LOCATION_LOANS_PORTFOLIO = 0x5981f3997a6cf8235e2e8b5dd35e430c9a70b916501c3c7672c830ad91b0d400;
 
 /**
  * @title LoansPortfolioStorageWrapper
@@ -395,11 +397,11 @@ library LoansPortfolioStorageWrapper {
     /**
      * @notice Returns the storage slot for the loans portfolio data.
      * @dev Uses inline assembly to load the storage pointer from the constant position
-     *      `_LOANS_PORTFOLIO_STORAGE_POSITION`.
+     *      `STORAGE_LOCATION_LOANS_PORTFOLIO`.
      * @return loansPortfolioData_ Reference to the `LoansPortfolioDataStorage` struct in storage.
      */
     function loansPortfolioStorage() internal pure returns (LoansPortfolioDataStorage storage loansPortfolioData_) {
-        bytes32 position = _LOANS_PORTFOLIO_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_LOANS_PORTFOLIO;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             loansPortfolioData_.slot := position

@@ -4,9 +4,11 @@ pragma solidity >=0.8.0 <0.9.0;
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { ICorporateActions } from "../../facets/corporateActions/ICorporateActions.sol";
-import { _CORPORATE_ACTION_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { KPI_CA_ADD_ACTION } from "../../constants/values.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
+
+/// @custom:hash storage CorporateAction
+bytes32 constant STORAGE_LOCATION_CORPORATE_ACTION = 0xd54242d02bc8c723c5c0855ec1fcbb8ff6efc9ae65b3a86e8e6980a79cf77f00;
 
 struct ActionData {
     bytes32 actionType;
@@ -231,7 +233,7 @@ library CorporateActionsStorageWrapper {
     }
 
     function corporateActionsStorage() internal pure returns (CorporateActionDataStorage storage corporateActions_) {
-        bytes32 position = _CORPORATE_ACTION_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_CORPORATE_ACTION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             corporateActions_.slot := position

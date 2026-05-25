@@ -4,6 +4,9 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IHoldTypes } from "../layer_1/hold/IHoldTypes.sol";
 import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";
 
+/// @custom:hash resolverKey HoldByPartition
+bytes32 constant RESOLVER_KEY_HOLD_BY_PARTITION = 0x3bd50b70b7e42003cb9761c133e88d776c27b53729b463a2d5bf6b36a2fce367;
+
 /**
  * @title IHoldByPartition
  * @notice Interface for hold operations scoped to a specific partition: creation, execution,

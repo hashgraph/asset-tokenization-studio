@@ -3,6 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ScheduledTask } from "../layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 
+/// @custom:hash resolverKey ScheduledBalanceAdjustment
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_SCHEDULED_BALANCE_ADJUSTMENT = 0x90c7d769d18188f75b1092289e2465103d06f9c1195bf0ee4b2cf0844a5d6c96;
+
 /**
  * @title IScheduledBalanceAdjustment
  * @author Asset Tokenization Studio Team
@@ -68,7 +72,7 @@ interface IScheduledBalanceAdjustment {
 
     /**
      * @notice Enqueues a balance adjustment to be executed at a future date.
-     * @dev Caller must hold `CORPORATE_ACTION_ROLE`. The token must not be paused,
+     * @dev Caller must hold `ROLE_CORPORATE_ACTION`. The token must not be paused,
      *      `_newBalanceAdjustment.executionDate` must be a future timestamp, and `factor` must be
      *      non-zero. Creates a corporate action record via `EquityStorageWrapper` and emits
      *      `ScheduledBalanceAdjustmentSet`.
@@ -81,7 +85,7 @@ interface IScheduledBalanceAdjustment {
 
     /**
      * @notice Cancels a previously scheduled balance adjustment.
-     * @dev Caller must hold `CORPORATE_ACTION_ROLE`. The token must not be paused.
+     * @dev Caller must hold `ROLE_CORPORATE_ACTION`. The token must not be paused.
      *      Emits `ScheduledBalanceAdjustmentCancelled` on success.
      * @param _balanceAdjustmentID Identifier of the scheduled adjustment to cancel.
      * @return success_ True if the cancellation succeeded.
@@ -90,7 +94,7 @@ interface IScheduledBalanceAdjustment {
 
     /**
      * @notice Force-cancels a balance adjustment regardless of its execution date.
-     * @dev Restricted to `CORPORATE_ACTION_FORCE_CANCEL_ROLE` and gated by the unpaused state
+     * @dev Restricted to `ROLE_CORPORATE_ACTION_FORCE_CANCEL` and gated by the unpaused state
      *      and `notZeroValue`. Marks the corporate action disabled unconditionally — bypasses
      *      `BalanceAdjustmentAlreadyExecuted` — and emits `ScheduledBalanceAdjustmentForceCancelled`.
      * @param _balanceAdjustmentID Identifier of the scheduled adjustment to force-cancel.
@@ -101,7 +105,7 @@ interface IScheduledBalanceAdjustment {
     /**
      * @notice Returns the parameters and disabled state of a previously scheduled balance adjustment.
      * @dev Reverts if the corporate action type stored at index `_balanceAdjustmentID - 1` does not
-     *      match `BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE`.
+     *      match `CORPORATE_ACTION_TYPE_BALANCE_ADJUSTMENT`.
      * @param _balanceAdjustmentID Identifier of the scheduled adjustment to query.
      * @return balanceAdjustment_ Struct containing executionDate, factor, and decimals.
      * @return isDisabled_        True if the adjustment has been cancelled or already executed.

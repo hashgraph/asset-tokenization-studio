@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ILoan } from "./ILoan.sol";
-import { LOAN_MANAGER_ROLE } from "../../../constants/roles.sol";
+import { ROLE_LOAN_MANAGER } from "../../../constants/roles.sol";
 import { LoanStorageWrapper } from "../../../domain/asset/loan/LoanStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 
@@ -32,7 +32,7 @@ abstract contract Loan is ILoan, Modifiers {
         override
         onlyActivated
         onlyUnpaused
-        onlyRole(LOAN_MANAGER_ROLE)
+        onlyRole(ROLE_LOAN_MANAGER)
         onlyValidTimestamp(loanDetailsData_.loanBasicData.startingDate)
         onlyValidTimestamp(loanDetailsData_.loanBasicData.maturityDate)
         onlyValidTimestamp(loanDetailsData_.loanBasicData.signingDate)

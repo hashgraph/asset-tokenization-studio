@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _KPIS_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { KPI_KPIS_ADD_COUPON_DATE, KPI_KPIS_SET_MINDATE } from "../../constants/values.sol";
 import { IKpis } from "../../facets/layer_2/kpi/kpiLatest/IKpis.sol";
 import { Checkpoints } from "../../infrastructure/utils/Checkpoints.sol";
@@ -9,6 +8,9 @@ import { CouponStorageWrapper } from "./coupon/CouponStorageWrapper.sol";
 import { ICouponTypes } from "../../facets/coupon/ICouponTypes.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { _checkUnexpectedError } from "../../infrastructure/utils/UnexpectedError.sol";
+
+/// @custom:hash storage Kpis
+bytes32 constant STORAGE_LOCATION_KPIS = 0x0016dc918f7b373bc12e22119ae85cf4b20c396d9179f6ed9b5f01993586a000;
 
 struct KpisDataStorage {
     mapping(address => Checkpoints.Checkpoint[]) checkpointsByProject;
@@ -130,7 +132,7 @@ library KpisStorageWrapper {
     }
 
     function kpisDataStorage() internal pure returns (KpisDataStorage storage kpisDataStorage_) {
-        bytes32 position = _KPIS_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_KPIS;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             kpisDataStorage_.slot := position

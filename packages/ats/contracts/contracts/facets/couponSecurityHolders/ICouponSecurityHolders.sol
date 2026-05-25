@@ -3,6 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ICouponTypes } from "../coupon/ICouponTypes.sol";
 
+/// @custom:hash resolverKey CouponSecurityHolders
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_COUPON_SECURITY_HOLDERS = 0x8e5fc42839ddbceddb6022f61f5907a3849178cce5cfb82850a28e80140ac9a9;
+
 /**
  * @title ICouponSecurityHolders
  * @notice Interface for querying the set of security holders associated with a coupon.

@@ -7,10 +7,13 @@ import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableS
 import { IExternalControlList } from "../../facets/layer_1/externalControlList/IExternalControlList.sol";
 import { IExternalKycList } from "../../facets/layer_1/externalKycList/IExternalKycList.sol";
 import { IKyc } from "../../facets/layer_1/kyc/IKyc.sol";
-import {
-    _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
-    _KYC_MANAGEMENT_STORAGE_POSITION
-} from "../../constants/storagePositions.sol";
+
+/// @custom:hash storage ControlListManagement
+// solhint-disable-next-line max-line-length
+bytes32 constant STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT = 0x8d3f81a63425a80ad14eecea6638e8ea6f5d633c24e2865dd2228e2b62dc9100;
+
+/// @custom:hash storage KycManagement
+bytes32 constant STORAGE_LOCATION_KYC_MANAGEMENT = 0x44eb866201f22832539d72320900218d04c7d97cfb8ebacf9a6d65c395e5e700;
 
 struct ExternalListDataStorage {
     bool initialized;
@@ -64,24 +67,24 @@ library ExternalListManagementStorageWrapper {
         uint256 length = _controlLists.length;
         for (uint256 index; index < length; ) {
             checkValidAddress(_controlLists[index]);
-            addExternalList(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _controlLists[index]);
+            addExternalList(STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT, _controlLists[index]);
             unchecked {
                 ++index;
             }
         }
-        setExternalListInitialized(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION);
+        setExternalListInitialized(STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT);
     }
 
     function initializeExternalKycLists(address[] calldata _kycLists) internal {
         uint256 length = _kycLists.length;
         for (uint256 index; index < length; ) {
             checkValidAddress(_kycLists[index]);
-            addExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists[index]);
+            addExternalList(STORAGE_LOCATION_KYC_MANAGEMENT, _kycLists[index]);
             unchecked {
                 ++index;
             }
         }
-        setExternalListInitialized(_KYC_MANAGEMENT_STORAGE_POSITION);
+        setExternalListInitialized(STORAGE_LOCATION_KYC_MANAGEMENT);
     }
 
     function isExternalList(bytes32 _position, address _list) internal view returns (bool) {
@@ -102,9 +105,9 @@ library ExternalListManagementStorageWrapper {
 
     function isExternallyAuthorized(address _account) internal view returns (bool) {
         ExternalListDataStorage storage externalControlListStorage = externalListStorage(
-            _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION
+            STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT
         );
-        uint256 length = getExternalListsCount(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION);
+        uint256 length = getExternalListsCount(STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT);
         for (uint256 index; index < length; ) {
             if (!IExternalControlList(externalControlListStorage.list.at(index)).isAuthorized(_account)) return false;
             unchecked {
@@ -115,12 +118,12 @@ library ExternalListManagementStorageWrapper {
     }
 
     function isExternalControlListInitialized() internal view returns (bool) {
-        return externalListStorage(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION).initialized;
+        return externalListStorage(STORAGE_LOCATION_CONTROL_LIST_MANAGEMENT).initialized;
     }
 
     function isExternallyGranted(address _account, IKyc.KycStatus _kycStatus) internal view returns (bool) {
-        ExternalListDataStorage storage externalKycListStorage = externalListStorage(_KYC_MANAGEMENT_STORAGE_POSITION);
-        uint256 length = getExternalListsCount(_KYC_MANAGEMENT_STORAGE_POSITION);
+        ExternalListDataStorage storage externalKycListStorage = externalListStorage(STORAGE_LOCATION_KYC_MANAGEMENT);
+        uint256 length = getExternalListsCount(STORAGE_LOCATION_KYC_MANAGEMENT);
         for (uint256 index; index < length; ) {
             if (IExternalKycList(externalKycListStorage.list.at(index)).getKycStatus(_account) != _kycStatus)
                 return false;
@@ -132,7 +135,7 @@ library ExternalListManagementStorageWrapper {
     }
 
     function isKycExternalInitialized() internal view returns (bool) {
-        return externalListStorage(_KYC_MANAGEMENT_STORAGE_POSITION).initialized;
+        return externalListStorage(STORAGE_LOCATION_KYC_MANAGEMENT).initialized;
     }
 
     function checkValidAddress(address _addr) internal pure {

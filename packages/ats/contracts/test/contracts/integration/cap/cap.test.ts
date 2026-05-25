@@ -49,19 +49,19 @@ describe("Cap Tests", () => {
 
     await executeRbac(asset, [
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.CAP_ROLE,
+        role: ATS_ROLES.ROLE_CAP,
         members: [signer_A.address],
       },
     ]);
@@ -115,7 +115,7 @@ describe("Cap Tests", () => {
 
   describe("New Max Supply Too low or 0", () => {
     it("GIVEN a token WHEN setMaxSupply to 0 THEN transaction fails with NewMaxSupplyCannotBeZero", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CAP, signer_C.address);
 
       // add to list fails
       await expect(asset.connect(signer_C).setMaxSupply(0)).to.be.revertedWithCustomError(
@@ -124,8 +124,8 @@ describe("Cap Tests", () => {
       );
     });
     it("GIVEN a token WHEN setMaxSupply a value that is less than the current total supply THEN transaction fails with NewMaxSupplyTooLow", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CAP, signer_C.address);
 
       await asset.connect(signer_C).issueByPartition({
         partition: _PARTITION_ID_1,
@@ -144,7 +144,7 @@ describe("Cap Tests", () => {
 
   describe("New Max Supply OK", () => {
     it("GIVEN a token WHEN setMaxSupply THEN transaction succeeds", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CAP, signer_C.address);
 
       await expect(asset.connect(signer_C).setMaxSupply(maxSupply * 4))
         .to.emit(asset, "MaxSupplySet")
@@ -198,10 +198,10 @@ describe("Cap Tests", () => {
     };
 
     async function setPreBalanceAdjustment() {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CAP_ROLE, signer_C.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, signer_C.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.SNAPSHOT_ROLE, signer_A.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CAP, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_SNAPSHOT, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_C.address);
 
       await asset.connect(signer_C).setMaxSupply(maxSupply);
       await asset.connect(signer_C).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupplyByPartition);
@@ -294,7 +294,7 @@ describe("Cap Tests", () => {
     it("GIVEN a deactivated asset WHEN setMaxSupply THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).setMaxSupply(0)).to.be.revertedWithCustomError(
         deactivatedAsset,

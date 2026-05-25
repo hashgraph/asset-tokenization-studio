@@ -156,7 +156,7 @@ export const STORAGE_WRAPPER_REGISTRY = {
 
 export const ROLES = {
     DEFAULT_ADMIN_ROLE: '0x0000000000000000000000000000000000000000000000000000000000000000',
-    _PAUSER_ROLE: '0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a',
+    ROLE_PAUSER: '0x3cb8b459fdb6e7dc3d2a2aa529e530f885d45e03584adb438423209c86a2731f',
     // ... all role constants
 }
 ```
@@ -204,8 +204,8 @@ console.log(`Total wrappers: ${allWrappers.length}`);
 ```typescript
 import { ROLES } from "@scripts/domain";
 
-console.log(ROLES._PAUSER_ROLE); // bytes32 value
-console.log(ROLES.CORPORATE_ACTION_ROLE); // bytes32 value
+console.log(ROLES.ROLE_PAUSER); // bytes32 value
+console.log(ROLES.ROLE_CORPORATE_ACTION); // bytes32 value
 ```
 
 ### Downstream Projects

@@ -1,16 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IDocumentation } from "./IDocumentation.sol";
+import { IDocumentation, RESOLVER_KEY_DOCUMENTATION } from "./IDocumentation.sol";
 import { Documentation } from "./Documentation.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _DOCUMENTATION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title DocumentationFacet
  * @notice Diamond facet that exposes on-chain document management through the
- *         `IDocumentation` interface, registered under `_DOCUMENTATION_RESOLVER_KEY`.
+ *         `IDocumentation` interface, registered under `RESOLVER_KEY_DOCUMENTATION`.
  * @dev Inherits document logic from `Documentation` and satisfies the
  *      `IStaticFunctionSelectors` contract required by the Diamond proxy for
  *      static selector registration. Exposes four selectors: `getDocument`,
@@ -21,10 +19,10 @@ import { _DOCUMENTATION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 contract DocumentationFacet is Documentation, IStaticFunctionSelectors {
     /**
      * @notice Returns the resolver key used to register this facet in the Diamond proxy.
-     * @return staticResolverKey_ The `_DOCUMENTATION_RESOLVER_KEY` constant.
+     * @return staticResolverKey_ The `RESOLVER_KEY_DOCUMENTATION` constant.
      */
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _DOCUMENTATION_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_DOCUMENTATION;
     }
 
     /**

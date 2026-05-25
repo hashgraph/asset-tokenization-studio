@@ -12,6 +12,11 @@ task(
   "🛠  Compile, clone neutral interfaces into the ERC3643 subtree, patch the TypeChain " +
     "'interface' keyword collision, and regenerate the contract registry.",
   async function (taskArguments, hre, runSuper) {
+    // Hash codegen MUST run before solc so the rewritten hex is folded as a
+    // compile-time constant. Running it after compile would emit the new hex
+    // but leave the bytecode pointing at the previous values.
+    await hre.run("generate-hashes", { silent: true });
+
     await runSuper(taskArguments);
 
     await hre.run("erc3643-clone-interfaces");

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { SNAPSHOT_RESULT_ID } from "../../../constants/values.sol";
 import {
-    VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
-    SNAPSHOT_RESULT_ID,
-    SNAPSHOT_TASK_TYPE
-} from "../../../constants/values.sol";
+    CORPORATE_ACTION_TYPE_VOTING_RIGHTS,
+    SCHEDULED_TASK_TYPE_SNAPSHOT
+} from "../../../constants/dispatchTypes.sol";
 import { CorporateActionsStorageWrapper } from "../../core/CorporateActionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
@@ -43,7 +43,7 @@ library VotingStorageWrapper {
         bytes memory data = abi.encode(newVoting);
 
         (corporateActionId_, voteID_) = CorporateActionsStorageWrapper.addCorporateAction(
-            VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
+            CORPORATE_ACTION_TYPE_VOTING_RIGHTS,
             data
         );
 
@@ -108,7 +108,7 @@ library VotingStorageWrapper {
 
         IVotingTypes.Voting memory newVoting = abi.decode(data, (IVotingTypes.Voting));
 
-        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newVoting.recordDate, SNAPSHOT_TASK_TYPE);
+        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newVoting.recordDate, SCHEDULED_TASK_TYPE_SNAPSHOT);
         ScheduledTasksStorageWrapper.addScheduledSnapshot(newVoting.recordDate, actionId);
     }
 
@@ -130,7 +130,7 @@ library VotingStorageWrapper {
         returns (IVoting.RegisteredVoting memory registeredVoting_, bytes32 corporateActionId_, bool isDisabled_)
     {
         corporateActionId_ = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
-            VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
+            CORPORATE_ACTION_TYPE_VOTING_RIGHTS,
             voteID - 1
         );
 
@@ -182,7 +182,7 @@ library VotingStorageWrapper {
      * @return votingCount_ Total count of registered voting events.
      */
     function getVotingCount() internal view returns (uint256 votingCount_) {
-        return CorporateActionsStorageWrapper.getCorporateActionCountByType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE);
+        return CorporateActionsStorageWrapper.getCorporateActionCountByType(CORPORATE_ACTION_TYPE_VOTING_RIGHTS);
     }
 
     /**

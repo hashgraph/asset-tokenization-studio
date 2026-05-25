@@ -3,11 +3,11 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IAmortization } from "./IAmortization.sol";
 import {
-    AMORTIZATION_ROLE,
-    CORPORATE_ACTION_ROLE,
-    CORPORATE_ACTION_FORCE_CANCEL_ROLE
+    ROLE_AMORTIZATION,
+    ROLE_CORPORATE_ACTION,
+    ROLE_CORPORATE_ACTION_FORCE_CANCEL
 } from "../../../constants/roles.sol";
-import { AMORTIZATION_CORPORATE_ACTION_TYPE } from "../../../constants/values.sol";
+import { CORPORATE_ACTION_TYPE_AMORTIZATION } from "../../../constants/dispatchTypes.sol";
 import { AmortizationStorageWrapper } from "../../../domain/asset/amortization/AmortizationStorageWrapper.sol";
 import { IAmortizationStorageWrapper } from "../../../domain/asset/amortization/IAmortizationStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
@@ -22,7 +22,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
-        onlyRole(CORPORATE_ACTION_ROLE)
+        onlyRole(ROLE_CORPORATE_ACTION)
         onlyValidDates(_amortization.recordDate, _amortization.executionDate)
         onlyValidTimestamp(_amortization.recordDate)
         onlyValidDates(_amortization.recordDate, _amortization.executionDate)
@@ -40,17 +40,17 @@ abstract contract Amortization is IAmortization, Modifiers {
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
-        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
-        onlyRole(CORPORATE_ACTION_ROLE)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_AMORTIZATION, _amortizationID - 1)
+        onlyRole(ROLE_CORPORATE_ACTION)
         onlyNoActiveAmortizationHolds(_amortizationID)
     {
         AmortizationStorageWrapper.cancelAmortization(_amortizationID);
     }
 
     /// @inheritdoc IAmortization
-    /// @dev Restricted to `CORPORATE_ACTION_FORCE_CANCEL_ROLE`; gated by `onlyUnpaused`,
+    /// @dev Restricted to `ROLE_CORPORATE_ACTION_FORCE_CANCEL`; gated by `onlyUnpaused`,
     ///      `onlyWithoutMultiPartition`, and
-    ///      `onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)`.
+    ///      `onlyMatchingActionType(CORPORATE_ACTION_TYPE_AMORTIZATION, _amortizationID - 1)`.
     function forceCancelAmortization(
         uint256 _amortizationID
     )
@@ -59,8 +59,8 @@ abstract contract Amortization is IAmortization, Modifiers {
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
-        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
-        onlyRole(CORPORATE_ACTION_FORCE_CANCEL_ROLE)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_AMORTIZATION, _amortizationID - 1)
+        onlyRole(ROLE_CORPORATE_ACTION_FORCE_CANCEL)
     {
         AmortizationStorageWrapper.forceCancelAmortization(_amortizationID);
         emit IAmortizationStorageWrapper.AmortizationForceCancelled(_amortizationID, EvmAccessors.getMsgSender());
@@ -75,8 +75,8 @@ abstract contract Amortization is IAmortization, Modifiers {
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
-        onlyRole(AMORTIZATION_ROLE)
-        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        onlyRole(ROLE_AMORTIZATION)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_AMORTIZATION, _amortizationID - 1)
     {
         AmortizationStorageWrapper.releaseAmortizationHold(_amortizationID, _tokenHolder);
     }
@@ -91,8 +91,8 @@ abstract contract Amortization is IAmortization, Modifiers {
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
-        onlyRole(AMORTIZATION_ROLE)
-        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        onlyRole(ROLE_AMORTIZATION)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_AMORTIZATION, _amortizationID - 1)
         onlyPositiveTokenAmount(_tokenAmount, _amortizationID)
         returns (uint256 holdId_)
     {
@@ -106,7 +106,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         view
         override
         onlyWithoutMultiPartition
-        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_AMORTIZATION, _amortizationID - 1)
         returns (RegisteredAmortization memory registeredAmortization_, bool isDisabled_)
     {
         (registeredAmortization_, , isDisabled_) = AmortizationStorageWrapper.getAmortization(_amortizationID);
@@ -120,7 +120,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         view
         override
         onlyWithoutMultiPartition
-        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_AMORTIZATION, _amortizationID - 1)
         returns (AmortizationFor memory amortizationFor_)
     {
         return AmortizationStorageWrapper.getAmortizationFor(_amortizationID, _account);
@@ -135,7 +135,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         view
         override
         onlyWithoutMultiPartition
-        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_AMORTIZATION, _amortizationID - 1)
         returns (AmortizationFor[] memory amortizationsFor_, address[] memory holders_)
     {
         return AmortizationStorageWrapper.getAmortizationsFor(_amortizationID, _pageIndex, _pageLength);
@@ -160,7 +160,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         view
         override
         onlyWithoutMultiPartition
-        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_AMORTIZATION, _amortizationID - 1)
         returns (address[] memory holders_)
     {
         return AmortizationStorageWrapper.getAmortizationHolders(_amortizationID, _pageIndex, _pageLength);
@@ -173,7 +173,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         view
         override
         onlyWithoutMultiPartition
-        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_AMORTIZATION, _amortizationID - 1)
         returns (uint256)
     {
         return AmortizationStorageWrapper.getTotalAmortizationHolders(_amortizationID);
@@ -188,7 +188,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         view
         override
         onlyWithoutMultiPartition
-        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_AMORTIZATION, _amortizationID - 1)
         returns (address[] memory holders_)
     {
         return AmortizationStorageWrapper.getAmortizationActiveHolders(_amortizationID, _pageIndex, _pageLength);
@@ -201,7 +201,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         view
         override
         onlyWithoutMultiPartition
-        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_AMORTIZATION, _amortizationID - 1)
         returns (uint256)
     {
         return AmortizationStorageWrapper.getTotalAmortizationActiveHolders(_amortizationID);
@@ -214,7 +214,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         view
         override
         onlyWithoutMultiPartition
-        onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_AMORTIZATION, _amortizationID - 1)
         returns (uint256)
     {
         return AmortizationStorageWrapper.getTotalHoldByAmortizationId(_amortizationID);

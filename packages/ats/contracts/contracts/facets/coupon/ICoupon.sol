@@ -3,6 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ICouponTypes } from "./ICouponTypes.sol";
 
+/// @custom:hash resolverKey Coupon
+bytes32 constant RESOLVER_KEY_COUPON = 0xe292dde7a8154c59d06fe2333acc2b54d003262aadc39ee2c7b474e6e64add6b;
+
 /**
  * @title ICoupon
  * @author Asset Tokenization Studio Team
@@ -77,7 +80,7 @@ interface ICoupon is ICouponTypes {
     /**
      * @notice Schedules a new coupon corporate action and registers the snapshot/record-date
      *         tasks that drive its lifecycle.
-     * @dev Restricted to `CORPORATE_ACTION_ROLE` and gated by the unpaused state plus the
+     * @dev Restricted to `ROLE_CORPORATE_ACTION` and gated by the unpaused state plus the
      *      project date-validity modifiers; emits `CouponSet`. Reverts with
      *      `CouponCreationFailed` if the underlying corporate-action store rejects the insert.
      * @param _newCoupon Coupon parameters captured at scheduling time.
@@ -87,7 +90,7 @@ interface ICoupon is ICouponTypes {
 
     /**
      * @notice Cancels a previously scheduled coupon before its execution date is reached.
-     * @dev Restricted to `CORPORATE_ACTION_ROLE` and gated by the unpaused state. Reverts with
+     * @dev Restricted to `ROLE_CORPORATE_ACTION` and gated by the unpaused state. Reverts with
      *      `CouponAlreadyExecuted` if the execution date has passed; otherwise marks the
      *      corporate action disabled and emits `CouponCancelled`.
      * @param _couponID One-indexed identifier of the coupon to cancel.
@@ -97,7 +100,7 @@ interface ICoupon is ICouponTypes {
 
     /**
      * @notice Force-cancels a coupon regardless of its execution date.
-     * @dev Restricted to `CORPORATE_ACTION_FORCE_CANCEL_ROLE` and gated by the unpaused state
+     * @dev Restricted to `ROLE_CORPORATE_ACTION_FORCE_CANCEL` and gated by the unpaused state
      *      and `onlyMatchingActionType`. Marks the corporate action disabled unconditionally —
      *      bypasses `CouponAlreadyExecuted` — and emits `CouponForceCancelled`.
      * @param _couponID One-indexed identifier of the coupon to force-cancel.

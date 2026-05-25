@@ -3,6 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { RegulationData, AdditionalSecurityData } from "../../../constants/regulation.sol";
 
+/// @custom:hash resolverKey Security
+bytes32 constant RESOLVER_KEY_SECURITY = 0x4a0ea8dcc902efa355c705fe7211cb0da08f05ad9fc8888237dd67a8c4dc6f1a;
+
 /**
  * @title ISecurity
  * @author Asset Tokenization Studio Team

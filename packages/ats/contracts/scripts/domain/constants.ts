@@ -127,9 +127,21 @@ export const ATS_ROLES = ROLES;
 // ATS Task Types (for scheduled tasks, balance adjustments, etc.)
 // ============================================================================
 
+import { HASHES } from "../codegen/hashGen";
+
 export const ATS_TASK = {
-  SNAPSHOT: "0x322c4b500b27950e00c27e3a40ca8f9ffacbc81a3b4e3c9516717391fd54234c",
-  BALANCE_ADJUSTMENT: "0x9ce9cffaccaf68fc544ce4df9e5e2774249df2f0b3c9cf940a53a6827465db9d",
+  SNAPSHOT: HASHES.scheduledTask("Snapshot"),
+  BALANCE_ADJUSTMENT: HASHES.scheduledTask("BalanceAdjustment"),
+  COUPON_LISTING: HASHES.scheduledTask("CouponListing"),
+} as const;
+
+export const ATS_CORPORATE_ACTION = {
+  DIVIDEND: HASHES.corporateAction("Dividend"),
+  VOTING_RIGHTS: HASHES.corporateAction("VotingRights"),
+  COUPON: HASHES.corporateAction("Coupon"),
+  BALANCE_ADJUSTMENT: HASHES.corporateAction("BalanceAdjustment"),
+  AMORTIZATION: HASHES.corporateAction("Amortization"),
+  LOAN: HASHES.corporateAction("Loan"),
 } as const;
 
 export type AtsTaskType = keyof typeof ATS_TASK;

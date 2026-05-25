@@ -50,14 +50,14 @@ describe("Factory Tests", () => {
 
   const listOfRoles = [
     ATS_ROLES.DEFAULT_ADMIN_ROLE,
-    ATS_ROLES.CONTROL_LIST_ROLE,
-    ATS_ROLES.CORPORATE_ACTION_ROLE,
-    ATS_ROLES.ISSUER_ROLE,
-    ATS_ROLES.DOCUMENTER_ROLE,
-    ATS_ROLES.CONTROLLER_ROLE,
-    ATS_ROLES.PAUSER_ROLE,
-    ATS_ROLES.SNAPSHOT_ROLE,
-    ATS_ROLES.LOCKER_ROLE,
+    ATS_ROLES.ROLE_CONTROL_LIST,
+    ATS_ROLES.ROLE_CORPORATE_ACTION,
+    ATS_ROLES.ROLE_ISSUER,
+    ATS_ROLES.ROLE_DOCUMENTER,
+    ATS_ROLES.ROLE_CONTROLLER,
+    ATS_ROLES.ROLE_PAUSER,
+    ATS_ROLES.ROLE_SNAPSHOT,
+    ATS_ROLES.ROLE_LOCKER,
   ];
   let listOfMembers: string[];
 
@@ -321,7 +321,7 @@ describe("Factory Tests", () => {
       it("GIVEN rbacs with no admin role WHEN deploying equity THEN reverts with NoInitialAdmins", async () => {
         const noAdminRbacs: Rbac[] = [
           {
-            role: ATS_ROLES.CONTROL_LIST_ROLE,
+            role: ATS_ROLES.ROLE_CONTROL_LIST,
             members: [signer_A.address],
           },
         ];
@@ -368,7 +368,7 @@ describe("Factory Tests", () => {
       it("GIVEN rbacs with multiple roles where admin role is last WHEN deploying bond THEN passes validation", async () => {
         const orderedRbacs: Rbac[] = [
           {
-            role: ATS_ROLES.CONTROL_LIST_ROLE,
+            role: ATS_ROLES.ROLE_CONTROL_LIST,
             members: [signer_A.address],
           },
           {
@@ -1770,11 +1770,11 @@ describe("Factory Tests", () => {
     it("GIVEN rbacs with multiple roles but no admin role WHEN deploying equity THEN transaction fails", async () => {
       const noAdminRbacs: Rbac[] = [
         {
-          role: ATS_ROLES.CONTROL_LIST_ROLE,
+          role: ATS_ROLES.ROLE_CONTROL_LIST,
           members: [signer_A.address],
         },
         {
-          role: ATS_ROLES.ISSUER_ROLE,
+          role: ATS_ROLES.ROLE_ISSUER,
           members: [signer_B.address],
         },
       ];
@@ -1825,11 +1825,11 @@ describe("Factory Tests", () => {
     it("GIVEN rbacs with non-admin roles followed by admin role WHEN deploying bond THEN transaction succeeds", async () => {
       const orderedRbacs: Rbac[] = [
         {
-          role: ATS_ROLES.CONTROL_LIST_ROLE,
+          role: ATS_ROLES.ROLE_CONTROL_LIST,
           members: [signer_A.address],
         },
         {
-          role: ATS_ROLES.ISSUER_ROLE,
+          role: ATS_ROLES.ROLE_ISSUER,
           members: [signer_B.address],
         },
         {

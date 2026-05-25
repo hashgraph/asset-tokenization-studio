@@ -16,8 +16,8 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  *         amount-level freezing (locking a specific token balance).
  * @dev Implements `IFreeze`. Freeze state is delegated to `ERC3643StorageWrapper`. Partial
  *      freeze/unfreeze operations are restricted to single-partition tokens via the
- *      `onlyWithoutMultiPartition` modifier. All mutating functions require `FREEZE_MANAGER_ROLE`
- *      or `AGENT_ROLE` via `onlyFreezeRoles`. `getFrozenTokens` delegates timestamp resolution
+ *      `onlyWithoutMultiPartition` modifier. All mutating functions require `ROLE_FREEZE_MANAGER`
+ *      or `ROLE_AGENT` via `onlyFreezeRoles`. `getFrozenTokens` delegates timestamp resolution
  *      to `TimeTravelStorageWrapper` so the same code path is exercisable in test environments.
  *      Intended to be inherited exclusively by `FreezeFacet`.
  */

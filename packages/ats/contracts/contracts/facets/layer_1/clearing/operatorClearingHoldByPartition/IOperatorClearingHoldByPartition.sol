@@ -4,6 +4,10 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IHoldTypes } from "../../hold/IHoldTypes.sol";
 import { IClearingTypes } from "../IClearingTypes.sol";
 
+/// @custom:hash resolverKey OperatorClearingHoldbypartition
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_OPERATOR_CLEARING_HOLDBYPARTITION = 0xab5e4afdccea84152256072fb9f39bf08d591a7666557783209dff003658d945;
+
 /**
  * @title IOperatorClearingHoldByPartition
  * @author Asset Tokenization Studio Team

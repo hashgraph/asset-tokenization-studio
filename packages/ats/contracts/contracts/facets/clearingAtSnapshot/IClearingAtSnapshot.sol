@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey ClearingAtSnapshot
+bytes32 constant RESOLVER_KEY_CLEARING_AT_SNAPSHOT = 0xb65566db9291ca49b508408fe1ba503b28ea434b3f9bca05c3a0c4da031f9e86;
+
 /**
  * @title IClearingAtSnapshot
  * @author Asset Tokenization Studio Team

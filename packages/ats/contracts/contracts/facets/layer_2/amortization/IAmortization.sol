@@ -3,6 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IAmortizationStorageWrapper } from "../../../domain/asset/amortization/IAmortizationStorageWrapper.sol";
 
+/// @custom:hash resolverKey Amortization
+bytes32 constant RESOLVER_KEY_AMORTIZATION = 0xc0d83d8b9295f78954b1c7c9648bec9775edf597a57f9f4110883e9ca2134739;
+
 interface IAmortization is IAmortizationStorageWrapper {
     /// @notice Core amortization data structure
     /// @dev Stores the record/execution dates and the total amount of tokens to redeem (burn) across all holders.
@@ -61,7 +64,7 @@ interface IAmortization is IAmortizationStorageWrapper {
 
     /**
      * @notice Force-cancels an amortization regardless of its execution date.
-     * @dev Restricted to `CORPORATE_ACTION_FORCE_CANCEL_ROLE` and gated by the unpaused state,
+     * @dev Restricted to `ROLE_CORPORATE_ACTION_FORCE_CANCEL` and gated by the unpaused state,
      *      `onlyWithoutMultiPartition`, and `onlyMatchingActionType`. Marks the corporate action
      *      disabled unconditionally — bypasses `AmortizationAlreadyExecuted` and
      *      `AmortizationNotActive` — and emits `AmortizationForceCancelled`.

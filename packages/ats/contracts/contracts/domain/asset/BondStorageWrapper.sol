@@ -9,7 +9,9 @@ import { IPrincipal } from "../../facets/principal/IPrincipal.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { NominalValueStorageWrapper } from "./nominalValue/NominalValueStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { _BOND_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+
+/// @custom:hash storage Bond
+bytes32 constant STORAGE_LOCATION_BOND = 0xa99cdff87e8b13602d53b3661888bce1eb21f534ea5cb3f8223de98640507c00;
 
 /// @title Bond Storage Wrapper
 /// @notice Library for managing Bond token storage operations.
@@ -74,7 +76,7 @@ library BondStorageWrapper {
     }
 
     function _bondStorage() private pure returns (BondDataStorage storage bondData_) {
-        bytes32 position = _BOND_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_BOND;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             bondData_.slot := position

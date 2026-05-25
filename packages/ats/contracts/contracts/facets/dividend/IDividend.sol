@@ -3,6 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IDividendTypes } from "./IDividendTypes.sol";
 
+/// @custom:hash resolverKey Dividend
+bytes32 constant RESOLVER_KEY_DIVIDEND = 0xfcc58d1d55d14a1359461bb9cef220b267b9846b01d61bd27d97f7c10c28b445;
+
 /**
  * @title IDividend
  * @author Asset Tokenization Studio Team
@@ -70,7 +73,7 @@ interface IDividend is IDividendTypes {
     /**
      * @notice Schedules a new dividend corporate action and registers the snapshot/record-date
      *         tasks that drive its lifecycle.
-     * @dev Restricted to `CORPORATE_ACTION_ROLE` and gated by the unpaused state plus the
+     * @dev Restricted to `ROLE_CORPORATE_ACTION` and gated by the unpaused state plus the
      *      project's date-validity modifiers; emits `DividendSet`. Reverts with
      *      `DividendCreationFailed` if the underlying corporate-action store rejects the
      *      insert.
@@ -81,7 +84,7 @@ interface IDividend is IDividendTypes {
 
     /**
      * @notice Cancels a previously scheduled dividend before its execution date is reached.
-     * @dev Restricted to `CORPORATE_ACTION_ROLE` and gated by the unpaused state. Reverts with
+     * @dev Restricted to `ROLE_CORPORATE_ACTION` and gated by the unpaused state. Reverts with
      *      `DividendAlreadyExecuted` if the execution date has passed; otherwise marks the
      *      corporate action disabled and emits `DividendCancelled`.
      * @param dividendId One-indexed identifier of the dividend to cancel.
@@ -91,7 +94,7 @@ interface IDividend is IDividendTypes {
 
     /**
      * @notice Force-cancels a dividend regardless of its execution date.
-     * @dev Restricted to `CORPORATE_ACTION_FORCE_CANCEL_ROLE` and gated by the unpaused state
+     * @dev Restricted to `ROLE_CORPORATE_ACTION_FORCE_CANCEL` and gated by the unpaused state
      *      and `onlyMatchingActionType`. Marks the corporate action disabled unconditionally —
      *      bypasses `DividendAlreadyExecuted` — and emits `DividendForceCancelled`.
      * @param dividendId One-indexed identifier of the dividend to force-cancel.

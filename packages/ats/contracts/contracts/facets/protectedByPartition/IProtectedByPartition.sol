@@ -3,6 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IProtectedPartitions } from "../layer_1/protectedPartition/IProtectedPartitions.sol";
 
+/// @custom:hash resolverKey ProtectedByPartition
+// solhint-disable-next-line max-line-length
+bytes32 constant RESOLVER_KEY_PROTECTED_BY_PARTITION = 0x2f9cd983bc92f917e9c55a3f61b8984646d96980224f4712084967ea1d24d62f;
+
 /**
  * @title IProtectedByPartition
  * @author Asset Tokenization Studio Team

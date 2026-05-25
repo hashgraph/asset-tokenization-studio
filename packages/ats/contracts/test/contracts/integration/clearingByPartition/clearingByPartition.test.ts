@@ -59,13 +59,13 @@ describe("ClearingByPartitionFacet Tests", () => {
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
     await executeRbac(asset, [
-      { role: ATS_ROLES.ISSUER_ROLE, members: [signer_B.address] },
-      { role: ATS_ROLES.PAUSER_ROLE, members: [signer_D.address] },
-      { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
-      { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES.CLEARING_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES.CLEARING_VALIDATOR_ROLE, members: [signer_A.address] },
-      { role: ATS_ROLES.PROTECTED_PARTITIONS_ROLE, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_ISSUER, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_PAUSER, members: [signer_D.address] },
+      { role: ATS_ROLES.ROLE_KYC, members: [signer_B.address] },
+      { role: ATS_ROLES.ROLE_SSI_MANAGER, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_CLEARING, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_CLEARING_VALIDATOR, members: [signer_A.address] },
+      { role: ATS_ROLES.ROLE_PROTECTED_PARTITIONS, members: [signer_A.address] },
     ]);
 
     await asset.connect(signer_A).addIssuer(signer_A.address);
@@ -156,7 +156,7 @@ describe("ClearingByPartitionFacet Tests", () => {
     });
 
     it("GIVEN a recovered sender WHEN clearingRedeemByPartition THEN reverts with WalletRecovered", async () => {
-      await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
       await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
       const clearingOperation = {
         partition: _DEFAULT_PARTITION,
@@ -193,7 +193,7 @@ describe("ClearingByPartitionFacet Tests", () => {
 
     it("GIVEN protected partitions with wildcard role WHEN clearingRedeemByPartition THEN succeeds", async () => {
       await asset.connect(signer_A).protectPartitions();
-      await asset.grantRole(ATS_ROLES.WILD_CARD_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_WILD_CARD, signer_A.address);
       const clearingOperation = {
         partition: _DEFAULT_PARTITION,
         expirationTimestamp: EXPIRATION_TIMESTAMP,
@@ -289,7 +289,7 @@ describe("ClearingByPartitionFacet Tests", () => {
     });
 
     it("GIVEN a recovered sender WHEN clearingRedeemFromByPartition THEN reverts with WalletRecovered", async () => {
-      await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
       await asset.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
       const clearingOperationFrom = {
         clearingOperation: {
@@ -306,7 +306,7 @@ describe("ClearingByPartitionFacet Tests", () => {
     });
 
     it("GIVEN a recovered from address WHEN clearingRedeemFromByPartition THEN reverts with WalletRecovered", async () => {
-      await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
       await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
       const clearingOperationFrom = {
         clearingOperation: {
@@ -373,7 +373,7 @@ describe("ClearingByPartitionFacet Tests", () => {
     it("GIVEN protected partitions with wildcard role WHEN clearingRedeemFromByPartition THEN succeeds", async () => {
       await asset.connect(signer_A).increaseAllowance(signer_B.address, _AMOUNT);
       await asset.connect(signer_A).protectPartitions();
-      await asset.grantRole(ATS_ROLES.WILD_CARD_ROLE, signer_B.address);
+      await asset.grantRole(ATS_ROLES.ROLE_WILD_CARD, signer_B.address);
       const clearingOperationFrom = {
         clearingOperation: {
           partition: _DEFAULT_PARTITION,
@@ -532,7 +532,7 @@ describe("ClearingByPartitionFacet Tests", () => {
     });
 
     it("GIVEN a recovered sender WHEN clearingTransferByPartition THEN reverts with WalletRecovered", async () => {
-      await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
       await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
       const clearingOperation = {
         partition: _DEFAULT_PARTITION,
@@ -545,7 +545,7 @@ describe("ClearingByPartitionFacet Tests", () => {
     });
 
     it("GIVEN a recovered destination WHEN clearingTransferByPartition THEN reverts with WalletRecovered", async () => {
-      await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
       await asset.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
       const clearingOperation = {
         partition: _DEFAULT_PARTITION,
@@ -582,7 +582,7 @@ describe("ClearingByPartitionFacet Tests", () => {
 
     it("GIVEN protected partitions with wildcard role WHEN clearingTransferByPartition THEN succeeds", async () => {
       await asset.connect(signer_A).protectPartitions();
-      await asset.grantRole(ATS_ROLES.WILD_CARD_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_WILD_CARD, signer_A.address);
       const clearingOperation = {
         partition: _DEFAULT_PARTITION,
         expirationTimestamp: EXPIRATION_TIMESTAMP,
@@ -698,7 +698,7 @@ describe("ClearingByPartitionFacet Tests", () => {
     });
 
     it("GIVEN a recovered sender WHEN clearingTransferFromByPartition THEN reverts with WalletRecovered", async () => {
-      await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
       await asset.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
       const clearingOperationFrom = {
         clearingOperation: {
@@ -715,7 +715,7 @@ describe("ClearingByPartitionFacet Tests", () => {
     });
 
     it("GIVEN a recovered destination WHEN clearingTransferFromByPartition THEN reverts with WalletRecovered", async () => {
-      await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
       await asset.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
       const clearingOperationFrom = {
         clearingOperation: {
@@ -732,7 +732,7 @@ describe("ClearingByPartitionFacet Tests", () => {
     });
 
     it("GIVEN a recovered from address WHEN clearingTransferFromByPartition THEN reverts with WalletRecovered", async () => {
-      await asset.grantRole(ATS_ROLES.AGENT_ROLE, signer_A.address);
+      await asset.grantRole(ATS_ROLES.ROLE_AGENT, signer_A.address);
       await asset.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
       const clearingOperationFrom = {
         clearingOperation: {
@@ -783,7 +783,7 @@ describe("ClearingByPartitionFacet Tests", () => {
     it("GIVEN protected partitions with wildcard role WHEN clearingTransferFromByPartition THEN succeeds", async () => {
       await asset.connect(signer_A).increaseAllowance(signer_B.address, _AMOUNT);
       await asset.connect(signer_A).protectPartitions();
-      await asset.grantRole(ATS_ROLES.WILD_CARD_ROLE, signer_B.address);
+      await asset.grantRole(ATS_ROLES.ROLE_WILD_CARD, signer_B.address);
       const clearingOperationFrom = {
         clearingOperation: {
           partition: _DEFAULT_PARTITION,
@@ -1006,7 +1006,7 @@ describe("ClearingByPartitionFacet Tests", () => {
       ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
-    it("GIVEN no CLEARING_VALIDATOR_ROLE WHEN approveClearingOperationByPartition THEN reverts with AccountHasNoRole", async () => {
+    it("GIVEN no ROLE_CLEARING_VALIDATOR WHEN approveClearingOperationByPartition THEN reverts with AccountHasNoRole", async () => {
       const clearingOperation = {
         partition: _DEFAULT_PARTITION,
         expirationTimestamp: EXPIRATION_TIMESTAMP,
@@ -1138,7 +1138,7 @@ describe("ClearingByPartitionFacet Tests", () => {
       ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
 
-    it("GIVEN no CLEARING_VALIDATOR_ROLE WHEN cancelClearingOperationByPartition THEN reverts with AccountHasNoRole", async () => {
+    it("GIVEN no ROLE_CLEARING_VALIDATOR WHEN cancelClearingOperationByPartition THEN reverts with AccountHasNoRole", async () => {
       const clearingOperation = {
         partition: _DEFAULT_PARTITION,
         expirationTimestamp: EXPIRATION_TIMESTAMP,
@@ -1274,7 +1274,7 @@ describe("ClearingByPartitionFacet Tests", () => {
 
       const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
         ["bytes32", "bytes32"],
-        [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+        [ATS_ROLES.ROLE_PROTECTED_PARTITIONS_PARTICIPANT, _DEFAULT_PARTITION],
       );
       const packedDataWithoutPrefix = packedData.slice(2);
       const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
@@ -1640,7 +1640,7 @@ describe("ClearingByPartitionFacet Tests", () => {
 
       const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
         ["bytes32", "bytes32"],
-        [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+        [ATS_ROLES.ROLE_PROTECTED_PARTITIONS_PARTICIPANT, _DEFAULT_PARTITION],
       );
       const packedDataWithoutPrefix = packedData.slice(2);
       const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
@@ -1714,7 +1714,7 @@ describe("ClearingByPartitionFacet Tests", () => {
     it("GIVEN a deactivated asset WHEN clearingRedeemByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset
@@ -1726,7 +1726,7 @@ describe("ClearingByPartitionFacet Tests", () => {
     it("GIVEN a deactivated asset WHEN approveClearingOperationByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).approveClearingOperationByPartition({
@@ -1741,7 +1741,7 @@ describe("ClearingByPartitionFacet Tests", () => {
     it("GIVEN a deactivated asset WHEN cancelClearingOperationByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).cancelClearingOperationByPartition({
@@ -1756,7 +1756,7 @@ describe("ClearingByPartitionFacet Tests", () => {
     it("GIVEN a deactivated asset WHEN reclaimClearingOperationByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).reclaimClearingOperationByPartition({
@@ -1771,7 +1771,7 @@ describe("ClearingByPartitionFacet Tests", () => {
     it("GIVEN a deactivated asset WHEN clearingRedeemFromByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).clearingRedeemFromByPartition(
@@ -1788,7 +1788,7 @@ describe("ClearingByPartitionFacet Tests", () => {
     it("GIVEN a deactivated asset WHEN clearingTransferByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset
@@ -1804,7 +1804,7 @@ describe("ClearingByPartitionFacet Tests", () => {
     it("GIVEN a deactivated asset WHEN clearingTransferFromByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).clearingTransferFromByPartition(

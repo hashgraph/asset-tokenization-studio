@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IExternalPauseManagement } from "./IExternalPauseManagement.sol";
+import { IExternalPauseManagement, RESOLVER_KEY_EXTERNAL_PAUSE } from "./IExternalPauseManagement.sol";
 import { ExternalPauseManagement } from "./ExternalPauseManagement.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _EXTERNAL_PAUSE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /**
  * @title ExternalPauseManagementFacet
  * @author Asset Tokenization Studio Team
@@ -15,12 +13,12 @@ import { _EXTERNAL_PAUSE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
  *         functions.
  * @dev Inherits `ExternalPauseManagement` for the business logic and implements
  *      `IStaticFunctionSelectors` for the Diamond resolver pattern. The resolver key
- *      `_EXTERNAL_PAUSE_RESOLVER_KEY` identifies this facet within the diamond proxy.
+ *      `RESOLVER_KEY_EXTERNAL_PAUSE` identifies this facet within the diamond proxy.
  */
 contract ExternalPauseManagementFacet is ExternalPauseManagement, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _EXTERNAL_PAUSE_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_EXTERNAL_PAUSE;
     }
 
     /// @inheritdoc IStaticFunctionSelectors

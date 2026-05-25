@@ -26,23 +26,23 @@ describe("ControllerByPartition Tests", () => {
   function set_initRbacs() {
     return [
       {
-        role: ATS_ROLES.ISSUER_ROLE,
+        role: ATS_ROLES.ROLE_ISSUER,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.PAUSER_ROLE,
+        role: ATS_ROLES.ROLE_PAUSER,
         members: [signer_D.address],
       },
       {
-        role: ATS_ROLES.KYC_ROLE,
+        role: ATS_ROLES.ROLE_KYC,
         members: [signer_B.address],
       },
       {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
+        role: ATS_ROLES.ROLE_SSI_MANAGER,
         members: [signer_A.address],
       },
       {
-        role: ATS_ROLES.CONTROLLER_ROLE,
+        role: ATS_ROLES.ROLE_CONTROLLER,
         members: [signer_C.address],
       },
     ];
@@ -179,7 +179,7 @@ describe("ControllerByPartition Tests", () => {
     });
 
     describe("AccessControl — onlyAnyRole", () => {
-      it("GIVEN an account without CONTROLLER_ROLE or AGENT_ROLE WHEN controllerTransferByPartition THEN revert AccountHasNoRoles", async () => {
+      it("GIVEN an account without ROLE_CONTROLLER or ROLE_AGENT WHEN controllerTransferByPartition THEN revert AccountHasNoRoles", async () => {
         await expect(
           asset
             .connect(signer_B)
@@ -194,7 +194,7 @@ describe("ControllerByPartition Tests", () => {
         ).to.be.revertedWithCustomError(asset, "AccountHasNoRoles");
       });
 
-      it("GIVEN an account without CONTROLLER_ROLE or AGENT_ROLE WHEN controllerRedeemByPartition THEN revert AccountHasNoRoles", async () => {
+      it("GIVEN an account without ROLE_CONTROLLER or ROLE_AGENT WHEN controllerRedeemByPartition THEN revert AccountHasNoRoles", async () => {
         await expect(
           asset
             .connect(signer_B)
@@ -204,7 +204,7 @@ describe("ControllerByPartition Tests", () => {
     });
 
     describe("Success", () => {
-      it("GIVEN an account with CONTROLLER_ROLE WHEN controllerTransferByPartition THEN emit TransferByPartition and update balances", async () => {
+      it("GIVEN an account with ROLE_CONTROLLER WHEN controllerTransferByPartition THEN emit TransferByPartition and update balances", async () => {
         await expect(
           asset
             .connect(signer_C)
@@ -223,8 +223,8 @@ describe("ControllerByPartition Tests", () => {
         expect(await asset.totalSupply()).to.equal(_AMOUNT);
       });
 
-      it("GIVEN an account with AGENT_ROLE WHEN controllerTransferByPartition THEN emit TransferByPartition and update balances", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES.AGENT_ROLE, signer_B.address);
+      it("GIVEN an account with ROLE_AGENT WHEN controllerTransferByPartition THEN emit TransferByPartition and update balances", async () => {
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_AGENT, signer_B.address);
 
         await expect(
           asset
@@ -243,7 +243,7 @@ describe("ControllerByPartition Tests", () => {
         expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.equal(_AMOUNT);
       });
 
-      it("GIVEN an account with CONTROLLER_ROLE WHEN controllerRedeemByPartition THEN emit RedeemedByPartition and decrease supply", async () => {
+      it("GIVEN an account with ROLE_CONTROLLER WHEN controllerRedeemByPartition THEN emit RedeemedByPartition and decrease supply", async () => {
         const supplyBefore = await asset.totalSupply();
 
         await expect(
@@ -256,8 +256,8 @@ describe("ControllerByPartition Tests", () => {
         expect(await asset.totalSupply()).to.equal(supplyBefore - BigInt(_AMOUNT));
       });
 
-      it("GIVEN an account with AGENT_ROLE WHEN controllerRedeemByPartition THEN emit RedeemedByPartition and decrease supply", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES.AGENT_ROLE, signer_B.address);
+      it("GIVEN an account with ROLE_AGENT WHEN controllerRedeemByPartition THEN emit RedeemedByPartition and decrease supply", async () => {
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_AGENT, signer_B.address);
         const supplyBefore = await asset.totalSupply();
 
         await expect(
@@ -307,7 +307,7 @@ describe("ControllerByPartition Tests", () => {
     it("GIVEN a deactivated asset WHEN controllerTransferByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset
@@ -319,7 +319,7 @@ describe("ControllerByPartition Tests", () => {
     it("GIVEN a deactivated asset WHEN controllerRedeemByPartition THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset

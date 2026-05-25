@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ITransferByPartition } from "./ITransferByPartition.sol";
+import { ITransferByPartition, RESOLVER_KEY_TRANSFER_BY_PARTITION } from "./ITransferByPartition.sol";
 import { TransferByPartition } from "./TransferByPartition.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
-import { _TRANSFER_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
-
 /// @title TransferByPartitionFacet
 /// @author Asset Tokenization Studio Team
 /// @notice Diamond facet exposing token-holder-initiated partition transfers.
@@ -15,7 +13,7 @@ import { _TRANSFER_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKey
 contract TransferByPartitionFacet is TransferByPartition, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _TRANSFER_BY_PARTITION_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_TRANSFER_BY_PARTITION;
     }
 
     /// @inheritdoc IStaticFunctionSelectors

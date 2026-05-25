@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { PROTECTED_PARTITIONS_PARTICIPANT_ROLE } from "../../constants/roles.sol";
-import { _PROTECTED_PARTITIONS_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { ROLE_PROTECTED_PARTITIONS_PARTICIPANT } from "../../constants/roles.sol";
 import { IProtectedPartitions } from "../../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 import { IClearingTypes } from "../../facets/layer_1/clearing/IClearingTypes.sol";
@@ -17,10 +16,14 @@ import {
     _getMessageHashClearingCreateHold,
     _getMessageHashClearingRedeem,
     _verify
-} from "../../infrastructure/utils/ERC712.sol";
-import { WILD_CARD_ROLE } from "../../constants/roles.sol";
+} from "../../infrastructure/utils/EIP712.sol";
+import { ROLE_WILD_CARD } from "../../constants/roles.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+
+/// @custom:hash storage ProtectedPartitions
+// solhint-disable-next-line max-line-length
+bytes32 constant STORAGE_LOCATION_PROTECTED_PARTITIONS = 0x5b38507d21e10ec4c8c85573e8ea591487d38de787e0bb50e4ec54b4affd2900;
 
 /**
  * @notice Storage layout for the protected partitions module.
@@ -38,7 +41,7 @@ struct ProtectedPartitionsDataStorage {
  * @dev Provides functions to initialise, set, query, and validate protected partition state,
  *      as well as EIP-712 signature verification for transfers, redeems, holds, and clearing
  *      operations. All storage is accessed via a fixed slot defined in
- *      `_PROTECTED_PARTITIONS_STORAGE_POSITION`.
+ *      `STORAGE_LOCATION_PROTECTED_PARTITIONS`.
  * @author Asset Tokenization Studio Team
  */
 library ProtectedPartitionsStorageWrapper {
@@ -74,9 +77,9 @@ library ProtectedPartitionsStorageWrapper {
     function requireUnProtectedPartitionsOrWildCardRole() internal view {
         if (
             ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
-            !AccessControlStorageWrapper.hasRole(WILD_CARD_ROLE, EvmAccessors.getMsgSender())
+            !AccessControlStorageWrapper.hasRole(ROLE_WILD_CARD, EvmAccessors.getMsgSender())
         ) {
-            revert IProtectedPartitions.PartitionsAreProtectedAndNoRole(EvmAccessors.getMsgSender(), WILD_CARD_ROLE);
+            revert IProtectedPartitions.PartitionsAreProtectedAndNoRole(EvmAccessors.getMsgSender(), ROLE_WILD_CARD);
         }
     }
 
@@ -266,11 +269,11 @@ library ProtectedPartitionsStorageWrapper {
     }
 
     function protectedPartitionsRole(bytes32 _partition) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _partition));
+        return keccak256(abi.encodePacked(ROLE_PROTECTED_PARTITIONS_PARTICIPANT, _partition));
     }
 
     function calculateRoleForPartition(bytes32 partition) internal pure returns (bytes32 role) {
-        role = keccak256(abi.encode(PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partition));
+        role = keccak256(abi.encode(ROLE_PROTECTED_PARTITIONS_PARTICIPANT, partition));
     }
 
     function protectedPartitionsStorage()
@@ -278,7 +281,7 @@ library ProtectedPartitionsStorageWrapper {
         pure
         returns (ProtectedPartitionsDataStorage storage protectedPartitions_)
     {
-        bytes32 position = _PROTECTED_PARTITIONS_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_PROTECTED_PARTITIONS;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             protectedPartitions_.slot := position

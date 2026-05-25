@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _PAUSE_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { _PAUSE_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IExternalPause } from "../../facets/layer_1/externalPause/IExternalPause.sol";
 import { IPause } from "../../facets/pause/IPause.sol";
 import {
@@ -11,6 +9,12 @@ import {
 } from "./ExternalListManagementStorageWrapper.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+
+/// @custom:hash storage PauseManagement
+bytes32 constant STORAGE_LOCATION_PAUSE_MANAGEMENT = 0x930ab19e093b9d470c1f7056ddf51dcaf1bdf62558a355b33b78972be23e2500;
+
+/// @custom:hash storage Pause
+bytes32 constant STORAGE_LOCATION_PAUSE = 0x3bf57dcdaf5f1e5afff95a10b7216bcff83f9e35b273e271675d9ef0c0621100;
 
 struct PauseDataStorage {
     bool paused;
@@ -30,7 +34,7 @@ library PauseStorageWrapper {
     using EnumerableSet for EnumerableSet.AddressSet;
 
     function pauseStorage() internal pure returns (PauseDataStorage storage pause_) {
-        bytes32 position = _PAUSE_STORAGE_POSITION;
+        bytes32 position = STORAGE_LOCATION_PAUSE;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             pause_.slot := position
@@ -46,12 +50,12 @@ library PauseStorageWrapper {
         uint256 length = _pauses.length;
         for (uint256 index; index < length; ) {
             ExternalListManagementStorageWrapper.checkValidAddress(_pauses[index]);
-            ExternalListManagementStorageWrapper.addExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pauses[index]);
+            ExternalListManagementStorageWrapper.addExternalList(STORAGE_LOCATION_PAUSE_MANAGEMENT, _pauses[index]);
             unchecked {
                 ++index;
             }
         }
-        ExternalListManagementStorageWrapper.setExternalListInitialized(_PAUSE_MANAGEMENT_STORAGE_POSITION);
+        ExternalListManagementStorageWrapper.setExternalListInitialized(STORAGE_LOCATION_PAUSE_MANAGEMENT);
     }
 
     // solhint-disable-next-line ordering
@@ -61,8 +65,8 @@ library PauseStorageWrapper {
 
     function isExternallyPaused() internal view returns (bool) {
         ExternalListDataStorage storage externalPauseDataStorage = ExternalListManagementStorageWrapper
-            .externalListStorage(_PAUSE_MANAGEMENT_STORAGE_POSITION);
-        uint256 length = ExternalListManagementStorageWrapper.getExternalListsCount(_PAUSE_MANAGEMENT_STORAGE_POSITION);
+            .externalListStorage(STORAGE_LOCATION_PAUSE_MANAGEMENT);
+        uint256 length = ExternalListManagementStorageWrapper.getExternalListsCount(STORAGE_LOCATION_PAUSE_MANAGEMENT);
         for (uint256 index; index < length; ) {
             if (IExternalPause(externalPauseDataStorage.list.at(index)).isPaused()) return true;
             unchecked {
@@ -73,7 +77,7 @@ library PauseStorageWrapper {
     }
 
     function isExternalPauseInitialized() internal view returns (bool) {
-        return ExternalListManagementStorageWrapper.externalListStorage(_PAUSE_MANAGEMENT_STORAGE_POSITION).initialized;
+        return ExternalListManagementStorageWrapper.externalListStorage(STORAGE_LOCATION_PAUSE_MANAGEMENT).initialized;
     }
 
     function checkUnpaused() internal view {

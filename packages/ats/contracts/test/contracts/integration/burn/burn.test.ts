@@ -44,21 +44,21 @@ describe("Burn Tests", () => {
       asset = await ethers.getContractAt("IAsset", diamond.target);
       await executeRbac(asset, [
         {
-          role: ATS_ROLES.PAUSER_ROLE,
+          role: ATS_ROLES.ROLE_PAUSER,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.CLEARING_ROLE,
+          role: ATS_ROLES.ROLE_CLEARING,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.KYC_ROLE,
+          role: ATS_ROLES.ROLE_KYC,
           members: [signer_B.address],
         },
       ]);
 
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
-      await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROLLER_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CONTROLLER, signer_A.address);
     }
 
     beforeEach(async () => {
@@ -105,32 +105,32 @@ describe("Burn Tests", () => {
       asset = await ethers.getContractAt("IAsset", diamond.target);
       await executeRbac(asset, [
         {
-          role: ATS_ROLES.PAUSER_ROLE,
+          role: ATS_ROLES.ROLE_PAUSER,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.ISSUER_ROLE,
+          role: ATS_ROLES.ROLE_ISSUER,
           members: [signer_C.address],
         },
         {
-          role: ATS_ROLES.KYC_ROLE,
+          role: ATS_ROLES.ROLE_KYC,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.SSI_MANAGER_ROLE,
+          role: ATS_ROLES.ROLE_SSI_MANAGER,
           members: [signer_A.address],
         },
         {
-          role: ATS_ROLES.CLEARING_ROLE,
+          role: ATS_ROLES.ROLE_CLEARING,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.AGENT_ROLE,
+          role: ATS_ROLES.ROLE_AGENT,
           members: [signer_A.address],
         },
       ]);
 
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
       await asset.connect(signer_A).addIssuer(signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
@@ -142,7 +142,7 @@ describe("Burn Tests", () => {
 
     describe("burn", () => {
       beforeEach(async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROLLER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CONTROLLER, signer_A.address);
       });
 
       it("GIVEN an initialized token WHEN burning THEN transaction success", async () => {
@@ -164,7 +164,7 @@ describe("Burn Tests", () => {
         await expect(asset.burn(signer_A.address, AMOUNT)).to.be.revertedWithCustomError(asset, "IsPaused");
       });
 
-      it("GIVEN an account without CONTROLLER_ROLE or AGENT_ROLE WHEN burn THEN transaction fails with AccountHasNoRole", async () => {
+      it("GIVEN an account without ROLE_CONTROLLER or ROLE_AGENT WHEN burn THEN transaction fails with AccountHasNoRole", async () => {
         await expect(asset.connect(signer_B).burn(signer_E.address, AMOUNT)).to.be.revertedWithCustomError(
           asset,
           "AccountHasNoRoles",
@@ -203,7 +203,7 @@ describe("Burn Tests", () => {
       });
 
       it("GIVEN blocked account WHEN redeem THEN transaction fails with AccountIsBlocked", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROL_LIST_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CONTROL_LIST, signer_A.address);
         await asset.connect(signer_A).addToControlList(signer_E.address);
         await expect(asset.connect(signer_E).redeem(AMOUNT, DATA)).to.be.revertedWithCustomError(
           asset,
@@ -263,7 +263,7 @@ describe("Burn Tests", () => {
       });
 
       it("GIVEN blocked accounts WHEN redeemFrom THEN transaction fails with AccountIsBlocked", async () => {
-        await asset.connect(signer_A).grantRole(ATS_ROLES.CONTROL_LIST_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CONTROL_LIST, signer_A.address);
         await asset.connect(signer_A).addToControlList(signer_D.address);
         await expect(
           asset.connect(signer_D).redeemFrom(signer_E.address, AMOUNT / 2, DATA),
@@ -342,23 +342,23 @@ describe("Burn Tests", () => {
         asset = await ethers.getContractAt("IAsset", diamond.target);
         await executeRbac(asset, [
           {
-            role: ATS_ROLES.ISSUER_ROLE,
+            role: ATS_ROLES.ROLE_ISSUER,
             members: [signer_C.address],
           },
           {
-            role: ATS_ROLES.KYC_ROLE,
+            role: ATS_ROLES.ROLE_KYC,
             members: [signer_B.address],
           },
           {
-            role: ATS_ROLES.SSI_MANAGER_ROLE,
+            role: ATS_ROLES.ROLE_SSI_MANAGER,
             members: [signer_A.address],
           },
           {
-            role: ATS_ROLES.PROTECTED_PARTITIONS_ROLE,
+            role: ATS_ROLES.ROLE_PROTECTED_PARTITIONS,
             members: [signer_A.address],
           },
           {
-            role: ATS_ROLES.WILD_CARD_ROLE,
+            role: ATS_ROLES.ROLE_WILD_CARD,
             members: [signer_E.address],
           },
         ]);
@@ -415,20 +415,20 @@ describe("Burn Tests", () => {
       asset = await ethers.getContractAt("IAsset", diamond.target);
       await executeRbac(asset, [
         {
-          role: ATS_ROLES.KYC_ROLE,
+          role: ATS_ROLES.ROLE_KYC,
           members: [signer_B.address],
         },
         {
-          role: ATS_ROLES.AGENT_ROLE,
+          role: ATS_ROLES.ROLE_AGENT,
           members: [signer_A.address],
         },
         {
-          role: ATS_ROLES.SSI_MANAGER_ROLE,
+          role: ATS_ROLES.ROLE_SSI_MANAGER,
           members: [signer_A.address],
         },
       ]);
 
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ISSUER_ROLE, signer_A.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_ISSUER, signer_A.address);
       await asset.connect(signer_A).addIssuer(signer_E.address);
       await asset.connect(signer_B).grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
     }
@@ -446,7 +446,7 @@ describe("Burn Tests", () => {
     it("GIVEN a deactivated asset WHEN redeem THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).redeem(0, "0x")).to.be.revertedWithCustomError(
         deactivatedAsset,
@@ -457,7 +457,7 @@ describe("Burn Tests", () => {
     it("GIVEN a deactivated asset WHEN burn THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(deactivatedAsset.connect(base.deployer).burn(ethers.ZeroAddress, 0)).to.be.revertedWithCustomError(
         deactivatedAsset,
@@ -468,7 +468,7 @@ describe("Burn Tests", () => {
     it("GIVEN a deactivated asset WHEN redeemFrom THEN transaction fails with Deactivated", async () => {
       const base = await deployEquityTokenFixture();
       const deactivatedAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.DEACTIVATE_ROLE, base.deployer.address);
+      await deactivatedAsset.connect(base.deployer).grantRole(ATS_ROLES.ROLE_DEACTIVATE, base.deployer.address);
       await deactivatedAsset.connect(base.deployer).deactivate();
       await expect(
         deactivatedAsset.connect(base.deployer).redeemFrom(ethers.ZeroAddress, 0, "0x"),

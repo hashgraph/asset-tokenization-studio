@@ -2,17 +2,15 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { Voting } from "./Voting.sol";
-import { IVoting } from "./IVoting.sol";
+import { IVoting, RESOLVER_KEY_VOTING } from "./IVoting.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../../infrastructure/proxy/Bytes4Builder.sol";
-import { _VOTING_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
-
 /// @title VotingFacet
 /// @notice Concrete implementation of voting rights management facet
 contract VotingFacet is Voting, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _VOTING_RESOLVER_KEY;
+        staticResolverKey_ = RESOLVER_KEY_VOTING;
     }
 
     /// @inheritdoc IStaticFunctionSelectors

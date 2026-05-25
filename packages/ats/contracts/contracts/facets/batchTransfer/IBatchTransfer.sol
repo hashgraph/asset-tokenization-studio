@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/// @custom:hash resolverKey BatchTransfer
+bytes32 constant RESOLVER_KEY_BATCH_TRANSFER = 0x01e13672eac45bef2d8d3f1c56eaca6857103f3b72ec9ded3d1f30aa15747d05;
+
 /**
  * @title IBatchTransfer
  * @notice Interface for batch transferring tokens to multiple addresses in a single transaction.
