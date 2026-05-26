@@ -133,6 +133,16 @@ library PauseStorageWrapper {
     }
 
     /**
+     * @notice Reverts with `IPause.IsPaused` when the internal pause flag is set.
+     * @dev Intentionally ignores external pause contracts. Used by `removeExternalPause` so that a
+     *      permanently-paused external contract cannot create a deadlock (FIND-016): the manager can
+     *      still remove it as long as the token has not been paused internally.
+     */
+    function checkNotInternallyPaused() internal view {
+        if (pauseStorage().paused) revert IPause.IsPaused();
+    }
+
+    /**
      * @notice Reverts with `IPause.IsUnpaused` when the token is not currently paused.
      * @dev Used by flows that may only execute while the token is paused.
      */
