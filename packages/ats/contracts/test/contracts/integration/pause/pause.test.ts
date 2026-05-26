@@ -186,4 +186,18 @@ describe("Pause Tests", () => {
       await expect(asset.initializePause()).to.emit(asset, "PauseInitialized");
     });
   });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN pause THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.pause()).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN unpause THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.unpause()).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+  });
 });

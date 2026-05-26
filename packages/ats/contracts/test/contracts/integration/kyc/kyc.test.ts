@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset } from "@contract-types";
+import { type IAsset, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture } from "@test";
 import { ATS_ROLES, EQUITY_CONFIG_ID } from "@scripts";
@@ -11,11 +11,13 @@ import { ATS_ROLES, EQUITY_CONFIG_ID } from "@scripts";
 describe("Kyc Init Tests", () => {
   let signer_D: HardhatEthersSigner;
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deployFixture() {
     const base = await deployEquityTokenFixture();
     signer_D = base.user3;
     asset = await ethers.getContractAt("IAsset", base.diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", base.diamond.target);
   }
 
   beforeEach(async () => {
@@ -53,5 +55,23 @@ describe("Kyc Init Tests", () => {
     await expect(freshAsset.connect(infra.deployer).initializeInternalKyc(true))
       .to.emit(freshAsset, "KycInitialized")
       .withArgs(true);
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN activateInternalKyc THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.activateInternalKyc()).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN deactivateInternalKyc THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.deactivateInternalKyc()).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN revokeKyc THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.revokeKyc(ethers.ZeroAddress)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
   });
 });

@@ -361,11 +361,20 @@ describe("ControllerByPartition Tests", () => {
 
   describe("nonOperational", () => {
     beforeEach(async () => {
+      await loadFixture(deployFixtureSinglePartition);
       await mockDiamondCut.forceNonOperational();
     });
 
     it("GIVEN non-operational WHEN controllerRedeemByPartition is called THEN AssetNotOperational", async () => {
       await expect(asset.controllerRedeemByPartition(ethers.ZeroHash, ethers.ZeroAddress, 0n, "0x", "0x"))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN controllerTransferByPartition is called THEN AssetNotOperational", async () => {
+      await expect(
+        asset.controllerTransferByPartition(ethers.ZeroHash, ethers.ZeroAddress, ethers.ZeroAddress, 0n, "0x", "0x"),
+      )
         .to.be.revertedWithCustomError(asset, "AssetNotOperational")
         .withArgs(EQUITY_CONFIG_ID, 1);
     });

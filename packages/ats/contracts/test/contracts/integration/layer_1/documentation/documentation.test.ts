@@ -259,4 +259,20 @@ describe("Documentation Tests", () => {
       await expect(asset.initializeDocumentation()).to.emit(asset, "DocumentationInitialized");
     });
   });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setDocument THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setDocument(ethers.ZeroHash, "", ethers.ZeroHash)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN removeDocument THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.removeDocument(ethers.ZeroHash)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+  });
 });

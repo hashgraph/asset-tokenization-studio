@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
-import { ZERO, EMPTY_STRING, ATS_ROLES, CAP_BY_PARTITION_RESOLVER_KEY } from "@scripts";
+import { DEFAULT_PARTITION, ZERO, EMPTY_STRING, ATS_ROLES, CAP_BY_PARTITION_RESOLVER_KEY } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
@@ -174,6 +174,18 @@ describe("CapByPartition Tests", () => {
       await expect(
         deactivatedAsset.connect(base.deployer).setMaxSupplyByPartition(ethers.ZeroHash, 0),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setMaxSupplyByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setMaxSupplyByPartition(DEFAULT_PARTITION, 0)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
     });
   });
 });

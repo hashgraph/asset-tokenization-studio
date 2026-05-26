@@ -244,11 +244,18 @@ describe("Scheduled Tasks Tests", () => {
 });
 
 describe("Scheduled Tasks Failure Recovery", () => {
+  let asset: IAsset;
+
   async function deployWithCorporateActionRole() {
     const base = await deployEquityTokenFixture();
     await base.asset.grantRole(ATS_ROLES.CORPORATE_ACTION_ROLE, base.deployer.address);
     return base;
   }
+
+  beforeEach(async () => {
+    const base = await loadFixture(deployWithCorporateActionRole);
+    asset = base.asset;
+  });
 
   it("GIVEN a crossOrdered snapshot task WHEN triggered successfully THEN queue drains and no TaskExecutionFailed is emitted", async () => {
     const { asset, deployer } = await loadFixture(deployWithCorporateActionRole);
@@ -546,5 +553,25 @@ describe("Scheduled Tasks Failure Recovery", () => {
 
     expect(failedEvents.length).to.equal(2);
     expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(0);
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      const cut = await ethers.getContractAt("MockDiamondCut", await asset.getAddress());
+      await cut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN triggerPendingScheduledCrossOrderedTasks THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.triggerPendingScheduledCrossOrderedTasks()).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN triggerScheduledCrossOrderedTasks THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.triggerScheduledCrossOrderedTasks(0)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
   });
 });

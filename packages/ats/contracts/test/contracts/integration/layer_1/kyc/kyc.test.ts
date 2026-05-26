@@ -4,7 +4,9 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { deployEquityTokenFixture } from "@test";
 import { ATS_ROLES } from "@scripts";
+import { MockDiamondCut } from "@contract-types";
 
+// TODO: Apply beforeEach general with fixture instead in each test.
 describe("Kyc Tests", () => {
   describe("Deactivated", () => {
     it("GIVEN a deactivated asset WHEN activateInternalKyc THEN transaction fails with Deactivated", async () => {
@@ -47,6 +49,26 @@ describe("Kyc Tests", () => {
       await expect(deactivatedAsset.connect(base.deployer).revokeKyc(ethers.ZeroAddress)).to.be.revertedWithCustomError(
         deactivatedAsset,
         "Deactivated",
+      );
+    });
+  });
+
+  describe("nonOperational", () => {
+    let asset: any;
+    let mockDiamondCut: MockDiamondCut;
+
+    beforeEach(async () => {
+      // TODO: Fix it. deploy don't needed.
+      const base = await deployEquityTokenFixture();
+      asset = await ethers.getContractAt("IAsset", base.diamond.target);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", base.diamond.target);
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN grantKyc THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.grantKyc(ethers.ZeroAddress, "", 0, 0, ethers.ZeroAddress)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
       );
     });
   });

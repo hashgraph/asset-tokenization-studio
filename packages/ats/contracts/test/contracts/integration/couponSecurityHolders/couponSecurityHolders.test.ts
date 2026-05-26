@@ -248,4 +248,17 @@ describe("CouponSecurityHolders Tests", () => {
       await expect(asset.initializeCouponSecurityHolders()).to.emit(asset, "CouponSecurityHoldersInitialized");
     });
   });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN getCouponHolders THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.getCouponHolders(1, 0, 0)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN getCouponsFor THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.getCouponsFor(1, 0, 0)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+  });
 });

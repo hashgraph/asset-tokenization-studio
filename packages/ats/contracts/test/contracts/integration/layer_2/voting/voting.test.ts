@@ -46,4 +46,21 @@ describe("Voting Tests", () => {
       await expect(asset.initializeVoting()).to.emit(asset, "VotingInitialized");
     });
   });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setVoting THEN AssetNotOperational", async () => {
+      await expect(asset.setVoting({ recordDate: 0, data: "0x" })).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN cancelVoting THEN AssetNotOperational", async () => {
+      await expect(asset.cancelVoting(0)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+  });
 });

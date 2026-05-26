@@ -1450,4 +1450,45 @@ describe("HoldByPartition Tests", () => {
       await expect(asset.initializeHoldByPartition()).to.emit(asset, "HoldByPartitionInitialized");
     });
   });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN createHoldByPartition THEN reverts with AssetNotOperational", async () => {
+      const minimalHold = { amount: 0, expirationTimestamp: 0, escrow: ADDRESS_ZERO, to: ADDRESS_ZERO, data: "0x" };
+      await expect(asset.createHoldByPartition(_DEFAULT_PARTITION, minimalHold)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN createHoldFromByPartition THEN reverts with AssetNotOperational", async () => {
+      const minimalHold = { amount: 0, expirationTimestamp: 0, escrow: ADDRESS_ZERO, to: ADDRESS_ZERO, data: "0x" };
+      await expect(
+        asset.createHoldFromByPartition(_DEFAULT_PARTITION, ADDRESS_ZERO, minimalHold, "0x"),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN executeHoldByPartition THEN reverts with AssetNotOperational", async () => {
+      const minimalId = { partition: _DEFAULT_PARTITION, tokenHolder: ADDRESS_ZERO, holdId: 0 };
+      await expect(asset.executeHoldByPartition(minimalId, ADDRESS_ZERO, 0)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN releaseHoldByPartition THEN reverts with AssetNotOperational", async () => {
+      const minimalId = { partition: _DEFAULT_PARTITION, tokenHolder: ADDRESS_ZERO, holdId: 0 };
+      await expect(asset.releaseHoldByPartition(minimalId, 0)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN reclaimHoldByPartition THEN reverts with AssetNotOperational", async () => {
+      const minimalId = { partition: _DEFAULT_PARTITION, tokenHolder: ADDRESS_ZERO, holdId: 0 };
+      await expect(asset.reclaimHoldByPartition(minimalId)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+  });
 });

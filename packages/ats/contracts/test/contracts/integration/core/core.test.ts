@@ -189,4 +189,17 @@ describe("Core Facet Tests", () => {
       );
     });
   });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setName THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setName("")).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN setSymbol THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setSymbol("")).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+  });
 });

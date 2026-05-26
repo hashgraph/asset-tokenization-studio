@@ -352,4 +352,15 @@ describe("ERC20Permit Tests", () => {
       );
     });
   });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await _mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN permit THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.permit(ethers.ZeroAddress, ethers.ZeroAddress, 0, 0, 0, ethers.ZeroHash, ethers.ZeroHash),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+  });
 });

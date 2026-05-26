@@ -112,4 +112,14 @@ describe("InterestRateFacet Tests", () => {
       expect(await asset.getCouponRateType()).to.equal(RateType.STANDARD);
     });
   });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setCouponRateType THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setCouponRateType(1)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+  });
 });

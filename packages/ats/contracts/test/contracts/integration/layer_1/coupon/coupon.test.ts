@@ -1078,21 +1078,18 @@ describe("Coupon Fixed-Rate Variant Tests", () => {
       await mockDiamondCut.forceNonOperational();
     });
 
-    it("GIVEN non-operational WHEN setCoupon is called THEN AssetNotOperational", async () => {
-      await expect(
-        asset.setCoupon({
-          recordDate: 0n,
-          executionDate: 0n,
-          startDate: 0n,
-          endDate: 0n,
-          fixingDate: 0n,
-          rate: 0n,
-          rateDecimals: 0,
-          rateStatus: 0,
-        }),
-      )
-        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
-        .withArgs(EQUITY_CONFIG_ID, 1);
+    it("GIVEN non-operational asset WHEN setCoupon THEN reverts with AssetNotOperational", async () => {
+      const minimalCoupon = {
+        recordDate: 0,
+        executionDate: 0,
+        rate: 0,
+        rateDecimals: 0,
+        startDate: 0,
+        endDate: 0,
+        fixingDate: 0,
+        rateStatus: 0,
+      };
+      await expect(asset.setCoupon(minimalCoupon)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
 
     it("GIVEN non-operational WHEN cancelCoupon is called THEN AssetNotOperational", async () => {

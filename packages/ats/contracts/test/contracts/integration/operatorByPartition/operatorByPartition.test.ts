@@ -357,4 +357,45 @@ describe("OperatorByPartitionFacet Tests", () => {
       await expect(asset.initializeOperatorByPartition()).to.emit(asset, "OperatorByPartitionInitialized");
     });
   });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN authorizeOperatorByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.authorizeOperatorByPartition(DEFAULT_PARTITION, signer_B.address),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN revokeOperatorByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.revokeOperatorByPartition(DEFAULT_PARTITION, signer_B.address)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN operatorTransferByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.operatorTransferByPartition({
+          partition: DEFAULT_PARTITION,
+          from: signer_A.address,
+          to: signer_B.address,
+          value: 0,
+          data: EMPTY_HEX_BYTES,
+          operatorData: EMPTY_HEX_BYTES,
+        }),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN operatorRedeemByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.operatorRedeemByPartition(DEFAULT_PARTITION, signer_A.address, 0, EMPTY_HEX_BYTES, EMPTY_HEX_BYTES),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN revokeOperator THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.revokeOperator(signer_B.address)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+  });
 });

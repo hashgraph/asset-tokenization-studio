@@ -169,4 +169,17 @@ describe("Operator Facet Tests", () => {
   it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeOperator is called THEN it reverts with AccountHasNoRole", async () => {
     await expect(asset.connect(signer_C).initializeOperator()).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
   });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN authorizeOperator THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.authorizeOperator("0x0000000000000000000000000000000000000001")).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+  });
 });

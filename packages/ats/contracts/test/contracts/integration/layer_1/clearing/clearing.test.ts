@@ -5316,4 +5316,18 @@ describe("Clearing Tests", () => {
       );
     });
   });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      const cut = await ethers.getContractAt("MockDiamondCut", diamond.target);
+      await cut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN activateClearing THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.activateClearing()).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN deactivateClearing THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.deactivateClearing()).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+  });
 });

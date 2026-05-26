@@ -768,4 +768,17 @@ describe("Compliance Tests", () => {
       await expect(asset.initializeCompliance()).to.emit(asset, "ComplianceInitialized");
     });
   });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setCompliance THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setCompliance("0x0000000000000000000000000000000000000001")).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+  });
 });

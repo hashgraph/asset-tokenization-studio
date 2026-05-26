@@ -248,4 +248,30 @@ describe("Proceed Recipients Tests", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN addProceedRecipient THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.addProceedRecipient(ADDRESS_ZERO, "0x")).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN removeProceedRecipient THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.removeProceedRecipient(ADDRESS_ZERO)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN updateProceedRecipientData THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.updateProceedRecipientData(ADDRESS_ZERO, "0x")).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+  });
 });

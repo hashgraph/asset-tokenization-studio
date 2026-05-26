@@ -9,7 +9,15 @@ import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types
 import { deployEquityTokenFixture } from "@test";
 
 import { executeRbac, MAX_UINT256 } from "@test";
-import { EMPTY_STRING, ATS_ROLES, ZERO, dateToUnixTimestamp, LOCK_BY_PARTITION_RESOLVER_KEY } from "@scripts";
+import {
+  ADDRESS_ZERO,
+  DEFAULT_PARTITION,
+  EMPTY_STRING,
+  ATS_ROLES,
+  ZERO,
+  dateToUnixTimestamp,
+  LOCK_BY_PARTITION_RESOLVER_KEY,
+} from "@scripts";
 import { Rbac } from "@scripts/domain";
 
 const _NON_DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000011";
@@ -687,6 +695,33 @@ describe("LockByPartition Tests", () => {
     it("GIVEN a fresh deployment WHEN initializeLockByPartition is called THEN emits LockByPartitionInitialized", async () => {
       await mockDiamondCut.forceFacetNotRegistered(LOCK_BY_PARTITION_RESOLVER_KEY);
       await expect(asset.initializeLockByPartition()).to.emit(asset, "LockByPartitionInitialized");
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await loadFixture(deploySecurityFixtureSinglePartition);
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN lockByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.lockByPartition(DEFAULT_PARTITION, 0, ADDRESS_ZERO, 0)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN releaseByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.releaseByPartition(DEFAULT_PARTITION, 0, ADDRESS_ZERO)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN forceReleaseByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.forceReleaseByPartition(DEFAULT_PARTITION, 0, ADDRESS_ZERO)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
     });
   });
 });

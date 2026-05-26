@@ -224,6 +224,17 @@ describe("Loan Tests", () => {
     });
   });
 
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await _mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setLoanDetails THEN AssetNotOperational", async () => {
+      const loanDetails = await getLoanDetails();
+      await expect(asset.setLoanDetails(loanDetails)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+  });
+
   describe("Deactivated", () => {
     it("GIVEN a deactivated asset WHEN cancelAmortization THEN transaction fails with Deactivated", async () => {
       const base = await deployLoanTokenFixture();

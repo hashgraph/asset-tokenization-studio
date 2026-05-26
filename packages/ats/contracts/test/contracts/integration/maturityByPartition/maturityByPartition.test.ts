@@ -289,4 +289,16 @@ describe("MaturityByPartition Tests", () => {
       await expect(asset.initializeMaturityByPartition()).to.emit(asset, "MaturityByPartitionInitialized");
     });
   });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN redeemAtMaturityByPartition THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.redeemAtMaturityByPartition(ADDRESS_ZERO, DEFAULT_PARTITION, 0)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+  });
 });

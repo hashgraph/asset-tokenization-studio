@@ -3,12 +3,13 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import { DEFAULT_PARTITION, ATS_ROLES, ZERO, EMPTY_HEX_BYTES } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 const EMPTY_VC_ID = "";
+const SECURITY_HOLDERS_RESOLVER_KEY = "0x148e284bdf3173e3c2daee5f3ac9c0333c1e11b57edf4c3ed16f3d962e49e55c";
 
 describe("SecurityHoldersFacet Tests", () => {
   let diamond: ResolverProxy;
@@ -16,8 +17,10 @@ describe("SecurityHoldersFacet Tests", () => {
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
   let signer_D: HardhatEthersSigner;
+  let unknownSigner: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityHoldersFixture() {
     const base = await deployEquityTokenFixture();
@@ -27,8 +30,11 @@ describe("SecurityHoldersFacet Tests", () => {
     signer_C = base.user2;
     const signers = await ethers.getSigners();
     signer_D = signers[3];
+    const lastSigner = signers[signers.length - 1];
+    unknownSigner = lastSigner;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       {
         role: ATS_ROLES.KYC_ROLE,
@@ -407,6 +413,27 @@ describe("SecurityHoldersFacet Tests", () => {
       const holders = await asset.getSecurityHolders(0, 10);
       expect(holders).to.include(signer_B.address);
       expect(holders).to.include(signer_C.address);
+    });
+  });
+
+  describe("initializeSecurityHolders", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeSecurityHolders THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(unknownSigner).initializeSecurityHolders())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(await unknownSigner.getAddress(), ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeSecurityHolders THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeSecurityHolders())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(SECURITY_HOLDERS_RESOLVER_KEY, 1);
+    });
+  });
+
+  describe("initializeSecurityHolders event", () => {
+    it("GIVEN fresh facet WHEN initializeSecurityHolders THEN emits SecurityHoldersInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(SECURITY_HOLDERS_RESOLVER_KEY);
+      await expect(asset.initializeSecurityHolders()).to.emit(asset, "SecurityHoldersInitialized");
     });
   });
 

@@ -175,4 +175,22 @@ describe("Scheduled BalanceAdjustments Tests", () => {
       );
     });
   });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setScheduledBalanceAdjustment THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.setScheduledBalanceAdjustment({ executionDate: 0, factor: 0, decimals: 0 }),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN cancelScheduledBalanceAdjustment THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.cancelScheduledBalanceAdjustment(0)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+  });
 });

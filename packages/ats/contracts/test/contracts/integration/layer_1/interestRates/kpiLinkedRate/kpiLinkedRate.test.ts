@@ -375,4 +375,41 @@ describe("Kpi Linked Rate Tests", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setCouponRateType THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setCouponRateType(3)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN setKpiLinkedRateImpactData THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.setKpiLinkedRateImpactData({
+          maxDeviationCap: 0,
+          baseLine: 0,
+          maxDeviationFloor: 0,
+          impactDataDecimals: 0,
+          adjustmentPrecision: 0,
+        }),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN setKpiLinkedRateInterestRate THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.setKpiLinkedRateInterestRate({
+          maxRate: 0,
+          baseRate: 0,
+          minRate: 0,
+          startPeriod: 0,
+          startRate: 0,
+          missedPenalty: 0,
+          reportPeriod: 0,
+          rateDecimals: 0,
+        }),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+  });
 });

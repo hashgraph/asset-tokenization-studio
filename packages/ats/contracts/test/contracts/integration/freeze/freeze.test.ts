@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
-import { ATS_ROLES, FREEZE_RESOLVER_KEY } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, FREEZE_RESOLVER_KEY } from "@scripts";
 
 describe("Freeze Tests", () => {
   let diamond: ResolverProxy;
@@ -48,6 +48,32 @@ describe("Freeze Tests", () => {
     it("GIVEN a fresh deployment WHEN initializeFreeze is called THEN emits FreezeInitialized", async () => {
       await mockDiamondCut.forceFacetNotRegistered(FREEZE_RESOLVER_KEY);
       await expect(asset.initializeFreeze()).to.emit(asset, "FreezeInitialized");
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setAddressFrozen THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setAddressFrozen(ADDRESS_ZERO, true)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN freezePartialTokens THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.freezePartialTokens(ADDRESS_ZERO, 0)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN unfreezePartialTokens THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.unfreezePartialTokens(ADDRESS_ZERO, 0)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
     });
   });
 });

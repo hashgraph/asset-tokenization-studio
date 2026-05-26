@@ -375,6 +375,7 @@ export async function deployLoanTokenFixture({
   await asset.initializeBalanceTracker();
   await asset.initializeBalanceAdjustments();
   await asset.initializeScheduledBalanceAdjustment();
+  await asset.initializeTimeTravel();
 
   await asset.connect(deployer).initializeInitializer(150);
   await asset.connect(deployer).setOperationalStatus();

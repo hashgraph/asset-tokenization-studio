@@ -681,7 +681,6 @@ describe("Scheduled Snapshots Tests", () => {
     });
   });
 
-  // TODO: FIx and onlyOperational
   describe("initializeSnapshots", () => {
     it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeSnapshots is called THEN it reverts with AccountHasNoRole", async () => {
       const infra = await loadFixture(deployAtsInfrastructureFixture);
@@ -724,6 +723,16 @@ describe("Scheduled Snapshots Tests", () => {
         freshAsset,
         "SnapshotsInitialized",
       );
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      const cut = await ethers.getContractAt("MockDiamondCut", await asset.getAddress());
+      await cut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN takeSnapshot THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.takeSnapshot()).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

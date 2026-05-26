@@ -131,7 +131,6 @@ export async function deployLoansPortfolioTokenFixture({
     { role: ATS_ROLES.LOAN_MANAGER_ROLE, members: [deployer.address] },
     { role: ATS_ROLES.LOANS_PORTFOLIO_MANAGER_ROLE, members: [deployer.address] },
     { role: ATS_ROLES.ISSUER_ROLE, members: [deployer.address] },
-    { role: ATS_ROLES.MINTER_ROLE, members: [deployer.address] },
     { role: ATS_ROLES.DEACTIVATE_ROLE, members: [deployer.address] },
   ];
 
@@ -269,7 +268,6 @@ export async function deployLoansPortfolioTokenFixture({
   await asset.initializeBatchController();
   await asset.initializeCoreAtSnapshot();
   await asset.initializeComplianceByPartition();
-  await asset.initializeCoupon();
   await asset.initializeLockByPartition();
   await asset.initializeHoldByPartition();
   await asset.initializeDeactivate();
@@ -284,6 +282,7 @@ export async function deployLoansPortfolioTokenFixture({
   await asset.initializeBalanceAdjustments();
   await asset.initializeScheduledBalanceAdjustment();
   await asset.initializeNonces();
+  await asset.initializeTimeTravel();
 
   await initializerFacet.connect(deployer).initializeInitializer(150);
   await initializerFacet.connect(deployer).setOperationalStatus();

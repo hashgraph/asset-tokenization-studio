@@ -319,4 +319,14 @@ describe("Cap Tests", () => {
       );
     });
   });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setMaxSupply THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setMaxSupply(0)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+  });
 });

@@ -110,4 +110,14 @@ describe("Deactivate Tests", () => {
       await expect(asset.initializeDeactivate()).to.emit(asset, "DeactivateInitialized");
     });
   });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN deactivate THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.deactivate()).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+  });
 });

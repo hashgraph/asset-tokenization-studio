@@ -145,4 +145,13 @@ describe("Metadata Tests", () => {
       await expect(asset.initializeMetadata()).to.emit(asset, "MetadataInitialized");
     });
   });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setMetadata THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setMetadata(ethers.ZeroHash, [])).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+  });
 });

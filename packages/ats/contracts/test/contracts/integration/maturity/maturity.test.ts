@@ -13,20 +13,10 @@ import {
   EMPTY_STRING,
   MATURITY_RESOLVER_KEY,
 } from "@scripts";
-import {
-  getDltTimestamp,
-  grantRoleAndPauseToken,
-  deployEquityTokenFixture,
-  deployBondTokenFixture,
-  executeRbac,
-  MAX_UINT256,
-} from "@test";
+import { grantRoleAndPauseToken, deployBondTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 const numberOfUnits = 1000;
-let startingDate = 0;
-const numberOfCoupons = 50;
-const frequency = TIME_PERIODS_S.DAY;
 let maturityDate = 0;
 const amount = numberOfUnits;
 const _PARTITION_ID = "0x0000000000000000000000000000000000000000000000000000000000000002";
@@ -43,8 +33,10 @@ describe("Maturity Tests", () => {
   let asset: IAsset;
   let mockDiamondCut: MockDiamondCut;
 
-  async function deploySecurityFixture() {
-    const base = await deployEquityTokenFixture();
+  async function deploySecurityFixture(multiPartition = false) {
+    const base = await deployBondTokenFixture(
+      multiPartition ? { bondDataParams: { securityData: { isMultiPartition: true } } } : undefined,
+    );
     diamond = base.diamond;
     mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     signer_A = base.deployer;
@@ -53,6 +45,8 @@ describe("Maturity Tests", () => {
     signer_D = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+
+    maturityDate = Number((await asset.getBondDetails()).maturityDate);
 
     await executeRbac(asset, [
       {
@@ -97,12 +91,6 @@ describe("Maturity Tests", () => {
 
     await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
   }
-
-  before(async () => {
-    const currentTimestamp = await getDltTimestamp();
-    startingDate = currentTimestamp + TIME_PERIODS_S.DAY;
-    maturityDate = startingDate + numberOfCoupons * frequency;
-  });
 
   beforeEach(async () => {
     await loadFixture(deploySecurityFixture);
@@ -346,6 +334,22 @@ describe("Maturity Tests", () => {
     it("GIVEN a fresh deployment WHEN initializeMaturity is called THEN emits MaturityInitialized", async () => {
       await mockDiamondCut.forceFacetNotRegistered(MATURITY_RESOLVER_KEY);
       await expect(asset.initializeMaturity()).to.emit(asset, "MaturityInitialized");
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN fullRedeemAtMaturity THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.fullRedeemAtMaturity(ADDRESS_ZERO)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN updateMaturityDate THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.updateMaturityDate(0)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

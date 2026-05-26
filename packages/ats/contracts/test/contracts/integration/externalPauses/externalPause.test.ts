@@ -6,10 +6,11 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ADDRESS_ZERO, ATS_ROLES, EQUITY_CONFIG_ID, GAS_LIMIT } from "@scripts";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture } from "@test";
-import { ResolverProxy, type IAsset, MockedExternalPause } from "@contract-types";
+import { MockDiamondCut, ResolverProxy, type IAsset, MockedExternalPause } from "@contract-types";
 
 describe("ExternalPause Tests", () => {
   let diamond: ResolverProxy;
+  let mockDiamondCut: MockDiamondCut;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_D: HardhatEthersSigner;
@@ -39,6 +40,7 @@ describe("ExternalPause Tests", () => {
       },
     });
     diamond = base.diamond;
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     signer_A = base.deployer;
     signer_B = base.user1;
     signer_D = base.user3;
@@ -459,6 +461,29 @@ describe("ExternalPause Tests", () => {
       await expect(
         deactivatedAsset.connect(base.deployer).removeExternalPause(ethers.ZeroAddress),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN addExternalPause THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.addExternalPause("0x0000000000000000000000000000000000000001")).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN removeExternalPause THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.removeExternalPause("0x0000000000000000000000000000000000000001"),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN updateExternalPauses THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.updateExternalPauses([], [])).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

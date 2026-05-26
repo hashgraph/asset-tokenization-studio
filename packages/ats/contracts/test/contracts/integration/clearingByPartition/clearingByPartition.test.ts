@@ -1942,5 +1942,18 @@ describe("ClearingByPartitionFacet Tests", () => {
         .to.be.revertedWithCustomError(asset, "AssetNotOperational")
         .withArgs(EQUITY_CONFIG_ID, 1);
     });
+
+    it("GIVEN non-operational WHEN reclaimClearingOperationByPartition is called THEN AssetNotOperational", async () => {
+      await expect(
+        asset.reclaimClearingOperationByPartition({
+          clearingOperationType: ClearingOperationType.Redeem,
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          clearingId: 1,
+        }),
+      )
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
   });
 });

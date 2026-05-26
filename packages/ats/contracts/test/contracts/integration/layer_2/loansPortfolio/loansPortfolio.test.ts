@@ -1017,4 +1017,40 @@ describe("LoansPortfolio Token Tests", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN addHoldingsAsset THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.addHoldingsAsset({ assetAddress: ADDRESS_ZERO, holdingsAssetType: HoldingsAssetType.LOAN, country: "" }),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN removeHoldingsAsset THEN reverts with AssetNotOperational", async () => {
+      await expect(
+        asset.removeHoldingsAsset({
+          assetAddress: ADDRESS_ZERO,
+          holdingsAssetType: HoldingsAssetType.LOAN,
+          country: "",
+        }),
+      ).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN notifyLoanHoldingsAssetUpdate THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.notifyLoanHoldingsAssetUpdate(ADDRESS_ZERO)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN loansPortfolioWithdraw THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.loansPortfolioWithdraw(ADDRESS_ZERO, ADDRESS_ZERO, 0)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+  });
 });

@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
-import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO, MINT_RESOLVER_KEY } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO, MINT_RESOLVER_KEY } from "@scripts";
 
 const AMOUNT = 1000;
 const DATA = "0x1234";
@@ -199,6 +199,19 @@ describe("MintFacet Tests", () => {
         deactivatedAsset,
         "Deactivated",
       );
+    });
+  });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN issue THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.issue(ADDRESS_ZERO, 0, "0x")).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN mint THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.mint(ADDRESS_ZERO, 0)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
     });
   });
 });

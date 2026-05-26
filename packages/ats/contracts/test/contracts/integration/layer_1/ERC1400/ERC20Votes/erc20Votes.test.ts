@@ -807,4 +807,13 @@ describe("ERC20Votes Tests", () => {
       );
     });
   });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN delegate THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.delegate(ethers.ZeroAddress)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+  });
 });

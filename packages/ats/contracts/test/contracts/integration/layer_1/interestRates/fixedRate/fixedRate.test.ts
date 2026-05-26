@@ -116,4 +116,18 @@ describe("Fixed Rate Tests", () => {
       );
     });
   });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN setCouponRateType THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setCouponRateType(2)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN setRate THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.setRate(0, 0)).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+  });
 });

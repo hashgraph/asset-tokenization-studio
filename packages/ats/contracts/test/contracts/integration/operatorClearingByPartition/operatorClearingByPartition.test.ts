@@ -353,4 +353,33 @@ describe("OperatorClearingByPartition Tests", () => {
       );
     });
   });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN operatorClearingRedeemByPartition THEN reverts with AssetNotOperational", async () => {
+      const minimalOp: ClearingOperationFrom = {
+        clearingOperation: { partition: ethers.ZeroHash, expirationTimestamp: 0, data: "0x" },
+        from: ADDRESS_ZERO,
+        operatorData: "0x",
+      };
+      await expect(asset.operatorClearingRedeemByPartition(minimalOp, 0)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+
+    it("GIVEN non-operational asset WHEN operatorClearingTransferByPartition THEN reverts with AssetNotOperational", async () => {
+      const minimalOp: ClearingOperationFrom = {
+        clearingOperation: { partition: ethers.ZeroHash, expirationTimestamp: 0, data: "0x" },
+        from: ADDRESS_ZERO,
+        operatorData: "0x",
+      };
+      await expect(asset.operatorClearingTransferByPartition(minimalOp, 0, ADDRESS_ZERO)).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+  });
 });

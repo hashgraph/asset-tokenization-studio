@@ -422,4 +422,24 @@ describe("BatchFreeze Tests", () => {
       await expect(asset.initializeBatchFreeze()).to.emit(asset, "BatchFreezeInitialized");
     });
   });
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational asset WHEN batchSetAddressFrozen THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.batchSetAddressFrozen([], [])).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN batchFreezePartialTokens THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.batchFreezePartialTokens([], [])).to.be.revertedWithCustomError(asset, "AssetNotOperational");
+    });
+
+    it("GIVEN non-operational asset WHEN batchUnfreezePartialTokens THEN reverts with AssetNotOperational", async () => {
+      await expect(asset.batchUnfreezePartialTokens([], [])).to.be.revertedWithCustomError(
+        asset,
+        "AssetNotOperational",
+      );
+    });
+  });
 });
