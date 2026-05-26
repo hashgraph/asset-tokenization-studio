@@ -34,7 +34,15 @@ abstract contract SsiManagement is ISsiManagement, Modifiers {
     /// @inheritdoc ISsiManagement
     function addIssuer(
         address _issuer
-    ) external override onlyActivated onlyUnpaused onlyRole(ROLE_SSI_MANAGER) returns (bool success_) {
+    )
+        external
+        override
+        onlyActivated
+        onlyUnpaused
+        onlyRole(ROLE_SSI_MANAGER)
+        notZeroAddress(_issuer)
+        returns (bool success_)
+    {
         success_ = SsiManagementStorageWrapper.addIssuer(_issuer);
         if (!success_) {
             revert ListedIssuer(_issuer);
