@@ -138,45 +138,65 @@ library AccessControlStorageWrapper {
     }
 
     /**
-     * @notice Applies a batch of role grants and revocations to `_account` in a single call.
-     * @dev For each entry, asserts the caller holds the role's admin via `checkRole`, then
-     *      diffs current membership against the desired `_actives` flag. Skips no-op updates
-     *      to avoid spurious set churn. Reverts via `checkRole` if the caller lacks the admin
-     *      role for any entry.
-     * @param _roles   Roles to apply, indexed in parallel with `_actives`.
-     * @param _actives Desired membership flag per role (`true` grants, `false` revokes).
-     * @param _account Account being updated.
-     * @return success_ Always true on a successful return.
+     * @notice Applies a batch of role grants and revocations to `_account`, returning only the
+     *         entries that effectively changed state.
+     * @dev Iterates `_roles` / `_actives` in order. For each entry, asserts the caller holds the
+     *      role's admin via `checkRole` (so a caller without admin rights reverts even on no-op
+     *      entries — this is intentional; do not move the check past the no-op predicate).
+     *      Entries where the requested state matches current storage are skipped and excluded
+     *      from the returned arrays, so off-chain indexers can distinguish requested from
+     *      effective changes (audit FIND-142).
+     * @param _roles    Roles to apply, indexed in parallel with `_actives`.
+     * @param _actives  Desired membership flag per role (`true` grants, `false` revokes).
+     * @param _account  Account being updated.
+     * @return appliedRoles_  Subset of `_roles` whose state effectively changed, in input order.
+     * @return appliedStates_ Corresponding final state for each effectively applied entry.
      */
     function applyRoles(
         bytes32[] calldata _roles,
         bool[] calldata _actives,
         address _account
-    ) internal returns (bool success_) {
+    ) internal returns (bytes32[] memory appliedRoles_, bool[] memory appliedStates_) {
         RoleDataStorage storage roleDataStorage = rolesStorage();
         address sender = EvmAccessors.getMsgSender();
         uint256 length = _roles.length;
+
+        appliedRoles_ = new bytes32[](length);
+        appliedStates_ = new bool[](length);
+        uint256 count;
+
         for (uint256 index; index < length; ) {
-            checkRole(getRoleAdmin(_roles[index]), sender);
-            if (_actives[index]) {
-                if (!_has(roleDataStorage, _roles[index], _account)) {
-                    roleDataStorage.roles[_roles[index]].roleMembers.add(_account);
-                    roleDataStorage.memberRoles[_account].add(_roles[index]);
-                }
-                unchecked {
-                    ++index;
-                }
-                continue;
-            }
-            if (_has(roleDataStorage, _roles[index], _account)) {
-                roleDataStorage.roles[_roles[index]].roleMembers.remove(_account);
-                roleDataStorage.memberRoles[_account].remove(_roles[index]);
-            }
+            bytes32 role = _roles[index];
+            bool active = _actives[index];
             unchecked {
                 ++index;
             }
+
+            checkRole(getRoleAdmin(role), sender);
+            if (active == _has(roleDataStorage, role, _account)) continue;
+
+            appliedRoles_[count] = role;
+            appliedStates_[count] = active;
+            unchecked {
+                ++count;
+            }
+
+            if (active) {
+                roleDataStorage.roles[role].roleMembers.add(_account);
+                roleDataStorage.memberRoles[_account].add(role);
+                continue;
+            }
+            roleDataStorage.roles[role].roleMembers.remove(_account);
+            roleDataStorage.memberRoles[_account].remove(role);
         }
-        success_ = true;
+
+        // Shrink the dynamic-array length slot in memory to `count` —
+        // avoids an O(n) copy into a freshly-sized array.
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            mstore(appliedRoles_, count)
+            mstore(appliedStates_, count)
+        }
     }
 
     /**
