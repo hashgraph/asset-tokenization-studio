@@ -139,7 +139,6 @@ const EQUITY_FACETS = [
 
   "InterestRateFacet",
   "ProceedRecipientsFacet",
-  "TimeTravelFacet",
 
   // Jurisdiction-Specific (2)
   "SecurityFacet",
@@ -206,10 +205,7 @@ export async function createEquityConfiguration(
   // When useTimeTravel=true, ALL facets get TimeTravel suffix (universal mapping)
   // plus TimeTravelFacet controller. No filtering needed — simplifies deployment logic.
   const facetNames = useTimeTravel
-    ? [
-        ...EQUITY_FACETS.filter((name) => name !== "TimeTravelFacet").map((name) => `${name}TimeTravel`),
-        "TimeTravelFacet",
-      ]
+    ? [...EQUITY_FACETS.map((name) => `${name}TimeTravel`), "TimeTravelFacet"]
     : [...EQUITY_FACETS];
 
   // Build facet data with resolver keys from registry
