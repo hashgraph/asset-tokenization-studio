@@ -10,7 +10,7 @@ import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
  * @author Asset Tokenization Studio Team
  * @notice Diamond facet exposing principal queries via `IPrincipal`, registered under
  *         `RESOLVER_KEY_PRINCIPAL`.
- * @dev Consolidates `getPrincipalFor` previously hosted in `BondRead` / `BondUSAReadFacetBase`.
+ * @dev Consolidates `getPrincipalFor` previously hosted in the original Bond facet implementation.
  *      Exposes 1 selector: `getPrincipalFor`.
  */
 contract PrincipalFacet is Principal, IStaticFunctionSelectors {

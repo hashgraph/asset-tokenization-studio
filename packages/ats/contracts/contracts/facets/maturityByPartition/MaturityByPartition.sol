@@ -16,10 +16,7 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
  * @title MaturityByPartition
  * @author Asset Tokenization Studio Team
  * @notice Abstract implementation of `IMaturityByPartition` providing single-partition
- *         bond maturity redemption with full modifier chain enforcement.
- * @dev Delegates storage writes to `ERC1410StorageWrapper.redeemByPartition`. Preserves
- *      all modifier semantics from the original `Bond.redeemAtMaturityByPartition`
- *      implementation. Intended to be inherited by `MaturityByPartitionFacet`.
+ *         maturity redemption with full modifier chain enforcement.
  */
 abstract contract MaturityByPartition is IMaturityByPartition, Modifiers {
     /// @inheritdoc IMaturityByPartition

@@ -7,14 +7,14 @@ bytes32 constant RESOLVER_KEY_PRINCIPAL = 0xa3dc20804ebd6f2a06a7e8b8de31712f3d18
 /**
  * @title IPrincipal
  * @author Asset Tokenization Studio Team
- * @notice Interface exposing principal queries for bond tokens, providing the numerator and
+ * @notice Interface exposing principal queries for security tokens, providing the numerator and
  *         denominator required to compute a token holder's principal value.
- * @dev Read-only interface whose single function delegates to `BondStorageWrapper`.
+ * @dev Read-only interface whose single function delegates to `TokenCoreOps`.
  */
 interface IPrincipal {
     /**
      * @notice Encodes a principal value as a fraction.
-     * @dev `principal = numerator / denominator` expressed in the bond's currency unit.
+     * @dev `principal = numerator / denominator` expressed in the security's currency unit.
      *      The specific decomposition of numerator and denominator is an implementation
      *      detail and may change to preserve precision or overflow safety; only the ratio
      *      is part of the public contract. Callers should never assume that `denominator`

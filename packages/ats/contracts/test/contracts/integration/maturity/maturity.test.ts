@@ -242,7 +242,7 @@ describe("Maturity Tests", () => {
   });
 
   describe("updateMaturityDate", () => {
-    it("GIVEN the caller lacks ROLE_BOND_MANAGER WHEN updateMaturityDate THEN reverts with AccountHasNoRole", async () => {
+    it("GIVEN the caller lacks ROLE_MATURITY_MANAGER WHEN updateMaturityDate THEN reverts with AccountHasNoRole", async () => {
       const maturityDateBefore = await asset.getMaturityDate();
       const newMaturityDate = maturityDateBefore + 86400n;
 
@@ -255,7 +255,7 @@ describe("Maturity Tests", () => {
     });
 
     it("GIVEN the token is paused WHEN updateMaturityDate THEN reverts with IsPaused", async () => {
-      await grantRoleAndPauseToken(asset, ATS_ROLES.ROLE_BOND_MANAGER, signer_A, signer_B, signer_C.address);
+      await grantRoleAndPauseToken(asset, ATS_ROLES.ROLE_MATURITY_MANAGER, signer_A, signer_B, signer_C.address);
 
       const maturityDateBefore = await asset.getMaturityDate();
       const newMaturityDate = maturityDateBefore + 86400n;
@@ -269,7 +269,7 @@ describe("Maturity Tests", () => {
     });
 
     it("GIVEN a new date earlier than current maturity WHEN updateMaturityDate THEN reverts with MaturityDateInvalid", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_BOND_MANAGER, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_MATURITY_MANAGER, signer_C.address);
       const maturityDateBefore = await asset.getMaturityDate();
       const dayBeforeCurrentMaturity = maturityDateBefore - 86400n;
 
@@ -281,8 +281,8 @@ describe("Maturity Tests", () => {
       expect(maturityDateAfter).to.be.equal(maturityDateBefore);
     });
 
-    it("GIVEN ROLE_BOND_MANAGER and a valid future date WHEN updateMaturityDate THEN emits MaturityDateUpdated and persists new date", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_BOND_MANAGER, signer_C.address);
+    it("GIVEN ROLE_MATURITY_MANAGER and a valid future date WHEN updateMaturityDate THEN emits MaturityDateUpdated and persists new date", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_MATURITY_MANAGER, signer_C.address);
       const maturityDateBefore = await asset.getMaturityDate();
       const newMaturityDate = maturityDateBefore + 86400n;
 
@@ -304,7 +304,7 @@ describe("Maturity Tests", () => {
     });
 
     it("GIVEN updateMaturityDate was called WHEN getMaturityDate THEN returns the updated date", async () => {
-      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_BOND_MANAGER, signer_C.address);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_MATURITY_MANAGER, signer_C.address);
       const currentMaturityDate = await asset.getMaturityDate();
       const newMaturityDate = currentMaturityDate + 86400n;
 

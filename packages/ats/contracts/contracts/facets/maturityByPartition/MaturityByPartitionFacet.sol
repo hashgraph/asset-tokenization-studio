@@ -8,7 +8,7 @@ import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 /**
  * @title MaturityByPartitionFacet
  * @author Asset Tokenization Studio Team
- * @notice Diamond facet that exposes single-partition bond maturity redemption through
+ * @notice Diamond facet that exposes single-partition maturity redemption through
  *         the `IMaturityByPartition` interface, registered under
  *         `RESOLVER_KEY_MATURITY_BY_PARTITION`.
  * @dev Inherits redemption logic from `MaturityByPartition` and satisfies

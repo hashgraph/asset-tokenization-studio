@@ -8,7 +8,7 @@ import { _checkNotInitialized } from "../InitializationErrors.sol";
  * @title  MaturityModifiers
  * @notice Abstract contract providing maturity date-related modifiers.
  * @dev    Wraps `MaturityDateStorageWrapper` library functions into modifiers for convenient use
- *         in bond facets. Keeping the storage wrapper as a library avoids duplicating validation
+ *         in security facets. Keeping the storage wrapper as a library avoids duplicating validation
  *         logic across facets.
  * @author Asset Tokenization Studio Team
  */

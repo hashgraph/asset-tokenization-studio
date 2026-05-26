@@ -11,7 +11,7 @@ import { TokenCoreOps } from "../../domain/orchestrator/TokenCoreOps.sol";
 /**
  * @title Principal
  * @author Asset Tokenization Studio Team
- * @notice Abstract implementation of `IPrincipal`, providing principal queries for bond tokens.
+ * @notice Abstract implementation of `IPrincipal`, providing principal queries for security tokens.
  * @dev Stateless wrapper that delegates the actual computation to {TokenCoreOps}.
  *      Intended to be inherited by `PrincipalFacet`.
  */

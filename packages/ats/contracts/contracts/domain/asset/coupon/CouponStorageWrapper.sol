@@ -150,11 +150,38 @@ library CouponStorageWrapper {
     }
 
     /**
-     * @notice Reverts with `ICommonErrors.WrongDates` when the bond has a non-zero maturity date
-     *         and `endDate` exceeds it.
-     * @dev When `maturityDate` is zero the bond is treated as open-ended and no constraint is
+     * @notice Stamps a resolved fixed-rate value and decimals onto a previously
+     *         scheduled coupon.
+     * @dev Mutates the supplied `coupon` struct in memory and persists it via
+     *      `CorporateActionsStorageWrapper.updateCorporateActionData`. Rate status
+     *      is transitioned to SET.
+     * @param couponID One-indexed coupon identifier.
+     * @param coupon In-memory coupon struct modified by reference.
+     * @param rate Fixed-rate numerator resolved by `CouponRateDispatch`.
+     * @param rateDecimals Scale of the rate value.
+     */
+    function updateCouponRate(
+        uint256 couponID,
+        ICouponTypes.Coupon memory coupon,
+        uint256 rate,
+        uint8 rateDecimals
+    ) internal {
+        coupon.rate = rate;
+        coupon.rateDecimals = rateDecimals;
+        coupon.rateStatus = ICouponTypes.RateCalculationStatus.SET;
+
+        CorporateActionsStorageWrapper.updateCorporateActionData(
+            CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(CORPORATE_ACTION_TYPE_COUPON, couponID - 1),
+            abi.encode(coupon)
+        );
+    }
+
+    /**
+     * @notice Reverts with `ICommonErrors.WrongDates` when the security has a non-zero maturity
+     *         date and `endDate` exceeds it.
+     * @dev When `maturityDate` is zero the security is treated as open-ended and no constraint is
      *      applied. Delegates the ordered-date check to `DatesValidation.checkDates`.
-     * @param endDate Coupon end date to validate against the bond's maturity date.
+     * @param endDate Coupon end date to validate against the security's maturity date.
      */
     function checkEndDateAgainstMaturity(uint256 endDate) internal view {
         uint256 maturityDate = MaturityDateStorageWrapper.getMaturityDate();

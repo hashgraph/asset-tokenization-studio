@@ -68,7 +68,7 @@ interface ICouponTypes is IKpiLinkedRateErrors {
      * @dev `recordDateReached` is true once the record date has passed; until then the balance
      *      and `couponAmount` fields are not yet meaningful.
      * @param tokenBalance Holder balance captured at the coupon snapshot (or zero if not yet reached).
-     * @param nominalValue Nominal value of the underlying bond per unit, used for amount maths.
+     * @param nominalValue Nominal value of the underlying security per unit, used for amount maths.
      * @param decimals Decimal precision of the underlying token at the snapshot.
      * @param recordDateReached True once the record date has passed.
      * @param coupon Underlying `Coupon` parameters.

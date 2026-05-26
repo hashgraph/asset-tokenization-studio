@@ -23,12 +23,12 @@ interface IMaturity {
 
     /**
      * @notice Emitted whenever the maturity date is updated via `updateMaturityDate`.
-     * @param bondId               Address of the bond proxy whose date was updated.
+     * @param tokenId              Address of the token proxy whose date was updated.
      * @param maturityDate         New maturity timestamp (Unix epoch, seconds).
      * @param previousMaturityDate Previous maturity timestamp that was replaced.
      */
     event MaturityDateUpdated(
-        address indexed bondId,
+        address indexed tokenId,
         uint256 indexed maturityDate,
         uint256 indexed previousMaturityDate
     );
@@ -36,16 +36,19 @@ interface IMaturity {
     error MaturityDateInvalid();
 
     /**
-     * @notice Initialises the maturity capability on the token.
-     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
-     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     * @notice Sets the token maturity date exactly once during deployment.
+     * @dev    Called by the Factory immediately after the proxy is deployed. No role gate —
+     *         the one-time guard is enforced by `onlyNotMaturityInitialized`, which reverts with
+     *         `AlreadyInitialized` on any subsequent call. Persists the date via
+     *         `MaturityDateStorageWrapper.initializeMaturity`.
+     * @dev    Emits {MaturityInitialized} with the contract address and the maturity date.
      * @param  _maturityDate Maturity timestamp to set (Unix epoch, in seconds). Must be strictly
      *                       greater than zero and in the future at deployment time.
      */
     function initializeMaturity(uint256 _maturityDate) external;
 
     /**
-     * @notice Redeems all token partitions held by a token holder at bond maturity.
+     * @notice Redeems all token partitions held by a token holder at maturity.
      * @dev    Caller must hold `ROLE_MATURITY_REDEEMER`. Contract must be unpaused and clearing
      *         must be disabled. `_tokenHolder` must be on the allowed list, hold granted KYC
      *         status, must not be recovered, and the current timestamp must be at or past the
@@ -58,8 +61,8 @@ interface IMaturity {
     function fullRedeemAtMaturity(address _tokenHolder) external;
 
     /**
-     * @notice Updates the bond maturity date to a new timestamp.
-     * @dev    Caller must hold `ROLE_BOND_MANAGER`. Contract must be unpaused. `_newMaturityDate`
+     * @notice Updates the token maturity date to a new timestamp.
+     * @dev    Caller must hold `ROLE_MATURITY_MANAGER`. Contract must be unpaused. `_newMaturityDate`
      *         must satisfy the validity constraint enforced by `onlyValidMaturityDate` — the new
      *         date must be strictly greater than the current maturity date. Persists the new date
      *         via `MaturityDateStorageWrapper.setMaturityDate`.
@@ -71,7 +74,7 @@ interface IMaturity {
     function updateMaturityDate(uint256 _newMaturityDate) external returns (bool success_);
 
     /**
-     * @notice Returns the current bond maturity date.
+     * @notice Returns the current token maturity date.
      * @dev    Reads directly from `MaturityDateStorageWrapper` storage slot. No access-control gate —
      *         maturity date is public information.
      * @return maturityDate_ Current maturity timestamp (Unix epoch, in seconds). Returns zero if

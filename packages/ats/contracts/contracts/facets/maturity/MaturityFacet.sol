@@ -8,7 +8,7 @@ import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 /**
  * @title  MaturityFacet
  * @author Asset Tokenization Studio Team
- * @notice Diamond facet that exposes bond maturity initialisation, redemption, and maturity date
+ * @notice Diamond facet that exposes token maturity initialisation, redemption, and maturity date
  *         management via `IMaturity`, registered under `RESOLVER_KEY_MATURITY`.
  * @dev    Inherits maturity logic from `Maturity` and satisfies `IStaticFunctionSelectors` for
  *         Diamond proxy selector registration. Exposes four selectors:
