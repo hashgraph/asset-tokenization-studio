@@ -15,7 +15,5 @@ bytes32 constant RESOLVER_KEY_ERC1410_MANAGEMENT = 0xb4096d676324d7f4d32415a0a08
  *      live on `IProtectedByPartition`.
  */
 interface IERC1410Management is IERC1410Types {
-    // Initialization function
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1410(bool _multiPartition) external;
+    function initializeERC1410(bool _multiPartition) external;
 }

@@ -5,6 +5,7 @@ import { Equity } from "@domain/context/equity/Equity";
 import { Security } from "@domain/context/security/Security";
 import ValidatedRequest from "@core/validation/ValidatedArgs";
 import FormatValidation from "../FormatValidation";
+import { MIN_CONFIG_VERSION } from "@core/Constants";
 
 import { Factory } from "@domain/context/factory/Factories";
 
@@ -201,6 +202,7 @@ export default class CreateTrexSuiteEquityRequest extends ValidatedRequest<Creat
         return Factory.checkRegulationSubType(val, this.regulationType);
       },
       configId: FormatValidation.checkBytes32Format(),
+      configVersion: FormatValidation.checkNumber({ min: MIN_CONFIG_VERSION }),
       externalPauses: (val) => {
         return FormatValidation.checkHederaIdOrEvmAddressArray(val ?? [], "externalPauses", true);
       },

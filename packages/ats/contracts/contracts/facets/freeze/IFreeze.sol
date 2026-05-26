@@ -44,9 +44,9 @@ interface IFreeze {
 
     /**
      * @notice Reverts when a partial token freeze is attempted with a zero amount.
-     * @dev Checked at the start of `ERC3643StorageWrapper.freezeTokensByPartition`, the
-     *      single entry point shared by both `freezePartialTokens` and any partition-scoped
-     *      freeze call. Freezing zero tokens is semantically invalid and rejected early.
+     * @dev Checked at the start of `ERC3643StorageWrapper.freezeTokens`, the entry point for
+     *      partial token freezes. Freezing zero tokens is semantically invalid and rejected
+     *      early.
      */
     error InvalidFreezeAmount();
 

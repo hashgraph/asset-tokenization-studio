@@ -75,6 +75,7 @@ import {
   UpdateResolverRequest,
   UpdateConfigRequest,
   GetConfigInfoRequest,
+  ResolveLatestConfigVersionRequest,
   ConfigInfoViewModel,
   UpdateMaturityDateRequest,
   SetScheduledBalanceAdjustmentRequest,
@@ -733,6 +734,11 @@ export class SDKService {
   // MANAGEMENT ////////////////////////////////////////////
   public static async getConfigInfo(req: GetConfigInfoRequest): Promise<ConfigInfoViewModel> {
     return await Management.getConfigInfo(req);
+  }
+
+  public static async resolveLatestConfigVersion(req: ResolveLatestConfigVersionRequest): Promise<number> {
+    const response = await Management.resolveLatestConfigVersion(req);
+    return response.payload;
   }
 
   public static async updateSecurityConfigVersion(req: UpdateConfigVersionRequest): Promise<boolean> {

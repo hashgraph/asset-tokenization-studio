@@ -2,10 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ScheduledTasksLib } from "../../facets/layer_2/scheduledTask/ScheduledTasksLib.sol";
-import {
-    ScheduledTask,
-    ScheduledTasksDataStorage
-} from "../../facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
+import { ScheduledTask } from "../../facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { IScheduledBalanceAdjustment } from "../../facets/scheduledBalanceAdjustment/IScheduledBalanceAdjustment.sol";
 import {
     SCHEDULED_TASK_TYPE_SNAPSHOT,
@@ -34,6 +31,25 @@ bytes32 constant STORAGE_LOCATION_SCHEDULED_BALANCE_ADJUSTMENTS = 0x2585709bc5ff
 /// @custom:hash storage ScheduledCrossOrderedTasks
 // solhint-disable-next-line max-line-length
 bytes32 constant STORAGE_LOCATION_SCHEDULED_CROSS_ORDERED_TASKS = 0xc0ba5b9a820688d8898770d2f45db1e829785cb69882e5bb2981fdd22d60f900;
+
+/**
+ * @notice Generic ordered-task-queue storage layout.
+ * @dev Instantiated at four independent ERC-7201 namespaces by this wrapper, one per task family:
+ *        - erc7201:security.token.standard.storage.ScheduledSnapshots
+ *        - erc7201:security.token.standard.storage.ScheduledCouponListing
+ *        - erc7201:security.token.standard.storage.ScheduledBalanceAdjustments
+ *        - erc7201:security.token.standard.storage.ScheduledCrossOrderedTasks
+ *      No single `@custom:storage-location` annotation can capture the four-slot binding;
+ *      tooling that needs per-slot layout resolution must consult the four STORAGE_LOCATION_*
+ *      constants in this file directly.
+ */
+struct ScheduledTasksDataStorage {
+    // ─── R3 Single-slot scalars (uint256, bytes32, string) ───
+    uint256 scheduledTaskCount;
+    // ─── R4 Aggregates (mapping, array, EnumerableSet) ───────
+    mapping(uint256 => ScheduledTask) scheduledTasks;
+    // ─── APPEND-ONLY ZONE BELOW ───
+}
 
 /**
  * @title Scheduled Tasks Storage Wrapper
@@ -88,7 +104,7 @@ library ScheduledTasksStorageWrapper {
                 pos
             );
 
-            if (currentScheduledTask.scheduledTimestamp >= currentBlockTimestamp) break;
+            if (currentScheduledTask.scheduledTimestamp > currentBlockTimestamp) break;
 
             ScheduledTasksLib.popScheduledTask(_scheduledTasks);
 
@@ -506,7 +522,7 @@ library ScheduledTasksStorageWrapper {
         }
 
         ScheduledTask memory subTask = ScheduledTasksLib.getScheduledTasksByIndex(subQueue_, pos);
-        if (subTask.scheduledTimestamp >= currentBlockTimestamp) return;
+        if (subTask.scheduledTimestamp > currentBlockTimestamp) return;
 
         ScheduledTasksLib.popScheduledTask(subQueue_);
 

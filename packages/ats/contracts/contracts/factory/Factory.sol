@@ -314,7 +314,7 @@ abstract contract Factory is IFactory {
         IControlList(securityAddress_).initializeControlList(_securityData.isWhiteList);
 
         // configure multi partition flag (ERC1410ManagementFacet may not be present)
-        _tryInitialize_ERC1410(securityAddress_, _securityData.isMultiPartition);
+        _tryInitializeERC1410(securityAddress_, _securityData.isMultiPartition);
 
         // configure controller flag (ControllerFacet may not be present)
         _tryInitializeController(securityAddress_, _securityData.isControllable);
@@ -353,14 +353,14 @@ abstract contract Factory is IFactory {
         IExternalKycListManagement(securityAddress_).initializeExternalKycLists(_securityData.externalKycLists);
 
         // configure ERC20Votes (ERC20VotesFacet may not be present)
-        _tryInitialize_ERC20Votes(securityAddress_, _securityData.erc20VotesActivated);
+        _tryInitializeERC20Votes(securityAddress_, _securityData.erc20VotesActivated);
 
         // configure ERC3643 (should be present)
         IERC3643(securityAddress_).initialize_ERC3643(_securityData.compliance, _securityData.identityRegistry);
     }
 
-    function _tryInitialize_ERC1410(address securityAddress_, bool isMultiPartition) private {
-        try IERC1410Management(securityAddress_).initialize_ERC1410(isMultiPartition) {
+    function _tryInitializeERC1410(address securityAddress_, bool isMultiPartition) private {
+        try IERC1410Management(securityAddress_).initializeERC1410(isMultiPartition) {
             // success
         } catch {
             // facet not present - skip initialization
@@ -391,8 +391,8 @@ abstract contract Factory is IFactory {
         }
     }
 
-    function _tryInitialize_ERC20Votes(address securityAddress_, bool erc20VotesActivated) private {
-        try IERC20Votes(securityAddress_).initialize_ERC20Votes(erc20VotesActivated) {
+    function _tryInitializeERC20Votes(address securityAddress_, bool erc20VotesActivated) private {
+        try IERC20Votes(securityAddress_).initializeERC20Votes(erc20VotesActivated) {
             // success
         } catch {
             // facet not present - skip initialization

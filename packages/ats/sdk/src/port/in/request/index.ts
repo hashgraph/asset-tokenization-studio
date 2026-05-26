@@ -60,6 +60,7 @@ import GetConfigInfoRequest from "./management/GetConfigInfoRequest";
 import UpdateConfigRequest from "./management/UpdateConfigRequest";
 import UpdateConfigVersionRequest from "./management/UpdateConfigVersionRequest";
 import UpdateResolverRequest from "./management/UpdateResolverRequest";
+import ResolveLatestConfigVersionRequest from "./management/ResolveLatestConfigVersionRequest";
 import UpdateMaturityDateRequest from "./bond/UpdateMaturityDateRequest";
 import SetScheduledBalanceAdjustmentRequest from "./equity/SetScheduledBalanceAdjustmentRequest";
 import GetScheduledBalanceAdjustmentRequest from "./equity/GetScheduledBalanceAdjustmentRequest";
@@ -313,6 +314,7 @@ export {
   UpdateConfigVersionRequest,
   UpdateConfigRequest,
   GetConfigInfoRequest,
+  ResolveLatestConfigVersionRequest,
   UpdateMaturityDateRequest,
   SetScheduledBalanceAdjustmentRequest,
   GetScheduledBalanceAdjustmentRequest,

@@ -7,9 +7,8 @@ import { Modifiers } from "../../../../services/Modifiers.sol";
 import { ERC20VotesStorageWrapper } from "../../../../domain/asset/ERC20VotesStorageWrapper.sol";
 
 abstract contract ERC20Votes is IERC20Votes, Modifiers {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC20Votes(bool _activated) external override onlyNotERC20VotesInitialized {
-        ERC20VotesStorageWrapper.initialize_ERC20Votes(_activated);
+    function initializeERC20Votes(bool _activated) external override onlyNotERC20VotesInitialized {
+        ERC20VotesStorageWrapper.initializeERC20Votes(_activated);
     }
 
     function delegate(address _delegatee) external override onlyActivated onlyUnpaused {

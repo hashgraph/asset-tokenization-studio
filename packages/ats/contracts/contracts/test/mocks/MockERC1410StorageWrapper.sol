@@ -5,11 +5,12 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { IERC1410Types } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410Types.sol";
+import { ICommonErrors } from "../../infrastructure/errors/ICommonErrors.sol";
 
 /// @dev Test-only mock that exposes internal ERC1410StorageWrapper functions
 /// so that unit tests can exercise them directly without going through the full
 /// diamond infrastructure.
-contract MockERC1410StorageWrapper is IERC1410Types {
+contract MockERC1410StorageWrapper is IERC1410Types, ICommonErrors {
     function exposed_addNewTokenHolder(address tokenHolder) external {
         ERC1410StorageWrapper.addNewTokenHolder(tokenHolder);
     }

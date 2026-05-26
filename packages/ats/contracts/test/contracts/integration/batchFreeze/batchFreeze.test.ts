@@ -236,6 +236,12 @@ describe("BatchFreeze Tests", () => {
           "ZeroAddressNotAllowed",
         );
       });
+
+      it("GIVEN an account without ROLE_FREEZE_MANAGER or ROLE_AGENT WHEN batchFreezePartialTokens THEN fails with AccountHasNoRoles", async () => {
+        await expect(
+          asset.connect(signer_F).batchFreezePartialTokens([signer_D.address], [freezeAmount]),
+        ).to.be.revertedWithCustomError(asset, "AccountHasNoRoles");
+      });
     });
 
     describe("batchUnfreezePartialTokens", () => {
@@ -306,6 +312,12 @@ describe("BatchFreeze Tests", () => {
           asset,
           "ZeroAddressNotAllowed",
         );
+      });
+
+      it("GIVEN an account without ROLE_FREEZE_MANAGER or ROLE_AGENT WHEN batchUnfreezePartialTokens THEN fails with AccountHasNoRoles", async () => {
+        await expect(
+          asset.connect(signer_F).batchUnfreezePartialTokens([signer_D.address], [unfreezeAmount]),
+        ).to.be.revertedWithCustomError(asset, "AccountHasNoRoles");
       });
     });
 

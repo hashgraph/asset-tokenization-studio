@@ -8,6 +8,14 @@ export const TOKEN_CREATION_COST_HBAR = 80;
 export const EVM_ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const HEDERA_ZERO_ADDRESS = "0.0.0";
 export const HBAR_DECIMALS = 8;
+/**
+ * Minimum accepted value for a configuration version in resolver-backed entry points.
+ *
+ * The diamond cut manager rejects `version == 0` with the `VersionZero` custom error;
+ * callers that want the most recent registered version must read it first via
+ * `Management.resolveLatestConfigVersion` and pass the resolved number explicitly.
+ */
+export const MIN_CONFIG_VERSION = 1;
 export const GAS = {
   CREATE_EQUITY_ST: 15000000,
   CREATE_BOND_ST: 15000000,

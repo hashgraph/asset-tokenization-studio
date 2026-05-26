@@ -156,7 +156,7 @@ export async function deployLoansPortfolioTokenFixture({
   const timeTravelFacet = TimeTravelFacet__factory.connect(proxyAddress, deployer);
 
   await controlListFacet.initializeControlList(securityData.isWhiteList);
-  await erc1410ManagementFacet.initialize_ERC1410(securityData.isMultiPartition);
+  await erc1410ManagementFacet.initializeERC1410(securityData.isMultiPartition);
   await controllerFacet.initializeController(securityData.isControllable);
   await coreFacet.initializeCore({
     info: {
@@ -175,7 +175,7 @@ export async function deployLoansPortfolioTokenFixture({
   await externalControlListManagementFacet.initializeExternalControlLists([]);
   await kycFacet.initializeInternalKyc(securityData.internalKycActivated);
   await externalKycListManagementFacet.initializeExternalKycLists([]);
-  await erc20VotesFacet.initialize_ERC20Votes(false);
+  await erc20VotesFacet.initializeERC20Votes(false);
   await erc3643ManagementFacet.initialize_ERC3643(ZeroAddress, ZeroAddress);
   // Loan portfolios don't carry a per-token currency; pass bytes3(0).
   await nominalValueFacet.initializeNominalValue(

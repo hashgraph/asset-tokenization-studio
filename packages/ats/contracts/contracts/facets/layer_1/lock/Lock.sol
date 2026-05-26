@@ -44,9 +44,9 @@ abstract contract Lock is ILock, Modifiers {
         onlyWithoutMultiPartition
         onlyUnrecoveredAddress(_tokenHolder)
         onlyValidExpirationTimestamp(_expirationTimestamp)
-        returns (bool success_, uint256 lockId_)
+        returns (uint256 lockId_)
     {
-        (success_, lockId_) = LockStorageWrapper.lockByPartition(
+        lockId_ = LockStorageWrapper.lockByPartition(
             _DEFAULT_PARTITION,
             _amount,
             _tokenHolder,
