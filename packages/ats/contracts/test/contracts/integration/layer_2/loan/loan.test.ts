@@ -3,16 +3,10 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset } from "@contract-types";
+import { type IAsset, MockDiamondCut } from "@contract-types";
 import { ZERO, EMPTY_STRING, ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import {
-  deployAtsInfrastructureFixture,
-  deployLoanTokenFixture,
-  executeRbac,
-  getLoanDetails,
-  MAX_UINT256,
-} from "@test";
+import { deployAtsInfrastructureFixture, deployLoanTokenFixture, getLoanDetails, MAX_UINT256 } from "@test";
 
 const EMPTY_VC_ID = EMPTY_STRING;
 
@@ -22,6 +16,7 @@ describe("Loan Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let _mockDiamondCut: MockDiamondCut;
 
   let startingDate: number;
   let maturityDate: number;
@@ -38,28 +33,10 @@ describe("Loan Tests", () => {
     maturityDate = startingDate + 100_000;
 
     asset = await ethers.getContractAt("IAsset", base.tokenAddress);
+    _mockDiamondCut = await ethers.getContractAt("MockDiamondCut", base.tokenAddress);
 
-    await executeRbac(asset, [
-      {
-        role: ATS_ROLES.PAUSER_ROLE,
-        members: [signer_B.address],
-      },
-      {
-        role: ATS_ROLES.KYC_ROLE,
-        members: [signer_B.address],
-      },
-      {
-        role: ATS_ROLES.SSI_MANAGER_ROLE,
-        members: [signer_A.address],
-      },
-      {
-        role: ATS_ROLES.LOAN_MANAGER_ROLE,
-        members: [signer_A.address],
-      },
-    ]);
-
-    await asset.connect(signer_A).addIssuer(signer_A.address);
-    await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+    await asset.connect(base.deployer).addIssuer(signer_A.address);
+    await asset.connect(base.deployer).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
   }
 
   beforeEach(async () => {

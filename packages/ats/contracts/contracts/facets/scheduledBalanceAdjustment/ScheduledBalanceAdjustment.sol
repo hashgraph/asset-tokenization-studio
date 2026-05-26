@@ -40,6 +40,7 @@ abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, Mod
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(CORPORATE_ACTION_ROLE)
@@ -68,6 +69,7 @@ abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, Mod
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(CORPORATE_ACTION_ROLE)

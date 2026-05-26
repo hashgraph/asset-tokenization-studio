@@ -44,6 +44,7 @@ abstract contract ProtectedHoldByPartition is IProtectedHoldByPartition, Modifie
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition))

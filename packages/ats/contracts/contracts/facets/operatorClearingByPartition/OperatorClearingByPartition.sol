@@ -35,6 +35,7 @@ abstract contract OperatorClearingByPartition is IOperatorClearingByPartition, M
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyClearingActivated
@@ -67,6 +68,7 @@ abstract contract OperatorClearingByPartition is IOperatorClearingByPartition, M
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyClearingActivated

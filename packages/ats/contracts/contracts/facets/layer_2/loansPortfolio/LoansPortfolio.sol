@@ -9,7 +9,16 @@ import { LoansPortfolioStorageWrapper } from "../../../domain/asset/loansPortfol
 import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
+/**
+ * @title Loans Portfolio Facet
+ * @notice Manages loan portfolio metadata, holdings assets, withdrawals, and portfolio metrics.
+ * @dev Uses storage wrappers for diamond-compatible state access and facet initialisation.
+ *      Mutating operations require the portfolio to be operational, active, unpaused, and
+ *      authorised through role-based access control.
+ * @author Asset Tokenization Studio Team
+ */
 abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
+    /// @inheritdoc ILoansPortfolio
     function initializeLoansPortfolio(
         ILoansPortfolio.LoansPortfolioDetailsData calldata _loansPortfolioData
     ) external onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_LOANS_PORTFOLIO_RESOLVER_KEY) {
@@ -21,11 +30,13 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         emit ILoansPortfolio.LoansPortfolioInitialized(_loansPortfolioData);
     }
 
+    /// @inheritdoc ILoansPortfolio
     function addHoldingsAsset(
         ILoansPortfolio.HoldingsAsset memory _holdingsAsset
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(LOANS_PORTFOLIO_MANAGER_ROLE)
@@ -37,11 +48,13 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         success_ = true;
     }
 
+    /// @inheritdoc ILoansPortfolio
     function removeHoldingsAsset(
         ILoansPortfolio.HoldingsAsset memory _holdingsAsset
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(LOANS_PORTFOLIO_MANAGER_ROLE)
@@ -53,11 +66,13 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         success_ = true;
     }
 
+    /// @inheritdoc ILoansPortfolio
     function notifyLoanHoldingsAssetUpdate(
         address _holdingsAssetAddress
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(LOANS_PORTFOLIO_MANAGER_ROLE)
@@ -68,6 +83,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         success_ = true;
     }
 
+    /// @inheritdoc ILoansPortfolio
     function loansPortfolioWithdraw(
         address _assetAddress,
         address _to,
@@ -75,6 +91,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(LOANS_PORTFOLIO_MANAGER_ROLE)
@@ -85,6 +102,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         success_ = LoansPortfolioStorageWrapper.loansPortfolioWithdraw(_assetAddress, _to, _amount);
     }
 
+    /// @inheritdoc ILoansPortfolio
     function getLoansPortfolioData()
         external
         view
@@ -94,6 +112,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         loansPortfolioData_ = LoansPortfolioStorageWrapper.getLoansPortfolioDetails();
     }
 
+    /// @inheritdoc ILoansPortfolio
     function getHoldingsAssets(
         uint256 _pageIndex,
         uint256 _pageLength
@@ -101,6 +120,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         assets_ = LoansPortfolioStorageWrapper.getHoldingsAssets(_pageIndex, _pageLength);
     }
 
+    /// @inheritdoc ILoansPortfolio
     function getLoanHoldingsAssets(
         uint256 _pageIndex,
         uint256 _pageLength
@@ -108,6 +128,7 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         assets_ = LoansPortfolioStorageWrapper.getLoanHoldingsAssetsPaginated(_pageIndex, _pageLength);
     }
 
+    /// @inheritdoc ILoansPortfolio
     function getHoldingsAssetOwnership(
         uint256 _pageIndex,
         uint256 _pageLength
@@ -115,46 +136,57 @@ abstract contract LoansPortfolio is ILoansPortfolio, Modifiers {
         (assets_, balances_) = LoansPortfolioStorageWrapper.getHoldingsAssetBalances(_pageIndex, _pageLength);
     }
 
+    /// @inheritdoc ILoansPortfolio
     function getNumberOfAssets() external view override returns (uint256 numberOfAssets_) {
         numberOfAssets_ = LoansPortfolioStorageWrapper.getNumberOfAssets();
     }
 
+    /// @inheritdoc ILoansPortfolio
     function getNumberOfLoans() external view override returns (uint256 numberOfLoans_) {
         numberOfLoans_ = LoansPortfolioStorageWrapper.getNumberOfLoans();
     }
 
+    /// @inheritdoc ILoansPortfolio
     function getNumberOfCash() external view override returns (uint256 numberOfCash_) {
         numberOfCash_ = LoansPortfolioStorageWrapper.getNumberOfCash();
     }
 
+    /// @inheritdoc ILoansPortfolio
     function getNumberOfPerformingLoans() external view override returns (uint256 numberOfPerformingLoans_) {
         numberOfPerformingLoans_ = LoansPortfolioStorageWrapper.getNumberOfPerformingLoans();
     }
 
+    /// @inheritdoc ILoansPortfolio
     function getNumberOfNonPerformingLoans() external view override returns (uint256 numberOfNonPerformingLoans_) {
         numberOfNonPerformingLoans_ = LoansPortfolioStorageWrapper.getNumberOfNonPerformingLoans();
     }
 
+    /// @inheritdoc ILoansPortfolio
     function getNumberDefaultedLoans() external view override returns (uint256 numberDefaultedLoans_) {
         numberDefaultedLoans_ = LoansPortfolioStorageWrapper.getNumberDefaultedLoans();
     }
 
+    /// @inheritdoc ILoansPortfolio
     function getSecuredLoansRatio() external view override returns (uint256 numerator_, uint256 denominator_) {
         (numerator_, denominator_) = LoansPortfolioStorageWrapper.getSecuredLoansRatio();
     }
 
+    /// @inheritdoc ILoansPortfolio
     function getPerformingLoansRatio() external view override returns (uint256 numerator_, uint256 denominator_) {
         (numerator_, denominator_) = LoansPortfolioStorageWrapper.getPerformingLoansRatio();
     }
 
+    /// @inheritdoc ILoansPortfolio
     function getNonPerformingLoansRatio() external view override returns (uint256 numerator_, uint256 denominator_) {
         (numerator_, denominator_) = LoansPortfolioStorageWrapper.getNonPerformingLoansRatio();
     }
 
+    /// @inheritdoc ILoansPortfolio
     function getDefaultedLoansRatio() external view override returns (uint256 numerator_, uint256 denominator_) {
         (numerator_, denominator_) = LoansPortfolioStorageWrapper.getDefaultedLoansRatio();
     }
 
+    /// @inheritdoc ILoansPortfolio
     function getGeographicalExposure()
         external
         view

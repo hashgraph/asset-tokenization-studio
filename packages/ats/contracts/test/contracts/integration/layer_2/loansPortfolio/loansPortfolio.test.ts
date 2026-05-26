@@ -2,7 +2,7 @@
 
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type IAsset } from "@contract-types";
+import { type IAsset, MockDiamondCut } from "@contract-types";
 import {
   executeRbac,
   deployLoanTokenFixture,
@@ -10,15 +10,15 @@ import {
   deployLoansPortfolioTokenFixture,
   DEFAULT_LOANS_PORTFOLIO_PARAMS,
   getLoanDetails,
-  deployAtsInfrastructureFixture,
 } from "@test";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO, LOANS_PORTFOLIO_RESOLVER_KEY } from "@scripts";
 import { HoldingsAssetType } from "@scripts/domain";
 import { ethers } from "hardhat";
 
 describe("LoansPortfolio Token Tests", () => {
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
   let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
@@ -34,6 +34,7 @@ describe("LoansPortfolio Token Tests", () => {
     signer_C = base.user3;
 
     asset = await ethers.getContractAt("IAsset", base.tokenAddress, signer_A);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", base.tokenAddress);
 
     await executeRbac(asset, [
       { role: ATS_ROLES.LOANS_PORTFOLIO_MANAGER_ROLE, members: [signer_A.address] },
@@ -103,23 +104,12 @@ describe("LoansPortfolio Token Tests", () => {
     });
 
     it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeLoansPortfolio is called THEN it emits LoansPortfolioInitialized", async () => {
-      const { decodeEvent } = await import("@scripts/infrastructure");
-      const { LOANS_PORTFOLIO_CONFIG_ID } = await import("@scripts/domain");
-      const infra = await loadFixture(deployAtsInfrastructureFixture);
-      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, LOANS_PORTFOLIO_CONFIG_ID, 1, [
-        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
-      ]);
-      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
-      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
+      await mockDiamondCut.forceFacetNotRegistered(LOANS_PORTFOLIO_RESOLVER_KEY);
       const loansPortfolioData = {
         portfolioType: DEFAULT_LOANS_PORTFOLIO_PARAMS.portfolioType,
         distributionPolicy: DEFAULT_LOANS_PORTFOLIO_PARAMS.distributionPolicy,
       };
-      const tx = await freshAsset.connect(infra.deployer).initializeLoansPortfolio(loansPortfolioData);
-      const receipt = await tx.wait();
-      const emitted = await decodeEvent(freshAsset, "LoansPortfolioInitialized", receipt!);
-      expect(emitted.loansPortfolioData.portfolioType).to.equal(loansPortfolioData.portfolioType);
-      expect(emitted.loansPortfolioData.distributionPolicy).to.equal(loansPortfolioData.distributionPolicy);
+      await expect(asset.initializeLoansPortfolio(loansPortfolioData)).to.emit(asset, "LoansPortfolioInitialized");
     });
   });
 

@@ -8,6 +8,9 @@ import { SnapshotsStorageWrapper } from "../../../domain/asset/SnapshotsStorageW
 import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { ScheduledTask } from "../../layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
+import { _SNAPSHOTS_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
 /**
  * @title Snapshots
@@ -23,9 +26,21 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract Snapshots is ISnapshots, Modifiers {
     /// @inheritdoc ISnapshots
+    function initializeSnapshots()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_SNAPSHOTS_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_SNAPSHOTS_RESOLVER_KEY);
+        emit SnapshotsInitialized();
+    }
+
+    /// @inheritdoc ISnapshots
     function takeSnapshot()
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(SNAPSHOT_ROLE)

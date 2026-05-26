@@ -3,8 +3,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset } from "@contract-types";
-import { ZERO, EMPTY_STRING, ADDRESS_ZERO, ATS_ROLES } from "@scripts";
+import { type IAsset, MockDiamondCut } from "@contract-types";
+import { ZERO, EMPTY_STRING, ADDRESS_ZERO, ATS_ROLES, HOLD_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
@@ -24,6 +24,7 @@ describe("HoldAtSnapshotByPartition Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixtureMultiPartition() {
     const base = await deployEquityTokenFixture({
@@ -38,6 +39,7 @@ describe("HoldAtSnapshotByPartition Tests", () => {
     signer_C = base.user3;
 
     asset = await ethers.getContractAt("IAsset", base.diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", base.diamond.target);
     await executeRbac(asset, set_initRbacs());
   }
 
@@ -193,32 +195,24 @@ describe("HoldAtSnapshotByPartition Tests", () => {
     expect(heldBalance_C_2_Partition_2).to.equal(0);
   });
 
-  describe.skip("initializeHoldAtSnapshotByPartition", () => {
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeHoldAtSnapshotByPartition is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeHoldAtSnapshotByPartition()).to.be.revertedWithCustomError(
-        asset,
-        "AccountHasNoRole",
-      );
+  describe("initializeHoldAtSnapshotByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeHoldAtSnapshotByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeHoldAtSnapshotByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeHoldAtSnapshotByPartition();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeHoldAtSnapshotByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeHoldAtSnapshotByPartition()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
+    it("GIVEN already-initialised WHEN initializeHoldAtSnapshotByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeHoldAtSnapshotByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(HOLD_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY, 1);
     });
+  });
 
-    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeHoldAtSnapshotByPartition is called THEN it emits HoldAtSnapshotByPartitionInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeHoldAtSnapshotByPartition()).to.emit(
-        asset,
-        "HoldAtSnapshotByPartitionInitialized",
-      );
+  describe("initializeHoldAtSnapshotByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeHoldAtSnapshotByPartition is called THEN emits HoldAtSnapshotByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(HOLD_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY);
+      await expect(asset.initializeHoldAtSnapshotByPartition()).to.emit(asset, "HoldAtSnapshotByPartitionInitialized");
     });
   });
 });

@@ -14,6 +14,19 @@ import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
  */
 interface IClearingHoldByPartition is IClearingTypes {
     /**
+     * @notice Emitted once when the clearing-hold-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeClearingHoldByPartition`.
+     */
+    event ClearingHoldByPartitionInitialized();
+
+    /**
+     * @notice Initialises the clearing-hold-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeClearingHoldByPartition() external;
+
+    /**
      * @notice Creates a hold for a clearing operation by partition
      *
      * @param _clearingOperation The clearing operation details

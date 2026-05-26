@@ -35,7 +35,7 @@ abstract contract Metadata is IMetadata, Modifiers {
     function setMetadata(
         bytes32 _key,
         bytes[] calldata _value
-    ) external onlyActivated onlyUnpaused onlyRole(METADATA_MANAGER_ROLE) {
+    ) external override onlyOperational onlyActivated onlyUnpaused onlyRole(METADATA_MANAGER_ROLE) {
         MetadataStorageWrapper.setMetadata(_key, _value);
     }
 

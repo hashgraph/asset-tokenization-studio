@@ -52,6 +52,7 @@ abstract contract Lock is ILock, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(LOCKER_ROLE)
@@ -89,6 +90,7 @@ abstract contract Lock is ILock, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
@@ -123,7 +125,15 @@ abstract contract Lock is ILock, Modifiers {
         bytes32 _partition,
         uint256 _lockId,
         address _tokenHolder
-    ) external onlyActivated onlyUnpaused onlyDefaultPartitionWithSinglePartition(_partition) returns (bool success_) {
+    )
+        external
+        override
+        onlyOperational
+        onlyActivated
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        returns (bool success_)
+    {
         bytes32[] memory roles = new bytes32[](2);
         roles[0] = LOCKER_ROLE;
         roles[1] = CONTROLLER_ROLE;

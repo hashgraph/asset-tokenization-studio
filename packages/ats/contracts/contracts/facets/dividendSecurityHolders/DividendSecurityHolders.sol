@@ -14,7 +14,7 @@ import { _DIVIDEND_SECURITY_HOLDERS_RESOLVER_KEY } from "../../constants/resolve
  * @author Asset Tokenization Studio Team
  * @notice Abstract base providing the read-only holder lookups exposed by
  *         `DividendSecurityHoldersFacet`.
- * @dev Thin forwarder over `DividendStorageWrapper`; holds no storage of its own. Each external
+ * @dev Thin forwarder over `DividendStorageWrapper`; holds no storage of its own. Each external onlyOperational
  *      method is gated by `onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, dividendId - 1)`,
  *      ensuring the caller's `dividendId` actually resolves to a dividend corporate action before
  *      any storage read. The library handles snapshot vs. live-registry sourcing internally.

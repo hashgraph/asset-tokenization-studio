@@ -25,14 +25,13 @@ abstract contract Voting is IVoting, Modifiers {
         emit VotingInitialized();
     }
 
-    /// @notice Sets a new voting for the security
-    /// @param _newVoting The new voting to be set
-    /// @return voteID_ The created voting identifier
+    /// @inheritdoc IVoting
     function setVoting(
         IVotingTypes.Voting calldata _newVoting
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(CORPORATE_ACTION_ROLE)
@@ -42,14 +41,13 @@ abstract contract Voting is IVoting, Modifiers {
         (, voteID_) = VotingStorageWrapper.setVoting(_newVoting);
     }
 
-    /// @notice Cancels an existing voting
-    /// @param _voteId The ID of the voting to be cancelled
-    /// @return success_ Whether the cancellation was successful
+    /// @inheritdoc IVoting
     function cancelVoting(
         uint256 _voteId
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(CORPORATE_ACTION_ROLE)
@@ -59,10 +57,7 @@ abstract contract Voting is IVoting, Modifiers {
         success_ = VotingStorageWrapper.cancelVoting(_voteId);
     }
 
-    /// @notice Retrieves a registered voting by its ID
-    /// @param _voteID The ID of the voting to retrieve
-    /// @return registeredVoting_ The registered voting data
-    /// @return isDisabled_ Whether the voting is disabled
+    /// @inheritdoc IVoting
     function getVoting(
         uint256 _voteID
     )
@@ -75,10 +70,7 @@ abstract contract Voting is IVoting, Modifiers {
         (registeredVoting_, , isDisabled_) = VotingStorageWrapper.getVoting(_voteID);
     }
 
-    /// @notice Retrieves voting information for a specific account and voting ID
-    /// @param _voteID The ID of the voting
-    /// @param _account The account address
-    /// @return votingFor_ Voting information for the specified account
+    /// @inheritdoc IVoting
     function getVotingFor(
         uint256 _voteID,
         address _account
@@ -92,8 +84,7 @@ abstract contract Voting is IVoting, Modifiers {
         return VotingStorageWrapper.getVotingFor(_voteID, _account);
     }
 
-    /// @notice Retrieves the total number of votings
-    /// @return votingCount_ The total count of votings
+    /// @inheritdoc IVoting
     function getVotingCount() external view override returns (uint256 votingCount_) {
         return VotingStorageWrapper.getVotingCount();
     }

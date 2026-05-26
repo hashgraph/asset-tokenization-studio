@@ -3,6 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearingAtSnapshotByPartition } from "./IClearingAtSnapshotByPartition.sol";
 import { SnapshotsStorageWrapper } from "../../domain/asset/SnapshotsStorageWrapper.sol";
+import { Modifiers } from "../../services/Modifiers.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _CLEARING_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title ClearingAtSnapshotByPartition
@@ -12,7 +16,18 @@ import { SnapshotsStorageWrapper } from "../../domain/asset/SnapshotsStorageWrap
  * @dev Delegates storage reads to `SnapshotsStorageWrapper`. Intended to be inherited by
  *      `ClearingAtSnapshotByPartitionFacet`.
  */
-abstract contract ClearingAtSnapshotByPartition is IClearingAtSnapshotByPartition {
+abstract contract ClearingAtSnapshotByPartition is IClearingAtSnapshotByPartition, Modifiers {
+    /// @inheritdoc IClearingAtSnapshotByPartition
+    function initializeClearingAtSnapshotByPartition()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_CLEARING_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_CLEARING_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY);
+        emit ClearingAtSnapshotByPartitionInitialized();
+    }
+
     /// @inheritdoc IClearingAtSnapshotByPartition
     function clearedBalanceOfAtSnapshotByPartition(
         bytes32 _partition,

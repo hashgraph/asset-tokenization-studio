@@ -3,9 +3,9 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, EMPTY_STRING, ZERO } from "@scripts";
+import { ATS_ROLES, EMPTY_STRING, ZERO, BALANCE_TRACKER_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -19,6 +19,7 @@ describe("BalanceTrackerAtSnapshotByPartition Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deployEquity() {
     const base = await deployEquityTokenFixture();
@@ -28,6 +29,7 @@ describe("BalanceTrackerAtSnapshotByPartition Tests", () => {
     signer_C = base.user2;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       {
@@ -145,29 +147,25 @@ describe("BalanceTrackerAtSnapshotByPartition Tests", () => {
       expect(await asset.totalSupplyAtSnapshotByPartition(_UNKNOWN_PARTITION, 1)).to.equal(0);
     });
   });
-  describe.skip("initializeBalanceTrackerAtSnapshotByPartition", () => {
-    it("GIVEN an already-initialised facet WHEN initializeBalanceTrackerAtSnapshotByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-      const base = await deployEquityTokenFixture();
-      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await freshAsset.connect(base.deployer).initializeBalanceTrackerAtSnapshotByPartition();
-      await expect(
-        freshAsset.connect(base.deployer).initializeBalanceTrackerAtSnapshotByPartition(),
-      ).to.be.revertedWithCustomError(freshAsset, "FacetAlreadyRegistered");
+  describe("initializeBalanceTrackerAtSnapshotByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeBalanceTrackerAtSnapshotByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeBalanceTrackerAtSnapshotByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeBalanceTrackerAtSnapshotByPartition is called THEN it reverts with AccountHasNoRole", async () => {
-      const base = await deployEquityTokenFixture();
-      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await expect(
-        freshAsset.connect(base.user3).initializeBalanceTrackerAtSnapshotByPartition(),
-      ).to.be.revertedWithCustomError(freshAsset, "AccountHasNoRole");
+    it("GIVEN already-initialised WHEN initializeBalanceTrackerAtSnapshotByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeBalanceTrackerAtSnapshotByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(BALANCE_TRACKER_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY, 1);
     });
+  });
 
-    it("GIVEN a fresh deployment WHEN initializeBalanceTrackerAtSnapshotByPartition is called THEN it emits BalanceTrackerAtSnapshotByPartitionInitialized", async () => {
-      const base = await deployEquityTokenFixture();
-      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await expect(freshAsset.connect(base.deployer).initializeBalanceTrackerAtSnapshotByPartition()).to.emit(
-        freshAsset,
+  describe("initializeBalanceTrackerAtSnapshotByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeBalanceTrackerAtSnapshotByPartition is called THEN emits BalanceTrackerAtSnapshotByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(BALANCE_TRACKER_AT_SNAPSHOT_BY_PARTITION_RESOLVER_KEY);
+      await expect(asset.initializeBalanceTrackerAtSnapshotByPartition()).to.emit(
+        asset,
         "BalanceTrackerAtSnapshotByPartitionInitialized",
       );
     });

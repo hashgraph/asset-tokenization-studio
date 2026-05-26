@@ -13,6 +13,14 @@ import { TokenCoreOps } from "../../../domain/orchestrator/TokenCoreOps.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
 
+/**
+ * @title TransferAndLock
+ * @notice Provides default-partition transfer and lock operations for security tokens.
+ * @dev Implements `ITransferAndLock` for tokens without multi-partition support. Transfers
+ *      tokens through `TokenCoreOps` before creating a lock in `LockStorageWrapper`, so the
+ *      transfer must succeed before any lock state is written. Intended for diamond facet use.
+ * @author Asset Tokenization Studio Team
+ */
 abstract contract TransferAndLock is ITransferAndLock, Modifiers {
     /// @inheritdoc ITransferAndLock
     function initializeTransferAndLock()
@@ -25,6 +33,7 @@ abstract contract TransferAndLock is ITransferAndLock, Modifiers {
         emit TransferAndLockInitialized();
     }
 
+    /// @inheritdoc ITransferAndLock
     function transferAndLock(
         address _to,
         uint256 _amount,
@@ -33,6 +42,7 @@ abstract contract TransferAndLock is ITransferAndLock, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(LOCKER_ROLE)
@@ -67,5 +77,11 @@ abstract contract TransferAndLock is ITransferAndLock, Modifiers {
         );
     }
 
+    /**
+     * @notice Returns the unique initialisation key for this transfer-and-lock facet.
+     * @dev Implementations must return a stable key used to prevent repeated facet
+     *      initialisation.
+     * @return The resolver key used by `InitializerStorageWrapper` for this facet.
+     */
     function _transferAndLockInitializerKey() internal view virtual returns (bytes32);
 }

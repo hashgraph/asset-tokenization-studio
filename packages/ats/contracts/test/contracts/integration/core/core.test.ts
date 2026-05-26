@@ -5,10 +5,10 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { isinGenerator } from "@thomaschaplin/isin-generator";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ATS_ROLES, EQUITY_CONFIG_ID } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { ATS_ROLES, CORE_RESOLVER_KEY } from "@scripts";
 import { SecurityType } from "@scripts/domain";
-import { assertObject, deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac } from "@test";
+import { assertObject, deployEquityTokenFixture, executeRbac } from "@test";
 
 const name = "TEST_Core";
 const symbol = "TCR";
@@ -25,6 +25,7 @@ describe("Core Facet Tests", () => {
   let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deployFixture() {
     const base = await deployEquityTokenFixture({
@@ -41,6 +42,7 @@ describe("Core Facet Tests", () => {
     signer_D = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       { role: ATS_ROLES.PAUSER_ROLE, members: [signer_B.address] },
@@ -53,16 +55,7 @@ describe("Core Facet Tests", () => {
   });
 
   describe("initializeCore", () => {
-    it("GIVEN an initialized token WHEN initializeCore is called again THEN reverts with FacetAlreadyRegistered", async () => {
-      await expect(
-        asset.initializeCore({
-          info: { name: "X", symbol: "Y", isin: "ES1234567890", decimals: 6 },
-          securityType: SecurityType.BOND_VARIABLE_RATE,
-        }),
-      ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
-    });
-
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeCore is called THEN it reverts with AccountHasNoRole", async () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeCore is called THEN AccountHasNoRole", async () => {
       await expect(
         asset.connect(signer_D).initializeCore({
           info: { name: "X", symbol: "Y", isin: "ES1234567890", decimals: 6 },
@@ -71,22 +64,25 @@ describe("Core Facet Tests", () => {
       ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
-    it("GIVEN a new deployment WHEN initializeCore is called THEN it emits CoreInitialized", async () => {
-      const { decodeEvent } = await import("@scripts/infrastructure");
-      const infra = await loadFixture(deployAtsInfrastructureFixture);
-      const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
-        { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
-      ]);
-      const proxyReceipt = await proxyTx.wait();
-      const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", proxyReceipt!);
-      const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
-      const deployReceipt = await (
-        await freshAsset.connect(infra.deployer).initializeCore({
+    it("GIVEN already-initialised WHEN initializeCore is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(
+        asset.initializeCore({
+          info: { name: "X", symbol: "Y", isin: "ES1234567890", decimals: 6 },
+          securityType: SecurityType.BOND_VARIABLE_RATE,
+        }),
+      ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    });
+  });
+
+  describe("initializeCore event", () => {
+    it("GIVEN a fresh deployment WHEN initializeCore is called THEN emits CoreInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(CORE_RESOLVER_KEY);
+      await expect(
+        asset.initializeCore({
           info: { name, symbol, decimals, isin },
           securityType: SecurityType.EQUITY,
-        })
-      ).wait();
-      await expect(deployReceipt).to.emit(freshAsset, "CoreInitialized");
+        }),
+      ).to.emit(asset, "CoreInitialized");
     });
   });
 

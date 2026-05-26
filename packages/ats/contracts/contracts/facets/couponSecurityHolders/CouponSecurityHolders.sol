@@ -38,6 +38,7 @@ abstract contract CouponSecurityHolders is ICouponSecurityHolders, Modifiers {
         external
         view
         override
+        onlyOperational
         onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
         returns (address[] memory holders_)
     {
@@ -53,6 +54,7 @@ abstract contract CouponSecurityHolders is ICouponSecurityHolders, Modifiers {
         external
         view
         override
+        onlyOperational
         onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
         returns (ICouponTypes.CouponFor[] memory couponFor_, address[] memory holders_)
     {

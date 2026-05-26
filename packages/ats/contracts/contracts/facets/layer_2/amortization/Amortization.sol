@@ -10,8 +10,16 @@ import { DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
 import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
 import { _AMORTIZATION_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
+/**
+ * @title Amortization Facet
+ * @notice Manages amortization corporate actions and related token holder holds.
+ * @dev Implements amortization lifecycle operations through shared storage wrappers and
+ *      enforces operational, activation, pause, role, date, and partition constraints.
+ * @author Hashgraph
+ */
 abstract contract Amortization is IAmortization, Modifiers {
     /// @inheritdoc IAmortization
+    /// @dev Registers the amortization facet as ready and can only be executed once by an admin.
     function initializeAmortization()
         external
         override
@@ -22,11 +30,14 @@ abstract contract Amortization is IAmortization, Modifiers {
         emit AmortizationInitialized();
     }
 
+    /// @inheritdoc IAmortization
+    /// @dev Requires an operational, activated, unpaused, single-partition token and valid dates.
     function setAmortization(
         IAmortization.Amortization calldata _amortization
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
@@ -40,11 +51,14 @@ abstract contract Amortization is IAmortization, Modifiers {
         success_ = true;
     }
 
+    /// @inheritdoc IAmortization
+    /// @dev Requires no active amortization holds for the specified corporate action.
     function cancelAmortization(
         uint256 _amortizationID
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
@@ -55,12 +69,15 @@ abstract contract Amortization is IAmortization, Modifiers {
         AmortizationStorageWrapper.cancelAmortization(_amortizationID);
     }
 
+    /// @inheritdoc IAmortization
+    /// @dev Releases a holder-specific amortization hold for a valid amortization action.
     function releaseAmortizationHold(
         uint256 _amortizationID,
         address _tokenHolder
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
@@ -70,6 +87,8 @@ abstract contract Amortization is IAmortization, Modifiers {
         AmortizationStorageWrapper.releaseAmortizationHold(_amortizationID, _tokenHolder);
     }
 
+    /// @inheritdoc IAmortization
+    /// @dev Creates or updates a positive holder-specific hold for a valid amortization action.
     function setAmortizationHold(
         uint256 _amortizationID,
         address _tokenHolder,
@@ -77,6 +96,7 @@ abstract contract Amortization is IAmortization, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
@@ -88,6 +108,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         return AmortizationStorageWrapper.setAmortizationHold(_amortizationID, _tokenHolder, _tokenAmount);
     }
 
+    /// @inheritdoc IAmortization
     function getAmortization(
         uint256 _amortizationID
     )
@@ -101,6 +122,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         (registeredAmortization_, , isDisabled_) = AmortizationStorageWrapper.getAmortization(_amortizationID);
     }
 
+    /// @inheritdoc IAmortization
     function getAmortizationFor(
         uint256 _amortizationID,
         address _account
@@ -115,6 +137,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         return AmortizationStorageWrapper.getAmortizationFor(_amortizationID, _account);
     }
 
+    /// @inheritdoc IAmortization
     function getAmortizationsFor(
         uint256 _amortizationID,
         uint256 _pageIndex,
@@ -130,6 +153,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         return AmortizationStorageWrapper.getAmortizationsFor(_amortizationID, _pageIndex, _pageLength);
     }
 
+    /// @inheritdoc IAmortization
     function getAmortizationsCount()
         external
         view
@@ -140,6 +164,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         return AmortizationStorageWrapper.getAmortizationsCount();
     }
 
+    /// @inheritdoc IAmortization
     function getAmortizationHolders(
         uint256 _amortizationID,
         uint256 _pageIndex,
@@ -155,6 +180,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         return AmortizationStorageWrapper.getAmortizationHolders(_amortizationID, _pageIndex, _pageLength);
     }
 
+    /// @inheritdoc IAmortization
     function getTotalAmortizationHolders(
         uint256 _amortizationID
     )
@@ -168,6 +194,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         return AmortizationStorageWrapper.getTotalAmortizationHolders(_amortizationID);
     }
 
+    /// @inheritdoc IAmortization
     function getAmortizationActiveHolders(
         uint256 _amortizationID,
         uint256 _pageIndex,
@@ -183,6 +210,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         return AmortizationStorageWrapper.getAmortizationActiveHolders(_amortizationID, _pageIndex, _pageLength);
     }
 
+    /// @inheritdoc IAmortization
     function getTotalAmortizationActiveHolders(
         uint256 _amortizationID
     )
@@ -196,6 +224,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         return AmortizationStorageWrapper.getTotalAmortizationActiveHolders(_amortizationID);
     }
 
+    /// @inheritdoc IAmortization
     function getTotalHoldByAmortizationId(
         uint256 _amortizationID
     )
@@ -209,6 +238,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         return AmortizationStorageWrapper.getTotalHoldByAmortizationId(_amortizationID);
     }
 
+    /// @inheritdoc IAmortization
     function getActiveAmortizationIds(
         uint256 _pageIndex,
         uint256 _pageLength
@@ -216,6 +246,7 @@ abstract contract Amortization is IAmortization, Modifiers {
         return AmortizationStorageWrapper.getActiveAmortizationIds(_pageIndex, _pageLength);
     }
 
+    /// @inheritdoc IAmortization
     function getTotalActiveAmortizationIds() external view override onlyWithoutMultiPartition returns (uint256) {
         return AmortizationStorageWrapper.getTotalActiveAmortizationIds();
     }

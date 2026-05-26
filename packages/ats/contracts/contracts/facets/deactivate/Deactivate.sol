@@ -33,15 +33,15 @@ abstract contract Deactivate is IDeactivate, Modifiers {
 
     /// @inheritdoc IDeactivate
     /// @dev Composed of three preconditions: `onlyUnpaused` rejects the call when the token is
-    ///      paused (own flag or any external pause source), `onlyRole(DEACTIVATE_ROLE)`
+    ///      paused (own flag or any external onlyOperational pause source), `onlyRole(DEACTIVATE_ROLE)`
     ///      enforces caller authorisation, and `onlyActivated` makes the transition idempotent
     ///      by reverting with `Deactivated` on a token that is already retired.
-    function deactivate() external onlyUnpaused onlyRole(DEACTIVATE_ROLE) onlyActivated {
+    function deactivate() external override onlyOperational onlyUnpaused onlyRole(DEACTIVATE_ROLE) onlyActivated {
         DeactivateStorageWrapper.deactivate();
     }
 
     /// @inheritdoc IDeactivate
-    function isDeactivated() external view returns (bool) {
+    function isDeactivated() external view override returns (bool) {
         return DeactivateStorageWrapper.isDeactivated();
     }
 }

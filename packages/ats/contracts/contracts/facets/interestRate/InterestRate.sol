@@ -37,7 +37,7 @@ abstract contract InterestRate is IInterestRate, Modifiers {
     /// @dev Protected by `onlyRole(INTEREST_RATE_MANAGER_ROLE)` and `onlyValidRateType`.
     function setCouponRateType(
         IInterestRate.RateType rateType
-    ) external onlyActivated onlyRole(INTEREST_RATE_MANAGER_ROLE) onlyValidRateType(rateType) {
+    ) external override onlyOperational onlyActivated onlyRole(INTEREST_RATE_MANAGER_ROLE) onlyValidRateType(rateType) {
         // TODO: check if changing the rate type is allowed after existing coupons have been issued
         InterestRateStorageWrapper.setCouponRateType(rateType);
         emit CouponRateTypeSet(msg.sender, rateType);

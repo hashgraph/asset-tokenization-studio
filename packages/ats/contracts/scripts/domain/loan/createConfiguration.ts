@@ -73,6 +73,7 @@ const LOAN_FACETS = [
   // ERC Standards
   "TransferFacet",
   "CoreAdjustedFacet",
+  "InitializerFacet", // Core initializer facet
   "MetadataFacet",
   "ERC20PermitFacet",
   "EIP712Facet",

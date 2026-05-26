@@ -3,8 +3,15 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { DEFAULT_PARTITION, ATS_ROLES, ZERO, dateToUnixTimestamp } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import {
+  DEFAULT_PARTITION,
+  ATS_ROLES,
+  ZERO,
+  dateToUnixTimestamp,
+  EQUITY_CONFIG_ID,
+  BALANCE_ADJUSTMENTS_RESOLVER_KEY,
+} from "@scripts";
 import { deployEquityTokenFixture, executeRbac, grantRoleAndPauseToken, MAX_UINT256, MAX_UINT8 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
@@ -27,6 +34,7 @@ describe("AdjustBalancesFacet Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixtureSinglePartition() {
     const base = await deployEquityTokenFixture();
@@ -36,6 +44,7 @@ describe("AdjustBalancesFacet Tests", () => {
     signer_C = base.user2;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       {
         role: ATS_ROLES.PAUSER_ROLE,
@@ -644,33 +653,42 @@ describe("AdjustBalancesFacet Tests", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
-  describe.skip("initializeBalanceAdjustments", () => {
-    it("GIVEN an already-initialised facet WHEN initializeBalanceAdjustments is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-      const base = await deployEquityTokenFixture();
-      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await freshAsset.connect(base.deployer).initializeBalanceAdjustments();
-      await expect(freshAsset.connect(base.deployer).initializeBalanceAdjustments()).to.be.revertedWithCustomError(
-        freshAsset,
-        "FacetAlreadyRegistered",
-      );
+  describe("initializeBalanceAdjustments", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeBalanceAdjustments is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeBalanceAdjustments())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeBalanceAdjustments is called THEN it reverts with AccountHasNoRole", async () => {
-      const base = await deployEquityTokenFixture();
-      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await expect(freshAsset.connect(base.user3).initializeBalanceAdjustments()).to.be.revertedWithCustomError(
-        freshAsset,
-        "AccountHasNoRole",
-      );
+    it("GIVEN already-initialised WHEN initializeBalanceAdjustments is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeBalanceAdjustments())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(BALANCE_ADJUSTMENTS_RESOLVER_KEY, 1);
+    });
+  });
+
+  describe("initializeBalanceAdjustments event", () => {
+    it("GIVEN a fresh deployment WHEN initializeBalanceAdjustments is called THEN emits BalanceAdjustmentsInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(BALANCE_ADJUSTMENTS_RESOLVER_KEY);
+      await expect(asset.initializeBalanceAdjustments()).to.emit(asset, "BalanceAdjustmentsInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
     });
 
-    it("GIVEN a fresh deployment WHEN initializeBalanceAdjustments is called THEN it emits BalanceAdjustmentsInitialized", async () => {
-      const base = await deployEquityTokenFixture();
-      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await expect(freshAsset.connect(base.deployer).initializeBalanceAdjustments()).to.emit(
-        freshAsset,
-        "BalanceAdjustmentsInitialized",
-      );
+    it("GIVEN non-operational WHEN adjustBalances is called THEN AssetNotOperational", async () => {
+      await expect(asset.adjustBalances(0, 0))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN triggerAndSyncAll is called THEN AssetNotOperational", async () => {
+      await expect(asset.triggerAndSyncAll(ethers.ZeroHash, ethers.ZeroAddress, ethers.ZeroAddress))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

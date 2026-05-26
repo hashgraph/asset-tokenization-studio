@@ -15,6 +15,19 @@ import { IIdentityRegistry } from "../layer_1/ERC3643/IIdentityRegistry.sol";
  */
 interface IIdentity {
     /**
+     * @notice Emitted once when the identity capability is initialised on a token.
+     * @dev Fires exclusively from `initializeIdentity`.
+     */
+    event IdentityInitialized();
+
+    /**
+     * @notice Initialises the identity capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeIdentity() external;
+
+    /**
      * @notice Sets the onchainID of the token to `_onchainID`.
      * @dev Restricted to `TREX_OWNER_ROLE` and only callable when the token is not paused.
      *      Emits an `UpdatedTokenInformation` event from the underlying storage wrapper.

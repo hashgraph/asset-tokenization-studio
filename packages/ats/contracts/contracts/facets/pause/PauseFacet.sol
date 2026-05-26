@@ -2,10 +2,10 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IPause } from "./IPause.sol";
-import { Pause } from "./Pause.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 import { _PAUSE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
+import { PauseOperational } from "./PauseOperational.sol";
 
 /**
  * @title PauseFacet
@@ -16,7 +16,7 @@ import { _PAUSE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
  *      the Diamond resolver pattern. The resolver key `_PAUSE_RESOLVER_KEY` identifies this
  *      facet within the diamond proxy.
  */
-contract PauseFacet is Pause, IStaticFunctionSelectors {
+contract PauseFacet is PauseOperational, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _PAUSE_RESOLVER_KEY;

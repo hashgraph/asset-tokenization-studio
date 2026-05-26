@@ -3,10 +3,10 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { ComplianceMock, IdentityRegistryMock, IAsset, type ResolverProxy } from "@contract-types";
+import { ComplianceMock, IdentityRegistryMock, IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
-import { ATS_ROLES, EMPTY_STRING, ZERO, ADDRESS_ZERO } from "@scripts";
+import { ATS_ROLES, EMPTY_STRING, ZERO, ADDRESS_ZERO, BATCH_FREEZE_RESOLVER_KEY } from "@scripts";
 
 const AMOUNT = 1000;
 const MAX_SUPPLY = 10000000;
@@ -20,6 +20,7 @@ describe("BatchFreeze Tests", () => {
   let signer_F: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   let identityRegistryMock: IdentityRegistryMock;
   let complianceMock: ComplianceMock;
@@ -54,7 +55,7 @@ describe("BatchFreeze Tests", () => {
     signer_F = base.user5;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
-
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       {
         role: ATS_ROLES.PAUSER_ROLE,
@@ -401,33 +402,24 @@ describe("BatchFreeze Tests", () => {
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
   });
-  describe.skip("initializeBatchFreeze", () => {
-    it("GIVEN an already-initialised facet WHEN initializeBatchFreeze is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-      const base = await deployEquityTokenFixture();
-      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await freshAsset.connect(base.deployer).initializeBatchFreeze();
-      await expect(freshAsset.connect(base.deployer).initializeBatchFreeze()).to.be.revertedWithCustomError(
-        freshAsset,
-        "FacetAlreadyRegistered",
-      );
+  describe("initializeBatchFreeze", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeBatchFreeze is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeBatchFreeze())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeBatchFreeze is called THEN it reverts with AccountHasNoRole", async () => {
-      const base = await deployEquityTokenFixture();
-      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await expect(freshAsset.connect(base.user3).initializeBatchFreeze()).to.be.revertedWithCustomError(
-        freshAsset,
-        "AccountHasNoRole",
-      );
+    it("GIVEN already-initialised WHEN initializeBatchFreeze is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeBatchFreeze())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(BATCH_FREEZE_RESOLVER_KEY, 1);
     });
+  });
 
-    it("GIVEN a fresh deployment WHEN initializeBatchFreeze is called THEN it emits BatchFreezeInitialized", async () => {
-      const base = await deployEquityTokenFixture();
-      const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-      await expect(freshAsset.connect(base.deployer).initializeBatchFreeze()).to.emit(
-        freshAsset,
-        "BatchFreezeInitialized",
-      );
+  describe("initializeBatchFreeze event", () => {
+    it("GIVEN a fresh deployment WHEN initializeBatchFreeze is called THEN emits BatchFreezeInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(BATCH_FREEZE_RESOLVER_KEY);
+      await expect(asset.initializeBatchFreeze()).to.emit(asset, "BatchFreezeInitialized");
     });
   });
 });

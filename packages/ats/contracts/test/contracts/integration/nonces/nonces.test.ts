@@ -3,8 +3,9 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import { deployEquityTokenFixture } from "@test";
+import { ATS_ROLES, NONCES_RESOLVER_KEY } from "@scripts";
 
 describe("Nonces Tests", () => {
   let diamond: ResolverProxy;
@@ -12,6 +13,7 @@ describe("Nonces Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   beforeEach(async () => {
     const base = await deployEquityTokenFixture();
@@ -20,6 +22,7 @@ describe("Nonces Tests", () => {
     signer_C = base.user2;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
   });
 
   describe("Nonces", () => {
@@ -29,26 +32,24 @@ describe("Nonces Tests", () => {
     });
   });
 
-  describe.skip("initializeNonces", () => {
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeNonces is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeNonces()).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+  describe("initializeNonces", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeNonces is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeNonces())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeNonces();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeNonces is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeNonces()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
+    it("GIVEN already-initialised WHEN initializeNonces is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeNonces())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(NONCES_RESOLVER_KEY, 1);
     });
+  });
 
-    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeNonces is called THEN it emits NoncesInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeNonces()).to.emit(asset, "NoncesInitialized");
+  describe("initializeNonces event", () => {
+    it("GIVEN a fresh deployment WHEN initializeNonces is called THEN emits NoncesInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(NONCES_RESOLVER_KEY);
+      await expect(asset.initializeNonces()).to.emit(asset, "NoncesInitialized");
     });
   });
 });

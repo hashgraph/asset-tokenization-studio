@@ -4,8 +4,8 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ATS_ROLES } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { ATS_ROLES, CORE_ADJUSTED_RESOLVER_KEY } from "@scripts";
 import { deployEquityTokenFixture, executeRbac } from "@test";
 
 const decimals = 6;
@@ -18,6 +18,7 @@ describe("CoreAdjusted Facet Tests", () => {
   let signer_B: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deployFixture() {
     const base = await deployEquityTokenFixture({
@@ -32,7 +33,7 @@ describe("CoreAdjusted Facet Tests", () => {
     signer_B = base.user1;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
-
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       { role: ATS_ROLES.CORPORATE_ACTION_ROLE, members: [signer_A.address] },
       { role: ATS_ROLES.ADJUSTMENT_BALANCE_ROLE, members: [signer_A.address] },
@@ -70,29 +71,24 @@ describe("CoreAdjusted Facet Tests", () => {
       expect(await asset.decimalsAt(adjustmentTimestamp - 1)).to.equal(decimals);
     });
   });
-  describe.skip("initializeCoreAdjusted", () => {
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeCoreAdjusted is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_B).initializeCoreAdjusted()).to.be.revertedWithCustomError(
-        asset,
-        "AccountHasNoRole",
-      );
+  describe("initializeCoreAdjusted", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeCoreAdjusted is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_B).initializeCoreAdjusted())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_B.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeCoreAdjusted();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeCoreAdjusted is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeCoreAdjusted()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
+    it("GIVEN already-initialised WHEN initializeCoreAdjusted is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeCoreAdjusted())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(CORE_ADJUSTED_RESOLVER_KEY, 1);
     });
+  });
 
-    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeCoreAdjusted is called THEN it emits CoreAdjustedInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeCoreAdjusted()).to.emit(asset, "CoreAdjustedInitialized");
+  describe("initializeCoreAdjusted event", () => {
+    it("GIVEN a fresh deployment WHEN initializeCoreAdjusted is called THEN emits CoreAdjustedInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(CORE_ADJUSTED_RESOLVER_KEY);
+      await expect(asset.initializeCoreAdjusted()).to.emit(asset, "CoreAdjustedInitialized");
     });
   });
 });

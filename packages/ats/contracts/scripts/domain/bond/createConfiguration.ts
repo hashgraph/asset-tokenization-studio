@@ -73,6 +73,7 @@ const BOND_FACETS = [
 
   // CoreAdjusted
   "CoreAdjustedFacet",
+  "InitializerFacet", // Core initializer facet
 
   //Metadata
   "MetadataFacet",

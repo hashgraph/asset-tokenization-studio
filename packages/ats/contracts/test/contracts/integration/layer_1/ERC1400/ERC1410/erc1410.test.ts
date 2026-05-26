@@ -5,17 +5,17 @@ import { ethers, network } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
-import { IAsset, type ResolverProxy } from "@contract-types";
+import { IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
 import {
   ADDRESS_ZERO,
   ATS_ROLES,
   dateToUnixTimestamp,
   EMPTY_HEX_BYTES,
   EMPTY_STRING,
-  EQUITY_CONFIG_ID,
+  ERC1410_MANAGEMENT_RESOLVER_KEY,
   ZERO,
 } from "@scripts";
-import { deployAtsInfrastructureFixture, deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
+import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const _WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
@@ -91,6 +91,7 @@ describe("Clearing Tests", () => {
   let signer_C: HardhatEthersSigner;
   let signer_D: HardhatEthersSigner;
   let signer_E: HardhatEthersSigner;
+  let mockDiamondCut: MockDiamondCut;
 
   function set_initRbacs() {
     return [
@@ -181,7 +182,7 @@ describe("Clearing Tests", () => {
     signer_E = base.user4;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
-
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       {
         role: ATS_ROLES.ISSUER_ROLE,
@@ -5138,34 +5139,23 @@ describe("Clearing Tests", () => {
       });
     });
   });
-});
 
-describe("initializeERC1410", () => {
-  let signer_D: HardhatEthersSigner;
-  before(async () => {
-    const s = await ethers.getSigners();
-    signer_D = s[3];
-  });
+  describe("initializeERC1410", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeERC1410 is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeERC1410(true))
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
 
-  it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeERC1410 is called THEN it reverts with AccountHasNoRole", async () => {
-    const base = await loadFixture(deployEquityTokenFixture);
-    const freshAsset = await ethers.getContractAt("IAsset", base.diamond.target);
-    await expect(freshAsset.connect(signer_D).initializeERC1410(true)).to.be.revertedWithCustomError(
-      freshAsset,
-      "AccountHasNoRole",
-    );
-  });
+    it("GIVEN already-initialised WHEN initializeERC1410 is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeERC1410(true)).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    });
 
-  it("GIVEN a new deployment WHEN initializeERC1410 is called THEN it emits ERC1410Initialized", async () => {
-    const { decodeEvent } = await import("@scripts/infrastructure");
-    const infra = await loadFixture(deployAtsInfrastructureFixture);
-    const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, EQUITY_CONFIG_ID, 1, [
-      { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
-    ]);
-    const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
-    const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
-    await expect(freshAsset.connect(infra.deployer).initializeERC1410(true))
-      .to.emit(freshAsset, "ERC1410Initialized")
-      .withArgs(true);
+    describe("initializeERC1410 event", () => {
+      it("GIVEN a fresh deployment WHEN initializeERC1410 is called THEN emits ERC1410Initialized", async () => {
+        await mockDiamondCut.forceFacetNotRegistered(ERC1410_MANAGEMENT_RESOLVER_KEY);
+        await expect(asset.initializeERC1410(true)).to.emit(asset, "ERC1410Initialized");
+      });
+    });
   });
 });

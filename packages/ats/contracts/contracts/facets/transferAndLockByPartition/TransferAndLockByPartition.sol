@@ -47,6 +47,7 @@ abstract contract TransferAndLockByPartition is ITransferAndLockByPartition, Mod
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(LOCKER_ROLE)

@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
-
 import { TREX_OWNER_ROLE, DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { IComplianceFacet } from "./IComplianceFacet.sol";
@@ -17,14 +16,16 @@ import { _COMPLIANCE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title Compliance
- * @notice Abstract implementation of transfer-eligibility checks and compliance contract management.
- * @dev Consolidates `canTransfer`, `canTransferFrom`, `setCompliance`, and `compliance` in a single
- *      abstract contract. Both transfer-check functions are restricted to single-partition mode and
- *      delegate the actual validation to `ERC1594StorageWrapper.isAbleToTransferFromByPartition`.
- *      When the token is paused they short-circuit with the EIP-1066 PAUSED status code.
+ * @notice Manages ERC-3643 compliance configuration and single-partition transfer checks.
+ * @dev Provides the compliance facet initialisation hook, compliance contract storage access,
+ *      and ERC-1594 transfer validation helpers for default-partition assets. Transfer checks
+ *      short-circuit with the EIP-1066 paused status when the token is paused and otherwise
+ *      delegate eligibility validation to the ERC-1594 storage wrapper.
+ * @author Asset Tokenization Studio Team
  */
 abstract contract Compliance is IComplianceFacet, Modifiers {
     /// @inheritdoc IComplianceFacet
+    /// @dev Marks the compliance facet as ready and emits `ComplianceInitialized`.
     function initializeCompliance()
         external
         override
@@ -35,23 +36,16 @@ abstract contract Compliance is IComplianceFacet, Modifiers {
         emit ComplianceInitialized();
     }
 
-    /**
-     * @notice Sets the compliance contract address
-     * @param _compliance The address of the new compliance contract
-     */
-    function setCompliance(address _compliance) external override onlyActivated onlyUnpaused onlyRole(TREX_OWNER_ROLE) {
+    /// @inheritdoc IComplianceFacet
+    /// @dev Requires an operational, activated, unpaused token and `TREX_OWNER_ROLE`.
+    function setCompliance(
+        address _compliance
+    ) external override onlyOperational onlyActivated onlyUnpaused onlyRole(TREX_OWNER_ROLE) {
         ERC3643StorageWrapper.setCompliance(_compliance);
     }
 
-    /**
-     * @notice Checks if a transfer can be executed
-     * @param _to The recipient address
-     * @param _value The amount of tokens to transfer
-     * @param _data Additional data for the transfer check
-     * @return status True if the transfer can be executed
-     * @return code EIP1066 status code indicating the result
-     * @return reason Additional reason data for the result
-     */
+    /// @inheritdoc IComplianceFacet
+    /// @dev Only available when multi-partition mode is disabled. Uses `msg.sender` as sender.
     function canTransfer(
         address _to,
         uint256 _value,
@@ -71,16 +65,8 @@ abstract contract Compliance is IComplianceFacet, Modifiers {
         return (status, statusCode, reason);
     }
 
-    /**
-     * @notice Checks if a transferFrom can be executed
-     * @param _from The sender address
-     * @param _to The recipient address
-     * @param _value The amount of tokens to transfer
-     * @param _data Additional data for the transfer check
-     * @return status True if the transfer can be executed
-     * @return code EIP1066 status code indicating the result
-     * @return reason Additional reason data for the result
-     */
+    /// @inheritdoc IComplianceFacet
+    /// @dev Only available when multi-partition mode is disabled.
     function canTransferFrom(
         address _from,
         address _to,
@@ -101,10 +87,7 @@ abstract contract Compliance is IComplianceFacet, Modifiers {
         return (status, statusCode, reason);
     }
 
-    /**
-     * @notice Returns the address of the compliance contract
-     * @return ICompliance The compliance contract
-     */
+    /// @inheritdoc IComplianceFacet
     function compliance() external view override returns (ICompliance) {
         return ERC3643StorageWrapper.getCompliance();
     }

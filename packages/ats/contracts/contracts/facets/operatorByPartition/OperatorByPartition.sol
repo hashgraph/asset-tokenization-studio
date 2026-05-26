@@ -38,6 +38,7 @@ abstract contract OperatorByPartition is IOperatorByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
@@ -55,6 +56,7 @@ abstract contract OperatorByPartition is IOperatorByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
@@ -71,6 +73,7 @@ abstract contract OperatorByPartition is IOperatorByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         notZeroAddress(_operatorTransferData.to)
         onlyDefaultPartitionWithSinglePartition(_operatorTransferData.partition)
@@ -98,6 +101,7 @@ abstract contract OperatorByPartition is IOperatorByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnProtectedPartitionsOrWildCardRole

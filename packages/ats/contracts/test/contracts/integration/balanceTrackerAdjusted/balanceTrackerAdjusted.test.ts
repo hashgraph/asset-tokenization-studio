@@ -3,9 +3,9 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, dateToUnixTimestamp, EMPTY_STRING, ZERO } from "@scripts";
+import { ATS_ROLES, dateToUnixTimestamp, EMPTY_STRING, ZERO, BALANCE_TRACKER_ADJUSTED_RESOLVER_KEY } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -18,6 +18,7 @@ describe("BalanceTrackerAdjusted Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deployEquity() {
     const base = await deployEquityTokenFixture();
@@ -27,6 +28,7 @@ describe("BalanceTrackerAdjusted Tests", () => {
     signer_C = base.user2;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       {
@@ -163,36 +165,24 @@ describe("BalanceTrackerAdjusted Tests", () => {
       expect(await asset.balanceOfAt(signer_A.address, secondAdjustmentDate + 1)).to.equal(mintAmount * 2 * 3);
     });
   });
-  describe.skip("initializeBalanceTrackerAdjusted", () => {
-    beforeEach(async () => {
-      const base = await deployEquityTokenFixture();
-      diamond = base.diamond;
-      signer_A = base.deployer;
-      signer_B = base.user1;
-      signer_C = base.user2;
-      asset = await ethers.getContractAt("IAsset", diamond.target);
+  describe("initializeBalanceTrackerAdjusted", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeBalanceTrackerAdjusted is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeBalanceTrackerAdjusted())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    it("GIVEN an already-initialised facet WHEN initializeBalanceTrackerAdjusted is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-      await asset.connect(signer_A).initializeBalanceTrackerAdjusted();
-      await expect(asset.connect(signer_A).initializeBalanceTrackerAdjusted()).to.be.revertedWithCustomError(
-        asset,
-        "FacetAlreadyRegistered",
-      );
+    it("GIVEN already-initialised WHEN initializeBalanceTrackerAdjusted is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeBalanceTrackerAdjusted())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(BALANCE_TRACKER_ADJUSTED_RESOLVER_KEY, 1);
     });
+  });
 
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeBalanceTrackerAdjusted is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeBalanceTrackerAdjusted()).to.be.revertedWithCustomError(
-        asset,
-        "AccountHasNoRole",
-      );
-    });
-
-    it("GIVEN a fresh deployment WHEN initializeBalanceTrackerAdjusted is called THEN it emits BalanceTrackerAdjustedInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeBalanceTrackerAdjusted()).to.emit(
-        asset,
-        "BalanceTrackerAdjustedInitialized",
-      );
+  describe("initializeBalanceTrackerAdjusted event", () => {
+    it("GIVEN a fresh deployment WHEN initializeBalanceTrackerAdjusted is called THEN emits BalanceTrackerAdjustedInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(BALANCE_TRACKER_ADJUSTED_RESOLVER_KEY);
+      await expect(asset.initializeBalanceTrackerAdjusted()).to.emit(asset, "BalanceTrackerAdjustedInitialized");
     });
   });
 });

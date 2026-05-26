@@ -12,7 +12,8 @@
  * @see https://hardhat.org/hardhat-network-helpers/docs/reference#loadfixture
  */
 
-import { ZeroAddress } from "ethers";
+import { ZeroAddress, ethers as ethersTypes } from "ethers";
+import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture } from "../infrastructure.fixture";
 import {
@@ -41,12 +42,13 @@ import {
   ExternalKycListManagementFacet__factory,
   ExternalControlListManagementFacet__factory,
   ExternalPauseManagementFacet__factory,
-  TimeTravelFacet__factory,
   ILoansPortfolio__factory,
   ILoansPortfolio,
   ISecurity__factory,
+  InitializerFacet__factory,
+  IDiamondFacet__factory,
+  IAsset,
 } from "@contract-types";
-
 import { decodeEvent } from "@scripts/infrastructure";
 import { DeepPartial } from "@scripts";
 import { getRegulationData, getSecurityData, TEST_NOMINAL_VALUES } from "@test";
@@ -121,7 +123,17 @@ export async function deployLoansPortfolioTokenFixture({
 
   await createLoansPortfolioConfiguration(blr, facetAddresses, true);
 
-  const rbacs = [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [deployer.address] }];
+  const rbacs = [
+    { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [deployer.address] },
+    { role: ATS_ROLES.PAUSER_ROLE, members: [infrastructure.user2.address] },
+    { role: ATS_ROLES.KYC_ROLE, members: [deployer.address, infrastructure.user2.address] },
+    { role: ATS_ROLES.SSI_MANAGER_ROLE, members: [deployer.address] },
+    { role: ATS_ROLES.LOAN_MANAGER_ROLE, members: [deployer.address] },
+    { role: ATS_ROLES.LOANS_PORTFOLIO_MANAGER_ROLE, members: [deployer.address] },
+    { role: ATS_ROLES.ISSUER_ROLE, members: [deployer.address] },
+    { role: ATS_ROLES.MINTER_ROLE, members: [deployer.address] },
+    { role: ATS_ROLES.DEACTIVATE_ROLE, members: [deployer.address] },
+  ];
 
   const blrProxyAddress = infrastructure.deployment.infrastructure.blr.proxy;
 
@@ -129,13 +141,12 @@ export async function deployLoansPortfolioTokenFixture({
   const receipt = await tx.wait();
   const proxyAddress = (await decodeEvent(factory, "ProxyDeployed", receipt)).proxyAddress;
 
-  // Connect commonly used facets to the proxy
+  // Common facets connects (pointing to proxy)
   const accessControlFacet = AccessControlFacet__factory.connect(proxyAddress, deployer);
   const pauseFacet = PauseFacet__factory.connect(proxyAddress, deployer);
   const kycFacet = KycFacet__factory.connect(proxyAddress, deployer);
   const controlListFacet = ControlListFacet__factory.connect(proxyAddress, deployer);
   const coreFacet = CoreFacet__factory.connect(proxyAddress, deployer);
-  const freezeFacet = FreezeFacet__factory.connect(proxyAddress, deployer);
   const capFacet = CapFacet__factory.connect(proxyAddress, deployer);
   const controllerFacet = ControllerFacet__factory.connect(proxyAddress, deployer);
   const mintFacet = MintFacet__factory.connect(proxyAddress, deployer);
@@ -153,7 +164,9 @@ export async function deployLoansPortfolioTokenFixture({
   const externalPauseManagementFacet = ExternalPauseManagementFacet__factory.connect(proxyAddress, deployer);
   const loanPortfolioFacet = ILoansPortfolio__factory.connect(proxyAddress, deployer);
   const securityFacet = ISecurity__factory.connect(proxyAddress, deployer);
-  const timeTravelFacet = TimeTravelFacet__factory.connect(proxyAddress, deployer);
+  const initializerFacet = InitializerFacet__factory.connect(proxyAddress, deployer);
+  const diamondFacet = IDiamondFacet__factory.connect(proxyAddress, deployer);
+  const asset = await ethers.getContractAt("IAsset", proxyAddress, deployer);
 
   await controlListFacet.initializeControlList(securityData.isWhiteList);
   await erc1410ManagementFacet.initializeERC1410(securityData.isMultiPartition);
@@ -197,6 +210,84 @@ export async function deployLoansPortfolioTokenFixture({
     },
   );
 
+  await diamondFacet.initializeDiamondCut();
+  await accessControlFacet.initializeAccessControl();
+
+  // Initialize remaining registered facets so setOperationalStatus() passes.
+  await asset.initializeTransferAndLock();
+  await asset.initializeAllowance();
+  await asset.initializeBurn();
+  await asset.initializeSecurityHolders();
+  await asset.initializeHold();
+  await asset.initializeBatchMint();
+  await asset.initializeBatchTransfer();
+  await asset.initializeBatchBurn();
+  await asset.initializeFreeze();
+  await asset.initializeBalanceTrackerAdjusted();
+  await asset.initializeFreezeAtSnapshot();
+  await asset.initializeOperatorClearingByPartition();
+  await asset.initializeControllerHoldByPartition();
+  await asset.initializeProtectedHoldByPartition();
+  await asset.initializeRecovery();
+  await asset.initializeProtectedClearingByPartition();
+  await asset.initializeProtectedClearingHoldByPartition();
+  await asset.initializeBurnByPartition();
+  await asset.initializeNominalValueAtSnapshot();
+  await asset.initializeClearingAtSnapshot();
+  await asset.initializeControllerByPartition();
+  await asset.initializeBatchFreeze();
+  await asset.initializeClearingByPartition();
+  await asset.initializeSnapshotsByPartition();
+  await asset.initializeIdentity();
+  await asset.initializeSecurityHoldersAtSnapshot();
+  await asset.initializeFreezeAtSnapshotByPartition();
+  await asset.initializeProtectedByPartition();
+  await asset.initializeEIP712();
+  await asset.initializeDocumentation();
+  await asset.initializeTransferAndLockByPartition();
+  await asset.initializeHoldAtSnapshot();
+  await asset.initializeLock();
+  await asset.initializeOperatorClearingHoldByPartition();
+  await asset.initializeSnapshots();
+  await asset.initializeERC20Permit();
+  await asset.initializeLockAtSnapshotByPartition();
+  await asset.initializeOperator();
+  await asset.initializeTransfer();
+  await asset.initializeLockAtSnapshot();
+  await asset.initializeHoldAtSnapshotByPartition();
+  await asset.initializeBalanceTrackerAtSnapshotByPartition();
+  await asset.initializeTransferByPartition();
+  await asset.initializeBalanceTrackerAtSnapshot();
+  await asset.initializePartitions();
+  await asset.initializeBalanceTrackerByPartition();
+  await asset.initializeSsiManagement();
+  await asset.initializeOperatorByPartition();
+  await asset.initializeScheduledCrossOrderedTasks();
+  await asset.initializeCorporateActions();
+  await asset.initializeMintByPartition();
+  await asset.initializeClearingAtSnapshotByPartition();
+  await asset.initializeBatchController();
+  await asset.initializeCoreAtSnapshot();
+  await asset.initializeComplianceByPartition();
+  await asset.initializeCoupon();
+  await asset.initializeLockByPartition();
+  await asset.initializeHoldByPartition();
+  await asset.initializeDeactivate();
+  await asset.initializeOperatorHoldByPartition();
+  await asset.initializeCoreAdjusted();
+  await asset.initializeMetadata();
+  await asset.initializeCompliance();
+  await asset.initializeCouponListing();
+  await asset.initializeCapByPartition();
+  await asset.initializePause();
+  await asset.initializeBalanceTracker();
+  await asset.initializeBalanceAdjustments();
+  await asset.initializeScheduledBalanceAdjustment();
+  await asset.initializeNonces();
+
+  await initializerFacet.connect(deployer).initializeInitializer(150);
+  await initializerFacet.connect(deployer).setOperationalStatus();
+
   return {
     ...infrastructure,
 
@@ -206,10 +297,11 @@ export async function deployLoansPortfolioTokenFixture({
     // Token
     tokenAddress: proxyAddress,
 
-    // Connected facets (most commonly used)
-    accessControlFacet,
-    pauseFacet,
-    kycFacet,
-    controlListFacet,
+    // Connected facets
+    accessControlFacet: AccessControlFacet__factory.connect(proxyAddress, deployer),
+    pauseFacet: PauseFacet__factory.connect(proxyAddress, deployer),
+    kycFacet: KycFacet__factory.connect(proxyAddress, deployer),
+    controlListFacet: ControlListFacet__factory.connect(proxyAddress, deployer),
+    asset,
   };
 }

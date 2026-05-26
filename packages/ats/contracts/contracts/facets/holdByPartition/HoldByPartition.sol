@@ -44,6 +44,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyClearingDisabled
@@ -75,6 +76,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyClearingDisabled
@@ -110,6 +112,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
@@ -136,6 +139,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
@@ -157,6 +161,7 @@ abstract contract HoldByPartition is IHoldByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)

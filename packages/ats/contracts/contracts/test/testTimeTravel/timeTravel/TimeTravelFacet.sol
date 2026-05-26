@@ -8,8 +8,16 @@ import { ITimeTravel } from "../ITimeTravel.sol";
 import { TimeTravelProvider } from "./TimeTravelProvider.sol";
 import { TimeTravelStorageWrapper } from "./TimeTravelStorageWrapper.sol";
 import { _TIME_TRAVEL_RESOLVER_KEY } from "../constants/resolverKeys.sol";
+import { InitializerModifiers } from "../../../services/core/InitializerModifiers.sol";
+import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
+import { Bytes4Builder } from "../../../infrastructure/proxy/Bytes4Builder.sol";
+/// solhint-disable
 
-contract TimeTravelFacet is IStaticFunctionSelectors, ITimeTravel, TimeTravelProvider {
+contract TimeTravelFacet is IStaticFunctionSelectors, ITimeTravel, TimeTravelProvider, InitializerModifiers {
+    function initializeTimeTravel() external override onlyFacetNotRegistered(_TIME_TRAVEL_RESOLVER_KEY) {
+        InitializerStorageWrapper.setFacetToReady(_TIME_TRAVEL_RESOLVER_KEY);
+    }
+
     function changeSystemTimestamp(uint256 newTimestamp) external override {
         DatesValidation.checkTimestamp(newTimestamp);
 
@@ -63,14 +71,16 @@ contract TimeTravelFacet is IStaticFunctionSelectors, ITimeTravel, TimeTravelPro
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](6);
-        staticFunctionSelectors_[selectorIndex++] = this.changeSystemTimestamp.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.resetSystemTimestamp.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.blockTimestamp.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.checkBlockChainid.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.changeSystemBlocknumber.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.resetSystemBlocknumber.selector;
+        return
+            Bytes4Builder.build(
+                this.initializeTimeTravel.selector,
+                this.changeSystemTimestamp.selector,
+                this.resetSystemTimestamp.selector,
+                this.blockTimestamp.selector,
+                this.checkBlockChainid.selector,
+                this.changeSystemBlocknumber.selector,
+                this.resetSystemBlocknumber.selector
+            );
     }
 
     function getStaticInterfaceIds() external pure virtual override returns (bytes4[] memory staticInterfaceIds_) {
@@ -79,3 +89,4 @@ contract TimeTravelFacet is IStaticFunctionSelectors, ITimeTravel, TimeTravelPro
         staticInterfaceIds_[selectorsIndex++] = type(ITimeTravel).interfaceId;
     }
 }
+/// solhint-enable

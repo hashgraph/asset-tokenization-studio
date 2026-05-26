@@ -15,10 +15,10 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 /**
  * @title ExternalPauseManagement
  * @author Asset Tokenization Studio Team
- * @notice Abstract contract implementing external pause management logic for a security token.
+ * @notice Abstract contract implementing external onlyOperational pause management logic for a security token.
  *         Maintains a list of trusted third-party pause contracts whose combined pause state
  *         contributes to the token's global pause evaluation.
- * @dev Implements `IExternalPauseManagement`. The external pause list is stored in diamond storage
+ * @dev Implements `IExternalPauseManagement`. The external onlyOperational pause list is stored in diamond storage
  *      at `_PAUSE_MANAGEMENT_STORAGE_POSITION` via `ExternalListManagementStorageWrapper`.
  *      All mutating functions after initialisation are gated by `PAUSE_MANAGER_ROLE` and the
  *      `onlyUnpaused` modifier inherited from `Modifiers`. Intended to be inherited exclusively
@@ -38,7 +38,15 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers
     function updateExternalPauses(
         address[] calldata _pauses,
         bool[] calldata _actives
-    ) external override onlyActivated onlyUnpaused onlyRole(PAUSE_MANAGER_ROLE) returns (bool success_) {
+    )
+        external
+        override
+        onlyOperational
+        onlyActivated
+        onlyUnpaused
+        onlyRole(PAUSE_MANAGER_ROLE)
+        returns (bool success_)
+    {
         ArrayValidation.checkUniqueValues(_pauses, _actives);
         success_ = ExternalListManagementStorageWrapper.updateExternalLists(
             _PAUSE_MANAGEMENT_STORAGE_POSITION,
@@ -57,6 +65,7 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(PAUSE_MANAGER_ROLE)
@@ -73,7 +82,15 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers
     /// @inheritdoc IExternalPauseManagement
     function removeExternalPause(
         address _pause
-    ) external override onlyActivated onlyUnpaused onlyRole(PAUSE_MANAGER_ROLE) returns (bool success_) {
+    )
+        external
+        override
+        onlyOperational
+        onlyActivated
+        onlyUnpaused
+        onlyRole(PAUSE_MANAGER_ROLE)
+        returns (bool success_)
+    {
         success_ = ExternalListManagementStorageWrapper.removeExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
         if (!success_) {
             revert UnlistedPause(_pause);

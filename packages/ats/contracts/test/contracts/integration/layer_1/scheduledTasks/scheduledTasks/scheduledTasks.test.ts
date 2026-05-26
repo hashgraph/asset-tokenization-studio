@@ -3,8 +3,16 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ZERO, EMPTY_STRING, dateToUnixTimestamp, ATS_ROLES, ATS_TASK, TIME_PERIODS_S } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import {
+  ZERO,
+  EMPTY_STRING,
+  dateToUnixTimestamp,
+  ATS_ROLES,
+  ATS_TASK,
+  TIME_PERIODS_S,
+  SCHEDULED_TASKS_RESOLVER_KEY,
+} from "@scripts";
 import { getOrchestratorLibraryAddresses } from "@scripts/domain";
 import { loadFixture, takeSnapshot } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, deployBondKpiLinkedRateTokenFixture, getDltTimestamp, MAX_UINT256 } from "@test";
@@ -21,6 +29,7 @@ describe("Scheduled Tasks Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixtureSinglePartition() {
     const base = await deployEquityTokenFixture();
@@ -30,6 +39,7 @@ describe("Scheduled Tasks Tests", () => {
     signer_C = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       {
@@ -205,6 +215,30 @@ describe("Scheduled Tasks Tests", () => {
       await expect(
         deactivatedAsset.connect(base.deployer).triggerScheduledCrossOrderedTasks(0),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("initializeScheduledCrossOrderedTasks", () => {
+    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeScheduledCrossOrderedTasks is called THEN it reverts with AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_B).initializeScheduledCrossOrderedTasks()).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN an already-initialised facet WHEN initializeScheduledCrossOrderedTasks is called again THEN it reverts with FacetAlreadyRegistered", async () => {
+      await expect(asset.connect(signer_A).initializeScheduledCrossOrderedTasks()).to.be.revertedWithCustomError(
+        asset,
+        "FacetAlreadyRegistered",
+      );
+    });
+
+    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeScheduledCrossOrderedTasks is called THEN it emits ScheduledCrossOrderedTasksInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(SCHEDULED_TASKS_RESOLVER_KEY);
+      await expect(asset.connect(signer_A).initializeScheduledCrossOrderedTasks()).to.emit(
+        asset,
+        "ScheduledCrossOrderedTasksInitialized",
+      );
     });
   });
 });

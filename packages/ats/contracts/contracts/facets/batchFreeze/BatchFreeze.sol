@@ -38,6 +38,8 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
         bool[] calldata _freeze
     )
         external
+        override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyValidInputBoolArrayLength(_userAddresses, _freeze)
@@ -62,6 +64,8 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
         uint256[] calldata _amounts
     )
         external
+        override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
@@ -85,6 +89,8 @@ abstract contract BatchFreeze is IBatchFreeze, Modifiers {
         uint256[] calldata _amounts
     )
         external
+        override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyValidInputAmountsArrayLength(_userAddresses, _amounts)

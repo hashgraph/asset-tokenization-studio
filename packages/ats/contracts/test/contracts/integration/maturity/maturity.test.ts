@@ -3,9 +3,24 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { ResolverProxy, type IAsset } from "@contract-types";
-import { DEFAULT_PARTITION, ATS_ROLES, TIME_PERIODS_S, ADDRESS_ZERO, ZERO, EMPTY_STRING } from "@scripts";
-import { getDltTimestamp, grantRoleAndPauseToken, deployBondTokenFixture, executeRbac, MAX_UINT256 } from "@test";
+import { ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import {
+  DEFAULT_PARTITION,
+  ATS_ROLES,
+  TIME_PERIODS_S,
+  ADDRESS_ZERO,
+  ZERO,
+  EMPTY_STRING,
+  MATURITY_RESOLVER_KEY,
+} from "@scripts";
+import {
+  getDltTimestamp,
+  grantRoleAndPauseToken,
+  deployEquityTokenFixture,
+  deployBondTokenFixture,
+  executeRbac,
+  MAX_UINT256,
+} from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 const numberOfUnits = 1000;
@@ -26,20 +41,12 @@ describe("Maturity Tests", () => {
   let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
-  async function deploySecurityFixture(isMultiPartition = false) {
-    const base = await deployBondTokenFixture({
-      bondDataParams: {
-        securityData: {
-          isMultiPartition,
-        },
-        bondDetails: {
-          startingDate: startingDate,
-          maturityDate: maturityDate,
-        },
-      },
-    });
+  async function deploySecurityFixture() {
+    const base = await deployEquityTokenFixture();
     diamond = base.diamond;
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     signer_A = base.deployer;
     signer_B = base.user1;
     signer_C = base.user2;
@@ -321,33 +328,24 @@ describe("Maturity Tests", () => {
     });
   });
 
-  describe.skip("initializeMaturity", () => {
-    beforeEach(async () => {
-      await loadFixture(deploySecurityFixture);
+  describe("initializeMaturity", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeMaturity is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeMaturity())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeMaturity is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeMaturity()).to.be.revertedWithCustomError(
-        asset,
-        "AccountHasNoRole",
-      );
+    it("GIVEN already-initialised WHEN initializeMaturity is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeMaturity())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(MATURITY_RESOLVER_KEY, 1);
     });
+  });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeMaturity();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeMaturity is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeMaturity()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
-    });
-
-    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeMaturity is called THEN it emits MaturityInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeMaturity()).to.emit(asset, "MaturityInitialized");
+  describe("initializeMaturity event", () => {
+    it("GIVEN a fresh deployment WHEN initializeMaturity is called THEN emits MaturityInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(MATURITY_RESOLVER_KEY);
+      await expect(asset.initializeMaturity()).to.emit(asset, "MaturityInitialized");
     });
   });
 });

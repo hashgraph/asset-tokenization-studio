@@ -9,7 +9,18 @@ import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrappe
 import { InitializerStorageWrapper } from "../../../domain/core/InitializerStorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
+/**
+ * @title ERC3643 Management
+ * @notice Initialises ERC-3643 compliance and identity registry dependencies for an asset.
+ * @dev Implements `IERC3643Management` in a facet-based architecture. Initialisation is
+ *      restricted to operational deployments, requires `DEFAULT_ADMIN_ROLE`, and can only be
+ *      performed once for the ERC-3643 management resolver key.
+ * @author Asset Tokenization Studio Team
+ */
 abstract contract ERC3643Management is IERC3643Management, Modifiers {
+    /// @inheritdoc IERC3643Management
+    /// @dev Stores the compliance and identity registry contracts, marks this facet as ready,
+    ///      and emits `ERC3643Initialized`.
     function initializeERC3643(
         address _compliance,
         address _identityRegistry

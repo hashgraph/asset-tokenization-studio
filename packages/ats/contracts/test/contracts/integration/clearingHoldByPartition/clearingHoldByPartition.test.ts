@@ -1,12 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
-import { IAsset, type ResolverProxy } from "@contract-types";
-import { ADDRESS_ZERO, ATS_ROLES, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
+import { IAsset, MockDiamondCut, type ResolverProxy } from "@contract-types";
+import {
+  ADDRESS_ZERO,
+  ATS_ROLES,
+  EMPTY_HEX_BYTES,
+  EMPTY_STRING,
+  ZERO,
+  EQUITY_CONFIG_ID,
+  CLEARING_HOLDBYPARTITION_RESOLVER_KEY,
+} from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -54,6 +62,7 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
   let signer_E: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;
@@ -97,7 +106,7 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
     signer_E = base.user4;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
-
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       { role: ATS_ROLES.ISSUER_ROLE, members: [signer_B.address] },
       { role: ATS_ROLES.CONTROLLER_ROLE, members: [signer_C.address] },
@@ -684,6 +693,71 @@ describe("ClearingHoldByPartitionFacet Tests", () => {
           { amount: 0, expirationTimestamp: 0, escrow: ethers.ZeroAddress, to: ethers.ZeroAddress, data: "0x" },
         ),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
+    });
+  });
+
+  describe("initializeClearingHoldByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeClearingHoldByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeClearingHoldByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeClearingHoldByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeClearingHoldByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(CLEARING_HOLDBYPARTITION_RESOLVER_KEY, 1);
+    });
+  });
+
+  describe("initializeClearingHoldByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeClearingHoldByPartition is called THEN emits ClearingHoldByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(CLEARING_HOLDBYPARTITION_RESOLVER_KEY);
+      await expect(asset.initializeClearingHoldByPartition()).to.emit(asset, "ClearingHoldByPartitionInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN clearingCreateHoldByPartition is called THEN AssetNotOperational", async () => {
+      await expect(
+        asset.clearingCreateHoldByPartition(
+          { partition: _DEFAULT_PARTITION, expirationTimestamp, data: _DATA },
+          {
+            amount: BigInt(_AMOUNT),
+            expirationTimestamp: BigInt(expirationTimestamp),
+            escrow: signer_B.address,
+            to: signer_C.address,
+            data: _DATA,
+          },
+        ),
+      )
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN clearingCreateHoldFromByPartition is called THEN AssetNotOperational", async () => {
+      await expect(
+        asset.clearingCreateHoldFromByPartition(
+          {
+            clearingOperation: { partition: _DEFAULT_PARTITION, expirationTimestamp, data: _DATA },
+            from: signer_A.address,
+            operatorData: _DATA,
+          },
+          {
+            amount: BigInt(_AMOUNT),
+            expirationTimestamp: BigInt(expirationTimestamp),
+            escrow: signer_B.address,
+            to: signer_C.address,
+            data: _DATA,
+          },
+        ),
+      )
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

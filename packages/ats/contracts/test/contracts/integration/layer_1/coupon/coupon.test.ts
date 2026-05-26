@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { ResolverProxy, type IAsset } from "@contract-types";
+import { ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
 import {
   DEFAULT_PARTITION,
   ATS_ROLES,
@@ -12,15 +12,16 @@ import {
   ZERO,
   EMPTY_HEX_BYTES,
   EMPTY_STRING,
+  EQUITY_CONFIG_ID,
+  COUPON_RESOLVER_KEY,
 } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import {
   getDltTimestamp,
   grantRoleAndPauseToken,
+  deployEquityTokenFixture,
   deployBondTokenFixture,
   deployBondFixedRateTokenFixture,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-imports
-  deployBondKpiLinkedRateTokenFixture,
   executeRbac,
   MAX_UINT256,
   EVENT_NAMES,
@@ -66,6 +67,7 @@ describe("Coupon Tests", () => {
   let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixture(isMultiPartition = false) {
     const base = await deployBondTokenFixture({
@@ -154,6 +156,7 @@ describe("Coupon Tests", () => {
       rateStatus: 1,
     };
     await loadFixture(deploySecurityFixture);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
   });
 
   it("GIVEN an account without corporateActions role WHEN setCoupon THEN transaction fails with AccountHasNoRole", async () => {
@@ -943,26 +946,24 @@ describe("Coupon Tests", () => {
       expect(couponAmountFor.numerator * canonicalDenominator).to.equal(preFixProduct * couponAmountFor.denominator);
     });
   });
-  describe.skip("initializeCoupon", () => {
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeCoupon is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_D).initializeCoupon()).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+  describe("initializeCoupon", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeCoupon is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeCoupon())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeCoupon();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeCoupon is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeCoupon()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
+    it("GIVEN already-initialised WHEN initializeCoupon is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeCoupon())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(COUPON_RESOLVER_KEY, 1);
     });
+  });
 
-    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeCoupon is called THEN it emits CouponInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeCoupon()).to.emit(asset, "CouponInitialized");
+  describe("initializeCoupon event", () => {
+    it("GIVEN a fresh deployment WHEN initializeCoupon is called THEN emits CouponInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(COUPON_RESOLVER_KEY);
+      await expect(asset.initializeCoupon()).to.emit(asset, "CouponInitialized");
     });
   });
 });
@@ -973,6 +974,7 @@ describe("Coupon Fixed-Rate Variant Tests", () => {
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deployFixedRateFixture() {
     const base = await deployBondFixedRateTokenFixture({
@@ -1065,6 +1067,38 @@ describe("Coupon Fixed-Rate Variant Tests", () => {
         deactivatedAsset,
         "Deactivated",
       );
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      const base = await deployEquityTokenFixture();
+      asset = await ethers.getContractAt("IAsset", base.diamond.target);
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", base.diamond.target);
+      await mockDiamondCut.forceNonOperational();
+    });
+
+    it("GIVEN non-operational WHEN setCoupon is called THEN AssetNotOperational", async () => {
+      await expect(
+        asset.setCoupon({
+          recordDate: 0n,
+          executionDate: 0n,
+          startDate: 0n,
+          endDate: 0n,
+          fixingDate: 0n,
+          rate: 0n,
+          rateDecimals: 0,
+          rateStatus: 0,
+        }),
+      )
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN cancelCoupon is called THEN AssetNotOperational", async () => {
+      await expect(asset.cancelCoupon(0n))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

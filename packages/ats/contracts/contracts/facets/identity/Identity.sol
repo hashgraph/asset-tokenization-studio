@@ -6,6 +6,9 @@ import { IIdentity } from "./IIdentity.sol";
 import { IIdentityRegistry } from "../layer_1/ERC3643/IIdentityRegistry.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
 import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.sol";
+import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
+import { _IDENTITY_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 /**
  * @title Identity
@@ -18,14 +21,27 @@ import { ERC3643StorageWrapper } from "../../domain/core/ERC3643StorageWrapper.s
  */
 abstract contract Identity is IIdentity, Modifiers {
     /// @inheritdoc IIdentity
-    function setOnchainID(address _onchainID) external override onlyActivated onlyUnpaused onlyRole(TREX_OWNER_ROLE) {
+    function initializeIdentity()
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyFacetNotRegistered(_IDENTITY_RESOLVER_KEY)
+    {
+        InitializerStorageWrapper.setFacetToReady(_IDENTITY_RESOLVER_KEY);
+        emit IdentityInitialized();
+    }
+
+    /// @inheritdoc IIdentity
+    function setOnchainID(
+        address _onchainID
+    ) external override onlyOperational onlyActivated onlyUnpaused onlyRole(TREX_OWNER_ROLE) {
         ERC3643StorageWrapper.setOnchainID(_onchainID);
     }
 
     /// @inheritdoc IIdentity
     function setIdentityRegistry(
         address _identityRegistry
-    ) external override onlyActivated onlyUnpaused onlyRole(TREX_OWNER_ROLE) {
+    ) external override onlyOperational onlyActivated onlyUnpaused onlyRole(TREX_OWNER_ROLE) {
         ERC3643StorageWrapper.setIdentityRegistry(_identityRegistry);
     }
 

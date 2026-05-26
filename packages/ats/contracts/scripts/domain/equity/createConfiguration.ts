@@ -22,6 +22,7 @@ import {
 import { BusinessLogicResolver } from "@contract-types";
 import { EQUITY_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
+import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 
 /**
  * Equity-specific facets list (44 facets total).
@@ -42,10 +43,11 @@ const EQUITY_FACETS = [
   "CapByPartitionFacet",
   "ControlListFacet",
   "CorporateActionsFacet",
-  "DiamondFacet", // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
+  "MockDiamondCut", // TEST-ONLY: Replaces DiamondFacet for integration tests
   "CoreFacet",
   "TransferFacet",
   "CoreAdjustedFacet",
+  "InitializerFacet",
   "MetadataFacet",
   "FreezeFacet",
   "BatchFreezeFacet",
@@ -136,13 +138,12 @@ const EQUITY_FACETS = [
   "VotingSecurityHoldersFacet",
 
   "InterestRateFacet",
+  "ProceedRecipientsFacet",
+  "TimeTravelFacet",
+
   // Jurisdiction-Specific (2)
   "SecurityFacet",
   "EquityUSAFacet",
-
-  // Loan & Loans Portfolio (2)
-  "LoanFacet",
-  //"LoansPortfolioFacet",
 ] as const;
 
 /**
@@ -205,7 +206,10 @@ export async function createEquityConfiguration(
   // When useTimeTravel=true, ALL facets get TimeTravel suffix (universal mapping)
   // plus TimeTravelFacet controller. No filtering needed — simplifies deployment logic.
   const facetNames = useTimeTravel
-    ? [...EQUITY_FACETS.map((name) => `${name}TimeTravel`), "TimeTravelFacet"]
+    ? [
+        ...EQUITY_FACETS.filter((name) => name !== "TimeTravelFacet").map((name) => `${name}TimeTravel`),
+        "TimeTravelFacet",
+      ]
     : [...EQUITY_FACETS];
 
   // Build facet data with resolver keys from registry
@@ -213,7 +217,7 @@ export async function createEquityConfiguration(
     // Strip "TimeTravel" suffix to get base name for registry lookup
     const baseName = name.replace(/TimeTravel$/, "");
 
-    const facetDef = atsRegistry.getFacetDefinition(baseName);
+    const facetDef = atsRegistry.getFacetDefinition(baseName) ?? getMockFacetDefinition(baseName);
     if (!facetDef?.resolverKey?.value) {
       throw new Error(`No resolver key found for facet: ${baseName}`);
     }

@@ -3,10 +3,18 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type IAsset, type ResolverProxy } from "@contract-types";
+import { type IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
-import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
+import {
+  ATS_ROLES,
+  DEFAULT_PARTITION,
+  EMPTY_HEX_BYTES,
+  EMPTY_STRING,
+  ZERO,
+  EQUITY_CONFIG_ID,
+  MINT_BY_PARTITION_RESOLVER_KEY,
+} from "@scripts";
 
 const AMOUNT = 1000;
 const DATA = "0x1234";
@@ -24,6 +32,7 @@ describe("MintByPartitionFacet Tests", () => {
   let signer_D: HardhatEthersSigner;
   let signer_E: HardhatEthersSigner;
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   describe("Single partition mode", () => {
     async function deploySinglePartitionFixture() {
@@ -42,7 +51,7 @@ describe("MintByPartitionFacet Tests", () => {
       signer_D = base.user3;
       signer_E = base.user4;
       asset = await ethers.getContractAt("IAsset", diamond.target);
-
+      mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
       await executeRbac(asset, [
         { role: ATS_ROLES.ISSUER_ROLE, members: [signer_A.address] },
         { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
@@ -358,36 +367,69 @@ describe("MintByPartitionFacet Tests", () => {
     });
   });
 
-  describe.skip("initializeMintByPartition", () => {
+  describe("initializeMintByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeMintByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeMintByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeMintByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeMintByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(MINT_BY_PARTITION_RESOLVER_KEY, 1);
+    });
+  });
+
+  describe("initializeMintByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeMintByPartition is called THEN emits MintByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(MINT_BY_PARTITION_RESOLVER_KEY);
+      await expect(asset.initializeMintByPartition()).to.emit(asset, "MintByPartitionInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
     beforeEach(async () => {
-      const base = await deployEquityTokenFixture();
-      signer_A = base.deployer;
-      signer_C = base.user2;
-      asset = await ethers.getContractAt("IAsset", base.diamond.target, signer_A);
+      await mockDiamondCut.forceNonOperational();
     });
 
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeMintByPartition is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeMintByPartition()).to.be.revertedWithCustomError(
-        asset,
-        "AccountHasNoRole",
-      );
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeMintByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeMintByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeMintByPartition();
-      });
+    it("GIVEN already-initialised WHEN initializeMintByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeMintByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(MINT_BY_PARTITION_RESOLVER_KEY, 1);
+    });
+  });
 
-      it("GIVEN an already-initialised facet WHEN initializeMintByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeMintByPartition()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
+  describe("initializeMintByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeMintByPartition is called THEN emits MintByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(MINT_BY_PARTITION_RESOLVER_KEY);
+      await expect(asset.initializeMintByPartition()).to.emit(asset, "MintByPartitionInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
+    beforeEach(async () => {
+      await mockDiamondCut.forceNonOperational();
     });
 
-    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeMintByPartition is called THEN it emits MintByPartitionInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeMintByPartition()).to.emit(asset, "MintByPartitionInitialized");
+    it("GIVEN non-operational WHEN issueByPartition is called THEN AssetNotOperational", async () => {
+      await expect(
+        asset.issueByPartition({
+          partition: ethers.ZeroHash,
+          tokenHolder: ethers.ZeroAddress,
+          value: 0n,
+          data: "0x",
+          operatorData: "0x",
+        }),
+      )
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

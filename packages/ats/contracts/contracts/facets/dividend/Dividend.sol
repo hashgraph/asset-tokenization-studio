@@ -42,6 +42,7 @@ abstract contract Dividend is IDividend, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(CORPORATE_ACTION_ROLE)
@@ -60,6 +61,7 @@ abstract contract Dividend is IDividend, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, dividendId - 1)
         onlyUnpaused

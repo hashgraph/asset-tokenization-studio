@@ -22,6 +22,7 @@ import {
 import { BusinessLogicResolver } from "@contract-types";
 import { FACTORY_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
+import { getMockFacetDefinition } from "../initializeMock/mockFacetsRegistry";
 
 /**
  * Factory-specific facets list (1 facet).
@@ -84,14 +85,16 @@ export async function createFactoryConfiguration(
   confirmations: number = 0,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
   // Build facet list based on time travel mode
-  const facetNames = useTimeTravel ? FACTORY_FACETS.map((name) => `${name}TimeTravel`) : [...FACTORY_FACETS];
+  const facetNames = useTimeTravel ? FACTORY_FACETS.map(() => "MockFactoryFacet") : [...FACTORY_FACETS];
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {
     // Strip "TimeTravel" suffix to get base name for registry lookup
     const baseName = name.replace(/TimeTravel$/, "");
 
-    const facetDef = atsRegistry.getFacetDefinition(baseName);
+    const facetDef = useTimeTravel
+      ? (getMockFacetDefinition(name) ?? atsRegistry.getFacetDefinition(baseName))
+      : atsRegistry.getFacetDefinition(baseName);
     if (!facetDef?.resolverKey?.value) {
       throw new Error(`No resolver key found for facet: ${baseName}`);
     }

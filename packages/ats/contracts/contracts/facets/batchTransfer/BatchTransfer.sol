@@ -40,6 +40,8 @@ abstract contract BatchTransfer is IBatchTransfer, Modifiers {
         uint256[] calldata _amounts
     )
         external
+        override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyValidInputAmountsArrayLength(_toList, _amounts)

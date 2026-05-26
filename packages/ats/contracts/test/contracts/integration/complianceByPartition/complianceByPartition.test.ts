@@ -4,9 +4,17 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type IAsset, type ResolverProxy } from "@contract-types";
+import { type IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
-import { ADDRESS_ZERO, ATS_ROLES, EIP1066_CODES, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
+import {
+  ADDRESS_ZERO,
+  ATS_ROLES,
+  EIP1066_CODES,
+  EMPTY_HEX_BYTES,
+  EMPTY_STRING,
+  ZERO,
+  COMPLIANCE_BY_PARTITION_RESOLVER_KEY,
+} from "@scripts";
 import { getSelector } from "@scripts/infrastructure";
 
 const _PARTITION_ID_1 = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -25,6 +33,7 @@ describe("ComplianceByPartition Tests", () => {
   let signer_E: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixtureMultiPartition() {
     const base = await deployEquityTokenFixture({
@@ -43,6 +52,7 @@ describe("ComplianceByPartition Tests", () => {
     signer_E = base.user4;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       { role: ATS_ROLES.PAUSER_ROLE, members: [signer_B.address] },
@@ -314,43 +324,24 @@ describe("ComplianceByPartition Tests", () => {
       ).to.be.deep.equal([true, EIP1066_CODES.SUCCESS, ethers.ZeroHash]);
     });
   });
-  describe.skip("initializeComplianceByPartition", () => {
-    let initAsset: IAsset;
-    let initSigner_A: HardhatEthersSigner;
-    let initSigner_D: HardhatEthersSigner;
-
-    beforeEach(async () => {
-      const base = await deployEquityTokenFixture();
-      initSigner_A = base.deployer;
-      initSigner_D = base.user3;
-      initAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+  describe("initializeComplianceByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeComplianceByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeComplianceByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeComplianceByPartition is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(initAsset.connect(initSigner_D).initializeComplianceByPartition()).to.be.revertedWithCustomError(
-        initAsset,
-        "AccountHasNoRole",
-      );
+    it("GIVEN already-initialised WHEN initializeComplianceByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeComplianceByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(COMPLIANCE_BY_PARTITION_RESOLVER_KEY, 1);
     });
+  });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await initAsset.connect(initSigner_A).initializeComplianceByPartition();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeComplianceByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(initAsset.connect(initSigner_A).initializeComplianceByPartition()).to.be.revertedWithCustomError(
-          initAsset,
-          "FacetAlreadyRegistered",
-        );
-      });
-    });
-
-    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeComplianceByPartition is called THEN it emits ComplianceByPartitionInitialized", async () => {
-      await expect(initAsset.connect(initSigner_A).initializeComplianceByPartition()).to.emit(
-        initAsset,
-        "ComplianceByPartitionInitialized",
-      );
+  describe("initializeComplianceByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeComplianceByPartition is called THEN emits ComplianceByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(COMPLIANCE_BY_PARTITION_RESOLVER_KEY);
+      await expect(asset.initializeComplianceByPartition()).to.emit(asset, "ComplianceByPartitionInitialized");
     });
   });
 });

@@ -20,6 +20,19 @@ interface IScheduledCrossOrderedTasks {
     event TaskExecutionFailed(bytes32 indexed actionId, bytes32 indexed taskType, uint256 scheduledTimestamp);
 
     /**
+     * @notice Emitted once when the scheduled-cross-ordered-tasks capability is initialised on a token.
+     * @dev Fires exclusively from `initializeScheduledCrossOrderedTasks`.
+     */
+    event ScheduledCrossOrderedTasksInitialized();
+
+    /**
+     * @notice Initialises the scheduled-cross-ordered-tasks capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeScheduledCrossOrderedTasks() external;
+
+    /**
      * @notice Triggers all currently due cross-ordered scheduled tasks.
      * @dev Mutates scheduled task queues and may trigger one due downstream task per
      *      cross-ordered task. Implementations may emit `TaskExecutionFailed` for failed tasks.

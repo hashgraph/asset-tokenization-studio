@@ -15,10 +15,10 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 /**
  * @title ExternalKycListManagement
  * @author Asset Tokenization Studio Team
- * @notice Abstract contract implementing external KYC list management logic for a security token.
+ * @notice Abstract contract implementing external onlyOperational KYC list management logic for a security token.
  *         Maintains a list of trusted third-party KYC provider contracts whose combined KYC
  *         evaluation must be satisfied for an account to be considered externally KYC-granted.
- * @dev Implements `IExternalKycListManagement`. The external KYC list is stored in diamond storage
+ * @dev Implements `IExternalKycListManagement`. The external onlyOperational KYC list is stored in diamond storage
  *      at `_KYC_MANAGEMENT_STORAGE_POSITION` via `ExternalListManagementStorageWrapper`.
  *      All mutating functions after initialisation are gated by `KYC_MANAGER_ROLE` and the
  *      `onlyUnpaused` modifier inherited from `Modifiers`. Intended to be inherited exclusively
@@ -38,7 +38,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
     function updateExternalKycLists(
         address[] calldata _kycLists,
         bool[] calldata _actives
-    ) external override onlyActivated onlyUnpaused onlyRole(KYC_MANAGER_ROLE) returns (bool success_) {
+    ) external override onlyOperational onlyActivated onlyUnpaused onlyRole(KYC_MANAGER_ROLE) returns (bool success_) {
         ArrayValidation.checkUniqueValues(_kycLists, _actives);
         success_ = ExternalListManagementStorageWrapper.updateExternalLists(
             _KYC_MANAGEMENT_STORAGE_POSITION,
@@ -57,6 +57,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(KYC_MANAGER_ROLE)
@@ -73,7 +74,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Modif
     /// @inheritdoc IExternalKycListManagement
     function removeExternalKycList(
         address _kycLists
-    ) external override onlyActivated onlyUnpaused onlyRole(KYC_MANAGER_ROLE) returns (bool success_) {
+    ) external override onlyOperational onlyActivated onlyUnpaused onlyRole(KYC_MANAGER_ROLE) returns (bool success_) {
         success_ = ExternalListManagementStorageWrapper.removeExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists);
         if (!success_) {
             revert UnlistedKycList(_kycLists);

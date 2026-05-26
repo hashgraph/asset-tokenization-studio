@@ -68,6 +68,7 @@ const BOND_FIXED_RATE_FACETS = [
 
   // CoreAdjusted
   "CoreAdjustedFacet",
+  "InitializerFacet", // Core initializer facet
 
   //Metadata
   "MetadataFacet",

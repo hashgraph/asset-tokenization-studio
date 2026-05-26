@@ -3,8 +3,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ATS_ROLES } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { ATS_ROLES, CORPORATE_ACTIONS_RESOLVER_KEY } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac } from "@test";
@@ -13,20 +13,21 @@ const corporateActionId_1 = "0x0000000000000000000000000000000000000000000000000
 
 describe("Corporate Actions Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: HardhatEthersSigner;
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixtureSinglePartition() {
     const base = await deployEquityTokenFixture();
     diamond = base.diamond;
-    signer_A = base.deployer;
+    const _signer_A = base.deployer;
     signer_B = base.user1;
     signer_C = base.user2;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       {
         role: ATS_ROLES.PAUSER_ROLE,
@@ -120,29 +121,24 @@ describe("Corporate Actions Tests", () => {
     expect(corporateActions.datas_[0]).to.equal(corporateActionsByType.datas_[0]);
     expect(corporateActions.isDisabled_[0]).to.equal(corporateActionsByType.isDisabled_[0]);
   });
-  describe.skip("initializeCorporateActions", () => {
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeCorporateActions is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_B).initializeCorporateActions()).to.be.revertedWithCustomError(
-        asset,
-        "AccountHasNoRole",
-      );
+  describe("initializeCorporateActions", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeCorporateActions is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_B).initializeCorporateActions())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_B.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeCorporateActions();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeCorporateActions is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeCorporateActions()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
+    it("GIVEN already-initialised WHEN initializeCorporateActions is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeCorporateActions())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(CORPORATE_ACTIONS_RESOLVER_KEY, 1);
     });
+  });
 
-    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeCorporateActions is called THEN it emits CorporateActionsInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeCorporateActions()).to.emit(asset, "CorporateActionsInitialized");
+  describe("initializeCorporateActions event", () => {
+    it("GIVEN a fresh deployment WHEN initializeCorporateActions is called THEN emits CorporateActionsInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(CORPORATE_ACTIONS_RESOLVER_KEY);
+      await expect(asset.initializeCorporateActions()).to.emit(asset, "CorporateActionsInitialized");
     });
   });
 });

@@ -5,8 +5,15 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
-import { IAsset, type ResolverProxy } from "@contract-types";
-import { ADDRESS_ZERO, ATS_ROLES, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
+import { IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
+import {
+  ADDRESS_ZERO,
+  ATS_ROLES,
+  EMPTY_HEX_BYTES,
+  EMPTY_STRING,
+  OPERATOR_CLEARING_BY_PARTITION_RESOLVER_KEY,
+  ZERO,
+} from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -38,6 +45,7 @@ describe("OperatorClearingByPartition Tests", () => {
   let signer_E: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;
@@ -74,6 +82,7 @@ describe("OperatorClearingByPartition Tests", () => {
     signer_E = base.user4;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
 
     await executeRbac(asset, [
       { role: ATS_ROLES.ISSUER_ROLE, members: [signer_B.address] },
@@ -321,36 +330,24 @@ describe("OperatorClearingByPartition Tests", () => {
     });
   });
 
-  describe.skip("initializeOperatorClearingByPartition", () => {
-    beforeEach(async () => {
-      const base = await deployEquityTokenFixture();
-      signer_A = base.deployer;
-      signer_C = base.user2;
-      asset = await ethers.getContractAt("IAsset", base.diamond.target, signer_A);
+  describe("initializeOperatorClearingByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeOperatorClearingByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeOperatorClearingByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeOperatorClearingByPartition is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeOperatorClearingByPartition()).to.be.revertedWithCustomError(
-        asset,
-        "AccountHasNoRole",
-      );
+    it("GIVEN already-initialised WHEN initializeOperatorClearingByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeOperatorClearingByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(OPERATOR_CLEARING_BY_PARTITION_RESOLVER_KEY, 1);
     });
+  });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeOperatorClearingByPartition();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeOperatorClearingByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeOperatorClearingByPartition()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
-    });
-
-    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeOperatorClearingByPartition is called THEN it emits OperatorClearingByPartitionInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeOperatorClearingByPartition()).to.emit(
+  describe("initializeOperatorClearingByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeOperatorClearingByPartition is called THEN emits OperatorClearingByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(OPERATOR_CLEARING_BY_PARTITION_RESOLVER_KEY);
+      await expect(asset.initializeOperatorClearingByPartition()).to.emit(
         asset,
         "OperatorClearingByPartitionInitialized",
       );

@@ -2,8 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IAccessControl } from "./IAccessControl.sol";
+import { AccessControlRead } from "./AccessControlRead.sol";
 import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
-import { Modifiers } from "../../services/Modifiers.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageWrapper.sol";
 import { DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
@@ -20,7 +20,7 @@ import { _ACCESS_CONTROL_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
  *      `AccessControlStorageWrapper.getRoleAdmin`. `applyRoles` enforces per-role admin checks
  *      inside the storage layer. Intended to be inherited exclusively by `AccessControlFacet`.
  */
-abstract contract AccessControl is IAccessControl, Modifiers {
+abstract contract AccessControl is AccessControlRead {
     /// @inheritdoc IAccessControl
     function initializeAccessControl()
         external
@@ -106,38 +106,5 @@ abstract contract AccessControl is IAccessControl, Modifiers {
             revert RolesNotApplied(_roles, _actives, _account);
         }
         emit RolesApplied(_roles, _actives, _account);
-    }
-
-    /// @inheritdoc IAccessControl
-    function hasRole(bytes32 _role, address _account) external view override returns (bool) {
-        return AccessControlStorageWrapper.hasRole(_role, _account);
-    }
-
-    /// @inheritdoc IAccessControl
-    function getRoleCountFor(address _account) external view override returns (uint256 roleCount_) {
-        roleCount_ = AccessControlStorageWrapper.getRoleCountFor(_account);
-    }
-
-    /// @inheritdoc IAccessControl
-    function getRolesFor(
-        address _account,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view override returns (bytes32[] memory roles_) {
-        roles_ = AccessControlStorageWrapper.getRolesFor(_account, _pageIndex, _pageLength);
-    }
-
-    /// @inheritdoc IAccessControl
-    function getRoleMemberCount(bytes32 _role) external view override returns (uint256 memberCount_) {
-        memberCount_ = AccessControlStorageWrapper.getRoleMemberCount(_role);
-    }
-
-    /// @inheritdoc IAccessControl
-    function getRoleMembers(
-        bytes32 _role,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view override returns (address[] memory members_) {
-        members_ = AccessControlStorageWrapper.getRoleMembers(_role, _pageIndex, _pageLength);
     }
 }

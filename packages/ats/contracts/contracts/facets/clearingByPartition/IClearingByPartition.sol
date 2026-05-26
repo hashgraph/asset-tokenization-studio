@@ -13,6 +13,19 @@ import { IClearingTypes } from "../layer_1/clearing/IClearingTypes.sol";
  */
 interface IClearingByPartition is IClearingTypes {
     /**
+     * @notice Emitted once when the clearing-by-partition capability is initialised on a token.
+     * @dev Fires exclusively from `initializeClearingByPartition`.
+     */
+    event ClearingByPartitionInitialized();
+
+    /**
+     * @notice Initialises the clearing-by-partition capability on the token.
+     * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
+     *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     */
+    function initializeClearingByPartition() external;
+
+    /**
      * @notice Approves a clearing operation previously requested by a token holder
      * @dev Can only be called before expiration date
      *

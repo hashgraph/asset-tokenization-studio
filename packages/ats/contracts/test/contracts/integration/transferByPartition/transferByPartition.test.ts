@@ -4,8 +4,17 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type IAsset, type ResolverProxy, ITransferByPartition__factory } from "@contract-types";
-import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
+import { type IAsset, type ResolverProxy, ITransferByPartition__factory, MockDiamondCut } from "@contract-types";
+import { TRANSFER_BY_PARTITION_RESOLVER_KEY } from "@scripts";
+import {
+  ADDRESS_ZERO,
+  ATS_ROLES,
+  DEFAULT_PARTITION,
+  EMPTY_HEX_BYTES,
+  EMPTY_STRING,
+  ZERO,
+  EQUITY_CONFIG_ID,
+} from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const _WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
@@ -19,6 +28,7 @@ describe("TransferByPartition Facet Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function setupBalances() {
     await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -65,7 +75,7 @@ describe("TransferByPartition Facet Tests", () => {
     signer_C = base.user2;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
-
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       { role: ATS_ROLES.ISSUER_ROLE, members: [signer_B.address] },
       { role: ATS_ROLES.KYC_ROLE, members: [signer_B.address] },
@@ -150,39 +160,36 @@ describe("TransferByPartition Facet Tests", () => {
     });
   });
 
-  describe.skip("initializeTransferByPartition", () => {
+  describe("initializeTransferByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeTransferByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_C).initializeTransferByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeTransferByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeTransferByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(TRANSFER_BY_PARTITION_RESOLVER_KEY, 1);
+    });
+  });
+
+  describe("initializeTransferByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeTransferByPartition is called THEN emits TransferByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(TRANSFER_BY_PARTITION_RESOLVER_KEY);
+      await expect(asset.initializeTransferByPartition()).to.emit(asset, "TransferByPartitionInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
     beforeEach(async () => {
-      const base = await deployEquityTokenFixture();
-      signer_A = base.deployer;
-      signer_C = base.user2;
-      asset = await ethers.getContractAt("IAsset", base.diamond.target, signer_A);
+      await mockDiamondCut.forceNonOperational();
     });
 
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeTransferByPartition is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeTransferByPartition()).to.be.revertedWithCustomError(
-        asset,
-        "AccountHasNoRole",
-      );
-    });
-
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeTransferByPartition();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeTransferByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeTransferByPartition()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
-    });
-
-    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeTransferByPartition is called THEN it emits TransferByPartitionInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeTransferByPartition()).to.emit(
-        asset,
-        "TransferByPartitionInitialized",
-      );
+    it("GIVEN non-operational WHEN transferByPartition is called THEN AssetNotOperational", async () => {
+      await expect(asset.transferByPartition(ethers.ZeroHash, { to: ethers.ZeroAddress, value: 0n }, "0x"))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(EQUITY_CONFIG_ID, 1);
     });
   });
 });

@@ -42,6 +42,7 @@ abstract contract Burn is IBurn, Modifiers, ProtectedPartitionRoleValidator {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
@@ -60,6 +61,7 @@ abstract contract Burn is IBurn, Modifiers, ProtectedPartitionRoleValidator {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
@@ -78,6 +80,7 @@ abstract contract Burn is IBurn, Modifiers, ProtectedPartitionRoleValidator {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(_tokenHolder)

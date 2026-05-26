@@ -9,7 +9,15 @@ import { Modifiers } from "../../../../services/Modifiers.sol";
 import { InitializerStorageWrapper } from "../../../../domain/core/InitializerStorageWrapper.sol";
 import { EvmAccessors } from "../../../../infrastructure/utils/EvmAccessors.sol";
 
+/**
+ * @title Fixed Rate
+ * @notice Manages a fixed interest rate and its decimal precision for an asset.
+ * @dev Uses shared storage wrappers and lifecycle modifiers to initialise and update the rate.
+ * @author Hashgraph
+ */
 contract FixedRate is IFixedRate, Modifiers {
+    /// @inheritdoc IFixedRate
+    /// @dev Registers the fixed-rate facet as ready after storing the initial rate configuration.
     function initializeFixedRate(
         FixedRateData calldata _initData
     ) external override onlyRole(DEFAULT_ADMIN_ROLE) onlyFacetNotRegistered(_FIXED_RATE_RESOLVER_KEY) {
@@ -18,14 +26,17 @@ contract FixedRate is IFixedRate, Modifiers {
         emit IFixedRate.FixedRateInitialized(_initData);
     }
 
+    /// @inheritdoc IFixedRate
+    /// @dev Requires an operational, activated, unpaused asset and the interest rate manager role.
     function setRate(
         uint256 _newRate,
         uint8 _newRateDecimals
-    ) external override onlyActivated onlyUnpaused onlyRole(INTEREST_RATE_MANAGER_ROLE) {
+    ) external override onlyOperational onlyActivated onlyUnpaused onlyRole(INTEREST_RATE_MANAGER_ROLE) {
         InterestRateStorageWrapper.setRate(_newRate, _newRateDecimals);
         emit RateUpdated(EvmAccessors.getMsgSender(), _newRate, _newRateDecimals);
     }
 
+    /// @inheritdoc IFixedRate
     function getRate() external view override returns (uint256 rate_, uint8 decimals_) {
         return InterestRateStorageWrapper.getRate();
     }

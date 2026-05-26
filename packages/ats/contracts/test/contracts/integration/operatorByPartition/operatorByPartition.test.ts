@@ -4,8 +4,15 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type IAsset, type ResolverProxy } from "@contract-types";
-import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
+import { type IAsset, type ResolverProxy, MockDiamondCut } from "@contract-types";
+import {
+  ATS_ROLES,
+  DEFAULT_PARTITION,
+  EMPTY_HEX_BYTES,
+  EMPTY_STRING,
+  OPERATOR_BY_PARTITION_RESOLVER_KEY,
+  ZERO,
+} from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 
 const WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
@@ -20,6 +27,7 @@ describe("OperatorByPartitionFacet Tests", () => {
   let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deployFixture() {
     const base = await deployEquityTokenFixture();
@@ -30,7 +38,7 @@ describe("OperatorByPartitionFacet Tests", () => {
     signer_D = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
-
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       { role: ATS_ROLES.ISSUER_ROLE, members: [signer_A.address] },
       { role: ATS_ROLES.KYC_ROLE, members: [signer_A.address] },
@@ -329,39 +337,24 @@ describe("OperatorByPartitionFacet Tests", () => {
     });
   });
 
-  describe.skip("initializeOperatorByPartition", () => {
-    beforeEach(async () => {
-      const base = await deployEquityTokenFixture();
-      signer_A = base.deployer;
-      signer_C = base.user2;
-      asset = await ethers.getContractAt("IAsset", base.diamond.target, signer_A);
+  describe("initializeOperatorByPartition", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeOperatorByPartition is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(signer_D).initializeOperatorByPartition())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_D.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeOperatorByPartition is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeOperatorByPartition()).to.be.revertedWithCustomError(
-        asset,
-        "AccountHasNoRole",
-      );
+    it("GIVEN already-initialised WHEN initializeOperatorByPartition is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeOperatorByPartition())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(OPERATOR_BY_PARTITION_RESOLVER_KEY, 1);
     });
+  });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(signer_A).initializeOperatorByPartition();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeOperatorByPartition is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(signer_A).initializeOperatorByPartition()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
-    });
-
-    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeOperatorByPartition is called THEN it emits OperatorByPartitionInitialized", async () => {
-      await expect(asset.connect(signer_A).initializeOperatorByPartition()).to.emit(
-        asset,
-        "OperatorByPartitionInitialized",
-      );
+  describe("initializeOperatorByPartition event", () => {
+    it("GIVEN a fresh deployment WHEN initializeOperatorByPartition is called THEN emits OperatorByPartitionInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(OPERATOR_BY_PARTITION_RESOLVER_KEY);
+      await expect(asset.initializeOperatorByPartition()).to.emit(asset, "OperatorByPartitionInitialized");
     });
   });
 });

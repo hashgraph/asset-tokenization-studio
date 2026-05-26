@@ -3,15 +3,10 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type IAsset } from "@contract-types";
-import { ATS_ROLES } from "@scripts";
+import { type ResolverProxy, type IAsset, MockDiamondCut } from "@contract-types";
+import { ATS_ROLES, KPI_LINKED_RATE_RESOLVER_KEY } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import {
-  DEFAULT_BOND_KPI_LINKED_RATE_PARAMS,
-  deployAtsInfrastructureFixture,
-  deployBondKpiLinkedRateTokenFixture,
-  executeRbac,
-} from "@test";
+import { DEFAULT_BOND_KPI_LINKED_RATE_PARAMS, deployBondKpiLinkedRateTokenFixture, executeRbac } from "@test";
 
 describe("Kpi Linked Rate Tests", () => {
   let diamond: ResolverProxy;
@@ -20,6 +15,7 @@ describe("Kpi Linked Rate Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
 
   async function deploySecurityFixtureMultiPartition() {
     const base = await deployBondKpiLinkedRateTokenFixture();
@@ -29,6 +25,7 @@ describe("Kpi Linked Rate Tests", () => {
     signer_C = base.user3;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", diamond.target);
     await executeRbac(asset, [
       {
         role: ATS_ROLES.PAUSER_ROLE,
@@ -45,52 +42,83 @@ describe("Kpi Linked Rate Tests", () => {
     await loadFixture(deploySecurityFixtureMultiPartition);
   });
 
-  it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeKpiLinkedRate is called THEN it reverts with AccountHasNoRole", async () => {
-    await expect(
-      asset.connect(signer_C).initializeKpiLinkedRate(
-        {
-          maxRate: 3,
-          baseRate: 2,
-          minRate: 1,
-          startPeriod: 1000,
-          startRate: 2,
-          missedPenalty: 2,
-          reportPeriod: 5000,
-          rateDecimals: 1,
-        },
-        {
-          maxDeviationCap: 1000,
-          baseLine: 700,
-          maxDeviationFloor: 300,
-          impactDataDecimals: 1,
-          adjustmentPrecision: 3,
-        },
-      ),
-    ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
+  describe("initializeKpiLinkedRate", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeKpiLinkedRate is called THEN AccountHasNoRole", async () => {
+      await expect(
+        asset.connect(signer_C).initializeKpiLinkedRate(
+          {
+            maxRate: 3,
+            baseRate: 2,
+            minRate: 1,
+            startPeriod: 1000,
+            startRate: 2,
+            missedPenalty: 2,
+            reportPeriod: 5000,
+            rateDecimals: 1,
+          },
+          {
+            maxDeviationCap: 1000,
+            baseLine: 700,
+            maxDeviationFloor: 300,
+            impactDataDecimals: 1,
+            adjustmentPrecision: 3,
+          },
+        ),
+      )
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeKpiLinkedRate is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(
+        asset.initializeKpiLinkedRate(
+          {
+            maxRate: 3,
+            baseRate: 2,
+            minRate: 1,
+            startPeriod: 1000,
+            startRate: 2,
+            missedPenalty: 2,
+            reportPeriod: 5000,
+            rateDecimals: 1,
+          },
+          {
+            maxDeviationCap: 1000,
+            baseLine: 700,
+            maxDeviationFloor: 300,
+            impactDataDecimals: 1,
+            adjustmentPrecision: 3,
+          },
+        ),
+      ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+    });
   });
 
-  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with FacetAlreadyRegistered", async () => {
-    await expect(
-      asset.initializeKpiLinkedRate(
-        {
-          maxRate: 3,
-          baseRate: 2,
-          minRate: 1,
-          startPeriod: 1000,
-          startRate: 2,
-          missedPenalty: 2,
-          reportPeriod: 5000,
-          rateDecimals: 1,
-        },
-        {
-          maxDeviationCap: 1000,
-          baseLine: 700,
-          maxDeviationFloor: 300,
-          impactDataDecimals: 1,
-          adjustmentPrecision: 3,
-        },
-      ),
-    ).to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered");
+  describe("initializeKpiLinkedRate event", () => {
+    it("GIVEN a fresh deployment WHEN initializeKpiLinkedRate is called THEN emits KpiLinkedRateInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(KPI_LINKED_RATE_RESOLVER_KEY);
+      await expect(
+        asset.initializeKpiLinkedRate(
+          {
+            maxRate: 3n,
+            baseRate: 2n,
+            minRate: 1n,
+            startPeriod: 5000,
+            startRate: 2n,
+            missedPenalty: 2n,
+            reportPeriod: 5000,
+            rateDecimals: 1,
+          },
+          {
+            maxDeviationCap: 1000,
+            baseLine: 700,
+            maxDeviationFloor: 300,
+            impactDataDecimals: 1,
+            adjustmentPrecision: 3,
+          },
+        ),
+      ).to.emit(asset, "KpiLinkedRateInitialized");
+    });
   });
 
   describe("Paused", () => {
@@ -346,40 +374,5 @@ describe("Kpi Linked Rate Tests", () => {
         }),
       ).to.be.revertedWithCustomError(deactivatedAsset, "Deactivated");
     });
-  });
-});
-
-describe("initializeKpiLinkedRate", () => {
-  it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeKpiLinkedRate is called THEN it emits KpiLinkedRateInitialized", async () => {
-    const { decodeEvent } = await import("@scripts/infrastructure");
-    const { BOND_KPI_LINKED_RATE_CONFIG_ID } = await import("@scripts/domain");
-    const infra = await loadFixture(deployAtsInfrastructureFixture);
-    const proxyTx = await infra.factory.deployProxy(infra.blr.target as string, BOND_KPI_LINKED_RATE_CONFIG_ID, 1, [
-      { role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [infra.deployer.address] },
-    ]);
-    const { proxyAddress } = await decodeEvent(infra.factory, "ProxyDeployed", (await proxyTx.wait())!);
-    const freshAsset = await ethers.getContractAt("IAsset", proxyAddress as string);
-    const interestRateArgs = {
-      maxRate: 3,
-      baseRate: 2,
-      minRate: 1,
-      startPeriod: 1000,
-      startRate: 2,
-      missedPenalty: 2,
-      reportPeriod: 5000,
-      rateDecimals: 1,
-    };
-    const impactDataArgs = {
-      maxDeviationCap: 1000,
-      baseLine: 700,
-      maxDeviationFloor: 300,
-      impactDataDecimals: 1,
-      adjustmentPrecision: 3,
-    };
-    const tx = await freshAsset.connect(infra.deployer).initializeKpiLinkedRate(interestRateArgs, impactDataArgs);
-    const receipt = await tx.wait();
-    const emitted = await decodeEvent(freshAsset, "KpiLinkedRateInitialized", receipt!);
-    expect(emitted.interestRate.maxRate).to.equal(interestRateArgs.maxRate);
-    expect(emitted.impactData.maxDeviationCap).to.equal(impactDataArgs.maxDeviationCap);
   });
 });

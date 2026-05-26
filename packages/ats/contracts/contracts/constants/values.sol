@@ -170,6 +170,9 @@ bytes4 constant KPI_LINKED_RATE_COUPON = 0x0000000A;
 /// @dev ID for ClearingOps.clearingHoldCreationExecution()
 bytes4 constant CLEARING_HOLD_CREATION = 0x0000000B;
 
+/// @dev ID for the defensive operational-status guard in Factory deploy functions.
+bytes4 constant FACTORY_OPERATIONAL_STATUS = 0x0000000C;
+
 /// @dev Precomputed constants for powers of 10 (0-18)
 uint256 constant POW10_0 = 1;
 uint256 constant POW10_1 = 10;

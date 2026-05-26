@@ -16,6 +16,7 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
  * @author Hashgraph
  */
 abstract contract Loan is ILoan, Modifiers {
+    /// @inheritdoc ILoan
     function initializeLoan(
         LoanDetailsData calldata _loanDetailsData
     )
@@ -33,11 +34,13 @@ abstract contract Loan is ILoan, Modifiers {
         emit ILoan.LoanInitialized(_loanDetailsData);
     }
 
+    /// @inheritdoc ILoan
     function setLoanDetails(
         LoanDetailsData calldata loanDetailsData_
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(LOAN_MANAGER_ROLE)
@@ -52,6 +55,7 @@ abstract contract Loan is ILoan, Modifiers {
         LoanStorageWrapper.setLoanDetails(loanDetailsData_);
     }
 
+    /// @inheritdoc ILoan
     function getLoanDetails() external view override returns (LoanDetailsData memory loanDetailsData_) {
         return LoanStorageWrapper.getLoanDetails();
     }

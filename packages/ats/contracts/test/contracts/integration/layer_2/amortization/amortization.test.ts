@@ -4,8 +4,8 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type IAsset } from "@contract-types";
-import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES } from "@scripts";
+import { type IAsset, MockDiamondCut } from "@contract-types";
+import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_HEX_BYTES, LOAN_CONFIG_ID, AMORTIZATION_RESOLVER_KEY } from "@scripts";
 import { deployLoanTokenFixture, getDltTimestamp } from "@test";
 import { DEFAULT_SECURITY_PARAMS } from "@test/fixtures/tokens/common.fixture";
 
@@ -16,6 +16,7 @@ const EXECUTION_DATE_OFFSET = 1200;
 
 describe("AmortizationFacet", () => {
   let asset: IAsset;
+  let mockDiamondCut: MockDiamondCut;
   let deployer: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
   let user2: HardhatEthersSigner;
@@ -35,7 +36,7 @@ describe("AmortizationFacet", () => {
     const { tokenAddress, deployer } = base;
 
     const asset = await ethers.getContractAt("IAsset", tokenAddress, deployer);
-
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", tokenAddress, deployer);
     const [, user1, user2, user3] = await ethers.getSigners();
 
     return {
@@ -51,6 +52,7 @@ describe("AmortizationFacet", () => {
   beforeEach(async () => {
     const fixture = await loadFixture(deployAmortizationLoanFixture);
     asset = fixture.asset;
+    mockDiamondCut = await ethers.getContractAt("MockDiamondCut", await asset.getAddress());
     deployer = fixture.deployer;
     user1 = fixture.user1;
     user2 = fixture.user2;
@@ -1516,32 +1518,53 @@ describe("AmortizationFacet", () => {
   });
 
   describe("initializeAmortization", () => {
+    it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeAmortization is called THEN AccountHasNoRole", async () => {
+      await expect(asset.connect(user2).initializeAmortization())
+        .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
+        .withArgs(user2.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
+    });
+
+    it("GIVEN already-initialised WHEN initializeAmortization is called again THEN FacetAlreadyRegistered", async () => {
+      await expect(asset.initializeAmortization())
+        .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
+        .withArgs(AMORTIZATION_RESOLVER_KEY, 1);
+    });
+  });
+
+  describe("initializeAmortization event", () => {
+    it("GIVEN a fresh deployment WHEN initializeAmortization is called THEN emits AmortizationInitialized", async () => {
+      await mockDiamondCut.forceFacetNotRegistered(AMORTIZATION_RESOLVER_KEY);
+      await expect(asset.initializeAmortization()).to.emit(asset, "AmortizationInitialized");
+    });
+  });
+
+  describe("nonOperational", () => {
     beforeEach(async () => {
-      await loadFixture(deployAmortizationLoanFixture);
+      await mockDiamondCut.forceNonOperational();
     });
 
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeAmortization is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(user2).initializeAmortization()).to.be.revertedWithCustomError(
-        asset,
-        "AccountHasNoRole",
-      );
+    it("GIVEN non-operational WHEN setAmortization is called THEN AssetNotOperational", async () => {
+      await expect(asset.setAmortization({ recordDate: 0n, executionDate: 0n, tokensToRedeem: 0n }))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(LOAN_CONFIG_ID, 1);
     });
 
-    describe("when already initialised", () => {
-      beforeEach(async () => {
-        await asset.connect(deployer).initializeAmortization();
-      });
-
-      it("GIVEN an already-initialised facet WHEN initializeAmortization is called again THEN it reverts with FacetAlreadyRegistered", async () => {
-        await expect(asset.connect(deployer).initializeAmortization()).to.be.revertedWithCustomError(
-          asset,
-          "FacetAlreadyRegistered",
-        );
-      });
+    it("GIVEN non-operational WHEN cancelAmortization is called THEN AssetNotOperational", async () => {
+      await expect(asset.cancelAmortization(0n))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(LOAN_CONFIG_ID, 1);
     });
 
-    it("GIVEN a caller with DEFAULT_ADMIN_ROLE WHEN initializeAmortization is called THEN it emits AmortizationInitialized", async () => {
-      await expect(asset.connect(deployer).initializeAmortization()).to.emit(asset, "AmortizationInitialized");
+    it("GIVEN non-operational WHEN releaseAmortizationHold is called THEN AssetNotOperational", async () => {
+      await expect(asset.releaseAmortizationHold(0n, ethers.ZeroAddress))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(LOAN_CONFIG_ID, 1);
+    });
+
+    it("GIVEN non-operational WHEN setAmortizationHold is called THEN AssetNotOperational", async () => {
+      await expect(asset.setAmortizationHold(0n, ethers.ZeroAddress, 0n))
+        .to.be.revertedWithCustomError(asset, "AssetNotOperational")
+        .withArgs(LOAN_CONFIG_ID, 1);
     });
   });
 });

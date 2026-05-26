@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-// solhint-disable func-name-mixedcase
-// solhint-disable private-vars-leading-underscore
-
 import { IFactory } from "./IFactory.sol";
+import { _checkUnexpectedError } from "../infrastructure/utils/UnexpectedError.sol";
+import { FACTORY_OPERATIONAL_STATUS } from "../constants/values.sol";
 import { ResolverProxy } from "../infrastructure/proxy/ResolverProxy.sol";
 import { IResolverProxy } from "../infrastructure/proxy/IResolverProxy.sol";
 import { DEFAULT_ADMIN_ROLE } from "../constants/roles.sol";
 import { IAccessControl } from "../facets/accessControl/IAccessControl.sol";
+import { IInitializer } from "../facets/initializer/IInitializer.sol";
 import { IControlList } from "../facets/controlList/IControlList.sol";
 import { ICore } from "../facets/core/ICore.sol";
 import { IERC20Votes } from "../facets/layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
@@ -17,6 +17,7 @@ import { IERC1410Management } from "../facets/layer_1/ERC1400/ERC1410/IERC1410Ma
 import { ICap } from "../facets/cap/ICap.sol";
 import { IMint } from "../facets/mint/IMint.sol";
 import { IClearing } from "../facets/clearing/IClearing.sol";
+import { IDiamondFacet } from "../infrastructure/diamond/IDiamondFacet.sol";
 import { IBusinessLogicResolver } from "../infrastructure/diamond/IBusinessLogicResolver.sol";
 import {
     FactoryRegulationData,
@@ -31,11 +32,25 @@ import { IEquityUSA } from "../facets/layer_3/equityUSA/IEquityUSA.sol";
 import { IBondUSA } from "../facets/layer_3/bondUSA/IBondUSA.sol";
 import { ISecurity } from "../facets/layer_2/security/ISecurity.sol";
 import { IBondRead } from "../facets/layer_2/bond/IBondRead.sol";
+import { IClearingAtSnapshot } from "../facets/clearingAtSnapshot/IClearingAtSnapshot.sol";
+import {
+    IClearingAtSnapshotByPartition
+} from "../facets/clearingAtSnapshotByPartition/IClearingAtSnapshotByPartition.sol";
+import { IClearingByPartition } from "../facets/clearingByPartition/IClearingByPartition.sol";
+import { IClearingHoldByPartition } from "../facets/clearingHoldByPartition/IClearingHoldByPartition.sol";
+import { IERC20Permit } from "../facets/layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
+import { IIdentity } from "../facets/identity/IIdentity.sol";
+import {
+    IScheduledCrossOrderedTasks
+} from "../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
+import { ISnapshots } from "../facets/layer_1/snapshot/ISnapshots.sol";
 import { IProceedRecipients } from "../facets/layer_2/proceedRecipient/IProceedRecipients.sol";
+
 import { INominalValue } from "../facets/layer_2/nominalValue/INominalValue.sol";
 import { ScheduledTasksStorageWrapper } from "../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { IProtectedPartitions } from "../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 import { IExternalPauseManagement } from "../facets/externalPauseManagement/IExternalPauseManagement.sol";
+import { IInitializer } from "../facets/initializer/IInitializer.sol";
 import {
     IExternalControlListManagement
 } from "../facets/externalControlListManagement/IExternalControlListManagement.sol";
@@ -50,6 +65,7 @@ import { IInterestRate } from "../facets/interestRate/IInterestRate.sol";
 import { EvmAccessors } from "../infrastructure/utils/EvmAccessors.sol";
 import { DatesValidation } from "../infrastructure/utils/DatesValidation.sol";
 import { IAdjustBalances } from "../facets/adjustBalances/IAdjustBalances.sol";
+import { IKpis } from "../facets/layer_2/kpi/kpiLatest/IKpis.sol";
 import { IAllowance } from "../facets/allowance/IAllowance.sol";
 import { IBalanceTracker } from "../facets/balanceTracker/IBalanceTracker.sol";
 import { IBalanceTrackerAdjusted } from "../facets/balanceTrackerAdjusted/IBalanceTrackerAdjusted.sol";
@@ -135,10 +151,17 @@ import { IVotingSecurityHolders } from "../facets/votingSecurityHolders/IVotingS
  * @notice Abstract base contract implementing shared deployment logic for ATS securities
  *         (equities, bonds, fixed-rate bonds, and KPI-linked-rate bonds).
  * @dev Concrete subclasses must implement `IFactory`. Each `deploy*` function creates a
- *      `ResolverProxy` and initialises all facets. If any initialisation fails the whole
- *      deployment reverts.
+ *      `ResolverProxy`, initialises all mandatory facets, and optionally initialises
+ *      optional facets through `try…catch` wrappers.
  */
 abstract contract Factory is IFactory {
+    /// Upper bound for a single-pass setOperationalStatus() call.
+    /// Set to the largest _deploySecurity configuration (bondKpiLinkedRate: 101 facets
+    /// including InitializerFacet) rounded up to the nearest 50 for future additions.
+    /// At this value, gas cost for one setOperationalStatus() pass is ~300 k — well within
+    /// the 10 M deployment budget. Must be updated if any configuration exceeds 150 facets.
+    uint256 private constant _SECURITY_FACETS_MAX = 150;
+
     modifier checkResolver(IBusinessLogicResolver resolver) {
         if (address(resolver) == address(0)) {
             revert EmptyResolver(resolver);
@@ -228,11 +251,15 @@ abstract contract Factory is IFactory {
 
         IInterestRate(equityAddress_).initializeInterestRateType(IInterestRate.RateType.STANDARD);
 
+        IProceedRecipients(equityAddress_).initializeProceedRecipients(new address[](0), new bytes[](0));
+
         IDividend(equityAddress_).initializeDividend();
         IDividendSecurityHolders(equityAddress_).initializeDividendSecurityHolders();
         IVoting(equityAddress_).initializeVoting();
         IVotingSecurityHolders(equityAddress_).initializeVotingSecurityHolders();
 
+        (bool isOperational_, ) = IInitializer(equityAddress_).setOperationalStatus();
+        _checkUnexpectedError(!isOperational_, FACTORY_OPERATIONAL_STATUS);
         IAccessControl(equityAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
 
         emit EquityDeployed(EvmAccessors.getMsgSender(), equityAddress_, _equityData, _factoryRegulationData);
@@ -260,6 +287,8 @@ abstract contract Factory is IFactory {
 
         IInterestRate(bondAddress_).initializeInterestRateType(IInterestRate.RateType.STANDARD);
 
+        (bool isOperational_, ) = IInitializer(bondAddress_).setOperationalStatus();
+        _checkUnexpectedError(!isOperational_, FACTORY_OPERATIONAL_STATUS);
         IAccessControl(bondAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
 
         emit BondDeployed(EvmAccessors.getMsgSender(), bondAddress_, _bondData, _factoryRegulationData);
@@ -298,6 +327,8 @@ abstract contract Factory is IFactory {
 
         IInterestRate(bondAddress_).initializeInterestRateType(IInterestRate.RateType.FIXED);
 
+        (bool isOperational_, ) = IInitializer(bondAddress_).setOperationalStatus();
+        _checkUnexpectedError(!isOperational_, FACTORY_OPERATIONAL_STATUS);
         IAccessControl(bondAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
 
         emit BondFixedRateDeployed(EvmAccessors.getMsgSender(), bondAddress_, _bondFixedRateData);
@@ -329,6 +360,8 @@ abstract contract Factory is IFactory {
         returns (address bondAddress_)
     {
         bondAddress_ = _deployBondKpiLinkedRate(_bondKpiLinkedRateData);
+        (bool isOperational_, ) = IInitializer(bondAddress_).setOperationalStatus();
+        _checkUnexpectedError(!isOperational_, FACTORY_OPERATIONAL_STATUS);
         IAccessControl(bondAddress_).renounceRole(DEFAULT_ADMIN_ROLE);
         _emitBondKpiLinkedRateDeployed(bondAddress_, _bondKpiLinkedRateData);
     }
@@ -386,13 +419,14 @@ abstract contract Factory is IFactory {
 
         IKpiLinkedRate(bondAddress_).initializeKpiLinkedRate(_data.interestRate, _data.impactData);
         IInterestRate(bondAddress_).initializeInterestRateType(IInterestRate.RateType.KPI_LINKED);
+        IKpis(bondAddress_).initializeKpis();
     }
 
     //solhint-disable-next-line function-max-lines
     function _deploySecurity(
         SecurityData calldata _securityData,
         SecurityType _securityType
-    ) private returns (address securityAddress_) {
+    ) internal virtual returns (address securityAddress_) {
         // Build extended rbacs array that includes the factory as a temporary
         // DEFAULT_ADMIN_ROLE holder during initialisation.
         uint256 rbacsLen = _securityData.rbacs.length;
@@ -648,6 +682,23 @@ abstract contract Factory is IFactory {
 
         // configure cap by partition
         ICapByPartition(securityAddress_).initializeCapByPartition();
+
+        // Initialize remaining facets that are in production configurations but
+        // lack dedicated _tryInitialize_* calls above. These are view-only helper
+        // facets registered alongside the main business facets.
+        ISnapshots(securityAddress_).initializeSnapshots();
+        IClearingByPartition(securityAddress_).initializeClearingByPartition();
+        IClearingHoldByPartition(securityAddress_).initializeClearingHoldByPartition();
+        IClearingAtSnapshot(securityAddress_).initializeClearingAtSnapshot();
+        IClearingAtSnapshotByPartition(securityAddress_).initializeClearingAtSnapshotByPartition();
+        IERC20Permit(securityAddress_).initializeERC20Permit();
+        IIdentity(securityAddress_).initializeIdentity();
+        IScheduledCrossOrderedTasks(securityAddress_).initializeScheduledCrossOrderedTasks();
+        IDiamondFacet(securityAddress_).initializeDiamondCut();
+        // Seed the initializer facet's batch size so that setOperationalStatus
+        // (called from each deployEquity / deployBond / …) can iterate through
+        // every registered facet in a single pass.
+        IInitializer(securityAddress_).initializeInitializer(_SECURITY_FACETS_MAX);
     }
 
     function _emitBondKpiLinkedRateDeployed(

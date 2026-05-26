@@ -45,6 +45,7 @@ abstract contract LockByPartition is ILockByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(LOCKER_ROLE)
@@ -78,6 +79,7 @@ abstract contract LockByPartition is ILockByPartition, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)

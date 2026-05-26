@@ -31,7 +31,14 @@ abstract contract Operator is IOperator, Modifiers {
     /// @inheritdoc IOperator
     function authorizeOperator(
         address _operator
-    ) external override onlyActivated onlyUnpaused onlyCompliant(EvmAccessors.getMsgSender(), _operator, false) {
+    )
+        external
+        override
+        onlyOperational
+        onlyActivated
+        onlyUnpaused
+        onlyCompliant(EvmAccessors.getMsgSender(), _operator, false)
+    {
         ERC1410StorageWrapper.authorizeOperator(_operator);
         emit OperatorAuthorized(_operator, EvmAccessors.getMsgSender());
     }
@@ -42,6 +49,7 @@ abstract contract Operator is IOperator, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyIdentifiedAddresses(EvmAccessors.getMsgSender(), _operator)

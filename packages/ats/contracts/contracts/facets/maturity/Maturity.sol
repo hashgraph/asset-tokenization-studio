@@ -42,6 +42,7 @@ abstract contract Maturity is IMaturity, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyClearingDisabled
@@ -73,6 +74,7 @@ abstract contract Maturity is IMaturity, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(BOND_MANAGER_ROLE)

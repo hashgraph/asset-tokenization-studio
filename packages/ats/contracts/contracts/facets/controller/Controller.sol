@@ -38,6 +38,7 @@ abstract contract Controller is IController, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyControllable
@@ -57,6 +58,7 @@ abstract contract Controller is IController, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyControllable
@@ -68,7 +70,14 @@ abstract contract Controller is IController, Modifiers {
     }
 
     /// @inheritdoc IController
-    function finalizeControllable() external override onlyActivated onlyRole(DEFAULT_ADMIN_ROLE) onlyControllable {
+    function finalizeControllable()
+        external
+        override
+        onlyOperational
+        onlyActivated
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyControllable
+    {
         ERC1644StorageWrapper.finalizeControllable();
     }
 
@@ -80,6 +89,7 @@ abstract contract Controller is IController, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyWithoutMultiPartition
@@ -93,13 +103,13 @@ abstract contract Controller is IController, Modifiers {
     }
 
     /// @inheritdoc IController
-    function addAgent(address _agent) external override onlyActivated onlyUnpaused onlyAdminRole {
+    function addAgent(address _agent) external override onlyOperational onlyActivated onlyUnpaused onlyAdminRole {
         ERC3643StorageWrapper.addAgent(_agent);
         emit IERC3643Types.AgentAdded(_agent);
     }
 
     /// @inheritdoc IController
-    function removeAgent(address _agent) external override onlyActivated onlyUnpaused onlyAdminRole {
+    function removeAgent(address _agent) external override onlyOperational onlyActivated onlyUnpaused onlyAdminRole {
         ERC3643StorageWrapper.removeAgent(_agent);
         emit IERC3643Types.AgentRemoved(_agent);
     }

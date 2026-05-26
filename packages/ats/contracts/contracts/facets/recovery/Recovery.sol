@@ -35,6 +35,7 @@ abstract contract Recovery is IRecovery, Modifiers {
     )
         external
         override
+        onlyOperational
         onlyActivated
         onlyUnpaused
         onlyRole(AGENT_ROLE)

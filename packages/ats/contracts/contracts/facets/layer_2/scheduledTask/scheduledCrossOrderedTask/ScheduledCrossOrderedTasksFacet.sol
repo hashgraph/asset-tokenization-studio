@@ -9,12 +9,13 @@ import { _SCHEDULED_TASKS_RESOLVER_KEY } from "../../../../constants/resolverKey
 
 contract ScheduledCrossOrderedTasksFacet is ScheduledCrossOrderedTasks, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _SCHEDULED_TASKS_RESOLVER_KEY;
+        staticResolverKey_ = _getResolverKey();
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeScheduledCrossOrderedTasks.selector,
                 this.triggerPendingScheduledCrossOrderedTasks.selector,
                 this.triggerScheduledCrossOrderedTasks.selector,
                 this.scheduledCrossOrderedTaskCount.selector,
@@ -24,5 +25,9 @@ contract ScheduledCrossOrderedTasksFacet is ScheduledCrossOrderedTasks, IStaticF
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory) {
         return Bytes4Builder.build(type(IScheduledCrossOrderedTasks).interfaceId);
+    }
+
+    function _getResolverKey() internal pure override returns (bytes32) {
+        return _SCHEDULED_TASKS_RESOLVER_KEY;
     }
 }

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _INITIALIZER_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { ResolverProxyStorageWrapper } from "./ResolverProxyStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { IDiamondCutManager } from "../../infrastructure/diamond/IDiamondCutManager.sol";
 import { IInitializer } from "../../facets/initializer/IInitializer.sol";
-import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { ResolverProxyStorageWrapper } from "./ResolverProxyStorageWrapper.sol";
+import { _INITIALIZER_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 
 /**
  * @notice Diamond-storage layout backing the initializer facet.
@@ -178,6 +178,16 @@ library InitializerStorageWrapper {
      */
     function setFacetLastVersionTo(bytes32 _facetId, uint256 _versionId) internal {
         initializerStorage().facetLastVersion[_facetId] = _versionId;
+    }
+
+    /// @notice Sets the operational status for a configuration version.
+    /// @dev Used by tests (via MockDiamondCut.forceNonOperational()) to set status to 0
+    ///      and by `setOperationalStatus` flow to set status to 1 after full initialisation.
+    /// @param configId Resolver-proxy configuration.
+    /// @param versionId Configuration version.
+    /// @param status Status value: 0 = not started, 1 = fully operational.
+    function setConfigVersion(bytes32 configId, uint256 versionId, uint256 status) internal {
+        initializerStorage().configVersionStatus[configId][versionId] = status;
     }
 
     /**

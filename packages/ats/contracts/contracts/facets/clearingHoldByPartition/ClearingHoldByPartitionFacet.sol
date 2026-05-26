@@ -25,6 +25,7 @@ contract ClearingHoldByPartitionFacet is ClearingHoldByPartition, IStaticFunctio
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory) {
         return
             Bytes4Builder.build(
+                this.initializeClearingHoldByPartition.selector,
                 this.getClearingCreateHoldForByPartition.selector,
                 this.clearingCreateHoldFromByPartition.selector,
                 this.clearingCreateHoldByPartition.selector
