@@ -26,7 +26,6 @@ import {
     RegulationSubType,
     _checkRegulationTypeAndSubType
 } from "../constants/regulation.sol";
-import { IEquityUSA } from "../facets/layer_3/equityUSA/IEquityUSA.sol";
 import { IClearingAtSnapshot } from "../facets/clearingAtSnapshot/IClearingAtSnapshot.sol";
 import {
     IClearingAtSnapshotByPartition
@@ -250,7 +249,6 @@ abstract contract Factory is IFactory {
         returns (address equityAddress_)
     {
         equityAddress_ = _deploySecurity(_equityData.security, SecurityType.Equity);
-        IEquityUSA(equityAddress_).initializeEquityUSA(_equityData.equityDetails);
         INominalValue(equityAddress_).initializeNominalValue(
             _equityData.equityDetails.nominalValue,
             _equityData.equityDetails.nominalValueDecimals,

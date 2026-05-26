@@ -79,17 +79,8 @@ bytes4 constant KPI_KPIS_SET_MINDATE = 0x00000004;
 /// @dev ID for ERC20VotesStorageWrapper.calculateFactorBetween()
 bytes4 constant KPI_VOTES_CALC_FACTOR = 0x00000005;
 
-/// @dev ID for EquityStorageWrapper.getDividend()
-bytes4 constant KPI_EQUITY_DIVIDEND_DATA = 0x00000006;
-
-/// @dev ID for EquityStorageWrapper.getVoting()
-bytes4 constant KPI_EQUITY_VOTING_DATA = 0x00000007;
-
-/// @dev ID for EquityStorageWrapper.getScheduledBalanceAdjustment()
-bytes4 constant KPI_EQUITY_BALANCE_ADJ = 0x00000008;
-
-/// @dev ID for Bond.redeemAtMaturity()
-bytes4 constant KPI_BOND_REDEEM_BALANCE = 0x00000009;
+/// @dev ID for BalanceAdjustmentOps.getScheduledBalanceAdjustment()
+bytes4 constant BALANCE_ADJ_DATA = 0x00000008;
 
 /// @dev ID for KpiLinkedRateLib._getPreviousCouponRate()
 bytes4 constant KPI_LINKED_RATE_COUPON = 0x0000000A;

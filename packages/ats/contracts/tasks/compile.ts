@@ -88,7 +88,6 @@ task("erc3643-clone-interfaces", async (_, hre) => {
       removeImports: false,
       removeHierarchy: false,
     },
-    { original: "IEquity" },
     { original: "IFactory", removeImports: false },
     { original: "IResolverProxy" },
     { original: "IStaticFunctionSelectors" },

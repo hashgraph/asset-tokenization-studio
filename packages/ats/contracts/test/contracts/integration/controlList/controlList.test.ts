@@ -10,7 +10,7 @@ import {
   IAsset__factory,
 } from "@contract-types";
 import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT } from "@scripts";
-import { deployEquityTokenFixture, getSecurityData, getEquityDetails, getRegulationData } from "@test";
+import { deployEquityTokenFixture, getSecurityData, getRegulationData, makeEquityDetailsData } from "@test";
 import { grantRoleAndPauseToken } from "@test";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { ethers } from "hardhat";
@@ -87,7 +87,7 @@ describe("Control List Tests", () => {
       security: getSecurityData(blr, {
         rbacs: [{ role: ATS_ROLES.DEFAULT_ADMIN_ROLE, members: [signer_A.address] }],
       }),
-      equityDetails: getEquityDetails(),
+      equityDetails: makeEquityDetailsData(),
     };
     const tx = await factory.deployEquity(equityData, getRegulationData(), { gasLimit: GAS_LIMIT.high });
     const receipt = await tx.wait();

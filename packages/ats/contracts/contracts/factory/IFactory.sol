@@ -4,7 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IResolverProxy } from "../infrastructure/proxy/IResolverProxy.sol";
 import { IBusinessLogicResolver } from "../infrastructure/diamond/IBusinessLogicResolver.sol";
 import { ICore } from "../facets/core/ICore.sol";
-import { IEquity } from "../facets/layer_2/equity/IEquity.sol";
 import { FactoryRegulationData, RegulationData, RegulationType, RegulationSubType } from "../constants/regulation.sol";
 
 /// @custom:hash resolverKey Factory
@@ -34,6 +33,12 @@ interface IFactory {
         /// @notice A loan instrument.
         Loan,
         DepositToken
+    }
+
+    enum DividendType {
+        NONE,
+        PREFERRED,
+        COMMON
     }
 
     /**
@@ -88,6 +93,20 @@ interface IFactory {
         bool erc20VotesActivated;
     }
 
+    struct EquityDetailsData {
+        bool votingRight;
+        bool informationRight;
+        bool liquidationRight;
+        bool subscriptionRight;
+        bool conversionRight;
+        bool redemptionRight;
+        bool putRight;
+        DividendType dividendRight;
+        bytes3 currency;
+        uint256 nominalValue;
+        uint8 nominalValueDecimals;
+    }
+
     /**
      * @notice Full configuration for deploying an equity token.
      * @param security      Core security configuration shared across all security types.
@@ -95,7 +114,7 @@ interface IFactory {
      */
     struct EquityData {
         SecurityData security;
-        IEquity.EquityDetailsData equityDetails;
+        EquityDetailsData equityDetails;
     }
 
     /**

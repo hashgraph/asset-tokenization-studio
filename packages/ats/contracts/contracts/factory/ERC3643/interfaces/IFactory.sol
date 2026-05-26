@@ -9,7 +9,6 @@ pragma solidity ^0.8.17;
 import { TRexIResolverProxy as IResolverProxy } from "./IResolverProxy.sol";
 import { TRexIBusinessLogicResolver as IBusinessLogicResolver } from "./IBusinessLogicResolver.sol";
 import { TRexICore as ICore } from "./ICore.sol";
-import { TRexIEquity as IEquity } from "./IEquity.sol";
 import { FactoryRegulationData, RegulationData, RegulationType, RegulationSubType } from "./regulation.sol";
 
 /// @custom:hash resolverKey Factory
@@ -39,6 +38,12 @@ interface TRexIFactory {
         /// @notice A loan instrument.
         Loan,
         DepositToken
+    }
+
+    enum DividendType {
+        NONE,
+        PREFERRED,
+        COMMON
     }
 
     /**
@@ -93,6 +98,20 @@ interface TRexIFactory {
         bool erc20VotesActivated;
     }
 
+    struct EquityDetailsData {
+        bool votingRight;
+        bool informationRight;
+        bool liquidationRight;
+        bool subscriptionRight;
+        bool conversionRight;
+        bool redemptionRight;
+        bool putRight;
+        DividendType dividendRight;
+        bytes3 currency;
+        uint256 nominalValue;
+        uint8 nominalValueDecimals;
+    }
+
     /**
      * @notice Full configuration for deploying an equity token.
      * @param security      Core security configuration shared across all security types.
@@ -100,7 +119,7 @@ interface TRexIFactory {
      */
     struct EquityData {
         SecurityData security;
-        IEquity.EquityDetailsData equityDetails;
+        EquityDetailsData equityDetails;
     }
 
     /**

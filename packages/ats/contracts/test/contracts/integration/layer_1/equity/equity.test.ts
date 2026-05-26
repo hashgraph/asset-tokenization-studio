@@ -14,7 +14,7 @@ import {
   ATS_ROLES,
   CURRENCIES,
 } from "@scripts";
-import { getEquityDetails, grantRoleAndPauseToken } from "@test";
+import { grantRoleAndPauseToken } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
@@ -111,29 +111,6 @@ describe("Equity Tests", () => {
       factor: balanceAdjustmentFactor,
       decimals: balanceAdjustmentDecimals,
     };
-  });
-
-  describe("Initialization", () => {
-    it("GIVEN a caller without DEFAULT_ADMIN_ROLE WHEN initializeEquityUSA is called THEN it reverts with AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeEquityUSA(getEquityDetails())).to.be.revertedWithCustomError(
-        asset,
-        "AccountHasNoRole",
-      );
-    });
-
-    it("GIVEN an initialized equity WHEN trying to initialize again THEN transaction fails with FacetAlreadyRegistered", async () => {
-      await expect(asset.initializeEquityUSA(getEquityDetails())).to.be.revertedWithCustomError(
-        asset,
-        "FacetAlreadyRegistered",
-      );
-    });
-
-    it("GIVEN an equity token WHEN getEquityDetails is called THEN returns correct equity details", async () => {
-      const equityDetails = await asset.getEquityDetails();
-
-      expect(equityDetails.nominalValue).to.be.gt(0);
-      expect(equityDetails.currency).to.equal(CURRENCIES.USD);
-    });
   });
 
   describe("Dividends", () => {

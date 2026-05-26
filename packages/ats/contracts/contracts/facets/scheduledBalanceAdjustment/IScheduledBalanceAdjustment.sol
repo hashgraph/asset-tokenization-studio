@@ -13,7 +13,7 @@ bytes32 constant RESOLVER_KEY_SCHEDULED_BALANCE_ADJUSTMENT = 0x90c7d769d18188f75
  * @notice Interface for scheduled balance adjustment corporate actions on tokenised assets.
  * @dev Scheduled balance adjustments enqueue operations to multiply every token holder's balance
  *      by `factor / 10^decimals` at a future date. Tasks are managed through `ScheduledTasksStorageWrapper`
- *      and corporate-action records through `EquityStorageWrapper`.
+ *      and corporate-action records through `BalanceAdjustmentOps`.
  */
 interface IScheduledBalanceAdjustment {
     /**
@@ -87,7 +87,7 @@ interface IScheduledBalanceAdjustment {
      * @notice Enqueues a balance adjustment to be executed at a future date.
      * @dev Caller must hold `ROLE_CORPORATE_ACTION`. The token must not be paused,
      *      `_newBalanceAdjustment.executionDate` must be a future timestamp, and `factor` must be
-     *      non-zero. Creates a corporate action record via `EquityStorageWrapper` and emits
+     *      non-zero. Creates a corporate action record via `BalanceAdjustmentOps` and emits
      *      `ScheduledBalanceAdjustmentSet`.
      * @param _newBalanceAdjustment Parameters of the adjustment to schedule.
      * @return balanceAdjustmentID_ Sequential identifier assigned to the newly created adjustment.

@@ -8,7 +8,7 @@ import {
 import { ROLE_CORPORATE_ACTION, ROLE_CORPORATE_ACTION_FORCE_CANCEL } from "../../constants/roles.sol";
 import { CORPORATE_ACTION_TYPE_BALANCE_ADJUSTMENT } from "../../constants/dispatchTypes.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
-import { EquityStorageWrapper } from "../../domain/asset/EquityStorageWrapper.sol";
+import { BalanceAdjustmentOps } from "../../domain/orchestrator/BalanceAdjustmentOps.sol";
 import { ScheduledTasksStorageWrapper } from "../../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { ScheduledTask } from "../layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
@@ -21,7 +21,7 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
  * @notice Abstract implementation of `IScheduledBalanceAdjustment` providing scheduled
  *         balance adjustment corporate actions for tokenised assets.
  * @dev Inherits access-control guards from `Modifiers`. Scheduled adjustments are managed
- *      through `EquityStorageWrapper` and `ScheduledTasksStorageWrapper`. Intended to be
+ *      through `BalanceAdjustmentOps` and `ScheduledTasksStorageWrapper`. Intended to be
  *      inherited by `ScheduledBalanceAdjustmentFacet`.
  */
 abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, Modifiers {
@@ -52,7 +52,7 @@ abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, Mod
         returns (uint256 balanceAdjustmentID_)
     {
         bytes32 corporateActionID;
-        (corporateActionID, balanceAdjustmentID_) = EquityStorageWrapper.setScheduledBalanceAdjustment(
+        (corporateActionID, balanceAdjustmentID_) = BalanceAdjustmentOps.setScheduledBalanceAdjustment(
             _newBalanceAdjustment
         );
         emit IScheduledBalanceAdjustment.ScheduledBalanceAdjustmentSet(
@@ -78,7 +78,7 @@ abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, Mod
         notZeroValue(_balanceAdjustmentId)
         returns (bool success_)
     {
-        EquityStorageWrapper.cancelScheduledBalanceAdjustment(_balanceAdjustmentId);
+        BalanceAdjustmentOps.cancelScheduledBalanceAdjustment(_balanceAdjustmentId);
         emit IScheduledBalanceAdjustment.ScheduledBalanceAdjustmentCancelled(
             _balanceAdjustmentId,
             EvmAccessors.getMsgSender()
@@ -100,7 +100,7 @@ abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, Mod
         onlyMatchingActionType(CORPORATE_ACTION_TYPE_BALANCE_ADJUSTMENT, _balanceAdjustmentId - 1)
         returns (bool success_)
     {
-        EquityStorageWrapper.forceCancelScheduledBalanceAdjustment(_balanceAdjustmentId);
+        BalanceAdjustmentOps.forceCancelScheduledBalanceAdjustment(_balanceAdjustmentId);
         emit IScheduledBalanceAdjustment.ScheduledBalanceAdjustmentForceCancelled(
             _balanceAdjustmentId,
             EvmAccessors.getMsgSender()
@@ -119,12 +119,12 @@ abstract contract ScheduledBalanceAdjustment is IScheduledBalanceAdjustment, Mod
         onlyMatchingActionType(CORPORATE_ACTION_TYPE_BALANCE_ADJUSTMENT, _balanceAdjustmentID - 1)
         returns (IScheduledBalanceAdjustment.ScheduledBalanceAdjustment memory balanceAdjustment_, bool isDisabled_)
     {
-        (balanceAdjustment_, , isDisabled_) = EquityStorageWrapper.getScheduledBalanceAdjustment(_balanceAdjustmentID);
+        (balanceAdjustment_, , isDisabled_) = BalanceAdjustmentOps.getScheduledBalanceAdjustment(_balanceAdjustmentID);
     }
 
     /// @inheritdoc IScheduledBalanceAdjustment
     function getBalanceAdjustmentCount() external view override returns (uint256 balanceAdjustmentCount_) {
-        return EquityStorageWrapper.getScheduledBalanceAdjustmentsCount();
+        return BalanceAdjustmentOps.getScheduledBalanceAdjustmentsCount();
     }
 
     /// @inheritdoc IScheduledBalanceAdjustment

@@ -34,8 +34,6 @@ import { ITransfer } from "./transfer/ITransfer.sol";
 // Layer 1 — Remaining facets
 import { IERC20Votes } from "./erc20Votes/IERC20Votes.sol";
 import { IERC3643 } from "./layer_1/ERC3643/IERC3643.sol";
-import { IEquity } from "./layer_2/equity/IEquity.sol";
-import { IEquityUSA } from "./layer_3/equityUSA/IEquityUSA.sol";
 import { IExternalControlList } from "./layer_1/externalControlList/IExternalControlList.sol";
 import { IExternalControlListManagement } from "./externalControlListManagement/IExternalControlListManagement.sol";
 import { IExternalKycList } from "./layer_1/externalKycList/IExternalKycList.sol";
@@ -195,7 +193,6 @@ interface IAsset is
     IScheduledCrossOrderedTasks,
     IPrincipal,
     IMaturity,
-    IEquity,
     ICorporateActions,
     IProtectedPartitions,
     IProceedRecipients,
@@ -208,7 +205,6 @@ interface IAsset is
     ILoansPortfolio,
     IVoting,
     IVotingSecurityHolders,
-    IEquityUSA,
     ITransferAndLock,
     ITransferAndLockByPartition,
     // Corporate Actions

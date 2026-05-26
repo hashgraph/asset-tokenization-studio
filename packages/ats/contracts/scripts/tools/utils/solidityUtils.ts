@@ -21,8 +21,7 @@ const BASE_CLASSES_TO_EXCLUDE = new Set([
   "TransferAndLockStorageWrapper",
   "ERC20StorageWrapper",
   "CorporateActionStorageWrapper",
-  "BondStorageWrapper",
-  "EquityStorageWrapper",
+  "BalanceAdjustmentOps",
   "ComplianceStorageWrapper",
   "ScheduledTaskStorageWrapper",
 ]);

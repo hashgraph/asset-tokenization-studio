@@ -28,7 +28,7 @@ import { ADDRESS_ZERO, EQUITY_CONFIG_ID, BOND_CONFIG_ID, ATS_ROLES } from "@scri
 import { Rbac } from "@scripts/domain";
 import { decodeEvent } from "@scripts/infrastructure";
 import { getSecurityData, getRegulationData } from "@test";
-import { getEquityDetails } from "@test";
+import { makeEquityDetailsData } from "@test";
 import { getBondDetails } from "@test";
 
 describe("TREX Factory Tests", () => {
@@ -130,7 +130,7 @@ describe("TREX Factory Tests", () => {
     it("GIVEN a consumed salt WHEN reusing it THEN transaction reverts with token already deployed", async () => {
       const equityData = {
         security: getSecurityData(businessLogicResolver),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -151,7 +151,7 @@ describe("TREX Factory Tests", () => {
     it("GIVEN an invalid claim pattern THEN transaction reverts with claim pattern not valid", async () => {
       const equityData = {
         security: getSecurityData(businessLogicResolver),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -172,7 +172,7 @@ describe("TREX Factory Tests", () => {
     it("GIVEN max claim issuers exceeded THEN transaction reverts with max 5 claim issuers at deployment", async () => {
       const equityData = {
         security: getSecurityData(businessLogicResolver),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -194,7 +194,7 @@ describe("TREX Factory Tests", () => {
     it("GIVEN max claim topics exceeded THEN transaction reverts with max 5 claim topics at deployment", async () => {
       const equityData = {
         security: getSecurityData(businessLogicResolver),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -215,7 +215,7 @@ describe("TREX Factory Tests", () => {
     it("GIVEN max ir agents exceeded THEN transaction reverts with max 5 agents at deployment", async () => {
       const equityData = {
         security: getSecurityData(businessLogicResolver),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -236,7 +236,7 @@ describe("TREX Factory Tests", () => {
     it("GIVEN max token agents exceeded THEN transaction reverts with max 5 agents at deployment", async () => {
       const equityData = {
         security: getSecurityData(businessLogicResolver),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -257,7 +257,7 @@ describe("TREX Factory Tests", () => {
     it("GIVEN max token agents exceeded THEN transaction reverts with max 5 agents at deployment", async () => {
       const equityData = {
         security: getSecurityData(businessLogicResolver),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -278,7 +278,7 @@ describe("TREX Factory Tests", () => {
     it("GIVEN max modules actions exceeded THEN transaction reverts with max 30 module actions at deployment", async () => {
       const equityData = {
         security: getSecurityData(businessLogicResolver),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -301,7 +301,7 @@ describe("TREX Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -331,7 +331,7 @@ describe("TREX Factory Tests", () => {
     it("GIVEN correct data WHEN fetching deployed suite by salt THEN suite details are returned", async () => {
       const equityData = {
         security: getSecurityData(businessLogicResolver),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -351,7 +351,7 @@ describe("TREX Factory Tests", () => {
     it("GIVEN no DEFAULT_ADMIN_ROLE in rbacs WHEN deploying equity THEN tRexOwner has DEFAULT_ADMIN_ROLE after deployment", async () => {
       const equityData = {
         security: getSecurityData(businessLogicResolver), // rbacs: [] — owner does NOT explicitly grant themselves DEFAULT_ADMIN_ROLE
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -391,7 +391,7 @@ describe("TREX Factory Tests", () => {
             },
           ],
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -430,7 +430,7 @@ describe("TREX Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -491,7 +491,7 @@ describe("TREX Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: rbacWithDifferentOwner,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -540,7 +540,7 @@ describe("TREX Factory Tests", () => {
           rbacs: init_rbacs,
           compliance: compliance.target as string,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -590,7 +590,7 @@ describe("TREX Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -631,7 +631,7 @@ describe("TREX Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityDataFirst.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -690,7 +690,7 @@ describe("TREX Factory Tests", () => {
           rbacs: init_rbacs,
           identityRegistry: firstIR,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -737,7 +737,7 @@ describe("TREX Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -789,7 +789,7 @@ describe("TREX Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -830,7 +830,7 @@ describe("TREX Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -873,7 +873,7 @@ describe("TREX Factory Tests", () => {
         security: getSecurityData(businessLogicResolver, {
           rbacs: init_rbacs,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = {
         key: EQUITY_CONFIG_ID,
@@ -1730,7 +1730,7 @@ describe("TREX Factory Tests", () => {
           rbacs: init_rbacs,
           compliance: compliance.target as string,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = { key: EQUITY_CONFIG_ID, version: 1 };
 
@@ -1763,7 +1763,7 @@ describe("TREX Factory Tests", () => {
 
       const equityData = {
         security: getSecurityData(businessLogicResolver, { rbacs: init_rbacs }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = { key: EQUITY_CONFIG_ID, version: 1 };
 
@@ -1787,7 +1787,7 @@ describe("TREX Factory Tests", () => {
     it("GIVEN existing IR WHEN deploying equity THEN IR/TIR/CTR/IRS ownership is NOT transferred to tokenDetails.owner", async () => {
       const equityDataFirst = {
         security: getSecurityData(businessLogicResolver, { rbacs: init_rbacs }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityDataFirst.security.resolverProxyConfiguration = { key: EQUITY_CONFIG_ID, version: 1 };
 
@@ -1827,7 +1827,7 @@ describe("TREX Factory Tests", () => {
           rbacs: init_rbacs,
           identityRegistry: firstIR,
         }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = { key: EQUITY_CONFIG_ID, version: 1 };
 
@@ -1859,7 +1859,7 @@ describe("TREX Factory Tests", () => {
     it("GIVEN all-new infrastructure WHEN deploying equity THEN ownership IS transferred to tokenDetails.owner", async () => {
       const equityData = {
         security: getSecurityData(businessLogicResolver, { rbacs: init_rbacs }),
-        equityDetails: getEquityDetails(),
+        equityDetails: makeEquityDetailsData(),
       };
       equityData.security.resolverProxyConfiguration = { key: EQUITY_CONFIG_ID, version: 1 };
 
