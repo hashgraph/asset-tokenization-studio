@@ -85,15 +85,13 @@ abstract contract AccessControl is IAccessControl, Modifiers {
         onlyUnpaused
         onlySameRolesAndActivesLength(_roles.length, _actives.length)
         onlyConsistentRoles(_roles, _actives)
-        returns (bool success_)
     {
-        bytes32[] memory appliedRoles;
-        bool[] memory appliedActives;
-        (success_, appliedRoles, appliedActives) = AccessControlStorageWrapper.applyRoles(_roles, _actives, _account);
-        if (!success_) {
-            revert RolesNotApplied(_roles, _actives, _account);
-        }
-        emit RolesApplied(_roles, _actives, _account, appliedRoles, appliedActives);
+        (bytes32[] memory appliedRoles, bool[] memory appliedStates) = AccessControlStorageWrapper.applyRoles(
+            _roles,
+            _actives,
+            _account
+        );
+        emit RolesApplied(_roles, _actives, _account, appliedRoles, appliedStates);
     }
 
     /// @inheritdoc IAccessControl
