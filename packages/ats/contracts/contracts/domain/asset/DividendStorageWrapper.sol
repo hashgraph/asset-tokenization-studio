@@ -166,7 +166,7 @@ library DividendStorageWrapper {
      * @notice Retrieves dividend-related information for a specific account,
      *         including token balance and decimals at the record date.
      * @dev Calls `getDividend` to obtain the dividend record, then uses the
-     *      internal helper `_getSnapshotBalanceForIfDateReached` to determine
+     *      helper `SnapshotsStorageWrapper.getSnapshotTakenBalance` to determine
      *      the holder's balance, token decimals, and whether the record date has
      *      already been reached.
      * @param dividendId The dividend identifier
@@ -187,15 +187,8 @@ library DividendStorageWrapper {
         dividendFor_.executionDate = registeredDividend.dividend.executionDate;
         dividendFor_.isDisabled = isDisabled;
 
-        (
-            dividendFor_.tokenBalance,
-            dividendFor_.decimals,
-            dividendFor_.recordDateReached
-        ) = _getSnapshotBalanceForIfDateReached(
-            registeredDividend.dividend.recordDate,
-            registeredDividend.snapshotId,
-            account
-        );
+        (dividendFor_.tokenBalance, dividendFor_.decimals, dividendFor_.recordDateReached) = SnapshotsStorageWrapper
+            .getSnapshotTakenBalance(registeredDividend.dividend.recordDate, registeredDividend.snapshotId, account);
     }
 
     /**
@@ -312,20 +305,5 @@ library DividendStorageWrapper {
         CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
     }
 
-    function _getSnapshotBalanceForIfDateReached(
-        uint256 date,
-        uint256 snapshotId,
-        address account
-    ) private view returns (uint256 balance_, uint8 decimals_, bool dateReached_) {
-        if (date >= TimeTravelStorageWrapper.getBlockTimestamp()) return (balance_, decimals_, dateReached_);
-        dateReached_ = true;
-
-        balance_ = (snapshotId != 0)
-            ? SnapshotsStorageWrapper.getTotalBalanceOfAtSnapshot(snapshotId, account)
-            : TokenCoreOps.getTotalBalanceForAdjustedAt(account, date);
-
-        decimals_ = (snapshotId != 0)
-            ? SnapshotsStorageWrapper.decimalsAtSnapshot(snapshotId)
-            : ERC20StorageWrapper.decimalsAdjustedAt(date);
-    }
+    
 }

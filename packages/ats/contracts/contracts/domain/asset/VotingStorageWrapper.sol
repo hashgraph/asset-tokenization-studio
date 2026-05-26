@@ -162,15 +162,8 @@ library VotingStorageWrapper {
         votingFor_.data = registeredVoting.voting.data;
         votingFor_.isDisabled = isDisabled_;
 
-        (
-            votingFor_.tokenBalance,
-            votingFor_.decimals,
-            votingFor_.recordDateReached
-        ) = _getSnapshotBalanceForIfDateReached(
-            registeredVoting.voting.recordDate,
-            registeredVoting.snapshotId,
-            account
-        );
+        (votingFor_.tokenBalance, votingFor_.decimals, votingFor_.recordDateReached) = SnapshotsStorageWrapper
+            .getSnapshotTakenBalance(registeredVoting.voting.recordDate, registeredVoting.snapshotId, account);
     }
 
     /**
@@ -241,22 +234,5 @@ library VotingStorageWrapper {
      */
     function _executeCancelVoting(bytes32 corporateActionId) private {
         CorporateActionsStorageWrapper.cancelCorporateAction(corporateActionId);
-    }
-
-    function _getSnapshotBalanceForIfDateReached(
-        uint256 date,
-        uint256 snapshotId,
-        address account
-    ) private view returns (uint256 balance_, uint8 decimals_, bool dateReached_) {
-        if (date >= TimeTravelStorageWrapper.getBlockTimestamp()) return (balance_, decimals_, dateReached_);
-        dateReached_ = true;
-
-        balance_ = (snapshotId != 0)
-            ? SnapshotsStorageWrapper.getTotalBalanceOfAtSnapshot(snapshotId, account)
-            : TokenCoreOps.getTotalBalanceForAdjustedAt(account, date);
-
-        decimals_ = (snapshotId != 0)
-            ? SnapshotsStorageWrapper.decimalsAtSnapshot(snapshotId)
-            : ERC20StorageWrapper.decimalsAdjustedAt(date);
     }
 }
