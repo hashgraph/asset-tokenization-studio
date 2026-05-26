@@ -192,6 +192,11 @@ library DividendStorageWrapper {
      *      with `recordDateReached` set to false. Otherwise sets
      *      `recordDateReached` to true and calculates the proportional amount as
      *      `tokenBalance * amount / 10^(tokenDecimals + amountDecimals)`.
+     *      The numerator is staged via `Math.mulDiv(tokenBalance, amount, 10^tokenDecimals)`
+     *      to avoid a direct two-value overflow: the token-decimal scale is consumed inside
+     *      a 512-bit intermediate, and the denominator is reduced to `10^amountDecimals`.
+     *      The resulting fraction is mathematically equivalent; intermediate products remain
+     *      bounded even for large institutional balances or high-precision dividend amounts.
      * @param dividendId The dividend identifier
      * @param account The holder address
      * @return dividendAmountFor_ Struct containing the fraction (numerator,
