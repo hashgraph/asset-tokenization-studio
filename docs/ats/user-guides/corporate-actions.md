@@ -253,48 +253,93 @@ See [Roles and Permissions](./roles-and-permissions.md) for more details.
 
 ---
 
+## Cancelling Corporate Actions
+
+Each corporate action type has two cancellation paths depending on when it is called relative to its execution date.
+
+### Normal cancel — use before the execution date
+
+Use this when the action has not yet been processed on-chain. It simply marks the action as disabled and prevents any further execution.
+
+| Action type        | Function                               |
+| ------------------ | -------------------------------------- |
+| Balance Adjustment | `cancelScheduledBalanceAdjustment(id)` |
+| Dividend           | `cancelDividend(id)`                   |
+| Voting             | `cancelVoting(id)`                     |
+| Coupon             | `cancelCoupon(id)`                     |
+| Amortization       | `cancelAmortization(id)`               |
+
+These functions enforce a date guard — they revert if the execution (or record) date has already passed.
+
+---
+
 ## ⚠️ Emergency Force-Cancel Operations
 
-:::danger If you use these functions incorrectly you will permanently corrupt the token. There is no undo.
+:::danger THIS SYSTEM DOES NOT PERFORM ROLLBACKS
+
+Force cancel sets a disabled flag. It does **not** undo any on-chain state that was already written. Balances, snapshots, and coupon listings that executed before the cancel are **permanent**. If you call force cancel after execution has already occurred, your token will be in an inconsistent state with no recovery path other than a full token migration.
 :::
 
 ### What are force-cancel functions?
 
-Every corporate action type exposes a `forceCancel*` variant alongside the standard `cancel*` function:
+Every corporate action type has two cancellation functions. Use the normal one whenever possible — it enforces a date guard that protects consistency. The force-cancel variant bypasses that guard and is a last resort only.
 
-| Function                                    | Applies to                     |
-| ------------------------------------------- | ------------------------------ |
-| `forceCancelAmortization(id)`               | Amortisation corporate actions |
-| `forceCancelCoupon(id)`                     | Coupon payments                |
-| `forceCancelDividend(id)`                   | Dividend distributions         |
-| `forceCancelVoting(id)`                     | Voting events                  |
-| `forceCancelScheduledBalanceAdjustment(id)` | Balance adjustments            |
+| Action type        | Normal cancel — use before execution date | Force cancel — last resort, after execution date |
+| ------------------ | ----------------------------------------- | ------------------------------------------------ |
+| Balance Adjustment | `cancelScheduledBalanceAdjustment(id)`    | `forceCancelScheduledBalanceAdjustment(id)`      |
+| Dividend           | `cancelDividend(id)`                      | `forceCancelDividend(id)`                        |
+| Voting             | `cancelVoting(id)`                        | `forceCancelVoting(id)`                          |
+| Coupon             | `cancelCoupon(id)`                        | `forceCancelCoupon(id)`                          |
+| Amortization       | `cancelAmortization(id)`                  | `forceCancelAmortization(id)`                    |
 
-The standard `cancel*` functions refuse to cancel a corporate action once its execution or record date has already passed. The `forceCancel*` variants bypass that date check and cancel unconditionally.
+The normal `cancel*` functions revert if the execution (or record) date has already passed. The `forceCancel*` variants bypass that check and cancel unconditionally.
 
 ### When to use them
 
-These functions exist exclusively as a **last-resort recovery mechanism** for situations where:
-
-- A corporate action passed its execution date but was **never processed** (e.g. automated task failure, network outage).
-- The action was created with incorrect parameters discovered only after the deadline.
-- There is no other on-chain way to clean up the stale action.
+These functions exist exclusively as a **last-resort recovery mechanism** for situations where a failing scheduled task has blocked the task queue. When a task fails, the entire transaction reverts and the queue stops processing. Because the execution date has already passed by the time the block is discovered, the standard `cancel*` functions will revert. Force cancel is the only way to unblock.
 
 **Do not use them as a shortcut to cancel an action that could still be cancelled via the standard flow.**
 
 ### Why they are dangerous
 
-Calling a `forceCancel*` function on an action that **has already been executed or partially settled** will leave the token in an inconsistent state:
+Force cancel only sets a disabled flag on the corporate action — it does not roll back any on-chain state that was written before the failure. The consequences depend on the action type and the exact moment the call is made.
 
-- Holder balances or holds that were already adjusted will **not** be rolled back.
-- Snapshot data bound to the action becomes orphaned.
-- Downstream accounting (dividend payouts, coupon payments, balance adjustments) will produce incorrect results for all affected holders.
-- **Recovery requires coordinated off-chain remediation and may necessitate a full token migration.**
+### Risks by action type
+
+#### Balance Adjustment
+
+A balance adjustment permanently rescales token balances, decimals, and supply as soon as it executes on-chain. There is no rollback mechanism.
+
+- **Before execution date** — use normal cancel, nothing has executed, no risk.
+- **After execution date, task blocked (not yet executed on-chain)** — force cancel unblocks the queue safely. Be aware that any external system reading the token in virtual / KPI mode may have already projected the adjusted balance. Cancelling will cause an abrupt discrepancy from their perspective.
+- **After execution date, task already executed** — force cancel marks the action as cancelled but the balance adjustment has already taken effect. The rescaling of balances, total supply, max supply, and decimals cannot be undone. This creates an inconsistency between the on-chain "cancelled" status and the actual token state, which may cause confusion in future audits.
+
+#### Dividend and Voting
+
+Both actions take a snapshot at the record date. The snapshot ID is stored in the action result and persists even after cancellation.
+
+- **Before record date** — use normal cancel, snapshot never fires.
+- **After record date, task blocked** — force cancel unblocks the queue. Any external system that has already read the snapshot and begun processing payments or vote tallies off-chain must be notified of the cancellation.
+- **After snapshot already taken** — the snapshot remains on-chain and its ID stays in the action results. Force cancel only prevents any further processing steps from running; it does not invalidate the snapshot itself.
+
+#### Amortization
+
+Same pattern as dividends — a snapshot is taken at the record date, and amortization also manages token holds. The risks are identical to the dividend case.
+
+#### Coupon
+
+The most complex case. A coupon generates two on-chain operations at different times: a **snapshot** (at the fixing date) and a **coupon listing** (which appends the coupon ID to the ordered payment list).
+
+- **Before fixing date** — use normal cancel. Neither the snapshot nor the listing has fired.
+- **Between fixing date and execution date (listing already fired)** — the coupon ID has been appended to the ordered list. This is irreversible — the list is append-only with no removal mechanism. Force cancel will prevent the execution step from running but the coupon remains permanently in the listing.
+- **After execution date** — snapshot taken, coupon listed, and payments may already have been distributed externally. Force cancel marks the action as cancelled but none of these effects can be undone. Any external system that has already processed payments based on this coupon must be notified.
+
+> **Summary**: force cancel is safe only when applied before the scheduled task has actually fired on-chain. Once a task has executed, the `isDisabled` flag becomes a historical marker — it prevents future steps from running but does not undo any state that was already written.
 
 ### Rules before you call a force-cancel
 
 1. **Verify off-chain that the action was never executed.** Check event logs and backend records before sending the transaction.
-2. **Use multisig approval.** The `CORPORATE_ACTION_ROLE` must be held by a multisig in any production environment. A single EOA must never be able to execute these functions unilaterally.
+2. **Use multisig approval.** The `ROLE_CORPORATE_ACTION_FORCE_CANCEL` must be held by a multisig in any production environment. A single EOA must never be able to execute these functions unilaterally.
 3. **Document the operation.** Record the action ID, the reason, and the authorising signatures in your governance log before executing.
 4. **Notify all relevant parties.** Inform holders, custodians, and payment processors that the action has been cancelled and will not be settled.
 

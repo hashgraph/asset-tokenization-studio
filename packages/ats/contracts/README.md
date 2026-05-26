@@ -627,40 +627,61 @@ bytes32 constant _ADJUSTMENT_BALANCE_ROLE = 0x6d0d63b623e69df3a6ea8aebd01f360a02
 
 ## ⚠️ Force-Cancel Functions — HIGH RISK
 
-> **WARNING: Using these functions incorrectly WILL corrupt or destroy your token. Read this section in full before touching them.**
+> ### 🚨 THIS SYSTEM DOES NOT PERFORM ROLLBACKS
+>
+> Force cancel sets a disabled flag. It does **not** undo any on-chain state that was already written.
+> Balances, snapshots, and coupon listings that executed before the cancel are **permanent**.
+> If you call force cancel after execution has already occurred, your token will be in an inconsistent state with no recovery path other than a full token migration.
 
-### What they are
+---
 
-A small set of administrative override functions exist that bypass the normal date-based guards used by their regular counterparts:
+### How the task queue works
 
-| Function                                         | File                             |
-| ------------------------------------------------ | -------------------------------- |
-| `forceCancelAmortization(uint256)`               | `AmortizationStorageWrapper.sol` |
-| `forceCancelCoupon(uint256)`                     | `CouponStorageWrapper.sol`       |
-| `forceCancelDividend(uint256)`                   | `DividendStorageWrapper.sol`     |
-| `forceCancelVoting(uint256)`                     | `VotingStorageWrapper.sol`       |
-| `forceCancelScheduledBalanceAdjustment(uint256)` | `EquityStorageWrapper.sol`       |
+When a scheduled task fails, the entire triggering transaction reverts and the queue blocks at that task. Because the execution date has already passed by the time the block is discovered, the standard `cancel*` functions refuse to act (they enforce a date guard and will revert). `forceCancel*` bypasses that guard and is the only way to unblock the queue.
 
-The standard `cancel*` variants refuse to cancel a corporate action once its execution or record date has passed (they revert). The `forceCancel*` variants skip that check entirely and cancel the action unconditionally.
+**The right time to call force cancel is before the blocked task has actually executed.** Once it has run, calling force cancel changes a status flag but cannot reverse what happened on-chain.
 
-### Why they exist
+---
 
-They are a last-resort recovery mechanism for situations where a corporate action has already passed its execution date but cannot be processed — this situation should never happen, corporate actions should have been properly tested before deploying them, but still nothing can ever be 100% guaranteed.
+### Cancellation functions by action type
 
-### Why they are dangerous
+| Action type        | Normal cancel — before execution date  | Force cancel — after execution date, queue blocked |
+| ------------------ | -------------------------------------- | -------------------------------------------------- |
+| Balance Adjustment | `cancelScheduledBalanceAdjustment(id)` | `forceCancelScheduledBalanceAdjustment(id)`        |
+| Dividend           | `cancelDividend(id)`                   | `forceCancelDividend(id)`                          |
+| Voting             | `cancelVoting(id)`                     | `forceCancelVoting(id)`                            |
+| Coupon             | `cancelCoupon(id)`                     | `forceCancelCoupon(id)`                            |
+| Amortization       | `cancelAmortization(id)`               | `forceCancelAmortization(id)`                      |
 
-Cancelling a corporate action that has **already been executed or partially settled** will leave on-chain state in an inconsistent condition:
+---
 
-- Holder balances or holds that were already adjusted will not be rolled back.
-- Snapshot data bound to the action will become orphaned.
-- Downstream accounting (dividend payouts, amortisation payments, balance adjustments) will produce incorrect results.
-- **There is no undo.** Diamond storage writes are permanent. Recovering from misuse requires a coordinated off-chain remediation and potentially a full token migration.
+### What gets permanently written per action type
+
+**Balance Adjustment** — on execution, balances, total supply, max supply, and decimals are rescaled permanently. No rollback exists.
+
+- Task blocked, not yet executed → force cancel is safe. External systems in virtual/KPI mode may have already projected the adjusted balance; cancelling creates a discrepancy for them.
+- Task already executed → force cancel marks the action cancelled but the rescaling is permanent. The token state and the "cancelled" status will contradict each other.
+
+**Dividend / Voting** — a snapshot is taken at the record date. The snapshot ID is stored on-chain and is not cleared by cancellation.
+
+- Task blocked, snapshot not yet taken → force cancel is safe. The snapshot never fires.
+- Snapshot already taken → force cancel only stops further steps. The snapshot and its ID remain on-chain. Notify any external system that already read it and began processing payments or vote tallies.
+
+**Amortization** — same pattern as dividends, plus token hold management. Risks are identical.
+
+**Coupon** — fires two on-chain operations at different times: a snapshot at the fixing date and a coupon listing (an append to the ordered payment list, with no removal mechanism).
+
+- Task blocked, fixing date not yet passed → force cancel is safe.
+- Coupon listing already fired → the coupon ID is permanently in the ordered list. Force cancel stops the execution step but the listing cannot be removed.
+- Execution date already passed → snapshot taken, coupon listed, payments may already be distributed. None of these can be undone.
+
+---
 
 ### Rules for safe use
 
 1. **Use regular `cancel*` functions when possible.** They include the necessary checks to ensure consistency.
-2. **Grant the ROLE_CORPORATE_ACTION_FORCE_CANCEL role only to multisig accounts.** The `ROLE_CORPORATE_ACTION_FORCE_CANCEL` that gates these calls must be held by a multisig — never a single EOA — in any production or pre-production environment.
-3. **Document every use.** So that external systems that might be relying on your tokens data consistency are informed and can potentially roll back their own changes.
+2. **Grant `ROLE_CORPORATE_ACTION_FORCE_CANCEL` only to multisig accounts.** Never a single EOA in any production or pre-production environment.
+3. **Document every use.** Record the action ID, the reason, and the authorising signatures in your governance log. Inform all external systems that may be relying on the action's data.
 
 ---
 
