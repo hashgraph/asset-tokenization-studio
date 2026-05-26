@@ -12,7 +12,14 @@ contract KpiLinkedRate is IKpiLinkedRate, Modifiers {
     function initializeKpiLinkedRate(
         InterestRate calldata _interestRate,
         ImpactData calldata _impactData
-    ) external override onlyNotKpiLinkedRateInitialized {
+    )
+        external
+        override
+        onlyNotKpiLinkedRateInitialized
+        onlyValidInterestRate(_interestRate)
+        onlyValidImpactData(_impactData)
+    {
+        ScheduledTasksOps.triggerPendingScheduledCrossOrderedTasks();
         InterestRateStorageWrapper.setInterestRate(_interestRate);
         InterestRateStorageWrapper.setImpactData(_impactData);
         InterestRateStorageWrapper.kpiLinkedRateStorage().initialized = true;
