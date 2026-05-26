@@ -154,10 +154,6 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   BalanceTrackerAtSnapshotByPartitionFacet: ["clearingReadOps"],
   ClearingAtSnapshotFacet: ["clearingReadOps"],
   ClearingAtSnapshotByPartitionFacet: ["clearingReadOps"],
-  // Layer 2/3 Bond read facets transitively reach ClearingReadOps via SnapshotsStorageWrapper
-  BondUSAReadFacet: ["clearingReadOps"],
-  BondUSAReadFixedRateFacet: ["clearingReadOps"],
-  BondUSAReadKpiLinkedRateFacet: ["clearingReadOps"],
   // Layer 3 EquityUSA — same transitive dependency
   EquityUSAFacet: ["clearingReadOps"],
   // Layer 2 facet families — coupon/dividend/voting/amortization reach ClearingReadOps

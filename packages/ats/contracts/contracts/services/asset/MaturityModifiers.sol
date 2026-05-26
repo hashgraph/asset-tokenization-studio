@@ -1,32 +1,37 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { BondStorageWrapper } from "../../domain/asset/BondStorageWrapper.sol";
+import { MaturityDateStorageWrapper } from "../../domain/asset/maturity/MaturityDateStorageWrapper.sol";
+import { _checkNotInitialized } from "../InitializationErrors.sol";
 
 /**
- * @title MaturityModifiers
- * @dev Abstract contract providing maturity date-related modifiers
- *
- * This contract wraps BondStorageWrapper library functions into modifiers
- * for convenient use in bond facets. It allows facets to use modifier syntax while
- * keeping BondStorageWrapper as a library.
- *
- * @notice Inherit from this contract to gain access to maturity modifiers
+ * @title  MaturityModifiers
+ * @notice Abstract contract providing maturity date-related modifiers.
+ * @dev    Wraps `MaturityDateStorageWrapper` library functions into modifiers for convenient use
+ *         in bond facets. Keeping the storage wrapper as a library avoids duplicating validation
+ *         logic across facets.
  * @author Asset Tokenization Studio Team
  */
 abstract contract MaturityModifiers {
     /**
-     * @dev Modifier that validates maturity date has passed
-     *
-     * Requirements:
-     * - Provided timestamp must be greater than the stored maturity date
-     * - Used for maturity redemption operations (verifies maturity has passed)
-     * - Also used in maturity date updates (verifies proposed date is valid)
-     *
-     * @param _maturityDate The timestamp to validate against stored maturity date
+     * @notice Ensures the maturity date has not yet been initialised.
+     * @dev    Reverts with `AlreadyInitialized` if `MaturityDateStorageWrapper.isMaturityInitialized`
+     *         returns `true`. Used exclusively on `initializeMaturity`.
+     */
+    modifier onlyNotMaturityInitialized() {
+        _checkNotInitialized(MaturityDateStorageWrapper.isMaturityInitialized());
+        _;
+    }
+
+    /**
+     * @notice Validates a timestamp against the stored maturity date.
+     * @dev    Reverts with `MaturityDateInvalid` when `_maturityDate <= storedMaturityDate`.
+     *         Used for both redemption guards (current timestamp must exceed maturity) and
+     *         update guards (new date must exceed current date).
+     * @param _maturityDate The timestamp to validate against the stored maturity date.
      */
     modifier onlyValidMaturityDate(uint256 _maturityDate) {
-        BondStorageWrapper.requireValidMaturityDate(_maturityDate);
+        MaturityDateStorageWrapper.requireValidMaturityDate(_maturityDate);
         _;
     }
 }

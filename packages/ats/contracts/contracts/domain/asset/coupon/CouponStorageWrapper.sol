@@ -13,7 +13,7 @@ import { ERC20StorageWrapper } from "../ERC20StorageWrapper.sol";
 import { TokenCoreOps } from "../../orchestrator/TokenCoreOps.sol";
 import { ICoupon } from "../../../facets/coupon/ICoupon.sol";
 import { ICouponTypes } from "../../../facets/coupon/ICouponTypes.sol";
-import { BondStorageWrapper } from "../BondStorageWrapper.sol";
+import { MaturityDateStorageWrapper } from "../maturity/MaturityDateStorageWrapper.sol";
 import { CouponRateDispatch } from "./CouponRateDispatch.sol";
 import { DatesValidation } from "../../../infrastructure/utils/DatesValidation.sol";
 import { DecimalsLib } from "../../../infrastructure/utils/DecimalsLib.sol";
@@ -157,7 +157,7 @@ library CouponStorageWrapper {
      * @param endDate Coupon end date to validate against the bond's maturity date.
      */
     function checkEndDateAgainstMaturity(uint256 endDate) internal view {
-        uint256 maturityDate = BondStorageWrapper.getMaturityDate();
+        uint256 maturityDate = MaturityDateStorageWrapper.getMaturityDate();
         if (maturityDate != 0) {
             DatesValidation.checkDates(endDate, maturityDate);
         }

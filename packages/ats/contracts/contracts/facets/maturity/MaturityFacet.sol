@@ -8,11 +8,11 @@ import { Bytes4Builder } from "../../infrastructure/proxy/Bytes4Builder.sol";
 /**
  * @title  MaturityFacet
  * @author Asset Tokenization Studio Team
- * @notice Diamond facet that exposes bond maturity redemption and maturity date management via
- *         `IMaturity`, registered under `RESOLVER_KEY_MATURITY`.
+ * @notice Diamond facet that exposes bond maturity initialisation, redemption, and maturity date
+ *         management via `IMaturity`, registered under `RESOLVER_KEY_MATURITY`.
  * @dev    Inherits maturity logic from `Maturity` and satisfies `IStaticFunctionSelectors` for
- *         Diamond proxy selector registration. Exposes two selectors:
- *         `fullRedeemAtMaturity` and `updateMaturityDate`.
+ *         Diamond proxy selector registration. Exposes four selectors:
+ *         `initializeMaturity`, `fullRedeemAtMaturity`, `updateMaturityDate`, and `getMaturityDate`.
  */
 contract MaturityFacet is Maturity, IStaticFunctionSelectors {
     /// @inheritdoc IStaticFunctionSelectors
@@ -26,7 +26,8 @@ contract MaturityFacet is Maturity, IStaticFunctionSelectors {
             Bytes4Builder.build(
                 this.initializeMaturity.selector,
                 this.fullRedeemAtMaturity.selector,
-                this.updateMaturityDate.selector
+                this.updateMaturityDate.selector,
+                this.getMaturityDate.selector
             );
     }
 

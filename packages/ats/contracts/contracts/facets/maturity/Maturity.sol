@@ -5,7 +5,7 @@ import { IMaturity, RESOLVER_KEY_MATURITY } from "./IMaturity.sol";
 import { IKyc } from "../kyc/IKyc.sol";
 import { ROLE_BOND_MANAGER, ROLE_MATURITY_REDEEMER } from "../../constants/roles.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
-import { BondStorageWrapper } from "../../domain/asset/BondStorageWrapper.sol";
+import { MaturityDateStorageWrapper } from "../../domain/asset/maturity/MaturityDateStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../domain/asset/ERC1410StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
@@ -25,14 +25,19 @@ import { InitializerStorageWrapper } from "../../domain/core/InitializerStorageW
  */
 abstract contract Maturity is IMaturity, Modifiers {
     /// @inheritdoc IMaturity
-    function initializeMaturity()
+    function initializeMaturity(
+        uint256 _maturityDate
+    )
         external
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
         onlyFacetNotRegistered(RESOLVER_KEY_MATURITY)
+        notZeroValue(_maturityDate)
+        onlyValidMaturityDate(_maturityDate)
     {
         InitializerStorageWrapper.setFacetToReady(RESOLVER_KEY_MATURITY);
-        emit MaturityInitialized();
+        MaturityDateStorageWrapper.initializeMaturity(_maturityDate);
+        emit MaturityInitialized(_maturityDate);
     }
 
     /// @inheritdoc IMaturity
@@ -80,9 +85,14 @@ abstract contract Maturity is IMaturity, Modifiers {
         onlyValidMaturityDate(_newMaturityDate)
         returns (bool success_)
     {
-        emit MaturityDateUpdated(address(this), _newMaturityDate, BondStorageWrapper.getMaturityDate());
-        BondStorageWrapper.setMaturityDate(_newMaturityDate);
+        emit MaturityDateUpdated(address(this), _newMaturityDate, MaturityDateStorageWrapper.getMaturityDate());
+        MaturityDateStorageWrapper.setMaturityDate(_newMaturityDate);
         return true;
+    }
+
+    /// @inheritdoc IMaturity
+    function getMaturityDate() external view override returns (uint256 maturityDate_) {
+        return MaturityDateStorageWrapper.getMaturityDate();
     }
 
     /**

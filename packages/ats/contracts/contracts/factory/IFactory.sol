@@ -4,7 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IResolverProxy } from "../infrastructure/proxy/IResolverProxy.sol";
 import { IBusinessLogicResolver } from "../infrastructure/diamond/IBusinessLogicResolver.sol";
 import { ICore } from "../facets/core/ICore.sol";
-import { IBondRead } from "../facets/layer_2/bond/IBondRead.sol";
 import { IEquity } from "../facets/layer_2/equity/IEquity.sol";
 import { FactoryRegulationData, RegulationData, RegulationType, RegulationSubType } from "../constants/regulation.sol";
 
@@ -100,6 +99,27 @@ interface IFactory {
     }
 
     /**
+     * @notice Input data describing a bond's economic parameters.
+     * @dev    Replaces the removed `IBondRead.BondDetailsData` type. Consumed by the Factory
+     *         during `deployBond`, `deployBondFixedRate`, and `deployBondKpiLinkedRate`.
+     * @param currency               ISO 4217 currency code encoded as `bytes3`.
+     * @param nominalValue           Face value of one unit of the bond (raw integer).
+     * @param nominalValueDecimals   Number of decimals applied to `nominalValue`.
+     * @param startingDate           Bond issuance / start-of-coupon-accrual timestamp (Unix epoch,
+     *                               seconds). Persisted as metadata under
+     *                               `BOND_STARTING_DATE_METADATA_KEY`.
+     * @param maturityDate           Redemption date timestamp (Unix epoch, seconds). Must be
+     *                               strictly greater than `startingDate`.
+     */
+    struct BondDetailsData {
+        bytes3 currency;
+        uint256 nominalValue;
+        uint8 nominalValueDecimals;
+        uint256 startingDate;
+        uint256 maturityDate;
+    }
+
+    /**
      * @notice Full configuration for deploying a bond token.
      * @param security              Core security configuration shared across all security types.
      * @param bondDetails           Bond-specific details such as maturity date and nominal value.
@@ -108,7 +128,7 @@ interface IFactory {
      */
     struct BondData {
         SecurityData security;
-        IBondRead.BondDetailsData bondDetails;
+        BondDetailsData bondDetails;
         address[] proceedRecipients;
         bytes[] proceedRecipientsData;
     }

@@ -162,10 +162,10 @@ describe("MaturityByPartition Tests", () => {
         ).to.be.revertedWithCustomError(asset, "InvalidKycStatus");
       });
 
-      it("GIVEN the current date is before maturity WHEN redeeming at maturity THEN transaction fails with BondMaturityDateWrong", async () => {
+      it("GIVEN the current date is before maturity WHEN redeeming at maturity THEN transaction fails with MaturityDateWrong", async () => {
         await expect(
           asset.connect(signer_A).redeemAtMaturityByPartition(signer_A.address, DEFAULT_PARTITION, amount),
-        ).to.be.revertedWithCustomError(asset, "BondMaturityDateWrong");
+        ).to.be.revertedWithCustomError(asset, "MaturityDateInvalid");
       });
 
       it("GIVEN a recovered wallet WHEN redeeming at maturity THEN transaction fails with WalletRecovered", async () => {

@@ -141,7 +141,6 @@ const EQUITY_FACETS = [
   "ProceedRecipientsFacet",
 
   // Jurisdiction-Specific (2)
-  "SecurityFacet",
   "EquityUSAFacet",
 ] as const;
 

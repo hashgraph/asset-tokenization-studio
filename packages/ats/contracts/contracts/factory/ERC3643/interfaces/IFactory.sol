@@ -9,7 +9,6 @@ pragma solidity ^0.8.17;
 import { TRexIResolverProxy as IResolverProxy } from "./IResolverProxy.sol";
 import { TRexIBusinessLogicResolver as IBusinessLogicResolver } from "./IBusinessLogicResolver.sol";
 import { TRexICore as ICore } from "./ICore.sol";
-import { TRexIBondRead as IBondRead } from "./IBondRead.sol";
 import { TRexIEquity as IEquity } from "./IEquity.sol";
 import { FactoryRegulationData, RegulationData, RegulationType, RegulationSubType } from "./regulation.sol";
 
@@ -105,6 +104,27 @@ interface TRexIFactory {
     }
 
     /**
+     * @notice Input data describing a bond's economic parameters.
+     * @dev    Replaces the removed `IBondRead.BondDetailsData` type. Consumed by the Factory
+     *         during `deployBond`, `deployBondFixedRate`, and `deployBondKpiLinkedRate`.
+     * @param currency               ISO 4217 currency code encoded as `bytes3`.
+     * @param nominalValue           Face value of one unit of the bond (raw integer).
+     * @param nominalValueDecimals   Number of decimals applied to `nominalValue`.
+     * @param startingDate           Bond issuance / start-of-coupon-accrual timestamp (Unix epoch,
+     *                               seconds). Persisted as metadata under
+     *                               `BOND_STARTING_DATE_METADATA_KEY`.
+     * @param maturityDate           Redemption date timestamp (Unix epoch, seconds). Must be
+     *                               strictly greater than `startingDate`.
+     */
+    struct BondDetailsData {
+        bytes3 currency;
+        uint256 nominalValue;
+        uint8 nominalValueDecimals;
+        uint256 startingDate;
+        uint256 maturityDate;
+    }
+
+    /**
      * @notice Full configuration for deploying a bond token.
      * @param security              Core security configuration shared across all security types.
      * @param bondDetails           Bond-specific details such as maturity date and nominal value.
@@ -113,7 +133,7 @@ interface TRexIFactory {
      */
     struct BondData {
         SecurityData security;
-        IBondRead.BondDetailsData bondDetails;
+        BondDetailsData bondDetails;
         address[] proceedRecipients;
         bytes[] proceedRecipientsData;
     }

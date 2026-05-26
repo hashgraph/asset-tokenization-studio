@@ -13,7 +13,7 @@ import {
   EMPTY_STRING,
   RESOLVER_KEY_MATURITY,
 } from "@scripts";
-import { grantRoleAndPauseToken, deployBondTokenFixture, executeRbac, MAX_UINT256 } from "@test";
+import { grantRoleAndPauseToken, deployBondTokenFixture, executeRbac, MAX_UINT256, getDltTimestamp } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 const numberOfUnits = 1000;
@@ -33,6 +33,8 @@ describe("Maturity Tests", () => {
   let asset: IAsset;
   let mockDiamondCut: MockDiamondCut;
 
+  let mockMaturityDate: number;
+
   async function deploySecurityFixture(multiPartition = false) {
     const base = await deployBondTokenFixture(
       multiPartition ? { bondDataParams: { securityData: { isMultiPartition: true } } } : undefined,
@@ -46,7 +48,7 @@ describe("Maturity Tests", () => {
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
 
-    maturityDate = Number((await asset.getBondDetails()).maturityDate);
+    maturityDate = Number(await asset.getMaturityDate());
 
     await executeRbac(asset, [
       {
@@ -94,6 +96,7 @@ describe("Maturity Tests", () => {
 
   beforeEach(async () => {
     await loadFixture(deploySecurityFixture);
+    mockMaturityDate = (await getDltTimestamp()) + TIME_PERIODS_S.MONTH;
   });
 
   describe("fullRedeemAtMaturity", () => {
@@ -145,10 +148,10 @@ describe("Maturity Tests", () => {
       );
     });
 
-    it("GIVEN the current date is before maturity WHEN fullRedeemAtMaturity THEN reverts with BondMaturityDateWrong", async () => {
+    it("GIVEN the current date is before maturity WHEN fullRedeemAtMaturity THEN reverts with MaturityDateInvalid", async () => {
       await expect(asset.connect(signer_A).fullRedeemAtMaturity(signer_A.address)).to.be.revertedWithCustomError(
         asset,
-        "BondMaturityDateWrong",
+        "MaturityDateInvalid",
       );
     });
 
@@ -240,56 +243,74 @@ describe("Maturity Tests", () => {
 
   describe("updateMaturityDate", () => {
     it("GIVEN the caller lacks ROLE_BOND_MANAGER WHEN updateMaturityDate THEN reverts with AccountHasNoRole", async () => {
-      const maturityDateBefore = (await asset.getBondDetails()).maturityDate;
+      const maturityDateBefore = await asset.getMaturityDate();
       const newMaturityDate = maturityDateBefore + 86400n;
 
       await expect(asset.connect(signer_C).updateMaturityDate(newMaturityDate)).to.be.revertedWithCustomError(
         asset,
         "AccountHasNoRole",
       );
-      const maturityDateAfter = (await asset.getBondDetails()).maturityDate;
+      const maturityDateAfter = await asset.getMaturityDate();
       expect(maturityDateAfter).to.be.equal(maturityDateBefore);
     });
 
     it("GIVEN the token is paused WHEN updateMaturityDate THEN reverts with IsPaused", async () => {
       await grantRoleAndPauseToken(asset, ATS_ROLES.ROLE_BOND_MANAGER, signer_A, signer_B, signer_C.address);
 
-      const maturityDateBefore = (await asset.getBondDetails()).maturityDate;
+      const maturityDateBefore = await asset.getMaturityDate();
       const newMaturityDate = maturityDateBefore + 86400n;
 
       await expect(asset.connect(signer_C).updateMaturityDate(newMaturityDate)).to.be.revertedWithCustomError(
         asset,
         "IsPaused",
       );
-      const maturityDateAfter = (await asset.getBondDetails()).maturityDate;
+      const maturityDateAfter = await asset.getMaturityDate();
       expect(maturityDateAfter).to.be.equal(maturityDateBefore);
     });
 
-    it("GIVEN a new date earlier than current maturity WHEN updateMaturityDate THEN reverts with BondMaturityDateWrong", async () => {
+    it("GIVEN a new date earlier than current maturity WHEN updateMaturityDate THEN reverts with MaturityDateInvalid", async () => {
       await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_BOND_MANAGER, signer_C.address);
-      const maturityDateBefore = (await asset.getBondDetails()).maturityDate;
+      const maturityDateBefore = await asset.getMaturityDate();
       const dayBeforeCurrentMaturity = maturityDateBefore - 86400n;
 
       await expect(asset.connect(signer_C).updateMaturityDate(dayBeforeCurrentMaturity)).to.be.revertedWithCustomError(
         asset,
-        "BondMaturityDateWrong",
+        "MaturityDateInvalid",
       );
-      const maturityDateAfter = (await asset.getBondDetails()).maturityDate;
+      const maturityDateAfter = await asset.getMaturityDate();
       expect(maturityDateAfter).to.be.equal(maturityDateBefore);
     });
 
     it("GIVEN ROLE_BOND_MANAGER and a valid future date WHEN updateMaturityDate THEN emits MaturityDateUpdated and persists new date", async () => {
       await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_BOND_MANAGER, signer_C.address);
-      const maturityDateBefore = (await asset.getBondDetails()).maturityDate;
+      const maturityDateBefore = await asset.getMaturityDate();
       const newMaturityDate = maturityDateBefore + 86400n;
 
       await expect(asset.connect(signer_C).updateMaturityDate(newMaturityDate))
         .to.emit(asset, "MaturityDateUpdated")
         .withArgs(asset.target, newMaturityDate, maturityDateBefore);
 
-      const maturityDateAfter = (await asset.getBondDetails()).maturityDate;
+      const maturityDateAfter = await asset.getMaturityDate();
       expect(maturityDateAfter).not.to.be.equal(maturityDateBefore);
       expect(maturityDateAfter).to.be.equal(newMaturityDate);
+    });
+  });
+
+  describe("getMaturityDate", () => {
+    it("GIVEN a deployed bond WHEN getMaturityDate THEN returns the maturity date set at deployment", async () => {
+      const expected = await asset.getMaturityDate();
+
+      expect(await asset.getMaturityDate()).to.be.equal(expected);
+    });
+
+    it("GIVEN updateMaturityDate was called WHEN getMaturityDate THEN returns the updated date", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_BOND_MANAGER, signer_C.address);
+      const currentMaturityDate = await asset.getMaturityDate();
+      const newMaturityDate = currentMaturityDate + 86400n;
+
+      await asset.connect(signer_C).updateMaturityDate(newMaturityDate);
+
+      expect(await asset.getMaturityDate()).to.be.equal(newMaturityDate);
     });
   });
 
@@ -318,13 +339,13 @@ describe("Maturity Tests", () => {
 
   describe("initializeMaturity", () => {
     it("GIVEN caller without DEFAULT_ADMIN_ROLE WHEN initializeMaturity is called THEN AccountHasNoRole", async () => {
-      await expect(asset.connect(signer_C).initializeMaturity())
+      await expect(asset.connect(signer_C).initializeMaturity(mockMaturityDate))
         .to.be.revertedWithCustomError(asset, "AccountHasNoRole")
         .withArgs(signer_C.address, ATS_ROLES.DEFAULT_ADMIN_ROLE);
     });
 
     it("GIVEN already-initialised WHEN initializeMaturity is called again THEN FacetAlreadyRegistered", async () => {
-      await expect(asset.initializeMaturity())
+      await expect(asset.initializeMaturity(mockMaturityDate))
         .to.be.revertedWithCustomError(asset, "FacetAlreadyRegistered")
         .withArgs(RESOLVER_KEY_MATURITY, 1);
     });
@@ -333,7 +354,9 @@ describe("Maturity Tests", () => {
   describe("initializeMaturity event", () => {
     it("GIVEN a fresh deployment WHEN initializeMaturity is called THEN emits MaturityInitialized", async () => {
       await mockDiamondCut.forceFacetNotRegistered(RESOLVER_KEY_MATURITY);
-      await expect(asset.initializeMaturity()).to.emit(asset, "MaturityInitialized");
+      // forceFacetNotRegistered resets the registration flag but NOT storage, so the
+      // stored maturityDate is still the fixture value. Pass a date strictly after it.
+      await expect(asset.initializeMaturity(maturityDate + TIME_PERIODS_S.MONTH)).to.emit(asset, "MaturityInitialized");
     });
   });
   describe("nonOperational", () => {

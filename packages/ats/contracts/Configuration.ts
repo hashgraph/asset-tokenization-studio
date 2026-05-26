@@ -101,8 +101,6 @@ export const CONTRACT_NAMES = [
   "ComplianceByPartitionFacet",
   "DiamondFacet",
   "EquityUSAFacet",
-  "BondUSAFacet",
-  "BondUSARead", //TODO
   "PrincipalFacet",
   "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",

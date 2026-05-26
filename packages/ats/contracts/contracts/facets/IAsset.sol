@@ -8,9 +8,7 @@ import {
 import { IAccessControl } from "./accessControl/IAccessControl.sol";
 import { IAdjustBalances } from "./adjustBalances/IAdjustBalances.sol";
 import { IAmortization } from "./layer_2/amortization/IAmortization.sol";
-import { IBondUSA } from "./layer_3/bondUSA/IBondUSA.sol";
 import { IMaturity } from "./maturity/IMaturity.sol";
-import { IBondRead } from "./layer_2/bond/IBondRead.sol";
 import { IPrincipal } from "./principal/IPrincipal.sol";
 
 // Layer 1 — ERC1400
@@ -62,7 +60,6 @@ import { IVoting } from "./voting/IVoting.sol";
 import { IVotingSecurityHolders } from "./votingSecurityHolders/IVotingSecurityHolders.sol";
 
 // Layer 3
-import { ISecurity } from "./layer_2/security/ISecurity.sol";
 import { ISsiManagement } from "./ssiManagement/ISsiManagement.sol";
 import { ITimeTravel } from "../test/testTimeTravel/ITimeTravel.sol";
 import { IBalanceTracker } from "./balanceTracker/IBalanceTracker.sol";
@@ -196,11 +193,9 @@ interface IAsset is
     IRecovery,
     IBurn,
     IScheduledCrossOrderedTasks,
-    IBondRead,
     IPrincipal,
     IMaturity,
     IEquity,
-    ISecurity,
     ICorporateActions,
     IProtectedPartitions,
     IProceedRecipients,
@@ -213,7 +208,6 @@ interface IAsset is
     ILoansPortfolio,
     IVoting,
     IVotingSecurityHolders,
-    IBondUSA,
     IEquityUSA,
     ITransferAndLock,
     ITransferAndLockByPartition,

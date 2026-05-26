@@ -74,8 +74,6 @@ task("erc3643-clone-interfaces", async (_, hre) => {
   const targetDir = hre.config.paths.sources + "/factory/ERC3643/interfaces";
   const interfacesToClone: DataSubstitution[] = [
     { original: "IAccessControl" },
-    { original: "IBondTypes" },
-    { original: "IBondRead", removeImports: false, removeHierarchy: false },
     {
       original: "IBusinessLogicResolver",
       removeImports: false,

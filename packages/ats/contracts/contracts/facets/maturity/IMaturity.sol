@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBondTypes } from "../layer_2/bond/IBondTypes.sol";
-
 /// @custom:hash resolverKey Maturity
 bytes32 constant RESOLVER_KEY_MATURITY = 0x16825792debc7c17efd86bdf71500575f9ff5d4aa20e3a35031c583437a3ca82;
 
@@ -15,19 +13,36 @@ bytes32 constant RESOLVER_KEY_MATURITY = 0x16825792debc7c17efd86bdf71500575f9ff5
  *         inherited from `IBondTypes`.
  * @author Asset Tokenization Studio Team
  */
-interface IMaturity is IBondTypes {
+interface IMaturity {
     /**
-     * @notice Emitted once when the maturity capability is initialised on a token.
-     * @dev Fires exclusively from `initializeMaturity`.
+     * @notice Emitted once when the maturity date is set for the first time via
+     *         `initializeMaturity`.
+     * @param maturityDate  Initial maturity timestamp (Unix epoch, seconds).
      */
-    event MaturityInitialized();
+    event MaturityInitialized(uint256 indexed maturityDate);
+
+    /**
+     * @notice Emitted whenever the maturity date is updated via `updateMaturityDate`.
+     * @param bondId               Address of the bond proxy whose date was updated.
+     * @param maturityDate         New maturity timestamp (Unix epoch, seconds).
+     * @param previousMaturityDate Previous maturity timestamp that was replaced.
+     */
+    event MaturityDateUpdated(
+        address indexed bondId,
+        uint256 indexed maturityDate,
+        uint256 indexed previousMaturityDate
+    );
+
+    error MaturityDateInvalid();
 
     /**
      * @notice Initialises the maturity capability on the token.
      * @dev Callable once; subsequent calls revert with `FacetAlreadyRegistered`.
      *      Requires `DEFAULT_ADMIN_ROLE`. Called by the factory during deployment.
+     * @param  _maturityDate Maturity timestamp to set (Unix epoch, in seconds). Must be strictly
+     *                       greater than zero and in the future at deployment time.
      */
-    function initializeMaturity() external;
+    function initializeMaturity(uint256 _maturityDate) external;
 
     /**
      * @notice Redeems all token partitions held by a token holder at bond maturity.
@@ -47,11 +62,20 @@ interface IMaturity is IBondTypes {
      * @dev    Caller must hold `ROLE_BOND_MANAGER`. Contract must be unpaused. `_newMaturityDate`
      *         must satisfy the validity constraint enforced by `onlyValidMaturityDate` — the new
      *         date must be strictly greater than the current maturity date. Persists the new date
-     *         via `BondStorageWrapper.setMaturityDate`.
+     *         via `MaturityDateStorageWrapper.setMaturityDate`.
      * @dev    Emits {MaturityDateUpdated} with the contract address, the new maturity date, and
      *         the previous maturity date.
      * @param  _newMaturityDate New maturity timestamp to set (Unix epoch, in seconds).
      * @return success_         Always `true` on successful execution.
      */
     function updateMaturityDate(uint256 _newMaturityDate) external returns (bool success_);
+
+    /**
+     * @notice Returns the current bond maturity date.
+     * @dev    Reads directly from `MaturityDateStorageWrapper` storage slot. No access-control gate —
+     *         maturity date is public information.
+     * @return maturityDate_ Current maturity timestamp (Unix epoch, in seconds). Returns zero if
+     *                       the date has not been set yet.
+     */
+    function getMaturityDate() external view returns (uint256 maturityDate_);
 }

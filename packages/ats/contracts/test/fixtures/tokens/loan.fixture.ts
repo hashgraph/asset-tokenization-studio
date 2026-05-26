@@ -13,7 +13,7 @@
  */
 
 import { ethers } from "hardhat";
-import { ZeroAddress, ethers as ethersTypes } from "ethers";
+import { ZeroAddress } from "ethers";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture } from "../infrastructure.fixture";
 import {
@@ -287,11 +287,6 @@ export async function deployLoanTokenFixture({
   await asset.initializeTransferAndLock();
 
   await asset.initializeLoan(loanDetails);
-  await asset.initializeSecurity(buildRegulationData(regulationData.regulationType, regulationData.regulationSubType), {
-    countriesControlListType: regulationData.additionalSecurityData.countriesControlListType,
-    listOfCountries: regulationData.additionalSecurityData.listOfCountries,
-    info: regulationData.additionalSecurityData.info,
-  });
   await asset.initializeAccessControl();
 
   // Call all other initializations provided by the user list that are present in IAsset

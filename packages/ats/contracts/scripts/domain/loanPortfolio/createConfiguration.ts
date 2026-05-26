@@ -144,9 +144,6 @@ const LOANS_PORTFOLIO_FACETS = [
   "SecurityHoldersFacet",
   "TransferAndLockFacet",
   "TransferAndLockByPartitionFacet",
-
-  // Jurisdiction-Specific
-  "SecurityFacet",
 ] as const;
 
 export async function createLoansPortfolioConfiguration(

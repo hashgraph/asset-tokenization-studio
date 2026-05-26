@@ -901,13 +901,15 @@ describe("Factory Tests", () => {
       const maxSupply = await capFacet.getMaxSupply();
       expect(maxSupply).to.equal(bondData.security.maxSupply);
 
-      const bondFacet = await ethers.getContractAt("BondRead", bondAddress);
-      const bondDetails = await bondFacet.getBondDetails();
-      expect(bondDetails.currency).to.be.deep.equal(bondData.bondDetails.currency);
-      expect(bondDetails.nominalValue).to.be.deep.equal(bondData.bondDetails.nominalValue);
-      expect(bondDetails.nominalValueDecimals).to.be.deep.equal(bondData.bondDetails.nominalValueDecimals);
-      expect(bondDetails.startingDate).to.be.deep.equal(bondData.bondDetails.startingDate);
-      expect(bondDetails.maturityDate).to.be.deep.equal(bondData.bondDetails.maturityDate);
+      const nominalFacet = await ethers.getContractAt("NominalValue", bondAddress);
+
+      expect(await nominalFacet.getNominalValueCurrency()).to.be.deep.equal(bondData.bondDetails.currency);
+      expect(await nominalFacet.getNominalValue()).to.be.deep.equal(bondData.bondDetails.nominalValue);
+      expect(await nominalFacet.getNominalValueDecimals()).to.be.deep.equal(bondData.bondDetails.nominalValueDecimals);
+
+      const maturityFacet = await ethers.getContractAt("Maturity", bondAddress);
+      expect(await maturityFacet.getMaturityDate()).to.be.deep.equal(bondData.bondDetails.maturityDate);
+
       const couponFacet = await ethers.getContractAt("CouponFacet", bondAddress);
       const couponCount = await couponFacet.getCouponCount();
       expect(couponCount).to.equal(0);

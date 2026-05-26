@@ -42,7 +42,6 @@ import {
   ExternalPauseManagementFacet__factory,
   ILoansPortfolio__factory,
   ILoansPortfolio,
-  ISecurity__factory,
   InitializerFacet__factory,
   IDiamondFacet__factory,
   IAsset,
@@ -50,6 +49,7 @@ import {
 import { decodeEvent } from "@scripts/infrastructure";
 import { DeepPartial } from "@scripts";
 import { getRegulationData, getSecurityData, TEST_NOMINAL_VALUES } from "@test";
+import { ISecurity__factory } from "../../../typechain-types/factories/contracts/facets/layer_2/security";
 
 type LoansPortfolioDefaultParamsType = ILoansPortfolio.LoansPortfolioDetailsDataStruct & {
   nominalValue: bigint;
@@ -149,7 +149,7 @@ export async function deployLoansPortfolioTokenFixture({
   );
   const externalPauseManagementFacet = ExternalPauseManagementFacet__factory.connect(proxyAddress, deployer);
   const loanPortfolioFacet = ILoansPortfolio__factory.connect(proxyAddress, deployer);
-  const securityFacet = ISecurity__factory.connect(proxyAddress, deployer);
+
   const initializerFacet = InitializerFacet__factory.connect(proxyAddress, deployer);
   const diamondFacet = IDiamondFacet__factory.connect(proxyAddress, deployer);
   const asset = await ethers.getContractAt("IAsset", proxyAddress, deployer);
@@ -184,16 +184,6 @@ export async function deployLoansPortfolioTokenFixture({
     portfolioType: loanPortfolioDetails.portfolioType,
     distributionPolicy: loanPortfolioDetails.distributionPolicy,
   });
-
-  await securityFacet.initializeSecurity(
-    buildRegulationData(regulationData.regulationType, regulationData.regulationSubType),
-    {
-      countriesControlListType: regulationData.additionalSecurityData.countriesControlListType,
-      listOfCountries: regulationData.additionalSecurityData.listOfCountries,
-      info: regulationData.additionalSecurityData.info,
-    },
-  );
-
   await diamondFacet.initializeDiamondCut();
   await accessControlFacet.initializeAccessControl();
 
