@@ -131,7 +131,6 @@ export async function deployLoansPortfolioTokenFixture({
     { role: ATS_ROLES.LOAN_MANAGER_ROLE, members: [deployer.address] },
     { role: ATS_ROLES.LOANS_PORTFOLIO_MANAGER_ROLE, members: [deployer.address] },
     { role: ATS_ROLES.ISSUER_ROLE, members: [deployer.address] },
-    { role: ATS_ROLES.MINTER_ROLE, members: [deployer.address] },
     { role: ATS_ROLES.DEACTIVATE_ROLE, members: [deployer.address] },
   ];
 
