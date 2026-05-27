@@ -273,15 +273,12 @@ describe("Scheduled Tasks Failure Recovery", () => {
 
     await asset.changeSystemTimestamp(recordDate + 1);
 
-    await expect(asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks()).to.not.emit(
-      asset,
-      "TaskExecutionFailed",
-    );
+    await asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks();
 
     expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(0);
   });
 
-  it("GIVEN two crossOrdered snapshot tasks WHEN all triggered successfully THEN queue fully drains and no TaskExecutionFailed is emitted", async () => {
+  it("GIVEN two crossOrdered snapshot tasks WHEN all triggered successfully THEN queue fully drains", async () => {
     const { asset, deployer } = await loadFixture(deployWithCorporateActionRole);
 
     const currentTimestamp = await getDltTimestamp();
@@ -305,10 +302,7 @@ describe("Scheduled Tasks Failure Recovery", () => {
 
     await asset.changeSystemTimestamp(recordDate2 + 1);
 
-    await expect(asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks()).to.not.emit(
-      asset,
-      "TaskExecutionFailed",
-    );
+    await asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks();
 
     expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(0);
   });
@@ -347,10 +341,7 @@ describe("Scheduled Tasks Failure Recovery", () => {
 
     await asset.changeSystemTimestamp(recordDate3 + 1);
 
-    await expect(asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks()).to.not.emit(
-      asset,
-      "TaskExecutionFailed",
-    );
+    await asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks();
 
     expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(0);
     expect(await asset.scheduledSnapshotCount(false)).to.equal(0);
@@ -359,12 +350,9 @@ describe("Scheduled Tasks Failure Recovery", () => {
   // ─── Failure path: hardhat_setCode injection ───────────────────────────────
   //
   // MockScheduledTasksDispatchOps is swapped in at the real library address via
-  // hardhat_setCode. It reads _FAIL_TYPE_SLOT from Diamond's storage (DELEGATECALL
-  // context) and reverts when callbackType matches the configured value.
-  //
-  // This lets us test _cancelPendingSubTaskAction without touching production code.
-
-  const FAIL_TYPE_SLOT = "0xdead000000000000000000000000000000000000000000000000000000001337";
+  // hardhat_setCode. Its selector does not match the real library's, so any
+  // DELEGATECALL to it reverts — simulating a failing dispatch without touching
+  // production code.
 
   // Snapshot taken just before mock injection so afterEach can restore real bytecode.
   // Prevents hardhat_setCode from persisting into loadFixture snapshots of other fixtures.
@@ -389,17 +377,17 @@ describe("Scheduled Tasks Failure Recovery", () => {
   async function deployEquityWithCorporateActionRole() {
     const base = await deployEquityTokenFixture();
     await base.asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, base.deployer.address);
-    return { ...base, diamondAddress: base.diamond.target as string };
+    return base;
   }
 
   async function deployBondWithCorporateActionRole() {
     const base = await deployBondKpiLinkedRateTokenFixture();
     await base.asset.grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, base.deployer.address);
-    return { ...base, diamondAddress: base.diamond.target as string };
+    return base;
   }
 
-  it("GIVEN failing crossOrdered SNAPSHOT task WHEN triggered THEN snapshot action cancelled and TaskExecutionFailed emitted", async () => {
-    const { asset, deployer, diamondAddress } = await loadFixture(deployEquityWithCorporateActionRole);
+  it("GIVEN failing crossOrdered SNAPSHOT task WHEN triggered THEN transaction reverts and queue not drained", async () => {
+    const { asset, deployer } = await loadFixture(deployEquityWithCorporateActionRole);
     await injectMockDispatch();
 
     const currentTimestamp = await getDltTimestamp();
@@ -411,19 +399,11 @@ describe("Scheduled Tasks Failure Recovery", () => {
       amountDecimals: 2,
     });
 
-    await ethers.provider.send("hardhat_setStorageAt", [
-      diamondAddress,
-      FAIL_TYPE_SLOT,
-      ethers.encodeBytes32String("crossOrdered"),
-    ]);
-
     await asset.changeSystemTimestamp(recordDate + 1);
 
-    await expect(asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks())
-      .to.emit(asset, "TaskExecutionFailed")
-      .withArgs(ATS_TASK.SNAPSHOT, ethers.encodeBytes32String("crossOrdered"), recordDate);
+    await expect(asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks()).to.be.reverted;
 
-    expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(0);
+    expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(1);
     expect(await asset.scheduledSnapshotCount(true)).to.equal(1);
 
     const snapshots = await asset.getScheduledSnapshots(0, 10, true);
@@ -432,8 +412,8 @@ describe("Scheduled Tasks Failure Recovery", () => {
     expect(isDisabled).to.be.true;
   });
 
-  it("GIVEN failing crossOrdered BALANCE_ADJUSTMENT task WHEN triggered THEN balance adjustment action cancelled and TaskExecutionFailed emitted", async () => {
-    const { asset, deployer, diamondAddress } = await loadFixture(deployEquityWithCorporateActionRole);
+  it("GIVEN failing crossOrdered BALANCE_ADJUSTMENT task WHEN triggered THEN transaction reverts and queue not drained", async () => {
+    const { asset, deployer } = await loadFixture(deployEquityWithCorporateActionRole);
     await injectMockDispatch();
 
     const currentTimestamp = await getDltTimestamp();
@@ -444,33 +424,16 @@ describe("Scheduled Tasks Failure Recovery", () => {
       decimals: 2,
     });
 
-    await ethers.provider.send("hardhat_setStorageAt", [
-      diamondAddress,
-      FAIL_TYPE_SLOT,
-      ethers.encodeBytes32String("crossOrdered"),
-    ]);
-
     await asset.changeSystemTimestamp(executionDate + 1);
 
-    await expect(asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks())
-      .to.emit(asset, "TaskExecutionFailed")
-      .withArgs(ATS_TASK.BALANCE_ADJUSTMENT, ethers.encodeBytes32String("crossOrdered"), executionDate);
+    await expect(asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks()).to.be.reverted;
 
-    expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(0);
-
-    const balanceAdjustments = await asset.getScheduledBalanceAdjustments(0, 10, true);
-    expect(balanceAdjustments.length).to.equal(1);
-
-    const balanceAdjustmentActionId = ethers.AbiCoder.defaultAbiCoder().decode(
-      ["bytes32"],
-      balanceAdjustments[0].data,
-    )[0];
-    const [, , , isDisabled] = await asset.getCorporateAction(balanceAdjustmentActionId);
-    expect(isDisabled).to.be.true;
+    expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(1);
+    expect((await asset.getScheduledBalanceAdjustments(0, 10, true)).length).to.equal(1);
   });
 
-  it("GIVEN failing crossOrdered COUPON_LISTING task WHEN triggered THEN coupon listing action cancelled and TaskExecutionFailed emitted", async () => {
-    const { asset, deployer, diamondAddress } = await loadFixture(deployBondWithCorporateActionRole);
+  it("GIVEN failing crossOrdered COUPON_LISTING task WHEN triggered THEN transaction reverts and queue not drained", async () => {
+    const { asset, deployer } = await loadFixture(deployBondWithCorporateActionRole);
     await injectMockDispatch();
 
     const currentTimestamp = await getDltTimestamp();
@@ -486,20 +449,15 @@ describe("Scheduled Tasks Failure Recovery", () => {
       rateStatus: 0,
     });
 
-    await ethers.provider.send("hardhat_setStorageAt", [
-      diamondAddress,
-      FAIL_TYPE_SLOT,
-      ethers.encodeBytes32String("crossOrdered"),
-    ]);
+    const crossOrderedBefore = await asset.scheduledCrossOrderedTaskCount();
+    const couponListingBefore = await asset.scheduledCouponListingCount();
 
     await asset.changeSystemTimestamp(fixingDate + 1);
 
-    await expect(asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks())
-      .to.emit(asset, "TaskExecutionFailed")
-      .withArgs(ATS_TASK.COUPON_LISTING, ethers.encodeBytes32String("crossOrdered"), fixingDate);
+    await expect(asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks()).to.be.reverted;
 
-    expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(0);
-    expect(await asset.scheduledCouponListingCount(true)).to.equal(1);
+    expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(crossOrderedBefore);
+    expect(await asset.scheduledCouponListingCount(true)).to.equal(couponListingBefore);
 
     const couponListings = await asset.getScheduledCouponListing(0, 10, true);
     const couponListingActionId = ethers.AbiCoder.defaultAbiCoder().decode(["bytes32"], couponListings[0].data)[0];
@@ -507,8 +465,8 @@ describe("Scheduled Tasks Failure Recovery", () => {
     expect(isDisabled).to.be.true;
   });
 
-  it("GIVEN two failing crossOrdered tasks WHEN triggered THEN queue fully drains and TaskExecutionFailed emitted for each", async () => {
-    const { asset, deployer, diamondAddress } = await loadFixture(deployEquityWithCorporateActionRole);
+  it("GIVEN two failing crossOrdered tasks WHEN triggered THEN transaction reverts and queue not drained", async () => {
+    const { asset, deployer } = await loadFixture(deployEquityWithCorporateActionRole);
     await injectMockDispatch();
 
     const currentTimestamp = await getDltTimestamp();
@@ -530,25 +488,10 @@ describe("Scheduled Tasks Failure Recovery", () => {
 
     expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(2);
 
-    await ethers.provider.send("hardhat_setStorageAt", [
-      diamondAddress,
-      FAIL_TYPE_SLOT,
-      ethers.encodeBytes32String("crossOrdered"),
-    ]);
-
     await asset.changeSystemTimestamp(recordDate2 + 1);
 
-    const tx = await asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks();
-    const receipt = await tx.wait();
-    const failedEvents = receipt!.logs.filter((log) => {
-      try {
-        return asset.interface.parseLog(log)?.name === "TaskExecutionFailed";
-      } catch {
-        return false;
-      }
-    });
+    await expect(asset.connect(deployer).triggerPendingScheduledCrossOrderedTasks()).to.be.reverted;
 
-    expect(failedEvents.length).to.equal(2);
-    expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(0);
+    expect(await asset.scheduledCrossOrderedTaskCount()).to.equal(2);
   });
 });

@@ -280,18 +280,12 @@ describe("ExternalPause Tests", () => {
   });
 
   describe("Pause Modifier Tests (onlyUnpaused)", () => {
-    it("GIVEN an external pause is paused WHEN calling a function with onlyUnpaused THEN it reverts with IsPaused", async () => {
+    it("GIVEN an external pause is paused WHEN calling addExternalPause or updateExternalPauses THEN they revert with IsPaused", async () => {
       await externalPauseMock1.setPaused(true, {
         gasLimit: GAS_LIMIT.default,
       });
-      // Use asset instance for error checking as Common interface loading failed
       await expect(
         asset.addExternalPause(externalPauseMock3.target as string, {
-          gasLimit: GAS_LIMIT.default,
-        }),
-      ).to.be.revertedWithCustomError(asset, "IsPaused"); // Assumes IsPaused is inherited/available
-      await expect(
-        asset.removeExternalPause(externalPauseMock2.target as string, {
           gasLimit: GAS_LIMIT.default,
         }),
       ).to.be.revertedWithCustomError(asset, "IsPaused");
@@ -324,6 +318,29 @@ describe("ExternalPause Tests", () => {
           gasLimit: GAS_LIMIT.high,
         }),
       ).to.not.be.reverted;
+    });
+  });
+
+  describe("External Pause Removal Deadlock", () => {
+    it("GIVEN a stuck external pause (always paused) AND internal flag is NOT set WHEN removeExternalPause THEN it succeeds", async () => {
+      await externalPauseMock1.setPaused(true, { gasLimit: GAS_LIMIT.default });
+      await expect(
+        asset.removeExternalPause(externalPauseMock1.target as string, {
+          gasLimit: GAS_LIMIT.default,
+        }),
+      ).to.not.be.reverted;
+      expect(await asset.isExternalPause(externalPauseMock1.target as string)).to.be.false;
+    });
+
+    it("GIVEN the internal pause flag IS set WHEN removeExternalPause THEN it reverts with IsPaused", async () => {
+      await asset.grantRole(ATS_ROLES.ROLE_PAUSER, signer_A.address, { gasLimit: GAS_LIMIT.default });
+      await asset.pause({ gasLimit: GAS_LIMIT.default });
+      expect(await asset.paused()).to.be.true;
+      await expect(
+        asset.removeExternalPause(externalPauseMock1.target as string, {
+          gasLimit: GAS_LIMIT.default,
+        }),
+      ).to.be.revertedWithCustomError(asset, "IsPaused");
     });
   });
 

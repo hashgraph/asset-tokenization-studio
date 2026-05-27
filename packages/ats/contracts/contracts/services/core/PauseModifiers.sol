@@ -6,22 +6,40 @@ import { _checkNotInitialized } from "../InitializationErrors.sol";
 
 /**
  * @title PauseModifiers
- * @notice Abstract contract providing pause-related modifiers
- * @dev Provides modifiers for pause state validation using _check* pattern
- *      from PauseStorageWrapper
  * @author Asset Tokenization Studio Team
+ * @notice Abstract contract providing pause-state precondition modifiers for security-token facets.
+ * @dev Each modifier delegates to a `check*` helper in `PauseStorageWrapper` and reverts on
+ *      violation. The combined pause state covers both the internal flag
+ *      (`PauseDataStorage.paused`) and any registered external `IExternalPause` contracts.
+ *      `onlyNotInternallyPaused` deliberately ignores external contracts so that a permanently
+ *      paused external contract cannot deadlock management operations that remove it from the
+ *      registry.
  */
 abstract contract PauseModifiers {
+    /// @notice Reverts with `IPause.IsPaused` when the token is paused by either the internal
+    ///         flag or any registered external pause contract.
     modifier onlyUnpaused() {
         PauseStorageWrapper.checkUnpaused();
         _;
     }
 
+    /// @notice Reverts with `IPause.IsUnpaused` when the token is not currently paused (by
+    ///         either the internal flag or any registered external pause contract).
     modifier onlyPaused() {
         PauseStorageWrapper.checkPaused();
         _;
     }
 
+    /// @notice Reverts with `IPause.IsPaused` only when the internal pause flag is set.
+    /// @dev Intentionally ignores external pause contracts so that a permanently-reporting
+    ///      external contract cannot block its own removal from the registry.
+    modifier onlyNotInternallyPaused() {
+        PauseStorageWrapper.checkNotInternallyPaused();
+        _;
+    }
+
+    /// @notice Reverts with `AlreadyInitialized` when the external-pause registry has already
+    ///         been initialised, preventing a second call to `initializeExternalPauses`.
     modifier onlyNotExternalPauseInitialized() {
         _checkNotInitialized(PauseStorageWrapper.isExternalPauseInitialized());
         _;

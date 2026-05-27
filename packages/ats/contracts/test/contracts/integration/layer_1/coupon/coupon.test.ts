@@ -646,6 +646,67 @@ describe("Coupon Tests", () => {
     await expect(asset.connect(signer_C).cancelCoupon(999)).to.be.revertedWithCustomError(asset, "WrongIndexForAction");
   });
 
+  describe("Force Cancel Coupon", () => {
+    it("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelCoupon before execution date THEN transaction succeeds and isDisabled is true", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C);
+
+      await asset.connect(signer_C).setCoupon(couponData);
+
+      await expect(asset.connect(signer_C).forceCancelCoupon(1))
+        .to.emit(asset, "CouponForceCancelled")
+        .withArgs(1, signer_C.address);
+      const isDisabled = (await asset.getCoupon(1)).isDisabled_;
+      expect(isDisabled).to.equal(true);
+    });
+
+    it("GIVEN account with ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelCoupon after execution date THEN transaction succeeds bypassing date guard", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C);
+
+      await asset.connect(signer_C).setCoupon(couponData);
+
+      await asset.changeSystemTimestamp(couponExecutionDateInSeconds + 1);
+
+      await expect(asset.connect(signer_C).forceCancelCoupon(1))
+        .to.emit(asset, "CouponForceCancelled")
+        .withArgs(1, signer_C.address);
+      const isDisabled = (await asset.getCoupon(1)).isDisabled_;
+      expect(isDisabled).to.equal(true);
+    });
+
+    it("GIVEN account without ROLE_CORPORATE_ACTION_FORCE_CANCEL WHEN forceCancelCoupon THEN transaction fails with AccountHasNoRole", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C);
+
+      await asset.connect(signer_C).setCoupon(couponData);
+
+      await expect(asset.connect(signer_D).forceCancelCoupon(1)).to.be.revertedWithCustomError(
+        asset,
+        "AccountHasNoRole",
+      );
+    });
+
+    it("GIVEN paused token WHEN forceCancelCoupon THEN transaction fails with IsPaused", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION, signer_C);
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C);
+
+      await asset.connect(signer_C).setCoupon(couponData);
+
+      await asset.connect(signer_B).pause();
+
+      await expect(asset.connect(signer_C).forceCancelCoupon(1)).to.be.revertedWithCustomError(asset, "IsPaused");
+    });
+
+    it("GIVEN no existing coupon WHEN forceCancelCoupon with invalid ID THEN transaction fails with WrongIndexForAction", async () => {
+      await asset.connect(signer_A).grantRole(ATS_ROLES.ROLE_CORPORATE_ACTION_FORCE_CANCEL, signer_C);
+
+      await expect(asset.connect(signer_C).forceCancelCoupon(999)).to.be.revertedWithCustomError(
+        asset,
+        "WrongIndexForAction",
+      );
+    });
+  });
+
   it("GIVEN a coupon without snapshot WHEN getCouponFor is called after record date THEN uses balance at record date", async () => {
     const TotalAmount = 1000;
     const Decimals = await asset.decimals();

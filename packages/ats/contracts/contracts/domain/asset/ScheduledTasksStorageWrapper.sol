@@ -12,9 +12,6 @@ import {
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { ScheduledTasksDispatchOps } from "../orchestrator/ScheduledTasksDispatchOps.sol";
-import {
-    IScheduledCrossOrderedTasks
-} from "../../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
 
 /// @custom:hash storage ScheduledSnapshots
 // solhint-disable-next-line max-line-length
@@ -69,10 +66,10 @@ library ScheduledTasksStorageWrapper {
 
     /**
      * @notice Executes due scheduled tasks from a queue up to the requested limit.
-     * @dev Pops each due task before dispatch. Failed executions cancel the related
-     *      corporate action or pending sub-task action and emit `TaskExecutionFailed`.
-     *      If a cross-ordered task returns a recognised sub-task type, one due task from
-     *      the corresponding sub-queue is triggered in the same call.
+     * @dev Pops each due task before dispatch. A failed execution reverts the entire call,
+     *      leaving the queue unchanged so the blocked task can be force-cancelled by an
+     *      authorised caller. If a cross-ordered task returns a recognised sub-task type,
+     *      one due task from the corresponding sub-queue is triggered in the same call.
      * @param _scheduledTasks Queue storage containing the scheduled tasks to process.
      * @param callbackType Dispatch discriminator used by `ScheduledTasksDispatchOps`.
      * @param _max Maximum number of tasks to process; zero means all currently queued tasks.
@@ -108,12 +105,9 @@ library ScheduledTasksStorageWrapper {
 
             ScheduledTasksLib.popScheduledTask(_scheduledTasks);
 
-            try ScheduledTasksDispatchOps.execute(callbackType, currentScheduledTask) returns (bytes32 subTaskType) {
-                if (subTaskType != bytes32(0)) {
-                    _triggerOneSubTask(subTaskType, currentBlockTimestamp);
-                }
-            } catch {
-                _onTaskExecutionFailed(callbackType, currentScheduledTask);
+            bytes32 subTaskType = ScheduledTasksDispatchOps.execute(callbackType, currentScheduledTask);
+            if (subTaskType != bytes32(0)) {
+                _triggerOneSubTask(subTaskType, currentBlockTimestamp);
             }
 
             unchecked {
@@ -605,7 +599,7 @@ library ScheduledTasksStorageWrapper {
     /**
      * @notice Triggers one due sub-task for a recognised cross-ordered task type.
      * @dev Returns silently for unknown task types, empty queues or sub-tasks that are not due.
-     *      Pops the sub-task before dispatch and handles execution failure by cancellation.
+     *      Pops the sub-task before dispatch; a failed execution reverts the entire call.
      * @param subTaskType Task type identifying the sub-queue to process.
      * @param currentBlockTimestamp Timestamp used as the due-task threshold.
      */
@@ -639,64 +633,7 @@ library ScheduledTasksStorageWrapper {
 
         ScheduledTasksLib.popScheduledTask(subQueue_);
 
-        try ScheduledTasksDispatchOps.execute(subCallbackType, subTask) returns (bytes32) {} catch {
-            _onTaskExecutionFailed(subCallbackType, subTask);
-        }
-    }
-
-    /**
-     * @notice Handles a failed scheduled task execution.
-     * @dev Cross-ordered failures cancel the pending top action in the referenced sub-queue.
-     *      Other failures cancel the corporate action encoded in the failed task. Always emits
-     *      `TaskExecutionFailed` with the failed action or task identifier.
-     * @param callbackType Dispatch discriminator of the failed task.
-     * @param task Failed scheduled task.
-     */
-    function _onTaskExecutionFailed(bytes32 callbackType, ScheduledTask memory task) private {
-        bytes32 actionId = _getActionIdFromScheduledTask(task);
-
-        if (callbackType == bytes32("crossOrdered")) {
-            _cancelPendingSubTaskAction(actionId);
-            emit IScheduledCrossOrderedTasks.TaskExecutionFailed(actionId, callbackType, task.scheduledTimestamp);
-            return;
-        }
-
-        CorporateActionsStorageWrapper.cancelCorporateAction(actionId);
-        emit IScheduledCrossOrderedTasks.TaskExecutionFailed(actionId, callbackType, task.scheduledTimestamp);
-    }
-
-    /**
-     * @notice Cancels the pending action at the top of a recognised sub-task queue.
-     * @dev Returns silently for unknown task types and empty queues.
-     * @param taskType Task type identifying the sub-queue whose top action should be cancelled.
-     */
-    function _cancelPendingSubTaskAction(bytes32 taskType) private {
-        if (taskType == SCHEDULED_TASK_TYPE_SNAPSHOT) {
-            _cancelTopQueueAction(scheduledSnapshotStorage());
-            return;
-        }
-
-        if (taskType == SCHEDULED_TASK_TYPE_BALANCE_ADJUSTMENT) {
-            _cancelTopQueueAction(scheduledBalanceAdjustmentStorage());
-            return;
-        }
-
-        if (taskType == SCHEDULED_TASK_TYPE_COUPON_LISTING) {
-            _cancelTopQueueAction(scheduledCouponListingStorage());
-        }
-    }
-
-    /**
-     * @notice Cancels the corporate action encoded in the top task of a queue.
-     * @dev Does not remove the task from the queue. Returns silently when the queue is empty.
-     * @param subQueue Queue whose top task contains the action identifier to cancel.
-     */
-    function _cancelTopQueueAction(ScheduledTasksDataStorage storage subQueue) private {
-        uint256 count = ScheduledTasksLib.getScheduledTaskCount(subQueue);
-        if (count == 0) return;
-
-        ScheduledTask memory pendingTask = ScheduledTasksLib.getScheduledTasksByIndex(subQueue, count - 1);
-        CorporateActionsStorageWrapper.cancelCorporateAction(abi.decode(pendingTask.data, (bytes32)));
+        ScheduledTasksDispatchOps.execute(subCallbackType, subTask);
     }
 
     /**
@@ -749,17 +686,5 @@ library ScheduledTasksStorageWrapper {
                 ++i;
             }
         }
-    }
-
-    /**
-     * @notice Decodes the corporate action identifier from a scheduled task.
-     * @dev Assumes the task data was encoded as a single `bytes32` value.
-     * @param _scheduledTask Scheduled task containing ABI-encoded action data.
-     * @return actionId_ Decoded corporate action identifier.
-     */
-    function _getActionIdFromScheduledTask(
-        ScheduledTask memory _scheduledTask
-    ) private pure returns (bytes32 actionId_) {
-        return abi.decode(_scheduledTask.data, (bytes32));
     }
 }

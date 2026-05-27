@@ -19,6 +19,7 @@ contract VotingFacet is Voting, IStaticFunctionSelectors {
             Bytes4Builder.build(
                 this.setVoting.selector,
                 this.cancelVoting.selector,
+                this.forceCancelVoting.selector,
                 this.getVoting.selector,
                 this.getVotingFor.selector,
                 this.getVotingCount.selector

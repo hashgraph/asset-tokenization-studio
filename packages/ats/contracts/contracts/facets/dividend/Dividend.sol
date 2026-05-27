@@ -3,10 +3,11 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IDividend } from "./IDividend.sol";
 import { IDividendTypes } from "./IDividendTypes.sol";
-import { ROLE_CORPORATE_ACTION } from "../../constants/roles.sol";
+import { ROLE_CORPORATE_ACTION, ROLE_CORPORATE_ACTION_FORCE_CANCEL } from "../../constants/roles.sol";
 import { CORPORATE_ACTION_TYPE_DIVIDEND } from "../../constants/dispatchTypes.sol";
 import { DividendStorageWrapper } from "../../domain/asset/DividendStorageWrapper.sol";
 import { Modifiers } from "../../services/Modifiers.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title Dividend
@@ -54,6 +55,24 @@ abstract contract Dividend is IDividend, Modifiers {
         returns (bool success_)
     {
         success_ = DividendStorageWrapper.cancelDividend(dividendId);
+    }
+
+    /// @inheritdoc IDividend
+    /// @dev Restricted to `ROLE_CORPORATE_ACTION_FORCE_CANCEL`; gated by `onlyUnpaused` and
+    ///      `onlyMatchingActionType(CORPORATE_ACTION_TYPE_DIVIDEND, dividendId - 1)`.
+    function forceCancelDividend(
+        uint256 dividendId
+    )
+        external
+        override
+        onlyActivated
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_DIVIDEND, dividendId - 1)
+        onlyUnpaused
+        onlyRole(ROLE_CORPORATE_ACTION_FORCE_CANCEL)
+        returns (bool success_)
+    {
+        success_ = DividendStorageWrapper.forceCancelDividend(dividendId);
+        emit IDividend.DividendForceCancelled(dividendId, EvmAccessors.getMsgSender());
     }
 
     /// @inheritdoc IDividend

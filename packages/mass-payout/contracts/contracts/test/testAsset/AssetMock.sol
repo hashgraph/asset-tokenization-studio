@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.8.22;
+// solhint-disable
 
 import { IAssetMock } from "./interfaces/IAssetMock.sol";
 // solhint-disable-next-line max-line-length
@@ -414,4 +415,18 @@ contract AssetMock is IAssetMock {
     function getCouponsOrderedListTotal(bool) external pure returns (uint256) {
         revert NotImplemented();
     }
+
+    /// @notice Mock implementation — always reverts with `NotImplemented`.
+    function forceCancelScheduledBalanceAdjustment(uint256) external pure returns (bool) {
+        revert NotImplemented();
+    }
+
+    function forceCancelCoupon(uint256) external pure returns (bool) {
+        revert NotImplemented();
+    }
+
+    function forceCancelVoting(uint256) external pure returns (bool) {
+        revert NotImplemented();
+    }
 }
+// solhint-enable

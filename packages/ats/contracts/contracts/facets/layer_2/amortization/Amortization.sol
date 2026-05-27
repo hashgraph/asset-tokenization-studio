@@ -2,10 +2,15 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IAmortization } from "./IAmortization.sol";
-import { ROLE_AMORTIZATION, ROLE_CORPORATE_ACTION } from "../../../constants/roles.sol";
+import {
+    ROLE_AMORTIZATION,
+    ROLE_CORPORATE_ACTION,
+    ROLE_CORPORATE_ACTION_FORCE_CANCEL
+} from "../../../constants/roles.sol";
 import { CORPORATE_ACTION_TYPE_AMORTIZATION } from "../../../constants/dispatchTypes.sol";
 import { AmortizationStorageWrapper } from "../../../domain/asset/AmortizationStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title Amortization
@@ -52,6 +57,24 @@ abstract contract Amortization is IAmortization, Modifiers {
     }
 
     /// @inheritdoc IAmortization
+    /// @dev Restricted to `ROLE_CORPORATE_ACTION_FORCE_CANCEL`; gated by `onlyUnpaused`,
+    ///      `onlyWithoutMultiPartition`, and
+    ///      `onlyMatchingActionType(CORPORATE_ACTION_TYPE_AMORTIZATION, _amortizationID - 1)`.
+    function forceCancelAmortization(
+        uint256 _amortizationID
+    )
+        external
+        override
+        onlyActivated
+        onlyUnpaused
+        onlyWithoutMultiPartition
+        onlyMatchingActionType(CORPORATE_ACTION_TYPE_AMORTIZATION, _amortizationID - 1)
+        onlyRole(ROLE_CORPORATE_ACTION_FORCE_CANCEL)
+    {
+        AmortizationStorageWrapper.forceCancelAmortization(_amortizationID);
+        emit IAmortization.AmortizationForceCancelled(_amortizationID, EvmAccessors.getMsgSender());
+    }
+
     function releaseAmortizationHold(
         uint256 _amortizationID,
         address _tokenHolder

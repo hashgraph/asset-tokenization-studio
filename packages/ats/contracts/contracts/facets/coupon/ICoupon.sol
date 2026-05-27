@@ -44,6 +44,13 @@ interface ICoupon is ICouponTypes {
     event CouponCancelled(uint256 indexed couponId, address indexed operator);
 
     /**
+     * @notice Emitted when an admin force-cancels a coupon, bypassing date guards.
+     * @param couponId One-indexed identifier of the force-cancelled coupon.
+     * @param operator Address that performed the force-cancellation.
+     */
+    event CouponForceCancelled(uint256 indexed couponId, address indexed operator);
+
+    /**
      * @notice Reverts when an operator attempts to cancel a coupon whose execution date has
      *         already passed.
      * @param corporateActionId Identifier of the underlying corporate action.
@@ -90,6 +97,16 @@ interface ICoupon is ICouponTypes {
      * @return success_ True if the cancellation was recorded.
      */
     function cancelCoupon(uint256 _couponID) external returns (bool success_);
+
+    /**
+     * @notice Force-cancels a coupon regardless of its execution date.
+     * @dev Restricted to `ROLE_CORPORATE_ACTION_FORCE_CANCEL` and gated by the unpaused state
+     *      and `onlyMatchingActionType`. Marks the corporate action disabled unconditionally —
+     *      bypasses `CouponAlreadyExecuted` — and emits `CouponForceCancelled`.
+     * @param _couponID One-indexed identifier of the coupon to force-cancel.
+     * @return success_ True if the force-cancellation was recorded.
+     */
+    function forceCancelCoupon(uint256 _couponID) external returns (bool success_);
 
     /**
      * @notice Returns the persisted coupon record together with its cancelled flag.
